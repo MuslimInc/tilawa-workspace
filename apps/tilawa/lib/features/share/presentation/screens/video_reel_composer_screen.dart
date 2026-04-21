@@ -69,8 +69,8 @@ class VideoReelComposerScreen extends StatefulWidget {
     ValueListenable<Uint8List?>? readerPreviewBytesNotifier,
   }) {
     return PageRouteBuilder<void>(
-      transitionDuration: const Duration(milliseconds: 320),
-      reverseTransitionDuration: const Duration(milliseconds: 220),
+      transitionDuration: const Duration(milliseconds: 300),
+      reverseTransitionDuration: const Duration(milliseconds: 200),
       pageBuilder: (context, animation, secondaryAnimation) =>
           BlocProvider.value(
             value: cubit,
@@ -301,9 +301,9 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                   : context.l10n.shareModeReel,
               subtitle: isReviewing ? null : context.l10n.shareComposerSubtitle,
               onClose: () => Navigator.of(context).maybePop(),
-              background: _backdropWidget,
+              enableAutoHide: false,
               preview: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+                duration: Theme.of(context).tokens.durationMedium,
                 child: isVideoReview
                     ? _VideoReviewPreview(
                         filePath: (state.content as ShareVideo).filePath,
@@ -325,7 +325,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                 children: [
                   _VideoStepIndicator(status: state.status),
                   AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
+                    duration: Theme.of(context).tokens.durationFast,
                     child: isReviewing
                         ? _VideoReviewPanel(
                             content: state.content!,
@@ -459,7 +459,6 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     if (notifier == null) return null;
     // Opacity forces a saveLayer each frame. Bake the alpha into the image via
     // modulate blending so the compositor can skip the offscreen pass.
-    const Color modulate = Color(0x29FFFFFF); // ~0.16 alpha
     return RepaintBoundary(
       child: ValueListenableBuilder<Uint8List?>(
         valueListenable: notifier,
@@ -469,7 +468,6 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                 bytes,
                 fit: BoxFit.cover,
                 gaplessPlayback: true,
-                color: modulate,
                 colorBlendMode: BlendMode.modulate,
               ),
       ),
@@ -477,54 +475,40 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   }
 
   Widget _buildLivePreview(String reciterName) {
-    final theme = Theme.of(context);
-    final chipForeground = theme.colorScheme.onSurface;
-    final chipBackground = theme.colorScheme.surface.withValues(alpha: 0.08);
-    final chipBorder = theme.colorScheme.outline.withValues(alpha: 0.18);
-
-    final tokens = theme.tokens;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: tokens.spaceSmall,
-          runSpacing: tokens.spaceExtraSmall,
-          children: [
-            MetadataChip(
-              icon: Icons.auto_stories_rounded,
-              label: getSurahNameArabic(widget.surahNumber),
-              foregroundColor: chipForeground,
-              backgroundColor: chipBackground,
-              borderColor: chipBorder,
-            ),
-            MetadataChip(
-              icon: Icons.format_list_numbered_rounded,
-              label: '$_fromAyah - $_toAyah',
-              foregroundColor: chipForeground,
-              backgroundColor: chipBackground,
-              borderColor: chipBorder,
-            ),
-            MetadataChip(
-              icon: Icons.multitrack_audio_rounded,
-              label: reciterName,
-              foregroundColor: chipForeground,
-              backgroundColor: chipBackground,
-              borderColor: chipBorder,
-            ),
-          ],
-        ),
-        SizedBox(height: tokens.spaceMedium),
-        Expanded(
-          child: PreviewFrame(
-            aspectRatio: 9 / 16,
-            maxWidth: null,
-            maxHeight: null,
-            // Preview only the first page spec. A PageView embedded in a
-            // FittedBox/AspectRatio doesn't layout correctly and breaks
-            // cross-page selections; the offscreen capture pipeline still
-            // renders every spec via `_OffScreenRenderers`.
+    return SafeArea(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Wrap(
+          //   alignment: WrapAlignment.center,
+          //   spacing: tokens.spaceSmall,
+          //   runSpacing: tokens.spaceExtraSmall,
+          //   children: [
+          //     MetadataChip(
+          //       icon: Icons.auto_stories_rounded,
+          //       label: getSurahNameArabic(widget.surahNumber),
+          //       foregroundColor: chipForeground,
+          //       backgroundColor: chipBackground,
+          //       borderColor: chipBorder,
+          //     ),
+          //     MetadataChip(
+          //       icon: Icons.format_list_numbered_rounded,
+          //       label: '$_fromAyah - $_toAyah',
+          //       foregroundColor: chipForeground,
+          //       backgroundColor: chipBackground,
+          //       borderColor: chipBorder,
+          //     ),
+          //     MetadataChip(
+          //       icon: Icons.multitrack_audio_rounded,
+          //       label: reciterName,
+          //       foregroundColor: chipForeground,
+          //       backgroundColor: chipBackground,
+          //       borderColor: chipBorder,
+          //     ),
+          //   ],
+          // ),
+          // SizedBox(height: tokens.spaceMedium),
+          Expanded(
             child: RepaintBoundary(
               child: VideoContentRenderer(
                 surahNumber: widget.surahNumber,
@@ -537,8 +521,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -587,8 +571,8 @@ class _OffScreenRenderers extends StatelessWidget {
           (i) => RepaintBoundary(
             key: videoBoundaryKeys[i],
             child: SizedBox(
-              width: 1080,
-              height: 1920,
+              width: VideoContentRenderer.videoWidth,
+              height: VideoContentRenderer.videoHeight,
               child: VideoContentRenderer(
                 surahNumber: surahNumber,
                 fromAyah: videoPageSpecs[i].fromAyah,
@@ -660,7 +644,9 @@ class _VideoReviewPanel extends StatelessWidget {
         children: [
           Expanded(
             child: SizedBox(
-              height: 44,
+              height: Theme.of(
+                context,
+              ).componentTokens.immersiveComposer.headerButtonSize,
               child: OutlinedButton(
                 onPressed: onEdit,
                 child: Text(context.l10n.edit),
@@ -669,10 +655,15 @@ class _VideoReviewPanel extends StatelessWidget {
           ),
           Expanded(
             child: SizedBox(
-              height: 44,
+              height: Theme.of(
+                context,
+              ).componentTokens.immersiveComposer.headerButtonSize,
               child: FilledButton.icon(
                 onPressed: onShare,
-                icon: const Icon(Icons.share_rounded, size: 18),
+                icon: Icon(
+                  Icons.share_rounded,
+                  size: Theme.of(context).tokens.iconSizeSmall,
+                ),
                 label: Text(context.l10n.shareReel),
               ),
             ),
@@ -910,12 +901,15 @@ class _ReciterPickerSheetState extends State<_ReciterPickerSheet> {
     final filtered = widget.options
         .where((o) => o.name.toLowerCase().contains(_query.toLowerCase()))
         .toList();
+    final tokens = Theme.of(context).tokens;
     return Container(
       height: MediaQuery.sizeOf(context).height * 0.8,
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      padding: EdgeInsets.all(tokens.spaceLarge),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(tokens.radiusExtraLarge),
+        ),
       ),
       child: Column(
         children: [

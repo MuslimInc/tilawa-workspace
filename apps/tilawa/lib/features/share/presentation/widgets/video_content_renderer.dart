@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:quran/quran.dart' as quran;
-// ignore: implementation_imports
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../utils/video_page_specs.dart';
 import 'mushaf_page_renderer.dart';
 
 /// A Quran-focused 9:16 canvas used for video generation.
 class VideoContentRenderer extends StatefulWidget {
+  /// The target width for video generation (Full HD portrait).
+  static const double videoWidth = 1080;
+
+  /// The target height for video generation (Full HD portrait).
+  static const double videoHeight = 1920;
+
+  /// The standard 9:16 aspect ratio for reels and shorts.
+  static const double aspectRatio = 9 / 16;
+
   const VideoContentRenderer({
     super.key,
     required this.surahNumber,
@@ -61,8 +67,8 @@ class _VideoContentRendererState extends State<VideoContentRenderer> {
     }
 
     return SizedBox(
-      width: 1080,
-      height: 1920,
+      width: VideoContentRenderer.videoWidth,
+      height: VideoContentRenderer.videoHeight,
       child: PageView.builder(
         itemCount: effectivePageSpecs.length,
         itemBuilder: (context, index) {
@@ -117,74 +123,10 @@ class VideoContentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final normalizedReciterName = reciterName?.trim();
-
-    return DecoratedBox(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            _VideoPalette.deepGreen,
-            _VideoPalette.forestGreen,
-            _VideoPalette.tealGreen,
-          ],
-        ),
-      ),
-      child: Stack(
-        children: [
-          if (!isCapturing)
-            const Positioned(
-              top: -140,
-              right: -60,
-              child: TilawaAmbientOrb(
-                size: 320,
-                color: _VideoPalette.mint,
-                opacity: 0.12,
-              ),
-            ),
-          if (!isCapturing)
-            const Positioned(
-              bottom: -120,
-              left: -50,
-              child: TilawaAmbientOrb(
-                size: 260,
-                color: _VideoPalette.gold,
-                opacity: 0.12,
-              ),
-            ),
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(60),
-                border: Border.all(
-                  color: _VideoPalette.gold.withValues(alpha: 0.18),
-                ),
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: .stretch,
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: _VideoMushafPage(
-                        surahNumber: surahNumber,
-                        pageSpec: pageSpec,
-                        pageRenderer: pageRenderer,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    _VideoFooter(reciterName: normalizedReciterName),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return _VideoMushafPage(
+      surahNumber: surahNumber,
+      pageSpec: pageSpec,
+      pageRenderer: pageRenderer,
     );
   }
 }
@@ -206,86 +148,36 @@ class _VideoMushafPage extends StatelessWidget {
         verseNumber > pageSpec.toAyah) {
       return null;
     }
-    return _VideoPalette.gold.withValues(alpha: 0.24);
+    return Colors.orange.withValues(alpha: _VideoLayout.verseHighlightAlpha);
   }
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: Color(0xFFFFF8ED)),
-      child: pageRenderer.build(
-        context: context,
-        pageSpec: pageSpec,
-        surahNumber: surahNumber,
-        verseBackgroundColor: _verseBackgroundColor,
-        textColor: _VideoPalette.ink.withValues(alpha: 0.96),
-        pageBackgroundColor: const Color(0xFFFFF8ED),
-      ),
+    return pageRenderer.build(
+      context: context,
+      pageSpec: pageSpec,
+      surahNumber: surahNumber,
+      verseBackgroundColor: _verseBackgroundColor,
+      textColor: Colors.pink.withValues(alpha: _VideoLayout.textOpacity),
+      pageBackgroundColor: _VideoLayout.pageBackgroundColor,
     );
   }
 }
 
-class _VideoFooter extends StatelessWidget {
-  const _VideoFooter({required this.reciterName});
+abstract final class _VideoLayout {
+  static const double orbLargeSize = 320;
+  static const double orbMediumSize = 260;
+  static const double orbTopOffset = -140;
+  static const double orbRightOffset = -60;
+  static const double orbBottomOffset = -120;
+  static const double orbLeftOffset = -50;
 
-  final String? reciterName;
+  static const double canvasRadius = 60;
+  static const double canvasBorderAlpha = 0.18;
 
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 10,
-      runSpacing: 10,
-      children: [
-        const _FooterPill(icon: Icons.auto_stories_rounded, label: 'Tilawa'),
-        if (reciterName != null && reciterName!.isNotEmpty)
-          _FooterPill(
-            icon: Icons.multitrack_audio_rounded,
-            label: reciterName!,
-          ),
-      ],
-    );
-  }
-}
-
-class _FooterPill extends StatelessWidget {
-  const _FooterPill({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 340),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          color: _VideoPalette.deepGreen.withValues(alpha: 0.1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: _VideoPalette.gold),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.alexandria(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                  color: _VideoPalette.deepGreen.withValues(alpha: 0.78),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+  static const Color pageBackgroundColor = Color(0xFFFFF8ED);
+  static const double verseHighlightAlpha = 0.24;
+  static const double textOpacity = 0.96;
 }
 
 // Video card labels are always Arabic — the Mushaf is an Arabic artifact.
@@ -293,16 +185,4 @@ abstract final class _VideoStrings {
   static const String ayah = 'آية';
   static const String ayahs = 'الآيات';
   static const String mushafPage = 'صفحة المصحف';
-}
-
-abstract final class _VideoPalette {
-  static const Color deepGreen = Color(0xFF0B342E);
-  static const Color forestGreen = Color(0xFF145247);
-  static const Color tealGreen = Color(0xFF1E6558);
-  static const Color gold = Color(0xFFE1C17B);
-  static const Color mint = Color(0xFF8FDFC0);
-  static const Color cream = Color(0xFFF6F0DF);
-  static const Color parchment = Color(0xFFF7F1E1);
-  static const Color warmParchment = Color(0xFFEDDFC1);
-  static const Color ink = Color(0xFF1E1B16);
 }

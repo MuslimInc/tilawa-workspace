@@ -2,7 +2,6 @@ export 'alphabet_scrollbar.dart';
 export 'language_switcher.dart';
 export 'metadata_chip.dart';
 export 'selection_pill.dart';
-export 'tilawa_ambient_orb.dart';
 export 'tilawa_feedback_strip.dart';
 export 'tilawa_glass_panel.dart';
 export 'tilawa_icon_action_button.dart';

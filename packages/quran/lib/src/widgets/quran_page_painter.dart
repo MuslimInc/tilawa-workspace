@@ -36,6 +36,7 @@ class QuranPagePainter extends StatefulWidget {
     super.key,
     required this.painters,
     required this.lineSpacing,
+    this.width,
     this.onLongPress,
     this.onLongPressUp,
     this.onLongPressCancel,
@@ -45,6 +46,7 @@ class QuranPagePainter extends StatefulWidget {
   /// Each entry: (textPainter, metadata) for one line.
   final List<(TextPainter, List<QuranWordMetadata>)> painters;
   final double lineSpacing;
+  final double? width;
   final void Function(int surah, int verse)? onLongPress;
   final void Function(int surah, int verse)? onLongPressUp;
   final void Function(int surah, int verse)? onLongPressCancel;
@@ -65,8 +67,10 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
   /// Total height of all lines + spacing.
   late double _totalHeight;
 
-  /// Maximum width across all painters.
-  late double _maxWidth;
+  /// Fixed paint width shared by every line.
+  late double _paintWidth;
+
+  late List<QuranLineAlignment?> _alignments;
 
   /// Cached recorded [ui.Picture] from the first paint call.
   /// Wrapped in a mutable cache class so CustomPainter can track it across repaints.
@@ -82,7 +86,8 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
   void didUpdateWidget(QuranPagePainter oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (!identical(oldWidget.painters, widget.painters) ||
-        oldWidget.lineSpacing != widget.lineSpacing) {
+        oldWidget.lineSpacing != widget.lineSpacing ||
+        oldWidget.width != widget.width) {
       _invalidatePictureCache();
       _computeLayout();
     }
@@ -113,7 +118,42 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
     }
     _yOffsets = offsets;
     _totalHeight = y;
-    _maxWidth = maxW;
+    _paintWidth = switch (widget.width) {
+      final double width when width.isFinite && width > 0 => width,
+      _ => maxW,
+    };
+    _alignments = _computeAlignments();
+  }
+
+  List<QuranLineAlignment?> _computeAlignments() {
+    final List<QuranLineVisualBounds?> positionedBounds = [];
+    final List<QuranLineVisualBounds?> sourceBounds = [];
+
+    for (final (TextPainter painter, _) in widget.painters) {
+      final QuranLineVisualBounds? source = quranLineVisualBoundsFor(painter);
+      sourceBounds.add(source);
+      if (source == null) {
+        positionedBounds.add(null);
+        continue;
+      }
+
+      final double naturalDx = (_paintWidth - painter.width) / 2;
+      positionedBounds.add(source.shift(naturalDx));
+    }
+
+    final QuranLineVisualBounds? target = quranLineTargetBoundsFor(
+      positionedBounds,
+    );
+    if (target == null) {
+      return List<QuranLineAlignment?>.filled(widget.painters.length, null);
+    }
+
+    return sourceBounds
+        .map((source) {
+          if (source == null) return null;
+          return QuranLineAlignment(source: source, target: target);
+        })
+        .toList(growable: false);
   }
 
   @override
@@ -151,13 +191,14 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
       },
       child: Center(
         child: SizedBox(
-          width: _maxWidth,
+          width: _paintWidth,
           height: _totalHeight,
           child: KeyedSubtree(
             key: _paintKey,
             child: CustomPaint(
               painter: _AllLinesPainter(
                 painters: widget.painters,
+                alignments: _alignments,
                 yOffsets: _yOffsets,
                 pictureCache: _pictureCache,
               ),
@@ -184,9 +225,13 @@ class _QuranPagePainterState extends State<QuranPagePainter> {
       final double yBottom = yTop + painter.height;
 
       if (localPos.dy >= yTop && localPos.dy < yBottom) {
-        // Center-aligned: offset x relative to this painter.
-        final double painterX = (_maxWidth - painter.width) / 2;
-        final posInPainter = Offset(localPos.dx - painterX, localPos.dy - yTop);
+        final QuranLineAlignment? alignment = _alignments[i];
+        final Offset posInPainter =
+            alignment?.inverse(Offset(localPos.dx, localPos.dy - yTop)) ??
+            Offset(
+              localPos.dx - ((_paintWidth - painter.width) / 2),
+              localPos.dy - yTop,
+            );
 
         final TextPosition textPos = painter.getPositionForOffset(posInPainter);
         final int offset = textPos.offset;
@@ -211,11 +256,13 @@ class _TextPictureCache {
 class _AllLinesPainter extends CustomPainter {
   _AllLinesPainter({
     required this.painters,
+    required this.alignments,
     required this.yOffsets,
     required this.pictureCache,
   });
 
   final List<(TextPainter, List<QuranWordMetadata>)> painters;
+  final List<QuranLineAlignment?> alignments;
   final List<double> yOffsets;
 
   /// Mutable cache object passed from the state.
@@ -235,8 +282,17 @@ class _AllLinesPainter extends CustomPainter {
 
     for (var i = 0; i < painters.length; i++) {
       final TextPainter painter = painters[i].$1;
-      final double dx = (size.width - painter.width) / 2;
-      painter.paint(recordingCanvas, Offset(dx, yOffsets[i]));
+      final QuranLineAlignment? alignment = alignments[i];
+      if (alignment != null && alignment.isValid) {
+        recordingCanvas.save();
+        recordingCanvas.translate(alignment.translateX, yOffsets[i]);
+        recordingCanvas.scale(alignment.scaleX, 1);
+        painter.paint(recordingCanvas, Offset.zero);
+        recordingCanvas.restore();
+      } else {
+        final double dx = (size.width - painter.width) / 2;
+        painter.paint(recordingCanvas, Offset(dx, yOffsets[i]));
+      }
     }
 
     final ui.Picture picture = recorder.endRecording();
@@ -252,6 +308,7 @@ class _AllLinesPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _AllLinesPainter oldDelegate) {
     return !identical(oldDelegate.painters, painters) ||
+        !identical(oldDelegate.alignments, alignments) ||
         oldDelegate.pictureCache != pictureCache;
   }
 }

@@ -116,12 +116,6 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
           subtitle: isReviewing ? null : context.l10n.shareComposerSubtitle,
           onClose: () => Navigator.of(context).maybePop(),
           background: _backdropWidget,
-          compactPanelHeightFactor: isReviewing ? 0.32 : null,
-          regularPanelHeightFactor: isReviewing ? 0.28 : null,
-          compactPreviewHeightFactor: isReviewing ? 0.56 : null,
-          regularPreviewHeightFactor: isReviewing ? 0.7 : null,
-          panelMinHeight: isReviewing ? 156 : null,
-          previewMaxHeight: isReviewing ? 640 : null,
           preview: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: isReviewing && state.content is ShareScreenshot
@@ -245,12 +239,7 @@ class _ReviewPreview extends StatelessWidget {
   final String filePath, surahName;
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: PreviewFrame(
-        aspectRatio: 4 / 5,
-        child: GeneratedImagePreview(filePath: filePath),
-      ),
-    );
+    return Center(child: GeneratedImagePreview(filePath: filePath));
   }
 }
 

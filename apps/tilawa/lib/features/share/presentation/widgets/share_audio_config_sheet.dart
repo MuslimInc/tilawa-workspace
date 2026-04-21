@@ -182,24 +182,6 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                     borderRadius: BorderRadius.circular(32),
                     child: Stack(
                       children: [
-                        const Positioned(
-                          top: -120,
-                          right: -40,
-                          child: TilawaAmbientOrb(
-                            size: 220,
-                            color: _ShareComposerColors.mint,
-                            opacity: 0.08,
-                          ),
-                        ),
-                        const Positioned(
-                          bottom: -90,
-                          left: -30,
-                          child: TilawaAmbientOrb(
-                            size: 170,
-                            color: _ShareComposerColors.gold,
-                            opacity: 0.07,
-                          ),
-                        ),
                         SingleChildScrollView(
                           padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
                           child: Column(

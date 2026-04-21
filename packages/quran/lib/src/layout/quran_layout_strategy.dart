@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 
 import '../constants/quran_constants.dart';
 import '../constants/surah_header_banner_constants.dart';
+import '../helpers/app_logger.dart';
 import '../services/mushaf_service.dart';
 import '../services/quran_special_line.dart';
 
@@ -147,6 +148,11 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     final double fontSize = math.min(idealFontSizeByHeight, maxFontSizeByWidth);
     double lineSpacing = (fontSize * 0.108).clamp(0.8, 3.4);
 
+    logger.d('[PAGE $pageNumber] lineSpacing: $lineSpacing');
+    logger.d('[PAGE $pageNumber] fontSize: $fontSize');
+    logger.d('[PAGE $pageNumber] fontHeight: $_fontHeight');
+    logger.d('[PAGE $pageNumber] availableWidth: $availableWidth');
+
     // We dynamically calculate height consumption using exact counts of
     // headers and bismillahs instead of blindly assuming 15 normal verses.
     final QuranSpecialLineCounts specialCounts = MushafService.instance
@@ -164,15 +170,17 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
     // baseline height consumption on the page.
     final double spacingHeight = QuranConstants.lineGapCount * lineSpacing;
 
+    logger.d('[PAGE $pageNumber] spacingHeight: $spacingHeight');
+
     final double usedHeight =
         (normalLines * fontSize * _fontHeight) +
         (bismillahs * bismillahHeight) +
         (headers * bannerHeight) +
         spacingHeight;
 
-    // We reserve an 8px safety margin to ensure full-page coverage while
+    // We reserve an 50px safety margin to ensure full-page coverage while
     // absorbing Flutter's sub-pixel TextSpan rounding accumulations.
-    const bottomSafetyBuffer = 8.0;
+    const bottomSafetyBuffer = 150.0;
     final double safeHeightLimit = availableHeight - bottomSafetyBuffer;
 
     if (usedHeight < safeHeightLimit && pageNumber > 2) {
@@ -180,6 +188,11 @@ class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
       final double delta = extraHeight / QuranConstants.lineGapCount;
       lineSpacing += delta;
     }
+
+    logger.d('[PAGE $pageNumber] lineSpacing 2: $lineSpacing');
+    logger.d('[PAGE $pageNumber] fontSize2: $fontSize');
+    logger.d('[PAGE $pageNumber] fontHeight2: $_fontHeight');
+    logger.d('[PAGE $pageNumber] availableWidth2: $availableWidth');
 
     return QuranLayoutMetrics(
       fontSize: fontSize,

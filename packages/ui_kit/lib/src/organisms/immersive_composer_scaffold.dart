@@ -1,13 +1,20 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
-import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
-import '../molecules/tilawa_glass_panel.dart';
 
-class ImmersiveComposerScaffold extends StatelessWidget {
+/// Immersive three-layer scaffold: full-bleed [preview] content with a
+/// top app bar overlay and a bottom panel overlay that auto-hide on
+/// inactivity.
+///
+/// Overlays never resize the content — they float above it and manage
+/// their own safe-area insets. Visibility can be driven externally via
+/// [overlaysVisible]; otherwise the scaffold owns the state internally
+/// (tap to toggle, auto-hide after [autoHideDuration]).
+class ImmersiveComposerScaffold extends StatefulWidget {
   const ImmersiveComposerScaffold({
     super.key,
     required this.title,
@@ -19,13 +26,11 @@ class ImmersiveComposerScaffold extends StatelessWidget {
     this.trailing,
     this.background,
     this.backgroundGradient,
-    this.compactPanelHeightFactor,
-    this.regularPanelHeightFactor,
-    this.compactPreviewHeightFactor,
-    this.regularPreviewHeightFactor,
-    this.panelMinHeight,
-    this.previewMaxHeight,
     this.floatingActionButton,
+    this.overlaysVisible,
+    this.onVisibilityChanged,
+    this.autoHideDuration = const Duration(seconds: 3),
+    this.enableAutoHide = true,
   });
 
   final String title;
@@ -37,220 +42,276 @@ class ImmersiveComposerScaffold extends StatelessWidget {
   final Widget? trailing;
   final Widget? background;
   final Gradient? backgroundGradient;
-  final double? compactPanelHeightFactor;
-  final double? regularPanelHeightFactor;
-  final double? compactPreviewHeightFactor;
-  final double? regularPreviewHeightFactor;
-  final double? panelMinHeight;
-  final double? previewMaxHeight;
   final Widget? floatingActionButton;
+
+  /// When non-null, overrides internal visibility state. The scaffold
+  /// becomes a controlled widget — pair with [onVisibilityChanged] to
+  /// observe user-driven toggles.
+  final bool? overlaysVisible;
+
+  /// Fires when the user toggles visibility (tap) or the auto-hide
+  /// timer elapses. Always fires, whether controlled or not.
+  final ValueChanged<bool>? onVisibilityChanged;
+
+  final Duration autoHideDuration;
+  final bool enableAutoHide;
+
+  @override
+  State<ImmersiveComposerScaffold> createState() =>
+      _ImmersiveComposerScaffoldState();
+}
+
+class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold> {
+  static const Duration _animationDuration = Duration(milliseconds: 200);
+
+  bool _internalVisible = true;
+  Timer? _hideTimer;
+
+  bool get _visible => widget.overlaysVisible ?? _internalVisible;
+
+  @override
+  void initState() {
+    super.initState();
+    _restartHideTimer();
+  }
+
+  @override
+  void didUpdateWidget(covariant ImmersiveComposerScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_visible) {
+      _restartHideTimer();
+    } else {
+      _hideTimer?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _hideTimer?.cancel();
+    super.dispose();
+  }
+
+  void _restartHideTimer() {
+    _hideTimer?.cancel();
+    if (!_visible || !widget.enableAutoHide) return;
+    _hideTimer = Timer(widget.autoHideDuration, () {
+      _setVisible(false);
+    });
+  }
+
+  void _setVisible(bool next) {
+    if (_visible == next) return;
+    if (widget.overlaysVisible == null) {
+      setState(() => _internalVisible = next);
+    }
+    widget.onVisibilityChanged?.call(next);
+    if (next) _restartHideTimer();
+  }
+
+  void _handleTap() => _setVisible(!_visible);
+
+  void _handleInteraction() {
+    if (_visible) _restartHideTimer();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.immersiveComposer;
-    final glassTokens = theme.componentTokens.glassPanel;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      floatingActionButton: floatingActionButton,
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient:
-              backgroundGradient ??
-              LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  theme.colorScheme.surface,
-                  theme.colorScheme.surfaceContainerLowest,
-                ],
-              ),
-        ),
-        child: Stack(
-          children: [
-            if (background != null) ...[
-              Positioned.fill(child: background!),
-              Positioned.fill(
-                child: BackdropFilter(
-                  filter: ImageFilter.blur(
-                    sigmaX:
-                        designTokens.blurShadow *
-                        componentTokens.backgroundBlurScale,
-                    sigmaY:
-                        designTokens.blurShadow *
-                        componentTokens.backgroundBlurScale,
-                  ),
-                  child: ColoredBox(
-                    color: theme.colorScheme.surface.withValues(
-                      alpha: componentTokens.backgroundOverlayOpacity,
-                    ),
-                  ),
+      floatingActionButton: widget.floatingActionButton,
+      body: Stack(
+        children: [
+          if (widget.background != null) ...[
+            Positioned.fill(child: widget.background!),
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX:
+                      designTokens.blurShadow *
+                      componentTokens.backgroundBlurScale,
+                  sigmaY:
+                      designTokens.blurShadow *
+                      componentTokens.backgroundBlurScale,
                 ),
-              ),
-            ],
-            SafeArea(
-              bottom: false,
-              child: TilawaContentBounds(
-                kind: TilawaContentKind.media,
-                alignment: Alignment.topCenter,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isCompactHeight =
-                        constraints.maxHeight <
-                        componentTokens.compactHeightBreakpoint;
-                    final verticalSpacing = isCompactHeight
-                        ? designTokens.spaceMedium
-                        : designTokens.spaceLarge;
-                    final resolvedCompactPanelHeightFactor =
-                        compactPanelHeightFactor ??
-                        componentTokens.compactPanelHeightFactor;
-                    final resolvedRegularPanelHeightFactor =
-                        regularPanelHeightFactor ??
-                        componentTokens.regularPanelHeightFactor;
-                    final resolvedCompactPreviewHeightFactor =
-                        compactPreviewHeightFactor ??
-                        componentTokens.compactPreviewHeightFactor;
-                    final resolvedRegularPreviewHeightFactor =
-                        regularPreviewHeightFactor ??
-                        componentTokens.regularPreviewHeightFactor;
-                    final resolvedPanelMinHeight =
-                        panelMinHeight ?? componentTokens.panelMinHeight;
-                    final resolvedPreviewMaxHeight =
-                        previewMaxHeight ?? componentTokens.previewMaxHeight;
-                    final panelMaxHeight = clampDouble(
-                      constraints.maxHeight *
-                          (isCompactHeight
-                              ? resolvedCompactPanelHeightFactor
-                              : resolvedRegularPanelHeightFactor),
-                      resolvedPanelMinHeight,
-                      constraints.maxHeight,
-                    );
-                    final previewHeight = clampDouble(
-                      constraints.maxHeight *
-                          (isCompactHeight
-                              ? resolvedCompactPreviewHeightFactor
-                              : resolvedRegularPreviewHeightFactor),
-                      resolvedPanelMinHeight,
-                      resolvedPreviewMaxHeight,
-                    );
-
-                    Widget buildHeader() {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: designTokens.spaceLarge,
-                        ),
-                        child: Row(
-                          children: [
-                            leading ??
-                                _RoundHeaderButton(
-                                  icon: Icons.close_rounded,
-                                  onPressed: onClose,
-                                ),
-                            Expanded(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                spacing: designTokens.spaceExtraSmall,
-                                children: [
-                                  Text(title, textAlign: TextAlign.center),
-                                ],
-                              ),
-                            ),
-                            trailing ??
-                                SizedBox(
-                                  width: componentTokens.headerButtonSize,
-                                  height: componentTokens.headerButtonSize,
-                                ),
-                          ],
-                        ),
-                      );
-                    }
-
-                    Widget buildBottomPanel({required bool scrollInternally}) {
-                      final panelChild = scrollInternally
-                          ? SingleChildScrollView(
-                              primary: false,
-                              child: bottomPanel,
-                            )
-                          : bottomPanel;
-
-                      final bottomInset = MediaQuery.paddingOf(context).bottom;
-
-                      return TilawaGlassPanel(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(
-                            designTokens.radiusExtraLarge +
-                                glassTokens.borderRadiusOffset,
-                          ),
-                        ),
-                        padding: EdgeInsets.only(
-                          left: designTokens.spaceLarge,
-                          right: designTokens.spaceLarge,
-                          top: designTokens.spaceLarge,
-                          bottom: bottomInset + designTokens.spaceLarge,
-                        ),
-                        child: panelChild,
-                      );
-                    }
-
-                    if (isCompactHeight) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Expanded(
-                            child: SingleChildScrollView(
-                              physics: const BouncingScrollPhysics(),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                spacing: verticalSpacing,
-                                children: [
-                                  buildHeader(),
-                                  SizedBox(
-                                    height: previewHeight,
-                                    child: preview,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          buildBottomPanel(scrollInternally: false),
-                        ],
-                      );
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: verticalSpacing,
-                      children: [
-                        buildHeader(),
-                        Expanded(
-                          child: Stack(
-                            children: [
-                              Positioned.fill(child: preview),
-                              Align(
-                                alignment: Alignment.bottomCenter,
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxHeight: panelMaxHeight,
-                                  ),
-                                  child: buildBottomPanel(
-                                    scrollInternally: true,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    );
-                  },
+                child: ColoredBox(
+                  color: theme.colorScheme.surface.withValues(
+                    alpha: componentTokens.backgroundOverlayOpacity,
+                  ),
                 ),
               ),
             ),
           ],
+          // Full-bleed content layer. Isolated in its own RepaintBoundary
+          // so overlay fade/slide never invalidates the preview.
+          Positioned.fill(
+            child: RepaintBoundary(
+              child: Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerDown: (_) => _handleInteraction(),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onTap: _handleTap,
+                  child: widget.preview,
+                ),
+              ),
+            ),
+          ),
+          // Top overlay.
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: _OverlaySlot(
+              isTopPanel: true,
+              visible: _visible,
+              duration: _animationDuration,
+              slideFrom: const Offset(0, -1),
+              child: SafeArea(
+                bottom: false,
+                child: _TopAppBar(
+                  title: widget.title,
+                  leading: widget.leading,
+                  trailing: widget.trailing,
+                  onClose: widget.onClose,
+                ),
+              ),
+            ),
+          ),
+          // Bottom overlay.
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _OverlaySlot(
+              isTopPanel: false,
+              visible: _visible,
+              duration: _animationDuration,
+              slideFrom: const Offset(0, 1),
+              child: _BottomPanel(
+                onInteraction: _handleInteraction,
+                child: widget.bottomPanel,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OverlaySlot extends StatelessWidget {
+  const _OverlaySlot({
+    required this.visible,
+    required this.duration,
+    required this.slideFrom,
+    required this.child,
+    required this.isTopPanel,
+  });
+
+  final bool visible;
+  final Duration duration;
+  final Offset slideFrom;
+  final Widget child;
+  final bool isTopPanel;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final designTokens = theme.tokens;
+
+    return IgnorePointer(
+      ignoring: !visible,
+      child: AnimatedSlide(
+        duration: duration,
+        curve: Curves.easeOut,
+        offset: visible ? Offset.zero : slideFrom,
+        child: AnimatedOpacity(
+          duration: duration,
+          curve: Curves.easeOut,
+          opacity: visible ? 1 : 0,
+          child: RepaintBoundary(
+            child: ClipRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: designTokens.blurGlass,
+                  sigmaY: designTokens.blurGlass,
+                ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    // color: theme.colorScheme.surface,
+                    color: Colors.green,
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(isTopPanel ? 16 : 0),
+                      top: Radius.circular(isTopPanel ? 0 : 16),
+                    ),
+                  ),
+                  child: child,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
+    );
+  }
+}
+
+class _TopAppBar extends StatelessWidget {
+  const _TopAppBar({
+    required this.title,
+    required this.leading,
+    required this.trailing,
+    required this.onClose,
+  });
+
+  final String title;
+  final Widget? leading;
+  final Widget? trailing;
+  final VoidCallback? onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final designTokens = theme.tokens;
+    final componentTokens = theme.componentTokens.immersiveComposer;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: designTokens.spaceLarge,
+        vertical: designTokens.spaceSmall,
+      ),
+      child: Row(
+        children: [
+          leading ??
+              _RoundHeaderButton(icon: Icons.close_rounded, onPressed: onClose),
+          Expanded(child: Text(title, textAlign: TextAlign.center)),
+          trailing ??
+              SizedBox(
+                width: componentTokens.headerButtonSize,
+                height: componentTokens.headerButtonSize,
+              ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BottomPanel extends StatelessWidget {
+  const _BottomPanel({required this.onInteraction, required this.child});
+
+  final VoidCallback onInteraction;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      behavior: HitTestBehavior.deferToChild,
+      onPointerDown: (_) => onInteraction(),
+      onPointerMove: (_) => onInteraction(),
+      child: child,
     );
   }
 }

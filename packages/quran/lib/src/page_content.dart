@@ -114,10 +114,6 @@ class _PageContentState extends State<PageContent>
   Color? _cachedLuminanceColor;
   bool _cachedIsLightPage = false;
 
-  // Spaced lines cache
-  List<Widget>? _cachedSpacedLines;
-  double? _cachedSpacedLinesLineSpacing;
-
   // Bitmap snapshot support — captures the rendered page body as a GPU
   // texture for fast blitting during swipe animations.
   final GlobalKey _snapshotBoundaryKey = GlobalKey();
@@ -249,8 +245,8 @@ class _PageContentState extends State<PageContent>
   }
 
   void _invalidateLineCaches() {
-    _cachedSpacedLines = null;
-    _cachedSpacedLinesLineSpacing = null;
+    // The highlight path intentionally rebuilds line widgets every build so
+    // per-line visual-bound alignment cannot reuse stale QuranLine instances.
   }
 
   /// Called when the scroll state changes (start/end).
@@ -402,21 +398,12 @@ class _PageContentState extends State<PageContent>
     if (lineBuildMode == 'PREPARED') {
       spacedLines = lineWidgets;
     } else {
-      final bool spacedCacheHit =
-          _cachedSpacedLines != null &&
-          _cachedSpacedLinesLineSpacing == metrics.lineSpacing;
-      if (spacedCacheHit) {
-        spacedLines = _cachedSpacedLines!;
-      } else {
-        final List<Widget> built = [];
-        for (var i = 0; i < lineWidgets.length; i++) {
-          if (i > 0) built.add(SizedBox(height: metrics.lineSpacing));
-          built.add(lineWidgets[i]);
-        }
-        spacedLines = built;
-        _cachedSpacedLines = spacedLines;
-        _cachedSpacedLinesLineSpacing = metrics.lineSpacing;
+      final List<Widget> built = [];
+      for (var i = 0; i < lineWidgets.length; i++) {
+        if (i > 0) built.add(SizedBox(height: metrics.lineSpacing));
+        built.add(lineWidgets[i]);
       }
+      spacedLines = built;
     }
 
     if (!kReleaseMode) {
@@ -525,6 +512,7 @@ class _PageContentState extends State<PageContent>
     required bool isPortrait,
   }) {
     final List<List<Map<String, dynamic>>> pageLines = _cachedPageLines!;
+    final double lineWidth = _verseLineWidth(metrics, viewportWidth);
     final quranStyle = TextStyle(
       fontFamily: pageFont,
       fontSize: metrics.fontSize,
@@ -546,10 +534,11 @@ class _PageContentState extends State<PageContent>
           }).toList()
         : List.generate(QuranConstants.linesPerPage, (int i) => i);
 
-    final List<Widget> blocks = [];
+    final List<_PendingQuranBlock> blocks = [];
     final List<InlineSpan> currentSpans = [];
     final List<QuranWordMetadata> currentMetadata = [];
     var currentOffset = 0;
+    final nbSpaceSpan = TextSpan(text: '\u00A0', style: quranStyle);
 
     void flushSpans() {
       if (currentSpans.isNotEmpty) {
@@ -557,22 +546,18 @@ class _PageContentState extends State<PageContent>
           text: TextSpan(children: List<InlineSpan>.from(currentSpans)),
           textDirection: TextDirection.rtl,
           textAlign: TextAlign.center,
-          textWidthBasis: TextWidthBasis.longestLine,
           strutStyle: StrutStyle(
             fontFamily: pageFont,
             fontSize: metrics.fontSize,
             height: metrics.fontHeight,
             forceStrutHeight: true,
           ),
-        )..layout(maxWidth: viewportWidth);
+        )..layout(minWidth: lineWidth, maxWidth: lineWidth);
         blocks.add(
-          QuranLine(
+          _PendingQuranTextLine(
             textPainter: painter,
             metadata: List.from(currentMetadata),
-            onLongPress: widget.onLongPress,
-            onLongPressUp: widget.onLongPressUp,
-            onLongPressDown: widget.onLongPressDown,
-            onLongPressCancel: widget.onLongPressCancel,
+            visualBounds: quranLineVisualBoundsFor(painter),
           ),
         );
         currentSpans.clear();
@@ -597,6 +582,8 @@ class _PageContentState extends State<PageContent>
       }
     }
 
+    var hasSeenFirstTextLine = false;
+
     for (final i in lineIndices) {
       if (isCenteredPage) {
         // Centered page: emit header at index 2, bismillah at index 4.
@@ -615,13 +602,15 @@ class _PageContentState extends State<PageContent>
             headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
           );
           blocks.add(
-            widget.onSurahSelected == null
-                ? banner
-                : GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => widget.onSurahSelected!(surahNum),
-                    child: banner,
-                  ),
+            _PendingWidgetBlock(
+              widget: widget.onSurahSelected == null
+                  ? banner
+                  : GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => widget.onSurahSelected!(surahNum),
+                      child: banner,
+                    ),
+            ),
           );
           continue;
         }
@@ -629,11 +618,13 @@ class _PageContentState extends State<PageContent>
             hasCenteredBismillah) {
           flushSpans();
           blocks.add(
-            BismillahWidget(
-              fontSize: metrics.fontSize,
-              pageNumber: widget.pageNumber,
-              color: widget.textColor,
-              fontFamily: pageFont,
+            _PendingWidgetBlock(
+              widget: BismillahWidget(
+                fontSize: metrics.fontSize,
+                pageNumber: widget.pageNumber,
+                color: widget.textColor,
+                fontFamily: pageFont,
+              ),
             ),
           );
           continue;
@@ -662,13 +653,15 @@ class _PageContentState extends State<PageContent>
             headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
           );
           blocks.add(
-            widget.onSurahSelected == null
-                ? banner
-                : GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => widget.onSurahSelected!(surahNum),
-                    child: banner,
-                  ),
+            _PendingWidgetBlock(
+              widget: widget.onSurahSelected == null
+                  ? banner
+                  : GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => widget.onSurahSelected!(surahNum),
+                      child: banner,
+                    ),
+            ),
           );
           continue;
         }
@@ -676,11 +669,13 @@ class _PageContentState extends State<PageContent>
         if (_isBismillah(widget.pageNumber, i + 1)) {
           flushSpans();
           blocks.add(
-            BismillahWidget(
-              fontSize: metrics.fontSize,
-              pageNumber: widget.pageNumber,
-              color: widget.textColor,
-              fontFamily: pageFont,
+            _PendingWidgetBlock(
+              widget: BismillahWidget(
+                fontSize: metrics.fontSize,
+                pageNumber: widget.pageNumber,
+                color: widget.textColor,
+                fontFamily: pageFont,
+              ),
             ),
           );
           continue;
@@ -698,7 +693,15 @@ class _PageContentState extends State<PageContent>
         currentSpans.add(TextSpan(text: char, style: quranStyle));
         currentOffset += char.length;
       } else {
+        final bool isFirstTextLine = !hasSeenFirstTextLine;
+        hasSeenFirstTextLine = true;
+
         for (var idx = 0; idx < wordSpans.length; idx++) {
+          if (isFirstTextLine && idx == 1) {
+            currentSpans.add(nbSpaceSpan);
+            currentOffset += 1;
+          }
+
           final _WordSpanGroup group = wordSpans[idx];
           currentSpans.addAll(group.spans);
 
@@ -731,7 +734,35 @@ class _PageContentState extends State<PageContent>
       }
     }
     flushSpans();
-    return blocks;
+    final QuranLineVisualBounds? targetBounds = quranLineTargetBoundsFor(
+      blocks.whereType<_PendingQuranTextLine>().map(
+        (line) => line.visualBounds,
+      ),
+    );
+    return blocks
+        .map((block) {
+          return switch (block) {
+            _PendingQuranTextLine() => QuranLine(
+              textPainter: block.textPainter,
+              width: lineWidth,
+              alignment: switch ((block.visualBounds, targetBounds)) {
+                (
+                  final QuranLineVisualBounds source,
+                  final QuranLineVisualBounds target,
+                ) =>
+                  QuranLineAlignment(source: source, target: target),
+                _ => null,
+              },
+              metadata: block.metadata,
+              onLongPress: widget.onLongPress,
+              onLongPressUp: widget.onLongPressUp,
+              onLongPressDown: widget.onLongPressDown,
+              onLongPressCancel: widget.onLongPressCancel,
+            ),
+            _PendingWidgetBlock() => block.widget,
+          };
+        })
+        .toList(growable: false);
   }
 
   /// Builds line widgets from pre-laid-out [PreparedQuranPage] data.
@@ -749,6 +780,7 @@ class _PageContentState extends State<PageContent>
   }) {
     final List<Widget> result = [];
     final pageFont = 'QCF_P${widget.pageNumber.toString().padLeft(3, '0')}';
+    final double lineWidth = _verseLineWidth(metrics, viewportWidth);
 
     // Accumulate consecutive text blocks.
     final List<(TextPainter, List<QuranWordMetadata>)> textRun = [];
@@ -759,6 +791,7 @@ class _PageContentState extends State<PageContent>
         QuranPagePainter(
           painters: List.of(textRun),
           lineSpacing: metrics.lineSpacing,
+          width: lineWidth,
           onLongPress: widget.onLongPress,
           onLongPressUp: widget.onLongPressUp,
           onLongPressDown: widget.onLongPressDown,
@@ -815,6 +848,13 @@ class _PageContentState extends State<PageContent>
     // Flush any remaining text lines.
     flushTextRun();
     return result;
+  }
+
+  double _verseLineWidth(QuranLayoutMetrics metrics, double viewportWidth) {
+    final double lineWidth =
+        viewportWidth - (metrics.verseHorizontalPadding * 2);
+    if (lineWidth.isFinite && lineWidth > 0) return lineWidth;
+    return viewportWidth;
   }
 
   List<List<Map<String, dynamic>>> _getWordsGroupedByLine(int pageNumber) {
@@ -953,9 +993,9 @@ class _QuranPageBody extends StatelessWidget {
   Widget build(BuildContext context) {
     // No manual RepaintBoundary — the sliver auto-inserts one per child.
     final Widget pageBody = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: .center,
+      crossAxisAlignment: .stretch,
+      mainAxisSize: .min,
       children: spacedLines,
     );
 
@@ -1095,6 +1135,28 @@ class _MetadataStrip extends StatelessWidget {
     }
     return strip;
   }
+}
+
+sealed class _PendingQuranBlock {
+  const _PendingQuranBlock();
+}
+
+class _PendingQuranTextLine extends _PendingQuranBlock {
+  const _PendingQuranTextLine({
+    required this.textPainter,
+    required this.metadata,
+    required this.visualBounds,
+  });
+
+  final TextPainter textPainter;
+  final List<QuranWordMetadata> metadata;
+  final QuranLineVisualBounds? visualBounds;
+}
+
+class _PendingWidgetBlock extends _PendingQuranBlock {
+  const _PendingWidgetBlock({required this.widget});
+
+  final Widget widget;
 }
 
 class _WordSpanGroup {

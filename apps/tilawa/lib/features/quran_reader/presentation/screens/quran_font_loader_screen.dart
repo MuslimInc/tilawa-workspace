@@ -245,7 +245,7 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
           if (isSuccess) {
             if (initialPageNumber == null) {
               // No page yet — blank scaffold while page hint arrives.
-              return const _FontLoaderScaffold(child: SizedBox.shrink());
+              return const Scaffold(body: SizedBox.shrink());
             }
 
             // Build the prepared window once, synchronously. Cached so
@@ -293,8 +293,8 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
           }
 
           if (error != null) {
-            return _FontLoaderScaffold(
-              child: _ErrorView(
+            return Scaffold(
+              body: _ErrorView(
                 message: error.message,
                 onRetry: () {
                   final page = initialPageNumber;
@@ -309,8 +309,8 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
           }
 
           if (downloading != null) {
-            return _FontLoaderScaffold(
-              child: _DownloadView(
+            return Scaffold(
+              body: _DownloadView(
                 progress: downloading.progress,
                 speedKbps: downloading.speedKbps,
                 etaSeconds: downloading.etaSeconds,
@@ -320,7 +320,7 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
 
           // initial / checking / registering — show blank branded scaffold.
           // These states are fast (<500ms). No spinner needed.
-          return const _FontLoaderScaffold(child: SizedBox.shrink());
+          return const Scaffold(body: SizedBox.shrink());
         },
       ),
     );
@@ -349,54 +349,6 @@ class _ReaderView extends StatelessWidget {
       initialAyah: initialAyah,
       initialPageNumber: initialPageNumber,
       initialPreparedWindow: initialPreparedWindow,
-    );
-  }
-}
-
-// ─── Scaffold shell ──────────────────────────────────────────────────────────
-
-class _FontLoaderScaffold extends StatelessWidget {
-  const _FontLoaderScaffold({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primary = theme.primaryColor;
-    final tokens = theme.tokens;
-
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned(
-            top: -80,
-            right: -80,
-            child: TilawaAmbientOrb(
-              size: 300,
-              color: primary,
-              opacity: tokens.opacitySubtle,
-            ),
-          ),
-          Positioned(
-            bottom: -60,
-            left: -60,
-            child: TilawaAmbientOrb(
-              size: 240,
-              color: primary,
-              opacity: tokens.opacitySubtle * 0.6,
-            ),
-          ),
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: tokens.spaceExtraLarge * 1.5,
-              ),
-              child: child,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

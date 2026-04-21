@@ -2,56 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-class PreviewFrame extends StatelessWidget {
-  const PreviewFrame({
-    super.key,
-    required this.aspectRatio,
-    required this.child,
-    this.maxWidth = 420,
-    this.maxHeight = 760,
-  });
-
-  final double aspectRatio;
-  final Widget child;
-  final double? maxWidth;
-  final double? maxHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      constraints: BoxConstraints(
-        maxWidth: maxWidth ?? double.infinity,
-        maxHeight: maxHeight ?? double.infinity,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(34),
-        color: theme.colorScheme.surface.withValues(alpha: 0.08),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.18),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: 0.16),
-            blurRadius: 28,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest,
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
 class MediaPreviewFrame extends StatelessWidget {
   const MediaPreviewFrame({
     super.key,
