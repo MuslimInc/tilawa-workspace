@@ -17,21 +17,44 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: Flutter / Dart [version or NEEDS CLARIFICATION]
+**Primary Dependencies**: BLoC, GoRouter, Tilawa UI Kit, [feature-specific packages or N/A]
+**Storage**: [Hydrated BLoC, local cache, secure storage, API, files, or N/A]
+**Testing**: `flutter test`, widget tests, BLoC/unit tests, [golden/performance tests if needed]
+**Target Platform**: [Android, iOS, web, desktop, or NEEDS CLARIFICATION]
+**Project Type**: Flutter workspace feature/package
+**Performance Goals**: [60 fps, startup target, scroll/render budget, p95 latency, or N/A]
+**Constraints**: [offline behavior, memory, accessibility, RTL, responsive/adaptive support, or N/A]
+**Scale/Scope**: [screens, packages, features, data size, supported form factors, or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **Clean Architecture Boundaries**: PASS/FAIL - Plan identifies affected
+  presentation, domain, and data layers; dependencies point toward domain
+  contracts; cross-feature access uses public APIs or shared packages.
+- **BLoC and GoRouter**: PASS/FAIL - Feature state uses BLoC/Cubit; widgets keep
+  only ephemeral view state; routes, redirects, and deep links use GoRouter.
+- **Atomic Design and Tilawa UI Kit**: PASS/FAIL - Shared UI goes through the
+  Tilawa UI Kit; components are classified as foundation, atom, molecule,
+  organism, or layout primitive; tokens/localization/theme own visual constants.
+- **Responsive and Adaptive UI**: PASS/FAIL - Compact, medium, expanded, RTL,
+  safe-area, and text-scaling behavior is planned for affected surfaces.
+- **Performance and Low Jank**: PASS/FAIL - Hot paths avoid work in `build`;
+  scrolling, startup, Quran text rendering, audio, and adaptive layout changes
+  include measurement or regression thresholds.
+- **Structured Logging and Diagnostics**: PASS/FAIL - BLoC transitions, route
+  decisions, repository failures, retries, async durations, and recoverable
+  errors have appropriate structured diagnostics.
+- **Testing Discipline**: PASS/FAIL - Unit, widget, and performance-sensitive
+  tests are planned for critical paths; any omitted coverage has an approved
+  waiver with owner and expiry.
+- **Safe Refactoring and Delivery**: PASS/FAIL - Refactors are scoped; migration,
+  downstream impact, rollback or mitigation, and waiver needs are documented.
+
+Unresolved FAIL entries require a Complexity Tracking row or a documented
+Governance waiver before Phase 0 may proceed.
 
 ## Project Structure
 
@@ -56,39 +79,28 @@ specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+apps/[app_name]/
+├── lib/
+│   ├── features/[feature]/
+│   │   ├── presentation/   # widgets, pages, BLoCs, route integration
+│   │   ├── domain/         # entities, repository contracts, use cases
+│   │   └── data/           # DTOs, mappers, data sources, repository impls
+│   └── routing/            # GoRouter configuration when app-owned
+└── test/
+    └── features/[feature]/
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+packages/core/
+├── lib/                    # logging, errors, DI, utilities, network abstractions
+└── test/
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+packages/ui_kit/
+├── lib/src/
+│   ├── foundation/
+│   ├── atoms/
+│   ├── molecules/
+│   ├── organisms/
+│   └── [layout_primitives]/
+└── test/
 ```
 
 **Structure Decision**: [Document the selected structure and reference the real
