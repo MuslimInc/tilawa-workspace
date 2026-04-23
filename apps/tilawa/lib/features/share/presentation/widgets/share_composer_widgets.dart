@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A card container for share composer controls.
@@ -10,19 +11,14 @@ class ShareControlsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(
-          alpha: tokens.opacitySubtle,
-        ),
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(
-            alpha: tokens.opacitySubtle,
-          ),
-          width: tokens.borderWidthThin,
-        ),
+    return TilawaCard(
+      backgroundColor: theme.colorScheme.surface.withValues(
+        alpha: tokens.opacitySubtle,
       ),
+      borderColor: theme.colorScheme.outline.withValues(
+        alpha: tokens.opacitySubtle,
+      ),
+      padding: EdgeInsets.zero,
       child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
@@ -119,45 +115,43 @@ class AyahStepper extends StatelessWidget {
     final tokens = theme.tokens;
     final clamped = value.clamp(min, max);
 
-    return Container(
-      height: 36,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(
-          alpha: tokens.opacitySubtle,
-        ),
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(
-            alpha: tokens.opacitySubtle,
-          ),
-          width: tokens.borderWidthThin,
-        ),
+    return TilawaCard(
+      padding: EdgeInsets.zero,
+      backgroundColor: theme.colorScheme.surface.withValues(
+        alpha: tokens.opacitySubtle,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _StepperButton(
-            icon: Icons.remove_rounded,
-            enabled: clamped > min,
-            onTap: () => onChanged(clamped - 1),
-          ),
-          SizedBox(
-            width: 32,
-            child: Text(
-              '$clamped',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
+      borderRadius: tokens.radiusMedium,
+      borderColor: theme.colorScheme.outline.withValues(
+        alpha: tokens.opacitySubtle,
+      ),
+      child: SizedBox(
+        height: 36,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _StepperButton(
+              icon: Icons.remove_rounded,
+              enabled: clamped > min,
+              onTap: () => onChanged(clamped - 1),
+            ),
+            SizedBox(
+              width: 32,
+              child: Text(
+                '$clamped',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
-          ),
-          _StepperButton(
-            icon: Icons.add_rounded,
-            enabled: clamped < max,
-            onTap: () => onChanged(clamped + 1),
-          ),
-        ],
+            _StepperButton(
+              icon: Icons.add_rounded,
+              enabled: clamped < max,
+              onTap: () => onChanged(clamped + 1),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -191,6 +185,123 @@ class _StepperButton extends StatelessWidget {
         child: InkWell(
           onTap: enabled ? onTap : null,
           child: Icon(icon, size: tokens.iconSizeSmall, color: color),
+        ),
+      ),
+    );
+  }
+}
+
+class ReciterTile extends StatelessWidget {
+  const ReciterTile({
+    super.key,
+    required this.reciterName,
+    required this.isLoading,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final String reciterName;
+  final bool isLoading;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return ShareControlTileShell(
+      onTap: enabled ? onTap : null,
+      icon: Icons.multitrack_audio_rounded,
+      label: context.l10n.reciters,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Expanded(
+            child: Text(
+              reciterName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          SizedBox(width: tokens.spaceSmall),
+          if (isLoading)
+            SizedBox(
+              width: tokens.iconSizeSmall,
+              height: tokens.iconSizeSmall,
+              child: const CircularProgressIndicator(strokeWidth: 2),
+            )
+          else
+            Icon(
+              Icons.chevron_right_rounded,
+              size: tokens.iconSizeMedium,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class AyahRangeTile extends StatelessWidget {
+  const AyahRangeTile({
+    super.key,
+    required this.fromAyah,
+    required this.toAyah,
+    required this.minAyah,
+    required this.maxAyah,
+    required this.onFromChanged,
+    required this.onToChanged,
+  });
+
+  final int fromAyah;
+  final int toAyah;
+  final int minAyah;
+  final int maxAyah;
+  final ValueChanged<int> onFromChanged;
+  final ValueChanged<int> onToChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return ShareControlTileShell(
+      icon: Icons.format_list_numbered_rounded,
+      label: context.l10n.ayah,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: AlignmentDirectional.centerEnd,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AyahStepper(
+              value: fromAyah,
+              min: minAyah,
+              max: maxAyah,
+              onChanged: onFromChanged,
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              child: Text(
+                '-',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            AyahStepper(
+              value: toAyah,
+              min: minAyah,
+              max: maxAyah,
+              onChanged: onToChanged,
+            ),
+          ],
         ),
       ),
     );

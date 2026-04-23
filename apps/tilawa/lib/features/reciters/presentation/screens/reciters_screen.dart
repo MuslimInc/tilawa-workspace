@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
@@ -27,26 +28,70 @@ class RecitersScreen extends StatefulWidget {
 
 class _RecitersScreenState extends State<RecitersScreen> {
   static const Duration _searchDebounceDuration = Duration(milliseconds: 200);
+  static const Duration _initialRecitersLoadDelay = Duration(
+    milliseconds: 1500,
+  );
+  static const Duration _startupLiteUiDuration = Duration(milliseconds: 650);
+  static const Duration _loadedResultsActivationDelay = Duration(
+    milliseconds: 500,
+  );
 
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   Timer? _searchDebounceTimer;
+  Timer? _initialLoadTimer;
+  Timer? _loadedResultsActivationTimer;
+  Timer? _startupLiteUiTimer;
+  bool _isStartupLiteUi = true;
+  bool _allowHeavyLoadedResults = false;
+  late final FavoritesCubit _favoritesCubit;
 
   @override
   void initState() {
     super.initState();
+    _favoritesCubit = getIt<FavoritesCubit>();
+    _startupLiteUiTimer = Timer(_startupLiteUiDuration, () {
+      if (!mounted) return;
+      setState(() {
+        _isStartupLiteUi = false;
+      });
+      _favoritesCubit.loadFavorites();
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RecitersBloc>().add(const LoadReciters());
+      debugPrint(
+        '[PerfLogger][RecitersScreen] initial-load scheduled '
+        'delayMs=${_initialRecitersLoadDelay.inMilliseconds}',
+      );
+      _initialLoadTimer = Timer(_initialRecitersLoadDelay, () {
+        if (!mounted) return;
+        debugPrint('[PerfLogger][RecitersScreen] initial-load started');
+        context.read<RecitersBloc>().add(const LoadReciters());
+      });
+    });
+  }
+
+  void _scheduleLoadedResultsActivation() {
+    _loadedResultsActivationTimer?.cancel();
+    _loadedResultsActivationTimer = Timer(_loadedResultsActivationDelay, () {
+      if (!mounted || _allowHeavyLoadedResults) return;
+      setState(() {
+        _allowHeavyLoadedResults = true;
+      });
     });
   }
 
   @override
   void dispose() {
+    _startupLiteUiTimer?.cancel();
+    _loadedResultsActivationTimer?.cancel();
+    _initialLoadTimer?.cancel();
     _searchDebounceTimer?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
+    _favoritesCubit.close();
     super.dispose();
   }
 
@@ -178,9 +223,18 @@ class _RecitersScreenState extends State<RecitersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('RecitersScreen');
+    if (_isStartupLiteUi) {
+      return Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(title: Text(context.l10n.reciters)),
+        body: const _RecitersStartupLitePane(),
+      );
+    }
+
     final tokens = Theme.of(context).tokens;
-    return BlocProvider(
-      create: (_) => getIt<FavoritesCubit>()..loadFavorites(),
+    return BlocProvider.value(
+      value: _favoritesCubit,
       child: Builder(
         builder: (innerContext) => MultiBlocListener(
           listeners: [
@@ -193,19 +247,11 @@ class _RecitersScreenState extends State<RecitersScreen> {
               listenWhen: (previous, current) =>
                   previous is! RecitersLoaded && current is RecitersLoaded,
               listener: (context, state) {
+                _scheduleLoadedResultsActivation();
                 final String? selectedLetter = context
                     .read<AlphabetScrollbarBloc>()
                     .state
                     .selectedLetter;
-                final FavoritesState favoritesState = context
-                    .read<FavoritesCubit>()
-                    .state;
-
-                if (favoritesState is FavoritesLoaded) {
-                  context.read<RecitersBloc>().add(
-                    SyncFavoriteIds(favoritesState.favoriteIds.toList()),
-                  );
-                }
 
                 if (selectedLetter != null) {
                   context.read<RecitersBloc>().add(
@@ -314,6 +360,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                     ),
                     child: _RecitersSurface(
                       state: state,
+                      allowHeavyLoadedResults: _allowHeavyLoadedResults,
                       searchController: _searchController,
                       focusNode: _focusNode,
                       scrollController: _scrollController,
@@ -342,9 +389,35 @@ class _RecitersScreenState extends State<RecitersScreen> {
   }
 }
 
+class _RecitersStartupLitePane extends StatelessWidget {
+  const _RecitersStartupLitePane();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+            const SizedBox(height: 12),
+            Text(context.l10n.loadingReciters),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _RecitersSurface extends StatelessWidget {
   const _RecitersSurface({
     required this.state,
+    required this.allowHeavyLoadedResults,
     required this.searchController,
     required this.focusNode,
     required this.scrollController,
@@ -359,6 +432,7 @@ class _RecitersSurface extends StatelessWidget {
   });
 
   final RecitersState state;
+  final bool allowHeavyLoadedResults;
   final TextEditingController searchController;
   final FocusNode focusNode;
   final ScrollController scrollController;
@@ -373,6 +447,7 @@ class _RecitersSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('_RecitersSurface');
     final ThemeData theme = Theme.of(context);
 
     return DecoratedBox(
@@ -441,6 +516,7 @@ class _RecitersSurface extends StatelessWidget {
             Expanded(
               child: _ResultsPane(
                 state: state,
+                allowHeavyLoadedResults: allowHeavyLoadedResults,
                 scrollController: scrollController,
                 onLetterSelected: onLetterSelected,
                 onRetry: onRetry,
@@ -662,6 +738,7 @@ class _FilterChip extends StatelessWidget {
 class _ResultsPane extends StatelessWidget {
   const _ResultsPane({
     required this.state,
+    required this.allowHeavyLoadedResults,
     required this.scrollController,
     required this.onLetterSelected,
     required this.onRetry,
@@ -669,6 +746,7 @@ class _ResultsPane extends StatelessWidget {
   });
 
   final RecitersState state;
+  final bool allowHeavyLoadedResults;
   final ScrollController scrollController;
   final ValueChanged<String?> onLetterSelected;
   final Future<void> Function() onRetry;
@@ -705,6 +783,15 @@ class _ResultsPane extends StatelessWidget {
 
     if (state is RecitersLoaded) {
       final RecitersLoaded loadedState = state as RecitersLoaded;
+
+      if (!allowHeavyLoadedResults) {
+        return _StatePanel(
+          key: const ValueKey('deferred_loaded_state'),
+          icon: Icons.hourglass_top_rounded,
+          title: context.l10n.loadingReciters,
+          isLoading: true,
+        );
+      }
 
       if (loadedState.filteredReciters.isEmpty) {
         final bool isSearchState = loadedState.searchQuery.isNotEmpty;
@@ -757,6 +844,7 @@ class _LoadedResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('_LoadedResults');
     final bool showScrollbar =
         state.filteredReciters.isNotEmpty && state.searchQuery.isEmpty;
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
@@ -892,6 +980,7 @@ class _ReciterListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('_ReciterListView');
     return RefreshIndicator.adaptive(
       onRefresh: onRefresh,
       child: ListView.separated(

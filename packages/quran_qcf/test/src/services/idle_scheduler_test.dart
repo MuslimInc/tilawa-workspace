@@ -1,13 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/services/idle_scheduler.dart';
+import 'package:quran_qcf/src/presentation/services/idle_scheduler.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  late IdleScheduler scheduler;
+
   setUp(() {
-    IdleScheduler.instance.cancelAll();
+    scheduler = IdleScheduler();
   });
 
   group('IdleScheduler', () {
@@ -16,7 +18,7 @@ void main() {
     ) async {
       var executed = false;
 
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         executed = true;
       });
 
@@ -30,13 +32,13 @@ void main() {
     testWidgets('tasks execute in FIFO order', (WidgetTester tester) async {
       final order = <int>[];
 
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         order.add(1);
       });
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         order.add(2);
       });
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         order.add(3);
       });
 
@@ -53,7 +55,7 @@ void main() {
     ) async {
       var executed = false;
 
-      final IdleTask task = IdleScheduler.instance.runWhenIdle(() async {
+      final IdleTask task = scheduler.runWhenIdle(() async {
         executed = true;
       });
 
@@ -72,7 +74,7 @@ void main() {
     ) async {
       var execCount = 0;
 
-      final IdleTask task = IdleScheduler.instance.runWhenIdle(() async {
+      final IdleTask task = scheduler.runWhenIdle(() async {
         execCount++;
       });
 
@@ -92,17 +94,17 @@ void main() {
     ) async {
       final executed = <int>[];
 
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         executed.add(1);
       });
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         executed.add(2);
       });
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         executed.add(3);
       });
 
-      IdleScheduler.instance.cancelAll();
+      scheduler.cancelAll();
 
       await tester.pump();
       await tester.pump();
@@ -117,10 +119,10 @@ void main() {
     ) async {
       var secondRan = false;
 
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         throw Exception('Boom!');
       });
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         secondRan = true;
       });
 
@@ -134,7 +136,7 @@ void main() {
     testWidgets('IdleTask.future completes after execution', (
       WidgetTester tester,
     ) async {
-      final IdleTask task = IdleScheduler.instance.runWhenIdle(() async {
+      final IdleTask task = scheduler.runWhenIdle(() async {
         // Simulate some work.
       });
 
@@ -150,7 +152,7 @@ void main() {
     testWidgets('IdleTask.future completes after cancel', (
       WidgetTester tester,
     ) async {
-      final IdleTask task = IdleScheduler.instance.runWhenIdle(() async {});
+      final IdleTask task = scheduler.runWhenIdle(() async {});
 
       task.cancel();
 
@@ -165,7 +167,7 @@ void main() {
     ) async {
       var executed = false;
 
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         executed = true;
       });
 
@@ -186,12 +188,12 @@ void main() {
       var firstDone = false;
       var secondStarted = false;
 
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         await blocker.future;
         firstDone = true;
       });
 
-      IdleScheduler.instance.runWhenIdle(() async {
+      scheduler.runWhenIdle(() async {
         // If serial, firstDone must be true by the time this runs.
         secondStarted = true;
         expect(firstDone, isTrue);

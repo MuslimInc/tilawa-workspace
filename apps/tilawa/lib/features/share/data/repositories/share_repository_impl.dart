@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:tilawa/features/share/domain/entities/widget_capture_handle.dart';
 
 import '../../../../features/downloads/domain/entities/download_item.dart';
 import '../../../../features/downloads/domain/repositories/download_query_repository.dart';
@@ -32,13 +33,14 @@ class ShareRepositoryImpl implements ShareRepository {
 
   @override
   Future<ShareContent> captureScreenshot({
-    required GlobalKey boundaryKey,
+    required WidgetCaptureHandle handle,
     required String surahName,
     required int pageNumber,
     required String appName,
     required String sharedViaLabel,
     bool brandCapture = true,
   }) async {
+    final boundaryKey = handle.value as GlobalKey;
     await WidgetsBinding.instance.endOfFrame;
     final filePath = brandCapture
         ? await _screenshotService.captureAndBrand(
@@ -99,7 +101,7 @@ class ShareRepositoryImpl implements ShareRepository {
 
   @override
   Future<ShareContent> generateVideo({
-    required List<GlobalKey> boundaryKeys,
+    required List<WidgetCaptureHandle> handles,
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
@@ -109,7 +111,6 @@ class ShareRepositoryImpl implements ShareRepository {
     void Function(int index)? onFrameCaptureStarted,
     CancelToken? cancelToken,
   }) async {
-    final effectiveBoundaryKeys = boundaryKeys;
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
       maxDurationSeconds: maxDurationSeconds,
@@ -126,15 +127,12 @@ class ShareRepositoryImpl implements ShareRepository {
     );
 
     // 2. Capture screenshots sequentially.
-    // Capturing screenshots is a heavy GPU operation (RepaintBoundary.toImage).
-    // Running them in parallel via Future.wait causes massive raster jank
-    // and high memory pressure. Serializing them stabilizes the frame rate.
     final List<String> screenshotPaths = [];
     final double captureBaseProgress = 0.45;
-    final double captureStep = 0.15 / effectiveBoundaryKeys.length;
+    final double captureStep = 0.15 / handles.length;
 
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
-    for (int i = 0; i < effectiveBoundaryKeys.length; i++) {
+    for (int i = 0; i < handles.length; i++) {
       if (cancelToken?.isCancelled ?? false) break;
 
       // Notify the UI to render the current frame before we capture it.
@@ -144,8 +142,9 @@ class ShareRepositoryImpl implements ShareRepository {
       // and other UI elements to animate smoothly.
       await WidgetsBinding.instance.endOfFrame;
 
+      final boundaryKey = handles[i].value as GlobalKey;
       final path = await _screenshotService.captureRaw(
-        boundaryKey: effectiveBoundaryKeys[i],
+        boundaryKey: boundaryKey,
         fileName: 'video_capture_${timestamp}_${i + 1}.png',
         pixelRatio: 1.0,
         targetWidth: VideoService.outputVideoWidth,

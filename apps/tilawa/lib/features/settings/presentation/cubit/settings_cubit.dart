@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/features/settings/domain/usecases/get_app_info.dart';
 import 'package:tilawa_core/entities/app_info.dart';
 
@@ -12,18 +13,21 @@ class SettingsState extends Equatable {
     this.maxConcurrentDownloads = 2,
     this.restorePlaybackState = true,
     this.isSleepTimerEnabled = true,
+    this.prefetchQuranAssetsOnWifiOnly = true,
     this.appInfo,
   });
 
   final int maxConcurrentDownloads;
   final bool restorePlaybackState;
   final bool isSleepTimerEnabled;
+  final bool prefetchQuranAssetsOnWifiOnly;
   final AppInfo? appInfo;
 
   SettingsState copyWith({
     int? maxConcurrentDownloads,
     bool? restorePlaybackState,
     bool? isSleepTimerEnabled,
+    bool? prefetchQuranAssetsOnWifiOnly,
     AppInfo? appInfo,
   }) {
     return SettingsState(
@@ -31,6 +35,8 @@ class SettingsState extends Equatable {
           maxConcurrentDownloads ?? this.maxConcurrentDownloads,
       restorePlaybackState: restorePlaybackState ?? this.restorePlaybackState,
       isSleepTimerEnabled: isSleepTimerEnabled ?? this.isSleepTimerEnabled,
+      prefetchQuranAssetsOnWifiOnly:
+          prefetchQuranAssetsOnWifiOnly ?? this.prefetchQuranAssetsOnWifiOnly,
       appInfo: appInfo ?? this.appInfo,
     );
   }
@@ -40,6 +46,7 @@ class SettingsState extends Equatable {
     maxConcurrentDownloads,
     restorePlaybackState,
     isSleepTimerEnabled,
+    prefetchQuranAssetsOnWifiOnly,
     appInfo,
   ];
 }
@@ -52,10 +59,13 @@ class SettingsCubit extends HydratedCubit<SettingsState>
     // Initialize DownloadQueueManager with persisted value
     _updateQueueManager();
     _fetchAppInfo();
+    _syncPrefetchPolicy();
   }
 
   final IDownloadQueueService _downloadQueueService;
   final GetAppInfo _getAppInfo;
+  final QuranAssetsPrefetchPolicyService _prefetchPolicyService =
+      QuranAssetsPrefetchPolicyService();
 
   Future<void> _fetchAppInfo() async {
     try {
@@ -66,6 +76,18 @@ class SettingsCubit extends HydratedCubit<SettingsState>
     }
   }
 
+  Future<void> _syncPrefetchPolicy() async {
+    try {
+      final bool wifiOnlyEnabled = await _prefetchPolicyService
+          .isWifiOnlyEnabled();
+      if (wifiOnlyEnabled != state.prefetchQuranAssetsOnWifiOnly) {
+        emit(state.copyWith(prefetchQuranAssetsOnWifiOnly: wifiOnlyEnabled));
+      }
+    } catch (_) {
+      // Keep current state if preference loading fails.
+    }
+  }
+
   @override
   SettingsState? fromJson(Map<String, dynamic> json) {
     try {
@@ -73,6 +95,8 @@ class SettingsCubit extends HydratedCubit<SettingsState>
         maxConcurrentDownloads: json['maxConcurrentDownloads'] as int? ?? 2,
         restorePlaybackState: json['restorePlaybackState'] as bool? ?? true,
         isSleepTimerEnabled: json['isSleepTimerEnabled'] as bool? ?? true,
+        prefetchQuranAssetsOnWifiOnly:
+            json['prefetchQuranAssetsOnWifiOnly'] as bool? ?? true,
       );
     } catch (_) {
       return const SettingsState();
@@ -85,6 +109,7 @@ class SettingsCubit extends HydratedCubit<SettingsState>
       'maxConcurrentDownloads': state.maxConcurrentDownloads,
       'restorePlaybackState': state.restorePlaybackState,
       'isSleepTimerEnabled': state.isSleepTimerEnabled,
+      'prefetchQuranAssetsOnWifiOnly': state.prefetchQuranAssetsOnWifiOnly,
     };
   }
 
@@ -99,6 +124,11 @@ class SettingsCubit extends HydratedCubit<SettingsState>
 
   Future<void> toggleSleepTimerEnabled(bool enabled) async {
     emit(state.copyWith(isSleepTimerEnabled: enabled));
+  }
+
+  Future<void> togglePrefetchQuranAssetsOnWifiOnly(bool enabled) async {
+    emit(state.copyWith(prefetchQuranAssetsOnWifiOnly: enabled));
+    await _prefetchPolicyService.setWifiOnlyEnabled(enabled);
   }
 
   void _updateQueueManager() {

@@ -14,6 +14,11 @@ import 'package:tilawa/features/downloads/data/services/downloads_initialization
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
+import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
+import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
+import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 // Mocks
 class MockCrashlyticsService extends Mock implements CrashlyticsService {}
@@ -40,6 +45,18 @@ class MockAthkarNotificationService extends Mock
 
 class MockStorage extends Mock implements Storage {}
 
+class MockFCMService extends Mock implements FCMService {}
+
+class MockAudioPlayerHandler extends Mock implements AudioPlayerHandler {}
+
+class MockNotificationDispatcher extends Mock
+    implements INotificationDispatcher {}
+
+class MockDownloadNotificationService extends Mock
+    implements IDownloadNotificationService {}
+
+class MockMushafService extends Mock implements MushafService {}
+
 void main() {
   final GetIt getIt = GetIt.instance;
 
@@ -53,8 +70,14 @@ void main() {
   late MockFirebaseInitializationService mockFirebaseInit;
   late MockAthkarNotificationService mockAthkarService;
   late MockStorage mockStorage;
+  late MockFCMService mockFCMService;
+  late MockAudioPlayerHandler mockAudioHandler;
+  late MockNotificationDispatcher mockNotificationDispatcher;
+  late MockDownloadNotificationService mockDownloadNotificationService;
+  late MockMushafService mockMushafService;
 
   setUpAll(() async {
+    AppStartupTasks.skipNonCriticalServicesForTesting = true;
     TestWidgetsFlutterBinding.ensureInitialized();
 
     // Mock PathProvider for HydratedStorage
@@ -108,6 +131,11 @@ void main() {
     mockFirebaseInit = MockFirebaseInitializationService();
     mockAthkarService = MockAthkarNotificationService();
     mockStorage = MockStorage();
+    mockFCMService = MockFCMService();
+    mockAudioHandler = MockAudioPlayerHandler();
+    mockNotificationDispatcher = MockNotificationDispatcher();
+    mockDownloadNotificationService = MockDownloadNotificationService();
+    mockMushafService = MockMushafService();
 
     getIt.allowReassignment = true;
 
@@ -122,6 +150,19 @@ void main() {
     getIt.registerSingleton<CredentialManager>(mockCredentialManager);
     getIt.registerSingleton<FirebaseInitializationService>(mockFirebaseInit);
     getIt.registerSingleton<IAthkarNotificationService>(mockAthkarService);
+    getIt.registerSingleton<FCMService>(mockFCMService);
+    getIt.registerSingleton<AudioPlayerHandler>(mockAudioHandler);
+    getIt.registerSingleton<INotificationDispatcher>(
+      mockNotificationDispatcher,
+    );
+    getIt.registerSingleton<IDownloadNotificationService>(
+      mockDownloadNotificationService,
+    );
+    getIt.allowReassignment = true;
+    if (getIt.isRegistered<MushafService>()) {
+      getIt.unregister<MushafService>();
+    }
+    getIt.registerSingleton<MushafService>(mockMushafService);
 
     // Stubs
     when(() => mockCrashlytics.initialize()).thenAnswer((_) async {});
@@ -158,6 +199,16 @@ void main() {
     ) async {
       return;
     });
+    when(() => mockFCMService.initialize()).thenAnswer((_) async {});
+    when(
+      () => mockNotificationDispatcher.initialize(
+        createHighImportanceChannel: any(named: 'createHighImportanceChannel'),
+      ),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockDownloadNotificationService.initialize(),
+    ).thenAnswer((_) async {});
+    when(() => mockMushafService.ensureLoaded()).thenAnswer((_) async {});
 
     HydratedBloc.storage = mockStorage;
   });
@@ -290,9 +341,16 @@ void main() {
     // wraps everything in Future.microtask and is void.
     // However, for coverage, calling it is enough.
     testWidgets('initializeNonCriticalServices coverage', (tester) async {
+      AppStartupTasks.skipNonCriticalServicesForTesting = true;
+      addTearDown(
+        () => AppStartupTasks.skipNonCriticalServicesForTesting = false,
+      );
+
       initializeNonCriticalServices();
+      // Trigger postFrameCallback
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      // With skip flag true, it uses Duration.zero
+      await tester.pumpAndSettle();
     });
 
     test('firebaseMessagingBackgroundHandler', () async {

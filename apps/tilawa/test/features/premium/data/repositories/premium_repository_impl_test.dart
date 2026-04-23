@@ -7,7 +7,7 @@ import 'package:tilawa/features/premium/data/repositories/premium_repository_imp
 import 'package:tilawa/features/premium/domain/entities/premium_status.dart';
 import 'package:tilawa/features/premium/domain/entities/subscription_plan.dart';
 
-import '../../../athkar/presentation/cubit/athkar_cubit_test.mocks.dart';
+import '../../../../core/services/athkar_notification_service_test.mocks.dart';
 import 'premium_repository_impl_test.mocks.dart';
 
 @GenerateMocks([PremiumLocalDataSource, PremiumRemoteDataSource])
@@ -28,17 +28,32 @@ void main() {
     );
   });
 
-  group('getPremiumStatus', () {
-    final tPremiumStatus = PremiumStatus(
-      isPremium: true,
-      subscriptionStartDate: DateTime.now(),
-      subscriptionEndDate: DateTime.now().add(const Duration(days: 30)),
-      subscriptionType: 'monthly',
-      isTrialUsed: false,
-      trialStartDate: null,
-      trialEndDate: null,
-    );
+  final tPremiumStatus = PremiumStatus(
+    isPremium: true,
+    subscriptionStartDate: DateTime.now(),
+    subscriptionEndDate: DateTime.now().add(const Duration(days: 30)),
+    subscriptionType: 'monthly',
+    isTrialUsed: false,
+    trialStartDate: null,
+    trialEndDate: null,
+  );
 
+  final tPlans = [
+    const SubscriptionPlan(
+      id: 'monthly',
+      name: 'Test Plan',
+      description: 'Test Description',
+      price: 9.99,
+      currency: 'USD',
+      type: SubscriptionType.monthly,
+      durationInDays: 30,
+      features: [],
+      isPopular: false,
+      discountPercentage: null,
+    ),
+  ];
+
+  group('getPremiumStatus', () {
     test(
       'should return remote status and save it locally when remote is successful',
       () async {
@@ -80,21 +95,6 @@ void main() {
   });
 
   group('getAvailablePlans', () {
-    final tPlans = [
-      const SubscriptionPlan(
-        id: '1',
-        name: 'Test Plan',
-        description: 'Test Description',
-        price: 9.99,
-        currency: 'USD',
-        type: SubscriptionType.monthly,
-        durationInDays: 30,
-        features: [],
-        isPopular: false,
-        discountPercentage: null,
-      ),
-    ];
-
     test('should return remote plans when remote is successful', () async {
       // Arrange
       when(
@@ -151,6 +151,9 @@ void main() {
         when(
           mockLocalDataSource.getPremiumStatus(),
         ).thenAnswer((_) async => tPremiumStatus);
+        when(
+          mockRemoteDataSource.getAvailablePlans(),
+        ).thenAnswer((_) async => tPlans);
         when(
           mockLocalDataSource.savePremiumStatus(any),
         ).thenAnswer((_) async => {});
@@ -231,6 +234,9 @@ void main() {
         when(
           mockRemoteDataSource.updatePremiumStatus(any),
         ).thenAnswer((_) async => {});
+        when(
+          mockRemoteDataSource.getAvailablePlans(),
+        ).thenAnswer((_) async => []);
 
         // Act
         final bool result = await repository.startTrial();
@@ -379,6 +385,9 @@ void main() {
         when(
           mockRemoteDataSource.updatePremiumStatus(any),
         ).thenAnswer((_) async => {});
+        when(
+          mockRemoteDataSource.getAvailablePlans(),
+        ).thenAnswer((_) async => []);
 
         // Act
         final bool result = await repository.cancelSubscription();

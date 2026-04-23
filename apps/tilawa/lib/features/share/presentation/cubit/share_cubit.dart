@@ -1,22 +1,25 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart' show GlobalKey;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+import 'package:tilawa/features/share/domain/entities/audio_clip_config.dart';
+import 'package:tilawa/features/share/domain/entities/share_content.dart';
+import 'package:tilawa/features/share/domain/entities/share_progress_messages.dart';
+import 'package:tilawa/features/share/domain/entities/widget_capture_handle.dart';
+import 'package:tilawa/features/share/domain/usecases/capture_screenshot_use_case.dart';
+import 'package:tilawa/features/share/domain/usecases/generate_audio_clip_use_case.dart';
+import 'package:tilawa/features/share/domain/usecases/generate_video_use_case.dart';
+import 'package:tilawa/features/share/domain/usecases/get_share_ayahs_use_case.dart';
+import 'package:tilawa/features/share/domain/usecases/prepare_share_range_use_case.dart';
+import 'package:tilawa/features/share/domain/usecases/share_content_use_case.dart';
 import 'package:tilawa_core/logger.dart';
 
-import '../../../quran_reader/domain/entities/entities.dart';
-import '../../../quran_reader/domain/repositories/quran_reader_repository.dart';
+import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
 import '../../data/services/reciter_audio_mapping.dart';
-import '../../domain/entities/audio_clip_config.dart';
-import '../../domain/entities/share_content.dart';
-import '../../domain/entities/share_progress_messages.dart';
-import '../../domain/usecases/capture_screenshot_use_case.dart';
-import '../../domain/usecases/generate_audio_clip_use_case.dart';
-import '../../domain/usecases/generate_video_use_case.dart';
-import '../../domain/usecases/share_content_use_case.dart';
+import '../utils/share_reciter_options.dart';
 import 'share_state.dart';
 
 @injectable
@@ -25,33 +28,53 @@ class ShareCubit extends Cubit<ShareState> {
     this._captureScreenshot,
     this._generateAudioClip,
     this._generateVideo,
-    this._quranRepository,
+    this._prepareShareRange,
+    this._getShareAyahs,
     this._shareContent,
+    this._getReciters,
   ) : super(const ShareState());
 
   final CaptureScreenshotUseCase _captureScreenshot;
   final GenerateAudioClipUseCase _generateAudioClip;
   final GenerateVideoUseCase _generateVideo;
-  final QuranReaderRepository _quranRepository;
+  final PrepareShareRangeUseCase _prepareShareRange;
+  final GetShareAyahsUseCase _getShareAyahs;
   final ShareContentUseCase _shareContent;
+  final GetRecitersUseCase _getReciters;
 
   CancelToken? _cancelToken;
 
-  /// Initializes the sharing flow with current context.
   void configureAudioClip({
     required int surahNumber,
     required int fromAyah,
     required int toAyah,
+    int? minAyah,
+    int? maxAyah,
     required String reciterName,
     required String serverUrl,
     String? reciterFolder,
   }) {
+    final effectiveMin = minAyah ?? 1;
+    final effectiveMax = maxAyah ?? getVerseCount(surahNumber);
+
+    developer.log(
+      '[SHARE_CUBIT] configureAudioClip | surah=$surahNumber | range=$fromAyah-$toAyah | bounds=$effectiveMin-$effectiveMax',
+    );
+
+    final result = _prepareShareRange(
+      surahNumber: surahNumber,
+      fromAyah: fromAyah.clamp(effectiveMin, effectiveMax),
+      toAyah: toAyah.clamp(effectiveMin, effectiveMax),
+    );
+
     emit(
       state.copyWith(
         status: ShareStatus.idle,
         surahNumber: surahNumber,
-        fromAyah: fromAyah,
-        toAyah: toAyah,
+        fromAyah: result.fromAyah,
+        toAyah: result.toAyah,
+        minAyah: minAyah,
+        maxAyah: maxAyah,
         reciterName: reciterName,
         reciterServerUrl: serverUrl,
         content: null,
@@ -59,64 +82,93 @@ class ShareCubit extends Cubit<ShareState> {
         progressMessage: '',
         ayahs: null,
         errorMessage: null,
+        videoPageSpecs: result.videoPageSpecs,
       ),
     );
 
-    _fetchAyahs(surahNumber, fromAyah, toAyah);
+    _fetchAyahs(surahNumber, result.fromAyah, result.toAyah);
   }
 
-  /// Updates the verse range.
   void updateVerseRange({int? fromAyah, int? toAyah}) {
-    final nextFrom = fromAyah ?? state.fromAyah;
-    final nextTo = toAyah ?? state.toAyah;
+    if (state.surahNumber == null) return;
+
+    final int min = state.minAyah ?? 1;
+    final int max = state.maxAyah ?? getVerseCount(state.surahNumber!);
+
+    final int targetFrom = (fromAyah ?? state.fromAyah!).clamp(min, max);
+    final int targetTo = (toAyah ?? state.toAyah!).clamp(targetFrom, max);
+
+    final result = _prepareShareRange(
+      surahNumber: state.surahNumber!,
+      fromAyah: targetFrom,
+      toAyah: targetTo,
+    );
 
     emit(
       state.copyWith(
         status: ShareStatus.idle,
-        fromAyah: nextFrom,
-        toAyah: nextTo,
+        fromAyah: result.fromAyah,
+        toAyah: result.toAyah,
         content: null,
         progress: 0,
         progressMessage: '',
         errorMessage: null,
+        videoPageSpecs: result.videoPageSpecs,
       ),
     );
 
-    if (state.surahNumber != null && nextFrom != null && nextTo != null) {
-      _fetchAyahs(state.surahNumber!, nextFrom, nextTo);
-    }
+    _fetchAyahs(state.surahNumber!, result.fromAyah, result.toAyah);
   }
 
   Future<void> _fetchAyahs(int surahNumber, int fromAyah, int toAyah) async {
     try {
-      final surahContent = await _quranRepository.getSurahContent(surahNumber);
-      final rangeAyahs = surahContent.ayahs
-          .where(
-            (a) => a.numberInSurah >= fromAyah && a.numberInSurah <= toAyah,
-          )
-          .map(
-            (a) => PageAyahInfo(
-              surahNumber: surahNumber,
-              surahName: surahContent.name,
-              surahNameEnglish: surahContent.nameEnglish,
-              ayahNumber: a.numberInSurah,
-              text: a.textUthmani ?? a.text,
-              words: null,
-            ),
-          )
-          .toList();
+      final rangeAyahs = await _getShareAyahs(
+        surahNumber: surahNumber,
+        fromAyah: fromAyah,
+        toAyah: toAyah,
+      );
 
       emit(state.copyWith(ayahs: rangeAyahs));
       unawaited(_preheatSelectionFonts(surahNumber, fromAyah, toAyah));
     } catch (e, st) {
       logger.e('[SHARE_CUBIT] _fetchAyahs failed', error: e, stackTrace: st);
-      // Non-fatal: ayah list is supplementary metadata; generation can proceed.
     }
+  }
+
+  Future<void> loadReciterOptions() async {
+    if (state.surahNumber == null) return;
+    emit(state.copyWith(isLoadingReciters: true));
+
+    final result = await _getReciters();
+    result.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            isLoadingReciters: false,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (reciters) {
+        final options = buildShareReciterOptions(
+          reciters: reciters,
+          surahNumber: state.surahNumber!,
+          selectedReciterName: state.reciterName ?? '',
+          selectedServerUrl: state.reciterServerUrl ?? '',
+        );
+        emit(state.copyWith(isLoadingReciters: false, reciterOptions: options));
+      },
+    );
   }
 
   /// Updates the selected reciter.
   void updateReciter({required String name, required String serverUrl}) {
     emit(state.copyWith(reciterName: name, reciterServerUrl: serverUrl));
+  }
+
+  /// Updates the screenshot layout.
+  void updateScreenshotLayout(ShareScreenshotLayout layout) {
+    emit(state.copyWith(screenshotLayout: layout));
   }
 
   AudioClipConfig? _buildAudioConfig() {
@@ -160,7 +212,7 @@ class ShareCubit extends Cubit<ShareState> {
       }
 
       for (final page in uniquePages) {
-        await QuranFontService.instance.ensureSingleFontLoaded(page);
+        await quranQcfLocator<QuranFontService>().ensureSingleFontLoaded(page);
       }
     } catch (e) {
       logger.w('[SHARE_CUBIT] _preheatSelectionFonts failed: $e');
@@ -214,7 +266,7 @@ class ShareCubit extends Cubit<ShareState> {
 
   /// Captures a screenshot and enters review mode.
   Future<void> prepareScreenshot({
-    required GlobalKey boundaryKey,
+    required WidgetCaptureHandle handle,
     required String surahName,
     required int pageNumber,
     required String appName,
@@ -235,10 +287,12 @@ class ShareCubit extends Cubit<ShareState> {
     try {
       // Ensure the font for the page is loaded to prevent fallback to system fonts,
       // which would cause incorrect text metrics and layout overflows.
-      await QuranFontService.instance.ensureSingleFontLoaded(pageNumber);
+      await quranQcfLocator<QuranFontService>().ensureSingleFontLoaded(
+        pageNumber,
+      );
 
       final content = await _captureScreenshot(
-        boundaryKey: boundaryKey,
+        handle: handle,
         surahName: surahName,
         pageNumber: pageNumber,
         appName: appName,
@@ -263,7 +317,7 @@ class ShareCubit extends Cubit<ShareState> {
 
   /// Captures a screenshot of the current page and shares it.
   Future<void> captureAndShareScreenshot({
-    required GlobalKey boundaryKey,
+    required WidgetCaptureHandle handle,
     required String surahName,
     required int pageNumber,
     required String appName,
@@ -271,9 +325,11 @@ class ShareCubit extends Cubit<ShareState> {
   }) async {
     emit(state.copyWith(status: ShareStatus.sharing));
     try {
-      await QuranFontService.instance.ensureSingleFontLoaded(pageNumber);
+      await quranQcfLocator<QuranFontService>().ensureSingleFontLoaded(
+        pageNumber,
+      );
       final content = await _captureScreenshot(
-        boundaryKey: boundaryKey,
+        handle: handle,
         surahName: surahName,
         pageNumber: pageNumber,
         appName: appName,
@@ -386,28 +442,25 @@ class ShareCubit extends Cubit<ShareState> {
     required ShareProgressMessages progressMessages,
     required String appName,
     required String sharedViaLabel,
-    required List<GlobalKey> boundaryKeys,
+    required List<WidgetCaptureHandle> handles,
     int? maxDurationSeconds,
   }) async {
     final audioConfig = _buildAudioConfig();
-    final List<GlobalKey> activeBoundaryKeys = boundaryKeys
-        .where((key) => key.currentContext != null)
-        .toList();
 
     logger.d(
-      '[VIDEO_GEN] generateVideo called | boundaryKeysTotal=${boundaryKeys.length} | active=${activeBoundaryKeys.length} | audioConfig=${audioConfig != null}',
+      '[VIDEO_GEN] generateVideo called | handlesTotal=${handles.length} | audioConfig=${audioConfig != null}',
     );
 
-    if (audioConfig == null || activeBoundaryKeys.isEmpty) {
+    if (audioConfig == null || handles.isEmpty) {
       logger.d(
-        '[VIDEO_GEN] generateVideo ABORTED | audioConfig=$audioConfig | active=${activeBoundaryKeys.length}',
+        '[VIDEO_GEN] generateVideo ABORTED | audioConfig=$audioConfig | handles=${handles.length}',
       );
       return;
     }
 
     final int tVideo = DateTime.now().millisecondsSinceEpoch;
     logger.d(
-      '[VIDEO_GEN] start | surah=${audioConfig.surahNumber} ${audioConfig.fromAyah}-${audioConfig.toAyah} | pages=${activeBoundaryKeys.length} | t=${tVideo}ms',
+      '[VIDEO_GEN] start | surah=${audioConfig.surahNumber} ${audioConfig.fromAyah}-${audioConfig.toAyah} | pages=${handles.length} | t=${tVideo}ms',
     );
 
     _cancelToken?.cancel();
@@ -424,7 +477,7 @@ class ShareCubit extends Cubit<ShareState> {
 
     try {
       final content = await _generateVideo(
-        boundaryKeys: activeBoundaryKeys,
+        handles: handles,
         config: audioConfig,
         appName: appName,
         sharedViaLabel: sharedViaLabel,

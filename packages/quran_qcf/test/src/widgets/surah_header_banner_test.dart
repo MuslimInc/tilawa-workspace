@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/constants/quran_constants.dart';
-import 'package:quran_qcf/src/constants/surah_header_banner_constants.dart';
-import 'package:quran_qcf/src/layout/surah_header_banner_layout.dart';
-import 'package:quran_qcf/src/widgets/surah_header_banner.dart';
-import 'package:quran_qcf/src/widgets/surah_header_glyph_provider.dart';
+import 'package:quran_qcf/src/core/constants/quran_constants.dart';
+import 'package:quran_qcf/src/core/constants/surah_header_banner_constants.dart';
+import 'package:quran_qcf/src/presentation/layout/surah_header_banner_layout.dart';
+import 'package:quran_qcf/src/presentation/widgets/surah_header_banner.dart';
+import 'package:quran_qcf/src/presentation/widgets/surah_header_glyph_provider.dart';
 
 void main() {
   group('SurahHeaderBanner sizing', () {

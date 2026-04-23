@@ -16,7 +16,9 @@ final logger = Logger(
 
 void main() async {
   try {
-    final file = File('../../packages/quran/assets/quran_fonts/qpc-v4.json');
+    final file = File(
+      '../../packages/quran_qcf/assets/quran_fonts/qpc-v4.json',
+    );
     if (!await file.exists()) {
       logger.e('Source file not found: ${file.path}');
       return;
@@ -74,7 +76,7 @@ void main() async {
     sb.writeln('};');
 
     final outputFile = File(
-      '../../packages/quran/lib/src/data/qcf_v4_data.dart',
+      '../../packages/quran_qcf/lib/src/data/qcf_v4_data.dart',
     );
     await outputFile.parent.create(recursive: true);
     await outputFile.writeAsString(sb.toString());

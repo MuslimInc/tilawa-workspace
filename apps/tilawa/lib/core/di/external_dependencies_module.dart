@@ -116,5 +116,8 @@ abstract class ExternalDependenciesModule {
   AssetBundle get assetBundle => rootBundle;
 
   @singleton
-  QuranFontService get quranFontService => QuranFontService();
+  QuranFontService get quranFontService => QuranFontService(
+    mushafService: quranQcfLocator<MushafService>(),
+    idleScheduler: quranQcfLocator<IdleScheduler>(),
+  );
 }

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/services/verse_service_impl.dart';
+import 'package:quran_qcf/src/data/repositories/verse_service_impl.dart';
 
 void main() {
   group('VerseServiceImpl', () {

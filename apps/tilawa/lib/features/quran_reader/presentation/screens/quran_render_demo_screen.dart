@@ -57,11 +57,13 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
 
     try {
       // 1. Data Loading implicitly checked by initial page
-      await MushafService.instance.ensureLoaded();
+      await quranQcfLocator<MushafService>().ensureLoaded();
 
       // 2. Font Registration
       final fontWatch = Stopwatch()..start();
-      await QuranFontService.instance.ensureSingleFontLoaded(pageNumber);
+      await quranQcfLocator<QuranFontService>().ensureSingleFontLoaded(
+        pageNumber,
+      );
       fontWatch.stop();
       _addLog(
         '🔤 Page $pageNumber Font Registered: ${fontWatch.elapsedMilliseconds}ms',
@@ -136,6 +138,9 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
                           isWarming: _isWarming,
                           textColor: readerTheme.textColor,
                           pageBackgroundColor: readerTheme.pageBackground,
+                          mushafService: quranQcfLocator<MushafService>(),
+                          pageSnapshotService:
+                              quranQcfLocator<PageSnapshotService>(),
                         );
                 },
               ),

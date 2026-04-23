@@ -33,15 +33,15 @@ List<VideoPageSpec> buildVideoPageSpecs({
   final List<VideoPageSpec> specs = <VideoPageSpec>[];
 
   for (int pageNumber = startPage; pageNumber <= endPage; pageNumber++) {
-    final List<Map<String, int>> pageEntries = getPageData(pageNumber);
+    final List<PageSurahEntry> pageEntries = getPageData(pageNumber);
 
-    for (final Map<String, int> entry in pageEntries) {
-      if (entry['surah'] != surahNumber) {
+    for (final PageSurahEntry entry in pageEntries) {
+      if (entry.surah != surahNumber) {
         continue;
       }
 
-      final int pageStartAyah = entry['start'] ?? ayahRange.fromAyah;
-      final int pageEndAyah = entry['end'] ?? ayahRange.toAyah;
+      final int pageStartAyah = entry.start;
+      final int pageEndAyah = entry.end;
       final int pageFromAyah = math.max(ayahRange.fromAyah, pageStartAyah);
       final int pageToAyah = math.min(ayahRange.toAyah, pageEndAyah);
 

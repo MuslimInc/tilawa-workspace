@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quran_qcf/quran_qcf.dart';
 
 import '../utils/video_page_specs.dart';
 import 'mushaf_page_renderer.dart';
@@ -110,17 +109,6 @@ class VideoContentPage extends StatelessWidget {
   /// the heavy BoxShadow while capturing a frozen frame for FFmpeg.
   final bool isCapturing;
 
-  String get _arabicSurahName => getSurahNameArabic(surahNumber);
-  String get _englishSurahName => getSurahNameEnglish(surahNumber);
-
-  String get _ayahRangeLabel => pageSpec.fromAyah == pageSpec.toAyah
-      ? '${_VideoStrings.ayah} ${pageSpec.fromAyah}'
-      : '${_VideoStrings.ayahs} ${pageSpec.fromAyah} - ${pageSpec.toAyah}';
-
-  String get _mushafPageLabel => totalPages == 1
-      ? '${_VideoStrings.mushafPage} ${pageSpec.pageNumber}'
-      : '${_VideoStrings.mushafPage} ${pageSpec.pageNumber} • ${pageIndex + 1}/$totalPages';
-
   @override
   Widget build(BuildContext context) {
     return _VideoMushafPage(
@@ -165,24 +153,7 @@ class _VideoMushafPage extends StatelessWidget {
 }
 
 abstract final class _VideoLayout {
-  static const double orbLargeSize = 320;
-  static const double orbMediumSize = 260;
-  static const double orbTopOffset = -140;
-  static const double orbRightOffset = -60;
-  static const double orbBottomOffset = -120;
-  static const double orbLeftOffset = -50;
-
-  static const double canvasRadius = 60;
-  static const double canvasBorderAlpha = 0.18;
-
   static const Color pageBackgroundColor = Color(0xFFFFF8ED);
   static const double verseHighlightAlpha = 0.24;
   static const double textOpacity = 0.96;
-}
-
-// Video card labels are always Arabic — the Mushaf is an Arabic artifact.
-abstract final class _VideoStrings {
-  static const String ayah = 'آية';
-  static const String ayahs = 'الآيات';
-  static const String mushafPage = 'صفحة المصحف';
 }

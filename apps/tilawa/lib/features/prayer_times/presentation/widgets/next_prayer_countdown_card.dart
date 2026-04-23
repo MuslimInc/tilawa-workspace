@@ -41,94 +41,36 @@ class NextPrayerCountdownCard extends StatelessWidget {
 
     final tokens = theme.tokens;
 
-    return Container(
-      margin: EdgeInsets.symmetric(
+    return Padding(
+      padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceLarge,
         vertical: tokens.spaceSmall,
       ),
-      decoration: BoxDecoration(
+      child: TilawaCard(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [colorScheme.surface, colorScheme.surfaceContainerLow],
         ),
-        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.42),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: tokens.blurShadow,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Padding(
+        borderRadius: tokens.radiusExtraLarge,
+        borderColor: colorScheme.outlineVariant.withValues(alpha: 0.42),
         padding: EdgeInsets.all(tokens.spaceLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tokens.spaceMedium,
-                    vertical: tokens.spaceSmall,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.notifications_active_rounded,
-                        size: 16,
-                        color: colorScheme.onPrimary,
-                      ),
-                      SizedBox(width: tokens.spaceSmall),
-                      Text(
-                        nextPrayerLabel,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
+                TilawaStatusChip(
+                  label: nextPrayerLabel,
+                  backgroundColor: accentColor,
+                  foregroundColor: colorScheme.onPrimary,
+                  icon: Icons.notifications_active_rounded,
                 ),
                 const Spacer(),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tokens.spaceMedium,
-                    vertical: tokens.spaceSmall,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        scheduledLabel,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: tokens.spaceExtraSmall),
-                      Text(
-                        prayerTime,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
+                TilawaStatusChip(
+                  label: '$scheduledLabel • $prayerTime',
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  foregroundColor: colorScheme.onSurfaceVariant,
                 ),
               ],
             ),
@@ -199,15 +141,11 @@ class _TimerSegment extends StatelessWidget {
 
     final tokens = theme.tokens;
 
-    return Container(
+    return TilawaCard(
       padding: EdgeInsets.symmetric(vertical: tokens.spaceSmall),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.42),
-        ),
-      ),
+      backgroundColor: theme.colorScheme.surface,
+      borderRadius: tokens.radiusMedium,
+      borderColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.42),
       child: Column(
         children: [
           Text(

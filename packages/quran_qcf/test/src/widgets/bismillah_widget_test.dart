@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/widgets/bismillah_widget.dart';
+import 'package:quran_qcf/src/presentation/widgets/bismillah_widget.dart';
 
 void main() {
   group('BismillahStyleConfig', () {
@@ -24,7 +24,7 @@ void main() {
       final BismillahStyleConfig config = BismillahStyleConfig.forPage(3);
       expect(config.text, '齃𧻓𥳐龎');
       expect(config.fontFamily, 'QCF_BSML');
-      expect(config.package, 'quran');
+      expect(config.package, 'quran_qcf');
       // We expect the original 0.8 internal scale factor
       expect(config.fontScale, 0.8);
     });
@@ -72,7 +72,7 @@ void main() {
       expect(textWidget.data, '齃𧻓𥳐龎');
 
       final TextStyle style = textWidget.style!;
-      expect(style.fontFamily, 'packages/quran/QCF_BSML');
+      expect(style.fontFamily, 'packages/quran_qcf/QCF_BSML');
       expect(style.fontSize, 16.0); // 20.0 * 0.8
       expect(style.color, Colors.red);
     });

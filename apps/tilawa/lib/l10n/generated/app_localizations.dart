@@ -2618,6 +2618,12 @@ abstract class AppLocalizations {
   /// **'Choose a format that carries these verses beautifully.'**
   String get shareSheetSubtitle;
 
+  /// Instruction label shown when a page has multiple surahs
+  ///
+  /// In en, this message translates to:
+  /// **'Select Surah to share'**
+  String get selectSurahToShare;
+
   /// Description for the screenshot share option
   ///
   /// In en, this message translates to:

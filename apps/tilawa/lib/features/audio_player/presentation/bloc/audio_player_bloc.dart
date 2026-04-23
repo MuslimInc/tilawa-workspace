@@ -119,6 +119,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   Timer? _sleepTimer;
   bool _isSleepTimerEnabled = true;
   String? _lastPersistedStateJson;
+  AudioPlayerState? _lastPersistedState;
 
   /// Maximum number of cached entries before eviction.
   static const int _maxCacheSize = 50;
@@ -855,22 +856,46 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   @override
   AudioPlayerState? fromJson(Map<String, dynamic> json) {
     _lastPersistedStateJson = jsonEncode(json);
-    return AudioPlayerState.fromJson(
+    final AudioPlayerState restored = AudioPlayerState.fromJson(
       json,
     ).copyWith(playbackState: null, positionData: null);
+    _lastPersistedState = restored;
+    return restored;
   }
 
   @override
   Map<String, dynamic>? toJson(AudioPlayerState state) {
-    final Map<String, dynamic> persistedStateJson = state
-        .copyWith(playbackState: null, positionData: null)
-        .toJson();
-    final String serializedState = jsonEncode(persistedStateJson);
-
-    if (_lastPersistedStateJson == serializedState) {
+    // Fast path: skip all JSON work if only positionData/playbackState changed.
+    // These two fields are excluded from persistence, so any other state change
+    // is the only reason we need to re-persist.
+    final AudioPlayerState? prev = _lastPersistedState;
+    if (prev != null &&
+        state.status == prev.status &&
+        state.currentAudio == prev.currentAudio &&
+        state.volume == prev.volume &&
+        state.speed == prev.speed &&
+        state.repeatMode == prev.repeatMode &&
+        state.shuffleMode == prev.shuffleMode &&
+        state.sleepTimerTargetTime == prev.sleepTimerTargetTime &&
+        state.lastSleepTimerDuration == prev.lastSleepTimerDuration &&
+        state.lastSleepTimerType == prev.lastSleepTimerType &&
+        state.dismissedAudioId == prev.dismissedAudioId) {
       return null;
     }
 
+    final AudioPlayerState persistableState = state.copyWith(
+      playbackState: null,
+      positionData: null,
+    );
+    final Map<String, dynamic> persistedStateJson = persistableState.toJson();
+    final String serializedState = jsonEncode(persistedStateJson);
+
+    if (_lastPersistedStateJson == serializedState) {
+      _lastPersistedState = persistableState;
+      return null;
+    }
+
+    _lastPersistedState = persistableState;
     _lastPersistedStateJson = serializedState;
     return persistedStateJson;
   }

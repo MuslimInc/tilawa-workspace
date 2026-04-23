@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart' show GlobalKey;
 import 'package:injectable/injectable.dart';
 
 import '../entities/audio_clip_config.dart';
 import '../entities/share_content.dart';
 import '../entities/share_progress_messages.dart';
+import '../entities/widget_capture_handle.dart';
 import '../repositories/share_repository.dart';
 
 @injectable
@@ -14,7 +14,7 @@ class GenerateVideoUseCase {
   final ShareRepository _repository;
 
   Future<ShareContent> call({
-    required List<GlobalKey> boundaryKeys,
+    required List<WidgetCaptureHandle> handles,
     required AudioClipConfig config,
     required String appName,
     required String sharedViaLabel,
@@ -25,7 +25,7 @@ class GenerateVideoUseCase {
     CancelToken? cancelToken,
   }) {
     return _repository.generateVideo(
-      boundaryKeys: boundaryKeys,
+      handles: handles,
       config: config,
       appName: appName,
       sharedViaLabel: sharedViaLabel,

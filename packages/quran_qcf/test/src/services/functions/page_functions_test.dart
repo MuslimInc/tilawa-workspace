@@ -1,18 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/quran_exception.dart';
-import 'package:quran_qcf/src/services/functions/page_functions.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 void main() {
   group('page_functions', () {
     group('getPageData', () {
       test('returns data for page 1', () {
-        final List<Map<String, int>> data = getPageData(1);
+        final List<PageSurahEntry> data = getPageData(1);
         expect(data, isNotEmpty);
-        expect(data.first['surah'], 1);
+        expect(data.first.surah, 1);
       });
 
       test('returns data for page 604', () {
-        final List<Map<String, int>> data = getPageData(604);
+        final List<PageSurahEntry> data = getPageData(604);
         expect(data, isNotEmpty);
       });
 

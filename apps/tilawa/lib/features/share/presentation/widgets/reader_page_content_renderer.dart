@@ -36,14 +36,14 @@ class ReaderPageContentRenderer extends StatelessWidget {
             context,
             constraints,
             pageNumber,
+            quranQcfLocator<MushafService>(),
           );
 
           return ListenableBuilder(
-            listenable: QuranFontService.instance,
+            listenable: quranQcfLocator<QuranFontService>(),
             builder: (context, _) {
-              final bool isFontLoaded = QuranFontService.instance.isFontLoaded(
-                pageNumber,
-              );
+              final bool isFontLoaded = quranQcfLocator<QuranFontService>()
+                  .isFontLoaded(pageNumber);
 
               if (!isFontLoaded) {
                 return const Center(
@@ -51,12 +51,13 @@ class ReaderPageContentRenderer extends StatelessWidget {
                 );
               }
 
-              final preparedPage = QuranPagePreparationService.instance
-                  .preparePage(
+              final preparedPage =
+                  quranQcfLocator<QuranPagePreparationService>().preparePage(
                     pageNumber: pageNumber,
                     metrics: metrics,
                     viewportWidth: constraints.maxWidth,
                     textColor: readerTheme.textColor,
+                    mushafService: quranQcfLocator<MushafService>(),
                   );
 
               return MediaQuery(
@@ -68,6 +69,8 @@ class ReaderPageContentRenderer extends StatelessWidget {
                 child: Directionality(
                   textDirection: TextDirection.rtl,
                   child: PageContent(
+                    mushafService: quranQcfLocator<MushafService>(),
+                    pageSnapshotService: quranQcfLocator<PageSnapshotService>(),
                     pageNumber: pageNumber,
                     preparedPage: preparedPage,
                     textColor: readerTheme.textColor,

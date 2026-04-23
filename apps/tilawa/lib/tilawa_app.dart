@@ -4,6 +4,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
@@ -18,7 +19,6 @@ import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
-import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
 
@@ -30,8 +30,16 @@ class TilawaApp extends StatefulWidget {
 }
 
 class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
+  static const Duration _initialUpdateCheckDelay = Duration(seconds: 8);
+  static const Duration _resumeUpdateCheckDelay = Duration(seconds: 2);
+  static const Duration _deferredColdStartLocalProbeDelay = Duration(
+    milliseconds: 900,
+  );
+
   bool _hasProcessedLaunchNotification = false;
   Timer? _resumeDebounceTimer;
+  Timer? _updateCheckTimer;
+  Timer? _localLaunchProbeTimer;
   bool _isCheckingNotification = false;
 
   @override
@@ -41,13 +49,18 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     // Process launch notification after first frame when router is ready
     SchedulerBinding.instance.addPostFrameCallback((_) {
       _processLaunchNotificationIfNeeded();
-      _checkForUpdate();
+      _scheduleUpdateCheck(
+        delay: _initialUpdateCheckDelay,
+        reason: 'initial-startup',
+      );
     });
   }
 
   @override
   void dispose() {
     _resumeDebounceTimer?.cancel();
+    _updateCheckTimer?.cancel();
+    _localLaunchProbeTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -64,9 +77,24 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
       // Use debounce to prevent excessive checks when rapidly switching states
       _resumeDebounceTimer = Timer(const Duration(milliseconds: 100), () {
         _checkForNotificationOnResume();
-        _checkForUpdate();
+        _scheduleUpdateCheck(
+          delay: _resumeUpdateCheckDelay,
+          reason: 'app-resumed',
+        );
       });
     }
+  }
+
+  void _scheduleUpdateCheck({required Duration delay, required String reason}) {
+    _updateCheckTimer?.cancel();
+    logger.d(
+      '[PerfLogger][Startup] update-check scheduled '
+      'reason=$reason delayMs=${delay.inMilliseconds}',
+    );
+    _updateCheckTimer = Timer(delay, () {
+      logger.d('[PerfLogger][Startup] update-check started reason=$reason');
+      _checkForUpdate();
+    });
   }
 
   Future<void> _checkForUpdate() async {
@@ -121,25 +149,58 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     }
     _hasProcessedLaunchNotification = true;
 
-    await initializeNotificationHandlers();
-
+    // Large-scale startup pattern: avoid eager heavy notification wiring on
+    // every cold start. Only process immediately when startup was actually
+    // notification-driven.
     if (AppRouter.pendingStartupNotificationLaunch) {
+      await initializeNotificationHandlers();
       AppRouter.pendingStartupNotificationLaunch = false;
       return;
     }
 
+    // Probe local-notification cold-start lazily so startup frames stay fast.
+    _localLaunchProbeTimer?.cancel();
+    _localLaunchProbeTimer = Timer(_deferredColdStartLocalProbeDelay, () {
+      if (!mounted) return;
+      unawaited(_checkForDeferredColdStartLocalNotification());
+    });
+  }
+
+  Future<void> _checkForDeferredColdStartLocalNotification() async {
+    if (_isCheckingNotification) {
+      return;
+    }
+    _isCheckingNotification = true;
+
     try {
       final INotificationDispatcher dispatcher =
           getIt<INotificationDispatcher>();
+      await dispatcher.initialize(createHighImportanceChannel: false);
+
+      final launchDetails = await dispatcher.getNotificationAppLaunchDetails();
+      final bool didLaunch = launchDetails?.didNotificationLaunchApp ?? false;
+      final int? currentId = launchDetails?.notificationResponse?.id;
+
+      if (!didLaunch ||
+          currentId == null ||
+          currentId == AppRouter.lastProcessedNotificationId) {
+        return;
+      }
+
+      await initializeNotificationHandlers();
       final bool processed = await dispatcher.processLaunchNotification();
       if (processed) {
-        logger.d('Launch notification processed after app ready');
+        AppRouter.lastProcessedNotificationId = currentId;
+        logger.d(
+          '[QuranPlayerApp] Deferred cold-start local notification processed',
+        );
       }
-      // NOTE: getInitialMessage() is already consumed once in main.dart
-      // bootstrap and stored in AppRouter.pendingFcmMessage. A second call
-      // would always return null, so we don't call it here.
     } catch (e) {
-      logger.d('Error processing launch notification: $e');
+      logger.d(
+        '[QuranPlayerApp] Error processing deferred cold-start notification: $e',
+      );
+    } finally {
+      _isCheckingNotification = false;
     }
   }
 

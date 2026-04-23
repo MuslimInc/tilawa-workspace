@@ -10,6 +10,7 @@ import 'package:quran_image/data/repositories/in_memory_page_repository.dart';
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
+import 'package:quran_image/l10n/app_localizations.dart';
 import 'package:quran_image/presentation/widgets/organisms/navigation_slider_overlay.dart';
 import 'package:quran_image/quran_image_reader.dart';
 
@@ -81,6 +82,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: BlocProvider<NavigationBloc>.value(
             value: navigationBloc,
             child: const QuranImageReader(),
@@ -122,6 +126,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('en'),
         home: BlocProvider<NavigationBloc>.value(
           value: navigationBloc,
           child: const QuranImageReader(),
@@ -130,7 +137,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.drag(find.byType(PageView), const Offset(-400, 0));
+    await tester.drag(find.byType(PageView), const Offset(400, 0));
     await tester.pumpAndSettle();
 
     expect((navigationBloc.state as NavigationLoaded).pageState.currentPage, 2);

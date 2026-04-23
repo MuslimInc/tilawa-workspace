@@ -4,7 +4,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Bottom sheet presenting share options using the Tilawa UI kit.
-class ShareOptionsSheet extends StatelessWidget {
+class ShareOptionsSheet extends StatefulWidget {
   const ShareOptionsSheet({
     super.key,
     required this.surahNumber,
@@ -15,8 +15,30 @@ class ShareOptionsSheet extends StatelessWidget {
 
   final int surahNumber;
   final int pageNumber;
-  final VoidCallback onShareScreenshot;
-  final VoidCallback onShareVideoReel;
+  final void Function(int selectedSurah) onShareScreenshot;
+  final void Function(int selectedSurah) onShareVideoReel;
+
+  @override
+  State<ShareOptionsSheet> createState() => _ShareOptionsSheetState();
+}
+
+class _ShareOptionsSheetState extends State<ShareOptionsSheet> {
+  late int _selectedSurah;
+  late List<int> _uniqueSurahs;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedSurah = widget.surahNumber;
+    _uniqueSurahs = getPageData(
+      widget.pageNumber,
+    ).map((e) => e.surah).toSet().toList();
+
+    // If the provided surahNumber is not on the page (sanity check), pick the first one.
+    if (!_uniqueSurahs.contains(_selectedSurah) && _uniqueSurahs.isNotEmpty) {
+      _selectedSurah = _uniqueSurahs.first;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,67 +49,49 @@ class ShareOptionsSheet extends StatelessWidget {
 
     return SafeArea(
       top: false,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          tokens.spaceMedium,
-          tokens.spaceSmall,
-          tokens.spaceMedium,
-          tokens.spaceMedium,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
         ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(radius),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(
-                alpha: tokens.opacitySubtle,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            tokens.spaceLarge,
+            tokens.spaceSmall,
+            tokens.spaceLarge,
+            tokens.spaceLarge,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const TilawaSheetHandle(),
+              SizedBox(height: tokens.spaceSmall),
+              _ShareHeader(
+                selectedSurah: _selectedSurah,
+                uniqueSurahs: _uniqueSurahs,
+                pageNumber: widget.pageNumber,
+                onSurahChanged: (surah) {
+                  setState(() {
+                    _selectedSurah = surah;
+                  });
+                },
               ),
-              width: tokens.borderWidthThin,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.shadow.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
-                blurRadius: tokens.blurShadow,
-                offset: tokens.shadowOffsetMedium,
+              SizedBox(height: tokens.spaceMedium),
+              _ShareOptionCard(
+                icon: Icons.image_rounded,
+                title: context.l10n.shareScreenshot,
+                description: context.l10n.shareScreenshotDescription,
+                onTap: () => widget.onShareScreenshot(_selectedSurah),
+              ),
+              SizedBox(height: tokens.spaceSmall),
+              _ShareOptionCard(
+                icon: Icons.movie_creation_outlined,
+                title: context.l10n.shareModeReel,
+                description: context.l10n.shareAudioClipDescription,
+                onTap: () => widget.onShareVideoReel(_selectedSurah),
               ),
             ],
-          ),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              tokens.spaceLarge,
-              tokens.spaceSmall,
-              tokens.spaceLarge,
-              tokens.spaceLarge,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const TilawaSheetHandle(),
-                SizedBox(height: tokens.spaceSmall),
-                _ShareHeader(
-                  arabicSurahName: getSurahNameArabic(surahNumber),
-                  englishSurahName: getSurahNameEnglish(surahNumber),
-                  pageNumber: pageNumber,
-                ),
-                SizedBox(height: tokens.spaceMedium),
-                _ShareOptionCard(
-                  icon: Icons.image_rounded,
-                  title: context.l10n.shareScreenshot,
-                  description: context.l10n.shareScreenshotDescription,
-                  onTap: onShareScreenshot,
-                ),
-                SizedBox(height: tokens.spaceSmall),
-                _ShareOptionCard(
-                  icon: Icons.movie_creation_outlined,
-                  title: context.l10n.shareModeReel,
-                  description: context.l10n.shareAudioClipDescription,
-                  onTap: onShareVideoReel,
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -97,19 +101,22 @@ class ShareOptionsSheet extends StatelessWidget {
 
 class _ShareHeader extends StatelessWidget {
   const _ShareHeader({
-    required this.arabicSurahName,
-    required this.englishSurahName,
+    required this.selectedSurah,
+    required this.uniqueSurahs,
     required this.pageNumber,
+    required this.onSurahChanged,
   });
 
-  final String arabicSurahName;
-  final String englishSurahName;
+  final int selectedSurah;
+  final List<int> uniqueSurahs;
   final int pageNumber;
+  final ValueChanged<int> onSurahChanged;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final isArabic = context.l10n.localeName == 'ar';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -125,8 +132,41 @@ class _ShareHeader extends StatelessWidget {
           ],
         ),
         SizedBox(height: tokens.spaceMedium),
+        if (uniqueSurahs.length > 1) ...[
+          Text(
+            context.l10n.selectSurahToShare,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              spacing: tokens.spaceSmall,
+              children: uniqueSurahs.map((surah) {
+                final isSelected = surah == selectedSurah;
+                return ChoiceChip(
+                  label: Text(
+                    isArabic
+                        ? getSurahNameArabic(surah)
+                        : getSurahNameEnglish(surah),
+                  ),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) onSurahChanged(surah);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          SizedBox(height: tokens.spaceMedium),
+        ],
         Text(
-          arabicSurahName,
+          isArabic
+              ? getSurahNameArabic(selectedSurah)
+              : getSurahNameEnglish(selectedSurah),
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w700,
             color: theme.colorScheme.onSurface,
@@ -135,7 +175,7 @@ class _ShareHeader extends StatelessWidget {
         ),
         SizedBox(height: tokens.spaceExtraSmall),
         Text(
-          englishSurahName,
+          getSurahNameEnglish(selectedSurah),
           style: theme.textTheme.titleSmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w600,

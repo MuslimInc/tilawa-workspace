@@ -2,9 +2,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
-import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/errors/failures.dart';
-import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import '../../domain/entities/athkar_category.dart';
 import '../../domain/entities/athkar_item.dart';
@@ -12,106 +10,62 @@ import '../../domain/usecases/get_athkar_by_category_use_case.dart';
 import '../../domain/usecases/get_athkar_categories_use_case.dart';
 import 'athkar_state.dart';
 
+/// Cubit responsible for managing Athkar categories and items.
+///
+/// Strictly acts as a state machine, delegating logic to UseCases.
 @injectable
 class AthkarCubit extends Cubit<AthkarState> {
-  AthkarCubit(
-    this._getCategories,
-    this._getAthkarByCategory,
-    this._analyticsService,
-  ) : super(AthkarInitial());
+  AthkarCubit(this._getCategories, this._getAthkarByCategory)
+    : super(const AthkarState.initial());
+
   final GetAthkarCategoriesUseCase _getCategories;
   final GetAthkarByCategoryUseCase _getAthkarByCategory;
-  final AnalyticsService _analyticsService;
 
+  /// Loads all Athkar categories.
   Future<void> loadCategories() async {
-    emit(AthkarLoading());
+    emit(const AthkarState.loading());
     final Either<Failure, List<AthkarCategory>> result = await _getCategories(
       const NoParams(),
     );
     result.fold(
-      (failure) =>
-          emit(AthkarError(failure.message ?? 'Error loading categories')),
-      (categories) {
-        emit(AthkarCategoriesLoaded(categories));
-      },
+      (failure) => emit(AthkarState.error(failure)),
+      (categories) => emit(AthkarState.categoriesLoaded(categories)),
     );
   }
 
+  /// Loads items for a specific category.
   Future<void> loadAthkar(int categoryId) async {
-    emit(AthkarLoading());
+    emit(const AthkarState.loading());
     final Either<Failure, List<AthkarItem>> result = await _getAthkarByCategory(
       categoryId,
     );
-    result.fold(
-      (failure) => emit(AthkarError(failure.message ?? 'Error loading items')),
-      (items) {
-        final Map<int, int> counts = {
-          for (final item in items) item.id: item.count,
-        };
-        emit(AthkarItemsLoaded(items: items, currentCounts: counts));
-      },
-    );
+    result.fold((failure) => emit(AthkarState.error(failure)), (items) {
+      final counts = {for (final item in items) item.id: item.count};
+      emit(AthkarState.itemsLoaded(items: items, currentCounts: counts));
+    });
   }
 
+  /// Decrements the counter for a specific Athkar item.
   void decrementCount(int athkarId) {
     if (state is AthkarItemsLoaded) {
-      final currentState = state as AthkarItemsLoaded;
-      final currentCounts = Map<int, int>.from(currentState.currentCounts);
-      if (currentCounts[athkarId]! > 0) {
-        currentCounts[athkarId] = currentCounts[athkarId]! - 1;
-
-        // Log decrement event
-        final AthkarItem item = currentState.items.firstWhere(
-          (element) => element.id == athkarId,
-        );
-        _analyticsService.logEvent(
-          AnalyticsEvents.athkarItemDecrement,
-          parameters: {
-            AnalyticsParams.itemId: athkarId,
-            AnalyticsParams.itemText: item.textAr.length > 100
-                ? item.textAr.substring(0, 100)
-                : item.textAr,
-            AnalyticsParams.remainingCount: currentCounts[athkarId]!,
-          },
-        );
-
-        if (currentCounts[athkarId] == 0) {
-          _analyticsService.logEvent(
-            AnalyticsEvents.athkarItemCompleted,
-            parameters: {AnalyticsParams.itemId: athkarId},
-          );
-        }
-
-        emit(
-          AthkarItemsLoaded(
-            items: currentState.items,
-            currentCounts: currentCounts,
-          ),
-        );
+      final s = state as AthkarItemsLoaded;
+      final currentCount = s.currentCounts[athkarId] ?? 0;
+      if (currentCount > 0) {
+        final updatedCounts = Map<int, int>.from(s.currentCounts);
+        updatedCounts[athkarId] = currentCount - 1;
+        emit(s.copyWith(currentCounts: updatedCounts));
       }
     }
   }
 
+  /// Resets the counter for a specific Athkar item to its original value.
   void resetCount(int athkarId) {
     if (state is AthkarItemsLoaded) {
-      final currentState = state as AthkarItemsLoaded;
-      final currentCounts = Map<int, int>.from(currentState.currentCounts);
-      final AthkarItem item = currentState.items.firstWhere(
-        (element) => element.id == athkarId,
-      );
-      currentCounts[athkarId] = item.count;
-
-      _analyticsService.logEvent(
-        AnalyticsEvents.athkarItemReset,
-        parameters: {AnalyticsParams.itemId: athkarId},
-      );
-
-      emit(
-        AthkarItemsLoaded(
-          items: currentState.items,
-          currentCounts: currentCounts,
-        ),
-      );
+      final s = state as AthkarItemsLoaded;
+      final item = s.items.firstWhere((i) => i.id == athkarId);
+      final updatedCounts = Map<int, int>.from(s.currentCounts);
+      updatedCounts[athkarId] = item.count;
+      emit(s.copyWith(currentCounts: updatedCounts));
     }
   }
 }

@@ -82,18 +82,13 @@ class PrayerTimesLocationHeader extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                ),
-                child: Icon(
-                  Icons.calendar_month_rounded,
-                  size: 20,
-                  color: theme.colorScheme.primary,
-                ),
+              TilawaIconBox(
+                icon: Icons.calendar_month_rounded,
+                size: 20,
+                backgroundColor: theme.colorScheme.surface,
+                iconColor: theme.colorScheme.primary,
+                borderRadius: tokens.radiusMedium,
+                padding: tokens.spaceSmall,
               ),
             ],
           ),

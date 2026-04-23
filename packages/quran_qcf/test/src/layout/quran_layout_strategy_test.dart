@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/layout/quran_layout_strategy.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 void main() {
   group('QuranLayoutMetrics', () {
@@ -65,14 +65,14 @@ void main() {
           data: const MediaQueryData(size: screenSize, padding: padding),
           child: Builder(
             builder: (context) {
-              // Note: In real app, QuranDataService must be loaded.
-              // For tests, we might need to mock it if calculateMetrics calls it.
-              // Since it's a singleton, we'll just try to call it.
+              final mushafService = MushafService();
+              mushafService.ensureLoaded();
 
               final QuranLayoutMetrics metrics = strategy.calculateMetrics(
                 context,
                 const BoxConstraints(maxWidth: 392.7, maxHeight: 803.6),
                 1, // Page 1
+                mushafService,
               );
 
               expect(metrics.isScrollable, false);
@@ -96,10 +96,14 @@ void main() {
           data: const MediaQueryData(size: screenSize, padding: padding),
           child: Builder(
             builder: (context) {
+              final mushafService = MushafService();
+              mushafService.ensureLoaded();
+
               final QuranLayoutMetrics metrics = strategy.calculateMetrics(
                 context,
                 const BoxConstraints(maxWidth: 803.6, maxHeight: 392.7),
                 1,
+                mushafService,
               );
 
               expect(metrics.isScrollable, true);

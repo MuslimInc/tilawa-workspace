@@ -5,6 +5,7 @@ import 'package:tilawa/core/extensions.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../domain/entities/qibla_direction_entity.dart';
 import '../bloc/qibla_bloc.dart';
 import '../widgets/qibla_compass_widget.dart';
 
@@ -53,6 +54,11 @@ class _QiblaScreenState extends State<QiblaScreen> {
                     children: [
                       const Spacer(),
                       BlocBuilder<QiblaBloc, QiblaState>(
+                        // Only rebuild the outer switch on status transitions.
+                        // Direction-only updates are handled by the inner
+                        // BlocSelector so only QiblaCompassWidget rebuilds.
+                        buildWhen: (previous, current) =>
+                            previous.status != current.status,
                         builder: (context, state) {
                           switch (state.status) {
                             case QiblaStatus.loading:
@@ -93,15 +99,27 @@ class _QiblaScreenState extends State<QiblaScreen> {
                                 ),
                               );
                             case QiblaStatus.success:
-                              if (state.direction == null) {
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    color: colorScheme.onSurface,
-                                  ),
-                                );
-                              }
-                              return QiblaCompassWidget(
-                                qiblaDirection: state.direction!,
+                              // Subscribe only the compass widget to direction
+                              // updates — the outer switch won't rebuild on
+                              // every sensor tick.
+                              return BlocSelector<
+                                QiblaBloc,
+                                QiblaState,
+                                QiblaDirectionEntity?
+                              >(
+                                selector: (s) => s.direction,
+                                builder: (context, direction) {
+                                  if (direction == null) {
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        color: colorScheme.onSurface,
+                                      ),
+                                    );
+                                  }
+                                  return QiblaCompassWidget(
+                                    qiblaDirection: direction,
+                                  );
+                                },
                               );
                             case QiblaStatus.initial:
                               return const SizedBox.shrink();

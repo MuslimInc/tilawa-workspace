@@ -17,7 +17,7 @@ void main() {
   setUpAll(() async {
     final base = File('assets/quran_fonts/qpc-v4.json').existsSync()
         ? 'assets/quran_fonts'
-        : 'packages/quran/assets/quran_fonts';
+        : 'packages/quran_qcf/assets/quran_fonts';
 
     pageIndex =
         json.decode(File('$base/quran_page_index.json').readAsStringSync())

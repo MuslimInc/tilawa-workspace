@@ -19,9 +19,6 @@ class SharePosterRenderer extends StatelessWidget {
   final int toAyah;
   final String? reciterName;
 
-  String get _arabicSurahName => getSurahNameArabic(surahNumber);
-  String get _englishSurahName => getSurahNameEnglish(surahNumber);
-
   @override
   Widget build(BuildContext context) {
     final normalizedReciterName = reciterName?.trim();
@@ -33,6 +30,23 @@ class SharePosterRenderer extends StatelessWidget {
 
     return Column(
       children: [
+        Text(
+          getSurahNameArabic(surahNumber),
+          style: GoogleFonts.amiri(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: _PosterPalette.deepGreen,
+          ),
+        ),
+        Text(
+          getSurahNameEnglish(surahNumber),
+          style: GoogleFonts.alexandria(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: _PosterPalette.deepGreen.withValues(alpha: 0.64),
+          ),
+        ),
+        const SizedBox(height: 18),
         Expanded(
           child: Directionality(
             textDirection: TextDirection.rtl,
@@ -211,43 +225,8 @@ class _PosterPill extends StatelessWidget {
   }
 }
 
-class _PosterOrb extends StatelessWidget {
-  const _PosterOrb({
-    required this.size,
-    required this.color,
-    required this.opacity,
-  });
-
-  final double size;
-  final Color color;
-  final double opacity;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [
-              color.withValues(alpha: opacity),
-              color.withValues(alpha: 0),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 abstract final class _PosterPalette {
   static const Color deepGreen = Color(0xFF0B342E);
-  static const Color forestGreen = Color(0xFF145247);
   static const Color gold = Color(0xFFE1C17B);
-  static const Color mint = Color(0xFF8FDFC0);
-  static const Color parchment = Color(0xFFF7F1E1);
-  static const Color warmParchment = Color(0xFFEFE1C2);
   static const Color ink = Color(0xFF1E1B16);
 }

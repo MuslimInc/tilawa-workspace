@@ -104,7 +104,7 @@ Why this matters:
 Affected files and components:
 - `apps/tilawa/lib/features/notifications/presentation/services/fcm_notification_handler_service.dart:107-115`
 - `apps/tilawa/lib/features/quran_reader/presentation/screens/quran_reader_screen.dart:67-70`
-- `packages/quran/lib/src/services/functions/page_functions.dart:39-44`
+- `packages/quran_qcf/lib/src/services/functions/page_functions.dart:39-44`
 - Notification deep-link routing and Quran reader startup
 
 What is happening:
@@ -199,7 +199,7 @@ Why this matters:
 - On low-memory devices this can cause noticeable stalls or memory spikes.
 
 Affected files and components:
-- `packages/quran/lib/src/services/quran_font_service.dart:121-171`
+- `packages/quran_qcf/lib/src/services/quran_font_service.dart:121-171`
 - `apps/tilawa/lib/features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart:73-75`
 - Quran reader initialization and font engine registration
 

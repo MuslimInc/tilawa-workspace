@@ -72,8 +72,9 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
               maxHeight: viewportSize.height,
             ),
             initialPageNumber,
+            quranQcfLocator<MushafService>(),
           );
-      QuranFontService.instance.setRenderFontSize(metrics.fontSize);
+      quranQcfLocator<QuranFontService>().setRenderFontSize(metrics.fontSize);
     }
     _maybeDispatchInit();
   }
@@ -95,8 +96,10 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
   /// registered, JSON data is loaded, and the glyph atlas is pre-warmed.
   /// All 15 [TextPainter.layout()] calls complete in <5ms on any device.
   PreparedQuranPageWindow? _buildInitialPreparedWindow(int pageNumber) {
-    if (!QuranFontService.instance.isQuranDataLoaded) return null;
-    if (!QuranFontService.instance.isFontLoaded(pageNumber)) return null;
+    if (!quranQcfLocator<QuranFontService>().isQuranDataLoaded) return null;
+    if (!quranQcfLocator<QuranFontService>().isFontLoaded(pageNumber)) {
+      return null;
+    }
 
     final Size viewportSize = MediaQuery.sizeOf(context);
     final strategy = StandardQuranLayoutStrategy();
@@ -120,20 +123,23 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
         QuranConstants.totalPagesCount,
       );
       if (preparedPages.containsKey(p)) continue;
-      if (!QuranFontService.instance.isFontLoaded(p)) continue;
+      if (!quranQcfLocator<QuranFontService>().isFontLoaded(p)) continue;
 
       final int tPage = DateTime.now().millisecondsSinceEpoch;
       final QuranLayoutMetrics metrics = strategy.calculateMetrics(
         context,
         constraints,
         p,
+        quranQcfLocator<MushafService>(),
       );
-      preparedPages[p] = QuranPagePreparationService.instance.preparePage(
-        pageNumber: p,
-        metrics: metrics,
-        viewportWidth: viewportSize.width,
-        textColor: textColor,
-      );
+      preparedPages[p] = quranQcfLocator<QuranPagePreparationService>()
+          .preparePage(
+            pageNumber: p,
+            metrics: metrics,
+            viewportWidth: viewportSize.width,
+            textColor: textColor,
+            mushafService: quranQcfLocator<MushafService>(),
+          );
       assert(() {
         final int tPageDone = DateTime.now().millisecondsSinceEpoch;
         final int pageMs = tPageDone - tPage;
@@ -268,8 +274,8 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
                 } else {
                   logger.d(
                     '[PERF][STARTUP] ✗ window null for p=$initialPageNumber '
-                    '— data=${QuranFontService.instance.isQuranDataLoaded} '
-                    'fontLoaded=${QuranFontService.instance.isFontLoaded(initialPageNumber)}',
+                    '— data=${quranQcfLocator<QuranFontService>().isQuranDataLoaded} '
+                    'fontLoaded=${quranQcfLocator<QuranFontService>().isFontLoaded(initialPageNumber)}',
                   );
                 }
               }

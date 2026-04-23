@@ -1401,6 +1401,9 @@ class AppLocalizationsAr extends AppLocalizations {
       'اختر الصيغة الأنسب لمشاركة هذه الآيات بصورة جميلة.';
 
   @override
+  String get selectSurahToShare => 'اختر السورة للمشاركة';
+
+  @override
   String get shareScreenshotDescription =>
       'لقطة نظيفة من صفحة المصحف جاهزة للمشاركة.';
 

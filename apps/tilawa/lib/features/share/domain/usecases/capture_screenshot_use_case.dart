@@ -1,7 +1,7 @@
-import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 
 import '../entities/share_content.dart';
+import '../entities/widget_capture_handle.dart';
 import '../repositories/share_repository.dart';
 
 @injectable
@@ -10,7 +10,7 @@ class CaptureScreenshotUseCase {
   final ShareRepository _repository;
 
   Future<ShareContent> call({
-    required GlobalKey boundaryKey,
+    required WidgetCaptureHandle handle,
     required String surahName,
     required int pageNumber,
     required String appName,
@@ -18,7 +18,7 @@ class CaptureScreenshotUseCase {
     bool brandCapture = true,
   }) {
     return _repository.captureScreenshot(
-      boundaryKey: boundaryKey,
+      handle: handle,
       surahName: surahName,
       pageNumber: pageNumber,
       appName: appName,

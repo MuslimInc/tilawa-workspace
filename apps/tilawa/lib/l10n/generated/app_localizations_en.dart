@@ -1408,6 +1408,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Choose a format that carries these verses beautifully.';
 
   @override
+  String get selectSurahToShare => 'Select Surah to share';
+
+  @override
   String get shareScreenshotDescription =>
       'A clean Quran page capture ready to send.';
 

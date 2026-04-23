@@ -5,6 +5,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -68,19 +69,17 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _expandController.addListener(() {
-      setState(() {});
-    });
+    // No addListener here — animation-driven rebuilds are handled by the
+    // AnimatedBuilder inside build(), which confines layout work to its own
+    // subtree instead of calling setState() on the full BottomPlayerWidgetState.
 
     _dismissAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _dismissAnimController.addListener(() {
-      setState(() {
-        _dismissOffsetY = _dismissAnimation?.value ?? 0;
-      });
-    });
+    // No addListener here — dismiss animation rebuilds are handled by the
+    // AnimatedBuilder inside build(), confining layout work to the
+    // Transform+Opacity subtree only.
   }
 
   @override
@@ -179,6 +178,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('BottomPlayerWidget');
     return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
       listenWhen: (previous, current) {
         return previous.currentAudio?.id != current.currentAudio?.id ||
@@ -186,6 +186,20 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 current.shouldShowBottomPlayer) ||
             (previous.isPlaying != current.isPlaying && current.isPlaying);
       },
+      // Guard against position-only updates: positionData is intentionally
+      // excluded because _MiniPlayerProgressBar handles it with its own
+      // BlocSelector. Without this, every position tick (~200 ms when playing)
+      // rebuilds the full player UI tree (≈50–70 ms), causing persistent jank.
+      buildWhen: (previous, current) =>
+          previous.currentAudio != current.currentAudio ||
+          previous.shouldShowBottomPlayer != current.shouldShowBottomPlayer ||
+          previous.isPlaying != current.isPlaying ||
+          previous.canGoPrevious != current.canGoPrevious ||
+          previous.canGoNext != current.canGoNext ||
+          previous.isSleepTimerActive != current.isSleepTimerActive ||
+          previous.volume != current.volume ||
+          previous.speed != current.speed ||
+          previous.dismissedAudioId != current.dismissedAudioId,
       listener: (context, state) {
         if (_isDismissed) {
           setState(() {
@@ -204,60 +218,81 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
           return const SizedBox.shrink();
         }
 
-        final double progress = _expandController.value;
         final double screenHeight = MediaQuery.sizeOf(context).height;
-        // When collapsed (progress=0), the height must be
-        // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
-        final double currentHeight = lerpDouble(
-          _miniPlayerHeight + widget.bottomNavBarHeight,
-          screenHeight,
-          progress,
-        )!;
 
         return Align(
           alignment: Alignment.bottomCenter,
           child: GestureDetector(
             onVerticalDragUpdate: _onVerticalDragUpdate,
             onVerticalDragEnd: _onVerticalDragEnd,
-            child: SizedBox(
-              height: currentHeight,
-              width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Expanded player (behind, fades in)
-                  if (progress > 0.01)
-                    Opacity(
-                      opacity: progress.clamp(0.0, 1.0),
-                      child: _buildExpandedPlayer(context, state, audio),
-                    ),
+            // AnimatedBuilder confines expand/collapse animation rebuilds to
+            // this subtree, preventing them from propagating up to BlocConsumer
+            // and rebuilding the full player tree on every vsync tick.
+            child: AnimatedBuilder(
+              animation: _expandController,
+              builder: (context, _) {
+                final double progress = _expandController.value;
+                // When collapsed (progress=0), the height must be
+                // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
+                final double currentHeight = lerpDouble(
+                  _miniPlayerHeight + widget.bottomNavBarHeight,
+                  screenHeight,
+                  progress,
+                )!;
 
-                  // Mini player (in front, fades out quickly)
-                  if (progress < 0.99)
-                    Positioned(
-                      bottom: lerpDouble(
-                        widget.bottomNavBarHeight,
-                        0,
-                        progress,
-                      ),
-                      left: 0,
-                      right: 0,
-                      child: Transform.translate(
-                        offset: Offset(0, _dismissOffsetY),
-                        child: Opacity(
-                          opacity:
-                              ((1 - progress * 2.5) *
-                                      (1 - _dismissOffsetY / 200))
-                                  .clamp(0.0, 1.0),
-                          child: IgnorePointer(
-                            ignoring: progress > 0.4,
-                            child: _buildMiniPlayer(context, state, audio),
+                return SizedBox(
+                  height: currentHeight,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Expanded player (behind, fades in)
+                      if (progress > 0.01)
+                        Opacity(
+                          opacity: progress.clamp(0.0, 1.0),
+                          child: _buildExpandedPlayer(context, state, audio),
+                        ),
+
+                      // Mini player (in front, fades out quickly)
+                      if (progress < 0.99)
+                        Positioned(
+                          bottom: lerpDouble(
+                            widget.bottomNavBarHeight,
+                            0,
+                            progress,
+                          ),
+                          left: 0,
+                          right: 0,
+                          // AnimatedBuilder confines dismiss animation
+                          // rebuilds to Transform+Opacity only — the
+                          // _buildMiniPlayer child is not recreated on
+                          // every dismiss animation frame.
+                          child: AnimatedBuilder(
+                            animation: _dismissAnimController,
+                            builder: (context, child) {
+                              final double dismissOffset =
+                                  _dismissAnimation?.value ?? _dismissOffsetY;
+                              return Transform.translate(
+                                offset: Offset(0, dismissOffset),
+                                child: Opacity(
+                                  opacity:
+                                      ((1 - progress * 2.5) *
+                                              (1 - dismissOffset / 200))
+                                          .clamp(0.0, 1.0),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: IgnorePointer(
+                              ignoring: progress > 0.4,
+                              child: _buildMiniPlayer(context, state, audio),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                ],
-              ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         );

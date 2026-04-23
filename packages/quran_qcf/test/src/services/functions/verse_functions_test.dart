@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_qcf/src/domain/services/functions/verse_functions.dart';
 import 'package:quran_qcf/src/quran_exception.dart';
-import 'package:quran_qcf/src/services/functions/verse_functions.dart';
 
 void main() {
   group('verse_functions', () {

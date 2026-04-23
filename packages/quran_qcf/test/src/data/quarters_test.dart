@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/data/quarters.dart';
+import 'package:quran_qcf/src/data/sources/quarters.dart';
 
 void main() {
   group('Quarters data', () {

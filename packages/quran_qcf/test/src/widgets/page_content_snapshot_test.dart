@@ -3,13 +3,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/layout/quran_layout_strategy.dart';
-import 'package:quran_qcf/src/page_content.dart';
-import 'package:quran_qcf/src/services/idle_scheduler.dart';
-import 'package:quran_qcf/src/services/mushaf_service.dart';
-import 'package:quran_qcf/src/services/page_snapshot_service.dart';
-import 'package:quran_qcf/src/services/quran_font_service.dart';
-import 'package:quran_qcf/src/services/quran_page_preparation_service.dart';
+import 'package:quran_qcf/src/data/repositories/mushaf_service.dart';
+import 'package:quran_qcf/src/domain/models/quran_page_models.dart';
+import 'package:quran_qcf/src/presentation/layout/quran_layout_strategy.dart';
+import 'package:quran_qcf/src/presentation/services/idle_scheduler.dart';
+import 'package:quran_qcf/src/presentation/services/page_snapshot_service.dart';
+import 'package:quran_qcf/src/presentation/services/quran_font_service.dart';
+import 'package:quran_qcf/src/presentation/services/quran_page_preparation_service.dart';
+import 'package:quran_qcf/src/presentation/widgets/page_content.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 final Uint8List _k1x1TransparentPng = Uint8List.fromList(const <int>[
   0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
@@ -52,13 +54,13 @@ void _registerFakeAssets() {
 
     if (key == 'AssetManifest.bin') return _kEmptyAssetManifestBin;
 
-    if (key == 'packages/quran/assets/quran_fonts/qpc-v4.json') {
+    if (key == 'packages/quran_qcf/assets/quran_fonts/qpc-v4.json') {
       return ByteData.sublistView(
         Uint8List.fromList(utf8.encode(_fakeQpcV4Json)),
       );
     }
 
-    if (key == 'packages/quran/assets/quran_fonts/quran_page_index.json') {
+    if (key == 'packages/quran_qcf/assets/quran_fonts/quran_page_index.json') {
       return ByteData.sublistView(
         Uint8List.fromList(utf8.encode(_fakePageIndexJson)),
       );
@@ -72,17 +74,24 @@ void _registerFakeAssets() {
   });
 }
 
+late MushafService mushafService;
+late QuranFontService fontService;
+late QuranPagePreparationService preparationService;
+late PageSnapshotService snapshotService;
+late IdleScheduler idleScheduler;
+
 Future<PreparedQuranPage> _preparePage(WidgetTester tester) async {
   await tester.binding.setSurfaceSize(const Size(400, 800));
   addTearDown(() => tester.binding.setSurfaceSize(null));
 
   await tester.runAsync(() async {
-    await MushafService.instance.ensureLoaded();
+    await mushafService.ensureLoaded();
   });
 
   late final PreparedQuranPage preparedPage;
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
       home: Scaffold(
         body: Builder(
           builder: (context) {
@@ -92,12 +101,14 @@ Future<PreparedQuranPage> _preparePage(WidgetTester tester) async {
                   context,
                   BoxConstraints(maxWidth: size.width, maxHeight: size.height),
                   10,
+                  mushafService,
                 );
-            preparedPage = QuranPagePreparationService.instance.preparePage(
+            preparedPage = preparationService.preparePage(
               pageNumber: 10,
               metrics: metrics,
               viewportWidth: size.width,
               textColor: Colors.black,
+              mushafService: mushafService,
             );
             return const SizedBox.shrink();
           },
@@ -114,19 +125,23 @@ Widget _buildPageContentWidget({
   ValueNotifier<int>? currentPage,
   ValueNotifier<bool>? isScrolling,
   bool isWarming = false,
+  Color textColor = Colors.black,
 }) {
   return MaterialApp(
+    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
     home: Scaffold(
       body: PageContent(
         pageNumber: 10,
         preparedPage: preparedPage,
-        textColor: Colors.black,
+        textColor: textColor,
         pageBackgroundColor: Colors.white,
         currentPageListenable: currentPage ?? ValueNotifier<int>(10),
         showOverlaysListenable: ValueNotifier<bool>(true),
         isScrollingListenable: isScrolling,
         isWarming: isWarming,
         surahNameBuilder: (n) => 'Surah $n',
+        mushafService: mushafService,
+        pageSnapshotService: snapshotService,
       ),
     ),
   );
@@ -138,10 +153,14 @@ void main() {
   setUpAll(_registerFakeAssets);
 
   setUp(() {
-    QuranFontService.instance.debugResetForTests();
-    QuranPagePreparationService.instance.clear();
-    PageSnapshotService.instance.clear();
-    IdleScheduler.instance.cancelAll();
+    mushafService = MushafService();
+    idleScheduler = IdleScheduler();
+    fontService = QuranFontService(
+      mushafService: mushafService,
+      idleScheduler: idleScheduler,
+    );
+    preparationService = QuranPagePreparationService();
+    snapshotService = PageSnapshotService(idleScheduler: idleScheduler);
   });
 
   group('PageContent snapshot scheduling', () {
@@ -149,7 +168,7 @@ void main() {
         '(no scroll guard — IdleScheduler defers execution)', (
       WidgetTester tester,
     ) async {
-      QuranFontService.instance.debugMarkFontLoaded(10);
+      fontService.debugMarkFontLoaded(10);
 
       final isScrolling = ValueNotifier<bool>(true);
       final PreparedQuranPage preparedPage = await _preparePage(tester);
@@ -160,7 +179,7 @@ void main() {
           isScrolling: isScrolling,
         ),
       );
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 1500));
 
       // The scroll state is true, but _scheduleSnapshotCapture should
       // still have run (no early-return guard). The IdleScheduler queue
@@ -174,33 +193,33 @@ void main() {
 
       // The snapshot should have been captured — proving the scheduling
       // path was NOT blocked by the scroll state.
-      expect(PageSnapshotService.instance.hasSnapshot(10), isTrue);
+      expect(snapshotService.hasSnapshot(10), isTrue);
     });
 
     testWidgets('does NOT schedule snapshot when isWarming is true', (
       WidgetTester tester,
     ) async {
-      QuranFontService.instance.debugMarkFontLoaded(10);
+      fontService.debugMarkFontLoaded(10);
 
       final PreparedQuranPage preparedPage = await _preparePage(tester);
 
       await tester.pumpWidget(
         _buildPageContentWidget(preparedPage: preparedPage, isWarming: true),
       );
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 1500));
 
       // Pump frames generously — should still not capture.
       for (var i = 0; i < 8; i++) {
         await tester.pump();
       }
 
-      expect(PageSnapshotService.instance.hasSnapshot(10), isFalse);
+      expect(snapshotService.hasSnapshot(10), isFalse);
     });
 
     testWidgets('disposes cleanly without errors when widget is removed', (
       WidgetTester tester,
     ) async {
-      QuranFontService.instance.debugMarkFontLoaded(10);
+      fontService.debugMarkFontLoaded(10);
 
       final PreparedQuranPage preparedPage = await _preparePage(tester);
 
@@ -223,41 +242,32 @@ void main() {
     testWidgets(
       'invalidation cancels pending capture and evicts cached snapshot',
       (WidgetTester tester) async {
-        QuranFontService.instance.debugMarkFontLoaded(10);
+        fontService.debugMarkFontLoaded(10);
 
         final PreparedQuranPage preparedPage = await _preparePage(tester);
 
         await tester.pumpWidget(
           _buildPageContentWidget(preparedPage: preparedPage),
         );
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 1500));
 
         // Pump frames to let the capture complete.
         for (var i = 0; i < 8; i++) {
           await tester.pump();
         }
-        expect(PageSnapshotService.instance.hasSnapshot(10), isTrue);
+        expect(snapshotService.hasSnapshot(10), isTrue);
 
         // Trigger invalidation by changing textColor → didUpdateWidget →
         // _invalidateSnapshot(). This evicts the old snapshot synchronously.
-        PageSnapshotService.instance.evict(10);
-        expect(PageSnapshotService.instance.hasSnapshot(10), isFalse);
+        snapshotService.evict(10);
+        expect(snapshotService.hasSnapshot(10), isFalse);
 
         // Rebuild with new textColor — _invalidateSnapshot runs in
         // didUpdateWidget, which evicts and resets flags.
         await tester.pumpWidget(
-          MaterialApp(
-            home: Scaffold(
-              body: PageContent(
-                pageNumber: 10,
-                preparedPage: preparedPage,
-                textColor: Colors.red, // changed
-                pageBackgroundColor: Colors.white,
-                currentPageListenable: ValueNotifier<int>(10),
-                showOverlaysListenable: ValueNotifier<bool>(true),
-                surahNameBuilder: (n) => 'Surah $n',
-              ),
-            ),
+          _buildPageContentWidget(
+            preparedPage: preparedPage,
+            textColor: Colors.red, // changed
           ),
         );
 
@@ -271,7 +281,7 @@ void main() {
     testWidgets(
       'displays RawImage (snapshot) when scrolling with cached snapshot',
       (WidgetTester tester) async {
-        QuranFontService.instance.debugMarkFontLoaded(10);
+        fontService.debugMarkFontLoaded(10);
 
         final isScrolling = ValueNotifier<bool>(false);
         final PreparedQuranPage preparedPage = await _preparePage(tester);
@@ -282,13 +292,13 @@ void main() {
             isScrolling: isScrolling,
           ),
         );
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 1500));
 
         // Let snapshot capture complete.
         for (var i = 0; i < 8; i++) {
           await tester.pump();
         }
-        expect(PageSnapshotService.instance.hasSnapshot(10), isTrue);
+        expect(snapshotService.hasSnapshot(10), isTrue);
 
         // Start scrolling — should switch to RawImage snapshot path.
         isScrolling.value = true;
@@ -309,7 +319,7 @@ void main() {
     testWidgets('shows live RepaintBoundary when not scrolling', (
       WidgetTester tester,
     ) async {
-      QuranFontService.instance.debugMarkFontLoaded(10);
+      fontService.debugMarkFontLoaded(10);
 
       final isScrolling = ValueNotifier<bool>(false);
       final PreparedQuranPage preparedPage = await _preparePage(tester);

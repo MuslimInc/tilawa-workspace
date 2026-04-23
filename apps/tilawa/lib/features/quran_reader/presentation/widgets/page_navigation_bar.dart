@@ -346,7 +346,7 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
                                   pageNumber: displayPage,
                                   surahNumber: getPageData(
                                     displayPage,
-                                  ).first['surah']!,
+                                  ).first.surah,
                                   surahName: displayInfo.surahName,
                                   juzNumber: displayInfo.juzNumber,
                                   hizbLabel: displayInfo.hizbLabel,
@@ -418,17 +418,17 @@ class _PagePreviewInfo {
     final pageData = getPageData(pageNumber);
     final bool isArabic = context.l10n.localeName == 'ar';
     final Set<int> uniqueSurahNumbers = pageData
-        .map((entry) => entry['surah']!)
+        .map((entry) => entry.surah)
         .toSet();
 
     final int juzNumber = getJuzNumber(
-      pageData.first['surah']!,
-      pageData.first['start']!,
+      pageData.first.surah,
+      pageData.first.start,
     );
 
     final int? quarterNumber = pageNumber == 1 || pageNumber == 2
         ? null
-        : getQuarterNumber(pageData.first['surah']!, pageData.first['start']!);
+        : getQuarterNumber(pageData.first.surah, pageData.first.start);
 
     String hizbLabelStr = '';
     if (quarterNumber != null) {

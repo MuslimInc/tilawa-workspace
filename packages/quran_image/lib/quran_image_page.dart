@@ -247,7 +247,7 @@ class QuranAppBar extends StatelessWidget {
     final locale = Localizations.localeOf(context);
 
     final pageData = getPageData(pageNumber);
-    final surahNumbers = pageData.map((e) => e['surah']!).toSet().toList();
+    final surahNumbers = pageData.map((e) => e.surah).toSet().toList();
     final surahNames = surahNumbers
         .map((s) => SurahNames.getSurahName(s, locale.languageCode))
         .join(' ');

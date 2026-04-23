@@ -12,6 +12,10 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
   final QuranDataSource _quranDataSource;
   final ReaderSettingsDataSource _settingsDataSource;
 
+  // In-memory cache for pages to offload logic from the Bloc
+  final Map<int, QuranPageEntity> _pageCache = {};
+  static const int _maxCachedPages = 20;
+
   @override
   Future<SurahContentEntity> getSurahContent(int surahNumber) async {
     return _quranDataSource.getSurahContent(surahNumber);
@@ -30,7 +34,28 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
 
   @override
   Future<QuranPageEntity> getPage(int pageNumber) async {
-    return _quranDataSource.getPage(pageNumber);
+    // Return from cache if available
+    if (_pageCache.containsKey(pageNumber)) {
+      return _pageCache[pageNumber]!;
+    }
+
+    final page = await _quranDataSource.getPage(pageNumber);
+
+    // Manage cache size
+    if (_pageCache.length >= _maxCachedPages) {
+      // Remove the furthest page from the current one to optimize for linear reading
+      final keysToRemove = _pageCache.keys.toList()
+        ..sort(
+          (a, b) => (a - pageNumber).abs().compareTo((b - pageNumber).abs()),
+        );
+
+      while (_pageCache.length >= _maxCachedPages) {
+        _pageCache.remove(keysToRemove.removeLast());
+      }
+    }
+
+    _pageCache[pageNumber] = page;
+    return page;
   }
 
   @override
@@ -49,8 +74,6 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
     required int ayahNumber,
     required String language,
   }) async {
-    // This would load translation from a separate data source
-    // For now, return null
     return null;
   }
 
@@ -59,8 +82,6 @@ class QuranReaderRepositoryImpl implements QuranReaderRepository {
     required int surahNumber,
     required String language,
   }) async {
-    // This would load translations from a separate data source
-    // For now, return empty map
     return {};
   }
 

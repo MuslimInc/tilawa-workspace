@@ -3,14 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/layout/quran_layout_strategy.dart';
-import 'package:quran_qcf/src/page_content.dart';
-import 'package:quran_qcf/src/services/mushaf_service.dart';
-import 'package:quran_qcf/src/services/quran_font_service.dart';
-import 'package:quran_qcf/src/services/quran_page_preparation_service.dart';
-import 'package:quran_qcf/src/widgets/page_metadata_strip.dart';
-import 'package:quran_qcf/src/widgets/quran_page_painter.dart';
-import 'package:quran_qcf/src/widgets/surah_header_banner.dart';
+import 'package:quran_qcf/quran_qcf.dart';
+import 'package:quran_qcf/src/presentation/widgets/page_metadata_strip.dart';
+import 'package:quran_qcf/src/presentation/widgets/quran_page_painter.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 final Uint8List _k1x1TransparentPng = Uint8List.fromList(const <int>[
   0x89,
@@ -86,6 +82,7 @@ final ByteData _kEmptyAssetManifestBin = const StandardMessageCodec()
 
 const String _fakeQpcV4Json = '''
 {
+  "h1": {"text": "SURAH_HEADER", "surah": "5", "ayah": "0", "word": "0"},
   "w1": {"text": "AB", "surah": "5", "ayah": "1", "word": "1"},
   "w2": {"text": "CD", "surah": "5", "ayah": "2", "word": "1"}
 }
@@ -94,6 +91,7 @@ const String _fakeQpcV4Json = '''
 const String _fakePageIndexJson = '''
 {
   "10": {
+    "1": ["h1"],
     "4": ["w1", "w2"]
   }
 }
@@ -115,12 +113,12 @@ void _registerFakeAssets() {
       return _kEmptyAssetManifestBin;
     }
 
-    if (key == 'packages/quran/assets/quran_fonts/qpc-v4.json') {
+    if (key == 'packages/quran_qcf/assets/quran_fonts/qpc-v4.json') {
       final bytes = Uint8List.fromList(utf8.encode(_fakeQpcV4Json));
       return ByteData.sublistView(bytes);
     }
 
-    if (key == 'packages/quran/assets/quran_fonts/quran_page_index.json') {
+    if (key == 'packages/quran_qcf/assets/quran_fonts/quran_page_index.json') {
       final bytes = Uint8List.fromList(utf8.encode(_fakePageIndexJson));
       return ByteData.sublistView(bytes);
     }
@@ -133,6 +131,12 @@ void _registerFakeAssets() {
   });
 }
 
+late MushafService mushafService;
+late QuranFontService fontService;
+late QuranPagePreparationService preparationService;
+late PageSnapshotService snapshotService;
+late IdleScheduler idleScheduler;
+
 Widget _buildPageContent({
   required PreparedQuranPage preparedPage,
   ValueNotifier<int>? currentPage,
@@ -140,6 +144,7 @@ Widget _buildPageContent({
   VoidCallback? onShowIndex,
 }) {
   return MaterialApp(
+    theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
     home: Scaffold(
       body: PageContent(
         pageNumber: 10,
@@ -151,6 +156,8 @@ Widget _buildPageContent({
         surahNameBuilder: (surahNumber) => 'Surah $surahNumber',
         onSurahSelected: onSurahSelected,
         onShowIndex: onShowIndex,
+        mushafService: mushafService,
+        pageSnapshotService: snapshotService,
       ),
     ),
   );
@@ -163,12 +170,13 @@ Future<PreparedQuranPage> _preparePageContent(WidgetTester tester) async {
   });
 
   await tester.runAsync(() async {
-    await MushafService.instance.ensureLoaded();
+    await mushafService.ensureLoaded();
   });
 
   late final PreparedQuranPage preparedPage;
   await tester.pumpWidget(
     MaterialApp(
+      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
       home: Scaffold(
         body: Builder(
           builder: (context) {
@@ -181,12 +189,14 @@ Future<PreparedQuranPage> _preparePageContent(WidgetTester tester) async {
                     maxHeight: viewportSize.height,
                   ),
                   10,
+                  mushafService,
                 );
-            preparedPage = QuranPagePreparationService.instance.preparePage(
+            preparedPage = preparationService.preparePage(
               pageNumber: 10,
               metrics: metrics,
               viewportWidth: viewportSize.width,
               textColor: Colors.black,
+              mushafService: mushafService,
             );
             return const SizedBox.shrink();
           },
@@ -221,14 +231,20 @@ void main() {
 
   setUpAll(_registerFakeAssets);
   setUp(() {
-    QuranFontService.instance.debugResetForTests();
-    QuranPagePreparationService.instance.clear();
+    mushafService = MushafService();
+    idleScheduler = IdleScheduler();
+    fontService = QuranFontService(
+      mushafService: mushafService,
+      idleScheduler: idleScheduler,
+    );
+    preparationService = QuranPagePreparationService();
+    snapshotService = PageSnapshotService(idleScheduler: idleScheduler);
   });
 
   testWidgets(
     'PageContent renders prepared Quran page painter once the page font is ready',
     (WidgetTester tester) async {
-      QuranFontService.instance.debugMarkFontLoaded(10);
+      fontService.debugMarkFontLoaded(10);
 
       await _pumpPageContent(tester);
 
@@ -242,7 +258,7 @@ void main() {
     (WidgetTester tester) async {
       int? selectedSurah;
       var showIndexCalls = 0;
-      QuranFontService.instance.debugMarkFontLoaded(10);
+      fontService.debugMarkFontLoaded(10);
 
       await _pumpPageContent(
         tester,

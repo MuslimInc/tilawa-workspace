@@ -1912,6 +1912,10 @@
     "@shareSheetSubtitle": {
         "description": "Subtitle in the share options sheet"
     },
+    "selectSurahToShare": "اختر السورة للمشاركة",
+    "@selectSurahToShare": {
+        "description": "Instruction label shown when a page has multiple surahs"
+    },
     "shareScreenshotDescription": "لقطة نظيفة من صفحة المصحف جاهزة للمشاركة.",
     "@shareScreenshotDescription": {
         "description": "Description for the screenshot share option"

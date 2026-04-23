@@ -121,9 +121,17 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
         final loadTimer = PerfLogger.startTimer();
         // Use load() instead of loadString() — returns ByteData without
         // the ~70ms UTF-16 string conversion on the main thread.
-        final byteData = await rootBundle.load(
-          'packages/quran_image/assets/data/verse_marker_coordinates.json',
-        );
+        ByteData byteData;
+        try {
+          byteData = await rootBundle.load(
+            'packages/quran_image/assets/data/verse_marker_coordinates.json',
+          );
+        } catch (_) {
+          // Fallback for tests running from package root
+          byteData = await rootBundle.load(
+            'assets/data/verse_marker_coordinates.json',
+          );
+        }
         final bytes = byteData.buffer.asUint8List(
           byteData.offsetInBytes,
           byteData.lengthInBytes,
@@ -246,9 +254,16 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     _preloadProgress = 0.0;
 
     if (source == MarkerDataSource.production) {
-      final raw = await rootBundle.loadString(
-        'assets/data/verse_marker_coordinates.json',
-      );
+      String raw;
+      try {
+        raw = await rootBundle.loadString(
+          'packages/quran_image/assets/data/verse_marker_coordinates.json',
+        );
+      } catch (_) {
+        raw = await rootBundle.loadString(
+          'assets/data/verse_marker_coordinates.json',
+        );
+      }
       final flat = await compute(_decodeMarkersFlatPacked, raw);
       _markerData = {};
       var i = 0;
@@ -372,7 +387,15 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     try {
       final path =
           'assets/data/quran_marker_debug_coordinates/$pageNumber.json';
-      final raw = await rootBundle.loadString(path);
+      final prefixedPath =
+          'packages/quran_image/assets/data/quran_marker_debug_coordinates/$pageNumber.json';
+
+      String raw;
+      try {
+        raw = await rootBundle.loadString(prefixedPath);
+      } catch (_) {
+        raw = await rootBundle.loadString(path);
+      }
       final decoded = await compute(jsonDecode, raw) as List<dynamic>;
       _markerData ??= {};
       _markerData![pageNumber.toString()] = decoded;

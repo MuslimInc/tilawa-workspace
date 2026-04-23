@@ -1,10 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/services/quran_data_service_impl.dart';
-import 'package:quran_qcf/src/services/quran_service_locator.dart';
-import 'package:quran_qcf/src/services/search_service_impl.dart';
-import 'package:quran_qcf/src/services/surah_service_impl.dart';
-import 'package:quran_qcf/src/services/text_normalization_service_impl.dart';
-import 'package:quran_qcf/src/services/verse_service_impl.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 void main() {
   group('QuranServiceLocator', () {
@@ -31,17 +26,25 @@ void main() {
       );
     });
 
-    test('services are const instances (same reference)', () {
-      // Access twice and verify they're the same instance
-      const QuranDataServiceImpl service1 =
+    test('services are accessible via QuranServiceLocator', () {
+      // Verify services can be accessed through the locator
+      final QuranDataService quranDataService =
           QuranServiceLocator.quranDataService;
-      const QuranDataServiceImpl service2 =
-          QuranServiceLocator.quranDataService;
-      expect(identical(service1, service2), isTrue);
+      final SurahService surahService = QuranServiceLocator.surahService;
+      final VerseService verseService = QuranServiceLocator.verseService;
+      final SearchService searchService = QuranServiceLocator.searchService;
+      final TextNormalizationService textNormalizationService =
+          QuranServiceLocator.textNormalizationService;
+
+      expect(quranDataService, isNotNull);
+      expect(surahService, isNotNull);
+      expect(verseService, isNotNull);
+      expect(searchService, isNotNull);
+      expect(textNormalizationService, isNotNull);
     });
 
     test('quranDataService can get page data', () {
-      final List<Map<String, int>> data = QuranServiceLocator.quranDataService
+      final List<PageSurahEntry> data = QuranServiceLocator.quranDataService
           .getPageData(1);
       expect(data, isNotEmpty);
     });
@@ -57,9 +60,10 @@ void main() {
     });
 
     test('searchService can search words', () {
-      final Map<String, dynamic> result = QuranServiceLocator.searchService
-          .searchWords('الحمد');
-      expect(result['occurences'], greaterThan(0));
+      final SearchResult result = QuranServiceLocator.searchService.searchWords(
+        'الحمد',
+      );
+      expect(result.occurrences, greaterThan(0));
     });
 
     test('textNormalizationService can normalise text', () {

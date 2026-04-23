@@ -20,10 +20,10 @@ class PageIndicatorText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fontSize = screenWidth * AppDimensions.pageNumberTextSizeRatio;
-    final l10n = AppLocalizations.of(context)!;
+    final l10n = AppLocalizations.of(context);
 
     return Text(
-      l10n.page(pageNumber.toString()),
+      l10n?.page(pageNumber.toString()) ?? 'Page $pageNumber',
       style: TextStyle(
         fontSize: fontSize,
         fontWeight: FontWeight.w600,

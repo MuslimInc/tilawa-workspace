@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/quran_exception.dart';
-import 'package:quran_qcf/src/services/quran_data_service_impl.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 void main() {
   late QuranDataServiceImpl service;
@@ -12,13 +11,13 @@ void main() {
   group('QuranDataServiceImpl', () {
     group('getPageData', () {
       test('returns data for valid page 1', () {
-        final List<Map<String, int>> data = service.getPageData(1);
+        final List<PageSurahEntry> data = service.getPageData(1);
         expect(data, isNotEmpty);
-        expect(data.first['surah'], 1); // Al-Fatiha
+        expect(data.first.surah, 1); // Al-Fatiha
       });
 
       test('returns data for valid page 604', () {
-        final List<Map<String, int>> data = service.getPageData(604);
+        final List<PageSurahEntry> data = service.getPageData(604);
         expect(data, isNotEmpty);
       });
 

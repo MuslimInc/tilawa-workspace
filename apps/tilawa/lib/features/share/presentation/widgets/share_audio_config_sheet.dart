@@ -11,6 +11,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
+import '../../domain/entities/widget_capture_handle.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
 import '../share_progress_messages_l10n.dart';
@@ -45,6 +46,7 @@ class ShareAudioConfigSheet extends StatefulWidget {
 class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
   late int _fromAyah;
   late int _toAyah;
+  late int _minAyah;
   late int _maxAyah;
   final List<GlobalKey> _videoContentKeys = <GlobalKey>[];
   final MushafPageRenderer _pageRenderer = MushafPageRenderer.defaultRenderer();
@@ -52,20 +54,37 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
   @override
   void initState() {
     super.initState();
-    _maxAyah = getVerseCount(widget.surahNumber);
+    final pageData = getPageData(
+      getPageNumber(widget.surahNumber, widget.initialFromAyah),
+    );
+    final primarySurahEntries = pageData
+        .where((entry) => entry.surah == widget.surahNumber)
+        .toList();
+
+    final firstAyah = primarySurahEntries.isNotEmpty
+        ? primarySurahEntries.first.start
+        : 1;
+    final lastAyah = primarySurahEntries.isNotEmpty
+        ? primarySurahEntries.last.end
+        : getVerseCount(widget.surahNumber);
+
+    _minAyah = firstAyah;
+    _maxAyah = lastAyah;
     final ayahRange = normalizeShareAyahRange(
       surahNumber: widget.surahNumber,
       fromAyah: widget.initialFromAyah,
       toAyah: widget.initialToAyah,
     );
-    _fromAyah = ayahRange.fromAyah;
-    _toAyah = ayahRange.toAyah;
+    _fromAyah = ayahRange.fromAyah.clamp(_minAyah, _maxAyah);
+    _toAyah = ayahRange.toAyah.clamp(_fromAyah, _maxAyah);
     _syncVideoContentKeys();
 
     context.read<ShareCubit>().configureAudioClip(
       surahNumber: widget.surahNumber,
       fromAyah: _fromAyah,
       toAyah: _toAyah,
+      minAyah: firstAyah,
+      maxAyah: lastAyah,
       reciterName: widget.reciterName,
       serverUrl: widget.reciterServerUrl,
     );
@@ -221,6 +240,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                               _RangeSelectionCard(
                                 fromAyah: _fromAyah,
                                 toAyah: _toAyah,
+                                minAyah: _minAyah,
                                 maxAyah: _maxAyah,
                                 verseCount: _verseCount,
                                 enabled: !isBusy,
@@ -286,7 +306,12 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                               appName: context.l10n.appTitle,
                                               sharedViaLabel:
                                                   context.l10n.sharedViaTilawa,
-                                              boundaryKeys: _videoContentKeys,
+                                              handles: _videoContentKeys
+                                                  .map(
+                                                    (k) =>
+                                                        WidgetCaptureHandle(k),
+                                                  )
+                                                  .toList(),
                                             );
                                       }
                                     : null,
@@ -471,6 +496,7 @@ class _RangeSelectionCard extends StatelessWidget {
   const _RangeSelectionCard({
     required this.fromAyah,
     required this.toAyah,
+    required this.minAyah,
     required this.maxAyah,
     required this.verseCount,
     required this.enabled,
@@ -480,6 +506,7 @@ class _RangeSelectionCard extends StatelessWidget {
 
   final int fromAyah;
   final int toAyah;
+  final int minAyah;
   final int maxAyah;
   final int verseCount;
   final bool enabled;
@@ -522,7 +549,7 @@ class _RangeSelectionCard extends StatelessWidget {
                 child: _VerseDropdown(
                   label: context.l10n.fromAyah,
                   value: fromAyah,
-                  min: 1,
+                  min: minAyah,
                   max: toAyah,
                   enabled: enabled,
                   onChanged: onFromChanged,

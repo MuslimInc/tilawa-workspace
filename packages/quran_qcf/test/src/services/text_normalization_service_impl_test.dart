@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/services/text_normalization_service_impl.dart';
+import 'package:quran_qcf/src/data/repositories/text_normalization_service_impl.dart';
 
 void main() {
   late TextNormalizationServiceImpl service;

@@ -1,16 +1,19 @@
-00:00 +0: loading /Users/mohammadkamel/flutter_projects/tilawa_workspace/packages/quran/test/src/layout/quran_layout_strategy_test.dart                                                                00:00 +0: StandardQuranLayoutStrategy calculates landscape metrics correctly                                                                                                                           00:00 +0: StandardQuranLayoutStrategy calculates landscape metrics correctly                                                                                                                           
+packages/quran_qcf/
+00:00 +0: loading /Users/mohammadkamel/flutter_projects/tilawa_workspace/packages/quran/test/src/layout/quran_layout_strategy_test.dart                                                                
+00:00 +0: StandardQuranLayoutStrategy calculates landscape metrics correctly                                                                                                                           
+00:00 +0: StandardQuranLayoutStrategy calculates landscape metrics correctly                                                                                                                           
 ══╡ EXCEPTION CAUGHT BY WIDGETS LIBRARY ╞═══════════════════════════════════════════════════════════
 The following TestFailure was thrown building Builder(dirty, dependencies: [MediaQuery]):
 Expected: <40.0>
   Actual: <0.0>
-
+packages/quran_qcf/
 The relevant error-causing widget was:
   Builder
   Builder:file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/packages/quran/test/src/layout/quran_layout_strategy_test.dart:87:18
 
 When the exception was thrown, this was the stack:
 #0      fail (package:matcher/src/expect/expect.dart:187:31)
-#1      _expect (package:matcher/src/expect/expect.dart:182:3)
+#1      _expect (package:matcher/src/expect/expect.dart:182:3)packages/quran_qcf/
 #2      expect (package:matcher/src/expect/expect.dart:65:3)
 #3      expect (package:flutter_test/src/widget_tester.dart:473:18)
 #4      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/packages/quran/test/src/layout/quran_layout_strategy_test.dart:104:15)
@@ -91,7 +94,7 @@ When the exception was thrown, this was the stack:
 #84     AutomatedTestWidgetsFlutterBinding.pump.<anonymous closure> (package:flutter_test/src/binding.dart:1960:9)
 #87     TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
 #88     AutomatedTestWidgetsFlutterBinding.pump (package:flutter_test/src/binding.dart:1949:27)
-#89     WidgetTester.pumpWidget.<anonymous closure> (package:flutter_test/src/widget_tester.dart:598:22)
+#89     WidgetTester.pumpWidget.<anonymous closure> (package:flutter_test/src/widget_tester.dart:598:22)packages/quran_qcf/
 #92     TestAsyncUtils.guard (package:flutter_test/src/test_async_utils.dart:74:41)
 #93     WidgetTester.pumpWidget (package:flutter_test/src/widget_tester.dart:595:27)
 #94     main.<anonymous closure>.<anonymous closure> (file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/packages/quran/test/src/layout/quran_layout_strategy_test.dart:84:20)
@@ -103,10 +106,12 @@ When the exception was thrown, this was the stack:
 (elided 5 frames from dart:async and package:stack_trace)
 
 ════════════════════════════════════════════════════════════════════════════════════════════════════
-00:00 +0 -1: StandardQuranLayoutStrategy calculates landscape metrics correctly [E]                                                                                                                    
-  Test failed. See exception logs above.
+
+00:00 +0 -1: StandardQuranLayoutStrategy calculates landscape metrics correctly [E]                                                                                                                    
+  Test failed. See exception logs above.packages/quran_qcf/
   The test description was: calculates landscape metrics correctly
   
 
 To run this test again: /Users/mohammadkamel/fvm/versions/3.41.0/bin/cache/dart-sdk/bin/dart test /Users/mohammadkamel/flutter_projects/tilawa_workspace/packages/quran/test/src/layout/quran_layout_strategy_test.dart -p vm --plain-name 'StandardQuranLayoutStrategy calculates landscape metrics correctly'
-00:00 +0 -1: Some tests failed.                                                                                                                                                                        
+
+00:00 +0 -1: Some tests failed.                                                                                                                                                                        

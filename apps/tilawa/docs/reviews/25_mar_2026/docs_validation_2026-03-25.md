@@ -26,7 +26,7 @@ Notes:
   - Invalid notification deep-link crash path in `lib/features/notifications/presentation/services/fcm_notification_handler_service.dart` and `lib/features/quran_reader/presentation/screens/quran_reader_screen.dart`
   - Qibla lifecycle issue across `lib/core/providers/app_providers.dart`, `lib/screens/main_screen.dart`, and `lib/features/qibla`
   - Startup delay from `warmUpSplashWordmark()`
-  - Large concurrent font registration in `packages/quran/lib/src/services/quran_font_service.dart`
+  - Large concurrent font registration in `packages/quran_qcf/lib/src/services/quran_font_service.dart`
   - Dead router test file causing `flutter test` failure
 - This document is currently the best canonical release audit in the folder.
 
@@ -67,20 +67,20 @@ Status: Partially validated
 
 Validated points:
 - `QuranFontService` does load fonts concurrently:
-  - `packages/quran/lib/src/services/quran_font_service.dart:121-163`
+  - `packages/quran_qcf/lib/src/services/quran_font_service.dart:121-163`
 - `QuranFontService` does create `Dio()` with no explicit timeouts:
-  - `packages/quran/lib/src/services/quran_font_service.dart:10`
+  - `packages/quran_qcf/lib/src/services/quran_font_service.dart:10`
 - The shared Dio client does accept any status `< 500`:
   - `lib/core/di/external_dependencies_module.dart:64-77`
 - `HydratedStorage.build()` failure is swallowed with only a debug log:
   - `lib/core/bootstrap/app_startup.dart:398-410`
 - `_specialLinesCache` and static Quran page caches exist:
-  - `packages/quran/lib/src/page_content.dart:72-77`
-  - `packages/quran/lib/src/page_content.dart:485-491`
+  - `packages/quran_qcf/lib/src/page_content.dart:72-77`
+  - `packages/quran_qcf/lib/src/page_content.dart:485-491`
 - `PageContent` uses `AutomaticKeepAliveClientMixin`:
-  - `packages/quran/lib/src/page_content.dart:69-92`
+  - `packages/quran_qcf/lib/src/page_content.dart:69-92`
 - `_SurahHeaderBanner` does hardcode black text:
-  - `packages/quran/lib/src/page_content.dart:576-584`
+  - `packages/quran_qcf/lib/src/page_content.dart:576-584`
 - `SplashCubit` does silently swallow all exceptions:
   - `lib/features/splash/presentation/cubit/splash_cubit.dart:51-54`
 - `DevicePreview(enabled: false)` still wraps the root app:

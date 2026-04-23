@@ -1,36 +1,15 @@
-import 'dart:developer' as developer;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
-import 'package:tilawa_core/logger.dart';
+import 'package:quran_image/core/perf_logger.dart';
 
-/// A utility class for tracking performance metrics and marking timeline events.
+/// Thin facade over [PerfLogger] kept for call-site compatibility.
+///
+/// Prefer calling [PerfLogger] directly in new code.
 class PerformanceMonitor {
   static final PerformanceMonitor instance = PerformanceMonitor._();
   PerformanceMonitor._();
 
-  /// Marks the start of a custom performance event.
-  void startEvent(String name) {
-    developer.Timeline.startSync(name);
-  }
-
-  /// Marks the end of a custom performance event.
-  void endEvent() {
-    developer.Timeline.finishSync();
-  }
-
-  /// Logs a one-off performance metric.
-  void logMetric(String name, dynamic value) {
-    logger.i('PERF_METRIC: $name = $value');
-  }
-
-  /// Tracks the duration of the next frame.
-  void trackNextFrame(String label) {
-    if (!kDebugMode && !kProfileMode) return;
-
-    final int start = DateTime.now().millisecondsSinceEpoch;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      final int end = DateTime.now().millisecondsSinceEpoch;
-      logger.i('FRAME_DURATION [$label]: ${end - start}ms');
-    });
-  }
+  void startEvent(String name) => PerfLogger.startEvent(name);
+  void endEvent() => PerfLogger.endEvent();
+  void logMetric(String name, dynamic value) =>
+      PerfLogger.logMetric(name, value);
+  void trackNextFrame(String label) => PerfLogger.trackNextFrame(label);
 }

@@ -2,9 +2,10 @@ name: quran_qcf
 resolution: workspace
 description: "Quran Reader"
 version: 0.0.1
+publish_to: none
 
 environment:
-  sdk: ^3.11.4
+  sdk: ^3.11.5
 
 dependencies:
   archive: ^4.0.9
@@ -12,8 +13,11 @@ dependencies:
   equatable: ^2.0.8
   flutter:
     sdk: flutter
+  get_it: ^9.2.1
   logger: ^2.7.0
   path_provider: ^2.1.5
+  tilawa_ui_kit:
+    path: ../ui_kit
 
 dev_dependencies:
   flutter_lints: ^6.0.0
@@ -21,8 +25,10 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  mocktail: ^1.0.5
 
 flutter:
+  uses-material-design: true
   assets:
     - assets/
     - assets/quran_fonts/qpc-v4.json

@@ -10,24 +10,50 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  // Provide a 1×1 transparent PNG for any asset image that can't be loaded.
+  // Provide mock assets for MushafService and images.
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
   binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (
     ByteData? message,
   ) async {
-    // Try the real asset first; if it fails, return a 1×1 transparent PNG.
-    try {
-      final ByteData? response = await binding.defaultBinaryMessenger.send(
-        'flutter/assets',
-        message,
-      );
-      if (response != null && response.lengthInBytes > 0) {
-        return response;
+    final key = message != null
+        ? String.fromCharCodes(message.buffer.asUint8List())
+        : '';
+
+    // MushafService data
+    if (key == 'packages/quran_qcf/assets/quran_fonts/qpc-v4.json') {
+      const fakeQpcV4Json = '''
+      {
+        "w1": {"text": "A", "surah": "1", "ayah": "1", "word": "1"},
+        "w2": {"text": "B", "surah": "1", "ayah": "1", "word": "2"},
+        "w3": {"text": "C", "surah": "1", "ayah": "1", "word": "3"},
+        "w4": {"text": "D", "surah": "1", "ayah": "1", "word": "4"},
+        "w5": {"text": "E", "surah": "1", "ayah": "1", "word": "5"}
       }
-    } catch (_) {
-      // Fall through to fake image.
+      ''';
+      return ByteData.sublistView(Uint8List.fromList(fakeQpcV4Json.codeUnits));
     }
-    return ByteData.sublistView(_k1x1TransparentPng);
+
+    if (key == 'packages/quran_qcf/assets/quran_fonts/quran_page_index.json') {
+      const fakePageIndexJson = '''
+      {
+        "1": { "1": ["w1", "w2", "w3", "w4", "w5"] },
+        "10": { "1": ["w1"] }
+      }
+      ''';
+      return ByteData.sublistView(
+        Uint8List.fromList(fakePageIndexJson.codeUnits),
+      );
+    }
+
+    // Default 1x1 PNG for any image request
+    if (key.endsWith('.png') ||
+        key.endsWith('.jpg') ||
+        key.endsWith('.jpeg') ||
+        key.endsWith('.webp')) {
+      return ByteData.sublistView(_k1x1TransparentPng);
+    }
+
+    return null;
   });
 
   await testMain();

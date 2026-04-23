@@ -5,15 +5,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/services/navigation_service.dart';
+import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
-import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
 import '../../router/app_router_config.dart';
@@ -120,8 +120,9 @@ class AthkarNotificationService implements IAthkarNotificationService {
         tz.setLocalLocation(tz.UTC);
       }
 
-      // Initialize the dispatcher (which initializes the shared notification plugin)
-      await _dispatcher.initialize();
+      // Keep startup path lightweight; high-importance channel creation is
+      // deferred centrally in app_startup.
+      await _dispatcher.initialize(createHighImportanceChannel: false);
 
       // Register our handler with the dispatcher
       _dispatcher.registerHandler(

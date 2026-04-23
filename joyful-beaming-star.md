@@ -465,4 +465,4 @@ And create `android/app/src/main/res/xml/file_provider_paths.xml` if not present
 | `QuranPageAudioController` | `features/quran_reader/presentation/controllers/` | Reference for `qurancdn.com` URL pattern |
 | `ShareFileManager` pattern | `features/downloads/utils/download_path_utils.dart` | Reuse path sanitization logic |
 | `UiVisibilityCubit` | `core/presentation/cubit/` | Hide overlays before screenshot capture |
-| `getPageData()`, `getSurahNameArabic()` | `packages/quran/` | Page metadata for branding overlay |
+| `getPageData()`, `getSurahNameArabic()` | `packages/quran_qcf/` | Page metadata for branding overlay |

@@ -1,13 +1,13 @@
+import 'package:quran_qcf/quran_qcf.dart';
+
 import 'lib/src/helpers/app_logger.dart';
-import 'lib/src/services/functions/page_functions.dart';
-import 'lib/src/services/functions/verse_functions.dart';
 
 void main() {
-  final List<Map<String, int>> ranges = getPageData(18);
+  final List<PageSurahEntry> ranges = getPageData(18);
   logger.d('Ranges for page 18: $ranges');
   if (ranges.isNotEmpty) {
-    final int surah = ranges[0]['surah']!;
-    final int v = ranges[0]['start']!;
+    final int surah = ranges[0].surah;
+    final int v = ranges[0].start;
     String verseText = getVerseQCF(surah, v, verseEndSymbol: false);
     logger.d('Original verseText: "$verseText" (length: ${verseText.length})');
 

@@ -14,6 +14,7 @@ import 'package:tilawa/features/quran_reader/presentation/widgets/page_navigatio
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
 import 'package:tilawa/features/share/presentation/screens/screenshot_composer_screen.dart';
+import 'package:tilawa/features/share/presentation/screens/video_reel_composer_screen.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -162,7 +163,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     }
     _warmingNotifier = ValueNotifier<_WarmingState>(const _WarmingState());
     _pageController = PageController(initialPage: syncPage - 1);
-    QuranFontService.instance.addListener(_handleFontRegistryChanged);
+    quranQcfLocator<QuranFontService>().addListener(_handleFontRegistryChanged);
 
     if (widget.surahNumber > 0 &&
         bloc.state.currentSurah?.number != widget.surahNumber) {
@@ -215,7 +216,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     if (didViewportChange || didOrientationChange || didThemeChange) {
       _lastPreparedViewportWidth = viewportWidth;
       _lastPreparedOrientation = currentOrientation;
-      QuranPagePreparationService.instance.clear();
+      quranQcfLocator<QuranPagePreparationService>().clear();
     }
     _cachedAppSystemUiStyle = _buildAppSystemUiOverlayStyle(incomingTheme);
     _cachedReaderSystemUiStyle = _buildReaderSystemUiOverlayStyle(
@@ -238,11 +239,13 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _debugLog(() => '[READER_EXIT] dispose');
     _warmingCooldownTimer?.cancel();
     _isScrollingNotifier.dispose();
-    PageSnapshotService.instance.clear();
+    quranQcfLocator<PageSnapshotService>().clear();
     _settlementTimer?.cancel();
     _cacheExtentRestoreTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    QuranFontService.instance.removeListener(_handleFontRegistryChanged);
+    quranQcfLocator<QuranFontService>().removeListener(
+      _handleFontRegistryChanged,
+    );
     _pageController.dispose();
     _currentPageNotifier.dispose();
     _cacheExtentNotifier.dispose();
@@ -405,7 +408,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     if (window == null || window.centerPage != centerPage) {
       return false;
     }
-    if (!QuranFontService.instance.isQuranDataLoaded) {
+    if (!quranQcfLocator<QuranFontService>().isQuranDataLoaded) {
       return false;
     }
 
@@ -440,8 +443,10 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
   PreparedQuranPage? _preparePageContentSync(int pageNumber) {
     if (!mounted || _cachedReaderTheme == null) return null;
-    if (!QuranFontService.instance.isQuranDataLoaded) return null;
-    if (!QuranFontService.instance.isFontLoaded(pageNumber)) return null;
+    if (!quranQcfLocator<QuranFontService>().isQuranDataLoaded) return null;
+    if (!quranQcfLocator<QuranFontService>().isFontLoaded(pageNumber)) {
+      return null;
+    }
 
     final Size viewportSize = MediaQuery.sizeOf(context);
     final QuranLayoutMetrics metrics = _pagePreparationLayoutStrategy
@@ -452,22 +457,24 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
             maxHeight: viewportSize.height,
           ),
           pageNumber,
+          quranQcfLocator<MushafService>(),
         );
 
-    QuranFontService.instance.setRenderFontSize(metrics.fontSize);
+    quranQcfLocator<QuranFontService>().setRenderFontSize(metrics.fontSize);
     final int tPrep = DateTime.now().millisecondsSinceEpoch;
-    final PreparedQuranPage page = QuranPagePreparationService.instance
-        .preparePage(
+    final PreparedQuranPage page =
+        quranQcfLocator<QuranPagePreparationService>().preparePage(
           pageNumber: pageNumber,
           metrics: metrics,
           viewportWidth: viewportSize.width,
           textColor: _cachedReaderTheme!.textColor,
+          mushafService: quranQcfLocator<MushafService>(),
         );
 
     // Warm the glyph atlas in the background for the newly prepared page.
     // This is critical for reducing first-frame raster cost on pages that
     // are rendered for the first time.
-    QuranFontService.instance.warmPreparedPage(pageNumber, page);
+    quranQcfLocator<QuranFontService>().warmPreparedPage(pageNumber, page);
 
     if (!kReleaseMode) {
       final int prepMs = DateTime.now().millisecondsSinceEpoch - tPrep;
@@ -554,7 +561,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final QuranFontLoaderBloc fontLoaderBloc = context
         .read<QuranFontLoaderBloc>();
     await Future.wait([
-      QuranFontService.instance.ensureQuranDataLoaded(),
+      quranQcfLocator<QuranFontService>().ensureQuranDataLoaded(),
       fontLoaderBloc.ensureFontReady(centerPage),
     ]);
     if (!mounted) return;
@@ -833,7 +840,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     }
 
     await Future.wait([
-      QuranFontService.instance.ensureQuranDataLoaded(),
+      quranQcfLocator<QuranFontService>().ensureQuranDataLoaded(),
       fontLoaderBloc.ensureFontReady(pageNumber),
     ]);
     _preparePageWindowSync(pageNumber);
@@ -862,15 +869,21 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     );
 
     final pageData = getPageData(currentPage);
-    final primarySurahNumber = pageData.first['surah']!;
-    final primarySurahEntries = pageData
-        .where((entry) => entry['surah'] == primarySurahNumber)
-        .toList();
-    final firstAyah = primarySurahEntries.first['start'] ?? 1;
-    final lastAyah = primarySurahEntries.last['end'] ?? firstAyah;
+    final readerBloc = context.read<QuranReaderBloc>();
+    final readerState = readerBloc.state;
+    final currentSurahOnPage = readerState.currentSurah?.number;
+
+    // Use current surah if it's on the page, otherwise pick the first surah on page.
+    final initialSurahNumber =
+        (currentSurahOnPage != null &&
+            pageData.any((entry) => entry.surah == currentSurahOnPage))
+        ? currentSurahOnPage
+        : pageData.first.surah;
+
     // Read context-dependent values before the async gap.
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
+    final serverUrl = audioState.currentAudio?.url ?? '';
     final shareCubit = context.read<ShareCubit>();
     final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     final navigator = Navigator.of(context);
@@ -907,13 +920,19 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) => ShareOptionsSheet(
-          surahNumber: primarySurahNumber,
+          surahNumber: initialSurahNumber,
           pageNumber: currentPage,
-          onShareScreenshot: () {
+          onShareScreenshot: (selectedSurah) {
+            final surahEntries = pageData
+                .where((entry) => entry.surah == selectedSurah)
+                .toList();
+            final firstAyah = surahEntries.first.start;
+            final lastAyah = surahEntries.last.end;
+
             navigator.push(
               ScreenshotComposerScreen.route(
                 cubit: shareCubit,
-                surahNumber: primarySurahNumber,
+                surahNumber: selectedSurah,
                 currentPage: currentPage,
                 initialFromAyah: firstAyah,
                 initialToAyah: lastAyah,
@@ -923,20 +942,26 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
               ),
             );
           },
-          onShareVideoReel: () {
-            // navigator.push(
-            //   VideoReelComposerScreen.route(
-            //     cubit: shareCubit,
-            //     surahNumber: primarySurahNumber,
-            //     currentPage: currentPage,
-            //     initialFromAyah: firstAyah,
-            //     initialToAyah: lastAyah,
-            //     reciterName: reciterName,
-            //     reciterServerUrl: serverUrl,
-            //     readerBoundaryKey: _screenshotBoundaryKey,
-            //     readerPreviewBytesNotifier: previewNotifier,
-            //   ),
-            // );
+          onShareVideoReel: (selectedSurah) {
+            final surahEntries = pageData
+                .where((entry) => entry.surah == selectedSurah)
+                .toList();
+            final firstAyah = surahEntries.first.start;
+            final lastAyah = surahEntries.last.end;
+
+            navigator.push(
+              VideoReelComposerScreen.route(
+                cubit: shareCubit,
+                surahNumber: selectedSurah,
+                currentPage: currentPage,
+                initialFromAyah: firstAyah,
+                initialToAyah: lastAyah,
+                reciterName: reciterName,
+                reciterServerUrl: serverUrl,
+                readerBoundaryKey: _screenshotBoundaryKey,
+                readerPreviewBytesNotifier: previewNotifier,
+              ),
+            );
           },
         ),
       );
@@ -1121,7 +1146,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     fontLoaderBloc.pauseBackgroundWarmUp();
 
     await Future.wait([
-      QuranFontService.instance.ensureQuranDataLoaded(),
+      quranQcfLocator<QuranFontService>().ensureQuranDataLoaded(),
       fontLoaderBloc.ensureFontReady(pageNumber),
     ]);
     _preparePageWindowSync(pageNumber);
@@ -1291,6 +1316,8 @@ class _ReaderStack extends StatelessWidget {
                 // QuranPageView to unmount/remount, destroying PageContent state
                 // and missing the first notifier fire after mount.
                 child: QuranPageView(
+                  mushafService: quranQcfLocator<MushafService>(),
+                  pageSnapshotService: quranQcfLocator<PageSnapshotService>(),
                   controller: pageController,
                   currentPageListenable: currentPageNotifier,
                   cacheExtentListenable: cacheExtentNotifier,
@@ -1369,6 +1396,8 @@ class _WarmingLayer extends StatelessWidget {
                 pageBackgroundColor: readerTheme.pageBackground,
                 uiTextDirection: Directionality.of(context),
                 isWarming: true,
+                mushafService: quranQcfLocator<MushafService>(),
+                pageSnapshotService: quranQcfLocator<PageSnapshotService>(),
               ),
             ),
           ),
@@ -1563,7 +1592,7 @@ class __PerformanceBenchmarkOverlayState
           ),
           _buildStat(
             'Total Loaded',
-            '${QuranFontService.instance.loadedCount}/604',
+            '${quranQcfLocator<QuranFontService>().loadedCount}/604',
           ),
         ],
       ),

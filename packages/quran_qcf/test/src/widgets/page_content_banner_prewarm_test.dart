@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/constants/surah_header_banner_constants.dart';
-import 'package:quran_qcf/src/widgets/surah_header_banner.dart';
+import 'package:quran_qcf/src/core/constants/surah_header_banner_constants.dart';
+import 'package:quran_qcf/src/presentation/widgets/surah_header_banner.dart';
 
 // ---------------------------------------------------------------------------
 // Helpers

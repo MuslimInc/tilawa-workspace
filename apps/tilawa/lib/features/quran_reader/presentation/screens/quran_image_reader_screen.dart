@@ -116,12 +116,12 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
   Future<void> _showShareOptions(int currentPage) async {
     // Read context-dependent values before the async gap.
     final pageData = getPageData(currentPage);
-    final primarySurahNumber = pageData.first['surah']!;
+    final primarySurahNumber = pageData.first.surah;
     final primarySurahEntries = pageData
-        .where((entry) => entry['surah'] == primarySurahNumber)
+        .where((entry) => entry.surah == primarySurahNumber)
         .toList();
-    final firstAyah = primarySurahEntries.first['start'] ?? 1;
-    final lastAyah = primarySurahEntries.last['end'] ?? firstAyah;
+    final firstAyah = primarySurahEntries.first.start;
+    final lastAyah = primarySurahEntries.last.end;
 
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
@@ -139,11 +139,17 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
         builder: (context) => ShareOptionsSheet(
           surahNumber: primarySurahNumber,
           pageNumber: currentPage,
-          onShareScreenshot: () {
+          onShareScreenshot: (selectedSurah) {
+            final surahEntries = pageData
+                .where((entry) => entry.surah == selectedSurah)
+                .toList();
+            final firstAyah = surahEntries.first.start;
+            final lastAyah = surahEntries.last.end;
+
             navigator.push(
               ScreenshotComposerScreen.route(
                 cubit: shareCubit,
-                surahNumber: primarySurahNumber,
+                surahNumber: selectedSurah,
                 currentPage: currentPage,
                 initialFromAyah: firstAyah,
                 initialToAyah: lastAyah,
@@ -152,11 +158,17 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
               ),
             );
           },
-          onShareVideoReel: () {
+          onShareVideoReel: (selectedSurah) {
+            final surahEntries = pageData
+                .where((entry) => entry.surah == selectedSurah)
+                .toList();
+            final firstAyah = surahEntries.first.start;
+            final lastAyah = surahEntries.last.end;
+
             navigator.push(
               VideoReelComposerScreen.route(
                 cubit: shareCubit,
-                surahNumber: primarySurahNumber,
+                surahNumber: selectedSurah,
                 currentPage: currentPage,
                 initialFromAyah: firstAyah,
                 initialToAyah: lastAyah,

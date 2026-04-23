@@ -10,13 +10,13 @@ Full codebase audit before publishing to Google Play. This combines my own findi
 ### CRITICAL
 
 #### C1. QuranFontService: 604 fonts loaded into memory simultaneously
-**File:** [quran_font_service.dart:121-166](packages/quran/lib/src/services/quran_font_service.dart#L121-L166)
+**File:** [quran_font_service.dart:121-166](packages/quran_qcf/lib/src/services/quran_font_service.dart#L121-L166)
 - `loadFontsToEngine()` calls `Future.wait(loadFutures)` on ALL 604 font files at once
 - 604 concurrent file reads can spike memory significantly
 - **Fix:** Batch font loading (e.g., 50 at a time)
 
 #### C2. QuranFontService: Dio without timeout
-**File:** [quran_font_service.dart:10](packages/quran/lib/src/services/quran_font_service.dart#L10)
+**File:** [quran_font_service.dart:10](packages/quran_qcf/lib/src/services/quran_font_service.dart#L10)
 - `final Dio _dio = Dio()` has no `connectTimeout` or `receiveTimeout`
 - Font zip download could hang indefinitely
 - **Fix:** Add timeout options
@@ -48,7 +48,7 @@ Full codebase audit before publishing to Google Play. This combines my own findi
 - User permanently blocked from Quran reader after transient network error
 
 #### H4. `_SurahHeaderBanner` hardcodes black text
-**File:** [page_content.dart:583](packages/quran/lib/src/page_content.dart#L583)
+**File:** [page_content.dart:583](packages/quran_qcf/lib/src/page_content.dart#L583)
 - `color: const Color(0xFF000000)` — invisible in dark mode
 
 #### H5. Silent catch in splash cubit

@@ -46,16 +46,16 @@ class PrayerTimesGrid extends StatelessWidget {
     final double mainAxisExtent =
         174.0 + ((textScale - 1.0).clamp(0.0, 0.6) * 24);
 
+    final tokens = Theme.of(context).tokens;
+
     return TilawaContentGrid(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       targetItemExtent: 160,
       childAspectRatio: 1.0,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
-      padding: EdgeInsets.symmetric(
-        horizontal: Theme.of(context).tokens.spaceLarge,
-      ),
+      mainAxisSpacing: tokens.spaceMedium,
+      crossAxisSpacing: tokens.spaceMedium,
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
       itemCount: gridItems.length,
       itemBuilder: (context, index) {
         final prayer = gridItems[index];

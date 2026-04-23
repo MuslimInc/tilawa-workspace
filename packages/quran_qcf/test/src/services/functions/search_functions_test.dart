@@ -1,32 +1,32 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/services/functions/search_functions.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 
 void main() {
   group('search_functions', () {
     group('searchWords', () {
       test('returns results for common Arabic word', () {
-        final Map<String, dynamic> result = searchWords('الله');
-        expect(result['occurences'], greaterThan(0));
-        expect(result['result'], isA<List>());
+        final SearchResult result = searchWords('الله');
+        expect(result.occurrences, greaterThan(0));
+        expect(result.entries, isA<List>());
       });
 
       test('returns empty for non-existent word', () {
-        final Map<String, dynamic> result = searchWords('xyznonexistent123');
-        expect(result['occurences'], 0);
-        expect((result['result'] as List).isEmpty, isTrue);
+        final SearchResult result = searchWords('xyznonexistent123');
+        expect(result.occurrences, 0);
+        expect(result.entries.isEmpty, isTrue);
       });
 
       test('result contains surah and verse numbers', () {
-        final Map<String, dynamic> result = searchWords('الحمد');
-        expect(result['occurences'], greaterThan(0));
-        final firstResult = (result['result'] as List).first;
-        expect(firstResult['suraNumber'], isA<int>());
-        expect(firstResult['verseNumber'], isA<int>());
+        final SearchResult result = searchWords('الحمد');
+        expect(result.occurrences, greaterThan(0));
+        final SearchEntry firstResult = result.entries.first;
+        expect(firstResult.surahNumber, isA<int>());
+        expect(firstResult.verseNumber, isA<int>());
       });
 
       test('limits results to 50', () {
-        final Map<String, dynamic> result = searchWords('الله');
-        expect(result['occurences'], lessThanOrEqualTo(50));
+        final SearchResult result = searchWords('الله');
+        expect(result.entries.length, lessThanOrEqualTo(50));
       });
     });
 

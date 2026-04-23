@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/config/notification_config.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/services/download_notification_navigator.dart';
 import '../../domain/services/download_notification_service_interface.dart';
@@ -43,8 +44,9 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
 
     try {
-      // Initialize the dispatcher (which initializes the shared notification plugin)
-      await _dispatcher.initialize();
+      // Keep startup path lightweight; high-importance channel creation is
+      // deferred centrally in app_startup.
+      await _dispatcher.initialize(createHighImportanceChannel: false);
 
       // Register our payload handler with the dispatcher
       // Download notifications use JSON payloads with reciterName

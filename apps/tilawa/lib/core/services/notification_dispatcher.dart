@@ -3,9 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
-import 'package:tilawa/core/logging/app_logger.dart';
 import '../config/notification_config.dart';
 
 /// Handler registration data
@@ -49,37 +49,42 @@ class NotificationDispatcher implements INotificationDispatcher {
   final List<_PayloadHandlerRegistration> _payloadHandlers = [];
 
   bool _initialized = false;
+  bool _highImportanceChannelCreated = false;
 
   @override
-  Future<void> initialize() async {
+  Future<void> initialize({bool createHighImportanceChannel = true}) async {
     if (!NotificationConfig.enableLocalNotifications) {
       logger.d('[NotificationDispatcher] Notifications disabled in config');
       return;
     }
 
-    if (_initialized) {
-      logger.d('[NotificationDispatcher] Already initialized');
-      return;
-    }
-
     try {
-      const androidSettings = AndroidInitializationSettings(
-        'ic_launcher_monochrome',
-      );
-      const iosSettings = DarwinInitializationSettings();
+      if (!_initialized) {
+        const androidSettings = AndroidInitializationSettings(
+          'ic_launcher_monochrome',
+        );
+        const iosSettings = DarwinInitializationSettings();
 
-      const initSettings = InitializationSettings(
-        android: androidSettings,
-        iOS: iosSettings,
-      );
+        const initSettings = InitializationSettings(
+          android: androidSettings,
+          iOS: iosSettings,
+        );
 
-      await _notifications.initialize(
-        settings: initSettings,
-        onDidReceiveNotificationResponse: _handleNotificationResponse,
-      );
+        await _notifications.initialize(
+          settings: initSettings,
+          onDidReceiveNotificationResponse: _handleNotificationResponse,
+        );
 
-      // Create High Importance Channel for Android
-      if (Platform.isAndroid) {
+        _initialized = true;
+        logger.d('[NotificationDispatcher] Initialized successfully');
+      } else {
+        logger.d('[NotificationDispatcher] Already initialized');
+      }
+
+      // Create high-importance channel only when explicitly requested.
+      if (createHighImportanceChannel &&
+          Platform.isAndroid &&
+          !_highImportanceChannelCreated) {
         const AndroidNotificationChannel channel = AndroidNotificationChannel(
           'high_importance_channel',
           'High Importance Notifications',
@@ -93,11 +98,10 @@ class NotificationDispatcher implements INotificationDispatcher {
             >()
             ?.createNotificationChannel(channel);
 
+        _highImportanceChannelCreated = true;
+
         logger.d('[NotificationDispatcher] High importance channel created');
       }
-
-      _initialized = true;
-      logger.d('[NotificationDispatcher] Initialized successfully');
     } catch (e, stackTrace) {
       logger.e(
         '[NotificationDispatcher] Initialization failed: $e',

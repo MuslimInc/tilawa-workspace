@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:quran_qcf/src/widgets/quran_line.dart';
-import 'package:quran_qcf/src/widgets/quran_page_painter.dart';
+import 'package:quran_qcf/quran_qcf.dart';
+import 'package:quran_qcf/src/presentation/widgets/quran_page_painter.dart';
 
 void main() {
   final IntegrationTestWidgetsFlutterBinding binding =

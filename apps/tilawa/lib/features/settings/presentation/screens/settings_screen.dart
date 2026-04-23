@@ -225,21 +225,38 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     BlocBuilder<SettingsCubit, SettingsState>(
                       builder: (context, state) {
-                        return TilawaSettingsTile(
-                          icon: FluentIcons.arrow_download_24_regular,
-                          iconColor: AppColors.settingsDownloads,
-                          title: context.l10n.concurrentDownloads,
-                          subtitle: context.l10n.concurrentDownloadsSubtitle(
-                            state.maxConcurrentDownloads,
-                          ),
-                          onTap: () => _showConcurrentDownloadsPicker(
-                            context,
-                            state.maxConcurrentDownloads,
-                          ),
-                          showDivider: false,
-                          borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(16),
-                          ),
+                        return Column(
+                          children: [
+                            TilawaSettingsSwitchTile(
+                              icon: Icons.wifi_rounded,
+                              iconColor: AppColors.settingsDownloads,
+                              title: _getQuranAssetPrefetchTitle(context),
+                              subtitle: _getQuranAssetPrefetchSubtitle(context),
+                              value: state.prefetchQuranAssetsOnWifiOnly,
+                              onChanged: (value) {
+                                context
+                                    .read<SettingsCubit>()
+                                    .togglePrefetchQuranAssetsOnWifiOnly(value);
+                              },
+                            ),
+                            TilawaSettingsTile(
+                              icon: FluentIcons.arrow_download_24_regular,
+                              iconColor: AppColors.settingsDownloads,
+                              title: context.l10n.concurrentDownloads,
+                              subtitle: context.l10n
+                                  .concurrentDownloadsSubtitle(
+                                    state.maxConcurrentDownloads,
+                                  ),
+                              onTap: () => _showConcurrentDownloadsPicker(
+                                context,
+                                state.maxConcurrentDownloads,
+                              ),
+                              showDivider: false,
+                              borderRadius: BorderRadius.vertical(
+                                bottom: Radius.circular(16),
+                              ),
+                            ),
+                          ],
                         );
                       },
                     ),
@@ -516,6 +533,18 @@ class SettingsScreen extends StatelessWidget {
       'Purple' => l10n.colorPurple,
       _ => name,
     };
+  }
+
+  String _getQuranAssetPrefetchTitle(BuildContext context) {
+    return context.l10n.localeName == 'ar'
+        ? 'تهيئة أصول القرآن مسبقًا عبر الواي فاي فقط'
+        : 'Prefetch Quran assets on Wi-Fi only';
+  }
+
+  String _getQuranAssetPrefetchSubtitle(BuildContext context) {
+    return context.l10n.localeName == 'ar'
+        ? 'حمّل خطوط وصور المصحف في الخلفية قبل فتح القارئ عند الاتصال بالواي فاي.'
+        : 'Prepare Quran fonts and reader images in the background before opening the reader when connected to Wi-Fi.';
   }
 
   void _showColorPicker(BuildContext context, Color currentColor) {

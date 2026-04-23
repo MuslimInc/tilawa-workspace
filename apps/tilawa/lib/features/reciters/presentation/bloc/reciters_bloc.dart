@@ -55,12 +55,14 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
           );
 
       if (recitersData != null) {
-        final List<entity.ReciterEntity> filteredReciters = _filterReciters(
-          recitersData,
-          searchQuery,
-          selectedLetter,
-          showFavoritesOnly,
-          favoriteIds,
+        final List<entity.ReciterEntity> filteredReciters = await Future(
+          () => _filterReciters(
+            recitersData,
+            searchQuery,
+            selectedLetter,
+            showFavoritesOnly,
+            favoriteIds,
+          ),
         );
 
         emit(
@@ -220,18 +222,23 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     );
   }
 
-  void _onSyncFavoriteIds(SyncFavoriteIds event, Emitter<RecitersState> emit) {
+  Future<void> _onSyncFavoriteIds(
+    SyncFavoriteIds event,
+    Emitter<RecitersState> emit,
+  ) async {
     if (state is! RecitersLoaded) {
       return;
     }
 
     final currentState = state as RecitersLoaded;
-    final List<entity.ReciterEntity> filteredReciters = _filterReciters(
-      currentState.reciters,
-      currentState.searchQuery,
-      currentState.selectedLetter,
-      currentState.showFavoritesOnly,
-      event.favoriteIds,
+    final List<entity.ReciterEntity> filteredReciters = await Future(
+      () => _filterReciters(
+        currentState.reciters,
+        currentState.searchQuery,
+        currentState.selectedLetter,
+        currentState.showFavoritesOnly,
+        event.favoriteIds,
+      ),
     );
 
     emit(

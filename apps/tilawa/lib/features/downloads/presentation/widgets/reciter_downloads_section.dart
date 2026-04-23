@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/entities/audio.dart';
+
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/download_item.dart';
@@ -142,6 +142,9 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               children: [
                 if (_hasCompletedDownloads())
                   BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                    buildWhen: (previous, current) =>
+                        previous.currentAudio != current.currentAudio ||
+                        previous.isPlaying != current.isPlaying,
                     builder: (context, audioState) {
                       final bool isPlayingFromThisReciter =
                           _isPlayingFromThisReciter(audioState);

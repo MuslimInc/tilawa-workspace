@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:tilawa_core/di/injection.dart';
-import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
+import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_core/entities/audio.dart';
+
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../../domain/services/download_queue_service_interface.dart';
 import '../../domain/entities/download_item.dart';
+import '../../domain/services/download_queue_service_interface.dart';
 import '../bloc/downloads_bloc.dart';
 import '../extensions/download_item_extensions.dart';
 
@@ -122,6 +122,9 @@ class DownloadItemCard extends StatelessWidget {
           // Completed -> Play/Pause
           if (download.status == DownloadStatus.completed)
             BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+              buildWhen: (previous, current) =>
+                  previous.currentAudio != current.currentAudio ||
+                  previous.isPlaying != current.isPlaying,
               builder: (context, audioState) {
                 final bool isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
                 return IconButton.filled(

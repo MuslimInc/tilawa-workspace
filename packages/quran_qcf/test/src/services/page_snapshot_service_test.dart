@@ -2,42 +2,44 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:quran_qcf/src/services/idle_scheduler.dart';
-import 'package:quran_qcf/src/services/page_snapshot_service.dart';
+import 'package:quran_qcf/src/presentation/services/idle_scheduler.dart';
+import 'package:quran_qcf/src/presentation/services/page_snapshot_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  late IdleScheduler scheduler;
+  late PageSnapshotService service;
+
   setUp(() {
-    // Clean slate for each test.
-    PageSnapshotService.instance.clear();
-    IdleScheduler.instance.cancelAll();
+    scheduler = IdleScheduler();
+    service = PageSnapshotService(idleScheduler: scheduler);
   });
 
   group('PageSnapshotService', () {
     test('hasSnapshot returns false for uncached pages', () {
-      expect(PageSnapshotService.instance.hasSnapshot(1), isFalse);
+      expect(service.hasSnapshot(1), isFalse);
     });
 
     test('getSnapshot returns null for uncached pages', () {
-      expect(PageSnapshotService.instance.getSnapshot(1), isNull);
+      expect(service.getSnapshot(1), isNull);
     });
 
     test('clear() empties the cache', () {
       // clear() should not throw even on an empty cache.
-      PageSnapshotService.instance.clear();
-      expect(PageSnapshotService.instance.hasSnapshot(1), isFalse);
+      service.clear();
+      expect(service.hasSnapshot(1), isFalse);
     });
 
     test('evict() removes a specific page', () {
-      PageSnapshotService.instance.evict(42);
+      service.evict(42);
       // Should not throw.
-      expect(PageSnapshotService.instance.hasSnapshot(42), isFalse);
+      expect(service.hasSnapshot(42), isFalse);
     });
 
     test('cancelPending() is safe to call when no capture is pending', () {
       // Should be a no-op, no throw.
-      PageSnapshotService.instance.cancelPending();
+      service.cancelPending();
     });
   });
 
@@ -54,15 +56,15 @@ void main() {
         ),
       );
 
-      final bool result = await PageSnapshotService.instance.captureSnapshot(
+      final bool result = await service.captureSnapshot(
         pageNumber: 1,
         boundaryKey: boundaryKey,
         pixelRatio: 1.0,
       );
 
       expect(result, isTrue);
-      expect(PageSnapshotService.instance.hasSnapshot(1), isTrue);
-      expect(PageSnapshotService.instance.getSnapshot(1), isNotNull);
+      expect(service.hasSnapshot(1), isTrue);
+      expect(service.getSnapshot(1), isNotNull);
     });
 
     testWidgets('skips capture if page already in cache', (
@@ -77,12 +79,12 @@ void main() {
         ),
       );
 
-      final bool first = await PageSnapshotService.instance.captureSnapshot(
+      final bool first = await service.captureSnapshot(
         pageNumber: 7,
         boundaryKey: boundaryKey,
         pixelRatio: 1.0,
       );
-      final bool second = await PageSnapshotService.instance.captureSnapshot(
+      final bool second = await service.captureSnapshot(
         pageNumber: 7,
         boundaryKey: boundaryKey,
         pixelRatio: 1.0,
@@ -98,14 +100,14 @@ void main() {
     ) async {
       final GlobalKey key = GlobalKey();
 
-      final bool result = await PageSnapshotService.instance.captureSnapshot(
+      final bool result = await service.captureSnapshot(
         pageNumber: 1,
         boundaryKey: key,
         pixelRatio: 3.0,
       );
 
       expect(result, isFalse);
-      expect(PageSnapshotService.instance.hasSnapshot(1), isFalse);
+      expect(service.hasSnapshot(1), isFalse);
     });
 
     testWidgets('fails when key is on a non-RepaintBoundary widget', (
@@ -115,7 +117,7 @@ void main() {
 
       await tester.pumpWidget(SizedBox(key: key, width: 50, height: 50));
 
-      final bool result = await PageSnapshotService.instance.captureSnapshot(
+      final bool result = await service.captureSnapshot(
         pageNumber: 2,
         boundaryKey: key,
         pixelRatio: 1.0,
@@ -136,15 +138,15 @@ void main() {
         ),
       );
 
-      await PageSnapshotService.instance.captureSnapshot(
+      await service.captureSnapshot(
         pageNumber: 5,
         boundaryKey: boundaryKey,
         pixelRatio: 1.0,
       );
-      expect(PageSnapshotService.instance.hasSnapshot(5), isTrue);
+      expect(service.hasSnapshot(5), isTrue);
 
-      PageSnapshotService.instance.evict(5);
-      expect(PageSnapshotService.instance.hasSnapshot(5), isFalse);
+      service.evict(5);
+      expect(service.hasSnapshot(5), isFalse);
     });
 
     testWidgets('clear disposes all cached snapshots', (
@@ -169,24 +171,24 @@ void main() {
         ),
       );
 
-      await PageSnapshotService.instance.captureSnapshot(
+      await service.captureSnapshot(
         pageNumber: 1,
         boundaryKey: key1,
         pixelRatio: 1.0,
       );
-      await PageSnapshotService.instance.captureSnapshot(
+      await service.captureSnapshot(
         pageNumber: 2,
         boundaryKey: key2,
         pixelRatio: 1.0,
       );
 
-      expect(PageSnapshotService.instance.hasSnapshot(1), isTrue);
-      expect(PageSnapshotService.instance.hasSnapshot(2), isTrue);
+      expect(service.hasSnapshot(1), isTrue);
+      expect(service.hasSnapshot(2), isTrue);
 
-      PageSnapshotService.instance.clear();
+      service.clear();
 
-      expect(PageSnapshotService.instance.hasSnapshot(1), isFalse);
-      expect(PageSnapshotService.instance.hasSnapshot(2), isFalse);
+      expect(service.hasSnapshot(1), isFalse);
+      expect(service.hasSnapshot(2), isFalse);
     });
 
     testWidgets('LRU eviction removes oldest entry when cache is full', (
@@ -212,28 +214,28 @@ void main() {
 
       // Fill cache with pages 1–10.
       for (var i = 1; i <= 10; i++) {
-        await PageSnapshotService.instance.captureSnapshot(
+        await service.captureSnapshot(
           pageNumber: i,
           boundaryKey: keys[i - 1],
           pixelRatio: 1.0,
         );
       }
 
-      expect(PageSnapshotService.instance.hasSnapshot(1), isTrue);
-      expect(PageSnapshotService.instance.hasSnapshot(10), isTrue);
+      expect(service.hasSnapshot(1), isTrue);
+      expect(service.hasSnapshot(10), isTrue);
 
       // Add page 11 — should evict page 1 (oldest).
-      await PageSnapshotService.instance.captureSnapshot(
+      await service.captureSnapshot(
         pageNumber: 11,
         boundaryKey: keys[10],
         pixelRatio: 1.0,
       );
 
-      expect(PageSnapshotService.instance.hasSnapshot(1), isFalse);
-      expect(PageSnapshotService.instance.hasSnapshot(11), isTrue);
+      expect(service.hasSnapshot(1), isFalse);
+      expect(service.hasSnapshot(11), isTrue);
       // Pages 2–10 should still be cached.
       for (var i = 2; i <= 10; i++) {
-        expect(PageSnapshotService.instance.hasSnapshot(i), isTrue);
+        expect(service.hasSnapshot(i), isTrue);
       }
     });
   });
@@ -242,13 +244,12 @@ void main() {
     testWidgets('returns a cancellable IdleTask', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
 
-      final IdleTask task = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 99,
-            boundaryKey: key,
-            pixelRatio: 3.0,
-            centerPage: 99,
-          );
+      final IdleTask task = service.scheduleCaptureWhenIdle(
+        pageNumber: 99,
+        boundaryKey: key,
+        pixelRatio: 3.0,
+        centerPage: 99,
+      );
 
       expect(task.isCancelled, isFalse);
 
@@ -270,15 +271,14 @@ void main() {
       );
 
       // Schedule — should NOT capture immediately.
-      final IdleTask task = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 42,
-            boundaryKey: boundaryKey,
-            pixelRatio: 1.0,
-          );
+      final IdleTask task = service.scheduleCaptureWhenIdle(
+        pageNumber: 42,
+        boundaryKey: boundaryKey,
+        pixelRatio: 1.0,
+      );
 
       // Not yet captured — still in the IdleScheduler queue.
-      expect(PageSnapshotService.instance.hasSnapshot(42), isFalse);
+      expect(service.hasSnapshot(42), isFalse);
 
       // Pump frames to let IdleScheduler execute.
       for (var i = 0; i < 4; i++) {
@@ -286,7 +286,7 @@ void main() {
       }
       await task.future;
 
-      expect(PageSnapshotService.instance.hasSnapshot(42), isTrue);
+      expect(service.hasSnapshot(42), isTrue);
     });
 
     testWidgets('cancelled task never captures', (WidgetTester tester) async {
@@ -299,12 +299,11 @@ void main() {
         ),
       );
 
-      final IdleTask task = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 55,
-            boundaryKey: boundaryKey,
-            pixelRatio: 1.0,
-          );
+      final IdleTask task = service.scheduleCaptureWhenIdle(
+        pageNumber: 55,
+        boundaryKey: boundaryKey,
+        pixelRatio: 1.0,
+      );
 
       task.cancel();
 
@@ -312,7 +311,7 @@ void main() {
         await tester.pump();
       }
 
-      expect(PageSnapshotService.instance.hasSnapshot(55), isFalse);
+      expect(service.hasSnapshot(55), isFalse);
     });
 
     testWidgets('off-center pages use reduced pixel ratio (smaller image)', (
@@ -348,22 +347,20 @@ void main() {
       );
 
       // Off-center capture: centerPage=11, pageNumber=10
-      final IdleTask offCenterTask = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 10,
-            boundaryKey: offCenterKey,
-            pixelRatio: 2.0,
-            centerPage: 11,
-          );
+      final IdleTask offCenterTask = service.scheduleCaptureWhenIdle(
+        pageNumber: 10,
+        boundaryKey: offCenterKey,
+        pixelRatio: 2.0,
+        centerPage: 11,
+      );
 
       // Center capture: centerPage=20, pageNumber=20
-      final IdleTask centerTask = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 20,
-            boundaryKey: centerKey,
-            pixelRatio: 2.0,
-            centerPage: 20,
-          );
+      final IdleTask centerTask = service.scheduleCaptureWhenIdle(
+        pageNumber: 20,
+        boundaryKey: centerKey,
+        pixelRatio: 2.0,
+        centerPage: 20,
+      );
 
       for (var i = 0; i < 8; i++) {
         await tester.pump();
@@ -371,12 +368,8 @@ void main() {
       await offCenterTask.future;
       await centerTask.future;
 
-      final ui.Image offCenterImage = PageSnapshotService.instance.getSnapshot(
-        10,
-      )!;
-      final ui.Image centerImage = PageSnapshotService.instance.getSnapshot(
-        20,
-      )!;
+      final ui.Image offCenterImage = service.getSnapshot(10)!;
+      final ui.Image centerImage = service.getSnapshot(20)!;
 
       // Both boundaries are 100×100. Center uses pixelRatio=2.0,
       // off-center uses 2.0*0.75=1.5. So off-center image should be
@@ -418,22 +411,20 @@ void main() {
       );
 
       // Center page: pixelRatio=2.0, centerPage == pageNumber
-      final IdleTask centerTask = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 10,
-            boundaryKey: centerKey,
-            pixelRatio: 2.0,
-            centerPage: 10,
-          );
+      final IdleTask centerTask = service.scheduleCaptureWhenIdle(
+        pageNumber: 10,
+        boundaryKey: centerKey,
+        pixelRatio: 2.0,
+        centerPage: 10,
+      );
 
       // Baseline: pixelRatio=1.0 to determine raw boundary size
-      final IdleTask baseTask = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 20,
-            boundaryKey: baseKey,
-            pixelRatio: 1.0,
-            centerPage: 20,
-          );
+      final IdleTask baseTask = service.scheduleCaptureWhenIdle(
+        pageNumber: 20,
+        boundaryKey: baseKey,
+        pixelRatio: 1.0,
+        centerPage: 20,
+      );
 
       for (var i = 0; i < 8; i++) {
         await tester.pump();
@@ -441,10 +432,8 @@ void main() {
       await centerTask.future;
       await baseTask.future;
 
-      final ui.Image centerImage = PageSnapshotService.instance.getSnapshot(
-        10,
-      )!;
-      final ui.Image baseImage = PageSnapshotService.instance.getSnapshot(20)!;
+      final ui.Image centerImage = service.getSnapshot(10)!;
+      final ui.Image baseImage = service.getSnapshot(20)!;
 
       // Center image at 2x should be exactly double the 1x baseline.
       expect(centerImage.width, baseImage.width * 2);
@@ -484,21 +473,19 @@ void main() {
       );
 
       // null centerPage → full ratio
-      final IdleTask nullTask = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 10,
-            boundaryKey: nullKey,
-            pixelRatio: 2.0,
-          );
+      final IdleTask nullTask = service.scheduleCaptureWhenIdle(
+        pageNumber: 10,
+        boundaryKey: nullKey,
+        pixelRatio: 2.0,
+      );
 
       // Explicit centerPage == pageNumber → also full ratio
-      final IdleTask explicitTask = PageSnapshotService.instance
-          .scheduleCaptureWhenIdle(
-            pageNumber: 20,
-            boundaryKey: explicitKey,
-            pixelRatio: 2.0,
-            centerPage: 20,
-          );
+      final IdleTask explicitTask = service.scheduleCaptureWhenIdle(
+        pageNumber: 20,
+        boundaryKey: explicitKey,
+        pixelRatio: 2.0,
+        centerPage: 20,
+      );
 
       for (var i = 0; i < 8; i++) {
         await tester.pump();
@@ -506,10 +493,8 @@ void main() {
       await nullTask.future;
       await explicitTask.future;
 
-      final ui.Image nullImage = PageSnapshotService.instance.getSnapshot(10)!;
-      final ui.Image explicitImage = PageSnapshotService.instance.getSnapshot(
-        20,
-      )!;
+      final ui.Image nullImage = service.getSnapshot(10)!;
+      final ui.Image explicitImage = service.getSnapshot(20)!;
 
       // Both should produce identical dimensions — null centerPage
       // means no off-center scaling.
@@ -540,7 +525,7 @@ void main() {
         final List<IdleTask> tasks = [];
         for (var i = 0; i < 3; i++) {
           tasks.add(
-            PageSnapshotService.instance.scheduleCaptureWhenIdle(
+            service.scheduleCaptureWhenIdle(
               pageNumber: i + 1,
               boundaryKey: keys[i],
               pixelRatio: 1.0,
@@ -550,7 +535,7 @@ void main() {
 
         // None should be captured immediately.
         for (var i = 1; i <= 3; i++) {
-          expect(PageSnapshotService.instance.hasSnapshot(i), isFalse);
+          expect(service.hasSnapshot(i), isFalse);
         }
 
         // Pump enough frames to complete all serial tasks.
@@ -563,7 +548,7 @@ void main() {
 
         // All three should now be captured.
         for (var i = 1; i <= 3; i++) {
-          expect(PageSnapshotService.instance.hasSnapshot(i), isTrue);
+          expect(service.hasSnapshot(i), isTrue);
         }
       },
     );
