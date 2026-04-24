@@ -3,13 +3,14 @@ import 'dart:async';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
@@ -27,26 +28,70 @@ class RecitersScreen extends StatefulWidget {
 
 class _RecitersScreenState extends State<RecitersScreen> {
   static const Duration _searchDebounceDuration = Duration(milliseconds: 200);
+  static const Duration _initialRecitersLoadDelay = Duration(
+    milliseconds: 1500,
+  );
+  static const Duration _startupLiteUiDuration = Duration(milliseconds: 650);
+  static const Duration _loadedResultsActivationDelay = Duration(
+    milliseconds: 500,
+  );
 
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   Timer? _searchDebounceTimer;
+  Timer? _initialLoadTimer;
+  Timer? _loadedResultsActivationTimer;
+  Timer? _startupLiteUiTimer;
+  bool _isStartupLiteUi = true;
+  bool _allowHeavyLoadedResults = false;
+  late final FavoritesCubit _favoritesCubit;
 
   @override
   void initState() {
     super.initState();
+    _favoritesCubit = getIt<FavoritesCubit>();
+    _startupLiteUiTimer = Timer(_startupLiteUiDuration, () {
+      if (!mounted) return;
+      setState(() {
+        _isStartupLiteUi = false;
+      });
+      _favoritesCubit.loadFavorites();
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RecitersBloc>().add(const LoadReciters());
+      debugPrint(
+        '[PerfLogger][RecitersScreen] initial-load scheduled '
+        'delayMs=${_initialRecitersLoadDelay.inMilliseconds}',
+      );
+      _initialLoadTimer = Timer(_initialRecitersLoadDelay, () {
+        if (!mounted) return;
+        debugPrint('[PerfLogger][RecitersScreen] initial-load started');
+        context.read<RecitersBloc>().add(const LoadReciters());
+      });
+    });
+  }
+
+  void _scheduleLoadedResultsActivation() {
+    _loadedResultsActivationTimer?.cancel();
+    _loadedResultsActivationTimer = Timer(_loadedResultsActivationDelay, () {
+      if (!mounted || _allowHeavyLoadedResults) return;
+      setState(() {
+        _allowHeavyLoadedResults = true;
+      });
     });
   }
 
   @override
   void dispose() {
+    _startupLiteUiTimer?.cancel();
+    _loadedResultsActivationTimer?.cancel();
+    _initialLoadTimer?.cancel();
     _searchDebounceTimer?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
+    _favoritesCubit.close();
     super.dispose();
   }
 
@@ -178,8 +223,18 @@ class _RecitersScreenState extends State<RecitersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<FavoritesCubit>()..loadFavorites(),
+    PerfLogger.markBuild('RecitersScreen');
+    if (_isStartupLiteUi) {
+      return Scaffold(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(title: Text(context.l10n.reciters)),
+        body: const _RecitersStartupLitePane(),
+      );
+    }
+
+    final tokens = Theme.of(context).tokens;
+    return BlocProvider.value(
+      value: _favoritesCubit,
       child: Builder(
         builder: (innerContext) => MultiBlocListener(
           listeners: [
@@ -192,19 +247,11 @@ class _RecitersScreenState extends State<RecitersScreen> {
               listenWhen: (previous, current) =>
                   previous is! RecitersLoaded && current is RecitersLoaded,
               listener: (context, state) {
+                _scheduleLoadedResultsActivation();
                 final String? selectedLetter = context
                     .read<AlphabetScrollbarBloc>()
                     .state
                     .selectedLetter;
-                final FavoritesState favoritesState = context
-                    .read<FavoritesCubit>()
-                    .state;
-
-                if (favoritesState is FavoritesLoaded) {
-                  context.read<RecitersBloc>().add(
-                    SyncFavoriteIds(favoritesState.favoriteIds.toList()),
-                  );
-                }
 
                 if (selectedLetter != null) {
                   context.read<RecitersBloc>().add(
@@ -225,6 +272,29 @@ class _RecitersScreenState extends State<RecitersScreen> {
             ),
           ],
           child: BlocBuilder<RecitersBloc, RecitersState>(
+            buildWhen: (previous, current) {
+              // Skip rebuild when only favoriteIds changed — _FavoriteButton
+              // handles that independently via context.select<FavoritesCubit>.
+              if (previous is RecitersLoaded && current is RecitersLoaded) {
+                // Check if only favoriteIds changed (filteredReciters gets
+                // re-sorted by _filterReciters but we don't need to rebuild)
+                final onlyFavoritesChanged =
+                    previous.favoriteIds != current.favoriteIds &&
+                    previous.searchQuery == current.searchQuery &&
+                    previous.selectedLetter == current.selectedLetter &&
+                    previous.showFavoritesOnly == current.showFavoritesOnly;
+
+                if (onlyFavoritesChanged) {
+                  return false;
+                }
+
+                return previous.filteredReciters != current.filteredReciters ||
+                    previous.searchQuery != current.searchQuery ||
+                    previous.selectedLetter != current.selectedLetter ||
+                    previous.showFavoritesOnly != current.showFavoritesOnly;
+              }
+              return true;
+            },
             builder: (context, state) {
               final l10n = context.l10n;
 
@@ -279,26 +349,35 @@ class _RecitersScreenState extends State<RecitersScreen> {
                     ),
                   ],
                 ),
-                body: Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-                  child: _RecitersSurface(
-                    state: state,
-                    searchController: _searchController,
-                    focusNode: _focusNode,
-                    scrollController: _scrollController,
-                    onSearchChanged: _onSearchChanged,
-                    onClearSearch: _clearSearch,
-                    onToggleFavorites: () =>
-                        _toggleFavoritesFilter(innerContext),
-                    onClearLetter: _clearLetterFilter,
-                    onClearFavorites: () {
-                      context.read<RecitersBloc>().add(
-                        const ClearFavoritesFilter(),
-                      );
-                    },
-                    onClearAll: _clearAllFilters,
-                    onLetterSelected: _onLetterSelected,
-                    onRetry: _refreshReciters,
+                body: TilawaContentBounds(
+                  kind: TilawaContentKind.media,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      tokens.spaceMedium,
+                      tokens.spaceSmall,
+                      tokens.spaceMedium,
+                      tokens.spaceSmall,
+                    ),
+                    child: _RecitersSurface(
+                      state: state,
+                      allowHeavyLoadedResults: _allowHeavyLoadedResults,
+                      searchController: _searchController,
+                      focusNode: _focusNode,
+                      scrollController: _scrollController,
+                      onSearchChanged: _onSearchChanged,
+                      onClearSearch: _clearSearch,
+                      onToggleFavorites: () =>
+                          _toggleFavoritesFilter(innerContext),
+                      onClearLetter: _clearLetterFilter,
+                      onClearFavorites: () {
+                        context.read<RecitersBloc>().add(
+                          const ClearFavoritesFilter(),
+                        );
+                      },
+                      onClearAll: _clearAllFilters,
+                      onLetterSelected: _onLetterSelected,
+                      onRetry: _refreshReciters,
+                    ),
                   ),
                 ),
               );
@@ -310,9 +389,35 @@ class _RecitersScreenState extends State<RecitersScreen> {
   }
 }
 
+class _RecitersStartupLitePane extends StatelessWidget {
+  const _RecitersStartupLitePane();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 36,
+              height: 36,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+            const SizedBox(height: 12),
+            Text(context.l10n.loadingReciters),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _RecitersSurface extends StatelessWidget {
   const _RecitersSurface({
     required this.state,
+    required this.allowHeavyLoadedResults,
     required this.searchController,
     required this.focusNode,
     required this.scrollController,
@@ -327,6 +432,7 @@ class _RecitersSurface extends StatelessWidget {
   });
 
   final RecitersState state;
+  final bool allowHeavyLoadedResults;
   final TextEditingController searchController;
   final FocusNode focusNode;
   final ScrollController scrollController;
@@ -341,6 +447,7 @@ class _RecitersSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('_RecitersSurface');
     final ThemeData theme = Theme.of(context);
 
     return DecoratedBox(
@@ -350,13 +457,6 @@ class _RecitersSurface extends StatelessWidget {
         border: Border.all(
           color: theme.colorScheme.outlineVariant.withValues(alpha: 0.22),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.primaryColor.withValues(alpha: 0.04),
-            blurRadius: 22,
-            offset: const Offset(0, 10),
-          ),
-        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
@@ -385,25 +485,25 @@ class _RecitersSurface extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   _ResultsSummary(state: state),
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    child: switch (state) {
-                      final RecitersLoaded loadedState
-                          when _hasActiveFilters(loadedState) =>
-                        Padding(
-                          key: const ValueKey('active_filters'),
-                          padding: const EdgeInsets.only(top: 10),
-                          child: _ActiveFiltersBar(
-                            state: loadedState,
-                            onClearSearch: onClearSearch,
-                            onClearLetter: onClearLetter,
-                            onClearFavorites: onClearFavorites,
-                            onClearAll: onClearAll,
-                          ),
+                  Builder(
+                    builder: (context) {
+                      if (state is! RecitersLoaded) {
+                        return const SizedBox.shrink();
+                      }
+                      final loadedState = state as RecitersLoaded;
+                      if (!_hasActiveFilters(loadedState)) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: _ActiveFiltersBar(
+                          state: loadedState,
+                          onClearSearch: onClearSearch,
+                          onClearLetter: onClearLetter,
+                          onClearFavorites: onClearFavorites,
+                          onClearAll: onClearAll,
                         ),
-                      _ => const SizedBox.shrink(
-                        key: ValueKey('inactive_filters'),
-                      ),
+                      );
                     },
                   ),
                 ],
@@ -416,6 +516,7 @@ class _RecitersSurface extends StatelessWidget {
             Expanded(
               child: _ResultsPane(
                 state: state,
+                allowHeavyLoadedResults: allowHeavyLoadedResults,
                 scrollController: scrollController,
                 onLetterSelected: onLetterSelected,
                 onRetry: onRetry,
@@ -471,73 +572,18 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return ListenableBuilder(
-      listenable: Listenable.merge([controller, focusNode]),
-      builder: (context, _) {
-        final bool hasText = controller.text.isNotEmpty;
-        final bool isFocused = focusNode.hasFocus;
-
-        return Container(
-          height: 48,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isFocused
-                  ? theme.primaryColor.withValues(alpha: 0.28)
-                  : theme.colorScheme.outlineVariant.withValues(alpha: 0.26),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.primaryColor.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: TextField(
-            focusNode: focusNode,
-            controller: controller,
-            textAlignVertical: TextAlignVertical.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              border: InputBorder.none,
-              hintText: context.l10n.searchReciters,
-              hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.58,
-                ),
-              ),
-              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-              prefixIcon: Icon(
-                FluentIcons.search_24_regular,
-                size: 18,
-                color: isFocused
-                    ? theme.primaryColor
-                    : theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.72,
-                      ),
-              ),
-              suffixIcon: hasText
-                  ? IconButton(
-                      icon: const Icon(
-                        FluentIcons.dismiss_24_regular,
-                        size: 18,
-                      ),
-                      onPressed: onClear,
-                    )
-                  : null,
-            ),
-            onChanged: onChanged,
-            onTapOutside: (_) => focusNode.unfocus(),
-          ),
-        );
-      },
+    return TilawaSearchField(
+      controller: controller,
+      focusNode: focusNode,
+      hintText: context.l10n.searchReciters,
+      prefixIcon: FluentIcons.search_24_regular,
+      clearIcon: FluentIcons.dismiss_24_regular,
+      onChanged: onChanged,
+      onClear: onClear,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      showShadow: true,
+      onTapOutside: (_) => focusNode.unfocus(),
     );
   }
 }
@@ -557,7 +603,7 @@ class _FavoritesToggle extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        _SquareActionButton(
+        TilawaIconActionButton(
           icon: isActive
               ? Icons.favorite_rounded
               : Icons.favorite_border_rounded,
@@ -610,60 +656,9 @@ class _DownloadsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _SquareActionButton(
+    return TilawaIconActionButton(
       icon: FluentIcons.arrow_download_24_regular,
       onTap: () => const DownloadsRoute().push(context),
-    );
-  }
-}
-
-class _SquareActionButton extends StatelessWidget {
-  const _SquareActionButton({
-    required this.icon,
-    required this.onTap,
-    this.isActive = false,
-  });
-
-  final IconData icon;
-  final VoidCallback onTap;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: Material(
-        color: isActive
-            ? theme.primaryColor.withValues(alpha: 0.12)
-            : theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isActive
-                    ? theme.primaryColor.withValues(alpha: 0.35)
-                    : theme.colorScheme.outlineVariant.withValues(alpha: 0.26),
-              ),
-            ),
-            child: Center(
-              child: Icon(
-                icon,
-                size: 20,
-                color: isActive
-                    ? theme.primaryColor
-                    : theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
@@ -743,6 +738,7 @@ class _FilterChip extends StatelessWidget {
 class _ResultsPane extends StatelessWidget {
   const _ResultsPane({
     required this.state,
+    required this.allowHeavyLoadedResults,
     required this.scrollController,
     required this.onLetterSelected,
     required this.onRetry,
@@ -750,6 +746,7 @@ class _ResultsPane extends StatelessWidget {
   });
 
   final RecitersState state;
+  final bool allowHeavyLoadedResults;
   final ScrollController scrollController;
   final ValueChanged<String?> onLetterSelected;
   final Future<void> Function() onRetry;
@@ -757,10 +754,8 @@ class _ResultsPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: _buildChild(context),
-    );
+    // Skip AnimatedSwitcher for loaded state to avoid jank when filtering
+    return _buildChild(context);
   }
 
   Widget _buildChild(BuildContext context) {
@@ -788,6 +783,15 @@ class _ResultsPane extends StatelessWidget {
 
     if (state is RecitersLoaded) {
       final RecitersLoaded loadedState = state as RecitersLoaded;
+
+      if (!allowHeavyLoadedResults) {
+        return _StatePanel(
+          key: const ValueKey('deferred_loaded_state'),
+          icon: Icons.hourglass_top_rounded,
+          title: context.l10n.loadingReciters,
+          isLoading: true,
+        );
+      }
 
       if (loadedState.filteredReciters.isEmpty) {
         final bool isSearchState = loadedState.searchQuery.isNotEmpty;
@@ -840,52 +844,40 @@ class _LoadedResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('_LoadedResults');
     final bool showScrollbar =
         state.filteredReciters.isNotEmpty && state.searchQuery.isEmpty;
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
 
+    // Memoize scrollbar with stable identity to prevent rebuilds during filtering
+    final scrollbar = showScrollbar
+        ? ReciterAlphabetScrollbar(
+            key: const ValueKey('alphabet_scrollbar'),
+            // Use allReciters (unfiltered) so letters stay stable during filtering
+            allReciters: state.reciters,
+            scrollController: scrollController,
+            onLetterSelected: onLetterSelected,
+          )
+        : const SizedBox.shrink();
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (isRtl && showScrollbar)
-          ReciterAlphabetScrollbar(
-            reciters: state.filteredReciters,
-            scrollController: scrollController,
-            onLetterSelected: onLetterSelected,
-          ),
+        if (isRtl && showScrollbar) scrollbar,
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              if (constraints.maxWidth >= 980) {
-                return _ReciterGridView(
+          child: context.isCompact
+              ? _ReciterListView(
                   state: state,
                   scrollController: scrollController,
-                  crossAxisCount: 3,
                   onRefresh: onRefresh,
-                );
-              }
-              if (constraints.maxWidth >= 680) {
-                return _ReciterGridView(
+                )
+              : _ReciterGridView(
                   state: state,
                   scrollController: scrollController,
-                  crossAxisCount: 2,
                   onRefresh: onRefresh,
-                );
-              }
-              return _ReciterListView(
-                state: state,
-                scrollController: scrollController,
-                onRefresh: onRefresh,
-              );
-            },
-          ),
+                ),
         ),
-        if (!isRtl && showScrollbar)
-          ReciterAlphabetScrollbar(
-            reciters: state.filteredReciters,
-            scrollController: scrollController,
-            onLetterSelected: onLetterSelected,
-          ),
+        if (!isRtl && showScrollbar) scrollbar,
       ],
     );
   }
@@ -988,6 +980,7 @@ class _ReciterListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('_ReciterListView');
     return RefreshIndicator.adaptive(
       onRefresh: onRefresh,
       child: ListView.separated(
@@ -996,7 +989,12 @@ class _ReciterListView extends StatelessWidget {
           parent: BouncingScrollPhysics(),
         ),
         itemCount: state.filteredReciters.length,
-        padding: const EdgeInsets.fromLTRB(10, 10, 10, 18),
+        padding: EdgeInsets.fromLTRB(
+          10,
+          10,
+          10,
+          TilawaShellPadding.of(context) + 20,
+        ),
         separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           final ReciterEntity reciter = state.filteredReciters[index];
@@ -1011,31 +1009,32 @@ class _ReciterGridView extends StatelessWidget {
   const _ReciterGridView({
     required this.state,
     required this.scrollController,
-    required this.crossAxisCount,
     required this.onRefresh,
   });
 
   final RecitersLoaded state;
   final ScrollController scrollController;
-  final int crossAxisCount;
   final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator.adaptive(
       onRefresh: onRefresh,
-      child: GridView.builder(
+      child: TilawaContentGrid(
         controller: scrollController,
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: const EdgeInsets.fromLTRB(12, 10, 12, 18),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          mainAxisSpacing: 10,
-          crossAxisSpacing: 10,
-          mainAxisExtent: 104,
+        padding: EdgeInsets.fromLTRB(
+          12,
+          10,
+          12,
+          TilawaShellPadding.of(context) + 20,
         ),
+        targetItemExtent: 220,
+        mainAxisSpacing: 10,
+        crossAxisSpacing: 10,
+        childAspectRatio: 2.12, // 220 / 104 ≈ 2.12
         itemCount: state.filteredReciters.length,
         itemBuilder: (context, index) {
           final ReciterEntity reciter = state.filteredReciters[index];
@@ -1046,104 +1045,118 @@ class _ReciterGridView extends StatelessWidget {
   }
 }
 
-class ReciterAlphabetScrollbar extends StatelessWidget {
+class ReciterAlphabetScrollbar extends StatefulWidget {
   const ReciterAlphabetScrollbar({
     super.key,
-    required this.reciters,
+    required this.allReciters,
     required this.scrollController,
     required this.onLetterSelected,
   });
-  final List<ReciterEntity> reciters;
+  final List<ReciterEntity> allReciters;
   final ScrollController scrollController;
   final Function(String? letter) onLetterSelected;
 
   @override
-  Widget build(BuildContext context) {
-    // Get unique letters from reciters, sorted
-    final List<String> letters =
-        reciters.map((reciter) => reciter.letter).toSet().toList()..sort();
+  State<ReciterAlphabetScrollbar> createState() =>
+      _ReciterAlphabetScrollbarState();
+}
 
-    if (letters.isEmpty) {
+class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
+  late List<String> _letters;
+
+  @override
+  void initState() {
+    super.initState();
+    _letters = _extractLetters(widget.allReciters);
+  }
+
+  @override
+  void didUpdateWidget(covariant ReciterAlphabetScrollbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Only recalculate letters if reciters actually changed
+    if (widget.allReciters.length != oldWidget.allReciters.length ||
+        widget.allReciters.isEmpty != oldWidget.allReciters.isEmpty) {
+      _letters = _extractLetters(widget.allReciters);
+    }
+  }
+
+  List<String> _extractLetters(List<ReciterEntity> reciters) {
+    return reciters.map((r) => r.letter).toSet().toList()..sort();
+  }
+
+  void _handleLetterTap(String letter, AlphabetScrollbarState currentState) {
+    if (currentState.selectedLetter == letter) {
+      context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+      widget.onLetterSelected(null);
+      return;
+    }
+
+    context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
+
+    final int index = widget.allReciters.indexWhere(
+      (item) => item.letter == letter,
+    );
+    if (index != -1) {
+      widget.scrollController.jumpTo(0.0);
+    }
+
+    widget.onLetterSelected(letter);
+  }
+
+  void _handlePanUpdate(
+    DragUpdateDetails details,
+    AlphabetScrollbarState currentState,
+  ) {
+    if (!currentState.isDragging) return;
+
+    final box = context.findRenderObject()! as RenderBox;
+    final localPosition = box.globalToLocal(details.globalPosition);
+    final letterHeight = box.size.height / _letters.length;
+    final letterIndex = (localPosition.dy / letterHeight)
+        .clamp(0, _letters.length - 1)
+        .floor();
+
+    if (letterIndex >= 0 && letterIndex < _letters.length) {
+      final String letter = _letters[letterIndex];
+      if (currentState.selectedLetter != letter) {
+        context.read<AlphabetScrollbarBloc>().add(UpdateDragLetter(letter));
+
+        final int index = widget.allReciters.indexWhere(
+          (item) => item.letter == letter,
+        );
+        if (index != -1) {
+          widget.scrollController.jumpTo(0.0);
+        }
+
+        widget.onLetterSelected(letter);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_letters.isEmpty) {
       return const SizedBox.shrink();
     }
 
+    final selectedLetter = context
+        .watch<AlphabetScrollbarBloc>()
+        .state
+        .selectedLetter;
+
     return ArabicAlphabetScrollbar(
-      letters: letters,
-      selectedLetter: context
-          .watch<AlphabetScrollbarBloc>()
-          .state
-          .selectedLetter,
-      onLetterSelected: (letter) {
-        final AlphabetScrollbarState currentState = context
-            .read<AlphabetScrollbarBloc>()
-            .state;
-
-        if (currentState.selectedLetter == letter) {
-          // Toggle off
-          context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
-          onLetterSelected(null);
-          return;
-        }
-
-        context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
-
-        // Find the first item that starts with this letter
-        final int index = reciters.indexWhere((item) {
-          return item.letter == letter;
-        });
-
-        if (index != -1) {
-          // Scroll to the top of the list when a letter is selected
-          scrollController.animateTo(
-            0.0,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        }
-
-        onLetterSelected(letter);
-      },
-      onPanStart: (details) =>
+      key: const ValueKey('alphabet_scrollbar'),
+      letters: _letters,
+      selectedLetter: selectedLetter,
+      onLetterSelected: (letter) =>
+          _handleLetterTap(letter, context.read<AlphabetScrollbarBloc>().state),
+      onPanStart: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
-      onPanUpdate: (details) {
-        final AlphabetScrollbarState currentState = context
-            .read<AlphabetScrollbarBloc>()
-            .state;
-        if (!currentState.isDragging) {
-          return;
-        }
-
-        final box = context.findRenderObject()! as RenderBox;
-        final Offset localPosition = box.globalToLocal(details.globalPosition);
-        final double letterHeight = box.size.height / letters.length;
-        final int letterIndex = (localPosition.dy / letterHeight)
-            .clamp(0, letters.length - 1)
-            .floor();
-
-        if (letterIndex >= 0 && letterIndex < letters.length) {
-          final String letter = letters[letterIndex];
-          if (currentState.selectedLetter != letter) {
-            context.read<AlphabetScrollbarBloc>().add(UpdateDragLetter(letter));
-
-            // Find the first item that starts with this letter
-            final int index = reciters.indexWhere((item) {
-              return item.letter == letter;
-            });
-
-            if (index != -1) {
-              // Scroll to the top of the list when a letter is selected
-              scrollController.animateTo(
-                0.0,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-              );
-            }
-
-            onLetterSelected(letter);
-          }
-        }
-      },
-      onPanEnd: (details) =>
+      onPanUpdate: (details) => _handlePanUpdate(
+        details,
+        context.read<AlphabetScrollbarBloc>().state,
+      ),
+      onPanEnd: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
     );
   }

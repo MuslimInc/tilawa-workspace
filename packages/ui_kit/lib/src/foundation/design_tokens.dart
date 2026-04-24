@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 @immutable
 class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   const TilawaDesignTokens({
+    required this.spaceTiny,
     required this.spaceExtraSmall,
     required this.spaceSmall,
     required this.spaceMedium,
@@ -30,7 +31,17 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.durationFast,
     required this.durationMedium,
     required this.durationSlow,
+    required this.contentMaxWidthReader,
+    required this.contentMaxWidthForm,
+    required this.contentMaxWidthMedia,
+    required this.contentMaxWidthSettings,
+    required this.cardCompactWidthThreshold,
+    required this.cardCompactHeightThreshold,
+    required this.cardTightHeightThreshold,
   });
+
+  /// 2.0
+  final double spaceTiny;
 
   /// 4.0
   final double spaceExtraSmall;
@@ -107,8 +118,30 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 600ms
   final Duration durationSlow;
 
+  /// 720 — max width for the Quran reader body.
+  final double contentMaxWidthReader;
+
+  /// 560 — max width for settings, dialogs, auth, and sheets.
+  final double contentMaxWidthForm;
+
+  /// 1200 — max width for share composers and galleries.
+  final double contentMaxWidthMedia;
+
+  /// 760 — max width for settings detail pages.
+  final double contentMaxWidthSettings;
+
+  /// 180 — width threshold for compact card layout.
+  final double cardCompactWidthThreshold;
+
+  /// 194 — height threshold for compact card layout.
+  final double cardCompactHeightThreshold;
+
+  /// 145 — height threshold for tight card layout.
+  final double cardTightHeightThreshold;
+
   /// Default values for light/dark theme
   factory TilawaDesignTokens.light() => const TilawaDesignTokens(
+    spaceTiny: 2.0,
     spaceExtraSmall: 4.0,
     spaceSmall: 8.0,
     spaceMedium: 12.0,
@@ -134,12 +167,20 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     durationFast: Duration(milliseconds: 200),
     durationMedium: Duration(milliseconds: 400),
     durationSlow: Duration(milliseconds: 600),
+    contentMaxWidthReader: 720,
+    contentMaxWidthForm: 560,
+    contentMaxWidthMedia: 1200,
+    contentMaxWidthSettings: 760,
+    cardCompactWidthThreshold: 180.0,
+    cardCompactHeightThreshold: 194.0,
+    cardTightHeightThreshold: 145.0,
   );
 
   factory TilawaDesignTokens.dark() => TilawaDesignTokens.light();
 
   @override
   TilawaDesignTokens copyWith({
+    double? spaceTiny,
     double? spaceExtraSmall,
     double? spaceSmall,
     double? spaceMedium,
@@ -165,8 +206,16 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     Duration? durationFast,
     Duration? durationMedium,
     Duration? durationSlow,
+    double? contentMaxWidthReader,
+    double? contentMaxWidthForm,
+    double? contentMaxWidthMedia,
+    double? contentMaxWidthSettings,
+    double? cardCompactWidthThreshold,
+    double? cardCompactHeightThreshold,
+    double? cardTightHeightThreshold,
   }) {
     return TilawaDesignTokens(
+      spaceTiny: spaceTiny ?? this.spaceTiny,
       spaceExtraSmall: spaceExtraSmall ?? this.spaceExtraSmall,
       spaceSmall: spaceSmall ?? this.spaceSmall,
       spaceMedium: spaceMedium ?? this.spaceMedium,
@@ -192,6 +241,18 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       durationFast: durationFast ?? this.durationFast,
       durationMedium: durationMedium ?? this.durationMedium,
       durationSlow: durationSlow ?? this.durationSlow,
+      contentMaxWidthReader:
+          contentMaxWidthReader ?? this.contentMaxWidthReader,
+      contentMaxWidthForm: contentMaxWidthForm ?? this.contentMaxWidthForm,
+      contentMaxWidthMedia: contentMaxWidthMedia ?? this.contentMaxWidthMedia,
+      contentMaxWidthSettings:
+          contentMaxWidthSettings ?? this.contentMaxWidthSettings,
+      cardCompactWidthThreshold:
+          cardCompactWidthThreshold ?? this.cardCompactWidthThreshold,
+      cardCompactHeightThreshold:
+          cardCompactHeightThreshold ?? this.cardCompactHeightThreshold,
+      cardTightHeightThreshold:
+          cardTightHeightThreshold ?? this.cardTightHeightThreshold,
     );
   }
 
@@ -199,6 +260,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   TilawaDesignTokens lerp(ThemeExtension<TilawaDesignTokens>? other, double t) {
     if (other is! TilawaDesignTokens) return this;
     return TilawaDesignTokens(
+      spaceTiny: lerpDouble(spaceTiny, other.spaceTiny, t)!,
       spaceExtraSmall: lerpDouble(spaceExtraSmall, other.spaceExtraSmall, t)!,
       spaceSmall: lerpDouble(spaceSmall, other.spaceSmall, t)!,
       spaceMedium: lerpDouble(spaceMedium, other.spaceMedium, t)!,
@@ -236,6 +298,41 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       durationFast: t < 0.5 ? durationFast : other.durationFast,
       durationMedium: t < 0.5 ? durationMedium : other.durationMedium,
       durationSlow: t < 0.5 ? durationSlow : other.durationSlow,
+      contentMaxWidthReader: lerpDouble(
+        contentMaxWidthReader,
+        other.contentMaxWidthReader,
+        t,
+      )!,
+      contentMaxWidthForm: lerpDouble(
+        contentMaxWidthForm,
+        other.contentMaxWidthForm,
+        t,
+      )!,
+      contentMaxWidthMedia: lerpDouble(
+        contentMaxWidthMedia,
+        other.contentMaxWidthMedia,
+        t,
+      )!,
+      contentMaxWidthSettings: lerpDouble(
+        contentMaxWidthSettings,
+        other.contentMaxWidthSettings,
+        t,
+      )!,
+      cardCompactWidthThreshold: lerpDouble(
+        cardCompactWidthThreshold,
+        other.cardCompactWidthThreshold,
+        t,
+      )!,
+      cardCompactHeightThreshold: lerpDouble(
+        cardCompactHeightThreshold,
+        other.cardCompactHeightThreshold,
+        t,
+      )!,
+      cardTightHeightThreshold: lerpDouble(
+        cardTightHeightThreshold,
+        other.cardTightHeightThreshold,
+        t,
+      )!,
     );
   }
 

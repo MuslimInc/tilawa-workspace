@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../domain/entities/athkar_category.dart';
@@ -33,16 +34,19 @@ class AthkarCategoriesScreen extends StatelessWidget {
             if (state is AthkarLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is AthkarError) {
-              return Center(child: Text(state.message));
-            } else if (state is AthkarCategoriesLoaded) {
-              return GridView.builder(
-                padding: EdgeInsets.all(20).copyWith(bottom: 120),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.9,
+              return Center(
+                child: Text(
+                  state.failure.message ?? 'An unexpected error occurred',
                 ),
+              );
+            } else if (state is AthkarCategoriesLoaded) {
+              return TilawaContentGrid(
+                padding: EdgeInsets.all(20).copyWith(bottom: 120),
+                targetItemExtent: 180,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.9,
+                shrinkWrap: true,
                 itemCount: state.categories.length,
                 itemBuilder: (context, index) {
                   final AthkarCategory category = state.categories[index];

@@ -21,6 +21,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
     return MultiBlocListener(
       listeners: [
         BlocListener<AuthBloc, AuthState>(
@@ -43,290 +45,313 @@ class SettingsScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(title: Text(context.l10n.settings)),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 20,
-          ).copyWith(bottom: 120),
-          child: Column(
-            children: [
-              // User Profile Section
-              _buildProfileSection(context),
-              SizedBox(height: 32),
+        body: TilawaContentBounds(
+          kind: TilawaContentKind.settings,
+          child: SingleChildScrollView(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceLarge,
+              vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
+            ).copyWith(bottom: TilawaShellPadding.of(context) + 20),
+            child: Column(
+              children: [
+                // User Profile Section
+                _buildProfileSection(context),
+                SizedBox(height: tokens.spaceLarge * 2),
 
-              // General Group (Theme & Language)
-              _SettingsGroup(
-                title: context.l10n.appearance.toUpperCase(),
-                children: [
-                  BlocBuilder<ThemeCubit, ThemeState>(
-                    builder: (context, state) {
-                      return Column(
-                        children: [
-                          _SettingsTile(
-                            icon: FluentIcons.dark_theme_24_regular,
-                            iconColor: AppColors.settingsTheme,
-                            title: context.l10n.theme,
-                            subtitle: _getThemeName(context, state.mode),
-                            onTap: () => _showThemePicker(context, state.mode),
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(16),
-                            ),
-                          ),
-                          _SettingsTile(
-                            icon: FluentIcons.color_24_regular,
-                            iconColor: AppColors.settingsColor,
-                            title: context.l10n.primaryColor,
-                            subtitle: _getColorName(
-                              context,
-                              state.primaryColor,
-                            ),
-                            onTap: () =>
-                                _showColorPicker(context, state.primaryColor),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  BlocBuilder<LocalizationBloc, LocalizationState>(
-                    builder: (context, state) {
-                      return _SettingsTile(
-                        icon: FluentIcons.local_language_24_regular,
-                        iconColor: AppColors.settingsLanguage,
-                        title: context.l10n.language,
-                        subtitle: state.locale.languageCode == 'ar'
-                            ? context.l10n.arabic
-                            : context.l10n.english,
-                        onTap: () => _showLanguagePicker(context, state.locale),
-                        showDivider: false,
-                        borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(16),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 24),
-
-              // Audio Group
-              _SettingsGroup(
-                title: context.l10n.audioSettings.toUpperCase(),
-                children: [
-                  BlocBuilder<SettingsCubit, SettingsState>(
-                    builder: (context, state) {
-                      return Column(
-                        children: [
-                          _SwitchSettingsTile(
-                            icon: FluentIcons.history_24_regular,
-                            iconColor: AppColors.settingsPlayback,
-                            title: context.l10n.restorePlaybackState,
-                            subtitle: context.l10n.restorePlaybackStateSubtitle,
-                            value: state.restorePlaybackState,
-                            onChanged: (value) {
-                              context
-                                  .read<SettingsCubit>()
-                                  .toggleRestorePlaybackState(value);
-                            },
-                            borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(16),
-                            ),
-                          ),
-                          _SwitchSettingsTile(
-                            icon: FluentIcons.timer_24_regular,
-                            iconColor: AppColors.settingsDuration,
-                            title: context.l10n.enableRecitationDuration,
-                            subtitle:
-                                context.l10n.enableRecitationDurationSubtitle,
-                            value: state.isSleepTimerEnabled,
-                            onChanged: (value) {
-                              context
-                                  .read<SettingsCubit>()
-                                  .toggleSleepTimerEnabled(value);
-                            },
-                            showDivider: false,
-                            borderRadius: BorderRadius.vertical(
-                              bottom: Radius.circular(16),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 24),
-
-              // Features Group
-              _SettingsGroup(
-                title: context.l10n.features.toUpperCase(),
-                children: [
-                  _SettingsTile(
-                    icon: FluentIcons.bookmark_24_regular,
-                    iconColor: AppColors.settingsBookmarks,
-                    title: context.l10n.bookmarks,
-                    subtitle: context.l10n.noBookmarksHint,
-                    onTap: () => const BookmarksRoute().push(context),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                  ),
-                  _SettingsTile(
-                    icon: FluentIcons.history_24_regular,
-                    iconColor: AppColors.settingsHistory,
-                    title: context.l10n.listeningHistory,
-                    subtitle: context.l10n.noHistoryDescription,
-                    onTap: () => const HistoryRoute().push(context),
-                  ),
-                  _SettingsTile(
-                    icon: FluentIcons.clock_24_regular,
-                    iconColor: AppColors.settingsPrayer,
-                    title: context.l10n.prayerTimes,
-                    subtitle: context.l10n.locationRequiredDescription,
-                    onTap: () => const PrayerTimesRoute().push(context),
-                  ),
-                  _SettingsTile(
-                    icon: FluentIcons.book_24_regular,
-                    iconColor: AppColors.settingsQuran,
-                    title: context.l10n.quranReader,
-                    subtitle: context.l10n.continueReading,
-                    onTap: () => const QuranLastReadRoute().push(context),
-                    showDivider: false,
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(16),
-                    ),
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 24),
-
-              // Downloads Group
-              _SettingsGroup(
-                title: context.l10n.downloads.toUpperCase(),
-                children: [
-                  _SettingsTile(
-                    icon: FluentIcons.folder_24_regular,
-                    iconColor: AppColors.settingsStorage,
-                    title: context.l10n.manageStorage,
-                    subtitle: context.l10n.manageStorageSubtitle,
-                    onTap: () => const DownloadsRoute().push(context),
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                  ),
-                  BlocBuilder<SettingsCubit, SettingsState>(
-                    builder: (context, state) {
-                      return _SettingsTile(
-                        icon: FluentIcons.arrow_download_24_regular,
-                        iconColor: AppColors.settingsDownloads,
-                        title: context.l10n.concurrentDownloads,
-                        subtitle: context.l10n.concurrentDownloadsSubtitle(
-                          state.maxConcurrentDownloads,
-                        ),
-                        onTap: () => _showConcurrentDownloadsPicker(
-                          context,
-                          state.maxConcurrentDownloads,
-                        ),
-                        showDivider: false,
-                        borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(16),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-
-              SizedBox(height: 32),
-
-              // Logout Button
-              BlocBuilder<AuthBloc, AuthState>(
-                builder: (context, state) {
-                  if (state is AuthAuthenticated) {
-                    return Material(
-                      color: context.isDarkMode
-                          ? context.theme.cardColor
-                          : AppColors.logoutBackground,
-                      borderRadius: BorderRadius.circular(20),
-                      child: InkWell(
-                        onTap: () => _showLogoutDialog(context),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                FluentIcons.sign_out_24_filled,
-                                color: AppColors.error,
-                                size: 20,
+                // General Group (Theme & Language)
+                TilawaSettingsGroup(
+                  title: context.l10n.appearance.toUpperCase(),
+                  children: [
+                    BlocBuilder<ThemeCubit, ThemeState>(
+                      builder: (context, state) {
+                        return Column(
+                          children: [
+                            TilawaSettingsTile(
+                              icon: FluentIcons.dark_theme_24_regular,
+                              iconColor: AppColors.settingsTheme,
+                              title: context.l10n.theme,
+                              subtitle: _getThemeName(context, state.mode),
+                              onTap: () =>
+                                  _showThemePicker(context, state.mode),
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(16),
                               ),
-                              SizedBox(width: 12),
-                              Text(
-                                context.l10n.logout,
-                                style: TextStyle(
-                                  color: AppColors.error,
-                                  fontSize: 16,
-                                ),
+                            ),
+                            TilawaSettingsTile(
+                              icon: FluentIcons.color_24_regular,
+                              iconColor: AppColors.settingsColor,
+                              title: context.l10n.primaryColor,
+                              subtitle: _getColorName(
+                                context,
+                                state.primaryColor,
                               ),
-                            ],
+                              onTap: () =>
+                                  _showColorPicker(context, state.primaryColor),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    BlocBuilder<LocalizationBloc, LocalizationState>(
+                      builder: (context, state) {
+                        return TilawaSettingsTile(
+                          icon: FluentIcons.local_language_24_regular,
+                          iconColor: AppColors.settingsLanguage,
+                          title: context.l10n.language,
+                          subtitle: state.locale.languageCode == 'ar'
+                              ? context.l10n.arabic
+                              : context.l10n.english,
+                          onTap: () =>
+                              _showLanguagePicker(context, state.locale),
+                          showDivider: false,
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(16),
                           ),
-                        ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: tokens.spaceExtraLarge),
+
+                // Audio Group
+                TilawaSettingsGroup(
+                  title: context.l10n.audioSettings.toUpperCase(),
+                  children: [
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return Column(
+                          children: [
+                            TilawaSettingsSwitchTile(
+                              icon: FluentIcons.history_24_regular,
+                              iconColor: AppColors.settingsPlayback,
+                              title: context.l10n.restorePlaybackState,
+                              subtitle:
+                                  context.l10n.restorePlaybackStateSubtitle,
+                              value: state.restorePlaybackState,
+                              onChanged: (value) {
+                                context
+                                    .read<SettingsCubit>()
+                                    .toggleRestorePlaybackState(value);
+                              },
+                              borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(16),
+                              ),
+                            ),
+                            TilawaSettingsSwitchTile(
+                              icon: FluentIcons.timer_24_regular,
+                              iconColor: AppColors.settingsDuration,
+                              title: context.l10n.enableRecitationDuration,
+                              subtitle:
+                                  context.l10n.enableRecitationDurationSubtitle,
+                              value: state.isSleepTimerEnabled,
+                              onChanged: (value) {
+                                context
+                                    .read<SettingsCubit>()
+                                    .toggleSleepTimerEnabled(value);
+                              },
+                              showDivider: false,
+                              borderRadius: BorderRadius.vertical(
+                                bottom: Radius.circular(16),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: tokens.spaceExtraLarge),
+
+                // Features Group
+                TilawaSettingsGroup(
+                  title: context.l10n.features.toUpperCase(),
+                  children: [
+                    TilawaSettingsTile(
+                      icon: FluentIcons.bookmark_24_regular,
+                      iconColor: AppColors.settingsBookmarks,
+                      title: context.l10n.bookmarks,
+                      subtitle: context.l10n.noBookmarksHint,
+                      onTap: () => const BookmarksRoute().push(context),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(16),
                       ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+                    ),
+                    TilawaSettingsTile(
+                      icon: FluentIcons.history_24_regular,
+                      iconColor: AppColors.settingsHistory,
+                      title: context.l10n.listeningHistory,
+                      subtitle: context.l10n.noHistoryDescription,
+                      onTap: () => const HistoryRoute().push(context),
+                    ),
+                    TilawaSettingsTile(
+                      icon: FluentIcons.clock_24_regular,
+                      iconColor: AppColors.settingsPrayer,
+                      title: context.l10n.prayerTimes,
+                      subtitle: context.l10n.locationRequiredDescription,
+                      onTap: () => const PrayerTimesRoute().push(context),
+                    ),
+                    TilawaSettingsTile(
+                      icon: FluentIcons.book_24_regular,
+                      iconColor: AppColors.settingsQuran,
+                      title: context.l10n.quranReader,
+                      subtitle: context.l10n.continueReading,
+                      onTap: () => const QuranLastReadRoute().push(context),
+                      showDivider: false,
+                      borderRadius: BorderRadius.vertical(
+                        bottom: Radius.circular(16),
+                      ),
+                    ),
+                  ],
+                ),
 
-              // Route List (Dev)
-              if (kDebugMode) ...[
+                SizedBox(height: tokens.spaceExtraLarge),
+
+                // Downloads Group
+                TilawaSettingsGroup(
+                  title: context.l10n.downloads.toUpperCase(),
+                  children: [
+                    TilawaSettingsTile(
+                      icon: FluentIcons.folder_24_regular,
+                      iconColor: AppColors.settingsStorage,
+                      title: context.l10n.manageStorage,
+                      subtitle: context.l10n.manageStorageSubtitle,
+                      onTap: () => const DownloadsRoute().push(context),
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(16),
+                      ),
+                    ),
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return Column(
+                          children: [
+                            TilawaSettingsSwitchTile(
+                              icon: Icons.wifi_rounded,
+                              iconColor: AppColors.settingsDownloads,
+                              title: _getQuranAssetPrefetchTitle(context),
+                              subtitle: _getQuranAssetPrefetchSubtitle(context),
+                              value: state.prefetchQuranAssetsOnWifiOnly,
+                              onChanged: (value) {
+                                context
+                                    .read<SettingsCubit>()
+                                    .togglePrefetchQuranAssetsOnWifiOnly(value);
+                              },
+                            ),
+                            TilawaSettingsTile(
+                              icon: FluentIcons.arrow_download_24_regular,
+                              iconColor: AppColors.settingsDownloads,
+                              title: context.l10n.concurrentDownloads,
+                              subtitle: context.l10n
+                                  .concurrentDownloadsSubtitle(
+                                    state.maxConcurrentDownloads,
+                                  ),
+                              onTap: () => _showConcurrentDownloadsPicker(
+                                context,
+                                state.maxConcurrentDownloads,
+                              ),
+                              showDivider: false,
+                              borderRadius: BorderRadius.vertical(
+                                bottom: Radius.circular(16),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: tokens.spaceLarge * 2),
+
+                // Logout Button
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is AuthAuthenticated) {
+                      return Material(
+                        color: context.isDarkMode
+                            ? context.theme.cardColor
+                            : AppColors.logoutBackground,
+                        borderRadius: BorderRadius.circular(20),
+                        child: InkWell(
+                          onTap: () => _showLogoutDialog(context),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  FluentIcons.sign_out_24_filled,
+                                  color: AppColors.error,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 12),
+                                Text(
+                                  context.l10n.logout,
+                                  style: TextStyle(
+                                    color: AppColors.error,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
+                  },
+                ),
+
+                // Route List (Dev)
+                if (kDebugMode) ...[
+                  SizedBox(height: tokens.spaceLarge * 2),
+                  TilawaSettingsTile(
+                    icon: Icons.list_alt_rounded,
+                    title: 'Route List (Dev)',
+                    onTap: () => const RouteListRoute().push(context),
+                    borderRadius: BorderRadius.circular(16),
+                    showDivider: false,
+                  ),
+                ],
+
                 SizedBox(height: 32),
-                _SettingsTile(
-                  icon: Icons.list_alt_rounded,
-                  title: 'Route List (Dev)',
-                  onTap: () => const RouteListRoute().push(context),
-                  borderRadius: BorderRadius.circular(16),
-                  showDivider: false,
+
+                // App Version Section
+                BlocBuilder<SettingsCubit, SettingsState>(
+                  builder: (context, state) {
+                    final version = state.appInfo?.version ?? '...';
+                    final buildNumber = state.appInfo?.buildNumber ?? '...';
+                    return Column(
+                      children: [
+                        Text(
+                          context.l10n.version(version),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: context.colorScheme.onSurface.withValues(
+                              alpha: 0.5,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: tokens.spaceExtraSmall),
+                        Text(
+                          context.l10n.build(buildNumber),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: context.colorScheme.onSurface.withValues(
+                              alpha: 0.3,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
-
-              SizedBox(height: 32),
-
-              // App Version Section
-              BlocBuilder<SettingsCubit, SettingsState>(
-                builder: (context, state) {
-                  final version = state.appInfo?.version ?? '...';
-                  final buildNumber = state.appInfo?.buildNumber ?? '...';
-                  return Column(
-                    children: [
-                      Text(
-                        context.l10n.version(version),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: context.colorScheme.onSurface.withValues(
-                            alpha: 0.5,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        context.l10n.build(buildNumber),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.colorScheme.onSurface.withValues(
-                            alpha: 0.3,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -508,6 +533,18 @@ class SettingsScreen extends StatelessWidget {
       'Purple' => l10n.colorPurple,
       _ => name,
     };
+  }
+
+  String _getQuranAssetPrefetchTitle(BuildContext context) {
+    return context.l10n.localeName == 'ar'
+        ? 'تهيئة أصول القرآن مسبقًا عبر الواي فاي فقط'
+        : 'Prefetch Quran assets on Wi-Fi only';
+  }
+
+  String _getQuranAssetPrefetchSubtitle(BuildContext context) {
+    return context.l10n.localeName == 'ar'
+        ? 'حمّل خطوط وصور المصحف في الخلفية قبل فتح القارئ عند الاتصال بالواي فاي.'
+        : 'Prepare Quran fonts and reader images in the background before opening the reader when connected to Wi-Fi.';
   }
 
   void _showColorPicker(BuildContext context, Color currentColor) {
@@ -780,122 +817,6 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class _SettingsGroup extends StatelessWidget {
-  const _SettingsGroup({required this.title, required this.children});
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.fromLTRB(12, 16, 16, 8),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              color: Theme.of(context).primaryColor,
-              letterSpacing: 1.1,
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: const [
-              BoxShadow(
-                color: AppColors.settingsCardShadow,
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(children: children),
-        ),
-      ],
-    );
-  }
-}
-
-class _SettingsTile extends StatelessWidget {
-  const _SettingsTile({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.iconColor,
-    this.subtitle,
-    this.showDivider = true,
-    this.borderRadius = BorderRadius.zero,
-  });
-  final IconData icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final VoidCallback onTap;
-  final bool showDivider;
-  final BorderRadiusGeometry borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final effectiveIconColor = iconColor ?? theme.primaryColor;
-    return Column(
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: borderRadius,
-          child: ListTile(
-            onTap: onTap,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-            shape: RoundedRectangleBorder(borderRadius: borderRadius),
-            leading: Container(
-              padding: EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: effectiveIconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: effectiveIconColor, size: 22),
-            ),
-            title: Text(
-              title,
-              style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600),
-            ),
-            subtitle: subtitle != null
-                ? Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: theme.textTheme.bodySmall?.color?.withValues(
-                        alpha: 0.5,
-                      ),
-                    ),
-                  )
-                : null,
-            trailing: Icon(
-              FluentIcons.chevron_right_24_filled,
-              size: 14,
-              color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.35),
-            ),
-          ),
-        ),
-        if (showDivider)
-          Padding(
-            padding: EdgeInsets.only(left: 64, right: 16),
-            child: Divider(
-              height: 1,
-              thickness: 0.5,
-              color: theme.dividerColor.withValues(alpha: 0.05),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
 class _ThemeOption extends StatelessWidget {
   const _ThemeOption({
     required this.title,
@@ -926,104 +847,6 @@ class _ThemeOption extends StatelessWidget {
               color: Theme.of(context).primaryColor,
             )
           : null,
-    );
-  }
-}
-
-class _SwitchSettingsTile extends StatelessWidget {
-  const _SwitchSettingsTile({
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.onChanged,
-    this.iconColor,
-    this.subtitle,
-    this.showDivider = true,
-    this.borderRadius = BorderRadius.zero,
-  });
-
-  final IconData icon;
-  final Color? iconColor;
-  final String title;
-  final String? subtitle;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final bool showDivider;
-  final BorderRadiusGeometry borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final effectiveIconColor = iconColor ?? theme.primaryColor;
-    return Column(
-      children: [
-        Material(
-          color: Colors.transparent,
-          borderRadius: borderRadius,
-          child: InkWell(
-            onTap: () => onChanged(!value),
-            borderRadius: borderRadius is BorderRadius
-                ? borderRadius as BorderRadius
-                : null,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: effectiveIconColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(icon, color: effectiveIconColor, size: 22),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 15.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (subtitle != null) ...[
-                          SizedBox(height: 4),
-                          Text(
-                            subtitle!,
-                            style: TextStyle(
-                              fontSize: 12.5,
-                              color: theme.textTheme.bodySmall?.color
-                                  ?.withValues(alpha: 0.5),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  Switch.adaptive(
-                    value: value,
-                    onChanged: onChanged,
-                    activeTrackColor: theme.primaryColor.withValues(alpha: 0.5),
-                    activeThumbColor: theme.primaryColor,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        if (showDivider)
-          Padding(
-            padding: EdgeInsets.only(left: 64, right: 16),
-            child: Divider(
-              height: 1,
-              thickness: 0.5,
-              color: theme.dividerColor.withValues(alpha: 0.05),
-            ),
-          ),
-      ],
     );
   }
 }

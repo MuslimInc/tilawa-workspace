@@ -12,10 +12,12 @@ import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../../features/premium/presentation/bloc/premium_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
+import '../../features/quran_reader/presentation/cubit/quran_settings_cubit.dart';
 import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
+import '../../features/share/presentation/cubit/share_cubit.dart';
 import '../../features/theme/presentation/cubit/theme_cubit.dart';
 import '../presentation/cubit/ui_visibility_cubit.dart';
 
@@ -64,9 +66,7 @@ class AppProviders {
     // Font Loader provider — lazy so font-checking I/O only runs when the
     // QuranFontLoaderScreen is first accessed, not at app startup.
     BlocProvider<QuranFontLoaderBloc>(
-      create: (context) =>
-          getIt<QuranFontLoaderBloc>()
-            ..add(const QuranFontLoaderEvent.initialize()),
+      create: (context) => getIt<QuranFontLoaderBloc>(),
     ),
 
     // Quran Reader provider — lazy so last-read loading only runs when the
@@ -75,10 +75,17 @@ class AppProviders {
       create: (context) =>
           getIt<QuranReaderBloc>()..add(const QuranReaderEvent.loadLastRead()),
     ),
+    // Settings cubit — lazy, loads persisted settings on first access.
+    BlocProvider<QuranSettingsCubit>(
+      create: (context) => getIt<QuranSettingsCubit>()..load(),
+    ),
     // UI Visibility provider (Global for immersive mode across routes)
     BlocProvider<UiVisibilityCubit>(
       create: (context) => getIt<UiVisibilityCubit>(),
     ),
+
+    // Share provider — ephemeral cubit for screenshot & audio clip sharing
+    BlocProvider<ShareCubit>(create: (context) => getIt<ShareCubit>()),
   ];
 
   static List<RepositoryProvider> get repositories => [

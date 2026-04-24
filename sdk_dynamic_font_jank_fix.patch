@@ -1,0 +1,189 @@
+diff --git a/engine/src/flutter/txt/src/txt/font_collection.h b/engine/src/flutter/txt/src/txt/font_collection.h
+index 6727723..fa3db7c 100644
+--- a/engine/src/flutter/txt/src/txt/font_collection.h
++++ b/engine/src/flutter/txt/src/txt/font_collection.h
+@@ -38,18 +38,23 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
+   // missing from the requested font family.
+   void DisableFontFallback();
+ 
+-  // Remove all entries in the font family cache.
++  // Marks the SkParagraph font family cache dirty so it can be cleared once
++  // before the next paragraph build.
+   void ClearFontFamilyCache();
+ 
+   // Construct a Skia text layout FontCollection based on this collection.
+   sk_sp<skia::textlayout::FontCollection> CreateSktFontCollection();
+ 
+  private:
++  FRIEND_TEST(FontCollectionTests,
++              ClearingFontFamilyCacheIsDeferredUntilNextParagraphBuild);
++
+   sk_sp<SkFontMgr> default_font_manager_;
+   sk_sp<SkFontMgr> asset_font_manager_;
+   sk_sp<SkFontMgr> dynamic_font_manager_;
+   sk_sp<SkFontMgr> test_font_manager_;
+   bool enable_font_fallback_;
++  bool font_family_cache_dirty_ = false;
+ 
+   // An equivalent font collection usable by the Skia text shaper library.
+   sk_sp<skia::textlayout::FontCollection> skt_collection_;
+diff --git a/engine/src/flutter/txt/src/txt/font_collection.cc b/engine/src/flutter/txt/src/txt/font_collection.cc
+index 665ca01..58bbbff 100644
+--- a/engine/src/flutter/txt/src/txt/font_collection.cc
++++ b/engine/src/flutter/txt/src/txt/font_collection.cc
+@@ -35,26 +35,31 @@ void FontCollection::SetupDefaultFontManager(
+     uint32_t font_initialization_data) {
+   default_font_manager_ = GetDefaultFontManager(font_initialization_data);
+   skt_collection_.reset();
++  font_family_cache_dirty_ = false;
+ }
+ 
+ void FontCollection::SetDefaultFontManager(sk_sp<SkFontMgr> font_manager) {
+   default_font_manager_ = std::move(font_manager);
+   skt_collection_.reset();
++  font_family_cache_dirty_ = false;
+ }
+ 
+ void FontCollection::SetAssetFontManager(sk_sp<SkFontMgr> font_manager) {
+   asset_font_manager_ = std::move(font_manager);
+   skt_collection_.reset();
++  font_family_cache_dirty_ = false;
+ }
+ 
+ void FontCollection::SetDynamicFontManager(sk_sp<SkFontMgr> font_manager) {
+   dynamic_font_manager_ = std::move(font_manager);
+   skt_collection_.reset();
++  font_family_cache_dirty_ = false;
+ }
+ 
+ void FontCollection::SetTestFontManager(sk_sp<SkFontMgr> font_manager) {
+   test_font_manager_ = std::move(font_manager);
+   skt_collection_.reset();
++  font_family_cache_dirty_ = false;
+ }
+ 
+ // Return the available font managers in the order they should be queried.
+@@ -84,7 +89,7 @@ void FontCollection::DisableFontFallback() {
+ 
+ void FontCollection::ClearFontFamilyCache() {
+   if (skt_collection_) {
+-    skt_collection_->clearCaches();
++    font_family_cache_dirty_ = true;
+   }
+ }
+ 
+@@ -105,8 +110,11 @@ FontCollection::CreateSktFontCollection() {
+     if (!enable_font_fallback_) {
+       skt_collection_->disableFontFallback();
+     }
++  } else if (font_family_cache_dirty_) {
++    skt_collection_->clearCaches();
+   }
+ 
++  font_family_cache_dirty_ = false;
+   return skt_collection_;
+ }
+ 
+diff --git a/engine/src/flutter/txt/tests/font_collection_tests.cc b/engine/src/flutter/txt/tests/font_collection_tests.cc
+index af146bd..4ba6f67 100644
+--- a/engine/src/flutter/txt/tests/font_collection_tests.cc
++++ b/engine/src/flutter/txt/tests/font_collection_tests.cc
+@@ -27,5 +27,20 @@ TEST_F(FontCollectionTests, SettingUpDefaultFontManagerClearsCache) {
+   sk_font_collection = font_collection.CreateSktFontCollection();
+   ASSERT_NE(sk_font_collection->getFallbackManager().get(), nullptr);
+ }
++
++TEST_F(FontCollectionTests,
++       ClearingFontFamilyCacheIsDeferredUntilNextParagraphBuild) {
++  FontCollection font_collection;
++  sk_sp<skia::textlayout::FontCollection> sk_font_collection =
++      font_collection.CreateSktFontCollection();
++
++  font_collection.ClearFontFamilyCache();
++
++  EXPECT_TRUE(font_collection.font_family_cache_dirty_);
++  EXPECT_EQ(font_collection.skt_collection_.get(), sk_font_collection.get());
++  EXPECT_EQ(font_collection.CreateSktFontCollection().get(),
++            sk_font_collection.get());
++  EXPECT_FALSE(font_collection.font_family_cache_dirty_);
++}
+ }  // namespace testing
+ }  // namespace txt
+diff --git a/packages/flutter/lib/src/painting/binding.dart b/packages/flutter/lib/src/painting/binding.dart
+index 3ecd42d..03a2a4f 100644
+--- a/packages/flutter/lib/src/painting/binding.dart
++++ b/packages/flutter/lib/src/painting/binding.dart
+@@ -10,6 +10,7 @@ library;
+ 
+ import 'dart:ui' as ui;
+ import 'package:flutter/foundation.dart';
++import 'package:flutter/scheduler.dart' show SchedulerBinding;
+ import 'package:flutter/services.dart' show ServicesBinding;
+ 
+ import 'image_cache.dart';
+@@ -187,8 +188,16 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
+ 
+ class _SystemFontsNotifier extends Listenable {
+   final Set<VoidCallback> _systemFontsCallbacks = <VoidCallback>{};
++  bool _hasPendingFrameReset = false;
+ 
+   void notifyListeners() {
++    if (_hasPendingFrameReset) {
++      return;
++    }
++    _hasPendingFrameReset = true;
++    SchedulerBinding.instance.scheduleFrameCallback((Duration timeStamp) {
++      _hasPendingFrameReset = false;
++    });
+     for (final VoidCallback callback in _systemFontsCallbacks) {
+       callback();
+     }
+diff --git a/packages/flutter/test/painting/system_fonts_test.dart b/packages/flutter/test/painting/system_fonts_test.dart
+index 704a6c0..7b28b20 100644
+--- a/packages/flutter/test/painting/system_fonts_test.dart
++++ b/packages/flutter/test/painting/system_fonts_test.dart
+@@ -37,6 +37,44 @@ Future<void> verifyMarkedNeedsLayoutDuringTransientCallbacksPhase(
+ }
+ 
+ void main() {
++  testWidgets('system fonts notifier coalesces repeated changes before next frame', (
++    WidgetTester tester,
++  ) async {
++    int notificationCount = 0;
++    void listener() {
++      notificationCount += 1;
++    }
++
++    PaintingBinding.instance.systemFonts.addListener(listener);
++    addTearDown(() => PaintingBinding.instance.systemFonts.removeListener(listener));
++
++    const data = <String, dynamic>{'type': 'fontsChange'};
++    final ByteData? message = SystemChannels.system.codec.encodeMessage(data);
++
++    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
++      'flutter/system',
++      message,
++      (ByteData? data) {},
++    );
++    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
++      'flutter/system',
++      message,
++      (ByteData? data) {},
++    );
++
++    expect(notificationCount, 1);
++
++    await tester.pump();
++
++    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
++      'flutter/system',
++      message,
++      (ByteData? data) {},
++    );
++
++    expect(notificationCount, 2);
++  });
++
+   testWidgets('RenderParagraph relayout upon system fonts changes', (WidgetTester tester) async {
+     await tester.pumpWidget(const MaterialApp(home: Text('text widget')));
+     final RenderObject renderObject = tester.renderObject(find.text('text widget'));

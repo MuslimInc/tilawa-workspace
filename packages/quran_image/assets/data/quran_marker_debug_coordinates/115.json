@@ -1,0 +1,26 @@
+[
+    {
+        "sura": 5,
+        "ayah": 42,
+        "line": 3,
+        "centerX": 0.4559
+    },
+    {
+        "sura": 5,
+        "ayah": 43,
+        "line": 5,
+        "centerX": 0.39722
+    },
+    {
+        "sura": 5,
+        "ayah": 44,
+        "line": 10,
+        "centerX": 0.23785
+    },
+    {
+        "sura": 5,
+        "ayah": 45,
+        "line": 14,
+        "centerX": 0.05194
+    }
+]

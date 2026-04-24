@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+/// A row displaying the current location with a refresh action.
 class LocationRow extends StatelessWidget {
   const LocationRow({
     super.key,
@@ -15,137 +17,145 @@ class LocationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final String helperText = isLoading
-        ? context.l10n.prayerTimesRefreshingLocation
-        : context.l10n.prayerTimesTapToRefreshLocation;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool compact = constraints.maxWidth < 420;
-        final bool showHelperText = isLoading || !compact;
-        final double borderRadius = compact ? 20 : 24;
-        final double outerPadding = compact ? 14 : 16;
-        final double leadingSize = compact ? 46 : 52;
-        final double actionSize = compact ? 38 : 42;
-        final double leadingIconSize = compact ? 22 : 24;
-        final double actionIconSize = compact ? 20 : 22;
 
-        return Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(borderRadius),
-          child: InkWell(
-            onTap: isLoading ? null : onUpdateLocation,
-            borderRadius: BorderRadius.circular(borderRadius),
-            child: Ink(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    colorScheme.surface,
-                    colorScheme.surfaceContainerLowest,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(borderRadius),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.42),
-                ),
+        return TilawaCard(
+          onTap: isLoading ? null : onUpdateLocation,
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [colorScheme.surface, colorScheme.surfaceContainerLowest],
+          ),
+          borderRadius: tokens.radiusExtraLarge,
+          borderColor: colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacityMedium,
+          ),
+          padding: EdgeInsets.all(
+            compact ? tokens.spaceMedium : tokens.spaceLarge,
+          ),
+          child: Row(
+            children: [
+              _LocationIcon(compact: compact),
+              SizedBox(width: compact ? tokens.spaceMedium : tokens.spaceLarge),
+              _LocationInfo(locationName: locationName),
+              SizedBox(width: tokens.spaceSmall),
+              _LocationActionButton(
+                isLoading: isLoading,
+                compact: compact,
+                onPressed: onUpdateLocation,
               ),
-              child: Padding(
-                padding: EdgeInsets.all(outerPadding),
-                child: Row(
-                  children: [
-                    Container(
-                      width: leadingSize,
-                      height: leadingSize,
-                      decoration: BoxDecoration(
-                        color: colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(compact ? 16 : 18),
-                      ),
-                      child: Icon(
-                        Icons.location_on_rounded,
-                        size: leadingIconSize,
-                        color: colorScheme.onPrimaryContainer,
-                      ),
-                    ),
-                    SizedBox(width: compact ? 12 : 14),
-                    Expanded(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            context.l10n.currentLocation,
-                            style: theme.textTheme.labelMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            (locationName != null && locationName!.isNotEmpty)
-                                ? locationName!
-                                : context.l10n.unknownLocation,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              color: colorScheme.onSurface,
-                            ),
-                            maxLines: showHelperText ? 1 : 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          if (showHelperText) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              helperText,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Tooltip(
-                      message: context.l10n.updateLocation,
-                      child: Container(
-                        width: actionSize,
-                        height: actionSize,
-                        decoration: BoxDecoration(
-                          color: colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(
-                            compact ? 14 : 16,
-                          ),
-                        ),
-                        child: Center(
-                          child: isLoading
-                              ? SizedBox(
-                                  width: compact ? 18 : 20,
-                                  height: compact ? 18 : 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    color: colorScheme.onPrimaryContainer,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.gps_fixed_rounded,
-                                  size: actionIconSize,
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            ],
           ),
         );
       },
+    );
+  }
+}
+
+class _LocationIcon extends StatelessWidget {
+  const _LocationIcon({required this.compact});
+
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return TilawaIconBox(
+      icon: Icons.location_on_rounded,
+      size: compact ? tokens.iconSizeMedium : tokens.iconSizeLarge,
+      backgroundColor: colorScheme.primaryContainer,
+      iconColor: colorScheme.onPrimaryContainer,
+      borderRadius: compact ? tokens.radiusMedium : tokens.radiusLarge,
+      padding: compact ? tokens.spaceSmall : tokens.spaceMedium,
+    );
+  }
+}
+
+class _LocationInfo extends StatelessWidget {
+  const _LocationInfo({required this.locationName});
+
+  final String? locationName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Expanded(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.currentLocation,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            (locationName != null && locationName!.isNotEmpty)
+                ? locationName!
+                : context.l10n.unknownLocation,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+              color: colorScheme.onSurface,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LocationActionButton extends StatelessWidget {
+  const _LocationActionButton({
+    required this.isLoading,
+    required this.compact,
+    required this.onPressed,
+  });
+
+  final bool isLoading;
+  final bool compact;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Tooltip(
+      message: context.l10n.updateLocation,
+      child: TilawaIconBox(
+        icon: Icons.gps_fixed_rounded,
+        size: tokens.iconSizeMedium,
+        backgroundColor: colorScheme.primaryContainer,
+        iconColor: colorScheme.onPrimaryContainer,
+        borderRadius: compact ? tokens.radiusMedium : tokens.radiusLarge - 4,
+        padding: tokens.spaceSmall,
+        child: isLoading
+            ? SizedBox(
+                width: tokens.iconSizeMedium,
+                height: tokens.iconSizeMedium,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: colorScheme.onPrimaryContainer,
+                ),
+              )
+            : null,
+      ),
     );
   }
 }

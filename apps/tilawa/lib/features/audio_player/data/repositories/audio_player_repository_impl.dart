@@ -185,11 +185,16 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
   }
 
   @override
-  ResultVoid playFromQueue(List<AudioEntity> queue, int index) async {
+  ResultVoid playFromQueue(
+    List<AudioEntity> queue,
+    int index, {
+    Duration? initialPosition,
+  }) async {
     return _guardVoid(
       () => _audioHandler.playFromQueue(
         queue.map(_mapEntityToMediaItem).toList(),
         index,
+        initialPosition: initialPosition,
       ),
     );
   }

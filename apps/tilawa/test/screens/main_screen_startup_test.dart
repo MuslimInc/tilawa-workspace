@@ -1,0 +1,118 @@
+import 'package:dartz_plus/dartz_plus.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/reciters/domain/usecases/clear_favorite_reciters_use_case.dart';
+import 'package:tilawa/features/reciters/domain/usecases/get_favorite_reciters_use_case.dart';
+import 'package:tilawa/features/reciters/domain/usecases/toggle_favorite_reciter_use_case.dart';
+import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
+import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/screens/main_screen.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/usecases/usecase.dart';
+
+class _MockGetFavoriteRecitersUseCase extends Mock
+    implements GetFavoriteRecitersUseCase {}
+
+class _MockToggleFavoriteReciterUseCase extends Mock
+    implements ToggleFavoriteReciterUseCase {}
+
+class _MockClearFavoriteRecitersUseCase extends Mock
+    implements ClearFavoriteRecitersUseCase {}
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  final GetIt getIt = GetIt.instance;
+  late _MockGetFavoriteRecitersUseCase mockGetFavorites;
+  late _MockToggleFavoriteReciterUseCase mockToggleFavorite;
+  late _MockClearFavoriteRecitersUseCase mockClearFavorites;
+  late FavoritesCubit favoritesCubit;
+
+  setUpAll(() {
+    registerFallbackValue(const NoParams());
+  });
+
+  setUp(() async {
+    await getIt.reset();
+    getIt.allowReassignment = true;
+
+    mockGetFavorites = _MockGetFavoriteRecitersUseCase();
+    mockToggleFavorite = _MockToggleFavoriteReciterUseCase();
+    mockClearFavorites = _MockClearFavoriteRecitersUseCase();
+
+    when(() => mockGetFavorites(any())).thenAnswer(
+      (_) async => Future<Either<Failure, List<ReciterEntity>>>.value(
+        const Right<Failure, List<ReciterEntity>>([]),
+      ),
+    );
+    when(
+      () => mockToggleFavorite(any()),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
+    when(
+      () => mockClearFavorites(),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
+
+    favoritesCubit = FavoritesCubit(
+      mockGetFavorites,
+      mockToggleFavorite,
+      mockClearFavorites,
+    );
+
+    getIt.registerSingleton<FavoritesCubit>(favoritesCubit);
+  });
+
+  tearDown(() async {
+    if (!favoritesCubit.isClosed) {
+      await favoritesCubit.close();
+    }
+    await getIt.reset();
+  });
+
+  Widget buildTestApp() {
+    return MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: const MainScreen(),
+    );
+  }
+
+  testWidgets('keeps main content deferred before initial tab settle delay', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildTestApp());
+
+    expect(find.byType(RecitersScreen), findsNothing);
+
+    await tester.pump(const Duration(milliseconds: 1100));
+    expect(find.byType(RecitersScreen), findsNothing);
+  });
+
+  testWidgets('mounts initial reciters tab after settle delay gate', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(buildTestApp());
+
+    await tester.pump(const Duration(milliseconds: 1200));
+    await tester.pump();
+
+    expect(find.byType(RecitersScreen), findsOneWidget);
+  });
+
+  testWidgets(
+    'does not regress by remounting tab during short follow-up frames',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(buildTestApp());
+
+      await tester.pump(const Duration(milliseconds: 1200));
+      await tester.pump();
+      expect(find.byType(RecitersScreen), findsOneWidget);
+
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(RecitersScreen), findsOneWidget);
+    },
+  );
+}

@@ -5,15 +5,16 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A YouTube/Spotify-style sliding player panel.
 ///
@@ -68,19 +69,17 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    _expandController.addListener(() {
-      setState(() {});
-    });
+    // No addListener here — animation-driven rebuilds are handled by the
+    // AnimatedBuilder inside build(), which confines layout work to its own
+    // subtree instead of calling setState() on the full BottomPlayerWidgetState.
 
     _dismissAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _dismissAnimController.addListener(() {
-      setState(() {
-        _dismissOffsetY = _dismissAnimation?.value ?? 0;
-      });
-    });
+    // No addListener here — dismiss animation rebuilds are handled by the
+    // AnimatedBuilder inside build(), confining layout work to the
+    // Transform+Opacity subtree only.
   }
 
   @override
@@ -113,7 +112,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       return;
     }
 
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenHeight = MediaQuery.sizeOf(context).height;
     // Negative primaryDelta = dragging up = expanding
     final delta = -primaryDelta / screenHeight;
     _expandController.value = (_expandController.value + delta * 1.5).clamp(
@@ -179,6 +178,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('BottomPlayerWidget');
     return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
       listenWhen: (previous, current) {
         return previous.currentAudio?.id != current.currentAudio?.id ||
@@ -186,6 +186,20 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 current.shouldShowBottomPlayer) ||
             (previous.isPlaying != current.isPlaying && current.isPlaying);
       },
+      // Guard against position-only updates: positionData is intentionally
+      // excluded because _MiniPlayerProgressBar handles it with its own
+      // BlocSelector. Without this, every position tick (~200 ms when playing)
+      // rebuilds the full player UI tree (≈50–70 ms), causing persistent jank.
+      buildWhen: (previous, current) =>
+          previous.currentAudio != current.currentAudio ||
+          previous.shouldShowBottomPlayer != current.shouldShowBottomPlayer ||
+          previous.isPlaying != current.isPlaying ||
+          previous.canGoPrevious != current.canGoPrevious ||
+          previous.canGoNext != current.canGoNext ||
+          previous.isSleepTimerActive != current.isSleepTimerActive ||
+          previous.volume != current.volume ||
+          previous.speed != current.speed ||
+          previous.dismissedAudioId != current.dismissedAudioId,
       listener: (context, state) {
         if (_isDismissed) {
           setState(() {
@@ -204,60 +218,81 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
           return const SizedBox.shrink();
         }
 
-        final double progress = _expandController.value;
-        final double screenHeight = MediaQuery.of(context).size.height;
-        // When collapsed (progress=0), the height must be
-        // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
-        final double currentHeight = lerpDouble(
-          _miniPlayerHeight + widget.bottomNavBarHeight,
-          screenHeight,
-          progress,
-        )!;
+        final double screenHeight = MediaQuery.sizeOf(context).height;
 
         return Align(
           alignment: Alignment.bottomCenter,
           child: GestureDetector(
             onVerticalDragUpdate: _onVerticalDragUpdate,
             onVerticalDragEnd: _onVerticalDragEnd,
-            child: SizedBox(
-              height: currentHeight,
-              width: double.infinity,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  // Expanded player (behind, fades in)
-                  if (progress > 0.01)
-                    Opacity(
-                      opacity: progress.clamp(0.0, 1.0),
-                      child: _buildExpandedPlayer(context, state, audio),
-                    ),
+            // AnimatedBuilder confines expand/collapse animation rebuilds to
+            // this subtree, preventing them from propagating up to BlocConsumer
+            // and rebuilding the full player tree on every vsync tick.
+            child: AnimatedBuilder(
+              animation: _expandController,
+              builder: (context, _) {
+                final double progress = _expandController.value;
+                // When collapsed (progress=0), the height must be
+                // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
+                final double currentHeight = lerpDouble(
+                  _miniPlayerHeight + widget.bottomNavBarHeight,
+                  screenHeight,
+                  progress,
+                )!;
 
-                  // Mini player (in front, fades out quickly)
-                  if (progress < 0.99)
-                    Positioned(
-                      bottom: lerpDouble(
-                        widget.bottomNavBarHeight,
-                        0,
-                        progress,
-                      ),
-                      left: 0,
-                      right: 0,
-                      child: Transform.translate(
-                        offset: Offset(0, _dismissOffsetY),
-                        child: Opacity(
-                          opacity:
-                              ((1 - progress * 2.5) *
-                                      (1 - _dismissOffsetY / 200))
-                                  .clamp(0.0, 1.0),
-                          child: IgnorePointer(
-                            ignoring: progress > 0.4,
-                            child: _buildMiniPlayer(context, state, audio),
+                return SizedBox(
+                  height: currentHeight,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Expanded player (behind, fades in)
+                      if (progress > 0.01)
+                        Opacity(
+                          opacity: progress.clamp(0.0, 1.0),
+                          child: _buildExpandedPlayer(context, state, audio),
+                        ),
+
+                      // Mini player (in front, fades out quickly)
+                      if (progress < 0.99)
+                        Positioned(
+                          bottom: lerpDouble(
+                            widget.bottomNavBarHeight,
+                            0,
+                            progress,
+                          ),
+                          left: 0,
+                          right: 0,
+                          // AnimatedBuilder confines dismiss animation
+                          // rebuilds to Transform+Opacity only — the
+                          // _buildMiniPlayer child is not recreated on
+                          // every dismiss animation frame.
+                          child: AnimatedBuilder(
+                            animation: _dismissAnimController,
+                            builder: (context, child) {
+                              final double dismissOffset =
+                                  _dismissAnimation?.value ?? _dismissOffsetY;
+                              return Transform.translate(
+                                offset: Offset(0, dismissOffset),
+                                child: Opacity(
+                                  opacity:
+                                      ((1 - progress * 2.5) *
+                                              (1 - dismissOffset / 200))
+                                          .clamp(0.0, 1.0),
+                                  child: child,
+                                ),
+                              );
+                            },
+                            child: IgnorePointer(
+                              ignoring: progress > 0.4,
+                              child: _buildMiniPlayer(context, state, audio),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                ],
-              ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
         );
@@ -381,109 +416,117 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             // gracefully during the expand/collapse animation.
             Positioned.fill(
               child: SafeArea(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return SingleChildScrollView(
-                      physics: const NeverScrollableScrollPhysics(),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: constraints.maxHeight,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            _buildExpandedAppBar(context, state),
+                child: TilawaContentBounds(
+                  kind: TilawaContentKind.media,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        physics: const NeverScrollableScrollPhysics(),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              _buildExpandedAppBar(context, state),
 
-                            // Artwork — flexible via ConstrainedBox
-                            Padding(
-                              padding: EdgeInsets.symmetric(vertical: 12),
-                              child: Container(
-                                width: 280,
-                                height: (constraints.maxHeight * 0.35).clamp(
-                                  0.0,
-                                  280,
-                                ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(24),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.3,
+                              // Artwork — flexible via ConstrainedBox
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Container(
+                                  width: 280,
+                                  height: (constraints.maxHeight * 0.35).clamp(
+                                    0.0,
+                                    280,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(24),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(
+                                          alpha: 0.3,
+                                        ),
+                                        blurRadius: 30,
+                                        offset: const Offset(0, 15),
                                       ),
-                                      blurRadius: 30,
-                                      offset: const Offset(0, 15),
+                                    ],
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(24),
+                                    child: audio.artUri != null
+                                        ? CachedNetworkImage(
+                                            imageUrl: audio.artUri!,
+                                            fit: BoxFit.cover,
+                                            errorWidget: (_, _, _) =>
+                                                _buildDefaultArt(context),
+                                          )
+                                        : _buildDefaultArt(context),
+                                  ),
+                                ),
+                              ),
+
+                              // Title & Artist
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 24),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      audio.title,
+                                      style: context
+                                          .responsiveStyle(
+                                            (t) => t.headlineMedium,
+                                          )
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      audio.artist ?? 'Unknown',
+                                      style: context
+                                          .responsiveStyle((t) => t.bodyLarge)
+                                          ?.copyWith(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.7,
+                                            ),
+                                          ),
+                                      textAlign: TextAlign.center,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(24),
-                                  child: audio.artUri != null
-                                      ? CachedNetworkImage(
-                                          imageUrl: audio.artUri!,
-                                          fit: BoxFit.cover,
-                                          errorWidget: (_, _, _) =>
-                                              _buildDefaultArt(context),
-                                        )
-                                      : _buildDefaultArt(context),
-                                ),
                               ),
-                            ),
 
-                            // Title & Artist
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 24),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    audio.title,
-                                    style: TextStyle(
-                                      fontSize: 24,
-                                      color: Colors.white,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    audio.artist ?? 'Unknown',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.7,
-                                      ),
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
+                              SizedBox(height: 16),
 
-                            SizedBox(height: 16),
+                              // Seek bar
+                              const _ExpandedProgressBar(),
 
-                            // Seek bar
-                            const _ExpandedProgressBar(),
+                              SizedBox(height: 16),
 
-                            SizedBox(height: 16),
+                              // Controls
+                              _buildControls(context, state),
 
-                            // Controls
-                            _buildControls(context, state),
-
-                            SizedBox(height: 24),
-                          ],
+                              SizedBox(height: 24),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
 
             // Drag handle at top
             Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
+              top: MediaQuery.paddingOf(context).top + 8,
               left: 0,
               right: 0,
               child: Center(

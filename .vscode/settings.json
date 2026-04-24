@@ -1,10 +1,11 @@
 {
-  "dart.flutterSdkPath": ".fvm/versions/3.41.5",
+  "dart.flutterSdkPath": ".fvm/versions/3.41.7",
   "cSpell.words": [
     "Athkar",
     "Firestore",
     "tilawa",
     "usecases"
   ],
-  "chatgpt.openOnStartup": false
+  "chatgpt.openOnStartup": false,
+  "kiroAgent.configureMCP": "Disabled"
 }

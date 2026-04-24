@@ -2,11 +2,11 @@ name: tilawa
 resolution: workspace
 description: An Audio Quran Player project.
 
-publish_to: "none"
+publish_to: none
 version: 0.1.3+20
 
 environment:
-  sdk: ^3.11.3
+  sdk: ^3.11.5
 
 dependencies:
   audio_service: ^0.18.18
@@ -46,7 +46,7 @@ dependencies:
   gap: ^3.0.1
   geolocator: ^14.0.2
   get_it: ^9.2.0
-  go_router: ^17.0.1
+  go_router: ^17.2.2
   google_fonts: ^8.0.0
   google_sign_in: ^7.2.0
   hive_ce: ^2.19.1
@@ -69,18 +69,24 @@ dependencies:
     path: ../../packages/core
   tilawa_ui_kit:
     path: ../../packages/ui_kit
-  quran:
-    path: ../../packages/quran
+  quran_qcf:
+    path: ../../packages/quran_qcf
+  quran_image:
+    path: ../../packages/quran_image
 
   rxdart: ^0.28.0
   share_plus: ^12.0.1
   shared_preferences: ^2.5.4
   skeletonizer: ^2.1.2
   stream_transform: ^2.1.1
+  term_glyph: ^1.2.2
   timezone: ^0.11.0
   geocoding: ^4.0.0
   package_info_plus: ^9.0.0
   device_preview: ^1.3.1
+  ffmpeg_kit_flutter_new: ^4.1.0
+  video_player: ^2.11.1
+  chewie: ^1.13.0
 
 dev_dependencies:
   bloc_lint: ^0.3.6
@@ -92,7 +98,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^3.2.4
-  go_router_builder: ^4.1.3
+  go_router_builder: ^4.3.0
   injectable_generator: ^2.12.0
   integration_test:
     sdk: flutter

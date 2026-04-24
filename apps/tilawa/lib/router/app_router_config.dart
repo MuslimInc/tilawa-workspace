@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/quran_reader/presentation/screens/quran_font_loader_screen.dart';
+import 'package:tilawa/features/quran_reader/presentation/screens/quran_image_reader_screen.dart';
+import 'package:tilawa/features/quran_reader/presentation/screens/quran_render_demo_screen.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
@@ -261,7 +262,7 @@ class QuranLastReadRoute extends GoRouteData with $QuranLastReadRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const QuranFontLoaderScreen(surahNumber: 0);
+    return const QuranImageReaderScreen(surahNumber: 0);
   }
 }
 
@@ -274,9 +275,19 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return QuranFontLoaderScreen(
+    return QuranImageReaderScreen(
       surahNumber: surahNumber,
       initialAyah: ayahNumber,
     );
+  }
+}
+
+@TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo')
+class QuranRenderDemoRoute extends GoRouteData with $QuranRenderDemoRoute {
+  const QuranRenderDemoRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const QuranRenderDemoScreen();
   }
 }

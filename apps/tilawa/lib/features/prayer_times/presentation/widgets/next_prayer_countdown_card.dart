@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import 'prayer_time_localizations.dart';
@@ -38,109 +39,57 @@ class NextPrayerCountdownCard extends StatelessWidget {
         ? nextPrayer.formattedTime
         : nextPrayer.getFormattedTime12Hour(isArabic: isArabic);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
+    final tokens = theme.tokens;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceSmall,
+      ),
+      child: TilawaCard(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [colorScheme.surface, colorScheme.surfaceContainerLow],
         ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.42),
-          width: 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 24,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+        borderRadius: tokens.radiusExtraLarge,
+        borderColor: colorScheme.outlineVariant.withValues(alpha: 0.42),
+        padding: EdgeInsets.all(tokens.spaceLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.notifications_active_rounded,
-                        size: 18,
-                        color: colorScheme.onPrimary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        nextPrayerLabel,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: colorScheme.onPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
+                TilawaStatusChip(
+                  label: nextPrayerLabel,
+                  backgroundColor: accentColor,
+                  foregroundColor: colorScheme.onPrimary,
+                  icon: Icons.notifications_active_rounded,
                 ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        scheduledLabel,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        prayerTime,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                    ],
-                  ),
+                TilawaStatusChip(
+                  label: '$scheduledLabel • $prayerTime',
+                  backgroundColor: colorScheme.surfaceContainerHighest,
+                  foregroundColor: colorScheme.onSurfaceVariant,
                 ),
               ],
             ),
-            const SizedBox(height: 22),
+            SizedBox(height: tokens.spaceLarge),
             Text(
               prayerName,
-              style: theme.textTheme.headlineMedium?.copyWith(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.w800,
                 color: colorScheme.onSurface,
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: tokens.spaceExtraSmall),
             Text(
               timeRemainingText,
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: tokens.spaceLarge),
             Row(
               children: [
                 Expanded(
@@ -150,7 +99,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
                     accentColor: accentColor,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: tokens.spaceSmall),
                 Expanded(
                   child: _TimerSegment(
                     value: minutes.toString().padLeft(2, '0'),
@@ -158,7 +107,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
                     accentColor: accentColor,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: tokens.spaceSmall),
                 Expanded(
                   child: _TimerSegment(
                     value: seconds.toString().padLeft(2, '0'),
@@ -190,36 +139,29 @@ class _TimerSegment extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.42),
-        ),
-      ),
+    final tokens = theme.tokens;
+
+    return TilawaCard(
+      padding: EdgeInsets.symmetric(vertical: tokens.spaceSmall),
+      backgroundColor: theme.colorScheme.surface,
+      borderRadius: tokens.radiusMedium,
+      borderColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.42),
       child: Column(
         children: [
           Text(
             value,
-            style: theme.textTheme.headlineMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               color: accentColor,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                label,
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          SizedBox(height: tokens.spaceExtraSmall),
+          Text(
+            label,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

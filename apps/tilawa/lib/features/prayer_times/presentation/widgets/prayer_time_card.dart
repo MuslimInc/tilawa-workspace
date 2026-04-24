@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
+import '../extensions/prayer_type_ui.dart';
 import 'prayer_time_localizations.dart';
 
+/// A card displaying a specific prayer time with status and supporting info.
+///
+/// Follows Atomic Design by decomposing into atoms: icon, status chip, labels.
 class PrayerTimeCard extends StatelessWidget {
   const PrayerTimeCard({
     super.key,
@@ -20,291 +25,245 @@ class PrayerTimeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final Color accentColor = colorScheme.primary;
-    final Color emphasisColor = colorScheme.onSurface;
-    final Color secondaryColor = hasPassed
-        ? colorScheme.onSurfaceVariant.withValues(alpha: 0.72)
-        : colorScheme.onSurfaceVariant;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        // Thresholds for compact mode to avoid overflows on small screens
         final bool compact =
-            constraints.maxWidth < 180 || constraints.maxHeight < 194;
-        final double iconBoxSize = compact ? 40 : 44;
-        final double iconSize = compact ? 20 : 22;
-        final double titleFontSize = compact
-            ? ((theme.textTheme.titleLarge?.fontSize ?? 22) - 2)
-            : (theme.textTheme.titleLarge?.fontSize ?? 22);
-        final double timeFontSize = compact
-            ? ((theme.textTheme.headlineSmall?.fontSize ?? 24) - 2)
-            : (theme.textTheme.headlineSmall?.fontSize ?? 24);
-        final double supportFontSize = compact
-            ? ((theme.textTheme.bodySmall?.fontSize ?? 12) - 1)
-            : (theme.textTheme.bodySmall?.fontSize ?? 12);
-        final EdgeInsets contentPadding = EdgeInsets.fromLTRB(
-          compact ? 14 : 16,
-          compact ? 14 : 16,
-          compact ? 14 : 16,
-          compact ? 12 : 14,
-        );
+            constraints.maxWidth < tokens.cardCompactWidthThreshold ||
+            constraints.maxHeight < tokens.cardCompactHeightThreshold;
+        final bool tightHeight =
+            constraints.maxHeight < tokens.cardTightHeightThreshold;
+
+        final Color accentColor = colorScheme.primary;
+        final Color emphasisColor = colorScheme.onSurface;
 
         return Container(
           decoration: BoxDecoration(
             color: isNext
                 ? colorScheme.surfaceContainerLow
                 : colorScheme.surface,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
             border: Border.all(
               color: isNext
-                  ? accentColor.withValues(alpha: 0.28)
-                  : colorScheme.outlineVariant.withValues(alpha: 0.28),
-              width: isNext ? 1.4 : 1.0,
-            ),
-            boxShadow: isNext
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
+                  ? accentColor.withValues(alpha: tokens.opacityMedium)
+                  : colorScheme.outlineVariant.withValues(
+                      alpha: tokens.opacityMedium,
                     ),
-                  ]
-                : null,
+              width: isNext
+                  ? tokens.borderWidthThin * 3
+                  : tokens.borderWidthThin * 2,
+            ),
           ),
           child: Padding(
-            padding: contentPadding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: iconBoxSize,
-                      height: iconBoxSize,
-                      decoration: BoxDecoration(
-                        color: isNext
-                            ? colorScheme.primaryContainer
-                            : colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(compact ? 14 : 16),
-                      ),
-                      child: Icon(
-                        _iconForPrayerType(prayer.type),
-                        size: iconSize,
-                        color: isNext
-                            ? colorScheme.onPrimaryContainer
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const Spacer(),
-                    _PrayerStatusChip(
-                      label: _statusLabel(context),
-                      isNext: isNext,
-                      hasPassed: hasPassed,
-                      compact: compact,
-                    ),
-                  ],
-                ),
-                const Spacer(),
-                Text(
-                  prayer.type.localizedName(context),
-                  maxLines: compact ? 1 : 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: titleFontSize,
-                    fontWeight: FontWeight.w800,
-                    color: emphasisColor.withValues(
-                      alpha: hasPassed ? 0.70 : 1.0,
-                    ),
-                  ),
-                ),
-                SizedBox(height: compact ? 6 : 8),
-                Text(
-                  use24HourFormat
-                      ? prayer.formattedTime
-                      : prayer.getFormattedTime12Hour(isArabic: isArabic),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontSize: timeFontSize,
-                    fontWeight: FontWeight.w800,
-                    color: isNext
-                        ? accentColor
-                        : colorScheme.onSurface.withValues(
-                            alpha: hasPassed ? 0.76 : 1.0,
-                          ),
-                  ),
-                ),
-                SizedBox(height: compact ? 10 : 12),
-                Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: compact ? 8 : 10,
-                    vertical: compact ? 6 : 7,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isNext
-                        ? colorScheme.primaryContainer
-                        : colorScheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(compact ? 12 : 14),
-                  ),
-                  child: Text(
-                    _supportingText(context),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: supportFontSize,
-                      fontWeight: FontWeight.w600,
-                      color: isNext
-                          ? colorScheme.onPrimaryContainer
-                          : secondaryColor,
-                    ),
-                  ),
-                ),
-              ],
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceMedium,
+              vertical: tightHeight ? tokens.spaceSmall : tokens.spaceMedium,
+            ),
+            child: _MainColumn(
+              constraints: constraints,
+              compact: compact,
+              tightHeight: tightHeight,
+              prayer: prayer,
+              isNext: isNext,
+              hasPassed: hasPassed,
+              emphasisColor: emphasisColor,
+              accentColor: accentColor,
+              use24HourFormat: use24HourFormat,
             ),
           ),
         );
       },
     );
   }
-
-  String _statusLabel(BuildContext context) {
-    if (isNext) {
-      return context.l10n.next;
-    }
-    if (hasPassed) {
-      return context.l10n.prayerTimesPassed;
-    }
-    return context.l10n.prayerTimesUpcoming;
-  }
-
-  String _supportingText(BuildContext context) {
-    switch (prayer.type) {
-      case PrayerType.fajr:
-      case PrayerType.dhuhr:
-      case PrayerType.asr:
-      case PrayerType.maghrib:
-      case PrayerType.isha:
-        return context.l10n.prayerTimesIqamahAt(_secondaryTime());
-      case PrayerType.sunrise:
-        return context.l10n.prayerTimesIshraqAt(_secondaryTime());
-      case PrayerType.midnight:
-        return context.l10n.prayerTimesNightMidpointMarker;
-      case PrayerType.lastThird:
-        return context.l10n.prayerTimesLastThirdBegins;
-    }
-  }
-
-  String _secondaryTime() {
-    int minutesToAdd = 0;
-
-    switch (prayer.type) {
-      case PrayerType.fajr:
-        minutesToAdd = 25;
-        break;
-      case PrayerType.sunrise:
-        minutesToAdd = 20;
-        break;
-      case PrayerType.dhuhr:
-      case PrayerType.asr:
-      case PrayerType.isha:
-        minutesToAdd = 20;
-        break;
-      case PrayerType.maghrib:
-        minutesToAdd = 5;
-        break;
-      case PrayerType.midnight:
-      case PrayerType.lastThird:
-        return '';
-    }
-
-    final DateTime secondaryTime = prayer.time.add(
-      Duration(minutes: minutesToAdd),
-    );
-    final int hour12 = secondaryTime.hour > 12
-        ? secondaryTime.hour - 12
-        : secondaryTime.hour;
-    final String formattedHour = hour12 == 0 ? '12' : hour12.toString();
-    final String formattedMinute = secondaryTime.minute.toString().padLeft(
-      2,
-      '0',
-    );
-
-    if (use24HourFormat) {
-      return '${secondaryTime.hour.toString().padLeft(2, '0')}:$formattedMinute';
-    }
-
-    return '$formattedHour:$formattedMinute';
-  }
-
-  IconData _iconForPrayerType(PrayerType type) {
-    switch (type) {
-      case PrayerType.fajr:
-        return Icons.dark_mode_rounded;
-      case PrayerType.sunrise:
-        return Icons.wb_sunny_outlined;
-      case PrayerType.dhuhr:
-        return Icons.light_mode_rounded;
-      case PrayerType.asr:
-        return Icons.wb_sunny_rounded;
-      case PrayerType.maghrib:
-        return Icons.nights_stay_rounded;
-      case PrayerType.isha:
-        return Icons.bedtime_rounded;
-      case PrayerType.midnight:
-        return Icons.dark_mode_outlined;
-      case PrayerType.lastThird:
-        return Icons.schedule_rounded;
-    }
-  }
 }
 
-class _PrayerStatusChip extends StatelessWidget {
-  const _PrayerStatusChip({
-    required this.label,
+class _MainColumn extends StatelessWidget {
+  const _MainColumn({
+    required this.constraints,
+    required this.compact,
+    required this.tightHeight,
+    required this.prayer,
     required this.isNext,
     required this.hasPassed,
-    required this.compact,
+    required this.emphasisColor,
+    required this.accentColor,
+    required this.use24HourFormat,
   });
 
-  final String label;
+  final BoxConstraints constraints;
+  final bool compact;
+  final bool tightHeight;
+  final PrayerTimeItem prayer;
   final bool isNext;
   final bool hasPassed;
-  final bool compact;
+  final Color emphasisColor;
+  final Color accentColor;
+  final bool use24HourFormat;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final Color backgroundColor = isNext
-        ? colorScheme.primary
-        : hasPassed
-        ? colorScheme.surfaceContainerHighest
-        : colorScheme.primaryContainer;
-    final Color foregroundColor = isNext
-        ? colorScheme.onPrimary
-        : hasPassed
-        ? colorScheme.onSurfaceVariant
-        : colorScheme.onPrimaryContainer;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: compact ? 8 : 10,
-        vertical: compact ? 5 : 6,
-      ),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.labelMedium?.copyWith(
-          fontSize: compact ? 11 : null,
-          color: foregroundColor,
-          fontWeight: FontWeight.w700,
+    return Column(
+      crossAxisAlignment: .start,
+      mainAxisSize: .min,
+      mainAxisAlignment: .spaceBetween,
+      children: [
+        _HeaderRow(
+          prayer: prayer,
+          isNext: isNext,
+          hasPassed: hasPassed,
+          compact: compact,
+          tightHeight: tightHeight,
         ),
+        _PrayerTimeLabel(
+          prayer: prayer,
+          hasPassed: hasPassed,
+          compact: compact,
+          emphasisColor: emphasisColor,
+        ),
+        _PrayerTimeValue(
+          prayer: prayer,
+          isNext: isNext,
+          hasPassed: hasPassed,
+          use24HourFormat: use24HourFormat,
+          accentColor: accentColor,
+        ),
+      ],
+    );
+  }
+}
+
+class _HeaderRow extends StatelessWidget {
+  const _HeaderRow({
+    required this.prayer,
+    required this.isNext,
+    required this.hasPassed,
+    required this.compact,
+    required this.tightHeight,
+  });
+
+  final PrayerTimeItem prayer;
+  final bool isNext;
+  final bool hasPassed;
+  final bool compact;
+  final bool tightHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TilawaIconBox(
+          icon: prayer.type.icon,
+          size: compact ? 16 : 24,
+          padding: tightHeight ? 4 : 8,
+          backgroundColor: isNext
+              ? colorScheme.primary.withValues(alpha: 0.12)
+              : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          iconColor: isNext
+              ? colorScheme.primary
+              : colorScheme.onSurfaceVariant,
+          borderRadius: 8,
+        ),
+        const Spacer(),
+        TilawaStatusChip(
+          label: isNext
+              ? context.l10n.next
+              : hasPassed
+              ? context.l10n.prayerTimesPassed
+              : context.l10n.prayerTimesUpcoming,
+          backgroundColor: isNext
+              ? colorScheme.primary
+              : hasPassed
+              ? colorScheme.surfaceContainerHighest
+              : colorScheme.primaryContainer,
+          foregroundColor: isNext
+              ? colorScheme.onPrimary
+              : hasPassed
+              ? colorScheme.onSurfaceVariant
+              : colorScheme.onPrimaryContainer,
+        ),
+      ],
+    );
+  }
+}
+
+class _PrayerTimeLabel extends StatelessWidget {
+  const _PrayerTimeLabel({
+    required this.prayer,
+    required this.hasPassed,
+    required this.compact,
+    required this.emphasisColor,
+  });
+
+  final PrayerTimeItem prayer;
+  final bool hasPassed;
+  final bool compact;
+  final Color emphasisColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final double baseFontSize = theme.textTheme.titleMedium?.fontSize ?? 18;
+    final double fontSize = compact ? baseFontSize - 1 : baseFontSize;
+
+    return Text(
+      prayer.type.localizedName(context),
+      maxLines: compact ? 1 : 2,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.titleLarge?.copyWith(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w800,
+        color: emphasisColor.withValues(
+          alpha: hasPassed ? theme.tokens.opacityEmphasis : 1.0,
+        ),
+      ),
+    );
+  }
+}
+
+class _PrayerTimeValue extends StatelessWidget {
+  const _PrayerTimeValue({
+    required this.prayer,
+    required this.isNext,
+    required this.hasPassed,
+    required this.use24HourFormat,
+    required this.accentColor,
+  });
+
+  final PrayerTimeItem prayer;
+  final bool isNext;
+  final bool hasPassed;
+  final bool use24HourFormat;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final double fontSize =
+        (theme.textTheme.titleLarge?.fontSize ?? 22) -
+        (theme.tokens.spaceExtraSmall / 2);
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+
+    return Text(
+      use24HourFormat
+          ? prayer.formattedTime
+          : prayer.getFormattedTime12Hour(isArabic: isArabic),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.headlineSmall?.copyWith(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w800,
+        color: isNext
+            ? accentColor
+            : theme.colorScheme.onSurface.withValues(
+                alpha: hasPassed ? theme.tokens.opacityEmphasis : 1.0,
+              ),
       ),
     );
   }

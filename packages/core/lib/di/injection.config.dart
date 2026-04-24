@@ -16,6 +16,9 @@ import 'package:tilawa_core/network/network_info.dart' as _i464;
 import 'package:tilawa_core/network/network_info_impl.dart' as _i571;
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart'
     as _i516;
+import 'package:tilawa_core/services/interfaces/keep_awake_service.dart'
+    as _i951;
+import 'package:tilawa_core/services/wakelock_keep_awake_service.dart' as _i874;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -29,6 +32,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i895.Connectivity>(),
         internetLookup: internetLookup,
       ),
+    );
+    gh.lazySingleton<_i951.KeepAwakeService>(
+      () => _i874.WakelockKeepAwakeService(),
     );
     gh.factory<_i516.InternetStatusBloc>(
       () => _i516.InternetStatusBloc(gh<_i464.NetworkInfo>()),

@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa_core/errors/failures.dart';
-import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import 'package:tilawa/features/athkar/domain/entities/athkar_category.dart';
@@ -16,16 +15,11 @@ import 'package:tilawa/features/athkar/presentation/cubit/athkar_state.dart';
 
 import 'athkar_cubit_test.mocks.dart';
 
-@GenerateMocks([
-  GetAthkarCategoriesUseCase,
-  GetAthkarByCategoryUseCase,
-  AnalyticsService,
-])
+@GenerateMocks([GetAthkarCategoriesUseCase, GetAthkarByCategoryUseCase])
 void main() {
   late AthkarCubit cubit;
   late MockGetAthkarCategoriesUseCase mockGetCategories;
   late MockGetAthkarByCategoryUseCase mockGetAthkarByCategory;
-  late MockAnalyticsService mockAnalyticsService;
 
   setUp(() {
     provideDummy<ResultFuture<List<AthkarCategory>>>(
@@ -37,12 +31,7 @@ void main() {
 
     mockGetCategories = MockGetAthkarCategoriesUseCase();
     mockGetAthkarByCategory = MockGetAthkarByCategoryUseCase();
-    mockAnalyticsService = MockAnalyticsService();
-    cubit = AthkarCubit(
-      mockGetCategories,
-      mockGetAthkarByCategory,
-      mockAnalyticsService,
-    );
+    cubit = AthkarCubit(mockGetCategories, mockGetAthkarByCategory);
   });
 
   tearDown(() {
@@ -97,7 +86,10 @@ void main() {
         return cubit;
       },
       act: (cubit) => cubit.loadCategories(),
-      expect: () => [AthkarLoading(), const AthkarError('Server Error')],
+      expect: () => [
+        const AthkarLoading(),
+        const AthkarError(ServerFailure('Server Error')),
+      ],
     );
   });
 
@@ -129,7 +121,10 @@ void main() {
         return cubit;
       },
       act: (cubit) => cubit.loadAthkar(1),
-      expect: () => [AthkarLoading(), const AthkarError('Server Error')],
+      expect: () => [
+        const AthkarLoading(),
+        const AthkarError(ServerFailure('Server Error')),
+      ],
     );
     group('counter management', () {
       blocTest<AthkarCubit, AthkarState>(

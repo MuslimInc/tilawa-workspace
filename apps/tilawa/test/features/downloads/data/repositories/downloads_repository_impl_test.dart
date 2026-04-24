@@ -1052,7 +1052,7 @@ void main() {
       );
 
       test('should return false when file validation fails', () async {
-        // The repository's validateDownloadedFile uses File.exists() directly
+        // The repository's validateDownloadedFile uses File.existsSync() directly
         // which is hard to mock, so we test the exception handling path
         // by providing an invalid file path that will cause an exception
         final DownloadItem invalidDownloadItem = testDownloadItem.copyWith(

@@ -149,6 +149,7 @@ class BottomPlayerUi extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: tokens.spaceExtraSmall / 2,
                           children: [
                             Text(
                               audio.title,
@@ -156,7 +157,6 @@ class BottomPlayerUi extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(height: tokens.spaceExtraSmall / 2),
                             Text(
                               audio.artist ?? 'Unknown Reciter',
                               style: subtitleStyle,
@@ -174,6 +174,7 @@ class BottomPlayerUi extends StatelessWidget {
                         textDirection: TextDirection.ltr,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
+                          spacing: tokens.spaceExtraSmall,
                           children: [
                             // Previous
                             SizedBox(
@@ -193,8 +194,6 @@ class BottomPlayerUi extends StatelessWidget {
                                 onPressed: canGoPrevious ? onPrevious : null,
                               ),
                             ),
-
-                            SizedBox(width: tokens.spaceExtraSmall),
 
                             // Play/Pause
                             Container(
@@ -226,8 +225,6 @@ class BottomPlayerUi extends StatelessWidget {
                               ),
                             ),
 
-                            SizedBox(width: tokens.spaceExtraSmall),
-
                             // Next
                             SizedBox(
                               width: 32,
@@ -246,8 +243,6 @@ class BottomPlayerUi extends StatelessWidget {
                                 onPressed: canGoNext ? onNext : null,
                               ),
                             ),
-
-                            SizedBox(width: tokens.spaceExtraSmall),
 
                             // Sleep Timer
                             if (isSleepTimerEnabled)

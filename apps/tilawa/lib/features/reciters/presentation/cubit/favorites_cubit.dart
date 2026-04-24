@@ -1,10 +1,10 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
+
 import '../../domain/usecases/clear_favorite_reciters_use_case.dart';
 import '../../domain/usecases/get_favorite_reciters_use_case.dart';
 import '../../domain/usecases/toggle_favorite_reciter_use_case.dart';
@@ -25,10 +25,12 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   final Set<int> _pendingReciterIds = {};
 
   Future<void> loadFavorites() async {
+    if (isClosed) return;
     emit(FavoritesLoading());
     final Either<Failure, List<ReciterEntity>> result = await _getFavorites(
       const NoParams(),
     );
+    if (isClosed) return;
 
     result.fold(
       (failure) => emit(FavoritesError(failure.message ?? 'Unknown Error')),
@@ -45,6 +47,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   }
 
   Future<void> toggleFavorite(ReciterEntity reciter) async {
+    if (isClosed) return;
     if (_pendingReciterIds.contains(reciter.id)) {
       return;
     }
@@ -60,7 +63,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       }
 
       // Emit loaded state immediately with updated IDs to reflect UI change fast
-      if (state is FavoritesLoaded) {
+      if (!isClosed && state is FavoritesLoaded) {
         final List<ReciterEntity> currentReciters =
             (state as FavoritesLoaded).favorites;
         List<ReciterEntity> updatedReciters;
@@ -81,6 +84,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       }
 
       final Either<Failure, void> result = await _toggleFavorite(reciter.id);
+      if (isClosed) return;
 
       result.fold(
         (failure) {
@@ -104,6 +108,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   }
 
   Future<bool> clearAllFavorites() async {
+    if (isClosed) return false;
     if (_pendingReciterIds.isNotEmpty) {
       return false;
     }
@@ -128,6 +133,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     );
 
     final Either<Failure, void> result = await _clearFavoriteReciters();
+    if (isClosed) return false;
 
     return result.fold((_) {
       _currentFavoriteIds = previousFavoriteIds;

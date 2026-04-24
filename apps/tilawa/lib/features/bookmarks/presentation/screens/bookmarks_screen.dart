@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_core/entities/audio.dart';
+
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/bookmark_entity.dart';
 import '../bloc/bookmarks_bloc.dart';
 import '../widgets/bookmark_card.dart';
@@ -31,126 +35,133 @@ class BookmarksScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: BlocConsumer<BookmarksBloc, BookmarksState>(
-        listener: (context, state) {
-          state.whenOrNull(
-            bookmarkCreated: (bookmark, _) {
-              ToastUtils.showSuccessToast(context.l10n.bookmarkAdded);
-            },
-            bookmarkDeleted: (_, _) {
-              ToastUtils.showSuccessToast(context.l10n.bookmarkDeleted);
-            },
-            bookmarkUpdated: (_, _) {
-              ToastUtils.showSuccessToast(context.l10n.bookmarkUpdated);
-            },
-            error: (message) {
-              ToastUtils.showErrorToast(message);
-            },
-          );
-        },
-        builder: (context, state) {
-          return Stack(
-            children: [
-              state.when(
-                initial: () => const Center(child: CircularProgressIndicator()),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                loaded: (bookmarks, filteredBookmarks, searchQuery) => Column(
-                  children: [
-                    BookmarkSearchBar(
-                      onSearchChanged: (query) {
-                        context.read<BookmarksBloc>().add(
-                          SearchBookmarksEvent(query: query),
-                        );
-                      },
-                      onClearSearch: () {
-                        context.read<BookmarksBloc>().add(
-                          const ClearBookmarksSearchEvent(),
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: filteredBookmarks.isEmpty
-                          ? _buildEmptyState(context, searchQuery.isNotEmpty)
-                          : ListView.separated(
-                              padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
-                              itemCount: filteredBookmarks.length,
-                              separatorBuilder: (context, index) =>
-                                  SizedBox(height: 8),
-                              itemBuilder: (context, index) {
-                                final BookmarkEntity bookmark =
-                                    filteredBookmarks[index];
-                                return Dismissible(
-                                  key: ValueKey(bookmark.id),
-                                  background: Container(
-                                    alignment: Alignment.centerRight,
-                                    padding: EdgeInsets.only(right: 20),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red,
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: const Icon(
-                                      Icons.delete_outline_rounded,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  onDismissed: (direction) {
-                                    context.read<BookmarksBloc>().add(
-                                      DeleteBookmarkEvent(id: bookmark.id),
-                                    );
-                                  },
-                                  child: BookmarkCard(
-                                    bookmark: bookmark,
-                                    onTap: () =>
-                                        _playFromBookmark(context, bookmark),
-                                    onEdit: () =>
-                                        _showEditLabelDialog(context, bookmark),
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
-                ),
-                bookmarkCreated: (_, bookmarks) =>
-                    _buildLoadedList(context, bookmarks),
-                bookmarkUpdated: (_, bookmarks) =>
-                    _buildLoadedList(context, bookmarks),
-                bookmarkDeleted: (_, bookmarks) =>
-                    _buildLoadedList(context, bookmarks),
-                error: (message) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+      body: TilawaContentBounds(
+        kind: TilawaContentKind.media,
+        child: BlocConsumer<BookmarksBloc, BookmarksState>(
+          listener: (context, state) {
+            state.whenOrNull(
+              bookmarkCreated: (bookmark, _) {
+                ToastUtils.showSuccessToast(context.l10n.bookmarkAdded);
+              },
+              bookmarkDeleted: (_, _) {
+                ToastUtils.showSuccessToast(context.l10n.bookmarkDeleted);
+              },
+              bookmarkUpdated: (_, _) {
+                ToastUtils.showSuccessToast(context.l10n.bookmarkUpdated);
+              },
+              error: (message) {
+                ToastUtils.showErrorToast(message);
+              },
+            );
+          },
+          builder: (context, state) {
+            return Stack(
+              children: [
+                state.when(
+                  initial: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  loaded: (bookmarks, filteredBookmarks, searchQuery) => Column(
                     children: [
-                      Icon(
-                        Icons.error_outline_rounded,
-                        size: 64,
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        message,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                      SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
+                      BookmarkSearchBar(
+                        onSearchChanged: (query) {
                           context.read<BookmarksBloc>().add(
-                            const LoadBookmarksEvent(),
+                            SearchBookmarksEvent(query: query),
                           );
                         },
-                        child: Text(context.l10n.retry),
+                        onClearSearch: () {
+                          context.read<BookmarksBloc>().add(
+                            const ClearBookmarksSearchEvent(),
+                          );
+                        },
+                      ),
+                      Expanded(
+                        child: filteredBookmarks.isEmpty
+                            ? _buildEmptyState(context, searchQuery.isNotEmpty)
+                            : ListView.separated(
+                                padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
+                                itemCount: filteredBookmarks.length,
+                                separatorBuilder: (context, index) =>
+                                    SizedBox(height: 8),
+                                itemBuilder: (context, index) {
+                                  final BookmarkEntity bookmark =
+                                      filteredBookmarks[index];
+                                  return Dismissible(
+                                    key: ValueKey(bookmark.id),
+                                    background: Container(
+                                      alignment: Alignment.centerRight,
+                                      padding: EdgeInsets.only(right: 20),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: const Icon(
+                                        Icons.delete_outline_rounded,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    onDismissed: (direction) {
+                                      context.read<BookmarksBloc>().add(
+                                        DeleteBookmarkEvent(id: bookmark.id),
+                                      );
+                                    },
+                                    child: BookmarkCard(
+                                      bookmark: bookmark,
+                                      onTap: () =>
+                                          _playFromBookmark(context, bookmark),
+                                      onEdit: () => _showEditLabelDialog(
+                                        context,
+                                        bookmark,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
                       ),
                     ],
                   ),
+                  bookmarkCreated: (_, bookmarks) =>
+                      _buildLoadedList(context, bookmarks),
+                  bookmarkUpdated: (_, bookmarks) =>
+                      _buildLoadedList(context, bookmarks),
+                  bookmarkDeleted: (_, bookmarks) =>
+                      _buildLoadedList(context, bookmarks),
+                  error: (message) => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 64,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        SizedBox(height: 16),
+                        Text(
+                          message,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () {
+                            context.read<BookmarksBloc>().add(
+                              const LoadBookmarksEvent(),
+                            );
+                          },
+                          child: Text(context.l10n.retry),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              const Positioned.fill(child: BottomPlayerWidget()),
-            ],
-          );
-        },
+                const Positioned.fill(child: BottomPlayerWidget()),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -242,9 +253,28 @@ class BookmarksScreen extends StatelessWidget {
   }
 
   void _playFromBookmark(BuildContext context, BookmarkEntity bookmark) {
-    // TODO: Implement play from bookmark position
-    // This will be connected to AudioPlayerBloc
-    ToastUtils.showToast(msg: 'Playing from ${bookmark.formattedPosition}');
+    final audio = AudioEntity(
+      id: bookmark.audioUrl,
+      title: bookmark.surahName,
+      url: bookmark.audioUrl,
+      duration: bookmark.duration,
+      artist: bookmark.reciterName,
+      album: bookmark.moshafName,
+      artUri: bookmark.artworkUrl,
+      extras: {
+        'surahId': bookmark.surahId,
+        'reciterId': bookmark.reciterId,
+        'moshafId': bookmark.moshafId,
+      },
+    );
+
+    context.read<AudioPlayerBloc>().add(
+      AudioPlayerEvent.playFromQueue(
+        [audio],
+        0,
+        initialPosition: bookmark.position,
+      ),
+    );
   }
 
   void _showEditLabelDialog(BuildContext context, BookmarkEntity bookmark) {

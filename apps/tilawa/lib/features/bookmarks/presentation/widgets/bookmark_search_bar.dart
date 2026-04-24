@@ -1,5 +1,6 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:tilawa/core/extensions.dart';
 
@@ -30,32 +31,20 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(16),
-      child: TextField(
-        controller: _controller,
-        focusNode: _focusNode,
-        decoration: InputDecoration(
-          hintText: context.l10n.searchBookmarks,
-          prefixIcon: const Icon(FluentIcons.search_24_regular),
-          suffixIcon: _controller.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(FluentIcons.dismiss_24_regular),
-                  onPressed: () {
-                    _controller.clear();
-                    widget.onClearSearch();
-                  },
-                )
-              : null,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-        ),
-        onChanged: widget.onSearchChanged,
-      ),
+    return TilawaSearchField(
+      controller: _controller,
+      focusNode: _focusNode,
+      hintText: context.l10n.searchBookmarks,
+      prefixIcon: FluentIcons.search_24_regular,
+      clearIcon: FluentIcons.dismiss_24_regular,
+      onChanged: widget.onSearchChanged,
+      onClear: () {
+        _controller.clear();
+        widget.onClearSearch();
+      },
+      margin: const EdgeInsets.all(16),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(12),
     );
   }
 }

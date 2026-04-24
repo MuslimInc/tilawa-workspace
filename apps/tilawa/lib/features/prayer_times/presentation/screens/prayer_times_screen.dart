@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
@@ -40,46 +41,52 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 80,
-        titleSpacing: 20,
+        toolbarHeight: 72,
+        titleSpacing: tokens.spaceLarge + 4,
         title: Text(
           context.l10n.prayerTimes,
-          style: theme.textTheme.headlineMedium?.copyWith(
+          style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.w800,
           ),
         ),
-        actionsPadding: const EdgeInsets.only(right: 12),
+        actionsPadding: EdgeInsets.only(right: tokens.spaceMedium),
         actions: [
           IconButton(
             style: IconButton.styleFrom(
               backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
               foregroundColor: colorScheme.onPrimary,
             ),
-            icon: const Icon(Icons.explore_outlined),
+            icon: const Icon(Icons.explore_outlined, size: 22),
             onPressed: () => context.push('/qibla'),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: tokens.spaceSmall),
           IconButton(
             style: IconButton.styleFrom(
               backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
               foregroundColor: colorScheme.onPrimary,
             ),
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.settings, size: 22),
             onPressed: () => _showSettingsDialog(context),
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: tokens.spaceExtraSmall),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(72),
+          preferredSize: const Size.fromHeight(64),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            padding: EdgeInsets.fromLTRB(
+              tokens.spaceLarge,
+              0,
+              tokens.spaceLarge,
+              tokens.spaceMedium,
+            ),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 color: colorScheme.surface.withValues(alpha: 0.22),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(tokens.radiusLarge),
                 border: Border.all(
                   color: colorScheme.surface.withValues(alpha: 0.34),
                 ),
@@ -88,22 +95,29 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                 controller: _tabController,
                 dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: const EdgeInsets.all(6),
+                indicatorPadding: const EdgeInsets.all(4),
                 indicator: BoxDecoration(
                   color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(tokens.radiusLarge - 4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 labelColor: colorScheme.onSurface,
                 unselectedLabelColor: colorScheme.onPrimary.withValues(
                   alpha: 0.82,
                 ),
-                labelStyle: theme.textTheme.titleSmall?.copyWith(
+                labelStyle: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+                unselectedLabelStyle: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
-                unselectedLabelStyle: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-                splashBorderRadius: BorderRadius.circular(16),
+                splashBorderRadius: BorderRadius.circular(tokens.radiusLarge),
                 tabs: [
                   Tab(text: context.l10n.today),
                   Tab(text: context.l10n.monthly),
@@ -243,6 +257,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       return const Center(child: CircularProgressIndicator());
     }
 
+    final tokens = Theme.of(context).tokens;
+
     return RefreshIndicator(
       onRefresh: () async {
         context.read<PrayerTimesBloc>().add(
@@ -254,8 +270,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           parent: BouncingScrollPhysics(),
         ),
         padding: EdgeInsets.only(
-          top: 12,
-          bottom: 24 + MediaQuery.viewPaddingOf(context).bottom,
+          top: tokens.spaceMedium,
+          bottom: TilawaShellPadding.of(context) + tokens.spaceExtraLarge,
         ),
         children: [
           PrayerTimesLocationHeader(
@@ -348,39 +364,46 @@ class _TodaySectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 14),
+      padding: EdgeInsets.fromLTRB(
+        tokens.spaceLarge,
+        tokens.spaceSmall,
+        tokens.spaceLarge,
+        tokens.spaceMedium,
+      ),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 40,
+            height: 40,
             decoration: BoxDecoration(
               color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(tokens.radiusMedium),
             ),
             child: Icon(
               Icons.schedule_rounded,
+              size: 20,
               color: colorScheme.onPrimaryContainer,
             ),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: tokens.spaceMedium),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   context.l10n.prayerTimesTodaySchedule,
-                  style: theme.textTheme.titleLarge?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   context.l10n.prayerTimesTodayScheduleSubtitle,
-                  style: theme.textTheme.bodyMedium?.copyWith(
+                  style: theme.textTheme.labelMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),

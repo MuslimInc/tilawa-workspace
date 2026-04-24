@@ -352,6 +352,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   Future<void> _safeSetAudioSources(
     List<AudioSource> sources, {
     int? initialIndex,
+    Duration? initialPosition,
   }) async {
     // TRACKING: We want to allow new requests to override old ones
     // just_audio handles concurrency internally for setAudioSource
@@ -380,7 +381,11 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       }
 
       // Set new audio sources
-      await _player.setAudioSources(sources, initialIndex: initialIndex);
+      await _player.setAudioSources(
+        sources,
+        initialIndex: initialIndex,
+        initialPosition: initialPosition,
+      );
 
       log(
         'Successfully set ${sources.length} audio sources at index $initialIndex',
@@ -927,11 +932,16 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   @override
   Future<void> playFromQueue(
     List<audio_service.MediaItem> queue,
-    int index,
-  ) async {
+    int index, {
+    Duration? initialPosition,
+  }) async {
     _playlist.clear();
     _playlist.addAll(await _itemsToSources(queue));
-    await _safeSetAudioSources(_playlist, initialIndex: index);
+    await _safeSetAudioSources(
+      _playlist,
+      initialIndex: index,
+      initialPosition: initialPosition,
+    );
     await play();
   }
 

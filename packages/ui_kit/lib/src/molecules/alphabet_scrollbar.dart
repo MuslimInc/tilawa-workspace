@@ -1,110 +1,168 @@
 import 'package:flutter/material.dart';
+
 import '../foundation/design_tokens.dart';
 
-class ArabicAlphabetScrollbar extends StatelessWidget {
+class ArabicAlphabetScrollbar extends StatefulWidget {
   const ArabicAlphabetScrollbar({
     super.key,
     required this.letters,
-    required this.onLetterSelected,
     required this.selectedLetter,
+    required this.onLetterSelected,
     required this.onPanUpdate,
     required this.onPanStart,
     required this.onPanEnd,
   });
 
   final List<String> letters;
-  final Function(String letter) onLetterSelected;
   final String? selectedLetter;
-  final Function(DragUpdateDetails details) onPanUpdate;
-  final Function(DragStartDetails details) onPanStart;
-  final Function(DragEndDetails details) onPanEnd;
+  final ValueChanged<String> onLetterSelected;
+  final GestureDragUpdateCallback onPanUpdate;
+  final GestureDragStartCallback onPanStart;
+  final GestureDragEndCallback onPanEnd;
+
+  @override
+  State<ArabicAlphabetScrollbar> createState() =>
+      _ArabicAlphabetScrollbarState();
+}
+
+class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
+  String? _lastSelectedLetter;
+  final Map<String, Widget> _itemCache = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _lastSelectedLetter = widget.selectedLetter;
+  }
+
+  @override
+  void didUpdateWidget(covariant ArabicAlphabetScrollbar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _lastSelectedLetter = oldWidget.selectedLetter;
+    // Clear cache when selection changes
+    _itemCache.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final itemSize = tokens.spaceExtraLarge * 1.25;
+    final primaryColor = theme.primaryColor;
+    final unselectedColor = theme.colorScheme.onSurfaceVariant.withValues(
+      alpha: tokens.opacityEmphasis,
+    );
 
     return RepaintBoundary(
-      child: Container(
-        width: tokens.spaceExtraLarge * 1.5,
-        margin: EdgeInsets.fromLTRB(
-          tokens.spaceExtraSmall,
-          tokens.spaceSmall,
-          tokens.spaceMedium,
-          tokens.spaceSmall,
-        ),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface.withValues(
-            alpha: tokens.opacityGlass,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onPanStart: widget.onPanStart,
+        onPanUpdate: widget.onPanUpdate,
+        onPanEnd: widget.onPanEnd,
+        child: Container(
+          width: tokens.spaceExtraLarge * 1.5,
+          margin: EdgeInsets.fromLTRB(
+            tokens.spaceExtraSmall,
+            tokens.spaceSmall,
+            tokens.spaceMedium,
+            tokens.spaceSmall,
           ),
-          borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: tokens.opacitySubtle / 3),
-              blurRadius: tokens.radiusSmall,
-              offset: tokens.shadowOffsetSmall,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(
+              alpha: tokens.opacityGlass,
             ),
-          ],
-        ),
-        child: GestureDetector(
-          onPanStart: onPanStart,
-          onPanUpdate: onPanUpdate,
-          onPanEnd: onPanEnd,
+            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+          ),
           child: Padding(
             padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                children: letters.map((letter) {
-                  final isSelected = selectedLetter == letter;
-                  return GestureDetector(
-                    onTap: () => onLetterSelected(letter),
-                    child: AnimatedContainer(
-                      duration: tokens.durationFast,
-                      height: tokens.spaceExtraLarge * 1.25,
-                      width: tokens.spaceExtraLarge * 1.25,
-                      margin: EdgeInsets.symmetric(
-                        vertical: tokens.spaceExtraSmall / 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? theme.primaryColor
-                            : Colors.transparent,
-                        shape: BoxShape.circle,
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: theme.primaryColor.withValues(
-                                    alpha: tokens.opacityMedium,
-                                  ),
-                                  blurRadius: tokens.radiusSmall,
-                                  offset: tokens.shadowOffsetSmall,
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          letter,
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.w500,
-                            color: isSelected
-                                ? Colors.white
-                                : theme.colorScheme.onSurfaceVariant.withValues(
-                                    alpha: tokens.opacityEmphasis,
-                                  ),
-                          ),
-                        ),
-                      ),
-                    ),
+            child: ListView.builder(
+              physics: const ClampingScrollPhysics(),
+              itemCount: widget.letters.length,
+              itemExtent: itemSize,
+              itemBuilder: (context, index) {
+                final letter = widget.letters[index];
+                final isSelected = letter == widget.selectedLetter;
+                final wasSelected = letter == _lastSelectedLetter;
+
+                // Only create new widget if selection state changed for this item
+                // Otherwise reuse cached widget
+                if (isSelected != wasSelected ||
+                    !_itemCache.containsKey(letter)) {
+                  _itemCache[letter] = _LetterItem(
+                    key: ValueKey(letter),
+                    letter: letter,
+                    isSelected: isSelected,
+                    onTap: widget.onLetterSelected,
+                    size: itemSize,
+                    primaryColor: primaryColor,
+                    unselectedColor: unselectedColor,
                   );
-                }).toList(),
-              ),
+                }
+
+                return _itemCache[letter]!;
+              },
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LetterItem extends StatelessWidget {
+  const _LetterItem({
+    super.key,
+    required this.letter,
+    required this.isSelected,
+    required this.onTap,
+    required this.size,
+    required this.primaryColor,
+    required this.unselectedColor,
+  });
+
+  final String letter;
+  final bool isSelected;
+  final ValueChanged<String> onTap;
+  final double size;
+  final Color primaryColor;
+  final Color unselectedColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => onTap(letter),
+      borderRadius: BorderRadius.circular(size),
+      child: SizedBox(
+        height: size,
+        width: size,
+        child: Center(
+          child: isSelected
+              ? Container(
+                  width: size * 0.85,
+                  height: size * 0.85,
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      letter,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                )
+              : Text(
+                  letter,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: unselectedColor,
+                  ),
+                ),
         ),
       ),
     );

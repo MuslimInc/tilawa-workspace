@@ -9,7 +9,7 @@ typedef NotificationHandler = Future<void> Function(NotificationResponse);
 /// based on notification ID or payload content.
 abstract interface class INotificationDispatcher {
   /// Initialize the dispatcher and notification plugin
-  Future<void> initialize();
+  Future<void> initialize({bool createHighImportanceChannel = true});
 
   /// Register a handler for specific notification IDs
   void registerHandler({

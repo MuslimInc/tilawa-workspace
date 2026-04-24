@@ -73,7 +73,11 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
                 if (state is AthkarLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is AthkarError) {
-                  return Center(child: Text(state.message));
+                  return Center(
+                    child: Text(
+                      state.failure.message ?? 'An unexpected error occurred',
+                    ),
+                  );
                 } else if (state is AthkarItemsLoaded) {
                   return AthkarDetailsBody(
                     items: state.items,

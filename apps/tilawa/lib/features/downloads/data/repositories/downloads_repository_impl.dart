@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/config/notification_config.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
-import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/repositories/downloads_repository.dart';
 import '../../utils/download_path_utils.dart';
@@ -133,13 +134,16 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
   Future<DownloadItem?> getDownloadItem(String id) async {
     final List<DownloadItem> downloads = await localDataSource.getDownloads();
     try {
-      final DownloadItem item = downloads.firstWhere(
+      final DownloadItem? item = downloads.firstWhereOrNull(
         (item) => item.id == id || item.url == id,
       );
+      if (item == null) {
+        return null;
+      }
       final String downloadsDir = await pathResolver.getDownloadsDir();
       return pathResolver.resolveDownloadPath(item, downloadsDir);
-      // ignore: avoid_catches_without_on_clauses
     } catch (e) {
+      logger.e('[DownloadsRepository] Error getting download item: $e');
       return null;
     }
   }

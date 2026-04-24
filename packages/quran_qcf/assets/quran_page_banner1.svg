@@ -1,0 +1,264 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 100" width="900" height="100">
+  <defs>
+    <!-- Outer border gradient -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B6914;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C9A84C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B6914;stop-opacity:1" />
+    </linearGradient>
+    <!-- Background fill gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FDF6E3;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FAF0D7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FDF6E3;stop-opacity:1" />
+    </linearGradient>
+    <!-- Center cartouche fill -->
+    <linearGradient id="cartoucheGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FEFBF0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FDF6E3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FEFBF0;stop-opacity:1" />
+    </linearGradient>
+    <!-- Gold pattern fill -->
+    <linearGradient id="goldFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4A843;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C49A38;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4A843;stop-opacity:1" />
+    </linearGradient>
+    <!-- Deep gold for outlines -->
+    <linearGradient id="deepGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7A5A10;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5C4008;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Arabesque petal shape -->
+    <symbol id="petal" viewBox="0 0 20 36">
+      <path d="M10,2 C14,8 18,14 18,20 C18,28 14,34 10,34 C6,34 2,28 2,20 C2,14 6,8 10,2 Z"
+            fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.8"/>
+      <path d="M10,8 C12,12 13,16 13,20 C13,25 12,29 10,31 C8,29 7,25 7,20 C7,16 8,12 10,8 Z"
+            fill="url(#bgGrad)" stroke="none"/>
+    </symbol>
+
+    <!-- Small 4-petal flower -->
+    <symbol id="flower4" viewBox="0 0 32 32">
+      <ellipse cx="16" cy="8"  rx="4" ry="7" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.8"/>
+      <ellipse cx="16" cy="24" rx="4" ry="7" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.8"/>
+      <ellipse cx="8"  cy="16" rx="7" ry="4" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.8"/>
+      <ellipse cx="24" cy="16" rx="7" ry="4" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.8"/>
+      <circle cx="16" cy="16" r="4" fill="#C49A38" stroke="#8B6914" stroke-width="0.8"/>
+    </symbol>
+
+    <!-- Diagonal petal rosette (45deg petals) -->
+    <symbol id="rosette" viewBox="0 0 44 44">
+      <!-- Cardinal petals -->
+      <ellipse cx="22" cy="8"  rx="4" ry="7" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+      <ellipse cx="22" cy="36" rx="4" ry="7" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+      <ellipse cx="8"  cy="22" rx="7" ry="4" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+      <ellipse cx="36" cy="22" rx="7" ry="4" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+      <!-- Diagonal petals -->
+      <ellipse cx="12" cy="12" rx="4.5" ry="7" transform="rotate(-45 12 12)" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+      <ellipse cx="32" cy="12" rx="4.5" ry="7" transform="rotate(45 32 12)"  fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+      <ellipse cx="12" cy="32" rx="4.5" ry="7" transform="rotate(45 12 32)"  fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+      <ellipse cx="32" cy="32" rx="4.5" ry="7" transform="rotate(-45 32 32)" fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+      <!-- Center -->
+      <circle cx="22" cy="22" r="5.5" fill="#C49A38" stroke="#8B6914" stroke-width="0.9"/>
+      <circle cx="22" cy="22" r="2.5" fill="#FAF0D7" stroke="none"/>
+    </symbol>
+
+    <!-- Vine/scroll path helper (S-curve leaf) -->
+    <symbol id="leaf" viewBox="0 0 18 30">
+      <path d="M9,1 C16,6 17,14 12,20 C9,24 6,27 9,29 C6,27 3,22 5,16 C7,10 2,5 9,1 Z"
+            fill="url(#goldFill)" stroke="#8B6914" stroke-width="0.7"/>
+    </symbol>
+  </defs>
+
+  <!-- ═══════════════════════════════════════════════════════
+       OUTER BORDER FRAME
+  ════════════════════════════════════════════════════════ -->
+  <!-- Outer rectangle -->
+  <rect x="0" y="0" width="900" height="100" rx="4" ry="4" fill="url(#borderGrad)"/>
+  <!-- Inner inset -->
+  <rect x="3" y="3" width="894" height="94" rx="3" ry="3" fill="url(#bgGrad)"/>
+  <!-- Thin gold line inner border -->
+  <rect x="6" y="6" width="888" height="88" rx="2" ry="2"
+        fill="none" stroke="#C9A84C" stroke-width="1.2"/>
+  <!-- Narrow inner inset line -->
+  <rect x="9" y="9" width="882" height="82" rx="1.5" ry="1.5"
+        fill="none" stroke="#D4A843" stroke-width="0.6"/>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CORNER ROSETTES
+  ════════════════════════════════════════════════════════ -->
+  <!-- Top-left -->
+  <use href="#rosette" x="10" y="10" width="44" height="44" transform="translate(-2,-2)"/>
+  <!-- Top-right -->
+  <use href="#rosette" x="848" y="10" width="44" height="44" transform="translate(2,-2)"/>
+  <!-- Bottom-left -->
+  <use href="#rosette" x="10" y="46" width="44" height="44" transform="translate(-2,2)"/>
+  <!-- Bottom-right -->
+  <use href="#rosette" x="848" y="46" width="44" height="44" transform="translate(2,2)"/>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CENTER CARTOUCHE
+  ════════════════════════════════════════════════════════ -->
+  <!-- Outer cartouche shadow/border -->
+  <path d="
+    M 350,18
+    L 362,10 L 538,10 L 550,18
+    L 558,26
+    Q 562,32 562,50
+    Q 562,68 558,74
+    L 550,82
+    L 538,90 L 362,90 L 350,82
+    L 342,74
+    Q 338,68 338,50
+    Q 338,32 342,26
+    Z"
+    fill="url(#borderGrad)" stroke="none"/>
+  <!-- Cartouche inner fill -->
+  <path d="
+    M 354,21
+    L 364,13 L 536,13 L 546,21
+    L 554,29
+    Q 557,35 557,50
+    Q 557,65 554,71
+    L 546,79
+    L 536,87 L 364,87 L 354,79
+    L 346,71
+    Q 343,65 343,50
+    Q 343,35 346,29
+    Z"
+    fill="url(#cartoucheGrad)" stroke="#C9A84C" stroke-width="1"/>
+  <!-- Cartouche inner accent line -->
+  <path d="
+    M 360,26
+    L 368,18 L 532,18 L 540,26
+    L 547,33
+    Q 549,39 549,50
+    Q 549,61 547,67
+    L 540,74
+    L 532,82 L 368,82 L 360,74
+    L 353,67
+    Q 351,61 351,50
+    Q 351,39 353,33
+    Z"
+    fill="none" stroke="#D4A843" stroke-width="0.7"/>
+
+  <!-- ═══════════════════════════════════════════════════════
+       LEFT ARABESQUE PANEL  (x: 55 → 330)
+  ════════════════════════════════════════════════════════ -->
+
+  <!-- Main horizontal vine spine -->
+  <path d="M 58,50 Q 100,32 140,50 Q 180,68 220,50 Q 260,32 300,50 Q 320,58 334,50"
+        fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- Upper scrolls from spine -->
+  <path d="M 80,46 Q 82,24 98,20 Q 110,17 114,28"
+        fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 160,44 Q 162,22 178,18 Q 190,15 194,26"
+        fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 240,44 Q 242,22 258,18 Q 270,15 274,26"
+        fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 305,46 Q 307,30 318,26 Q 326,23 328,32"
+        fill="none" stroke="#C9A84C" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Lower scrolls from spine -->
+  <path d="M 80,54 Q 82,76 98,80 Q 110,83 114,72"
+        fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 160,56 Q 162,78 178,82 Q 190,85 194,74"
+        fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 240,56 Q 242,78 258,82 Q 270,85 274,74"
+        fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M 305,54 Q 307,70 318,74 Q 326,77 328,68"
+        fill="none" stroke="#C9A84C" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- Flowers at upper scroll tips -->
+  <use href="#flower4" x="100" y="10" width="28" height="28"/>
+  <use href="#flower4" x="180" y="8"  width="28" height="28"/>
+  <use href="#flower4" x="260" y="8"  width="28" height="28"/>
+  <use href="#flower4" x="312" y="16" width="24" height="24"/>
+
+  <!-- Flowers at lower scroll tips -->
+  <use href="#flower4" x="100" y="62" width="28" height="28"/>
+  <use href="#flower4" x="180" y="64" width="28" height="28"/>
+  <use href="#flower4" x="260" y="64" width="28" height="28"/>
+  <use href="#flower4" x="312" y="60" width="24" height="24"/>
+
+  <!-- Accent petals along vine -->
+  <use href="#petal" x="68"  y="36" width="14" height="28" transform="rotate(-30 75 50)"/>
+  <use href="#petal" x="130" y="34" width="14" height="28" transform="rotate(20 137 48)"/>
+  <use href="#petal" x="208" y="34" width="14" height="28" transform="rotate(-20 215 48)"/>
+  <use href="#petal" x="288" y="34" width="14" height="28" transform="rotate(15 295 48)"/>
+
+  <!-- Small diamond accents -->
+  <polygon points="139,50 143,46 147,50 143,54" fill="#C9A84C" stroke="#8B6914" stroke-width="0.7"/>
+  <polygon points="219,50 223,46 227,50 223,54" fill="#C9A84C" stroke="#8B6914" stroke-width="0.7"/>
+  <polygon points="299,50 303,46 307,50 303,54" fill="#C9A84C" stroke="#8B6914" stroke-width="0.7"/>
+
+  <!-- ═══════════════════════════════════════════════════════
+       RIGHT ARABESQUE PANEL  (x: 570 → 845)  — mirror of left
+  ════════════════════════════════════════════════════════ -->
+  <g transform="translate(900,0) scale(-1,1)">
+    <!-- Main horizontal vine spine -->
+    <path d="M 58,50 Q 100,32 140,50 Q 180,68 220,50 Q 260,32 300,50 Q 320,58 334,50"
+          fill="none" stroke="#C9A84C" stroke-width="1.8" stroke-linecap="round"/>
+
+    <!-- Upper scrolls -->
+    <path d="M 80,46 Q 82,24 98,20 Q 110,17 114,28"
+          fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M 160,44 Q 162,22 178,18 Q 190,15 194,26"
+          fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M 240,44 Q 242,22 258,18 Q 270,15 274,26"
+          fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M 305,46 Q 307,30 318,26 Q 326,23 328,32"
+          fill="none" stroke="#C9A84C" stroke-width="1.2" stroke-linecap="round"/>
+
+    <!-- Lower scrolls -->
+    <path d="M 80,54 Q 82,76 98,80 Q 110,83 114,72"
+          fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M 160,56 Q 162,78 178,82 Q 190,85 194,74"
+          fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M 240,56 Q 242,78 258,82 Q 270,85 274,74"
+          fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M 305,54 Q 307,70 318,74 Q 326,77 328,68"
+          fill="none" stroke="#C9A84C" stroke-width="1.2" stroke-linecap="round"/>
+
+    <!-- Flowers -->
+    <use href="#flower4" x="100" y="10" width="28" height="28"/>
+    <use href="#flower4" x="180" y="8"  width="28" height="28"/>
+    <use href="#flower4" x="260" y="8"  width="28" height="28"/>
+    <use href="#flower4" x="312" y="16" width="24" height="24"/>
+
+    <use href="#flower4" x="100" y="62" width="28" height="28"/>
+    <use href="#flower4" x="180" y="64" width="28" height="28"/>
+    <use href="#flower4" x="260" y="64" width="28" height="28"/>
+    <use href="#flower4" x="312" y="60" width="24" height="24"/>
+
+    <!-- Petals -->
+    <use href="#petal" x="68"  y="36" width="14" height="28" transform="rotate(-30 75 50)"/>
+    <use href="#petal" x="130" y="34" width="14" height="28" transform="rotate(20 137 48)"/>
+    <use href="#petal" x="208" y="34" width="14" height="28" transform="rotate(-20 215 48)"/>
+    <use href="#petal" x="288" y="34" width="14" height="28" transform="rotate(15 295 48)"/>
+
+    <!-- Diamonds -->
+    <polygon points="139,50 143,46 147,50 143,54" fill="#C9A84C" stroke="#8B6914" stroke-width="0.7"/>
+    <polygon points="219,50 223,46 227,50 223,54" fill="#C9A84C" stroke="#8B6914" stroke-width="0.7"/>
+    <polygon points="299,50 303,46 307,50 303,54" fill="#C9A84C" stroke="#8B6914" stroke-width="0.7"/>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════════════
+       CARTOUCHE SIDE CONNECTORS (transition vine → cartouche)
+  ════════════════════════════════════════════════════════ -->
+  <!-- Left connector -->
+  <path d="M 334,50 Q 336,42 343,36" fill="none" stroke="#C9A84C" stroke-width="1.4"/>
+  <path d="M 334,50 Q 336,58 343,64" fill="none" stroke="#C9A84C" stroke-width="1.4"/>
+  <!-- Right connector -->
+  <path d="M 566,50 Q 564,42 557,36" fill="none" stroke="#C9A84C" stroke-width="1.4"/>
+  <path d="M 566,50 Q 564,58 557,64" fill="none" stroke="#C9A84C" stroke-width="1.4"/>
+
+  <!-- ═══════════════════════════════════════════════════════
+       BORDER TOP & BOTTOM RUNNER LINES
+  ════════════════════════════════════════════════════════ -->
+  <line x1="55" y1="14" x2="845" y2="14" stroke="#C9A84C" stroke-width="0.6" stroke-dasharray="4,3"/>
+  <line x1="55" y1="86" x2="845" y2="86" stroke="#C9A84C" stroke-width="0.6" stroke-dasharray="4,3"/>
+
+</svg>

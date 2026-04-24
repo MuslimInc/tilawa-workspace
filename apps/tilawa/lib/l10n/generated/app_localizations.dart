@@ -2515,6 +2515,444 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load fonts'**
   String get fontsFailedToLoad;
+
+  /// Share action title
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
+  /// Option to share a page screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Share Screenshot'**
+  String get shareScreenshot;
+
+  /// Option to share an audio clip of a recitation
+  ///
+  /// In en, this message translates to:
+  /// **'Share Audio Clip'**
+  String get shareAudioClip;
+
+  /// Option to share ayah as text
+  ///
+  /// In en, this message translates to:
+  /// **'Share as Text'**
+  String get shareAsText;
+
+  /// Option to share audio clip of a single verse
+  ///
+  /// In en, this message translates to:
+  /// **'Share Verse Audio'**
+  String get shareVerseAudioClip;
+
+  /// Label for start ayah picker
+  ///
+  /// In en, this message translates to:
+  /// **'From Ayah'**
+  String get fromAyah;
+
+  /// Label for end ayah picker
+  ///
+  /// In en, this message translates to:
+  /// **'To Ayah'**
+  String get toAyah;
+
+  /// Button to generate audio clip and share
+  ///
+  /// In en, this message translates to:
+  /// **'Generate & Share'**
+  String get generateAndShare;
+
+  /// Error when verse range exceeds maximum
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum {count} verses per clip.'**
+  String maxVersesExceeded(int count);
+
+  /// Status message while sharing
+  ///
+  /// In en, this message translates to:
+  /// **'Sharing...'**
+  String get sharing;
+
+  /// Branding text on shared content
+  ///
+  /// In en, this message translates to:
+  /// **'Shared via Tilawa'**
+  String get sharedViaTilawa;
+
+  /// Fallback message when reciter is not mapped
+  ///
+  /// In en, this message translates to:
+  /// **'Verse audio not available for this reciter. Using default reciter.'**
+  String get reciterNotAvailable;
+
+  /// Button to share audio clip
+  ///
+  /// In en, this message translates to:
+  /// **'Share Audio Clip'**
+  String get shareAudio;
+
+  /// Button to generate a reel
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Reel (Video)'**
+  String get generateReel;
+
+  /// Title for reel review section
+  ///
+  /// In en, this message translates to:
+  /// **'Review Reel'**
+  String get reviewReel;
+
+  /// Button to share generated reel
+  ///
+  /// In en, this message translates to:
+  /// **'Share Reel'**
+  String get shareReel;
+
+  /// Subtitle in the share options sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a format that carries these verses beautifully.'**
+  String get shareSheetSubtitle;
+
+  /// Instruction label shown when a page has multiple surahs
+  ///
+  /// In en, this message translates to:
+  /// **'Select Surah to share'**
+  String get selectSurahToShare;
+
+  /// Description for the screenshot share option
+  ///
+  /// In en, this message translates to:
+  /// **'A clean Quran page capture ready to send.'**
+  String get shareScreenshotDescription;
+
+  /// Description for the audio clip share option
+  ///
+  /// In en, this message translates to:
+  /// **'Create a recitation clip or reel with audio.'**
+  String get shareAudioClipDescription;
+
+  /// Subtitle in the audio clip and reel configuration sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Select a verse range and generate audio or a vertical reel.'**
+  String get audioClipConfigSubtitle;
+
+  /// Supportive text describing the verse limit for a clip
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {count} verses per clip.'**
+  String shareVerseLimit(int count);
+
+  /// Label above the live reel preview
+  ///
+  /// In en, this message translates to:
+  /// **'Live Reel Preview'**
+  String get liveReelPreview;
+
+  /// Title for the full-screen share composer
+  ///
+  /// In en, this message translates to:
+  /// **'Create Share'**
+  String get createShare;
+
+  /// Subtitle for the full-screen share composer
+  ///
+  /// In en, this message translates to:
+  /// **'Build a polished Quran share with live preview and simple controls.'**
+  String get shareComposerSubtitle;
+
+  /// Title shown when the share asset is prepared
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Share'**
+  String get shareReadyTitle;
+
+  /// Subtitle shown in the review step
+  ///
+  /// In en, this message translates to:
+  /// **'Review the final result, then share it when it feels right.'**
+  String get shareReviewSubtitle;
+
+  /// Short label showing content is ready
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to Share'**
+  String get readyToShare;
+
+  /// Section title for share mode selection
+  ///
+  /// In en, this message translates to:
+  /// **'Share Format'**
+  String get shareMode;
+
+  /// Screenshot share mode label
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get shareModeScreenshot;
+
+  /// Audio share mode label
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get shareModeAudio;
+
+  /// Reel share mode label
+  ///
+  /// In en, this message translates to:
+  /// **'Reel'**
+  String get shareModeReel;
+
+  /// Step indicator label for the configuration step
+  ///
+  /// In en, this message translates to:
+  /// **'Configure'**
+  String get shareStepConfigure;
+
+  /// Step indicator label for the generation step
+  ///
+  /// In en, this message translates to:
+  /// **'Generating'**
+  String get shareStepGenerating;
+
+  /// Step indicator label for the review step
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get shareStepReview;
+
+  /// Section title for screenshot layout selection
+  ///
+  /// In en, this message translates to:
+  /// **'Visual Layout'**
+  String get shareContentLayout;
+
+  /// Option label for capturing the current reader page
+  ///
+  /// In en, this message translates to:
+  /// **'Reader Page'**
+  String get shareLayoutReaderPage;
+
+  /// Option label for generating a stylized passage card
+  ///
+  /// In en, this message translates to:
+  /// **'Passage Card'**
+  String get shareLayoutPassageCard;
+
+  /// Hint shown when the reader page screenshot option is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Reader Page uses the current Quran page exactly as shown in the reader.'**
+  String get shareReaderPageHint;
+
+  /// Section title for share duration presets
+  ///
+  /// In en, this message translates to:
+  /// **'Clip Duration'**
+  String get shareDuration;
+
+  /// Label for automatic clip duration
+  ///
+  /// In en, this message translates to:
+  /// **'Full Range'**
+  String get shareDurationAuto;
+
+  /// Label for short clip duration
+  ///
+  /// In en, this message translates to:
+  /// **'30 sec'**
+  String get shareDurationShort;
+
+  /// Label for medium clip duration
+  ///
+  /// In en, this message translates to:
+  /// **'60 sec'**
+  String get shareDurationMedium;
+
+  /// Label for long clip duration
+  ///
+  /// In en, this message translates to:
+  /// **'90 sec'**
+  String get shareDurationLong;
+
+  /// Hint below duration presets
+  ///
+  /// In en, this message translates to:
+  /// **'Duration presets keep the full-ayah flow when timing data is available.'**
+  String get shareDurationHint;
+
+  /// Primary action to prepare a screenshot for review
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare Screenshot'**
+  String get prepareScreenshot;
+
+  /// Primary action to prepare an audio clip for review
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare Audio Clip'**
+  String get prepareAudioClip;
+
+  /// Primary action to prepare a reel for review
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare Reel'**
+  String get prepareReel;
+
+  /// Status message while preparing a screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing screenshot...'**
+  String get preparingScreenshot;
+
+  /// Status message while preparing an audio clip
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing audio clip...'**
+  String get preparingAudioClip;
+
+  /// Status message while preparing a reel
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing reel...'**
+  String get preparingReelStatus;
+
+  /// Status message while generating the audio portion of a reel
+  ///
+  /// In en, this message translates to:
+  /// **'Generating audio clip...'**
+  String get generatingAudioClipStatus;
+
+  /// Status message while capturing the Quran reader visuals for a reel
+  ///
+  /// In en, this message translates to:
+  /// **'Capturing reader visuals...'**
+  String get capturingReaderVisuals;
+
+  /// Status message while combining reel visuals and audio
+  ///
+  /// In en, this message translates to:
+  /// **'Combining visuals and audio into a reel...'**
+  String get combiningReelMedia;
+
+  /// Status message while preparing to trim a locally stored audio file
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing to trim local audio...'**
+  String get preparingToTrimLocalAudio;
+
+  /// Status message when the selected reciter cannot be trimmed locally and the app falls back to downloading verses
+  ///
+  /// In en, this message translates to:
+  /// **'Reciter not supported for local trimming. Falling back to online download...'**
+  String get reciterNotSupportedForLocalTrim;
+
+  /// Status message while loading verse timing data
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching ayah timings...'**
+  String get fetchingAyahTimings;
+
+  /// Status message when no timing data is available and the app falls back to online download
+  ///
+  /// In en, this message translates to:
+  /// **'No timings found. Falling back to online download...'**
+  String get noTimingsFound;
+
+  /// Status message when no timing data is available for the chosen verse range
+  ///
+  /// In en, this message translates to:
+  /// **'No timings found for the selected range. Falling back to online download...'**
+  String get noTimingsFoundForRange;
+
+  /// Status message while trimming audio
+  ///
+  /// In en, this message translates to:
+  /// **'Trimming audio...'**
+  String get trimmingAudio;
+
+  /// Error shown when a generated audio preview file is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Generated audio file was not found.'**
+  String get generatedAudioFileNotFound;
+
+  /// Error shown when a generated reel preview file is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Generated reel file was not found.'**
+  String get generatedReelFileNotFound;
+
+  /// Status message while downloading verse-by-verse audio
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading verse {currentVerse} of {totalVerses}...'**
+  String downloadingVerseProgress(int currentVerse, int totalVerses);
+
+  /// Status message while assembling the final audio clip
+  ///
+  /// In en, this message translates to:
+  /// **'Assembling audio clip...'**
+  String get assemblingAudioClip;
+
+  /// Status message while preparing reel video encoding
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing video encoding...'**
+  String get preparingVideoEncoding;
+
+  /// Status message while encoding the final vertical reel video
+  ///
+  /// In en, this message translates to:
+  /// **'Encoding vertical video (this may take a moment)...'**
+  String get encodingVerticalVideo;
+
+  /// Status message after the reel has been generated successfully
+  ///
+  /// In en, this message translates to:
+  /// **'Reel generated!'**
+  String get reelGenerated;
+
+  /// Title for the final share review panel
+  ///
+  /// In en, this message translates to:
+  /// **'Review Your Share'**
+  String get shareReviewTitle;
+
+  /// Review text for a prepared screenshot
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot is ready to share.'**
+  String get shareReviewScreenshot;
+
+  /// Review text for a prepared audio clip
+  ///
+  /// In en, this message translates to:
+  /// **'Audio clip is ready to share.'**
+  String get shareReviewAudio;
+
+  /// Review text for a prepared reel
+  ///
+  /// In en, this message translates to:
+  /// **'Reel is ready to share.'**
+  String get shareReviewReel;
+
+  /// Label showing the selected duration preset in seconds
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds} sec max'**
+  String shareDurationPresetLabel(int seconds);
+
+  /// Button label to go back and edit the share
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get edit;
 }
 
 class _AppLocalizationsDelegate

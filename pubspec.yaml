@@ -2,17 +2,18 @@ name: tilawa_workspace
 description: Mono-repo workspace for Tilawa.
 publish_to: none
 environment:
-  sdk: ^3.11.3
+  sdk: ^3.11.5
 
 workspace:
   - apps/tilawa
   - packages/core
   - packages/qibla
   - packages/ui_kit
-  - packages/quran
+  - packages/quran_qcf
+  - packages/quran_image
 
 dev_dependencies:
-  melos: ^7.4.0
+  melos: ^7.5.1
 
 melos:
   command:
@@ -20,25 +21,53 @@ melos:
       usePubspecOverrides: true
 
   scripts:
-    gen:
-      run: melos exec --concurrency=1 -- "dart run build_runner build --delete-conflicting-outputs"
-      description: Run build_runner for all packages.
-      packageFilters:
-        dependsOn: build_runner
+    # -- Analysis & Formatting -----------------------------------------
+    analyze:
+      description: Run static analysis across all packages.
+      run: dart analyze --fatal-infos
+      exec:
+        concurrency: 1
 
+    format:
+      description: Check Dart formatting across all packages.
+      run: dart format --set-exit-if-changed .
+
+    format:fix:
+      description: Auto-fix Dart formatting across all packages.
+      run: dart format .
+
+    fix:
+      description: Apply dart fix suggestions across all packages.
+      run: melos exec -- "dart fix --apply"
+
+    lint:
+      description: Run analyze + format check (CI gate).
+      run: |
+        melos run analyze
+        melos run format
+
+    # -- Testing -------------------------------------------------------
     test:
-      run: melos exec --concurrency=1 -- "flutter test"
-      description: Run all tests in the workspace.
+      description: Run all tests across all packages.
+      run: melos exec -- "flutter test"
       packageFilters:
         dirExists: test
 
-    lint:
-      run: melos exec --concurrency=1 -- "flutter analyze"
-      description: Run analyzer for all packages.
+    test:coverage:
+      description: Run tests with coverage across all packages.
+      run: melos exec -- "flutter test --coverage"
+      packageFilters:
+        dirExists: test
 
-    fix:
-      run: melos exec -- "dart fix --apply"
-      description: Apply dart fixes for all packages.
+    # -- Code Generation -----------------------------------------------
+    build_runner:
+      description: Run build_runner in packages that depend on it.
+      run: melos exec -- "dart run build_runner build --delete-conflicting-outputs"
+      packageFilters:
+        dependsOn: build_runner
 
-dependency_overrides:
-  test_api: 0.7.7
+    build_runner:watch:
+      description: Run build_runner in watch mode.
+      run: melos exec -- "dart run build_runner watch --delete-conflicting-outputs"
+      packageFilters:
+        dependsOn: build_runner

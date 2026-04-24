@@ -61,7 +61,11 @@ void main() {
       );
 
       // Mock dispatcher to return our mock plugin
-      when(mockDispatcher.initialize()).thenAnswer((_) async {
+      when(
+        mockDispatcher.initialize(
+          createHighImportanceChannel: anyNamed('createHighImportanceChannel'),
+        ),
+      ).thenAnswer((_) async {
         return;
       });
       when(
@@ -170,7 +174,13 @@ void main() {
       test('should initialize dispatcher', () async {
         await service.initialize();
 
-        verify(mockDispatcher.initialize()).called(1);
+        verify(
+          mockDispatcher.initialize(
+            createHighImportanceChannel: anyNamed(
+              'createHighImportanceChannel',
+            ),
+          ),
+        ).called(1);
         verify(
           mockDispatcher.registerHandler(
             serviceId: 'athkar',
@@ -191,14 +201,26 @@ void main() {
         NotificationConfig.enableLocalNotifications = false;
         await service.initialize();
 
-        verifyNever(mockDispatcher.initialize());
+        verifyNever(
+          mockDispatcher.initialize(
+            createHighImportanceChannel: anyNamed(
+              'createHighImportanceChannel',
+            ),
+          ),
+        );
       });
 
       test('should not initialize twice if already initialized', () async {
         await service.initialize();
         reset(mockDispatcher);
         // Re-setup mock after reset
-        when(mockDispatcher.initialize()).thenAnswer((_) async {
+        when(
+          mockDispatcher.initialize(
+            createHighImportanceChannel: anyNamed(
+              'createHighImportanceChannel',
+            ),
+          ),
+        ).thenAnswer((_) async {
           return;
         });
         when(
@@ -207,11 +229,23 @@ void main() {
 
         await service.initialize(); // Second call
 
-        verifyNever(mockDispatcher.initialize());
+        verifyNever(
+          mockDispatcher.initialize(
+            createHighImportanceChannel: anyNamed(
+              'createHighImportanceChannel',
+            ),
+          ),
+        );
       });
 
       test('should handle initialization error gracefully', () async {
-        when(mockDispatcher.initialize()).thenThrow(Exception('Init failed'));
+        when(
+          mockDispatcher.initialize(
+            createHighImportanceChannel: anyNamed(
+              'createHighImportanceChannel',
+            ),
+          ),
+        ).thenThrow(Exception('Init failed'));
 
         await service.initialize(); // Should not throw
 
@@ -278,7 +312,13 @@ void main() {
         await service.initialize();
 
         // Verify the dispatcher was initialized and handler was registered
-        verify(mockDispatcher.initialize()).called(1);
+        verify(
+          mockDispatcher.initialize(
+            createHighImportanceChannel: anyNamed(
+              'createHighImportanceChannel',
+            ),
+          ),
+        ).called(1);
         verify(
           mockDispatcher.registerHandler(
             serviceId: 'athkar',

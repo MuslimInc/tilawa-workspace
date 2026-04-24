@@ -34,13 +34,7 @@ class ReciterCard extends StatelessWidget {
               border: Border.all(
                 color: theme.colorScheme.outlineVariant.withValues(alpha: 0.22),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.primaryColor.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              // Remove expensive boxShadow to reduce raster jank
             ),
             child: Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 8, 10),
@@ -70,37 +64,28 @@ class _ReciterAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            theme.primaryColor.withValues(alpha: 0.9),
-            theme.primaryColor.withValues(alpha: 0.72),
-          ],
+    // Pre-calculate colors to avoid multiple withValues calls
+    final primaryColor = theme.primaryColor;
+
+    return RepaintBoundary(
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          color: primaryColor.withValues(alpha: 0.85),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.primaryColor.withValues(alpha: 0.18),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+        child: Center(
+          child: Text(
+            reciter.letter,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.4,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-        ],
-      ),
-      child: Center(
-        child: Text(
-          reciter.letter,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.4,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

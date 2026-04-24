@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import 'prayer_time_card.dart';
@@ -40,46 +41,35 @@ class PrayerTimesGrid extends StatelessWidget {
       _getPrayer(PrayerType.lastThird),
     ];
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const double spacing = 14;
-        final double textScale = MediaQuery.textScalerOf(context).scale(1);
-        final int crossAxisCount = constraints.maxWidth >= 980
-            ? 4
-            : constraints.maxWidth >= 680
-            ? 3
-            : 2;
-        final double itemWidth =
-            (constraints.maxWidth - (spacing * (crossAxisCount - 1))) /
-            crossAxisCount;
-        final bool compact = itemWidth < 180;
-        final double mainAxisExtent =
-            (compact ? 202.0 : 190.0) +
-            ((textScale - 1.0).clamp(0.0, 0.6) * 28);
+    final double textScale = MediaQuery.textScalerOf(context).scale(1);
+    // Dynamic height based on text scale to accommodate larger accessibility fonts
+    final double mainAxisExtent =
+        174.0 + ((textScale - 1.0).clamp(0.0, 0.6) * 24);
 
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            mainAxisExtent: mainAxisExtent,
-            crossAxisSpacing: spacing,
-            mainAxisSpacing: spacing,
+    final tokens = Theme.of(context).tokens;
+
+    return TilawaContentGrid(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      targetItemExtent: 160,
+      childAspectRatio: 1.0,
+      mainAxisSpacing: tokens.spaceMedium,
+      crossAxisSpacing: tokens.spaceMedium,
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+      itemCount: gridItems.length,
+      itemBuilder: (context, index) {
+        final prayer = gridItems[index];
+        final isNext = currentPrayer?.type == prayer.type;
+        final bool hasPassed = prayerTimes.hasPrayerPassed(prayer.type);
+
+        return SizedBox(
+          height: mainAxisExtent,
+          child: PrayerTimeCard(
+            prayer: prayer,
+            isNext: isNext,
+            hasPassed: hasPassed && !isNext,
+            use24HourFormat: use24HourFormat,
           ),
-          itemCount: gridItems.length,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemBuilder: (context, index) {
-            final prayer = gridItems[index];
-            final isNext = currentPrayer?.type == prayer.type;
-            final bool hasPassed = prayerTimes.hasPrayerPassed(prayer.type);
-
-            return PrayerTimeCard(
-              prayer: prayer,
-              isNext: isNext,
-              hasPassed: hasPassed && !isNext,
-              use24HourFormat: use24HourFormat,
-            );
-          },
         );
       },
     );

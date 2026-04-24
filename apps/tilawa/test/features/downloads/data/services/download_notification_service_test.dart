@@ -16,7 +16,7 @@ class FakeNotificationDispatcher implements INotificationDispatcher {
       FlutterLocalNotificationsPlugin();
 
   @override
-  Future<void> initialize() async {}
+  Future<void> initialize({bool createHighImportanceChannel = true}) async {}
 
   @override
   void registerHandler({

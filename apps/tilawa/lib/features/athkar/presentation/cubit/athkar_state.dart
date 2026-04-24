@@ -1,40 +1,28 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/athkar_category.dart';
 import '../../domain/entities/athkar_item.dart';
 
-abstract class AthkarState extends Equatable {
-  const AthkarState();
+part 'athkar_state.freezed.dart';
 
-  @override
-  List<Object?> get props => [];
+@freezed
+sealed class AthkarState with _$AthkarState {
+  const factory AthkarState.initial() = AthkarInitial;
+  const factory AthkarState.loading() = AthkarLoading;
+  const factory AthkarState.categoriesLoaded(List<AthkarCategory> categories) =
+      AthkarCategoriesLoaded;
+  const factory AthkarState.itemsLoaded({
+    required List<AthkarItem> items,
+    required Map<int, int> currentCounts,
+  }) = AthkarItemsLoaded;
+  const factory AthkarState.error(Failure failure) = AthkarError;
 }
 
-class AthkarInitial extends AthkarState {}
-
-class AthkarLoading extends AthkarState {}
-
-class AthkarCategoriesLoaded extends AthkarState {
-  const AthkarCategoriesLoaded(this.categories);
-  final List<AthkarCategory> categories;
-
-  @override
-  List<Object?> get props => [categories];
-}
-
-class AthkarItemsLoaded extends AthkarState {
-  const AthkarItemsLoaded({required this.items, required this.currentCounts});
-  final List<AthkarItem> items;
-  final Map<int, int> currentCounts;
-
-  @override
-  List<Object?> get props => [items, currentCounts];
-}
-
-class AthkarError extends AthkarState {
-  const AthkarError(this.message);
-  final String message;
-
-  @override
-  List<Object?> get props => [message];
+extension AthkarStateX on AthkarState {
+  String? get errorMessage => switch (this) {
+    AthkarError(:final failure) =>
+      failure.message ?? 'An unexpected error occurred',
+    _ => null,
+  };
 }

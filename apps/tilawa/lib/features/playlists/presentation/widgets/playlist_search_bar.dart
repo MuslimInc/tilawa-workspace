@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:tilawa/core/extensions.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 
-class PlaylistSearchBar extends StatelessWidget {
+class PlaylistSearchBar extends StatefulWidget {
   const PlaylistSearchBar({
     super.key,
     required this.onSearchChanged,
@@ -16,32 +17,33 @@ class PlaylistSearchBar extends StatelessWidget {
   final String? hintText;
 
   @override
+  State<PlaylistSearchBar> createState() => _PlaylistSearchBarState();
+}
+
+class _PlaylistSearchBarState extends State<PlaylistSearchBar> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
-    final ThemeData theme = Theme.of(context);
 
-    return Container(
+    return TilawaSearchField(
+      controller: _controller,
+      hintText: widget.hintText ?? l10n.searchPlaylists,
+      onChanged: widget.onSearchChanged,
+      onClear: () {
+        _controller.clear();
+        widget.onClearSearch();
+      },
       margin: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TextField(
-        onChanged: onSearchChanged,
-        decoration: InputDecoration(
-          hintText: hintText ?? l10n.searchPlaylists,
-          prefixIcon: const Icon(Icons.search),
-          suffixIcon: IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: onClearSearch,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-        ),
-      ),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(12),
     );
   }
 }

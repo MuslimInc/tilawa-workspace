@@ -1838,5 +1838,320 @@
     "fontsFailedToLoad": "فشل تحميل الخطوط",
     "@fontsFailedToLoad": {
         "description": "Error message when Quran fonts fail to load"
+    },
+    "share": "مشاركة",
+    "@share": {
+        "description": "Share action title"
+    },
+    "shareScreenshot": "مشاركة لقطة شاشة",
+    "@shareScreenshot": {
+        "description": "Option to share a page screenshot"
+    },
+    "shareAudioClip": "مشاركة مقطع صوتي",
+    "@shareAudioClip": {
+        "description": "Option to share an audio clip of a recitation"
+    },
+    "shareAsText": "مشاركة كنص",
+    "@shareAsText": {
+        "description": "Option to share ayah as text"
+    },
+    "shareVerseAudioClip": "مشاركة صوت الآية",
+    "@shareVerseAudioClip": {
+        "description": "Option to share audio clip of a single verse"
+    },
+    "fromAyah": "من الآية",
+    "@fromAyah": {
+        "description": "Label for start ayah picker"
+    },
+    "toAyah": "إلى الآية",
+    "@toAyah": {
+        "description": "Label for end ayah picker"
+    },
+    "generateAndShare": "إنشاء ومشاركة",
+    "@generateAndShare": {
+        "description": "Button to generate audio clip and share"
+    },
+    "maxVersesExceeded": "الحد الأقصى {count} آية لكل مقطع.",
+    "@maxVersesExceeded": {
+        "description": "Error when verse range exceeds maximum",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "sharing": "جاري المشاركة...",
+    "@sharing": {
+        "description": "Status message while sharing"
+    },
+    "sharedViaTilawa": "تمت المشاركة عبر تلاوة",
+    "@sharedViaTilawa": {
+        "description": "Branding text on shared content"
+    },
+    "reciterNotAvailable": "صوت الآيات غير متاح لهذا القارئ. سيتم استخدام القارئ الافتراضي.",
+    "@reciterNotAvailable": {
+        "description": "Fallback message when reciter is not mapped"
+    },
+    "shareAudio": "مشاركة مقطع صوتي",
+    "@shareAudio": {
+        "description": "Button to share audio clip"
+    },
+    "generateReel": "إنشاء ريل (فيديو)",
+    "@generateReel": {
+        "description": "Button to generate a reel"
+    },
+    "reviewReel": "مراجعة الريل",
+    "@reviewReel": {
+        "description": "Title for reel review section"
+    },
+    "shareReel": "مشاركة الريل",
+    "@shareReel": {
+        "description": "Button to share generated reel"
+    },
+    "shareSheetSubtitle": "اختر الصيغة الأنسب لمشاركة هذه الآيات بصورة جميلة.",
+    "@shareSheetSubtitle": {
+        "description": "Subtitle in the share options sheet"
+    },
+    "selectSurahToShare": "اختر السورة للمشاركة",
+    "@selectSurahToShare": {
+        "description": "Instruction label shown when a page has multiple surahs"
+    },
+    "shareScreenshotDescription": "لقطة نظيفة من صفحة المصحف جاهزة للمشاركة.",
+    "@shareScreenshotDescription": {
+        "description": "Description for the screenshot share option"
+    },
+    "shareAudioClipDescription": "أنشئ مقطع تلاوة أو ريل مصحوبًا بالصوت.",
+    "@shareAudioClipDescription": {
+        "description": "Description for the audio clip share option"
+    },
+    "audioClipConfigSubtitle": "حدّد نطاق الآيات ثم أنشئ مقطعًا صوتيًا أو ريل عموديًا.",
+    "@audioClipConfigSubtitle": {
+        "description": "Subtitle in the audio clip and reel configuration sheet"
+    },
+    "shareVerseLimit": "حتى {count} آية لكل مقطع.",
+    "@shareVerseLimit": {
+        "description": "Supportive text describing the verse limit for a clip",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "liveReelPreview": "معاينة مباشرة للريل",
+    "@liveReelPreview": {
+        "description": "Label above the live reel preview"
+    },
+    "createShare": "إنشاء مشاركة",
+    "@createShare": {
+        "description": "Title for the full-screen share composer"
+    },
+    "shareComposerSubtitle": "أنشئ مشاركة قرآنية أنيقة مع معاينة مباشرة وتحكمات سهلة.",
+    "@shareComposerSubtitle": {
+        "description": "Subtitle for the full-screen share composer"
+    },
+    "shareReadyTitle": "جاهز للمشاركة",
+    "@shareReadyTitle": {
+        "description": "Title shown when the share asset is prepared"
+    },
+    "shareReviewSubtitle": "راجع النتيجة النهائية ثم شاركها عندما تراها مناسبة.",
+    "@shareReviewSubtitle": {
+        "description": "Subtitle shown in the review step"
+    },
+    "readyToShare": "جاهز للمشاركة",
+    "@readyToShare": {
+        "description": "Short label showing content is ready"
+    },
+    "shareMode": "صيغة المشاركة",
+    "@shareMode": {
+        "description": "Section title for share mode selection"
+    },
+    "shareModeScreenshot": "صورة",
+    "@shareModeScreenshot": {
+        "description": "Screenshot share mode label"
+    },
+    "shareModeAudio": "صوت",
+    "@shareModeAudio": {
+        "description": "Audio share mode label"
+    },
+    "shareModeReel": "ريل",
+    "@shareModeReel": {
+        "description": "Reel share mode label"
+    },
+    "shareStepConfigure": "الإعداد",
+    "@shareStepConfigure": {
+        "description": "Step indicator label for the configuration step"
+    },
+    "shareStepGenerating": "جاري الإنشاء",
+    "@shareStepGenerating": {
+        "description": "Step indicator label for the generation step"
+    },
+    "shareStepReview": "المراجعة",
+    "@shareStepReview": {
+        "description": "Step indicator label for the review step"
+    },
+    "shareContentLayout": "نمط المحتوى",
+    "@shareContentLayout": {
+        "description": "Section title for screenshot layout selection"
+    },
+    "shareLayoutReaderPage": "صفحة القارئ",
+    "@shareLayoutReaderPage": {
+        "description": "Option label for capturing the current reader page"
+    },
+    "shareLayoutPassageCard": "بطاقة الآيات",
+    "@shareLayoutPassageCard": {
+        "description": "Option label for generating a stylized passage card"
+    },
+    "shareReaderPageHint": "تستخدم صفحة القارئ الصفحة الحالية كما تظهر داخل القارئ تمامًا.",
+    "@shareReaderPageHint": {
+        "description": "Hint shown when the reader page screenshot option is selected"
+    },
+    "shareDuration": "مدة المقطع",
+    "@shareDuration": {
+        "description": "Section title for share duration presets"
+    },
+    "shareDurationAuto": "النطاق الكامل",
+    "@shareDurationAuto": {
+        "description": "Label for automatic clip duration"
+    },
+    "shareDurationShort": "30 ثانية",
+    "@shareDurationShort": {
+        "description": "Label for short clip duration"
+    },
+    "shareDurationMedium": "60 ثانية",
+    "@shareDurationMedium": {
+        "description": "Label for medium clip duration"
+    },
+    "shareDurationLong": "90 ثانية",
+    "@shareDurationLong": {
+        "description": "Label for long clip duration"
+    },
+    "shareDurationHint": "تحافظ خيارات المدة على اكتمال الآيات عندما تكون بيانات التوقيت متاحة.",
+    "@shareDurationHint": {
+        "description": "Hint below duration presets"
+    },
+    "prepareScreenshot": "تجهيز الصورة",
+    "@prepareScreenshot": {
+        "description": "Primary action to prepare a screenshot for review"
+    },
+    "prepareAudioClip": "تجهيز المقطع الصوتي",
+    "@prepareAudioClip": {
+        "description": "Primary action to prepare an audio clip for review"
+    },
+    "prepareReel": "تجهيز الريل",
+    "@prepareReel": {
+        "description": "Primary action to prepare a reel for review"
+    },
+    "preparingScreenshot": "جارِ تجهيز الصورة...",
+    "@preparingScreenshot": {
+        "description": "Status message while preparing a screenshot"
+    },
+    "preparingAudioClip": "جارِ تجهيز المقطع الصوتي...",
+    "@preparingAudioClip": {
+        "description": "Status message while preparing an audio clip"
+    },
+    "preparingReelStatus": "جارِ تجهيز الريل...",
+    "@preparingReelStatus": {
+        "description": "Status message while preparing a reel"
+    },
+    "generatingAudioClipStatus": "جارِ إنشاء المقطع الصوتي...",
+    "@generatingAudioClipStatus": {
+        "description": "Status message while generating the audio portion of a reel"
+    },
+    "capturingReaderVisuals": "جارِ التقاط مشهد القارئ...",
+    "@capturingReaderVisuals": {
+        "description": "Status message while capturing the Quran reader visuals for a reel"
+    },
+    "combiningReelMedia": "جارِ دمج المشهد والصوت في ريل...",
+    "@combiningReelMedia": {
+        "description": "Status message while combining reel visuals and audio"
+    },
+    "preparingToTrimLocalAudio": "جارِ تجهيز قص الصوت المحلي...",
+    "@preparingToTrimLocalAudio": {
+        "description": "Status message while preparing to trim a locally stored audio file"
+    },
+    "reciterNotSupportedForLocalTrim": "هذا القارئ غير مدعوم للقص المحلي. سيتم التحويل إلى التنزيل عبر الإنترنت...",
+    "@reciterNotSupportedForLocalTrim": {
+        "description": "Status message when the selected reciter cannot be trimmed locally and the app falls back to downloading verses"
+    },
+    "fetchingAyahTimings": "جارِ جلب توقيت الآيات...",
+    "@fetchingAyahTimings": {
+        "description": "Status message while loading verse timing data"
+    },
+    "noTimingsFound": "لم يتم العثور على توقيتات. سيتم التحويل إلى التنزيل عبر الإنترنت...",
+    "@noTimingsFound": {
+        "description": "Status message when no timing data is available and the app falls back to online download"
+    },
+    "noTimingsFoundForRange": "لم يتم العثور على توقيتات للنطاق المحدد. سيتم التحويل إلى التنزيل عبر الإنترنت...",
+    "@noTimingsFoundForRange": {
+        "description": "Status message when no timing data is available for the chosen verse range"
+    },
+    "trimmingAudio": "جارِ قص الصوت...",
+    "@trimmingAudio": {
+        "description": "Status message while trimming audio"
+    },
+    "generatedAudioFileNotFound": "لم يتم العثور على ملف الصوت الذي تم إنشاؤه.",
+    "@generatedAudioFileNotFound": {
+        "description": "Error shown when a generated audio preview file is missing"
+    },
+    "generatedReelFileNotFound": "لم يتم العثور على ملف الريل الذي تم إنشاؤه.",
+    "@generatedReelFileNotFound": {
+        "description": "Error shown when a generated reel preview file is missing"
+    },
+    "downloadingVerseProgress": "جارِ تنزيل الآية {currentVerse} من {totalVerses}...",
+    "@downloadingVerseProgress": {
+        "description": "Status message while downloading verse-by-verse audio",
+        "placeholders": {
+            "currentVerse": {
+                "type": "int"
+            },
+            "totalVerses": {
+                "type": "int"
+            }
+        }
+    },
+    "assemblingAudioClip": "جارِ تجميع المقطع الصوتي...",
+    "@assemblingAudioClip": {
+        "description": "Status message while assembling the final audio clip"
+    },
+    "preparingVideoEncoding": "جارِ تجهيز ترميز الفيديو...",
+    "@preparingVideoEncoding": {
+        "description": "Status message while preparing reel video encoding"
+    },
+    "encodingVerticalVideo": "جارِ ترميز الفيديو العمودي، قد يستغرق ذلك بعض الوقت...",
+    "@encodingVerticalVideo": {
+        "description": "Status message while encoding the final vertical reel video"
+    },
+    "reelGenerated": "تم إنشاء الريل!",
+    "@reelGenerated": {
+        "description": "Status message after the reel has been generated successfully"
+    },
+    "shareReviewTitle": "راجع المشاركة",
+    "@shareReviewTitle": {
+        "description": "Title for the final share review panel"
+    },
+    "shareReviewScreenshot": "الصورة جاهزة للمشاركة.",
+    "@shareReviewScreenshot": {
+        "description": "Review text for a prepared screenshot"
+    },
+    "shareReviewAudio": "المقطع الصوتي جاهز للمشاركة.",
+    "@shareReviewAudio": {
+        "description": "Review text for a prepared audio clip"
+    },
+    "shareReviewReel": "الريل جاهز للمشاركة.",
+    "@shareReviewReel": {
+        "description": "Review text for a prepared reel"
+    },
+    "shareDurationPresetLabel": "حتى {seconds} ثانية",
+    "@shareDurationPresetLabel": {
+        "description": "Label showing the selected duration preset in seconds",
+        "placeholders": {
+            "seconds": {
+                "type": "int"
+            }
+        }
+    },
+    "edit": "تعديل",
+    "@edit": {
+        "description": "Button label to go back and edit the share"
     }
 }

@@ -72,7 +72,11 @@ abstract class AudioPlayerHandler implements AudioHandler {
     String? reciterId,
   });
   Future<void> playArtistPlaylist(String artistId);
-  Future<void> playFromQueue(List<MediaItem> queue, int index);
+  Future<void> playFromQueue(
+    List<MediaItem> queue,
+    int index, {
+    Duration? initialPosition,
+  });
 
   // Children management (from AudioHandler)
   @override

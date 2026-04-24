@@ -27,8 +27,9 @@ sealed class AudioPlayerEvent with _$AudioPlayerEvent {
   const factory AudioPlayerEvent.skipToQueueItem(int index) = SkipToQueueItem;
   const factory AudioPlayerEvent.playFromQueue(
     List<AudioEntity> queue,
-    int index,
-  ) = PlayFromQueue;
+    int index, {
+    Duration? initialPosition,
+  }) = PlayFromQueue;
   const factory AudioPlayerEvent.updateQueue(List<AudioEntity> queue) =
       UpdateQueue;
   const factory AudioPlayerEvent.addQueueItem(AudioEntity audio) = AddQueueItem;

@@ -1,35 +1,93 @@
+import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa/shared/services/audio_position_service.dart';
+
+class _FakeAudioPlayerHandler implements AudioPlayerHandler {
+  _FakeAudioPlayerHandler({
+    required this.mediaItem,
+    required this.playbackState,
+  });
+
+  @override
+  final ValueStream<audio_service.MediaItem?> mediaItem;
+
+  @override
+  final ValueStream<audio_service.PlaybackState> playbackState;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    throw UnimplementedError('Unused member: ${invocation.memberName}');
+  }
+}
 
 void main() {
   group('AudioPositionServiceImpl', () {
-    test('position returns AudioService.position stream', () {
-      // Arrange
-      final AudioPositionService service = AudioPositionServiceImpl();
+    late _FakeAudioPlayerHandler audioHandler;
+    late BehaviorSubject<audio_service.MediaItem?> mediaItemSubject;
+    late BehaviorSubject<audio_service.PlaybackState> playbackStateSubject;
 
-      // Act
-      final Stream<Duration> positionStream = service.position;
+    setUp(() {
+      mediaItemSubject = BehaviorSubject<audio_service.MediaItem?>.seeded(null);
+      playbackStateSubject =
+          BehaviorSubject<audio_service.PlaybackState>.seeded(
+            audio_service.PlaybackState(),
+          );
+      audioHandler = _FakeAudioPlayerHandler(
+        mediaItem: mediaItemSubject,
+        playbackState: playbackStateSubject,
+      );
+    });
 
-      // Assert
-      expect(positionStream, isA<Stream<Duration>>());
+    tearDown(() async {
+      await mediaItemSubject.close();
+      await playbackStateSubject.close();
     });
 
     test(
-      'position stream applies distinct() to filter duplicate durations',
+      'position returns a duration stream derived from the audio handler',
       () {
-        // This test verifies that the implementation uses .distinct()
-        // The AudioPositionServiceImpl wraps AudioService.position.distinct()
-        // which filters consecutive duplicate Duration values.
-        //
-        // Note: We cannot easily test the actual distinct behavior here
-        // because AudioService.position is a static stream that requires
-        // the audio service to be initialized. The distinct() operator
-        // is applied in the implementation and uses Duration's built-in
-        // equality (which compares microseconds), so duplicate durations
-        // will be filtered correctly.
-        final AudioPositionService service = AudioPositionServiceImpl();
+        final AudioPositionService service = AudioPositionServiceImpl(
+          audioHandler,
+        );
+
         expect(service.position, isA<Stream<Duration>>());
       },
     );
+
+    test('position stream filters duplicate durations', () async {
+      final AudioPositionService service = AudioPositionServiceImpl(
+        audioHandler,
+      );
+
+      final emittedPositions = <Duration>[];
+      final subscription = service.position
+          .where((position) => position > Duration.zero)
+          .listen(emittedPositions.add);
+
+      await Future<void>.delayed(Duration.zero);
+
+      playbackStateSubject.add(
+        audio_service.PlaybackState(updatePosition: Duration(seconds: 1)),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      playbackStateSubject.add(
+        audio_service.PlaybackState(updatePosition: Duration(seconds: 1)),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      playbackStateSubject.add(
+        audio_service.PlaybackState(updatePosition: Duration(seconds: 2)),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(emittedPositions, <Duration>[
+        const Duration(seconds: 1),
+        const Duration(seconds: 2),
+      ]);
+      await subscription.cancel();
+    });
   });
 }

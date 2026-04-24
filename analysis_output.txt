@@ -1,0 +1,92 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 92.0.0 (99.0.0 available)
+  analyzer 9.0.0 (12.1.0 available)
+  bloc_lint 0.3.6 (0.4.1 available)
+  cli_util 0.4.2 (0.5.0 available)
+  dart_style 3.1.3 (3.1.8 available)
+  geocoding_android 4.0.1 (5.0.1 available)
+  geocoding_platform_interface 3.2.0 (5.0.0 available)
+  injectable 2.7.1+4 (3.0.0 available)
+  injectable_generator 2.12.1 (3.0.2 available)
+  json_serializable 6.13.0 (6.13.1 available)
+  lean_builder 0.1.6 (0.1.10 available)
+  meta 1.17.0 (1.18.2 available)
+  native_toolchain_c 0.17.6 (0.18.0 available)
+  package_info_plus 9.0.1 (10.1.0 available)
+  package_info_plus_platform_interface 3.2.1 (4.1.0 available)
+  rx 0.4.0 (0.5.0 available)
+  share_plus 12.0.2 (13.1.0 available)
+  share_plus_platform_interface 6.1.0 (7.1.0 available)
+  test 1.30.0 (1.31.0 available)
+  test_api 0.7.10 (0.7.11 available)
+  test_core 0.6.16 (0.6.17 available)
+  vector_math 2.2.0 (2.3.0 available)
+  wakelock_plus 1.5.2 (1.6.0 available)
+  watcher 1.1.4 (1.2.1 available)
+  win32 5.15.0 (6.0.1 available)
+Got dependencies!
+25 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Analyzing presentation...                                       
+
+  error • Undefined class 'CaptureScreenshotUseCase' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:31:9 • undefined_class
+  error • Undefined class 'GenerateAudioClipUseCase' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:32:9 • undefined_class
+  error • Undefined class 'GenerateVideoUseCase' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:33:9 • undefined_class
+  error • Undefined class 'ShareContentUseCase' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:35:9 • undefined_class
+  error • The named parameter 'videoPageSpecs' isn't defined • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:74:9 • undefined_named_parameter
+  error • The named parameter 'videoPageSpecs' isn't defined • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:109:9 • undefined_named_parameter
+  error • The named parameter 'isLoadingReciters' isn't defined • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:144:25 • undefined_named_parameter
+  error • The named parameter 'isLoadingReciters' isn't defined • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:151:13 • undefined_named_parameter
+  error • The named parameter 'isLoadingReciters' isn't defined • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:163:29 • undefined_named_parameter
+  error • The named parameter 'reciterOptions' isn't defined • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:163:55 • undefined_named_parameter
+  error • Undefined class 'ShareContent' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:221:3 • undefined_class
+  error • Undefined class 'ShareContent' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:222:5 • undefined_class
+  error • Undefined class 'ShareScreenshot' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:226:7 • undefined_class
+  error • Undefined name 'ShareContent' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:227:9 • undefined_identifier
+  error • Undefined class 'ShareAudioClip' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:232:7 • undefined_class
+  error • Undefined name 'ShareContent' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:238:9 • undefined_identifier
+  error • Undefined class 'ShareVideo' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:245:7 • undefined_class
+  error • Undefined name 'ShareContent' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:251:9 • undefined_identifier
+  error • Undefined class 'ShareText' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:258:7 • undefined_class
+  error • Undefined name 'ShareContent' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:258:50 • undefined_identifier
+  error • Undefined class 'ShareProgressMessages' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:357:14 • undefined_class
+  error • Undefined class 'ShareProgressMessages' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:424:14 • undefined_class
+  error • The name 'ShareAudioClip' isn't defined, so it can't be used in an 'is' expression • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:433:26 • type_test_with_undefined_name
+  error • Undefined class 'ShareProgressMessages' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:441:14 • undefined_class
+  error • Undefined name 'ShareContent' • apps/tilawa/lib/features/share/presentation/cubit/share_cubit.dart:571:27 • undefined_identifier
+  error • The redirected constructor '_ShareState Function({List<PageAyahInfo>? ayahs, int? capturingIndex, ShareContent? content, String? errorMessage, int? fromAyah, double progress, String progressMessage, String? reciterName, String? reciterServerUrl, ShareStatus status, int? surahNumber, int? toAyah})' has incompatible parameters with 'ShareState Function({List<PageAyahInfo>? ayahs, int? capturingIndex, ShareContent? content, String? errorMessage, int? fromAyah, bool isLoadingReciters, double progress, String progressMessage, String? reciterName, List<ShareReciterOption> reciterOptions, String? reciterServerUrl, ShareStatus status, int? surahNumber, int? toAyah, List<VideoPageSpec> videoPageSpecs})' • apps/tilawa/lib/features/share/presentation/cubit/share_state.dart:34:8 • redirect_to_invalid_function_type
+warning • Unused import: 'package:tilawa_core/di/injection.dart' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:8:8 • unused_import
+warning • Unused import: '../../../reciters/domain/usecases/get_reciters_use_case.dart' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:11:8 • unused_import
+warning • Unused import: '../utils/share_ayah_range_utils.dart' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:17:8 • unused_import
+  error • The getter 'reciterOptions' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:111:21 • undefined_getter
+  error • The getter 'reciterOptions' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:121:30 • undefined_getter
+  error • The getter 'videoPageSpecs' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:135:40 • undefined_getter
+  error • The getter 'videoPageSpecs' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:135:63 • undefined_getter
+  error • The getter 'videoPageSpecs' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:136:66 • undefined_getter
+  error • The getter 'videoPageSpecs' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:155:23 • undefined_getter
+  error • The getter 'videoPageSpecs' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:162:43 • undefined_getter
+  error • The getter 'videoPageSpecs' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:198:31 • undefined_getter
+  error • The getter 'isLoadingReciters' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:225:54 • undefined_getter
+  error • The getter 'videoPageSpecs' isn't defined for the type 'ShareState' • apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart:282:32 • undefined_getter
+warning • The declaration '_arabicSurahName' isn't referenced • apps/tilawa/lib/features/share/presentation/widgets/share_poster_renderer.dart:22:14 • unused_element
+warning • The declaration '_englishSurahName' isn't referenced • apps/tilawa/lib/features/share/presentation/widgets/share_poster_renderer.dart:23:14 • unused_element
+warning • The declaration '_PosterOrb' isn't referenced • apps/tilawa/lib/features/share/presentation/widgets/share_poster_renderer.dart:214:7 • unused_element
+warning • The value of the field 'forestGreen' isn't used • apps/tilawa/lib/features/share/presentation/widgets/share_poster_renderer.dart:247:22 • unused_field
+warning • The value of the field 'mint' isn't used • apps/tilawa/lib/features/share/presentation/widgets/share_poster_renderer.dart:249:22 • unused_field
+warning • The value of the field 'parchment' isn't used • apps/tilawa/lib/features/share/presentation/widgets/share_poster_renderer.dart:250:22 • unused_field
+warning • The value of the field 'warmParchment' isn't used • apps/tilawa/lib/features/share/presentation/widgets/share_poster_renderer.dart:251:22 • unused_field
+warning • The declaration '_arabicSurahName' isn't referenced • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:113:14 • unused_element
+warning • The declaration '_englishSurahName' isn't referenced • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:114:14 • unused_element
+warning • The declaration '_ayahRangeLabel' isn't referenced • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:116:14 • unused_element
+warning • The declaration '_mushafPageLabel' isn't referenced • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:120:14 • unused_element
+warning • The value of the field 'orbLargeSize' isn't used • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:168:23 • unused_field
+warning • The value of the field 'orbMediumSize' isn't used • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:169:23 • unused_field
+warning • The value of the field 'orbTopOffset' isn't used • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:170:23 • unused_field
+warning • The value of the field 'orbRightOffset' isn't used • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:171:23 • unused_field
+warning • The value of the field 'orbBottomOffset' isn't used • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:172:23 • unused_field
+warning • The value of the field 'orbLeftOffset' isn't used • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:173:23 • unused_field
+warning • The value of the field 'canvasRadius' isn't used • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:175:23 • unused_field
+warning • The value of the field 'canvasBorderAlpha' isn't used • apps/tilawa/lib/features/share/presentation/widgets/video_content_renderer.dart:176:23 • unused_field
+
+58 issues found. (ran in 1.2s)

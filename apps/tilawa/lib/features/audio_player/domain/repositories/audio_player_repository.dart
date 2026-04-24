@@ -34,6 +34,10 @@ abstract class AudioPlayerRepository {
   ResultVoid updateQueue(List<AudioEntity> queue);
 
   // Custom restoration/initialization logic if needed
-  ResultVoid playFromQueue(List<AudioEntity> queue, int index);
+  ResultVoid playFromQueue(
+    List<AudioEntity> queue,
+    int index, {
+    Duration? initialPosition,
+  });
   ResultVoid loadAudioPlayerData({bool restorePlayback = true});
 }

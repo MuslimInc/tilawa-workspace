@@ -1351,4 +1351,245 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fontsFailedToLoad => 'Failed to load fonts';
+
+  @override
+  String get share => 'Share';
+
+  @override
+  String get shareScreenshot => 'Share Screenshot';
+
+  @override
+  String get shareAudioClip => 'Share Audio Clip';
+
+  @override
+  String get shareAsText => 'Share as Text';
+
+  @override
+  String get shareVerseAudioClip => 'Share Verse Audio';
+
+  @override
+  String get fromAyah => 'From Ayah';
+
+  @override
+  String get toAyah => 'To Ayah';
+
+  @override
+  String get generateAndShare => 'Generate & Share';
+
+  @override
+  String maxVersesExceeded(int count) {
+    return 'Maximum $count verses per clip.';
+  }
+
+  @override
+  String get sharing => 'Sharing...';
+
+  @override
+  String get sharedViaTilawa => 'Shared via Tilawa';
+
+  @override
+  String get reciterNotAvailable =>
+      'Verse audio not available for this reciter. Using default reciter.';
+
+  @override
+  String get shareAudio => 'Share Audio Clip';
+
+  @override
+  String get generateReel => 'Generate Reel (Video)';
+
+  @override
+  String get reviewReel => 'Review Reel';
+
+  @override
+  String get shareReel => 'Share Reel';
+
+  @override
+  String get shareSheetSubtitle =>
+      'Choose a format that carries these verses beautifully.';
+
+  @override
+  String get selectSurahToShare => 'Select Surah to share';
+
+  @override
+  String get shareScreenshotDescription =>
+      'A clean Quran page capture ready to send.';
+
+  @override
+  String get shareAudioClipDescription =>
+      'Create a recitation clip or reel with audio.';
+
+  @override
+  String get audioClipConfigSubtitle =>
+      'Select a verse range and generate audio or a vertical reel.';
+
+  @override
+  String shareVerseLimit(int count) {
+    return 'Up to $count verses per clip.';
+  }
+
+  @override
+  String get liveReelPreview => 'Live Reel Preview';
+
+  @override
+  String get createShare => 'Create Share';
+
+  @override
+  String get shareComposerSubtitle =>
+      'Build a polished Quran share with live preview and simple controls.';
+
+  @override
+  String get shareReadyTitle => 'Ready to Share';
+
+  @override
+  String get shareReviewSubtitle =>
+      'Review the final result, then share it when it feels right.';
+
+  @override
+  String get readyToShare => 'Ready to Share';
+
+  @override
+  String get shareMode => 'Share Format';
+
+  @override
+  String get shareModeScreenshot => 'Screenshot';
+
+  @override
+  String get shareModeAudio => 'Audio';
+
+  @override
+  String get shareModeReel => 'Reel';
+
+  @override
+  String get shareStepConfigure => 'Configure';
+
+  @override
+  String get shareStepGenerating => 'Generating';
+
+  @override
+  String get shareStepReview => 'Review';
+
+  @override
+  String get shareContentLayout => 'Visual Layout';
+
+  @override
+  String get shareLayoutReaderPage => 'Reader Page';
+
+  @override
+  String get shareLayoutPassageCard => 'Passage Card';
+
+  @override
+  String get shareReaderPageHint =>
+      'Reader Page uses the current Quran page exactly as shown in the reader.';
+
+  @override
+  String get shareDuration => 'Clip Duration';
+
+  @override
+  String get shareDurationAuto => 'Full Range';
+
+  @override
+  String get shareDurationShort => '30 sec';
+
+  @override
+  String get shareDurationMedium => '60 sec';
+
+  @override
+  String get shareDurationLong => '90 sec';
+
+  @override
+  String get shareDurationHint =>
+      'Duration presets keep the full-ayah flow when timing data is available.';
+
+  @override
+  String get prepareScreenshot => 'Prepare Screenshot';
+
+  @override
+  String get prepareAudioClip => 'Prepare Audio Clip';
+
+  @override
+  String get prepareReel => 'Prepare Reel';
+
+  @override
+  String get preparingScreenshot => 'Preparing screenshot...';
+
+  @override
+  String get preparingAudioClip => 'Preparing audio clip...';
+
+  @override
+  String get preparingReelStatus => 'Preparing reel...';
+
+  @override
+  String get generatingAudioClipStatus => 'Generating audio clip...';
+
+  @override
+  String get capturingReaderVisuals => 'Capturing reader visuals...';
+
+  @override
+  String get combiningReelMedia => 'Combining visuals and audio into a reel...';
+
+  @override
+  String get preparingToTrimLocalAudio => 'Preparing to trim local audio...';
+
+  @override
+  String get reciterNotSupportedForLocalTrim =>
+      'Reciter not supported for local trimming. Falling back to online download...';
+
+  @override
+  String get fetchingAyahTimings => 'Fetching ayah timings...';
+
+  @override
+  String get noTimingsFound =>
+      'No timings found. Falling back to online download...';
+
+  @override
+  String get noTimingsFoundForRange =>
+      'No timings found for the selected range. Falling back to online download...';
+
+  @override
+  String get trimmingAudio => 'Trimming audio...';
+
+  @override
+  String get generatedAudioFileNotFound =>
+      'Generated audio file was not found.';
+
+  @override
+  String get generatedReelFileNotFound => 'Generated reel file was not found.';
+
+  @override
+  String downloadingVerseProgress(int currentVerse, int totalVerses) {
+    return 'Downloading verse $currentVerse of $totalVerses...';
+  }
+
+  @override
+  String get assemblingAudioClip => 'Assembling audio clip...';
+
+  @override
+  String get preparingVideoEncoding => 'Preparing video encoding...';
+
+  @override
+  String get encodingVerticalVideo =>
+      'Encoding vertical video (this may take a moment)...';
+
+  @override
+  String get reelGenerated => 'Reel generated!';
+
+  @override
+  String get shareReviewTitle => 'Review Your Share';
+
+  @override
+  String get shareReviewScreenshot => 'Screenshot is ready to share.';
+
+  @override
+  String get shareReviewAudio => 'Audio clip is ready to share.';
+
+  @override
+  String get shareReviewReel => 'Reel is ready to share.';
+
+  @override
+  String shareDurationPresetLabel(int seconds) {
+    return '$seconds sec max';
+  }
+
+  @override
+  String get edit => 'Edit';
 }

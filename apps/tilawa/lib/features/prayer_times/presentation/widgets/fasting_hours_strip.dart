@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/entities.dart';
 
 class FastingHoursStrip extends StatelessWidget {
@@ -10,6 +10,7 @@ class FastingHoursStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     // Calculate duration
@@ -33,48 +34,48 @@ class FastingHoursStrip extends StatelessWidget {
     // Active color from theme to ensure good contrast
     final Color activeColor = theme.colorScheme.primary;
 
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
-          width: 1.0,
-        ),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceSmall,
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.restaurant_outlined, color: activeColor, size: 20),
-                SizedBox(width: 8),
-                Flexible(
-                  child: Text(
-                    label,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: theme.colorScheme.onSurface,
+      child: TilawaCard(
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceLarge,
+          vertical: tokens.spaceMedium,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.restaurant_outlined, color: activeColor, size: 20),
+                  SizedBox(width: tokens.spaceSmall),
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          SizedBox(width: 8),
-          Text(
-            formattedDuration,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: activeColor,
+            SizedBox(width: tokens.spaceSmall),
+            Text(
+              formattedDuration,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: activeColor,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

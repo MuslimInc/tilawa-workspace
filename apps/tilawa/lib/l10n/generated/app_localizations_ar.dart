@@ -1344,4 +1344,246 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get fontsFailedToLoad => 'فشل تحميل الخطوط';
+
+  @override
+  String get share => 'مشاركة';
+
+  @override
+  String get shareScreenshot => 'مشاركة لقطة شاشة';
+
+  @override
+  String get shareAudioClip => 'مشاركة مقطع صوتي';
+
+  @override
+  String get shareAsText => 'مشاركة كنص';
+
+  @override
+  String get shareVerseAudioClip => 'مشاركة صوت الآية';
+
+  @override
+  String get fromAyah => 'من الآية';
+
+  @override
+  String get toAyah => 'إلى الآية';
+
+  @override
+  String get generateAndShare => 'إنشاء ومشاركة';
+
+  @override
+  String maxVersesExceeded(int count) {
+    return 'الحد الأقصى $count آية لكل مقطع.';
+  }
+
+  @override
+  String get sharing => 'جاري المشاركة...';
+
+  @override
+  String get sharedViaTilawa => 'تمت المشاركة عبر تلاوة';
+
+  @override
+  String get reciterNotAvailable =>
+      'صوت الآيات غير متاح لهذا القارئ. سيتم استخدام القارئ الافتراضي.';
+
+  @override
+  String get shareAudio => 'مشاركة مقطع صوتي';
+
+  @override
+  String get generateReel => 'إنشاء ريل (فيديو)';
+
+  @override
+  String get reviewReel => 'مراجعة الريل';
+
+  @override
+  String get shareReel => 'مشاركة الريل';
+
+  @override
+  String get shareSheetSubtitle =>
+      'اختر الصيغة الأنسب لمشاركة هذه الآيات بصورة جميلة.';
+
+  @override
+  String get selectSurahToShare => 'اختر السورة للمشاركة';
+
+  @override
+  String get shareScreenshotDescription =>
+      'لقطة نظيفة من صفحة المصحف جاهزة للمشاركة.';
+
+  @override
+  String get shareAudioClipDescription =>
+      'أنشئ مقطع تلاوة أو ريل مصحوبًا بالصوت.';
+
+  @override
+  String get audioClipConfigSubtitle =>
+      'حدّد نطاق الآيات ثم أنشئ مقطعًا صوتيًا أو ريل عموديًا.';
+
+  @override
+  String shareVerseLimit(int count) {
+    return 'حتى $count آية لكل مقطع.';
+  }
+
+  @override
+  String get liveReelPreview => 'معاينة مباشرة للريل';
+
+  @override
+  String get createShare => 'إنشاء مشاركة';
+
+  @override
+  String get shareComposerSubtitle =>
+      'أنشئ مشاركة قرآنية أنيقة مع معاينة مباشرة وتحكمات سهلة.';
+
+  @override
+  String get shareReadyTitle => 'جاهز للمشاركة';
+
+  @override
+  String get shareReviewSubtitle =>
+      'راجع النتيجة النهائية ثم شاركها عندما تراها مناسبة.';
+
+  @override
+  String get readyToShare => 'جاهز للمشاركة';
+
+  @override
+  String get shareMode => 'صيغة المشاركة';
+
+  @override
+  String get shareModeScreenshot => 'صورة';
+
+  @override
+  String get shareModeAudio => 'صوت';
+
+  @override
+  String get shareModeReel => 'ريل';
+
+  @override
+  String get shareStepConfigure => 'الإعداد';
+
+  @override
+  String get shareStepGenerating => 'جاري الإنشاء';
+
+  @override
+  String get shareStepReview => 'المراجعة';
+
+  @override
+  String get shareContentLayout => 'نمط المحتوى';
+
+  @override
+  String get shareLayoutReaderPage => 'صفحة القارئ';
+
+  @override
+  String get shareLayoutPassageCard => 'بطاقة الآيات';
+
+  @override
+  String get shareReaderPageHint =>
+      'تستخدم صفحة القارئ الصفحة الحالية كما تظهر داخل القارئ تمامًا.';
+
+  @override
+  String get shareDuration => 'مدة المقطع';
+
+  @override
+  String get shareDurationAuto => 'النطاق الكامل';
+
+  @override
+  String get shareDurationShort => '30 ثانية';
+
+  @override
+  String get shareDurationMedium => '60 ثانية';
+
+  @override
+  String get shareDurationLong => '90 ثانية';
+
+  @override
+  String get shareDurationHint =>
+      'تحافظ خيارات المدة على اكتمال الآيات عندما تكون بيانات التوقيت متاحة.';
+
+  @override
+  String get prepareScreenshot => 'تجهيز الصورة';
+
+  @override
+  String get prepareAudioClip => 'تجهيز المقطع الصوتي';
+
+  @override
+  String get prepareReel => 'تجهيز الريل';
+
+  @override
+  String get preparingScreenshot => 'جارِ تجهيز الصورة...';
+
+  @override
+  String get preparingAudioClip => 'جارِ تجهيز المقطع الصوتي...';
+
+  @override
+  String get preparingReelStatus => 'جارِ تجهيز الريل...';
+
+  @override
+  String get generatingAudioClipStatus => 'جارِ إنشاء المقطع الصوتي...';
+
+  @override
+  String get capturingReaderVisuals => 'جارِ التقاط مشهد القارئ...';
+
+  @override
+  String get combiningReelMedia => 'جارِ دمج المشهد والصوت في ريل...';
+
+  @override
+  String get preparingToTrimLocalAudio => 'جارِ تجهيز قص الصوت المحلي...';
+
+  @override
+  String get reciterNotSupportedForLocalTrim =>
+      'هذا القارئ غير مدعوم للقص المحلي. سيتم التحويل إلى التنزيل عبر الإنترنت...';
+
+  @override
+  String get fetchingAyahTimings => 'جارِ جلب توقيت الآيات...';
+
+  @override
+  String get noTimingsFound =>
+      'لم يتم العثور على توقيتات. سيتم التحويل إلى التنزيل عبر الإنترنت...';
+
+  @override
+  String get noTimingsFoundForRange =>
+      'لم يتم العثور على توقيتات للنطاق المحدد. سيتم التحويل إلى التنزيل عبر الإنترنت...';
+
+  @override
+  String get trimmingAudio => 'جارِ قص الصوت...';
+
+  @override
+  String get generatedAudioFileNotFound =>
+      'لم يتم العثور على ملف الصوت الذي تم إنشاؤه.';
+
+  @override
+  String get generatedReelFileNotFound =>
+      'لم يتم العثور على ملف الريل الذي تم إنشاؤه.';
+
+  @override
+  String downloadingVerseProgress(int currentVerse, int totalVerses) {
+    return 'جارِ تنزيل الآية $currentVerse من $totalVerses...';
+  }
+
+  @override
+  String get assemblingAudioClip => 'جارِ تجميع المقطع الصوتي...';
+
+  @override
+  String get preparingVideoEncoding => 'جارِ تجهيز ترميز الفيديو...';
+
+  @override
+  String get encodingVerticalVideo =>
+      'جارِ ترميز الفيديو العمودي، قد يستغرق ذلك بعض الوقت...';
+
+  @override
+  String get reelGenerated => 'تم إنشاء الريل!';
+
+  @override
+  String get shareReviewTitle => 'راجع المشاركة';
+
+  @override
+  String get shareReviewScreenshot => 'الصورة جاهزة للمشاركة.';
+
+  @override
+  String get shareReviewAudio => 'المقطع الصوتي جاهز للمشاركة.';
+
+  @override
+  String get shareReviewReel => 'الريل جاهز للمشاركة.';
+
+  @override
+  String shareDurationPresetLabel(int seconds) {
+    return 'حتى $seconds ثانية';
+  }
+
+  @override
+  String get edit => 'تعديل';
 }

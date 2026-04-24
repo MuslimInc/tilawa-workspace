@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
 /// Compact app bar showing the reciter name with a gradient
@@ -65,11 +66,12 @@ class ReciterDetailsAppBar extends StatelessWidget {
           Flexible(
             child: Text(
               reciter.name,
-              style: TextStyle(
-                color: appBarForegroundColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
+              style: context
+                  .responsiveStyle((t) => t.titleLarge)
+                  ?.copyWith(
+                    color: appBarForegroundColor,
+                    fontWeight: FontWeight.bold,
+                  ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
