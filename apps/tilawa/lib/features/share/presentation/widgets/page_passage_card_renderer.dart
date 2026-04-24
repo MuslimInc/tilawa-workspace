@@ -28,8 +28,8 @@ class PagePassageCardRenderer extends StatelessWidget {
     final String? normalizedReciterName = reciterName?.trim();
 
     return SizedBox(
-      width: 1080,
-      height: 1350,
+      width: _PagePosterLayout.canvasWidth,
+      height: _PagePosterLayout.canvasHeight,
       child: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -44,29 +44,31 @@ class PagePassageCardRenderer extends StatelessWidget {
         child: Stack(
           children: [
             const Positioned(
-              top: -80,
-              right: -40,
+              top: _PagePosterLayout.topOrbTop,
+              right: _PagePosterLayout.topOrbRight,
               child: _PosterOrb(
-                size: 220,
+                size: _PagePosterLayout.topOrbSize,
                 color: _PagePosterPalette.mint,
                 opacity: 0.12,
               ),
             ),
             const Positioned(
-              bottom: -70,
-              left: -30,
+              bottom: _PagePosterLayout.bottomOrbBottom,
+              left: _PagePosterLayout.bottomOrbLeft,
               child: _PosterOrb(
-                size: 180,
+                size: _PagePosterLayout.bottomOrbSize,
                 color: _PagePosterPalette.gold,
                 opacity: 0.12,
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(54, 58, 54, 50),
+              padding: _PagePosterLayout.outerPadding,
               child: Container(
-                padding: const EdgeInsets.fromLTRB(42, 38, 42, 34),
+                padding: _PagePosterLayout.contentPadding,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(36),
+                  borderRadius: BorderRadius.circular(
+                    _PagePosterLayout.contentRadius,
+                  ),
                   border: Border.all(
                     color: _PagePosterPalette.gold.withValues(alpha: 0.42),
                     width: 2,
@@ -95,41 +97,46 @@ class PagePassageCardRenderer extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: _PagePosterLayout.headerGap),
                     Text(
                       arabicSurahNames,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.amiri(
-                        fontSize: 38,
-                        height: 1.18,
+                        fontSize: _PagePosterLayout.arabicTitleSize,
+                        height: _PagePosterLayout.arabicTitleHeight,
                         fontWeight: FontWeight.w700,
                         color: _PagePosterPalette.deepGreen,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: _PagePosterLayout.subtitleGap),
                     Text(
                       englishSurahNames.toUpperCase(),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.alexandria(
-                        fontSize: 18,
-                        letterSpacing: 1.6,
+                        fontSize: _PagePosterLayout.englishTitleSize,
+                        letterSpacing:
+                            _PagePosterLayout.englishTitleLetterSpacing,
                         fontWeight: FontWeight.w600,
                         color: _PagePosterPalette.deepGreen.withValues(
                           alpha: 0.72,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: _PagePosterLayout.readerGap),
                     Expanded(
                       child: Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(
+                          _PagePosterLayout.readerFramePadding,
+                        ),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28),
+                          borderRadius: BorderRadius.circular(
+                            _PagePosterLayout.readerFrameRadius,
+                          ),
                           color: Colors.white.withValues(alpha: 0.42),
                           border: Border.all(
                             color: _PagePosterPalette.gold.withValues(
@@ -138,7 +145,9 @@ class PagePassageCardRenderer extends StatelessWidget {
                           ),
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(
+                            _PagePosterLayout.readerClipRadius,
+                          ),
                           child: ReaderPageContentRenderer(
                             pageNumber: pageNumber,
                             uiTextDirection: uiTextDirection,
@@ -146,11 +155,11 @@ class PagePassageCardRenderer extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 18),
+                    const SizedBox(height: _PagePosterLayout.footerGap),
                     Wrap(
                       alignment: WrapAlignment.center,
-                      spacing: 10,
-                      runSpacing: 10,
+                      spacing: _PagePosterLayout.footerPillSpacing,
+                      runSpacing: _PagePosterLayout.footerPillRunSpacing,
                       children: [
                         const _PosterPill(
                           icon: Icons.auto_stories_rounded,
@@ -184,25 +193,31 @@ class _PosterPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 320),
+      constraints: const BoxConstraints(
+        maxWidth: _PagePosterLayout.pillMaxWidth,
+      ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: _PagePosterLayout.pillPadding,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(_PagePosterLayout.pillRadius),
           color: _PagePosterPalette.deepGreen.withValues(alpha: 0.08),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: _PagePosterPalette.gold),
-            const SizedBox(width: 8),
+            Icon(
+              icon,
+              size: _PagePosterLayout.pillIconSize,
+              color: _PagePosterPalette.gold,
+            ),
+            const SizedBox(width: _PagePosterLayout.pillIconGap),
             Flexible(
               child: Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.alexandria(
-                  fontSize: 16,
+                  fontSize: _PagePosterLayout.pillTextSize,
                   fontWeight: FontWeight.w600,
                   color: _PagePosterPalette.deepGreen,
                 ),
@@ -244,6 +259,42 @@ class _PosterOrb extends StatelessWidget {
       ),
     );
   }
+}
+
+abstract final class _PagePosterLayout {
+  static const double canvasWidth = 1080;
+  static const double canvasHeight = 1350;
+  static const double topOrbTop = -80;
+  static const double topOrbRight = -40;
+  static const double topOrbSize = 220;
+  static const double bottomOrbBottom = -70;
+  static const double bottomOrbLeft = -30;
+  static const double bottomOrbSize = 180;
+  static const EdgeInsets outerPadding = EdgeInsets.fromLTRB(54, 58, 54, 50);
+  static const EdgeInsets contentPadding = EdgeInsets.fromLTRB(42, 38, 42, 34);
+  static const double contentRadius = 36;
+  static const double headerGap = 24;
+  static const double arabicTitleSize = 38;
+  static const double arabicTitleHeight = 1.18;
+  static const double subtitleGap = 8;
+  static const double englishTitleSize = 18;
+  static const double englishTitleLetterSpacing = 1.6;
+  static const double readerGap = 22;
+  static const double readerFramePadding = 20;
+  static const double readerFrameRadius = 28;
+  static const double readerClipRadius = 20;
+  static const double footerGap = 18;
+  static const double footerPillSpacing = 10;
+  static const double footerPillRunSpacing = 10;
+  static const double pillMaxWidth = 320;
+  static const EdgeInsets pillPadding = EdgeInsets.symmetric(
+    horizontal: 14,
+    vertical: 10,
+  );
+  static const double pillRadius = 999;
+  static const double pillIconSize = 16;
+  static const double pillIconGap = 8;
+  static const double pillTextSize = 16;
 }
 
 abstract final class _PagePosterPalette {

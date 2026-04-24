@@ -3,6 +3,88 @@ import 'package:flutter/material.dart';
 import 'token_lerp.dart';
 
 @immutable
+class TilawaShareFooterBarTokens {
+  const TilawaShareFooterBarTokens({
+    required this.height,
+    required this.horizontalPadding,
+    required this.contentGap,
+    required this.labelFontSize,
+    required this.labelFontWeight,
+    required this.secondaryLabelFontSize,
+    required this.secondaryLabelOpacity,
+  });
+
+  final double height;
+  final double horizontalPadding;
+  final double contentGap;
+  final double labelFontSize;
+  final FontWeight labelFontWeight;
+  final double secondaryLabelFontSize;
+  final double secondaryLabelOpacity;
+
+  factory TilawaShareFooterBarTokens.defaults() =>
+      const TilawaShareFooterBarTokens(
+        height: 56,
+        horizontalPadding: 16,
+        contentGap: 12,
+        labelFontSize: 16,
+        labelFontWeight: FontWeight.bold,
+        secondaryLabelFontSize: 12,
+        secondaryLabelOpacity: 0.7,
+      );
+
+  TilawaShareFooterBarTokens copyWith({
+    double? height,
+    double? horizontalPadding,
+    double? contentGap,
+    double? labelFontSize,
+    FontWeight? labelFontWeight,
+    double? secondaryLabelFontSize,
+    double? secondaryLabelOpacity,
+  }) {
+    return TilawaShareFooterBarTokens(
+      height: height ?? this.height,
+      horizontalPadding: horizontalPadding ?? this.horizontalPadding,
+      contentGap: contentGap ?? this.contentGap,
+      labelFontSize: labelFontSize ?? this.labelFontSize,
+      labelFontWeight: labelFontWeight ?? this.labelFontWeight,
+      secondaryLabelFontSize:
+          secondaryLabelFontSize ?? this.secondaryLabelFontSize,
+      secondaryLabelOpacity:
+          secondaryLabelOpacity ?? this.secondaryLabelOpacity,
+    );
+  }
+
+  static TilawaShareFooterBarTokens lerp(
+    TilawaShareFooterBarTokens a,
+    TilawaShareFooterBarTokens b,
+    double t,
+  ) {
+    return TilawaShareFooterBarTokens(
+      height: lerpTokenDouble(a.height, b.height, t),
+      horizontalPadding: lerpTokenDouble(
+        a.horizontalPadding,
+        b.horizontalPadding,
+        t,
+      ),
+      contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
+      labelFontSize: lerpTokenDouble(a.labelFontSize, b.labelFontSize, t),
+      labelFontWeight: t < 0.5 ? a.labelFontWeight : b.labelFontWeight,
+      secondaryLabelFontSize: lerpTokenDouble(
+        a.secondaryLabelFontSize,
+        b.secondaryLabelFontSize,
+        t,
+      ),
+      secondaryLabelOpacity: lerpTokenDouble(
+        a.secondaryLabelOpacity,
+        b.secondaryLabelOpacity,
+        t,
+      ),
+    );
+  }
+}
+
+@immutable
 class TilawaSettingsGroupTokens {
   const TilawaSettingsGroupTokens({
     required this.groupHeaderPadding,

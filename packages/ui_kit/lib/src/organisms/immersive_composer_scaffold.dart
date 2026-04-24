@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -30,7 +29,6 @@ class ImmersiveComposerScaffold extends StatefulWidget {
     this.overlaysVisible,
     this.onVisibilityChanged,
     this.autoHideDuration = const Duration(seconds: 3),
-    this.enableAutoHide = true,
   });
 
   final String title;
@@ -54,7 +52,6 @@ class ImmersiveComposerScaffold extends StatefulWidget {
   final ValueChanged<bool>? onVisibilityChanged;
 
   final Duration autoHideDuration;
-  final bool enableAutoHide;
 
   @override
   State<ImmersiveComposerScaffold> createState() =>
@@ -64,54 +61,32 @@ class ImmersiveComposerScaffold extends StatefulWidget {
 class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold> {
   static const Duration _animationDuration = Duration(milliseconds: 200);
 
-  bool _internalVisible = true;
-  Timer? _hideTimer;
+  bool _visible = true;
 
-  bool get _visible => widget.overlaysVisible ?? _internalVisible;
+  bool get _effectiveVisible => widget.overlaysVisible ?? _visible;
 
   @override
   void initState() {
     super.initState();
-    _restartHideTimer();
   }
 
   @override
   void didUpdateWidget(covariant ImmersiveComposerScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_visible) {
-      _restartHideTimer();
-    } else {
-      _hideTimer?.cancel();
-    }
   }
 
   @override
   void dispose() {
-    _hideTimer?.cancel();
     super.dispose();
   }
 
-  void _restartHideTimer() {
-    _hideTimer?.cancel();
-    if (!_visible || !widget.enableAutoHide) return;
-    _hideTimer = Timer(widget.autoHideDuration, () {
-      _setVisible(false);
-    });
-  }
-
   void _setVisible(bool next) {
-    if (_visible == next) return;
+    print('[ImmersiveComposerScaffold] Setting overlay visibility: $next');
+    if (_effectiveVisible == next) return;
     if (widget.overlaysVisible == null) {
-      setState(() => _internalVisible = next);
+      setState(() => _visible = next);
     }
     widget.onVisibilityChanged?.call(next);
-    if (next) _restartHideTimer();
-  }
-
-  void _handleTap() => _setVisible(!_visible);
-
-  void _handleInteraction() {
-    if (_visible) _restartHideTimer();
   }
 
   @override
@@ -150,12 +125,8 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold> {
             child: RepaintBoundary(
               child: Listener(
                 behavior: HitTestBehavior.translucent,
-                onPointerDown: (_) => _handleInteraction(),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onTap: _handleTap,
-                  child: widget.preview,
-                ),
+                onPointerDown: (_) => _setVisible(!_effectiveVisible),
+                child: widget.preview,
               ),
             ),
           ),
@@ -166,7 +137,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold> {
             right: 0,
             child: _OverlaySlot(
               isTopPanel: true,
-              visible: _visible,
+              visible: _effectiveVisible,
               duration: _animationDuration,
               slideFrom: const Offset(0, -1),
               child: SafeArea(
@@ -187,13 +158,10 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold> {
             right: 0,
             child: _OverlaySlot(
               isTopPanel: false,
-              visible: _visible,
+              visible: _effectiveVisible,
               duration: _animationDuration,
               slideFrom: const Offset(0, 1),
-              child: _BottomPanel(
-                onInteraction: _handleInteraction,
-                child: widget.bottomPanel,
-              ),
+              child: widget.bottomPanel,
             ),
           ),
         ],
@@ -221,6 +189,10 @@ class _OverlaySlot extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final designTokens = theme.tokens;
+    final BorderRadius borderRadius = BorderRadius.vertical(
+      bottom: Radius.circular(isTopPanel ? 16 : 0),
+      top: Radius.circular(isTopPanel ? 0 : 16),
+    );
 
     return IgnorePointer(
       ignoring: !visible,
@@ -241,11 +213,15 @@ class _OverlaySlot extends StatelessWidget {
                 ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    // color: theme.colorScheme.surface,
-                    color: Colors.green,
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(isTopPanel ? 16 : 0),
-                      top: Radius.circular(isTopPanel ? 0 : 16),
+                    color: theme.colorScheme.surface.withValues(
+                      alpha: designTokens.opacityGlass,
+                    ),
+                    borderRadius: borderRadius,
+                    border: Border.all(
+                      color: theme.colorScheme.outline.withValues(
+                        alpha: designTokens.opacitySubtle,
+                      ),
+                      width: designTokens.borderWidthThin,
                     ),
                   ),
                   child: child,
@@ -295,23 +271,6 @@ class _TopAppBar extends StatelessWidget {
               ),
         ],
       ),
-    );
-  }
-}
-
-class _BottomPanel extends StatelessWidget {
-  const _BottomPanel({required this.onInteraction, required this.child});
-
-  final VoidCallback onInteraction;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      behavior: HitTestBehavior.deferToChild,
-      onPointerDown: (_) => onInteraction(),
-      onPointerMove: (_) => onInteraction(),
-      child: child,
     );
   }
 }

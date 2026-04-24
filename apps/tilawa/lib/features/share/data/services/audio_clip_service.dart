@@ -34,6 +34,13 @@ class AudioClipService {
 
   /// Max retries per verse.
   static const _maxRetries = 3;
+  static const int _millisecondsPerSecond = Duration.millisecondsPerSecond;
+  static const double _initialProgress = 0.0;
+  static const double _timingLookupProgress = 0.1;
+  static const double _trimProgress = 0.5;
+  static const double _onlineDownloadProgressShare = 0.9;
+  static const double _onlineAssemblyProgress = 0.95;
+  static const double _completeProgress = 1.0;
 
   /// Resolves the effective verse range for a duration-constrained clip.
   Future<AudioClipConfig> resolveConfigForDuration({
@@ -65,7 +72,7 @@ class AudioClipService {
           .toList();
       if (rangeTimings.isEmpty) return config;
 
-      final maxDurationMs = maxDurationSeconds * 1000;
+      final maxDurationMs = maxDurationSeconds * _millisecondsPerSecond;
       final startTimeMs = rangeTimings.first.startTimeMs;
       var resolvedToAyah = config.fromAyah;
 
@@ -117,14 +124,20 @@ class AudioClipService {
     AudioClipProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
   ) async {
-    onProgress?.call(0.0, progressMessages.preparingToTrimLocalAudio);
+    onProgress?.call(
+      _initialProgress,
+      progressMessages.preparingToTrimLocalAudio,
+    );
 
     final recitationId = ReciterAudioMapping.resolveRecitationId(
       config.serverUrl,
     );
     if (recitationId == null) {
       // Fallback to online verse download if we can't get timings
-      onProgress?.call(0.0, progressMessages.reciterNotSupportedForLocalTrim);
+      onProgress?.call(
+        _initialProgress,
+        progressMessages.reciterNotSupportedForLocalTrim,
+      );
       return _generateFromOnlineVerses(
         config: config,
         progressMessages: progressMessages,
@@ -132,14 +145,17 @@ class AudioClipService {
       );
     }
 
-    onProgress?.call(0.1, progressMessages.fetchingAyahTimings);
+    onProgress?.call(
+      _timingLookupProgress,
+      progressMessages.fetchingAyahTimings,
+    );
     final timings = await _timingService.getSurahTimings(
       recitationId: recitationId,
       surahNumber: config.surahNumber,
     );
 
     if (timings.isEmpty) {
-      onProgress?.call(0.0, progressMessages.noTimingsFound);
+      onProgress?.call(_initialProgress, progressMessages.noTimingsFound);
       return _generateFromOnlineVerses(
         config: config,
         progressMessages: progressMessages,
@@ -155,7 +171,10 @@ class AudioClipService {
         .toList();
 
     if (rangeTimings.isEmpty) {
-      onProgress?.call(0.0, progressMessages.noTimingsFoundForRange);
+      onProgress?.call(
+        _initialProgress,
+        progressMessages.noTimingsFoundForRange,
+      );
       return _generateFromOnlineVerses(
         config: config,
         progressMessages: progressMessages,
@@ -172,9 +191,9 @@ class AudioClipService {
         'trimmed_${config.reciterFolder}_${s}_${config.fromAyah}-${config.toAyah}.mp3';
     final outputPath = p.join(shareDir.path, outputFileName);
 
-    onProgress?.call(0.5, progressMessages.trimmingAudio);
+    onProgress?.call(_trimProgress, progressMessages.trimmingAudio);
     await _trimWithFFmpeg(localPath, startTime, endTime, outputPath, config);
-    onProgress?.call(1.0, progressMessages.done);
+    onProgress?.call(_completeProgress, progressMessages.done);
 
     return outputPath;
   }
@@ -252,7 +271,7 @@ class AudioClipService {
 
           completedCount++;
           onProgress?.call(
-            completedCount / totalVerses * 0.9, // 90% for downloads
+            completedCount / totalVerses * _onlineDownloadProgressShare,
             progressMessages.downloadingVerse(completedCount, totalVerses),
           );
 
@@ -263,7 +282,10 @@ class AudioClipService {
 
     versePaths.addAll(await Future.wait(futures));
 
-    onProgress?.call(0.95, progressMessages.assemblingAudioClip);
+    onProgress?.call(
+      _onlineAssemblyProgress,
+      progressMessages.assemblingAudioClip,
+    );
 
     // Concatenate MP3 files.
     final outputPath = await _concatenateFiles(
@@ -271,7 +293,7 @@ class AudioClipService {
       config: config,
     );
 
-    onProgress?.call(1.0, progressMessages.done);
+    onProgress?.call(_completeProgress, progressMessages.done);
 
     // Evict old cache entries in the background.
     unawaited(_fileManager.evictVerseCacheIfNeeded());

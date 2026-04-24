@@ -169,6 +169,7 @@ Widget _buildRendererHarness({required int pageNumber}) {
               ),
               surahNumber: surahNumber,
               verseBackgroundColor: (_, _) => null,
+              verseTextColor: (_, _) => null,
               textColor: const Color(0xFF2E2116),
               pageBackgroundColor: const Color(0xFFFFF8ED),
             );

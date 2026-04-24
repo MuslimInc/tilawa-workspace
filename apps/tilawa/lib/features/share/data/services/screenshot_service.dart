@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'share_file_manager.dart';
 
@@ -10,6 +11,8 @@ import 'share_file_manager.dart';
 @lazySingleton
 class ScreenshotService {
   ScreenshotService(this._fileManager);
+
+  static const int _captureBoundaryRetryFrames = 4;
 
   final ShareFileManager _fileManager;
 
@@ -58,9 +61,14 @@ class ScreenshotService {
     required int pageNumber,
     required String appName,
     required String sharedViaLabel,
-    Color brandColor = const Color(0xFF1B5E20),
+    Color? footerBackgroundColor,
+    Color? footerForegroundColor,
     double pixelRatio = 2.0,
   }) async {
+    const Color defaultFooterBg = Color(0xFF1B4060);
+    final Color brandColor = footerBackgroundColor ?? defaultFooterBg;
+    final Color foregroundColor =
+        footerForegroundColor ?? const Color(0xFFFFFFFF);
     final pageImage = await _captureBoundaryImage(
       boundaryKey: boundaryKey,
       pixelRatio: pixelRatio,
@@ -74,6 +82,7 @@ class ScreenshotService {
         appName: appName,
         sharedViaLabel: sharedViaLabel,
         brandColor: brandColor,
+        foregroundColor: foregroundColor,
         pixelRatio: pixelRatio,
       );
 
@@ -100,8 +109,10 @@ class ScreenshotService {
     int? targetWidth,
     int? targetHeight,
   }) async {
-    final boundary = boundaryKey.currentContext?.findRenderObject();
-    if (boundary is! RenderRepaintBoundary) {
+    final RenderRepaintBoundary? boundary = await _waitForBoundaryReady(
+      boundaryKey,
+    );
+    if (boundary == null) {
       throw StateError('RepaintBoundary not found. Page may still be loading.');
     }
 
@@ -135,6 +146,28 @@ class ScreenshotService {
     }
   }
 
+  Future<RenderRepaintBoundary?> _waitForBoundaryReady(
+    GlobalKey boundaryKey,
+  ) async {
+    for (var attempt = 0; attempt < _captureBoundaryRetryFrames; attempt++) {
+      final renderObject = boundaryKey.currentContext?.findRenderObject();
+      if (renderObject is RenderRepaintBoundary &&
+          renderObject.hasSize &&
+          !renderObject.debugNeedsPaint) {
+        return renderObject;
+      }
+
+      await WidgetsBinding.instance.endOfFrame;
+    }
+
+    final renderObject = boundaryKey.currentContext?.findRenderObject();
+    if (renderObject is RenderRepaintBoundary && renderObject.hasSize) {
+      return renderObject;
+    }
+
+    return null;
+  }
+
   Future<ui.Image> _composeBrandedImage({
     required ui.Image pageImage,
     required String surahName,
@@ -142,12 +175,18 @@ class ScreenshotService {
     required String appName,
     required String sharedViaLabel,
     required Color brandColor,
+    required Color foregroundColor,
     required double pixelRatio,
   }) async {
     final imageWidth = pageImage.width.toDouble();
     final imageHeight = pageImage.height.toDouble();
-    final stripHeight = 56.0 * pixelRatio;
+    final footerTokens = TilawaShareFooterBarTokens.defaults();
+    final stripHeight = footerTokens.height * pixelRatio;
     final totalHeight = imageHeight + stripHeight;
+    final horizontalPadding = footerTokens.horizontalPadding * pixelRatio;
+    final footerGap = footerTokens.contentGap * pixelRatio;
+    final footerContentWidth = imageWidth - (horizontalPadding * 2);
+    final footerColumnWidth = (footerContentWidth - footerGap) / 2;
 
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(
@@ -165,9 +204,9 @@ class ScreenshotService {
 
     // Draw surah name (left-aligned, RTL-friendly).
     final surahStyle = ui.TextStyle(
-      color: const Color(0xFFFFFFFF),
-      fontSize: 16.0 * pixelRatio,
-      fontWeight: FontWeight.bold,
+      color: foregroundColor,
+      fontSize: footerTokens.labelFontSize * pixelRatio,
+      fontWeight: footerTokens.labelFontWeight,
     );
     final surahParagraphBuilder =
         ui.ParagraphBuilder(
@@ -176,19 +215,21 @@ class ScreenshotService {
           ..pushStyle(surahStyle)
           ..addText('$surahName  |  ${_localizePageLabel(pageNumber)}');
     final surahParagraph = surahParagraphBuilder.build()
-      ..layout(ui.ParagraphConstraints(width: imageWidth - 32.0 * pixelRatio));
+      ..layout(ui.ParagraphConstraints(width: footerColumnWidth));
     canvas.drawParagraph(
       surahParagraph,
       Offset(
-        16.0 * pixelRatio,
+        horizontalPadding,
         imageHeight + (stripHeight - surahParagraph.height) / 2,
       ),
     );
 
     // Draw "Shared via Tilawa" (right side).
     final viaStyle = ui.TextStyle(
-      color: const Color(0xB3FFFFFF), // 70% white
-      fontSize: 12.0 * pixelRatio,
+      color: foregroundColor.withValues(
+        alpha: footerTokens.secondaryLabelOpacity,
+      ),
+      fontSize: footerTokens.secondaryLabelFontSize * pixelRatio,
     );
     final viaParagraphBuilder =
         ui.ParagraphBuilder(
@@ -200,11 +241,11 @@ class ScreenshotService {
           ..pushStyle(viaStyle)
           ..addText(sharedViaLabel);
     final viaParagraph = viaParagraphBuilder.build()
-      ..layout(ui.ParagraphConstraints(width: imageWidth - 32.0 * pixelRatio));
+      ..layout(ui.ParagraphConstraints(width: footerColumnWidth));
     canvas.drawParagraph(
       viaParagraph,
       Offset(
-        16.0 * pixelRatio,
+        imageWidth - horizontalPadding - footerColumnWidth,
         imageHeight + (stripHeight - viaParagraph.height) / 2,
       ),
     );

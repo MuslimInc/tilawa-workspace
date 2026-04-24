@@ -49,9 +49,9 @@ class ShareControlTileShell extends StatelessWidget {
         vertical: tokens.spaceMedium,
       ),
       child: Row(
+        spacing: tokens.spaceSmall,
         children: [
           Icon(icon, size: tokens.iconSizeSmall, color: theme.primaryColor),
-          SizedBox(width: tokens.spaceSmall),
           Text(
             label,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -59,8 +59,12 @@ class ShareControlTileShell extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(child: child),
+          Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: child,
+            ),
+          ),
         ],
       ),
     );

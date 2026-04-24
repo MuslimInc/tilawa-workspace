@@ -7,8 +7,10 @@ import '../../domain/models/quran_word_metadata.dart';
 import '../../helpers/app_logger.dart';
 import '../layout/quran_line_layout.dart';
 
-const bool _kDebugQuranLineGuides = true;
-const bool _kDebugQuranLineLogs = true;
+const bool _kDebugQuranLineGuides = bool.fromEnvironment(
+  'QURAN_DEBUG_LINE_GUIDES',
+);
+const bool _kDebugQuranLineLogs = bool.fromEnvironment('QURAN_DEBUG_LINE_LOGS');
 
 /// Metadata for a single word within the consolidated page painter.
 ///
@@ -336,15 +338,19 @@ class _AllLinesPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final stopwatch = Stopwatch()..start();
+    final Stopwatch? stopwatch = _kDebugQuranLineLogs
+        ? (Stopwatch()..start())
+        : null;
 
     // Fast path: replay the cached Picture in a single GPU command.
     if (pictureCache.picture != null && pictureCache.size == size) {
       canvas.drawPicture(pictureCache.picture!);
-      stopwatch.stop();
-      logger.w(
-        '[QuranFontsPerformance] Replayed cached picture in ${stopwatch.elapsedMilliseconds}ms (${stopwatch.elapsedMicroseconds}µs)',
-      );
+      stopwatch?.stop();
+      if (_kDebugQuranLineLogs) {
+        logger.w(
+          '[QuranFontsPerformance] Replayed cached picture in ${stopwatch!.elapsedMilliseconds}ms (${stopwatch.elapsedMicroseconds}µs)',
+        );
+      }
       return;
     }
 
@@ -411,10 +417,12 @@ class _AllLinesPainter extends CustomPainter {
     pictureCache.picture = picture;
     pictureCache.size = size;
 
-    stopwatch.stop();
-    logger.w(
-      '[QuranFontsPerformance] Recorded and painted lines in ${stopwatch.elapsedMilliseconds}ms (${stopwatch.elapsedMicroseconds}µs)',
-    );
+    stopwatch?.stop();
+    if (_kDebugQuranLineLogs) {
+      logger.w(
+        '[QuranFontsPerformance] Recorded and painted lines in ${stopwatch!.elapsedMilliseconds}ms (${stopwatch.elapsedMicroseconds}µs)',
+      );
+    }
   }
 
   @override

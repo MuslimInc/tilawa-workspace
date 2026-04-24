@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran_qcf/quran_qcf.dart';
@@ -168,7 +169,7 @@ class ShareCubit extends Cubit<ShareState> {
 
   /// Updates the screenshot layout.
   void updateScreenshotLayout(ShareScreenshotLayout layout) {
-    emit(state.copyWith(screenshotLayout: layout));
+    emit(state.copyWith(screenshotLayout: ShareScreenshotLayout.readerPage));
   }
 
   AudioClipConfig? _buildAudioConfig() {
@@ -273,6 +274,8 @@ class ShareCubit extends Cubit<ShareState> {
     required String sharedViaLabel,
     required String preparingImageLabel,
     bool brandCapture = true,
+    Color? footerBackgroundColor,
+    Color? footerForegroundColor,
   }) async {
     emit(
       state.copyWith(
@@ -298,6 +301,8 @@ class ShareCubit extends Cubit<ShareState> {
         appName: appName,
         sharedViaLabel: sharedViaLabel,
         brandCapture: brandCapture,
+        footerBackgroundColor: footerBackgroundColor,
+        footerForegroundColor: footerForegroundColor,
       );
       emit(state.copyWith(status: ShareStatus.reviewing, content: content));
     } catch (e, st) {
@@ -322,6 +327,8 @@ class ShareCubit extends Cubit<ShareState> {
     required int pageNumber,
     required String appName,
     required String sharedViaLabel,
+    Color? footerBackgroundColor,
+    Color? footerForegroundColor,
   }) async {
     emit(state.copyWith(status: ShareStatus.sharing));
     try {
@@ -334,6 +341,8 @@ class ShareCubit extends Cubit<ShareState> {
         pageNumber: pageNumber,
         appName: appName,
         sharedViaLabel: sharedViaLabel,
+        footerBackgroundColor: footerBackgroundColor,
+        footerForegroundColor: footerForegroundColor,
       );
       await _shareContent(content);
       emit(state.copyWith(status: ShareStatus.idle));

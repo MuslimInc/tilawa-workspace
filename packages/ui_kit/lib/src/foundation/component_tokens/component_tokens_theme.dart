@@ -13,6 +13,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.glassPanel,
     required this.iconActionButton,
     required this.searchField,
+    required this.shareFooterBar,
     required this.settingsGroup,
     required this.immersiveComposer,
   });
@@ -23,6 +24,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaGlassPanelTokens glassPanel;
   final TilawaIconActionButtonTokens iconActionButton;
   final TilawaSearchFieldTokens searchField;
+  final TilawaShareFooterBarTokens shareFooterBar;
   final TilawaSettingsGroupTokens settingsGroup;
   final TilawaImmersiveComposerTokens immersiveComposer;
 
@@ -33,6 +35,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     glassPanel: TilawaGlassPanelTokens.defaults(),
     iconActionButton: TilawaIconActionButtonTokens.defaults(),
     searchField: TilawaSearchFieldTokens.defaults(),
+    shareFooterBar: TilawaShareFooterBarTokens.defaults(),
     settingsGroup: TilawaSettingsGroupTokens.defaults(),
     immersiveComposer: TilawaImmersiveComposerTokens.defaults(),
   );
@@ -47,6 +50,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaGlassPanelTokens? glassPanel,
     TilawaIconActionButtonTokens? iconActionButton,
     TilawaSearchFieldTokens? searchField,
+    TilawaShareFooterBarTokens? shareFooterBar,
     TilawaSettingsGroupTokens? settingsGroup,
     TilawaImmersiveComposerTokens? immersiveComposer,
   }) {
@@ -57,6 +61,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       glassPanel: glassPanel ?? this.glassPanel,
       iconActionButton: iconActionButton ?? this.iconActionButton,
       searchField: searchField ?? this.searchField,
+      shareFooterBar: shareFooterBar ?? this.shareFooterBar,
       settingsGroup: settingsGroup ?? this.settingsGroup,
       immersiveComposer: immersiveComposer ?? this.immersiveComposer,
     );
@@ -94,6 +99,11 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       searchField: TilawaSearchFieldTokens.lerp(
         searchField,
         other.searchField,
+        t,
+      ),
+      shareFooterBar: TilawaShareFooterBarTokens.lerp(
+        shareFooterBar,
+        other.shareFooterBar,
         t,
       ),
       settingsGroup: TilawaSettingsGroupTokens.lerp(

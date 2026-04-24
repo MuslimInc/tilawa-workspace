@@ -10,6 +10,7 @@ import 'package:path/path.dart' as p;
 import 'package:tilawa_core/logger.dart';
 
 import '../../domain/entities/share_progress_messages.dart';
+import '../../domain/entities/share_video_profile.dart';
 import 'share_file_manager.dart';
 
 @lazySingleton
@@ -24,15 +25,21 @@ class VideoService {
   // the need for FFmpeg scale/crop filters on the hot path.
   /// Target output width (px) for generated reels. Kept public so the capture
   /// and offscreen-render layers can pin the same dimensions end-to-end.
-  static const int outputVideoWidth = 720;
+  static const int outputVideoWidth = ShareVideoProfile.outputWidthPx;
 
   /// Target output height (px) for generated reels.
-  static const int outputVideoHeight = 1280;
-  static const int _outputFps = 30;
+  static const int outputVideoHeight = ShareVideoProfile.outputHeightPx;
+  static const int _outputFps = ShareVideoProfile.outputFps;
+  static const int _stillImageInputFps = ShareVideoProfile.stillImageInputFps;
   // Keyframe cadence of 2 seconds keeps Reels/TikTok/Shorts happy without
   // paying real encoder cost on a still-image stream.
-  static const int _keyframeIntervalFrames = _outputFps * 2;
-  static const String _audioBitrate = '128k';
+  static const int _keyframeIntervalFrames =
+      ShareVideoProfile.keyframeIntervalFrames;
+  static const String _audioBitrate = ShareVideoProfile.audioBitrate;
+  static const double _preparingEncodingProgress = 0.1;
+  static const double _encodingStartProgress = 0.3;
+  static const double _encodingEndProgress = 0.9;
+  static const double _minProgressDelta = 0.005;
 
   /// Combines a screenshot and an audio clip into a vertical MP4 video.
   ///
@@ -54,7 +61,10 @@ class VideoService {
       throw StateError('At least one video screenshot is required.');
     }
 
-    onProgress?.call(0.1, progressMessages.preparingVideoEncoding);
+    onProgress?.call(
+      _preparingEncodingProgress,
+      progressMessages.preparingVideoEncoding,
+    );
 
     final shareDir = await _fileManager.getShareDirectory();
     final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -73,7 +83,8 @@ class VideoService {
         ? audioDurationSeconds
         // Conservative fallback when ffprobe is unavailable; -shortest will
         // still clamp to audio at mux time, so this only bounds the image loop.
-        : 90.0 * effectiveScreenshotPaths.length;
+        : ShareVideoProfile.fallbackSecondsPerSlide *
+              effectiveScreenshotPaths.length;
 
     final String command = effectiveScreenshotPaths.length == 1
         ? _buildSingleImageCommand(
@@ -94,7 +105,10 @@ class VideoService {
           );
 
     _videoLog('[VIDEO_SVC] ffmpeg command: $command');
-    onProgress?.call(0.3, progressMessages.encodingVerticalVideo);
+    onProgress?.call(
+      _encodingStartProgress,
+      progressMessages.encodingVerticalVideo,
+    );
 
     final int tEncode = DateTime.now().millisecondsSinceEpoch;
     final FFmpegSession session = await _runWithProgress(
@@ -138,7 +152,7 @@ class VideoService {
   }) async {
     final completer = Completer<FFmpegSession>();
     final double audioDurationMs = audioDurationSeconds * 1000.0;
-    double lastReportedFraction = 0.3;
+    double lastReportedFraction = _encodingStartProgress;
 
     final FFmpegSession session = await FFmpegKit.executeAsync(
       command,
@@ -150,12 +164,17 @@ class VideoService {
         if (audioDurationMs <= 0 || onProgress == null) return;
         final int timeMs = stats.getTime();
         if (timeMs <= 0) return;
-        // Local 0.3..0.9 progress window during the encode phase. The repo
-        // layer re-maps this to the global share progress bar, so we stay out
-        // of the 0.9..1.0 range which is reserved for muxing/finalization.
-        final double fraction = 0.3 + (timeMs / audioDurationMs) * 0.6;
-        final double clamped = fraction.clamp(0.3, 0.9);
-        if (clamped - lastReportedFraction < 0.005) return;
+        // Local encode progress is remapped by the repository to the global
+        // share progress bar. Keep the top range for muxing/finalization.
+        final double fraction =
+            _encodingStartProgress +
+            (timeMs / audioDurationMs) *
+                (_encodingEndProgress - _encodingStartProgress);
+        final double clamped = fraction.clamp(
+          _encodingStartProgress,
+          _encodingEndProgress,
+        );
+        if (clamped - lastReportedFraction < _minProgressDelta) return;
         lastReportedFraction = clamped;
         onProgress(clamped, progressMessages.encodingVerticalVideo);
       },
@@ -190,7 +209,7 @@ class VideoService {
       // and feeds every one of them through scale/crop before the output -r
       // drops them, which is the entire encode-time bottleneck.
       '-framerate',
-      '1',
+      '$_stillImageInputFps',
       '-loop',
       '1',
       // Hard-cap the image loop to the audio duration so the looped input
@@ -264,7 +283,7 @@ class VideoService {
     for (int index = 0; index < screenshotPaths.length; index++) {
       commandParts.addAll(<String>[
         '-framerate',
-        '1',
+        '$_stillImageInputFps',
         '-loop',
         '1',
         '-t',
@@ -275,7 +294,7 @@ class VideoService {
       // Each slide is already at the target resolution thanks to the
       // offscreen capture pipeline, so we only normalise SAR and clamp the
       // internal frame rate. No scale/crop — that is the expensive step.
-      filterParts.add('[$index:v]setsar=1,fps=1[v$index]');
+      filterParts.add('[$index:v]setsar=1,fps=$_stillImageInputFps[v$index]');
       concatInputs.write('[v$index]');
     }
 
@@ -337,7 +356,7 @@ class VideoService {
     final double totalDurationSeconds =
         audioDurationSeconds != null && audioDurationSeconds > 0
         ? audioDurationSeconds
-        : 90.0 * slideCount;
+        : ShareVideoProfile.fallbackSecondsPerSlide * slideCount;
     final double baseDurationSeconds = totalDurationSeconds / slideCount;
 
     return List<double>.generate(slideCount, (index) {

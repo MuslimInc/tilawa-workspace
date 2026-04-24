@@ -15,16 +15,41 @@ class ReaderPageContentRenderer extends StatelessWidget {
   const ReaderPageContentRenderer({
     super.key,
     required this.pageNumber,
+    this.surahNumber,
+    this.fromAyah,
+    this.toAyah,
     this.uiTextDirection = TextDirection.ltr,
   });
 
   final int pageNumber;
+  final int? surahNumber;
+  final int? fromAyah;
+  final int? toAyah;
   final TextDirection uiTextDirection;
+
+  bool _isSelectedVerse(int verseSurahNumber, int verseNumber) {
+    final selectedSurahNumber = surahNumber;
+    final selectedFromAyah = fromAyah;
+    final selectedToAyah = toAyah;
+
+    if (selectedSurahNumber == null ||
+        selectedFromAyah == null ||
+        selectedToAyah == null) {
+      return false;
+    }
+
+    return verseSurahNumber == selectedSurahNumber &&
+        verseNumber >= selectedFromAyah &&
+        verseNumber <= selectedToAyah;
+  }
 
   @override
   Widget build(BuildContext context) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final QuranReaderTheme readerTheme = QuranReaderTheme.of(context);
+    final Color verseHighlightColor = Theme.of(
+      context,
+    ).colorScheme.primary.withValues(alpha: 0.14);
 
     return DecoratedBox(
       decoration: BoxDecoration(color: readerTheme.pageBackground),
@@ -57,6 +82,11 @@ class ReaderPageContentRenderer extends StatelessWidget {
                     metrics: metrics,
                     viewportWidth: constraints.maxWidth,
                     textColor: readerTheme.textColor,
+                    verseBackgroundColor: (verseSurahNumber, verseNumber) {
+                      return _isSelectedVerse(verseSurahNumber, verseNumber)
+                          ? verseHighlightColor
+                          : null;
+                    },
                     mushafService: quranQcfLocator<MushafService>(),
                   );
 
@@ -74,6 +104,11 @@ class ReaderPageContentRenderer extends StatelessWidget {
                     pageNumber: pageNumber,
                     preparedPage: preparedPage,
                     textColor: readerTheme.textColor,
+                    verseBackgroundColor: (verseSurahNumber, verseNumber) {
+                      return _isSelectedVerse(verseSurahNumber, verseNumber)
+                          ? verseHighlightColor
+                          : null;
+                    },
                     pageBackgroundColor: readerTheme.pageBackground,
                     headerImageFilter: readerTheme.headerImageFilter,
                     headerTextColor: readerTheme.headerTextColor,

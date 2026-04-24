@@ -1,7 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+import 'package:tilawa/core/extensions.dart';
 
 import '../utils/video_page_specs.dart';
+import 'video_reel_design.dart';
 
 /// Renders a single mushaf page for share media generation.
 ///
@@ -20,6 +23,7 @@ abstract class MushafPageRenderer {
     required VideoPageSpec pageSpec,
     required int surahNumber,
     required Color? Function(int surah, int verse) verseBackgroundColor,
+    required Color? Function(int surah, int verse) verseTextColor,
     required Color textColor,
     required Color pageBackgroundColor,
   });
@@ -34,12 +38,16 @@ abstract class MushafPageRenderer {
 class QcfMushafPageRenderer extends MushafPageRenderer {
   const QcfMushafPageRenderer();
 
+  static const int _alFatihahSurahNumber = 1;
+  static const int _atTawbahSurahNumber = 9;
+
   @override
   Widget build({
     required BuildContext context,
     required VideoPageSpec pageSpec,
     required int surahNumber,
     required Color? Function(int surah, int verse) verseBackgroundColor,
+    required Color? Function(int surah, int verse) verseTextColor,
     required Color textColor,
     required Color pageBackgroundColor,
   }) {
@@ -47,21 +55,19 @@ class QcfMushafPageRenderer extends MushafPageRenderer {
       pageSpec: pageSpec,
       surahNumber: surahNumber,
       verseBackgroundColor: verseBackgroundColor,
+      verseTextColor: verseTextColor,
       textColor: textColor,
       pageBackgroundColor: pageBackgroundColor,
     );
   }
 }
 
-class _QcfPage extends StatelessWidget {
-  static const Color _frameTextColor = Color(0xFF6B5B4F);
-  static const Color _frameAccentColor = Color(0xFFC5A358);
-  static const Color _frameSurfaceColor = Color(0xFFFFF9F2);
-
+class _QcfPage extends StatefulWidget {
   const _QcfPage({
     required this.pageSpec,
     required this.surahNumber,
     required this.verseBackgroundColor,
+    required this.verseTextColor,
     required this.textColor,
     required this.pageBackgroundColor,
   });
@@ -69,8 +75,17 @@ class _QcfPage extends StatelessWidget {
   final VideoPageSpec pageSpec;
   final int surahNumber;
   final Color? Function(int surah, int verse) verseBackgroundColor;
+  final Color? Function(int surah, int verse) verseTextColor;
   final Color textColor;
   final Color pageBackgroundColor;
+
+  @override
+  State<_QcfPage> createState() => _QcfPageState();
+}
+
+class _QcfPageState extends State<_QcfPage> {
+  _PreparedVideoPageCacheKey? _preparedPageKey;
+  PreparedQuranPage? _preparedPage;
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +93,11 @@ class _QcfPage extends StatelessWidget {
       builder: (context, constraints) {
         final mushafService = quranQcfLocator<MushafService>();
         final PageMetadata meta = mushafService.getPageMetadata(
-          pageSpec.pageNumber,
+          widget.pageSpec.pageNumber,
         );
+        final bool isArabic = context.l10n.localeName == 'ar';
         final List<String> surahNames = meta.surahNumbers
-            .map(getSurahNameArabic)
+            .map(isArabic ? getSurahNameArabic : getSurahNameEnglish)
             .toList(growable: false);
 
         return ListenableBuilder(
@@ -89,14 +105,14 @@ class _QcfPage extends StatelessWidget {
           builder: (context, _) {
             final fontService = quranQcfLocator<QuranFontService>();
             final bool isFontLoaded = fontService.isFontLoaded(
-              pageSpec.pageNumber,
+              widget.pageSpec.pageNumber,
             );
 
             if (!isFontLoaded) {
               // Actively kick off loading so the ListenableBuilder is notified
               // when done. Safe to call repeatedly — the service deduplicates
               // in-flight requests.
-              fontService.ensureSingleFontLoaded(pageSpec.pageNumber);
+              fontService.ensureSingleFontLoaded(widget.pageSpec.pageNumber);
               return const Center(child: CircularProgressIndicator.adaptive());
             }
 
@@ -116,39 +132,58 @@ class _QcfPage extends StatelessWidget {
                             .calculateMetrics(
                               context,
                               bodyConstraints,
-                              pageSpec.pageNumber,
+                              widget.pageSpec.pageNumber,
                               mushafService,
                             );
-                        final preparedPage =
-                            quranQcfLocator<QuranPagePreparationService>()
-                                .preparePage(
-                                  pageNumber: pageSpec.pageNumber,
-                                  metrics: metrics,
-                                  viewportWidth: bodyConstraints.maxWidth,
-                                  textColor: textColor,
-                                  verseBackgroundColor: verseBackgroundColor,
-                                  mushafService: mushafService,
-                                );
-                        final fixedPreparedPage = _injectMissingSurahHeaders(
-                          preparedPage,
+                        final cacheKey = _PreparedVideoPageCacheKey(
+                          pageNumber: widget.pageSpec.pageNumber,
+                          surahNumber: widget.surahNumber,
+                          fromAyah: widget.pageSpec.fromAyah,
+                          toAyah: widget.pageSpec.toAyah,
+                          fontSize: metrics.fontSize,
+                          fontHeight: metrics.fontHeight,
+                          viewportWidth: bodyConstraints.maxWidth,
+                          textColorValue: widget.textColor.toARGB32(),
                         );
+                        PreparedQuranPage? fixedPreparedPage =
+                            _preparedPageKey == cacheKey ? _preparedPage : null;
+                        if (fixedPreparedPage == null) {
+                          final preparedPage =
+                              quranQcfLocator<QuranPagePreparationService>()
+                                  .preparePage(
+                                    pageNumber: widget.pageSpec.pageNumber,
+                                    metrics: metrics,
+                                    viewportWidth: bodyConstraints.maxWidth,
+                                    textColor: widget.textColor,
+                                    verseBackgroundColor:
+                                        widget.verseBackgroundColor,
+                                    mushafService: mushafService,
+                                  );
+                          fixedPreparedPage = _injectMissingSurahHeaders(
+                            preparedPage,
+                          );
+                          _preparedPageKey = cacheKey;
+                          _preparedPage = fixedPreparedPage;
+                        }
 
                         return PageContent(
                           mushafService: mushafService,
                           pageSnapshotService:
                               quranQcfLocator<PageSnapshotService>(),
-                          pageNumber: pageSpec.pageNumber,
+                          pageNumber: widget.pageSpec.pageNumber,
                           preparedPage: fixedPreparedPage,
-                          textColor: textColor,
-                          pageBackgroundColor: pageBackgroundColor,
+                          textColor: widget.textColor,
+                          pageBackgroundColor: widget.pageBackgroundColor,
                           alignTextToTop: true,
-                          // Highlights are already baked into preparedPage;
-                          // keeping this null ensures PageContent uses the
-                          // prepared render path that preserves inline Surah
-                          // header blocks.
-                          verseBackgroundColor: null,
+                          verseBackgroundColor: widget.verseBackgroundColor,
+                          verseTextColor: widget.verseTextColor,
+                          showSpecialBlocks: false,
                           uiTextDirection: TextDirection.rtl,
                           showOverlaysListenable: _kHiddenOverlaysListenable,
+                          viewportSize: Size(
+                            bodyConstraints.maxWidth,
+                            bodyConstraints.maxHeight,
+                          ),
                         );
                       },
                     ),
@@ -230,12 +265,20 @@ class _QcfPage extends StatelessWidget {
     if (source.isEmpty) return source;
 
     final double lineHeight = metrics.fontSize * metrics.fontHeight;
-    final double headerToBismillahGap = (lineHeight * 0.08)
-        .clamp(3.0, 6.0)
-        .toDouble();
-    final double bismillahToTextGap = (lineHeight * 0.05)
-        .clamp(2.0, 4.0)
-        .toDouble();
+    final double headerToBismillahGap =
+        (lineHeight * VideoReelDesign.surahHeaderToBismillahGapFactor)
+            .clamp(
+              VideoReelDesign.surahHeaderToBismillahMinGap,
+              VideoReelDesign.surahHeaderToBismillahMaxGap,
+            )
+            .toDouble();
+    final double bismillahToTextGap =
+        (lineHeight * VideoReelDesign.bismillahToTextGapFactor)
+            .clamp(
+              VideoReelDesign.bismillahToTextMinGap,
+              VideoReelDesign.bismillahToTextMaxGap,
+            )
+            .toDouble();
 
     final List<PreparedPageBlock> result = <PreparedPageBlock>[];
 
@@ -275,7 +318,8 @@ class _QcfPage extends StatelessWidget {
 
   bool _needsStandaloneBismillah(int surahNumber) {
     // Standalone Bismillah is omitted for Al-Fatihah and At-Tawbah.
-    return surahNumber != 1 && surahNumber != 9;
+    return surahNumber != QcfMushafPageRenderer._alFatihahSurahNumber &&
+        surahNumber != QcfMushafPageRenderer._atTawbahSurahNumber;
   }
 
   void _consumeTrailingSpacerSlots(
@@ -303,6 +347,44 @@ class _QcfPage extends StatelessWidget {
   }
 }
 
+class _PreparedVideoPageCacheKey extends Equatable {
+  static const int _dimensionPrecision = 100;
+
+  _PreparedVideoPageCacheKey({
+    required this.pageNumber,
+    required this.surahNumber,
+    required this.fromAyah,
+    required this.toAyah,
+    required double fontSize,
+    required double fontHeight,
+    required double viewportWidth,
+    required this.textColorValue,
+  }) : fontSizeKey = (fontSize * _dimensionPrecision).round(),
+       fontHeightKey = (fontHeight * _dimensionPrecision).round(),
+       viewportWidthKey = (viewportWidth * _dimensionPrecision).round();
+
+  final int pageNumber;
+  final int surahNumber;
+  final int fromAyah;
+  final int toAyah;
+  final int fontSizeKey;
+  final int fontHeightKey;
+  final int viewportWidthKey;
+  final int textColorValue;
+
+  @override
+  List<Object> get props => [
+    pageNumber,
+    surahNumber,
+    fromAyah,
+    toAyah,
+    fontSizeKey,
+    fontHeightKey,
+    viewportWidthKey,
+    textColorValue,
+  ];
+}
+
 class _ReelTopBar extends StatelessWidget {
   const _ReelTopBar({
     required this.pageHeight,
@@ -316,36 +398,47 @@ class _ReelTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double height = (pageHeight * 0.042).clamp(28.0, 42.0).toDouble();
+    final bool isArabic = context.l10n.localeName == 'ar';
+    final double height = (pageHeight * VideoReelDesign.topBarHeightFactor)
+        .clamp(VideoReelDesign.topBarMinHeight, VideoReelDesign.topBarMaxHeight)
+        .toDouble();
+    final String localizedJuzNumber = _localizedQuranNumber(context, juzNumber);
 
     return SizedBox(
       height: height,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                surahNames.join(' '),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: _QcfPage._frameTextColor,
+        padding: const EdgeInsets.symmetric(
+          horizontal: VideoReelDesign.topBarHorizontalPadding,
+        ),
+        child: Directionality(
+          textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  surahNames.join(' '),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: const TextStyle(
+                    fontSize: VideoReelDesign.topBarTitleFontSize,
+                    fontWeight: FontWeight.w600,
+                    color: VideoReelDesign.frameTextColor,
+                    decoration: TextDecoration.none,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'الجزء ${convertToArabicNumber(juzNumber.toString())}',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF8B7355),
+              const SizedBox(width: VideoReelDesign.topBarGap),
+              Text(
+                '${context.l10n.juzPart} $localizedJuzNumber',
+                style: const TextStyle(
+                  fontSize: VideoReelDesign.topBarMetaFontSize,
+                  fontWeight: FontWeight.w500,
+                  color: VideoReelDesign.frameSecondaryTextColor,
+                  decoration: TextDecoration.none,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -368,39 +461,59 @@ class _ReelBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double circleSize = (pageHeight * 0.05).clamp(34.0, 46.0).toDouble();
+    final bool isArabic = context.l10n.localeName == 'ar';
+    final double circleSize = (pageHeight * VideoReelDesign.pageBadgeSizeFactor)
+        .clamp(
+          VideoReelDesign.pageBadgeMinSize,
+          VideoReelDesign.pageBadgeMaxSize,
+        )
+        .toDouble();
+    final String localizedHizbNumber = _localizedQuranNumber(
+      context,
+      hizbNumber,
+    );
 
     return Container(
       margin: EdgeInsets.fromLTRB(
-        pageWidth * 0.04,
-        pageHeight * 0.006,
-        pageWidth * 0.04,
-        pageHeight * 0.010,
+        pageWidth * VideoReelDesign.bottomBarHorizontalMarginFactor,
+        pageHeight * VideoReelDesign.bottomBarTopMarginFactor,
+        pageWidth * VideoReelDesign.bottomBarHorizontalMarginFactor,
+        pageHeight * VideoReelDesign.bottomBarBottomMarginFactor,
       ),
       padding: EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: (pageHeight * 0.002).clamp(2.0, 6.0).toDouble(),
+        horizontal: VideoReelDesign.bottomBarHorizontalPadding,
+        vertical: (pageHeight * VideoReelDesign.bottomBarVerticalPaddingFactor)
+            .clamp(
+              VideoReelDesign.bottomBarMinVerticalPadding,
+              VideoReelDesign.bottomBarMaxVerticalPadding,
+            )
+            .toDouble(),
       ),
       decoration: BoxDecoration(
-        color: _QcfPage._frameSurfaceColor,
-        borderRadius: BorderRadius.circular(32),
+        color: VideoReelDesign.frameSurfaceColor,
+        borderRadius: BorderRadius.circular(VideoReelDesign.bottomBarRadius),
         border: Border.all(
-          color: _QcfPage._frameAccentColor.withValues(alpha: 0.3),
+          color: VideoReelDesign.frameAccentColor.withValues(
+            alpha: VideoReelDesign.bottomBarBorderAlpha,
+          ),
         ),
       ),
-      child: Row(
-        children: [
-          _ReelPageNumberBadge(size: circleSize, pageNumber: pageNumber),
-          const Spacer(),
-          Text(
-            'الحزب ${convertToArabicNumber(hizbNumber.toString())}',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF5D4037),
+      child: Directionality(
+        textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+        child: Row(
+          children: [
+            _ReelPageNumberBadge(size: circleSize, pageNumber: pageNumber),
+            const Spacer(),
+            Text(
+              '${context.l10n.hizb} $localizedHizbNumber',
+              style: const TextStyle(
+                fontSize: VideoReelDesign.bottomBarMetaFontSize,
+                fontWeight: FontWeight.bold,
+                color: VideoReelDesign.frameStrongTextColor,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -419,23 +532,32 @@ class _ReelPageNumberBadge extends StatelessWidget {
       width: size,
       height: size,
       alignment: Alignment.center,
-      padding: const EdgeInsets.all(1),
+      padding: const EdgeInsets.all(VideoReelDesign.pageBadgePadding),
       decoration: BoxDecoration(
-        color: _QcfPage._frameAccentColor.withValues(alpha: 0.1),
+        color: VideoReelDesign.frameAccentColor.withValues(
+          alpha: VideoReelDesign.pageBadgeAccentAlpha,
+        ),
         shape: BoxShape.circle,
-        border: Border.all(color: _QcfPage._frameAccentColor),
+        border: Border.all(color: VideoReelDesign.frameAccentColor),
       ),
       child: Text(
-        convertToArabicNumber(pageNumber.toString()),
+        _localizedQuranNumber(context, pageNumber),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
-          color: Color(0xFF5D4037),
+          color: VideoReelDesign.frameStrongTextColor,
         ),
       ),
     );
   }
+}
+
+String _localizedQuranNumber(BuildContext context, int value) {
+  final String number = value.toString();
+  return context.l10n.localeName == 'ar'
+      ? convertToArabicNumber(number)
+      : number;
 }
 
 // Shared across instances: overlays are always hidden during share capture.

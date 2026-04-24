@@ -11,8 +11,8 @@ import '../../domain/entities/share_content.dart';
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/repositories/share_repository.dart';
 import '../services/audio_clip_service.dart';
-import '../services/share_file_manager.dart';
 import '../services/screenshot_service.dart';
+import '../services/share_file_manager.dart';
 import '../services/video_service.dart';
 
 @LazySingleton(as: ShareRepository)
@@ -30,6 +30,12 @@ class ShareRepositoryImpl implements ShareRepository {
   final VideoService _videoService;
   final ShareFileManager _fileManager;
   final DownloadQueryRepository _downloadQueryRepository;
+  static const double _videoAudioStartProgress = 0.1;
+  static const double _videoAudioProgressShare = 0.35;
+  static const double _videoCaptureBaseProgress = 0.45;
+  static const double _videoCaptureProgressShare = 0.15;
+  static const double _videoEncodeStartProgress = 0.6;
+  static const double _videoEncodeProgressShare = 0.4;
 
   @override
   Future<ShareContent> captureScreenshot({
@@ -39,6 +45,8 @@ class ShareRepositoryImpl implements ShareRepository {
     required String appName,
     required String sharedViaLabel,
     bool brandCapture = true,
+    Color? footerBackgroundColor,
+    Color? footerForegroundColor,
   }) async {
     final boundaryKey = handle.value as GlobalKey;
     await WidgetsBinding.instance.endOfFrame;
@@ -49,6 +57,8 @@ class ShareRepositoryImpl implements ShareRepository {
             pageNumber: pageNumber,
             appName: appName,
             sharedViaLabel: sharedViaLabel,
+            footerBackgroundColor: footerBackgroundColor,
+            footerForegroundColor: footerForegroundColor,
           )
         : await _screenshotService.captureRaw(
             boundaryKey: boundaryKey,
@@ -116,20 +126,25 @@ class ShareRepositoryImpl implements ShareRepository {
       maxDurationSeconds: maxDurationSeconds,
     );
 
-    onProgress?.call(0.1, progressMessages.generatingAudioClip);
+    onProgress?.call(
+      _videoAudioStartProgress,
+      progressMessages.generatingAudioClip,
+    );
 
     // 1. Generate audio clip (independent of screenshots).
     final audioContent = await generateAudioClip(
       config: effectiveConfig,
       progressMessages: progressMessages.audioClip,
-      onProgress: (p, msg) => onProgress?.call(0.1 + p * 0.35, msg),
+      onProgress: (p, msg) => onProgress?.call(
+        _videoAudioStartProgress + p * _videoAudioProgressShare,
+        msg,
+      ),
       cancelToken: cancelToken,
     );
 
     // 2. Capture screenshots sequentially.
     final List<String> screenshotPaths = [];
-    final double captureBaseProgress = 0.45;
-    final double captureStep = 0.15 / handles.length;
+    final double captureStep = _videoCaptureProgressShare / handles.length;
 
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
     for (int i = 0; i < handles.length; i++) {
@@ -153,20 +168,26 @@ class ShareRepositoryImpl implements ShareRepository {
       screenshotPaths.add(path);
 
       onProgress?.call(
-        captureBaseProgress + (i + 1) * captureStep,
+        _videoCaptureBaseProgress + (i + 1) * captureStep,
         progressMessages.capturingReaderVisuals,
       );
     }
 
-    // 2. Generate video
-    onProgress?.call(0.6, progressMessages.combiningVideoMedia);
+    // 3. Generate video.
+    onProgress?.call(
+      _videoEncodeStartProgress,
+      progressMessages.combiningVideoMedia,
+    );
     final videoPath = await _videoService.generateVideo(
       screenshotPaths: screenshotPaths,
       audioPath: audioContent.filePath,
       surahName: '', // Metadata
       reciterName: effectiveConfig.reciterName,
       progressMessages: progressMessages.video,
-      onProgress: (p, msg) => onProgress?.call(0.6 + p * 0.4, msg),
+      onProgress: (p, msg) => onProgress?.call(
+        _videoEncodeStartProgress + p * _videoEncodeProgressShare,
+        msg,
+      ),
       cancelToken: cancelToken,
     );
 

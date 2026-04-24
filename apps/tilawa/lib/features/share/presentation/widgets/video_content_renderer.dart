@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../../domain/entities/share_video_profile.dart';
 import '../utils/video_page_specs.dart';
 import 'mushaf_page_renderer.dart';
+import 'video_reel_design.dart';
 
 /// A Quran-focused 9:16 canvas used for video generation.
 class VideoContentRenderer extends StatefulWidget {
-  /// The target width for video generation (Full HD portrait).
-  static const double videoWidth = 1080;
+  /// The target width for generated reels.
+  ///
+  /// Keep this aligned with the video encoder output size so capture does not
+  /// lay out and rasterize a larger off-screen surface than the final MP4 uses.
+  static const double videoWidth = ShareVideoProfile.outputWidth;
 
-  /// The target height for video generation (Full HD portrait).
-  static const double videoHeight = 1920;
+  /// The target height for generated reels.
+  static const double videoHeight = ShareVideoProfile.outputHeight;
 
   /// The standard 9:16 aspect ratio for reels and shorts.
-  static const double aspectRatio = 9 / 16;
+  static const double aspectRatio = ShareVideoProfile.aspectRatio;
 
   const VideoContentRenderer({
     super.key,
@@ -22,6 +27,7 @@ class VideoContentRenderer extends StatefulWidget {
     this.reciterName,
     this.pageSpecs,
     this.isCapturing = false,
+    this.backgroundColor,
   });
 
   final int surahNumber;
@@ -29,6 +35,7 @@ class VideoContentRenderer extends StatefulWidget {
   final int toAyah;
   final String? reciterName;
   final List<VideoPageSpec>? pageSpecs;
+  final Color? backgroundColor;
 
   /// When `true`, the render tree drops animated/cosmetic layers (ambient
   /// orbs, drop shadow) because those costs are wasted on a still-image
@@ -45,6 +52,8 @@ class _VideoContentRendererState extends State<VideoContentRenderer> {
 
   @override
   Widget build(BuildContext context) {
+    final Color backgroundColor =
+        widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
     final List<VideoPageSpec> effectivePageSpecs =
         widget.pageSpecs ??
         buildVideoPageSpecs(
@@ -53,34 +62,35 @@ class _VideoContentRendererState extends State<VideoContentRenderer> {
           toAyah: widget.toAyah,
         );
 
-    if (effectivePageSpecs.length == 1) {
-      return VideoContentPage(
-        surahNumber: widget.surahNumber,
-        pageSpec: effectivePageSpecs.single,
-        pageIndex: 0,
-        totalPages: 1,
-        reciterName: widget.reciterName,
-        isCapturing: widget.isCapturing,
-        pageRenderer: _pageRenderer,
-      );
-    }
-
-    return SizedBox(
-      width: VideoContentRenderer.videoWidth,
-      height: VideoContentRenderer.videoHeight,
-      child: PageView.builder(
-        itemCount: effectivePageSpecs.length,
-        itemBuilder: (context, index) {
-          return VideoContentPage(
-            surahNumber: widget.surahNumber,
-            pageSpec: effectivePageSpecs[index],
-            pageIndex: index,
-            totalPages: effectivePageSpecs.length,
-            reciterName: widget.reciterName,
-            isCapturing: widget.isCapturing,
-            pageRenderer: _pageRenderer,
-          );
-        },
+    return ColoredBox(
+      color: backgroundColor,
+      child: SizedBox.expand(
+        child: effectivePageSpecs.length == 1
+            ? VideoContentPage(
+                surahNumber: widget.surahNumber,
+                pageSpec: effectivePageSpecs.single,
+                pageIndex: 0,
+                totalPages: 1,
+                reciterName: widget.reciterName,
+                isCapturing: widget.isCapturing,
+                pageRenderer: _pageRenderer,
+                backgroundColor: backgroundColor,
+              )
+            : PageView.builder(
+                itemCount: effectivePageSpecs.length,
+                itemBuilder: (context, index) {
+                  return VideoContentPage(
+                    surahNumber: widget.surahNumber,
+                    pageSpec: effectivePageSpecs[index],
+                    pageIndex: index,
+                    totalPages: effectivePageSpecs.length,
+                    reciterName: widget.reciterName,
+                    isCapturing: widget.isCapturing,
+                    pageRenderer: _pageRenderer,
+                    backgroundColor: backgroundColor,
+                  );
+                },
+              ),
       ),
     );
   }
@@ -96,6 +106,7 @@ class VideoContentPage extends StatelessWidget {
     this.reciterName,
     this.isCapturing = false,
     required this.pageRenderer,
+    required this.backgroundColor,
   });
 
   final int surahNumber;
@@ -104,6 +115,7 @@ class VideoContentPage extends StatelessWidget {
   final int totalPages;
   final String? reciterName;
   final MushafPageRenderer pageRenderer;
+  final Color backgroundColor;
 
   /// Mirrors [VideoContentRenderer.isCapturing] — disables ambient orbs and
   /// the heavy BoxShadow while capturing a frozen frame for FFmpeg.
@@ -115,6 +127,7 @@ class VideoContentPage extends StatelessWidget {
       surahNumber: surahNumber,
       pageSpec: pageSpec,
       pageRenderer: pageRenderer,
+      backgroundColor: backgroundColor,
     );
   }
 }
@@ -124,11 +137,13 @@ class _VideoMushafPage extends StatelessWidget {
     required this.surahNumber,
     required this.pageSpec,
     required this.pageRenderer,
+    required this.backgroundColor,
   });
 
   final int surahNumber;
   final VideoPageSpec pageSpec;
   final MushafPageRenderer pageRenderer;
+  final Color backgroundColor;
 
   Color? _verseBackgroundColor(int currentSurah, int verseNumber) {
     if (currentSurah != surahNumber ||
@@ -136,7 +151,17 @@ class _VideoMushafPage extends StatelessWidget {
         verseNumber > pageSpec.toAyah) {
       return null;
     }
-    return Colors.orange.withValues(alpha: _VideoLayout.verseHighlightAlpha);
+    return VideoReelDesign.verseHighlightColor;
+  }
+
+  Color? _verseTextColor(int currentSurah, int verseNumber) {
+    if (currentSurah == surahNumber &&
+        verseNumber >= pageSpec.fromAyah &&
+        verseNumber <= pageSpec.toAyah) {
+      return VideoReelDesign.mushafTextColor;
+    }
+
+    return Colors.transparent;
   }
 
   @override
@@ -146,14 +171,9 @@ class _VideoMushafPage extends StatelessWidget {
       pageSpec: pageSpec,
       surahNumber: surahNumber,
       verseBackgroundColor: _verseBackgroundColor,
-      textColor: Colors.pink.withValues(alpha: _VideoLayout.textOpacity),
-      pageBackgroundColor: _VideoLayout.pageBackgroundColor,
+      verseTextColor: _verseTextColor,
+      textColor: VideoReelDesign.mushafTextColor,
+      pageBackgroundColor: backgroundColor,
     );
   }
-}
-
-abstract final class _VideoLayout {
-  static const Color pageBackgroundColor = Color(0xFFFFF8ED);
-  static const double verseHighlightAlpha = 0.24;
-  static const double textOpacity = 0.96;
 }

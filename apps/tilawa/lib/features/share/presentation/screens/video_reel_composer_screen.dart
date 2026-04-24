@@ -164,6 +164,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
         final minAyah = state.minAyah ?? 1;
         final maxAyah = state.maxAyah ?? getVerseCount(widget.surahNumber);
         final reciterName = state.reciterName ?? widget.reciterName;
+        final Color backgroundColor = context.colorScheme.surface;
 
         return Stack(
           children: [
@@ -177,6 +178,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                     videoPageSpecs: state.videoPageSpecs,
                     surahNumber: widget.surahNumber,
                     reciterName: reciterName,
+                    backgroundColor: backgroundColor,
                   ),
                 ),
               ),
@@ -186,7 +188,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                   : context.l10n.shareModeReel,
               subtitle: isReviewing ? null : context.l10n.shareComposerSubtitle,
               onClose: () => Navigator.of(context).maybePop(),
-              enableAutoHide: false,
+              background: ColoredBox(color: backgroundColor),
               preview: AnimatedSwitcher(
                 duration: Theme.of(context).tokens.durationMedium,
                 child: isVideoReview
@@ -201,7 +203,6 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                       )
                     : isScreenshotReview
                     ? MediaPreviewFrame(
-                        aspectRatio: 4 / 5,
                         child: GeneratedImagePreview(
                           filePath: (state.content as ShareScreenshot).filePath,
                         ),
@@ -332,6 +333,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     int toAyah,
     List<VideoPageSpec> specs,
   ) {
+    final Color backgroundColor = context.colorScheme.surface;
+
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -344,6 +347,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                 toAyah: toAyah,
                 reciterName: reciterName,
                 pageSpecs: specs.isEmpty ? null : [specs.first],
+                backgroundColor: backgroundColor,
               ),
             ),
           ),
@@ -372,12 +376,14 @@ class _OffScreenRenderers extends StatelessWidget {
     required this.videoPageSpecs,
     required this.surahNumber,
     required this.reciterName,
+    this.backgroundColor,
   });
 
   final Map<int, GlobalKey> videoBoundaryKeys;
   final List<VideoPageSpec> videoPageSpecs;
   final int surahNumber;
   final String reciterName;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -403,6 +409,7 @@ class _OffScreenRenderers extends StatelessWidget {
                 reciterName: reciterName,
                 pageSpecs: [videoPageSpecs[i]],
                 isCapturing: true,
+                backgroundColor: backgroundColor,
               ),
             ),
           ),

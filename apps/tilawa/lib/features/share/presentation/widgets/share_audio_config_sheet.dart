@@ -163,6 +163,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                     reciterName: reciterName,
                     isCapturing: true,
                     pageRenderer: _pageRenderer,
+                    backgroundColor: context.colorScheme.surface,
                   ),
                 ),
               ),
@@ -704,8 +705,8 @@ class _LiveVideoPreview extends StatelessWidget {
                 child: FittedBox(
                   fit: BoxFit.cover,
                   child: SizedBox(
-                    width: 1080,
-                    height: 1920,
+                    width: VideoContentRenderer.videoWidth,
+                    height: VideoContentRenderer.videoHeight,
                     child: IgnorePointer(child: child),
                   ),
                 ),

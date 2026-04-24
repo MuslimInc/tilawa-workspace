@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 
 import '../entities/audio_clip_config.dart';
 import '../entities/share_content.dart';
@@ -15,6 +16,8 @@ abstract class ShareRepository {
     required String appName,
     required String sharedViaLabel,
     bool brandCapture = true,
+    Color? footerBackgroundColor,
+    Color? footerForegroundColor,
   });
 
   /// Generates an audio clip for the given verse range and reciter.

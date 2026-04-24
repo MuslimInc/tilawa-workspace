@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 
+import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
 import '../utils/share_ayah_range_utils.dart';
 
-/// A premium static poster used for screenshot previews and audio artwork.
+final ValueNotifier<bool> _hiddenSharePosterOverlays = ValueNotifier<bool>(
+  false,
+);
+
+/// Renders the selected ayah slice using prepared QCF page blocks.
+///
+/// This keeps the original Mushaf line geometry and font size instead of
+/// reflowing the selected verses into a custom poster composition.
 class SharePosterRenderer extends StatelessWidget {
   const SharePosterRenderer({
     super.key,
@@ -21,212 +28,191 @@ class SharePosterRenderer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final normalizedReciterName = reciterName?.trim();
     final ayahRange = normalizeShareAyahRange(
       surahNumber: surahNumber,
       fromAyah: fromAyah,
       toAyah: toAyah,
     );
-
-    return Column(
-      children: [
-        Text(
-          getSurahNameArabic(surahNumber),
-          style: GoogleFonts.amiri(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: _PosterPalette.deepGreen,
-          ),
-        ),
-        Text(
-          getSurahNameEnglish(surahNumber),
-          style: GoogleFonts.alexandria(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: _PosterPalette.deepGreen.withValues(alpha: 0.64),
-          ),
-        ),
-        const SizedBox(height: 18),
-        Expanded(
-          child: Directionality(
-            textDirection: TextDirection.rtl,
-            child: _PosterAyahFlow(
-              surahNumber: surahNumber,
-              fromAyah: ayahRange.fromAyah,
-              toAyah: ayahRange.toAyah,
-            ),
-          ),
-        ),
-        const SizedBox(height: 18),
-        Wrap(
-          alignment: WrapAlignment.center,
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            const _PosterPill(
-              icon: Icons.auto_stories_rounded,
-              label: 'Shared from Tilawa',
-            ),
-            if (normalizedReciterName != null &&
-                normalizedReciterName.isNotEmpty)
-              _PosterPill(
-                icon: Icons.multitrack_audio_rounded,
-                label: normalizedReciterName,
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _PosterAyahFlow extends StatelessWidget {
-  const _PosterAyahFlow({
-    required this.surahNumber,
-    required this.fromAyah,
-    required this.toAyah,
-  });
-
-  final int surahNumber;
-  final int fromAyah;
-  final int toAyah;
-
-  _PosterTypography _resolveTypography() {
-    final ayahRange = normalizeShareAyahRange(
-      surahNumber: surahNumber,
-      fromAyah: fromAyah,
-      toAyah: toAyah,
-    );
-    final verseCount = ayahRange.toAyah - ayahRange.fromAyah + 1;
-    var glyphCount = 0;
-
-    for (int ayah = ayahRange.fromAyah; ayah <= ayahRange.toAyah; ayah++) {
-      glyphCount +=
-          tryGetVerseQcfText(
-            surahNumber,
-            ayah,
-            verseEndSymbol: false,
-          )?.length ??
-          getVerse(surahNumber, ayah, verseEndSymbol: false).length;
-    }
-
-    if (verseCount >= 16 || glyphCount > 460) {
-      return const _PosterTypography(44, 1.9, 1.46);
-    }
-    if (verseCount >= 10 || glyphCount > 280) {
-      return const _PosterTypography(50, 2.0, 1.54);
-    }
-    if (verseCount >= 6 || glyphCount > 160) {
-      return const _PosterTypography(56, 2.1, 1.62);
-    }
-    return const _PosterTypography(64, 2.2, 1.72);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ayahRange = normalizeShareAyahRange(
-      surahNumber: surahNumber,
-      fromAyah: fromAyah,
-      toAyah: toAyah,
-    );
-    final typography = _resolveTypography();
-    final spans = <InlineSpan>[];
-
-    for (int ayah = ayahRange.fromAyah; ayah <= ayahRange.toAyah; ayah++) {
-      final pageNumber = getPageNumber(surahNumber, ayah);
-      final pageFont = 'QCF_P${pageNumber.toString().padLeft(3, '0')}';
-      final qcfStyle = TextStyle(
-        fontFamily: pageFont,
-        fontSize: typography.fontSize,
-        height: typography.lineHeight,
-        color: _PosterPalette.ink.withValues(alpha: 0.92),
-      );
-      final fallbackStyle = GoogleFonts.amiri(
-        fontSize: typography.fontSize * 0.76,
-        height: typography.lineHeight,
-        color: _PosterPalette.ink.withValues(alpha: 0.92),
-      );
-      final verseText =
-          tryGetVerseQcfText(surahNumber, ayah, verseEndSymbol: false) ??
-          getVerse(surahNumber, ayah, verseEndSymbol: false);
-      final verseNumberText =
-          tryGetVerseNumberQcfText(surahNumber, ayah) ??
-          getVerseEndSymbol(ayah);
-      final usesQcf =
-          tryGetVerseQcfText(surahNumber, ayah, verseEndSymbol: false) != null;
-      final baseStyle = usesQcf ? qcfStyle : fallbackStyle;
-
-      spans.add(TextSpan(text: verseText, style: baseStyle));
-      spans.add(
-        TextSpan(
-          text: '$verseNumberText ',
-          style: baseStyle.copyWith(height: typography.endSymbolHeight),
-        ),
-      );
-    }
+    final pageNumber = getPageNumber(surahNumber, ayahRange.fromAyah);
+    final mediaQuery = MediaQuery.of(context);
+    final readerTheme = QuranReaderTheme.of(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return RichText(
-          text: TextSpan(children: spans),
-          textAlign: TextAlign.justify,
-          textDirection: TextDirection.rtl,
+        final pageHeight = constraints.maxHeight.isFinite
+            ? constraints.maxHeight
+            : mediaQuery.size.height;
+        final pageViewportSize = Size(constraints.maxWidth, pageHeight);
+        final pageConstraints = BoxConstraints.tight(pageViewportSize);
+
+        final metrics = StandardQuranLayoutStrategy().calculateMetrics(
+          context,
+          pageConstraints,
+          pageNumber,
+          quranQcfLocator<MushafService>(),
+        );
+
+        return ListenableBuilder(
+          listenable: quranQcfLocator<QuranFontService>(),
+          builder: (context, _) {
+            final isFontLoaded = quranQcfLocator<QuranFontService>()
+                .isFontLoaded(pageNumber);
+
+            if (!isFontLoaded) {
+              return const Center(child: CircularProgressIndicator.adaptive());
+            }
+
+            final preparedPage = quranQcfLocator<QuranPagePreparationService>()
+                .preparePage(
+                  pageNumber: pageNumber,
+                  metrics: metrics,
+                  viewportWidth: constraints.maxWidth,
+                  textColor: readerTheme.textColor,
+                  mushafService: quranQcfLocator<MushafService>(),
+                );
+
+            final cropWindow = _selectedCropWindow(
+              preparedPage.blocks,
+              metrics: metrics,
+              surahNumber: surahNumber,
+              fromAyah: ayahRange.fromAyah,
+              toAyah: ayahRange.toAyah,
+            );
+
+            if (cropWindow == null) {
+              return const SizedBox.shrink();
+            }
+
+            return DecoratedBox(
+              decoration: BoxDecoration(color: readerTheme.pageBackground),
+              child: MediaQuery(
+                data: mediaQuery.copyWith(
+                  padding: EdgeInsets.zero,
+                  viewPadding: EdgeInsets.zero,
+                  viewInsets: EdgeInsets.zero,
+                ),
+                child: Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: ClipRect(
+                    child: SizedBox(
+                      width: constraints.maxWidth,
+                      height: cropWindow.height.clamp(0.0, pageHeight),
+                      child: OverflowBox(
+                        alignment: Alignment.topCenter,
+                        minWidth: constraints.maxWidth,
+                        maxWidth: constraints.maxWidth,
+                        minHeight: pageHeight,
+                        maxHeight: pageHeight,
+                        child: Transform.translate(
+                          offset: Offset(
+                            0,
+                            -(metrics.padding.top + cropWindow.top),
+                          ),
+                          child: SizedBox(
+                            width: constraints.maxWidth,
+                            height: pageHeight,
+                            child: PageContent(
+                              mushafService: quranQcfLocator<MushafService>(),
+                              pageSnapshotService:
+                                  quranQcfLocator<PageSnapshotService>(),
+                              pageNumber: pageNumber,
+                              preparedPage: preparedPage,
+                              textColor: readerTheme.textColor,
+                              verseTextColor: (verseSurahNumber, verseNumber) {
+                                final isSelected =
+                                    verseSurahNumber == surahNumber &&
+                                    verseNumber >= ayahRange.fromAyah &&
+                                    verseNumber <= ayahRange.toAyah;
+                                return isSelected
+                                    ? readerTheme.textColor
+                                    : Colors.transparent;
+                              },
+                              pageBackgroundColor: readerTheme.pageBackground,
+                              headerImageFilter: readerTheme.headerImageFilter,
+                              headerTextColor: readerTheme.headerTextColor,
+                              headerFontSizeMultiplier: 0.57,
+                              uiTextDirection: TextDirection.rtl,
+                              showOverlaysListenable:
+                                  _hiddenSharePosterOverlays,
+                              alignTextToTop: true,
+                              showSpecialBlocks: false,
+                              viewportSize: pageViewportSize,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
   }
 }
 
-class _PosterTypography {
-  const _PosterTypography(this.fontSize, this.lineHeight, this.endSymbolHeight);
+_SelectionCropWindow? _selectedCropWindow(
+  List<PreparedPageBlock> blocks, {
+  required QuranLayoutMetrics metrics,
+  required int surahNumber,
+  required int fromAyah,
+  required int toAyah,
+}) {
+  double yOffset = 0;
+  double? top;
+  double? bottom;
+  var previousWasTextBlock = false;
 
-  final double fontSize;
-  final double lineHeight;
-  final double endSymbolHeight;
-}
+  for (final block in blocks) {
+    if (block is PreparedHeaderBlock || block is PreparedBismillahBlock) {
+      previousWasTextBlock = false;
+      continue;
+    }
 
-class _PosterPill extends StatelessWidget {
-  const _PosterPill({required this.icon, required this.label});
+    if (block is PreparedSpacerBlock) {
+      yOffset += block.height;
+      previousWasTextBlock = false;
+      continue;
+    }
 
-  final IconData icon;
-  final String label;
+    if (block is! PreparedTextBlock) {
+      continue;
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 320),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          color: _PosterPalette.deepGreen.withValues(alpha: 0.08),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: _PosterPalette.gold),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.alexandria(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: _PosterPalette.deepGreen,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    if (previousWasTextBlock) {
+      yOffset += metrics.lineSpacing;
+    }
+
+    final blockTop = yOffset;
+    final blockBottom = blockTop + block.painter.height;
+    final hasSelectedVerse = block.metadata.any(
+      (word) =>
+          word.surah == surahNumber &&
+          word.verse >= fromAyah &&
+          word.verse <= toAyah,
     );
+
+    if (hasSelectedVerse) {
+      top ??= blockTop;
+      bottom = blockBottom;
+    }
+
+    yOffset = blockBottom;
+    previousWasTextBlock = true;
   }
+
+  if (top == null || bottom == null || bottom <= top) {
+    return null;
+  }
+
+  return _SelectionCropWindow(top: top, height: bottom - top);
 }
 
-abstract final class _PosterPalette {
-  static const Color deepGreen = Color(0xFF0B342E);
-  static const Color gold = Color(0xFFE1C17B);
-  static const Color ink = Color(0xFF1E1B16);
+class _SelectionCropWindow {
+  const _SelectionCropWindow({required this.top, required this.height});
+
+  final double top;
+  final double height;
 }

@@ -10,6 +10,10 @@ import '../../domain/models/quran_word_metadata.dart';
 import '../../domain/repositories/quran_mushaf_service.dart';
 import '../../helpers/app_logger.dart';
 
+const bool _kLogQuranPagePreparation = bool.fromEnvironment(
+  'QURAN_PAGE_PREPARATION_LOGS',
+);
+
 class QuranPagePreparationService {
   // 25 pages × ~20KB per PreparedQuranPage (TextPainter + spans) ≈ 500KB.
   // Keeps a wide navigation window hot without significant memory pressure.
@@ -42,7 +46,9 @@ class QuranPagePreparationService {
     required QuranMushafService mushafService,
     Color? Function(int surahNumber, int verseNumber)? verseBackgroundColor,
   }) {
-    final totalStopwatch = Stopwatch()..start();
+    final Stopwatch? totalStopwatch = _kLogQuranPagePreparation
+        ? (Stopwatch()..start())
+        : null;
     final hasHighlight = verseBackgroundColor != null;
     final _PreparedPageKey key = _buildKey(
       pageNumber: pageNumber,
@@ -56,10 +62,12 @@ class QuranPagePreparationService {
       final PreparedQuranPage? cached = _cache.remove(key);
       if (cached != null) {
         _cache[key] = cached;
-        totalStopwatch.stop();
-        logger.w(
-          '[QuranFontsPerformance] preparePage(page: $pageNumber) CACHE HIT in ${totalStopwatch.elapsedMilliseconds}ms (${totalStopwatch.elapsedMicroseconds}µs)',
-        );
+        totalStopwatch?.stop();
+        if (_kLogQuranPagePreparation) {
+          logger.w(
+            '[QuranFontsPerformance] preparePage(page: $pageNumber) CACHE HIT in ${totalStopwatch!.elapsedMilliseconds}ms (${totalStopwatch.elapsedMicroseconds}µs)',
+          );
+        }
         return cached;
       }
     }
@@ -80,10 +88,12 @@ class QuranPagePreparationService {
       }
     }
 
-    totalStopwatch.stop();
-    logger.w(
-      '[QuranFontsPerformance] preparePage(page: $pageNumber) NEW BUILD in ${totalStopwatch.elapsedMilliseconds}ms (${totalStopwatch.elapsedMicroseconds}µs)',
-    );
+    totalStopwatch?.stop();
+    if (_kLogQuranPagePreparation) {
+      logger.w(
+        '[QuranFontsPerformance] preparePage(page: $pageNumber) NEW BUILD in ${totalStopwatch!.elapsedMilliseconds}ms (${totalStopwatch.elapsedMicroseconds}µs)',
+      );
+    }
     return prepared;
   }
 

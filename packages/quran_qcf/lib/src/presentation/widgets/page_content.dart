@@ -21,6 +21,7 @@ class PageContent extends StatefulWidget {
     this.preparedWindowListenable,
     required this.textColor,
     this.verseBackgroundColor,
+    this.verseTextColor,
     this.onLongPress,
     this.onLongPressUp,
     this.onLongPressCancel,
@@ -42,6 +43,8 @@ class PageContent extends StatefulWidget {
     this.isWarming = false,
     this.showShadows = true,
     this.alignTextToTop = false,
+    this.showSpecialBlocks = true,
+    this.viewportSize,
     required this.mushafService,
     required this.pageSnapshotService,
   });
@@ -84,6 +87,7 @@ class PageContent extends StatefulWidget {
   final ValueListenable<int>? currentPageListenable;
   final Color textColor;
   final Color? Function(int surahNumber, int verseNumber)? verseBackgroundColor;
+  final Color? Function(int surahNumber, int verseNumber)? verseTextColor;
   final void Function(int surahNumber, int verseNumber)? onLongPress;
   final void Function(int surahNumber, int verseNumber)? onLongPressUp;
   final void Function(int surahNumber, int verseNumber)? onLongPressCancel;
@@ -97,6 +101,8 @@ class PageContent extends StatefulWidget {
   final double headerFontSizeMultiplier;
   final Color pageBackgroundColor;
   final TextDirection uiTextDirection;
+  final bool showSpecialBlocks;
+  final Size? viewportSize;
   final void Function(
     int surahNumber,
     int verseNumber,
@@ -373,7 +379,7 @@ class _PageContentState extends State<PageContent>
     super.build(context);
     _buildStartMs = DateTime.now().millisecondsSinceEpoch;
 
-    final Size mediaSize = MediaQuery.sizeOf(context);
+    final Size mediaSize = widget.viewportSize ?? MediaQuery.sizeOf(context);
     final double pageWidth = mediaSize.width;
     final double pageHeight = mediaSize.height;
     final Orientation currentOrientation = MediaQuery.orientationOf(context);
@@ -397,7 +403,8 @@ class _PageContentState extends State<PageContent>
     }
 
     final QuranLayoutMetrics metrics = preparedPage.metrics;
-    final hasHighlight = widget.verseBackgroundColor != null;
+    final bool hasHighlight =
+        widget.verseBackgroundColor != null || widget.verseTextColor != null;
 
     final List<Widget> lineWidgets;
     final String lineBuildMode;
@@ -618,6 +625,9 @@ class _PageContentState extends State<PageContent>
         if (i == QuranConstants.centeredHeaderLineIndex &&
             centeredHeaderSurah != null) {
           flushSpans();
+          if (!widget.showSpecialBlocks) {
+            continue;
+          }
           final int surahNum = centeredHeaderSurah;
           final banner = SurahHeaderBanner(
             surahNumber: surahNum,
@@ -645,6 +655,9 @@ class _PageContentState extends State<PageContent>
         if (i == QuranConstants.centeredBismillahLineIndex &&
             hasCenteredBismillah) {
           flushSpans();
+          if (!widget.showSpecialBlocks) {
+            continue;
+          }
           blocks.add(
             _PendingWidgetBlock(
               widget: BismillahWidget(
@@ -669,6 +682,9 @@ class _PageContentState extends State<PageContent>
         // Standard page: use raw special-line positions.
         if (_isSurahHeader(widget.pageNumber, i + 1)) {
           flushSpans();
+          if (!widget.showSpecialBlocks) {
+            continue;
+          }
           final int surahNum = _getSurahAtLine(widget.pageNumber, i + 1);
           final banner = SurahHeaderBanner(
             surahNumber: surahNum,
@@ -696,6 +712,9 @@ class _PageContentState extends State<PageContent>
 
         if (_isBismillah(widget.pageNumber, i + 1)) {
           flushSpans();
+          if (!widget.showSpecialBlocks) {
+            continue;
+          }
           blocks.add(
             _PendingWidgetBlock(
               widget: BismillahWidget(
@@ -839,6 +858,9 @@ class _PageContentState extends State<PageContent>
       flushTextRun();
 
       if (block is PreparedHeaderBlock) {
+        if (!widget.showSpecialBlocks) {
+          continue;
+        }
         final Widget banner = SurahHeaderBanner(
           surahNumber: block.surahNumber,
           lineHeight: metrics.fontSize * metrics.fontHeight,
@@ -862,6 +884,9 @@ class _PageContentState extends State<PageContent>
       }
 
       if (block is PreparedBismillahBlock) {
+        if (!widget.showSpecialBlocks) {
+          continue;
+        }
         result.add(
           BismillahWidget(
             fontSize: metrics.fontSize,
@@ -932,18 +957,22 @@ class _PageContentState extends State<PageContent>
       final int surah = word.surah;
       final int ayah = word.ayah;
       final Color? bgColor = widget.verseBackgroundColor?.call(surah, ayah);
+      final Color textColor =
+          widget.verseTextColor?.call(surah, ayah) ?? widget.textColor;
       return _WordSpanGroup(
         surah: surah,
         verse: ayah,
         spans: _buildWordSpans(
           text: text,
           isVerseEndWord: qData.isVerseEndWord(word),
-          quranTextStyle: bgColor != null
-              ? quranStyle.copyWith(backgroundColor: bgColor)
-              : quranStyle,
-          markerTextStyle: bgColor != null
-              ? markerStyle.copyWith(backgroundColor: bgColor)
-              : markerStyle,
+          quranTextStyle: quranStyle.copyWith(
+            color: textColor,
+            backgroundColor: bgColor,
+          ),
+          markerTextStyle: markerStyle.copyWith(
+            color: textColor,
+            backgroundColor: bgColor,
+          ),
         ),
       );
     }).toList();
