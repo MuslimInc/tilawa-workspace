@@ -184,6 +184,7 @@ class _QcfPageState extends State<_QcfPage> {
                             bodyConstraints.maxWidth,
                             bodyConstraints.maxHeight,
                           ),
+                          enableSnapshots: false,
                         );
                       },
                     ),

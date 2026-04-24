@@ -115,6 +115,7 @@ class ReaderPageContentRenderer extends StatelessWidget {
                     headerFontSizeMultiplier: 0.57,
                     uiTextDirection: uiTextDirection,
                     showOverlaysListenable: _hiddenReaderPageOverlays,
+                    enableSnapshots: false,
                   ),
                 ),
               );

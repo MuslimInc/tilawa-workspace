@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -65,6 +66,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 @visibleForTesting
 Future<void> initializeNotificationService() =>
     _startupTasks.initializeNotificationService();
+
+@visibleForTesting
+void resetMemoizedInitFutures() => _startupTasks.resetMemoizedInitFutures();
 
 @visibleForTesting
 Future<void> initializeHydratedStorage() =>
@@ -129,95 +133,55 @@ class AppBootstrapper {
     try {
       timeline.startPhase();
       WidgetsFlutterBinding.ensureInitialized();
-
-      // Frame jank detector — profile/debug builds only.
-      // Delegates to PerfLogger which also captures widget build contributors
-      // (see PerfLogger.markBuild) and emits DevTools Timeline spans.
       PerfLogger.startFrameWatcher();
-
       _startupTasks.resetLaunchState();
       timeline.log('WidgetsBinding');
 
-      timeline.resetPhase();
-      bool firebaseOk = false;
+      // Pre-runApp is a fast path: run() as soon as the Flutter binding is
+      // ready. Critical init is scheduled to start AFTER the first frame
+      // paints so the isolate isn't saturated while the first frame is
+      // trying to vsync. Non-critical work (audio, Quran data, analytics,
+      // etc.) still runs after that via initializeNonCriticalServices().
+      final Completer<Future<void>> criticalInitFutureCompleter =
+          Completer<Future<void>>();
 
-      // 1. Initialize Firebase first
-      final Future<void> firebaseFuture = _startupTasks
-          .initializeFirebase()
-          .then((_) {
-            firebaseOk = true;
-            timeline.log('Firebase.initializeApp');
-          })
-          .catchError((Object e, StackTrace stackTrace) {
-            timeline.log('Firebase FAILED');
-            logger.e(
-              'Firebase initialization failed: $e',
-              stackTrace: stackTrace,
-            );
-          });
-
-      // 2. Small delay to prevent native initialization contention
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-
-      // 3. Initialize HydratedStorage next
-      final Future<void> hydratedFuture = _startupTasks
-          .initializeHydratedStorage()
-          .then((_) => timeline.log('HydratedStorage'))
-          .catchError((Object e) => timeline.log('HydratedStorage FAILED'));
-
-      // Wait for only the strictly required services before runApp
-      await Future.wait([firebaseFuture, hydratedFuture]);
-      timeline.log('Phase1 parallel done');
-
-      if (firebaseOk) {
-        try {
-          timeline.resetPhase();
-          await _startupTasks.configureForegroundMessaging();
-          timeline.log('FCM setup');
-        } catch (e) {
-          logger.d('[LaunchApp] FCM setup FAILED: $e');
-        }
-      } else {
-        AppRouter.init();
+      void kickOffCriticalInit() {
+        if (criticalInitFutureCompleter.isCompleted) return;
+        final Future<void> f = _startupTasks
+            .runCriticalInit(configureDI: configureDI, timeline: timeline)
+            .catchError((Object e, StackTrace stackTrace) {
+              logger.e('Critical init failed: $e', stackTrace: stackTrace);
+            });
+        criticalInitFutureCompleter.complete(f);
       }
 
-      timeline.resetPhase();
-      QuranQcfLocator.setup();
-      timeline.log('DI quranQcfLocator');
-
-      timeline.resetPhase();
-      await configureDI();
-      timeline.log('DI configureDependencies');
-
-      timeline.resetPhase();
-      await QuranImageDependenciesModule.initialize();
-      timeline.log('DI quran_image dependencies');
-
-      timeline.resetPhase();
-      _startupTasks.initializeBlocObserver();
-
-      final Future<void> notificationFuture = _startupTasks
-          .prepareNotificationLaunchState()
-          .then((_) => timeline.log('NotificationDispatcher'))
-          .catchError(
-            (Object e) => timeline.log('NotificationDispatcher FAILED'),
-          );
-
-      final Future<void> chromeFuture = _startupTasks
-          .configureSystemChrome()
-          .then((_) => timeline.log('SystemChrome'))
-          .catchError(
-            (Object e) => timeline.log('SystemChrome FAILED/timeout'),
-          );
-
-      await Future.wait([notificationFuture, chromeFuture]);
-      timeline.log('Phase2 parallel (notif+chrome)');
-
-      await _startupTasks.warmUpSplashWordmark();
+      // Preferred path: start right after the first frame paints the splash.
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        kickOffCriticalInit();
+      });
 
       timeline.logTotal('=== TOTAL before runApp');
-      run(_startupTasks.buildRootApp());
+      run(
+        _startupTasks.buildBootGate(() async {
+          // Widget-side hook: wait for whoever kicks off init first.
+          kickOffCriticalInit();
+          await criticalInitFutureCompleter.future.then((f) => f);
+        }),
+      );
       timeline.logTotal('runApp called at');
+
+      // Fallback for environments where no frame pumps (e.g. unit tests): if
+      // the post-frame callback hasn't fired after a short wait, start init
+      // directly so bootstrap() still makes forward progress.
+      if (!criticalInitFutureCompleter.isCompleted) {
+        await Future<void>.delayed(const Duration(milliseconds: 16));
+        kickOffCriticalInit();
+      }
+
+      // Await critical init so callers (e.g. tests) observe the same lifecycle
+      // they did pre-refactor. runApp has already been called, so first pixels
+      // ship independently of this await.
+      await criticalInitFutureCompleter.future.then((f) => f);
 
       if (!AppStartupTasks.skipNonCriticalServicesForTesting) {
         _startupTasks.initializeNonCriticalServices();
@@ -234,9 +198,6 @@ class AppStartupTasks {
 
   static bool skipNonCriticalServicesForTesting = false;
 
-  static const AssetImage _launchWordmarkImage = AssetImage(
-    'assets/images/launch_wordmark.png',
-  );
   static const Duration _nonCriticalStartupDelay = Duration(milliseconds: 3200);
   static const Duration _notificationLaunchProbeTimeout = Duration(
     milliseconds: 180,
@@ -256,6 +217,12 @@ class AppStartupTasks {
   QuranAssetsPrefetchService? _quranAssetsPrefetchService;
   QuranAssetsPrefetchPolicyService? _quranAssetsPrefetchPolicyService;
 
+  Future<void>? _notificationServiceInitFuture;
+  Future<void>? _notificationHandlersInitFuture;
+  Future<void>? _crashlyticsInitFuture;
+  Future<void>? _analyticsInitFuture;
+  Future<void>? _notificationPermissionFuture;
+
   void resetLaunchState() {
     AppRouter.disableStateRestoration = false;
     AppRouter.pendingStartupNotificationLaunch = false;
@@ -264,9 +231,111 @@ class AppStartupTasks {
     AppRouter.lastProcessedNotificationId = null;
   }
 
+  /// Clears memoized init futures. Tests re-stub getIt between cases and need
+  /// the one-shot helpers below to actually run each time. Not intended for
+  /// runtime use.
+  @visibleForTesting
+  void resetMemoizedInitFutures() {
+    _notificationServiceInitFuture = null;
+    _notificationHandlersInitFuture = null;
+    _crashlyticsInitFuture = null;
+    _analyticsInitFuture = null;
+    _notificationPermissionFuture = null;
+  }
+
   Future<void> initializeFirebase() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
+
+  /// Runs the critical init pipeline that used to live pre-runApp. Order is
+  /// important: Firebase must be ready before DI (which registers Firebase*
+  /// singletons), and HydratedStorage must be ready before any HydratedBloc
+  /// is constructed (which happens when AppProviders mount).
+  Future<void> runCriticalInit({
+    required DiConfigurator configureDI,
+    required LaunchTimeline timeline,
+  }) async {
+    bool firebaseOk = false;
+    timeline.resetPhase();
+
+    final Future<void> firebaseFuture = initializeFirebase()
+        .then((_) {
+          firebaseOk = true;
+          timeline.log('Firebase.initializeApp');
+        })
+        .catchError((Object e, StackTrace stackTrace) {
+          timeline.log('Firebase FAILED');
+          logger.e(
+            'Firebase initialization failed: $e',
+            stackTrace: stackTrace,
+          );
+        });
+
+    // HydratedStorage is independent of Firebase; run in parallel.
+    final Future<void> hydratedFuture = initializeHydratedStorage()
+        .then((_) => timeline.log('HydratedStorage'))
+        .catchError((Object e) => timeline.log('HydratedStorage FAILED'));
+
+    await Future.wait([firebaseFuture, hydratedFuture]);
+    timeline.log('Critical parallel (firebase+hydrated)');
+
+    if (firebaseOk) {
+      try {
+        timeline.resetPhase();
+        await configureForegroundMessaging();
+        timeline.log('FCM setup');
+      } catch (e) {
+        logger.d('[LaunchApp] FCM setup FAILED: $e');
+      }
+    } else {
+      AppRouter.init();
+    }
+
+    timeline.resetPhase();
+    QuranQcfLocator.setup();
+    timeline.log('DI quranQcfLocator');
+
+    timeline.resetPhase();
+    await configureDI();
+    timeline.log('DI configureDependencies');
+
+    timeline.resetPhase();
+    await QuranImageDependenciesModule.initialize();
+    timeline.log('DI quran_image dependencies');
+
+    initializeBlocObserver();
+
+    // Notification probe and SystemChrome don't block provider mount but we
+    // want them done before the first route renders so splash sees correct
+    // overlay style + launch notification state.
+    timeline.resetPhase();
+    final Future<void> notificationFuture = prepareNotificationLaunchState()
+        .then((_) => timeline.log('NotificationDispatcher'))
+        .catchError(
+          (Object e) => timeline.log('NotificationDispatcher FAILED'),
+        );
+
+    final Future<void> chromeFuture = configureSystemChrome()
+        .then((_) => timeline.log('SystemChrome'))
+        .catchError((Object e) => timeline.log('SystemChrome FAILED/timeout'));
+
+    await Future.wait([notificationFuture, chromeFuture]);
+    timeline.log('Critical parallel (notif+chrome)');
+    timeline.logTotal('=== Critical init done');
+  }
+
+  /// Root widget that shows the native-matching splash until
+  /// [startCriticalInit] resolves, then swaps in the real app. The gate calls
+  /// [startCriticalInit] from a postFrameCallback so the splash paints its
+  /// first frame BEFORE the (synchronous, isolate-saturating) init work
+  /// begins. This trades ~16ms of "splash appears later" for eliminating the
+  /// ~700ms vsync wait we'd otherwise see on frame #1.
+  Widget buildBootGate(Future<void> Function() startCriticalInit) {
+    return _BootGate(
+      startCriticalInit: startCriticalInit,
+      child: buildRootApp(),
     );
   }
 
@@ -301,38 +370,6 @@ class AppStartupTasks {
     return DevicePreview(
       enabled: false,
       builder: (context) => const TilawaApp(),
-    );
-  }
-
-  Future<void> warmUpSplashWordmark() async {
-    final ImageStream stream = _launchWordmarkImage.resolve(
-      const ImageConfiguration(),
-    );
-    final Completer<void> completer = Completer<void>();
-
-    late final ImageStreamListener listener;
-    listener = ImageStreamListener(
-      (ImageInfo _, bool synchronousCall) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-        stream.removeListener(listener);
-      },
-      onError: (Object error, StackTrace? stackTrace) {
-        if (!completer.isCompleted) {
-          completer.complete();
-        }
-        stream.removeListener(listener);
-        logger.d('Warning: Could not warm splash wordmark: $error');
-      },
-    );
-
-    stream.addListener(listener);
-    await completer.future.timeout(
-      const Duration(milliseconds: 750),
-      onTimeout: () {
-        stream.removeListener(listener);
-      },
     );
   }
 
@@ -483,20 +520,22 @@ class AppStartupTasks {
   }
 
   Future<void> initializeNotificationService() async {
-    try {
-      final NotificationsRepository notificationsRepository =
-          getIt<NotificationsRepository>();
-      await notificationsRepository.requestPermission();
-      await notificationsRepository.getToken();
-      await notificationsRepository.initializeListeners();
+    return _notificationServiceInitFuture ??= () async {
+      try {
+        final NotificationsRepository notificationsRepository =
+            getIt<NotificationsRepository>();
+        await notificationsRepository.requestPermission();
+        await notificationsRepository.getToken();
+        await notificationsRepository.initializeListeners();
 
-      final FCMService fcmService = getIt<FCMService>();
-      fcmService.initialize();
+        final FCMService fcmService = getIt<FCMService>();
+        fcmService.initialize();
 
-      logger.d('Notification services initialized successfully');
-    } catch (e) {
-      logger.d('Warning: Could not initialize Notification services: $e');
-    }
+        logger.d('Notification services initialized successfully');
+      } catch (e) {
+        logger.d('Warning: Could not initialize Notification services: $e');
+      }
+    }();
   }
 
   Future<void> initializeHydratedStorage() async {
@@ -546,44 +585,49 @@ class AppStartupTasks {
   }
 
   Future<void> initializeCrashlytics() async {
-    try {
-      final CrashlyticsService crashlyticsService = getIt<CrashlyticsService>();
-      await crashlyticsService.initialize();
-      logger.d('Crashlytics initialized successfully');
-    } catch (e) {
-      logger.d('Crashlytics initialization error: $e');
-    }
+    return _crashlyticsInitFuture ??= () async {
+      try {
+        final CrashlyticsService crashlyticsService =
+            getIt<CrashlyticsService>();
+        await crashlyticsService.initialize();
+      } catch (e) {
+        logger.d('Crashlytics initialization error: $e');
+      }
+    }();
   }
 
   Future<void> initializeAnalytics() async {
-    try {
-      final AnalyticsInitializationService analyticsInitService =
-          getIt<AnalyticsInitializationService>();
-      await analyticsInitService.initialize();
-      logger.d('Analytics initialized successfully');
-    } catch (e) {
-      logger.d('Analytics initialization error: $e');
-    }
+    return _analyticsInitFuture ??= () async {
+      try {
+        final AnalyticsInitializationService analyticsInitService =
+            getIt<AnalyticsInitializationService>();
+        await analyticsInitService.initialize();
+      } catch (e) {
+        logger.d('Analytics initialization error: $e');
+      }
+    }();
   }
 
   Future<void> requestNotificationPermission() async {
-    try {
-      final NotificationPermissionService notificationPermissionService =
-          getIt<NotificationPermissionService>();
-      await notificationPermissionService
-          .requestPermissionIfNecessary()
-          .timeout(
-            _notificationPermissionSoftTimeout,
-            onTimeout: () {
-              logger.d(
-                'Notification permission request still pending (deferred)',
-              );
-            },
-          );
-      logger.d('Notification permission request completed');
-    } catch (e) {
-      logger.d('Warning: Could not request notification permission: $e');
-    }
+    return _notificationPermissionFuture ??= () async {
+      try {
+        final NotificationPermissionService notificationPermissionService =
+            getIt<NotificationPermissionService>();
+        await notificationPermissionService
+            .requestPermissionIfNecessary()
+            .timeout(
+              _notificationPermissionSoftTimeout,
+              onTimeout: () {
+                logger.d(
+                  'Notification permission request still pending (deferred)',
+                );
+              },
+            );
+        logger.d('Notification permission request completed');
+      } catch (e) {
+        logger.d('Warning: Could not request notification permission: $e');
+      }
+    }();
   }
 
   Future<void> initializeFirebaseDataAsync() async {
@@ -627,25 +671,27 @@ class AppStartupTasks {
   }
 
   Future<void> initializeNotificationHandlers() async {
-    try {
-      // Keep early notification handler startup lightweight. Channel creation
-      // is deferred separately by _createNotificationChannelDeferred().
-      final INotificationDispatcher dispatcher =
-          getIt<INotificationDispatcher>();
-      await dispatcher.initialize(createHighImportanceChannel: false);
+    return _notificationHandlersInitFuture ??= () async {
+      try {
+        // Keep early notification handler startup lightweight. Channel creation
+        // is deferred separately by _createNotificationChannelDeferred().
+        final INotificationDispatcher dispatcher =
+            getIt<INotificationDispatcher>();
+        await dispatcher.initialize(createHighImportanceChannel: false);
 
-      final IAthkarNotificationService athkarService =
-          getIt<IAthkarNotificationService>();
-      await athkarService.initialize();
+        final IAthkarNotificationService athkarService =
+            getIt<IAthkarNotificationService>();
+        await athkarService.initialize();
 
-      final IDownloadNotificationService downloadNotificationService =
-          getIt<IDownloadNotificationService>();
-      await downloadNotificationService.initialize();
+        final IDownloadNotificationService downloadNotificationService =
+            getIt<IDownloadNotificationService>();
+        await downloadNotificationService.initialize();
 
-      logger.d('Notification handlers initialized');
-    } catch (e) {
-      logger.d('Warning: Could not initialize notification handlers: $e');
-    }
+        logger.d('Notification handlers initialized');
+      } catch (e) {
+        logger.d('Warning: Could not initialize notification handlers: $e');
+      }
+    }();
   }
 
   Future<void> _createNotificationChannelDeferred() async {
@@ -717,6 +763,102 @@ class LaunchTimeline {
 
   void logTotal(String label) {
     logger.d('[LaunchApp] $label: ${total.elapsedMilliseconds}ms');
+  }
+}
+
+/// Root widget that shows a native-matching launch splash until
+/// [criticalInit] resolves, then swaps in [child]. This lets us call runApp()
+/// immediately after WidgetsFlutterBinding.ensureInitialized(), so pre-runApp
+/// time is near zero and the user sees pixels sooner.
+class _BootGate extends StatefulWidget {
+  const _BootGate({required this.startCriticalInit, required this.child});
+
+  final Future<void> Function() startCriticalInit;
+  final Widget child;
+
+  @override
+  State<_BootGate> createState() => _BootGateState();
+}
+
+class _BootGateState extends State<_BootGate> {
+  static const Color _launchBackgroundColor = Color(0xFF1AADC5);
+  static const String _launchWordmarkAsset =
+      'assets/images/launch_wordmark.png';
+  static const double _wordmarkBoxSize = 288;
+  static const SystemUiOverlayStyle _launchOverlayStyle = SystemUiOverlayStyle(
+    statusBarColor: _launchBackgroundColor,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: _launchBackgroundColor,
+    systemNavigationBarIconBrightness: Brightness.light,
+    systemNavigationBarDividerColor: Colors.transparent,
+    systemStatusBarContrastEnforced: false,
+    systemNavigationBarContrastEnforced: false,
+  );
+
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Bootstrap() schedules critical init from its own post-frame callback;
+    // here we just await the resulting future so we can swap in the real app
+    // when it completes. Calling startCriticalInit() is a no-op if bootstrap
+    // already kicked it off, which it will have in production.
+    widget.startCriticalInit().whenComplete(() {
+      if (!mounted) return;
+      setState(() => _ready = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_ready) return widget.child;
+    return const _LaunchSplash(
+      backgroundColor: _launchBackgroundColor,
+      overlayStyle: _launchOverlayStyle,
+      wordmarkAsset: _launchWordmarkAsset,
+      wordmarkBoxSize: _wordmarkBoxSize,
+    );
+  }
+}
+
+class _LaunchSplash extends StatelessWidget {
+  const _LaunchSplash({
+    required this.backgroundColor,
+    required this.overlayStyle,
+    required this.wordmarkAsset,
+    required this.wordmarkBoxSize,
+  });
+
+  final Color backgroundColor;
+  final SystemUiOverlayStyle overlayStyle;
+  final String wordmarkAsset;
+  final double wordmarkBoxSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: ColoredBox(
+          color: backgroundColor,
+          child: SizedBox.expand(
+            child: Center(
+              child: SizedBox.square(
+                dimension: wordmarkBoxSize,
+                child: Image.asset(
+                  wordmarkAsset,
+                  filterQuality: FilterQuality.high,
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

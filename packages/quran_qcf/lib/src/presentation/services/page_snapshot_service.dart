@@ -106,19 +106,13 @@ class PageSnapshotService {
     }
 
     try {
-      // Safety check: if the boundary is marked as dirty (needs paint or layout),
-      // attempting to capture it via toImage() will trigger a Flutter assertion
-      // error. We skip the capture and let it be retried on the next idle cycle.
-      if (renderObject.debugNeedsPaint || renderObject.debugNeedsLayout) {
+      // Safety check: use public render-object state only. debugNeedsPaint and
+      // debugNeedsLayout are debug-only internals and can throw in profile mode.
+      if (!renderObject.attached ||
+          !renderObject.hasSize ||
+          renderObject.size.isEmpty) {
         if (!kReleaseMode) {
-          logger.w('[SNAPSHOT_SKIP] p$pageNumber: boundary is dirty');
-        }
-        return false;
-      }
-
-      if (!renderObject.hasSize || renderObject.size.isEmpty) {
-        if (!kReleaseMode) {
-          logger.w('[SNAPSHOT_SKIP] p$pageNumber: boundary has no size');
+          logger.w('[SNAPSHOT_SKIP] p$pageNumber: boundary is not ready');
         }
         return false;
       }

@@ -4,6 +4,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -37,6 +38,7 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   );
 
   bool _hasProcessedLaunchNotification = false;
+  bool _hasPrimedNotificationDispatcher = false;
   Timer? _resumeDebounceTimer;
   Timer? _updateCheckTimer;
   Timer? _localLaunchProbeTimer;
@@ -175,7 +177,10 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     try {
       final INotificationDispatcher dispatcher =
           getIt<INotificationDispatcher>();
-      await dispatcher.initialize(createHighImportanceChannel: false);
+      if (!_hasPrimedNotificationDispatcher) {
+        await dispatcher.initialize(createHighImportanceChannel: false);
+        _hasPrimedNotificationDispatcher = true;
+      }
 
       final launchDetails = await dispatcher.getNotificationAppLaunchDetails();
       final bool didLaunch = launchDetails?.didNotificationLaunchApp ?? false;
@@ -206,6 +211,7 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('TilawaAppRoot');
     return AppProviders.create(child: const _PlayerApp());
   }
 }
@@ -215,6 +221,7 @@ class _PlayerApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('PlayerAppMaterialRoot');
     return BlocListener<LocalizationBloc, LocalizationState>(
       listener: (context, state) {
         // Update download notification locale when app locale changes
@@ -223,8 +230,10 @@ class _PlayerApp extends StatelessWidget {
       },
       child: BlocBuilder<LocalizationBloc, LocalizationState>(
         builder: (context, locState) {
+          PerfLogger.markBuild('LocalizationBlocBuilder');
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
+              PerfLogger.markBuild('ThemeBlocBuilder');
               return MaterialApp.router(
                 title: AppStrings.appName,
                 debugShowCheckedModeBanner: false,

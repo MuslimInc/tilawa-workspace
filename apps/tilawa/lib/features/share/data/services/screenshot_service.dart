@@ -152,8 +152,9 @@ class ScreenshotService {
     for (var attempt = 0; attempt < _captureBoundaryRetryFrames; attempt++) {
       final renderObject = boundaryKey.currentContext?.findRenderObject();
       if (renderObject is RenderRepaintBoundary &&
+          renderObject.attached &&
           renderObject.hasSize &&
-          !renderObject.debugNeedsPaint) {
+          !renderObject.size.isEmpty) {
         return renderObject;
       }
 

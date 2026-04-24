@@ -125,6 +125,7 @@ Widget _buildPageContentWidget({
   ValueNotifier<int>? currentPage,
   ValueNotifier<bool>? isScrolling,
   bool isWarming = false,
+  bool enableSnapshots = true,
   Color textColor = Colors.black,
 }) {
   return MaterialApp(
@@ -139,6 +140,7 @@ Widget _buildPageContentWidget({
         showOverlaysListenable: ValueNotifier<bool>(true),
         isScrollingListenable: isScrolling,
         isWarming: isWarming,
+        enableSnapshots: enableSnapshots,
         surahNameBuilder: (n) => 'Surah $n',
         mushafService: mushafService,
         pageSnapshotService: snapshotService,
@@ -209,6 +211,28 @@ void main() {
       await tester.pump(const Duration(milliseconds: 1500));
 
       // Pump frames generously — should still not capture.
+      for (var i = 0; i < 8; i++) {
+        await tester.pump();
+      }
+
+      expect(snapshotService.hasSnapshot(10), isFalse);
+    });
+
+    testWidgets('does NOT schedule snapshot when snapshots are disabled', (
+      WidgetTester tester,
+    ) async {
+      fontService.debugMarkFontLoaded(10);
+
+      final PreparedQuranPage preparedPage = await _preparePage(tester);
+
+      await tester.pumpWidget(
+        _buildPageContentWidget(
+          preparedPage: preparedPage,
+          enableSnapshots: false,
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 1500));
+
       for (var i = 0; i < 8; i++) {
         await tester.pump();
       }

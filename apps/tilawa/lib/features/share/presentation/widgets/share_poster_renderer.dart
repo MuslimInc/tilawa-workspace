@@ -137,6 +137,7 @@ class SharePosterRenderer extends StatelessWidget {
                               alignTextToTop: true,
                               showSpecialBlocks: false,
                               viewportSize: pageViewportSize,
+                              enableSnapshots: false,
                             ),
                           ),
                         ),

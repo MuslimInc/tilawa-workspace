@@ -45,6 +45,7 @@ class PageContent extends StatefulWidget {
     this.alignTextToTop = false,
     this.showSpecialBlocks = true,
     this.viewportSize,
+    this.enableSnapshots = true,
     required this.mushafService,
     required this.pageSnapshotService,
   });
@@ -103,6 +104,7 @@ class PageContent extends StatefulWidget {
   final TextDirection uiTextDirection;
   final bool showSpecialBlocks;
   final Size? viewportSize;
+  final bool enableSnapshots;
   final void Function(
     int surahNumber,
     int verseNumber,
@@ -132,6 +134,7 @@ class _PageContentState extends State<PageContent>
   final GlobalKey _snapshotBoundaryKey = GlobalKey();
   bool _snapshotScheduled = false;
   bool _snapshotCaptured = false;
+  bool _snapshotFailed = false;
   IdleTask? _pendingIdleCapture;
   Timer? _deferredSnapshotTimer;
   bool _hasDeferredCenterSnapshotCapture = false;
@@ -192,6 +195,7 @@ class _PageContentState extends State<PageContent>
       _hasDeferredCenterSnapshotCapture = false;
       _snapshotCaptured = false;
       _snapshotScheduled = false;
+      _snapshotFailed = false;
       _primePageData();
       return;
     }
@@ -277,7 +281,12 @@ class _PageContentState extends State<PageContent>
   /// Schedules a bitmap snapshot capture via the [IdleScheduler] so the
   /// expensive `toImage()` call runs only when the GPU is idle.
   void _scheduleSnapshotCapture() {
-    if (_snapshotScheduled || _snapshotCaptured) return;
+    if (!widget.enableSnapshots ||
+        _snapshotScheduled ||
+        _snapshotCaptured ||
+        _snapshotFailed) {
+      return;
+    }
     final int centerPage =
         widget.currentPageListenable?.value ?? widget.pageNumber;
 
@@ -302,18 +311,23 @@ class _PageContentState extends State<PageContent>
     final double pixelRatio = MediaQuery.devicePixelRatioOf(context);
 
     _pendingIdleCapture?.cancel();
-    _pendingIdleCapture = widget.pageSnapshotService.scheduleCaptureWhenIdle(
-      pageNumber: widget.pageNumber,
-      boundaryKey: _snapshotBoundaryKey,
-      pixelRatio: pixelRatio,
-      centerPage: centerPage,
-    );
+    final IdleTask idleCapture = widget.pageSnapshotService
+        .scheduleCaptureWhenIdle(
+          pageNumber: widget.pageNumber,
+          boundaryKey: _snapshotBoundaryKey,
+          pixelRatio: pixelRatio,
+          centerPage: centerPage,
+        );
+    _pendingIdleCapture = idleCapture;
 
-    _pendingIdleCapture!.future.then((_) {
+    idleCapture.future.then((_) {
       if (!mounted) return;
-      if (!_pendingIdleCapture!.isCancelled &&
+      if (!identical(_pendingIdleCapture, idleCapture)) return;
+      if (!idleCapture.isCancelled &&
           widget.pageSnapshotService.hasSnapshot(widget.pageNumber)) {
         _snapshotCaptured = true;
+      } else if (!idleCapture.isCancelled) {
+        _snapshotFailed = true;
       }
       _snapshotScheduled = false;
       _pendingIdleCapture = null;
@@ -330,6 +344,7 @@ class _PageContentState extends State<PageContent>
     widget.pageSnapshotService.evict(widget.pageNumber);
     _snapshotCaptured = false;
     _snapshotScheduled = false;
+    _snapshotFailed = false;
   }
 
   void _primePageData() {
@@ -488,11 +503,12 @@ class _PageContentState extends State<PageContent>
     // During swipe animations, display a pre-rendered bitmap snapshot
     // instead of the full widget tree. This reduces raster cost from
     // ~25ms (15 TextPainters) to ~2ms (single texture blit).
+    final bool snapshotsEnabled = widget.enableSnapshots;
     final bool isScrolling = widget.isScrollingListenable?.value ?? false;
-    final ui.Image? snapshot = isScrolling
+    final ui.Image? snapshot = snapshotsEnabled && isScrolling
         ? widget.pageSnapshotService.getSnapshot(widget.pageNumber)
         : null;
-    if (snapshot == null) {
+    if (snapshotsEnabled && snapshot == null) {
       // Schedule a snapshot capture after the first successful paint,
       // unless we are just warming up the cache (which doesn't need a snapshot).
       if (!widget.isWarming && !_snapshotCaptured && !_snapshotScheduled) {

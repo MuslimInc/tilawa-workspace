@@ -211,6 +211,10 @@ void main() {
     when(() => mockMushafService.ensureLoaded()).thenAnswer((_) async {});
 
     HydratedBloc.storage = mockStorage;
+
+    // Bootstrap memoizes one-shot init helpers to avoid duplicate runtime init;
+    // clear the cache so each test's freshly stubbed mocks are actually called.
+    resetMemoizedInitFutures();
   });
 
   group('Main Initialization Functions', () {
