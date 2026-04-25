@@ -290,7 +290,10 @@ class _TopAppBar extends StatelessWidget {
         child: Row(
           children: [
             leading ??
-                _RoundHeaderButton(icon: Icons.close_rounded, onPressed: onClose),
+                _RoundHeaderButton(
+                  icon: Icons.close_rounded,
+                  onPressed: onClose,
+                ),
             Expanded(
               child: Text(
                 title,

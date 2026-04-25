@@ -33,6 +33,15 @@ class VideoReelComposerScreen extends StatefulWidget {
     GlobalKey? readerBoundaryKey,
     ValueNotifier<Uint8List?>? readerPreviewBytesNotifier,
   }) {
+    // Initialize cubit with audio configuration and verse range
+    cubit.configureAudioClip(
+      surahNumber: surahNumber,
+      fromAyah: initialFromAyah,
+      toAyah: initialToAyah,
+      reciterName: reciterName,
+      serverUrl: reciterServerUrl,
+    );
+
     return MaterialPageRoute(
       builder: (context) => BlocProvider.value(
         value: cubit,
@@ -41,6 +50,7 @@ class VideoReelComposerScreen extends StatefulWidget {
           initialFromAyah: initialFromAyah,
           initialToAyah: initialToAyah,
           reciterName: reciterName,
+          reciterServerUrl: reciterServerUrl,
         ),
       ),
     );
@@ -52,12 +62,14 @@ class VideoReelComposerScreen extends StatefulWidget {
     required this.initialFromAyah,
     required this.initialToAyah,
     required this.reciterName,
+    required this.reciterServerUrl,
   });
 
   final int surahNumber;
   final int initialFromAyah;
   final int initialToAyah;
   final String reciterName;
+  final String reciterServerUrl;
 
   @override
   State<VideoReelComposerScreen> createState() =>
@@ -96,7 +108,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     return MultiBlocListener(
       listeners: [
         BlocListener<ShareCubit, ShareState>(
-          listenWhen: (prev, curr) => prev.videoPageSpecs != curr.videoPageSpecs,
+          listenWhen: (prev, curr) =>
+              prev.videoPageSpecs != curr.videoPageSpecs,
           listener: (context, state) =>
               _syncVideoBoundaryKeys(state.videoPageSpecs),
         ),
@@ -108,7 +121,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
             buildWhen: (p, c) =>
                 p.videoPageSpecs != c.videoPageSpecs || p.status != c.status,
             builder: (context, state) {
-              final isBusy = state.status == ShareStatus.capturing ||
+              final isBusy =
+                  state.status == ShareStatus.capturing ||
                   state.status == ShareStatus.generating ||
                   state.status == ShareStatus.sharing;
               final reciterName = state.reciterName ?? widget.reciterName;
@@ -129,43 +143,48 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                       ),
                     ),
                   ImmersiveComposerScaffold(
+                    key: const ValueKey('immersive_composer_scaffold'),
                     disableBlur: true,
                     title: context.l10n.shareModeReel,
                     subtitle: context.l10n.shareComposerSubtitle,
                     onClose: () => Navigator.of(context).maybePop(),
                     background:
                         BlocSelector<ShareCubit, ShareState, _BackgroundState>(
-                      selector: (state) => _BackgroundState(
-                        status: state.status,
-                        content: state.content,
-                        fromAyah: state.fromAyah ?? widget.initialFromAyah,
-                        toAyah: state.toAyah ?? widget.initialToAyah,
-                        reciterName: state.reciterName ?? widget.reciterName,
-                      ),
-                      builder: (context, bState) {
-                        final isReviewing =
-                            bState.status == ShareStatus.reviewing;
-                        final isScreenshotReview =
-                            isReviewing && bState.content is ShareScreenshot;
+                          selector: (state) => _BackgroundState(
+                            status: state.status,
+                            content: state.content,
+                            fromAyah: state.fromAyah ?? widget.initialFromAyah,
+                            toAyah: state.toAyah ?? widget.initialToAyah,
+                            reciterName:
+                                state.reciterName ?? widget.reciterName,
+                          ),
+                          builder: (context, bState) {
+                            final isReviewing =
+                                bState.status == ShareStatus.reviewing;
+                            final isScreenshotReview =
+                                isReviewing &&
+                                bState.content is ShareScreenshot;
 
-                        final child = isReviewing && bState.content is ShareVideo
-                            ? MediaPreviewFrame(
-                                key: const ValueKey('video_preview'),
-                                aspectRatio: 9 / 16,
-                                child: ValueListenableBuilder<bool>(
-                                  valueListenable: _videoIsMuted,
-                                  builder: (context, isMuted, _) {
-                                    return GeneratedVideoPreview(
-                                      filePath: (bState.content as ShareVideo)
-                                          .filePath,
-                                      isMuted: isMuted,
-                                      onMuteChanged: (muted) =>
-                                          _videoIsMuted.value = muted,
-                                    );
-                                  },
-                                ),
-                              )
-                            : isScreenshotReview
+                            final child =
+                                isReviewing && bState.content is ShareVideo
+                                ? MediaPreviewFrame(
+                                    key: const ValueKey('video_preview'),
+                                    aspectRatio: 9 / 16,
+                                    child: ValueListenableBuilder<bool>(
+                                      valueListenable: _videoIsMuted,
+                                      builder: (context, isMuted, _) {
+                                        return GeneratedVideoPreview(
+                                          filePath:
+                                              (bState.content as ShareVideo)
+                                                  .filePath,
+                                          isMuted: isMuted,
+                                          onMuteChanged: (muted) =>
+                                              _videoIsMuted.value = muted,
+                                        );
+                                      },
+                                    ),
+                                  )
+                                : isScreenshotReview
                                 ? MediaPreviewFrame(
                                     key: const ValueKey('image_preview'),
                                     child: GeneratedImagePreview(
@@ -179,15 +198,16 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                     surahNumber: widget.surahNumber,
                                     fromAyah: bState.fromAyah,
                                     toAyah: bState.toAyah,
-                                    reciterName: bState.reciterName ??
+                                    reciterName:
+                                        bState.reciterName ??
                                         widget.reciterName,
                                     backgroundColor:
                                         VideoReelDesign.mushafBackgroundColor,
                                   );
 
-                        return child;
-                      },
-                    ),
+                            return child;
+                          },
+                        ),
                     preview: const SizedBox.expand(),
                     bottomPanel: BlocBuilder<ShareCubit, ShareState>(
                       buildWhen: (p, c) =>
@@ -200,7 +220,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                       builder: (context, state) {
                         final isReviewing =
                             state.status == ShareStatus.reviewing;
-                        final isBusy = state.status == ShareStatus.capturing ||
+                        final isBusy =
+                            state.status == ShareStatus.capturing ||
                             state.status == ShareStatus.generating ||
                             state.status == ShareStatus.sharing;
 
@@ -216,7 +237,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (!isBusy) VideoStepIndicator(status: state.status),
+                            if (!isBusy)
+                              VideoStepIndicator(status: state.status),
                             if (isReviewing && !isBusy)
                               VideoReviewPanel(
                                 key: const ValueKey('review_panel'),
@@ -236,18 +258,24 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 minAyah: state.minAyah ?? 1,
                                 maxAyah: maxAyah,
                                 isBusy: isBusy,
-                                rangeIsValid:
-                                    _isValidRange(fromAyah, toAyah, maxAyah),
+                                rangeIsValid: _isValidRange(
+                                  fromAyah,
+                                  toAyah,
+                                  maxAyah,
+                                ),
                                 reciterName: reciterName,
                                 isLoadingReciters: state.isLoadingReciters,
                                 canSelectReciter: true,
-                                arabicSurahName:
-                                    getSurahNameArabic(widget.surahNumber),
+                                arabicSurahName: getSurahNameArabic(
+                                  widget.surahNumber,
+                                ),
                                 errorMessage: state.status == ShareStatus.error
                                     ? state.errorMessage
                                     : null,
-                                progressLabel:
-                                    _progressLabelForState(context, state),
+                                progressLabel: _progressLabelForState(
+                                  context,
+                                  state,
+                                ),
                                 onFromChanged: (v) => context
                                     .read<ShareCubit>()
                                     .updateVerseRange(fromAyah: v),
@@ -255,7 +283,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                     .read<ShareCubit>()
                                     .updateVerseRange(toAyah: v),
                                 onPrimaryAction: () => _handleGenerateVideo(
-                                    context, state, maxAyah),
+                                  context,
+                                  state,
+                                  maxAyah,
+                                ),
                                 onCancel: () => context
                                     .read<ShareCubit>()
                                     .cancelGeneration(),
@@ -269,23 +300,24 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                     ),
                     floatingActionButton:
                         BlocSelector<ShareCubit, ShareState, bool>(
-                      selector: (state) => state.status != ShareStatus.reviewing,
-                      builder: (context, showFab) {
-                        if (!showFab) return const SizedBox.shrink();
-                        return FloatingActionButton(
-                          key: const ValueKey('composer_fab'),
-                          onPressed: () {
-                            final state = context.read<ShareCubit>().state;
-                            _handleGenerateVideo(
-                              context,
-                              state,
-                              getVerseCount(widget.surahNumber),
+                          selector: (state) =>
+                              state.status != ShareStatus.reviewing,
+                          builder: (context, showFab) {
+                            if (!showFab) return const SizedBox.shrink();
+                            return FloatingActionButton(
+                              key: const ValueKey('composer_fab'),
+                              onPressed: () {
+                                final state = context.read<ShareCubit>().state;
+                                _handleGenerateVideo(
+                                  context,
+                                  state,
+                                  getVerseCount(widget.surahNumber),
+                                );
+                              },
+                              child: const Icon(Icons.movie_creation_outlined),
                             );
                           },
-                          child: const Icon(Icons.movie_creation_outlined),
-                        );
-                      },
-                    ),
+                        ),
                   ),
                 ],
               );
@@ -446,7 +478,8 @@ class _OffScreenRenderers extends StatelessWidget {
   final bool isCapturing;
 
   /// Cached renderer instance to avoid recreating on every build.
-  static final MushafPageRenderer _renderer = MushafPageRenderer.defaultRenderer();
+  static final MushafPageRenderer _renderer =
+      MushafPageRenderer.defaultRenderer();
 
   @override
   Widget build(BuildContext context) {
