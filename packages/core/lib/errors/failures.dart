@@ -92,3 +92,11 @@ class PermissionFailure extends Failure {
 class UnexpectedFailure extends Failure {
   const UnexpectedFailure([super.message]);
 }
+
+class PersistenceFailure extends Failure {
+  const PersistenceFailure([super.message]);
+}
+
+class UIError extends Failure {
+  const UIError([super.message]);
+}

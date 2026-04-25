@@ -579,6 +579,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get serverError => 'Server error, please try again later';
+
+  @override
+  String get cacheError => 'Storage error';
+
+  @override
+  String get audioError => 'Audio playback error';
+
+  @override
+  String get validationError => 'Invalid data provided';
+
+  @override
+  String get permissionError => 'Permission denied';
+
+  @override
+  String get unexpectedError => 'An unexpected error occurred';
+
+  @override
+  String get persistenceError => 'Failed to save data';
+
+  @override
+  String get uiError => 'User interface error';
+
+  @override
+  String get unknownError => 'Unknown error occurred';
+
+  @override
   String get startFreeTrial => 'Start Free Trial';
 
   @override

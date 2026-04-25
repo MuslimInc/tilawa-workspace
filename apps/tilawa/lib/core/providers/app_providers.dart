@@ -4,6 +4,7 @@ import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
 import 'package:tilawa_core/di/injection.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../features/audio_player/presentation/cubit/player_background_cubit.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/downloads/presentation/bloc/downloads_bloc.dart';
@@ -52,6 +53,9 @@ class AppProviders {
     ),
     BlocProvider<AudioPlayerBloc>(
       create: (context) => getIt<AudioPlayerBloc>(),
+    ),
+    BlocProvider<PlayerBackgroundCubit>(
+      create: (context) => getIt<PlayerBackgroundCubit>(),
     ),
     BlocProvider<DownloadsBloc>(create: (context) => getIt<DownloadsBloc>()),
     BlocProvider<PlaylistsBloc>(create: (context) => getIt<PlaylistsBloc>()),

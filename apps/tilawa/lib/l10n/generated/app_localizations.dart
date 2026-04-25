@@ -1166,6 +1166,60 @@ abstract class AppLocalizations {
   /// **'Storage Used: {size}'**
   String storageUsed(String size);
 
+  /// Server error message
+  ///
+  /// In en, this message translates to:
+  /// **'Server error, please try again later'**
+  String get serverError;
+
+  /// Cache/Storage error message
+  ///
+  /// In en, this message translates to:
+  /// **'Storage error'**
+  String get cacheError;
+
+  /// Audio playback error message
+  ///
+  /// In en, this message translates to:
+  /// **'Audio playback error'**
+  String get audioError;
+
+  /// Validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid data provided'**
+  String get validationError;
+
+  /// Permission error message
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied'**
+  String get permissionError;
+
+  /// Unexpected error message
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred'**
+  String get unexpectedError;
+
+  /// Persistence error message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save data'**
+  String get persistenceError;
+
+  /// UI error message
+  ///
+  /// In en, this message translates to:
+  /// **'User interface error'**
+  String get uiError;
+
+  /// Unknown error message
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error occurred'**
+  String get unknownError;
+
   /// Start free trial button text
   ///
   /// In en, this message translates to:

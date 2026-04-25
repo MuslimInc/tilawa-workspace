@@ -577,6 +577,33 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get serverError => 'خطأ في الخادم، يرجى المحاولة مرة أخرى لاحقاً';
+
+  @override
+  String get cacheError => 'خطأ في التخزين';
+
+  @override
+  String get audioError => 'خطأ في تشغيل الصوت';
+
+  @override
+  String get validationError => 'بيانات المقدمة غير صالحة';
+
+  @override
+  String get permissionError => 'تم رفض الإذن';
+
+  @override
+  String get unexpectedError => 'حدث خطأ غير متوقع';
+
+  @override
+  String get persistenceError => 'فشل في حفظ البيانات';
+
+  @override
+  String get uiError => 'خطأ في واجهة المستخدم';
+
+  @override
+  String get unknownError => 'حدث خطأ غير معروف';
+
+  @override
   String get startFreeTrial => 'ابدأ التجربة المجانية';
 
   @override

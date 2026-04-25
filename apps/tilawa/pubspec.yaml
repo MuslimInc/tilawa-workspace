@@ -87,6 +87,7 @@ dependencies:
   ffmpeg_kit_flutter_new: ^4.1.0
   video_player: ^2.11.1
   chewie: ^1.13.0
+  image_picker: ^1.2.1
 
 dev_dependencies:
   bloc_lint: ^0.3.6

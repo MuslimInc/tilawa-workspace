@@ -800,6 +800,42 @@
             }
         }
     },
+    "serverError": "Server error, please try again later",
+    "@serverError": {
+        "description": "Server error message"
+    },
+    "cacheError": "Storage error",
+    "@cacheError": {
+        "description": "Cache/Storage error message"
+    },
+    "audioError": "Audio playback error",
+    "@audioError": {
+        "description": "Audio playback error message"
+    },
+    "validationError": "Invalid data provided",
+    "@validationError": {
+        "description": "Validation error message"
+    },
+    "permissionError": "Permission denied",
+    "@permissionError": {
+        "description": "Permission error message"
+    },
+    "unexpectedError": "An unexpected error occurred",
+    "@unexpectedError": {
+        "description": "Unexpected error message"
+    },
+    "persistenceError": "Failed to save data",
+    "@persistenceError": {
+        "description": "Persistence error message"
+    },
+    "uiError": "User interface error",
+    "@uiError": {
+        "description": "UI error message"
+    },
+    "unknownError": "Unknown error occurred",
+    "@unknownError": {
+        "description": "Unknown error message"
+    },
     "startFreeTrial": "Start Free Trial",
     "@startFreeTrial": {
         "description": "Start free trial button text"

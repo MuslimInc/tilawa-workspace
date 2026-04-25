@@ -7,10 +7,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
+import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import '../../features/audio_player/presentation/cubit/player_background_cubit.dart';
+import '../../features/audio_player/presentation/widgets/background_source_dialog.dart';
+import '../../features/audio_player/presentation/widgets/player_background_layer.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
@@ -179,124 +184,133 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('BottomPlayerWidget');
-    return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
-      listenWhen: (previous, current) {
-        return previous.currentAudio?.id != current.currentAudio?.id ||
-            (!previous.shouldShowBottomPlayer &&
-                current.shouldShowBottomPlayer) ||
-            (previous.isPlaying != current.isPlaying && current.isPlaying);
-      },
-      // Guard against position-only updates: positionData is intentionally
-      // excluded because _MiniPlayerProgressBar handles it with its own
-      // BlocSelector. Without this, every position tick (~200 ms when playing)
-      // rebuilds the full player UI tree (≈50–70 ms), causing persistent jank.
-      buildWhen: (previous, current) =>
-          previous.currentAudio != current.currentAudio ||
-          previous.shouldShowBottomPlayer != current.shouldShowBottomPlayer ||
-          previous.isPlaying != current.isPlaying ||
-          previous.canGoPrevious != current.canGoPrevious ||
-          previous.canGoNext != current.canGoNext ||
-          previous.isSleepTimerActive != current.isSleepTimerActive ||
-          previous.volume != current.volume ||
-          previous.speed != current.speed ||
-          previous.dismissedAudioId != current.dismissedAudioId,
+    return BlocListener<PlayerBackgroundCubit, PlayerBackgroundState>(
+      listenWhen: (previous, current) => current is PlayerBackgroundError,
       listener: (context, state) {
-        if (_isDismissed) {
-          setState(() {
-            _isDismissed = false;
-          });
+        if (state is PlayerBackgroundError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to set background: ${state.message}'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
         }
       },
-      builder: (context, state) {
-        final AudioEntity? audio = state.currentAudio;
+      child: BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
+        listenWhen: (previous, current) {
+          return previous.currentAudio?.id != current.currentAudio?.id ||
+              (!previous.shouldShowBottomPlayer &&
+                  current.shouldShowBottomPlayer) ||
+              (previous.isPlaying != current.isPlaying && current.isPlaying);
+        },
+        buildWhen: (previous, current) =>
+            previous.currentAudio != current.currentAudio ||
+            previous.shouldShowBottomPlayer != current.shouldShowBottomPlayer ||
+            previous.isPlaying != current.isPlaying ||
+            previous.canGoPrevious != current.canGoPrevious ||
+            previous.canGoNext != current.canGoNext ||
+            previous.isSleepTimerActive != current.isSleepTimerActive ||
+            previous.volume != current.volume ||
+            previous.speed != current.speed ||
+            previous.dismissedAudioId != current.dismissedAudioId,
+        listener: (context, state) {
+          if (_isDismissed) {
+            setState(() {
+              _isDismissed = false;
+            });
+          }
+        },
+        builder: (context, state) {
+          final AudioEntity? audio = state.currentAudio;
 
-        // Hide if no media, error, manually dismissed, or if keyboard is open
-        if (!state.shouldShowBottomPlayer ||
-            audio == null ||
-            _isDismissed ||
-            (widget.isKeyboardOpen && !isExpanding)) {
-          return const SizedBox.shrink();
-        }
+          // Hide if no media, error, manually dismissed, or if keyboard is open
+          if (!state.shouldShowBottomPlayer ||
+              audio == null ||
+              _isDismissed ||
+              (widget.isKeyboardOpen && !isExpanding)) {
+            return const SizedBox.shrink();
+          }
 
-        final double screenHeight = MediaQuery.sizeOf(context).height;
+          final double screenHeight = MediaQuery.sizeOf(context).height;
 
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: GestureDetector(
-            onVerticalDragUpdate: _onVerticalDragUpdate,
-            onVerticalDragEnd: _onVerticalDragEnd,
-            // AnimatedBuilder confines expand/collapse animation rebuilds to
-            // this subtree, preventing them from propagating up to BlocConsumer
-            // and rebuilding the full player tree on every vsync tick.
-            child: AnimatedBuilder(
-              animation: _expandController,
-              builder: (context, _) {
-                final double progress = _expandController.value;
-                // When collapsed (progress=0), the height must be
-                // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
-                final double currentHeight = lerpDouble(
-                  _miniPlayerHeight + widget.bottomNavBarHeight,
-                  screenHeight,
-                  progress,
-                )!;
+          return Align(
+            alignment: Alignment.bottomCenter,
+            child: GestureDetector(
+              onVerticalDragUpdate: _onVerticalDragUpdate,
+              onVerticalDragEnd: _onVerticalDragEnd,
+              // AnimatedBuilder confines expand/collapse animation rebuilds to
+              // this subtree, preventing them from propagating up to BlocConsumer
+              // and rebuilding the full player tree on every vsync tick.
+              child: AnimatedBuilder(
+                animation: _expandController,
+                builder: (context, _) {
+                  final double progress = _expandController.value;
+                  // When collapsed (progress=0), the height must be
+                  // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
+                  final double currentHeight = lerpDouble(
+                    _miniPlayerHeight + widget.bottomNavBarHeight,
+                    screenHeight,
+                    progress,
+                  )!;
 
-                return SizedBox(
-                  height: currentHeight,
-                  width: double.infinity,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Expanded player (behind, fades in)
-                      if (progress > 0.01)
-                        Opacity(
-                          opacity: progress.clamp(0.0, 1.0),
-                          child: _buildExpandedPlayer(context, state, audio),
-                        ),
-
-                      // Mini player (in front, fades out quickly)
-                      if (progress < 0.99)
-                        Positioned(
-                          bottom: lerpDouble(
-                            widget.bottomNavBarHeight,
-                            0,
-                            progress,
+                  return SizedBox(
+                    height: currentHeight,
+                    width: double.infinity,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Expanded player (behind, fades in)
+                        if (progress > 0.01)
+                          Opacity(
+                            opacity: progress.clamp(0.0, 1.0),
+                            child: _buildExpandedPlayer(context, state, audio),
                           ),
-                          left: 0,
-                          right: 0,
-                          // AnimatedBuilder confines dismiss animation
-                          // rebuilds to Transform+Opacity only — the
-                          // _buildMiniPlayer child is not recreated on
-                          // every dismiss animation frame.
-                          child: AnimatedBuilder(
-                            animation: _dismissAnimController,
-                            builder: (context, child) {
-                              final double dismissOffset =
-                                  _dismissAnimation?.value ?? _dismissOffsetY;
-                              return Transform.translate(
-                                offset: Offset(0, dismissOffset),
-                                child: Opacity(
-                                  opacity:
-                                      ((1 - progress * 2.5) *
-                                              (1 - dismissOffset / 200))
-                                          .clamp(0.0, 1.0),
-                                  child: child,
-                                ),
-                              );
-                            },
-                            child: IgnorePointer(
-                              ignoring: progress > 0.4,
-                              child: _buildMiniPlayer(context, state, audio),
+
+                        // Mini player (in front, fades out quickly)
+                        if (progress < 0.99)
+                          Positioned(
+                            bottom: lerpDouble(
+                              widget.bottomNavBarHeight,
+                              0,
+                              progress,
+                            ),
+                            left: 0,
+                            right: 0,
+                            // AnimatedBuilder confines dismiss animation
+                            // rebuilds to Transform+Opacity only — the
+                            // _buildMiniPlayer child is not recreated on
+                            // every dismiss animation frame.
+                            child: AnimatedBuilder(
+                              animation: _dismissAnimController,
+                              builder: (context, child) {
+                                final double dismissOffset =
+                                    _dismissAnimation?.value ?? _dismissOffsetY;
+                                return Transform.translate(
+                                  offset: Offset(0, dismissOffset),
+                                  child: Opacity(
+                                    opacity:
+                                        ((1 - progress * 2.5) *
+                                                (1 - dismissOffset / 200))
+                                            .clamp(0.0, 1.0),
+                                    child: child,
+                                  ),
+                                );
+                              },
+                              child: IgnorePointer(
+                                ignoring: progress > 0.4,
+                                child: _buildMiniPlayer(context, state, audio),
+                              ),
                             ),
                           ),
-                        ),
-                    ],
-                  ),
-                );
-              },
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -395,26 +409,44 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // 1. Background image
-            if (audio.artUri != null)
-              Positioned.fill(
-                child: CachedNetworkImage(
-                  imageUrl: audio.artUri!,
-                  fit: BoxFit.cover,
-                  errorWidget: (_, _, _) => Container(color: Colors.grey),
-                  placeholder: (_, _) => Container(color: Colors.grey),
-                ),
-              )
-            else
-              Container(
-                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              ),
+            // 1. Background layer (Default or Custom)
+            const PlayerBackgroundLayer(),
 
-            // 2. Blur overlay
+            // 2. Default fallback background if custom is not active
+            // This mirrors the old behavior for when no custom image is set
             Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                child: Container(color: Colors.black.withValues(alpha: 0.4)),
+              child: BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
+                builder: (context, state) {
+                  if (state.config.type == PlayerBackgroundType.custom) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return audio.artUri != null
+                      ? Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            CachedNetworkImage(
+                              imageUrl: audio.artUri!,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, _, _) =>
+                                  Container(color: Colors.grey),
+                              placeholder: (_, _) =>
+                                  Container(color: Colors.grey),
+                            ),
+                            BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                              child: Container(
+                                color: Colors.black.withValues(alpha: 0.4),
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(
+                          color: Theme.of(
+                            context,
+                          ).primaryColor.withValues(alpha: 0.1),
+                        );
+                },
               ),
             ),
 
@@ -591,6 +623,23 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               );
             },
           ),
+        IconButton(
+          icon: const Icon(
+            FluentIcons.image_24_regular,
+            color: Colors.white,
+            size: 24,
+          ),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => BackgroundSourceDialog(
+                onSourceSelected: (source) {
+                  context.read<PlayerBackgroundCubit>().pickImage(source);
+                },
+              ),
+            );
+          },
+        ),
       ],
     );
   }
