@@ -1286,7 +1286,9 @@ void main() {
         );
 
         when(mockPrefs.getString(any)).thenAnswer((_) async => payload);
-        when(mockPrefs.getInt(any)).thenAnswer((_) async => DateTime.now().millisecondsSinceEpoch - 30000);
+        when(mockPrefs.getInt(any)).thenAnswer(
+          (_) async => DateTime.now().millisecondsSinceEpoch - 30000,
+        );
 
         await service.handleNotificationResponse(response);
 
