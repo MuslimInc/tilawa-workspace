@@ -13,7 +13,7 @@ import 'share_file_manager.dart';
 class ScreenshotService {
   ScreenshotService(this._fileManager);
 
-  static const int _captureBoundaryRetryFrames = 4;
+  static const int _captureBoundaryRetryFrames = 15;
 
   final ShareFileManager _fileManager;
 
@@ -72,7 +72,7 @@ class ScreenshotService {
     );
   }
 
-  /// PHASE 4 OPTIMIZATION: Ultra-fast capture with minimal processing.
+   /// PHASE 4 OPTIMIZATION: Ultra-fast capture with minimal processing.
   /// Skips PNG encoding for faster capture cycles in video pipelines.
   Future<String> captureRawFast({
     required GlobalKey boundaryKey,
@@ -81,12 +81,26 @@ class ScreenshotService {
     int? targetWidth,
     int? targetHeight,
   }) async {
-    final pageImage = await _captureBoundaryImage(
-      boundaryKey: boundaryKey,
-      pixelRatio: pixelRatio,
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
-    );
+    late ui.Image pageImage;
+    
+    try {
+      pageImage = await _captureBoundaryImage(
+        boundaryKey: boundaryKey,
+        pixelRatio: pixelRatio,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+      );
+    } catch (e) {
+      debugPrint('[ScreenshotService] Capture attempt 1 failed: $e, retrying with extra wait...');
+      // Give page extra time to settle before final retry
+      await Future.delayed(const Duration(milliseconds: 100));
+      pageImage = await _captureBoundaryImage(
+        boundaryKey: boundaryKey,
+        pixelRatio: pixelRatio,
+        targetWidth: targetWidth,
+        targetHeight: targetHeight,
+      );
+    }
 
     try {
       // Get raw pixel data without PNG encoding (faster)
@@ -248,6 +262,13 @@ class ScreenshotService {
     if (renderObject is RenderRepaintBoundary && renderObject.hasSize) {
       return renderObject;
     }
+
+    // Log detailed diagnostic info when boundary is not found
+    debugPrint(
+      '[ScreenshotService] BOUNDARY NOT FOUND - Context: ${boundaryKey.currentContext}, '
+      'RenderObject: ${boundaryKey.currentContext?.findRenderObject()}, '
+      'BuildOwner: ${boundaryKey.currentContext?.owner}',
+    );
 
     return null;
   }
