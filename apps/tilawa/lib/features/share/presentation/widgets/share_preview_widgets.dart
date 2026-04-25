@@ -30,16 +30,14 @@ class MediaPreviewFrame extends StatelessWidget {
           backgroundColor: Colors.white.withValues(alpha: 0.08),
           borderColor: Colors.white.withValues(alpha: 0.12),
           borderRadius: 34,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHighest,
-              ),
-              child: aspectRatio == null
-                  ? child
-                  : AspectRatio(aspectRatio: aspectRatio!, child: child),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
             ),
+            child: aspectRatio == null
+                ? child
+                : AspectRatio(aspectRatio: aspectRatio!, child: child),
           ),
         ),
       ),

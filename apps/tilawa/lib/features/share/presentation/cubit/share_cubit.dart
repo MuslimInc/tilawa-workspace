@@ -33,7 +33,11 @@ class ShareCubit extends Cubit<ShareState> {
     this._getShareAyahs,
     this._shareContent,
     this._getReciters,
-  ) : super(const ShareState());
+  ) : super(const ShareState()) {
+    logger.d(
+      '[AppLaunch][ShareCubit.constructor]: Start in (${DateTime.now()})',
+    );
+  }
 
   final CaptureScreenshotUseCase _captureScreenshot;
   final GenerateAudioClipUseCase _generateAudioClip;
@@ -55,6 +59,9 @@ class ShareCubit extends Cubit<ShareState> {
     required String serverUrl,
     String? reciterFolder,
   }) {
+    logger.d(
+      '[AppLaunch][ShareCubit.configureAudioClip]: Start in (${DateTime.now()})',
+    );
     final effectiveMin = minAyah ?? 1;
     final effectiveMax = maxAyah ?? getVerseCount(surahNumber);
 
@@ -122,6 +129,9 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   Future<void> _fetchAyahs(int surahNumber, int fromAyah, int toAyah) async {
+    logger.d(
+      '[AppLaunch][ShareCubit._fetchAyahs]: Start in (${DateTime.now()})',
+    );
     try {
       final rangeAyahs = await _getShareAyahs(
         surahNumber: surahNumber,
@@ -137,6 +147,9 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   Future<void> loadReciterOptions() async {
+    logger.d(
+      '[AppLaunch][ShareCubit.loadReciterOptions]: Start in (${DateTime.now()})',
+    );
     if (state.surahNumber == null) return;
     emit(state.copyWith(isLoadingReciters: true));
 
@@ -277,6 +290,9 @@ class ShareCubit extends Cubit<ShareState> {
     Color? footerBackgroundColor,
     Color? footerForegroundColor,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareCubit.prepareScreenshot]: Start in (${DateTime.now()})',
+    );
     emit(
       state.copyWith(
         status: ShareStatus.capturing,
@@ -330,6 +346,9 @@ class ShareCubit extends Cubit<ShareState> {
     Color? footerBackgroundColor,
     Color? footerForegroundColor,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareCubit.captureAndShareScreenshot]: Start in (${DateTime.now()})',
+    );
     emit(state.copyWith(status: ShareStatus.sharing));
     try {
       await quranQcfLocator<QuranFontService>().ensureSingleFontLoaded(
@@ -367,6 +386,9 @@ class ShareCubit extends Cubit<ShareState> {
     required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareCubit.prepareAudioClip]: Start in (${DateTime.now()})',
+    );
     final config = _buildAudioConfig();
     if (config == null) return;
 
@@ -454,6 +476,9 @@ class ShareCubit extends Cubit<ShareState> {
     required List<WidgetCaptureHandle> handles,
     int? maxDurationSeconds,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareCubit.generateVideo]: Start in (${DateTime.now()})',
+    );
     final audioConfig = _buildAudioConfig();
 
     logger.d(

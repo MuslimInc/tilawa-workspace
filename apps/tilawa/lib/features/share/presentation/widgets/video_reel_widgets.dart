@@ -25,11 +25,16 @@ class VideoStepIndicator extends StatelessWidget {
     return RepaintBoundary(
       child: SizedBox(
         height: tokens.progressHeight,
-        child: LinearProgressIndicator(
-          backgroundColor: theme.colorScheme.surface.withValues(
-            alpha: tokens.opacitySubtle,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(tokens.radiusSmall),
+          child: LinearProgressIndicator(
+            // Use a fixed value or very slow update to avoid constant raster pressure
+            value: status == ShareStatus.sharing ? null : 0.7,
+            backgroundColor: theme.colorScheme.surface.withValues(
+              alpha: tokens.opacitySubtle,
+            ),
+            valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
           ),
-          valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
         ),
       ),
     );

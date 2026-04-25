@@ -14,6 +14,7 @@ import '../services/audio_clip_service.dart';
 import '../services/screenshot_service.dart';
 import '../services/share_file_manager.dart';
 import '../services/video_service.dart';
+import 'package:tilawa_core/logger.dart';
 
 @LazySingleton(as: ShareRepository)
 class ShareRepositoryImpl implements ShareRepository {
@@ -48,6 +49,9 @@ class ShareRepositoryImpl implements ShareRepository {
     Color? footerBackgroundColor,
     Color? footerForegroundColor,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareRepositoryImpl.captureScreenshot]: Start in (${DateTime.now()})',
+    );
     final boundaryKey = handle.value as GlobalKey;
     await WidgetsBinding.instance.endOfFrame;
     final filePath = brandCapture
@@ -80,6 +84,9 @@ class ShareRepositoryImpl implements ShareRepository {
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareRepositoryImpl.generateAudioClip]: Start in (${DateTime.now()})',
+    );
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
       maxDurationSeconds: maxDurationSeconds,
@@ -121,6 +128,9 @@ class ShareRepositoryImpl implements ShareRepository {
     void Function(int index)? onFrameCaptureStarted,
     CancelToken? cancelToken,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareRepositoryImpl.generateVideo]: Start in (${DateTime.now()})',
+    );
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
       maxDurationSeconds: maxDurationSeconds,
@@ -202,6 +212,9 @@ class ShareRepositoryImpl implements ShareRepository {
 
   @override
   Future<void> shareContent(ShareContent content) async {
+    logger.d(
+      '[AppLaunch][ShareRepositoryImpl.shareContent]: Start in (${DateTime.now()})',
+    );
     if (content case ShareText(:final text)) {
       await SharePlus.instance.share(ShareParams(text: text));
       return;
@@ -249,5 +262,10 @@ class ShareRepositoryImpl implements ShareRepository {
   }
 
   @override
-  Future<void> cleanup() => _fileManager.cleanup();
+  Future<void> cleanup() {
+    logger.d(
+      '[AppLaunch][ShareRepositoryImpl.cleanup]: Start in (${DateTime.now()})',
+    );
+    return _fileManager.cleanup();
+  }
 }

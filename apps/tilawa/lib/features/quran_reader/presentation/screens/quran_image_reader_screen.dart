@@ -117,11 +117,6 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     // Read context-dependent values before the async gap.
     final pageData = getPageData(currentPage);
     final primarySurahNumber = pageData.first.surah;
-    final primarySurahEntries = pageData
-        .where((entry) => entry.surah == primarySurahNumber)
-        .toList();
-    final firstAyah = primarySurahEntries.first.start;
-    final lastAyah = primarySurahEntries.last.end;
 
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';

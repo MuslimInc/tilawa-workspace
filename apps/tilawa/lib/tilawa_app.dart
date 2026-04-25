@@ -236,6 +236,7 @@ class _PlayerApp extends StatelessWidget {
               PerfLogger.markBuild('ThemeBlocBuilder');
               return MaterialApp.router(
                 title: AppStrings.appName,
+                showPerformanceOverlay: true,
                 debugShowCheckedModeBanner: false,
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
                 // checkerboardRasterCacheImages: kDebugMode || kProfileMode,

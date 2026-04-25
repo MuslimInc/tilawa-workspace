@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'share_file_manager.dart';
@@ -29,6 +30,9 @@ class ScreenshotService {
     int? targetWidth,
     int? targetHeight,
   }) async {
+    logger.d(
+      '[AppLaunch][ScreenshotService.captureRaw]: Start in (${DateTime.now()})',
+    );
     final pageImage = await _captureBoundaryImage(
       boundaryKey: boundaryKey,
       pixelRatio: pixelRatio,
@@ -65,6 +69,9 @@ class ScreenshotService {
     Color? footerForegroundColor,
     double pixelRatio = 2.0,
   }) async {
+    logger.d(
+      '[AppLaunch][ScreenshotService.captureAndBrand]: Start in (${DateTime.now()})',
+    );
     const Color defaultFooterBg = Color(0xFF1B4060);
     final Color brandColor = footerBackgroundColor ?? defaultFooterBg;
     final Color foregroundColor =

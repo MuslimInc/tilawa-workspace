@@ -190,8 +190,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
   @override
   Widget build(BuildContext context) {
-    final sw = PerfLogger.startTimer();
-
     if (_pageWidth <= 0) {
       return const SizedBox.shrink();
     }

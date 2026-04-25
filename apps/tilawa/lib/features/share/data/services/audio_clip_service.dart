@@ -13,6 +13,7 @@ import '../../domain/entities/share_progress_messages.dart';
 import 'ayah_timing_service.dart';
 import 'reciter_audio_mapping.dart';
 import 'share_file_manager.dart';
+import 'package:tilawa_core/logger.dart';
 
 /// Downloads verse-level audio files and concatenates them into a single MP3 clip.
 @lazySingleton
@@ -102,6 +103,9 @@ class AudioClipService {
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
+    logger.d(
+      '[AppLaunch][AudioClipService.generateAudioClip]: Start in (${DateTime.now()})',
+    );
     if (localSurahPath != null && File(localSurahPath).existsSync()) {
       return _generateFromLocalFile(
         config,

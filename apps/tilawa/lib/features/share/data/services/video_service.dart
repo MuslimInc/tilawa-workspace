@@ -54,6 +54,9 @@ class VideoService {
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
+    logger.d(
+      '[AppLaunch][VideoService.generateVideo]: Start in (${DateTime.now()})',
+    );
     final List<String> effectiveScreenshotPaths = screenshotPaths
         .where((path) => path.trim().isNotEmpty)
         .toList();

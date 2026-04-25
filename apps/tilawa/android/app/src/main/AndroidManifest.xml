@@ -102,6 +102,11 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <!-- Force Skia to avoid 100ms raster spikes on Adreno 619 -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
+
         <!-- Firebase Crashlytics Configuration -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"

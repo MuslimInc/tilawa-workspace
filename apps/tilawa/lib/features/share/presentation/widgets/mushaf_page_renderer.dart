@@ -26,6 +26,7 @@ abstract class MushafPageRenderer {
     required Color? Function(int surah, int verse) verseTextColor,
     required Color textColor,
     required Color pageBackgroundColor,
+    bool isCapturing = false,
   });
 }
 
@@ -50,6 +51,7 @@ class QcfMushafPageRenderer extends MushafPageRenderer {
     required Color? Function(int surah, int verse) verseTextColor,
     required Color textColor,
     required Color pageBackgroundColor,
+    bool isCapturing = false,
   }) {
     return _QcfPage(
       pageSpec: pageSpec,
@@ -58,6 +60,7 @@ class QcfMushafPageRenderer extends MushafPageRenderer {
       verseTextColor: verseTextColor,
       textColor: textColor,
       pageBackgroundColor: pageBackgroundColor,
+      isCapturing: isCapturing,
     );
   }
 }
@@ -70,6 +73,7 @@ class _QcfPage extends StatefulWidget {
     required this.verseTextColor,
     required this.textColor,
     required this.pageBackgroundColor,
+    required this.isCapturing,
   });
 
   final VideoPageSpec pageSpec;
@@ -78,6 +82,7 @@ class _QcfPage extends StatefulWidget {
   final Color? Function(int surah, int verse) verseTextColor;
   final Color textColor;
   final Color pageBackgroundColor;
+  final bool isCapturing;
 
   @override
   State<_QcfPage> createState() => _QcfPageState();
@@ -184,7 +189,8 @@ class _QcfPageState extends State<_QcfPage> {
                             bodyConstraints.maxWidth,
                             bodyConstraints.maxHeight,
                           ),
-                          enableSnapshots: false,
+                          enableSnapshots: !widget.isCapturing,
+                          isCapturing: widget.isCapturing,
                         );
                       },
                     ),
