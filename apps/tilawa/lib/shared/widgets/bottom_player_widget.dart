@@ -211,18 +211,15 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             previous.dismissedAudioId != current.dismissedAudioId,
         listener: (context, state) {
           if (_isDismissed) {
-            setState(() {
-              _isDismissed = false;
-            });
+            setState(() => _isDismissed = false);
           }
           if (state.failure != null) {
             ToastUtils.showErrorToast(state.failure!.localizedMessage(context));
           }
         },
         builder: (context, state) {
-          final AudioEntity? audio = state.currentAudio;
+          final audio = state.currentAudio;
 
-          // Hide if no media, error, manually dismissed, or if keyboard is open
           if (!state.shouldShowBottomPlayer ||
               audio == null ||
               _isDismissed ||
@@ -230,23 +227,18 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             return const SizedBox.shrink();
           }
 
-          final double screenHeight = MediaQuery.sizeOf(context).height;
+          final screenHeight = MediaQuery.sizeOf(context).height;
 
           return Align(
             alignment: Alignment.bottomCenter,
             child: GestureDetector(
               onVerticalDragUpdate: _onVerticalDragUpdate,
               onVerticalDragEnd: _onVerticalDragEnd,
-              // AnimatedBuilder confines expand/collapse animation rebuilds to
-              // this subtree, preventing them from propagating up to BlocConsumer
-              // and rebuilding the full player tree on every vsync tick.
               child: AnimatedBuilder(
                 animation: _expandController,
                 builder: (context, _) {
-                  final double progress = _expandController.value;
-                  // When collapsed (progress=0), the height must be
-                  // miniPlayerHeight + bottomNavBarHeight to avoid clipping.
-                  final double currentHeight = lerpDouble(
+                  final progress = _expandController.value;
+                  final currentHeight = lerpDouble(
                     _miniPlayerHeight + widget.bottomNavBarHeight,
                     screenHeight,
                     progress,
@@ -255,7 +247,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                   return Container(
                     height: currentHeight,
                     width: double.infinity,
-                    color: Colors.black,
+                    color: Colors.black.withValues(alpha: progress),
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
@@ -263,10 +255,15 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                         if (progress > 0.01)
                           Opacity(
                             opacity: progress.clamp(0.0, 1.0),
-                            child: _buildExpandedPlayer(context, state, audio),
+                            child: _ExpandedPlayerOrganism(
+                              state: state,
+                              audio: audio,
+                              onCollapse: collapse,
+                              expandProgress: progress,
+                            ),
                           ),
 
-                        // Mini player (in front, fades out quickly)
+                        // Mini player (in front, fades out)
                         if (progress < 0.99)
                           Positioned(
                             bottom: lerpDouble(
@@ -276,14 +273,10 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                             ),
                             left: 0,
                             right: 0,
-                            // AnimatedBuilder confines dismiss animation
-                            // rebuilds to Transform+Opacity only — the
-                            // _buildMiniPlayer child is not recreated on
-                            // every dismiss animation frame.
                             child: AnimatedBuilder(
                               animation: _dismissAnimController,
                               builder: (context, child) {
-                                final double dismissOffset =
+                                final dismissOffset =
                                     _dismissAnimation?.value ?? _dismissOffsetY;
                                 return Transform.translate(
                                   offset: Offset(0, dismissOffset),
@@ -298,7 +291,18 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                               },
                               child: IgnorePointer(
                                 ignoring: progress > 0.4,
-                                child: _buildMiniPlayer(context, state, audio),
+                                child: _MiniPlayerOrganism(
+                                  state: state,
+                                  audio: audio,
+                                  onTap: expand,
+                                  onClose: () {
+                                    HapticFeedback.lightImpact();
+                                    setState(() => _isDismissed = true);
+                                    context.read<AudioPlayerBloc>().add(
+                                      const AudioPlayerEvent.stopAudio(),
+                                    );
+                                  },
+                                ),
                               ),
                             ),
                           ),
@@ -313,16 +317,27 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       ),
     );
   }
+}
 
-  // ---------------------------------------------------------------------------
-  // Mini Player
-  // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Organisms
+// ---------------------------------------------------------------------------
 
-  Widget _buildMiniPlayer(
-    BuildContext context,
-    AudioPlayerState state,
-    AudioEntity audio,
-  ) {
+class _MiniPlayerOrganism extends StatelessWidget {
+  const _MiniPlayerOrganism({
+    required this.state,
+    required this.audio,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final AudioPlayerState state;
+  final AudioEntity audio;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -336,36 +351,30 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
             ? 0.0
             : (state.positionData?.position.inMilliseconds ?? 0) /
-                  (state.positionData?.duration.inMilliseconds ?? 1),
+                (state.positionData?.duration.inMilliseconds ?? 1),
         progressBarOverride: const _MiniPlayerProgressBar(),
         isPlaying: state.isPlaying,
         canGoPrevious: state.canGoPrevious,
         canGoNext: state.canGoNext,
         isSleepTimerActive: state.isSleepTimerActive,
-        isSleepTimerEnabled: context
-            .watch<SettingsCubit>()
-            .state
-            .isSleepTimerEnabled,
+        isSleepTimerEnabled:
+            context.watch<SettingsCubit>().state.isSleepTimerEnabled,
         onPlayPause: () {
-          if (state.isPlaying) {
-            context.read<AudioPlayerBloc>().add(
-              const AudioPlayerEvent.pauseAudio(),
-            );
-          } else {
-            context.read<AudioPlayerBloc>().add(
-              const AudioPlayerEvent.playAudio(),
-            );
-          }
+          context.read<AudioPlayerBloc>().add(
+                state.isPlaying
+                    ? const AudioPlayerEvent.pauseAudio()
+                    : const AudioPlayerEvent.playAudio(),
+              );
         },
         onPrevious: () {
           context.read<AudioPlayerBloc>().add(
-            const AudioPlayerEvent.skipToPrevious(),
-          );
+                const AudioPlayerEvent.skipToPrevious(),
+              );
         },
         onNext: () {
-          context.read<AudioPlayerBloc>().add(
-            const AudioPlayerEvent.skipToNext(),
-          );
+          context
+              .read<AudioPlayerBloc>()
+              .add(const AudioPlayerEvent.skipToNext());
         },
         onSleepTimerTap: () {
           showDialog(
@@ -373,29 +382,29 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             builder: (_) => const SleepTimerDialog(),
           );
         },
-        onClose: () {
-          HapticFeedback.lightImpact();
-          setState(() {
-            _isDismissed = true;
-          });
-          context.read<AudioPlayerBloc>().add(
-            const AudioPlayerEvent.stopAudio(),
-          );
-        },
-        onTap: expand,
+        onClose: onClose,
+        onTap: onTap,
       ),
     );
   }
+}
 
-  // ---------------------------------------------------------------------------
-  // Expanded Player
-  // ---------------------------------------------------------------------------
+class _ExpandedPlayerOrganism extends StatelessWidget {
+  const _ExpandedPlayerOrganism({
+    required this.state,
+    required this.audio,
+    required this.onCollapse,
+    required this.expandProgress,
+  });
 
-  Widget _buildExpandedPlayer(
-    BuildContext context,
-    AudioPlayerState state,
-    AudioEntity audio,
-  ) {
+  final AudioPlayerState state;
+  final AudioEntity audio;
+  final VoidCallback onCollapse;
+  final double expandProgress;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -409,18 +418,14 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // 1. Background layer (Default or Custom)
+            // Background
             const PlayerBackgroundLayer(),
-
-            // 2. Default fallback background if custom is not active
-            // This mirrors the old behavior for when no custom image is set
             Positioned.fill(
               child: BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
-                builder: (context, state) {
-                  if (state.config.type == PlayerBackgroundType.custom) {
+                builder: (context, bgState) {
+                  if (bgState.config.type == PlayerBackgroundType.custom) {
                     return const SizedBox.shrink();
                   }
-
                   return audio.artUri != null
                       ? Stack(
                           fit: StackFit.expand,
@@ -428,10 +433,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                             CachedNetworkImage(
                               imageUrl: audio.artUri!,
                               fit: BoxFit.cover,
-                              errorWidget: (_, _, _) =>
-                                  Container(color: Colors.grey),
-                              placeholder: (_, _) =>
-                                  Container(color: Colors.grey),
                             ),
                             BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
@@ -446,99 +447,54 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               ),
             ),
 
-            // 3. Content — Use LayoutBuilder so the Column can shrink
-            // gracefully during the expand/collapse animation.
+            // Content
             Positioned.fill(
               child: SafeArea(
                 child: TilawaContentBounds(
                   kind: TilawaContentKind.media,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final tokens = Theme.of(context).tokens;
                       return SingleChildScrollView(
                         physics: const NeverScrollableScrollPhysics(),
                         child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight,
-                          ),
+                          constraints:
+                              BoxConstraints(minHeight: constraints.maxHeight),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              _buildExpandedAppBar(context, state),
-
-                              // Artwork — flexible via ConstrainedBox
-                              Padding(
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                child: Container(
-                                  width: 280,
-                                  height: (constraints.maxHeight * 0.35).clamp(
-                                    0.0,
-                                    280,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(
-                                      tokens.radiusExtraLarge,
-                                    ),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(
-                                      tokens.radiusExtraLarge,
-                                    ),
-                                    child: audio.artUri != null
-                                        ? CachedNetworkImage(
-                                            imageUrl: audio.artUri!,
-                                            fit: BoxFit.cover,
-                                            errorWidget: (_, _, _) =>
-                                                _buildDefaultArt(context),
-                                          )
-                                        : _buildDefaultArt(context),
-                                  ),
-                                ),
+                              _PlayerHeaderMolecule(
+                                state: state,
+                                onCollapse: onCollapse,
                               ),
 
-                              // Title & Artist
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 24),
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      audio.title,
-                                      style: context
-                                          .responsiveStyle(
-                                            (t) => t.headlineMedium,
-                                          )
-                                          ?.copyWith(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    SizedBox(height: tokens.spaceSmall),
-                                    Text(
-                                      audio.artist ?? 'Unknown',
-                                      style: context
-                                          .responsiveStyle((t) => t.bodyLarge)
-                                          ?.copyWith(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.7,
-                                            ),
-                                          ),
-                                      textAlign: TextAlign.center,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
+                              // Artwork
+                              _PlayerArtAtom(
+                                artUri: audio.artUri,
+                                maxHeight: constraints.maxHeight * 0.35,
                               ),
 
-                              SizedBox(height: tokens.spaceLarge),
-                              // Seek bar
-                              const _ExpandedProgressBar(),
-                              SizedBox(height: tokens.spaceLarge),
-                              // Controls
-                              _buildControls(context, state),
+                              // Metadata
+                              _PlayerMetadataMolecule(
+                                title: audio.title,
+                                artist: audio.artist,
+                              ),
+
+                              // Progress & Controls (Thumb-friendly zone)
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const _ExpandedProgressBar(),
+                                  SizedBox(height: tokens.spaceLarge),
+                                  _PlayerMainControlsMolecule(
+                                    state: state,
+                                    isPlaying: state.isPlaying,
+                                  ),
+                                  SizedBox(height: tokens.spaceMedium),
+                                  _PlayerSecondaryControlsMolecule(
+                                    state: state,
+                                  ),
+                                ],
+                              ),
                               SizedBox(height: tokens.spaceExtraLarge),
                             ],
                           ),
@@ -550,43 +506,49 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               ),
             ),
 
-            // Drag handle at top
+            // Drag handle
             Positioned(
               top: MediaQuery.paddingOf(context).top + 8,
               left: 0,
               right: 0,
-              child: Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
+              child: const _PlayerSheetHandleAtom(),
             ),
           ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildExpandedAppBar(BuildContext context, AudioPlayerState state) {
+// ---------------------------------------------------------------------------
+// Molecules
+// ---------------------------------------------------------------------------
+
+class _PlayerHeaderMolecule extends StatelessWidget {
+  const _PlayerHeaderMolecule({
+    required this.state,
+    required this.onCollapse,
+  });
+
+  final AudioPlayerState state;
+  final VoidCallback onCollapse;
+
+  @override
+  Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
-        icon: Icon(
+        icon: const Icon(
           FluentIcons.chevron_down_24_regular,
           color: Colors.white,
           size: 28,
         ),
-        onPressed: collapse,
+        onPressed: onCollapse,
       ),
       title: Text(
         context.l10n.currentPlaying,
-        style: TextStyle(color: Colors.white, fontSize: 16),
+        style: const TextStyle(color: Colors.white, fontSize: 16),
       ),
       actions: [
         if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
@@ -598,7 +560,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               color: state.isSleepTimerActive
                   ? Theme.of(context).primaryColor
                   : Colors.white,
-              size: 24,
             ),
             onPressed: () {
               showDialog(
@@ -608,11 +569,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             },
           ),
         IconButton(
-          icon: const Icon(
-            FluentIcons.image_24_regular,
-            color: Colors.white,
-            size: 24,
-          ),
+          icon: const Icon(FluentIcons.image_24_regular, color: Colors.white),
           onPressed: () {
             showDialog(
               context: context,
@@ -627,143 +584,279 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       ],
     );
   }
+}
 
-  Widget _buildDefaultArt(BuildContext context) {
-    return ColoredBox(
-      color: Colors.white.withValues(alpha: 0.1),
-      child: Icon(
-        FluentIcons.music_note_1_24_regular,
-        color: Colors.white,
-        size: 80,
+class _PlayerMetadataMolecule extends StatelessWidget {
+  const _PlayerMetadataMolecule({
+    required this.title,
+    this.artist,
+  });
+
+  final String title;
+  final String? artist;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        children: [
+          Text(
+            title,
+            style: context.responsiveStyle((t) => t.headlineMedium)?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          Text(
+            artist ?? 'Unknown',
+            style: context.responsiveStyle((t) => t.bodyLarge)?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlayerMainControlsMolecule extends StatelessWidget {
+  const _PlayerMainControlsMolecule({
+    required this.state,
+    required this.isPlaying,
+  });
+
+  final AudioPlayerState state;
+  final bool isPlaying;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    // Thumb-friendly layout: Primary actions (Play/Next) grouped and sized
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Previous
+        IconButton(
+          icon: Icon(
+            FluentIcons.previous_24_filled,
+            color: state.canGoPrevious
+                ? Colors.white
+                : Colors.white.withValues(alpha: tokens.opacitySubtle),
+            size: tokens.iconSizeLarge,
+          ),
+          onPressed: state.canGoPrevious
+              ? () => context
+                  .read<AudioPlayerBloc>()
+                  .add(const AudioPlayerEvent.skipToPrevious())
+              : null,
+        ),
+        SizedBox(width: tokens.spaceLarge),
+
+        // Play/Pause (Centerpiece)
+        _PlayerPlayPauseAtom(
+          isPlaying: isPlaying,
+          onTap: () {
+            context.read<AudioPlayerBloc>().add(
+                  isPlaying
+                      ? const AudioPlayerEvent.pauseAudio()
+                      : const AudioPlayerEvent.playAudio(),
+                );
+          },
+        ),
+
+        SizedBox(width: tokens.spaceLarge),
+
+        // Next (Most common thumb action after play)
+        IconButton(
+          icon: Icon(
+            FluentIcons.next_24_filled,
+            color: state.canGoNext
+                ? Colors.white
+                : Colors.white.withValues(alpha: tokens.opacitySubtle),
+            size: tokens.iconSizeLarge,
+          ),
+          onPressed: state.canGoNext
+              ? () => context
+                  .read<AudioPlayerBloc>()
+                  .add(const AudioPlayerEvent.skipToNext())
+              : null,
+        ),
+      ],
+    );
+  }
+}
+
+class _PlayerSecondaryControlsMolecule extends StatelessWidget {
+  const _PlayerSecondaryControlsMolecule({required this.state});
+
+  final AudioPlayerState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        TilawaIconActionButton(
+          icon: FluentIcons.speaker_2_24_regular,
+          onTap: () => showSliderDialog(
+            context: context,
+            title: 'Adjust volume',
+            divisions: 10,
+            min: 0.0,
+            max: 1.0,
+            value: state.volume,
+            onChanged: (v) => context
+                .read<AudioPlayerBloc>()
+                .add(AudioPlayerEvent.setVolume(v)),
+          ),
+        ),
+        TilawaIconActionButton(
+          icon: FluentIcons.stop_24_regular,
+          onTap: () => context
+              .read<AudioPlayerBloc>()
+              .add(const AudioPlayerEvent.stopAudio()),
+        ),
+        GestureDetector(
+          onTap: () => showSliderDialog(
+            context: context,
+            title: 'Playback speed',
+            divisions: 8,
+            min: 0.5,
+            max: 2.5,
+            value: state.speed,
+            onChanged: (s) => context
+                .read<AudioPlayerBloc>()
+                .add(AudioPlayerEvent.setSpeed(s)),
+          ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '${state.speed.toStringAsFixed(1)}x',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Atoms
+// ---------------------------------------------------------------------------
+
+class _PlayerArtAtom extends StatelessWidget {
+  const _PlayerArtAtom({this.artUri, required this.maxHeight});
+
+  final String? artUri;
+  final double maxHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    return Container(
+      width: 280,
+      height: maxHeight.clamp(0.0, 280.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.5),
+            blurRadius: 20,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+        child: artUri != null
+            ? CachedNetworkImage(
+                imageUrl: artUri!,
+                fit: BoxFit.cover,
+                errorWidget: (context, url, error) => _buildDefaultArt(context),
+              )
+            : _buildDefaultArt(context),
       ),
     );
   }
 
-  Widget _buildControls(BuildContext context, AudioPlayerState state) {
-    final bool isPlaying = state.isPlaying;
-    final tokens = Theme.of(context).tokens;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // Volume
-            IconButton(
-              icon: Icon(
-                FluentIcons.speaker_2_24_regular,
-                color: Colors.white,
-                size: tokens.iconSizeMedium,
-              ),
-              onPressed: () {
-                showSliderDialog(
-                  context: context,
-                  title: 'Adjust volume',
-                  divisions: 10,
-                  min: 0.0,
-                  max: 1.0,
-                  value: state.volume,
-                  onChanged: (newVolume) {
-                    context.read<AudioPlayerBloc>().add(
-                      AudioPlayerEvent.setVolume(newVolume),
-                    );
-                  },
-                );
-              },
-            ),
-
-            // Previous
-            IconButton(
-              icon: Icon(
-                FluentIcons.previous_24_filled,
-                color: state.canGoPrevious
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: tokens.opacitySubtle),
-                size: tokens.iconSizeLarge,
-              ),
-              onPressed: state.canGoPrevious
-                  ? () {
-                      context.read<AudioPlayerBloc>().add(
-                        const AudioPlayerEvent.skipToPrevious(),
-                      );
-                    }
-                  : null,
-            ),
-
-            // Play/Pause
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: tokens.opacitySubtle),
-              ),
-              child: IconButton(
-                icon: Icon(
-                  isPlaying
-                      ? FluentIcons.pause_48_filled
-                      : FluentIcons.play_48_filled,
-                  color: Colors.white,
-                  size: tokens.iconSizeExtraLarge,
-                ),
-                onPressed: () {
-                  if (isPlaying) {
-                    context.read<AudioPlayerBloc>().add(
-                      const AudioPlayerEvent.pauseAudio(),
-                    );
-                  } else {
-                    context.read<AudioPlayerBloc>().add(
-                      const AudioPlayerEvent.playAudio(),
-                    );
-                  }
-                },
-              ),
-            ),
-
-            // Next
-            IconButton(
-              icon: Icon(
-                FluentIcons.next_24_filled,
-                color: state.canGoNext
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: tokens.opacitySubtle),
-                size: tokens.iconSizeLarge,
-              ),
-              onPressed: state.canGoNext
-                  ? () {
-                      context.read<AudioPlayerBloc>().add(
-                        const AudioPlayerEvent.skipToNext(),
-                      );
-                    }
-                  : null,
-            ),
-
-            // Speed
-            IconButton(
-              icon: Text(
-                '${state.speed.toStringAsFixed(1)}x',
-                style: TextStyle(color: Colors.white, fontSize: 14),
-              ),
-              onPressed: () {
-                showSliderDialog(
-                  context: context,
-                  title: 'Adjust speed',
-                  divisions: 10,
-                  min: 0.5,
-                  max: 1.5,
-                  value: state.speed,
-                  onChanged: (newSpeed) {
-                    context.read<AudioPlayerBloc>().add(
-                      AudioPlayerEvent.setSpeed(newSpeed),
-                    );
-                  },
-                );
-              },
-            ),
-          ],
+  Widget _buildDefaultArt(BuildContext context) {
+    return Container(
+      color: Colors.white.withValues(alpha: 0.1),
+      child: const Center(
+        child: Icon(
+          FluentIcons.music_note_2_24_filled,
+          size: 80,
+          color: Colors.white24,
         ),
+      ),
+    );
+  }
+}
+
+class _PlayerPlayPauseAtom extends StatelessWidget {
+  const _PlayerPlayPauseAtom({required this.isPlaying, required this.onTap});
+
+  final bool isPlaying;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.3),
+            blurRadius: 15,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: IconButton(
+        icon: Icon(
+          isPlaying ? FluentIcons.pause_48_filled : FluentIcons.play_48_filled,
+          color: Colors.black,
+          size: 40,
+        ),
+        onPressed: onTap,
+      ),
+    );
+  }
+}
+
+class _PlayerSheetHandleAtom extends StatelessWidget {
+  const _PlayerSheetHandleAtom();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(2),
       ),
     );
   }
