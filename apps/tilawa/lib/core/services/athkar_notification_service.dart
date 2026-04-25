@@ -569,6 +569,18 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
   }
 
+  @visibleForTesting
+  _ScheduledAthkarNotification? testCreateDynamicNotification({
+    required DateTime date,
+    required DateTime prayerTime,
+    required bool isMorning,
+  }) =>
+      _createDynamicNotification(
+        date: date,
+        prayerTime: prayerTime,
+        isMorning: isMorning,
+      );
+
   _ScheduledAthkarNotification? _createDynamicNotification({
     required DateTime date,
     required DateTime prayerTime,

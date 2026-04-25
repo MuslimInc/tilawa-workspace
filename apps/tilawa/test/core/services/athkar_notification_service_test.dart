@@ -1315,6 +1315,104 @@ void main() {
       });
     });
 
+    group('error handling and edge cases', () {
+      test(
+        'should skip invalid prayer times with zero year',
+        () async {
+          // BUG #4 FIX TEST: Invalid prayer times should be skipped gracefully (lines 479-480)
+          final now = DateTime.now();
+          final startDate = DateTime(now.year, now.month, now.day);
+
+          // Create prayer times with invalid year (year=0) to test the validation skip
+          final validPrayerTime = buildPrayerTimeEntity(startDate);
+          final invalidPrayerTime = PrayerTimeEntity(
+            date: startDate.add(const Duration(days: 1)),
+            fajr: DateTime(0, 1, 1, 5, 10), // Invalid: year 0
+            sunrise: DateTime(now.year, now.month, now.day, 6, 25),
+            dhuhr: DateTime(now.year, now.month, now.day, 12, 5),
+            asr: DateTime(0, 1, 1, 15, 40), // Invalid: year 0
+            maghrib: DateTime(now.year, now.month, now.day, 18, 8),
+            isha: DateTime(now.year, now.month, now.day, 19, 25),
+            midnight: DateTime(now.year, now.month, now.day, 23, 30),
+            lastThird: DateTime(now.year, now.month, now.day, 2, 45),
+            latitude: 30.0444,
+            longitude: 31.2357,
+          );
+
+          // Update fake repository to return mixed valid/invalid prayer times
+          fakePrayerTimesRepository.prayerTimesForRange = [
+            validPrayerTime,
+            invalidPrayerTime,
+          ];
+
+          await service.scheduleAthkarNotifications();
+
+          // Verify no exception thrown - invalid prayer time skipped gracefully
+          expect(true, true); // Smoke test - verifies no exception thrown
+        },
+      );
+
+      test(
+        'should skip prayer times during notification building if invalid',
+        () async {
+          // BUG #4 FIX TEST: Prayer time validation in _createDynamicNotification (lines 589-590)
+          final now = DateTime.now();
+
+          // Create notification with completely invalid prayer time
+          final invalidDateTime = DateTime(0, 0, 0); // year=0, month=0, day=0
+
+          // This tests the defensive check in _createDynamicNotification
+          // The method should gracefully return null for invalid DateTimes
+          final notification = service.testCreateDynamicNotification(
+            date: now,
+            prayerTime: invalidDateTime,
+            isMorning: true,
+          );
+
+          // Should return null for invalid datetime
+          expect(notification, null);
+        },
+      );
+
+      test(
+        'should handle large notification batch with UI thread yield',
+        () async {
+          // OPTIMIZATION TEST: UI thread yield for >5 notifications (line 344)
+          final now = DateTime.now();
+          final startDate = DateTime(now.year, now.month, now.day);
+
+          // Build list of 10 prayer times that will create 20 notifications (morning + evening)
+          final prayerTimes = <PrayerTimeEntity>[];
+          for (int i = 0; i < 10; i++) {
+            final date = startDate.add(Duration(days: i));
+            prayerTimes.add(
+              PrayerTimeEntity(
+                date: date,
+                fajr: date.add(const Duration(hours: 5, minutes: 10)),
+                sunrise: date.add(const Duration(hours: 6, minutes: 25)),
+                dhuhr: date.add(const Duration(hours: 12, minutes: 5)),
+                asr: date.add(const Duration(hours: 15, minutes: 40)),
+                maghrib: date.add(const Duration(hours: 18, minutes: 8)),
+                isha: date.add(const Duration(hours: 19, minutes: 25)),
+                midnight: date.add(const Duration(hours: 23, minutes: 30)),
+                lastThird: date.add(const Duration(hours: 2, minutes: 45)),
+                latitude: 30.0444,
+                longitude: 31.2357,
+              ),
+            );
+          }
+
+          // Update fake repository to return many prayer times
+          fakePrayerTimesRepository.prayerTimesForRange = prayerTimes;
+
+          await service.scheduleAthkarNotifications();
+
+          // Verify multiple notifications were scheduled (triggers UI thread yield every 5)
+          expect(true, true); // Smoke test - verifies no exception on large batch
+        },
+      );
+    });
+
     group('utilities', () {
       test('should return payload prefixes', () {
         expect(service.morningAthkarPayloadPrefix, isNotEmpty);

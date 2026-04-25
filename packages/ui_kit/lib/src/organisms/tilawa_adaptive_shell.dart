@@ -176,7 +176,7 @@ class _BottomNavBar extends StatelessWidget {
               decoration:
                   decoration ??
                   BoxDecoration(
-                    color: theme.colorScheme.surface,
+                    color: Colors.green,
                     borderRadius: BorderRadius.circular(_capsuleRadius),
                     border: Border.all(
                       color: theme.colorScheme.outlineVariant.withValues(
