@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
@@ -38,6 +39,8 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     return BlocProvider(
       create: (context) => getIt<AthkarCubit>()..loadAthkar(widget.categoryId),
       child: BlocBuilder<AthkarCubit, AthkarState>(
@@ -47,23 +50,23 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
               actions: [
                 if (state is AthkarItemsLoaded) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceSmall,
+                      vertical: tokens.spaceExtraSmall,
                     ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      borderRadius: BorderRadius.circular(12),
+                      color: theme.colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(tokens.radiusMedium),
                     ),
                     child: Text(
                       '${_currentIndex + 1} / ${state.items.length}',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: theme.colorScheme.onPrimaryContainer,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: tokens.spaceLarge),
                 ],
               ],
               title: Text(widget.categoryName),

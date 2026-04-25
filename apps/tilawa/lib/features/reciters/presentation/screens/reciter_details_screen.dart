@@ -157,44 +157,46 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final double bottomPlayerOffset = MediaQuery.viewPaddingOf(context).bottom;
     final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
       final AudioPlayerState state = bloc.state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;
     });
 
-    return Scaffold(
-      // Scroll-to-top FAB
-      floatingActionButton: AnimatedSlide(
-        offset: _showScrollToTop ? Offset.zero : const Offset(0, 2),
-        duration: const Duration(milliseconds: 250),
-        child: IgnorePointer(
-          ignoring: !_showScrollToTop,
-          child: AnimatedOpacity(
-            opacity: _showScrollToTop ? 1.0 : 0.0,
+    return Stack(
+      children: [
+        Scaffold(
+          // Scroll-to-top FAB
+          floatingActionButton: AnimatedSlide(
+            offset: _showScrollToTop ? Offset.zero : const Offset(0, 2),
             duration: const Duration(milliseconds: 250),
-            child: FloatingActionButton.small(
-              onPressed: _scrollToTop,
-              backgroundColor: Theme.of(
-                context,
-              ).primaryColor.withValues(alpha: 0.9),
-              child: const Icon(
-                Icons.arrow_upward_rounded,
-                color: Colors.white,
+            child: IgnorePointer(
+              ignoring: !_showScrollToTop,
+              child: AnimatedOpacity(
+                opacity: _showScrollToTop ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: FloatingActionButton.small(
+                  onPressed: _scrollToTop,
+                  backgroundColor: theme.primaryColor.withValues(alpha: 0.9),
+                  child: const Icon(
+                    Icons.arrow_upward_rounded,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           ),
-        ),
-      ),
-      floatingActionButtonLocation: showBottomPlayer
-          ? _CustomFloatingActionButtonLocation(
-              offset:
-                  BottomPlayerWidget.collapsedHeight + bottomPlayerOffset + 16,
-            )
-          : FloatingActionButtonLocation.miniEndFloat,
-      body: Stack(
-        children: [
-          TilawaContentBounds(
+          floatingActionButtonLocation: showBottomPlayer
+              ? _CustomFloatingActionButtonLocation(
+                  offset:
+                      BottomPlayerWidget.collapsedHeight +
+                      bottomPlayerOffset +
+                      tokens.spaceExtraLarge,
+                )
+              : FloatingActionButtonLocation.endFloat,
+          body: TilawaContentBounds(
             kind: TilawaContentKind.media,
             child: BlocConsumer<ReciterDetailsBloc, ReciterDetailsState>(
               listenWhen: (previous, current) =>
@@ -330,11 +332,12 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               },
             ),
           ),
+        ),
+        if (showBottomPlayer)
           Positioned.fill(
             child: BottomPlayerWidget(bottomNavBarHeight: bottomPlayerOffset),
           ),
-        ],
-      ),
+      ],
     );
   }
 
@@ -415,9 +418,12 @@ class _ReciterDetailsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = Theme.of(context).tokens;
     final double bottomPadding =
         bottomPlayerOffset +
-        (showBottomPlayer ? BottomPlayerWidget.collapsedHeight + 24 : 24);
+        (showBottomPlayer
+            ? BottomPlayerWidget.collapsedHeight + tokens.spaceExtraLarge
+            : tokens.spaceExtraLarge);
     final currentAudio = context.select(
       (AudioPlayerBloc bloc) => bloc.state.currentAudio,
     );

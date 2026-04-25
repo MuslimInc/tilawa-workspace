@@ -25,9 +25,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.shadowOffsetMedium,
     required this.borderWidthThin,
     required this.progressHeight,
+    required this.iconSizeExtraSmall,
     required this.iconSizeSmall,
     required this.iconSizeMedium,
     required this.iconSizeLarge,
+    required this.iconSizeExtraLarge,
     required this.durationFast,
     required this.durationMedium,
     required this.durationSlow,
@@ -100,6 +102,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 3.0
   final double progressHeight;
 
+  /// 12.0
+  final double iconSizeExtraSmall;
+
   /// 16.0
   final double iconSizeSmall;
 
@@ -108,6 +113,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
   /// 24.0
   final double iconSizeLarge;
+
+  /// 48.0
+  final double iconSizeExtraLarge;
 
   /// 200ms
   final Duration durationFast;
@@ -161,9 +169,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     shadowOffsetMedium: Offset(0, 4),
     borderWidthThin: 0.5,
     progressHeight: 3.0,
+    iconSizeExtraSmall: 12.0,
     iconSizeSmall: 16.0,
     iconSizeMedium: 20.0,
     iconSizeLarge: 24.0,
+    iconSizeExtraLarge: 48.0,
     durationFast: Duration(milliseconds: 200),
     durationMedium: Duration(milliseconds: 400),
     durationSlow: Duration(milliseconds: 600),
@@ -200,9 +210,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     Offset? shadowOffsetMedium,
     double? borderWidthThin,
     double? progressHeight,
+    double? iconSizeExtraSmall,
     double? iconSizeSmall,
     double? iconSizeMedium,
     double? iconSizeLarge,
+    double? iconSizeExtraLarge,
     Duration? durationFast,
     Duration? durationMedium,
     Duration? durationSlow,
@@ -235,9 +247,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       shadowOffsetMedium: shadowOffsetMedium ?? this.shadowOffsetMedium,
       borderWidthThin: borderWidthThin ?? this.borderWidthThin,
       progressHeight: progressHeight ?? this.progressHeight,
+      iconSizeExtraSmall: iconSizeExtraSmall ?? this.iconSizeExtraSmall,
       iconSizeSmall: iconSizeSmall ?? this.iconSizeSmall,
       iconSizeMedium: iconSizeMedium ?? this.iconSizeMedium,
       iconSizeLarge: iconSizeLarge ?? this.iconSizeLarge,
+      iconSizeExtraLarge: iconSizeExtraLarge ?? this.iconSizeExtraLarge,
       durationFast: durationFast ?? this.durationFast,
       durationMedium: durationMedium ?? this.durationMedium,
       durationSlow: durationSlow ?? this.durationSlow,
@@ -292,9 +306,19 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       )!,
       borderWidthThin: lerpDouble(borderWidthThin, other.borderWidthThin, t)!,
       progressHeight: lerpDouble(progressHeight, other.progressHeight, t)!,
+      iconSizeExtraSmall: lerpDouble(
+        iconSizeExtraSmall,
+        other.iconSizeExtraSmall,
+        t,
+      )!,
       iconSizeSmall: lerpDouble(iconSizeSmall, other.iconSizeSmall, t)!,
       iconSizeMedium: lerpDouble(iconSizeMedium, other.iconSizeMedium, t)!,
       iconSizeLarge: lerpDouble(iconSizeLarge, other.iconSizeLarge, t)!,
+      iconSizeExtraLarge: lerpDouble(
+        iconSizeExtraLarge,
+        other.iconSizeExtraLarge,
+        t,
+      )!,
       durationFast: t < 0.5 ? durationFast : other.durationFast,
       durationMedium: t < 0.5 ? durationMedium : other.durationMedium,
       durationSlow: t < 0.5 ? durationSlow : other.durationSlow,
@@ -345,4 +369,14 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 /// Helper extension to access tokens easily
 extension TilawaDesignTokensX on ThemeData {
   TilawaDesignTokens get tokens => extension<TilawaDesignTokens>()!;
+}
+
+extension TilawaIconSizeX on BuildContext {
+  ThemeData get theme => Theme.of(this);
+  TilawaDesignTokens get tokens => theme.tokens;
+  double get iconSizeExtraSmall => tokens.iconSizeExtraSmall;
+  double get iconSizeSmall => tokens.iconSizeSmall;
+  double get iconSizeMedium => tokens.iconSizeMedium;
+  double get iconSizeLarge => tokens.iconSizeLarge;
+  double get iconSizeExtraLarge => tokens.iconSizeExtraLarge;
 }

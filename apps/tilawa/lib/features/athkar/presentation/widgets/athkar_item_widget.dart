@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/athkar_item.dart';
 import 'item_count_widget.dart';
@@ -67,10 +68,10 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
           },
           child: Padding(
             padding: EdgeInsets.only(
-              left: 16,
-              top: 16,
-              right: 16,
-              bottom: 16 + bottomInset,
+              left: theme.tokens.spaceExtraLarge,
+              top: theme.tokens.spaceExtraLarge,
+              right: theme.tokens.spaceExtraLarge,
+              bottom: theme.tokens.spaceExtraLarge + bottomInset,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -79,7 +80,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                   child: Scrollbar(
                     controller: _scrollController,
                     thumbVisibility: true,
-                    radius: const Radius.circular(8),
+                    radius: Radius.circular(theme.tokens.radiusSmall),
                     child: SingleChildScrollView(
                       controller: _scrollController,
                       physics: const BouncingScrollPhysics(),
@@ -88,18 +89,14 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                         item.textAr,
                         textDirection: TextDirection.rtl,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          height: 2.0,
-                          color: theme.colorScheme.onSurface.withValues(
-                            alpha: 0.8,
-                          ),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 32),
+                SizedBox(height: theme.tokens.spaceExtraLarge),
                 ItemCountWidget(
                   item: item,
                   currentCount: currentCount,

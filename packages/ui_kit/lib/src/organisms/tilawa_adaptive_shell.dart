@@ -82,16 +82,23 @@ class TilawaAdaptiveShell extends StatelessWidget {
     final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
 
     if (windowSize == TilawaWindowSize.compact) {
-      return Scaffold(
-        extendBody: true,
-        body: Stack(children: [child, bottomPlayer]),
-        bottomNavigationBar: _BottomNavBar(
-          destinations: destinations,
-          selectedIndex: displayIndex,
-          onDestinationSelected: onDestinationSelected,
-          padding: bottomBarPadding,
-          decoration: bottomBarDecoration,
-        ),
+      return Stack(
+        children: [
+          Scaffold(extendBody: true, body: child),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _BottomNavBar(
+              destinations: destinations,
+              selectedIndex: displayIndex,
+              onDestinationSelected: onDestinationSelected,
+              padding: bottomBarPadding,
+              decoration: bottomBarDecoration,
+            ),
+          ),
+          Positioned.fill(child: bottomPlayer),
+        ],
       );
     }
 
@@ -114,7 +121,14 @@ class TilawaAdaptiveShell extends StatelessWidget {
               extended: windowSize == TilawaWindowSize.expanded,
             ),
           ),
-          Expanded(child: Stack(children: [child, bottomPlayer])),
+          Expanded(
+            child: Stack(
+              children: [
+                child,
+                Positioned.fill(child: bottomPlayer),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -169,19 +183,18 @@ class _BottomNavBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(_capsuleRadius),
           child: BackdropFilter(
             filter: ImageFilter.blur(
-              sigmaX: tokens.blurGlass,
-              sigmaY: tokens.blurGlass,
+              sigmaX: tokens.blurGlass * 1.5,
+              sigmaY: tokens.blurGlass * 1.5,
             ),
             child: DecoratedBox(
               decoration:
                   decoration ??
                   BoxDecoration(
-                    color: Colors.green,
+                    color: theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(_capsuleRadius),
                     border: Border.all(
-                      color: theme.colorScheme.outlineVariant.withValues(
-                        alpha: 0.15,
-                      ),
+                      color: theme.colorScheme.onPrimary,
+                      width: 1.2,
                     ),
                   ),
               child: Row(
@@ -192,6 +205,7 @@ class _BottomNavBar extends StatelessWidget {
                       child: _NavButton(
                         destination: destinations[i],
                         isSelected: selectedIndex == i,
+                        isCenterItem: i == destinations.length ~/ 2,
                         onTap: () => onDestinationSelected(i),
                         borderRadius: innerRadius,
                       ),
@@ -224,32 +238,63 @@ class _SideNavRail extends StatelessWidget {
     final theme = Theme.of(context);
     final inactiveColor = theme.colorScheme.onSurfaceVariant;
     final activeColor = theme.colorScheme.onPrimaryContainer;
+    final tokens = theme.tokens;
 
-    return NavigationRail(
-      extended: extended,
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onDestinationSelected,
-      backgroundColor: theme.colorScheme.surface,
-      indicatorColor: theme.colorScheme.primaryContainer,
-      labelType: extended
-          ? NavigationRailLabelType.none
-          : NavigationRailLabelType.all,
-      destinations: [
-        for (final d in destinations)
-          NavigationRailDestination(
-            icon: d.iconBuilder != null
-                ? d.iconBuilder!(
-                    context,
-                    isSelected: false,
-                    color: inactiveColor,
-                  )
-                : Icon(d.icon),
-            selectedIcon: d.iconBuilder != null
-                ? d.iconBuilder!(context, isSelected: true, color: activeColor)
-                : Icon(d.activeIcon ?? d.icon),
-            label: Text(d.label),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: tokens.blurGlass * 1.2,
+          sigmaY: tokens.blurGlass * 1.2,
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
+              width: 1,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.shadow.withValues(alpha: 0.06),
+                blurRadius: 12,
+                offset: const Offset(2, 0),
+              ),
+            ],
           ),
-      ],
+          child: NavigationRail(
+            extended: extended,
+            selectedIndex: selectedIndex,
+            onDestinationSelected: onDestinationSelected,
+            backgroundColor: Colors.transparent,
+            indicatorColor: theme.colorScheme.primaryContainer,
+            labelType: extended
+                ? NavigationRailLabelType.none
+                : NavigationRailLabelType.all,
+            destinations: [
+              for (final d in destinations)
+                NavigationRailDestination(
+                  icon: d.iconBuilder != null
+                      ? d.iconBuilder!(
+                          context,
+                          isSelected: false,
+                          color: inactiveColor,
+                        )
+                      : Icon(d.icon),
+                  selectedIcon: d.iconBuilder != null
+                      ? d.iconBuilder!(
+                          context,
+                          isSelected: true,
+                          color: activeColor,
+                        )
+                      : Icon(d.activeIcon ?? d.icon),
+                  label: Text(d.label),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -258,12 +303,14 @@ class _NavButton extends StatelessWidget {
   const _NavButton({
     required this.destination,
     required this.isSelected,
+    required this.isCenterItem,
     required this.onTap,
     required this.borderRadius,
   });
 
   final TilawaNavDestination destination;
   final bool isSelected;
+  final bool isCenterItem;
   final VoidCallback onTap;
   final double borderRadius;
 
@@ -271,21 +318,35 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final activeColor = theme.colorScheme.primary;
-    final inactiveColor = theme.colorScheme.onSurfaceVariant;
-    final tint = isSelected ? activeColor : inactiveColor;
+    final onPrimaryColor = theme.colorScheme.onPrimary;
+
+    // High contrast: selected items inverted (onPrimary bg with primary text)
+    final backgroundColor = isSelected ? onPrimaryColor : Colors.transparent;
+
     final baseLabelStyle = theme.textTheme.labelSmall ?? const TextStyle();
 
     final Widget iconWidget = destination.iconBuilder != null
-        ? destination.iconBuilder!(context, isSelected: isSelected, color: tint)
+        ? destination.iconBuilder!(
+            context,
+            isSelected: isSelected,
+            color: onPrimaryColor,
+          )
         : Icon(
             isSelected
                 ? (destination.activeIcon ?? destination.icon)
                 : destination.icon,
             key: ValueKey('${destination.icon.hashCode}_$isSelected'),
             size: 22,
-            color: tint,
+            color: onPrimaryColor,
           );
+
+    final double iconScale = isCenterItem
+        ? (isSelected ? 1.1 : 1.0)
+        : (isSelected ? 1.0 : 0.95);
+
+    final double backgroundAlpha = isSelected
+        ? (isCenterItem ? 0.22 : 0.18)
+        : 0.0;
 
     return Material(
       color: Colors.transparent,
@@ -301,9 +362,7 @@ class _NavButton extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: 64),
           padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
           decoration: BoxDecoration(
-            color: isSelected
-                ? activeColor.withValues(alpha: 0.12)
-                : Colors.transparent,
+            color: backgroundColor.withValues(alpha: backgroundAlpha),
             borderRadius: BorderRadius.circular(borderRadius),
           ),
           child: Column(
@@ -313,7 +372,7 @@ class _NavButton extends StatelessWidget {
             children: [
               AnimatedScale(
                 duration: tokens.durationFast,
-                scale: isSelected ? 1 : 0.95,
+                scale: iconScale,
                 child: AnimatedSwitcher(
                   duration: tokens.durationFast,
                   child: iconWidget,
@@ -324,7 +383,7 @@ class _NavButton extends StatelessWidget {
                 style: baseLabelStyle.copyWith(
                   fontSize: 10.5,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: tint,
+                  color: onPrimaryColor,
                 ),
                 child: Text(
                   destination.label,

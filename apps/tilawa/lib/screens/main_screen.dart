@@ -25,7 +25,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  static const double _bottomNavBarBaseHeight = 80;
+  static const double _bottomNavBarBaseHeight = 88;
   static const Duration _deferredPrayerTimesLoadDelay = Duration(
     milliseconds: 600,
   );
@@ -68,10 +68,20 @@ class _MainScreenState extends State<MainScreen> {
   ) {
     return [
       _NavDestination(
-        index: 3,
-        icon: FluentIcons.settings_24_regular,
-        activeIcon: FluentIcons.settings_24_filled,
-        label: context.l10n.settings,
+        index: 0,
+        icon: FluentIcons.person_24_regular,
+        activeIcon: FluentIcons.person_24_filled,
+        label: context.l10n.reciters,
+      ),
+      _NavDestination(
+        index: 1,
+        icon: FluentIcons.clock_24_regular,
+        activeIcon: FluentIcons.clock_24_filled,
+        label: context.l10n.prayerTimes,
+      ),
+      _NavDestination(
+        icon: Icons.menu_book_rounded,
+        label: _quranNavLabel(context),
       ),
       _NavDestination(
         index: 2,
@@ -81,20 +91,10 @@ class _MainScreenState extends State<MainScreen> {
         label: context.l10n.athkar,
       ),
       _NavDestination(
-        icon: Icons.menu_book_rounded,
-        label: _quranNavLabel(context),
-      ),
-      _NavDestination(
-        index: 1,
-        icon: FluentIcons.clock_24_regular,
-        activeIcon: FluentIcons.clock_24_filled,
-        label: context.l10n.prayerTimes,
-      ),
-      _NavDestination(
-        index: 0,
-        icon: FluentIcons.person_24_regular,
-        activeIcon: FluentIcons.person_24_filled,
-        label: context.l10n.reciters,
+        index: 3,
+        icon: FluentIcons.settings_24_regular,
+        activeIcon: FluentIcons.settings_24_filled,
+        label: context.l10n.settings,
       ),
     ];
   }
@@ -243,11 +243,9 @@ class _MainShellContent extends StatelessWidget {
               builtTabIndexes: state.builtTabIndexes,
               contentBottomPadding: contentBottomPadding,
             )
-          : Positioned.fill(
-              child: TilawaShellPadding(
-                padding: contentBottomPadding,
-                child: const _MainShellPlaceholder(),
-              ),
+          : TilawaShellPadding(
+              padding: contentBottomPadding,
+              child: const _MainShellPlaceholder(),
             ),
     );
   }

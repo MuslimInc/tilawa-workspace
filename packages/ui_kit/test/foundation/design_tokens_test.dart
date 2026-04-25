@@ -26,9 +26,11 @@ void main() {
       shadowOffsetMedium: Offset(0, 4),
       borderWidthThin: 0.5,
       progressHeight: 3.0,
+      iconSizeExtraSmall: 12.0,
       iconSizeSmall: 16.0,
       iconSizeMedium: 20.0,
       iconSizeLarge: 24.0,
+      iconSizeExtraLarge: 48.0,
       durationFast: Duration(milliseconds: 200),
       durationMedium: Duration(milliseconds: 400),
       durationSlow: Duration(milliseconds: 600),
@@ -63,9 +65,11 @@ void main() {
         expect(light.shadowOffsetMedium, const Offset(0, 4));
         expect(light.borderWidthThin, 0.5);
         expect(light.progressHeight, 3.0);
+        expect(light.iconSizeExtraSmall, 12.0);
         expect(light.iconSizeSmall, 16.0);
         expect(light.iconSizeMedium, 20.0);
         expect(light.iconSizeLarge, 24.0);
+        expect(light.iconSizeExtraLarge, 48.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
         expect(light.durationMedium, const Duration(milliseconds: 400));
         expect(light.durationSlow, const Duration(milliseconds: 600));
@@ -200,6 +204,8 @@ void main() {
           cardCompactWidthThreshold: 180.0,
           cardCompactHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
+          iconSizeExtraSmall: 12,
+          iconSizeExtraLarge: 48,
         );
         const second = TilawaDesignTokens(
           spaceTiny: 4.0,
@@ -235,6 +241,8 @@ void main() {
           cardCompactWidthThreshold: 200.0,
           cardCompactHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
+          iconSizeExtraSmall: 12,
+          iconSizeExtraLarge: 48,
         );
 
         final lerped = first.lerp(second, 0);
@@ -279,6 +287,8 @@ void main() {
           cardCompactWidthThreshold: 200.0,
           cardCompactHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
+          iconSizeExtraSmall: 12,
+          iconSizeExtraLarge: 48,
         );
 
         final lerped = first.lerp(second, 1);
@@ -321,6 +331,8 @@ void main() {
           cardCompactWidthThreshold: 180.0,
           cardCompactHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
+          iconSizeExtraSmall: 12,
+          iconSizeExtraLarge: 48,
         );
         const second = TilawaDesignTokens(
           spaceTiny: 4.0,
@@ -356,6 +368,8 @@ void main() {
           cardCompactWidthThreshold: 200.0,
           cardCompactHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
+          iconSizeExtraSmall: 18,
+          iconSizeExtraLarge: 72,
         );
 
         final lerped = first.lerp(second, 0.5);
@@ -363,6 +377,8 @@ void main() {
         expect(lerped.radiusSmall, closeTo(12.0, 0.01));
         expect(lerped.opacitySubtle, closeTo(0.15, 0.01));
         expect(lerped.contentMaxWidthReader, closeTo(810, 1.0));
+        expect(lerped.iconSizeExtraSmall, closeTo(18.0, 0.01));
+        expect(lerped.iconSizeExtraLarge, closeTo(72.0, 0.01));
       });
 
       test('interpolates Offset values', () {
@@ -401,6 +417,8 @@ void main() {
           cardCompactWidthThreshold: 180.0,
           cardCompactHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
+          iconSizeExtraSmall: 12,
+          iconSizeExtraLarge: 48,
         );
 
         final lerped = first.lerp(second, 0.5);
@@ -431,9 +449,11 @@ void main() {
             shadowOffsetMedium: Offset(0, 4),
             borderWidthThin: 0.5,
             progressHeight: 3.0,
+            iconSizeExtraSmall: 12.0,
             iconSizeSmall: 16.0,
             iconSizeMedium: 20.0,
             iconSizeLarge: 24.0,
+            iconSizeExtraLarge: 48.0,
             durationFast: Duration(milliseconds: 200),
             durationMedium: Duration(milliseconds: 400),
             durationSlow: Duration(milliseconds: 600),
@@ -466,9 +486,11 @@ void main() {
             shadowOffsetMedium: Offset(0, 8),
             borderWidthThin: 1.0,
             progressHeight: 6.0,
+            iconSizeExtraSmall: 24.0,
             iconSizeSmall: 24.0,
             iconSizeMedium: 32.0,
             iconSizeLarge: 40.0,
+            iconSizeExtraLarge: 96.0,
             durationFast: Duration(milliseconds: 300),
             durationMedium: Duration(milliseconds: 600),
             durationSlow: Duration(milliseconds: 900),

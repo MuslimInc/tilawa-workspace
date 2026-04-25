@@ -40,11 +40,17 @@ class AthkarCategoriesScreen extends StatelessWidget {
                 ),
               );
             } else if (state is AthkarCategoriesLoaded) {
+              final tokens = Theme.of(context).tokens;
               return TilawaContentGrid(
-                padding: EdgeInsets.all(20).copyWith(bottom: 120),
+                padding: EdgeInsets.fromLTRB(
+                  tokens.spaceExtraLarge,
+                  tokens.spaceExtraLarge,
+                  tokens.spaceExtraLarge,
+                  TilawaShellPadding.of(context) + tokens.spaceExtraLarge,
+                ),
                 targetItemExtent: 180,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+                crossAxisSpacing: tokens.spaceLarge,
+                mainAxisSpacing: tokens.spaceLarge,
                 childAspectRatio: 0.9,
                 shrinkWrap: true,
                 itemCount: state.categories.length,

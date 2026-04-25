@@ -309,8 +309,14 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     AudioPlayerState state,
     AudioEntity audio,
   ) {
+    final tokens = Theme.of(context).tokens;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+      padding: EdgeInsets.fromLTRB(
+        tokens.spaceLarge,
+        tokens.spaceSmall,
+        tokens.spaceLarge,
+        tokens.spaceLarge,
+      ),
       child: BottomPlayerUi(
         audio: audio,
         progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
@@ -420,6 +426,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                   kind: TilawaContentKind.media,
                   child: LayoutBuilder(
                     builder: (context, constraints) {
+                      final tokens = Theme.of(context).tokens;
                       return SingleChildScrollView(
                         physics: const NeverScrollableScrollPhysics(),
                         child: ConstrainedBox(
@@ -441,19 +448,26 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                                     280,
                                   ),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(24),
+                                    borderRadius: BorderRadius.circular(
+                                      tokens.radiusExtraLarge,
+                                    ),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withValues(
-                                          alpha: 0.3,
+                                          alpha: tokens.opacityEmphasis,
                                         ),
-                                        blurRadius: 30,
-                                        offset: const Offset(0, 15),
+                                        blurRadius: tokens.blurShadow * 2,
+                                        offset: Offset(
+                                          0,
+                                          tokens.shadowOffsetMedium.dy * 3,
+                                        ),
                                       ),
                                     ],
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(24),
+                                    borderRadius: BorderRadius.circular(
+                                      tokens.radiusExtraLarge,
+                                    ),
                                     child: audio.artUri != null
                                         ? CachedNetworkImage(
                                             imageUrl: audio.artUri!,
@@ -485,7 +499,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    SizedBox(height: 8),
+                                    SizedBox(height: tokens.spaceSmall),
                                     Text(
                                       audio.artist ?? 'Unknown',
                                       style: context
@@ -503,17 +517,13 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                                 ),
                               ),
 
-                              SizedBox(height: 16),
-
+                              SizedBox(height: tokens.spaceLarge),
                               // Seek bar
                               const _ExpandedProgressBar(),
-
-                              SizedBox(height: 16),
-
+                              SizedBox(height: tokens.spaceLarge),
                               // Controls
                               _buildControls(context, state),
-
-                              SizedBox(height: 24),
+                              SizedBox(height: tokens.spaceExtraLarge),
                             ],
                           ),
                         ),
@@ -598,9 +608,10 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
   Widget _buildControls(BuildContext context, AudioPlayerState state) {
     final bool isPlaying = state.isPlaying;
+    final tokens = Theme.of(context).tokens;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: Row(
@@ -611,7 +622,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               icon: Icon(
                 FluentIcons.speaker_2_24_regular,
                 color: Colors.white,
-                size: 24,
+                size: tokens.iconSizeMedium,
               ),
               onPressed: () {
                 showSliderDialog(
@@ -636,8 +647,8 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 FluentIcons.previous_24_filled,
                 color: state.canGoPrevious
                     ? Colors.white
-                    : Colors.white.withValues(alpha: 0.3),
-                size: 32,
+                    : Colors.white.withValues(alpha: tokens.opacitySubtle),
+                size: tokens.iconSizeLarge,
               ),
               onPressed: state.canGoPrevious
                   ? () {
@@ -654,22 +665,15 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               height: 72,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                color: Colors.white.withValues(alpha: tokens.opacitySubtle),
               ),
               child: IconButton(
                 icon: Icon(
                   isPlaying
-                      ? FluentIcons.pause_24_filled
-                      : FluentIcons.play_24_filled,
-                  color: Colors.black,
-                  size: 32,
+                      ? FluentIcons.pause_48_filled
+                      : FluentIcons.play_48_filled,
+                  color: Colors.white,
+                  size: tokens.iconSizeExtraLarge,
                 ),
                 onPressed: () {
                   if (isPlaying) {
@@ -691,8 +695,8 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                 FluentIcons.next_24_filled,
                 color: state.canGoNext
                     ? Colors.white
-                    : Colors.white.withValues(alpha: 0.3),
-                size: 32,
+                    : Colors.white.withValues(alpha: tokens.opacitySubtle),
+                size: tokens.iconSizeLarge,
               ),
               onPressed: state.canGoNext
                   ? () {
@@ -737,7 +741,9 @@ class _MiniPlayerProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color primaryColor = Theme.of(context).primaryColor;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final primaryColor = theme.primaryColor;
     return BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
       selector: (state) {
         final PositionData pos =
@@ -754,9 +760,9 @@ class _MiniPlayerProgressBar extends StatelessWidget {
       builder: (context, progress) {
         return LinearProgressIndicator(
           value: progress,
-          backgroundColor: primaryColor.withValues(alpha: 0.1),
+          backgroundColor: primaryColor.withValues(alpha: tokens.opacitySubtle),
           valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
-          minHeight: 3,
+          minHeight: tokens.progressHeight,
         );
       },
     );
@@ -777,8 +783,9 @@ class _ExpandedProgressBar extends StatelessWidget {
             duration: Duration.zero,
           ),
       builder: (context, positionData) {
+        final tokens = Theme.of(context).tokens;
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Column(
             children: [
               SeekBar(

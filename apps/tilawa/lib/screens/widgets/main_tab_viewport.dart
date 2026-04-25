@@ -52,9 +52,10 @@ class _MainTabViewportState extends State<MainTabViewport> {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fill(
-      child: TilawaShellPadding(
-        padding: widget.contentBottomPadding,
+    return TilawaShellPadding(
+      padding: widget.contentBottomPadding,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: widget.contentBottomPadding),
         child: Stack(
           children: List<Widget>.generate(4, (int index) {
             if (!widget.builtTabIndexes.contains(index)) {

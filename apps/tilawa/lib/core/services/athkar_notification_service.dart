@@ -326,7 +326,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
       // BUG #3 FIX: Prevent race condition in cancel/schedule sequence
       await Future<void>.delayed(Duration(milliseconds: 100));
 
-      final List<_ScheduledAthkarNotification>? dynamicNotifications =
+      final List<ScheduledAthkarNotification>? dynamicNotifications =
           await _buildDynamicAthkarNotifications();
 
       if (dynamicNotifications == null || dynamicNotifications.isEmpty) {
@@ -441,10 +441,10 @@ class AthkarNotificationService implements IAthkarNotificationService {
     return scheduledDate;
   }
 
-  Future<List<_ScheduledAthkarNotification>?>
+  Future<List<ScheduledAthkarNotification>?>
   _buildDynamicAthkarNotifications() async {
     try {
-      final _AthkarScheduleContext? context = await _resolveScheduleContext();
+      final AthkarScheduleContext? context = await _resolveScheduleContext();
       if (context == null) {
         return null;
       }
@@ -470,8 +470,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
 
       prayerTimes.sort((a, b) => a.date.compareTo(b.date));
 
-      final List<_ScheduledAthkarNotification> notifications =
-          <_ScheduledAthkarNotification>[];
+      final List<ScheduledAthkarNotification> notifications =
+          <ScheduledAthkarNotification>[];
 
       for (final PrayerTimeEntity prayerTime in prayerTimes) {
         // BUG #4 FIX: Validate prayer time values are reasonable (defensive check)
@@ -482,13 +482,13 @@ class AthkarNotificationService implements IAthkarNotificationService {
           continue;
         }
 
-        final _ScheduledAthkarNotification? morningNotification =
+        final ScheduledAthkarNotification? morningNotification =
             _createDynamicNotification(
               date: prayerTime.date,
               prayerTime: prayerTime.fajr.add(_athkarNotificationDelay),
               isMorning: true,
             );
-        final _ScheduledAthkarNotification? eveningNotification =
+        final ScheduledAthkarNotification? eveningNotification =
             _createDynamicNotification(
               date: prayerTime.date,
               prayerTime: prayerTime.asr.add(_athkarNotificationDelay),
@@ -514,7 +514,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
   }
 
-  Future<_AthkarScheduleContext?> _resolveScheduleContext() async {
+  Future<AthkarScheduleContext?> _resolveScheduleContext() async {
     try {
       var settings = await _resolvedPrayerTimesRepository.loadSettings();
       double? latitude = settings.savedLatitude;
@@ -554,7 +554,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
         }
       }
 
-      return _AthkarScheduleContext(
+      return AthkarScheduleContext(
         latitude: latitude,
         longitude: longitude,
         settings: settings,
@@ -570,18 +570,17 @@ class AthkarNotificationService implements IAthkarNotificationService {
   }
 
   @visibleForTesting
-  _ScheduledAthkarNotification? testCreateDynamicNotification({
+  ScheduledAthkarNotification? testCreateDynamicNotification({
     required DateTime date,
     required DateTime prayerTime,
     required bool isMorning,
-  }) =>
-      _createDynamicNotification(
-        date: date,
-        prayerTime: prayerTime,
-        isMorning: isMorning,
-      );
+  }) => _createDynamicNotification(
+    date: date,
+    prayerTime: prayerTime,
+    isMorning: isMorning,
+  );
 
-  _ScheduledAthkarNotification? _createDynamicNotification({
+  ScheduledAthkarNotification? _createDynamicNotification({
     required DateTime date,
     required DateTime prayerTime,
     required bool isMorning,
@@ -609,7 +608,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
     final String uniquePayloadId =
         '${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}';
 
-    return _ScheduledAthkarNotification(
+    return ScheduledAthkarNotification(
       id: _buildDynamicNotificationId(date: date, isMorning: isMorning),
       title: isMorning ? _morningAthkarTitle : _eveningAthkarTitle,
       body: isMorning ? _morningAthkarBody : _eveningAthkarBody,
@@ -620,7 +619,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
   }
 
   Future<void> _scheduleAthkarNotification(
-    _ScheduledAthkarNotification notification,
+    ScheduledAthkarNotification notification,
   ) async {
     try {
       // BUG #5 FIX: Check Android 12+ exact alarm permission before scheduling
@@ -1005,8 +1004,8 @@ class AthkarNotificationService implements IAthkarNotificationService {
   static const String _eveningAthkarBody = 'حان وقت أذكار المساء 🌙';
 }
 
-class _AthkarScheduleContext {
-  const _AthkarScheduleContext({
+class AthkarScheduleContext {
+  const AthkarScheduleContext({
     required this.latitude,
     required this.longitude,
     required this.settings,
@@ -1017,8 +1016,8 @@ class _AthkarScheduleContext {
   final PrayerSettingsEntity settings;
 }
 
-class _ScheduledAthkarNotification {
-  const _ScheduledAthkarNotification({
+class ScheduledAthkarNotification {
+  const ScheduledAthkarNotification({
     required this.id,
     required this.title,
     required this.body,

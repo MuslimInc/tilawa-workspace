@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../cubit/favorites_cubit.dart';
@@ -14,14 +15,15 @@ class ReciterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return RepaintBoundary(
       child: Material(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
           onTap: () {
             ReciterDetailsRoute(
               reciterId: reciter.id.toString(),
@@ -30,20 +32,22 @@ class ReciterCard extends StatelessWidget {
           },
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(tokens.radiusLarge),
               border: Border.all(
                 color: theme.colorScheme.outlineVariant.withValues(alpha: 0.22),
               ),
-              // Remove expensive boxShadow to reduce raster jank
             ),
             child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(10, 10, 8, 10),
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceMedium,
+                vertical: tokens.spaceSmall,
+              ),
               child: Row(
                 children: [
                   _ReciterAvatar(reciter: reciter),
-                  const SizedBox(width: 10),
+                  SizedBox(width: tokens.spaceMedium),
                   Expanded(child: _ReciterInfo(reciter: reciter)),
-                  const SizedBox(width: 6),
+                  SizedBox(width: tokens.spaceSmall),
                   _FavoriteButton(reciter: reciter),
                 ],
               ),
@@ -62,17 +66,16 @@ class _ReciterAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
-    // Pre-calculate colors to avoid multiple withValues calls
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final primaryColor = theme.primaryColor;
 
     return RepaintBoundary(
       child: Container(
-        width: 48,
-        height: 48,
+        width: tokens.iconSizeExtraLarge,
+        height: tokens.iconSizeExtraLarge,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(tokens.radiusMedium),
           color: primaryColor.withValues(alpha: 0.85),
         ),
         child: Center(
@@ -99,7 +102,8 @@ class _ReciterInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final String firstMoshaf = reciter.moshaf.isNotEmpty
         ? reciter.moshaf.first.name
         : '';
@@ -121,22 +125,22 @@ class _ReciterInfo extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: tokens.spaceSmall),
             _RecitationsBadge(count: reciter.moshaf.length),
           ],
         ),
         if (firstMoshaf.isNotEmpty) ...[
-          const SizedBox(height: 6),
+          SizedBox(height: tokens.spaceExtraSmall),
           Row(
             children: [
               Icon(
                 Icons.headphones_rounded,
-                size: 14,
+                size: tokens.iconSizeExtraSmall + 2,
                 color: theme.colorScheme.onSurfaceVariant.withValues(
                   alpha: 0.75,
                 ),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: tokens.spaceExtraSmall),
               Expanded(
                 child: Text(
                   firstMoshaf,
@@ -151,7 +155,7 @@ class _ReciterInfo extends StatelessWidget {
             ],
           ),
         ] else ...[
-          const SizedBox(height: 6),
+          SizedBox(height: tokens.spaceExtraSmall),
           Text(
             context.l10n.recitationsAvailable(reciter.moshaf.length),
             style: theme.textTheme.bodySmall?.copyWith(
@@ -174,10 +178,14 @@ class _RecitationsBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceSmall,
+        vertical: tokens.spaceExtraSmall,
+      ),
       decoration: BoxDecoration(
         color: theme.primaryColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(999),
@@ -187,10 +195,10 @@ class _RecitationsBadge extends StatelessWidget {
         children: [
           Icon(
             Icons.library_music_rounded,
-            size: 12,
+            size: tokens.iconSizeExtraSmall,
             color: theme.primaryColor,
           ),
-          const SizedBox(width: 4),
+          SizedBox(width: tokens.spaceExtraSmall),
           Text(
             '$count',
             style: theme.textTheme.labelSmall?.copyWith(
@@ -211,25 +219,26 @@ class _FavoriteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final bool isFavorite = context.select<FavoritesCubit, bool>((cubit) {
       final FavoritesState state = cubit.state;
       return state is FavoritesLoaded && state.favoriteIds.contains(reciter.id);
     });
 
     return InkResponse(
-      radius: 22,
+      radius: tokens.radiusExtraLarge,
       onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
       child: Container(
-        width: 38,
-        height: 38,
+        width: tokens.iconSizeExtraLarge - tokens.spaceSmall,
+        height: tokens.iconSizeExtraLarge - tokens.spaceSmall,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: theme.primaryColor.withValues(alpha: 0.06),
         ),
         child: Icon(
           isFavorite ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-          size: 20,
+          size: tokens.iconSizeMedium,
           color: isFavorite
               ? Colors.redAccent
               : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
