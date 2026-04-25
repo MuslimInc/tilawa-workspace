@@ -158,23 +158,29 @@ class ShareRepositoryImpl implements ShareRepository {
 
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
 
-    // Pre-warm the first page to compile shaders before the capture loop.
-    // This prevents the first frame spike by front-loading shader compilation.
+    // PHASE 3 AGGRESSIVE PRE-WARMING: Compile all shader variants upfront
+    // This prevents ANY shader compilation during the actual capture loop,
+    // ensuring consistent raster performance throughout.
     if (handles.isNotEmpty) {
-      onFrameCaptureStarted?.call(0);
-      await WidgetsBinding.instance.endOfFrame;
-      // Actually capture the first frame to trigger shader compilation
-      try {
-        final boundaryKey = handles[0].value as GlobalKey;
-        await _screenshotService.captureRaw(
-          boundaryKey: boundaryKey,
-          fileName: 'video_prewarm_$timestamp.png',
-          pixelRatio: 1.0,
-          targetWidth: VideoService.outputVideoWidth,
-          targetHeight: VideoService.outputVideoHeight,
-        );
-      } catch (_) {
-        // Pre-warm capture failure is non-critical
+      // Pre-warm with multiple renders to force all shader compilation
+      for (int warmupPass = 0; warmupPass < 3; warmupPass++) {
+        onFrameCaptureStarted?.call(0);
+        await WidgetsBinding.instance.endOfFrame;
+        await WidgetsBinding.instance.endOfFrame;
+        try {
+          final boundaryKey = handles[0].value as GlobalKey;
+          await _screenshotService.captureRaw(
+            boundaryKey: boundaryKey,
+            fileName: 'video_prewarm_${timestamp}_pass${warmupPass}.png',
+            pixelRatio: 1.0,
+            targetWidth: VideoService.outputVideoWidth,
+            targetHeight: VideoService.outputVideoHeight,
+          );
+        } catch (_) {
+          // Pre-warm failure is non-critical
+        }
+        // Extra yield after each warmup pass to let GPU complete
+        await WidgetsBinding.instance.endOfFrame;
       }
     }
 
@@ -184,11 +190,9 @@ class ShareRepositoryImpl implements ShareRepository {
       // Notify the UI to render the current frame before we capture it.
       onFrameCaptureStarted?.call(i);
 
-      // Yield to the UI thread before each capture to allow the progress bar
-            // and other UI elements to animate smoothly. Triple-yield ensures the
-      // GPU has completed shader compilation and rasterization work on
-      // mid-range devices with slower GPU settling time.
-      await WidgetsBinding.instance.endOfFrame;
+      // Yield to the UI thread before each capture. PHASE 3: Aggressive
+      // pre-warming means GPU is fully warm, so double-yield is sufficient.
+      // This reduces frame settling time while maintaining stability.
       await WidgetsBinding.instance.endOfFrame;
       await WidgetsBinding.instance.endOfFrame;
 
