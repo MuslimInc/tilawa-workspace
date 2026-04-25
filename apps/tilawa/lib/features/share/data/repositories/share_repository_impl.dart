@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tilawa/features/share/domain/entities/widget_capture_handle.dart';
+import 'package:tilawa_core/logger.dart';
 
 import '../../../../features/downloads/domain/entities/download_item.dart';
 import '../../../../features/downloads/domain/repositories/download_query_repository.dart';
@@ -14,7 +15,6 @@ import '../services/audio_clip_service.dart';
 import '../services/screenshot_service.dart';
 import '../services/share_file_manager.dart';
 import '../services/video_service.dart';
-import 'package:tilawa_core/logger.dart';
 
 @LazySingleton(as: ShareRepository)
 class ShareRepositoryImpl implements ShareRepository {
@@ -157,14 +157,27 @@ class ShareRepositoryImpl implements ShareRepository {
     final double captureStep = _videoCaptureProgressShare / handles.length;
 
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
-    
+
     // Pre-warm the first page to compile shaders before the capture loop.
     // This prevents the first frame spike by front-loading shader compilation.
     if (handles.isNotEmpty) {
       onFrameCaptureStarted?.call(0);
       await WidgetsBinding.instance.endOfFrame;
+      // Actually capture the first frame to trigger shader compilation
+      try {
+        final boundaryKey = handles[0].value as GlobalKey;
+        await _screenshotService.captureRaw(
+          boundaryKey: boundaryKey,
+          fileName: 'video_prewarm_$timestamp.png',
+          pixelRatio: 1.0,
+          targetWidth: VideoService.outputVideoWidth,
+          targetHeight: VideoService.outputVideoHeight,
+        );
+      } catch (_) {
+        // Pre-warm capture failure is non-critical
+      }
     }
-    
+
     for (int i = 0; i < handles.length; i++) {
       if (cancelToken?.isCancelled ?? false) break;
 
@@ -172,8 +185,10 @@ class ShareRepositoryImpl implements ShareRepository {
       onFrameCaptureStarted?.call(i);
 
       // Yield to the UI thread before each capture to allow the progress bar
-      // and other UI elements to animate smoothly. Double-yield ensures the
-      // GPU has completed shader compilation and rasterization work.
+            // and other UI elements to animate smoothly. Triple-yield ensures the
+      // GPU has completed shader compilation and rasterization work on
+      // mid-range devices with slower GPU settling time.
+      await WidgetsBinding.instance.endOfFrame;
       await WidgetsBinding.instance.endOfFrame;
       await WidgetsBinding.instance.endOfFrame;
 

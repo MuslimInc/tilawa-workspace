@@ -267,7 +267,14 @@ class _TopAppBar extends StatelessWidget {
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.immersiveComposer;
 
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(designTokens.radiusLarge),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.1),
+        ),
+      ),
       padding: EdgeInsets.symmetric(
         horizontal: designTokens.spaceLarge,
         vertical: designTokens.spaceSmall,
