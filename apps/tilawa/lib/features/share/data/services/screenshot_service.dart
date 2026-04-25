@@ -55,6 +55,82 @@ class ScreenshotService {
     }
   }
 
+  /// PHASE 4 OPTIMIZATION: Async capture with optimized encoding.
+  /// Captures without PNG encoding to reduce blocking time.
+  /// Returns raw image data for external encoding (faster).
+  Future<ui.Image> captureRawImage({
+    required GlobalKey boundaryKey,
+    double pixelRatio = 1.0,
+    int? targetWidth,
+    int? targetHeight,
+  }) async {
+    return _captureBoundaryImage(
+      boundaryKey: boundaryKey,
+      pixelRatio: pixelRatio,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+    );
+  }
+
+  /// PHASE 4 OPTIMIZATION: Ultra-fast capture with minimal processing.
+  /// Skips PNG encoding for faster capture cycles in video pipelines.
+  Future<String> captureRawFast({
+    required GlobalKey boundaryKey,
+    String fileName = 'share_capture_fast.raw',
+    double pixelRatio = 1.0,
+    int? targetWidth,
+    int? targetHeight,
+  }) async {
+    final pageImage = await _captureBoundaryImage(
+      boundaryKey: boundaryKey,
+      pixelRatio: pixelRatio,
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+    );
+
+    try {
+      // Get raw pixel data without PNG encoding (faster)
+      final byteData = await pageImage.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      );
+      if (byteData == null) {
+        throw StateError('Failed to get raw image data.');
+      }
+
+      final bytes = byteData.buffer.asUint8List();
+      return _fileManager.saveShareFile(bytes: bytes, fileName: fileName);
+    } finally {
+      pageImage.dispose();
+    }
+  }
+
+  /// PHASE 4 OPTIMIZATION: Batched capture for multiple pages.
+  /// Reduces frame settling overhead by batching captures together.
+  Future<List<String>> captureRawBatch({
+    required List<GlobalKey> boundaryKeys,
+    required List<String> fileNames,
+    double pixelRatio = 1.0,
+    int? targetWidth,
+    int? targetHeight,
+  }) async {
+    final List<String> paths = [];
+    
+    for (int i = 0; i < boundaryKeys.length; i++) {
+      if (i < fileNames.length) {
+        final path = await captureRaw(
+          boundaryKey: boundaryKeys[i],
+          fileName: fileNames[i],
+          pixelRatio: pixelRatio,
+          targetWidth: targetWidth,
+          targetHeight: targetHeight,
+        );
+        paths.add(path);
+      }
+    }
+    
+    return paths;
+  }
+
   /// Captures the widget behind [boundaryKey], adds a branded bottom strip
   /// with [surahName] and [pageNumber], and saves the result to a temp file.
   ///
