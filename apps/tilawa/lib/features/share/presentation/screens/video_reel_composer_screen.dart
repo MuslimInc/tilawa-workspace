@@ -216,8 +216,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            VideoStepIndicator(status: state.status),
-                            if (isReviewing)
+                            if (!isBusy) VideoStepIndicator(status: state.status),
+                            if (isReviewing && !isBusy)
                               VideoReviewPanel(
                                 key: const ValueKey('review_panel'),
                                 content: state.content!,
@@ -227,7 +227,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 onShare: () =>
                                     context.read<ShareCubit>().shareContent(),
                               )
-                            else
+                            else if (!isBusy)
                               ComposerControls(
                                 key: const ValueKey('composer_controls'),
                                 durationPreset: ShareDurationPreset.auto,
