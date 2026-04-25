@@ -135,12 +135,14 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
           if (widget.background != null)
             Positioned.fill(child: RepaintBoundary(child: widget.background!)),
 
-          // 2. Gesture/Preview Layer
+          // 2. Gesture/Preview Layer (Wrapped in RepaintBoundary to prevent repaints during overlay animations)
           Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => _setVisible(!_isVisible),
-              child: widget.preview,
+            child: RepaintBoundary(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => _setVisible(!_isVisible),
+                child: widget.preview,
+              ),
             ),
           ),
 
@@ -233,13 +235,14 @@ class _OverlayPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return Container(
+    // Cache border color calculation to avoid per-frame recalculation
+    final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.1);
+
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: borderColor),
       ),
       child: child,
     );
@@ -267,37 +270,41 @@ class _TopAppBar extends StatelessWidget {
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.immersiveComposer;
 
-    return Container(
+    // Cache border color and text style to avoid per-frame recalculation
+    final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.1);
+    final titleStyle = theme.textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.bold,
+    );
+
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(designTokens.radiusLarge),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.1),
+        border: Border.all(color: borderColor),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: designTokens.spaceLarge,
+          vertical: designTokens.spaceSmall,
         ),
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: designTokens.spaceLarge,
-        vertical: designTokens.spaceSmall,
-      ),
-      child: Row(
-        children: [
-          leading ??
-              _RoundHeaderButton(icon: Icons.close_rounded, onPressed: onClose),
-          Expanded(
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+        child: Row(
+          children: [
+            leading ??
+                _RoundHeaderButton(icon: Icons.close_rounded, onPressed: onClose),
+            Expanded(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: titleStyle,
               ),
             ),
-          ),
-          trailing ??
-              SizedBox(
-                width: componentTokens.headerButtonSize,
-                height: componentTokens.headerButtonSize,
-              ),
-        ],
+            trailing ??
+                SizedBox(
+                  width: componentTokens.headerButtonSize,
+                  height: componentTokens.headerButtonSize,
+                ),
+          ],
+        ),
       ),
     );
   }
