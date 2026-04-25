@@ -18,6 +18,12 @@
   - Tested independently
   - Deployed independently
   - Demonstrated to users independently
+  
+  FOR TILAWA FEATURES:
+  - Quran reader features: Consider rendering performance, font loading, prayer time integration
+  - Prayer times: Consider location-based APIs, notification scheduling, offline behavior
+  - Athkar/Islamic content: Consider RTL layout, audio/recitation support, bookmarking
+  - Audio sharing: Consider codec support, memory usage, background playback
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)
@@ -70,10 +76,22 @@
 <!--
   ACTION REQUIRED: The content in this section represents placeholders.
   Fill them out with the right edge cases.
+  
+  FOR TILAWA FEATURES - Always include:
+  - RTL/LTR handling (Arabic text mirroring, icon direction)
+  - Offline behavior (cache availability, API fallback)
+  - Low-memory devices (Snapdragon 600 series, limited RAM)
+  - Permission denials (location, camera, microphone)
+  - Slow network (3G, high latency, timeouts)
+  - Dark mode (if app supports theme switching)
 -->
 
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- What happens when device is offline or has slow connectivity?
+- How does system handle RTL (Arabic) and LTR (English) text switching?
+- What happens on low-memory devices (e.g., <2GB RAM)?
+- How does system behave if user denies required permissions (location, camera, etc.)?
+- What is displayed when required data fails to load?
+- How does dark mode affect UI rendering?
 
 ## Requirements *(mandatory)*
 
@@ -84,11 +102,24 @@
 
 ### Functional Requirements
 
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]  
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
+<!--
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right functional requirements.
+  
+  FOR TILAWA FEATURES - Examples:
+  - Quran readers: FR-001 MUST render Quranic text at 60fps without jank
+  - Prayer times: FR-002 MUST fetch times based on GPS location or manual coordinates
+  - Athkar: FR-003 Users MUST be able to bookmark favorite athkar for quick access
+  - Video generation: FR-004 System MUST encode video in H.264 format with audio sync
+  - Notifications: FR-005 System MUST schedule prayer time notifications offline-first
+-->
+
+- **FR-001**: System MUST [specific capability, e.g., "render Quran pages at 60fps without jank"]
+- **FR-002**: System MUST [specific capability, e.g., "fetch prayer times based on GPS location"]  
+- **FR-003**: Users MUST be able to [key interaction, e.g., "bookmark content for offline access"]
+- **FR-004**: System MUST [data requirement, e.g., "persist user preferences locally and sync to cloud"]
+- **FR-005**: System MUST [behavior, e.g., "handle offline gracefully with cached data fallback"]
+- **FR-006**: System MUST [accessibility, e.g., "support RTL text layout and screen reader semantics"]
 
 *Example of marking unclear requirements:*
 

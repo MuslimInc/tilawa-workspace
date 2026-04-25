@@ -286,17 +286,21 @@ class VideoService {
     for (int index = 0; index < screenshotPaths.length; index++) {
       final String screenshotPath = screenshotPaths[index];
       final bool isRawFile = screenshotPath.endsWith('.raw');
-      
+
       // For raw RGBA files, add explicit format parameters so FFmpeg knows how to read them
       if (isRawFile) {
         commandParts.addAll(<String>[
-          '-f', 'rawvideo',
-          '-pixel_format', 'rgba',
-          '-video_size', '${outputVideoWidth}x$outputVideoHeight',
-          '-framerate', '$_stillImageInputFps',
+          '-f',
+          'rawvideo',
+          '-pixel_format',
+          'rgba',
+          '-video_size',
+          '${outputVideoWidth}x$outputVideoHeight',
+          '-framerate',
+          '$_stillImageInputFps',
         ]);
       }
-      
+
       commandParts.addAll(<String>[
         '-framerate',
         '$_stillImageInputFps',

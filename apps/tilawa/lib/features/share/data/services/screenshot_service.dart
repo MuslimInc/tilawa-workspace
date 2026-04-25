@@ -72,7 +72,7 @@ class ScreenshotService {
     );
   }
 
-   /// PHASE 4 OPTIMIZATION: Ultra-fast capture with minimal processing.
+  /// PHASE 4 OPTIMIZATION: Ultra-fast capture with minimal processing.
   /// Skips PNG encoding for faster capture cycles in video pipelines.
   Future<String> captureRawFast({
     required GlobalKey boundaryKey,
@@ -82,7 +82,7 @@ class ScreenshotService {
     int? targetHeight,
   }) async {
     late ui.Image pageImage;
-    
+
     try {
       pageImage = await _captureBoundaryImage(
         boundaryKey: boundaryKey,
@@ -91,7 +91,9 @@ class ScreenshotService {
         targetHeight: targetHeight,
       );
     } catch (e) {
-      debugPrint('[ScreenshotService] Capture attempt 1 failed: $e, retrying with extra wait...');
+      debugPrint(
+        '[ScreenshotService] Capture attempt 1 failed: $e, retrying with extra wait...',
+      );
       // Give page extra time to settle before final retry
       await Future.delayed(const Duration(milliseconds: 100));
       pageImage = await _captureBoundaryImage(
@@ -128,7 +130,7 @@ class ScreenshotService {
     int? targetHeight,
   }) async {
     final List<String> paths = [];
-    
+
     for (int i = 0; i < boundaryKeys.length; i++) {
       if (i < fileNames.length) {
         final path = await captureRaw(
@@ -141,7 +143,7 @@ class ScreenshotService {
         paths.add(path);
       }
     }
-    
+
     return paths;
   }
 

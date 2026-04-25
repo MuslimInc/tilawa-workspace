@@ -195,7 +195,7 @@ class ShareRepositoryImpl implements ShareRepository {
       await WidgetsBinding.instance.endOfFrame;
 
       final boundaryKey = handles[i].value as GlobalKey;
-      
+
       // PHASE 4: Use ultra-fast capture method (raw RGBA instead of PNG)
       // Cuts encoding overhead from 1-2ms to nearly zero
       final path = await _screenshotService.captureRawFast(

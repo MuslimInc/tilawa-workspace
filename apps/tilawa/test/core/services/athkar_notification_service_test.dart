@@ -1286,6 +1286,7 @@ void main() {
         );
 
         when(mockPrefs.getString(any)).thenAnswer((_) async => payload);
+        when(mockPrefs.getInt(any)).thenAnswer((_) async => DateTime.now().millisecondsSinceEpoch - 30000);
 
         await service.handleNotificationResponse(response);
 
@@ -1299,6 +1300,9 @@ void main() {
           id: 1001,
           payload: 'morning_athkar_123',
         );
+
+        when(mockPrefs.getString(any)).thenAnswer((_) async => null);
+        when(mockPrefs.getInt(any)).thenAnswer((_) async => null);
 
         // Navigation service should throw to trigger the catch block
         when(
