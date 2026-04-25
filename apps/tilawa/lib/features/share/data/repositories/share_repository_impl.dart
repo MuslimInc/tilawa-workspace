@@ -157,6 +157,14 @@ class ShareRepositoryImpl implements ShareRepository {
     final double captureStep = _videoCaptureProgressShare / handles.length;
 
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
+    
+    // Pre-warm the first page to compile shaders before the capture loop.
+    // This prevents the first frame spike by front-loading shader compilation.
+    if (handles.isNotEmpty) {
+      onFrameCaptureStarted?.call(0);
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    
     for (int i = 0; i < handles.length; i++) {
       if (cancelToken?.isCancelled ?? false) break;
 
@@ -164,7 +172,9 @@ class ShareRepositoryImpl implements ShareRepository {
       onFrameCaptureStarted?.call(i);
 
       // Yield to the UI thread before each capture to allow the progress bar
-      // and other UI elements to animate smoothly.
+      // and other UI elements to animate smoothly. Double-yield ensures the
+      // GPU has completed shader compilation and rasterization work.
+      await WidgetsBinding.instance.endOfFrame;
       await WidgetsBinding.instance.endOfFrame;
 
       final boundaryKey = handles[i].value as GlobalKey;

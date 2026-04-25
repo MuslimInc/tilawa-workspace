@@ -133,9 +133,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
         children: [
           // 1. Background Layer (Isolated)
           if (widget.background != null)
-            Positioned.fill(
-              child: RepaintBoundary(child: widget.background!),
-            ),
+            Positioned.fill(child: RepaintBoundary(child: widget.background!)),
 
           // 2. Gesture/Preview Layer
           Positioned.fill(
@@ -235,19 +233,8 @@ class _OverlayPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    // Matching NavigationSliderOverlay's "Floating Island" performance pattern
-    // Horizontal margins reduce the 'fill rate' pressure on the GPU.
-    final horizontalPadding = MediaQuery.sizeOf(context).width * 0.04;
-
     return Container(
-      margin: EdgeInsets.fromLTRB(
-        horizontalPadding,
-        isTop ? 0 : tokens.spaceMedium,
-        horizontalPadding,
-        isTop ? tokens.spaceMedium : 0,
-      ),
       decoration: BoxDecoration(
-        // 100% opaque background is the most performant for Adreno GPUs
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
         border: Border.all(

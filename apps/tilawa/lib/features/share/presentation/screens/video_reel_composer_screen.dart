@@ -445,10 +445,11 @@ class _OffScreenRenderers extends StatelessWidget {
   final Color backgroundColor;
   final bool isCapturing;
 
+  /// Cached renderer instance to avoid recreating on every build.
+  static final MushafPageRenderer _renderer = MushafPageRenderer.defaultRenderer();
+
   @override
   Widget build(BuildContext context) {
-    final renderer = MushafPageRenderer.defaultRenderer();
-
     return Stack(
       children: videoPageSpecs.map((spec) {
         final key = videoBoundaryKeys[spec.pageNumber];
@@ -462,7 +463,7 @@ class _OffScreenRenderers extends StatelessWidget {
               child: Center(
                 child: AspectRatio(
                   aspectRatio: 9 / 16,
-                  child: renderer.build(
+                  child: _renderer.build(
                     context: context,
                     pageSpec: spec,
                     surahNumber: surahNumber,

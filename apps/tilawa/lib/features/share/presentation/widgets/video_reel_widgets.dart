@@ -144,7 +144,13 @@ class ComposerControls extends StatelessWidget {
       );
     }
 
-    return Padding(
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(tokens.radiusLarge),
+        ),
+      ),
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceMedium,
         vertical: tokens.spaceMedium,
