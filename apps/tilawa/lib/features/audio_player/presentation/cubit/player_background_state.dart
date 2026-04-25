@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/entities/player_background_configuration.dart';
 
 sealed class PlayerBackgroundState extends Equatable {
@@ -22,9 +23,9 @@ class PlayerBackgroundSuccess extends PlayerBackgroundState {
 }
 
 class PlayerBackgroundError extends PlayerBackgroundState {
-  const PlayerBackgroundError(super.config, this.message);
-  final String message;
+  const PlayerBackgroundError(super.config, this.failure);
+  final Failure failure;
 
   @override
-  List<Object?> get props => [config, message];
+  List<Object?> get props => [config, failure];
 }

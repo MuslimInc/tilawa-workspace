@@ -5,9 +5,6 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:tilawa/l10n/generated/app_localizations.dart';
-import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -547,23 +544,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
     await playabilityResult.fold(
       (failure) {
-        // Playback not allowed - show localized toast
-        if (failure is OfflinePlaybackFailure) {
-          final context = AppRouter.navigatorKey.currentContext;
-          final l10n = context != null ? AppLocalizations.of(context) : null;
-          final String message = switch (failure.reason) {
-            OfflinePlaybackReason.notDownloaded =>
-              l10n?.offlinePlaybackError ?? failure.message ?? '',
-            OfflinePlaybackReason.fileMissing =>
-              l10n?.offlineFileMissingError ?? failure.message ?? '',
-            OfflinePlaybackReason.downloadIncomplete =>
-              l10n?.offlineDownloadIncompleteError ?? failure.message ?? '',
-          };
-          ToastUtils.showErrorToast(message);
-        } else if (failure is NetworkFailure) {
-          ToastUtils.showErrorToast(failure.message ?? '');
-        }
-        // Don't proceed with playback
+        emit(state.copyWith(failure: failure));
+        // Reset failure so it's not shown again if state is copied
+        emit(state.copyWith(failure: null));
       },
       (_) async {
         // New playback session — reset sleep timer state

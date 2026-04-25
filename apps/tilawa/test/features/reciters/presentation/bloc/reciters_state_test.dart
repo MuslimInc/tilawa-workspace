@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 void main() {
   // Test data
@@ -355,30 +356,32 @@ void main() {
 
   group('RecitersError', () {
     test('should be a subclass of RecitersState', () {
-      const state = RecitersError('Error message');
+      final state = RecitersError(UnexpectedFailure('Error message'));
       expect(state, isA<RecitersState>());
     });
 
-    test('props should contain message', () {
-      const state = RecitersError('Error message');
-      expect(state.props, ['Error message']);
+    test('props should contain failure', () {
+      final failure = UnexpectedFailure('Error message');
+      final state = RecitersError(failure);
+      expect(state.props, [failure]);
     });
 
-    test('two instances with same message should be equal', () {
-      const state1 = RecitersError('Error message');
-      const state2 = RecitersError('Error message');
+    test('two instances with same failure should be equal', () {
+      final state1 = RecitersError(UnexpectedFailure('Error message'));
+      final state2 = RecitersError(UnexpectedFailure('Error message'));
       expect(state1, equals(state2));
     });
 
-    test('two instances with different message should not be equal', () {
-      const state1 = RecitersError('Error 1');
-      const state2 = RecitersError('Error 2');
+    test('two instances with different failure should not be equal', () {
+      final state1 = RecitersError(UnexpectedFailure('Error 1'));
+      final state2 = RecitersError(UnexpectedFailure('Error 2'));
       expect(state1, isNot(equals(state2)));
     });
 
-    test('message should be accessible', () {
-      const state = RecitersError('Test error');
-      expect(state.message, 'Test error');
+    test('failure should be accessible', () {
+      final failure = UnexpectedFailure('Test error');
+      final state = RecitersError(failure);
+      expect(state.failure, failure);
     });
   });
 
@@ -390,7 +393,7 @@ void main() {
         reciters: testReciters,
         filteredReciters: testReciters,
       );
-      const error = RecitersError('Error');
+      final error = RecitersError(UnexpectedFailure('Error'));
 
       expect(initial, isNot(equals(loading)));
       expect(initial, isNot(equals(loaded)));

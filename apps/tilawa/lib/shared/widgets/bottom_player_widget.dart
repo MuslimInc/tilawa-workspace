@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa_core/entities/audio.dart';
@@ -188,12 +189,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       listenWhen: (previous, current) => current is PlayerBackgroundError,
       listener: (context, state) {
         if (state is PlayerBackgroundError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to set background: ${state.message}'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+          ToastUtils.showErrorToast(state.failure.localizedMessage(context));
         }
       },
       child: BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
@@ -218,6 +214,9 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
             setState(() {
               _isDismissed = false;
             });
+          }
+          if (state.failure != null) {
+            ToastUtils.showErrorToast(state.failure!.localizedMessage(context));
           }
         },
         builder: (context, state) {
@@ -253,9 +252,10 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                     progress,
                   )!;
 
-                  return SizedBox(
+                  return Container(
                     height: currentHeight,
                     width: double.infinity,
+                    color: Colors.black,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
@@ -405,7 +405,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: Material(
-        color: Colors.transparent,
+        color: Colors.black,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -441,11 +441,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                             ),
                           ],
                         )
-                      : Container(
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withValues(alpha: 0.1),
-                        );
+                      : Container(color: Colors.black);
                 },
               ),
             ),
@@ -483,18 +479,6 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                                     borderRadius: BorderRadius.circular(
                                       tokens.radiusExtraLarge,
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: tokens.opacityEmphasis,
-                                        ),
-                                        blurRadius: tokens.blurShadow * 2,
-                                        offset: Offset(
-                                          0,
-                                          tokens.shadowOffsetMedium.dy * 3,
-                                        ),
-                                      ),
-                                    ],
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(

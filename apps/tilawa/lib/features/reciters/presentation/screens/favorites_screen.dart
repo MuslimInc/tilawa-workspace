@@ -8,6 +8,7 @@ import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import '../widgets/reciter_card.dart';
 
 class FavoritesScreen extends StatelessWidget {
@@ -21,22 +22,9 @@ class FavoritesScreen extends StatelessWidget {
         listener: (context, state) {
           if (state is FavoritesLoaded && state.removedReciter != null) {
             final ReciterEntity reciter = state.removedReciter!;
-            final snackBar = SnackBar(
-              content: Text(
-                context.l10n.reciterRemovedFromFavorites(reciter.name),
-              ),
-              duration: const Duration(seconds: 3),
-              persist: false,
-              action: SnackBarAction(
-                label: context.l10n.undo,
-                onPressed: () {
-                  context.read<FavoritesCubit>().toggleFavorite(reciter);
-                },
-              ),
+            ToastUtils.showSuccessToast(
+              context.l10n.reciterRemovedFromFavorites(reciter.name),
             );
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(snackBar);
           }
         },
         child: Stack(
@@ -50,7 +38,7 @@ class FavoritesScreen extends StatelessWidget {
                   } else if (state is FavoritesError) {
                     return Center(
                       child: Text(
-                        state.message,
+                        state.failure.localizedMessage(context),
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.error,
                         ),

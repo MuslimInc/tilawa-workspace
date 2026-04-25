@@ -16,16 +16,30 @@ extension BuildContextThemeX on BuildContext {
 }
 
 extension FailureExtensions on Failure {
-  String localizedMessage(BuildContext context) => switch (this) {
-    NetworkFailure() => context.l10n.networkError,
-    ServerFailure() => context.l10n.serverError,
-    CacheFailure() => context.l10n.cacheError,
-    AudioFailure() => context.l10n.audioError,
-    ValidationFailure() => context.l10n.validationError,
-    PermissionFailure() => context.l10n.permissionError,
-    UnexpectedFailure() => context.l10n.unexpectedError,
-    PersistenceFailure() => context.l10n.persistenceError,
-    UIError() => context.l10n.uiError,
-    _ => context.l10n.unknownError,
-  };
+  String localizedMessage(BuildContext context) {
+    final l10n = context.l10n;
+
+    if (this is OfflinePlaybackFailure) {
+      final f = this as OfflinePlaybackFailure;
+      return switch (f.reason) {
+        OfflinePlaybackReason.notDownloaded => l10n.offlinePlaybackError,
+        OfflinePlaybackReason.fileMissing => l10n.offlineFileMissingError,
+        OfflinePlaybackReason.downloadIncomplete =>
+          l10n.offlineDownloadIncompleteError,
+      };
+    }
+
+    return switch (this) {
+      NetworkFailure() => l10n.networkError,
+      ServerFailure() => l10n.serverError,
+      CacheFailure() => l10n.cacheError,
+      AudioFailure() => l10n.audioError,
+      ValidationFailure() => l10n.validationError,
+      PermissionFailure() => l10n.permissionError,
+      UnexpectedFailure() => l10n.unexpectedError,
+      PersistenceFailure() => l10n.persistenceError,
+      UIError() => l10n.uiError,
+      _ => l10n.unknownError,
+    };
+  }
 }

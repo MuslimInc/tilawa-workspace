@@ -48,13 +48,10 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
       // Prefer domain use case to fetch once and share data
       final Either<Failure, List<entity.ReciterEntity>> result =
           await _getRecitersUseCase();
-      final List<entity.ReciterEntity>? recitersData = result
-          .fold<List<entity.ReciterEntity>?>(
-            (_) => null,
-            (entities) => entities,
-          );
 
-      if (recitersData != null) {
+      await result.fold((failure) async => emit(RecitersError(failure)), (
+        recitersData,
+      ) async {
         final List<entity.ReciterEntity> filteredReciters = await Future(
           () => _filterReciters(
             recitersData,
@@ -75,11 +72,9 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
             favoriteIds: favoriteIds,
           ),
         );
-      } else {
-        emit(const RecitersError('Failed to load reciters'));
-      }
+      });
     } catch (e) {
-      emit(RecitersError('Error loading reciters: $e'));
+      emit(RecitersError(UnexpectedFailure(e.toString())));
     }
   }
 

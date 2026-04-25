@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 
 import '../../../../helpers/datetime_helper.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
@@ -153,7 +154,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
               children: [
                 const Icon(Icons.error_outline, size: 64, color: Colors.grey),
                 const SizedBox(height: 16),
-                Text(state.errorMessage, textAlign: TextAlign.center),
+                Text(
+                  state.failure?.localizedMessage(context) ??
+                      context.l10n.unknownError,
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   onPressed: () {
@@ -257,12 +262,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   context.read<HistoryBloc>().add(
                     HistoryEvent.deleteHistory(item.id),
                   );
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(context.l10n.historyDeleted),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
+                  ToastUtils.showSuccessToast(context.l10n.historyDeleted);
                 },
                 child: HistoryCard(
                   history: item,

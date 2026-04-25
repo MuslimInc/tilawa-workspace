@@ -64,9 +64,9 @@ class RecitersLoaded extends RecitersState {
 }
 
 class RecitersError extends RecitersState {
-  const RecitersError(this.message);
-  final String message;
+  const RecitersError(this.failure);
+  final Failure failure;
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [failure];
 }

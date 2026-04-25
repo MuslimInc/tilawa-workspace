@@ -1,6 +1,7 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import '../../data/models/player_background_configuration_model.dart';
 import '../../domain/entities/player_background_configuration.dart';
 import '../../domain/usecases/delete_player_background_use_case.dart';
@@ -46,12 +47,7 @@ class PlayerBackgroundCubit extends HydratedCubit<PlayerBackgroundState> {
           if (failure.message == 'No image selected') {
             emit(PlayerBackgroundInitial(state.config));
           } else {
-            emit(
-              PlayerBackgroundError(
-                state.config,
-                failure.message ?? 'Failed to pick image',
-              ),
-            );
+            emit(PlayerBackgroundError(state.config, failure));
           }
         },
         (persistentPath) async {
@@ -69,7 +65,9 @@ class PlayerBackgroundCubit extends HydratedCubit<PlayerBackgroundState> {
         },
       );
     } catch (e) {
-      emit(PlayerBackgroundError(state.config, e.toString()));
+      emit(
+        PlayerBackgroundError(state.config, UnexpectedFailure(e.toString())),
+      );
     }
   }
 
@@ -77,12 +75,7 @@ class PlayerBackgroundCubit extends HydratedCubit<PlayerBackgroundState> {
     final result = await _resetUseCase(state.config.customImagePath);
 
     result.fold(
-      (failure) => emit(
-        PlayerBackgroundError(
-          state.config,
-          failure.message ?? 'Failed to reset background',
-        ),
-      ),
+      (failure) => emit(PlayerBackgroundError(state.config, failure)),
       (_) =>
           emit(const PlayerBackgroundInitial(PlayerBackgroundConfiguration())),
     );

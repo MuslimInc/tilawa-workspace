@@ -8,6 +8,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
@@ -209,9 +210,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
     }
 
     if (!cleared) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(context.l10n.anErrorOccurred)));
+      ToastUtils.showErrorToast(context.l10n.anErrorOccurred);
       return;
     }
 
@@ -772,7 +771,7 @@ class _ResultsPane extends StatelessWidget {
       return _StatePanel(
         key: const ValueKey('error_state'),
         icon: Icons.error_outline_rounded,
-        title: (state as RecitersError).message,
+        title: (state as RecitersError).failure.localizedMessage(context),
         actionLabel: context.l10n.retry,
         onAction: () {
           onRetry();
