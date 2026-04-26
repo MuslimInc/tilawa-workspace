@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
@@ -988,12 +988,7 @@ class _ReciterListView extends StatelessWidget {
           parent: BouncingScrollPhysics(),
         ),
         itemCount: state.filteredReciters.length,
-        padding: EdgeInsets.fromLTRB(
-          10,
-          10,
-          10,
-          TilawaShellPadding.of(context) + 20,
-        ),
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 20),
         separatorBuilder: (_, _) => const SizedBox(height: 8),
         itemBuilder: (context, index) {
           final ReciterEntity reciter = state.filteredReciters[index];
@@ -1024,12 +1019,7 @@ class _ReciterGridView extends StatelessWidget {
         physics: const AlwaysScrollableScrollPhysics(
           parent: BouncingScrollPhysics(),
         ),
-        padding: EdgeInsets.fromLTRB(
-          12,
-          10,
-          12,
-          TilawaShellPadding.of(context) + 20,
-        ),
+        padding: EdgeInsets.fromLTRB(12, 10, 12, 20),
         targetItemExtent: 220,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,

@@ -25,11 +25,11 @@ class MetadataChip extends StatelessWidget {
     final color = foregroundColor ?? theme.colorScheme.onSurface;
 
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
       spacing: tokens.spaceSmall,
       children: [
         if (icon != null) Icon(icon, size: tokens.iconSizeSmall, color: color),
-        Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
+        Text(label, maxLines: 1, overflow: .ellipsis),
       ],
     );
   }

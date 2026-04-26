@@ -101,7 +101,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
     }
 
     final hingePadding = avoidDisplayFeatures
-        ? context.getHingeAvoidancePadding(AxisDirection.left)
+        ? context.getHingeAvoidancePadding(.left)
         : EdgeInsetsDirectional.zero;
 
     return Scaffold(
@@ -164,7 +164,7 @@ class _BottomNavBar extends StatelessWidget {
 
     return TilawaContentBounds(
       kind: TilawaContentKind.media,
-      alignment: Alignment.bottomCenter,
+      alignment: .bottomCenter,
       child: Padding(
         padding:
             padding ??
@@ -259,9 +259,7 @@ class _SideNavRail extends StatelessWidget {
           onDestinationSelected: onDestinationSelected,
           backgroundColor: Colors.transparent,
           indicatorColor: theme.colorScheme.primaryContainer,
-          labelType: extended
-              ? NavigationRailLabelType.none
-              : NavigationRailLabelType.all,
+          labelType: extended ? .none : .all,
           destinations: [
             for (final d in destinations)
               NavigationRailDestination(
@@ -358,19 +356,19 @@ class _NavButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(borderRadius),
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
             spacing: tokens.spaceExtraSmall,
             children: [
               Transform.scale(scale: iconScale, child: iconWidget),
               Text(
                 destination.label,
                 maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
+                overflow: .ellipsis,
+                textAlign: .center,
                 style: baseLabelStyle.copyWith(
                   fontSize: labelFontSize,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: isSelected ? .w700 : .w500,
                   color: onPrimaryColor,
                 ),
               ),

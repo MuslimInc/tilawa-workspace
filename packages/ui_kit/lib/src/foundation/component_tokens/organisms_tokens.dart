@@ -87,7 +87,7 @@ class TilawaShareFooterBarTokens {
         horizontalPadding: 16,
         contentGap: 12,
         labelFontSize: 16,
-        labelFontWeight: FontWeight.bold,
+        labelFontWeight: .bold,
         secondaryLabelFontSize: 12,
         secondaryLabelOpacity: 0.7,
       );

@@ -98,7 +98,7 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
                 itemCount: state.monthlyPrayerTimes.length,
                 padding: EdgeInsets.only(
                   top: tokens.spaceExtraSmall,
-                  bottom: TilawaShellPadding.of(context) + tokens.spaceLarge,
+                  bottom: tokens.spaceLarge,
                 ),
                 itemBuilder: (context, index) {
                   final prayerTimes = state.monthlyPrayerTimes[index];

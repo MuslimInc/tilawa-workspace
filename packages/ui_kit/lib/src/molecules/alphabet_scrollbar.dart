@@ -55,7 +55,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
 
     return RepaintBoundary(
       child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+        behavior: .opaque,
         onPanStart: widget.onPanStart,
         onPanUpdate: widget.onPanUpdate,
         onPanEnd: widget.onPanEnd,
@@ -142,14 +142,14 @@ class _LetterItem extends StatelessWidget {
                   height: size * 0.85,
                   decoration: BoxDecoration(
                     color: primaryColor,
-                    shape: BoxShape.circle,
+                    shape: .circle,
                   ),
                   child: Center(
                     child: Text(
                       letter,
                       style: const TextStyle(
                         fontSize: 13,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: .bold,
                         color: Colors.white,
                       ),
                     ),
@@ -159,7 +159,7 @@ class _LetterItem extends StatelessWidget {
                   letter,
                   style: TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: .w500,
                     color: unselectedColor,
                   ),
                 ),

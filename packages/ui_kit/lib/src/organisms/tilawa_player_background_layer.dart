@@ -11,7 +11,7 @@ class TilawaPlayerBackgroundLayer extends StatelessWidget {
     this.blurAmount,
     this.overlayOpacity,
     this.overlayColor,
-    this.fit = BoxFit.cover,
+    this.fit = .cover,
   });
 
   final ImageProvider<Object>? image;
@@ -36,7 +36,7 @@ class TilawaPlayerBackgroundLayer extends StatelessWidget {
         overlayOpacity ?? tokens.defaultOverlayOpacity;
 
     return Stack(
-      fit: StackFit.expand,
+      fit: .expand,
       children: [
         Image(
           image: ResizeImage.resizeIfNeeded(cacheWidth, null, effectiveImage),

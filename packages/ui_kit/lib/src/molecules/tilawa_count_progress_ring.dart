@@ -59,7 +59,7 @@ class TilawaCountProgressRing extends StatelessWidget {
                       strokeWidth: componentTokens.ringStrokeWidth,
                       backgroundColor: Colors.transparent,
                       valueColor: AlwaysStoppedAnimation<Color>(effectiveColor),
-                      strokeCap: StrokeCap.round,
+                      strokeCap: .round,
                     );
                   },
                 ),
@@ -117,7 +117,7 @@ class TilawaCountProgressRing extends StatelessWidget {
                               color:
                                   activeForegroundColor ??
                                   colorScheme.onPrimary,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: .bold,
                               fontSize: componentTokens.countFontSize,
                               height: 1.0,
                             ),
@@ -143,7 +143,7 @@ class TilawaCountProgressRing extends StatelessWidget {
               '$currentCount / $totalCount',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
               ),
             ),
           ),

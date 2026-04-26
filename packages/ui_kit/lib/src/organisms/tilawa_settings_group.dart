@@ -19,7 +19,7 @@ class TilawaSettingsGroup extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: .start,
       children: [
         Padding(
           padding: tokens.groupHeaderPadding,
@@ -27,7 +27,7 @@ class TilawaSettingsGroup extends StatelessWidget {
             title,
             style: TextStyle(
               fontSize: tokens.groupTitleFontSize,
-              fontWeight: FontWeight.w800,
+              fontWeight: .w800,
               color: theme.primaryColor,
               letterSpacing: tokens.groupTitleLetterSpacing,
             ),
@@ -100,7 +100,7 @@ class TilawaSettingsTile extends StatelessWidget {
               title,
               style: TextStyle(
                 fontSize: tokens.tileTitleFontSize,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
               ),
             ),
             subtitle: subtitle == null
@@ -191,14 +191,14 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                   ),
                   Expanded(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: .start,
                       spacing: tokens.tileSubtitleSpacing,
                       children: [
                         Text(
                           title,
                           style: TextStyle(
                             fontSize: tokens.tileTitleFontSize,
-                            fontWeight: FontWeight.w600,
+                            fontWeight: .w600,
                           ),
                         ),
                         if (subtitle != null)

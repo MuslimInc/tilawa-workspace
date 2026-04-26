@@ -25,8 +25,7 @@ class TilawaShareFooterBar extends StatelessWidget {
         backgroundColor ?? theme.colorScheme.secondaryContainer;
     final Color resolvedForegroundColor =
         foregroundColor ??
-        (ThemeData.estimateBrightnessForColor(resolvedBackgroundColor) ==
-                Brightness.dark
+        (ThemeData.estimateBrightnessForColor(resolvedBackgroundColor) == .dark
             ? theme.colorScheme.onSecondaryContainer
             : theme.colorScheme.onSecondaryContainer);
     final TextStyle primaryStyle = (textTheme.titleSmall ?? const TextStyle())
@@ -34,7 +33,7 @@ class TilawaShareFooterBar extends StatelessWidget {
           fontSize: tokens.labelFontSize,
           fontWeight: tokens.labelFontWeight,
           color: resolvedForegroundColor,
-          decoration: TextDecoration.none,
+          decoration: .none,
           decorationColor: Colors.transparent,
         );
     final TextStyle secondaryStyle = (textTheme.bodySmall ?? const TextStyle())
@@ -43,7 +42,7 @@ class TilawaShareFooterBar extends StatelessWidget {
           color: resolvedForegroundColor.withValues(
             alpha: tokens.secondaryLabelOpacity,
           ),
-          decoration: TextDecoration.none,
+          decoration: .none,
           decorationColor: Colors.transparent,
         );
 
@@ -60,9 +59,9 @@ class TilawaShareFooterBar extends StatelessWidget {
                 child: Text(
                   primaryLabel,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.start,
+                  overflow: .ellipsis,
+                  textDirection: .rtl,
+                  textAlign: .start,
                   style: primaryStyle,
                 ),
               ),
@@ -70,8 +69,8 @@ class TilawaShareFooterBar extends StatelessWidget {
                 child: Text(
                   secondaryLabel,
                   maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
+                  overflow: .ellipsis,
+                  textAlign: .right,
                   style: secondaryStyle,
                 ),
               ),

@@ -57,7 +57,7 @@ class TilawaFeedbackStrip extends StatelessWidget {
               message,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: foregroundColor,
-                fontWeight: FontWeight.w600,
+                fontWeight: .w600,
               ),
             ),
           ),

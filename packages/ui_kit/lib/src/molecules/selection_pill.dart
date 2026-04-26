@@ -71,7 +71,7 @@ class SelectionPill extends StatelessWidget {
                 : null,
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             spacing: tokens.spaceSmall,
             children: [
               if (icon != null)
@@ -80,7 +80,7 @@ class SelectionPill extends StatelessWidget {
                 label,
                 style: theme.textTheme.labelLarge?.copyWith(
                   color: foreground,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: .w700,
                 ),
               ),
             ],

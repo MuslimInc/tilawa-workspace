@@ -36,7 +36,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
                   tokens.spaceExtraLarge,
                   tokens.spaceExtraLarge,
                   tokens.spaceExtraLarge,
-                  TilawaShellPadding.of(context) + tokens.spaceExtraLarge,
+                  tokens.spaceExtraLarge,
                 ),
                 targetItemExtent: 180,
                 crossAxisSpacing: tokens.spaceLarge,

@@ -47,9 +47,9 @@ class BottomPlayerUi extends StatelessWidget {
 
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
-          fontWeight: FontWeight.w600,
+          fontWeight: .w600,
           color: theme.textTheme.bodyLarge?.color,
-          decoration: TextDecoration.none,
+          decoration: .none,
           decorationColor: Colors.transparent,
         );
     final TextStyle subtitleStyle =
@@ -57,7 +57,7 @@ class BottomPlayerUi extends StatelessWidget {
           color: theme.textTheme.bodyMedium?.color?.withValues(
             alpha: tokens.opacityEmphasis,
           ),
-          decoration: TextDecoration.none,
+          decoration: .none,
           decorationColor: Colors.transparent,
         );
     final borderRadius = BorderRadius.circular(tokens.radiusLarge);
@@ -84,9 +84,9 @@ class BottomPlayerUi extends StatelessWidget {
         borderRadius: borderRadius,
         child: GestureDetector(
           onTap: onTap,
-          behavior: HitTestBehavior.opaque,
+          behavior: .opaque,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               // Progress Bar (Slim at top)
               progressBarOverride ??
@@ -106,7 +106,7 @@ class BottomPlayerUi extends StatelessWidget {
                   children: [
                     // Album Art
                     Material(
-                      type: MaterialType.transparency,
+                      type: .transparency,
                       child: Container(
                         width: tokens.iconSizeExtraLarge,
                         height: tokens.iconSizeExtraLarge,
@@ -125,7 +125,7 @@ class BottomPlayerUi extends StatelessWidget {
                                 ),
                                 child: CachedNetworkImage(
                                   imageUrl: audio.artUri.toString(),
-                                  fit: BoxFit.cover,
+                                  fit: .cover,
                                   errorWidget: (context, error, stackTrace) =>
                                       _buildDefaultIcon(context),
                                   placeholder: (context, url) =>
@@ -141,21 +141,21 @@ class BottomPlayerUi extends StatelessWidget {
                     // Info
                     Expanded(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: .start,
+                        mainAxisAlignment: .center,
                         spacing: tokens.spaceExtraSmall / 2,
                         children: [
                           Text(
                             audio.title,
                             style: titleStyle,
                             maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            overflow: .ellipsis,
                           ),
                           Text(
                             audio.artist ?? 'Unknown Reciter',
                             style: subtitleStyle,
                             maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                            overflow: .ellipsis,
                           ),
                         ],
                       ),
@@ -165,9 +165,9 @@ class BottomPlayerUi extends StatelessWidget {
 
                     // Controls
                     Directionality(
-                      textDirection: TextDirection.ltr,
+                      textDirection: .ltr,
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisSize: .min,
                         spacing: tokens.spaceExtraSmall,
                         children: [
                           // Previous
@@ -194,7 +194,7 @@ class BottomPlayerUi extends StatelessWidget {
                             width: playPauseButtonSize,
                             height: playPauseButtonSize,
                             decoration: BoxDecoration(
-                              shape: BoxShape.circle,
+                              shape: .circle,
                               color: theme.primaryColor,
                               boxShadow: [
                                 BoxShadow(

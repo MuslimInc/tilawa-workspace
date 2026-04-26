@@ -9,7 +9,7 @@ class SeekBar extends StatefulWidget {
     super.key,
     required this.duration,
     required this.position,
-    this.bufferedPosition = Duration.zero,
+    this.bufferedPosition = .zero,
     this.onChanged,
     this.onChangeEnd,
   });
@@ -65,8 +65,8 @@ class SeekBarState extends State<SeekBar> {
               1.25, // Increased height for better touch target
           margin: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Stack(
-            alignment: Alignment.center, // Center the sliders vertically
-            clipBehavior: Clip.none,
+            alignment: .center, // Center the sliders vertically
+            clipBehavior: .none,
             children: [
               // Buffered progress background
               SliderTheme(

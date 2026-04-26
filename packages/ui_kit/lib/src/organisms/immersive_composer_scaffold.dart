@@ -79,12 +79,12 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
 
     _topOffset = Tween<Offset>(
       begin: const Offset(0, -1.2), // Off-screen top
-      end: Offset.zero,
+      end: .zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _bottomOffset = Tween<Offset>(
       begin: const Offset(0, 1.2), // Off-screen bottom
-      end: Offset.zero,
+      end: .zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
@@ -129,7 +129,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
     return Material(
       color: Colors.transparent,
       child: Stack(
-        clipBehavior: Clip.none,
+        clipBehavior: .none,
         children: [
           // 1. Background Layer (Isolated)
           if (widget.background != null)
@@ -139,7 +139,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
           Positioned.fill(
             child: RepaintBoundary(
               child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
+                behavior: .translucent,
                 onTap: () => _setVisible(!_isVisible),
                 child: widget.preview,
               ),
@@ -272,9 +272,7 @@ class _TopAppBar extends StatelessWidget {
 
     // Cache border color and text style to avoid per-frame recalculation
     final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.1);
-    final titleStyle = theme.textTheme.titleMedium?.copyWith(
-      fontWeight: FontWeight.bold,
-    );
+    final titleStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: .bold);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -295,11 +293,7 @@ class _TopAppBar extends StatelessWidget {
                   onPressed: onClose,
                 ),
             Expanded(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: titleStyle,
-              ),
+              child: Text(title, textAlign: .center, style: titleStyle),
             ),
             trailing ??
                 SizedBox(
@@ -328,7 +322,7 @@ class _RoundHeaderButton extends StatelessWidget {
       width: componentTokens.headerButtonSize,
       height: componentTokens.headerButtonSize,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        shape: .circle,
         color: theme.colorScheme.surfaceContainerHighest, // Opaque
       ),
       child: IconButton(onPressed: onPressed, iconSize: 20, icon: Icon(icon)),

@@ -169,14 +169,14 @@ class _SearchFieldBody extends StatelessWidget {
         enabled: enabled,
         onChanged: onChanged,
         onTapOutside: onTapOutside,
-        textAlignVertical: TextAlignVertical.center,
+        textAlignVertical: .center,
         style:
             textStyle ??
-            theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            theme.textTheme.bodyMedium?.copyWith(fontWeight: .w600),
         decoration: InputDecoration(
           isDense: true,
           filled: false,
-          border: InputBorder.none,
+          border: .none,
           hintText: hintText,
           hintStyle:
               hintStyle ??

@@ -35,7 +35,7 @@ class TilawaStatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusSmall),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: .min,
         spacing: tokens.spaceExtraSmall,
         children: [
           if (icon != null)
@@ -47,7 +47,7 @@ class TilawaStatusChip extends StatelessWidget {
           Text(
             label,
             style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w900,
+              fontWeight: .w900,
               color: foregroundColor ?? theme.colorScheme.onSurface,
               letterSpacing: 0.5,
             ),

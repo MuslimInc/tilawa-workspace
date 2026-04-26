@@ -30,8 +30,8 @@ class LanguageSwitcher extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
       ),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
-        textDirection: TextDirection.ltr,
+        mainAxisSize: .min,
+        textDirection: .ltr,
         children: languages.map((lang) {
           final isSelected = currentLanguage == lang;
           return GestureDetector(
@@ -53,9 +53,7 @@ class LanguageSwitcher extends StatelessWidget {
                     color: isSelected
                         ? Colors.white
                         : theme.colorScheme.onSurface,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                    fontWeight: isSelected ? .bold : .normal,
                   ),
                 ),
               ),
