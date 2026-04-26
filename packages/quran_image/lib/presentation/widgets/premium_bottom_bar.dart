@@ -15,44 +15,36 @@ class PremiumBottomBar extends StatelessWidget {
     final sw = PerfLogger.startTimer();
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
+    final pageLabel =
+        l10n?.page(state.displayPage.toString()) ?? 'Page ${state.displayPage}';
+    final hizbLabel =
+        l10n?.hizb(state.hizbNumber) ?? 'Hizb ${state.hizbNumber}';
 
-    final bottomBar = Container(
-      margin: EdgeInsets.all(tokens.spaceLarge),
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceTiny,
-        vertical: tokens.spaceTiny,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+    final bottomBar = Semantics(
+      container: true,
+      label: '$pageLabel, $hizbLabel',
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceExtraLarge,
+          tokens.spaceSmall,
+          tokens.spaceExtraLarge,
+          tokens.spaceMedium,
         ),
-      ),
-      child: Row(
-        children: [
-          // Page Number
-          _PageNumber(pageNumber: state.displayPage),
-          const Spacer(),
-          // Juz & Hizb
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            spacing: tokens.spaceMedium,
             children: [
-              Text(
-                l10n?.hizb(state.hizbNumber) ?? 'Hizb ${state.hizbNumber}',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
+              const Expanded(child: _MushafFooterRule(dotNearMedallion: true)),
+              _PageNumberMedallion(pageNumber: state.displayPage),
+              const Expanded(child: _MushafFooterRule(dotNearMedallion: false)),
             ],
           ),
-        ],
+        ),
       ),
     );
+
     PerfLogger.logElapsed(
       sw,
       widgetName: 'PremiumBottomBar',
@@ -62,8 +54,41 @@ class PremiumBottomBar extends StatelessWidget {
   }
 }
 
-class _PageNumber extends StatelessWidget {
-  const _PageNumber({required this.pageNumber});
+class _MushafFooterRule extends StatelessWidget {
+  const _MushafFooterRule({required this.dotNearMedallion});
+
+  final bool dotNearMedallion;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final color = theme.colorScheme.primary.withValues(
+      alpha: tokens.opacityMedium,
+    );
+
+    final divider = Expanded(
+      child: Divider(
+        height: tokens.spaceSmall,
+        thickness: tokens.borderWidthThin,
+        color: color,
+      ),
+    );
+    final dot = Container(
+      width: tokens.spaceExtraSmall,
+      height: tokens.spaceExtraSmall,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+    final gap = SizedBox(width: tokens.spaceSmall);
+
+    return Row(
+      children: dotNearMedallion ? [divider, gap, dot] : [dot, gap, divider],
+    );
+  }
+}
+
+class _PageNumberMedallion extends StatelessWidget {
+  const _PageNumberMedallion({required this.pageNumber});
 
   final int pageNumber;
 
@@ -72,27 +97,36 @@ class _PageNumber extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final medallionSize = tokens.iconSizeExtraLarge;
 
-    return Container(
-      alignment: Alignment.center,
-      padding: EdgeInsets.all(tokens.spaceExtraSmall),
-      decoration: BoxDecoration(
-        color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
-          strokeAlign: BorderSide.strokeAlignOutside,
-          style: BorderStyle.solid,
+    return SizedBox.square(
+      dimension: medallionSize,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+            width: tokens.borderWidthThin,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withValues(alpha: tokens.opacitySubtle),
+              blurRadius: tokens.blurGlass,
+              offset: tokens.shadowOffsetSmall,
+            ),
+          ],
         ),
-      ),
-      child: Center(
-        child: Text(
-          pageNumber.toString(),
-          overflow: TextOverflow.ellipsis,
-          maxLines: 1,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: colorScheme.onSurfaceVariant,
+        child: Center(
+          child: Text(
+            pageNumber.toString(),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+              color: colorScheme.primary,
+            ),
           ),
         ),
       ),

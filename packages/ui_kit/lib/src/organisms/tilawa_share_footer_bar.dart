@@ -54,6 +54,7 @@ class TilawaShareFooterBar extends StatelessWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: tokens.horizontalPadding),
           child: Row(
+            spacing: tokens.contentGap,
             children: [
               Expanded(
                 child: Text(
@@ -65,7 +66,6 @@ class TilawaShareFooterBar extends StatelessWidget {
                   style: primaryStyle,
                 ),
               ),
-              SizedBox(width: tokens.contentGap),
               Flexible(
                 child: Text(
                   secondaryLabel,

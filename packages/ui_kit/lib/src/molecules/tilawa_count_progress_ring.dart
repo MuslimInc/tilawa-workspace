@@ -39,12 +39,13 @@ class TilawaCountProgressRing extends StatelessWidget {
     final progress = totalCount > 0 ? currentCount / totalCount : 0.0;
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: .min,
+      spacing: componentTokens.progressLabelSpacing,
       children: [
         SizedBox.square(
           dimension: componentTokens.outerSize,
           child: Stack(
-            alignment: Alignment.center,
+            alignment: .center,
             children: [
               SizedBox.square(
                 dimension: componentTokens.outerSize,
@@ -67,7 +68,7 @@ class TilawaCountProgressRing extends StatelessWidget {
                 width: componentTokens.innerSize,
                 height: componentTokens.innerSize,
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  shape: .circle,
                   border: isDone
                       ? Border.all(
                           color: (doneForegroundColor ?? colorScheme.onTertiary)
@@ -78,8 +79,8 @@ class TilawaCountProgressRing extends StatelessWidget {
                         )
                       : null,
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: .topLeft,
+                    end: .bottomRight,
                     colors: [
                       effectiveColor,
                       effectiveColor.withValues(
@@ -127,7 +128,6 @@ class TilawaCountProgressRing extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: componentTokens.progressLabelSpacing),
         if (showProgressLabel && !isDone)
           Container(
             padding: componentTokens.progressLabelPadding,

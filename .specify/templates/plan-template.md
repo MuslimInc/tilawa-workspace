@@ -48,7 +48,9 @@
   only ephemeral view state; routes, redirects, and deep links use GoRouter.
 - **Atomic Design and Tilawa UI Kit**: PASS/FAIL - Shared UI goes through the
   Tilawa UI Kit; components are classified as foundation, atom, molecule,
-  organism, or layout primitive; tokens/localization/theme own visual constants.
+  organism, or layout primitive; tokens/localization/theme own visual constants;
+  UI code plans use `Row`/`Column`/`Flex.spacing` and Dart dot shorthands where
+  they improve clarity without changing semantics.
 - **Responsive and Adaptive UI**: PASS/FAIL - Compact, medium, expanded, RTL,
   safe-area, and text-scaling behavior is planned for affected surfaces.
 - **Performance and Low Jank**: PASS/FAIL - Hot paths avoid work in `build`;
