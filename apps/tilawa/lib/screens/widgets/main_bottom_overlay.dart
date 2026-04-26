@@ -36,7 +36,10 @@ class MainBottomOverlay extends StatelessWidget {
             right: 0,
             child: OfflineIndicatorWidget(),
           ),
-        Positioned.fill(child: playerWidget),
+        // Don't use Positioned.fill - let the player manage its own sizing
+        // based on its internal Align widget. This allows the bottom nav bar
+        // to receive touches when the player is collapsed.
+        playerWidget,
       ],
     );
   }
