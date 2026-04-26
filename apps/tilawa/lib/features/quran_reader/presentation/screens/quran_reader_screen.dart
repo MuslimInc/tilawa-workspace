@@ -316,6 +316,38 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     );
   }
 
+  SystemUiOverlayStyle _buildShareSheetSystemUiOverlayStyle(ThemeData theme) {
+    final Color statusBarColor = theme.colorScheme.scrim.withValues(
+      alpha: 0.45,
+    );
+    final Color navigationBarColor = theme.colorScheme.surface;
+
+    final Brightness statusBarColorBrightness =
+        ThemeData.estimateBrightnessForColor(statusBarColor);
+    final Brightness statusBarIconBrightness =
+        statusBarColorBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    final Brightness navigationBarColorBrightness =
+        ThemeData.estimateBrightnessForColor(navigationBarColor);
+    final Brightness navigationBarIconBrightness =
+        navigationBarColorBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    return SystemUiOverlayStyle(
+      statusBarColor: statusBarColor,
+      statusBarIconBrightness: statusBarIconBrightness,
+      statusBarBrightness: statusBarColorBrightness,
+      systemNavigationBarColor: navigationBarColor,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: navigationBarIconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
+  }
+
   Future<void> _prepareForExit() {
     return _pendingExitPreparation ??= _restoreAppSystemUiMode(
       waitForSystemUiFrame: true,
@@ -882,6 +914,9 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final shareCubit = context.read<ShareCubit>();
     final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     final navigator = Navigator.of(context);
+    final theme = Theme.of(context);
+    final readerOverlayStyle =
+        _cachedReaderSystemUiStyle ?? const SystemUiOverlayStyle();
 
     // Capture preview bytes concurrently with the route transition so the
     // push is not blocked by GPU readback + PNG encoding (~50–100ms on
@@ -909,6 +944,9 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
           '[SHARE_OPEN] pushing route | took=${DateTime.now().millisecondsSinceEpoch - t0}ms before push',
     );
     fontLoaderBloc.pauseBackgroundWarmUp();
+    SystemChrome.setSystemUIOverlayStyle(
+      _buildShareSheetSystemUiOverlayStyle(theme),
+    );
     try {
       await showModalBottomSheet<void>(
         context: context,
@@ -961,6 +999,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         ),
       );
     } finally {
+      SystemChrome.setSystemUIOverlayStyle(readerOverlayStyle);
       fontLoaderBloc.resumeBackgroundWarmUp();
     }
 

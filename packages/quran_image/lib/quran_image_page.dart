@@ -8,6 +8,7 @@ import 'package:quran_image/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_qcf/quran_qcf.dart'
     hide SurahHeaderBannerLayoutPolicy, CalibratedSurahHeaderBannerLayoutPolicy;
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/constants/surah_header_constants.dart';
 import 'core/constants/surah_names.dart';
@@ -222,6 +223,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
                 surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
                 imageCacheRepository: _imageCacheRepository,
                 devicePixelRatio: _devicePixelRatio,
+                isLandscape: _isLandscape,
               );
             },
           ),
@@ -246,31 +248,31 @@ class QuranAppBar extends StatelessWidget {
     final surahNames = surahNumbers
         .map((s) => SurahNames.getSurahName(s, 'ar'))
         .join(' ');
-    final height = MediaQuery.sizeOf(context).height * 0.04;
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final textStyle = theme.textTheme.titleSmall?.copyWith(
       color: theme.colorScheme.primary,
       fontWeight: FontWeight.w600,
     );
 
-    return SizedBox(
-      height: height,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                _arabicJuzLabel(pageInfo.juzNumber),
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.start,
-                style: textStyle,
-              ),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceSmall,
+        vertical: tokens.spaceTiny,
+      ),
+      child: Row(
+        mainAxisAlignment: .spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              _arabicJuzLabel(pageInfo.juzNumber),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.start,
+              style: textStyle,
             ),
-            Text(surahNames, overflow: TextOverflow.ellipsis, style: textStyle),
-          ],
-        ),
+          ),
+          Text(surahNames, overflow: TextOverflow.ellipsis, style: textStyle),
+        ],
       ),
     );
   }

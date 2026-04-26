@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
@@ -125,77 +126,56 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final padding = MediaQuery.paddingOf(context);
+    final overlayStyle = _buildSystemUiOverlayStyle(theme);
 
-    return Material(
-      color: Colors.transparent,
-      child: Stack(
-        clipBehavior: .none,
-        children: [
-          // 1. Background Layer (Isolated)
-          if (widget.background != null)
-            Positioned.fill(child: RepaintBoundary(child: widget.background!)),
-
-          // 2. Gesture/Preview Layer (Wrapped in RepaintBoundary to prevent repaints during overlay animations)
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: GestureDetector(
-                behavior: .translucent,
-                onTap: () => _setVisible(!_isVisible),
-                child: widget.preview,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Material(
+        color: Colors.transparent,
+        child: Stack(
+          clipBehavior: .none,
+          children: [
+            // 1. Background Layer (Isolated)
+            if (widget.background != null)
+              Positioned.fill(
+                child: RepaintBoundary(child: widget.background!),
               ),
-            ),
-          ),
 
-          // 3. Top Overlay (Slide only, no Fade)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SlideTransition(
-              position: _topOffset,
-              child: IgnorePointer(
-                ignoring: !_isVisible,
-                child: RepaintBoundary(
-                  child: Listener(
-                    onPointerDown: (_) => _setVisible(true),
-                    child: _hasBeenShown
-                        ? _OverlayPanel(
-                            isTop: true,
-                            child: SafeArea(
-                              bottom: false,
-                              child: _TopAppBar(
-                                title: widget.title,
-                                leading: widget.leading,
-                                trailing: widget.trailing,
-                                onClose: widget.onClose,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
-                  ),
+            // 2. Gesture/Preview Layer (Wrapped in RepaintBoundary to prevent repaints during overlay animations)
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: GestureDetector(
+                  behavior: .translucent,
+                  onTap: () => _setVisible(!_isVisible),
+                  child: widget.preview,
                 ),
               ),
             ),
-          ),
 
-          // 4. Bottom Overlay (Slide only, no Fade)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: -padding.bottom,
-            child: SlideTransition(
-              position: _bottomOffset,
-              child: IgnorePointer(
-                ignoring: !_isVisible,
-                child: RepaintBoundary(
-                  child: Listener(
-                    onPointerDown: (_) => _setVisible(true),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: padding.bottom),
+            // 3. Top Overlay (Slide only, no Fade)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SlideTransition(
+                position: _topOffset,
+                child: IgnorePointer(
+                  ignoring: !_isVisible,
+                  child: RepaintBoundary(
+                    child: Listener(
+                      onPointerDown: (_) => _setVisible(true),
                       child: _hasBeenShown
                           ? _OverlayPanel(
-                              isTop: false,
-                              child: widget.bottomPanel,
+                              isTop: true,
+                              child: SafeArea(
+                                bottom: false,
+                                child: _TopAppBar(
+                                  title: widget.title,
+                                  leading: widget.leading,
+                                  trailing: widget.trailing,
+                                  onClose: widget.onClose,
+                                ),
+                              ),
                             )
                           : const SizedBox.shrink(),
                     ),
@@ -203,22 +183,68 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                 ),
               ),
             ),
-          ),
 
-          if (widget.floatingActionButton != null)
+            // 4. Bottom Overlay (Slide only, no Fade)
             Positioned(
-              right: theme.tokens.spaceMedium,
-              bottom: theme.tokens.spaceMedium + padding.bottom,
-              child: ScaleTransition(
-                scale: _controller,
+              left: 0,
+              right: 0,
+              bottom: -padding.bottom,
+              child: SlideTransition(
+                position: _bottomOffset,
                 child: IgnorePointer(
                   ignoring: !_isVisible,
-                  child: RepaintBoundary(child: widget.floatingActionButton!),
+                  child: RepaintBoundary(
+                    child: Listener(
+                      onPointerDown: (_) => _setVisible(true),
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: padding.bottom),
+                        child: _hasBeenShown
+                            ? _OverlayPanel(
+                                isTop: false,
+                                child: widget.bottomPanel,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-        ],
+
+            if (widget.floatingActionButton != null)
+              Positioned(
+                right: theme.tokens.spaceMedium,
+                bottom: theme.tokens.spaceMedium + padding.bottom,
+                child: ScaleTransition(
+                  scale: _controller,
+                  child: IgnorePointer(
+                    ignoring: !_isVisible,
+                    child: RepaintBoundary(child: widget.floatingActionButton!),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
+    );
+  }
+
+  SystemUiOverlayStyle _buildSystemUiOverlayStyle(ThemeData theme) {
+    final barColor = theme.colorScheme.surface;
+    final barBrightness = ThemeData.estimateBrightnessForColor(barColor);
+    final iconBrightness = barBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    return SystemUiOverlayStyle(
+      statusBarColor: barColor,
+      statusBarIconBrightness: iconBrightness,
+      statusBarBrightness: barBrightness,
+      systemNavigationBarColor: barColor,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: iconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
     );
   }
 }

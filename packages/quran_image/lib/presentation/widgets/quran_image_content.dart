@@ -19,6 +19,7 @@ class QuranImageContent extends StatelessWidget {
     required this.imageCacheRepository,
     required this.devicePixelRatio,
     this.backgroundColor,
+    this.isLandscape = false,
   });
 
   final int pageNumber;
@@ -33,10 +34,11 @@ class QuranImageContent extends StatelessWidget {
   final QuranImageCacheRepository imageCacheRepository;
   final double devicePixelRatio;
   final Color? backgroundColor;
+  final bool isLandscape;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final contentStack = Container(
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Stack(
         clipBehavior: Clip.none,
@@ -83,5 +85,16 @@ class QuranImageContent extends StatelessWidget {
         ],
       ),
     );
+
+    if (isLandscape) {
+      return SingleChildScrollView(
+        child: SizedBox(
+          height: lineHeight * SurahHeaderConstants.lineCount,
+          child: contentStack,
+        ),
+      );
+    }
+
+    return contentStack;
   }
 }

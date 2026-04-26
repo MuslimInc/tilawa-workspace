@@ -47,20 +47,20 @@ class _ShareOptionsSheetState extends State<ShareOptionsSheet> {
 
     final radius = tokens.radiusExtraLarge + tokens.spaceSmall;
 
-    return SafeArea(
-      top: false,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceLarge,
+          tokens.spaceSmall,
+          tokens.spaceLarge,
+          tokens.spaceLarge,
         ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            tokens.spaceLarge,
-            tokens.spaceSmall,
-            tokens.spaceLarge,
-            tokens.spaceLarge,
-          ),
+        child: SafeArea(
+          top: false,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,

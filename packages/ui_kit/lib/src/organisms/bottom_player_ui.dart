@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa_core/entities/audio.dart';
+
 import '../foundation/design_tokens.dart';
 
 /// UI-only widget for the bottom player that can be used in previews
@@ -66,7 +67,7 @@ class BottomPlayerUi extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.cardColor.withValues(alpha: tokens.opacityGlass),
+        color: theme.cardColor,
         borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(

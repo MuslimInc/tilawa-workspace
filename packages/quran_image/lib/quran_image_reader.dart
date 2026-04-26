@@ -45,7 +45,7 @@ class QuranImageReader extends StatefulWidget {
 }
 
 class _QuranImageReaderState extends State<QuranImageReader>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   late final PageController _pageController;
   late int _lastSettledPageIndex;
 
@@ -77,9 +77,15 @@ class _QuranImageReaderState extends State<QuranImageReader>
   bool _isAppVisible = true;
 
   // Throttle slider preview updates to avoid excessive rebuilds during drags.
-  // 50ms limit = max 20 updates/second, down from 30-60 updates/second.
+  // 150ms limit = max ~7 updates/second. Slider generates 30-60/second, so this
+  // significantly reduces rebuild pressure while maintaining good preview responsiveness.
   DateTime _lastPreviewUpdateTime = DateTime(2000);
-  static const _previewUpdateThrottle = Duration(milliseconds: 50);
+  static const _previewUpdateThrottle = Duration(milliseconds: 150);
+
+  // Cache recently previewed pages to avoid redundant updates during session.
+  // Prevents same page from appearing in logs multiple times.
+  final LinkedHashSet<int> _previewedPagesCache = LinkedHashSet<int>();
+  static const int _maxCachedPages = 50;
 
   // Last page number dispatched to prewarmCurrentTarget. Guards against
   // firing on every sub-pixel scroll tick when the rounded page hasn't changed.
@@ -135,6 +141,14 @@ class _QuranImageReaderState extends State<QuranImageReader>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    // Register for route changes so we can reapply system UI when returning from dialogs
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      final routeObserver = RouteObserver<ModalRoute<dynamic>>();
+      routeObserver.subscribe(this, route as PageRoute<dynamic>);
+    }
+
     final view = View.of(context);
     final dpr = view.devicePixelRatio;
     // Quran line images are portrait-page-width images. Use the minimum of
@@ -239,6 +253,14 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   @override
+  void didPopNext() {
+    // Reapply system UI configuration when returning from a dialog or another route.
+    // This ensures the status bar and navigation bar colors are restored after the
+    // video reel generator or other overlay is dismissed.
+    _applySystemUiConfig();
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _backgroundMarkerWarmUpTimer?.cancel();
@@ -293,13 +315,20 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   void _applySystemUiOverlayStyle() {
+    final scaffoldColor = Theme.of(context).scaffoldBackgroundColor;
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarColor: scaffoldColor,
+        systemNavigationBarColor: scaffoldColor,
+        statusBarIconBrightness: isDarkTheme
+            ? Brightness.light
+            : Brightness.dark,
+        statusBarBrightness: isDarkTheme ? Brightness.dark : Brightness.light,
+        systemNavigationBarIconBrightness: isDarkTheme
+            ? Brightness.light
+            : Brightness.dark,
         systemNavigationBarContrastEnforced: false,
         systemStatusBarContrastEnforced: false,
       ),
@@ -415,7 +444,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   void _updatePreviewPage(int displayPage) {
-    // Throttle: max 20 updates/second (50ms interval) to reduce rebuild pressure.
+    // Throttle: max ~7 updates/second (150ms interval) to reduce rebuild pressure.
     final now = DateTime.now();
     if (now.difference(_lastPreviewUpdateTime) < _previewUpdateThrottle) {
       return;
@@ -424,6 +453,11 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
     final currentState = context.read<NavigationBloc>().state;
     if (currentState is! NavigationLoaded) return;
+
+    // Skip if already cached during this session — avoids logging redundant previews
+    if (_previewedPagesCache.contains(displayPage)) {
+      return;
+    }
 
     final currentPreviewState = _previewPageStateNotifier.value;
     if (displayPage == currentState.pageState.currentPage &&
@@ -444,6 +478,13 @@ class _QuranImageReaderState extends State<QuranImageReader>
       pageNumber: displayPage,
       cacheWidth: _cacheWidth,
     );
+
+    // Add to cache with LRU eviction to prevent unbounded growth
+    _previewedPagesCache.add(displayPage);
+    if (_previewedPagesCache.length > _maxCachedPages) {
+      // Remove oldest entry (LinkedHashSet preserves insertion order)
+      _previewedPagesCache.remove(_previewedPagesCache.first);
+    }
   }
 
   void _clearPreviewPage() {
@@ -563,6 +604,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final pageIndex = pageNumber - 1;
     _lastSettledPageIndex = pageIndex;
     _clearPreviewPage();
+    // Clear preview cache on page change to allow re-previewing around new page
+    _previewedPagesCache.clear();
     PerfLogger.log(widgetName: 'PageView', message: 'swiped page=$pageNumber');
     context.read<NavigationBloc>().add(PageChanged(pageNumber));
     _imagePrewarmer.prewarmSettledWindow(

@@ -202,21 +202,23 @@ class _PremiumNavigationControls extends StatelessWidget {
                             ),
                             SizedBox(height: tokens.spaceSmall),
                           ],
-                          NavigationSliderOverlay(
-                            screenWidth: constraints.maxWidth,
-                            state: effectivePageState,
-                            canGoToPreviousPage:
-                                committedPageState.currentPage > 1,
-                            canGoToNextPage:
-                                committedPageState.currentPage <
-                                committedPageState.totalPages,
-                            onPreviewPageChanged: onPreviewPageChanged,
-                            onPageNavigationRequested:
-                                onPageNavigationRequested,
-                            onPreviousPageRequested: onPreviousPageRequested,
-                            onNextPageRequested: onNextPageRequested,
-                            onInteractionStart: onInteractionStart,
-                            onInteractionEnd: onInteractionEnd,
+                          RepaintBoundary(
+                            child: NavigationSliderOverlay(
+                              screenWidth: constraints.maxWidth,
+                              state: effectivePageState,
+                              canGoToPreviousPage:
+                                  committedPageState.currentPage > 1,
+                              canGoToNextPage:
+                                  committedPageState.currentPage <
+                                  committedPageState.totalPages,
+                              onPreviewPageChanged: onPreviewPageChanged,
+                              onPageNavigationRequested:
+                                  onPageNavigationRequested,
+                              onPreviousPageRequested: onPreviousPageRequested,
+                              onNextPageRequested: onNextPageRequested,
+                              onInteractionStart: onInteractionStart,
+                              onInteractionEnd: onInteractionEnd,
+                            ),
                           ),
                         ],
                       );

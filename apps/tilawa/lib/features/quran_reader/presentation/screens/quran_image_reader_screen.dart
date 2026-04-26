@@ -113,6 +113,59 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     );
   }
 
+  SystemUiOverlayStyle _buildReaderSystemUiOverlayStyle(ThemeData theme) {
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Brightness iconBrightness = isDark
+        ? Brightness.light
+        : Brightness.dark;
+    final Brightness statusBarBrightness = isDark
+        ? Brightness.dark
+        : Brightness.light;
+
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: iconBrightness,
+      statusBarBrightness: statusBarBrightness,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: iconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
+  }
+
+  SystemUiOverlayStyle _buildShareSheetSystemUiOverlayStyle(ThemeData theme) {
+    final Color statusBarColor = theme.colorScheme.scrim.withValues(
+      alpha: 0.45,
+    );
+    final Color navigationBarColor = theme.colorScheme.surface;
+
+    final Brightness statusBarColorBrightness =
+        ThemeData.estimateBrightnessForColor(statusBarColor);
+    final Brightness statusBarIconBrightness =
+        statusBarColorBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    final Brightness navigationBarColorBrightness =
+        ThemeData.estimateBrightnessForColor(navigationBarColor);
+    final Brightness navigationBarIconBrightness =
+        navigationBarColorBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    return SystemUiOverlayStyle(
+      statusBarColor: statusBarColor,
+      statusBarIconBrightness: statusBarIconBrightness,
+      statusBarBrightness: statusBarColorBrightness,
+      systemNavigationBarColor: navigationBarColor,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: navigationBarIconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
+  }
+
   Future<void> _showShareOptions(int currentPage) async {
     // Read context-dependent values before the async gap.
     final pageData = getPageData(currentPage);
@@ -124,8 +177,13 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     final shareCubit = context.read<ShareCubit>();
     final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     final navigator = Navigator.of(context);
+    final theme = Theme.of(context);
+    final readerOverlayStyle = _buildReaderSystemUiOverlayStyle(theme);
 
     fontLoaderBloc.pauseBackgroundWarmUp();
+    SystemChrome.setSystemUIOverlayStyle(
+      _buildShareSheetSystemUiOverlayStyle(theme),
+    );
     try {
       await showModalBottomSheet<void>(
         context: context,
@@ -176,6 +234,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
         ),
       );
     } finally {
+      SystemChrome.setSystemUIOverlayStyle(readerOverlayStyle);
       fontLoaderBloc.resumeBackgroundWarmUp();
     }
   }

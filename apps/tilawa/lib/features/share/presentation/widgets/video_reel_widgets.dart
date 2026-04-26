@@ -130,6 +130,7 @@ class ComposerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     if (isBusy) {
       return Padding(
@@ -153,7 +154,7 @@ class ComposerControls extends StatelessWidget {
       ),
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceMedium,
+        vertical: tokens.spaceMedium + bottomPadding,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

@@ -301,10 +301,10 @@ class _ScreenshotLivePreview extends StatelessWidget {
     final tokens = theme.tokens;
     final readerTheme = QuranReaderTheme.of(context);
 
-    return SafeArea(
-      bottom: false,
-      child: ColoredBox(
-        color: readerTheme.pageBackground,
+    return ColoredBox(
+      color: readerTheme.pageBackground,
+      child: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             MetadataChip(

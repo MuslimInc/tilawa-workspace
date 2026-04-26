@@ -27,9 +27,9 @@ class PremiumBottomBar extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           tokens.spaceExtraLarge,
-          tokens.spaceSmall,
+          tokens.spaceTiny,
           tokens.spaceExtraLarge,
-          tokens.spaceMedium,
+          tokens.spaceTiny,
         ),
         child: Directionality(
           textDirection: TextDirection.ltr,

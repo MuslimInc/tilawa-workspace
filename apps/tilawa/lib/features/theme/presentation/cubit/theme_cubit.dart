@@ -9,7 +9,7 @@ class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
     this.primaryColor = AppColors.defaultPrimary,
-    this.useSystemTheme = true,
+    this.useSystemTheme = false,
     this.preset = AppThemePreset.defaultMode,
   });
   final ThemeMode mode;
@@ -29,7 +29,7 @@ class AppColorOption {
 
 @injectable
 class ThemeCubit extends HydratedCubit<ThemeState> {
-  ThemeCubit() : super(const ThemeState(mode: ThemeMode.system));
+  ThemeCubit() : super(const ThemeState(mode: ThemeMode.light));
 
   static const List<AppColorOption> colorOptions = [
     AppColorOption(name: 'Cyan', color: AppColors.primaryCyan),
@@ -43,13 +43,15 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     try {
       final modeValue = json['mode'] as String?;
       final colorValue = json['primaryColor'] as int?;
-      final bool useSystemTheme = json['useSystemTheme'] as bool? ?? true;
 
       final ThemeMode mode = switch (modeValue) {
         'light' => ThemeMode.light,
         'dark' => ThemeMode.dark,
-        _ => ThemeMode.system,
+        _ => ThemeMode.light,
       };
+
+      final bool useSystemTheme =
+          json['useSystemTheme'] as bool? ?? mode == ThemeMode.system;
 
       final Color primaryColor = colorValue != null
           ? Color(colorValue)
@@ -68,7 +70,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         preset: preset,
       );
     } catch (e) {
-      return const ThemeState(mode: ThemeMode.system);
+      return const ThemeState(mode: ThemeMode.light);
     }
   }
 

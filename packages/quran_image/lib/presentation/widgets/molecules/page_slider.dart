@@ -46,15 +46,17 @@ class PageSlider extends StatelessWidget {
         ),
         overlayShape: RoundSliderOverlayShape(overlayRadius: overlayRadius),
       ),
-      child: Slider(
-        value: currentPage.toDouble(),
-        min: 1,
-        max: totalPages.toDouble(),
-        // divisions intentionally omitted — 603 tick marks are invisible at
-        // this density and cause expensive CustomPainter repaints on every
-        // animation frame when the nav overlay slides in/out.
-        onChanged: onChanged,
-        onChangeEnd: onChangeEnd,
+      child: RepaintBoundary(
+        child: Slider(
+          value: currentPage.toDouble(),
+          min: 1,
+          max: totalPages.toDouble(),
+          // divisions intentionally omitted — 603 tick marks are invisible at
+          // this density and cause expensive CustomPainter repaints on every
+          // animation frame when the nav overlay slides in/out.
+          onChanged: onChanged,
+          onChangeEnd: onChangeEnd,
+        ),
       ),
     );
   }
