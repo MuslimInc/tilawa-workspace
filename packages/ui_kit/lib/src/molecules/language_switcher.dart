@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../foundation/design_tokens.dart';
+
+import '../foundation/component_tokens.dart';
 
 class LanguageSwitcher extends StatelessWidget {
   const LanguageSwitcher({
@@ -18,16 +19,15 @@ class LanguageSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final minItemWidth = tokens.iconSizeExtraLarge * 2 + tokens.spaceExtraSmall;
+    final tokens = theme.componentTokens.segmentedControl;
 
     return Container(
-      padding: EdgeInsets.all(tokens.spaceExtraSmall),
+      padding: tokens.containerPadding,
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest.withValues(
-          alpha: tokens.opacityMedium,
+          alpha: tokens.containerOpacity,
         ),
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+        borderRadius: BorderRadius.circular(tokens.containerRadius),
       ),
       child: Row(
         mainAxisSize: .min,
@@ -37,23 +37,22 @@ class LanguageSwitcher extends StatelessWidget {
           return GestureDetector(
             onTap: () => onLanguageChanged(lang),
             child: Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: tokens.spaceLarge,
-                vertical: tokens.spaceSmall,
-              ),
-              constraints: BoxConstraints(minWidth: minItemWidth),
+              padding: tokens.itemPadding,
+              constraints: BoxConstraints(minWidth: tokens.minItemWidth),
               decoration: BoxDecoration(
                 color: isSelected ? theme.primaryColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                borderRadius: BorderRadius.circular(tokens.itemRadius),
               ),
               child: Center(
                 child: Text(
                   getLanguageName(lang),
                   style: TextStyle(
                     color: isSelected
-                        ? Colors.white
+                        ? theme.colorScheme.onPrimary
                         : theme.colorScheme.onSurface,
-                    fontWeight: isSelected ? .bold : .normal,
+                    fontWeight: isSelected
+                        ? tokens.selectedFontWeight
+                        : tokens.unselectedFontWeight,
                   ),
                 ),
               ),

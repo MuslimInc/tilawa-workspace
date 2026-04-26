@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import 'tilawa_chip.dart';
 
 class MetadataChip extends StatelessWidget {
   const MetadataChip({
@@ -21,16 +23,20 @@ class MetadataChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final designTokens = theme.tokens;
+    final componentTokens = theme.componentTokens.chip;
     final color = foregroundColor ?? theme.colorScheme.onSurface;
 
-    return Row(
-      mainAxisSize: .min,
-      spacing: tokens.spaceSmall,
-      children: [
-        if (icon != null) Icon(icon, size: tokens.iconSizeSmall, color: color),
-        Text(label, maxLines: 1, overflow: .ellipsis),
-      ],
+    return TilawaChip(
+      label: label,
+      icon: icon,
+      backgroundColor: backgroundColor ?? Colors.transparent,
+      foregroundColor: color,
+      borderColor: borderColor,
+      padding: EdgeInsets.zero,
+      borderRadius: componentTokens.roundedRadius,
+      iconSize: designTokens.iconSizeSmall,
+      textStyle: theme.textTheme.bodyMedium?.copyWith(color: color),
     );
   }
 }

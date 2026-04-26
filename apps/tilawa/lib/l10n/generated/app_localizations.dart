@@ -3140,6 +3140,36 @@ abstract class AppLocalizations {
   /// **'Encoding vertical video (this may take a moment)...'**
   String get encodingVerticalVideo;
 
+  /// Error message when reel generation fails for a general encoding reason
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate reel video. Please try again.'**
+  String get reelGenerationFailed;
+
+  /// Error message when captured screenshot frame format is invalid for reel encoding
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to process captured frame data for reel generation. Please retry.'**
+  String get reelGenerationFailedInvalidFrame;
+
+  /// Error message when reel generation starts without any screenshot frame
+  ///
+  /// In en, this message translates to:
+  /// **'No captured frame was found for reel generation.'**
+  String get reelGenerationFailedMissingScreenshot;
+
+  /// Error message when encoding reports success but the output video file is unusable
+  ///
+  /// In en, this message translates to:
+  /// **'Generated reel output is invalid and could not be opened. Please try again.'**
+  String get reelGenerationFailedInvalidOutput;
+
+  /// Shown in review screen when generated video preview initialization fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load generated video preview.'**
+  String get reelPreviewLoadFailed;
+
   /// Status message after the reel has been generated successfully
   ///
   /// In en, this message translates to:

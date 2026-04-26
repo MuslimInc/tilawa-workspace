@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -27,7 +30,7 @@ class ImmersiveComposerScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.overlaysVisible,
     this.onVisibilityChanged,
-    this.autoHideDuration = const Duration(seconds: 3),
+    this.autoHideDuration,
     this.disableBlur = false,
   });
 
@@ -51,7 +54,7 @@ class ImmersiveComposerScaffold extends StatefulWidget {
   /// timer elapses. Always fires, whether controlled or not.
   final ValueChanged<bool>? onVisibilityChanged;
 
-  final Duration autoHideDuration;
+  final Duration? autoHideDuration;
   final bool disableBlur;
 
   @override
@@ -64,19 +67,21 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   late final AnimationController _controller;
   late final Animation<Offset> _topOffset;
   late final Animation<Offset> _bottomOffset;
+  Timer? _autoHideTimer;
   bool _isVisible = true;
   bool _hasBeenShown = true;
 
   @override
   void initState() {
     super.initState();
+    _isVisible = widget.overlaysVisible ?? true;
+    _hasBeenShown = _isVisible;
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: TilawaImmersiveComposerTokens.defaults().transitionDuration,
     );
 
-    // Initial state: visible
-    _controller.value = 1.0;
+    _controller.value = _isVisible ? 1.0 : 0.0;
 
     _topOffset = Tween<Offset>(
       begin: const Offset(0, -1.2), // Off-screen top
@@ -87,6 +92,8 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
       begin: const Offset(0, 1.2), // Off-screen bottom
       end: .zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
+
+    _scheduleAutoHide();
   }
 
   @override
@@ -95,21 +102,31 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
     if (widget.overlaysVisible != oldWidget.overlaysVisible &&
         widget.overlaysVisible != null) {
       if (widget.overlaysVisible!) {
+        _isVisible = true;
+        _hasBeenShown = true;
         _controller.forward();
       } else {
+        _isVisible = false;
         _controller.reverse();
       }
+      _scheduleAutoHide();
+    } else if (widget.autoHideDuration != oldWidget.autoHideDuration) {
+      _scheduleAutoHide();
     }
   }
 
   @override
   void dispose() {
+    _autoHideTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   void _setVisible(bool next) {
-    if (next == _isVisible) return;
+    if (next == _isVisible) {
+      if (next) _scheduleAutoHide();
+      return;
+    }
     setState(() {
       _isVisible = next;
       if (next) _hasBeenShown = true;
@@ -120,6 +137,20 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
       _controller.reverse();
     }
     widget.onVisibilityChanged?.call(next);
+    _scheduleAutoHide();
+  }
+
+  void _scheduleAutoHide() {
+    _autoHideTimer?.cancel();
+    final autoHideDuration =
+        widget.autoHideDuration ??
+        TilawaImmersiveComposerTokens.defaults().defaultAutoHideDuration;
+    if (!_isVisible || autoHideDuration <= Duration.zero) return;
+
+    _autoHideTimer = Timer(autoHideDuration, () {
+      if (!mounted || !_isVisible) return;
+      _setVisible(false);
+    });
   }
 
   @override
@@ -136,6 +167,14 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
           clipBehavior: .none,
           children: [
             // 1. Background Layer (Isolated)
+            if (widget.backgroundGradient != null)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: widget.backgroundGradient,
+                  ),
+                ),
+              ),
             if (widget.background != null)
               Positioned.fill(
                 child: RepaintBoundary(child: widget.background!),
@@ -166,11 +205,12 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                       onPointerDown: (_) => _setVisible(true),
                       child: _hasBeenShown
                           ? _OverlayPanel(
-                              isTop: true,
+                              disableBlur: widget.disableBlur,
                               child: SafeArea(
                                 bottom: false,
                                 child: _TopAppBar(
                                   title: widget.title,
+                                  subtitle: widget.subtitle,
                                   leading: widget.leading,
                                   trailing: widget.trailing,
                                   onClose: widget.onClose,
@@ -200,7 +240,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                         padding: EdgeInsets.only(bottom: padding.bottom),
                         child: _hasBeenShown
                             ? _OverlayPanel(
-                                isTop: false,
+                                disableBlur: widget.disableBlur,
                                 child: widget.bottomPanel,
                               )
                             : const SizedBox.shrink(),
@@ -251,41 +291,59 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
 
 /// Simplified panel that avoids BackdropFilter and uses opaque background.
 class _OverlayPanel extends StatelessWidget {
-  const _OverlayPanel({required this.isTop, required this.child});
+  const _OverlayPanel({required this.disableBlur, required this.child});
 
-  final bool isTop;
+  final bool disableBlur;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final componentTokens = theme.componentTokens.immersiveComposer;
 
     // Cache border color calculation to avoid per-frame recalculation
-    final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.1);
+    final borderColor = theme.colorScheme.outlineVariant.withValues(
+      alpha: componentTokens.overlayBorderOpacity,
+    );
 
-    return DecoratedBox(
+    final panel = DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(
+          alpha: disableBlur ? 1 : componentTokens.backgroundOverlayOpacity,
+        ),
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
         border: Border.all(color: borderColor),
       ),
       child: child,
     );
+
+    if (disableBlur) return panel;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: tokens.blurGlass * componentTokens.backgroundBlurScale,
+          sigmaY: tokens.blurGlass * componentTokens.backgroundBlurScale,
+        ),
+        child: panel,
+      ),
+    );
   }
 }
-
-// ... _maybeBackgroundBlur remains for internal use but is effectively bypassed by logic ...
 
 class _TopAppBar extends StatelessWidget {
   const _TopAppBar({
     required this.title,
+    required this.subtitle,
     required this.leading,
     required this.trailing,
     required this.onClose,
   });
 
   final String title;
+  final String? subtitle;
   final Widget? leading;
   final Widget? trailing;
   final VoidCallback? onClose;
@@ -297,8 +355,13 @@ class _TopAppBar extends StatelessWidget {
     final componentTokens = theme.componentTokens.immersiveComposer;
 
     // Cache border color and text style to avoid per-frame recalculation
-    final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.1);
+    final borderColor = theme.colorScheme.outlineVariant.withValues(
+      alpha: componentTokens.overlayBorderOpacity,
+    );
     final titleStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: .bold);
+    final subtitleStyle = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -319,7 +382,20 @@ class _TopAppBar extends StatelessWidget {
                   onPressed: onClose,
                 ),
             Expanded(
-              child: Text(title, textAlign: .center, style: titleStyle),
+              child: Column(
+                mainAxisSize: .min,
+                children: [
+                  Text(title, textAlign: .center, style: titleStyle),
+                  if (subtitle != null && subtitle!.isNotEmpty)
+                    Text(
+                      subtitle!,
+                      textAlign: .center,
+                      maxLines: 1,
+                      overflow: .ellipsis,
+                      style: subtitleStyle,
+                    ),
+                ],
+              ),
             ),
             trailing ??
                 SizedBox(
@@ -351,7 +427,14 @@ class _RoundHeaderButton extends StatelessWidget {
         shape: .circle,
         color: theme.colorScheme.surfaceContainerHighest, // Opaque
       ),
-      child: IconButton(onPressed: onPressed, iconSize: 20, icon: Icon(icon)),
+      child: IconButton(
+        onPressed: onPressed,
+        iconSize:
+            componentTokens.headerButtonSize -
+            componentTokens.headerIconSizeOffset -
+            componentTokens.headerIconSizeOffset,
+        icon: Icon(icon),
+      ),
     );
   }
 }

@@ -46,35 +46,48 @@ class _ReciterPickerSheetState extends State<ReciterPickerSheet> {
             ),
             SizedBox(height: tokens.spaceMedium),
             Expanded(
-              child: ListView.builder(
-                itemCount: filtered.length,
-                itemBuilder: (context, i) {
-                  final o = filtered[i];
-                  final sel = matchesShareReciterOption(
-                    o,
-                    selectedReciterName: widget.selectedReciterName,
-                    selectedServerUrl: widget.selectedServerUrl,
-                  );
-                  return ListTile(
-                    title: Text(
-                      o.name,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        fontWeight: sel ? FontWeight.w700 : null,
-                        color: sel
-                            ? Theme.of(context).colorScheme.primary
-                            : null,
+              child: filtered.isEmpty
+                  ? Center(
+                      child: Text(
+                        _query.trim().isEmpty
+                            ? context.l10n.noRecitersFound
+                            : context.l10n.noRecitersMatchSearch,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
+                    )
+                  : ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (context, i) {
+                        final o = filtered[i];
+                        final sel = matchesShareReciterOption(
+                          o,
+                          selectedReciterName: widget.selectedReciterName,
+                          selectedServerUrl: widget.selectedServerUrl,
+                        );
+                        return ListTile(
+                          title: Text(
+                            o.name,
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(
+                                  fontWeight: sel ? FontWeight.w700 : null,
+                                  color: sel
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                ),
+                          ),
+                          trailing: sel
+                              ? Icon(
+                                  Icons.check_circle_rounded,
+                                  color: Theme.of(context).colorScheme.primary,
+                                )
+                              : null,
+                          onTap: () => Navigator.pop(context, o),
+                        );
+                      },
                     ),
-                    trailing: sel
-                        ? Icon(
-                            Icons.check_circle_rounded,
-                            color: Theme.of(context).colorScheme.primary,
-                          )
-                        : null,
-                    onTap: () => Navigator.pop(context, o),
-                  );
-                },
-              ),
             ),
           ],
         ),

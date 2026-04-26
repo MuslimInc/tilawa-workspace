@@ -287,7 +287,7 @@ class ScreenshotService {
   }) async {
     final imageWidth = pageImage.width.toDouble();
     final imageHeight = pageImage.height.toDouble();
-    final footerTokens = TilawaShareFooterBarTokens.defaults();
+    final footerTokens = TilawaFooterBarTokens.defaults();
     final stripHeight = footerTokens.height * pixelRatio;
     final totalHeight = imageHeight + stripHeight;
     final horizontalPadding = footerTokens.horizontalPadding * pixelRatio;

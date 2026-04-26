@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widget_previews.dart';
-import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 PreviewThemeData themeData() {
@@ -17,22 +16,13 @@ PreviewThemeData themeData() {
   theme: themeData,
 )
 Widget preview() {
-  // Example AudioEntity for preview
-  const audio = AudioEntity(
-    id: 'preview-1',
-    title: 'Surah Al-Fatiha',
-    url: 'https://example.com/audio.mp3',
-    duration: Duration(minutes: 3),
-    artist: 'Abdul Basit',
-    artUri: 'https://example.com/art.jpg',
-  );
-
   return Scaffold(
     body: Padding(
       padding: const EdgeInsets.all(8.0),
       child: Center(
-        child: BottomPlayerUi(
-          audio: audio,
+        child: TilawaMediaPlayerBar(
+          title: 'Surah Al-Fatiha',
+          subtitle: 'Abdul Basit',
           progress: 0.5,
           isPlaying: true,
           canGoPrevious: true,

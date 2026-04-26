@@ -264,6 +264,7 @@ void main() {
       expect(tokens.innerSize, 62.0);
       expect(tokens.ringStrokeWidth, 10.0);
       expect(tokens.activeGradientEndOpacity, 0.8);
+      expect(tokens.countLineHeight, 1.0);
     });
 
     test('copyWith updates values preserving others', () {
@@ -281,6 +282,7 @@ void main() {
         ringStrokeWidth: 8.0,
         doneIconSize: 40.0,
         countFontSize: 30.0,
+        countLineHeight: 0.9,
         doneBorderWidth: 1.0,
         doneBorderOpacity: 0.2,
         activeGradientEndOpacity: 0.7,
@@ -296,6 +298,7 @@ void main() {
         ringStrokeWidth: 12.0,
         doneIconSize: 60.0,
         countFontSize: 42.0,
+        countLineHeight: 1.1,
         doneBorderWidth: 3.0,
         doneBorderOpacity: 0.4,
         activeGradientEndOpacity: 0.9,
@@ -308,6 +311,7 @@ void main() {
       final result = TilawaCountProgressRingTokens.lerp(first, second, 0.5);
       expect(result.outerSize, closeTo(70.0, 0.01));
       expect(result.countFontSize, closeTo(36.0, 0.01));
+      expect(result.countLineHeight, closeTo(1.0, 0.01));
       expect(result.progressLabelBackgroundOpacity, closeTo(0.3, 0.01));
     });
   });
@@ -443,8 +447,11 @@ void main() {
   group('TilawaImmersiveComposerTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaImmersiveComposerTokens.defaults();
+      expect(tokens.defaultAutoHideDuration, const Duration(seconds: 3));
+      expect(tokens.transitionDuration, const Duration(milliseconds: 300));
       expect(tokens.backgroundBlurScale, 0.9);
       expect(tokens.backgroundOverlayOpacity, 0.42);
+      expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.compactHeightBreakpoint, 760.0);
       expect(tokens.compactPanelHeightFactor, 0.5);
       expect(tokens.headerButtonSize, 44.0);
@@ -463,8 +470,11 @@ void main() {
 
     test('lerp interpolates all numeric values', () {
       const first = TilawaImmersiveComposerTokens(
+        defaultAutoHideDuration: Duration(seconds: 2),
+        transitionDuration: Duration(milliseconds: 250),
         backgroundBlurScale: 0.8,
         backgroundOverlayOpacity: 0.4,
+        overlayBorderOpacity: 0.08,
         compactHeightBreakpoint: 700.0,
         compactPanelHeightFactor: 0.45,
         regularPanelHeightFactor: 0.4,
@@ -476,8 +486,11 @@ void main() {
         headerIconSizeOffset: 1.0,
       );
       const second = TilawaImmersiveComposerTokens(
+        defaultAutoHideDuration: Duration(seconds: 4),
+        transitionDuration: Duration(milliseconds: 350),
         backgroundBlurScale: 0.95,
         backgroundOverlayOpacity: 0.5,
+        overlayBorderOpacity: 0.12,
         compactHeightBreakpoint: 800.0,
         compactPanelHeightFactor: 0.55,
         regularPanelHeightFactor: 0.5,

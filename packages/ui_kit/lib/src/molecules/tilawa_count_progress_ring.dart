@@ -119,7 +119,7 @@ class TilawaCountProgressRing extends StatelessWidget {
                                   colorScheme.onPrimary,
                               fontWeight: .bold,
                               fontSize: componentTokens.countFontSize,
-                              height: 1.0,
+                              height: componentTokens.countLineHeight,
                             ),
                           ),
                   ),

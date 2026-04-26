@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
@@ -7,6 +8,7 @@ import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../domain/entities/share_progress_messages.dart';
@@ -61,86 +63,117 @@ class VideoService {
         .where((path) => path.trim().isNotEmpty)
         .toList();
     if (effectiveScreenshotPaths.isEmpty) {
-      throw StateError('At least one video screenshot is required.');
-    }
-
-    onProgress?.call(
-      _preparingEncodingProgress,
-      progressMessages.preparingVideoEncoding,
-    );
-
-    final shareDir = await _fileManager.getShareDirectory();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final outputFileName = 'video_$timestamp.mp4';
-    final outputPath = p.join(shareDir.path, outputFileName);
-
-    final int tProbe = DateTime.now().millisecondsSinceEpoch;
-    final double audioDurationSeconds =
-        (await _probeAudioDurationInSeconds(audioPath)) ?? 0.0;
-    _videoLog(
-      '[VIDEO_SVC] ffprobe done | duration=${audioDurationSeconds}s | took=${DateTime.now().millisecondsSinceEpoch - tProbe}ms',
-    );
-
-    final bool hasUsableAudioDuration = audioDurationSeconds > 0;
-    final double effectiveDurationSeconds = hasUsableAudioDuration
-        ? audioDurationSeconds
-        // Conservative fallback when ffprobe is unavailable; -shortest will
-        // still clamp to audio at mux time, so this only bounds the image loop.
-        : ShareVideoProfile.fallbackSecondsPerSlide *
-              effectiveScreenshotPaths.length;
-
-    final String command = effectiveScreenshotPaths.length == 1
-        ? _buildSingleImageCommand(
-            screenshotPath: effectiveScreenshotPaths.single,
-            audioPath: audioPath,
-            surahName: surahName,
-            reciterName: reciterName,
-            outputPath: outputPath,
-            audioDurationSeconds: effectiveDurationSeconds,
-          )
-        : _buildSlideshowCommand(
-            screenshotPaths: effectiveScreenshotPaths,
-            audioPath: audioPath,
-            surahName: surahName,
-            reciterName: reciterName,
-            outputPath: outputPath,
-            audioDurationSeconds: effectiveDurationSeconds,
-          );
-
-    _videoLog('[VIDEO_SVC] ffmpeg command: $command');
-    onProgress?.call(
-      _encodingStartProgress,
-      progressMessages.encodingVerticalVideo,
-    );
-
-    final int tEncode = DateTime.now().millisecondsSinceEpoch;
-    final FFmpegSession session = await _runWithProgress(
-      command: command,
-      audioDurationSeconds: effectiveDurationSeconds,
-      onProgress: onProgress,
-      progressMessages: progressMessages,
-      cancelToken: cancelToken,
-    );
-    final returnCode = await session.getReturnCode();
-    _videoLog(
-      '[VIDEO_SVC] ffmpeg finished | returnCode=$returnCode | took=${DateTime.now().millisecondsSinceEpoch - tEncode}ms',
-    );
-
-    if (!ReturnCode.isSuccess(returnCode)) {
-      if (ReturnCode.isCancel(returnCode)) {
-        throw DioException.requestCancelled(
-          requestOptions: RequestOptions(path: outputPath),
-          reason: 'Video encoding was cancelled.',
-        );
-      }
-      final logs = await session.getLogs();
-      throw StateError(
-        'FFmpeg video generation failed with return code $returnCode. Logs: ${logs.map((l) => l.getMessage()).join('\n')}',
+      throw const VideoGenerationFailure(
+        'At least one screenshot is required to generate a reel.',
+        VideoGenerationFailureReason.missingScreenshot,
       );
     }
 
-    onProgress?.call(1.0, progressMessages.videoGenerated);
-    return outputPath;
+    final _PreparedScreenshots preparedScreenshots =
+        await _materializeScreenshotsForEncoding(effectiveScreenshotPaths);
+    final List<String> encodeScreenshotPaths = preparedScreenshots.paths;
+
+    try {
+      onProgress?.call(
+        _preparingEncodingProgress,
+        progressMessages.preparingVideoEncoding,
+      );
+
+      final shareDir = await _fileManager.getShareDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final outputFileName = 'video_$timestamp.mp4';
+      final outputPath = p.join(shareDir.path, outputFileName);
+
+      final int tProbe = DateTime.now().millisecondsSinceEpoch;
+      final double audioDurationSeconds =
+          (await _probeAudioDurationInSeconds(audioPath)) ?? 0.0;
+      _videoLog(
+        '[VIDEO_SVC] ffprobe done | duration=${audioDurationSeconds}s | took=${DateTime.now().millisecondsSinceEpoch - tProbe}ms',
+      );
+
+      final bool hasUsableAudioDuration = audioDurationSeconds > 0;
+      final double effectiveDurationSeconds = hasUsableAudioDuration
+          ? audioDurationSeconds
+          // Conservative fallback when ffprobe is unavailable; -shortest will
+          // still clamp to audio at mux time, so this only bounds the image loop.
+          : ShareVideoProfile.fallbackSecondsPerSlide *
+                encodeScreenshotPaths.length;
+
+      final String command = encodeScreenshotPaths.length == 1
+          ? _buildSingleImageCommand(
+              screenshotPath: encodeScreenshotPaths.single,
+              audioPath: audioPath,
+              surahName: surahName,
+              reciterName: reciterName,
+              outputPath: outputPath,
+              audioDurationSeconds: effectiveDurationSeconds,
+            )
+          : _buildSlideshowCommand(
+              screenshotPaths: encodeScreenshotPaths,
+              audioPath: audioPath,
+              surahName: surahName,
+              reciterName: reciterName,
+              outputPath: outputPath,
+              audioDurationSeconds: effectiveDurationSeconds,
+            );
+
+      _videoLog('[VIDEO_SVC] ffmpeg command: $command');
+      onProgress?.call(
+        _encodingStartProgress,
+        progressMessages.encodingVerticalVideo,
+      );
+
+      final int tEncode = DateTime.now().millisecondsSinceEpoch;
+      final FFmpegSession session = await _runWithProgress(
+        command: command,
+        audioDurationSeconds: effectiveDurationSeconds,
+        onProgress: onProgress,
+        progressMessages: progressMessages,
+        cancelToken: cancelToken,
+      );
+      final returnCode = await session.getReturnCode();
+      _videoLog(
+        '[VIDEO_SVC] ffmpeg finished | returnCode=$returnCode | took=${DateTime.now().millisecondsSinceEpoch - tEncode}ms',
+      );
+
+      if (!ReturnCode.isSuccess(returnCode)) {
+        if (ReturnCode.isCancel(returnCode)) {
+          throw DioException.requestCancelled(
+            requestOptions: RequestOptions(path: outputPath),
+            reason: 'Video encoding was cancelled.',
+          );
+        }
+        final logs = await session.getLogs();
+        final String ffmpegLogs = logs.map((l) => l.getMessage()).join('\n');
+        final bool hasFrameFormatIssue =
+            ffmpegLogs.contains('Invalid pixel format') ||
+            ffmpegLogs.contains('rawvideo') ||
+            ffmpegLogs.contains('Could not find codec parameters for stream 0');
+
+        throw VideoGenerationFailure(
+          hasFrameFormatIssue
+              ? 'Captured frame format is not supported for video encoding.'
+              : 'Failed to encode reel video.',
+          hasFrameFormatIssue
+              ? VideoGenerationFailureReason.invalidFrameFormat
+              : VideoGenerationFailureReason.encodingFailed,
+        );
+      }
+
+      final bool outputIsValid = await _isGeneratedVideoOutputValid(outputPath);
+
+      if (!outputIsValid) {
+        throw const VideoGenerationFailure(
+          'Encoded reel output is invalid and cannot be previewed.',
+          VideoGenerationFailureReason.invalidOutput,
+        );
+      }
+
+      onProgress?.call(1.0, progressMessages.videoGenerated);
+      return outputPath;
+    } finally {
+      await preparedScreenshots.cleanup();
+    }
   }
 
   /// Runs the given FFmpeg command asynchronously so we can stream real
@@ -205,7 +238,65 @@ class VideoService {
     required String outputPath,
     required double audioDurationSeconds,
   }) {
-    return [
+    final bool isRawFile = screenshotPath.endsWith('.raw');
+    if (isRawFile) {
+      final String duration = audioDurationSeconds.toStringAsFixed(3);
+      return <String>[
+        '-f',
+        'rawvideo',
+        '-pixel_format',
+        'rgba',
+        '-video_size',
+        '${outputVideoWidth}x$outputVideoHeight',
+        '-framerate',
+        '$_stillImageInputFps',
+        '-i',
+        '"$screenshotPath"',
+        '-i',
+        '"$audioPath"',
+        '-filter_complex',
+        '"[0:v]loop=loop=-1:size=1:start=0,fps=$_stillImageInputFps,trim=duration=$duration,setsar=1[v]"',
+        '-map',
+        '"[v]"',
+        '-map',
+        '1:a',
+        '-c:v',
+        'libx264',
+        '-preset',
+        'ultrafast',
+        '-crf',
+        '28',
+        '-tune',
+        'stillimage',
+        '-c:a',
+        'aac',
+        '-b:a',
+        _audioBitrate,
+        '-pix_fmt',
+        'yuv420p',
+        '-r',
+        '$_outputFps',
+        '-g',
+        '$_keyframeIntervalFrames',
+        '-keyint_min',
+        '$_keyframeIntervalFrames',
+        '-sc_threshold',
+        '0',
+        '-shortest',
+        '-movflags',
+        '+faststart',
+        '-metadata',
+        'title="$surahName Video"',
+        '-metadata',
+        'artist="$reciterName"',
+        '-metadata',
+        'album="Tilawa"',
+        '-y',
+        '"$outputPath"',
+      ].join(' ');
+    }
+
+    return <String>[
       // -framerate BEFORE -i on a looped image forces a 1fps input stream,
       // preventing the default 25fps internal expansion. That single flag is
       // the primary fix — without it, FFmpeg decodes ~audioDuration*25 frames
@@ -298,23 +389,30 @@ class VideoService {
           '${outputVideoWidth}x$outputVideoHeight',
           '-framerate',
           '$_stillImageInputFps',
+          '-i',
+          '"$screenshotPath"',
         ]);
+        final String slideDuration = slideDurations[index].toStringAsFixed(3);
+        // Raw input is a single frame; loop that frame to fill slide duration.
+        filterParts.add(
+          '[$index:v]loop=loop=-1:size=1:start=0,fps=$_stillImageInputFps,trim=duration=$slideDuration,setsar=1[v$index]',
+        );
+      } else {
+        commandParts.addAll(<String>[
+          '-framerate',
+          '$_stillImageInputFps',
+          '-loop',
+          '1',
+          '-t',
+          slideDurations[index].toStringAsFixed(3),
+          '-i',
+          '"$screenshotPath"',
+        ]);
+        // Each slide is already at the target resolution thanks to the
+        // offscreen capture pipeline, so we only normalise SAR and clamp the
+        // internal frame rate. No scale/crop — that is the expensive step.
+        filterParts.add('[$index:v]setsar=1,fps=$_stillImageInputFps[v$index]');
       }
-
-      commandParts.addAll(<String>[
-        '-framerate',
-        '$_stillImageInputFps',
-        '-loop',
-        '1',
-        '-t',
-        slideDurations[index].toStringAsFixed(3),
-        '-i',
-        '"$screenshotPath"',
-      ]);
-      // Each slide is already at the target resolution thanks to the
-      // offscreen capture pipeline, so we only normalise SAR and clamp the
-      // internal frame rate. No scale/crop — that is the expensive step.
-      filterParts.add('[$index:v]setsar=1,fps=$_stillImageInputFps[v$index]');
       concatInputs.write('[v$index]');
     }
 
@@ -395,6 +493,158 @@ class VideoService {
       return durationText == null ? null : double.tryParse(durationText);
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<_PreparedScreenshots> _materializeScreenshotsForEncoding(
+    List<String> screenshotPaths,
+  ) async {
+    final List<String> resolvedPaths = <String>[];
+    final List<String> tempPngPaths = <String>[];
+
+    for (int i = 0; i < screenshotPaths.length; i++) {
+      final String screenshotPath = screenshotPaths[i];
+      if (!screenshotPath.endsWith('.raw')) {
+        resolvedPaths.add(screenshotPath);
+        continue;
+      }
+
+      final String pngPath = await _extractRawFrameToPng(
+        rawPath: screenshotPath,
+        index: i,
+      );
+      resolvedPaths.add(pngPath);
+      tempPngPaths.add(pngPath);
+    }
+
+    return _PreparedScreenshots(
+      paths: resolvedPaths,
+      tempPngPaths: tempPngPaths,
+    );
+  }
+
+  Future<String> _extractRawFrameToPng({
+    required String rawPath,
+    required int index,
+  }) async {
+    const int expectedRawBytes = outputVideoWidth * outputVideoHeight * 4;
+    final rawFile = File(rawPath);
+    if (!rawFile.existsSync()) {
+      _videoLog('[VIDEO_SVC] raw frame validation failed: missing $rawPath');
+      throw const VideoGenerationFailure(
+        'Captured frame is missing and cannot be encoded.',
+        VideoGenerationFailureReason.missingScreenshot,
+      );
+    }
+
+    final int actualRawBytes = await rawFile.length();
+    if (actualRawBytes != expectedRawBytes) {
+      _videoLog(
+        '[VIDEO_SVC] raw frame validation failed: expected=${expectedRawBytes}B actual=${actualRawBytes}B path=$rawPath',
+      );
+      throw const VideoGenerationFailure(
+        'Captured frame size does not match the video encoder profile.',
+        VideoGenerationFailureReason.invalidFrameFormat,
+      );
+    }
+
+    final shareDir = await _fileManager.getShareDirectory();
+    final String pngPath = p.join(
+      shareDir.path,
+      'raw_frame_${DateTime.now().millisecondsSinceEpoch}_$index.png',
+    );
+
+    final extractCommand = <String>[
+      '-f',
+      'rawvideo',
+      '-pixel_format',
+      'rgba',
+      '-video_size',
+      '${outputVideoWidth}x$outputVideoHeight',
+      '-framerate',
+      '1',
+      '-i',
+      '"$rawPath"',
+      '-frames:v',
+      '1',
+      '-y',
+      '"$pngPath"',
+    ].join(' ');
+
+    _videoLog('[VIDEO_SVC] raw->png command: $extractCommand');
+    final extractSession = await FFmpegKit.execute(extractCommand);
+    final extractReturnCode = await extractSession.getReturnCode();
+    _videoLog('[VIDEO_SVC] raw->png finished | returnCode=$extractReturnCode');
+
+    if (!ReturnCode.isSuccess(extractReturnCode)) {
+      final logs = await extractSession.getLogs();
+      final String ffmpegLogs = logs.map((l) => l.getMessage()).join('\n');
+      _videoLog('[VIDEO_SVC] raw->png failed logs:\n$ffmpegLogs');
+      throw const VideoGenerationFailure(
+        'Captured frame format is not supported for video encoding.',
+        VideoGenerationFailureReason.invalidFrameFormat,
+      );
+    }
+
+    return pngPath;
+  }
+
+  Future<bool> _isGeneratedVideoOutputValid(String outputPath) async {
+    final file = File(outputPath);
+    if (!file.existsSync()) {
+      _videoLog(
+        '[VIDEO_SVC] output validation failed: missing file $outputPath',
+      );
+      return false;
+    }
+
+    final int sizeBytes = file.lengthSync();
+    // Guardrail: tiny MP4s (e.g. a few hundred bytes) are metadata-only and
+    // will hang/never initialize in the video preview.
+    if (sizeBytes < 8 * 1024) {
+      _videoLog(
+        '[VIDEO_SVC] output validation failed: file too small (${sizeBytes}B) path=$outputPath',
+      );
+      return false;
+    }
+
+    try {
+      final session = await FFprobeKit.getMediaInformation(outputPath);
+      final info = session.getMediaInformation();
+      final String? durationText = info?.getDuration();
+      final double durationSeconds = durationText == null
+          ? 0
+          : (double.tryParse(durationText) ?? 0);
+      if (durationSeconds <= 0) {
+        _videoLog(
+          '[VIDEO_SVC] output validation failed: invalid duration=$durationText path=$outputPath',
+        );
+        return false;
+      }
+      return true;
+    } catch (error) {
+      _videoLog('[VIDEO_SVC] output validation failed: ffprobe error=$error');
+      return false;
+    }
+  }
+}
+
+class _PreparedScreenshots {
+  _PreparedScreenshots({required this.paths, required this.tempPngPaths});
+
+  final List<String> paths;
+  final List<String> tempPngPaths;
+
+  Future<void> cleanup() async {
+    for (final path in tempPngPaths) {
+      try {
+        final file = File(path);
+        if (file.existsSync()) {
+          file.deleteSync();
+        }
+      } catch (_) {
+        // Best effort cleanup only.
+      }
     }
   }
 }

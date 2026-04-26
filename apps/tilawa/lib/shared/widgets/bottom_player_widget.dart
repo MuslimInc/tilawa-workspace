@@ -380,12 +380,22 @@ class _MiniPlayerOrganism extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         tokens.spaceLarge,
-        tokens.spaceSmall,
+        tokens.spaceTiny,
         tokens.spaceLarge,
-        tokens.spaceLarge,
+        tokens.spaceTiny,
       ),
-      child: BottomPlayerUi(
-        audio: audio,
+      child: TilawaMediaPlayerBar(
+        title: audio.title,
+        subtitle: audio.artist ?? context.l10n.unknownReciter,
+        artwork: audio.artUri == null
+            ? null
+            : CachedNetworkImage(
+                imageUrl: audio.artUri.toString(),
+                fit: BoxFit.cover,
+                errorWidget: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
+                placeholder: (context, url) => const SizedBox.shrink(),
+              ),
         progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
             ? 0.0
             : (state.positionData?.position.inMilliseconds ?? 0) /

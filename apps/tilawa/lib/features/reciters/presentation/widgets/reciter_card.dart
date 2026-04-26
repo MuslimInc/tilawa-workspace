@@ -44,8 +44,8 @@ class ReciterCard extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  _ReciterAvatar(reciter: reciter),
-                  SizedBox(width: tokens.spaceMedium),
+                  // _ReciterAvatar(reciter: reciter),
+                  // SizedBox(width: tokens.spaceMedium),
                   Expanded(child: _ReciterInfo(reciter: reciter)),
                   SizedBox(width: tokens.spaceSmall),
                   _FavoriteButton(reciter: reciter),
@@ -125,8 +125,8 @@ class _ReciterInfo extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(width: tokens.spaceSmall),
-            _RecitationsBadge(count: reciter.moshaf.length),
+            // SizedBox(width: tokens.spaceSmall),
+            // _RecitationsBadge(count: reciter.moshaf.length),
           ],
         ),
         if (firstMoshaf.isNotEmpty) ...[
@@ -148,7 +148,7 @@ class _ReciterInfo extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -226,22 +226,25 @@ class _FavoriteButton extends StatelessWidget {
       return state is FavoritesLoaded && state.favoriteIds.contains(reciter.id);
     });
 
-    return InkResponse(
-      radius: tokens.radiusExtraLarge,
-      onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
-      child: Container(
-        width: tokens.iconSizeExtraLarge - tokens.spaceSmall,
-        height: tokens.iconSizeExtraLarge - tokens.spaceSmall,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: theme.primaryColor.withValues(alpha: 0.06),
-        ),
-        child: Icon(
-          isFavorite ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-          size: tokens.iconSizeMedium,
-          color: isFavorite
-              ? Colors.redAccent
-              : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+    return Material(
+      color: theme.primaryColor.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+      child: InkWell(
+        radius: tokens.radiusExtraLarge,
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+        onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
+        child: SizedBox(
+          width: tokens.iconSizeExtraLarge - tokens.spaceSmall,
+          height: tokens.iconSizeExtraLarge - tokens.spaceSmall,
+          child: Icon(
+            isFavorite
+                ? Icons.favorite_rounded
+                : Icons.favorite_outline_rounded,
+            size: tokens.iconSizeMedium,
+            color: isFavorite
+                ? Colors.redAccent
+                : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+          ),
         ),
       ),
     );

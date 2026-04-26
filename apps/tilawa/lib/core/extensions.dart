@@ -19,27 +19,32 @@ extension FailureExtensions on Failure {
   String localizedMessage(BuildContext context) {
     final l10n = context.l10n;
 
-    if (this is OfflinePlaybackFailure) {
-      final f = this as OfflinePlaybackFailure;
-      return switch (f.reason) {
+    return switch (this) {
+      OfflinePlaybackFailure(reason: final reason) => switch (reason) {
         OfflinePlaybackReason.notDownloaded => l10n.offlinePlaybackError,
         OfflinePlaybackReason.fileMissing => l10n.offlineFileMissingError,
         OfflinePlaybackReason.downloadIncomplete =>
           l10n.offlineDownloadIncompleteError,
-      };
-    }
-
-    return switch (this) {
+      },
       NetworkFailure() => l10n.networkError,
       ServerFailure() => l10n.serverError,
       CacheFailure() => l10n.cacheError,
       AudioFailure() => l10n.audioError,
+      VideoGenerationFailure(reason: final reason) => switch (reason) {
+        VideoGenerationFailureReason.invalidFrameFormat =>
+          l10n.reelGenerationFailedInvalidFrame,
+        VideoGenerationFailureReason.missingScreenshot =>
+          l10n.reelGenerationFailedMissingScreenshot,
+        VideoGenerationFailureReason.invalidOutput =>
+          l10n.reelGenerationFailedInvalidOutput,
+        VideoGenerationFailureReason.encodingFailed =>
+          l10n.reelGenerationFailed,
+      },
       ValidationFailure() => l10n.validationError,
       PermissionFailure() => l10n.permissionError,
       UnexpectedFailure() => l10n.unexpectedError,
       PersistenceFailure() => l10n.persistenceError,
       UIError() => l10n.uiError,
-      _ => l10n.unknownError,
     };
   }
 }

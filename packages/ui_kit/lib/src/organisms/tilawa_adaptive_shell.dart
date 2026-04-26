@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../foundation/breakpoints.dart';
+import '../foundation/component_tokens.dart';
 import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/display_feature_insets.dart';
@@ -78,23 +79,25 @@ class TilawaAdaptiveShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final windowSize = context.windowSize;
     final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
+    final bool isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     if (windowSize == TilawaWindowSize.compact) {
       return Stack(
         children: [
           Scaffold(extendBody: true, body: child),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _BottomNavBar(
-              destinations: destinations,
-              selectedIndex: displayIndex,
-              onDestinationSelected: onDestinationSelected,
-              padding: bottomBarPadding,
-              decoration: bottomBarDecoration,
+          if (!isKeyboardOpen)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _BottomNavBar(
+                destinations: destinations,
+                selectedIndex: displayIndex,
+                onDestinationSelected: onDestinationSelected,
+                padding: bottomBarPadding,
+                decoration: bottomBarDecoration,
+              ),
             ),
-          ),
           Positioned.fill(child: bottomPlayer),
         ],
       );
@@ -151,15 +154,7 @@ class _BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    final double horizontalMargin = tokens.spaceLarge;
-    final double verticalMargin = tokens.spaceMedium;
-    final double internalPadding = tokens.spaceSmall;
-    final double capsuleRadius = tokens.radiusExtraLarge + tokens.spaceSmall;
-    // Nested-radius rule: inner capsule follows the outer edge inset by the
-    // vertical padding so the rounding stays concentric.
-    final double innerRadius = capsuleRadius - internalPadding;
+    final tokens = theme.componentTokens.adaptiveShell;
     final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     return TilawaContentBounds(
@@ -169,28 +164,28 @@ class _BottomNavBar extends StatelessWidget {
         padding:
             padding ??
             EdgeInsets.fromLTRB(
-              horizontalMargin,
-              verticalMargin,
-              horizontalMargin,
-              bottomPadding + verticalMargin,
+              tokens.bottomNavHorizontalMargin,
+              tokens.bottomNavVerticalMargin,
+              tokens.bottomNavHorizontalMargin,
+              bottomPadding + tokens.bottomNavVerticalMargin,
             ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(capsuleRadius),
+          borderRadius: BorderRadius.circular(tokens.bottomNavRadius),
           child: DecoratedBox(
             decoration:
                 decoration ??
                 BoxDecoration(
                   color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(capsuleRadius),
+                  borderRadius: BorderRadius.circular(tokens.bottomNavRadius),
                   border: Border.all(
                     color: theme.colorScheme.onPrimary.withValues(
-                      alpha: tokens.opacityMedium,
+                      alpha: theme.tokens.opacityMedium,
                     ),
-                    width: tokens.borderWidthThin * 2,
+                    width: tokens.bottomNavBorderWidth,
                   ),
                 ),
             child: Row(
-              spacing: tokens.spaceExtraSmall,
+              spacing: tokens.bottomNavItemGap,
               children: [
                 for (int i = 0; i < destinations.length; i++)
                   Expanded(
@@ -199,7 +194,7 @@ class _BottomNavBar extends StatelessWidget {
                       isSelected: selectedIndex == i,
                       isCenterItem: i == destinations.length ~/ 2,
                       onTap: () => onDestinationSelected(i),
-                      borderRadius: innerRadius,
+                      borderRadius: tokens.bottomNavInnerRadius,
                     ),
                   ),
               ],
@@ -229,29 +224,30 @@ class _SideNavRail extends StatelessWidget {
     final theme = Theme.of(context);
     final inactiveColor = theme.colorScheme.onSurfaceVariant;
     final activeColor = theme.colorScheme.onPrimaryContainer;
-    final tokens = theme.tokens;
+    final designTokens = theme.tokens;
+    final componentTokens = theme.componentTokens.adaptiveShell;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+      borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
       child: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface.withValues(
-            alpha: tokens.opacityGlass,
+            alpha: designTokens.opacityGlass,
           ),
-          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+          borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
           border: Border.all(
             color: theme.colorScheme.outlineVariant.withValues(
-              alpha: tokens.opacitySubtle,
+              alpha: designTokens.opacitySubtle,
             ),
-            width: tokens.borderWidthThin,
+            width: designTokens.borderWidthThin,
           ),
           boxShadow: [
             BoxShadow(
               color: theme.colorScheme.shadow.withValues(
-                alpha: tokens.opacitySubtle / 2,
+                alpha: componentTokens.sideRailShadowOpacity,
               ),
-              blurRadius: tokens.blurGlass,
-              offset: Offset(tokens.spaceTiny, 0),
+              blurRadius: componentTokens.sideRailShadowBlur,
+              offset: componentTokens.sideRailShadowOffset,
             ),
           ],
         ),
@@ -306,7 +302,7 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final tokens = theme.componentTokens.adaptiveShell;
     final onPrimaryColor = theme.colorScheme.onPrimary;
 
     // High contrast: selected items inverted (onPrimary bg with primary text)
@@ -325,20 +321,19 @@ class _NavButton extends StatelessWidget {
                 ? (destination.activeIcon ?? destination.icon)
                 : destination.icon,
             key: ValueKey('${destination.icon.hashCode}_$isSelected'),
-            size: tokens.iconSizeMedium + tokens.spaceTiny,
+            size: tokens.navButtonIconSize,
             color: onPrimaryColor,
           );
 
     final double iconScale = isCenterItem
-        ? (isSelected ? 1 + tokens.opacitySubtle : 1.0)
-        : (isSelected ? 1.0 : 1 - tokens.opacitySubtle / 2);
+        ? (isSelected ? tokens.navButtonSelectedCenterScale : 1.0)
+        : (isSelected ? 1.0 : tokens.navButtonUnselectedScale);
 
     final double backgroundAlpha = isSelected
-        ? tokens.opacityMedium -
-              tokens.opacitySubtle +
-              (isCenterItem ? tokens.opacitySubtle / 2 : 0)
+        ? (isCenterItem
+              ? tokens.navButtonSelectedCenterOpacity
+              : tokens.navButtonSelectedBackgroundOpacity)
         : 0.0;
-    final double labelFontSize = tokens.iconSizeExtraSmall - tokens.spaceTiny;
 
     return Material(
       color: Colors.transparent,
@@ -349,10 +344,10 @@ class _NavButton extends StatelessWidget {
         },
         borderRadius: BorderRadius.circular(borderRadius),
         child: Container(
-          constraints: BoxConstraints(
-            minHeight: tokens.iconSizeExtraLarge + tokens.spaceLarge,
+          constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
+          padding: EdgeInsets.symmetric(
+            vertical: tokens.navButtonVerticalPadding,
           ),
-          padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
           decoration: BoxDecoration(
             color: backgroundColor.withValues(alpha: backgroundAlpha),
             borderRadius: BorderRadius.circular(borderRadius),
@@ -360,7 +355,7 @@ class _NavButton extends StatelessWidget {
           child: Column(
             mainAxisSize: .min,
             mainAxisAlignment: .center,
-            spacing: tokens.spaceExtraSmall,
+            spacing: tokens.navButtonGap,
             children: [
               Transform.scale(scale: iconScale, child: iconWidget),
               Text(
@@ -369,8 +364,10 @@ class _NavButton extends StatelessWidget {
                 overflow: .ellipsis,
                 textAlign: .center,
                 style: baseLabelStyle.copyWith(
-                  fontSize: labelFontSize,
-                  fontWeight: isSelected ? .w700 : .w500,
+                  fontSize: tokens.navButtonLabelFontSize,
+                  fontWeight: isSelected
+                      ? tokens.navButtonSelectedLabelWeight
+                      : tokens.navButtonUnselectedLabelWeight,
                   color: onPrimaryColor,
                 ),
               ),

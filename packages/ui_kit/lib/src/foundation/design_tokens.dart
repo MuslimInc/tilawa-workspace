@@ -160,7 +160,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 145 — height threshold for tight card layout.
   final double cardTightHeightThreshold;
 
-  /// 100.0
+  /// 80.0
   final double playerCollapsedHeight;
 
   /// 80.0
@@ -225,7 +225,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     cardCompactWidthThreshold: 180.0,
     cardCompactHeightThreshold: 155.0,
     cardTightHeightThreshold: 145.0,
-    playerCollapsedHeight: 100.0,
+    playerCollapsedHeight: 80.0,
     playerDismissThreshold: 80.0,
     playerMaxDismissOffset: 200.0,
     playerVelocityThreshold: 500.0,

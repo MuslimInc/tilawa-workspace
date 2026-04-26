@@ -16,6 +16,7 @@ import 'package:tilawa/features/share/domain/usecases/generate_video_use_case.da
 import 'package:tilawa/features/share/domain/usecases/get_share_ayahs_use_case.dart';
 import 'package:tilawa/features/share/domain/usecases/prepare_share_range_use_case.dart';
 import 'package:tilawa/features/share/domain/usecases/share_content_use_case.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
@@ -90,6 +91,8 @@ class ShareCubit extends Cubit<ShareState> {
         progressMessage: '',
         ayahs: null,
         errorMessage: null,
+        reciterOptions: const [],
+        isLoadingReciters: false,
         videoPageSpecs: result.videoPageSpecs,
       ),
     );
@@ -151,6 +154,7 @@ class ShareCubit extends Cubit<ShareState> {
       '[AppLaunch][ShareCubit.loadReciterOptions]: Start in (${DateTime.now()})',
     );
     if (state.surahNumber == null) return;
+    if (state.isLoadingReciters) return;
     emit(state.copyWith(isLoadingReciters: true));
 
     final result = await _getReciters();
@@ -550,7 +554,10 @@ class ShareCubit extends Cubit<ShareState> {
           state.copyWith(
             status: ShareStatus.error,
             capturingIndex: null,
-            errorMessage: _userFacingError(e),
+            errorMessage: _userFacingError(
+              e,
+              videoMessages: progressMessages.video,
+            ),
           ),
         );
       } else {
@@ -614,7 +621,24 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   /// Returns a clean, user-facing error string without internal stack details.
-  String _userFacingError(Object e) {
+  String _userFacingError(Object e, {VideoProgressMessages? videoMessages}) {
+    if (e is VideoGenerationFailure) {
+      if (videoMessages == null) {
+        return e.message ?? 'Failed to generate reel.';
+      }
+
+      return switch (e.reason) {
+        VideoGenerationFailureReason.invalidFrameFormat =>
+          videoMessages.videoGenerationFailedInvalidFrame,
+        VideoGenerationFailureReason.missingScreenshot =>
+          videoMessages.videoGenerationFailedMissingScreenshot,
+        VideoGenerationFailureReason.invalidOutput =>
+          videoMessages.videoGenerationFailedInvalidOutput,
+        VideoGenerationFailureReason.encodingFailed =>
+          videoMessages.videoGenerationFailed,
+      };
+    }
+
     if (e is StateError) return e.message;
     final msg = e.toString();
     // Strip "Exception:" / "StateError:" prefixes that leak implementation detail.

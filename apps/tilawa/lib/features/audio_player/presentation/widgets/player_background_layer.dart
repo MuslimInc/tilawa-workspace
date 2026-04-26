@@ -19,7 +19,7 @@ class PlayerBackgroundLayer extends StatelessWidget {
 
         if (config.type == PlayerBackgroundType.custom &&
             config.customImagePath != null) {
-          return TilawaPlayerBackgroundLayer(
+          return TilawaBackdropImageLayer(
             image: FileImage(File(config.customImagePath!)),
             blurAmount: config.blurAmount,
             overlayOpacity: config.overlayOpacity,

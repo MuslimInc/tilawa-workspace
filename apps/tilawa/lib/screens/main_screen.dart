@@ -214,8 +214,12 @@ class _MainShellContent extends StatelessWidget {
                 audioState.currentAudio != null;
           });
 
-    final double playerHeight = playerShouldShow ? 100 : 0;
-    final double contentBottomPadding = bottomNavBarHeight + playerHeight;
+    final double playerHeight = playerShouldShow && !isKeyboardOpen
+        ? context.tokens.playerCollapsedHeight
+        : 0;
+    final double contentBottomPadding = isKeyboardOpen
+        ? 0
+        : bottomNavBarHeight + playerHeight;
 
     return TilawaAdaptiveShell(
       destinations: adaptiveDestinations,

@@ -1688,6 +1688,25 @@ class AppLocalizationsAr extends AppLocalizations {
       'جارِ ترميز الفيديو العمودي، قد يستغرق ذلك بعض الوقت...';
 
   @override
+  String get reelGenerationFailed =>
+      'تعذّر إنشاء فيديو الريل. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get reelGenerationFailedInvalidFrame =>
+      'تعذّر معالجة إطار الصورة الملتقطة لإنشاء الريل. يرجى إعادة المحاولة.';
+
+  @override
+  String get reelGenerationFailedMissingScreenshot =>
+      'لم يتم العثور على إطار ملتقط لإنشاء الريل.';
+
+  @override
+  String get reelGenerationFailedInvalidOutput =>
+      'ملف الريل الناتج غير صالح ولا يمكن فتحه. يرجى إعادة المحاولة.';
+
+  @override
+  String get reelPreviewLoadFailed => 'تعذّر تحميل معاينة الفيديو الناتج.';
+
+  @override
   String get reelGenerated => 'تم إنشاء الريل!';
 
   @override

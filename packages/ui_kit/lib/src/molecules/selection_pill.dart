@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import 'tilawa_chip.dart';
 
 class SelectionPill extends StatelessWidget {
   const SelectionPill({
@@ -27,65 +29,36 @@ class SelectionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final designTokens = theme.tokens;
+    final componentTokens = theme.componentTokens.chip;
     final background = selected
         ? (selectedColor ?? theme.colorScheme.primary)
         : (unselectedColor ??
               theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: tokens.opacityMedium,
+                alpha: designTokens.opacityMedium,
               ));
     final foreground = selected
         ? (selectedForegroundColor ?? theme.colorScheme.onPrimary)
         : (unselectedForegroundColor ?? theme.colorScheme.onSurface);
-    final shape = StadiumBorder(
-      side: BorderSide(
-        color: selected
-            ? background
-            : theme.colorScheme.outline.withValues(alpha: tokens.opacitySubtle),
-        width: tokens.borderWidthThin,
-      ),
-    );
 
-    return Material(
-      color: Colors.transparent,
-      shape: shape,
-      child: InkWell(
-        onTap: onTap,
-        customBorder: shape,
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceLarge,
-            vertical: tokens.spaceSmall + tokens.spaceTiny,
-          ),
-          decoration: ShapeDecoration(
-            shape: shape,
-            color: background,
-            shadows: selected
-                ? [
-                    BoxShadow(
-                      color: background.withValues(alpha: tokens.opacityMedium),
-                      blurRadius: tokens.blurShadow,
-                      offset: tokens.shadowOffsetSmall,
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: .min,
-            spacing: tokens.spaceSmall,
-            children: [
-              if (icon != null)
-                Icon(icon, size: tokens.iconSizeSmall, color: foreground),
-              Text(
-                label,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: foreground,
-                  fontWeight: .w700,
-                ),
-              ),
-            ],
-          ),
-        ),
+    return TilawaChip(
+      label: label,
+      icon: icon,
+      onTap: onTap,
+      backgroundColor: background,
+      foregroundColor: foreground,
+      borderColor: selected
+          ? background
+          : theme.colorScheme.outline.withValues(
+              alpha: designTokens.opacitySubtle,
+            ),
+      borderRadius: componentTokens.pillRadius,
+      padding: componentTokens.padding,
+      showShadow: selected,
+      shadowColor: background,
+      textStyle: theme.textTheme.labelLarge?.copyWith(
+        color: foreground,
+        fontWeight: componentTokens.selectionFontWeight,
       ),
     );
   }

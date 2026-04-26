@@ -3,6 +3,71 @@ import 'package:flutter/material.dart';
 import 'token_lerp.dart';
 
 @immutable
+class TilawaAlphabetScrollbarTokens {
+  const TilawaAlphabetScrollbarTokens({
+    required this.width,
+    required this.itemExtent,
+    required this.selectedIndicatorExtent,
+    required this.letterFontSize,
+    required this.verticalPadding,
+  });
+
+  final double width;
+  final double itemExtent;
+  final double selectedIndicatorExtent;
+  final double letterFontSize;
+  final EdgeInsetsGeometry verticalPadding;
+
+  factory TilawaAlphabetScrollbarTokens.defaults() =>
+      const TilawaAlphabetScrollbarTokens(
+        width: 36,
+        itemExtent: 30,
+        selectedIndicatorExtent: 25.5,
+        letterFontSize: 13,
+        verticalPadding: EdgeInsets.symmetric(vertical: 12),
+      );
+
+  TilawaAlphabetScrollbarTokens copyWith({
+    double? width,
+    double? itemExtent,
+    double? selectedIndicatorExtent,
+    double? letterFontSize,
+    EdgeInsetsGeometry? verticalPadding,
+  }) {
+    return TilawaAlphabetScrollbarTokens(
+      width: width ?? this.width,
+      itemExtent: itemExtent ?? this.itemExtent,
+      selectedIndicatorExtent:
+          selectedIndicatorExtent ?? this.selectedIndicatorExtent,
+      letterFontSize: letterFontSize ?? this.letterFontSize,
+      verticalPadding: verticalPadding ?? this.verticalPadding,
+    );
+  }
+
+  static TilawaAlphabetScrollbarTokens lerp(
+    TilawaAlphabetScrollbarTokens a,
+    TilawaAlphabetScrollbarTokens b,
+    double t,
+  ) {
+    return TilawaAlphabetScrollbarTokens(
+      width: lerpTokenDouble(a.width, b.width, t),
+      itemExtent: lerpTokenDouble(a.itemExtent, b.itemExtent, t),
+      selectedIndicatorExtent: lerpTokenDouble(
+        a.selectedIndicatorExtent,
+        b.selectedIndicatorExtent,
+        t,
+      ),
+      letterFontSize: lerpTokenDouble(a.letterFontSize, b.letterFontSize, t),
+      verticalPadding: EdgeInsetsGeometry.lerp(
+        a.verticalPadding,
+        b.verticalPadding,
+        t,
+      )!,
+    );
+  }
+}
+
+@immutable
 class TilawaFeedbackStripTokens {
   const TilawaFeedbackStripTokens({
     required this.padding,
@@ -184,6 +249,297 @@ class TilawaIconActionButtonTokens {
 }
 
 @immutable
+class TilawaChipTokens {
+  const TilawaChipTokens({
+    required this.padding,
+    required this.compactPadding,
+    required this.contentGap,
+    required this.iconSize,
+    required this.compactIconSize,
+    required this.borderWidth,
+    required this.pillRadius,
+    required this.roundedRadius,
+    required this.selectedShadowOpacity,
+    required this.selectedShadowBlur,
+    required this.selectionFontWeight,
+    required this.statusFontWeight,
+    required this.statusLetterSpacing,
+  });
+
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry compactPadding;
+  final double contentGap;
+  final double iconSize;
+  final double compactIconSize;
+  final double borderWidth;
+  final double pillRadius;
+  final double roundedRadius;
+  final double selectedShadowOpacity;
+  final double selectedShadowBlur;
+  final FontWeight selectionFontWeight;
+  final FontWeight statusFontWeight;
+  final double statusLetterSpacing;
+
+  factory TilawaChipTokens.defaults() => const TilawaChipTokens(
+    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+    contentGap: 8,
+    iconSize: 16,
+    compactIconSize: 14,
+    borderWidth: 0.5,
+    pillRadius: 999,
+    roundedRadius: 8,
+    selectedShadowOpacity: 0.3,
+    selectedShadowBlur: 16,
+    selectionFontWeight: FontWeight.w700,
+    statusFontWeight: FontWeight.w900,
+    statusLetterSpacing: 0.5,
+  );
+
+  TilawaChipTokens copyWith({
+    EdgeInsetsGeometry? padding,
+    EdgeInsetsGeometry? compactPadding,
+    double? contentGap,
+    double? iconSize,
+    double? compactIconSize,
+    double? borderWidth,
+    double? pillRadius,
+    double? roundedRadius,
+    double? selectedShadowOpacity,
+    double? selectedShadowBlur,
+    FontWeight? selectionFontWeight,
+    FontWeight? statusFontWeight,
+    double? statusLetterSpacing,
+  }) {
+    return TilawaChipTokens(
+      padding: padding ?? this.padding,
+      compactPadding: compactPadding ?? this.compactPadding,
+      contentGap: contentGap ?? this.contentGap,
+      iconSize: iconSize ?? this.iconSize,
+      compactIconSize: compactIconSize ?? this.compactIconSize,
+      borderWidth: borderWidth ?? this.borderWidth,
+      pillRadius: pillRadius ?? this.pillRadius,
+      roundedRadius: roundedRadius ?? this.roundedRadius,
+      selectedShadowOpacity:
+          selectedShadowOpacity ?? this.selectedShadowOpacity,
+      selectedShadowBlur: selectedShadowBlur ?? this.selectedShadowBlur,
+      selectionFontWeight: selectionFontWeight ?? this.selectionFontWeight,
+      statusFontWeight: statusFontWeight ?? this.statusFontWeight,
+      statusLetterSpacing: statusLetterSpacing ?? this.statusLetterSpacing,
+    );
+  }
+
+  static TilawaChipTokens lerp(
+    TilawaChipTokens a,
+    TilawaChipTokens b,
+    double t,
+  ) {
+    return TilawaChipTokens(
+      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t)!,
+      compactPadding: EdgeInsetsGeometry.lerp(
+        a.compactPadding,
+        b.compactPadding,
+        t,
+      )!,
+      contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
+      iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
+      compactIconSize: lerpTokenDouble(a.compactIconSize, b.compactIconSize, t),
+      borderWidth: lerpTokenDouble(a.borderWidth, b.borderWidth, t),
+      pillRadius: lerpTokenDouble(a.pillRadius, b.pillRadius, t),
+      roundedRadius: lerpTokenDouble(a.roundedRadius, b.roundedRadius, t),
+      selectedShadowOpacity: lerpTokenDouble(
+        a.selectedShadowOpacity,
+        b.selectedShadowOpacity,
+        t,
+      ),
+      selectedShadowBlur: lerpTokenDouble(
+        a.selectedShadowBlur,
+        b.selectedShadowBlur,
+        t,
+      ),
+      selectionFontWeight: FontWeight.lerp(
+        a.selectionFontWeight,
+        b.selectionFontWeight,
+        t,
+      )!,
+      statusFontWeight: FontWeight.lerp(
+        a.statusFontWeight,
+        b.statusFontWeight,
+        t,
+      )!,
+      statusLetterSpacing: lerpTokenDouble(
+        a.statusLetterSpacing,
+        b.statusLetterSpacing,
+        t,
+      ),
+    );
+  }
+}
+
+@immutable
+class TilawaSegmentedControlTokens {
+  const TilawaSegmentedControlTokens({
+    required this.containerPadding,
+    required this.itemPadding,
+    required this.containerRadius,
+    required this.itemRadius,
+    required this.containerOpacity,
+    required this.minItemWidth,
+    required this.selectedFontWeight,
+    required this.unselectedFontWeight,
+  });
+
+  final EdgeInsetsGeometry containerPadding;
+  final EdgeInsetsGeometry itemPadding;
+  final double containerRadius;
+  final double itemRadius;
+  final double containerOpacity;
+  final double minItemWidth;
+  final FontWeight selectedFontWeight;
+  final FontWeight unselectedFontWeight;
+
+  factory TilawaSegmentedControlTokens.defaults() =>
+      const TilawaSegmentedControlTokens(
+        containerPadding: EdgeInsets.all(4),
+        itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        containerRadius: 12,
+        itemRadius: 8,
+        containerOpacity: 0.3,
+        minItemWidth: 100,
+        selectedFontWeight: FontWeight.bold,
+        unselectedFontWeight: FontWeight.normal,
+      );
+
+  TilawaSegmentedControlTokens copyWith({
+    EdgeInsetsGeometry? containerPadding,
+    EdgeInsetsGeometry? itemPadding,
+    double? containerRadius,
+    double? itemRadius,
+    double? containerOpacity,
+    double? minItemWidth,
+    FontWeight? selectedFontWeight,
+    FontWeight? unselectedFontWeight,
+  }) {
+    return TilawaSegmentedControlTokens(
+      containerPadding: containerPadding ?? this.containerPadding,
+      itemPadding: itemPadding ?? this.itemPadding,
+      containerRadius: containerRadius ?? this.containerRadius,
+      itemRadius: itemRadius ?? this.itemRadius,
+      containerOpacity: containerOpacity ?? this.containerOpacity,
+      minItemWidth: minItemWidth ?? this.minItemWidth,
+      selectedFontWeight: selectedFontWeight ?? this.selectedFontWeight,
+      unselectedFontWeight: unselectedFontWeight ?? this.unselectedFontWeight,
+    );
+  }
+
+  static TilawaSegmentedControlTokens lerp(
+    TilawaSegmentedControlTokens a,
+    TilawaSegmentedControlTokens b,
+    double t,
+  ) {
+    return TilawaSegmentedControlTokens(
+      containerPadding: EdgeInsetsGeometry.lerp(
+        a.containerPadding,
+        b.containerPadding,
+        t,
+      )!,
+      itemPadding: EdgeInsetsGeometry.lerp(a.itemPadding, b.itemPadding, t)!,
+      containerRadius: lerpTokenDouble(a.containerRadius, b.containerRadius, t),
+      itemRadius: lerpTokenDouble(a.itemRadius, b.itemRadius, t),
+      containerOpacity: lerpTokenDouble(
+        a.containerOpacity,
+        b.containerOpacity,
+        t,
+      ),
+      minItemWidth: lerpTokenDouble(a.minItemWidth, b.minItemWidth, t),
+      selectedFontWeight: FontWeight.lerp(
+        a.selectedFontWeight,
+        b.selectedFontWeight,
+        t,
+      )!,
+      unselectedFontWeight: FontWeight.lerp(
+        a.unselectedFontWeight,
+        b.unselectedFontWeight,
+        t,
+      )!,
+    );
+  }
+}
+
+@immutable
+class TilawaSeekBarTokens {
+  const TilawaSeekBarTokens({
+    required this.touchExtent,
+    required this.horizontalMargin,
+    required this.trackHeight,
+    required this.thumbRadius,
+    required this.bufferedTrackOpacity,
+    required this.inactiveTrackOpacity,
+  });
+
+  final double touchExtent;
+  final double horizontalMargin;
+  final double trackHeight;
+  final double thumbRadius;
+  final double bufferedTrackOpacity;
+  final double inactiveTrackOpacity;
+
+  factory TilawaSeekBarTokens.defaults() => const TilawaSeekBarTokens(
+    touchExtent: 30,
+    horizontalMargin: 16,
+    trackHeight: 8,
+    thumbRadius: 12,
+    bufferedTrackOpacity: 0.3,
+    inactiveTrackOpacity: 0.1,
+  );
+
+  TilawaSeekBarTokens copyWith({
+    double? touchExtent,
+    double? horizontalMargin,
+    double? trackHeight,
+    double? thumbRadius,
+    double? bufferedTrackOpacity,
+    double? inactiveTrackOpacity,
+  }) {
+    return TilawaSeekBarTokens(
+      touchExtent: touchExtent ?? this.touchExtent,
+      horizontalMargin: horizontalMargin ?? this.horizontalMargin,
+      trackHeight: trackHeight ?? this.trackHeight,
+      thumbRadius: thumbRadius ?? this.thumbRadius,
+      bufferedTrackOpacity: bufferedTrackOpacity ?? this.bufferedTrackOpacity,
+      inactiveTrackOpacity: inactiveTrackOpacity ?? this.inactiveTrackOpacity,
+    );
+  }
+
+  static TilawaSeekBarTokens lerp(
+    TilawaSeekBarTokens a,
+    TilawaSeekBarTokens b,
+    double t,
+  ) {
+    return TilawaSeekBarTokens(
+      touchExtent: lerpTokenDouble(a.touchExtent, b.touchExtent, t),
+      horizontalMargin: lerpTokenDouble(
+        a.horizontalMargin,
+        b.horizontalMargin,
+        t,
+      ),
+      trackHeight: lerpTokenDouble(a.trackHeight, b.trackHeight, t),
+      thumbRadius: lerpTokenDouble(a.thumbRadius, b.thumbRadius, t),
+      bufferedTrackOpacity: lerpTokenDouble(
+        a.bufferedTrackOpacity,
+        b.bufferedTrackOpacity,
+        t,
+      ),
+      inactiveTrackOpacity: lerpTokenDouble(
+        a.inactiveTrackOpacity,
+        b.inactiveTrackOpacity,
+        t,
+      ),
+    );
+  }
+}
+
+@immutable
 class TilawaSearchFieldTokens {
   const TilawaSearchFieldTokens({
     required this.height,
@@ -295,6 +651,7 @@ class TilawaCountProgressRingTokens {
     required this.ringStrokeWidth,
     required this.doneIconSize,
     required this.countFontSize,
+    required this.countLineHeight,
     required this.doneBorderWidth,
     required this.doneBorderOpacity,
     required this.activeGradientEndOpacity,
@@ -310,6 +667,7 @@ class TilawaCountProgressRingTokens {
   final double ringStrokeWidth;
   final double doneIconSize;
   final double countFontSize;
+  final double countLineHeight;
   final double doneBorderWidth;
   final double doneBorderOpacity;
   final double activeGradientEndOpacity;
@@ -326,6 +684,7 @@ class TilawaCountProgressRingTokens {
         ringStrokeWidth: 10,
         doneIconSize: 50,
         countFontSize: 36,
+        countLineHeight: 1,
         doneBorderWidth: 2,
         doneBorderOpacity: 0.3,
         activeGradientEndOpacity: 0.8,
@@ -342,6 +701,7 @@ class TilawaCountProgressRingTokens {
     double? ringStrokeWidth,
     double? doneIconSize,
     double? countFontSize,
+    double? countLineHeight,
     double? doneBorderWidth,
     double? doneBorderOpacity,
     double? activeGradientEndOpacity,
@@ -357,6 +717,7 @@ class TilawaCountProgressRingTokens {
       ringStrokeWidth: ringStrokeWidth ?? this.ringStrokeWidth,
       doneIconSize: doneIconSize ?? this.doneIconSize,
       countFontSize: countFontSize ?? this.countFontSize,
+      countLineHeight: countLineHeight ?? this.countLineHeight,
       doneBorderWidth: doneBorderWidth ?? this.doneBorderWidth,
       doneBorderOpacity: doneBorderOpacity ?? this.doneBorderOpacity,
       activeGradientEndOpacity:
@@ -383,6 +744,7 @@ class TilawaCountProgressRingTokens {
       ringStrokeWidth: lerpTokenDouble(a.ringStrokeWidth, b.ringStrokeWidth, t),
       doneIconSize: lerpTokenDouble(a.doneIconSize, b.doneIconSize, t),
       countFontSize: lerpTokenDouble(a.countFontSize, b.countFontSize, t),
+      countLineHeight: lerpTokenDouble(a.countLineHeight, b.countLineHeight, t),
       doneBorderWidth: lerpTokenDouble(a.doneBorderWidth, b.doneBorderWidth, t),
       doneBorderOpacity: lerpTokenDouble(
         a.doneBorderOpacity,

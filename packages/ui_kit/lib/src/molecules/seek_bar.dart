@@ -1,8 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import '../foundation/design_tokens.dart';
-import 'hidden_thumb_shape.dart';
+
+import '../atoms/hidden_thumb_shape.dart';
+import '../foundation/component_tokens.dart';
 
 class SeekBar extends StatefulWidget {
   const SeekBar({
@@ -10,12 +11,20 @@ class SeekBar extends StatefulWidget {
     required this.duration,
     required this.position,
     this.bufferedPosition = .zero,
+    this.activeColor,
+    this.inactiveColor,
+    this.bufferedColor,
+    this.thumbColor,
     this.onChanged,
     this.onChangeEnd,
   });
   final Duration duration;
   final Duration position;
   final Duration bufferedPosition;
+  final Color? activeColor;
+  final Color? inactiveColor;
+  final Color? bufferedColor;
+  final Color? thumbColor;
   final ValueChanged<Duration>? onChanged;
   final ValueChanged<Duration>? onChangeEnd;
 
@@ -31,12 +40,12 @@ class SeekBarState extends State<SeekBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final tokens = Theme.of(context).tokens;
+    final tokens = Theme.of(context).componentTokens.seekBar;
 
     _sliderThemeData = SliderTheme.of(context).copyWith(
-      trackHeight: tokens.spaceSmall,
+      trackHeight: tokens.trackHeight,
       thumbShape: widget.duration.inMilliseconds > 0
-          ? RoundSliderThumbShape(enabledThumbRadius: tokens.radiusMedium)
+          ? RoundSliderThumbShape(enabledThumbRadius: tokens.thumbRadius)
           : HiddenThumbComponentShape(),
       overlayShape: widget.duration.inMilliseconds > 0
           ? const RoundSliderOverlayShape()
@@ -47,7 +56,17 @@ class SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.componentTokens.seekBar;
+    final baseColor = theme.colorScheme.onPrimary;
+    final activeColor = widget.activeColor ?? baseColor;
+    final inactiveColor =
+        widget.inactiveColor ??
+        baseColor.withValues(alpha: tokens.inactiveTrackOpacity);
+    final bufferedColor =
+        widget.bufferedColor ??
+        baseColor.withValues(alpha: tokens.bufferedTrackOpacity);
+    final thumbColor = widget.thumbColor ?? activeColor;
     final double value = min(
       _dragValue ?? widget.position.inMilliseconds.toDouble(),
       widget.duration.inMilliseconds.toDouble(),
@@ -60,10 +79,8 @@ class SeekBarState extends State<SeekBar> {
       children: [
         // Progress bar
         Container(
-          height:
-              tokens.spaceExtraLarge *
-              1.25, // Increased height for better touch target
-          margin: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+          height: tokens.touchExtent,
+          margin: EdgeInsets.symmetric(horizontal: tokens.horizontalMargin),
           child: Stack(
             alignment: .center, // Center the sliders vertically
             clipBehavior: .none,
@@ -72,12 +89,8 @@ class SeekBarState extends State<SeekBar> {
               SliderTheme(
                 data: _sliderThemeData.copyWith(
                   thumbShape: HiddenThumbComponentShape(),
-                  activeTrackColor: Colors.white.withValues(
-                    alpha: tokens.opacityMedium,
-                  ),
-                  inactiveTrackColor: Colors.white.withValues(
-                    alpha: tokens.opacitySubtle,
-                  ),
+                  activeTrackColor: bufferedColor,
+                  inactiveTrackColor: inactiveColor,
                 ),
                 child: ExcludeSemantics(
                   child: Slider(
@@ -94,8 +107,8 @@ class SeekBarState extends State<SeekBar> {
               SliderTheme(
                 data: _sliderThemeData.copyWith(
                   inactiveTrackColor: Colors.transparent,
-                  activeTrackColor: Colors.white,
-                  thumbColor: Colors.white,
+                  activeTrackColor: activeColor,
+                  thumbColor: thumbColor,
                 ),
                 child: Slider(
                   max: widget.duration.inMilliseconds.toDouble(),

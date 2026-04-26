@@ -2285,6 +2285,26 @@
     "@encodingVerticalVideo": {
         "description": "Status message while encoding the final vertical reel video"
     },
+    "reelGenerationFailed": "تعذّر إنشاء فيديو الريل. يرجى المحاولة مرة أخرى.",
+    "@reelGenerationFailed": {
+        "description": "Error message when reel generation fails for a general encoding reason"
+    },
+    "reelGenerationFailedInvalidFrame": "تعذّر معالجة إطار الصورة الملتقطة لإنشاء الريل. يرجى إعادة المحاولة.",
+    "@reelGenerationFailedInvalidFrame": {
+        "description": "Error message when captured screenshot frame format is invalid for reel encoding"
+    },
+    "reelGenerationFailedMissingScreenshot": "لم يتم العثور على إطار ملتقط لإنشاء الريل.",
+    "@reelGenerationFailedMissingScreenshot": {
+        "description": "Error message when reel generation starts without any screenshot frame"
+    },
+    "reelGenerationFailedInvalidOutput": "ملف الريل الناتج غير صالح ولا يمكن فتحه. يرجى إعادة المحاولة.",
+    "@reelGenerationFailedInvalidOutput": {
+        "description": "Error message when encoding reports success but the output video file is unusable"
+    },
+    "reelPreviewLoadFailed": "تعذّر تحميل معاينة الفيديو الناتج.",
+    "@reelPreviewLoadFailed": {
+        "description": "Shown in review screen when generated video preview initialization fails"
+    },
     "reelGenerated": "تم إنشاء الريل!",
     "@reelGenerated": {
         "description": "Status message after the reel has been generated successfully"

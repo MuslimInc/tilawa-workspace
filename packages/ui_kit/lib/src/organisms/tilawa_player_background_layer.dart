@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 
-class TilawaPlayerBackgroundLayer extends StatelessWidget {
-  const TilawaPlayerBackgroundLayer({
+class TilawaBackdropImageLayer extends StatelessWidget {
+  const TilawaBackdropImageLayer({
     super.key,
     required this.image,
     this.blurAmount,

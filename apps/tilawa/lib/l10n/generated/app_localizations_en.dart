@@ -1697,6 +1697,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Encoding vertical video (this may take a moment)...';
 
   @override
+  String get reelGenerationFailed =>
+      'Failed to generate reel video. Please try again.';
+
+  @override
+  String get reelGenerationFailedInvalidFrame =>
+      'Failed to process captured frame data for reel generation. Please retry.';
+
+  @override
+  String get reelGenerationFailedMissingScreenshot =>
+      'No captured frame was found for reel generation.';
+
+  @override
+  String get reelGenerationFailedInvalidOutput =>
+      'Generated reel output is invalid and could not be opened. Please try again.';
+
+  @override
+  String get reelPreviewLoadFailed => 'Unable to load generated video preview.';
+
+  @override
   String get reelGenerated => 'Reel generated!';
 
   @override

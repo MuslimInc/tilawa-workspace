@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/share/presentation/widgets/video_review_panel.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
@@ -14,7 +15,6 @@ import '../widgets/reader_page_content_renderer.dart';
 import '../widgets/screenshot_composer_widgets.dart';
 import '../widgets/share_poster_renderer.dart';
 import '../widgets/share_preview_widgets.dart';
-import '../widgets/video_reel_widgets.dart';
 
 class ScreenshotComposerScreen extends StatefulWidget {
   const ScreenshotComposerScreen({
