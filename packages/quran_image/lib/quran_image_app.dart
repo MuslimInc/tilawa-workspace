@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran_image/core/design_tokens/colors.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart';
 import 'package:quran_image/domain/repositories/quran_image_cache_repository.dart';
@@ -10,6 +9,8 @@ import 'package:quran_image/presentation/bloc/navigation/navigation_event.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/presentation/mappers/app_message_mapper.dart';
 import 'package:quran_image/quran_image_reader.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart'
+    show TilawaComponentTokens, TilawaDesignTokens;
 
 import 'core/di/dependency_injection.dart';
 import 'domain/entities/app_message.dart';
@@ -25,6 +26,10 @@ class QuranImageApp extends StatefulWidget {
 class _QuranImageAppState extends State<QuranImageApp> {
   static final ThemeData _appTheme = ThemeData(
     colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+    extensions: <ThemeExtension<dynamic>>[
+      TilawaDesignTokens.light(),
+      TilawaComponentTokens.light(),
+    ],
     useMaterial3: true,
   );
 
@@ -141,7 +146,7 @@ class _QuranReaderHome extends StatelessWidget {
         } else if (state is NavigationError) {
           final l10n = AppLocalizations.of(context)!;
           result = Scaffold(
-            backgroundColor: AppColors.pageBackground,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             body: Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -170,7 +175,9 @@ class _QuranReaderHome extends StatelessWidget {
           );
         } else {
           // Silent loading state with matching background.
-          result = const Scaffold(backgroundColor: Color(0xFFFFF9F2));
+          result = Scaffold(
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          );
         }
 
         PerfLogger.logElapsed(

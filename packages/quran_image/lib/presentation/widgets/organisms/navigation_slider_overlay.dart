@@ -43,8 +43,16 @@ class NavigationSliderOverlay extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final componentTokens = theme.extension<TilawaComponentTokens>();
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
     final panelRadius = BorderRadius.circular(
       tokens.radiusExtraLarge + tokens.spaceSmall,
+    );
+    final panelPadding = EdgeInsets.fromLTRB(
+      tokens.spaceLarge,
+      tokens.spaceMedium,
+      tokens.spaceLarge,
+      tokens.spaceLarge,
     );
 
     return GestureDetector(
@@ -57,63 +65,81 @@ class NavigationSliderOverlay extends StatelessWidget {
           tokens.spaceLarge,
           0,
           tokens.spaceLarge,
-          tokens.spaceMedium,
+          bottomInset + tokens.spaceMedium,
         ),
         child: Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: tokens.contentMaxWidthForm),
-            child: TilawaGlassPanel(
-              enableBackdropBlur: true,
-              borderRadius: panelRadius,
-              backgroundColor: colorScheme.surface.withValues(
-                alpha: tokens.opacityGlass,
-              ),
-              borderColor: colorScheme.primary.withValues(
-                alpha: tokens.opacityMedium,
-              ),
-              padding: EdgeInsets.fromLTRB(
-                tokens.spaceLarge,
-                tokens.spaceMedium,
-                tokens.spaceLarge,
-                tokens.spaceLarge,
-              ),
-              child: Builder(
-                builder: (context) {
-                  final sw = PerfLogger.startTimer();
-                  final content = Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      PageSlider(
-                        currentPage: state.displayPage,
-                        totalPages: state.totalPages,
-                        onChanged: (value) =>
-                            onPreviewPageChanged(value.round()),
-                        onChangeEnd: (value) =>
-                            onPageNavigationRequested(value.round()),
-                        screenWidth: screenWidth,
-                      ),
-                      SizedBox(height: tokens.spaceMedium),
-                      NavigationButtonGroup(
-                        currentPage: state.displayPage,
-                        totalPages: state.totalPages,
-                        onPrevious: canGoToPreviousPage
-                            ? onPreviousPageRequested
-                            : null,
-                        onNext: canGoToNextPage ? onNextPageRequested : null,
-                        screenWidth: screenWidth,
-                      ),
-                    ],
+            child: Builder(
+              builder: (context) {
+                final content = Builder(
+                  builder: (context) {
+                    final sw = PerfLogger.startTimer();
+                    final content = Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PageSlider(
+                          currentPage: state.displayPage,
+                          totalPages: state.totalPages,
+                          onChanged: (value) =>
+                              onPreviewPageChanged(value.round()),
+                          onChangeEnd: (value) =>
+                              onPageNavigationRequested(value.round()),
+                          screenWidth: screenWidth,
+                        ),
+                        SizedBox(height: tokens.spaceMedium),
+                        NavigationButtonGroup(
+                          currentPage: state.displayPage,
+                          totalPages: state.totalPages,
+                          onPrevious: canGoToPreviousPage
+                              ? onPreviousPageRequested
+                              : null,
+                          onNext: canGoToNextPage ? onNextPageRequested : null,
+                          screenWidth: screenWidth,
+                        ),
+                      ],
+                    );
+                    PerfLogger.logElapsed(
+                      sw,
+                      widgetName: 'NavigationSliderOverlay',
+                      message:
+                          'build displayPage=${state.displayPage} '
+                          'currentPage=${state.currentPage}',
+                    );
+                    return content;
+                  },
+                );
+
+                if (componentTokens != null) {
+                  return TilawaGlassPanel(
+                    enableBackdropBlur: true,
+                    borderRadius: panelRadius,
+                    backgroundColor: colorScheme.surface.withValues(
+                      alpha: tokens.opacityGlass,
+                    ),
+                    borderColor: colorScheme.primary.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+                    padding: panelPadding,
+                    child: content,
                   );
-                  PerfLogger.logElapsed(
-                    sw,
-                    widgetName: 'NavigationSliderOverlay',
-                    message:
-                        'build displayPage=${state.displayPage} '
-                        'currentPage=${state.currentPage}',
-                  );
-                  return content;
-                },
-              ),
+                }
+
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface.withValues(
+                      alpha: tokens.opacityGlass,
+                    ),
+                    borderRadius: panelRadius,
+                    border: Border.all(
+                      color: colorScheme.primary.withValues(
+                        alpha: tokens.opacityMedium,
+                      ),
+                    ),
+                  ),
+                  child: Padding(padding: panelPadding, child: content),
+                );
+              },
             ),
           ),
         ),

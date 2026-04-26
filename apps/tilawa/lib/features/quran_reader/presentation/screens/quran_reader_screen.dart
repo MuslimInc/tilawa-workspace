@@ -116,7 +116,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   bool _didReportInitialPreparedWindow = false;
   late final ValueNotifier<bool> _isScrollingNotifier;
 
-  ThemeData? _cachedThemeData;
+  ThemeData? _cachedAppTheme;
   QuranReaderTheme? _cachedReaderTheme;
   SystemUiOverlayStyle? _cachedReaderSystemUiStyle;
   SystemUiOverlayStyle? _cachedAppSystemUiStyle;
@@ -198,18 +198,16 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         (_lastPreparedViewportWidth! - viewportWidth).abs() > 0.5;
     final bool didOrientationChange =
         _lastPreparedOrientation != currentOrientation;
-    final bool didThemeChange = _cachedReaderTheme != incomingReaderTheme;
+    final bool didThemeChange = _cachedAppTheme != incomingTheme;
     _settledCacheExtent = 0.0;
     if (!_isInteracting &&
         _hasPreparedCoverageFor(_currentPageNotifier.value) &&
         (_cacheExtentNotifier.value - _settledCacheExtent).abs() > 0.5) {
       _cacheExtentNotifier.value = _settledCacheExtent;
     }
-    if (_cachedReaderTheme != incomingReaderTheme || _cachedThemeData == null) {
+    if (didThemeChange || _cachedReaderTheme == null) {
+      _cachedAppTheme = incomingTheme;
       _cachedReaderTheme = incomingReaderTheme;
-      _cachedThemeData = incomingTheme.copyWith(
-        scaffoldBackgroundColor: incomingReaderTheme.pageBackground,
-      );
       // Precache assets once theme and media query info is stable
       unawaited(QuranFontService.precacheQuranAssets(context));
     }
@@ -355,37 +353,34 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         if (didPop || _allowSystemPop) return;
         unawaited(_handleExitRequest());
       },
-      child: Theme(
-        data: _cachedThemeData!,
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: _cachedReaderSystemUiStyle!,
-          child: _ReaderListener(
-            isProgrammaticJump: _isProgrammaticJump,
-            syncToPage: _syncToPage,
-            updateSystemUiConfig: _updateSystemUiConfig,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: _cachedReaderSystemUiStyle!,
+        child: _ReaderListener(
+          isProgrammaticJump: _isProgrammaticJump,
+          syncToPage: _syncToPage,
+          updateSystemUiConfig: _updateSystemUiConfig,
+          showOverlaysNotifier: _showOverlaysNotifier,
+          child: _ReaderStack(
+            pageController: _pageController,
+            currentPageNotifier: _currentPageNotifier,
+            cacheExtentNotifier: _cacheExtentNotifier,
+            preparedWindowNotifier: _preparedWindowNotifier,
             showOverlaysNotifier: _showOverlaysNotifier,
-            child: _ReaderStack(
-              pageController: _pageController,
-              currentPageNotifier: _currentPageNotifier,
-              cacheExtentNotifier: _cacheExtentNotifier,
-              preparedWindowNotifier: _preparedWindowNotifier,
-              showOverlaysNotifier: _showOverlaysNotifier,
-              screenshotBoundaryKey: _screenshotBoundaryKey,
-              warmingNotifier: _warmingNotifier,
-              headerFontSizeMultiplier: _headerFontSizeMultiplier,
-              readerTheme: _cachedReaderTheme!,
-              onPageChanged: _handleOnPageChanged,
-              getSurahName: _getSurahName,
-              jumpToSurah: _jumpToSurah,
-              handleShowIndex: _handleShowIndex,
-              showSurahIndex: _showSurahIndex,
-              showShareOptions: _showShareOptions,
-              jumpToPage: _jumpToPage,
-              onWarming: _handleOnWarming,
-              onPointerDown: _pauseWarming,
-              onPointerUp: _resumeWarming,
-              isScrollingNotifier: _isScrollingNotifier,
-            ),
+            screenshotBoundaryKey: _screenshotBoundaryKey,
+            warmingNotifier: _warmingNotifier,
+            headerFontSizeMultiplier: _headerFontSizeMultiplier,
+            readerTheme: _cachedReaderTheme!,
+            onPageChanged: _handleOnPageChanged,
+            getSurahName: _getSurahName,
+            jumpToSurah: _jumpToSurah,
+            handleShowIndex: _handleShowIndex,
+            showSurahIndex: _showSurahIndex,
+            showShareOptions: _showShareOptions,
+            jumpToPage: _jumpToPage,
+            onWarming: _handleOnWarming,
+            onPointerDown: _pauseWarming,
+            onPointerUp: _resumeWarming,
+            isScrollingNotifier: _isScrollingNotifier,
           ),
         ),
       ),

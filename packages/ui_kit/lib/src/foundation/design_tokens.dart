@@ -493,7 +493,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
 /// Helper extension to access tokens easily
 extension TilawaDesignTokensX on ThemeData {
-  TilawaDesignTokens get tokens => extension<TilawaDesignTokens>()!;
+  TilawaDesignTokens get tokens =>
+      extension<TilawaDesignTokens>() ?? TilawaDesignTokens.light();
 }
 
 extension TilawaIconSizeX on BuildContext {

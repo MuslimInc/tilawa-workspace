@@ -18,7 +18,7 @@ class QuranImageContent extends StatelessWidget {
     required this.surahHeaderLayoutPolicy,
     required this.imageCacheRepository,
     required this.devicePixelRatio,
-    this.backgroundColor = const Color(0xFFFFF8ED),
+    this.backgroundColor,
   });
 
   final int pageNumber;
@@ -32,12 +32,12 @@ class QuranImageContent extends StatelessWidget {
   final SurahHeaderBannerLayoutPolicy surahHeaderLayoutPolicy;
   final QuranImageCacheRepository imageCacheRepository;
   final double devicePixelRatio;
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: backgroundColor,
+      color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Stack(
         clipBehavior: Clip.none,
         children: [

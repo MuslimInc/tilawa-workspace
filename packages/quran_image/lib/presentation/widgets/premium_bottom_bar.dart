@@ -119,7 +119,7 @@ class _PageNumberMedallion extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            pageNumber.toString(),
+            _toEasternArabicDigits(pageNumber),
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             textAlign: TextAlign.center,
@@ -132,4 +132,13 @@ class _PageNumberMedallion extends StatelessWidget {
       ),
     );
   }
+}
+
+String _toEasternArabicDigits(int value) {
+  const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return value
+      .toString()
+      .split('')
+      .map((character) => digits[int.parse(character)])
+      .join();
 }

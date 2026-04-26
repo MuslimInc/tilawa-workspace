@@ -214,7 +214,7 @@ class _ReaderShell extends StatelessWidget {
       builder: (context, state) {
         if (state is NavigationLoaded) {
           return QuranImageReader(
-            preferredSystemUiMode: SystemUiMode.immersiveSticky,
+            preferredSystemUiMode: SystemUiMode.edgeToEdge,
             restoreSystemUiMode: SystemUiMode.edgeToEdge,
             preferredOrientations: const [
               DeviceOrientation.portraitUp,

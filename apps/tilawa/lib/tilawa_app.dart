@@ -19,7 +19,6 @@ import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
-import 'features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
@@ -254,11 +253,9 @@ class _PlayerApp extends StatelessWidget {
                 },
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
-                  extensions: [QuranReaderTheme.light],
                 ),
                 darkTheme: AppTheme.getDarkTheme(
                   primaryColor: themeState.primaryColor,
-                  extensions: [QuranReaderTheme.dark],
                 ),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,
