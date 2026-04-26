@@ -320,6 +320,24 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// Label for stopping audio playback
+  ///
+  /// In en, this message translates to:
+  /// **'Stop playback'**
+  String get stopPlayback;
+
+  /// Confirmation message before stopping audio playback
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to stop playback?'**
+  String get stopPlaybackConfirmMessage;
+
+  /// Snackbar message when player is dismissed
+  ///
+  /// In en, this message translates to:
+  /// **'Player closed'**
+  String get playerDismissed;
+
   /// Play all button text
   ///
   /// In en, this message translates to:
@@ -1369,6 +1387,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Athkar'**
   String get athkar;
+
+  /// Tasbeeh category title in Athkar
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbeeh'**
+  String get tasbeehCategory;
+
+  /// Input label for creating custom dhikr
+  ///
+  /// In en, this message translates to:
+  /// **'Dhikr'**
+  String get tasbeehInputLabel;
+
+  /// Hint for custom dhikr input
+  ///
+  /// In en, this message translates to:
+  /// **'Write your dhikr, e.g. Subhan Allah'**
+  String get tasbeehInputHint;
+
+  /// Save custom dhikr button label
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get tasbeehSave;
+
+  /// Instruction for tap-to-count interaction
+  ///
+  /// In en, this message translates to:
+  /// **'Tap anywhere to increment'**
+  String get tasbeehTapToCount;
+
+  /// Target count input label
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get tasbeehTargetLabel;
+
+  /// Button label to apply target count
+  ///
+  /// In en, this message translates to:
+  /// **'Set target'**
+  String get tasbeehSetTarget;
+
+  /// Title for add new Tasbeeh option
+  ///
+  /// In en, this message translates to:
+  /// **'Add new Tasbeeh'**
+  String get tasbeehAddNewOptionTitle;
+
+  /// Subtitle for add new Tasbeeh option
+  ///
+  /// In en, this message translates to:
+  /// **'Create your dhikr and target, then start counting'**
+  String get tasbeehAddNewOptionSubtitle;
+
+  /// Title for viewing saved Tasbeeh history
+  ///
+  /// In en, this message translates to:
+  /// **'View saved Tasbeeh'**
+  String get tasbeehViewHistoryOptionTitle;
+
+  /// Subtitle for viewing saved Tasbeeh history
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one from your history and continue counting'**
+  String get tasbeehViewHistoryOptionSubtitle;
+
+  /// Button label to go to counting view
+  ///
+  /// In en, this message translates to:
+  /// **'Start counting'**
+  String get tasbeehGoToCounting;
+
+  /// Button label to return to Tasbeeh options
+  ///
+  /// In en, this message translates to:
+  /// **'Back to options'**
+  String get tasbeehBackToOptions;
+
+  /// Heading for selecting saved Tasbeeh
+  ///
+  /// In en, this message translates to:
+  /// **'Choose saved Tasbeeh'**
+  String get tasbeehChooseSavedDhikr;
+
+  /// Message shown when Tasbeeh history is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No saved Tasbeeh yet'**
+  String get tasbeehHistoryEmpty;
+
+  /// Confirmation message before deleting a saved Tasbeeh item
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{tasbeehText}\" from your saved Tasbeeh history?'**
+  String tasbeehDeleteConfirmationMessage(String tasbeehText);
+
+  /// Label for removing saved tasbeeh item
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get tasbeehRemoveItem;
+
+  /// Current target count label
+  ///
+  /// In en, this message translates to:
+  /// **'Current target: {count}'**
+  String tasbeehCurrentTarget(int count);
+
+  /// Prompt shown when no dhikr is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Select or create a dhikr to start counting'**
+  String get tasbeehSelectOrCreatePrompt;
 
   /// Done label for thikr completion
   ///

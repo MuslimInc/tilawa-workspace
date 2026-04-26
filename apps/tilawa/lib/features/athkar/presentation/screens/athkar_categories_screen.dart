@@ -5,10 +5,12 @@ import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
+import '../../domain/constants/tasbeeh_constants.dart';
 import '../../domain/entities/athkar_category.dart';
 import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
 import '../widgets/athkar_category_card.dart';
+import 'tasbeeh_screen.dart';
 
 class AthkarCategoriesScreen extends StatelessWidget {
   const AthkarCategoriesScreen({super.key});
@@ -31,6 +33,16 @@ class AthkarCategoriesScreen extends StatelessWidget {
               );
             } else if (state is AthkarCategoriesLoaded) {
               final tokens = Theme.of(context).tokens;
+              final categories = [
+                ...state.categories,
+                AthkarCategory(
+                  id: TasbeehConstants.categoryId,
+                  nameAr: context.l10n.tasbeehCategory,
+                  nameEn: context.l10n.tasbeehCategory,
+                  icon: TasbeehConstants.categoryIconName,
+                ),
+              ];
+
               return TilawaContentGrid(
                 padding: EdgeInsets.fromLTRB(
                   tokens.spaceExtraLarge,
@@ -43,13 +55,22 @@ class AthkarCategoriesScreen extends StatelessWidget {
                 mainAxisSpacing: tokens.spaceLarge,
                 childAspectRatio: 0.9,
                 shrinkWrap: true,
-                itemCount: state.categories.length,
+                itemCount: categories.length,
                 itemBuilder: (context, index) {
-                  final AthkarCategory category = state.categories[index];
+                  final AthkarCategory category = categories[index];
                   return AthkarCategoryCard(
                     name: category.nameAr,
                     icon: category.icon,
                     onTap: () {
+                      if (category.id == TasbeehConstants.categoryId) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const TasbeehScreen(),
+                          ),
+                        );
+                        return;
+                      }
+
                       AthkarDetailsRoute(
                         categoryId: category.id,
                         categoryName: category.nameAr,

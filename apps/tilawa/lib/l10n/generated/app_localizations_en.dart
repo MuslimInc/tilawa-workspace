@@ -121,6 +121,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
+  String get stopPlayback => 'Stop playback';
+
+  @override
+  String get stopPlaybackConfirmMessage =>
+      'Are you sure you want to stop playback?';
+
+  @override
+  String get playerDismissed => 'Player closed';
+
+  @override
   String get playAll => 'Play All';
 
   @override
@@ -691,6 +701,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get athkar => 'Athkar';
+
+  @override
+  String get tasbeehCategory => 'Tasbeeh';
+
+  @override
+  String get tasbeehInputLabel => 'Dhikr';
+
+  @override
+  String get tasbeehInputHint => 'Write your dhikr, e.g. Subhan Allah';
+
+  @override
+  String get tasbeehSave => 'Save';
+
+  @override
+  String get tasbeehTapToCount => 'Tap anywhere to increment';
+
+  @override
+  String get tasbeehTargetLabel => 'Target';
+
+  @override
+  String get tasbeehSetTarget => 'Set target';
+
+  @override
+  String get tasbeehAddNewOptionTitle => 'Add new Tasbeeh';
+
+  @override
+  String get tasbeehAddNewOptionSubtitle =>
+      'Create your dhikr and target, then start counting';
+
+  @override
+  String get tasbeehViewHistoryOptionTitle => 'View saved Tasbeeh';
+
+  @override
+  String get tasbeehViewHistoryOptionSubtitle =>
+      'Choose one from your history and continue counting';
+
+  @override
+  String get tasbeehGoToCounting => 'Start counting';
+
+  @override
+  String get tasbeehBackToOptions => 'Back to options';
+
+  @override
+  String get tasbeehChooseSavedDhikr => 'Choose saved Tasbeeh';
+
+  @override
+  String get tasbeehHistoryEmpty => 'No saved Tasbeeh yet';
+
+  @override
+  String tasbeehDeleteConfirmationMessage(String tasbeehText) {
+    return 'Delete \"$tasbeehText\" from your saved Tasbeeh history?';
+  }
+
+  @override
+  String get tasbeehRemoveItem => 'Remove';
+
+  @override
+  String tasbeehCurrentTarget(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'Current target: $countString';
+  }
+
+  @override
+  String get tasbeehSelectOrCreatePrompt =>
+      'Select or create a dhikr to start counting';
 
   @override
   String get done => 'Done';

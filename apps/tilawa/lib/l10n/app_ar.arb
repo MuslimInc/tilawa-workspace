@@ -148,6 +148,18 @@
     "@cancel": {
         "description": "Cancel button text"
     },
+    "stopPlayback": "إيقاف التشغيل",
+    "@stopPlayback": {
+        "description": "Label for stopping audio playback"
+    },
+    "stopPlaybackConfirmMessage": "هل أنت متأكد من إيقاف التشغيل؟",
+    "@stopPlaybackConfirmMessage": {
+        "description": "Confirmation message before stopping audio playback"
+    },
+    "playerDismissed": "تم إغلاق المشغل",
+    "@playerDismissed": {
+        "description": "Snackbar message when player is dismissed"
+    },
     "playAll": "تشغيل الكل",
     "@playAll": {
         "description": "Play all button text"
@@ -812,7 +824,7 @@
     "@audioError": {
         "description": "Audio playback error message"
     },
-    "validationError": "بيانات المقدمة غير صالحة",
+    "validationError": "البيانات المُدخلة غير صالحة",
     "@validationError": {
         "description": "Validation error message"
     },
@@ -965,6 +977,94 @@
     "athkar": "الأذكار",
     "@athkar": {
         "description": "Athkar tab label"
+    },
+    "tasbeehCategory": "مسبحة",
+    "@tasbeehCategory": {
+        "description": "Tasbeeh category title in Athkar"
+    },
+    "tasbeehInputLabel": "الذكر",
+    "@tasbeehInputLabel": {
+        "description": "Input label for creating custom dhikr"
+    },
+    "tasbeehInputHint": "اكتب ذكرك، مثل: سبحان الله",
+    "@tasbeehInputHint": {
+        "description": "Hint for custom dhikr input"
+    },
+    "tasbeehSave": "حفظ",
+    "@tasbeehSave": {
+        "description": "Save custom dhikr button label"
+    },
+    "tasbeehTapToCount": "اضغط في أي مكان للزيادة",
+    "@tasbeehTapToCount": {
+        "description": "Instruction for tap-to-count interaction"
+    },
+    "tasbeehTargetLabel": "الهدف",
+    "@tasbeehTargetLabel": {
+        "description": "Target count input label"
+    },
+    "tasbeehSetTarget": "تعيين الهدف",
+    "@tasbeehSetTarget": {
+        "description": "Button label to apply target count"
+    },
+    "tasbeehAddNewOptionTitle": "إضافة مسبحة جديدة",
+    "@tasbeehAddNewOptionTitle": {
+        "description": "Title for add new Tasbeeh option"
+    },
+    "tasbeehAddNewOptionSubtitle": "أنشئ الذكر والهدف ثم ابدأ العد",
+    "@tasbeehAddNewOptionSubtitle": {
+        "description": "Subtitle for add new Tasbeeh option"
+    },
+    "tasbeehViewHistoryOptionTitle": "عرض السجل المحفوظ",
+    "@tasbeehViewHistoryOptionTitle": {
+        "description": "Title for viewing saved Tasbeeh history"
+    },
+    "tasbeehViewHistoryOptionSubtitle": "اختر من السجل وواصل العد",
+    "@tasbeehViewHistoryOptionSubtitle": {
+        "description": "Subtitle for viewing saved Tasbeeh history"
+    },
+    "tasbeehGoToCounting": "ابدأ العد",
+    "@tasbeehGoToCounting": {
+        "description": "Button label to go to counting view"
+    },
+    "tasbeehBackToOptions": "العودة للخيارات",
+    "@tasbeehBackToOptions": {
+        "description": "Button label to return to Tasbeeh options"
+    },
+    "tasbeehChooseSavedDhikr": "اختر مسبحة محفوظة",
+    "@tasbeehChooseSavedDhikr": {
+        "description": "Heading for selecting saved Tasbeeh"
+    },
+    "tasbeehHistoryEmpty": "لا توجد مسبحة محفوظة بعد",
+    "@tasbeehHistoryEmpty": {
+        "description": "Message shown when Tasbeeh history is empty"
+    },
+    "tasbeehDeleteConfirmationMessage": "هل تريد حذف \"{tasbeehText}\" من سجل المسبحة المحفوظ؟",
+    "@tasbeehDeleteConfirmationMessage": {
+        "description": "Confirmation message before deleting a saved Tasbeeh item",
+        "placeholders": {
+            "tasbeehText": {
+                "type": "String",
+                "description": "The Tasbeeh text to be deleted"
+            }
+        }
+    },
+    "tasbeehRemoveItem": "إزالة",
+    "@tasbeehRemoveItem": {
+        "description": "Label for removing saved tasbeeh item"
+    },
+    "tasbeehCurrentTarget": "الهدف الحالي: {count}",
+    "@tasbeehCurrentTarget": {
+        "description": "Current target count label",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
+    "tasbeehSelectOrCreatePrompt": "اختر ذكراً محفوظاً أو أضف ذكراً جديداً للبدء",
+    "@tasbeehSelectOrCreatePrompt": {
+        "description": "Prompt shown when no dhikr is selected"
     },
     "done": "تم",
     "@done": {

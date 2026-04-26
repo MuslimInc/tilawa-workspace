@@ -148,6 +148,18 @@
     "@cancel": {
         "description": "Cancel button text"
     },
+    "stopPlayback": "Stop playback",
+    "@stopPlayback": {
+        "description": "Label for stopping audio playback"
+    },
+    "stopPlaybackConfirmMessage": "Are you sure you want to stop playback?",
+    "@stopPlaybackConfirmMessage": {
+        "description": "Confirmation message before stopping audio playback"
+    },
+    "playerDismissed": "Player closed",
+    "@playerDismissed": {
+        "description": "Snackbar message when player is dismissed"
+    },
     "playAll": "Play All",
     "@playAll": {
         "description": "Play all button text"
@@ -965,6 +977,94 @@
     "athkar": "Athkar",
     "@athkar": {
         "description": "Athkar tab label"
+    },
+    "tasbeehCategory": "Tasbeeh",
+    "@tasbeehCategory": {
+        "description": "Tasbeeh category title in Athkar"
+    },
+    "tasbeehInputLabel": "Dhikr",
+    "@tasbeehInputLabel": {
+        "description": "Input label for creating custom dhikr"
+    },
+    "tasbeehInputHint": "Write your dhikr, e.g. Subhan Allah",
+    "@tasbeehInputHint": {
+        "description": "Hint for custom dhikr input"
+    },
+    "tasbeehSave": "Save",
+    "@tasbeehSave": {
+        "description": "Save custom dhikr button label"
+    },
+    "tasbeehTapToCount": "Tap anywhere to increment",
+    "@tasbeehTapToCount": {
+        "description": "Instruction for tap-to-count interaction"
+    },
+    "tasbeehTargetLabel": "Target",
+    "@tasbeehTargetLabel": {
+        "description": "Target count input label"
+    },
+    "tasbeehSetTarget": "Set target",
+    "@tasbeehSetTarget": {
+        "description": "Button label to apply target count"
+    },
+    "tasbeehAddNewOptionTitle": "Add new Tasbeeh",
+    "@tasbeehAddNewOptionTitle": {
+        "description": "Title for add new Tasbeeh option"
+    },
+    "tasbeehAddNewOptionSubtitle": "Create your dhikr and target, then start counting",
+    "@tasbeehAddNewOptionSubtitle": {
+        "description": "Subtitle for add new Tasbeeh option"
+    },
+    "tasbeehViewHistoryOptionTitle": "View saved Tasbeeh",
+    "@tasbeehViewHistoryOptionTitle": {
+        "description": "Title for viewing saved Tasbeeh history"
+    },
+    "tasbeehViewHistoryOptionSubtitle": "Choose one from your history and continue counting",
+    "@tasbeehViewHistoryOptionSubtitle": {
+        "description": "Subtitle for viewing saved Tasbeeh history"
+    },
+    "tasbeehGoToCounting": "Start counting",
+    "@tasbeehGoToCounting": {
+        "description": "Button label to go to counting view"
+    },
+    "tasbeehBackToOptions": "Back to options",
+    "@tasbeehBackToOptions": {
+        "description": "Button label to return to Tasbeeh options"
+    },
+    "tasbeehChooseSavedDhikr": "Choose saved Tasbeeh",
+    "@tasbeehChooseSavedDhikr": {
+        "description": "Heading for selecting saved Tasbeeh"
+    },
+    "tasbeehHistoryEmpty": "No saved Tasbeeh yet",
+    "@tasbeehHistoryEmpty": {
+        "description": "Message shown when Tasbeeh history is empty"
+    },
+    "tasbeehDeleteConfirmationMessage": "Delete \"{tasbeehText}\" from your saved Tasbeeh history?",
+    "@tasbeehDeleteConfirmationMessage": {
+        "description": "Confirmation message before deleting a saved Tasbeeh item",
+        "placeholders": {
+            "tasbeehText": {
+                "type": "String",
+                "description": "The Tasbeeh text to be deleted"
+            }
+        }
+    },
+    "tasbeehRemoveItem": "Remove",
+    "@tasbeehRemoveItem": {
+        "description": "Label for removing saved tasbeeh item"
+    },
+    "tasbeehCurrentTarget": "Current target: {count}",
+    "@tasbeehCurrentTarget": {
+        "description": "Current target count label",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
+    "tasbeehSelectOrCreatePrompt": "Select or create a dhikr to start counting",
+    "@tasbeehSelectOrCreatePrompt": {
+        "description": "Prompt shown when no dhikr is selected"
     },
     "done": "Done",
     "@done": {

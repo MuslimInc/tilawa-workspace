@@ -121,6 +121,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
+  String get stopPlayback => 'إيقاف التشغيل';
+
+  @override
+  String get stopPlaybackConfirmMessage => 'هل أنت متأكد من إيقاف التشغيل؟';
+
+  @override
+  String get playerDismissed => 'تم إغلاق المشغل';
+
+  @override
   String get playAll => 'تشغيل الكل';
 
   @override
@@ -586,7 +595,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get audioError => 'خطأ في تشغيل الصوت';
 
   @override
-  String get validationError => 'بيانات المقدمة غير صالحة';
+  String get validationError => 'البيانات المُدخلة غير صالحة';
 
   @override
   String get permissionError => 'تم رفض الإذن';
@@ -688,6 +697,72 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get athkar => 'الأذكار';
+
+  @override
+  String get tasbeehCategory => 'مسبحة';
+
+  @override
+  String get tasbeehInputLabel => 'الذكر';
+
+  @override
+  String get tasbeehInputHint => 'اكتب ذكرك، مثل: سبحان الله';
+
+  @override
+  String get tasbeehSave => 'حفظ';
+
+  @override
+  String get tasbeehTapToCount => 'اضغط في أي مكان للزيادة';
+
+  @override
+  String get tasbeehTargetLabel => 'الهدف';
+
+  @override
+  String get tasbeehSetTarget => 'تعيين الهدف';
+
+  @override
+  String get tasbeehAddNewOptionTitle => 'إضافة مسبحة جديدة';
+
+  @override
+  String get tasbeehAddNewOptionSubtitle => 'أنشئ الذكر والهدف ثم ابدأ العد';
+
+  @override
+  String get tasbeehViewHistoryOptionTitle => 'عرض السجل المحفوظ';
+
+  @override
+  String get tasbeehViewHistoryOptionSubtitle => 'اختر من السجل وواصل العد';
+
+  @override
+  String get tasbeehGoToCounting => 'ابدأ العد';
+
+  @override
+  String get tasbeehBackToOptions => 'العودة للخيارات';
+
+  @override
+  String get tasbeehChooseSavedDhikr => 'اختر مسبحة محفوظة';
+
+  @override
+  String get tasbeehHistoryEmpty => 'لا توجد مسبحة محفوظة بعد';
+
+  @override
+  String tasbeehDeleteConfirmationMessage(String tasbeehText) {
+    return 'هل تريد حذف \"$tasbeehText\" من سجل المسبحة المحفوظ؟';
+  }
+
+  @override
+  String get tasbeehRemoveItem => 'إزالة';
+
+  @override
+  String tasbeehCurrentTarget(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'الهدف الحالي: $countString';
+  }
+
+  @override
+  String get tasbeehSelectOrCreatePrompt =>
+      'اختر ذكراً محفوظاً أو أضف ذكراً جديداً للبدء';
 
   @override
   String get done => 'تم';

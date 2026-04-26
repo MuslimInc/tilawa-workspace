@@ -11,6 +11,7 @@ import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -189,6 +190,31 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     });
   }
 
+  void _dismissWithUndo() {
+    HapticFeedback.lightImpact();
+    setState(() => _isDismissed = true);
+    context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
+
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.hideCurrentSnackBar();
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(context.l10n.playerDismissed),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: context.l10n.undo,
+          onPressed: () {
+            if (!mounted) return;
+            setState(() => _isDismissed = false);
+            context.read<AudioPlayerBloc>().add(
+              const AudioPlayerEvent.playAudio(),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('BottomPlayerWidget');
@@ -227,9 +253,12 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
         builder: (context, state) {
           final audio = state.currentAudio;
 
+          logger.d(
+            'BottomPlayerWidget - shouldShowBottomPlayer: ${state.shouldShowBottomPlayer}, currentAudio: ${audio?.title}, isPlaying: ${state.isPlaying}',
+          );
+
           if (!state.shouldShowBottomPlayer ||
               audio == null ||
-              _isDismissed ||
               (widget.isKeyboardOpen && !isExpanding)) {
             return const SizedBox.shrink();
           }
@@ -270,6 +299,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                                 state: state,
                                 audio: audio,
                                 onCollapse: collapse,
+                                onDismiss: _dismissWithUndo,
                                 expandProgress: progress,
                               ),
                             ),
@@ -302,34 +332,14 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                                       _dismissOffsetY;
                                   return Transform.translate(
                                     offset: Offset(0, dismissOffset),
-                                    child: Opacity(
-                                      opacity:
-                                          ((1 -
-                                                      progress *
-                                                          context
-                                                              .tokens
-                                                              .playerAlphaScalingFactor) *
-                                                  (1 -
-                                                      dismissOffset /
-                                                          context
-                                                              .tokens
-                                                              .playerMaxDismissOffset))
-                                              .clamp(0.0, 1.0),
-                                      child: child,
-                                    ),
+                                    child: child,
                                   );
                                 },
                                 child: _MiniPlayerOrganism(
                                   state: state,
                                   audio: audio,
                                   onTap: expand,
-                                  onClose: () {
-                                    HapticFeedback.lightImpact();
-                                    setState(() => _isDismissed = true);
-                                    context.read<AudioPlayerBloc>().add(
-                                      const AudioPlayerEvent.stopAudio(),
-                                    );
-                                  },
+                                  onClose: _dismissWithUndo,
                                 ),
                               ),
                             ),
@@ -424,12 +434,14 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
     required this.state,
     required this.audio,
     required this.onCollapse,
+    required this.onDismiss,
     required this.expandProgress,
   });
 
   final AudioPlayerState state;
   final AudioEntity audio;
   final VoidCallback onCollapse;
+  final VoidCallback onDismiss;
   final double expandProgress;
 
   @override
@@ -464,15 +476,9 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                               imageUrl: audio.artUri!,
                               fit: BoxFit.cover,
                             ),
-                            BackdropFilter(
-                              filter: ImageFilter.blur(
-                                sigmaX: tokens.blurShadow * 2,
-                                sigmaY: tokens.blurShadow * 2,
-                              ),
-                              child: Container(
-                                color: Colors.black.withValues(
-                                  alpha: tokens.opacityMedium,
-                                ),
+                            Container(
+                              color: Colors.black.withValues(
+                                alpha: tokens.opacityMedium,
                               ),
                             ),
                           ],
@@ -501,6 +507,7 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                               _PlayerHeaderMolecule(
                                 state: state,
                                 onCollapse: onCollapse,
+                                onDismiss: onDismiss,
                               ),
 
                               // Artwork
@@ -561,10 +568,15 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _PlayerHeaderMolecule extends StatelessWidget {
-  const _PlayerHeaderMolecule({required this.state, required this.onCollapse});
+  const _PlayerHeaderMolecule({
+    required this.state,
+    required this.onCollapse,
+    required this.onDismiss,
+  });
 
   final AudioPlayerState state;
   final VoidCallback onCollapse;
+  final VoidCallback onDismiss;
 
   @override
   Widget build(BuildContext context) {
@@ -585,6 +597,11 @@ class _PlayerHeaderMolecule extends StatelessWidget {
         style: TextStyle(color: Colors.white, fontSize: tokens.spaceLarge),
       ),
       actions: [
+        IconButton(
+          icon: const Icon(FluentIcons.dismiss_24_regular, color: Colors.white),
+          tooltip: context.l10n.close,
+          onPressed: onDismiss,
+        ),
         if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
           IconButton(
             icon: Icon(
@@ -672,6 +689,13 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final previousIcon = isRtl
+        ? FluentIcons.next_24_filled
+        : FluentIcons.previous_24_filled;
+    final nextIcon = isRtl
+        ? FluentIcons.previous_24_filled
+        : FluentIcons.next_24_filled;
     // Thumb-friendly layout: Primary actions (Play/Next) grouped and sized
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -679,7 +703,7 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
         // Previous
         IconButton(
           icon: Icon(
-            FluentIcons.previous_24_filled,
+            previousIcon,
             color: state.canGoPrevious
                 ? Colors.white
                 : Colors.white.withValues(alpha: tokens.opacitySubtle),
@@ -710,7 +734,7 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
         // Next (Most common thumb action after play)
         IconButton(
           icon: Icon(
-            FluentIcons.next_24_filled,
+            nextIcon,
             color: state.canGoNext
                 ? Colors.white
                 : Colors.white.withValues(alpha: tokens.opacitySubtle),
@@ -753,10 +777,8 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
           ),
         ),
         TilawaIconActionButton(
-          icon: FluentIcons.stop_24_regular,
-          onTap: () => context.read<AudioPlayerBloc>().add(
-            const AudioPlayerEvent.stopAudio(),
-          ),
+          icon: FluentIcons.more_horizontal_24_regular,
+          onTap: () => _showPlaybackActions(context),
         ),
         GestureDetector(
           onTap: () => showSliderDialog(
@@ -788,6 +810,50 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _showPlaybackActions(BuildContext context) async {
+    final bool? shouldOpenStopConfirm = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: ListTile(
+            leading: const Icon(FluentIcons.stop_24_regular),
+            title: Text(context.l10n.stopPlayback),
+            onTap: () => Navigator.of(sheetContext).pop(true),
+          ),
+        );
+      },
+    );
+
+    if (shouldOpenStopConfirm != true || !context.mounted) {
+      return;
+    }
+
+    final bool? shouldStop = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(context.l10n.stopPlayback),
+          content: Text(context.l10n.stopPlaybackConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(context.l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(context.l10n.stopPlayback),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldStop == true && context.mounted) {
+      context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
+    }
   }
 }
 
