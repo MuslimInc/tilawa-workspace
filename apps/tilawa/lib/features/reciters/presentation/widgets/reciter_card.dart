@@ -43,6 +43,7 @@ class ReciterCard extends StatelessWidget {
                 vertical: tokens.spaceSmall,
               ),
               child: Row(
+                crossAxisAlignment: .start,
                 children: [
                   // _ReciterAvatar(reciter: reciter),
                   // SizedBox(width: tokens.spaceMedium),
