@@ -78,7 +78,6 @@ class SurahHeaderWidget extends StatelessWidget {
             surah.name,
             style: theme.textTheme.headlineLarge?.copyWith(
               color: theme.colorScheme.onPrimary,
-              fontFamily: 'Amiri',
             ),
           ),
           const SizedBox(height: 8),

@@ -1556,6 +1556,48 @@ abstract class AppLocalizations {
   /// **'Recitation Duration'**
   String get recitationDuration;
 
+  /// Title of the background source selection dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Background Source'**
+  String get chooseBackgroundSource;
+
+  /// Gallery option in background source selection
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// Camera option in background source selection
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// Option to reset player background to default
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Default'**
+  String get resetToDefault;
+
+  /// Title of the volume adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust volume'**
+  String get adjustVolume;
+
+  /// Title of the playback speed adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed'**
+  String get playbackSpeed;
+
+  /// Fallback text when reciter name is not available
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Reciter'**
+  String get unknownReciter;
+
   /// 15 minutes option
   ///
   /// In en, this message translates to:

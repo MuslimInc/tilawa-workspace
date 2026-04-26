@@ -2,10 +2,12 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+import '../../domain/entities/player_background_configuration.dart';
 import '../cubit/player_background_cubit.dart';
 import '../cubit/player_background_state.dart';
-import '../../domain/entities/player_background_configuration.dart';
 
 class BackgroundSourceDialog extends StatelessWidget {
   const BackgroundSourceDialog({super.key, required this.onSourceSelected});
@@ -17,7 +19,10 @@ class BackgroundSourceDialog extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
 
     return AlertDialog(
-      title: const Text('Choose Background Source'),
+      title: Text(
+        context.l10n.chooseBackgroundSource,
+        style: context.textTheme.titleLarge,
+      ),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
       ),
@@ -26,7 +31,7 @@ class BackgroundSourceDialog extends StatelessWidget {
         children: [
           _SourceOption(
             icon: FluentIcons.image_24_regular,
-            label: 'Gallery',
+            label: context.l10n.gallery,
             onTap: () {
               Navigator.pop(context);
               onSourceSelected(ImageSource.gallery);
@@ -35,7 +40,7 @@ class BackgroundSourceDialog extends StatelessWidget {
           SizedBox(height: tokens.spaceSmall),
           _SourceOption(
             icon: FluentIcons.camera_24_regular,
-            label: 'Camera',
+            label: context.l10n.camera,
             onTap: () {
               Navigator.pop(context);
               onSourceSelected(ImageSource.camera);
@@ -53,7 +58,7 @@ class BackgroundSourceDialog extends StatelessWidget {
                   const Divider(),
                   _SourceOption(
                     icon: FluentIcons.delete_24_regular,
-                    label: 'Reset to Default',
+                    label: context.l10n.resetToDefault,
                     onTap: () {
                       Navigator.pop(context);
                       context.read<PlayerBackgroundCubit>().resetToDefault();
@@ -65,6 +70,12 @@ class BackgroundSourceDialog extends StatelessWidget {
           ),
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.close),
+        ),
+      ],
     );
   }
 }

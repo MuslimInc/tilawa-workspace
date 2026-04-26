@@ -298,26 +298,6 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                         );
                       },
                     ),
-                    floatingActionButton:
-                        BlocSelector<ShareCubit, ShareState, bool>(
-                          selector: (state) =>
-                              state.status != ShareStatus.reviewing,
-                          builder: (context, showFab) {
-                            if (!showFab) return const SizedBox.shrink();
-                            return FloatingActionButton(
-                              key: const ValueKey('composer_fab'),
-                              onPressed: () {
-                                final state = context.read<ShareCubit>().state;
-                                _handleGenerateVideo(
-                                  context,
-                                  state,
-                                  getVerseCount(widget.surahNumber),
-                                );
-                              },
-                              child: const Icon(Icons.movie_creation_outlined),
-                            );
-                          },
-                        ),
                   ),
                 ],
               );

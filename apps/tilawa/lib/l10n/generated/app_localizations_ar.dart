@@ -818,6 +818,27 @@ class AppLocalizationsAr extends AppLocalizations {
   String get recitationDuration => 'مدة التلاوة';
 
   @override
+  String get chooseBackgroundSource => 'اختر مصدر الخلفية';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String get resetToDefault => 'إعادة ضبط الافتراضي';
+
+  @override
+  String get adjustVolume => 'ضبط مستوى الصوت';
+
+  @override
+  String get playbackSpeed => 'سرعة التشغيل';
+
+  @override
+  String get unknownReciter => 'قارئ غير معروف';
+
+  @override
   String get minutes15 => '15 دقيقة';
 
   @override

@@ -89,8 +89,9 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                         item.textAr,
                         textDirection: TextDirection.rtl,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineMedium?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           color: theme.colorScheme.onSurface,
+                          // height: 1.7,
                         ),
                       ),
                     ),

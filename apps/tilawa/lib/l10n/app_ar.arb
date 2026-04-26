@@ -1124,6 +1124,34 @@
     "@recitationDuration": {
         "description": "Sleep timer dialog title"
     },
+    "chooseBackgroundSource": "اختر مصدر الخلفية",
+    "@chooseBackgroundSource": {
+        "description": "Title of the background source selection dialog"
+    },
+    "gallery": "المعرض",
+    "@gallery": {
+        "description": "Gallery option in background source selection"
+    },
+    "camera": "الكاميرا",
+    "@camera": {
+        "description": "Camera option in background source selection"
+    },
+    "resetToDefault": "إعادة ضبط الافتراضي",
+    "@resetToDefault": {
+        "description": "Option to reset player background to default"
+    },
+    "adjustVolume": "ضبط مستوى الصوت",
+    "@adjustVolume": {
+        "description": "Title of the volume adjustment dialog"
+    },
+    "playbackSpeed": "سرعة التشغيل",
+    "@playbackSpeed": {
+        "description": "Title of the playback speed adjustment dialog"
+    },
+    "unknownReciter": "قارئ غير معروف",
+    "@unknownReciter": {
+        "description": "Fallback text when reciter name is not available"
+    },
     "minutes15": "15 دقيقة",
     "@minutes15": {
         "description": "15 minutes option"

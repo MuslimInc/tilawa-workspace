@@ -34,7 +34,8 @@ class BottomPlayerWidget extends StatefulWidget {
     this.isKeyboardOpen = false,
   });
 
-  static const double collapsedHeight = 100;
+  static double collapsedHeight(BuildContext context) =>
+      context.tokens.playerCollapsedHeight;
 
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
@@ -60,7 +61,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   /// The height of the mini player bar (excluding nav bar offset).
   /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
   /// inner padding (12+12) + row content (~48) = ~99.
-  double get _miniPlayerHeight => BottomPlayerWidget.collapsedHeight;
+  double get _miniPlayerHeight => BottomPlayerWidget.collapsedHeight(context);
 
   /// Whether the player is currently expanded.
   bool get isExpanded => _expandController.value == 1.0;
@@ -75,17 +76,11 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
-    // No addListener here — animation-driven rebuilds are handled by the
-    // AnimatedBuilder inside build(), which confines layout work to its own
-    // subtree instead of calling setState() on the full BottomPlayerWidgetState.
 
     _dismissAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    // No addListener here — dismiss animation rebuilds are handled by the
-    // AnimatedBuilder inside build(), confining layout work to the
-    // Transform+Opacity subtree only.
   }
 
   @override
@@ -98,22 +93,32 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   /// Expand the player to full-screen.
   void expand() {
     HapticFeedback.lightImpact();
-    _expandController.forward();
+    _expandController.animateTo(
+      1.0,
+      duration: const Duration(milliseconds: 360),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   /// Collapse the player back to the mini bar.
   void collapse() {
-    _expandController.reverse();
+    _expandController.animateTo(
+      0.0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInCubic,
+    );
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     final primaryDelta = details.primaryDelta ?? 0;
 
-    // When collapsed and dragging down, track dismiss offset
     if ((_expandController.value == 0 && primaryDelta > 0) ||
         _dismissOffsetY > 0) {
       setState(() {
-        _dismissOffsetY = (_dismissOffsetY + primaryDelta).clamp(0.0, 200.0);
+        _dismissOffsetY = (_dismissOffsetY + primaryDelta).clamp(
+          0.0,
+          context.tokens.playerMaxDismissOffset,
+        );
       });
       return;
     }
@@ -121,10 +126,9 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     final screenHeight = MediaQuery.sizeOf(context).height;
     // Negative primaryDelta = dragging up = expanding
     final delta = -primaryDelta / screenHeight;
-    _expandController.value = (_expandController.value + delta * 1.5).clamp(
-      0.0,
-      1.0,
-    );
+    _expandController.value =
+        (_expandController.value + delta * context.tokens.playerDragSensitivity)
+            .clamp(0.0, 1.0);
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
@@ -132,7 +136,8 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
     // Handle dismiss gesture when swiping down on collapsed player
     if (_dismissOffsetY > 0) {
-      if (velocity > 300 || _dismissOffsetY > 80) {
+      if (velocity > context.tokens.playerDismissVelocityThreshold ||
+          _dismissOffsetY > context.tokens.playerDismissThreshold) {
         _dismiss();
       } else {
         _cancelDismiss();
@@ -141,9 +146,11 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
     }
 
     final negVelocity = -velocity;
-    if (negVelocity > 500 || _expandController.value > 0.5) {
+    if (negVelocity > context.tokens.playerVelocityThreshold ||
+        _expandController.value > context.tokens.playerProgressThreshold) {
       expand();
-    } else if (negVelocity < -500 || _expandController.value <= 0.5) {
+    } else if (negVelocity < -context.tokens.playerVelocityThreshold ||
+        _expandController.value <= context.tokens.playerProgressThreshold) {
       collapse();
     }
   }
@@ -231,66 +238,87 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
           return Align(
             alignment: Alignment.bottomCenter,
-            child: GestureDetector(
-              onVerticalDragUpdate: _onVerticalDragUpdate,
-              onVerticalDragEnd: _onVerticalDragEnd,
-              child: AnimatedBuilder(
-                animation: _expandController,
-                builder: (context, _) {
-                  final progress = _expandController.value;
-                  final currentHeight = lerpDouble(
-                    _miniPlayerHeight + widget.bottomNavBarHeight,
-                    screenHeight,
-                    progress,
-                  )!;
+            child: AnimatedBuilder(
+              animation: _expandController,
+              builder: (context, _) {
+                final progress = _expandController.value;
+                final currentHeight = lerpDouble(
+                  _miniPlayerHeight + widget.bottomNavBarHeight,
+                  screenHeight,
+                  progress,
+                )!;
+                final sheetOffsetY = screenHeight * (1 - progress);
 
-                  return Container(
-                    height: currentHeight,
-                    width: double.infinity,
-                    color: Colors.black.withValues(alpha: progress),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // Expanded player (behind, fades in)
-                        if (progress > 0.01)
-                          Opacity(
-                            opacity: progress.clamp(0.0, 1.0),
-                            child: _ExpandedPlayerOrganism(
-                              state: state,
-                              audio: audio,
-                              onCollapse: collapse,
-                              expandProgress: progress,
+                return SizedBox(
+                  height: progress > 0.01 ? screenHeight : currentHeight,
+                  width: double.infinity,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Expanded player slides up from the bottom and back down
+                      // on collapse, matching a media sheet transition.
+                      if (progress > 0.01)
+                        Transform.translate(
+                          offset: Offset(0, sheetOffsetY),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onVerticalDragUpdate: _onVerticalDragUpdate,
+                            onVerticalDragEnd: _onVerticalDragEnd,
+                            child: ColoredBox(
+                              color: Colors.black,
+                              child: _ExpandedPlayerOrganism(
+                                state: state,
+                                audio: audio,
+                                onCollapse: collapse,
+                                expandProgress: progress,
+                              ),
                             ),
                           ),
+                        ),
 
-                        // Mini player (in front, fades out)
-                        if (progress < 0.99)
-                          Positioned(
-                            bottom: lerpDouble(
-                              widget.bottomNavBarHeight,
-                              0,
-                              progress,
-                            ),
-                            left: 0,
-                            right: 0,
-                            child: AnimatedBuilder(
-                              animation: _dismissAnimController,
-                              builder: (context, child) {
-                                final dismissOffset =
-                                    _dismissAnimation?.value ?? _dismissOffsetY;
-                                return Transform.translate(
-                                  offset: Offset(0, dismissOffset),
-                                  child: Opacity(
-                                    opacity:
-                                        ((1 - progress * 2.5) *
-                                                (1 - dismissOffset / 200))
-                                            .clamp(0.0, 1.0),
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: IgnorePointer(
-                                ignoring: progress > 0.4,
+                      // Mini player (in front, fades out)
+                      if (progress < 0.99)
+                        Positioned(
+                          bottom: lerpDouble(
+                            widget.bottomNavBarHeight,
+                            0,
+                            progress,
+                          ),
+                          left: 0,
+                          right: 0,
+                          child: IgnorePointer(
+                            ignoring:
+                                progress >
+                                context.tokens.playerIgnorePointerThreshold,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onVerticalDragUpdate: _onVerticalDragUpdate,
+                              onVerticalDragEnd: _onVerticalDragEnd,
+                              child: AnimatedBuilder(
+                                animation: _dismissAnimController,
+                                builder: (context, child) {
+                                  final dismissOffset =
+                                      _dismissAnimation?.value ??
+                                      _dismissOffsetY;
+                                  return Transform.translate(
+                                    offset: Offset(0, dismissOffset),
+                                    child: Opacity(
+                                      opacity:
+                                          ((1 -
+                                                      progress *
+                                                          context
+                                                              .tokens
+                                                              .playerAlphaScalingFactor) *
+                                                  (1 -
+                                                      dismissOffset /
+                                                          context
+                                                              .tokens
+                                                              .playerMaxDismissOffset))
+                                              .clamp(0.0, 1.0),
+                                      child: child,
+                                    ),
+                                  );
+                                },
                                 child: _MiniPlayerOrganism(
                                   state: state,
                                   audio: audio,
@@ -306,11 +334,11 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                        ),
+                    ],
+                  ),
+                );
+              },
             ),
           );
         },
@@ -351,30 +379,32 @@ class _MiniPlayerOrganism extends StatelessWidget {
         progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
             ? 0.0
             : (state.positionData?.position.inMilliseconds ?? 0) /
-                (state.positionData?.duration.inMilliseconds ?? 1),
+                  (state.positionData?.duration.inMilliseconds ?? 1),
         progressBarOverride: const _MiniPlayerProgressBar(),
         isPlaying: state.isPlaying,
         canGoPrevious: state.canGoPrevious,
         canGoNext: state.canGoNext,
         isSleepTimerActive: state.isSleepTimerActive,
-        isSleepTimerEnabled:
-            context.watch<SettingsCubit>().state.isSleepTimerEnabled,
+        isSleepTimerEnabled: context
+            .watch<SettingsCubit>()
+            .state
+            .isSleepTimerEnabled,
         onPlayPause: () {
           context.read<AudioPlayerBloc>().add(
-                state.isPlaying
-                    ? const AudioPlayerEvent.pauseAudio()
-                    : const AudioPlayerEvent.playAudio(),
-              );
+            state.isPlaying
+                ? const AudioPlayerEvent.pauseAudio()
+                : const AudioPlayerEvent.playAudio(),
+          );
         },
         onPrevious: () {
           context.read<AudioPlayerBloc>().add(
-                const AudioPlayerEvent.skipToPrevious(),
-              );
+            const AudioPlayerEvent.skipToPrevious(),
+          );
         },
         onNext: () {
-          context
-              .read<AudioPlayerBloc>()
-              .add(const AudioPlayerEvent.skipToNext());
+          context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.skipToNext(),
+          );
         },
         onSleepTimerTap: () {
           showDialog(
@@ -435,9 +465,14 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                               fit: BoxFit.cover,
                             ),
                             BackdropFilter(
-                              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                              filter: ImageFilter.blur(
+                                sigmaX: tokens.blurShadow * 2,
+                                sigmaY: tokens.blurShadow * 2,
+                              ),
                               child: Container(
-                                color: Colors.black.withValues(alpha: 0.4),
+                                color: Colors.black.withValues(
+                                  alpha: tokens.opacityMedium,
+                                ),
                               ),
                             ),
                           ],
@@ -457,8 +492,9 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                       return SingleChildScrollView(
                         physics: const NeverScrollableScrollPhysics(),
                         child: ConstrainedBox(
-                          constraints:
-                              BoxConstraints(minHeight: constraints.maxHeight),
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -525,30 +561,28 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _PlayerHeaderMolecule extends StatelessWidget {
-  const _PlayerHeaderMolecule({
-    required this.state,
-    required this.onCollapse,
-  });
+  const _PlayerHeaderMolecule({required this.state, required this.onCollapse});
 
   final AudioPlayerState state;
   final VoidCallback onCollapse;
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(
+        icon: Icon(
           FluentIcons.chevron_down_24_regular,
           color: Colors.white,
-          size: 28,
+          size: tokens.iconSizeLarge + tokens.spaceExtraSmall,
         ),
         onPressed: onCollapse,
       ),
       title: Text(
         context.l10n.currentPlaying,
-        style: const TextStyle(color: Colors.white, fontSize: 16),
+        style: TextStyle(color: Colors.white, fontSize: tokens.spaceLarge),
       ),
       actions: [
         if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
@@ -587,10 +621,7 @@ class _PlayerHeaderMolecule extends StatelessWidget {
 }
 
 class _PlayerMetadataMolecule extends StatelessWidget {
-  const _PlayerMetadataMolecule({
-    required this.title,
-    this.artist,
-  });
+  const _PlayerMetadataMolecule({required this.title, this.artist});
 
   final String title;
   final String? artist;
@@ -599,24 +630,25 @@ class _PlayerMetadataMolecule extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraLarge),
       child: Column(
         children: [
           Text(
             title,
-            style: context.responsiveStyle((t) => t.headlineMedium)?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
+            style: context
+                .responsiveStyle((t) => t.headlineMedium)
+                ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: tokens.spaceSmall),
           Text(
-            artist ?? 'Unknown',
-            style: context.responsiveStyle((t) => t.bodyLarge)?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.7),
+            artist ?? context.l10n.unknownReciter,
+            style: context
+                .responsiveStyle((t) => t.bodyLarge)
+                ?.copyWith(
+                  color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
                 ),
             textAlign: TextAlign.center,
             maxLines: 1,
@@ -654,9 +686,9 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
             size: tokens.iconSizeLarge,
           ),
           onPressed: state.canGoPrevious
-              ? () => context
-                  .read<AudioPlayerBloc>()
-                  .add(const AudioPlayerEvent.skipToPrevious())
+              ? () => context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.skipToPrevious(),
+                )
               : null,
         ),
         SizedBox(width: tokens.spaceLarge),
@@ -666,10 +698,10 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
           isPlaying: isPlaying,
           onTap: () {
             context.read<AudioPlayerBloc>().add(
-                  isPlaying
-                      ? const AudioPlayerEvent.pauseAudio()
-                      : const AudioPlayerEvent.playAudio(),
-                );
+              isPlaying
+                  ? const AudioPlayerEvent.pauseAudio()
+                  : const AudioPlayerEvent.playAudio(),
+            );
           },
         ),
 
@@ -685,9 +717,9 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
             size: tokens.iconSizeLarge,
           ),
           onPressed: state.canGoNext
-              ? () => context
-                  .read<AudioPlayerBloc>()
-                  .add(const AudioPlayerEvent.skipToNext())
+              ? () => context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.skipToNext(),
+                )
               : null,
         ),
       ],
@@ -702,6 +734,7 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -709,33 +742,33 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
           icon: FluentIcons.speaker_2_24_regular,
           onTap: () => showSliderDialog(
             context: context,
-            title: 'Adjust volume',
+            title: context.l10n.adjustVolume,
             divisions: 10,
             min: 0.0,
             max: 1.0,
             value: state.volume,
-            onChanged: (v) => context
-                .read<AudioPlayerBloc>()
-                .add(AudioPlayerEvent.setVolume(v)),
+            onChanged: (v) => context.read<AudioPlayerBloc>().add(
+              AudioPlayerEvent.setVolume(v),
+            ),
           ),
         ),
         TilawaIconActionButton(
           icon: FluentIcons.stop_24_regular,
-          onTap: () => context
-              .read<AudioPlayerBloc>()
-              .add(const AudioPlayerEvent.stopAudio()),
+          onTap: () => context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.stopAudio(),
+          ),
         ),
         GestureDetector(
           onTap: () => showSliderDialog(
             context: context,
-            title: 'Playback speed',
+            title: context.l10n.playbackSpeed,
             divisions: 8,
             min: 0.5,
             max: 2.5,
             value: state.speed,
-            onChanged: (s) => context
-                .read<AudioPlayerBloc>()
-                .add(AudioPlayerEvent.setSpeed(s)),
+            onChanged: (s) => context.read<AudioPlayerBloc>().add(
+              AudioPlayerEvent.setSpeed(s),
+            ),
           ),
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -745,9 +778,9 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
             ),
             child: Text(
               '${state.speed.toStringAsFixed(1)}x',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 14,
+                fontSize: tokens.spaceMedium,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -771,19 +804,10 @@ class _PlayerArtAtom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    return Container(
-      width: 280,
-      height: maxHeight.clamp(0.0, 280.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.5),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
-      ),
+    final artSize = tokens.contentMaxWidthMedia / 4.2; // approx 280
+    return SizedBox(
+      width: artSize,
+      height: maxHeight.clamp(0.0, artSize),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
         child: artUri != null
@@ -798,13 +822,14 @@ class _PlayerArtAtom extends StatelessWidget {
   }
 
   Widget _buildDefaultArt(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     return Container(
-      color: Colors.white.withValues(alpha: 0.1),
-      child: const Center(
+      color: Colors.white.withValues(alpha: tokens.opacitySubtle),
+      child: Center(
         child: Icon(
           FluentIcons.music_note_2_24_filled,
-          size: 80,
-          color: Colors.white24,
+          size: tokens.iconSizeLarge * 3.3, // approx 80
+          color: Colors.white.withValues(alpha: tokens.opacityEmphasis / 3),
         ),
       ),
     );
@@ -820,17 +845,18 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final buttonSize = tokens.iconSizeLarge * 3.3; // approx 80
     return Container(
-      width: 80,
-      height: 80,
+      width: buttonSize,
+      height: buttonSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withValues(alpha: 0.3),
-            blurRadius: 15,
-            spreadRadius: 2,
+            color: Colors.white.withValues(alpha: tokens.opacityMedium),
+            blurRadius: tokens.spaceLarge,
+            spreadRadius: tokens.spaceTiny,
           ),
         ],
       ),
@@ -838,7 +864,7 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
         icon: Icon(
           isPlaying ? FluentIcons.pause_48_filled : FluentIcons.play_48_filled,
           color: Colors.black,
-          size: 40,
+          size: tokens.iconSizeLarge * 1.6, // approx 40
         ),
         onPressed: onTap,
       ),
@@ -851,12 +877,17 @@ class _PlayerSheetHandleAtom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(2),
+    final tokens = Theme.of(context).tokens;
+    return Center(
+      child: SizedBox(
+        width: tokens.iconSizeLarge * 1.6, // approx 40
+        height: tokens.spaceExtraSmall,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: tokens.opacityMedium),
+            borderRadius: BorderRadius.circular(tokens.spaceTiny),
+          ),
+        ),
       ),
     );
   }
@@ -924,22 +955,26 @@ class _ExpandedProgressBar extends StatelessWidget {
                   );
                 },
               ),
-              SizedBox(height: 4),
+              SizedBox(height: tokens.spaceExtraSmall),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     _formatDuration(positionData.position),
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
+                      color: Colors.white.withValues(
+                        alpha: tokens.opacityEmphasis - 0.1,
+                      ),
+                      fontSize: tokens.spaceMedium,
                     ),
                   ),
                   Text(
                     _formatDuration(positionData.duration),
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 12,
+                      color: Colors.white.withValues(
+                        alpha: tokens.opacityEmphasis - 0.1,
+                      ),
+                      fontSize: tokens.spaceMedium,
                     ),
                   ),
                 ],

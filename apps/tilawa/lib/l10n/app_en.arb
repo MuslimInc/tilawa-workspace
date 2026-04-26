@@ -1124,6 +1124,34 @@
     "@recitationDuration": {
         "description": "Sleep timer dialog title"
     },
+    "chooseBackgroundSource": "Choose Background Source",
+    "@chooseBackgroundSource": {
+        "description": "Title of the background source selection dialog"
+    },
+    "gallery": "Gallery",
+    "@gallery": {
+        "description": "Gallery option in background source selection"
+    },
+    "camera": "Camera",
+    "@camera": {
+        "description": "Camera option in background source selection"
+    },
+    "resetToDefault": "Reset to Default",
+    "@resetToDefault": {
+        "description": "Option to reset player background to default"
+    },
+    "adjustVolume": "Adjust volume",
+    "@adjustVolume": {
+        "description": "Title of the volume adjustment dialog"
+    },
+    "playbackSpeed": "Playback speed",
+    "@playbackSpeed": {
+        "description": "Title of the playback speed adjustment dialog"
+    },
+    "unknownReciter": "Unknown Reciter",
+    "@unknownReciter": {
+        "description": "Fallback text when reciter name is not available"
+    },
     "minutes15": "15 Minutes",
     "@minutes15": {
         "description": "15 minutes option"

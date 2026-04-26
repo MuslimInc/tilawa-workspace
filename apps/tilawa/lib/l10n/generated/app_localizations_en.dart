@@ -825,6 +825,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get recitationDuration => 'Recitation Duration';
 
   @override
+  String get chooseBackgroundSource => 'Choose Background Source';
+
+  @override
+  String get gallery => 'Gallery';
+
+  @override
+  String get camera => 'Camera';
+
+  @override
+  String get resetToDefault => 'Reset to Default';
+
+  @override
+  String get adjustVolume => 'Adjust volume';
+
+  @override
+  String get playbackSpeed => 'Playback speed';
+
+  @override
+  String get unknownReciter => 'Unknown Reciter';
+
+  @override
   String get minutes15 => '15 Minutes';
 
   @override
