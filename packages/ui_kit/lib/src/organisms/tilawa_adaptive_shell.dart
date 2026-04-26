@@ -183,7 +183,9 @@ class _BottomNavBar extends StatelessWidget {
                   color: theme.colorScheme.primary,
                   borderRadius: BorderRadius.circular(capsuleRadius),
                   border: Border.all(
-                    color: theme.colorScheme.onPrimary,
+                    color: theme.colorScheme.onPrimary.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
                     width: tokens.borderWidthThin * 2,
                   ),
                 ),
