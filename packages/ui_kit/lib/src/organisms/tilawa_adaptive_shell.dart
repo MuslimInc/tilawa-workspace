@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -144,10 +142,6 @@ class _BottomNavBar extends StatelessWidget {
     this.decoration,
   });
 
-  // Capsule radius for the floating bottom bar. Larger than any stock token,
-  // so declared locally with a clear name rather than a magic literal.
-  static const double _capsuleRadius = 32.0;
-
   final List<TilawaNavDestination> destinations;
   final int? selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -162,9 +156,10 @@ class _BottomNavBar extends StatelessWidget {
     final double horizontalMargin = tokens.spaceLarge;
     final double verticalMargin = tokens.spaceMedium;
     final double internalPadding = tokens.spaceSmall;
+    final double capsuleRadius = tokens.radiusExtraLarge + tokens.spaceSmall;
     // Nested-radius rule: inner capsule follows the outer edge inset by the
     // vertical padding so the rounding stays concentric.
-    final double innerRadius = _capsuleRadius - internalPadding;
+    final double innerRadius = capsuleRadius - internalPadding;
     final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     return TilawaContentBounds(
@@ -180,38 +175,32 @@ class _BottomNavBar extends StatelessWidget {
               bottomPadding + verticalMargin,
             ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(_capsuleRadius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: tokens.blurGlass * 1.5,
-              sigmaY: tokens.blurGlass * 1.5,
-            ),
-            child: DecoratedBox(
-              decoration:
-                  decoration ??
-                  BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(_capsuleRadius),
-                    border: Border.all(
-                      color: theme.colorScheme.onPrimary,
-                      width: 1.2,
+          borderRadius: BorderRadius.circular(capsuleRadius),
+          child: DecoratedBox(
+            decoration:
+                decoration ??
+                BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(capsuleRadius),
+                  border: Border.all(
+                    color: theme.colorScheme.onPrimary,
+                    width: tokens.borderWidthThin * 2,
+                  ),
+                ),
+            child: Row(
+              spacing: tokens.spaceExtraSmall,
+              children: [
+                for (int i = 0; i < destinations.length; i++)
+                  Expanded(
+                    child: _NavButton(
+                      destination: destinations[i],
+                      isSelected: selectedIndex == i,
+                      isCenterItem: i == destinations.length ~/ 2,
+                      onTap: () => onDestinationSelected(i),
+                      borderRadius: innerRadius,
                     ),
                   ),
-              child: Row(
-                spacing: tokens.spaceExtraSmall,
-                children: [
-                  for (int i = 0; i < destinations.length; i++)
-                    Expanded(
-                      child: _NavButton(
-                        destination: destinations[i],
-                        isSelected: selectedIndex == i,
-                        isCenterItem: i == destinations.length ~/ 2,
-                        onTap: () => onDestinationSelected(i),
-                        borderRadius: innerRadius,
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -241,58 +230,58 @@ class _SideNavRail extends StatelessWidget {
     final tokens = theme.tokens;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: tokens.blurGlass * 1.2,
-          sigmaY: tokens.blurGlass * 1.2,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.85),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
-              width: 1,
+      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(
+            alpha: tokens.opacityGlass,
+          ),
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(
+              alpha: tokens.opacitySubtle,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.shadow.withValues(alpha: 0.06),
-                blurRadius: 12,
-                offset: const Offset(2, 0),
+            width: tokens.borderWidthThin,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.shadow.withValues(
+                alpha: tokens.opacitySubtle / 2,
               ),
-            ],
-          ),
-          child: NavigationRail(
-            extended: extended,
-            selectedIndex: selectedIndex,
-            onDestinationSelected: onDestinationSelected,
-            backgroundColor: Colors.transparent,
-            indicatorColor: theme.colorScheme.primaryContainer,
-            labelType: extended
-                ? NavigationRailLabelType.none
-                : NavigationRailLabelType.all,
-            destinations: [
-              for (final d in destinations)
-                NavigationRailDestination(
-                  icon: d.iconBuilder != null
-                      ? d.iconBuilder!(
-                          context,
-                          isSelected: false,
-                          color: inactiveColor,
-                        )
-                      : Icon(d.icon),
-                  selectedIcon: d.iconBuilder != null
-                      ? d.iconBuilder!(
-                          context,
-                          isSelected: true,
-                          color: activeColor,
-                        )
-                      : Icon(d.activeIcon ?? d.icon),
-                  label: Text(d.label),
-                ),
-            ],
-          ),
+              blurRadius: tokens.blurGlass,
+              offset: Offset(tokens.spaceTiny, 0),
+            ),
+          ],
+        ),
+        child: NavigationRail(
+          extended: extended,
+          selectedIndex: selectedIndex,
+          onDestinationSelected: onDestinationSelected,
+          backgroundColor: Colors.transparent,
+          indicatorColor: theme.colorScheme.primaryContainer,
+          labelType: extended
+              ? NavigationRailLabelType.none
+              : NavigationRailLabelType.all,
+          destinations: [
+            for (final d in destinations)
+              NavigationRailDestination(
+                icon: d.iconBuilder != null
+                    ? d.iconBuilder!(
+                        context,
+                        isSelected: false,
+                        color: inactiveColor,
+                      )
+                    : Icon(d.icon),
+                selectedIcon: d.iconBuilder != null
+                    ? d.iconBuilder!(
+                        context,
+                        isSelected: true,
+                        color: activeColor,
+                      )
+                    : Icon(d.activeIcon ?? d.icon),
+                label: Text(d.label),
+              ),
+          ],
         ),
       ),
     );
@@ -336,17 +325,20 @@ class _NavButton extends StatelessWidget {
                 ? (destination.activeIcon ?? destination.icon)
                 : destination.icon,
             key: ValueKey('${destination.icon.hashCode}_$isSelected'),
-            size: 22,
+            size: tokens.iconSizeMedium + tokens.spaceTiny,
             color: onPrimaryColor,
           );
 
     final double iconScale = isCenterItem
-        ? (isSelected ? 1.1 : 1.0)
-        : (isSelected ? 1.0 : 0.95);
+        ? (isSelected ? 1 + tokens.opacitySubtle : 1.0)
+        : (isSelected ? 1.0 : 1 - tokens.opacitySubtle / 2);
 
     final double backgroundAlpha = isSelected
-        ? (isCenterItem ? 0.22 : 0.18)
+        ? tokens.opacityMedium -
+              tokens.opacitySubtle +
+              (isCenterItem ? tokens.opacitySubtle / 2 : 0)
         : 0.0;
+    final double labelFontSize = tokens.iconSizeExtraSmall - tokens.spaceTiny;
 
     return Material(
       color: Colors.transparent,
@@ -356,10 +348,10 @@ class _NavButton extends StatelessWidget {
           onTap();
         },
         borderRadius: BorderRadius.circular(borderRadius),
-        child: AnimatedContainer(
-          duration: tokens.durationFast,
-          curve: Curves.easeOutCubic,
-          constraints: const BoxConstraints(minHeight: 64),
+        child: Container(
+          constraints: BoxConstraints(
+            minHeight: tokens.iconSizeExtraLarge + tokens.spaceLarge,
+          ),
           padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
           decoration: BoxDecoration(
             color: backgroundColor.withValues(alpha: backgroundAlpha),
@@ -370,26 +362,16 @@ class _NavButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             spacing: tokens.spaceExtraSmall,
             children: [
-              AnimatedScale(
-                duration: tokens.durationFast,
-                scale: iconScale,
-                child: AnimatedSwitcher(
-                  duration: tokens.durationFast,
-                  child: iconWidget,
-                ),
-              ),
-              AnimatedDefaultTextStyle(
-                duration: tokens.durationFast,
+              Transform.scale(scale: iconScale, child: iconWidget),
+              Text(
+                destination.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
                 style: baseLabelStyle.copyWith(
-                  fontSize: 10.5,
+                  fontSize: labelFontSize,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: onPrimaryColor,
-                ),
-                child: Text(
-                  destination.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
                 ),
               ),
             ],

@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -19,16 +18,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => getIt<AthkarCubit>()..loadCategories(),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(context.l10n.athkar),
-          actions: [
-            IconButton(
-              icon: const Icon(FluentIcons.book_24_regular),
-              tooltip: context.l10n.quranReader,
-              onPressed: () => const QuranLastReadRoute().push(context),
-            ),
-          ],
-        ),
+        appBar: AppBar(title: Text(context.l10n.athkar)),
         body: BlocBuilder<AthkarCubit, AthkarState>(
           builder: (context, state) {
             if (state is AthkarLoading) {
@@ -57,7 +47,8 @@ class AthkarCategoriesScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final AthkarCategory category = state.categories[index];
                   return AthkarCategoryCard(
-                    category: category,
+                    name: category.nameAr,
+                    icon: category.icon,
                     onTap: () {
                       AthkarDetailsRoute(
                         categoryId: category.id,

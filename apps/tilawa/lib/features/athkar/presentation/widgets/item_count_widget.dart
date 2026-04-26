@@ -1,5 +1,5 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/athkar_item.dart';
 
@@ -17,139 +17,10 @@ class ItemCountWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    // Enhanced colors for better visibility and premium feel
-    final Color activeColor = isDone
-        ? const Color(0xFF4CAF50) // Vibrant Green for success
-        : colorScheme.primary;
-
-    final double progress = item.count > 0 ? (currentCount / item.count) : 0;
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: 120,
-          height: 120,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Outer decorative glow/shadow
-              Container(
-                width: 110,
-                height: 110,
-                decoration: BoxDecoration(shape: BoxShape.circle),
-              ),
-
-              // Animated Progress Ring
-              SizedBox(
-                width: 100,
-                height: 100,
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: progress, end: progress),
-                  duration: const Duration(milliseconds: 500),
-                  curve: Curves.easeOutBack,
-                  builder: (context, value, _) {
-                    return CircularProgressIndicator(
-                      value: value,
-                      strokeWidth: 10,
-                      backgroundColor: Colors.transparent,
-                      valueColor: AlwaysStoppedAnimation<Color>(activeColor),
-                      strokeCap: StrokeCap.round,
-                    );
-                  },
-                ),
-              ),
-              // Inner Circle Button
-              Container(
-                width: 78,
-                height: 78,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: isDone
-                      ? Border.all(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          width: 2,
-                        )
-                      : null,
-                  gradient: isDone
-                      ? const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFF66BB6A), // Balanced Green 400
-                            Color(0xFF43A047), // Balanced Green 600
-                          ],
-                        )
-                      : LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            activeColor,
-                            activeColor.withValues(alpha: 0.8),
-                          ],
-                        ),
-                ),
-                child: Center(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    switchInCurve: Curves.easeInOut,
-                    switchOutCurve: Curves.easeInOut,
-                    transitionBuilder: (child, animation) {
-                      return ScaleTransition(
-                        scale: animation,
-                        child: FadeTransition(opacity: animation, child: child),
-                      );
-                    },
-                    child: isDone
-                        ? Icon(
-                            key: const ValueKey('done'),
-                            FluentIcons.checkmark_24_filled,
-                            color: Colors.white,
-                            size: 50,
-                          )
-                        : Text(
-                            key: ValueKey(currentCount),
-                            '$currentCount',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 36,
-                              height: 1.0,
-                            ),
-                          ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        SizedBox(height: 16),
-        // Progress Text
-        AnimatedOpacity(
-          opacity: isDone ? 0.0 : 1.0,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '$currentCount / ${item.count}',
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-        ),
-      ],
+    return TilawaCountProgressRing(
+      currentCount: currentCount,
+      totalCount: item.count,
+      isDone: isDone,
     );
   }
 }

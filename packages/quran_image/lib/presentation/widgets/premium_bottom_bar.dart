@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../core/perf_logger.dart';
@@ -12,23 +13,22 @@ class PremiumBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sw = PerfLogger.startTimer();
-    final size = MediaQuery.sizeOf(context);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final height = MediaQuery.sizeOf(context).height;
 
     final bottomBar = Container(
-      margin: EdgeInsets.fromLTRB(
-        size.width * 0.04,
-        0,
-        size.width * 0.04,
-        size.height * 0.010,
+      margin: EdgeInsets.all(tokens.spaceLarge),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceTiny,
+        vertical: tokens.spaceTiny,
       ),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: height * 0.001),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF9F2),
-        borderRadius: BorderRadius.circular(32),
+        color: colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
         border: Border.all(
-          color: const Color(0xFFC5A358).withValues(alpha: 0.3),
+          color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
         ),
       ),
       child: Row(
@@ -41,20 +41,11 @@ class PremiumBottomBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Text(
-              //   JuzMessage(state.juzNumber).localize(l10n),
-              //   style: const TextStyle(
-              //     fontSize: 12,
-              //     fontWeight: FontWeight.bold,
-              //     color: Color(0xFF5D4037),
-              //   ),
-              // ),
               Text(
                 l10n?.hizb(state.hizbNumber) ?? 'Hizb ${state.hizbNumber}',
-                style: const TextStyle(
-                  fontSize: 12,
+                style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF5D4037),
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -78,25 +69,30 @@ class _PageNumber extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.sizeOf(context).height;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     return Container(
-      width: height * 0.05,
-      height: height * 0.05,
       alignment: Alignment.center,
-      padding: EdgeInsets.all(1),
+      padding: EdgeInsets.all(tokens.spaceExtraSmall),
       decoration: BoxDecoration(
-        color: const Color(0xFFC5A358).withValues(alpha: 0.1),
+        color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
         shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFC5A358)),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+          strokeAlign: BorderSide.strokeAlignOutside,
+          style: BorderStyle.solid,
+        ),
       ),
       child: Center(
         child: Text(
           pageNumber.toString(),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
-          style: const TextStyle(
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.bold,
-            color: Color(0xFF5D4037),
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
       ),

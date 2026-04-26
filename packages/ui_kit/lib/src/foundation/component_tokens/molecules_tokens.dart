@@ -286,3 +286,139 @@ class TilawaSearchFieldTokens {
     );
   }
 }
+
+@immutable
+class TilawaCountProgressRingTokens {
+  const TilawaCountProgressRingTokens({
+    required this.outerSize,
+    required this.innerSize,
+    required this.ringStrokeWidth,
+    required this.doneIconSize,
+    required this.countFontSize,
+    required this.doneBorderWidth,
+    required this.doneBorderOpacity,
+    required this.activeGradientEndOpacity,
+    required this.doneGradientEndOpacity,
+    required this.progressLabelSpacing,
+    required this.progressLabelPadding,
+    required this.progressLabelBorderRadius,
+    required this.progressLabelBackgroundOpacity,
+  });
+
+  final double outerSize;
+  final double innerSize;
+  final double ringStrokeWidth;
+  final double doneIconSize;
+  final double countFontSize;
+  final double doneBorderWidth;
+  final double doneBorderOpacity;
+  final double activeGradientEndOpacity;
+  final double doneGradientEndOpacity;
+  final double progressLabelSpacing;
+  final EdgeInsetsGeometry progressLabelPadding;
+  final double progressLabelBorderRadius;
+  final double progressLabelBackgroundOpacity;
+
+  factory TilawaCountProgressRingTokens.defaults() =>
+      const TilawaCountProgressRingTokens(
+        outerSize: 72,
+        innerSize: 62,
+        ringStrokeWidth: 10,
+        doneIconSize: 50,
+        countFontSize: 36,
+        doneBorderWidth: 2,
+        doneBorderOpacity: 0.3,
+        activeGradientEndOpacity: 0.8,
+        doneGradientEndOpacity: 0.7,
+        progressLabelSpacing: 16,
+        progressLabelPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        progressLabelBorderRadius: 24,
+        progressLabelBackgroundOpacity: 0.3,
+      );
+
+  TilawaCountProgressRingTokens copyWith({
+    double? outerSize,
+    double? innerSize,
+    double? ringStrokeWidth,
+    double? doneIconSize,
+    double? countFontSize,
+    double? doneBorderWidth,
+    double? doneBorderOpacity,
+    double? activeGradientEndOpacity,
+    double? doneGradientEndOpacity,
+    double? progressLabelSpacing,
+    EdgeInsetsGeometry? progressLabelPadding,
+    double? progressLabelBorderRadius,
+    double? progressLabelBackgroundOpacity,
+  }) {
+    return TilawaCountProgressRingTokens(
+      outerSize: outerSize ?? this.outerSize,
+      innerSize: innerSize ?? this.innerSize,
+      ringStrokeWidth: ringStrokeWidth ?? this.ringStrokeWidth,
+      doneIconSize: doneIconSize ?? this.doneIconSize,
+      countFontSize: countFontSize ?? this.countFontSize,
+      doneBorderWidth: doneBorderWidth ?? this.doneBorderWidth,
+      doneBorderOpacity: doneBorderOpacity ?? this.doneBorderOpacity,
+      activeGradientEndOpacity:
+          activeGradientEndOpacity ?? this.activeGradientEndOpacity,
+      doneGradientEndOpacity:
+          doneGradientEndOpacity ?? this.doneGradientEndOpacity,
+      progressLabelSpacing: progressLabelSpacing ?? this.progressLabelSpacing,
+      progressLabelPadding: progressLabelPadding ?? this.progressLabelPadding,
+      progressLabelBorderRadius:
+          progressLabelBorderRadius ?? this.progressLabelBorderRadius,
+      progressLabelBackgroundOpacity:
+          progressLabelBackgroundOpacity ?? this.progressLabelBackgroundOpacity,
+    );
+  }
+
+  static TilawaCountProgressRingTokens lerp(
+    TilawaCountProgressRingTokens a,
+    TilawaCountProgressRingTokens b,
+    double t,
+  ) {
+    return TilawaCountProgressRingTokens(
+      outerSize: lerpTokenDouble(a.outerSize, b.outerSize, t),
+      innerSize: lerpTokenDouble(a.innerSize, b.innerSize, t),
+      ringStrokeWidth: lerpTokenDouble(a.ringStrokeWidth, b.ringStrokeWidth, t),
+      doneIconSize: lerpTokenDouble(a.doneIconSize, b.doneIconSize, t),
+      countFontSize: lerpTokenDouble(a.countFontSize, b.countFontSize, t),
+      doneBorderWidth: lerpTokenDouble(a.doneBorderWidth, b.doneBorderWidth, t),
+      doneBorderOpacity: lerpTokenDouble(
+        a.doneBorderOpacity,
+        b.doneBorderOpacity,
+        t,
+      ),
+      activeGradientEndOpacity: lerpTokenDouble(
+        a.activeGradientEndOpacity,
+        b.activeGradientEndOpacity,
+        t,
+      ),
+      doneGradientEndOpacity: lerpTokenDouble(
+        a.doneGradientEndOpacity,
+        b.doneGradientEndOpacity,
+        t,
+      ),
+      progressLabelSpacing: lerpTokenDouble(
+        a.progressLabelSpacing,
+        b.progressLabelSpacing,
+        t,
+      ),
+      progressLabelPadding: EdgeInsetsGeometry.lerp(
+        a.progressLabelPadding,
+        b.progressLabelPadding,
+        t,
+      )!,
+      progressLabelBorderRadius: lerpTokenDouble(
+        a.progressLabelBorderRadius,
+        b.progressLabelBorderRadius,
+        t,
+      ),
+      progressLabelBackgroundOpacity: lerpTokenDouble(
+        a.progressLabelBackgroundOpacity,
+        b.progressLabelBackgroundOpacity,
+        t,
+      ),
+    );
+  }
+}

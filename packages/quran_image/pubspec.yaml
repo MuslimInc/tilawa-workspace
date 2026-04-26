@@ -29,6 +29,8 @@ dependencies:
   path_provider: ^2.1.5
   quran_qcf:
     path: ../quran_qcf
+  tilawa_ui_kit:
+    path: ../ui_kit
 
 dev_dependencies:
   flutter_test:

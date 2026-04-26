@@ -75,6 +75,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              spacing: theme.tokens.spaceMedium,
               children: [
                 Expanded(
                   child: Scrollbar(
@@ -91,13 +92,12 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                         textAlign: TextAlign.center,
                         style: theme.textTheme.titleLarge?.copyWith(
                           color: theme.colorScheme.onSurface,
-                          // height: 1.7,
+                          height: theme.tokens.textHeightLoose,
                         ),
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: theme.tokens.spaceExtraLarge),
                 ItemCountWidget(
                   item: item,
                   currentCount: currentCount,

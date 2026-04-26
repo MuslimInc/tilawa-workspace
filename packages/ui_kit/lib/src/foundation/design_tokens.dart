@@ -30,6 +30,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.iconSizeMedium,
     required this.iconSizeLarge,
     required this.iconSizeExtraLarge,
+    required this.textHeightLoose,
     required this.durationFast,
     required this.durationMedium,
     required this.durationSlow,
@@ -126,6 +127,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 48.0
   final double iconSizeExtraLarge;
 
+  /// 1.8 — relaxed line height for dense Arabic text.
+  final double textHeightLoose;
+
   /// 200ms
   final Duration durationFast;
 
@@ -210,6 +214,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     iconSizeMedium: 20.0,
     iconSizeLarge: 24.0,
     iconSizeExtraLarge: 48.0,
+    textHeightLoose: 1.8,
     durationFast: Duration(milliseconds: 200),
     durationMedium: Duration(milliseconds: 400),
     durationSlow: Duration(milliseconds: 600),
@@ -260,6 +265,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? iconSizeMedium,
     double? iconSizeLarge,
     double? iconSizeExtraLarge,
+    double? textHeightLoose,
     Duration? durationFast,
     Duration? durationMedium,
     Duration? durationSlow,
@@ -306,6 +312,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeMedium: iconSizeMedium ?? this.iconSizeMedium,
       iconSizeLarge: iconSizeLarge ?? this.iconSizeLarge,
       iconSizeExtraLarge: iconSizeExtraLarge ?? this.iconSizeExtraLarge,
+      textHeightLoose: textHeightLoose ?? this.textHeightLoose,
       durationFast: durationFast ?? this.durationFast,
       durationMedium: durationMedium ?? this.durationMedium,
       durationSlow: durationSlow ?? this.durationSlow,
@@ -391,6 +398,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         other.iconSizeExtraLarge,
         t,
       )!,
+      textHeightLoose: lerpDouble(textHeightLoose, other.textHeightLoose, t)!,
       durationFast: t < 0.5 ? durationFast : other.durationFast,
       durationMedium: t < 0.5 ? durationMedium : other.durationMedium,
       durationSlow: t < 0.5 ? durationSlow : other.durationSlow,

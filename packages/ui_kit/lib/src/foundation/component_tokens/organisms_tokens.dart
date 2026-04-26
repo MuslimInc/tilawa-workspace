@@ -3,6 +3,65 @@ import 'package:flutter/material.dart';
 import 'token_lerp.dart';
 
 @immutable
+class TilawaPlayerBackgroundTokens {
+  const TilawaPlayerBackgroundTokens({
+    required this.cacheWidthScale,
+    required this.defaultBlurAmount,
+    required this.defaultOverlayOpacity,
+    required this.overlayColor,
+  });
+
+  final double cacheWidthScale;
+  final double defaultBlurAmount;
+  final double defaultOverlayOpacity;
+  final Color overlayColor;
+
+  factory TilawaPlayerBackgroundTokens.defaults() =>
+      const TilawaPlayerBackgroundTokens(
+        cacheWidthScale: 2,
+        defaultBlurAmount: 0,
+        defaultOverlayOpacity: 0.4,
+        overlayColor: Colors.black,
+      );
+
+  TilawaPlayerBackgroundTokens copyWith({
+    double? cacheWidthScale,
+    double? defaultBlurAmount,
+    double? defaultOverlayOpacity,
+    Color? overlayColor,
+  }) {
+    return TilawaPlayerBackgroundTokens(
+      cacheWidthScale: cacheWidthScale ?? this.cacheWidthScale,
+      defaultBlurAmount: defaultBlurAmount ?? this.defaultBlurAmount,
+      defaultOverlayOpacity:
+          defaultOverlayOpacity ?? this.defaultOverlayOpacity,
+      overlayColor: overlayColor ?? this.overlayColor,
+    );
+  }
+
+  static TilawaPlayerBackgroundTokens lerp(
+    TilawaPlayerBackgroundTokens a,
+    TilawaPlayerBackgroundTokens b,
+    double t,
+  ) {
+    return TilawaPlayerBackgroundTokens(
+      cacheWidthScale: lerpTokenDouble(a.cacheWidthScale, b.cacheWidthScale, t),
+      defaultBlurAmount: lerpTokenDouble(
+        a.defaultBlurAmount,
+        b.defaultBlurAmount,
+        t,
+      ),
+      defaultOverlayOpacity: lerpTokenDouble(
+        a.defaultOverlayOpacity,
+        b.defaultOverlayOpacity,
+        t,
+      ),
+      overlayColor: Color.lerp(a.overlayColor, b.overlayColor, t)!,
+    );
+  }
+}
+
+@immutable
 class TilawaShareFooterBarTokens {
   const TilawaShareFooterBarTokens({
     required this.height,

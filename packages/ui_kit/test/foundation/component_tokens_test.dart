@@ -257,6 +257,97 @@ void main() {
     });
   });
 
+  group('TilawaCountProgressRingTokens', () {
+    test('defaults creates expected values', () {
+      final tokens = TilawaCountProgressRingTokens.defaults();
+      expect(tokens.outerSize, 72.0);
+      expect(tokens.innerSize, 62.0);
+      expect(tokens.ringStrokeWidth, 10.0);
+      expect(tokens.activeGradientEndOpacity, 0.8);
+    });
+
+    test('copyWith updates values preserving others', () {
+      final original = TilawaCountProgressRingTokens.defaults();
+      final updated = original.copyWith(outerSize: 80.0, countFontSize: 40.0);
+      expect(updated.outerSize, 80.0);
+      expect(updated.countFontSize, 40.0);
+      expect(updated.innerSize, original.innerSize);
+    });
+
+    test('lerp interpolates numeric values and EdgeInsets', () {
+      const first = TilawaCountProgressRingTokens(
+        outerSize: 60.0,
+        innerSize: 50.0,
+        ringStrokeWidth: 8.0,
+        doneIconSize: 40.0,
+        countFontSize: 30.0,
+        doneBorderWidth: 1.0,
+        doneBorderOpacity: 0.2,
+        activeGradientEndOpacity: 0.7,
+        doneGradientEndOpacity: 0.6,
+        progressLabelSpacing: 12.0,
+        progressLabelPadding: EdgeInsets.all(4),
+        progressLabelBorderRadius: 16.0,
+        progressLabelBackgroundOpacity: 0.2,
+      );
+      const second = TilawaCountProgressRingTokens(
+        outerSize: 80.0,
+        innerSize: 70.0,
+        ringStrokeWidth: 12.0,
+        doneIconSize: 60.0,
+        countFontSize: 42.0,
+        doneBorderWidth: 3.0,
+        doneBorderOpacity: 0.4,
+        activeGradientEndOpacity: 0.9,
+        doneGradientEndOpacity: 0.8,
+        progressLabelSpacing: 20.0,
+        progressLabelPadding: EdgeInsets.all(8),
+        progressLabelBorderRadius: 24.0,
+        progressLabelBackgroundOpacity: 0.4,
+      );
+      final result = TilawaCountProgressRingTokens.lerp(first, second, 0.5);
+      expect(result.outerSize, closeTo(70.0, 0.01));
+      expect(result.countFontSize, closeTo(36.0, 0.01));
+      expect(result.progressLabelBackgroundOpacity, closeTo(0.3, 0.01));
+    });
+  });
+
+  group('TilawaPlayerBackgroundTokens', () {
+    test('defaults creates expected values', () {
+      final tokens = TilawaPlayerBackgroundTokens.defaults();
+      expect(tokens.cacheWidthScale, 2.0);
+      expect(tokens.defaultBlurAmount, 0.0);
+      expect(tokens.defaultOverlayOpacity, 0.4);
+      expect(tokens.overlayColor, Colors.black);
+    });
+
+    test('copyWith updates values preserving others', () {
+      final original = TilawaPlayerBackgroundTokens.defaults();
+      final updated = original.copyWith(defaultOverlayOpacity: 0.5);
+      expect(updated.defaultOverlayOpacity, 0.5);
+      expect(updated.cacheWidthScale, original.cacheWidthScale);
+    });
+
+    test('lerp interpolates values', () {
+      const first = TilawaPlayerBackgroundTokens(
+        cacheWidthScale: 1.0,
+        defaultBlurAmount: 0.0,
+        defaultOverlayOpacity: 0.3,
+        overlayColor: Colors.black,
+      );
+      const second = TilawaPlayerBackgroundTokens(
+        cacheWidthScale: 3.0,
+        defaultBlurAmount: 12.0,
+        defaultOverlayOpacity: 0.5,
+        overlayColor: Colors.white,
+      );
+      final result = TilawaPlayerBackgroundTokens.lerp(first, second, 0.5);
+      expect(result.cacheWidthScale, closeTo(2.0, 0.01));
+      expect(result.defaultBlurAmount, closeTo(6.0, 0.01));
+      expect(result.defaultOverlayOpacity, closeTo(0.4, 0.01));
+    });
+  });
+
   group('TilawaSettingsGroupTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSettingsGroupTokens.defaults();
@@ -414,6 +505,8 @@ void main() {
       expect(tokens.glassPanel, isNotNull);
       expect(tokens.iconActionButton, isNotNull);
       expect(tokens.searchField, isNotNull);
+      expect(tokens.countProgressRing, isNotNull);
+      expect(tokens.playerBackground, isNotNull);
       expect(tokens.settingsGroup, isNotNull);
       expect(tokens.immersiveComposer, isNotNull);
     });

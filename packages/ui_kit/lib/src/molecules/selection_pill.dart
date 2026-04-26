@@ -37,31 +37,30 @@ class SelectionPill extends StatelessWidget {
     final foreground = selected
         ? (selectedForegroundColor ?? theme.colorScheme.onPrimary)
         : (unselectedForegroundColor ?? theme.colorScheme.onSurface);
+    final shape = StadiumBorder(
+      side: BorderSide(
+        color: selected
+            ? background
+            : theme.colorScheme.outline.withValues(alpha: tokens.opacitySubtle),
+        width: tokens.borderWidthThin,
+      ),
+    );
 
     return Material(
       color: Colors.transparent,
+      shape: shape,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: AnimatedContainer(
-          duration: tokens.durationFast,
-          curve: Curves.easeOutCubic,
+        customBorder: shape,
+        child: Container(
           padding: EdgeInsets.symmetric(
             horizontal: tokens.spaceLarge,
-            vertical: tokens.spaceSmall + 2,
+            vertical: tokens.spaceSmall + tokens.spaceTiny,
           ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
+          decoration: ShapeDecoration(
+            shape: shape,
             color: background,
-            border: Border.all(
-              color: selected
-                  ? background.withValues(alpha: 0.96)
-                  : theme.colorScheme.outline.withValues(
-                      alpha: tokens.opacitySubtle,
-                    ),
-              width: tokens.borderWidthThin,
-            ),
-            boxShadow: selected
+            shadows: selected
                 ? [
                     BoxShadow(
                       color: background.withValues(alpha: tokens.opacityMedium),

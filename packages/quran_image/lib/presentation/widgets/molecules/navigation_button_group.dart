@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../atoms/atoms.dart';
 
 /// Molecular component grouping navigation buttons and page indicator.
 ///
-/// Combines previous/next buttons with page number display, and an optional
-/// share/reel button shown when [onShare] is provided.
+/// Combines previous/next buttons with page number display.
 class NavigationButtonGroup extends StatelessWidget {
   final int currentPage;
   final int totalPages;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
-  final VoidCallback? onShare;
   final double screenWidth;
 
   const NavigationButtonGroup({
@@ -21,29 +20,29 @@ class NavigationButtonGroup extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.screenWidth,
-    this.onShare,
   });
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      spacing: tokens.spaceSmall,
       children: [
         NavigationIconButton(
           icon: Icons.arrow_back_ios,
           onPressed: onPrevious,
           screenWidth: screenWidth,
         ),
-        if (onShare != null)
-          NavigationIconButton(
-            icon: Icons.video_camera_back_outlined,
-            onPressed: onShare,
-            screenWidth: screenWidth,
+        Expanded(
+          child: Center(
+            child: PageIndicatorText(
+              pageNumber: currentPage,
+              totalPages: totalPages,
+              screenWidth: screenWidth,
+            ),
           ),
-        PageIndicatorText(
-          pageNumber: currentPage,
-          totalPages: totalPages,
-          screenWidth: screenWidth,
         ),
         NavigationIconButton(
           icon: Icons.arrow_forward_ios,

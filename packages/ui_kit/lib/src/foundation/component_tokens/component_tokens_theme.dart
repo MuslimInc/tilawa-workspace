@@ -13,6 +13,8 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.glassPanel,
     required this.iconActionButton,
     required this.searchField,
+    required this.countProgressRing,
+    required this.playerBackground,
     required this.shareFooterBar,
     required this.settingsGroup,
     required this.immersiveComposer,
@@ -24,6 +26,8 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaGlassPanelTokens glassPanel;
   final TilawaIconActionButtonTokens iconActionButton;
   final TilawaSearchFieldTokens searchField;
+  final TilawaCountProgressRingTokens countProgressRing;
+  final TilawaPlayerBackgroundTokens playerBackground;
   final TilawaShareFooterBarTokens shareFooterBar;
   final TilawaSettingsGroupTokens settingsGroup;
   final TilawaImmersiveComposerTokens immersiveComposer;
@@ -35,6 +39,8 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     glassPanel: TilawaGlassPanelTokens.defaults(),
     iconActionButton: TilawaIconActionButtonTokens.defaults(),
     searchField: TilawaSearchFieldTokens.defaults(),
+    countProgressRing: TilawaCountProgressRingTokens.defaults(),
+    playerBackground: TilawaPlayerBackgroundTokens.defaults(),
     shareFooterBar: TilawaShareFooterBarTokens.defaults(),
     settingsGroup: TilawaSettingsGroupTokens.defaults(),
     immersiveComposer: TilawaImmersiveComposerTokens.defaults(),
@@ -50,6 +56,8 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaGlassPanelTokens? glassPanel,
     TilawaIconActionButtonTokens? iconActionButton,
     TilawaSearchFieldTokens? searchField,
+    TilawaCountProgressRingTokens? countProgressRing,
+    TilawaPlayerBackgroundTokens? playerBackground,
     TilawaShareFooterBarTokens? shareFooterBar,
     TilawaSettingsGroupTokens? settingsGroup,
     TilawaImmersiveComposerTokens? immersiveComposer,
@@ -61,6 +69,8 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       glassPanel: glassPanel ?? this.glassPanel,
       iconActionButton: iconActionButton ?? this.iconActionButton,
       searchField: searchField ?? this.searchField,
+      countProgressRing: countProgressRing ?? this.countProgressRing,
+      playerBackground: playerBackground ?? this.playerBackground,
       shareFooterBar: shareFooterBar ?? this.shareFooterBar,
       settingsGroup: settingsGroup ?? this.settingsGroup,
       immersiveComposer: immersiveComposer ?? this.immersiveComposer,
@@ -99,6 +109,16 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       searchField: TilawaSearchFieldTokens.lerp(
         searchField,
         other.searchField,
+        t,
+      ),
+      countProgressRing: TilawaCountProgressRingTokens.lerp(
+        countProgressRing,
+        other.countProgressRing,
+        t,
+      ),
+      playerBackground: TilawaPlayerBackgroundTokens.lerp(
+        playerBackground,
+        other.playerBackground,
         t,
       ),
       shareFooterBar: TilawaShareFooterBarTokens.lerp(

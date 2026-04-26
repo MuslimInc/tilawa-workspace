@@ -19,6 +19,7 @@ class LanguageSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final minItemWidth = tokens.iconSizeExtraLarge * 2 + tokens.spaceExtraSmall;
 
     return Container(
       padding: EdgeInsets.all(tokens.spaceExtraSmall),
@@ -35,27 +36,15 @@ class LanguageSwitcher extends StatelessWidget {
           final isSelected = currentLanguage == lang;
           return GestureDetector(
             onTap: () => onLanguageChanged(lang),
-            child: AnimatedContainer(
-              duration: tokens.durationFast,
+            child: Container(
               padding: EdgeInsets.symmetric(
                 horizontal: tokens.spaceLarge,
                 vertical: tokens.spaceSmall,
               ),
-              constraints: const BoxConstraints(minWidth: 100),
+              constraints: BoxConstraints(minWidth: minItemWidth),
               decoration: BoxDecoration(
                 color: isSelected ? theme.primaryColor : Colors.transparent,
                 borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: theme.primaryColor.withValues(
-                            alpha: tokens.opacityMedium,
-                          ),
-                          blurRadius: tokens.radiusSmall / 2,
-                          offset: tokens.shadowOffsetSmall,
-                        ),
-                      ]
-                    : null,
               ),
               child: Center(
                 child: Text(
