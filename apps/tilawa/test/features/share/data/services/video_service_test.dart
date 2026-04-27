@@ -494,6 +494,7 @@ void main() {
         FakeAsyncPlan(
           // result is moot — cancel short-circuits via respectCancel=true.
           result: const FFmpegRunResult(status: FFmpegRunStatus.success),
+          manualCompletion: true,
         ),
       );
       runner.mediaInfoResults.add(const FFmpegMediaInfo(durationSeconds: 10.0));

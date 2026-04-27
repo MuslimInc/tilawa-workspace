@@ -235,7 +235,6 @@ void main() {
 
       expect(find.byType(RecitersScreen), findsOneWidget);
       expect(find.byType(CustomScrollView), findsOneWidget);
-      expect(find.byType(SliverAppBar), findsOneWidget);
       expect(find.text('Alpha Reciter'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });

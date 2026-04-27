@@ -167,6 +167,8 @@ class FakeAsyncHandle implements FFmpegRunHandle {
       if (_completer.isCompleted) return; // cancelled mid-flight
       _onStats?.call(stat);
     }
-    if (!_completer.isCompleted) _completer.complete(_plan.result);
+    if (!_plan.manualCompletion && !_completer.isCompleted) {
+      _completer.complete(_plan.result);
+    }
   }
 }

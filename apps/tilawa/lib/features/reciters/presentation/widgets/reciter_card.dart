@@ -60,42 +60,6 @@ class ReciterCard extends StatelessWidget {
   }
 }
 
-class _ReciterAvatar extends StatelessWidget {
-  const _ReciterAvatar({required this.reciter});
-
-  final ReciterEntity reciter;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final primaryColor = theme.primaryColor;
-
-    return RepaintBoundary(
-      child: Container(
-        width: tokens.iconSizeExtraLarge,
-        height: tokens.iconSizeExtraLarge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(tokens.radiusMedium),
-          color: primaryColor.withValues(alpha: 0.85),
-        ),
-        child: Center(
-          child: Text(
-            reciter.letter,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ReciterInfo extends StatelessWidget {
   const _ReciterInfo({required this.reciter});
 
@@ -168,47 +132,6 @@ class _ReciterInfo extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-class _RecitationsBadge extends StatelessWidget {
-  const _RecitationsBadge({required this.count});
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceExtraSmall,
-      ),
-      decoration: BoxDecoration(
-        color: theme.primaryColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.library_music_rounded,
-            size: tokens.iconSizeExtraSmall,
-            color: theme.primaryColor,
-          ),
-          SizedBox(width: tokens.spaceExtraSmall),
-          Text(
-            '$count',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.primaryColor,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
