@@ -422,7 +422,8 @@ class _VideoLivePreview extends StatefulWidget {
 }
 
 class _VideoLivePreviewState extends State<_VideoLivePreview> {
-  late final MushafPageRenderer _renderer = MushafPageRenderer.defaultRenderer();
+  late final MushafPageRenderer _renderer =
+      MushafPageRenderer.defaultRenderer();
 
   @override
   Widget build(BuildContext context) {
@@ -443,7 +444,9 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
               pageSpec: specs.first,
               surahNumber: widget.surahNumber,
               verseBackgroundColor: (s, v) =>
-                  (s == widget.surahNumber && v >= widget.fromAyah && v <= widget.toAyah)
+                  (s == widget.surahNumber &&
+                      v >= widget.fromAyah &&
+                      v <= widget.toAyah)
                   ? VideoReelDesign.verseHighlightColor
                   : null,
               verseTextColor: (s, v) => null,

@@ -186,66 +186,66 @@ class ShareRepositoryImpl implements ShareRepository {
     }
 
     try {
-    for (int i = 0; i < handles.length; i++) {
-      if (cancelToken?.isCancelled ?? false) break;
+      for (int i = 0; i < handles.length; i++) {
+        if (cancelToken?.isCancelled ?? false) break;
 
-      // Notify the UI to render the current frame before we capture it.
-      onFrameCaptureStarted?.call(i);
+        // Notify the UI to render the current frame before we capture it.
+        onFrameCaptureStarted?.call(i);
 
-      // The cubit's emit notifies BlocConsumer subscribers via a microtask,
-      // so yield once to let the listener fire and call setState before we
-      // wait for the rebuild frame. Without this, the swapped GlobalKey can
-      // still be unattached when capture begins.
-      await Future<void>.delayed(Duration.zero);
-      // First frame: rebuild with the new capturingIndex / GlobalKey.
-      await WidgetsBinding.instance.endOfFrame;
-      // Second frame: layout settles for the freshly-mounted boundary.
-      await WidgetsBinding.instance.endOfFrame;
+        // The cubit's emit notifies BlocConsumer subscribers via a microtask,
+        // so yield once to let the listener fire and call setState before we
+        // wait for the rebuild frame. Without this, the swapped GlobalKey can
+        // still be unattached when capture begins.
+        await Future<void>.delayed(Duration.zero);
+        // First frame: rebuild with the new capturingIndex / GlobalKey.
+        await WidgetsBinding.instance.endOfFrame;
+        // Second frame: layout settles for the freshly-mounted boundary.
+        await WidgetsBinding.instance.endOfFrame;
 
-      final boundaryKey = handles[i].value as GlobalKey;
+        final boundaryKey = handles[i].value as GlobalKey;
 
-      // PHASE 4: Use ultra-fast capture method (raw RGBA instead of PNG)
-      // Cuts encoding overhead from 1-2ms to nearly zero
-      final path = await _screenshotService.captureRawFast(
-        boundaryKey: boundaryKey,
-        fileName: 'video_capture_${timestamp}_${i + 1}.raw',
-        pixelRatio: 1.0,
-        targetWidth: VideoService.outputVideoWidth,
-        targetHeight: VideoService.outputVideoHeight,
-      );
-      screenshotPaths.add(path);
+        // PHASE 4: Use ultra-fast capture method (raw RGBA instead of PNG)
+        // Cuts encoding overhead from 1-2ms to nearly zero
+        final path = await _screenshotService.captureRawFast(
+          boundaryKey: boundaryKey,
+          fileName: 'video_capture_${timestamp}_${i + 1}.raw',
+          pixelRatio: 1.0,
+          targetWidth: VideoService.outputVideoWidth,
+          targetHeight: VideoService.outputVideoHeight,
+        );
+        screenshotPaths.add(path);
 
+        onProgress?.call(
+          _videoCaptureBaseProgress + (i + 1) * captureStep,
+          progressMessages.capturingReaderVisuals,
+        );
+      }
+
+      // 3. Generate video.
       onProgress?.call(
-        _videoCaptureBaseProgress + (i + 1) * captureStep,
-        progressMessages.capturingReaderVisuals,
+        _videoEncodeStartProgress,
+        progressMessages.combiningVideoMedia,
       );
-    }
+      final videoPath = await _videoService.generateVideo(
+        screenshotPaths: screenshotPaths,
+        audioPath: audioContent.filePath,
+        surahName: '', // Metadata
+        reciterName: effectiveConfig.reciterName,
+        progressMessages: progressMessages.video,
+        onProgress: (p, msg) => onProgress?.call(
+          _videoEncodeStartProgress + p * _videoEncodeProgressShare,
+          msg,
+        ),
+        cancelToken: cancelToken,
+      );
 
-    // 3. Generate video.
-    onProgress?.call(
-      _videoEncodeStartProgress,
-      progressMessages.combiningVideoMedia,
-    );
-    final videoPath = await _videoService.generateVideo(
-      screenshotPaths: screenshotPaths,
-      audioPath: audioContent.filePath,
-      surahName: '', // Metadata
-      reciterName: effectiveConfig.reciterName,
-      progressMessages: progressMessages.video,
-      onProgress: (p, msg) => onProgress?.call(
-        _videoEncodeStartProgress + p * _videoEncodeProgressShare,
-        msg,
-      ),
-      cancelToken: cancelToken,
-    );
-
-    return ShareContent.video(
-      filePath: videoPath,
-      surahName: '',
-      fromAyah: effectiveConfig.fromAyah,
-      toAyah: effectiveConfig.toAyah,
-      reciterName: effectiveConfig.reciterName,
-    );
+      return ShareContent.video(
+        filePath: videoPath,
+        surahName: '',
+        fromAyah: effectiveConfig.fromAyah,
+        toAyah: effectiveConfig.toAyah,
+        reciterName: effectiveConfig.reciterName,
+      );
     } finally {
       // Clean up pre-warm files regardless of success or failure.
       for (final path in prewarmPaths) {

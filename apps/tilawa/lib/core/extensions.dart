@@ -45,6 +45,7 @@ extension FailureExtensions on Failure {
       UnexpectedFailure() => l10n.unexpectedError,
       PersistenceFailure() => l10n.persistenceError,
       UIError() => l10n.uiError,
+      UserCancelledFailure() => '',
     };
   }
 }

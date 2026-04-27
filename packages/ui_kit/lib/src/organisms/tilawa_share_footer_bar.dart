@@ -19,7 +19,7 @@ class TilawaShareFooterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.componentTokens.shareFooterBar;
+    final tokens = theme.componentTokens.footerBar;
     final textTheme = theme.textTheme;
     final Color resolvedBackgroundColor =
         backgroundColor ?? theme.colorScheme.secondaryContainer;
