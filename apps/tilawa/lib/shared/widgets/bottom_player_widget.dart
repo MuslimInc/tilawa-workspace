@@ -230,7 +230,8 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
           return previous.currentAudio?.id != current.currentAudio?.id ||
               (!previous.shouldShowBottomPlayer &&
                   current.shouldShowBottomPlayer) ||
-              (previous.isPlaying != current.isPlaying && current.isPlaying);
+              (previous.isPlaying != current.isPlaying && current.isPlaying) ||
+              previous.failure != current.failure;
         },
         buildWhen: (previous, current) =>
             previous.currentAudio != current.currentAudio ||

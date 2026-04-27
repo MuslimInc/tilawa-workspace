@@ -50,15 +50,30 @@ class AudioPositionServiceImpl implements AudioPositionService {
       }
     }
 
+    void refreshPositionTimer() {
+      final bool shouldPollPosition =
+          _audioHandler.mediaItem.valueOrNull != null &&
+          _audioHandler.playbackState.value.playing;
+
+      if (!shouldPollPosition) {
+        positionTimer?.cancel();
+        positionTimer = null;
+        return;
+      }
+
+      positionTimer?.cancel();
+      positionTimer = Timer.periodic(tickPeriod(), emitCurrentPosition);
+    }
+
     controller = StreamController<Duration>.broadcast(
       sync: true,
       onListen: () {
         mediaItemSubscription = _audioHandler.mediaItem.listen((_) {
-          positionTimer?.cancel();
-          positionTimer = Timer.periodic(tickPeriod(), emitCurrentPosition);
+          refreshPositionTimer();
           emitCurrentPosition();
         });
         playbackStateSubscription = _audioHandler.playbackState.listen((_) {
+          refreshPositionTimer();
           emitCurrentPosition();
         });
       },
