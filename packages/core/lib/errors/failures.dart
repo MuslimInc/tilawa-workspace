@@ -119,3 +119,7 @@ final class PersistenceFailure extends Failure {
 final class UIError extends Failure {
   const UIError([super.message]);
 }
+
+final class UserCancelledFailure extends Failure {
+  const UserCancelledFailure([super.message]);
+}

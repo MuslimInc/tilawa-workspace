@@ -46,8 +46,8 @@ class ImmersiveComposerScaffold extends StatefulWidget {
   /// observe user-driven toggles.
   final bool? overlaysVisible;
 
-  /// Fires when the user toggles visibility (tap) or the auto-hide
-  /// timer elapses. Always fires, whether controlled or not.
+  /// Fires when the user toggles visibility (tap).
+  /// Always fires, whether controlled or not.
   final ValueChanged<bool>? onVisibilityChanged;
 
   final bool disableBlur;

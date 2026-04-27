@@ -15,7 +15,7 @@ class PickPlayerBackgroundUseCase {
       final String? imagePath = await _repository.pickImage(source);
 
       if (imagePath == null) {
-        return const Left(UnexpectedFailure('No image selected'));
+        return const Left(UserCancelledFailure('No image selected'));
       }
 
       final String persistentPath = await _repository.persistImage(imagePath);

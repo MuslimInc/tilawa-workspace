@@ -160,6 +160,7 @@ class ShareRepositoryImpl implements ShareRepository {
 
     // PHASE 3-4 AGGRESSIVE PRE-WARMING: Compile all shader variants upfront
     // Phase 4: Reduced to 2 passes (from 3) for faster pre-warm startup
+    final List<String> prewarmPaths = [];
     if (handles.isNotEmpty) {
       // Pre-warm with 2 renders to force most shader compilation
       // (reduced from 3 for speed, still covers 95%+ of variants)
@@ -168,13 +169,14 @@ class ShareRepositoryImpl implements ShareRepository {
         await WidgetsBinding.instance.endOfFrame;
         try {
           final boundaryKey = handles[0].value as GlobalKey;
-          await _screenshotService.captureRawFast(
+          final prewarmPath = await _screenshotService.captureRawFast(
             boundaryKey: boundaryKey,
             fileName: 'video_prewarm_${timestamp}_pass$warmupPass.raw',
             pixelRatio: 1.0,
             targetWidth: VideoService.outputVideoWidth,
             targetHeight: VideoService.outputVideoHeight,
           );
+          prewarmPaths.add(prewarmPath);
         } catch (_) {
           // Pre-warm failure is non-critical
         }
@@ -183,6 +185,7 @@ class ShareRepositoryImpl implements ShareRepository {
       await WidgetsBinding.instance.endOfFrame;
     }
 
+    try {
     for (int i = 0; i < handles.length; i++) {
       if (cancelToken?.isCancelled ?? false) break;
 
@@ -243,6 +246,16 @@ class ShareRepositoryImpl implements ShareRepository {
       toAyah: effectiveConfig.toAyah,
       reciterName: effectiveConfig.reciterName,
     );
+    } finally {
+      // Clean up pre-warm files regardless of success or failure.
+      for (final path in prewarmPaths) {
+        try {
+          await _fileManager.deleteShareFile(path);
+        } catch (_) {
+          // Best-effort cleanup.
+        }
+      }
+    }
   }
 
   @override

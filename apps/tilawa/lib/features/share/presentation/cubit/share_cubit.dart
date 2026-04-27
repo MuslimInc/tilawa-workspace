@@ -186,7 +186,7 @@ class ShareCubit extends Cubit<ShareState> {
 
   /// Updates the screenshot layout.
   void updateScreenshotLayout(ShareScreenshotLayout layout) {
-    emit(state.copyWith(screenshotLayout: ShareScreenshotLayout.readerPage));
+    emit(state.copyWith(screenshotLayout: layout));
   }
 
   AudioClipConfig? _buildAudioConfig() {

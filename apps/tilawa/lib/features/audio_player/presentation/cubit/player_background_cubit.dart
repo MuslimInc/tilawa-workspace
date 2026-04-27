@@ -42,28 +42,30 @@ class PlayerBackgroundCubit extends HydratedCubit<PlayerBackgroundState> {
 
       final result = await _pickUseCase(source);
 
-      result.fold(
-        (failure) {
-          if (failure.message == 'No image selected') {
-            emit(PlayerBackgroundInitial(state.config));
-          } else {
-            emit(PlayerBackgroundError(state.config, failure));
-          }
-        },
-        (persistentPath) async {
-          // Clean up old image if exists
-          if (state.config.customImagePath != null) {
-            await _deleteUseCase(state.config.customImagePath!);
-          }
+      String? persistentPath;
+      Failure? failure;
+      result.fold((f) => failure = f, (p) => persistentPath = p);
 
-          final newConfig = state.config.copyWith(
-            type: PlayerBackgroundType.custom,
-            customImagePath: persistentPath,
-          );
+      if (failure != null) {
+        if (failure is UserCancelledFailure) {
+          emit(PlayerBackgroundInitial(state.config));
+        } else {
+          emit(PlayerBackgroundError(state.config, failure!));
+        }
+        return;
+      }
 
-          emit(PlayerBackgroundSuccess(newConfig));
-        },
+      // Clean up old image if exists
+      if (state.config.customImagePath != null) {
+        await _deleteUseCase(state.config.customImagePath!);
+      }
+
+      final newConfig = state.config.copyWith(
+        type: PlayerBackgroundType.custom,
+        customImagePath: persistentPath,
       );
+
+      emit(PlayerBackgroundSuccess(newConfig));
     } catch (e) {
       emit(
         PlayerBackgroundError(state.config, UnexpectedFailure(e.toString())),

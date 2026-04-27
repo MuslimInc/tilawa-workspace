@@ -101,6 +101,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   }
 
   void _syncVideoBoundaryKeys(List<VideoPageSpec> specs) {
+    final activePages = specs.map((s) => s.pageNumber).toSet();
+    _videoBoundaryKeys.removeWhere((page, _) => !activePages.contains(page));
     for (final spec in specs) {
       _videoBoundaryKeys.putIfAbsent(spec.pageNumber, () => GlobalKey());
     }
@@ -399,7 +401,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   }
 }
 
-class _VideoLivePreview extends StatelessWidget {
+class _VideoLivePreview extends StatefulWidget {
   const _VideoLivePreview({
     super.key,
     required this.surahNumber,
@@ -416,32 +418,37 @@ class _VideoLivePreview extends StatelessWidget {
   final Color backgroundColor;
 
   @override
+  State<_VideoLivePreview> createState() => _VideoLivePreviewState();
+}
+
+class _VideoLivePreviewState extends State<_VideoLivePreview> {
+  late final MushafPageRenderer _renderer = MushafPageRenderer.defaultRenderer();
+
+  @override
   Widget build(BuildContext context) {
     final specs = buildVideoPageSpecs(
-      surahNumber: surahNumber,
-      fromAyah: fromAyah,
-      toAyah: toAyah,
+      surahNumber: widget.surahNumber,
+      fromAyah: widget.fromAyah,
+      toAyah: widget.toAyah,
     );
 
-    final renderer = MushafPageRenderer.defaultRenderer();
-
     return Container(
-      color: backgroundColor,
+      color: widget.backgroundColor,
       child: Center(
         child: AspectRatio(
           aspectRatio: 9 / 16,
           child: RepaintBoundary(
-            child: renderer.build(
+            child: _renderer.build(
               context: context,
               pageSpec: specs.first,
-              surahNumber: surahNumber,
+              surahNumber: widget.surahNumber,
               verseBackgroundColor: (s, v) =>
-                  (s == surahNumber && v >= fromAyah && v <= toAyah)
+                  (s == widget.surahNumber && v >= widget.fromAyah && v <= widget.toAyah)
                   ? VideoReelDesign.verseHighlightColor
                   : null,
               verseTextColor: (s, v) => null,
               textColor: VideoReelDesign.mushafTextColor,
-              pageBackgroundColor: backgroundColor,
+              pageBackgroundColor: widget.backgroundColor,
               isCapturing: false,
             ),
           ),
@@ -544,9 +551,5 @@ class _BackgroundState {
 
   @override
   int get hashCode =>
-      status.hashCode ^
-      content.hashCode ^
-      fromAyah.hashCode ^
-      toAyah.hashCode ^
-      reciterName.hashCode;
+      Object.hash(status, content, fromAyah, toAyah, reciterName);
 }
