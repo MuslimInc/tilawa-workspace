@@ -18,6 +18,10 @@ import 'prayer_times_bloc_test.mocks.dart';
   GetCountryCodeUseCase,
   SavePrayerSettingsUseCase,
   LoadPrayerSettingsUseCase,
+  SchedulePrayerNotificationsUseCase,
+  CancelPrayerNotificationsUseCase,
+  CheckPrayerAlarmCapabilityUseCase,
+  RequestExactAlarmPermissionUseCase,
 ])
 void main() {
   late PrayerTimesBloc bloc;
@@ -27,6 +31,14 @@ void main() {
   late MockGetCountryCodeUseCase mockGetCountryCodeUseCase;
   late MockSavePrayerSettingsUseCase mockSavePrayerSettingsUseCase;
   late MockLoadPrayerSettingsUseCase mockLoadPrayerSettingsUseCase;
+  late MockSchedulePrayerNotificationsUseCase
+  mockSchedulePrayerNotificationsUseCase;
+  late MockCancelPrayerNotificationsUseCase
+  mockCancelPrayerNotificationsUseCase;
+  late MockCheckPrayerAlarmCapabilityUseCase
+  mockCheckPrayerAlarmCapabilityUseCase;
+  late MockRequestExactAlarmPermissionUseCase
+  mockRequestExactAlarmPermissionUseCase;
 
   setUp(() {
     mockGetPrayerTimesUseCase = MockGetPrayerTimesUseCase();
@@ -35,6 +47,14 @@ void main() {
     mockGetCountryCodeUseCase = MockGetCountryCodeUseCase();
     mockSavePrayerSettingsUseCase = MockSavePrayerSettingsUseCase();
     mockLoadPrayerSettingsUseCase = MockLoadPrayerSettingsUseCase();
+    mockSchedulePrayerNotificationsUseCase =
+        MockSchedulePrayerNotificationsUseCase();
+    mockCancelPrayerNotificationsUseCase =
+        MockCancelPrayerNotificationsUseCase();
+    mockCheckPrayerAlarmCapabilityUseCase =
+        MockCheckPrayerAlarmCapabilityUseCase();
+    mockRequestExactAlarmPermissionUseCase =
+        MockRequestExactAlarmPermissionUseCase();
 
     bloc = PrayerTimesBloc(
       mockGetPrayerTimesUseCase,
@@ -43,6 +63,10 @@ void main() {
       mockGetCountryCodeUseCase,
       mockSavePrayerSettingsUseCase,
       mockLoadPrayerSettingsUseCase,
+      mockSchedulePrayerNotificationsUseCase,
+      mockCancelPrayerNotificationsUseCase,
+      mockCheckPrayerAlarmCapabilityUseCase,
+      mockRequestExactAlarmPermissionUseCase,
     );
 
     // Default stub
@@ -52,6 +76,15 @@ void main() {
         longitude: anyNamed('longitude'),
       ),
     ).thenAnswer((_) async => null);
+
+    when(
+      mockSchedulePrayerNotificationsUseCase.call(
+        settings: anyNamed('settings'),
+        latitude: anyNamed('latitude'),
+        longitude: anyNamed('longitude'),
+        forceReschedule: anyNamed('forceReschedule'),
+      ),
+    ).thenAnswer((_) async => const Right(null));
   });
   provideDummy<Either<Failure, PrayerSettingsEntity>>(
     const Right(PrayerSettingsEntity()),

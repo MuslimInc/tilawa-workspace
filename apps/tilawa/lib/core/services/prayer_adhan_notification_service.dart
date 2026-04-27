@@ -1,0 +1,634 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/services/navigation_service.dart';
+import 'package:tilawa_core/services/analytics_service.dart';
+import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+
+import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
+import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
+import '../../features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import '../../features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
+import '../../router/app_router_config.dart';
+import '../config/notification_config.dart';
+import 'prayer_notification_config.dart';
+
+/// Five prayers that participate in scheduled notifications. Sunrise, midnight
+/// and lastThird have no [PrayerNotificationSettings] field on
+/// [PrayerSettingsEntity] and are not user-configurable, so they are excluded.
+const List<PrayerType> _schedulablePrayers = [
+  PrayerType.fajr,
+  PrayerType.dhuhr,
+  PrayerType.asr,
+  PrayerType.maghrib,
+  PrayerType.isha,
+];
+
+@LazySingleton(as: IPrayerAdhanNotificationService)
+class PrayerAdhanNotificationService
+    implements IPrayerAdhanNotificationService {
+  PrayerAdhanNotificationService(
+    this._prefs,
+    this._dispatcher,
+    this._navigationService,
+    this._analytics,
+    this._adhanPlayer,
+  );
+
+  final SharedPreferencesAsync _prefs;
+  final INotificationDispatcher _dispatcher;
+  final NavigationService _navigationService;
+  final AnalyticsService _analytics;
+  final IAdhanAlarmPlayer _adhanPlayer;
+
+  bool _initialized = false;
+
+  /// Set on the next [schedulePrayerNotifications] call when [initialize]
+  /// detects the device timezone has changed since the last scheduling run.
+  bool _pendingForceReschedule = false;
+
+  FlutterLocalNotificationsPlugin get _notifications =>
+      _dispatcher.notificationsPlugin;
+
+  @override
+  Future<void> initialize() async {
+    if (!NotificationConfig.enableLocalNotifications) {
+      logger.d(
+        '${PrayerNotificationConfig.logTag} Notifications disabled in config',
+      );
+      return;
+    }
+
+    if (_initialized) {
+      logger.d('${PrayerNotificationConfig.logTag} Already initialized');
+      return;
+    }
+
+    try {
+      tz.initializeTimeZones();
+
+      String resolvedTzName = 'UTC';
+      try {
+        final TimezoneInfo info = await FlutterTimezone.getLocalTimezone();
+        if (info.identifier.isNotEmpty) {
+          resolvedTzName = info.identifier;
+        }
+        tz.setLocalLocation(tz.getLocation(resolvedTzName));
+        logger.d(
+          '${PrayerNotificationConfig.logTag} Timezone set to: $resolvedTzName',
+        );
+      } catch (e) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} Error setting timezone: $e, using UTC',
+        );
+        tz.setLocalLocation(tz.UTC);
+        resolvedTzName = 'UTC';
+      }
+
+      // Detect timezone change since last run; if changed, force the next
+      // scheduling pass to bypass dedup so alarms recompute against the new
+      // local time.
+      try {
+        final String? lastTz = await _prefs.getString(
+          PrayerNotificationConfig.lastTimezoneKey,
+        );
+        if (lastTz != null && lastTz != resolvedTzName) {
+          _pendingForceReschedule = true;
+          logger.d(
+            '${PrayerNotificationConfig.logTag} Timezone changed ($lastTz -> $resolvedTzName); forcing next reschedule',
+          );
+        }
+        await _prefs.setString(
+          PrayerNotificationConfig.lastTimezoneKey,
+          resolvedTzName,
+        );
+      } catch (e) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} Failed to read/persist timezone fingerprint: $e',
+        );
+      }
+
+      // Lightweight init — high-importance channel creation is owned by the
+      // central app startup path.
+      await _dispatcher.initialize(createHighImportanceChannel: false);
+
+      _dispatcher.registerHandler(
+        serviceId: 'prayer_notifications',
+        notificationIds: _staticNotificationIds,
+        handler: handleNotificationResponse,
+      );
+      _dispatcher.registerPayloadHandler(
+        serviceId: 'prayer_notifications',
+        matcher: _isPrayerPayload,
+        handler: handleNotificationResponse,
+      );
+
+      if (Platform.isAndroid) {
+        await _createAndroidChannels();
+      }
+
+      _initialized = true;
+      logger.d(
+        '${PrayerNotificationConfig.logTag} Initialized successfully',
+      );
+    } catch (e, stackTrace) {
+      logger.e(
+        '${PrayerNotificationConfig.logTag} Initialization failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  Future<void> _createAndroidChannels() async {
+    final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
+        _notifications
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
+    if (androidPlugin == null) {
+      return;
+    }
+    // Default-sound channel (Phase 1)
+    await androidPlugin.createNotificationChannel(
+      const AndroidNotificationChannel(
+        PrayerNotificationConfig.channelId,
+        PrayerNotificationConfig.channelName,
+        description: PrayerNotificationConfig.channelDescription,
+        importance: Importance.high,
+      ),
+    );
+    // Adhan-sound channel — created up front so Phase 2 can start using it
+    // without channel migration. No `sound:` is bound in Phase 1 because the
+    // adhan asset is not yet bundled; Phase 2 must delete and recreate this
+    // channel when the asset is added (Android channel sound lock).
+    await androidPlugin.createNotificationChannel(
+      const AndroidNotificationChannel(
+        PrayerNotificationConfig.adhanChannelId,
+        PrayerNotificationConfig.adhanChannelName,
+        description: PrayerNotificationConfig.adhanChannelDescription,
+        importance: Importance.high,
+      ),
+    );
+  }
+
+  Set<int> get _staticNotificationIds =>
+      _schedulablePrayers
+          .map(PrayerNotificationConfig.staticId)
+          .toSet();
+
+  @override
+  Future<void> schedulePrayerNotifications({
+    required PrayerSettingsEntity settings,
+    required List<PrayerTimeEntity> prayerTimesForDays,
+    bool forceReschedule = false,
+  }) async {
+    if (!NotificationConfig.enableLocalNotifications) {
+      logger.d(
+        '${PrayerNotificationConfig.logTag} Notifications disabled — skipping schedule',
+      );
+      return;
+    }
+
+    if (!_initialized) {
+      await initialize();
+    }
+
+    try {
+      final bool effectiveForce =
+          forceReschedule || _pendingForceReschedule;
+      _pendingForceReschedule = false;
+
+      if (prayerTimesForDays.isEmpty) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} No prayer times provided — schedule skipped',
+        );
+        return;
+      }
+
+      // Dedup
+      final String today = _todayDateKey();
+      final String currentFingerprint = _computeFingerprint(
+        settings: settings,
+        prayerTimesForDays: prayerTimesForDays,
+      );
+      if (!effectiveForce) {
+        final String? storedDate = await _prefs.getString(
+          PrayerNotificationConfig.dedupDateKey,
+        );
+        final String? storedFingerprint = await _prefs.getString(
+          PrayerNotificationConfig.settingsFingerprintKey,
+        );
+        if (storedDate == today &&
+            storedFingerprint == currentFingerprint) {
+          logger.d(
+            '${PrayerNotificationConfig.logTag} Dedup hit — already scheduled for $today (fingerprint match)',
+          );
+          return;
+        }
+      }
+
+      // Cancel previous schedule before installing the new one. Idempotent.
+      await cancelAllPrayerNotifications();
+
+      final bool canScheduleExact = await canScheduleExactAlarms();
+      final AndroidScheduleMode scheduleMode = canScheduleExact
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexact;
+      if (!canScheduleExact) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} Exact alarm permission denied — using inexact mode',
+        );
+      }
+
+      final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+      final int dayCount = prayerTimesForDays.length <
+              PrayerNotificationConfig.scheduleDaysAhead
+          ? prayerTimesForDays.length
+          : PrayerNotificationConfig.scheduleDaysAhead;
+
+      int scheduled = 0;
+      for (int dayOffset = 0; dayOffset < dayCount; dayOffset++) {
+        final PrayerTimeEntity dayTimes = prayerTimesForDays[dayOffset];
+
+        for (final PrayerType prayer in _schedulablePrayers) {
+          final PrayerNotificationSettings prayerSettings =
+              _settingsFor(settings, prayer);
+          if (!prayerSettings.enabled) {
+            continue;
+          }
+
+          final DateTime prayerTime = _prayerDateTime(dayTimes, prayer);
+          final DateTime targetTime = prayerTime.subtract(
+            Duration(minutes: prayerSettings.minutesBefore),
+          );
+          final tz.TZDateTime tzTarget =
+              tz.TZDateTime.from(targetTime, tz.local);
+
+          if (!tzTarget.isAfter(now)) {
+            logger.d(
+              '${PrayerNotificationConfig.logTag} Skipping $prayer ${_dateKey(dayTimes.date)} — time in past',
+            );
+            continue;
+          }
+
+          final int notificationId =
+              PrayerNotificationConfig.dynamicId(dayOffset, prayer);
+          final String payload = jsonEncode({
+            PrayerNotificationConfig.payloadTypeKey:
+                PrayerNotificationConfig.payloadTypeValue,
+            PrayerNotificationConfig.payloadPrayerKey: prayer.name,
+            PrayerNotificationConfig.payloadDateKey:
+                _dateKey(dayTimes.date),
+          });
+
+          try {
+            await _notifications.zonedSchedule(
+              id: notificationId,
+              title: prayer.displayNameAr,
+              body: _bodyFor(prayer),
+              scheduledDate: tzTarget,
+              notificationDetails:
+                  _detailsFor(prayerSettings.playAdhan),
+              androidScheduleMode: scheduleMode,
+              matchDateTimeComponents: null,
+              payload: payload,
+            );
+            scheduled++;
+            logger.d(
+              '${PrayerNotificationConfig.logTag} Scheduled ${prayer.name} ${_dateKey(dayTimes.date)} at $tzTarget '
+              '(${canScheduleExact ? 'exact' : 'inexact'})',
+            );
+          } catch (e) {
+            logger.e(
+              '${PrayerNotificationConfig.logTag} Error scheduling ${prayer.name} '
+              '${_dateKey(dayTimes.date)} (id=$notificationId): $e',
+            );
+          }
+
+          if (prayerSettings.playAdhan && _adhanPlayer.isSupported) {
+            try {
+              await _adhanPlayer.scheduleAdhan(
+                id: notificationId,
+                scheduledTime: targetTime,
+                prayerName: prayer.name,
+              );
+            } catch (e) {
+              logger.e(
+                '${PrayerNotificationConfig.logTag} Adhan player schedule failed for ${prayer.name}: $e',
+              );
+            }
+          }
+
+          // Yield every 5 schedules to avoid blocking the UI thread (mirrors
+          // the athkar service jank-prevention pattern).
+          if (scheduled > 0 && scheduled % 5 == 0) {
+            await Future<void>.delayed(Duration.zero);
+          }
+        }
+      }
+
+      try {
+        await _prefs.setString(
+          PrayerNotificationConfig.dedupDateKey,
+          today,
+        );
+        await _prefs.setString(
+          PrayerNotificationConfig.settingsFingerprintKey,
+          currentFingerprint,
+        );
+      } catch (e) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} Failed to persist dedup state: $e',
+        );
+      }
+
+      logger.d(
+        '${PrayerNotificationConfig.logTag} Scheduled $scheduled prayer notifications',
+      );
+    } catch (e, stackTrace) {
+      logger.e(
+        '${PrayerNotificationConfig.logTag} Error scheduling notifications: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> cancelAllPrayerNotifications() async {
+    if (!NotificationConfig.enableLocalNotifications) {
+      return;
+    }
+    try {
+      // Static IDs (debug/test slot)
+      for (final PrayerType prayer in _schedulablePrayers) {
+        await _notifications.cancel(
+          id: PrayerNotificationConfig.staticId(prayer),
+        );
+      }
+      // Dynamic IDs across the schedule window. Iterate every prayer slot in
+      // the window — cheaper and deterministic vs. filtering pendingNotifications.
+      int cancelled = 0;
+      for (
+        int dayOffset = 0;
+        dayOffset < PrayerNotificationConfig.scheduleDaysAhead;
+        dayOffset++
+      ) {
+        for (final PrayerType prayer in _schedulablePrayers) {
+          await _notifications.cancel(
+            id: PrayerNotificationConfig.dynamicId(dayOffset, prayer),
+          );
+          cancelled++;
+        }
+      }
+      try {
+        await _adhanPlayer.cancelAllAdhans();
+      } catch (e) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} Adhan player cancelAll failed: $e',
+        );
+      }
+      logger.d(
+        '${PrayerNotificationConfig.logTag} Cancelled $cancelled dynamic alarm IDs',
+      );
+    } catch (e, stackTrace) {
+      logger.e(
+        '${PrayerNotificationConfig.logTag} Error cancelling notifications: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<bool> canScheduleExactAlarms() async {
+    if (!Platform.isAndroid) {
+      return true;
+    }
+    try {
+      final AndroidFlutterLocalNotificationsPlugin? impl = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      return await impl?.canScheduleExactNotifications() ?? true;
+    } catch (e) {
+      logger.w(
+        '${PrayerNotificationConfig.logTag} canScheduleExactAlarms failed: $e',
+      );
+      // Fail-open: let the schedule path attempt; the OS will reject if needed.
+      return true;
+    }
+  }
+
+  @override
+  Future<void> requestExactAlarmPermission() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
+    try {
+      final AndroidFlutterLocalNotificationsPlugin? impl = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+      await impl?.requestExactAlarmsPermission();
+    } catch (e) {
+      logger.e(
+        '${PrayerNotificationConfig.logTag} requestExactAlarmPermission failed: $e',
+      );
+    }
+  }
+
+  @override
+  Future<void> handleNotificationResponse(
+    NotificationResponse response,
+  ) async {
+    try {
+      final String? payload = response.payload;
+      if (payload == null || !_isPrayerPayload(payload)) {
+        return;
+      }
+
+      String? prayerName;
+      try {
+        final dynamic decoded = jsonDecode(payload);
+        if (decoded is Map<String, dynamic>) {
+          final dynamic v = decoded[PrayerNotificationConfig.payloadPrayerKey];
+          if (v is String) {
+            prayerName = v;
+          }
+        }
+      } catch (_) {
+        // Best-effort decode; fall through with prayerName == null.
+      }
+
+      try {
+        final Map<String, Object> params = <String, Object>{};
+        if (prayerName != null) {
+          params['prayer'] = prayerName;
+        }
+        final int? id = response.id;
+        if (id != null) {
+          params['notification_id'] = id;
+        }
+        await _analytics.logEvent(
+          'prayer_notification_open',
+          parameters: params,
+        );
+      } catch (e) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} Analytics log failed: $e',
+        );
+      }
+
+      _navigateToPrayerTimes();
+    } catch (e, stackTrace) {
+      logger.e(
+        '${PrayerNotificationConfig.logTag} handleNotificationResponse failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  void _navigateToPrayerTimes() {
+    try {
+      _navigationService.navigateToNotification(
+        const PrayerTimesRoute().location,
+      );
+    } catch (e) {
+      logger.w(
+        '${PrayerNotificationConfig.logTag} Navigation failed: $e',
+      );
+    }
+  }
+
+  // -- helpers ----------------------------------------------------------------
+
+  bool _isPrayerPayload(String? payload) {
+    if (payload == null || payload.isEmpty) return false;
+    // Cheap structural check; keeps the dispatcher matcher allocation-free.
+    return payload.contains(
+      '"${PrayerNotificationConfig.payloadTypeKey}":"'
+      '${PrayerNotificationConfig.payloadTypeValue}"',
+    );
+  }
+
+  PrayerNotificationSettings _settingsFor(
+    PrayerSettingsEntity settings,
+    PrayerType prayer,
+  ) {
+    switch (prayer) {
+      case PrayerType.fajr:
+        return settings.fajrNotification;
+      case PrayerType.dhuhr:
+        return settings.dhuhrNotification;
+      case PrayerType.asr:
+        return settings.asrNotification;
+      case PrayerType.maghrib:
+        return settings.maghribNotification;
+      case PrayerType.isha:
+        return settings.ishaNotification;
+      case PrayerType.sunrise:
+      case PrayerType.midnight:
+      case PrayerType.lastThird:
+        return const PrayerNotificationSettings(enabled: false);
+    }
+  }
+
+  DateTime _prayerDateTime(PrayerTimeEntity day, PrayerType prayer) {
+    switch (prayer) {
+      case PrayerType.fajr:
+        return day.fajr;
+      case PrayerType.sunrise:
+        return day.sunrise;
+      case PrayerType.dhuhr:
+        return day.dhuhr;
+      case PrayerType.asr:
+        return day.asr;
+      case PrayerType.maghrib:
+        return day.maghrib;
+      case PrayerType.isha:
+        return day.isha;
+      case PrayerType.midnight:
+        return day.midnight;
+      case PrayerType.lastThird:
+        return day.lastThird;
+    }
+  }
+
+  String _bodyFor(PrayerType prayer) {
+    // Phase 1 uses Arabic literals to match the athkar service convention.
+    // Phase 7 of the rollout introduces ARB-driven body text.
+    return 'حان وقت ${prayer.displayNameAr}';
+  }
+
+  NotificationDetails _detailsFor(bool playAdhan) {
+    final String channelId = playAdhan
+        ? PrayerNotificationConfig.adhanChannelId
+        : PrayerNotificationConfig.channelId;
+    final String channelName = playAdhan
+        ? PrayerNotificationConfig.adhanChannelName
+        : PrayerNotificationConfig.channelName;
+    final String channelDescription = playAdhan
+        ? PrayerNotificationConfig.adhanChannelDescription
+        : PrayerNotificationConfig.channelDescription;
+
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        channelId,
+        channelName,
+        channelDescription: channelDescription,
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: 'ic_launcher_monochrome',
+        color: AppColors.notificationAccent,
+      ),
+      iOS: const DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+        sound: 'default',
+      ),
+    );
+  }
+
+  String _todayDateKey() {
+    final DateTime now = DateTime.now();
+    return _dateKey(now);
+  }
+
+  String _dateKey(DateTime date) {
+    final String y = date.year.toString().padLeft(4, '0');
+    final String m = date.month.toString().padLeft(2, '0');
+    final String d = date.day.toString().padLeft(2, '0');
+    return '$y$m$d';
+  }
+
+  /// Deterministic fingerprint of the inputs that affect alarm timing. A
+  /// matching fingerprint on the same calendar day is treated as "already
+  /// scheduled" — different fingerprint ⇒ schedule changed and we reschedule.
+  String _computeFingerprint({
+    required PrayerSettingsEntity settings,
+    required List<PrayerTimeEntity> prayerTimesForDays,
+  }) {
+    final Map<String, dynamic> json = settings.toJson();
+    final double lat = (prayerTimesForDays.first.latitude ?? 0).toDouble();
+    final double lon = (prayerTimesForDays.first.longitude ?? 0).toDouble();
+    final String fingerprint = [
+      jsonEncode(json),
+      lat.toStringAsFixed(4),
+      lon.toStringAsFixed(4),
+      settings.calculationMethod.name,
+    ].join('|');
+    return fingerprint;
+  }
+}

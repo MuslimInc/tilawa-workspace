@@ -9,6 +9,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/repositories/prayer_times_repository.dart';
 import '../../domain/usecases/usecases.dart';
+import '../../domain/value_objects/prayer_alarm_capability.dart';
 
 part 'prayer_times_bloc.freezed.dart';
 
@@ -29,6 +30,10 @@ class PrayerTimesEvent with _$PrayerTimesEvent {
     required double longitude,
     String? locationName,
   }) = _SetManualLocation;
+  const factory PrayerTimesEvent.checkAlarmCapability() =
+      _CheckAlarmCapability;
+  const factory PrayerTimesEvent.requestExactAlarmPermission() =
+      _RequestExactAlarmPermission;
 }
 
 // States
@@ -46,6 +51,7 @@ abstract class PrayerTimesState with _$PrayerTimesState {
     Duration? timeUntilNextPrayer,
     @Default('') String errorMessage,
     @Default(false) bool isLoadingLocation,
+    PrayerAlarmCapability? alarmCapability,
   }) = _PrayerTimesState;
 }
 
@@ -60,6 +66,10 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._getCountryCodeUseCase,
     this._savePrayerSettingsUseCase,
     this._loadPrayerSettingsUseCase,
+    this._schedulePrayerNotificationsUseCase,
+    this._cancelPrayerNotificationsUseCase,
+    this._checkPrayerAlarmCapabilityUseCase,
+    this._requestExactAlarmPermissionUseCase,
   ) : super(const PrayerTimesState()) {
     on<_LoadPrayerTimes>(_onLoadPrayerTimes);
     on<_LoadMonthlyPrayerTimes>(_onLoadMonthlyPrayerTimes);
@@ -67,6 +77,8 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     on<_UpdateSettings>(_onUpdateSettings);
     on<_RefreshCountdown>(_onRefreshCountdown);
     on<_SetManualLocation>(_onSetManualLocation);
+    on<_CheckAlarmCapability>(_onCheckAlarmCapability);
+    on<_RequestExactAlarmPermission>(_onRequestExactAlarmPermission);
   }
 
   final GetPrayerTimesUseCase _getPrayerTimesUseCase;
@@ -75,6 +87,17 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final GetCountryCodeUseCase _getCountryCodeUseCase;
   final SavePrayerSettingsUseCase _savePrayerSettingsUseCase;
   final LoadPrayerSettingsUseCase _loadPrayerSettingsUseCase;
+  final SchedulePrayerNotificationsUseCase _schedulePrayerNotificationsUseCase;
+  // ignore: unused_field
+  final CancelPrayerNotificationsUseCase _cancelPrayerNotificationsUseCase;
+  final CheckPrayerAlarmCapabilityUseCase _checkPrayerAlarmCapabilityUseCase;
+  final RequestExactAlarmPermissionUseCase _requestExactAlarmPermissionUseCase;
+
+  /// Set to `true` by user-initiated handlers (settings change, location
+  /// change, manual-location set) so that the next [_onLoadPrayerTimes]
+  /// schedule call bypasses the same-day fingerprint dedup guard. Reset to
+  /// `false` once consumed.
+  bool _pendingForceReschedule = false;
 
   Timer? _countdownTimer;
   bool _isCountdownActive = false;
@@ -269,8 +292,45 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
             timeUntilNextPrayer: timeUntil,
           ),
         );
+
+        // Single-source schedule trigger: every successful load triggers a
+        // (deduped) reschedule. Settings/location/manual-location handlers
+        // set `_pendingForceReschedule = true` before recursing here so the
+        // service's same-day fingerprint guard is bypassed.
+        final bool force = _pendingForceReschedule;
+        _pendingForceReschedule = false;
+        unawaited(
+          _schedulePrayerNotificationsUseCase.call(
+            settings: effectiveSettings,
+            latitude: latitude!,
+            longitude: longitude!,
+            forceReschedule: force,
+          ),
+        );
       },
     );
+  }
+
+  Future<void> _onCheckAlarmCapability(
+    _CheckAlarmCapability event,
+    Emitter<PrayerTimesState> emit,
+  ) async {
+    final Either<Failure, PrayerAlarmCapability> result =
+        await _checkPrayerAlarmCapabilityUseCase.call();
+    result.fold(
+      (_) {},
+      (capability) => emit(state.copyWith(alarmCapability: capability)),
+    );
+  }
+
+  Future<void> _onRequestExactAlarmPermission(
+    _RequestExactAlarmPermission event,
+    Emitter<PrayerTimesState> emit,
+  ) async {
+    await _requestExactAlarmPermissionUseCase.call();
+    // Re-check capability so the UI updates after the user returns from the
+    // system settings screen.
+    add(const PrayerTimesEvent.checkAlarmCapability());
   }
 
   Future<void> _onLoadMonthlyPrayerTimes(
@@ -324,7 +384,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           ),
         );
 
-        // Reload prayer times with new location
+        // Reload prayer times with new location; force reschedule on next
+        // schedule attempt because location materially changes timings.
+        _pendingForceReschedule = true;
         add(const PrayerTimesEvent.loadPrayerTimes());
       },
     );
@@ -338,8 +400,11 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
     emit(state.copyWith(settings: event.settings));
 
-    // Reload prayer times with new settings
+    // Reload prayer times with new settings; force reschedule on the next
+    // schedule pass because user-edited settings must propagate immediately
+    // even on the same day (bypasses the dedup fingerprint guard).
     if (state.latitude != null && state.longitude != null) {
+      _pendingForceReschedule = true;
       add(const PrayerTimesEvent.loadPrayerTimes());
     }
   }
@@ -395,7 +460,8 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     await _savePrayerSettingsUseCase.call(settings: updatedSettings);
     emit(state.copyWith(settings: updatedSettings));
 
-    // Reload prayer times
+    // Reload prayer times; manual location overrides force a reschedule.
+    _pendingForceReschedule = true;
     add(const PrayerTimesEvent.loadPrayerTimes());
   }
 }
