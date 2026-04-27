@@ -214,7 +214,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     iconSizeMedium: 20.0,
     iconSizeLarge: 24.0,
     iconSizeExtraLarge: 48.0,
-    textHeightLoose: 1.8,
+    textHeightLoose: 2.0,
     durationFast: Duration(milliseconds: 200),
     durationMedium: Duration(milliseconds: 400),
     durationSlow: Duration(milliseconds: 600),

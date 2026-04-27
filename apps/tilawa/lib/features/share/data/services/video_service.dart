@@ -2,10 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
-import 'package:ffmpeg_kit_flutter_new/ffmpeg_session.dart';
-import 'package:ffmpeg_kit_flutter_new/ffprobe_kit.dart';
-import 'package:ffmpeg_kit_flutter_new/return_code.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 import 'package:tilawa_core/errors/failures.dart';
@@ -13,13 +10,15 @@ import 'package:tilawa_core/logger.dart';
 
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/entities/share_video_profile.dart';
+import '../ffmpeg/ffmpeg_runner.dart';
 import 'share_file_manager.dart';
 
 @lazySingleton
 class VideoService {
-  VideoService(this._fileManager);
+  VideoService(this._fileManager, this._runner);
 
   final ShareFileManager _fileManager;
+  final FFmpegRunner _runner;
   // 720x1280 keeps the 9:16 aspect ratio social platforms expect while cutting
   // encoder pixel work by more than half versus 1080x1920 on mid-range phones.
   // Screenshots are already captured at this exact resolution (see
@@ -100,7 +99,7 @@ class VideoService {
                 encodeScreenshotPaths.length;
 
       final String command = encodeScreenshotPaths.length == 1
-          ? _buildSingleImageCommand(
+          ? buildSingleImageCommand(
               screenshotPath: encodeScreenshotPaths.single,
               audioPath: audioPath,
               surahName: surahName,
@@ -108,7 +107,7 @@ class VideoService {
               outputPath: outputPath,
               audioDurationSeconds: effectiveDurationSeconds,
             )
-          : _buildSlideshowCommand(
+          : buildSlideshowCommand(
               screenshotPaths: encodeScreenshotPaths,
               audioPath: audioPath,
               surahName: surahName,
@@ -124,27 +123,25 @@ class VideoService {
       );
 
       final int tEncode = DateTime.now().millisecondsSinceEpoch;
-      final FFmpegSession session = await _runWithProgress(
+      final FFmpegRunResult result = await _runWithProgress(
         command: command,
         audioDurationSeconds: effectiveDurationSeconds,
         onProgress: onProgress,
         progressMessages: progressMessages,
         cancelToken: cancelToken,
       );
-      final returnCode = await session.getReturnCode();
       _videoLog(
-        '[VIDEO_SVC] ffmpeg finished | returnCode=$returnCode | took=${DateTime.now().millisecondsSinceEpoch - tEncode}ms',
+        '[VIDEO_SVC] ffmpeg finished | status=${result.status} | took=${DateTime.now().millisecondsSinceEpoch - tEncode}ms',
       );
 
-      if (!ReturnCode.isSuccess(returnCode)) {
-        if (ReturnCode.isCancel(returnCode)) {
+      if (!result.isSuccess) {
+        if (result.isCancelled) {
           throw DioException.requestCancelled(
             requestOptions: RequestOptions(path: outputPath),
             reason: 'Video encoding was cancelled.',
           );
         }
-        final logs = await session.getLogs();
-        final String ffmpegLogs = logs.map((l) => l.getMessage()).join('\n');
+        final ffmpegLogs = result.logs;
         final bool hasFrameFormatIssue =
             ffmpegLogs.contains('Invalid pixel format') ||
             ffmpegLogs.contains('rawvideo') ||
@@ -177,28 +174,23 @@ class VideoService {
   }
 
   /// Runs the given FFmpeg command asynchronously so we can stream real
-  /// progress via the statistics callback (stats.getTime() is wall-clock ms
-  /// of encoded output), and wire cancellation through [cancelToken].
-  Future<FFmpegSession> _runWithProgress({
+  /// progress via the statistics callback (timeMs is wall-clock ms of encoded
+  /// output), and wire cancellation through [cancelToken].
+  Future<FFmpegRunResult> _runWithProgress({
     required String command,
     required double audioDurationSeconds,
     required VideoProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
     CancelToken? cancelToken,
   }) async {
-    final completer = Completer<FFmpegSession>();
     final double audioDurationMs = audioDurationSeconds * 1000.0;
     double lastReportedFraction = _encodingStartProgress;
 
-    final FFmpegSession session = await FFmpegKit.executeAsync(
+    final FFmpegRunHandle handle = await _runner.executeAsync(
       command,
-      (finishedSession) {
-        if (!completer.isCompleted) completer.complete(finishedSession);
-      },
-      null,
-      (stats) {
+      onStats: (stats) {
         if (audioDurationMs <= 0 || onProgress == null) return;
-        final int timeMs = stats.getTime();
+        final int timeMs = stats.timeMs;
         if (timeMs <= 0) return;
         // Local encode progress is remapped by the repository to the global
         // share progress bar. Keep the top range for muxing/finalization.
@@ -222,15 +214,18 @@ class VideoService {
             _videoLog(
               '[VIDEO_SVC] cancel requested — cancelling ffmpeg session.',
             );
-            FFmpegKit.cancel(session.getSessionId());
+            handle.cancel();
           })
           .catchError((_) {});
     }
 
-    return completer.future;
+    return handle.done;
   }
 
-  String _buildSingleImageCommand({
+  /// Builds the single-image FFmpeg command. Visible for testing so the
+  /// command shape can be locked down without spinning up a real encoder.
+  @visibleForTesting
+  String buildSingleImageCommand({
     required String screenshotPath,
     required String audioPath,
     required String surahName,
@@ -358,7 +353,11 @@ class VideoService {
     ].join(' ');
   }
 
-  String _buildSlideshowCommand({
+  /// Builds the multi-image slideshow FFmpeg command. Linear in slide count
+  /// (each slide must appear in the filter graph exactly once); no hidden
+  /// quadratic from string concat — we accumulate via `StringBuffer`/`join`.
+  @visibleForTesting
+  String buildSlideshowCommand({
     required List<String> screenshotPaths,
     required String audioPath,
     required String surahName,
@@ -366,7 +365,7 @@ class VideoService {
     required String outputPath,
     required double audioDurationSeconds,
   }) {
-    final List<double> slideDurations = _buildSlideDurations(
+    final List<double> slideDurations = buildSlideDurations(
       slideCount: screenshotPaths.length,
       audioDurationSeconds: audioDurationSeconds,
     );
@@ -467,7 +466,10 @@ class VideoService {
     return commandParts.join(' ');
   }
 
-  List<double> _buildSlideDurations({
+  /// Distributes [audioDurationSeconds] across [slideCount] slides. The last
+  /// slide absorbs any rounding remainder so the sum is exact.
+  @visibleForTesting
+  List<double> buildSlideDurations({
     required int slideCount,
     required double? audioDurationSeconds,
   }) {
@@ -487,13 +489,8 @@ class VideoService {
   }
 
   Future<double?> _probeAudioDurationInSeconds(String audioPath) async {
-    try {
-      final session = await FFprobeKit.getMediaInformation(audioPath);
-      final String? durationText = session.getMediaInformation()?.getDuration();
-      return durationText == null ? null : double.tryParse(durationText);
-    } catch (_) {
-      return null;
-    }
+    final info = await _runner.getMediaInformation(audioPath);
+    return info?.durationSeconds;
   }
 
   Future<_PreparedScreenshots> _materializeScreenshotsForEncoding(
@@ -572,14 +569,11 @@ class VideoService {
     ].join(' ');
 
     _videoLog('[VIDEO_SVC] raw->png command: $extractCommand');
-    final extractSession = await FFmpegKit.execute(extractCommand);
-    final extractReturnCode = await extractSession.getReturnCode();
-    _videoLog('[VIDEO_SVC] raw->png finished | returnCode=$extractReturnCode');
+    final result = await _runner.execute(extractCommand);
+    _videoLog('[VIDEO_SVC] raw->png finished | status=${result.status}');
 
-    if (!ReturnCode.isSuccess(extractReturnCode)) {
-      final logs = await extractSession.getLogs();
-      final String ffmpegLogs = logs.map((l) => l.getMessage()).join('\n');
-      _videoLog('[VIDEO_SVC] raw->png failed logs:\n$ffmpegLogs');
+    if (!result.isSuccess) {
+      _videoLog('[VIDEO_SVC] raw->png failed logs:\n${result.logs}');
       throw const VideoGenerationFailure(
         'Captured frame format is not supported for video encoding.',
         VideoGenerationFailureReason.invalidFrameFormat,
@@ -608,24 +602,15 @@ class VideoService {
       return false;
     }
 
-    try {
-      final session = await FFprobeKit.getMediaInformation(outputPath);
-      final info = session.getMediaInformation();
-      final String? durationText = info?.getDuration();
-      final double durationSeconds = durationText == null
-          ? 0
-          : (double.tryParse(durationText) ?? 0);
-      if (durationSeconds <= 0) {
-        _videoLog(
-          '[VIDEO_SVC] output validation failed: invalid duration=$durationText path=$outputPath',
-        );
-        return false;
-      }
-      return true;
-    } catch (error) {
-      _videoLog('[VIDEO_SVC] output validation failed: ffprobe error=$error');
+    final info = await _runner.getMediaInformation(outputPath);
+    final double durationSeconds = info?.durationSeconds ?? 0;
+    if (durationSeconds <= 0) {
+      _videoLog(
+        '[VIDEO_SVC] output validation failed: invalid duration=$durationSeconds path=$outputPath',
+      );
       return false;
     }
+    return true;
   }
 }
 

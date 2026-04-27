@@ -181,55 +181,63 @@ class _TasbeehCreateView extends StatelessWidget {
     final tokens = theme.tokens;
     final errorText = _resolveTasbeehErrorText(context, state);
 
-    return Padding(
-      padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            context.l10n.tasbeehAddNewOptionTitle,
-            style: theme.textTheme.titleLarge,
-          ),
-          SizedBox(height: tokens.spaceMedium),
-          _TilawaTextInputField(
-            hint: context.l10n.tasbeehInputHint,
-            icon: Icons.edit_note_rounded,
-            onChanged: cubit.updateDraftText,
-            maxLength: TasbeehConstants.maxTextLength,
-            counterText: '',
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          _TilawaTextInputField(
-            hint: '${TasbeehConstants.defaultTargetCount}',
-            icon: Icons.flag_rounded,
-            onChanged: cubit.updateDraftTargetText,
-            keyboardType: TextInputType.number,
-          ),
-          SizedBox(height: tokens.spaceMedium),
-          FilledButton(
-            onPressed:
-                state.draftText.trim().isEmpty ||
-                    state.draftTargetText.trim().isEmpty
-                ? null
-                : cubit.saveDraftDhikr,
-            child: Text(context.l10n.tasbeehGoToCounting),
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          OutlinedButton(
-            onPressed: cubit.showOptionsView,
-            child: Text(context.l10n.tasbeehBackToOptions),
-          ),
-          if (errorText != null) ...[
-            SizedBox(height: tokens.spaceSmall),
-            Text(
-              errorText,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(tokens.spaceLarge),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  context.l10n.tasbeehAddNewOptionTitle,
+                  style: theme.textTheme.titleLarge,
+                ),
+                SizedBox(height: tokens.spaceMedium),
+                _TilawaTextInputField(
+                  hint: context.l10n.tasbeehInputHint,
+                  icon: Icons.edit_note_rounded,
+                  onChanged: cubit.updateDraftText,
+                  maxLength: TasbeehConstants.maxTextLength,
+                  counterText: '',
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                _TilawaTextInputField(
+                  hint: '${TasbeehConstants.defaultTargetCount}',
+                  icon: Icons.flag_rounded,
+                  onChanged: cubit.updateDraftTargetText,
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: tokens.spaceMedium),
+                FilledButton(
+                  onPressed:
+                      state.draftText.trim().isEmpty ||
+                          state.draftTargetText.trim().isEmpty
+                      ? null
+                      : cubit.saveDraftDhikr,
+                  child: Text(context.l10n.tasbeehGoToCounting),
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                OutlinedButton(
+                  onPressed: cubit.showOptionsView,
+                  child: Text(context.l10n.tasbeehBackToOptions),
+                ),
+                if (errorText != null) ...[
+                  SizedBox(height: tokens.spaceSmall),
+                  Text(
+                    errorText,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                    ),
+                  ),
+                ],
+              ],
             ),
-          ],
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 }

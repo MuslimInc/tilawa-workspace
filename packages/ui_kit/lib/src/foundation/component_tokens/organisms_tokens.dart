@@ -313,6 +313,7 @@ class TilawaMediaPlayerBarTokens {
 @immutable
 class TilawaAdaptiveShellTokens {
   const TilawaAdaptiveShellTokens({
+    required this.compactBottomNavBarBaseHeight,
     required this.bottomNavHorizontalMargin,
     required this.bottomNavVerticalMargin,
     required this.bottomNavInternalPadding,
@@ -337,6 +338,7 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonUnselectedLabelWeight,
   });
 
+  final double compactBottomNavBarBaseHeight;
   final double bottomNavHorizontalMargin;
   final double bottomNavVerticalMargin;
   final double bottomNavInternalPadding;
@@ -362,8 +364,9 @@ class TilawaAdaptiveShellTokens {
 
   factory TilawaAdaptiveShellTokens.defaults() =>
       const TilawaAdaptiveShellTokens(
+        compactBottomNavBarBaseHeight: 70,
         bottomNavHorizontalMargin: 16,
-        bottomNavVerticalMargin: 12,
+        bottomNavVerticalMargin: 4,
         bottomNavInternalPadding: 8,
         bottomNavRadius: 32,
         bottomNavInnerRadius: 24,
@@ -387,6 +390,7 @@ class TilawaAdaptiveShellTokens {
       );
 
   TilawaAdaptiveShellTokens copyWith({
+    double? compactBottomNavBarBaseHeight,
     double? bottomNavHorizontalMargin,
     double? bottomNavVerticalMargin,
     double? bottomNavInternalPadding,
@@ -411,6 +415,8 @@ class TilawaAdaptiveShellTokens {
     FontWeight? navButtonUnselectedLabelWeight,
   }) {
     return TilawaAdaptiveShellTokens(
+      compactBottomNavBarBaseHeight:
+          compactBottomNavBarBaseHeight ?? this.compactBottomNavBarBaseHeight,
       bottomNavHorizontalMargin:
           bottomNavHorizontalMargin ?? this.bottomNavHorizontalMargin,
       bottomNavVerticalMargin:
@@ -455,6 +461,11 @@ class TilawaAdaptiveShellTokens {
     double t,
   ) {
     return TilawaAdaptiveShellTokens(
+      compactBottomNavBarBaseHeight: lerpTokenDouble(
+        a.compactBottomNavBarBaseHeight,
+        b.compactBottomNavBarBaseHeight,
+        t,
+      ),
       bottomNavHorizontalMargin: lerpTokenDouble(
         a.bottomNavHorizontalMargin,
         b.bottomNavHorizontalMargin,
@@ -876,7 +887,7 @@ class TilawaImmersiveComposerTokens {
         regularPreviewHeightFactor: 0.5,
         panelMinHeight: 220,
         previewMaxHeight: 460,
-        headerButtonSize: 44,
+        headerButtonSize: 24,
         headerIconSizeOffset: 2,
       );
 

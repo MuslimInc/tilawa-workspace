@@ -145,7 +145,6 @@ class AppStartupTasks {
       '[AppLaunch][AppStartupTasks.configureSystemChrome]: Start in (${DateTime.now()})',
     );
     return Future.wait([
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge),
       SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
     ]).timeout(const Duration(milliseconds: 1000));
   }

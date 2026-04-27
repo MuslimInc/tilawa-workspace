@@ -155,6 +155,7 @@ class _BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
+    final designTokens = theme.tokens;
     final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     return TilawaContentBounds(
@@ -167,23 +168,22 @@ class _BottomNavBar extends StatelessWidget {
               tokens.bottomNavHorizontalMargin,
               tokens.bottomNavVerticalMargin,
               tokens.bottomNavHorizontalMargin,
-              bottomPadding + tokens.bottomNavVerticalMargin,
+              bottomPadding,
             ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(tokens.bottomNavRadius),
+        child: Material(
+          color: theme.colorScheme.surfaceContainerHigh,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tokens.bottomNavRadius),
+            side: BorderSide(
+              color: theme.colorScheme.outlineVariant.withValues(
+                alpha: designTokens.opacitySubtle,
+              ),
+              width: tokens.bottomNavBorderWidth,
+            ),
+          ),
+          clipBehavior: Clip.antiAlias,
           child: DecoratedBox(
-            decoration:
-                decoration ??
-                BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(tokens.bottomNavRadius),
-                  border: Border.all(
-                    color: theme.colorScheme.onPrimary.withValues(
-                      alpha: theme.tokens.opacityMedium,
-                    ),
-                    width: tokens.bottomNavBorderWidth,
-                  ),
-                ),
+            decoration: decoration ?? const BoxDecoration(),
             child: Row(
               spacing: tokens.bottomNavItemGap,
               children: [
@@ -192,7 +192,6 @@ class _BottomNavBar extends StatelessWidget {
                     child: _NavButton(
                       destination: destinations[i],
                       isSelected: selectedIndex == i,
-                      isCenterItem: i == destinations.length ~/ 2,
                       onTap: () => onDestinationSelected(i),
                       borderRadius: tokens.bottomNavInnerRadius,
                     ),
@@ -288,14 +287,12 @@ class _NavButton extends StatelessWidget {
   const _NavButton({
     required this.destination,
     required this.isSelected,
-    required this.isCenterItem,
     required this.onTap,
     required this.borderRadius,
   });
 
   final TilawaNavDestination destination;
   final bool isSelected;
-  final bool isCenterItem;
   final VoidCallback onTap;
   final double borderRadius;
 
@@ -303,10 +300,9 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
-    final onPrimaryColor = theme.colorScheme.onPrimary;
-
-    // High contrast: selected items inverted (onPrimary bg with primary text)
-    final backgroundColor = isSelected ? onPrimaryColor : Colors.transparent;
+    final selectedBg = theme.colorScheme.primaryContainer;
+    final selectedFg = theme.colorScheme.onPrimaryContainer;
+    final unselectedFg = theme.colorScheme.onSurfaceVariant;
 
     final baseLabelStyle = theme.textTheme.labelSmall ?? const TextStyle();
 
@@ -314,7 +310,7 @@ class _NavButton extends StatelessWidget {
         ? destination.iconBuilder!(
             context,
             isSelected: isSelected,
-            color: onPrimaryColor,
+            color: isSelected ? selectedFg : unselectedFg,
           )
         : Icon(
             isSelected
@@ -322,18 +318,8 @@ class _NavButton extends StatelessWidget {
                 : destination.icon,
             key: ValueKey('${destination.icon.hashCode}_$isSelected'),
             size: tokens.navButtonIconSize,
-            color: onPrimaryColor,
+            color: isSelected ? selectedFg : unselectedFg,
           );
-
-    final double iconScale = isCenterItem
-        ? (isSelected ? tokens.navButtonSelectedCenterScale : 1.0)
-        : (isSelected ? 1.0 : tokens.navButtonUnselectedScale);
-
-    final double backgroundAlpha = isSelected
-        ? (isCenterItem
-              ? tokens.navButtonSelectedCenterOpacity
-              : tokens.navButtonSelectedBackgroundOpacity)
-        : 0.0;
 
     return Material(
       color: Colors.transparent,
@@ -349,7 +335,7 @@ class _NavButton extends StatelessWidget {
             vertical: tokens.navButtonVerticalPadding,
           ),
           decoration: BoxDecoration(
-            color: backgroundColor.withValues(alpha: backgroundAlpha),
+            color: isSelected ? selectedBg : Colors.transparent,
             borderRadius: BorderRadius.circular(borderRadius),
           ),
           child: Column(
@@ -357,10 +343,10 @@ class _NavButton extends StatelessWidget {
             mainAxisAlignment: .center,
             spacing: tokens.navButtonGap,
             children: [
-              Transform.scale(scale: iconScale, child: iconWidget),
+              iconWidget,
               Text(
                 destination.label,
-                maxLines: 1,
+                maxLines: 2,
                 overflow: .ellipsis,
                 textAlign: .center,
                 style: baseLabelStyle.copyWith(
@@ -368,7 +354,7 @@ class _NavButton extends StatelessWidget {
                   fontWeight: isSelected
                       ? tokens.navButtonSelectedLabelWeight
                       : tokens.navButtonUnselectedLabelWeight,
-                  color: onPrimaryColor,
+                  color: isSelected ? selectedFg : unselectedFg,
                 ),
               ),
             ],

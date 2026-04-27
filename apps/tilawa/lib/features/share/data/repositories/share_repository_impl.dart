@@ -189,9 +189,14 @@ class ShareRepositoryImpl implements ShareRepository {
       // Notify the UI to render the current frame before we capture it.
       onFrameCaptureStarted?.call(i);
 
-      // PHASE 4 OPTIMIZATION: Single endOfFrame yield after aggressive pre-warming.
-      // GPU is fully warmed with all shaders compiled, so minimal settling needed.
-      // This is the absolute minimum for stable capture on mid-range devices.
+      // The cubit's emit notifies BlocConsumer subscribers via a microtask,
+      // so yield once to let the listener fire and call setState before we
+      // wait for the rebuild frame. Without this, the swapped GlobalKey can
+      // still be unattached when capture begins.
+      await Future<void>.delayed(Duration.zero);
+      // First frame: rebuild with the new capturingIndex / GlobalKey.
+      await WidgetsBinding.instance.endOfFrame;
+      // Second frame: layout settles for the freshly-mounted boundary.
       await WidgetsBinding.instance.endOfFrame;
 
       final boundaryKey = handles[i].value as GlobalKey;

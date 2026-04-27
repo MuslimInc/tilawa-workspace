@@ -97,7 +97,7 @@ class _PageNumberMedallion extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final medallionSize = tokens.iconSizeExtraLarge;
+    final medallionSize = tokens.iconSizeLarge;
 
     return SizedBox.square(
       dimension: medallionSize,

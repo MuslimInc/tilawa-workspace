@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -8,13 +7,11 @@ import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 
 /// Immersive three-layer scaffold: full-bleed [preview] content with a
-/// top app bar overlay and a bottom panel overlay that auto-hide on
-/// inactivity.
+/// top app bar overlay and a bottom panel overlay.
 ///
 /// Overlays never resize the content — they float above it and manage
 /// their own safe-area insets. Visibility can be driven externally via
-/// [overlaysVisible]; otherwise the scaffold owns the state internally
-/// (tap to toggle, auto-hide after [autoHideDuration]).
+/// [overlaysVisible]; otherwise the scaffold owns the state internally.
 class ImmersiveComposerScaffold extends StatefulWidget {
   const ImmersiveComposerScaffold({
     super.key,
@@ -30,7 +27,6 @@ class ImmersiveComposerScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.overlaysVisible,
     this.onVisibilityChanged,
-    this.autoHideDuration,
     this.disableBlur = false,
   });
 
@@ -54,7 +50,6 @@ class ImmersiveComposerScaffold extends StatefulWidget {
   /// timer elapses. Always fires, whether controlled or not.
   final ValueChanged<bool>? onVisibilityChanged;
 
-  final Duration? autoHideDuration;
   final bool disableBlur;
 
   @override
@@ -67,7 +62,6 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   late final AnimationController _controller;
   late final Animation<Offset> _topOffset;
   late final Animation<Offset> _bottomOffset;
-  Timer? _autoHideTimer;
   bool _isVisible = true;
   bool _hasBeenShown = true;
 
@@ -92,8 +86,6 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
       begin: const Offset(0, 1.2), // Off-screen bottom
       end: .zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
-
-    _scheduleAutoHide();
   }
 
   @override
@@ -109,22 +101,17 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
         _isVisible = false;
         _controller.reverse();
       }
-      _scheduleAutoHide();
-    } else if (widget.autoHideDuration != oldWidget.autoHideDuration) {
-      _scheduleAutoHide();
     }
   }
 
   @override
   void dispose() {
-    _autoHideTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
   void _setVisible(bool next) {
     if (next == _isVisible) {
-      if (next) _scheduleAutoHide();
       return;
     }
     setState(() {
@@ -137,20 +124,6 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
       _controller.reverse();
     }
     widget.onVisibilityChanged?.call(next);
-    _scheduleAutoHide();
-  }
-
-  void _scheduleAutoHide() {
-    _autoHideTimer?.cancel();
-    final autoHideDuration =
-        widget.autoHideDuration ??
-        TilawaImmersiveComposerTokens.defaults().defaultAutoHideDuration;
-    if (!_isVisible || autoHideDuration <= Duration.zero) return;
-
-    _autoHideTimer = Timer(autoHideDuration, () {
-      if (!mounted || !_isVisible) return;
-      _setVisible(false);
-    });
   }
 
   @override
@@ -429,6 +402,7 @@ class _RoundHeaderButton extends StatelessWidget {
       ),
       child: IconButton(
         onPressed: onPressed,
+        style: IconButton.styleFrom(padding: .zero),
         iconSize:
             componentTokens.headerButtonSize -
             componentTokens.headerIconSizeOffset -

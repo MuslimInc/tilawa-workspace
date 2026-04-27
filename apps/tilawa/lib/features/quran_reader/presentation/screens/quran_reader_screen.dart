@@ -368,7 +368,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   Future<void> _restoreAppSystemUiMode({
     bool waitForSystemUiFrame = false,
   }) async {
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       _cachedAppSystemUiStyle ?? const SystemUiOverlayStyle(),
     );

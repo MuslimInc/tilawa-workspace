@@ -45,15 +45,15 @@ class AthkarCategoriesScreen extends StatelessWidget {
 
               return TilawaContentGrid(
                 padding: EdgeInsets.fromLTRB(
-                  tokens.spaceExtraLarge,
-                  tokens.spaceExtraLarge,
-                  tokens.spaceExtraLarge,
-                  tokens.spaceExtraLarge,
+                  tokens.spaceLarge,
+                  tokens.spaceLarge,
+                  tokens.spaceLarge,
+                  tokens.spaceLarge,
                 ),
                 targetItemExtent: 180,
                 crossAxisSpacing: tokens.spaceLarge,
                 mainAxisSpacing: tokens.spaceLarge,
-                childAspectRatio: 0.9,
+                childAspectRatio: 1.0,
                 shrinkWrap: true,
                 itemCount: categories.length,
                 itemBuilder: (context, index) {

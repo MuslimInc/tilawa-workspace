@@ -444,6 +444,80 @@ void main() {
     });
   });
 
+  group('TilawaAdaptiveShellTokens', () {
+    test('defaults creates expected values', () {
+      final tokens = TilawaAdaptiveShellTokens.defaults();
+      expect(tokens.compactBottomNavBarBaseHeight, 88.0);
+      expect(tokens.bottomNavHorizontalMargin, 16.0);
+      expect(tokens.navButtonMinHeight, 64.0);
+    });
+
+    test('copyWith updates compact bottom nav bar base height', () {
+      final original = TilawaAdaptiveShellTokens.defaults();
+      final updated = original.copyWith(compactBottomNavBarBaseHeight: 92.0);
+      expect(updated.compactBottomNavBarBaseHeight, 92.0);
+      expect(updated.bottomNavRadius, original.bottomNavRadius);
+    });
+
+    test('lerp interpolates compact bottom nav bar base height', () {
+      const first = TilawaAdaptiveShellTokens(
+        compactBottomNavBarBaseHeight: 88.0,
+        bottomNavHorizontalMargin: 16.0,
+        bottomNavVerticalMargin: 4.0,
+        bottomNavInternalPadding: 8.0,
+        bottomNavRadius: 32.0,
+        bottomNavInnerRadius: 24.0,
+        bottomNavBorderWidth: 1.0,
+        bottomNavItemGap: 4.0,
+        sideRailRadius: 16.0,
+        sideRailShadowOpacity: 0.05,
+        sideRailShadowBlur: 12.0,
+        sideRailShadowOffset: Offset(2, 0),
+        navButtonMinHeight: 64.0,
+        navButtonVerticalPadding: 4.0,
+        navButtonGap: 4.0,
+        navButtonIconSize: 22.0,
+        navButtonSelectedCenterScale: 1.1,
+        navButtonUnselectedScale: 0.95,
+        navButtonSelectedBackgroundOpacity: 0.2,
+        navButtonSelectedCenterOpacity: 0.25,
+        navButtonLabelFontSize: 10.0,
+        navButtonSelectedLabelWeight: FontWeight.w700,
+        navButtonUnselectedLabelWeight: FontWeight.w500,
+      );
+      const second = TilawaAdaptiveShellTokens(
+        compactBottomNavBarBaseHeight: 96.0,
+        bottomNavHorizontalMargin: 20.0,
+        bottomNavVerticalMargin: 8.0,
+        bottomNavInternalPadding: 12.0,
+        bottomNavRadius: 36.0,
+        bottomNavInnerRadius: 28.0,
+        bottomNavBorderWidth: 2.0,
+        bottomNavItemGap: 6.0,
+        sideRailRadius: 20.0,
+        sideRailShadowOpacity: 0.08,
+        sideRailShadowBlur: 16.0,
+        sideRailShadowOffset: Offset(4, 0),
+        navButtonMinHeight: 68.0,
+        navButtonVerticalPadding: 6.0,
+        navButtonGap: 6.0,
+        navButtonIconSize: 24.0,
+        navButtonSelectedCenterScale: 1.2,
+        navButtonUnselectedScale: 1.0,
+        navButtonSelectedBackgroundOpacity: 0.25,
+        navButtonSelectedCenterOpacity: 0.3,
+        navButtonLabelFontSize: 11.0,
+        navButtonSelectedLabelWeight: FontWeight.w800,
+        navButtonUnselectedLabelWeight: FontWeight.w600,
+      );
+
+      final result = TilawaAdaptiveShellTokens.lerp(first, second, 0.5);
+      expect(result.compactBottomNavBarBaseHeight, closeTo(92.0, 0.01));
+      expect(result.bottomNavHorizontalMargin, closeTo(18.0, 0.01));
+      expect(result.navButtonIconSize, closeTo(23.0, 0.01));
+    });
+  });
+
   group('TilawaImmersiveComposerTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaImmersiveComposerTokens.defaults();

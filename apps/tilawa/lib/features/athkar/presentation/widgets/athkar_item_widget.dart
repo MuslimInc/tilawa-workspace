@@ -67,11 +67,11 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
             onTap();
           },
           child: Padding(
-            padding: EdgeInsets.only(
-              left: theme.tokens.spaceExtraLarge,
-              top: theme.tokens.spaceExtraLarge,
-              right: theme.tokens.spaceExtraLarge,
-              bottom: theme.tokens.spaceExtraLarge + bottomInset,
+            padding: EdgeInsets.fromLTRB(
+              theme.tokens.spaceLarge,
+              theme.tokens.spaceLarge,
+              theme.tokens.spaceLarge,
+              bottomInset,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -90,7 +90,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                         item.textAr,
                         textDirection: TextDirection.rtl,
                         textAlign: TextAlign.center,
-                        style: theme.textTheme.titleLarge?.copyWith(
+                        style: theme.textTheme.titleMedium?.copyWith(
                           color: theme.colorScheme.onSurface,
                           height: theme.tokens.textHeightLoose,
                         ),

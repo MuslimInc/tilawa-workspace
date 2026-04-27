@@ -25,7 +25,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  static const double _bottomNavBarBaseHeight = 88;
   static const Duration _deferredPrayerTimesLoadDelay = Duration(
     milliseconds: 600,
   );
@@ -134,8 +133,12 @@ class _MainScreenState extends State<MainScreen> {
               context,
             ).bottom;
             final bool isKeyboardOpen = keyboardHeight > 0;
+            final adaptiveShellTokens = Theme.of(
+              context,
+            ).componentTokens.adaptiveShell;
             final double bottomNavBarHeight = context.isCompact
-                ? (_bottomNavBarBaseHeight + bottomPadding)
+                ? (adaptiveShellTokens.compactBottomNavBarBaseHeight +
+                      bottomPadding)
                 : 0;
 
             final List<_NavDestination> navDestinations = _buildDestinations(
