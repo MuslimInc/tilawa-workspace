@@ -2,7 +2,7 @@
 
 **Feature Branch**: `001-custom-player-background`  
 **Created**: 2026-04-25  
-**Status**: Draft  
+**Status**: Released — v0.1.4+21 (2026-04-27)  
 **Input**: User description: "Now, plan for a new feature that allow user to change the background of bottom prayer when expanded from his gallery or take a camera picture"
 
 ## User Scenarios & Testing *(mandatory)*

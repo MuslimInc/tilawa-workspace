@@ -6,6 +6,7 @@ import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
+import 'package:tilawa_core/logger.dart';
 
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_limits.dart';
@@ -13,7 +14,6 @@ import '../../domain/entities/share_progress_messages.dart';
 import 'ayah_timing_service.dart';
 import 'reciter_audio_mapping.dart';
 import 'share_file_manager.dart';
-import 'package:tilawa_core/logger.dart';
 
 /// Downloads verse-level audio files and concatenates them into a single MP3 clip.
 @lazySingleton

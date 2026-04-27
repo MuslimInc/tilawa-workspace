@@ -58,7 +58,9 @@ android {
         multiDexEnabled = true
         
         ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+            // x86_64 excluded: targets emulators/Chromebooks only, not production phones.
+            // Dropping it removes one full copy of FFmpeg native libs from user installs.
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
         }
     }
 
