@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4+21] - 2026-04-27
+
+### Added
+
+- **Release**: Added Android signing template and a Google Play release checklist to support safer production publishing.
+
+### Changed
+
+- **Android**: Hardened release signing configuration to fail fast when production keystore values are missing.
+- **Security**: Disabled cleartext network traffic in the Android manifest for production-safe defaults.
+- **CI**: Corrected monorepo workflow paths for Flutter test and build jobs.
+- **Tests**: Stabilized settings, startup, share rendering, FFmpeg cancellation, and navigation layer tests for current behavior.
+
+### Fixed
+
+- **Rendering**: Prevented small-screen Quran page overflow in non-scrollable page text rendering by clipping non-scrollable layout output.
+- **Testing**: Fixed SettingsCubit DI setup for SharedPreferencesAsync in unit tests.
+- **Testing**: Updated stale assertions in reciters startup and responsive mushaf renderer tests.
+- **Testing**: Fixed async FFmpeg fake to respect manual-completion plans and deterministic cancel flow tests.
+- **Tooling**: Removed unused reciter widget internals and scratch debug script to clear analyzer warnings.
+
 ## [0.1.3+20] - 2026-03-26
 
 ### Added

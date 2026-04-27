@@ -1,9 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../foundation/breakpoints.dart';
+import '../foundation/component_tokens.dart';
 import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/display_feature_insets.dart';
@@ -80,30 +79,32 @@ class TilawaAdaptiveShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final windowSize = context.windowSize;
     final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
+    final bool isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     if (windowSize == TilawaWindowSize.compact) {
       return Stack(
         children: [
           Scaffold(extendBody: true, body: child),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _BottomNavBar(
-              destinations: destinations,
-              selectedIndex: displayIndex,
-              onDestinationSelected: onDestinationSelected,
-              padding: bottomBarPadding,
-              decoration: bottomBarDecoration,
+          if (!isKeyboardOpen)
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _BottomNavBar(
+                destinations: destinations,
+                selectedIndex: displayIndex,
+                onDestinationSelected: onDestinationSelected,
+                padding: bottomBarPadding,
+                decoration: bottomBarDecoration,
+              ),
             ),
-          ),
           Positioned.fill(child: bottomPlayer),
         ],
       );
     }
 
     final hingePadding = avoidDisplayFeatures
-        ? context.getHingeAvoidancePadding(AxisDirection.left)
+        ? context.getHingeAvoidancePadding(.left)
         : EdgeInsetsDirectional.zero;
 
     return Scaffold(
@@ -144,10 +145,6 @@ class _BottomNavBar extends StatelessWidget {
     this.decoration,
   });
 
-  // Capsule radius for the floating bottom bar. Larger than any stock token,
-  // so declared locally with a clear name rather than a magic literal.
-  static const double _capsuleRadius = 32.0;
-
   final List<TilawaNavDestination> destinations;
   final int? selectedIndex;
   final ValueChanged<int> onDestinationSelected;
@@ -157,61 +154,49 @@ class _BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    final double horizontalMargin = tokens.spaceLarge;
-    final double verticalMargin = tokens.spaceMedium;
-    final double internalPadding = tokens.spaceSmall;
-    // Nested-radius rule: inner capsule follows the outer edge inset by the
-    // vertical padding so the rounding stays concentric.
-    final double innerRadius = _capsuleRadius - internalPadding;
+    final tokens = theme.componentTokens.adaptiveShell;
+    final designTokens = theme.tokens;
     final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
 
     return TilawaContentBounds(
       kind: TilawaContentKind.media,
-      alignment: Alignment.bottomCenter,
+      alignment: .bottomCenter,
       child: Padding(
         padding:
             padding ??
             EdgeInsets.fromLTRB(
-              horizontalMargin,
-              verticalMargin,
-              horizontalMargin,
-              bottomPadding + verticalMargin,
+              tokens.bottomNavHorizontalMargin,
+              tokens.bottomNavVerticalMargin,
+              tokens.bottomNavHorizontalMargin,
+              bottomPadding,
             ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(_capsuleRadius),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(
-              sigmaX: tokens.blurGlass * 1.5,
-              sigmaY: tokens.blurGlass * 1.5,
+        child: Material(
+          color: theme.colorScheme.surfaceContainerHigh,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tokens.bottomNavRadius),
+            side: BorderSide(
+              color: theme.colorScheme.outlineVariant.withValues(
+                alpha: designTokens.opacitySubtle,
+              ),
+              width: tokens.bottomNavBorderWidth,
             ),
-            child: DecoratedBox(
-              decoration:
-                  decoration ??
-                  BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(_capsuleRadius),
-                    border: Border.all(
-                      color: theme.colorScheme.onPrimary,
-                      width: 1.2,
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: DecoratedBox(
+            decoration: decoration ?? const BoxDecoration(),
+            child: Row(
+              spacing: tokens.bottomNavItemGap,
+              children: [
+                for (int i = 0; i < destinations.length; i++)
+                  Expanded(
+                    child: _NavButton(
+                      destination: destinations[i],
+                      isSelected: selectedIndex == i,
+                      onTap: () => onDestinationSelected(i),
+                      borderRadius: tokens.bottomNavInnerRadius,
                     ),
                   ),
-              child: Row(
-                spacing: tokens.spaceExtraSmall,
-                children: [
-                  for (int i = 0; i < destinations.length; i++)
-                    Expanded(
-                      child: _NavButton(
-                        destination: destinations[i],
-                        isSelected: selectedIndex == i,
-                        isCenterItem: i == destinations.length ~/ 2,
-                        onTap: () => onDestinationSelected(i),
-                        borderRadius: innerRadius,
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
           ),
         ),
@@ -238,61 +223,60 @@ class _SideNavRail extends StatelessWidget {
     final theme = Theme.of(context);
     final inactiveColor = theme.colorScheme.onSurfaceVariant;
     final activeColor = theme.colorScheme.onPrimaryContainer;
-    final tokens = theme.tokens;
+    final designTokens = theme.tokens;
+    final componentTokens = theme.componentTokens.adaptiveShell;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: tokens.blurGlass * 1.2,
-          sigmaY: tokens.blurGlass * 1.2,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(alpha: 0.85),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.2),
-              width: 1,
+      borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(
+            alpha: designTokens.opacityGlass,
+          ),
+          borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(
+              alpha: designTokens.opacitySubtle,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.shadow.withValues(alpha: 0.06),
-                blurRadius: 12,
-                offset: const Offset(2, 0),
+            width: designTokens.borderWidthThin,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: theme.colorScheme.shadow.withValues(
+                alpha: componentTokens.sideRailShadowOpacity,
               ),
-            ],
-          ),
-          child: NavigationRail(
-            extended: extended,
-            selectedIndex: selectedIndex,
-            onDestinationSelected: onDestinationSelected,
-            backgroundColor: Colors.transparent,
-            indicatorColor: theme.colorScheme.primaryContainer,
-            labelType: extended
-                ? NavigationRailLabelType.none
-                : NavigationRailLabelType.all,
-            destinations: [
-              for (final d in destinations)
-                NavigationRailDestination(
-                  icon: d.iconBuilder != null
-                      ? d.iconBuilder!(
-                          context,
-                          isSelected: false,
-                          color: inactiveColor,
-                        )
-                      : Icon(d.icon),
-                  selectedIcon: d.iconBuilder != null
-                      ? d.iconBuilder!(
-                          context,
-                          isSelected: true,
-                          color: activeColor,
-                        )
-                      : Icon(d.activeIcon ?? d.icon),
-                  label: Text(d.label),
-                ),
-            ],
-          ),
+              blurRadius: componentTokens.sideRailShadowBlur,
+              offset: componentTokens.sideRailShadowOffset,
+            ),
+          ],
+        ),
+        child: NavigationRail(
+          extended: extended,
+          selectedIndex: selectedIndex,
+          onDestinationSelected: onDestinationSelected,
+          backgroundColor: Colors.transparent,
+          indicatorColor: theme.colorScheme.primaryContainer,
+          labelType: extended ? .none : .all,
+          destinations: [
+            for (final d in destinations)
+              NavigationRailDestination(
+                icon: d.iconBuilder != null
+                    ? d.iconBuilder!(
+                        context,
+                        isSelected: false,
+                        color: inactiveColor,
+                      )
+                    : Icon(d.icon),
+                selectedIcon: d.iconBuilder != null
+                    ? d.iconBuilder!(
+                        context,
+                        isSelected: true,
+                        color: activeColor,
+                      )
+                    : Icon(d.activeIcon ?? d.icon),
+                label: Text(d.label),
+              ),
+          ],
         ),
       ),
     );
@@ -303,25 +287,22 @@ class _NavButton extends StatelessWidget {
   const _NavButton({
     required this.destination,
     required this.isSelected,
-    required this.isCenterItem,
     required this.onTap,
     required this.borderRadius,
   });
 
   final TilawaNavDestination destination;
   final bool isSelected;
-  final bool isCenterItem;
   final VoidCallback onTap;
   final double borderRadius;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final onPrimaryColor = theme.colorScheme.onPrimary;
-
-    // High contrast: selected items inverted (onPrimary bg with primary text)
-    final backgroundColor = isSelected ? onPrimaryColor : Colors.transparent;
+    final tokens = theme.componentTokens.adaptiveShell;
+    final selectedBg = theme.colorScheme.primaryContainer;
+    final selectedFg = theme.colorScheme.onPrimaryContainer;
+    final unselectedFg = theme.colorScheme.onSurfaceVariant;
 
     final baseLabelStyle = theme.textTheme.labelSmall ?? const TextStyle();
 
@@ -329,24 +310,16 @@ class _NavButton extends StatelessWidget {
         ? destination.iconBuilder!(
             context,
             isSelected: isSelected,
-            color: onPrimaryColor,
+            color: isSelected ? selectedFg : unselectedFg,
           )
         : Icon(
             isSelected
                 ? (destination.activeIcon ?? destination.icon)
                 : destination.icon,
             key: ValueKey('${destination.icon.hashCode}_$isSelected'),
-            size: 22,
-            color: onPrimaryColor,
+            size: tokens.navButtonIconSize,
+            color: isSelected ? selectedFg : unselectedFg,
           );
-
-    final double iconScale = isCenterItem
-        ? (isSelected ? 1.1 : 1.0)
-        : (isSelected ? 1.0 : 0.95);
-
-    final double backgroundAlpha = isSelected
-        ? (isCenterItem ? 0.22 : 0.18)
-        : 0.0;
 
     return Material(
       color: Colors.transparent,
@@ -356,40 +329,32 @@ class _NavButton extends StatelessWidget {
           onTap();
         },
         borderRadius: BorderRadius.circular(borderRadius),
-        child: AnimatedContainer(
-          duration: tokens.durationFast,
-          curve: Curves.easeOutCubic,
-          constraints: const BoxConstraints(minHeight: 64),
-          padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
+        child: Container(
+          constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
+          padding: EdgeInsets.symmetric(
+            vertical: tokens.navButtonVerticalPadding,
+          ),
           decoration: BoxDecoration(
-            color: backgroundColor.withValues(alpha: backgroundAlpha),
+            color: isSelected ? selectedBg : Colors.transparent,
             borderRadius: BorderRadius.circular(borderRadius),
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: tokens.spaceExtraSmall,
+            mainAxisSize: .min,
+            mainAxisAlignment: .center,
+            spacing: tokens.navButtonGap,
             children: [
-              AnimatedScale(
-                duration: tokens.durationFast,
-                scale: iconScale,
-                child: AnimatedSwitcher(
-                  duration: tokens.durationFast,
-                  child: iconWidget,
-                ),
-              ),
-              AnimatedDefaultTextStyle(
-                duration: tokens.durationFast,
+              iconWidget,
+              Text(
+                destination.label,
+                maxLines: 2,
+                overflow: .ellipsis,
+                textAlign: .center,
                 style: baseLabelStyle.copyWith(
-                  fontSize: 10.5,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: onPrimaryColor,
-                ),
-                child: Text(
-                  destination.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
+                  fontSize: tokens.navButtonLabelFontSize,
+                  fontWeight: isSelected
+                      ? tokens.navButtonSelectedLabelWeight
+                      : tokens.navButtonUnselectedLabelWeight,
+                  color: isSelected ? selectedFg : unselectedFg,
                 ),
               ),
             ],

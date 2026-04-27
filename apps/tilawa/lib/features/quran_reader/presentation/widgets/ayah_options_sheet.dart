@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:tilawa/core/extensions.dart';
+
 import '../../domain/entities/entities.dart';
 
 class AyahOptionsSheet extends StatelessWidget {
@@ -67,9 +67,7 @@ class AyahOptionsSheet extends StatelessWidget {
               textDirection: TextDirection.rtl,
               child: Text(
                 ayah.text,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontFamily: 'Amiri',
-                ),
+                style: theme.textTheme.bodyMedium?.copyWith(),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),

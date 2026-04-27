@@ -1,17 +1,17 @@
-import 'dart:ui';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-import 'package:tilawa_core/entities/audio.dart';
+
+import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 
 /// UI-only widget for the bottom player that can be used in previews
 /// without any bloc dependencies.
-class BottomPlayerUi extends StatelessWidget {
-  const BottomPlayerUi({
+class TilawaMediaPlayerBar extends StatelessWidget {
+  const TilawaMediaPlayerBar({
     super.key,
-    required this.audio,
+    required this.title,
+    this.subtitle,
+    this.artwork,
     required this.progress,
     this.progressBarOverride,
     required this.isPlaying,
@@ -27,7 +27,9 @@ class BottomPlayerUi extends StatelessWidget {
     this.onClose,
   });
 
-  final AudioEntity audio;
+  final String title;
+  final String? subtitle;
+  final Widget? artwork;
   final double progress;
   final Widget? progressBarOverride;
   final bool isPlaying;
@@ -45,234 +47,225 @@ class BottomPlayerUi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final designTokens = theme.tokens;
+    final componentTokens = theme.componentTokens.mediaPlayerBar;
+    final disabledControlColor = theme.colorScheme.onSurfaceVariant.withValues(
+      alpha: componentTokens.disabledControlOpacity,
+    );
 
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
+          fontWeight: componentTokens.titleFontWeight,
           color: theme.textTheme.bodyLarge?.color,
-          decoration: TextDecoration.none,
+          decoration: .none,
           decorationColor: Colors.transparent,
         );
     final TextStyle subtitleStyle =
         (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-          fontSize: 12,
           color: theme.textTheme.bodyMedium?.color?.withValues(
-            alpha: tokens.opacityEmphasis,
+            alpha: componentTokens.subtitleOpacity,
           ),
-          decoration: TextDecoration.none,
+          decoration: .none,
           decorationColor: Colors.transparent,
         );
+    final borderRadius = BorderRadius.circular(componentTokens.borderRadius);
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.cardColor.withValues(alpha: tokens.opacityGlass),
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        color: theme.cardColor,
+        borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: tokens.opacitySubtle),
-            blurRadius: tokens.blurShadow,
-            offset: tokens.shadowOffsetMedium,
+            color: theme.colorScheme.shadow.withValues(
+              alpha: componentTokens.shadowOpacity,
+            ),
+            blurRadius: designTokens.blurShadow,
+            offset: designTokens.shadowOffsetMedium,
           ),
         ],
         border: Border.all(
-          color: theme.dividerColor.withValues(alpha: tokens.opacitySubtle),
-          width: tokens.borderWidthThin,
+          color: theme.dividerColor.withValues(
+            alpha: designTokens.opacitySubtle,
+          ),
+          width: designTokens.borderWidthThin,
         ),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: tokens.blurGlass,
-            sigmaY: tokens.blurGlass,
-          ),
-          child: GestureDetector(
-            onTap: onTap,
-            behavior: HitTestBehavior.opaque,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Progress Bar (Slim at top)
-                progressBarOverride ??
-                    LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor: theme.primaryColor.withValues(
-                        alpha: tokens.opacitySubtle,
-                      ),
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        theme.primaryColor,
-                      ),
-                      minHeight: tokens.progressHeight,
+        borderRadius: borderRadius,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: .opaque,
+          child: Column(
+            mainAxisSize: .min,
+            children: [
+              // Progress Bar (Slim at top)
+              progressBarOverride ??
+                  LinearProgressIndicator(
+                    value: progress,
+                    backgroundColor: theme.primaryColor.withValues(
+                      alpha: designTokens.opacitySubtle,
                     ),
-                Padding(
-                  padding: EdgeInsets.all(tokens.spaceMedium),
-                  child: Row(
-                    children: [
-                      // Album Art
-                      Material(
-                        type: MaterialType.transparency,
-                        child: Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(
-                              tokens.radiusMedium,
-                            ),
-                            color: theme.primaryColor.withValues(
-                              alpha: tokens.opacitySubtle,
-                            ),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      theme.primaryColor,
+                    ),
+                    minHeight: designTokens.progressHeight,
+                  ),
+              Padding(
+                padding: componentTokens.contentPadding,
+                child: Row(
+                  children: [
+                    // Album Art
+                    Material(
+                      type: .transparency,
+                      child: Container(
+                        width: componentTokens.artworkSize,
+                        height: componentTokens.artworkSize,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            componentTokens.artworkRadius,
                           ),
-                          child: audio.artUri != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(
-                                    tokens.radiusMedium,
-                                  ),
-                                  child: CachedNetworkImage(
-                                    imageUrl: audio.artUri.toString(),
-                                    fit: BoxFit.cover,
-                                    errorWidget: (context, error, stackTrace) =>
-                                        _buildDefaultIcon(context),
-                                    placeholder: (context, url) =>
-                                        _buildDefaultIcon(context),
-                                  ),
-                                )
-                              : _buildDefaultIcon(context),
+                          color: theme.primaryColor.withValues(
+                            alpha: designTokens.opacitySubtle,
+                          ),
                         ),
+                        child: artwork == null
+                            ? _buildDefaultIcon(context)
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  componentTokens.artworkRadius,
+                                ),
+                                child: artwork,
+                              ),
                       ),
+                    ),
 
-                      SizedBox(width: tokens.spaceMedium),
+                    SizedBox(width: componentTokens.artworkInfoGap),
 
-                      // Info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          spacing: tokens.spaceExtraSmall / 2,
-                          children: [
+                    // Info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: .start,
+                        mainAxisAlignment: .center,
+                        spacing: componentTokens.infoGap,
+                        children: [
+                          Text(
+                            title,
+                            style: titleStyle,
+                            maxLines: 1,
+                            overflow: .ellipsis,
+                          ),
+                          if (subtitle != null && subtitle!.isNotEmpty)
                             Text(
-                              audio.title,
-                              style: titleStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              audio.artist ?? 'Unknown Reciter',
+                              subtitle!,
                               style: subtitleStyle,
                               maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              overflow: .ellipsis,
                             ),
-                          ],
-                        ),
+                        ],
                       ),
+                    ),
 
-                      SizedBox(width: tokens.spaceSmall),
+                    SizedBox(width: componentTokens.infoControlsGap),
 
-                      // Controls
-                      Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: tokens.spaceExtraSmall,
-                          children: [
-                            // Previous
-                            SizedBox(
-                              width: 32,
-                              height: 32,
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(
-                                  FluentIcons.previous_20_filled,
-                                  size: tokens.iconSizeMedium,
-                                  color: canGoPrevious
-                                      ? theme.iconTheme.color
-                                      : Colors.grey.withValues(
-                                          alpha: tokens.opacityMedium,
-                                        ),
-                                ),
-                                onPressed: canGoPrevious ? onPrevious : null,
+                    // Controls
+                    Directionality(
+                      textDirection: .ltr,
+                      child: Row(
+                        mainAxisSize: .min,
+                        spacing: componentTokens.controlsGap,
+                        children: [
+                          // Previous
+                          SizedBox(
+                            width: componentTokens.controlButtonSize,
+                            height: componentTokens.controlButtonSize,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                FluentIcons.previous_20_filled,
+                                size: designTokens.iconSizeMedium,
+                                color: canGoPrevious
+                                    ? theme.iconTheme.color
+                                    : disabledControlColor,
                               ),
+                              onPressed: canGoPrevious ? onPrevious : null,
                             ),
+                          ),
 
-                            // Play/Pause
-                            Container(
-                              width: 36,
-                              height: 36,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: theme.primaryColor,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: theme.primaryColor.withValues(
-                                      alpha: tokens.opacityMedium,
-                                    ),
-                                    blurRadius: tokens.radiusSmall,
-                                    offset: tokens.shadowOffsetSmall,
+                          // Play/Pause
+                          Container(
+                            width: componentTokens.playPauseButtonSize,
+                            height: componentTokens.playPauseButtonSize,
+                            decoration: BoxDecoration(
+                              shape: .circle,
+                              color: theme.primaryColor,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.primaryColor.withValues(
+                                    alpha:
+                                        componentTokens.playPauseShadowOpacity,
                                   ),
-                                ],
-                              ),
-                              child: IconButton(
-                                padding: EdgeInsets.zero,
-                                icon: Icon(
-                                  isPlaying
-                                      ? FluentIcons.pause_16_filled
-                                      : FluentIcons.play_16_filled,
-                                  color: Colors.white,
-                                  size: tokens.iconSizeSmall,
+                                  blurRadius:
+                                      componentTokens.playPauseShadowBlur,
+                                  offset: designTokens.shadowOffsetSmall,
                                 ),
-                                onPressed: onPlayPause,
-                              ),
+                              ],
                             ),
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                isPlaying
+                                    ? FluentIcons.pause_16_filled
+                                    : FluentIcons.play_16_filled,
+                                color: theme.colorScheme.onPrimary,
+                                size: componentTokens.playPauseIconSize,
+                              ),
+                              onPressed: onPlayPause,
+                            ),
+                          ),
 
-                            // Next
+                          // Next
+                          SizedBox(
+                            width: componentTokens.controlButtonSize,
+                            height: componentTokens.controlButtonSize,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                FluentIcons.next_20_filled,
+                                size: designTokens.iconSizeMedium,
+                                color: canGoNext
+                                    ? theme.iconTheme.color
+                                    : disabledControlColor,
+                              ),
+                              onPressed: canGoNext ? onNext : null,
+                            ),
+                          ),
+
+                          // Sleep Timer
+                          if (isSleepTimerEnabled)
                             SizedBox(
-                              width: 32,
-                              height: 32,
+                              width: componentTokens.controlButtonSize,
+                              height: componentTokens.controlButtonSize,
                               child: IconButton(
                                 padding: EdgeInsets.zero,
                                 icon: Icon(
-                                  FluentIcons.next_20_filled,
-                                  size: tokens.iconSizeMedium,
-                                  color: canGoNext
-                                      ? theme.iconTheme.color
-                                      : Colors.grey.withValues(
-                                          alpha: tokens.opacityMedium,
-                                        ),
+                                  isSleepTimerActive
+                                      ? FluentIcons.timer_20_filled
+                                      : FluentIcons.timer_20_regular,
+                                  size: designTokens.iconSizeMedium,
+                                  color: isSleepTimerActive
+                                      ? theme.primaryColor
+                                      : disabledControlColor,
                                 ),
-                                onPressed: canGoNext ? onNext : null,
+                                onPressed: onSleepTimerTap,
                               ),
                             ),
-
-                            // Sleep Timer
-                            if (isSleepTimerEnabled)
-                              SizedBox(
-                                width: 32,
-                                height: 32,
-                                child: IconButton(
-                                  padding: EdgeInsets.zero,
-                                  icon: Icon(
-                                    isSleepTimerActive
-                                        ? FluentIcons.timer_20_filled
-                                        : FluentIcons.timer_20_regular,
-                                    size: tokens.iconSizeMedium,
-                                    color: isSleepTimerActive
-                                        ? theme.primaryColor
-                                        : Colors.grey.withValues(
-                                            alpha: tokens.opacityMedium,
-                                          ),
-                                  ),
-                                  onPressed: onSleepTimerTap,
-                                ),
-                              ),
-                          ],
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -284,7 +277,7 @@ class BottomPlayerUi extends StatelessWidget {
       child: Icon(
         FluentIcons.music_note_2_24_filled,
         color: Theme.of(context).primaryColor,
-        size: 24,
+        size: Theme.of(context).componentTokens.mediaPlayerBar.defaultIconSize,
       ),
     );
   }

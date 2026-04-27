@@ -25,7 +25,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  static const double _bottomNavBarBaseHeight = 88;
   static const Duration _deferredPrayerTimesLoadDelay = Duration(
     milliseconds: 600,
   );
@@ -134,8 +133,12 @@ class _MainScreenState extends State<MainScreen> {
               context,
             ).bottom;
             final bool isKeyboardOpen = keyboardHeight > 0;
+            final adaptiveShellTokens = Theme.of(
+              context,
+            ).componentTokens.adaptiveShell;
             final double bottomNavBarHeight = context.isCompact
-                ? (_bottomNavBarBaseHeight + bottomPadding)
+                ? (adaptiveShellTokens.compactBottomNavBarBaseHeight +
+                      bottomPadding)
                 : 0;
 
             final List<_NavDestination> navDestinations = _buildDestinations(
@@ -214,8 +217,12 @@ class _MainShellContent extends StatelessWidget {
                 audioState.currentAudio != null;
           });
 
-    final double playerHeight = playerShouldShow ? 100 : 0;
-    final double contentBottomPadding = bottomNavBarHeight + playerHeight;
+    final double playerHeight = playerShouldShow && !isKeyboardOpen
+        ? context.tokens.playerCollapsedHeight
+        : 0;
+    final double contentBottomPadding = isKeyboardOpen
+        ? 0
+        : bottomNavBarHeight + playerHeight;
 
     return TilawaAdaptiveShell(
       destinations: adaptiveDestinations,

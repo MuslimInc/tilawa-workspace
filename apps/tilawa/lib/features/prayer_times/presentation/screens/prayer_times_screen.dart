@@ -271,7 +271,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
         ),
         padding: EdgeInsets.only(
           top: tokens.spaceMedium,
-          bottom: TilawaShellPadding.of(context) + tokens.spaceExtraLarge,
+          bottom: tokens.spaceExtraLarge,
         ),
         children: [
           PrayerTimesLocationHeader(

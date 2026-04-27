@@ -58,6 +58,36 @@ void main() {
       expect(find.byType(NavigationRail), findsNothing);
     });
 
+    testWidgets('compact hides bottom nav while keyboard is open', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewInsets);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: _destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            bottomPlayer: const SizedBox.shrink(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(InkWell), findsNothing);
+    });
+
     testInBothDirections('medium uses side rail (collapsed)', (
       tester,
       direction,

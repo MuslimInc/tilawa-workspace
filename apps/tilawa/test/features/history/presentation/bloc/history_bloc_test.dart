@@ -115,7 +115,7 @@ void main() {
         const HistoryState(status: HistoryStatus.loading),
         const HistoryState(
           status: HistoryStatus.error,
-          errorMessage: 'CacheFailure(Error)',
+          failure: CacheFailure('Error'),
         ),
       ],
     );

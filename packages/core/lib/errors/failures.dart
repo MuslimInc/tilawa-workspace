@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-abstract class Failure extends Equatable {
+sealed class Failure extends Equatable {
   const Failure([this.message]);
 
   final String? message;
@@ -17,25 +17,44 @@ abstract class Failure extends Equatable {
   static Failure networkError(String message) => NetworkFailure(message);
 }
 
-class ServerFailure extends Failure {
+final class ServerFailure extends Failure {
   const ServerFailure([super.message]);
 }
 
-class CacheFailure extends Failure {
+final class CacheFailure extends Failure {
   const CacheFailure([super.message]);
 }
 
-class NetworkFailure extends Failure {
+final class NetworkFailure extends Failure {
   const NetworkFailure([super.message]);
 }
 
-class AudioFailure extends Failure {
+final class AudioFailure extends Failure {
   const AudioFailure([super.message]);
+}
+
+enum VideoGenerationFailureReason {
+  missingScreenshot,
+  invalidFrameFormat,
+  invalidOutput,
+  encodingFailed,
+}
+
+final class VideoGenerationFailure extends Failure {
+  const VideoGenerationFailure([
+    super.message,
+    this.reason = VideoGenerationFailureReason.encodingFailed,
+  ]);
+
+  final VideoGenerationFailureReason reason;
+
+  @override
+  List<Object?> get props => [message, reason];
 }
 
 enum OfflinePlaybackReason { notDownloaded, fileMissing, downloadIncomplete }
 
-class OfflinePlaybackFailure extends NetworkFailure {
+final class OfflinePlaybackFailure extends NetworkFailure {
   const OfflinePlaybackFailure([
     super.message = 'Cannot play online content while offline',
     this.reason = OfflinePlaybackReason.notDownloaded,
@@ -56,7 +75,7 @@ class NetworkException implements Exception {
   String toString() => message ?? 'Network exception';
 }
 
-class ServerException implements Exception {
+final class ServerException implements Exception {
   ServerException([this.message]);
   final String? message;
 
@@ -64,7 +83,7 @@ class ServerException implements Exception {
   String toString() => message ?? 'Server exception';
 }
 
-class CacheException implements Exception {
+final class CacheException implements Exception {
   CacheException([this.message]);
   final String? message;
 
@@ -72,7 +91,7 @@ class CacheException implements Exception {
   String toString() => message ?? 'Cache exception';
 }
 
-class AudioException implements Exception {
+final class AudioException implements Exception {
   AudioException([this.message]);
   final String? message;
 
@@ -81,14 +100,22 @@ class AudioException implements Exception {
 }
 
 // Additional failure types for new features
-class ValidationFailure extends Failure {
+final class ValidationFailure extends Failure {
   const ValidationFailure([super.message]);
 }
 
-class PermissionFailure extends Failure {
+final class PermissionFailure extends Failure {
   const PermissionFailure([super.message]);
 }
 
-class UnexpectedFailure extends Failure {
+final class UnexpectedFailure extends Failure {
   const UnexpectedFailure([super.message]);
+}
+
+final class PersistenceFailure extends Failure {
+  const PersistenceFailure([super.message]);
+}
+
+final class UIError extends Failure {
+  const UIError([super.message]);
 }

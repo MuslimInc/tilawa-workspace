@@ -30,7 +30,7 @@ abstract class HistoryState with _$HistoryState {
     @Default([]) List<HistoryEntity> filteredList,
     @Default(HistoryStatus.initial) HistoryStatus status,
     @Default('') String searchQuery,
-    @Default('') String errorMessage,
+    Failure? failure,
     @Default(0) int totalListeningTimeMs,
   }) = _HistoryState;
 }
@@ -71,12 +71,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
         await _getAllHistoryUseCase.call();
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: HistoryStatus.error,
-          errorMessage: failure.toString(),
-        ),
-      ),
+      (failure) =>
+          emit(state.copyWith(status: HistoryStatus.error, failure: failure)),
       (history) {
         final int totalTime = history.fold(
           0,
@@ -106,12 +102,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
         await _getRecentHistoryUseCase.call(limit: event.limit);
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: HistoryStatus.error,
-          errorMessage: failure.toString(),
-        ),
-      ),
+      (failure) =>
+          emit(state.copyWith(status: HistoryStatus.error, failure: failure)),
       (history) {
         final int totalTime = history.fold(
           0,
@@ -148,12 +140,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
         await _searchHistoryUseCase.call(event.query);
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: HistoryStatus.error,
-          errorMessage: failure.toString(),
-        ),
-      ),
+      (failure) =>
+          emit(state.copyWith(status: HistoryStatus.error, failure: failure)),
       (history) {
         emit(
           state.copyWith(
@@ -188,12 +176,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     );
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: HistoryStatus.error,
-          errorMessage: failure.toString(),
-        ),
-      ),
+      (failure) =>
+          emit(state.copyWith(status: HistoryStatus.error, failure: failure)),
       (_) {
         final List<HistoryEntity> updatedHistory = state.historyList
             .where((h) => h.id != event.id)
@@ -227,12 +211,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     final Either<Failure, void> result = await _clearAllHistoryUseCase.call();
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: HistoryStatus.error,
-          errorMessage: failure.toString(),
-        ),
-      ),
+      (failure) =>
+          emit(state.copyWith(status: HistoryStatus.error, failure: failure)),
       (_) {
         emit(const HistoryState(status: HistoryStatus.empty));
       },

@@ -67,6 +67,7 @@ is documented with owner and expiry.
 **Storage**: Hydrated BLoC, HydratedStorage, local_preferences, secure_storage  
 **Testing**: `flutter test` (unit + widget), golden tests, benchmark tests  
 **UI Design**: Tilawa UI Kit with atomic design (foundation, atoms, molecules, organisms)  
+**Dart/Flutter Idioms**: Prefer `Row`/`Column`/`Flex.spacing` for simple fixed gaps and Dart dot shorthands where receiver type is obvious  
 **Core Utilities**: packages/core (logging, DI via getIt, error handling, network)  
 **Performance**: 60 fps target, <500ms startup, smooth Quran text rendering  
 **Constraints**: RTL support (Arabic/LTR), offline capability, accessibility (a11y)
@@ -154,6 +155,8 @@ is documented with owner and expiry.
 - [ ] T026 [P] Plan Tilawa UI Kit component usage (atoms, molecules, organisms) - reference `packages/ui_kit/lib/src/`
 - [ ] T027 [P] Create pages/screens in `presentation/pages/` - wire BLoC with BlocBuilder/BlocListener
 - [ ] T028 [P] Create reusable widgets in `presentation/widgets/` (extract from pages if shared across features)
+  - Use `Row`/`Column`/`Flex.spacing` instead of separator `SizedBox` widgets for simple fixed gaps
+  - Use Dart dot shorthands for enum-like/static values where the receiver type is obvious
 - [ ] T029 Create routes in GoRouter configuration (`apps/tilawa/lib/routing/` or feature-local routing)
   - Add route path, builder, guards, deep-linking if applicable
 - [ ] T030 Add structured logging for route transitions, user interactions
@@ -197,6 +200,7 @@ is documented with owner and expiry.
 - [ ] **BLoC State Management**: Feature state driven by BLoC/Cubit, widgets ephemeral state only
 - [ ] **GoRouter**: Routes declared, deep-linking supported, guards in place if needed
 - [ ] **Tilawa UI Kit**: Shared UI from packages/ui_kit, components classified (foundation/atom/molecule/organism)
+- [ ] **Dart/Flutter Idioms**: UI code uses `spacing` properties and Dart dot shorthands where appropriate
 - [ ] **Responsive/Adaptive**: Compact/medium/expanded layouts planned, RTL behavior verified
 - [ ] **Performance**: Hot paths avoid build(), scroll/startup/Quran text rendering measured, jank regression tested
 - [ ] **Structured Logging**: BLoC transitions, route decisions, failures, async durations logged

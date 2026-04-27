@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-
 import 'package:tilawa/core/extensions.dart';
 
 import '../domain/entities/share_progress_messages.dart';
@@ -30,6 +29,13 @@ extension ShareProgressMessagesL10nX on BuildContext {
         preparingVideoEncoding: l10n.preparingVideoEncoding,
         encodingVerticalVideo: l10n.encodingVerticalVideo,
         videoGenerated: l10n.reelGenerated,
+        videoGenerationFailed: l10n.reelGenerationFailed,
+        videoGenerationFailedInvalidFrame:
+            l10n.reelGenerationFailedInvalidFrame,
+        videoGenerationFailedMissingScreenshot:
+            l10n.reelGenerationFailedMissingScreenshot,
+        videoGenerationFailedInvalidOutput:
+            l10n.reelGenerationFailedInvalidOutput,
       ),
     );
   }

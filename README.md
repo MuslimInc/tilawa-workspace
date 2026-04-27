@@ -34,9 +34,10 @@ This project is configured with secure build settings including:
 
 2. **Create key.properties file**:
 
-   - Copy `android/key.properties.template` to `android/key.properties`
+   - Copy `apps/tilawa/android/key.properties.template` to `apps/tilawa/android/key.properties`
    - Fill in your keystore information:
-     ```
+
+   ```properties
      storePassword=YOUR_KEYSTORE_PASSWORD
      keyPassword=YOUR_KEY_PASSWORD
      keyAlias=YOUR_KEY_ALIAS
@@ -46,12 +47,13 @@ This project is configured with secure build settings including:
 3. **Build release APK**:
 
    ```bash
-   flutter build apk --release
+   cd apps/tilawa && flutter build apk --release
    ```
 
 4. **Build release App Bundle** (for Google Play):
+
    ```bash
-   flutter build appbundle --release
+   cd apps/tilawa && flutter build appbundle --release
    ```
 
 ### Security Features Enabled

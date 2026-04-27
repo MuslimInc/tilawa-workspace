@@ -30,6 +30,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.iconSizeMedium,
     required this.iconSizeLarge,
     required this.iconSizeExtraLarge,
+    required this.textHeightLoose,
     required this.durationFast,
     required this.durationMedium,
     required this.durationSlow,
@@ -40,6 +41,15 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.cardCompactWidthThreshold,
     required this.cardCompactHeightThreshold,
     required this.cardTightHeightThreshold,
+    required this.playerCollapsedHeight,
+    required this.playerDismissThreshold,
+    required this.playerMaxDismissOffset,
+    required this.playerVelocityThreshold,
+    required this.playerDismissVelocityThreshold,
+    required this.playerDragSensitivity,
+    required this.playerProgressThreshold,
+    required this.playerIgnorePointerThreshold,
+    required this.playerAlphaScalingFactor,
   });
 
   /// 2.0
@@ -117,6 +127,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 48.0
   final double iconSizeExtraLarge;
 
+  /// 1.8 — relaxed line height for dense Arabic text.
+  final double textHeightLoose;
+
   /// 200ms
   final Duration durationFast;
 
@@ -141,11 +154,38 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 180 — width threshold for compact card layout.
   final double cardCompactWidthThreshold;
 
-  /// 194 — height threshold for compact card layout.
+  /// 155 — height threshold for compact card layout.
   final double cardCompactHeightThreshold;
 
   /// 145 — height threshold for tight card layout.
   final double cardTightHeightThreshold;
+
+  /// 80.0
+  final double playerCollapsedHeight;
+
+  /// 80.0
+  final double playerDismissThreshold;
+
+  /// 200.0
+  final double playerMaxDismissOffset;
+
+  /// 500.0
+  final double playerVelocityThreshold;
+
+  /// 300.0
+  final double playerDismissVelocityThreshold;
+
+  /// 1.5
+  final double playerDragSensitivity;
+
+  /// 0.5
+  final double playerProgressThreshold;
+
+  /// 0.4
+  final double playerIgnorePointerThreshold;
+
+  /// 2.5
+  final double playerAlphaScalingFactor;
 
   /// Default values for light/dark theme
   factory TilawaDesignTokens.light() => const TilawaDesignTokens(
@@ -174,6 +214,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     iconSizeMedium: 20.0,
     iconSizeLarge: 24.0,
     iconSizeExtraLarge: 48.0,
+    textHeightLoose: 2.0,
     durationFast: Duration(milliseconds: 200),
     durationMedium: Duration(milliseconds: 400),
     durationSlow: Duration(milliseconds: 600),
@@ -182,8 +223,17 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     contentMaxWidthMedia: 1200,
     contentMaxWidthSettings: 760,
     cardCompactWidthThreshold: 180.0,
-    cardCompactHeightThreshold: 194.0,
+    cardCompactHeightThreshold: 155.0,
     cardTightHeightThreshold: 145.0,
+    playerCollapsedHeight: 80.0,
+    playerDismissThreshold: 80.0,
+    playerMaxDismissOffset: 200.0,
+    playerVelocityThreshold: 500.0,
+    playerDismissVelocityThreshold: 300.0,
+    playerDragSensitivity: 1.5,
+    playerProgressThreshold: 0.5,
+    playerIgnorePointerThreshold: 0.4,
+    playerAlphaScalingFactor: 2.5,
   );
 
   factory TilawaDesignTokens.dark() => TilawaDesignTokens.light();
@@ -215,6 +265,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? iconSizeMedium,
     double? iconSizeLarge,
     double? iconSizeExtraLarge,
+    double? textHeightLoose,
     Duration? durationFast,
     Duration? durationMedium,
     Duration? durationSlow,
@@ -225,6 +276,15 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? cardCompactWidthThreshold,
     double? cardCompactHeightThreshold,
     double? cardTightHeightThreshold,
+    double? playerCollapsedHeight,
+    double? playerDismissThreshold,
+    double? playerMaxDismissOffset,
+    double? playerVelocityThreshold,
+    double? playerDismissVelocityThreshold,
+    double? playerDragSensitivity,
+    double? playerProgressThreshold,
+    double? playerIgnorePointerThreshold,
+    double? playerAlphaScalingFactor,
   }) {
     return TilawaDesignTokens(
       spaceTiny: spaceTiny ?? this.spaceTiny,
@@ -252,6 +312,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeMedium: iconSizeMedium ?? this.iconSizeMedium,
       iconSizeLarge: iconSizeLarge ?? this.iconSizeLarge,
       iconSizeExtraLarge: iconSizeExtraLarge ?? this.iconSizeExtraLarge,
+      textHeightLoose: textHeightLoose ?? this.textHeightLoose,
       durationFast: durationFast ?? this.durationFast,
       durationMedium: durationMedium ?? this.durationMedium,
       durationSlow: durationSlow ?? this.durationSlow,
@@ -267,6 +328,24 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
           cardCompactHeightThreshold ?? this.cardCompactHeightThreshold,
       cardTightHeightThreshold:
           cardTightHeightThreshold ?? this.cardTightHeightThreshold,
+      playerCollapsedHeight:
+          playerCollapsedHeight ?? this.playerCollapsedHeight,
+      playerDismissThreshold:
+          playerDismissThreshold ?? this.playerDismissThreshold,
+      playerMaxDismissOffset:
+          playerMaxDismissOffset ?? this.playerMaxDismissOffset,
+      playerVelocityThreshold:
+          playerVelocityThreshold ?? this.playerVelocityThreshold,
+      playerDismissVelocityThreshold:
+          playerDismissVelocityThreshold ?? this.playerDismissVelocityThreshold,
+      playerDragSensitivity:
+          playerDragSensitivity ?? this.playerDragSensitivity,
+      playerProgressThreshold:
+          playerProgressThreshold ?? this.playerProgressThreshold,
+      playerIgnorePointerThreshold:
+          playerIgnorePointerThreshold ?? this.playerIgnorePointerThreshold,
+      playerAlphaScalingFactor:
+          playerAlphaScalingFactor ?? this.playerAlphaScalingFactor,
     );
   }
 
@@ -319,6 +398,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         other.iconSizeExtraLarge,
         t,
       )!,
+      textHeightLoose: lerpDouble(textHeightLoose, other.textHeightLoose, t)!,
       durationFast: t < 0.5 ? durationFast : other.durationFast,
       durationMedium: t < 0.5 ? durationMedium : other.durationMedium,
       durationSlow: t < 0.5 ? durationSlow : other.durationSlow,
@@ -357,6 +437,51 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         other.cardTightHeightThreshold,
         t,
       )!,
+      playerCollapsedHeight: lerpDouble(
+        playerCollapsedHeight,
+        other.playerCollapsedHeight,
+        t,
+      )!,
+      playerDismissThreshold: lerpDouble(
+        playerDismissThreshold,
+        other.playerDismissThreshold,
+        t,
+      )!,
+      playerMaxDismissOffset: lerpDouble(
+        playerMaxDismissOffset,
+        other.playerMaxDismissOffset,
+        t,
+      )!,
+      playerVelocityThreshold: lerpDouble(
+        playerVelocityThreshold,
+        other.playerVelocityThreshold,
+        t,
+      )!,
+      playerDismissVelocityThreshold: lerpDouble(
+        playerDismissVelocityThreshold,
+        other.playerDismissVelocityThreshold,
+        t,
+      )!,
+      playerDragSensitivity: lerpDouble(
+        playerDragSensitivity,
+        other.playerDragSensitivity,
+        t,
+      )!,
+      playerProgressThreshold: lerpDouble(
+        playerProgressThreshold,
+        other.playerProgressThreshold,
+        t,
+      )!,
+      playerIgnorePointerThreshold: lerpDouble(
+        playerIgnorePointerThreshold,
+        other.playerIgnorePointerThreshold,
+        t,
+      )!,
+      playerAlphaScalingFactor: lerpDouble(
+        playerAlphaScalingFactor,
+        other.playerAlphaScalingFactor,
+        t,
+      )!,
     );
   }
 
@@ -368,7 +493,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
 /// Helper extension to access tokens easily
 extension TilawaDesignTokensX on ThemeData {
-  TilawaDesignTokens get tokens => extension<TilawaDesignTokens>()!;
+  TilawaDesignTokens get tokens =>
+      extension<TilawaDesignTokens>() ?? TilawaDesignTokens.light();
 }
 
 extension TilawaIconSizeX on BuildContext {

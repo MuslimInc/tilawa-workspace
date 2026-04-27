@@ -3,8 +3,67 @@ import 'package:flutter/material.dart';
 import 'token_lerp.dart';
 
 @immutable
-class TilawaShareFooterBarTokens {
-  const TilawaShareFooterBarTokens({
+class TilawaPlayerBackgroundTokens {
+  const TilawaPlayerBackgroundTokens({
+    required this.cacheWidthScale,
+    required this.defaultBlurAmount,
+    required this.defaultOverlayOpacity,
+    required this.overlayColor,
+  });
+
+  final double cacheWidthScale;
+  final double defaultBlurAmount;
+  final double defaultOverlayOpacity;
+  final Color overlayColor;
+
+  factory TilawaPlayerBackgroundTokens.defaults() =>
+      const TilawaPlayerBackgroundTokens(
+        cacheWidthScale: 2,
+        defaultBlurAmount: 0,
+        defaultOverlayOpacity: 0.4,
+        overlayColor: Colors.black,
+      );
+
+  TilawaPlayerBackgroundTokens copyWith({
+    double? cacheWidthScale,
+    double? defaultBlurAmount,
+    double? defaultOverlayOpacity,
+    Color? overlayColor,
+  }) {
+    return TilawaPlayerBackgroundTokens(
+      cacheWidthScale: cacheWidthScale ?? this.cacheWidthScale,
+      defaultBlurAmount: defaultBlurAmount ?? this.defaultBlurAmount,
+      defaultOverlayOpacity:
+          defaultOverlayOpacity ?? this.defaultOverlayOpacity,
+      overlayColor: overlayColor ?? this.overlayColor,
+    );
+  }
+
+  static TilawaPlayerBackgroundTokens lerp(
+    TilawaPlayerBackgroundTokens a,
+    TilawaPlayerBackgroundTokens b,
+    double t,
+  ) {
+    return TilawaPlayerBackgroundTokens(
+      cacheWidthScale: lerpTokenDouble(a.cacheWidthScale, b.cacheWidthScale, t),
+      defaultBlurAmount: lerpTokenDouble(
+        a.defaultBlurAmount,
+        b.defaultBlurAmount,
+        t,
+      ),
+      defaultOverlayOpacity: lerpTokenDouble(
+        a.defaultOverlayOpacity,
+        b.defaultOverlayOpacity,
+        t,
+      ),
+      overlayColor: Color.lerp(a.overlayColor, b.overlayColor, t)!,
+    );
+  }
+}
+
+@immutable
+class TilawaFooterBarTokens {
+  const TilawaFooterBarTokens({
     required this.height,
     required this.horizontalPadding,
     required this.contentGap,
@@ -22,18 +81,17 @@ class TilawaShareFooterBarTokens {
   final double secondaryLabelFontSize;
   final double secondaryLabelOpacity;
 
-  factory TilawaShareFooterBarTokens.defaults() =>
-      const TilawaShareFooterBarTokens(
-        height: 56,
-        horizontalPadding: 16,
-        contentGap: 12,
-        labelFontSize: 16,
-        labelFontWeight: FontWeight.bold,
-        secondaryLabelFontSize: 12,
-        secondaryLabelOpacity: 0.7,
-      );
+  factory TilawaFooterBarTokens.defaults() => const TilawaFooterBarTokens(
+    height: 56,
+    horizontalPadding: 16,
+    contentGap: 12,
+    labelFontSize: 16,
+    labelFontWeight: .bold,
+    secondaryLabelFontSize: 12,
+    secondaryLabelOpacity: 0.7,
+  );
 
-  TilawaShareFooterBarTokens copyWith({
+  TilawaFooterBarTokens copyWith({
     double? height,
     double? horizontalPadding,
     double? contentGap,
@@ -42,7 +100,7 @@ class TilawaShareFooterBarTokens {
     double? secondaryLabelFontSize,
     double? secondaryLabelOpacity,
   }) {
-    return TilawaShareFooterBarTokens(
+    return TilawaFooterBarTokens(
       height: height ?? this.height,
       horizontalPadding: horizontalPadding ?? this.horizontalPadding,
       contentGap: contentGap ?? this.contentGap,
@@ -55,12 +113,12 @@ class TilawaShareFooterBarTokens {
     );
   }
 
-  static TilawaShareFooterBarTokens lerp(
-    TilawaShareFooterBarTokens a,
-    TilawaShareFooterBarTokens b,
+  static TilawaFooterBarTokens lerp(
+    TilawaFooterBarTokens a,
+    TilawaFooterBarTokens b,
     double t,
   ) {
-    return TilawaShareFooterBarTokens(
+    return TilawaFooterBarTokens(
       height: lerpTokenDouble(a.height, b.height, t),
       horizontalPadding: lerpTokenDouble(
         a.horizontalPadding,
@@ -80,6 +138,432 @@ class TilawaShareFooterBarTokens {
         b.secondaryLabelOpacity,
         t,
       ),
+    );
+  }
+}
+
+@immutable
+class TilawaMediaPlayerBarTokens {
+  const TilawaMediaPlayerBarTokens({
+    required this.contentPadding,
+    required this.borderRadius,
+    required this.artworkSize,
+    required this.artworkRadius,
+    required this.titleFontWeight,
+    required this.subtitleOpacity,
+    required this.infoGap,
+    required this.artworkInfoGap,
+    required this.infoControlsGap,
+    required this.controlsGap,
+    required this.controlButtonSize,
+    required this.playPauseButtonSize,
+    required this.defaultIconSize,
+    required this.playPauseIconSize,
+    required this.disabledControlOpacity,
+    required this.shadowOpacity,
+    required this.playPauseShadowOpacity,
+    required this.playPauseShadowBlur,
+  });
+
+  final EdgeInsetsGeometry contentPadding;
+  final double borderRadius;
+  final double artworkSize;
+  final double artworkRadius;
+  final FontWeight titleFontWeight;
+  final double subtitleOpacity;
+  final double infoGap;
+  final double artworkInfoGap;
+  final double infoControlsGap;
+  final double controlsGap;
+  final double controlButtonSize;
+  final double playPauseButtonSize;
+  final double defaultIconSize;
+  final double playPauseIconSize;
+  final double disabledControlOpacity;
+  final double shadowOpacity;
+  final double playPauseShadowOpacity;
+  final double playPauseShadowBlur;
+
+  factory TilawaMediaPlayerBarTokens.defaults() =>
+      const TilawaMediaPlayerBarTokens(
+        contentPadding: EdgeInsets.all(12),
+        borderRadius: 16,
+        artworkSize: 48,
+        artworkRadius: 12,
+        titleFontWeight: FontWeight.w600,
+        subtitleOpacity: 0.7,
+        infoGap: 2,
+        artworkInfoGap: 12,
+        infoControlsGap: 8,
+        controlsGap: 4,
+        controlButtonSize: 32,
+        playPauseButtonSize: 36,
+        defaultIconSize: 24,
+        playPauseIconSize: 16,
+        disabledControlOpacity: 0.3,
+        shadowOpacity: 0.1,
+        playPauseShadowOpacity: 0.3,
+        playPauseShadowBlur: 8,
+      );
+
+  TilawaMediaPlayerBarTokens copyWith({
+    EdgeInsetsGeometry? contentPadding,
+    double? borderRadius,
+    double? artworkSize,
+    double? artworkRadius,
+    FontWeight? titleFontWeight,
+    double? subtitleOpacity,
+    double? infoGap,
+    double? artworkInfoGap,
+    double? infoControlsGap,
+    double? controlsGap,
+    double? controlButtonSize,
+    double? playPauseButtonSize,
+    double? defaultIconSize,
+    double? playPauseIconSize,
+    double? disabledControlOpacity,
+    double? shadowOpacity,
+    double? playPauseShadowOpacity,
+    double? playPauseShadowBlur,
+  }) {
+    return TilawaMediaPlayerBarTokens(
+      contentPadding: contentPadding ?? this.contentPadding,
+      borderRadius: borderRadius ?? this.borderRadius,
+      artworkSize: artworkSize ?? this.artworkSize,
+      artworkRadius: artworkRadius ?? this.artworkRadius,
+      titleFontWeight: titleFontWeight ?? this.titleFontWeight,
+      subtitleOpacity: subtitleOpacity ?? this.subtitleOpacity,
+      infoGap: infoGap ?? this.infoGap,
+      artworkInfoGap: artworkInfoGap ?? this.artworkInfoGap,
+      infoControlsGap: infoControlsGap ?? this.infoControlsGap,
+      controlsGap: controlsGap ?? this.controlsGap,
+      controlButtonSize: controlButtonSize ?? this.controlButtonSize,
+      playPauseButtonSize: playPauseButtonSize ?? this.playPauseButtonSize,
+      defaultIconSize: defaultIconSize ?? this.defaultIconSize,
+      playPauseIconSize: playPauseIconSize ?? this.playPauseIconSize,
+      disabledControlOpacity:
+          disabledControlOpacity ?? this.disabledControlOpacity,
+      shadowOpacity: shadowOpacity ?? this.shadowOpacity,
+      playPauseShadowOpacity:
+          playPauseShadowOpacity ?? this.playPauseShadowOpacity,
+      playPauseShadowBlur: playPauseShadowBlur ?? this.playPauseShadowBlur,
+    );
+  }
+
+  static TilawaMediaPlayerBarTokens lerp(
+    TilawaMediaPlayerBarTokens a,
+    TilawaMediaPlayerBarTokens b,
+    double t,
+  ) {
+    return TilawaMediaPlayerBarTokens(
+      contentPadding: EdgeInsetsGeometry.lerp(
+        a.contentPadding,
+        b.contentPadding,
+        t,
+      )!,
+      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
+      artworkSize: lerpTokenDouble(a.artworkSize, b.artworkSize, t),
+      artworkRadius: lerpTokenDouble(a.artworkRadius, b.artworkRadius, t),
+      titleFontWeight: FontWeight.lerp(
+        a.titleFontWeight,
+        b.titleFontWeight,
+        t,
+      )!,
+      subtitleOpacity: lerpTokenDouble(a.subtitleOpacity, b.subtitleOpacity, t),
+      infoGap: lerpTokenDouble(a.infoGap, b.infoGap, t),
+      artworkInfoGap: lerpTokenDouble(a.artworkInfoGap, b.artworkInfoGap, t),
+      infoControlsGap: lerpTokenDouble(a.infoControlsGap, b.infoControlsGap, t),
+      controlsGap: lerpTokenDouble(a.controlsGap, b.controlsGap, t),
+      controlButtonSize: lerpTokenDouble(
+        a.controlButtonSize,
+        b.controlButtonSize,
+        t,
+      ),
+      playPauseButtonSize: lerpTokenDouble(
+        a.playPauseButtonSize,
+        b.playPauseButtonSize,
+        t,
+      ),
+      defaultIconSize: lerpTokenDouble(a.defaultIconSize, b.defaultIconSize, t),
+      playPauseIconSize: lerpTokenDouble(
+        a.playPauseIconSize,
+        b.playPauseIconSize,
+        t,
+      ),
+      disabledControlOpacity: lerpTokenDouble(
+        a.disabledControlOpacity,
+        b.disabledControlOpacity,
+        t,
+      ),
+      shadowOpacity: lerpTokenDouble(a.shadowOpacity, b.shadowOpacity, t),
+      playPauseShadowOpacity: lerpTokenDouble(
+        a.playPauseShadowOpacity,
+        b.playPauseShadowOpacity,
+        t,
+      ),
+      playPauseShadowBlur: lerpTokenDouble(
+        a.playPauseShadowBlur,
+        b.playPauseShadowBlur,
+        t,
+      ),
+    );
+  }
+}
+
+@immutable
+class TilawaAdaptiveShellTokens {
+  const TilawaAdaptiveShellTokens({
+    required this.compactBottomNavBarBaseHeight,
+    required this.bottomNavHorizontalMargin,
+    required this.bottomNavVerticalMargin,
+    required this.bottomNavInternalPadding,
+    required this.bottomNavRadius,
+    required this.bottomNavInnerRadius,
+    required this.bottomNavBorderWidth,
+    required this.bottomNavItemGap,
+    required this.sideRailRadius,
+    required this.sideRailShadowOpacity,
+    required this.sideRailShadowBlur,
+    required this.sideRailShadowOffset,
+    required this.navButtonMinHeight,
+    required this.navButtonVerticalPadding,
+    required this.navButtonGap,
+    required this.navButtonIconSize,
+    required this.navButtonSelectedCenterScale,
+    required this.navButtonUnselectedScale,
+    required this.navButtonSelectedBackgroundOpacity,
+    required this.navButtonSelectedCenterOpacity,
+    required this.navButtonLabelFontSize,
+    required this.navButtonSelectedLabelWeight,
+    required this.navButtonUnselectedLabelWeight,
+  });
+
+  final double compactBottomNavBarBaseHeight;
+  final double bottomNavHorizontalMargin;
+  final double bottomNavVerticalMargin;
+  final double bottomNavInternalPadding;
+  final double bottomNavRadius;
+  final double bottomNavInnerRadius;
+  final double bottomNavBorderWidth;
+  final double bottomNavItemGap;
+  final double sideRailRadius;
+  final double sideRailShadowOpacity;
+  final double sideRailShadowBlur;
+  final Offset sideRailShadowOffset;
+  final double navButtonMinHeight;
+  final double navButtonVerticalPadding;
+  final double navButtonGap;
+  final double navButtonIconSize;
+  final double navButtonSelectedCenterScale;
+  final double navButtonUnselectedScale;
+  final double navButtonSelectedBackgroundOpacity;
+  final double navButtonSelectedCenterOpacity;
+  final double navButtonLabelFontSize;
+  final FontWeight navButtonSelectedLabelWeight;
+  final FontWeight navButtonUnselectedLabelWeight;
+
+  factory TilawaAdaptiveShellTokens.defaults() =>
+      const TilawaAdaptiveShellTokens(
+        compactBottomNavBarBaseHeight: 70,
+        bottomNavHorizontalMargin: 16,
+        bottomNavVerticalMargin: 4,
+        bottomNavInternalPadding: 8,
+        bottomNavRadius: 32,
+        bottomNavInnerRadius: 24,
+        bottomNavBorderWidth: 1,
+        bottomNavItemGap: 4,
+        sideRailRadius: 16,
+        sideRailShadowOpacity: 0.05,
+        sideRailShadowBlur: 12,
+        sideRailShadowOffset: Offset(2, 0),
+        navButtonMinHeight: 64,
+        navButtonVerticalPadding: 4,
+        navButtonGap: 4,
+        navButtonIconSize: 22,
+        navButtonSelectedCenterScale: 1.1,
+        navButtonUnselectedScale: 0.95,
+        navButtonSelectedBackgroundOpacity: 0.2,
+        navButtonSelectedCenterOpacity: 0.25,
+        navButtonLabelFontSize: 10,
+        navButtonSelectedLabelWeight: FontWeight.w700,
+        navButtonUnselectedLabelWeight: FontWeight.w500,
+      );
+
+  TilawaAdaptiveShellTokens copyWith({
+    double? compactBottomNavBarBaseHeight,
+    double? bottomNavHorizontalMargin,
+    double? bottomNavVerticalMargin,
+    double? bottomNavInternalPadding,
+    double? bottomNavRadius,
+    double? bottomNavInnerRadius,
+    double? bottomNavBorderWidth,
+    double? bottomNavItemGap,
+    double? sideRailRadius,
+    double? sideRailShadowOpacity,
+    double? sideRailShadowBlur,
+    Offset? sideRailShadowOffset,
+    double? navButtonMinHeight,
+    double? navButtonVerticalPadding,
+    double? navButtonGap,
+    double? navButtonIconSize,
+    double? navButtonSelectedCenterScale,
+    double? navButtonUnselectedScale,
+    double? navButtonSelectedBackgroundOpacity,
+    double? navButtonSelectedCenterOpacity,
+    double? navButtonLabelFontSize,
+    FontWeight? navButtonSelectedLabelWeight,
+    FontWeight? navButtonUnselectedLabelWeight,
+  }) {
+    return TilawaAdaptiveShellTokens(
+      compactBottomNavBarBaseHeight:
+          compactBottomNavBarBaseHeight ?? this.compactBottomNavBarBaseHeight,
+      bottomNavHorizontalMargin:
+          bottomNavHorizontalMargin ?? this.bottomNavHorizontalMargin,
+      bottomNavVerticalMargin:
+          bottomNavVerticalMargin ?? this.bottomNavVerticalMargin,
+      bottomNavInternalPadding:
+          bottomNavInternalPadding ?? this.bottomNavInternalPadding,
+      bottomNavRadius: bottomNavRadius ?? this.bottomNavRadius,
+      bottomNavInnerRadius: bottomNavInnerRadius ?? this.bottomNavInnerRadius,
+      bottomNavBorderWidth: bottomNavBorderWidth ?? this.bottomNavBorderWidth,
+      bottomNavItemGap: bottomNavItemGap ?? this.bottomNavItemGap,
+      sideRailRadius: sideRailRadius ?? this.sideRailRadius,
+      sideRailShadowOpacity:
+          sideRailShadowOpacity ?? this.sideRailShadowOpacity,
+      sideRailShadowBlur: sideRailShadowBlur ?? this.sideRailShadowBlur,
+      sideRailShadowOffset: sideRailShadowOffset ?? this.sideRailShadowOffset,
+      navButtonMinHeight: navButtonMinHeight ?? this.navButtonMinHeight,
+      navButtonVerticalPadding:
+          navButtonVerticalPadding ?? this.navButtonVerticalPadding,
+      navButtonGap: navButtonGap ?? this.navButtonGap,
+      navButtonIconSize: navButtonIconSize ?? this.navButtonIconSize,
+      navButtonSelectedCenterScale:
+          navButtonSelectedCenterScale ?? this.navButtonSelectedCenterScale,
+      navButtonUnselectedScale:
+          navButtonUnselectedScale ?? this.navButtonUnselectedScale,
+      navButtonSelectedBackgroundOpacity:
+          navButtonSelectedBackgroundOpacity ??
+          this.navButtonSelectedBackgroundOpacity,
+      navButtonSelectedCenterOpacity:
+          navButtonSelectedCenterOpacity ?? this.navButtonSelectedCenterOpacity,
+      navButtonLabelFontSize:
+          navButtonLabelFontSize ?? this.navButtonLabelFontSize,
+      navButtonSelectedLabelWeight:
+          navButtonSelectedLabelWeight ?? this.navButtonSelectedLabelWeight,
+      navButtonUnselectedLabelWeight:
+          navButtonUnselectedLabelWeight ?? this.navButtonUnselectedLabelWeight,
+    );
+  }
+
+  static TilawaAdaptiveShellTokens lerp(
+    TilawaAdaptiveShellTokens a,
+    TilawaAdaptiveShellTokens b,
+    double t,
+  ) {
+    return TilawaAdaptiveShellTokens(
+      compactBottomNavBarBaseHeight: lerpTokenDouble(
+        a.compactBottomNavBarBaseHeight,
+        b.compactBottomNavBarBaseHeight,
+        t,
+      ),
+      bottomNavHorizontalMargin: lerpTokenDouble(
+        a.bottomNavHorizontalMargin,
+        b.bottomNavHorizontalMargin,
+        t,
+      ),
+      bottomNavVerticalMargin: lerpTokenDouble(
+        a.bottomNavVerticalMargin,
+        b.bottomNavVerticalMargin,
+        t,
+      ),
+      bottomNavInternalPadding: lerpTokenDouble(
+        a.bottomNavInternalPadding,
+        b.bottomNavInternalPadding,
+        t,
+      ),
+      bottomNavRadius: lerpTokenDouble(a.bottomNavRadius, b.bottomNavRadius, t),
+      bottomNavInnerRadius: lerpTokenDouble(
+        a.bottomNavInnerRadius,
+        b.bottomNavInnerRadius,
+        t,
+      ),
+      bottomNavBorderWidth: lerpTokenDouble(
+        a.bottomNavBorderWidth,
+        b.bottomNavBorderWidth,
+        t,
+      ),
+      bottomNavItemGap: lerpTokenDouble(
+        a.bottomNavItemGap,
+        b.bottomNavItemGap,
+        t,
+      ),
+      sideRailRadius: lerpTokenDouble(a.sideRailRadius, b.sideRailRadius, t),
+      sideRailShadowOpacity: lerpTokenDouble(
+        a.sideRailShadowOpacity,
+        b.sideRailShadowOpacity,
+        t,
+      ),
+      sideRailShadowBlur: lerpTokenDouble(
+        a.sideRailShadowBlur,
+        b.sideRailShadowBlur,
+        t,
+      ),
+      sideRailShadowOffset: Offset.lerp(
+        a.sideRailShadowOffset,
+        b.sideRailShadowOffset,
+        t,
+      )!,
+      navButtonMinHeight: lerpTokenDouble(
+        a.navButtonMinHeight,
+        b.navButtonMinHeight,
+        t,
+      ),
+      navButtonVerticalPadding: lerpTokenDouble(
+        a.navButtonVerticalPadding,
+        b.navButtonVerticalPadding,
+        t,
+      ),
+      navButtonGap: lerpTokenDouble(a.navButtonGap, b.navButtonGap, t),
+      navButtonIconSize: lerpTokenDouble(
+        a.navButtonIconSize,
+        b.navButtonIconSize,
+        t,
+      ),
+      navButtonSelectedCenterScale: lerpTokenDouble(
+        a.navButtonSelectedCenterScale,
+        b.navButtonSelectedCenterScale,
+        t,
+      ),
+      navButtonUnselectedScale: lerpTokenDouble(
+        a.navButtonUnselectedScale,
+        b.navButtonUnselectedScale,
+        t,
+      ),
+      navButtonSelectedBackgroundOpacity: lerpTokenDouble(
+        a.navButtonSelectedBackgroundOpacity,
+        b.navButtonSelectedBackgroundOpacity,
+        t,
+      ),
+      navButtonSelectedCenterOpacity: lerpTokenDouble(
+        a.navButtonSelectedCenterOpacity,
+        b.navButtonSelectedCenterOpacity,
+        t,
+      ),
+      navButtonLabelFontSize: lerpTokenDouble(
+        a.navButtonLabelFontSize,
+        b.navButtonLabelFontSize,
+        t,
+      ),
+      navButtonSelectedLabelWeight: FontWeight.lerp(
+        a.navButtonSelectedLabelWeight,
+        b.navButtonSelectedLabelWeight,
+        t,
+      )!,
+      navButtonUnselectedLabelWeight: FontWeight.lerp(
+        a.navButtonUnselectedLabelWeight,
+        b.navButtonUnselectedLabelWeight,
+        t,
+      )!,
     );
   }
 }
@@ -358,8 +842,11 @@ class TilawaSettingsGroupTokens {
 @immutable
 class TilawaImmersiveComposerTokens {
   const TilawaImmersiveComposerTokens({
+    required this.defaultAutoHideDuration,
+    required this.transitionDuration,
     required this.backgroundBlurScale,
     required this.backgroundOverlayOpacity,
+    required this.overlayBorderOpacity,
     required this.compactHeightBreakpoint,
     required this.compactPanelHeightFactor,
     required this.regularPanelHeightFactor,
@@ -371,8 +858,11 @@ class TilawaImmersiveComposerTokens {
     required this.headerIconSizeOffset,
   });
 
+  final Duration defaultAutoHideDuration;
+  final Duration transitionDuration;
   final double backgroundBlurScale;
   final double backgroundOverlayOpacity;
+  final double overlayBorderOpacity;
   final double compactHeightBreakpoint;
   final double compactPanelHeightFactor;
   final double regularPanelHeightFactor;
@@ -385,8 +875,11 @@ class TilawaImmersiveComposerTokens {
 
   factory TilawaImmersiveComposerTokens.defaults() =>
       const TilawaImmersiveComposerTokens(
+        defaultAutoHideDuration: Duration(seconds: 3),
+        transitionDuration: Duration(milliseconds: 300),
         backgroundBlurScale: 0.9,
         backgroundOverlayOpacity: 0.42,
+        overlayBorderOpacity: 0.1,
         compactHeightBreakpoint: 760,
         compactPanelHeightFactor: 0.5,
         regularPanelHeightFactor: 0.44,
@@ -394,13 +887,16 @@ class TilawaImmersiveComposerTokens {
         regularPreviewHeightFactor: 0.5,
         panelMinHeight: 220,
         previewMaxHeight: 460,
-        headerButtonSize: 44,
+        headerButtonSize: 24,
         headerIconSizeOffset: 2,
       );
 
   TilawaImmersiveComposerTokens copyWith({
+    Duration? defaultAutoHideDuration,
+    Duration? transitionDuration,
     double? backgroundBlurScale,
     double? backgroundOverlayOpacity,
+    double? overlayBorderOpacity,
     double? compactHeightBreakpoint,
     double? compactPanelHeightFactor,
     double? regularPanelHeightFactor,
@@ -412,9 +908,13 @@ class TilawaImmersiveComposerTokens {
     double? headerIconSizeOffset,
   }) {
     return TilawaImmersiveComposerTokens(
+      defaultAutoHideDuration:
+          defaultAutoHideDuration ?? this.defaultAutoHideDuration,
+      transitionDuration: transitionDuration ?? this.transitionDuration,
       backgroundBlurScale: backgroundBlurScale ?? this.backgroundBlurScale,
       backgroundOverlayOpacity:
           backgroundOverlayOpacity ?? this.backgroundOverlayOpacity,
+      overlayBorderOpacity: overlayBorderOpacity ?? this.overlayBorderOpacity,
       compactHeightBreakpoint:
           compactHeightBreakpoint ?? this.compactHeightBreakpoint,
       compactPanelHeightFactor:
@@ -438,6 +938,10 @@ class TilawaImmersiveComposerTokens {
     double t,
   ) {
     return TilawaImmersiveComposerTokens(
+      defaultAutoHideDuration: t < 0.5
+          ? a.defaultAutoHideDuration
+          : b.defaultAutoHideDuration,
+      transitionDuration: t < 0.5 ? a.transitionDuration : b.transitionDuration,
       backgroundBlurScale: lerpTokenDouble(
         a.backgroundBlurScale,
         b.backgroundBlurScale,
@@ -446,6 +950,11 @@ class TilawaImmersiveComposerTokens {
       backgroundOverlayOpacity: lerpTokenDouble(
         a.backgroundOverlayOpacity,
         b.backgroundOverlayOpacity,
+        t,
+      ),
+      overlayBorderOpacity: lerpTokenDouble(
+        a.overlayBorderOpacity,
+        b.overlayBorderOpacity,
         t,
       ),
       compactHeightBreakpoint: lerpTokenDouble(

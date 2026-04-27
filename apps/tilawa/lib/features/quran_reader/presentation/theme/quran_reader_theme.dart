@@ -239,8 +239,110 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
 
   /// Convenience accessor: `QuranReaderTheme.of(context)`.
   static QuranReaderTheme of(BuildContext context) {
-    return Theme.of(context).extension<QuranReaderTheme>() ??
-        (Theme.of(context).brightness == Brightness.dark ? dark : light);
+    final theme = Theme.of(context);
+    return theme.extension<QuranReaderTheme>() ?? fromTheme(theme);
+  }
+
+  /// Builds reader colors and text styles from the active app [ThemeData].
+  ///
+  /// This keeps the Quran reader aligned with the app-wide color scheme
+  /// instead of injecting a separate reader-specific theme at the app root.
+  static QuranReaderTheme fromTheme(ThemeData theme) {
+    final colorScheme = theme.colorScheme;
+    final textTheme = theme.textTheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final iconBrightness = isDark ? Brightness.light : Brightness.dark;
+    final statusBarBrightness = isDark ? Brightness.dark : Brightness.light;
+    final pageBackground = theme.scaffoldBackgroundColor;
+    final primary = colorScheme.primary;
+    final onSurface = colorScheme.onSurface;
+    final onSurfaceVariant = colorScheme.onSurfaceVariant;
+
+    return QuranReaderTheme(
+      pageBackground: pageBackground,
+      textColor: onSurface,
+      primaryColor: primary,
+      headerBackground: colorScheme.surfaceContainerHighest,
+      headerTextColor: onSurface,
+      headerImageFilter: isDark ? dark.headerImageFilter : null,
+      systemBarColor: pageBackground,
+      statusBarIconBrightness: iconBrightness,
+      statusBarBrightness: statusBarBrightness,
+      sliderRangeTextStyle:
+          textTheme.labelSmall?.copyWith(
+            color: onSurfaceVariant,
+            fontWeight: FontWeight.w800,
+          ) ??
+          TextStyle(
+            color: onSurfaceVariant,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+          ),
+      pillSurahTextStyle:
+          textTheme.labelLarge?.copyWith(
+            color: onSurface,
+            fontWeight: FontWeight.w700,
+          ) ??
+          TextStyle(
+            color: onSurface,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+      pillPageTextStyle:
+          textTheme.labelMedium?.copyWith(
+            color: primary,
+            fontWeight: FontWeight.w700,
+          ) ??
+          TextStyle(color: primary, fontSize: 11, fontWeight: FontWeight.w700),
+      cardPageBadgeTextStyle:
+          textTheme.labelLarge?.copyWith(
+            color: primary,
+            fontWeight: FontWeight.w800,
+          ) ??
+          TextStyle(color: primary, fontSize: 12, fontWeight: FontWeight.w800),
+      cardContextSummaryTextStyle:
+          textTheme.labelMedium?.copyWith(
+            color: onSurfaceVariant,
+            fontWeight: FontWeight.w600,
+          ) ??
+          TextStyle(
+            color: onSurfaceVariant,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+      indexTitleTextStyle:
+          textTheme.titleLarge?.copyWith(
+            color: onSurface,
+            fontWeight: FontWeight.w800,
+          ) ??
+          TextStyle(
+            color: onSurface,
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+          ),
+      indexSubtitleTextStyle:
+          textTheme.bodySmall?.copyWith(color: onSurfaceVariant) ??
+          TextStyle(color: onSurfaceVariant, fontSize: 12),
+      surahTileNameTextStyle:
+          textTheme.titleSmall?.copyWith(
+            color: onSurface,
+            fontWeight: FontWeight.w700,
+          ) ??
+          TextStyle(
+            color: onSurface,
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+          ),
+      surahTileMetaTextStyle:
+          textTheme.labelSmall?.copyWith(color: onSurfaceVariant) ??
+          TextStyle(color: onSurfaceVariant, fontSize: 11),
+      surahTileArabicNameTextStyle:
+          textTheme.titleMedium?.copyWith(
+            color: primary,
+            fontWeight: FontWeight.w800,
+          ) ??
+          TextStyle(color: primary, fontSize: 18, fontWeight: FontWeight.w800),
+    );
   }
 
   @override

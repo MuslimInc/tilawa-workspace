@@ -43,51 +43,16 @@ class ReciterCard extends StatelessWidget {
                 vertical: tokens.spaceSmall,
               ),
               child: Row(
+                crossAxisAlignment: .start,
                 children: [
-                  _ReciterAvatar(reciter: reciter),
-                  SizedBox(width: tokens.spaceMedium),
+                  // _ReciterAvatar(reciter: reciter),
+                  // SizedBox(width: tokens.spaceMedium),
                   Expanded(child: _ReciterInfo(reciter: reciter)),
                   SizedBox(width: tokens.spaceSmall),
                   _FavoriteButton(reciter: reciter),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ReciterAvatar extends StatelessWidget {
-  const _ReciterAvatar({required this.reciter});
-
-  final ReciterEntity reciter;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final primaryColor = theme.primaryColor;
-
-    return RepaintBoundary(
-      child: Container(
-        width: tokens.iconSizeExtraLarge,
-        height: tokens.iconSizeExtraLarge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(tokens.radiusMedium),
-          color: primaryColor.withValues(alpha: 0.85),
-        ),
-        child: Center(
-          child: Text(
-            reciter.letter,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.4,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
       ),
@@ -125,8 +90,8 @@ class _ReciterInfo extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            SizedBox(width: tokens.spaceSmall),
-            _RecitationsBadge(count: reciter.moshaf.length),
+            // SizedBox(width: tokens.spaceSmall),
+            // _RecitationsBadge(count: reciter.moshaf.length),
           ],
         ),
         if (firstMoshaf.isNotEmpty) ...[
@@ -148,7 +113,7 @@ class _ReciterInfo extends StatelessWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -171,47 +136,6 @@ class _ReciterInfo extends StatelessWidget {
   }
 }
 
-class _RecitationsBadge extends StatelessWidget {
-  const _RecitationsBadge({required this.count});
-
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceExtraSmall,
-      ),
-      decoration: BoxDecoration(
-        color: theme.primaryColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.library_music_rounded,
-            size: tokens.iconSizeExtraSmall,
-            color: theme.primaryColor,
-          ),
-          SizedBox(width: tokens.spaceExtraSmall),
-          Text(
-            '$count',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.primaryColor,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _FavoriteButton extends StatelessWidget {
   const _FavoriteButton({required this.reciter});
 
@@ -226,22 +150,25 @@ class _FavoriteButton extends StatelessWidget {
       return state is FavoritesLoaded && state.favoriteIds.contains(reciter.id);
     });
 
-    return InkResponse(
-      radius: tokens.radiusExtraLarge,
-      onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
-      child: Container(
-        width: tokens.iconSizeExtraLarge - tokens.spaceSmall,
-        height: tokens.iconSizeExtraLarge - tokens.spaceSmall,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: theme.primaryColor.withValues(alpha: 0.06),
-        ),
-        child: Icon(
-          isFavorite ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-          size: tokens.iconSizeMedium,
-          color: isFavorite
-              ? Colors.redAccent
-              : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+    return Material(
+      color: theme.primaryColor.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+      child: InkWell(
+        radius: tokens.radiusExtraLarge,
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+        onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
+        child: SizedBox(
+          width: tokens.iconSizeExtraLarge - tokens.spaceSmall,
+          height: tokens.iconSizeExtraLarge - tokens.spaceSmall,
+          child: Icon(
+            isFavorite
+                ? Icons.favorite_rounded
+                : Icons.favorite_outline_rounded,
+            size: tokens.iconSizeMedium,
+            color: isFavorite
+                ? Colors.redAccent
+                : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+          ),
         ),
       ),
     );

@@ -8,6 +8,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../bloc/quran_font_loader_bloc.dart';
 import '../bloc/quran_reader_bloc.dart';
 import '../theme/quran_reader_theme.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'quran_reader_screen.dart';
 
 /// Screen that ensures QCF4 fonts are downloaded and registered with the
@@ -204,11 +205,8 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
               current.mapOrNull(error: (_) => true) ?? false,
           listener: (context, state) {
             state.mapOrNull(
-              error: (s) => ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(s.message),
-                  backgroundColor: AppColors.error,
-                ),
+              error: (s) => ToastUtils.showErrorToast(
+                s.failure.localizedMessage(context),
               ),
             );
           },
@@ -301,7 +299,7 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
           if (error != null) {
             return Scaffold(
               body: _ErrorView(
-                message: error.message,
+                message: error.failure.localizedMessage(context),
                 onRetry: () {
                   final page = initialPageNumber;
                   if (page != null) {

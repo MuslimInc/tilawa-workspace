@@ -1,6 +1,6 @@
 import '../../../l10n/app_localizations.dart';
-import '../../../core/design_tokens/design_tokens.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Atomic component for displaying the current page number.
 ///
@@ -19,15 +19,26 @@ class PageIndicatorText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = screenWidth * AppDimensions.pageNumberTextSizeRatio;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
 
-    return Text(
-      l10n?.page(pageNumber.toString()) ?? 'Page $pageNumber',
-      style: TextStyle(
-        fontSize: fontSize,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+      ),
+      child: Text(
+        l10n?.page(pageNumber.toString()) ?? 'Page $pageNumber',
+        style: theme.textTheme.labelLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: colorScheme.onSurface,
+        ),
       ),
     );
   }

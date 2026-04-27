@@ -13,7 +13,7 @@ import 'share_file_manager.dart';
 class ScreenshotService {
   ScreenshotService(this._fileManager);
 
-  static const int _captureBoundaryRetryFrames = 15;
+  static const int _captureBoundaryRetryFrames = 30;
 
   final ShareFileManager _fileManager;
 
@@ -249,6 +249,12 @@ class ScreenshotService {
     GlobalKey boundaryKey,
   ) async {
     for (var attempt = 0; attempt < _captureBoundaryRetryFrames; attempt++) {
+      // Yield to microtasks so any pending bloc/stream listeners that
+      // schedule a rebuild get a chance to run before we check the key.
+      // Without this, the very first attempt can run inside the same
+      // microtask as the state emit and miss a not-yet-built tree.
+      await Future<void>.delayed(Duration.zero);
+
       final renderObject = boundaryKey.currentContext?.findRenderObject();
       if (renderObject is RenderRepaintBoundary &&
           renderObject.attached &&
@@ -257,6 +263,11 @@ class ScreenshotService {
         return renderObject;
       }
 
+      // Force a frame in case nothing else has marked the tree dirty —
+      // when a key swap is the only pending change, the framework may
+      // have already settled and `endOfFrame` would otherwise return
+      // immediately without giving the new boundary a chance to mount.
+      WidgetsBinding.instance.scheduleFrame();
       await WidgetsBinding.instance.endOfFrame;
     }
 
@@ -287,7 +298,7 @@ class ScreenshotService {
   }) async {
     final imageWidth = pageImage.width.toDouble();
     final imageHeight = pageImage.height.toDouble();
-    final footerTokens = TilawaShareFooterBarTokens.defaults();
+    final footerTokens = TilawaFooterBarTokens.defaults();
     final stripHeight = footerTokens.height * pixelRatio;
     final totalHeight = imageHeight + stripHeight;
     final horizontalPadding = footerTokens.horizontalPadding * pixelRatio;

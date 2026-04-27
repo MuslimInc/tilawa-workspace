@@ -32,18 +32,12 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     );
     if (isClosed) return;
 
-    result.fold(
-      (failure) => emit(FavoritesError(failure.message ?? 'Unknown Error')),
-      (favorites) {
-        _currentFavoriteIds = favorites.map((e) => e.id).toSet();
-        emit(
-          FavoritesLoaded(
-            favorites: favorites,
-            favoriteIds: _currentFavoriteIds,
-          ),
-        );
-      },
-    );
+    result.fold((failure) => emit(FavoritesError(failure)), (favorites) {
+      _currentFavoriteIds = favorites.map((e) => e.id).toSet();
+      emit(
+        FavoritesLoaded(favorites: favorites, favoriteIds: _currentFavoriteIds),
+      );
+    });
   }
 
   Future<void> toggleFavorite(ReciterEntity reciter) async {
@@ -95,7 +89,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
             _currentFavoriteIds.remove(reciter.id);
           }
           loadFavorites(); // Re-sync with source of truth
-          emit(FavoritesError(failure.message ?? 'Unknown Error'));
+          emit(FavoritesError(failure));
         },
         (_) {
           // Success - ensure our list is fully synced or just rely on optimistic

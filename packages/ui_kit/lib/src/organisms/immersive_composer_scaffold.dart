@@ -1,16 +1,17 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 
 /// Immersive three-layer scaffold: full-bleed [preview] content with a
-/// top app bar overlay and a bottom panel overlay that auto-hide on
-/// inactivity.
+/// top app bar overlay and a bottom panel overlay.
 ///
 /// Overlays never resize the content — they float above it and manage
 /// their own safe-area insets. Visibility can be driven externally via
-/// [overlaysVisible]; otherwise the scaffold owns the state internally
-/// (tap to toggle, auto-hide after [autoHideDuration]).
+/// [overlaysVisible]; otherwise the scaffold owns the state internally.
 class ImmersiveComposerScaffold extends StatefulWidget {
   const ImmersiveComposerScaffold({
     super.key,
@@ -26,7 +27,6 @@ class ImmersiveComposerScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.overlaysVisible,
     this.onVisibilityChanged,
-    this.autoHideDuration = const Duration(seconds: 3),
     this.disableBlur = false,
   });
 
@@ -50,7 +50,6 @@ class ImmersiveComposerScaffold extends StatefulWidget {
   /// timer elapses. Always fires, whether controlled or not.
   final ValueChanged<bool>? onVisibilityChanged;
 
-  final Duration autoHideDuration;
   final bool disableBlur;
 
   @override
@@ -69,22 +68,23 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   @override
   void initState() {
     super.initState();
+    _isVisible = widget.overlaysVisible ?? true;
+    _hasBeenShown = _isVisible;
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: TilawaImmersiveComposerTokens.defaults().transitionDuration,
     );
 
-    // Initial state: visible
-    _controller.value = 1.0;
+    _controller.value = _isVisible ? 1.0 : 0.0;
 
     _topOffset = Tween<Offset>(
       begin: const Offset(0, -1.2), // Off-screen top
-      end: Offset.zero,
+      end: .zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _bottomOffset = Tween<Offset>(
       begin: const Offset(0, 1.2), // Off-screen bottom
-      end: Offset.zero,
+      end: .zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
@@ -94,8 +94,11 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
     if (widget.overlaysVisible != oldWidget.overlaysVisible &&
         widget.overlaysVisible != null) {
       if (widget.overlaysVisible!) {
+        _isVisible = true;
+        _hasBeenShown = true;
         _controller.forward();
       } else {
+        _isVisible = false;
         _controller.reverse();
       }
     }
@@ -108,7 +111,9 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   }
 
   void _setVisible(bool next) {
-    if (next == _isVisible) return;
+    if (next == _isVisible) {
+      return;
+    }
     setState(() {
       _isVisible = next;
       if (next) _hasBeenShown = true;
@@ -125,77 +130,65 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final padding = MediaQuery.paddingOf(context);
+    final overlayStyle = _buildSystemUiOverlayStyle(theme);
 
-    return Material(
-      color: Colors.transparent,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          // 1. Background Layer (Isolated)
-          if (widget.background != null)
-            Positioned.fill(child: RepaintBoundary(child: widget.background!)),
-
-          // 2. Gesture/Preview Layer (Wrapped in RepaintBoundary to prevent repaints during overlay animations)
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () => _setVisible(!_isVisible),
-                child: widget.preview,
-              ),
-            ),
-          ),
-
-          // 3. Top Overlay (Slide only, no Fade)
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SlideTransition(
-              position: _topOffset,
-              child: IgnorePointer(
-                ignoring: !_isVisible,
-                child: RepaintBoundary(
-                  child: Listener(
-                    onPointerDown: (_) => _setVisible(true),
-                    child: _hasBeenShown
-                        ? _OverlayPanel(
-                            isTop: true,
-                            child: SafeArea(
-                              bottom: false,
-                              child: _TopAppBar(
-                                title: widget.title,
-                                leading: widget.leading,
-                                trailing: widget.trailing,
-                                onClose: widget.onClose,
-                              ),
-                            ),
-                          )
-                        : const SizedBox.shrink(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: Material(
+        color: Colors.transparent,
+        child: Stack(
+          clipBehavior: .none,
+          children: [
+            // 1. Background Layer (Isolated)
+            if (widget.backgroundGradient != null)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: widget.backgroundGradient,
                   ),
                 ),
               ),
-            ),
-          ),
+            if (widget.background != null)
+              Positioned.fill(
+                child: RepaintBoundary(child: widget.background!),
+              ),
 
-          // 4. Bottom Overlay (Slide only, no Fade)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: -padding.bottom,
-            child: SlideTransition(
-              position: _bottomOffset,
-              child: IgnorePointer(
-                ignoring: !_isVisible,
-                child: RepaintBoundary(
-                  child: Listener(
-                    onPointerDown: (_) => _setVisible(true),
-                    child: Padding(
-                      padding: EdgeInsets.only(bottom: padding.bottom),
+            // 2. Gesture/Preview Layer (Wrapped in RepaintBoundary to prevent repaints during overlay animations)
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: GestureDetector(
+                  behavior: .translucent,
+                  onTap: () => _setVisible(!_isVisible),
+                  child: widget.preview,
+                ),
+              ),
+            ),
+
+            // 3. Top Overlay (Slide only, no Fade)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SlideTransition(
+                position: _topOffset,
+                child: IgnorePointer(
+                  ignoring: !_isVisible,
+                  child: RepaintBoundary(
+                    child: Listener(
+                      onPointerDown: (_) => _setVisible(true),
                       child: _hasBeenShown
                           ? _OverlayPanel(
-                              isTop: false,
-                              child: widget.bottomPanel,
+                              disableBlur: widget.disableBlur,
+                              child: SafeArea(
+                                bottom: false,
+                                child: _TopAppBar(
+                                  title: widget.title,
+                                  subtitle: widget.subtitle,
+                                  leading: widget.leading,
+                                  trailing: widget.trailing,
+                                  onClose: widget.onClose,
+                                ),
+                              ),
                             )
                           : const SizedBox.shrink(),
                     ),
@@ -203,63 +196,127 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                 ),
               ),
             ),
-          ),
 
-          if (widget.floatingActionButton != null)
+            // 4. Bottom Overlay (Slide only, no Fade)
             Positioned(
-              right: theme.tokens.spaceMedium,
-              bottom: theme.tokens.spaceMedium + padding.bottom,
-              child: ScaleTransition(
-                scale: _controller,
+              left: 0,
+              right: 0,
+              bottom: -padding.bottom,
+              child: SlideTransition(
+                position: _bottomOffset,
                 child: IgnorePointer(
                   ignoring: !_isVisible,
-                  child: RepaintBoundary(child: widget.floatingActionButton!),
+                  child: RepaintBoundary(
+                    child: Listener(
+                      onPointerDown: (_) => _setVisible(true),
+                      child: Padding(
+                        padding: EdgeInsets.only(bottom: padding.bottom),
+                        child: _hasBeenShown
+                            ? _OverlayPanel(
+                                disableBlur: widget.disableBlur,
+                                child: widget.bottomPanel,
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-        ],
+
+            if (widget.floatingActionButton != null)
+              Positioned(
+                right: theme.tokens.spaceMedium,
+                bottom: theme.tokens.spaceMedium + padding.bottom,
+                child: ScaleTransition(
+                  scale: _controller,
+                  child: IgnorePointer(
+                    ignoring: !_isVisible,
+                    child: RepaintBoundary(child: widget.floatingActionButton!),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
+    );
+  }
+
+  SystemUiOverlayStyle _buildSystemUiOverlayStyle(ThemeData theme) {
+    final barColor = theme.colorScheme.surface;
+    final barBrightness = ThemeData.estimateBrightnessForColor(barColor);
+    final iconBrightness = barBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    return SystemUiOverlayStyle(
+      statusBarColor: barColor,
+      statusBarIconBrightness: iconBrightness,
+      statusBarBrightness: barBrightness,
+      systemNavigationBarColor: barColor,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: iconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
     );
   }
 }
 
 /// Simplified panel that avoids BackdropFilter and uses opaque background.
 class _OverlayPanel extends StatelessWidget {
-  const _OverlayPanel({required this.isTop, required this.child});
+  const _OverlayPanel({required this.disableBlur, required this.child});
 
-  final bool isTop;
+  final bool disableBlur;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final componentTokens = theme.componentTokens.immersiveComposer;
 
     // Cache border color calculation to avoid per-frame recalculation
-    final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.1);
+    final borderColor = theme.colorScheme.outlineVariant.withValues(
+      alpha: componentTokens.overlayBorderOpacity,
+    );
 
-    return DecoratedBox(
+    final panel = DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: theme.colorScheme.surface.withValues(
+          alpha: disableBlur ? 1 : componentTokens.backgroundOverlayOpacity,
+        ),
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
         border: Border.all(color: borderColor),
       ),
       child: child,
     );
+
+    if (disableBlur) return panel;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: tokens.blurGlass * componentTokens.backgroundBlurScale,
+          sigmaY: tokens.blurGlass * componentTokens.backgroundBlurScale,
+        ),
+        child: panel,
+      ),
+    );
   }
 }
-
-// ... _maybeBackgroundBlur remains for internal use but is effectively bypassed by logic ...
 
 class _TopAppBar extends StatelessWidget {
   const _TopAppBar({
     required this.title,
+    required this.subtitle,
     required this.leading,
     required this.trailing,
     required this.onClose,
   });
 
   final String title;
+  final String? subtitle;
   final Widget? leading;
   final Widget? trailing;
   final VoidCallback? onClose;
@@ -271,9 +328,12 @@ class _TopAppBar extends StatelessWidget {
     final componentTokens = theme.componentTokens.immersiveComposer;
 
     // Cache border color and text style to avoid per-frame recalculation
-    final borderColor = theme.colorScheme.outlineVariant.withValues(alpha: 0.1);
-    final titleStyle = theme.textTheme.titleMedium?.copyWith(
-      fontWeight: FontWeight.bold,
+    final borderColor = theme.colorScheme.outlineVariant.withValues(
+      alpha: componentTokens.overlayBorderOpacity,
+    );
+    final titleStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: .bold);
+    final subtitleStyle = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
     );
 
     return DecoratedBox(
@@ -295,10 +355,19 @@ class _TopAppBar extends StatelessWidget {
                   onPressed: onClose,
                 ),
             Expanded(
-              child: Text(
-                title,
-                textAlign: TextAlign.center,
-                style: titleStyle,
+              child: Column(
+                mainAxisSize: .min,
+                children: [
+                  Text(title, textAlign: .center, style: titleStyle),
+                  if (subtitle != null && subtitle!.isNotEmpty)
+                    Text(
+                      subtitle!,
+                      textAlign: .center,
+                      maxLines: 1,
+                      overflow: .ellipsis,
+                      style: subtitleStyle,
+                    ),
+                ],
               ),
             ),
             trailing ??
@@ -328,10 +397,18 @@ class _RoundHeaderButton extends StatelessWidget {
       width: componentTokens.headerButtonSize,
       height: componentTokens.headerButtonSize,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
+        shape: .circle,
         color: theme.colorScheme.surfaceContainerHighest, // Opaque
       ),
-      child: IconButton(onPressed: onPressed, iconSize: 20, icon: Icon(icon)),
+      child: IconButton(
+        onPressed: onPressed,
+        style: IconButton.styleFrom(padding: .zero),
+        iconSize:
+            componentTokens.headerButtonSize -
+            componentTokens.headerIconSizeOffset -
+            componentTokens.headerIconSizeOffset,
+        icon: Icon(icon),
+      ),
     );
   }
 }

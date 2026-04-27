@@ -4,6 +4,7 @@ import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc
 import 'package:tilawa/features/downloads/presentation/widgets/download_button.dart';
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class SurahGridItem extends StatelessWidget {
   const SurahGridItem({
@@ -24,6 +25,8 @@ class SurahGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final borderRadius = BorderRadius.circular(tokens.radiusLarge);
 
     // Combine selectors to reduce overhead and subscription count
     final (bool isPlaying, bool isCurrentItem) = context
@@ -45,7 +48,7 @@ class SurahGridItem extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: borderRadius,
         onTap: () {
           if (isCurrentItem) {
             if (isPlaying) {
@@ -64,123 +67,155 @@ class SurahGridItem extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: isCurrentItem
-                ? theme.primaryColor.withValues(alpha: 0.08)
+                ? theme.primaryColor.withValues(alpha: tokens.opacitySubtle)
                 : theme.cardColor,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: borderRadius,
             border: Border.all(
               color: isCurrentItem
-                  ? theme.primaryColor.withValues(alpha: 0.5)
-                  : theme.dividerColor.withValues(alpha: 0.15),
-              width: isCurrentItem ? 1.5 : 1,
+                  ? theme.primaryColor.withValues(alpha: tokens.opacityEmphasis)
+                  : theme.dividerColor.withValues(alpha: tokens.opacitySubtle),
+              width: isCurrentItem
+                  ? tokens.borderWidthThin * 3
+                  : tokens.borderWidthThin * 2,
             ),
             boxShadow: [
               BoxShadow(
                 color: isCurrentItem
-                    ? theme.primaryColor.withValues(alpha: 0.12)
-                    : Colors.black.withValues(alpha: 0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+                    ? theme.primaryColor.withValues(alpha: tokens.opacitySubtle)
+                    : Colors.black.withValues(alpha: tokens.opacitySubtle / 2),
+                blurRadius: tokens.blurGlass,
+                offset: tokens.shadowOffsetMedium,
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                color: Colors.black.withValues(alpha: tokens.opacitySubtle / 4),
+                blurRadius: tokens.spaceExtraSmall,
+                offset: tokens.shadowOffsetSmall,
               ),
             ],
           ),
-          padding: EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest
-                          .withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      surah.formattedId.isNotEmpty
-                          ? surah.formattedId
-                          : '${index + 1}',
-                      style: TextStyle(
-                        color: theme.primaryColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                  if (isCurrentItem)
-                    Icon(
-                      isPlaying
-                          ? Icons.pause_circle_filled_rounded
-                          : Icons.play_circle_fill_rounded,
-                      color: theme.primaryColor,
-                      size: 20,
-                    ),
-                ],
-              ),
-              SizedBox(height: 8),
-              Expanded(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final bool isTight =
+                  constraints.maxHeight < tokens.cardTightHeightThreshold;
+              final EdgeInsetsGeometry padding = EdgeInsets.all(
+                isTight ? tokens.spaceSmall : tokens.spaceMedium,
+              );
+              final EdgeInsets resolvedPadding = padding.resolve(
+                Directionality.of(context),
+              );
+              final double contentWidth =
+                  constraints.maxWidth - resolvedPadding.horizontal;
+              final double gap = isTight
+                  ? tokens.spaceExtraSmall
+                  : tokens.spaceSmall;
+              final double downloadButtonSize =
+                  tokens.iconSizeLarge + tokens.spaceSmall;
+
+              return Padding(
+                padding: padding,
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: .start,
+                  mainAxisAlignment: .spaceBetween,
+                  mainAxisSize: .min,
                   children: [
-                    Text(
-                      surah.name,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isCurrentItem
-                            ? theme.primaryColor
-                            : theme.textTheme.bodyLarge?.color,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: tokens.spaceSmall,
+                            vertical: tokens.spaceExtraSmall,
+                          ),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: tokens.opacityMedium),
+                            borderRadius: BorderRadius.circular(
+                              tokens.radiusMedium,
+                            ),
+                          ),
+                          child: Text(
+                            surah.formattedId.isNotEmpty
+                                ? surah.formattedId
+                                : '${index + 1}',
+                            style: theme.textTheme.labelMedium?.copyWith(
+                              color: theme.primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if (isCurrentItem)
+                          Icon(
+                            isPlaying
+                                ? Icons.pause_circle_filled_rounded
+                                : Icons.play_circle_fill_rounded,
+                            color: theme.primaryColor,
+                            size: tokens.iconSizeMedium,
+                          ),
+                      ],
                     ),
-                    SizedBox(height: 4),
-                    Text(
-                      surah.nameAr,
-                      // Arabic font handling usually needed here
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: theme.hintColor,
-                        fontFamily:
-                            'Amiri', // Assuming Amiri is available or default
+                    SizedBox(height: gap),
+                    Flexible(
+                      child: Align(
+                        alignment: .centerStart,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: .centerStart,
+                          child: SizedBox(
+                            width: contentWidth > 0 ? contentWidth : 0,
+                            child: Column(
+                              crossAxisAlignment: .start,
+                              mainAxisSize: .min,
+                              spacing: tokens.spaceExtraSmall,
+                              children: [
+                                Text(
+                                  surah.name,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: isCurrentItem
+                                        ? theme.primaryColor
+                                        : theme.textTheme.bodyLarge?.color,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  surah.nameAr,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w400,
+                                    color: theme.hintColor,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: gap),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: SizedBox(
+                        width: downloadButtonSize,
+                        height: downloadButtonSize,
+                        child: FittedBox(
+                          child: DownloadButton(
+                            url: surah.id,
+                            surahTitle: surah.name,
+                            reciterName: reciterName,
+                            reciterId: reciterId,
+                            initialIsDownloaded: surah.isDownloaded,
+                            initialIsDownloading: surah.isDownloading,
+                            initialProgress: surah.downloadProgress,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  SizedBox(
-                    width: 32,
-                    height: 32,
-                    child: FittedBox(
-                      child: DownloadButton(
-                        url: surah.id,
-                        surahTitle: surah.name,
-                        reciterName: reciterName,
-                        reciterId: reciterId,
-                        initialIsDownloaded: surah.isDownloaded,
-                        initialIsDownloading: surah.isDownloading,
-                        initialProgress: surah.downloadProgress,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),

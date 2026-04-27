@@ -14,11 +14,14 @@ import 'package:tilawa/features/share/presentation/share_progress_messages_l10n.
 import 'package:tilawa/features/share/presentation/utils/share_reciter_options.dart';
 import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
 import 'package:tilawa/features/share/presentation/utils/video_reel_composer_presets.dart';
+import 'package:tilawa/features/share/presentation/widgets/composer_controls.dart';
 import 'package:tilawa/features/share/presentation/widgets/mushaf_page_renderer.dart';
 import 'package:tilawa/features/share/presentation/widgets/reciter_picker_sheet.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_preview_widgets.dart';
+import 'package:tilawa/features/share/presentation/widgets/video_content_renderer.dart';
 import 'package:tilawa/features/share/presentation/widgets/video_reel_design.dart';
-import 'package:tilawa/features/share/presentation/widgets/video_reel_widgets.dart';
+import 'package:tilawa/features/share/presentation/widgets/video_review_panel.dart';
+import 'package:tilawa/features/share/presentation/widgets/video_step_indicator.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class VideoReelComposerScreen extends StatefulWidget {
@@ -224,6 +227,9 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                             state.status == ShareStatus.capturing ||
                             state.status == ShareStatus.generating ||
                             state.status == ShareStatus.sharing;
+                        final isGeneratingVideo =
+                            state.status == ShareStatus.capturing ||
+                            state.status == ShareStatus.generating;
 
                         final fromAyah =
                             state.fromAyah ?? widget.initialFromAyah;
@@ -237,8 +243,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (!isBusy)
-                              VideoStepIndicator(status: state.status),
+                            VideoStepIndicator(status: state.status),
                             if (isReviewing && !isBusy)
                               VideoReviewPanel(
                                 key: const ValueKey('review_panel'),
@@ -249,7 +254,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 onShare: () =>
                                     context.read<ShareCubit>().shareContent(),
                               )
-                            else if (!isBusy)
+                            else
                               ComposerControls(
                                 key: const ValueKey('composer_controls'),
                                 durationPreset: ShareDurationPreset.auto,
@@ -258,6 +263,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 minAyah: state.minAyah ?? 1,
                                 maxAyah: maxAyah,
                                 isBusy: isBusy,
+                                isGeneratingVideo: isGeneratingVideo,
                                 rangeIsValid: _isValidRange(
                                   fromAyah,
                                   toAyah,
@@ -291,33 +297,12 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                     .read<ShareCubit>()
                                     .cancelGeneration(),
                                 onDurationChanged: (_) {},
-                                onReciterTap: () =>
-                                    _showReciterPicker(context, state),
+                                onReciterTap: () => _showReciterPicker(context),
                               ),
                           ],
                         );
                       },
                     ),
-                    floatingActionButton:
-                        BlocSelector<ShareCubit, ShareState, bool>(
-                          selector: (state) =>
-                              state.status != ShareStatus.reviewing,
-                          builder: (context, showFab) {
-                            if (!showFab) return const SizedBox.shrink();
-                            return FloatingActionButton(
-                              key: const ValueKey('composer_fab'),
-                              onPressed: () {
-                                final state = context.read<ShareCubit>().state;
-                                _handleGenerateVideo(
-                                  context,
-                                  state,
-                                  getVerseCount(widget.surahNumber),
-                                );
-                              },
-                              child: const Icon(Icons.movie_creation_outlined),
-                            );
-                          },
-                        ),
                   ),
                 ],
               );
@@ -377,8 +362,14 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     );
   }
 
-  void _showReciterPicker(BuildContext context, ShareState state) {
+  Future<void> _showReciterPicker(BuildContext context) async {
     final cubit = context.read<ShareCubit>();
+    if (cubit.state.reciterOptions.isEmpty) {
+      await cubit.loadReciterOptions();
+      if (!context.mounted) return;
+    }
+
+    final state = cubit.state;
     showModalBottomSheet<ShareReciterOption>(
       context: context,
       isScrollControlled: true,
@@ -489,27 +480,31 @@ class _OffScreenRenderers extends StatelessWidget {
         if (key == null) return const SizedBox.shrink();
 
         return Positioned.fill(
-          child: RepaintBoundary(
-            key: key,
-            child: Container(
-              color: backgroundColor,
-              child: Center(
-                child: AspectRatio(
-                  aspectRatio: 9 / 16,
-                  child: _renderer.build(
-                    context: context,
-                    pageSpec: spec,
-                    surahNumber: surahNumber,
-                    verseBackgroundColor: (s, v) =>
-                        (s == surahNumber &&
-                            v >= spec.fromAyah &&
-                            v <= spec.toAyah)
-                        ? VideoReelDesign.verseHighlightColor
-                        : null,
-                    verseTextColor: (s, v) => null,
-                    textColor: VideoReelDesign.mushafTextColor,
-                    pageBackgroundColor: backgroundColor,
-                    isCapturing: isCapturing,
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: RepaintBoundary(
+                key: key,
+                child: SizedBox(
+                  width: VideoContentRenderer.videoWidth,
+                  height: VideoContentRenderer.videoHeight,
+                  child: ColoredBox(
+                    color: backgroundColor,
+                    child: _renderer.build(
+                      context: context,
+                      pageSpec: spec,
+                      surahNumber: surahNumber,
+                      verseBackgroundColor: (s, v) =>
+                          (s == surahNumber &&
+                              v >= spec.fromAyah &&
+                              v <= spec.toAyah)
+                          ? VideoReelDesign.verseHighlightColor
+                          : null,
+                      verseTextColor: (s, v) => null,
+                      textColor: VideoReelDesign.mushafTextColor,
+                      pageBackgroundColor: backgroundColor,
+                      isCapturing: isCapturing,
+                    ),
                   ),
                 ),
               ),

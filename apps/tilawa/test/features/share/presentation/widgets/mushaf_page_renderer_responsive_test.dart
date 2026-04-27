@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_qcf/quran_qcf.dart';
-import 'package:quran_qcf/src/presentation/widgets/quran_page_painter.dart';
 import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
 import 'package:tilawa/features/share/presentation/widgets/mushaf_page_renderer.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -250,7 +249,6 @@ void main() {
             );
 
             expect(find.byType(PageContent), findsOneWidget);
-            expect(find.byType(QuranPagePainter), findsWidgets);
           },
         );
       }

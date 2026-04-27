@@ -257,6 +257,101 @@ void main() {
     });
   });
 
+  group('TilawaCountProgressRingTokens', () {
+    test('defaults creates expected values', () {
+      final tokens = TilawaCountProgressRingTokens.defaults();
+      expect(tokens.outerSize, 72.0);
+      expect(tokens.innerSize, 62.0);
+      expect(tokens.ringStrokeWidth, 10.0);
+      expect(tokens.activeGradientEndOpacity, 0.8);
+      expect(tokens.countLineHeight, 1.0);
+    });
+
+    test('copyWith updates values preserving others', () {
+      final original = TilawaCountProgressRingTokens.defaults();
+      final updated = original.copyWith(outerSize: 80.0, countFontSize: 40.0);
+      expect(updated.outerSize, 80.0);
+      expect(updated.countFontSize, 40.0);
+      expect(updated.innerSize, original.innerSize);
+    });
+
+    test('lerp interpolates numeric values and EdgeInsets', () {
+      const first = TilawaCountProgressRingTokens(
+        outerSize: 60.0,
+        innerSize: 50.0,
+        ringStrokeWidth: 8.0,
+        doneIconSize: 40.0,
+        countFontSize: 30.0,
+        countLineHeight: 0.9,
+        doneBorderWidth: 1.0,
+        doneBorderOpacity: 0.2,
+        activeGradientEndOpacity: 0.7,
+        doneGradientEndOpacity: 0.6,
+        progressLabelSpacing: 12.0,
+        progressLabelPadding: EdgeInsets.all(4),
+        progressLabelBorderRadius: 16.0,
+        progressLabelBackgroundOpacity: 0.2,
+      );
+      const second = TilawaCountProgressRingTokens(
+        outerSize: 80.0,
+        innerSize: 70.0,
+        ringStrokeWidth: 12.0,
+        doneIconSize: 60.0,
+        countFontSize: 42.0,
+        countLineHeight: 1.1,
+        doneBorderWidth: 3.0,
+        doneBorderOpacity: 0.4,
+        activeGradientEndOpacity: 0.9,
+        doneGradientEndOpacity: 0.8,
+        progressLabelSpacing: 20.0,
+        progressLabelPadding: EdgeInsets.all(8),
+        progressLabelBorderRadius: 24.0,
+        progressLabelBackgroundOpacity: 0.4,
+      );
+      final result = TilawaCountProgressRingTokens.lerp(first, second, 0.5);
+      expect(result.outerSize, closeTo(70.0, 0.01));
+      expect(result.countFontSize, closeTo(36.0, 0.01));
+      expect(result.countLineHeight, closeTo(1.0, 0.01));
+      expect(result.progressLabelBackgroundOpacity, closeTo(0.3, 0.01));
+    });
+  });
+
+  group('TilawaPlayerBackgroundTokens', () {
+    test('defaults creates expected values', () {
+      final tokens = TilawaPlayerBackgroundTokens.defaults();
+      expect(tokens.cacheWidthScale, 2.0);
+      expect(tokens.defaultBlurAmount, 0.0);
+      expect(tokens.defaultOverlayOpacity, 0.4);
+      expect(tokens.overlayColor, Colors.black);
+    });
+
+    test('copyWith updates values preserving others', () {
+      final original = TilawaPlayerBackgroundTokens.defaults();
+      final updated = original.copyWith(defaultOverlayOpacity: 0.5);
+      expect(updated.defaultOverlayOpacity, 0.5);
+      expect(updated.cacheWidthScale, original.cacheWidthScale);
+    });
+
+    test('lerp interpolates values', () {
+      const first = TilawaPlayerBackgroundTokens(
+        cacheWidthScale: 1.0,
+        defaultBlurAmount: 0.0,
+        defaultOverlayOpacity: 0.3,
+        overlayColor: Colors.black,
+      );
+      const second = TilawaPlayerBackgroundTokens(
+        cacheWidthScale: 3.0,
+        defaultBlurAmount: 12.0,
+        defaultOverlayOpacity: 0.5,
+        overlayColor: Colors.white,
+      );
+      final result = TilawaPlayerBackgroundTokens.lerp(first, second, 0.5);
+      expect(result.cacheWidthScale, closeTo(2.0, 0.01));
+      expect(result.defaultBlurAmount, closeTo(6.0, 0.01));
+      expect(result.defaultOverlayOpacity, closeTo(0.4, 0.01));
+    });
+  });
+
   group('TilawaSettingsGroupTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSettingsGroupTokens.defaults();
@@ -349,11 +444,88 @@ void main() {
     });
   });
 
+  group('TilawaAdaptiveShellTokens', () {
+    test('defaults creates expected values', () {
+      final tokens = TilawaAdaptiveShellTokens.defaults();
+      expect(tokens.compactBottomNavBarBaseHeight, 88.0);
+      expect(tokens.bottomNavHorizontalMargin, 16.0);
+      expect(tokens.navButtonMinHeight, 64.0);
+    });
+
+    test('copyWith updates compact bottom nav bar base height', () {
+      final original = TilawaAdaptiveShellTokens.defaults();
+      final updated = original.copyWith(compactBottomNavBarBaseHeight: 92.0);
+      expect(updated.compactBottomNavBarBaseHeight, 92.0);
+      expect(updated.bottomNavRadius, original.bottomNavRadius);
+    });
+
+    test('lerp interpolates compact bottom nav bar base height', () {
+      const first = TilawaAdaptiveShellTokens(
+        compactBottomNavBarBaseHeight: 88.0,
+        bottomNavHorizontalMargin: 16.0,
+        bottomNavVerticalMargin: 4.0,
+        bottomNavInternalPadding: 8.0,
+        bottomNavRadius: 32.0,
+        bottomNavInnerRadius: 24.0,
+        bottomNavBorderWidth: 1.0,
+        bottomNavItemGap: 4.0,
+        sideRailRadius: 16.0,
+        sideRailShadowOpacity: 0.05,
+        sideRailShadowBlur: 12.0,
+        sideRailShadowOffset: Offset(2, 0),
+        navButtonMinHeight: 64.0,
+        navButtonVerticalPadding: 4.0,
+        navButtonGap: 4.0,
+        navButtonIconSize: 22.0,
+        navButtonSelectedCenterScale: 1.1,
+        navButtonUnselectedScale: 0.95,
+        navButtonSelectedBackgroundOpacity: 0.2,
+        navButtonSelectedCenterOpacity: 0.25,
+        navButtonLabelFontSize: 10.0,
+        navButtonSelectedLabelWeight: FontWeight.w700,
+        navButtonUnselectedLabelWeight: FontWeight.w500,
+      );
+      const second = TilawaAdaptiveShellTokens(
+        compactBottomNavBarBaseHeight: 96.0,
+        bottomNavHorizontalMargin: 20.0,
+        bottomNavVerticalMargin: 8.0,
+        bottomNavInternalPadding: 12.0,
+        bottomNavRadius: 36.0,
+        bottomNavInnerRadius: 28.0,
+        bottomNavBorderWidth: 2.0,
+        bottomNavItemGap: 6.0,
+        sideRailRadius: 20.0,
+        sideRailShadowOpacity: 0.08,
+        sideRailShadowBlur: 16.0,
+        sideRailShadowOffset: Offset(4, 0),
+        navButtonMinHeight: 68.0,
+        navButtonVerticalPadding: 6.0,
+        navButtonGap: 6.0,
+        navButtonIconSize: 24.0,
+        navButtonSelectedCenterScale: 1.2,
+        navButtonUnselectedScale: 1.0,
+        navButtonSelectedBackgroundOpacity: 0.25,
+        navButtonSelectedCenterOpacity: 0.3,
+        navButtonLabelFontSize: 11.0,
+        navButtonSelectedLabelWeight: FontWeight.w800,
+        navButtonUnselectedLabelWeight: FontWeight.w600,
+      );
+
+      final result = TilawaAdaptiveShellTokens.lerp(first, second, 0.5);
+      expect(result.compactBottomNavBarBaseHeight, closeTo(92.0, 0.01));
+      expect(result.bottomNavHorizontalMargin, closeTo(18.0, 0.01));
+      expect(result.navButtonIconSize, closeTo(23.0, 0.01));
+    });
+  });
+
   group('TilawaImmersiveComposerTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaImmersiveComposerTokens.defaults();
+      expect(tokens.defaultAutoHideDuration, const Duration(seconds: 3));
+      expect(tokens.transitionDuration, const Duration(milliseconds: 300));
       expect(tokens.backgroundBlurScale, 0.9);
       expect(tokens.backgroundOverlayOpacity, 0.42);
+      expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.compactHeightBreakpoint, 760.0);
       expect(tokens.compactPanelHeightFactor, 0.5);
       expect(tokens.headerButtonSize, 44.0);
@@ -372,8 +544,11 @@ void main() {
 
     test('lerp interpolates all numeric values', () {
       const first = TilawaImmersiveComposerTokens(
+        defaultAutoHideDuration: Duration(seconds: 2),
+        transitionDuration: Duration(milliseconds: 250),
         backgroundBlurScale: 0.8,
         backgroundOverlayOpacity: 0.4,
+        overlayBorderOpacity: 0.08,
         compactHeightBreakpoint: 700.0,
         compactPanelHeightFactor: 0.45,
         regularPanelHeightFactor: 0.4,
@@ -385,8 +560,11 @@ void main() {
         headerIconSizeOffset: 1.0,
       );
       const second = TilawaImmersiveComposerTokens(
+        defaultAutoHideDuration: Duration(seconds: 4),
+        transitionDuration: Duration(milliseconds: 350),
         backgroundBlurScale: 0.95,
         backgroundOverlayOpacity: 0.5,
+        overlayBorderOpacity: 0.12,
         compactHeightBreakpoint: 800.0,
         compactPanelHeightFactor: 0.55,
         regularPanelHeightFactor: 0.5,
@@ -414,6 +592,8 @@ void main() {
       expect(tokens.glassPanel, isNotNull);
       expect(tokens.iconActionButton, isNotNull);
       expect(tokens.searchField, isNotNull);
+      expect(tokens.countProgressRing, isNotNull);
+      expect(tokens.playerBackground, isNotNull);
       expect(tokens.settingsGroup, isNotNull);
       expect(tokens.immersiveComposer, isNotNull);
     });

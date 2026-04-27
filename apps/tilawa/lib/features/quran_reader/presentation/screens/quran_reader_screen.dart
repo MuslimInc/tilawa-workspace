@@ -116,7 +116,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   bool _didReportInitialPreparedWindow = false;
   late final ValueNotifier<bool> _isScrollingNotifier;
 
-  ThemeData? _cachedThemeData;
+  ThemeData? _cachedAppTheme;
   QuranReaderTheme? _cachedReaderTheme;
   SystemUiOverlayStyle? _cachedReaderSystemUiStyle;
   SystemUiOverlayStyle? _cachedAppSystemUiStyle;
@@ -198,18 +198,16 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         (_lastPreparedViewportWidth! - viewportWidth).abs() > 0.5;
     final bool didOrientationChange =
         _lastPreparedOrientation != currentOrientation;
-    final bool didThemeChange = _cachedReaderTheme != incomingReaderTheme;
+    final bool didThemeChange = _cachedAppTheme != incomingTheme;
     _settledCacheExtent = 0.0;
     if (!_isInteracting &&
         _hasPreparedCoverageFor(_currentPageNotifier.value) &&
         (_cacheExtentNotifier.value - _settledCacheExtent).abs() > 0.5) {
       _cacheExtentNotifier.value = _settledCacheExtent;
     }
-    if (_cachedReaderTheme != incomingReaderTheme || _cachedThemeData == null) {
+    if (didThemeChange || _cachedReaderTheme == null) {
+      _cachedAppTheme = incomingTheme;
       _cachedReaderTheme = incomingReaderTheme;
-      _cachedThemeData = incomingTheme.copyWith(
-        scaffoldBackgroundColor: incomingReaderTheme.pageBackground,
-      );
       // Precache assets once theme and media query info is stable
       unawaited(QuranFontService.precacheQuranAssets(context));
     }
@@ -318,6 +316,38 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     );
   }
 
+  SystemUiOverlayStyle _buildShareSheetSystemUiOverlayStyle(ThemeData theme) {
+    final Color statusBarColor = theme.colorScheme.scrim.withValues(
+      alpha: 0.45,
+    );
+    final Color navigationBarColor = theme.colorScheme.surface;
+
+    final Brightness statusBarColorBrightness =
+        ThemeData.estimateBrightnessForColor(statusBarColor);
+    final Brightness statusBarIconBrightness =
+        statusBarColorBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    final Brightness navigationBarColorBrightness =
+        ThemeData.estimateBrightnessForColor(navigationBarColor);
+    final Brightness navigationBarIconBrightness =
+        navigationBarColorBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    return SystemUiOverlayStyle(
+      statusBarColor: statusBarColor,
+      statusBarIconBrightness: statusBarIconBrightness,
+      statusBarBrightness: statusBarColorBrightness,
+      systemNavigationBarColor: navigationBarColor,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: navigationBarIconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
+  }
+
   Future<void> _prepareForExit() {
     return _pendingExitPreparation ??= _restoreAppSystemUiMode(
       waitForSystemUiFrame: true,
@@ -338,7 +368,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   Future<void> _restoreAppSystemUiMode({
     bool waitForSystemUiFrame = false,
   }) async {
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       _cachedAppSystemUiStyle ?? const SystemUiOverlayStyle(),
     );
@@ -355,37 +384,34 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         if (didPop || _allowSystemPop) return;
         unawaited(_handleExitRequest());
       },
-      child: Theme(
-        data: _cachedThemeData!,
-        child: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: _cachedReaderSystemUiStyle!,
-          child: _ReaderListener(
-            isProgrammaticJump: _isProgrammaticJump,
-            syncToPage: _syncToPage,
-            updateSystemUiConfig: _updateSystemUiConfig,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: _cachedReaderSystemUiStyle!,
+        child: _ReaderListener(
+          isProgrammaticJump: _isProgrammaticJump,
+          syncToPage: _syncToPage,
+          updateSystemUiConfig: _updateSystemUiConfig,
+          showOverlaysNotifier: _showOverlaysNotifier,
+          child: _ReaderStack(
+            pageController: _pageController,
+            currentPageNotifier: _currentPageNotifier,
+            cacheExtentNotifier: _cacheExtentNotifier,
+            preparedWindowNotifier: _preparedWindowNotifier,
             showOverlaysNotifier: _showOverlaysNotifier,
-            child: _ReaderStack(
-              pageController: _pageController,
-              currentPageNotifier: _currentPageNotifier,
-              cacheExtentNotifier: _cacheExtentNotifier,
-              preparedWindowNotifier: _preparedWindowNotifier,
-              showOverlaysNotifier: _showOverlaysNotifier,
-              screenshotBoundaryKey: _screenshotBoundaryKey,
-              warmingNotifier: _warmingNotifier,
-              headerFontSizeMultiplier: _headerFontSizeMultiplier,
-              readerTheme: _cachedReaderTheme!,
-              onPageChanged: _handleOnPageChanged,
-              getSurahName: _getSurahName,
-              jumpToSurah: _jumpToSurah,
-              handleShowIndex: _handleShowIndex,
-              showSurahIndex: _showSurahIndex,
-              showShareOptions: _showShareOptions,
-              jumpToPage: _jumpToPage,
-              onWarming: _handleOnWarming,
-              onPointerDown: _pauseWarming,
-              onPointerUp: _resumeWarming,
-              isScrollingNotifier: _isScrollingNotifier,
-            ),
+            screenshotBoundaryKey: _screenshotBoundaryKey,
+            warmingNotifier: _warmingNotifier,
+            headerFontSizeMultiplier: _headerFontSizeMultiplier,
+            readerTheme: _cachedReaderTheme!,
+            onPageChanged: _handleOnPageChanged,
+            getSurahName: _getSurahName,
+            jumpToSurah: _jumpToSurah,
+            handleShowIndex: _handleShowIndex,
+            showSurahIndex: _showSurahIndex,
+            showShareOptions: _showShareOptions,
+            jumpToPage: _jumpToPage,
+            onWarming: _handleOnWarming,
+            onPointerDown: _pauseWarming,
+            onPointerUp: _resumeWarming,
+            isScrollingNotifier: _isScrollingNotifier,
           ),
         ),
       ),
@@ -887,6 +913,9 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final shareCubit = context.read<ShareCubit>();
     final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     final navigator = Navigator.of(context);
+    final theme = Theme.of(context);
+    final readerOverlayStyle =
+        _cachedReaderSystemUiStyle ?? const SystemUiOverlayStyle();
 
     // Capture preview bytes concurrently with the route transition so the
     // push is not blocked by GPU readback + PNG encoding (~50–100ms on
@@ -914,6 +943,9 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
           '[SHARE_OPEN] pushing route | took=${DateTime.now().millisecondsSinceEpoch - t0}ms before push',
     );
     fontLoaderBloc.pauseBackgroundWarmUp();
+    SystemChrome.setSystemUIOverlayStyle(
+      _buildShareSheetSystemUiOverlayStyle(theme),
+    );
     try {
       await showModalBottomSheet<void>(
         context: context,
@@ -966,6 +998,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         ),
       );
     } finally {
+      SystemChrome.setSystemUIOverlayStyle(readerOverlayStyle);
       fontLoaderBloc.resumeBackgroundWarmUp();
     }
 

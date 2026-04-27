@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/logger.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/usecases/check_fonts_downloaded_use_case.dart';
 import '../../domain/usecases/download_quran_fonts_use_case.dart';
@@ -36,7 +37,7 @@ abstract class QuranFontLoaderState with _$QuranFontLoaderState {
   const factory QuranFontLoaderState.registering() = _Registering;
   const factory QuranFontLoaderState.warming(int current, int total) = _Warming;
   const factory QuranFontLoaderState.success() = _Success;
-  const factory QuranFontLoaderState.error(String message) = _Error;
+  const factory QuranFontLoaderState.error(Failure failure) = _Error;
 }
 
 @injectable
@@ -240,7 +241,7 @@ class QuranFontLoaderBloc
       _debugLog(
         () => '[FONT] ERROR: $e | t=${DateTime.now().millisecondsSinceEpoch}ms',
       );
-      emit(QuranFontLoaderState.error(e.toString()));
+      emit(QuranFontLoaderState.error(UnexpectedFailure(e.toString())));
     }
   }
 

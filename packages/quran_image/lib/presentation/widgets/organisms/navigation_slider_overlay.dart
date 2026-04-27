@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../core/design_tokens/design_tokens.dart';
 import '../../../core/perf_logger.dart';
 import '../../../domain/domain.dart';
 import '../molecules/molecules.dart';
@@ -25,7 +25,6 @@ class NavigationSliderOverlay extends StatelessWidget {
     required this.onNextPageRequested,
     required this.onInteractionStart,
     required this.onInteractionEnd,
-    this.onShare,
   });
 
   final double screenWidth;
@@ -38,79 +37,111 @@ class NavigationSliderOverlay extends StatelessWidget {
   final VoidCallback onNextPageRequested;
   final VoidCallback onInteractionStart;
   final VoidCallback onInteractionEnd;
-  final VoidCallback? onShare;
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final bool isLandscape = screenWidth > screenHeight;
-    final double effectiveHeight = isLandscape
-        ? screenWidth // use longer side for sizing in landscape
-        : screenHeight;
-    final sliderHeight = effectiveHeight * AppDimensions.sliderHeightRatio;
-    final horizontalPadding =
-        screenWidth * AppDimensions.sliderHorizontalPaddingRatio;
-    final bottomMargin = screenHeight * AppDimensions.sliderBottomMarginRatio;
-    final borderRadius = screenWidth * AppDimensions.sliderBorderRadiusRatio;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final componentTokens = theme.extension<TilawaComponentTokens>();
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final panelRadius = BorderRadius.circular(
+      tokens.radiusExtraLarge + tokens.spaceSmall,
+    );
+    final panelPadding = EdgeInsets.fromLTRB(
+      tokens.spaceLarge,
+      tokens.spaceMedium,
+      tokens.spaceLarge,
+      tokens.spaceLarge,
+    );
 
-    // Static decoration container stays outside BlocBuilder so it is not
-    // recreated on every displayPage tick during slider drags.
     return GestureDetector(
       onTapDown: (_) => onInteractionStart(),
       onTapUp: (_) => onInteractionEnd(),
       onHorizontalDragStart: (_) => onInteractionStart(),
       onHorizontalDragEnd: (_) => onInteractionEnd(),
-      child: Container(
-        margin: EdgeInsets.only(
-          left: horizontalPadding,
-          right: horizontalPadding,
-          bottom: bottomMargin,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceLarge,
+          0,
+          tokens.spaceLarge,
+          bottomInset + tokens.spaceMedium,
         ),
-        padding: EdgeInsets.symmetric(
-          horizontal: horizontalPadding,
-          vertical: sliderHeight * 0.1,
-        ),
-        decoration: BoxDecoration(
-          color: AppColors.sliderBackground.withValues(alpha: 0.95),
-          borderRadius: BorderRadius.circular(borderRadius),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
-        ),
-        child: Builder(
-          builder: (context) {
-            final sw = PerfLogger.startTimer();
-            final content = Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                PageSlider(
-                  currentPage: state.displayPage,
-                  totalPages: state.totalPages,
-                  onChanged: (value) => onPreviewPageChanged(value.round()),
-                  onChangeEnd: (value) =>
-                      onPageNavigationRequested(value.round()),
-                  screenWidth: screenWidth,
-                ),
-                SizedBox(height: sliderHeight * 0.15),
-                NavigationButtonGroup(
-                  currentPage: state.displayPage,
-                  totalPages: state.totalPages,
-                  onPrevious: canGoToPreviousPage
-                      ? onPreviousPageRequested
-                      : null,
-                  onNext: canGoToNextPage ? onNextPageRequested : null,
-                  onShare: onShare,
-                  screenWidth: screenWidth,
-                ),
-              ],
-            );
-            PerfLogger.logElapsed(
-              sw,
-              widgetName: 'NavigationSliderOverlay',
-              message:
-                  'build displayPage=${state.displayPage} '
-                  'currentPage=${state.currentPage}',
-            );
-            return content;
-          },
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: tokens.contentMaxWidthForm),
+            child: Builder(
+              builder: (context) {
+                final content = Builder(
+                  builder: (context) {
+                    final sw = PerfLogger.startTimer();
+                    final content = Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PageSlider(
+                          currentPage: state.displayPage,
+                          totalPages: state.totalPages,
+                          onChanged: (value) =>
+                              onPreviewPageChanged(value.round()),
+                          onChangeEnd: (value) =>
+                              onPageNavigationRequested(value.round()),
+                          screenWidth: screenWidth,
+                        ),
+                        SizedBox(height: tokens.spaceMedium),
+                        NavigationButtonGroup(
+                          currentPage: state.displayPage,
+                          totalPages: state.totalPages,
+                          onPrevious: canGoToPreviousPage
+                              ? onPreviousPageRequested
+                              : null,
+                          onNext: canGoToNextPage ? onNextPageRequested : null,
+                          screenWidth: screenWidth,
+                        ),
+                      ],
+                    );
+                    PerfLogger.logElapsed(
+                      sw,
+                      widgetName: 'NavigationSliderOverlay',
+                      message:
+                          'build displayPage=${state.displayPage} '
+                          'currentPage=${state.currentPage}',
+                    );
+                    return content;
+                  },
+                );
+
+                if (componentTokens != null) {
+                  return TilawaGlassPanel(
+                    enableBackdropBlur: true,
+                    borderRadius: panelRadius,
+                    backgroundColor: colorScheme.surface.withValues(
+                      alpha: tokens.opacityGlass,
+                    ),
+                    borderColor: colorScheme.primary.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+                    padding: panelPadding,
+                    child: content,
+                  );
+                }
+
+                return DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface.withValues(
+                      alpha: tokens.opacityGlass,
+                    ),
+                    borderRadius: panelRadius,
+                    border: Border.all(
+                      color: colorScheme.primary.withValues(
+                        alpha: tokens.opacityMedium,
+                      ),
+                    ),
+                  ),
+                  child: Padding(padding: panelPadding, child: content),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

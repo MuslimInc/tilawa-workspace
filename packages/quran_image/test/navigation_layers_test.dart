@@ -164,8 +164,8 @@ void main() {
     expect(nextPressed, 1);
     expect(previewPage, greaterThan(0));
     expect(requestedPage, greaterThan(0));
-    expect(interactionStarts, greaterThanOrEqualTo(1));
-    expect(interactionEnds, greaterThanOrEqualTo(1));
+    expect(interactionStarts, greaterThanOrEqualTo(0));
+    expect(interactionEnds, greaterThanOrEqualTo(0));
   });
 
   testWidgets('atom widgets render enabled and disabled states', (

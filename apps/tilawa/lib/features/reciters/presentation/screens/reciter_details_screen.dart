@@ -191,7 +191,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           floatingActionButtonLocation: showBottomPlayer
               ? _CustomFloatingActionButtonLocation(
                   offset:
-                      BottomPlayerWidget.collapsedHeight +
+                      BottomPlayerWidget.collapsedHeight(context) +
                       bottomPlayerOffset +
                       tokens.spaceExtraLarge,
                 )
@@ -418,12 +418,15 @@ class _ReciterDetailsContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final tokens = Theme.of(context).tokens;
+    final tokens = theme.tokens;
     final double bottomPadding =
         bottomPlayerOffset +
         (showBottomPlayer
-            ? BottomPlayerWidget.collapsedHeight + tokens.spaceExtraLarge
+            ? BottomPlayerWidget.collapsedHeight(context) +
+                  tokens.spaceExtraLarge
             : tokens.spaceExtraLarge);
+    final double emptyStateIconSize =
+        tokens.iconSizeExtraLarge + tokens.iconSizeSmall;
     final currentAudio = context.select(
       (AudioPlayerBloc bloc) => bloc.state.currentAudio,
     );
@@ -436,15 +439,15 @@ class _ReciterDetailsContent extends StatelessWidget {
               children: [
                 Icon(
                   Icons.error_outline_rounded,
-                  size: 64,
+                  size: emptyStateIconSize,
                   color: theme.colorScheme.error,
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: tokens.spaceLarge),
                 Text(
                   state.errorMessage ?? context.l10n.anErrorOccurred,
-                  style: TextStyle(fontSize: 16),
+                  style: theme.textTheme.bodyLarge,
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: tokens.spaceLarge),
                 ElevatedButton.icon(
                   onPressed: () {
                     if (reciter.moshaf.isNotEmpty) {
@@ -459,9 +462,12 @@ class _ReciterDetailsContent extends StatelessWidget {
                   icon: const Icon(Icons.refresh_rounded),
                   label: Text(context.l10n.retry),
                   style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceExtraLarge,
+                      vertical: tokens.spaceMedium,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(tokens.radiusSmall),
                     ),
                   ),
                 ),
@@ -476,11 +482,17 @@ class _ReciterDetailsContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.music_off_rounded, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                  Icon(
+                    Icons.music_off_rounded,
+                    size: emptyStateIconSize,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  SizedBox(height: tokens.spaceLarge),
                   Text(
                     context.l10n.noSurahsAvailable,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -495,11 +507,17 @@ class _ReciterDetailsContent extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search_off_rounded, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                  Icon(
+                    Icons.search_off_rounded,
+                    size: emptyStateIconSize,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  SizedBox(height: tokens.spaceLarge),
                   Text(
                     context.l10n.noSurahsMatchSearch,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -510,17 +528,17 @@ class _ReciterDetailsContent extends StatelessWidget {
         if (state.viewMode == ReciterViewMode.grid) {
           return SliverPadding(
             padding: EdgeInsets.only(
-              top: 4,
-              left: 16,
-              right: 16,
+              top: tokens.spaceExtraSmall,
+              left: tokens.spaceLarge,
+              right: tokens.spaceLarge,
               bottom: bottomPadding,
             ),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 180,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 0.99,
+                maxCrossAxisExtent: tokens.cardCompactWidthThreshold,
+                mainAxisSpacing: tokens.spaceMedium,
+                crossAxisSpacing: tokens.spaceMedium,
+                mainAxisExtent: tokens.cardCompactHeightThreshold,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final SurahEntity surah = filteredSurahs[index];
@@ -544,9 +562,9 @@ class _ReciterDetailsContent extends StatelessWidget {
 
         return SliverPadding(
           padding: EdgeInsets.only(
-            top: 4,
-            left: 16,
-            right: 16,
+            top: tokens.spaceExtraSmall,
+            left: tokens.spaceLarge,
+            right: tokens.spaceLarge,
             bottom: bottomPadding,
           ),
           sliver: SliverList(
@@ -557,7 +575,7 @@ class _ReciterDetailsContent extends StatelessWidget {
                   (currentAudio != null && currentAudio.url == surah.audio.url);
               final key = isPlaying ? playingSurahKey : null;
               return Padding(
-                padding: EdgeInsets.symmetric(vertical: 4),
+                padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
                 child: SurahListTile(
                   key: key,
                   surah: surah,
@@ -574,24 +592,26 @@ class _ReciterDetailsContent extends StatelessWidget {
       case ReciterDetailsStatus.loading:
         return SliverPadding(
           padding: EdgeInsets.only(
-            top: 16,
-            left: 16,
-            right: 16,
+            top: tokens.spaceLarge,
+            left: tokens.spaceLarge,
+            right: tokens.spaceLarge,
             bottom: bottomPadding,
           ),
           sliver: SliverSkeletonizer(
             child: state.viewMode == ReciterViewMode.grid
                 ? SliverGrid(
                     gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 180,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.99,
+                      maxCrossAxisExtent: tokens.cardCompactWidthThreshold,
+                      mainAxisSpacing: tokens.spaceMedium,
+                      crossAxisSpacing: tokens.spaceMedium,
+                      mainAxisExtent: tokens.cardCompactHeightThreshold,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => Card(
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(
+                            tokens.radiusLarge,
+                          ),
                         ),
                         child: const SizedBox.expand(),
                       ),

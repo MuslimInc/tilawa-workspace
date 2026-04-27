@@ -47,9 +47,10 @@
 - [ ] CHK020 **Component Classification**: Used components classified (foundation/atoms/molecules/organisms)
 - [ ] CHK021 **Design Tokens**: Colors, typography, spacing from design tokens (not hardcoded)
 - [ ] CHK022 **Localization**: i18n support via l10n.yaml, not English-only strings
-- [ ] CHK023 **Theme Support**: Dark mode tested and working (if app supports dark theme)
-- [ ] CHK024 **Responsive Behavior**: Compact (phone), medium (tablet), expanded layouts designed
-- [ ] CHK025 **RTL Support**: Arabic/RTL text and icons properly mirrored, tested
+- [ ] CHK023 **Dart/Flutter UI Idioms**: Simple fixed gaps use `Row`/`Column`/`Flex.spacing`; Dart dot shorthands used where receiver type is obvious
+- [ ] CHK024 **Theme Support**: Dark mode tested and working (if app supports dark theme)
+- [ ] CHK025 **Responsive Behavior**: Compact (phone), medium (tablet), expanded layouts designed
+- [ ] CHK026 **RTL Support**: Arabic/RTL text and icons properly mirrored, tested
 
 ---
 
@@ -57,15 +58,15 @@
 
 **Reference**: `.specify/memory/constitution.md` - Section VI: Safe Refactoring & Delivery
 
-- [ ] CHK026 **Domain Tests**: Entity, repository mock, use case tests written first (TDD)
-- [ ] CHK027 **Data Tests**: Mapper, data source, repository impl tests with mocked external data
-- [ ] CHK028 **BLoC Tests**: Event→state mappings tested, success/failure scenarios covered
-- [ ] CHK029 **Widget Tests**: Page/component rendering with BLoC state changes
-- [ ] CHK030 **Responsive Tests**: Compact/medium/expanded layouts rendering correctly
-- [ ] CHK031 **RTL Tests**: Arabic text and icon mirroring behavior verified
-- [ ] CHK032 **Accessibility Tests**: Touch targets ≥48dp, semantic labels, screen reader compatible
-- [ ] CHK033 **Performance Tests**: Critical path measured (startup, scroll, user interactions)
-- [ ] CHK034 **Test Coverage**: Critical paths ≥80%, no untested error handling
+- [ ] CHK027 **Domain Tests**: Entity, repository mock, use case tests written first (TDD)
+- [ ] CHK028 **Data Tests**: Mapper, data source, repository impl tests with mocked external data
+- [ ] CHK029 **BLoC Tests**: Event→state mappings tested, success/failure scenarios covered
+- [ ] CHK030 **Widget Tests**: Page/component rendering with BLoC state changes
+- [ ] CHK031 **Responsive Tests**: Compact/medium/expanded layouts rendering correctly
+- [ ] CHK032 **RTL Tests**: Arabic text and icon mirroring behavior verified
+- [ ] CHK033 **Accessibility Tests**: Touch targets ≥48dp, semantic labels, screen reader compatible
+- [ ] CHK034 **Performance Tests**: Critical path measured (startup, scroll, user interactions)
+- [ ] CHK035 **Test Coverage**: Critical paths ≥80%, no untested error handling
 
 ---
 
@@ -73,14 +74,14 @@
 
 **Reference**: `.specify/memory/constitution.md` - Section IV: Performance-First Flutter Delivery
 
-- [ ] CHK035 **Build Optimization**: Hot paths avoid expensive work in `build()`
-- [ ] CHK036 **Lazy Loading**: Lists, grids use ListView.builder/GridView.builder with visible item count
-- [ ] CHK037 **Caching**: Images, data cached appropriately (memory/disk/network layer)
-- [ ] CHK038 **Frame Budget**: Feature target 60 fps, raster time <16.7ms
-- [ ] CHK039 **Startup Time**: Cold launch <500ms from app root to first feature frame
-- [ ] CHK040 **Smooth Scrolling**: No jank when scrolling through content (if scrollable)
-- [ ] CHK041 **Quran Text Rendering**: If rendering Quranic text, uses QCF fonts, pre-warmed
-- [ ] CHK042 **Memory**: No memory leaks detected, disposal patterns used (StreamSubscription, AnimationController, etc.)
+- [ ] CHK036 **Build Optimization**: Hot paths avoid expensive work in `build()`
+- [ ] CHK037 **Lazy Loading**: Lists, grids use ListView.builder/GridView.builder with visible item count
+- [ ] CHK038 **Caching**: Images, data cached appropriately (memory/disk/network layer)
+- [ ] CHK039 **Frame Budget**: Feature target 60 fps, raster time <16.7ms
+- [ ] CHK040 **Startup Time**: Cold launch <500ms from app root to first feature frame
+- [ ] CHK041 **Smooth Scrolling**: No jank when scrolling through content (if scrollable)
+- [ ] CHK042 **Quran Text Rendering**: If rendering Quranic text, uses QCF fonts, pre-warmed
+- [ ] CHK043 **Memory**: No memory leaks detected, disposal patterns used (StreamSubscription, AnimationController, etc.)
 
 ---
 
@@ -88,13 +89,13 @@
 
 **Reference**: `.specify/memory/constitution.md` - Section V: Structured Observability & Diagnostics
 
-- [ ] CHK043 **Structured Logging**: BLoC state transitions logged with context
-- [ ] CHK044 **Error Logging**: Failures logged with stack trace and error type
-- [ ] CHK045 **Route Logging**: Route changes logged (user navigation flow)
-- [ ] CHK046 **Async Duration Logging**: Long operations (API calls, file I/O) timed and logged
-- [ ] CHK047 **User Action Logging**: Analytics events for critical user flows
-- [ ] CHK048 **Retry Logic**: Recoverable errors retried with exponential backoff, logged
-- [ ] CHK049 **Diagnostic Tags**: Features tagged consistently (e.g., `[AppLaunch][FeatureName]`)
+- [ ] CHK044 **Structured Logging**: BLoC state transitions logged with context
+- [ ] CHK045 **Error Logging**: Failures logged with stack trace and error type
+- [ ] CHK046 **Route Logging**: Route changes logged (user navigation flow)
+- [ ] CHK047 **Async Duration Logging**: Long operations (API calls, file I/O) timed and logged
+- [ ] CHK048 **User Action Logging**: Analytics events for critical user flows
+- [ ] CHK049 **Retry Logic**: Recoverable errors retried with exponential backoff, logged
+- [ ] CHK050 **Diagnostic Tags**: Features tagged consistently (e.g., `[AppLaunch][FeatureName]`)
 
 ---
 
@@ -102,12 +103,12 @@
 
 **Reference**: `.specify/memory/constitution.md` - Section VI: Safe Refactoring & Delivery
 
-- [ ] CHK050 **Backward Compatibility**: No breaking changes to public APIs or data contracts
-- [ ] CHK051 **Migration Path**: If data schema changed, migration logic documented
-- [ ] CHK052 **Downstream Impact**: Changes reviewed for impact on other features
-- [ ] CHK053 **Rollback Plan**: In case of critical issue, rollback documented
-- [ ] CHK054 **Code Review**: Feature PR reviewed for architecture, testing, performance
-- [ ] CHK055 **Documentation**: README or inline docs explain architecture, testing approach, known limitations
+- [ ] CHK051 **Backward Compatibility**: No breaking changes to public APIs or data contracts
+- [ ] CHK052 **Migration Path**: If data schema changed, migration logic documented
+- [ ] CHK053 **Downstream Impact**: Changes reviewed for impact on other features
+- [ ] CHK054 **Rollback Plan**: In case of critical issue, rollback documented
+- [ ] CHK055 **Code Review**: Feature PR reviewed for architecture, testing, performance
+- [ ] CHK056 **Documentation**: README or inline docs explain architecture, testing approach, known limitations
 
 ---
 

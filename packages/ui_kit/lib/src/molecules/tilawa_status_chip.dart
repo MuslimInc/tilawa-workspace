@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../foundation/design_tokens.dart';
+
+import '../foundation/component_tokens.dart';
+import 'tilawa_chip.dart';
 
 /// A standardized status chip used for badges and status indicators.
 class TilawaStatusChip extends StatelessWidget {
@@ -21,38 +23,22 @@ class TilawaStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final tokens = theme.componentTokens.chip;
+    final effectiveForeground = foregroundColor ?? theme.colorScheme.onSurface;
 
-    return Container(
-      padding:
-          padding ??
-          EdgeInsets.symmetric(
-            horizontal: tokens.spaceExtraSmall,
-            vertical: tokens.spaceTiny,
-          ),
-      decoration: BoxDecoration(
-        color: backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
-        borderRadius: BorderRadius.circular(tokens.radiusSmall),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: tokens.spaceExtraSmall,
-        children: [
-          if (icon != null)
-            Icon(
-              icon,
-              size: tokens.iconSizeSmall - 2,
-              color: foregroundColor ?? theme.colorScheme.onSurface,
-            ),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w900,
-              color: foregroundColor ?? theme.colorScheme.onSurface,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
+    return TilawaChip(
+      label: label,
+      icon: icon,
+      backgroundColor:
+          backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
+      foregroundColor: effectiveForeground,
+      padding: padding ?? tokens.compactPadding,
+      borderRadius: tokens.roundedRadius,
+      iconSize: tokens.compactIconSize,
+      textStyle: theme.textTheme.labelSmall?.copyWith(
+        fontWeight: tokens.statusFontWeight,
+        color: effectiveForeground,
+        letterSpacing: tokens.statusLetterSpacing,
       ),
     );
   }

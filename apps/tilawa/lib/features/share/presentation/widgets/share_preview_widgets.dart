@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:video_player/video_player.dart';
 
@@ -170,39 +172,131 @@ class GeneratedVideoPreview extends StatefulWidget {
 
 class _GeneratedVideoPreviewState extends State<GeneratedVideoPreview> {
   VideoPlayerController? _controller;
+  bool _isInitializing = false;
+  Object? _initError;
+
+  void _log(String message) {
+    debugPrint('[GeneratedVideoPreview] $message');
+  }
+
+  void _onControllerUpdate() {
+    final controller = _controller;
+    if (controller == null) return;
+    final value = controller.value;
+    if (value.hasError) {
+      _log('controller error: ${value.errorDescription}');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _log('initState filePath=${widget.filePath} isMuted=${widget.isMuted}');
     _init();
   }
 
   Future<void> _init() async {
-    _controller = VideoPlayerController.file(File(widget.filePath));
-    await _controller!.initialize();
-    await _controller!.setLooping(true);
-    await _controller!.setVolume(widget.isMuted ? 0 : 1);
-    await _controller!.play();
-    if (mounted) setState(() {});
+    _isInitializing = true;
+    _initError = null;
+
+    final file = File(widget.filePath);
+    final bool exists = file.existsSync();
+    int lengthBytes = -1;
+    if (exists) {
+      try {
+        lengthBytes = file.lengthSync();
+      } catch (_) {
+        lengthBytes = -1;
+      }
+    }
+
+    _log(
+      'init start path=${widget.filePath} exists=$exists bytes=$lengthBytes',
+    );
+
+    try {
+      final controller = VideoPlayerController.file(file);
+      _controller = controller;
+      controller.addListener(_onControllerUpdate);
+
+      await controller.initialize().timeout(const Duration(seconds: 8));
+      _log(
+        'initialized isInitialized=${controller.value.isInitialized} '
+        'size=${controller.value.size} duration=${controller.value.duration}',
+      );
+
+      await controller.setLooping(true);
+      await controller.setVolume(widget.isMuted ? 0 : 1);
+      await controller.play();
+      _log('play started muted=${widget.isMuted}');
+    } catch (error, stackTrace) {
+      _initError = error;
+      _log('init failed: $error');
+      _log('stack: $stackTrace');
+    } finally {
+      _isInitializing = false;
+      if (mounted) setState(() {});
+    }
   }
 
   @override
   void didUpdateWidget(GeneratedVideoPreview oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.filePath != widget.filePath) {
+      _log('filePath changed old=${oldWidget.filePath} new=${widget.filePath}');
+      final oldController = _controller;
+      _controller = null;
+      oldController?.removeListener(_onControllerUpdate);
+      oldController?.dispose();
+      _init();
+      return;
+    }
+
     if (oldWidget.isMuted != widget.isMuted) {
+      _log('mute changed -> ${widget.isMuted}');
       _controller?.setVolume(widget.isMuted ? 0 : 1);
     }
   }
 
   @override
   void dispose() {
+    _log('dispose filePath=${widget.filePath}');
+    _controller?.removeListener(_onControllerUpdate);
     _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_initError != null && kDebugMode) {
+      _log('build while initError=$_initError');
+    }
+
+    if (_initError != null) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 28),
+              const SizedBox(height: 8),
+              Text(
+                context.l10n.reelPreviewLoadFailed,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_controller == null || !_controller!.value.isInitialized) {
+      if (_isInitializing && kDebugMode) {
+        _log('build loading: waiting for controller initialization');
+      }
       return const Center(child: CircularProgressIndicator());
     }
 

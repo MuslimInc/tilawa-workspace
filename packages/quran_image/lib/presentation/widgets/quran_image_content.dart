@@ -18,7 +18,8 @@ class QuranImageContent extends StatelessWidget {
     required this.surahHeaderLayoutPolicy,
     required this.imageCacheRepository,
     required this.devicePixelRatio,
-    this.backgroundColor = const Color(0xFFFFF8ED),
+    this.backgroundColor,
+    this.isLandscape = false,
   });
 
   final int pageNumber;
@@ -32,12 +33,13 @@ class QuranImageContent extends StatelessWidget {
   final SurahHeaderBannerLayoutPolicy surahHeaderLayoutPolicy;
   final QuranImageCacheRepository imageCacheRepository;
   final double devicePixelRatio;
-  final Color backgroundColor;
+  final Color? backgroundColor;
+  final bool isLandscape;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: backgroundColor,
+    final contentStack = Container(
+      color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -83,5 +85,16 @@ class QuranImageContent extends StatelessWidget {
         ],
       ),
     );
+
+    if (isLandscape) {
+      return SingleChildScrollView(
+        child: SizedBox(
+          height: lineHeight * SurahHeaderConstants.lineCount,
+          child: contentStack,
+        ),
+      );
+    }
+
+    return contentStack;
   }
 }

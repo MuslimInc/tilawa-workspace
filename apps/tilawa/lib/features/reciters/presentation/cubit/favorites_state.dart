@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
 abstract class FavoritesState extends Equatable {
@@ -28,9 +28,9 @@ class FavoritesLoaded extends FavoritesState {
 }
 
 class FavoritesError extends FavoritesState {
-  const FavoritesError(this.message);
-  final String message;
+  const FavoritesError(this.failure);
+  final Failure failure;
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [failure];
 }

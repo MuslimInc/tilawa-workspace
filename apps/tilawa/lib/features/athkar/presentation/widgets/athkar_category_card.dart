@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../domain/entities/athkar_category.dart';
-
 class AthkarCategoryCard extends StatelessWidget {
   const AthkarCategoryCard({
     super.key,
-    required this.category,
+    required this.name,
+    required this.icon,
     required this.onTap,
   });
-  final AthkarCategory category;
+  final String name;
+  final String icon;
   final VoidCallback onTap;
 
   @override
@@ -37,29 +37,21 @@ class AthkarCategoryCard extends StatelessWidget {
       borderRadius: tokens.radiusExtraLarge,
       padding: EdgeInsets.all(tokens.spaceLarge),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: .center,
+        spacing: tokens.spaceMedium,
         children: [
           TilawaIconBox(
-            icon: getIcon(category.icon),
+            icon: getIcon(icon),
             size: tokens.iconSizeLarge,
             backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
             iconColor: colorScheme.primary,
             borderRadius: tokens.radiusMedium,
           ),
-          SizedBox(height: tokens.spaceMedium),
           Text(
-            category.nameAr,
+            name,
             textAlign: TextAlign.center,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          Text(
-            category.nameEn,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],

@@ -30,11 +30,19 @@ class VideoProgressMessages {
     required this.preparingVideoEncoding,
     required this.encodingVerticalVideo,
     required this.videoGenerated,
+    required this.videoGenerationFailed,
+    required this.videoGenerationFailedInvalidFrame,
+    required this.videoGenerationFailedMissingScreenshot,
+    required this.videoGenerationFailedInvalidOutput,
   });
 
   final String preparingVideoEncoding;
   final String encodingVerticalVideo;
   final String videoGenerated;
+  final String videoGenerationFailed;
+  final String videoGenerationFailedInvalidFrame;
+  final String videoGenerationFailedMissingScreenshot;
+  final String videoGenerationFailedInvalidOutput;
 }
 
 class ShareProgressMessages {
