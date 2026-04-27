@@ -37,4 +37,11 @@ abstract interface class IPrayerAdhanNotificationService {
   /// Open the system's exact-alarm permission settings. No-op on platforms
   /// or OS versions where the permission does not exist.
   Future<void> requestExactAlarmPermission();
+
+  /// Fire an immediate test notification for [prayer] using the given
+  /// [playAdhan] flag. Intended only for debug / QA use.
+  Future<void> fireTestNotification({
+    required PrayerType prayer,
+    required bool playAdhan,
+  });
 }

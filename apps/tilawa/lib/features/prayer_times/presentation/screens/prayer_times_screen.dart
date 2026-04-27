@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
+import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../widgets/widgets.dart';
 
@@ -45,14 +48,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 72,
-        titleSpacing: tokens.spaceLarge + 4,
-        title: Text(
-          context.l10n.prayerTimes,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        title: Text(context.l10n.prayerTimes),
         actionsPadding: EdgeInsets.only(right: tokens.spaceMedium),
         actions: [
           IconButton(
@@ -127,6 +123,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           ),
         ),
       ),
+      floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
       body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
         buildWhen: (previous, current) {
           return previous.status != current.status ||
@@ -412,6 +409,124 @@ class _TodaySectionHeader extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Debug-only FAB that fires an immediate test prayer notification.
+/// Shown only in [kDebugMode] — stripped from release builds.
+class _DebugNotificationFab extends StatefulWidget {
+  const _DebugNotificationFab();
+
+  @override
+  State<_DebugNotificationFab> createState() => _DebugNotificationFabState();
+}
+
+class _DebugNotificationFabState extends State<_DebugNotificationFab> {
+  PrayerType _selectedPrayer = PrayerType.isha;
+  bool _playAdhan = true;
+  bool _firing = false;
+
+  static const List<PrayerType> _prayers = [
+    PrayerType.fajr,
+    PrayerType.dhuhr,
+    PrayerType.asr,
+    PrayerType.maghrib,
+    PrayerType.isha,
+  ];
+
+  Future<void> _fire() async {
+    if (_firing) return;
+    setState(() => _firing = true);
+    try {
+      await getIt<IPrayerAdhanNotificationService>().fireTestNotification(
+        prayer: _selectedPrayer,
+        playAdhan: _playAdhan,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '🔔 Test fired: ${_selectedPrayer.name} (adhan=$_playAdhan)',
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _firing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Options card
+        Card(
+          margin: const EdgeInsets.only(bottom: 8, right: 4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Debug: Test Notification',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                DropdownButton<PrayerType>(
+                  value: _selectedPrayer,
+                  isDense: true,
+                  underline: const SizedBox.shrink(),
+                  items: _prayers
+                      .map(
+                        (p) => DropdownMenuItem(
+                          value: p,
+                          child: Text(p.name, style: theme.textTheme.bodySmall),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setState(() => _selectedPrayer = v);
+                  },
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Adhan', style: theme.textTheme.bodySmall),
+                    Switch(
+                      value: _playAdhan,
+                      onChanged: (v) => setState(() => _playAdhan = v),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        FloatingActionButton.extended(
+          onPressed: _firing ? null : _fire,
+          label: _firing
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Fire'),
+          icon: const Icon(Icons.notifications_active_outlined),
+          backgroundColor: theme.colorScheme.errorContainer,
+          foregroundColor: theme.colorScheme.onErrorContainer,
+        ),
+      ],
     );
   }
 }

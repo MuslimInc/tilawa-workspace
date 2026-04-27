@@ -340,8 +340,11 @@ class _RecitersSliverScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+    final topPadding = MediaQuery.paddingOf(context).top;
     final double listTopOffset =
-        _recitersSearchHeaderExtent(context) + tokens.spaceSmall;
+        _recitersSearchHeaderExtent(context) +
+        tokens.spaceExtraLarge +
+        topPadding;
     final bool showScrollbar =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
@@ -512,37 +515,30 @@ class _RecitersSearchHeaderSliver extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final double extent = _recitersSearchHeaderExtent(context);
-    final double topPadding = MediaQuery.paddingOf(context).top;
 
-    return SliverPersistentHeader(
+    return SliverAppBar(
       pinned: true,
-      delegate: _PinnedSliverHeaderDelegate(
-        extent: extent,
-        child: _HeaderSurface(
-          child: _ConstrainedHeaderContent(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium)
-                  .copyWith(
-                    top: topPadding + tokens.spaceMedium,
-                    bottom: tokens.spaceMedium,
-                  ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _SearchField(
-                      controller: searchController,
-                      focusNode: focusNode,
-                      onChanged: onSearchChanged,
-                      onClear: onClearSearch,
-                    ),
-                  ),
-                  SizedBox(width: tokens.spaceSmall),
-                  _FavoritesToggle(state: state, onTap: onToggleFavorites),
-                  SizedBox(width: tokens.spaceSmall),
-                  const _DownloadsButton(),
-                ],
+      expandedHeight: extent,
+      collapsedHeight: extent,
+      backgroundColor: theme.primaryColor,
+      flexibleSpace: _ConstrainedHeaderContent(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
+          child: Row(
+            children: [
+              Expanded(
+                child: _SearchField(
+                  controller: searchController,
+                  focusNode: focusNode,
+                  onChanged: onSearchChanged,
+                  onClear: onClearSearch,
+                ),
               ),
-            ),
+              SizedBox(width: tokens.spaceSmall),
+              _FavoritesToggle(state: state, onTap: onToggleFavorites),
+              SizedBox(width: tokens.spaceSmall),
+              const _DownloadsButton(),
+            ],
           ),
         ),
       ),
@@ -565,59 +561,6 @@ class _ConstrainedHeaderContent extends StatelessWidget {
         child: child,
       ),
     );
-  }
-}
-
-class _HeaderSurface extends StatelessWidget {
-  const _HeaderSurface({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final Color dividerColor = theme.colorScheme.outlineVariant.withValues(
-      alpha: tokens.opacitySubtle + tokens.opacitySubtle,
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(bottom: BorderSide(color: dividerColor)),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _PinnedSliverHeaderDelegate extends SliverPersistentHeaderDelegate {
-  const _PinnedSliverHeaderDelegate({
-    required this.extent,
-    required this.child,
-  });
-
-  final double extent;
-  final Widget child;
-
-  @override
-  double get minExtent => extent;
-
-  @override
-  double get maxExtent => extent;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return SizedBox.expand(child: child);
-  }
-
-  @override
-  bool shouldRebuild(covariant _PinnedSliverHeaderDelegate oldDelegate) {
-    return extent != oldDelegate.extent || child != oldDelegate.child;
   }
 }
 

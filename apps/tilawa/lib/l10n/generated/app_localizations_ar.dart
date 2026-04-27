@@ -1728,4 +1728,24 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get edit => 'تعديل';
+
+  @override
+  String get prayerNotifications => 'إشعارات الصلاة';
+
+  @override
+  String get prayerNotificationsEnabledAll => 'جميع إشعارات الصلاة';
+
+  @override
+  String get playAdhan => 'تشغيل الأذان';
+
+  @override
+  String get atPrayerTime => 'عند وقت الصلاة';
+
+  @override
+  String get exactAlarmPermissionRequired =>
+      'إذن التنبيه الدقيق مطلوب لضمان دقة إشعارات الصلاة.';
+
+  @override
+  String get notificationPermissionRequired =>
+      'إذن الإشعارات مطلوب لاستلام تذكيرات الصلاة.';
 }

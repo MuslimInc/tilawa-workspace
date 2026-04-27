@@ -1737,4 +1737,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get edit => 'Edit';
+
+  @override
+  String get prayerNotifications => 'Prayer Notifications';
+
+  @override
+  String get prayerNotificationsEnabledAll => 'All Prayer Notifications';
+
+  @override
+  String get playAdhan => 'Play Adhan';
+
+  @override
+  String get atPrayerTime => 'At prayer time';
+
+  @override
+  String get exactAlarmPermissionRequired =>
+      'Exact alarm permission required for reliable prayer reminders.';
+
+  @override
+  String get notificationPermissionRequired =>
+      'Notification permission required to receive prayer alerts.';
 }

@@ -6,6 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
+import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_capability.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -107,6 +108,14 @@ void main() {
         lastThird: DateTime(2023, 1, 2, 2, 0),
         latitude: 0,
         longitude: 0,
+      ),
+    ),
+  );
+  provideDummy<Either<Failure, PrayerAlarmCapability>>(
+    Right(
+      PrayerAlarmCapability(
+        canScheduleExact: false,
+        hasNotificationPermission: false,
       ),
     ),
   );
@@ -403,6 +412,101 @@ void main() {
                 capturedSettings, // Must match the saved (updated) settings
           ),
         ).called(1);
+      },
+    );
+
+    // --- Notification event tests ---
+
+    const tCapability = PrayerAlarmCapability(
+      canScheduleExact: true,
+      hasNotificationPermission: true,
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'checkAlarmCapability emits state with alarmCapability on success',
+      build: () {
+        when(
+          mockCheckPrayerAlarmCapabilityUseCase.call(),
+        ).thenAnswer((_) async => const Right(tCapability));
+        return bloc;
+      },
+      act: (b) => b.add(const PrayerTimesEvent.checkAlarmCapability()),
+      expect: () => [
+        isA<PrayerTimesState>().having(
+          (s) => s.alarmCapability,
+          'alarmCapability',
+          tCapability,
+        ),
+      ],
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'checkAlarmCapability emits no state when use case returns Left',
+      build: () {
+        when(
+          mockCheckPrayerAlarmCapabilityUseCase.call(),
+        ).thenAnswer((_) async => Left(Failure.unexpectedError('error')));
+        return bloc;
+      },
+      act: (b) => b.add(const PrayerTimesEvent.checkAlarmCapability()),
+      expect: () => [],
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'requestExactAlarmPermission calls use case then re-checks capability',
+      build: () {
+        when(
+          mockRequestExactAlarmPermissionUseCase.call(),
+        ).thenAnswer((_) async => const Right(null));
+        when(
+          mockCheckPrayerAlarmCapabilityUseCase.call(),
+        ).thenAnswer((_) async => const Right(tCapability));
+        return bloc;
+      },
+      act: (b) => b.add(const PrayerTimesEvent.requestExactAlarmPermission()),
+      verify: (_) {
+        verify(mockRequestExactAlarmPermissionUseCase.call()).called(1);
+        verify(mockCheckPrayerAlarmCapabilityUseCase.call()).called(1);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'updateSettings triggers internal loadPrayerTimes with forceReschedule=true',
+      build: () {
+        when(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        ).thenAnswer((_) async => const Right(null));
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(savedLatitude: 10.0, savedLongitude: 10.0),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      seed: () => const PrayerTimesState(
+        status: PrayerTimesStatus.loaded,
+        latitude: 10.0,
+        longitude: 10.0,
+      ),
+      act: (b) =>
+          b.add(const PrayerTimesEvent.updateSettings(PrayerSettingsEntity())),
+      verify: (_) {
+        verify(
+          mockSchedulePrayerNotificationsUseCase.call(
+            settings: anyNamed('settings'),
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            forceReschedule: true,
+          ),
+        ).called(greaterThanOrEqualTo(1));
       },
     );
   });

@@ -182,13 +182,16 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
       if (launchConfig.athkarNotificationsInit) {
         tasks.add(initializeAthkarNotifications());
       }
+      if (launchConfig.prayerNotificationsInit) {
+        tasks.add(initializePrayerNotifications());
+      }
       if (launchConfig.downloadsInit) {
         tasks.add(initializeDownloads());
       }
       if (tasks.isNotEmpty) {
         await Future.wait(tasks);
       }
-      timeline.log('Phase3 notificationService+athkar+downloads');
+      timeline.log('Phase3 notificationService+athkar+prayer+downloads');
 
       timeline.resetPhase();
       await Future<void>.delayed(const Duration(milliseconds: 150));

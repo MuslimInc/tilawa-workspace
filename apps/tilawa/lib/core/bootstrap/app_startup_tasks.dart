@@ -32,6 +32,7 @@ import 'package:tilawa/features/downloads/data/services/downloads_initialization
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
+import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
@@ -675,6 +676,36 @@ class AppStartupTasks {
     } catch (e) {
       logger.d(
         '[AppLaunch][AppStartupTasks.initializeAthkarNotifications]: Warning: Could not initialize athkar notifications at (${DateTime.now()}): $e',
+      );
+    }
+  }
+
+  /// Initializes the prayer adhan notification service.
+  ///
+  /// Called in Phase 3 alongside athkar and notification service init.
+  /// The service performs its own dedup fingerprint check — no scheduling
+  /// happens here beyond initialization and channel setup. The BLoC triggers
+  /// the first real schedule pass once prayer times load.
+  Future<void> initializePrayerNotifications() async {
+    if (!_isEnabled(
+      launchConfig.prayerNotificationsInit,
+      'PRAYER_NOTIFICATIONS_INIT',
+    )) {
+      return;
+    }
+    logger.d(
+      '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Start in (${DateTime.now()})',
+    );
+    try {
+      final IPrayerAdhanNotificationService service =
+          getIt<IPrayerAdhanNotificationService>();
+      await service.initialize();
+      logger.d(
+        '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Prayer notifications initialized at (${DateTime.now()})',
+      );
+    } catch (e) {
+      logger.d(
+        '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Warning: Could not initialize prayer notifications at (${DateTime.now()}): $e',
       );
     }
   }

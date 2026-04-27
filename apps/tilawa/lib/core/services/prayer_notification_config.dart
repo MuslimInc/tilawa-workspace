@@ -19,6 +19,18 @@ final class PrayerNotificationConfig {
   static const String adhanChannelDescription =
       'Prayer time reminders that play the adhan sound';
 
+  // --- Adhan sound ---
+  /// Filename used in both `android/app/src/main/res/raw/` and the iOS bundle.
+  static const String adhanSoundRawName = 'adhan';
+  static const String adhanSoundFilename = 'adhan.mp3';
+  static const String adhanAssetPath = 'assets/audio/adhan.mp3';
+
+  /// Bumped whenever the adhan channel configuration changes so the channel
+  /// is deleted and recreated on existing installs (Android channel sound lock).
+  static const String adhanChannelVersionKey =
+      'prayer_notifications_adhan_channel_version';
+  static const int adhanChannelVersion = 2;
+
   // --- Notification IDs ---
   /// Static IDs (test / debug): fajr=2001, sunrise=2002, dhuhr=2003,
   /// asr=2004, maghrib=2005, isha=2006.
@@ -37,8 +49,7 @@ final class PrayerNotificationConfig {
   // --- Deduplication & fingerprint ---
   // SharedPreferences keys — must not change after first release without a
   // migration; older devices will silently re-schedule on the next run.
-  static const String dedupDateKey =
-      'prayer_notifications_last_scheduled_date';
+  static const String dedupDateKey = 'prayer_notifications_last_scheduled_date';
   static const String settingsFingerprintKey =
       'prayer_notifications_settings_fingerprint';
   static const String lastTimezoneKey = 'prayer_notifications_last_tz';
@@ -50,7 +61,7 @@ final class PrayerNotificationConfig {
   static const String payloadDateKey = 'date';
 
   // --- Logging ---
-  static const String logTag = '[PrayerAdhanNotificationService]';
+  static const String logTag = '[PrayerTimes]';
 
   // --- ID helpers ---
   /// Returns the static notification ID for [prayer].

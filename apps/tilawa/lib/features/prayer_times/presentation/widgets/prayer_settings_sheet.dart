@@ -21,7 +21,21 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
   void initState() {
     super.initState();
     _settings = context.read<PrayerTimesBloc>().state.settings;
+    context.read<PrayerTimesBloc>().add(
+      const PrayerTimesEvent.checkAlarmCapability(),
+    );
   }
+
+  bool get _allNotificationsEnabled =>
+      _settings.fajrNotification.enabled &&
+      _settings.dhuhrNotification.enabled &&
+      _settings.asrNotification.enabled &&
+      _settings.maghribNotification.enabled &&
+      _settings.ishaNotification.enabled;
+
+  int get _globalMinutesBefore => _settings.fajrNotification.minutesBefore;
+
+  bool get _globalPlayAdhan => _settings.fajrNotification.playAdhan;
 
   void _updateSettings(PrayerSettingsEntity newSettings) {
     setState(() {
@@ -186,6 +200,164 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                         onChanged: (value) {
                           _updateSettings(
                             _settings.copyWith(ishaAdjustment: value.round()),
+                          );
+                        },
+                      ),
+                      SizedBox(height: tokens.spaceLarge),
+                      _SectionTitle(
+                        title: context.l10n.prayerNotifications,
+                        tokens: tokens,
+                        theme: theme,
+                      ),
+                      BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
+                        buildWhen: (p, c) =>
+                            p.alarmCapability != c.alarmCapability,
+                        builder: (context, state) {
+                          final capability = state.alarmCapability;
+                          if (capability == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return Column(
+                            children: [
+                              if (!capability.hasNotificationPermission)
+                                _PermissionBanner(
+                                  message: context
+                                      .l10n
+                                      .notificationPermissionRequired,
+                                  onTap: () => context.read<PrayerTimesBloc>().add(
+                                    const PrayerTimesEvent.requestExactAlarmPermission(),
+                                  ),
+                                  tokens: tokens,
+                                  theme: theme,
+                                ),
+                              if (capability.hasNotificationPermission &&
+                                  !capability.canScheduleExact)
+                                _PermissionBanner(
+                                  message:
+                                      context.l10n.exactAlarmPermissionRequired,
+                                  onTap: () => context.read<PrayerTimesBloc>().add(
+                                    const PrayerTimesEvent.requestExactAlarmPermission(),
+                                  ),
+                                  tokens: tokens,
+                                  theme: theme,
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                      _SettingsSwitch(
+                        title: context.l10n.prayerNotificationsEnabledAll,
+                        value: _allNotificationsEnabled,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(
+                              fajrNotification: _settings.fajrNotification
+                                  .copyWith(enabled: value),
+                              dhuhrNotification: _settings.dhuhrNotification
+                                  .copyWith(enabled: value),
+                              asrNotification: _settings.asrNotification
+                                  .copyWith(enabled: value),
+                              maghribNotification: _settings.maghribNotification
+                                  .copyWith(enabled: value),
+                              ishaNotification: _settings.ishaNotification
+                                  .copyWith(enabled: value),
+                            ),
+                          );
+                        },
+                      ),
+                      _SettingsSwitch(
+                        title: context.l10n.fajr,
+                        value: _settings.fajrNotification.enabled,
+                        onChanged: (value) => _updateSettings(
+                          _settings.copyWith(
+                            fajrNotification: _settings.fajrNotification
+                                .copyWith(enabled: value),
+                          ),
+                        ),
+                      ),
+                      _SettingsSwitch(
+                        title: context.l10n.dhuhr,
+                        value: _settings.dhuhrNotification.enabled,
+                        onChanged: (value) => _updateSettings(
+                          _settings.copyWith(
+                            dhuhrNotification: _settings.dhuhrNotification
+                                .copyWith(enabled: value),
+                          ),
+                        ),
+                      ),
+                      _SettingsSwitch(
+                        title: context.l10n.asr,
+                        value: _settings.asrNotification.enabled,
+                        onChanged: (value) => _updateSettings(
+                          _settings.copyWith(
+                            asrNotification: _settings.asrNotification.copyWith(
+                              enabled: value,
+                            ),
+                          ),
+                        ),
+                      ),
+                      _SettingsSwitch(
+                        title: context.l10n.maghrib,
+                        value: _settings.maghribNotification.enabled,
+                        onChanged: (value) => _updateSettings(
+                          _settings.copyWith(
+                            maghribNotification: _settings.maghribNotification
+                                .copyWith(enabled: value),
+                          ),
+                        ),
+                      ),
+                      _SettingsSwitch(
+                        title: context.l10n.isha,
+                        value: _settings.ishaNotification.enabled,
+                        onChanged: (value) => _updateSettings(
+                          _settings.copyWith(
+                            ishaNotification: _settings.ishaNotification
+                                .copyWith(enabled: value),
+                          ),
+                        ),
+                      ),
+                      if (_allNotificationsEnabled) ...[
+                        SizedBox(height: tokens.spaceSmall),
+                        _MinutesBeforePicker(
+                          value: _globalMinutesBefore,
+                          onChanged: (newValue) {
+                            _updateSettings(
+                              _settings.copyWith(
+                                fajrNotification: _settings.fajrNotification
+                                    .copyWith(minutesBefore: newValue),
+                                dhuhrNotification: _settings.dhuhrNotification
+                                    .copyWith(minutesBefore: newValue),
+                                asrNotification: _settings.asrNotification
+                                    .copyWith(minutesBefore: newValue),
+                                maghribNotification: _settings
+                                    .maghribNotification
+                                    .copyWith(minutesBefore: newValue),
+                                ishaNotification: _settings.ishaNotification
+                                    .copyWith(minutesBefore: newValue),
+                              ),
+                            );
+                          },
+                          tokens: tokens,
+                          theme: theme,
+                        ),
+                      ],
+                      _SettingsSwitch(
+                        title: context.l10n.playAdhan,
+                        value: _globalPlayAdhan,
+                        onChanged: (value) {
+                          _updateSettings(
+                            _settings.copyWith(
+                              fajrNotification: _settings.fajrNotification
+                                  .copyWith(playAdhan: value),
+                              dhuhrNotification: _settings.dhuhrNotification
+                                  .copyWith(playAdhan: value),
+                              asrNotification: _settings.asrNotification
+                                  .copyWith(playAdhan: value),
+                              maghribNotification: _settings.maghribNotification
+                                  .copyWith(playAdhan: value),
+                              ishaNotification: _settings.ishaNotification
+                                  .copyWith(playAdhan: value),
+                            ),
                           );
                         },
                       ),
@@ -423,6 +595,117 @@ class _AdjustmentSlider extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Banner shown when a required permission (exact alarm or notification) is
+/// not granted. Tapping [onTap] triggers the appropriate permission request.
+class _PermissionBanner extends StatelessWidget {
+  const _PermissionBanner({
+    required this.message,
+    required this.onTap,
+    required this.tokens,
+    required this.theme,
+  });
+
+  final String message;
+  final VoidCallback onTap;
+  final TilawaDesignTokens tokens;
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = theme.colorScheme;
+    return Container(
+      margin: EdgeInsets.only(bottom: tokens.spaceSmall),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: 16,
+            color: colorScheme.onTertiaryContainer,
+          ),
+          SizedBox(width: tokens.spaceSmall),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onTertiaryContainer,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: onTap,
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(
+              context.l10n.openSettings,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.onTertiaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Segmented picker for choosing how many minutes before the prayer time
+/// the notification should fire. Options: 0, 5, 10, 15.
+class _MinutesBeforePicker extends StatelessWidget {
+  const _MinutesBeforePicker({
+    required this.value,
+    required this.onChanged,
+    required this.tokens,
+    required this.theme,
+  });
+
+  final int value;
+  final ValueChanged<int> onChanged;
+  final TilawaDesignTokens tokens;
+  final ThemeData theme;
+
+  static const List<int> _options = [0, 5, 10, 15];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
+      child: SegmentedButton<int>(
+        segments: _options.map((minutes) {
+          return ButtonSegment<int>(
+            value: minutes,
+            label: Text(
+              minutes == 0
+                  ? context.l10n.atPrayerTime
+                  : context.l10n.minutesBefore(minutes),
+              style: theme.textTheme.labelSmall,
+              textAlign: TextAlign.center,
+            ),
+          );
+        }).toList(),
+        selected: {value},
+        onSelectionChanged: (selected) {
+          if (selected.isNotEmpty) {
+            onChanged(selected.first);
+          }
+        },
+        showSelectedIcon: false,
       ),
     );
   }

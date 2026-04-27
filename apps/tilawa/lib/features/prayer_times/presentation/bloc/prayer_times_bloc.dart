@@ -30,8 +30,7 @@ class PrayerTimesEvent with _$PrayerTimesEvent {
     required double longitude,
     String? locationName,
   }) = _SetManualLocation;
-  const factory PrayerTimesEvent.checkAlarmCapability() =
-      _CheckAlarmCapability;
+  const factory PrayerTimesEvent.checkAlarmCapability() = _CheckAlarmCapability;
   const factory PrayerTimesEvent.requestExactAlarmPermission() =
       _RequestExactAlarmPermission;
 }

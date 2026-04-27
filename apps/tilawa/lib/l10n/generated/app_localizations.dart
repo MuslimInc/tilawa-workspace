@@ -3211,6 +3211,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit'**
   String get edit;
+
+  /// Section title for prayer time notification settings
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Notifications'**
+  String get prayerNotifications;
+
+  /// Global toggle label for enabling/disabling all prayer notifications
+  ///
+  /// In en, this message translates to:
+  /// **'All Prayer Notifications'**
+  String get prayerNotificationsEnabledAll;
+
+  /// Toggle label for adhan sound playback on prayer notification
+  ///
+  /// In en, this message translates to:
+  /// **'Play Adhan'**
+  String get playAdhan;
+
+  /// Label for the 0-minutes-before notification offset option
+  ///
+  /// In en, this message translates to:
+  /// **'At prayer time'**
+  String get atPrayerTime;
+
+  /// Banner shown when the Android exact-alarm permission is not granted
+  ///
+  /// In en, this message translates to:
+  /// **'Exact alarm permission required for reliable prayer reminders.'**
+  String get exactAlarmPermissionRequired;
+
+  /// Banner shown when the Android POST_NOTIFICATIONS permission is not granted
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission required to receive prayer alerts.'**
+  String get notificationPermissionRequired;
 }
 
 class _AppLocalizationsDelegate
