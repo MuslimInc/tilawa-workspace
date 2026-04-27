@@ -20,6 +20,7 @@ abstract class AudioPlayerState with _$AudioPlayerState {
     Duration? lastSleepTimerDuration,
     SleepTimerType? lastSleepTimerType,
     String? dismissedAudioId,
+    @JsonKey(includeFromJson: false, includeToJson: false) Failure? failure,
   }) = _AudioPlayerState;
 
   factory AudioPlayerState.fromJson(Map<String, dynamic> json) =>

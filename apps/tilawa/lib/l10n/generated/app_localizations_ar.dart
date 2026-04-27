@@ -121,6 +121,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get cancel => 'إلغاء';
 
   @override
+  String get stopPlayback => 'إيقاف التشغيل';
+
+  @override
+  String get stopPlaybackConfirmMessage => 'هل أنت متأكد من إيقاف التشغيل؟';
+
+  @override
+  String get playerDismissed => 'تم إغلاق المشغل';
+
+  @override
   String get playAll => 'تشغيل الكل';
 
   @override
@@ -577,6 +586,33 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get serverError => 'خطأ في الخادم، يرجى المحاولة مرة أخرى لاحقاً';
+
+  @override
+  String get cacheError => 'خطأ في التخزين';
+
+  @override
+  String get audioError => 'خطأ في تشغيل الصوت';
+
+  @override
+  String get validationError => 'البيانات المُدخلة غير صالحة';
+
+  @override
+  String get permissionError => 'تم رفض الإذن';
+
+  @override
+  String get unexpectedError => 'حدث خطأ غير متوقع';
+
+  @override
+  String get persistenceError => 'فشل في حفظ البيانات';
+
+  @override
+  String get uiError => 'خطأ في واجهة المستخدم';
+
+  @override
+  String get unknownError => 'حدث خطأ غير معروف';
+
+  @override
   String get startFreeTrial => 'ابدأ التجربة المجانية';
 
   @override
@@ -661,6 +697,72 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get athkar => 'الأذكار';
+
+  @override
+  String get tasbeehCategory => 'مسبحة';
+
+  @override
+  String get tasbeehInputLabel => 'الذكر';
+
+  @override
+  String get tasbeehInputHint => 'اكتب ذكرك، مثل: سبحان الله';
+
+  @override
+  String get tasbeehSave => 'حفظ';
+
+  @override
+  String get tasbeehTapToCount => 'اضغط في أي مكان للزيادة';
+
+  @override
+  String get tasbeehTargetLabel => 'الهدف';
+
+  @override
+  String get tasbeehSetTarget => 'تعيين الهدف';
+
+  @override
+  String get tasbeehAddNewOptionTitle => 'إضافة مسبحة جديدة';
+
+  @override
+  String get tasbeehAddNewOptionSubtitle => 'أنشئ الذكر والهدف ثم ابدأ العد';
+
+  @override
+  String get tasbeehViewHistoryOptionTitle => 'عرض السجل المحفوظ';
+
+  @override
+  String get tasbeehViewHistoryOptionSubtitle => 'اختر من السجل وواصل العد';
+
+  @override
+  String get tasbeehGoToCounting => 'ابدأ العد';
+
+  @override
+  String get tasbeehBackToOptions => 'العودة للخيارات';
+
+  @override
+  String get tasbeehChooseSavedDhikr => 'اختر مسبحة محفوظة';
+
+  @override
+  String get tasbeehHistoryEmpty => 'لا توجد مسبحة محفوظة بعد';
+
+  @override
+  String tasbeehDeleteConfirmationMessage(String tasbeehText) {
+    return 'هل تريد حذف \"$tasbeehText\" من سجل المسبحة المحفوظ؟';
+  }
+
+  @override
+  String get tasbeehRemoveItem => 'إزالة';
+
+  @override
+  String tasbeehCurrentTarget(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return 'الهدف الحالي: $countString';
+  }
+
+  @override
+  String get tasbeehSelectOrCreatePrompt =>
+      'اختر ذكراً محفوظاً أو أضف ذكراً جديداً للبدء';
 
   @override
   String get done => 'تم';
@@ -789,6 +891,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recitationDuration => 'مدة التلاوة';
+
+  @override
+  String get chooseBackgroundSource => 'اختر مصدر الخلفية';
+
+  @override
+  String get gallery => 'المعرض';
+
+  @override
+  String get camera => 'الكاميرا';
+
+  @override
+  String get resetToDefault => 'إعادة ضبط الافتراضي';
+
+  @override
+  String get adjustVolume => 'ضبط مستوى الصوت';
+
+  @override
+  String get playbackSpeed => 'سرعة التشغيل';
+
+  @override
+  String get unknownReciter => 'قارئ غير معروف';
 
   @override
   String get minutes15 => '15 دقيقة';
@@ -1563,6 +1686,25 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get encodingVerticalVideo =>
       'جارِ ترميز الفيديو العمودي، قد يستغرق ذلك بعض الوقت...';
+
+  @override
+  String get reelGenerationFailed =>
+      'تعذّر إنشاء فيديو الريل. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get reelGenerationFailedInvalidFrame =>
+      'تعذّر معالجة إطار الصورة الملتقطة لإنشاء الريل. يرجى إعادة المحاولة.';
+
+  @override
+  String get reelGenerationFailedMissingScreenshot =>
+      'لم يتم العثور على إطار ملتقط لإنشاء الريل.';
+
+  @override
+  String get reelGenerationFailedInvalidOutput =>
+      'ملف الريل الناتج غير صالح ولا يمكن فتحه. يرجى إعادة المحاولة.';
+
+  @override
+  String get reelPreviewLoadFailed => 'تعذّر تحميل معاينة الفيديو الناتج.';
 
   @override
   String get reelGenerated => 'تم إنشاء الريل!';

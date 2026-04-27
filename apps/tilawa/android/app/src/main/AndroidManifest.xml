@@ -30,6 +30,7 @@
     <!-- Location permissions for Qibla feature -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Explicitly remove AD_ID permission added by Firebase Analytics since we don't use ads -->
     <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
@@ -40,7 +41,7 @@
         android:icon="@mipmap/ic_launcher"
         android:manageSpaceActivity=".ManageStorageActivity"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         android:extractNativeLibs="true"
         android:enableOnBackInvokedCallback="true">
         <activity
@@ -101,6 +102,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Force Skia to avoid 100ms raster spikes on Adreno 619 -->
+        <meta-data
+            android:name="io.flutter.embedding.android.EnableImpeller"
+            android:value="false" />
 
         <!-- Firebase Crashlytics Configuration -->
         <meta-data

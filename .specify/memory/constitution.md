@@ -1,22 +1,19 @@
 <!--
 Sync Impact Report:
-- Version change: 1.1.0 -> 1.2.0
+- Version change: 1.2.0 -> 1.3.0
 - Modified principles:
-  - I. Strict Layered Clean Architecture -> I. Clean Architecture Boundaries
-  - II. Reactive State Management & Routing: strengthened BLoC and GoRouter rules
-  - III. Atomic Design & Tilawa UI Kit: added design-token and component ownership gates
-  - IV. Performance-First Development (Anti-Jank) -> IV. Performance-First Flutter Delivery
-  - V. High Observability & Diagnostics -> V. Structured Observability & Diagnostics
-  - VI. Safe Delivery Rules -> VI. Safe Refactoring & Delivery
+  - III. Atomic Design & Tilawa UI Kit: added Dart/Flutter UI idiom gate for
+    `Row`/`Column`/`Flex.spacing` and Dart dot shorthands where appropriate.
+  - Development Quality Standards: added modern Dart/Flutter style requirement.
 - Added sections:
   - None
 - Removed sections:
   - None
 - Templates requiring updates:
-  - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/plan-template.md: ✅ updated - Constitution Check now enumerates Tilawa-specific gates.
-  - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/spec-template.md: ✅ updated - already requires independently testable stories and measurable outcomes.
-  - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/tasks-template.md: ✅ updated - tests now reflect Tilawa critical-path gates.
-  - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/checklist-template.md: ✅ updated - generic checklist generation remains compatible.
+  - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/plan-template.md: ✅ updated - Constitution Check now includes Dart/Flutter idiom compliance.
+  - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/spec-template.md: ✅ reviewed - no implementation-style requirements belong in feature specs.
+  - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/tasks-template.md: ✅ updated - UI implementation and compliance checklist now require idiom review.
+  - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/checklist-template.md: ✅ updated - UI Kit checklist now verifies idiomatic Dart/Flutter usage.
   - /Users/mohammadkamel/flutter_projects/tilawa_workspace/.specify/templates/commands: ✅ updated - directory is not present in this workspace.
 - Follow-up TODOs: None
 -->
@@ -70,6 +67,12 @@ Reusable UI MUST be built through Atomic Design and the Tilawa UI Kit.
 - **Reuse Before Custom UI**: Feature UI MUST reuse existing Tilawa UI Kit
   components before adding new local components. New reusable components require
   tests and public API documentation appropriate to their scope.
+- **Modern Flutter Composition**: UI implementation MUST use modern Dart and
+  Flutter framework idioms where they improve clarity and consistency. Prefer
+  `spacing` on `Row`, `Column`, and `Flex` over separator `SizedBox` widgets for
+  simple fixed gaps; prefer Dart dot shorthands for enum-like/static context
+  values when the receiver type is obvious. Do not force these idioms when they
+  reduce readability, change layout semantics, or hide meaningful constraints.
 - **Responsive Contract**: Screens and reusable components MUST support compact,
   medium, expanded, RTL, safe-area, and text-scaling constraints relevant to their
   surface.
@@ -132,6 +135,11 @@ Changes MUST preserve architectural integrity and keep delivery reversible.
 - **Configuration**: User-facing strings, dimensions, colors, and environment
   values MUST be managed through localization, themes, tokens, constants, or
   typed configuration.
+- **Dart/Flutter Idioms**: New and refactored Dart code SHOULD use framework
+  shorthands such as `Row.spacing`, `Column.spacing`, `Flex.spacing`, and Dart
+  dot shorthands where they make the implementation more direct. Reviewers MUST
+  reject avoidable separator widgets or verbose static references when a clearer
+  idiom exists and behavior is unchanged.
 - **Static Quality**: Flutter and Dart analyzer warnings, formatting failures,
   and project lint violations block merge unless an approved waiver exists.
 
@@ -185,4 +193,4 @@ Specs, plans, tasks, PRs, and architecture decisions MUST comply with it.
 - **Conflict Resolution**: When speed conflicts with this Constitution, the
   Constitution prevails unless an approved, time-boxed waiver exists.
 
-**Version**: 1.2.0 | **Ratified**: 2026-04-23 | **Last Amended**: 2026-04-23
+**Version**: 1.3.0 | **Ratified**: 2026-04-23 | **Last Amended**: 2026-04-26

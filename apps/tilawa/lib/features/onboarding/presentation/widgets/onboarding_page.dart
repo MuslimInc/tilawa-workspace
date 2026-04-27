@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'onboarding_content.dart';
 
@@ -9,29 +9,36 @@ class OnboardingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 24),
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraLarge),
       child: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(content.imagePath, width: 200, fit: BoxFit.fill),
-              Gap(40),
+              Image.asset(
+                content.imagePath,
+                width: tokens.iconSizeExtraLarge * 4 + tokens.spaceSmall,
+                fit: BoxFit.fill,
+              ),
+              SizedBox(height: tokens.spaceExtraLarge + tokens.spaceLarge),
               Text(
                 content.title,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: theme.colorScheme.primary,
                 ),
               ),
-              Gap(16),
+              SizedBox(height: tokens.spaceLarge),
               Text(
                 content.description,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

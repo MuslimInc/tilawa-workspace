@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
@@ -62,6 +63,9 @@ void main() {
       }
       if (getIt.isRegistered<DownloadNotificationService>()) {
         getIt.unregister<DownloadNotificationService>();
+      }
+      if (getIt.isRegistered<SharedPreferencesAsync>()) {
+        getIt.unregister<SharedPreferencesAsync>();
       }
 
       mockDownloadService = MockDownloadServiceInterface();
@@ -125,6 +129,9 @@ void main() {
         getIt.unregister<DownloadQueueManager>();
       }
       getIt.registerSingleton<DownloadQueueManager>(dqm);
+      getIt.registerSingleton<SharedPreferencesAsync>(
+        MockSharedPreferencesAsync(),
+      );
 
       // We must initialize the QueueManager because SettingsCubit might access it
       await dqm.initialize();
@@ -135,6 +142,9 @@ void main() {
 
     tearDown(() {
       cubit.close();
+      if (getIt.isRegistered<SharedPreferencesAsync>()) {
+        getIt.unregister<SharedPreferencesAsync>();
+      }
     });
 
     test('initial state has default maxConcurrentDownloads of 2', () async {

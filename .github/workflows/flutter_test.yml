@@ -1,7 +1,7 @@
 name: Flutter Test & Deploy
 
 env:
-  FLUTTER_VERSION: "3.41.5"
+  FLUTTER_VERSION: "3.41.7"
   PACKAGE_NAME: "com.tilawa.app"
 
 on:
@@ -98,8 +98,8 @@ jobs:
           ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
         run: |
           if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEY_PROPERTIES" ]; then
-            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
-            echo "$ANDROID_KEY_PROPERTIES" > android/key.properties
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > apps/tilawa/android/app/upload-keystore.jks
+            echo "$ANDROID_KEY_PROPERTIES" > apps/tilawa/android/key.properties
           fi
 
       - name: Build with Shorebird (Split APKs)
@@ -116,12 +116,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-apks
-          path: build/app/outputs/flutter-apk/*.apk
+          path: apps/tilawa/build/app/outputs/flutter-apk/*.apk
 
       - name: Deploy to Firebase App Distribution
         uses: w9jds/firebase-action@master
         with:
-          args: appdistribution:distribute build/app/outputs/flutter-apk/app-release.apk --app ${{ secrets.FIREBASE_ANDROID_APP_ID || '1:181575856185:android:d43fb05037208139381de8' }} --groups testers
+          args: appdistribution:distribute apps/tilawa/build/app/outputs/flutter-apk/app-release.apk --app ${{ secrets.FIREBASE_ANDROID_APP_ID || '1:181575856185:android:d43fb05037208139381de8' }} --groups testers
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
@@ -239,8 +239,8 @@ jobs:
           ANDROID_KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
         run: |
           if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEY_PROPERTIES" ]; then
-            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
-            echo "$ANDROID_KEY_PROPERTIES" > android/key.properties
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > apps/tilawa/android/app/upload-keystore.jks
+            echo "$ANDROID_KEY_PROPERTIES" > apps/tilawa/android/key.properties
           fi
 
       - name: Build AAB with Shorebird
@@ -258,7 +258,7 @@ jobs:
         with:
           serviceAccountJson: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: ${{ env.PACKAGE_NAME }}
-          releaseFiles: build/app/outputs/bundle/release/app-release.aab
+          releaseFiles: apps/tilawa/build/app/outputs/bundle/release/app-release.aab
           track: production
           status: completed
 

@@ -8,10 +8,10 @@ import 'package:quran_image/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_qcf/quran_qcf.dart'
     hide SurahHeaderBannerLayoutPolicy, CalibratedSurahHeaderBannerLayoutPolicy;
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/constants/surah_header_constants.dart';
 import 'core/constants/surah_names.dart';
-import 'l10n/app_localizations.dart';
 
 /// Renders a full Quran page using the same layout algorithm as the Ayah app.
 ///
@@ -190,8 +190,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
   @override
   Widget build(BuildContext context) {
-    final sw = PerfLogger.startTimer();
-
     if (_pageWidth <= 0) {
       return const SizedBox.shrink();
     }
@@ -225,6 +223,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
                 surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
                 imageCacheRepository: _imageCacheRepository,
                 devicePixelRatio: _devicePixelRatio,
+                isLandscape: _isLandscape,
               );
             },
           ),
@@ -243,45 +242,87 @@ class QuranAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final pageInfo = QuranPageMapping.getPageInfo(pageNumber);
-    final l10n = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context);
 
     final pageData = getPageData(pageNumber);
     final surahNumbers = pageData.map((e) => e.surah).toSet().toList();
     final surahNames = surahNumbers
-        .map((s) => SurahNames.getSurahName(s, locale.languageCode))
+        .map((s) => SurahNames.getSurahName(s, 'ar'))
         .join(' ');
-    final height = MediaQuery.sizeOf(context).height * 0.04;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final textStyle = theme.textTheme.titleSmall?.copyWith(
+      color: theme.colorScheme.primary,
+      fontWeight: FontWeight.w600,
+    );
 
-    return SizedBox(
-      height: height,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                surahNames,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF6B5B4F),
-                ),
-              ),
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceSmall,
+        vertical: tokens.spaceTiny,
+      ),
+      child: Row(
+        mainAxisAlignment: .spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              _arabicJuzLabel(pageInfo.juzNumber),
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.start,
+              style: textStyle,
             ),
-            Text(
-              l10n?.juz(pageInfo.juzNumber) ?? 'Part ${pageInfo.juzNumber}',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF8B7355),
-              ),
-            ),
-          ],
-        ),
+          ),
+          Text(surahNames, overflow: TextOverflow.ellipsis, style: textStyle),
+        ],
       ),
     );
   }
+}
+
+String _arabicJuzLabel(int juzNumber) {
+  const labels = [
+    'الأول',
+    'الثاني',
+    'الثالث',
+    'الرابع',
+    'الخامس',
+    'السادس',
+    'السابع',
+    'الثامن',
+    'التاسع',
+    'العاشر',
+    'الحادي عشر',
+    'الثاني عشر',
+    'الثالث عشر',
+    'الرابع عشر',
+    'الخامس عشر',
+    'السادس عشر',
+    'السابع عشر',
+    'الثامن عشر',
+    'التاسع عشر',
+    'العشرون',
+    'الحادي والعشرون',
+    'الثاني والعشرون',
+    'الثالث والعشرون',
+    'الرابع والعشرون',
+    'الخامس والعشرون',
+    'السادس والعشرون',
+    'السابع والعشرون',
+    'الثامن والعشرون',
+    'التاسع والعشرون',
+    'الثلاثون',
+  ];
+  final index = juzNumber - 1;
+  if (index < 0 || index >= labels.length) {
+    return 'الجزء ${_toEasternArabicDigits(juzNumber)}';
+  }
+  return 'الجزء ${labels[index]}';
+}
+
+String _toEasternArabicDigits(int value) {
+  const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+  return value
+      .toString()
+      .split('')
+      .map((character) => digits[int.parse(character)])
+      .join();
 }

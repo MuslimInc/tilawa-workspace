@@ -78,7 +78,10 @@ void main() {
         return cubit;
       },
       act: (cubit) => cubit.loadFavorites(),
-      expect: () => [FavoritesLoading(), const FavoritesError('Error')],
+      expect: () => [
+        FavoritesLoading(),
+        const FavoritesError(ServerFailure('Error')),
+      ],
     );
   });
 
@@ -121,7 +124,7 @@ void main() {
         const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
         FavoritesLoading(), // from loadFavorites() called on revert
         // Error emitted immediately after calling loadFavorites
-        const FavoritesError('Fail'),
+        const FavoritesError(ServerFailure('Fail')),
         // Revert (loadFavorites completion) -> Loaded empty
         const FavoritesLoaded(favorites: [], favoriteIds: {}),
       ],
@@ -176,7 +179,7 @@ void main() {
           removedReciter: tReciter,
         ),
         FavoritesLoading(),
-        const FavoritesError('Fail'),
+        const FavoritesError(ServerFailure('Fail')),
         const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
       ],
     );

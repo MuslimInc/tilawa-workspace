@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
-
-import '../../domain/entities/athkar_category.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class AthkarCategoryCard extends StatelessWidget {
   const AthkarCategoryCard({
     super.key,
-    required this.category,
+    required this.name,
+    required this.icon,
     required this.onTap,
   });
-  final AthkarCategory category;
+  final String name;
+  final String icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     // Map icon string to IconData (simplified for now)
     IconData getIcon(String iconName) {
       switch (iconName) {
@@ -28,59 +32,29 @@ class AthkarCategoryCard extends StatelessWidget {
       }
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+    return TilawaCard(
+      onTap: onTap,
+      borderRadius: tokens.radiusExtraLarge,
+      padding: EdgeInsets.all(tokens.spaceLarge),
+      child: Column(
+        mainAxisAlignment: .center,
+        spacing: tokens.spaceMedium,
+        children: [
+          TilawaIconBox(
+            icon: getIcon(icon),
+            size: tokens.iconSizeLarge,
+            backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+            iconColor: colorScheme.primary,
+            borderRadius: tokens.radiusMedium,
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(24),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    getIcon(category.icon),
-                    size: 32,
-                    color: theme.primaryColor,
-                  ),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  category.nameAr,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  category.nameEn,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
+          Text(
+            name,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
-        ),
+        ],
       ),
     );
   }

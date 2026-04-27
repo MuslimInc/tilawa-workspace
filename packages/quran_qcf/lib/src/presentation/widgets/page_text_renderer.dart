@@ -1,5 +1,7 @@
 import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+
 import '../../domain/models/quran_page_models.dart';
 
 /// Renders the main text content of a Quran page.
@@ -67,7 +69,7 @@ class PageTextRenderer extends StatelessWidget {
         ),
       );
     } else {
-      result = paddedBody;
+      result = ClipRect(child: paddedBody);
     }
 
     return RepaintBoundary(key: snapshotBoundaryKey, child: result);

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../../core/design_tokens/design_tokens.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Atomic component for navigation icon buttons.
 ///
@@ -19,32 +18,45 @@ class NavigationIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buttonSize = screenWidth * AppDimensions.iconButtonSizeRatio;
-    final iconSize = screenWidth * AppDimensions.iconSizeRatio;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final buttonSize = tokens.iconSizeExtraLarge;
+    final iconSize = tokens.iconSizeMedium;
+    final isEnabled = onPressed != null;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(buttonSize / 2),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: Container(
           width: buttonSize,
           height: buttonSize,
           decoration: BoxDecoration(
-            color: onPressed != null
-                ? AppColors.sliderBackground
-                : AppColors.divider,
-            shape: BoxShape.circle,
+            color: isEnabled
+                ? colorScheme.surfaceContainerLow
+                : colorScheme.surfaceContainerHighest.withValues(
+                    alpha: tokens.opacityMedium,
+                  ),
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
             border: Border.all(
-              color: AppColors.primary.withValues(alpha: 0.12),
+              color: isEnabled
+                  ? colorScheme.primary.withValues(alpha: tokens.opacityMedium)
+                  : colorScheme.outlineVariant.withValues(
+                      alpha: tokens.opacitySubtle,
+                    ),
+              width: tokens.borderWidthThin,
             ),
           ),
           child: Icon(
             icon,
             size: iconSize,
-            color: onPressed != null
-                ? AppColors.textPrimary
-                : AppColors.textSecondary,
+            color: isEnabled
+                ? colorScheme.onSurface
+                : colorScheme.onSurfaceVariant.withValues(
+                    alpha: tokens.opacityMedium,
+                  ),
           ),
         ),
       ),

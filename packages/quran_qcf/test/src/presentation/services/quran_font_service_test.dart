@@ -93,12 +93,6 @@ void main() {
       File('${fontDir.path}/$name').writeAsBytesSync(bytes);
     }
 
-    void seedPageFontFiles(Iterable<int> pages) {
-      for (final page in pages) {
-        writeFontFile('QCF4_${page.toString().padLeft(3, '0')}.woff');
-      }
-    }
-
     QuranFontService createService({
       IdleScheduler? scheduler,
       Future<void> Function(String family, Uint8List bytes)? fontRegistrar,
@@ -330,9 +324,9 @@ void main() {
           ],
         );
 
-        service.warmInitialPage(1);
+        unawaited(service.warmInitialPage(1));
         await Future.delayed(const Duration(milliseconds: 40));
-        service.warmInitialPage(1);
+        unawaited(service.warmInitialPage(1));
         await Future.delayed(const Duration(milliseconds: 40));
 
         expect(immediateScheduler.scheduledCount, 1);

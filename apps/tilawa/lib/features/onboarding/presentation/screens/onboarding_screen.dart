@@ -28,9 +28,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // We can rely on context.l10n being available after rebuild
-    // But since we just added keys, we might need a rebuild or assuming keys exist.
-    // For now we assume generated code will have them.
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final double bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final double indicatorHeight = tokens.spaceSmall - tokens.spaceTiny;
+    final double activeIndicatorWidth = tokens.spaceExtraLarge;
+    final double inactiveIndicatorWidth = tokens.spaceSmall;
+    final double indicatorRadius = tokens.radiusSmall / 2;
 
     final pages = <OnboardingContent>[
       OnboardingContent(
@@ -51,7 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ];
 
     return BlocProvider(
-      create: (context) => getIt<OnboardingCubit>(),
+      create: (_) => getIt<OnboardingCubit>(),
       child: BlocConsumer<OnboardingCubit, OnboardingState>(
         listener: (context, state) {
           if (state is OnboardingCompleted) {
@@ -60,20 +64,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         },
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: context.colorScheme.surface,
+            backgroundColor: theme.colorScheme.surface,
             body: SafeArea(
               child: Column(
-                spacing: 20,
+                spacing: tokens.spaceExtraLarge,
                 children: [
-                  // Skip button or similar could go here if needed
                   Expanded(
                     child: PageView.builder(
                       controller: _pageController,
                       itemCount: pages.length,
                       onPageChanged: (index) {
-                        setState(() {
-                          _currentPage = index;
-                        });
+                        setState(() => _currentPage = index);
                         context.read<OnboardingCubit>().pageChanged(index);
                       },
                       itemBuilder: (context, index) {
@@ -81,28 +82,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       },
                     ),
                   ),
-                  // Indicators
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       pages.length,
                       (index) => AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: EdgeInsets.symmetric(horizontal: 4),
-                        height: 6,
-                        width: _currentPage == index ? 24 : 8,
+                        duration: tokens.durationMedium,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: tokens.spaceExtraSmall,
+                        ),
+                        height: indicatorHeight,
+                        width: _currentPage == index
+                            ? activeIndicatorWidth
+                            : inactiveIndicatorWidth,
                         decoration: BoxDecoration(
                           color: _currentPage == index
-                              ? context.colorScheme.primary
-                              : context.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(4),
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(indicatorRadius),
                         ),
                       ),
                     ),
                   ),
-                  // Button
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    padding: EdgeInsets.fromLTRB(
+                      tokens.spaceExtraLarge,
+                      0,
+                      tokens.spaceExtraLarge,
+                      bottomPadding,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -110,27 +118,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           IconButton(
                             onPressed: () {
                               _pageController.previousPage(
-                                duration: const Duration(milliseconds: 300),
+                                duration: tokens.durationMedium,
                                 curve: Curves.easeInOut,
                               );
                             },
                             icon: const Icon(Icons.arrow_back_ios_new),
                             style: IconButton.styleFrom(
                               backgroundColor:
-                                  context.colorScheme.surfaceContainerHighest,
+                                  theme.colorScheme.surfaceContainerHighest,
                             ),
                           )
                         else
                           const SizedBox.shrink(),
-
                         if (_currentPage == pages.length - 1)
                           Expanded(
                             child: Padding(
-                              padding: EdgeInsets.only(
-                                left: 16,
-                              ), // Add padding if back button is hidden? No, if hidden it's shrunk.
-                              // Actually if back button is explicitly visible, we want Start button to take remaining space or be on right.
-                              // Design shows "Next" or "Start"
+                              padding: EdgeInsetsDirectional.only(
+                                start: tokens.spaceLarge,
+                              ),
                               child: FilledButton(
                                 onPressed: () {
                                   context
@@ -138,9 +143,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       .completeOnboarding();
                                 },
                                 style: FilledButton.styleFrom(
-                                  minimumSize: Size.fromHeight(50),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                  minimumSize: const Size.fromHeight(
+                                    kMinInteractiveDimension,
                                   ),
                                 ),
                                 child: Text(context.l10n.startJourney),
@@ -151,14 +155,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           FilledButton(
                             onPressed: () {
                               _pageController.nextPage(
-                                duration: const Duration(milliseconds: 300),
+                                duration: tokens.durationMedium,
                                 curve: Curves.easeInOut,
                               );
                             },
                             style: FilledButton.styleFrom(
-                              minimumSize: Size(100, 48),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                              minimumSize: Size(
+                                tokens.spaceExtraLarge * 4,
+                                kMinInteractiveDimension,
                               ),
                             ),
                             child: Text(context.l10n.next),

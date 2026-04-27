@@ -1,4 +1,3 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -6,10 +5,12 @@ import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
+import '../../domain/constants/tasbeeh_constants.dart';
 import '../../domain/entities/athkar_category.dart';
 import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
 import '../widgets/athkar_category_card.dart';
+import 'tasbeeh_screen.dart';
 
 class AthkarCategoriesScreen extends StatelessWidget {
   const AthkarCategoriesScreen({super.key});
@@ -19,16 +20,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => getIt<AthkarCubit>()..loadCategories(),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(context.l10n.athkar),
-          actions: [
-            IconButton(
-              icon: const Icon(FluentIcons.book_24_regular),
-              tooltip: context.l10n.quranReader,
-              onPressed: () => const QuranLastReadRoute().push(context),
-            ),
-          ],
-        ),
+        appBar: AppBar(title: Text(context.l10n.athkar)),
         body: BlocBuilder<AthkarCubit, AthkarState>(
           builder: (context, state) {
             if (state is AthkarLoading) {
@@ -40,19 +32,45 @@ class AthkarCategoriesScreen extends StatelessWidget {
                 ),
               );
             } else if (state is AthkarCategoriesLoaded) {
+              final tokens = Theme.of(context).tokens;
+              final categories = [
+                ...state.categories,
+                AthkarCategory(
+                  id: TasbeehConstants.categoryId,
+                  nameAr: context.l10n.tasbeehCategory,
+                  nameEn: context.l10n.tasbeehCategory,
+                  icon: TasbeehConstants.categoryIconName,
+                ),
+              ];
+
               return TilawaContentGrid(
-                padding: EdgeInsets.all(20).copyWith(bottom: 120),
+                padding: EdgeInsets.fromLTRB(
+                  tokens.spaceLarge,
+                  tokens.spaceLarge,
+                  tokens.spaceLarge,
+                  tokens.spaceLarge,
+                ),
                 targetItemExtent: 180,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
-                childAspectRatio: 0.9,
+                crossAxisSpacing: tokens.spaceLarge,
+                mainAxisSpacing: tokens.spaceLarge,
+                childAspectRatio: 1.0,
                 shrinkWrap: true,
-                itemCount: state.categories.length,
+                itemCount: categories.length,
                 itemBuilder: (context, index) {
-                  final AthkarCategory category = state.categories[index];
+                  final AthkarCategory category = categories[index];
                   return AthkarCategoryCard(
-                    category: category,
+                    name: category.nameAr,
+                    icon: category.icon,
                     onTap: () {
+                      if (category.id == TasbeehConstants.categoryId) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const TasbeehScreen(),
+                          ),
+                        );
+                        return;
+                      }
+
                       AthkarDetailsRoute(
                         categoryId: category.id,
                         categoryName: category.nameAr,

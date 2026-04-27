@@ -128,6 +128,7 @@ class VideoContentPage extends StatelessWidget {
       pageSpec: pageSpec,
       pageRenderer: pageRenderer,
       backgroundColor: backgroundColor,
+      isCapturing: isCapturing,
     );
   }
 }
@@ -138,12 +139,14 @@ class _VideoMushafPage extends StatelessWidget {
     required this.pageSpec,
     required this.pageRenderer,
     required this.backgroundColor,
+    required this.isCapturing,
   });
 
   final int surahNumber;
   final VideoPageSpec pageSpec;
   final MushafPageRenderer pageRenderer;
   final Color backgroundColor;
+  final bool isCapturing;
 
   Color? _verseBackgroundColor(int currentSurah, int verseNumber) {
     if (currentSurah != surahNumber ||
@@ -174,6 +177,7 @@ class _VideoMushafPage extends StatelessWidget {
       verseTextColor: _verseTextColor,
       textColor: VideoReelDesign.mushafTextColor,
       pageBackgroundColor: backgroundColor,
+      isCapturing: isCapturing,
     );
   }
 }

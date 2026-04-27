@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
+import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
 import 'package:tilawa/core/services/crashlytics_service.dart';
 import 'package:tilawa/core/services/firebase_initialization_service.dart';

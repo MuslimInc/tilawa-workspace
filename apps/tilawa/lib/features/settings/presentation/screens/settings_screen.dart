@@ -51,7 +51,7 @@ class SettingsScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               horizontal: tokens.spaceLarge,
               vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
-            ).copyWith(bottom: TilawaShellPadding.of(context) + 20),
+            ).copyWith(bottom: 20),
             child: Column(
               children: [
                 // User Profile Section

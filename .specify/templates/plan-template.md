@@ -15,17 +15,27 @@
   ACTION REQUIRED: Replace the content in this section with the technical details
   for the project. The structure here is presented in advisory capacity to guide
   the iteration process.
+  
+  TILAWA WORKSPACE DEFAULTS (override as needed):
+  - Language/Version: Flutter 3.x+, Dart 3.x+
+  - Primary Dependencies: BLoC 8.x+, GoRouter 13.x+, Tilawa UI Kit, Equatable, Freezed
+  - Storage: Hydrated BLoC + Hive for local cache, SecureStorage for sensitive data
+  - Testing: flutter test, mockito, mocktail for mocking, golden tests for UI regression
+  - Target Platform: Android 8.0+, iOS 14.0+ (primary), web as secondary
+  - Performance Goals: 60 fps UI, <500ms cold startup, Quran rendering <50ms per page
+  - Constraints: RTL support (Arabic), offline-first where applicable, responsive layouts (compact/medium/expanded)
+  - Scale: Multi-screen features, Quranic database (114 surahs × ~282 ayahs), prayer times calculation
 -->
 
-**Language/Version**: Flutter / Dart [version or NEEDS CLARIFICATION]
-**Primary Dependencies**: BLoC, GoRouter, Tilawa UI Kit, [feature-specific packages or N/A]
-**Storage**: [Hydrated BLoC, local cache, secure storage, API, files, or N/A]
-**Testing**: `flutter test`, widget tests, BLoC/unit tests, [golden/performance tests if needed]
-**Target Platform**: [Android, iOS, web, desktop, or NEEDS CLARIFICATION]
+**Language/Version**: Flutter 3.x+, Dart 3.x+
+**Primary Dependencies**: BLoC 8.x+, GoRouter 13.x+, Tilawa UI Kit, Equatable, Freezed, [feature-specific packages or N/A]
+**Storage**: Hydrated BLoC + Hive, SecureStorage for sensitive data, [cloud sync if applicable]
+**Testing**: `flutter test`, mockito/mocktail, widget tests, BLoC/unit tests, [golden/performance tests if needed]
+**Target Platform**: Android 8.0+, iOS 14.0+ (primary), web (secondary)
 **Project Type**: Flutter workspace feature/package
-**Performance Goals**: [60 fps, startup target, scroll/render budget, p95 latency, or N/A]
-**Constraints**: [offline behavior, memory, accessibility, RTL, responsive/adaptive support, or N/A]
-**Scale/Scope**: [screens, packages, features, data size, supported form factors, or NEEDS CLARIFICATION]
+**Performance Goals**: 60 fps UI, <500ms cold startup, <50ms Quran page render, smooth scrolling <33.3ms/frame
+**Constraints**: RTL/LTR support, offline-first where applicable, responsive layouts (compact/medium/expanded), memory efficient
+**Scale/Scope**: [screens, packages, features, Quran data handling, supported form factors, or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
@@ -38,7 +48,9 @@
   only ephemeral view state; routes, redirects, and deep links use GoRouter.
 - **Atomic Design and Tilawa UI Kit**: PASS/FAIL - Shared UI goes through the
   Tilawa UI Kit; components are classified as foundation, atom, molecule,
-  organism, or layout primitive; tokens/localization/theme own visual constants.
+  organism, or layout primitive; tokens/localization/theme own visual constants;
+  UI code plans use `Row`/`Column`/`Flex.spacing` and Dart dot shorthands where
+  they improve clarity without changing semantics.
 - **Responsive and Adaptive UI**: PASS/FAIL - Compact, medium, expanded, RTL,
   safe-area, and text-scaling behavior is planned for affected surfaces.
 - **Performance and Low Jank**: PASS/FAIL - Hot paths avoid work in `build`;

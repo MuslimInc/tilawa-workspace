@@ -320,6 +320,24 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cancel;
 
+  /// Label for stopping audio playback
+  ///
+  /// In en, this message translates to:
+  /// **'Stop playback'**
+  String get stopPlayback;
+
+  /// Confirmation message before stopping audio playback
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to stop playback?'**
+  String get stopPlaybackConfirmMessage;
+
+  /// Snackbar message when player is dismissed
+  ///
+  /// In en, this message translates to:
+  /// **'Player closed'**
+  String get playerDismissed;
+
   /// Play all button text
   ///
   /// In en, this message translates to:
@@ -1166,6 +1184,60 @@ abstract class AppLocalizations {
   /// **'Storage Used: {size}'**
   String storageUsed(String size);
 
+  /// Server error message
+  ///
+  /// In en, this message translates to:
+  /// **'Server error, please try again later'**
+  String get serverError;
+
+  /// Cache/Storage error message
+  ///
+  /// In en, this message translates to:
+  /// **'Storage error'**
+  String get cacheError;
+
+  /// Audio playback error message
+  ///
+  /// In en, this message translates to:
+  /// **'Audio playback error'**
+  String get audioError;
+
+  /// Validation error message
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid data provided'**
+  String get validationError;
+
+  /// Permission error message
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied'**
+  String get permissionError;
+
+  /// Unexpected error message
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred'**
+  String get unexpectedError;
+
+  /// Persistence error message
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save data'**
+  String get persistenceError;
+
+  /// UI error message
+  ///
+  /// In en, this message translates to:
+  /// **'User interface error'**
+  String get uiError;
+
+  /// Unknown error message
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error occurred'**
+  String get unknownError;
+
   /// Start free trial button text
   ///
   /// In en, this message translates to:
@@ -1315,6 +1387,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Athkar'**
   String get athkar;
+
+  /// Tasbeeh category title in Athkar
+  ///
+  /// In en, this message translates to:
+  /// **'Tasbeeh'**
+  String get tasbeehCategory;
+
+  /// Input label for creating custom dhikr
+  ///
+  /// In en, this message translates to:
+  /// **'Dhikr'**
+  String get tasbeehInputLabel;
+
+  /// Hint for custom dhikr input
+  ///
+  /// In en, this message translates to:
+  /// **'Write your dhikr, e.g. Subhan Allah'**
+  String get tasbeehInputHint;
+
+  /// Save custom dhikr button label
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get tasbeehSave;
+
+  /// Instruction for tap-to-count interaction
+  ///
+  /// In en, this message translates to:
+  /// **'Tap anywhere to increment'**
+  String get tasbeehTapToCount;
+
+  /// Target count input label
+  ///
+  /// In en, this message translates to:
+  /// **'Target'**
+  String get tasbeehTargetLabel;
+
+  /// Button label to apply target count
+  ///
+  /// In en, this message translates to:
+  /// **'Set target'**
+  String get tasbeehSetTarget;
+
+  /// Title for add new Tasbeeh option
+  ///
+  /// In en, this message translates to:
+  /// **'Add new Tasbeeh'**
+  String get tasbeehAddNewOptionTitle;
+
+  /// Subtitle for add new Tasbeeh option
+  ///
+  /// In en, this message translates to:
+  /// **'Create your dhikr and target, then start counting'**
+  String get tasbeehAddNewOptionSubtitle;
+
+  /// Title for viewing saved Tasbeeh history
+  ///
+  /// In en, this message translates to:
+  /// **'View saved Tasbeeh'**
+  String get tasbeehViewHistoryOptionTitle;
+
+  /// Subtitle for viewing saved Tasbeeh history
+  ///
+  /// In en, this message translates to:
+  /// **'Choose one from your history and continue counting'**
+  String get tasbeehViewHistoryOptionSubtitle;
+
+  /// Button label to go to counting view
+  ///
+  /// In en, this message translates to:
+  /// **'Start counting'**
+  String get tasbeehGoToCounting;
+
+  /// Button label to return to Tasbeeh options
+  ///
+  /// In en, this message translates to:
+  /// **'Back to options'**
+  String get tasbeehBackToOptions;
+
+  /// Heading for selecting saved Tasbeeh
+  ///
+  /// In en, this message translates to:
+  /// **'Choose saved Tasbeeh'**
+  String get tasbeehChooseSavedDhikr;
+
+  /// Message shown when Tasbeeh history is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No saved Tasbeeh yet'**
+  String get tasbeehHistoryEmpty;
+
+  /// Confirmation message before deleting a saved Tasbeeh item
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{tasbeehText}\" from your saved Tasbeeh history?'**
+  String tasbeehDeleteConfirmationMessage(String tasbeehText);
+
+  /// Label for removing saved tasbeeh item
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get tasbeehRemoveItem;
+
+  /// Current target count label
+  ///
+  /// In en, this message translates to:
+  /// **'Current target: {count}'**
+  String tasbeehCurrentTarget(int count);
+
+  /// Prompt shown when no dhikr is selected
+  ///
+  /// In en, this message translates to:
+  /// **'Select or create a dhikr to start counting'**
+  String get tasbeehSelectOrCreatePrompt;
 
   /// Done label for thikr completion
   ///
@@ -1501,6 +1687,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Recitation Duration'**
   String get recitationDuration;
+
+  /// Title of the background source selection dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Background Source'**
+  String get chooseBackgroundSource;
+
+  /// Gallery option in background source selection
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get gallery;
+
+  /// Camera option in background source selection
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get camera;
+
+  /// Option to reset player background to default
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to Default'**
+  String get resetToDefault;
+
+  /// Title of the volume adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust volume'**
+  String get adjustVolume;
+
+  /// Title of the playback speed adjustment dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Playback speed'**
+  String get playbackSpeed;
+
+  /// Fallback text when reciter name is not available
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Reciter'**
+  String get unknownReciter;
 
   /// 15 minutes option
   ///
@@ -2911,6 +3139,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Encoding vertical video (this may take a moment)...'**
   String get encodingVerticalVideo;
+
+  /// Error message when reel generation fails for a general encoding reason
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate reel video. Please try again.'**
+  String get reelGenerationFailed;
+
+  /// Error message when captured screenshot frame format is invalid for reel encoding
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to process captured frame data for reel generation. Please retry.'**
+  String get reelGenerationFailedInvalidFrame;
+
+  /// Error message when reel generation starts without any screenshot frame
+  ///
+  /// In en, this message translates to:
+  /// **'No captured frame was found for reel generation.'**
+  String get reelGenerationFailedMissingScreenshot;
+
+  /// Error message when encoding reports success but the output video file is unusable
+  ///
+  /// In en, this message translates to:
+  /// **'Generated reel output is invalid and could not be opened. Please try again.'**
+  String get reelGenerationFailedInvalidOutput;
+
+  /// Shown in review screen when generated video preview initialization fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load generated video preview.'**
+  String get reelPreviewLoadFailed;
 
   /// Status message after the reel has been generated successfully
   ///

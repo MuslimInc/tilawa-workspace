@@ -93,6 +93,18 @@ class ShareFileManager {
     }
   }
 
+  /// Deletes a single file at [path]. Silently ignores missing files.
+  Future<void> deleteShareFile(String path) async {
+    try {
+      final file = File(path);
+      if (file.existsSync()) {
+        await file.delete();
+      }
+    } catch (_) {
+      // Best-effort deletion — do not crash.
+    }
+  }
+
   /// Evicts least-recently-used verse cache files when the cache exceeds
   /// [_maxCacheSizeBytes].
   Future<void> evictVerseCacheIfNeeded() async {

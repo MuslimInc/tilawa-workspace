@@ -238,7 +238,7 @@ abstract final class PerfLogger {
 
     _logForWidget(
       'WidgetsBinding',
-      'Frame watcher started hz=${_refreshHz.toStringAsFixed(0)} '
+      'Frame watcher started at (${DateTime.now()}) hz=${_refreshHz.toStringAsFixed(0)} '
           'budgetMs=${budgetMs.toStringAsFixed(1)}',
     );
 
@@ -349,7 +349,7 @@ abstract final class PerfLogger {
   static void _log(String message) => print(message);
 
   static void _logForWidget(String widgetName, String message) {
-    _log('[PerfLogger][$widgetName] $message');
+    _log('[AppLaunch][$widgetName]: $message at (${DateTime.now()})');
   }
 }
 

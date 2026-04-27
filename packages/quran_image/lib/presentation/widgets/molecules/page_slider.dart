@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../../core/design_tokens/design_tokens.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Molecular component for page navigation slider.
 ///
@@ -23,31 +22,41 @@ class PageSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final thumbSize = screenWidth * AppDimensions.thumbSizeRatio;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final thumbRadius = tokens.spaceSmall;
+    final overlayRadius = tokens.iconSizeLarge;
 
     return SliderTheme(
       data: SliderThemeData(
-        trackHeight: 4,
-        activeTrackColor: AppColors.sliderActiveTrack,
-        inactiveTrackColor: AppColors.sliderTrack,
-        thumbColor: AppColors.sliderThumb,
-        thumbShape: RoundSliderThumbShape(
-          enabledThumbRadius: thumbSize / 2,
-          elevation: 0,
-          pressedElevation: 0,
+        trackHeight: tokens.progressHeight + tokens.borderWidthThin,
+        activeTrackColor: colorScheme.primary,
+        inactiveTrackColor: colorScheme.primary.withValues(
+          alpha: tokens.opacitySubtle,
         ),
-        overlayColor: AppColors.sliderThumb.withValues(alpha: 0.2),
-        overlayShape: RoundSliderOverlayShape(overlayRadius: thumbSize),
+        thumbColor: colorScheme.primary,
+        thumbShape: RoundSliderThumbShape(
+          enabledThumbRadius: thumbRadius,
+          elevation: 0,
+          pressedElevation: tokens.spaceTiny,
+        ),
+        overlayColor: colorScheme.primary.withValues(
+          alpha: tokens.opacitySubtle,
+        ),
+        overlayShape: RoundSliderOverlayShape(overlayRadius: overlayRadius),
       ),
-      child: Slider(
-        value: currentPage.toDouble(),
-        min: 1,
-        max: totalPages.toDouble(),
-        // divisions intentionally omitted — 603 tick marks are invisible at
-        // this density and cause expensive CustomPainter repaints on every
-        // animation frame when the nav overlay slides in/out.
-        onChanged: onChanged,
-        onChangeEnd: onChangeEnd,
+      child: RepaintBoundary(
+        child: Slider(
+          value: currentPage.toDouble(),
+          min: 1,
+          max: totalPages.toDouble(),
+          // divisions intentionally omitted — 603 tick marks are invisible at
+          // this density and cause expensive CustomPainter repaints on every
+          // animation frame when the nav overlay slides in/out.
+          onChanged: onChanged,
+          onChangeEnd: onChangeEnd,
+        ),
       ),
     );
   }

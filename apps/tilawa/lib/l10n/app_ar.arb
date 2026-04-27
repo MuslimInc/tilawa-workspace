@@ -52,14 +52,6 @@
     "@noRecitersMatchSearch": {
         "description": "No reciters match search message"
     },
-    "retry": "إعادة المحاولة",
-    "@retry": {
-        "description": "Retry button text"
-    },
-    "error": "خطأ",
-    "@error": {
-        "description": "Error message"
-    },
     "filteredByLetter": "مفلتر بالحرف:",
     "@filteredByLetter": {
         "description": "Filtered by letter indicator"
@@ -156,6 +148,18 @@
     "@cancel": {
         "description": "Cancel button text"
     },
+    "stopPlayback": "إيقاف التشغيل",
+    "@stopPlayback": {
+        "description": "Label for stopping audio playback"
+    },
+    "stopPlaybackConfirmMessage": "هل أنت متأكد من إيقاف التشغيل؟",
+    "@stopPlaybackConfirmMessage": {
+        "description": "Confirmation message before stopping audio playback"
+    },
+    "playerDismissed": "تم إغلاق المشغل",
+    "@playerDismissed": {
+        "description": "Snackbar message when player is dismissed"
+    },
     "playAll": "تشغيل الكل",
     "@playAll": {
         "description": "Play all button text"
@@ -208,6 +212,10 @@
     "@createPlaylist": {
         "description": "Create playlist button text"
     },
+    "retry": "إعادة المحاولة",
+    "@retry": {
+        "description": "Retry button text"
+    },
     "downloadStatusChecked": "تم فحص حالة التحميل",
     "@downloadStatusChecked": {
         "description": "Download status checked message"
@@ -223,6 +231,10 @@
     "playbackInitiated": "تم بدء التشغيل",
     "@playbackInitiated": {
         "description": "Playback initiated message"
+    },
+    "error": "خطأ",
+    "@error": {
+        "description": "Error message"
     },
     "settings": "الإعدادات",
     "@settings": {
@@ -800,6 +812,42 @@
             }
         }
     },
+    "serverError": "خطأ في الخادم، يرجى المحاولة مرة أخرى لاحقاً",
+    "@serverError": {
+        "description": "Server error message"
+    },
+    "cacheError": "خطأ في التخزين",
+    "@cacheError": {
+        "description": "Cache/Storage error message"
+    },
+    "audioError": "خطأ في تشغيل الصوت",
+    "@audioError": {
+        "description": "Audio playback error message"
+    },
+    "validationError": "البيانات المُدخلة غير صالحة",
+    "@validationError": {
+        "description": "Validation error message"
+    },
+    "permissionError": "تم رفض الإذن",
+    "@permissionError": {
+        "description": "Permission error message"
+    },
+    "unexpectedError": "حدث خطأ غير متوقع",
+    "@unexpectedError": {
+        "description": "Unexpected error message"
+    },
+    "persistenceError": "فشل في حفظ البيانات",
+    "@persistenceError": {
+        "description": "Persistence error message"
+    },
+    "uiError": "خطأ في واجهة المستخدم",
+    "@uiError": {
+        "description": "UI error message"
+    },
+    "unknownError": "حدث خطأ غير معروف",
+    "@unknownError": {
+        "description": "Unknown error message"
+    },
     "startFreeTrial": "ابدأ التجربة المجانية",
     "@startFreeTrial": {
         "description": "Start free trial button text"
@@ -929,6 +977,94 @@
     "athkar": "الأذكار",
     "@athkar": {
         "description": "Athkar tab label"
+    },
+    "tasbeehCategory": "مسبحة",
+    "@tasbeehCategory": {
+        "description": "Tasbeeh category title in Athkar"
+    },
+    "tasbeehInputLabel": "الذكر",
+    "@tasbeehInputLabel": {
+        "description": "Input label for creating custom dhikr"
+    },
+    "tasbeehInputHint": "اكتب ذكرك، مثل: سبحان الله",
+    "@tasbeehInputHint": {
+        "description": "Hint for custom dhikr input"
+    },
+    "tasbeehSave": "حفظ",
+    "@tasbeehSave": {
+        "description": "Save custom dhikr button label"
+    },
+    "tasbeehTapToCount": "اضغط في أي مكان للزيادة",
+    "@tasbeehTapToCount": {
+        "description": "Instruction for tap-to-count interaction"
+    },
+    "tasbeehTargetLabel": "الهدف",
+    "@tasbeehTargetLabel": {
+        "description": "Target count input label"
+    },
+    "tasbeehSetTarget": "تعيين الهدف",
+    "@tasbeehSetTarget": {
+        "description": "Button label to apply target count"
+    },
+    "tasbeehAddNewOptionTitle": "إضافة مسبحة جديدة",
+    "@tasbeehAddNewOptionTitle": {
+        "description": "Title for add new Tasbeeh option"
+    },
+    "tasbeehAddNewOptionSubtitle": "أنشئ الذكر والهدف ثم ابدأ العد",
+    "@tasbeehAddNewOptionSubtitle": {
+        "description": "Subtitle for add new Tasbeeh option"
+    },
+    "tasbeehViewHistoryOptionTitle": "عرض السجل المحفوظ",
+    "@tasbeehViewHistoryOptionTitle": {
+        "description": "Title for viewing saved Tasbeeh history"
+    },
+    "tasbeehViewHistoryOptionSubtitle": "اختر من السجل وواصل العد",
+    "@tasbeehViewHistoryOptionSubtitle": {
+        "description": "Subtitle for viewing saved Tasbeeh history"
+    },
+    "tasbeehGoToCounting": "ابدأ العد",
+    "@tasbeehGoToCounting": {
+        "description": "Button label to go to counting view"
+    },
+    "tasbeehBackToOptions": "العودة للخيارات",
+    "@tasbeehBackToOptions": {
+        "description": "Button label to return to Tasbeeh options"
+    },
+    "tasbeehChooseSavedDhikr": "اختر مسبحة محفوظة",
+    "@tasbeehChooseSavedDhikr": {
+        "description": "Heading for selecting saved Tasbeeh"
+    },
+    "tasbeehHistoryEmpty": "لا توجد مسبحة محفوظة بعد",
+    "@tasbeehHistoryEmpty": {
+        "description": "Message shown when Tasbeeh history is empty"
+    },
+    "tasbeehDeleteConfirmationMessage": "هل تريد حذف \"{tasbeehText}\" من سجل المسبحة المحفوظ؟",
+    "@tasbeehDeleteConfirmationMessage": {
+        "description": "Confirmation message before deleting a saved Tasbeeh item",
+        "placeholders": {
+            "tasbeehText": {
+                "type": "String",
+                "description": "The Tasbeeh text to be deleted"
+            }
+        }
+    },
+    "tasbeehRemoveItem": "إزالة",
+    "@tasbeehRemoveItem": {
+        "description": "Label for removing saved tasbeeh item"
+    },
+    "tasbeehCurrentTarget": "الهدف الحالي: {count}",
+    "@tasbeehCurrentTarget": {
+        "description": "Current target count label",
+        "placeholders": {
+            "count": {
+                "type": "int",
+                "format": "decimalPattern"
+            }
+        }
+    },
+    "tasbeehSelectOrCreatePrompt": "اختر ذكراً محفوظاً أو أضف ذكراً جديداً للبدء",
+    "@tasbeehSelectOrCreatePrompt": {
+        "description": "Prompt shown when no dhikr is selected"
     },
     "done": "تم",
     "@done": {
@@ -1087,6 +1223,34 @@
     "recitationDuration": "مدة التلاوة",
     "@recitationDuration": {
         "description": "Sleep timer dialog title"
+    },
+    "chooseBackgroundSource": "اختر مصدر الخلفية",
+    "@chooseBackgroundSource": {
+        "description": "Title of the background source selection dialog"
+    },
+    "gallery": "المعرض",
+    "@gallery": {
+        "description": "Gallery option in background source selection"
+    },
+    "camera": "الكاميرا",
+    "@camera": {
+        "description": "Camera option in background source selection"
+    },
+    "resetToDefault": "إعادة ضبط الافتراضي",
+    "@resetToDefault": {
+        "description": "Option to reset player background to default"
+    },
+    "adjustVolume": "ضبط مستوى الصوت",
+    "@adjustVolume": {
+        "description": "Title of the volume adjustment dialog"
+    },
+    "playbackSpeed": "سرعة التشغيل",
+    "@playbackSpeed": {
+        "description": "Title of the playback speed adjustment dialog"
+    },
+    "unknownReciter": "قارئ غير معروف",
+    "@unknownReciter": {
+        "description": "Fallback text when reciter name is not available"
     },
     "minutes15": "15 دقيقة",
     "@minutes15": {
@@ -2120,6 +2284,26 @@
     "encodingVerticalVideo": "جارِ ترميز الفيديو العمودي، قد يستغرق ذلك بعض الوقت...",
     "@encodingVerticalVideo": {
         "description": "Status message while encoding the final vertical reel video"
+    },
+    "reelGenerationFailed": "تعذّر إنشاء فيديو الريل. يرجى المحاولة مرة أخرى.",
+    "@reelGenerationFailed": {
+        "description": "Error message when reel generation fails for a general encoding reason"
+    },
+    "reelGenerationFailedInvalidFrame": "تعذّر معالجة إطار الصورة الملتقطة لإنشاء الريل. يرجى إعادة المحاولة.",
+    "@reelGenerationFailedInvalidFrame": {
+        "description": "Error message when captured screenshot frame format is invalid for reel encoding"
+    },
+    "reelGenerationFailedMissingScreenshot": "لم يتم العثور على إطار ملتقط لإنشاء الريل.",
+    "@reelGenerationFailedMissingScreenshot": {
+        "description": "Error message when reel generation starts without any screenshot frame"
+    },
+    "reelGenerationFailedInvalidOutput": "ملف الريل الناتج غير صالح ولا يمكن فتحه. يرجى إعادة المحاولة.",
+    "@reelGenerationFailedInvalidOutput": {
+        "description": "Error message when encoding reports success but the output video file is unusable"
+    },
+    "reelPreviewLoadFailed": "تعذّر تحميل معاينة الفيديو الناتج.",
+    "@reelPreviewLoadFailed": {
+        "description": "Shown in review screen when generated video preview initialization fails"
     },
     "reelGenerated": "تم إنشاء الريل!",
     "@reelGenerated": {

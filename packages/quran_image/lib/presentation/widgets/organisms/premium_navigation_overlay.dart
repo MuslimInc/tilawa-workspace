@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../core/design_tokens/design_tokens.dart';
 import '../../../core/perf_logger.dart';
 import '../../../domain/domain.dart';
 import '../../bloc/bloc.dart';
@@ -44,10 +44,7 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: AppDurations.sliderShowHide),
-      vsync: this,
-    );
+    _controller = AnimationController(vsync: this);
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
@@ -58,6 +55,12 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
       _controller.value = 1.0;
       _hasBeenShown = true;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller.duration = Theme.of(context).tokens.durationMedium;
   }
 
   @override
@@ -81,20 +84,10 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
 
   @override
   Widget build(BuildContext context) {
-    // Extend the positioned region downward by the bottom safe-area inset.
-    // The Stack lives inside a Padding that consumes safe-area insets, so
-    // bottom: 0 places the overlay's bottom edge at the top of the home
-    // indicator gap — not the physical screen edge. SlideTransition(Offset(0,1))
-    // translates by the widget's own height, which on a device with a 34pt home
-    // indicator is not enough to push the overlay fully off-screen; the top
-    // portion remains visible in the safe-area gap. Extending the bottom by the
-    // inset makes the widget taller by exactly that gap, so the slide-off target
-    // reaches the physical screen edge with no clip layer needed.
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Positioned(
       left: 0,
       right: 0,
-      bottom: -bottomInset,
+      bottom: 0,
       child: BlocListener<NavigationBloc, NavigationState>(
         listenWhen: (previous, current) {
           if (previous is NavigationLoaded && current is NavigationLoaded) {
@@ -183,20 +176,51 @@ class _PremiumNavigationControls extends StatelessWidget {
                 RepaintBoundary(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      return NavigationSliderOverlay(
-                        screenWidth: constraints.maxWidth,
-                        state: effectivePageState,
-                        canGoToPreviousPage: committedPageState.currentPage > 1,
-                        canGoToNextPage:
-                            committedPageState.currentPage <
-                            committedPageState.totalPages,
-                        onPreviewPageChanged: onPreviewPageChanged,
-                        onPageNavigationRequested: onPageNavigationRequested,
-                        onPreviousPageRequested: onPreviousPageRequested,
-                        onNextPageRequested: onNextPageRequested,
-                        onInteractionStart: onInteractionStart,
-                        onInteractionEnd: onInteractionEnd,
-                        onShare: onShareRequested,
+                      final tokens = Theme.of(context).tokens;
+
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (onShareRequested != null) ...[
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: tokens.spaceLarge,
+                              ),
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: tokens.contentMaxWidthForm,
+                                  ),
+                                  child: Align(
+                                    alignment: AlignmentDirectional.centerEnd,
+                                    child: _PremiumShareFab(
+                                      onTap: onShareRequested!,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: tokens.spaceSmall),
+                          ],
+                          RepaintBoundary(
+                            child: NavigationSliderOverlay(
+                              screenWidth: constraints.maxWidth,
+                              state: effectivePageState,
+                              canGoToPreviousPage:
+                                  committedPageState.currentPage > 1,
+                              canGoToNextPage:
+                                  committedPageState.currentPage <
+                                  committedPageState.totalPages,
+                              onPreviewPageChanged: onPreviewPageChanged,
+                              onPageNavigationRequested:
+                                  onPageNavigationRequested,
+                              onPreviousPageRequested: onPreviousPageRequested,
+                              onNextPageRequested: onNextPageRequested,
+                              onInteractionStart: onInteractionStart,
+                              onInteractionEnd: onInteractionEnd,
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -213,5 +237,35 @@ class _PremiumNavigationControls extends StatelessWidget {
       message: 'build',
     );
     return controls;
+  }
+}
+
+class _PremiumShareFab extends StatelessWidget {
+  const _PremiumShareFab({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return SizedBox.square(
+      dimension: tokens.iconSizeExtraLarge,
+      child: FloatingActionButton.small(
+        heroTag: null,
+        elevation: tokens.spaceTiny,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        ),
+        onPressed: onTap,
+        child: Icon(
+          Icons.video_camera_back_outlined,
+          size: tokens.iconSizeMedium,
+        ),
+      ),
+    );
   }
 }

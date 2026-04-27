@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class HiddenThumbComponentShape extends SliderComponentShape {
   @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) => Size.zero;
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) => .zero;
 
   @override
   void paint(

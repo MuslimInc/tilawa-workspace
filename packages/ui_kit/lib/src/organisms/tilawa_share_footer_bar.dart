@@ -28,7 +28,7 @@ class TilawaShareFooterBar extends StatelessWidget {
         (ThemeData.estimateBrightnessForColor(resolvedBackgroundColor) ==
                 Brightness.dark
             ? theme.colorScheme.onSecondaryContainer
-            : theme.colorScheme.onSecondaryContainer);
+            : theme.colorScheme.onSurface);
     final TextStyle primaryStyle = (textTheme.titleSmall ?? const TextStyle())
         .copyWith(
           fontSize: tokens.labelFontSize,

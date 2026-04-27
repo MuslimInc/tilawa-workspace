@@ -36,6 +36,9 @@ class MainBottomOverlay extends StatelessWidget {
             right: 0,
             child: OfflineIndicatorWidget(),
           ),
+        // Positioned.fill ensures the Align(bottomCenter) inside the player
+        // has proper constraints to position correctly. The player's internal
+        // Align and layout logic still manage sizing (mini vs expanded).
         Positioned.fill(child: playerWidget),
       ],
     );

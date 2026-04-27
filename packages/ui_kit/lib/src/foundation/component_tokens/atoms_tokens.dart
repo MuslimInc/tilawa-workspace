@@ -9,7 +9,7 @@ class TilawaSectionTitleTokens {
   final FontWeight fontWeight;
 
   factory TilawaSectionTitleTokens.defaults() =>
-      const TilawaSectionTitleTokens(fontWeight: FontWeight.w800);
+      const TilawaSectionTitleTokens(fontWeight: .w800);
 
   TilawaSectionTitleTokens copyWith({FontWeight? fontWeight}) {
     return TilawaSectionTitleTokens(fontWeight: fontWeight ?? this.fontWeight);

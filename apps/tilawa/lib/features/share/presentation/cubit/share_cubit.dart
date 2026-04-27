@@ -16,6 +16,7 @@ import 'package:tilawa/features/share/domain/usecases/generate_video_use_case.da
 import 'package:tilawa/features/share/domain/usecases/get_share_ayahs_use_case.dart';
 import 'package:tilawa/features/share/domain/usecases/prepare_share_range_use_case.dart';
 import 'package:tilawa/features/share/domain/usecases/share_content_use_case.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
@@ -33,7 +34,11 @@ class ShareCubit extends Cubit<ShareState> {
     this._getShareAyahs,
     this._shareContent,
     this._getReciters,
-  ) : super(const ShareState());
+  ) : super(const ShareState()) {
+    logger.d(
+      '[AppLaunch][ShareCubit.constructor]: Start in (${DateTime.now()})',
+    );
+  }
 
   final CaptureScreenshotUseCase _captureScreenshot;
   final GenerateAudioClipUseCase _generateAudioClip;
@@ -55,6 +60,9 @@ class ShareCubit extends Cubit<ShareState> {
     required String serverUrl,
     String? reciterFolder,
   }) {
+    logger.d(
+      '[AppLaunch][ShareCubit.configureAudioClip]: Start in (${DateTime.now()})',
+    );
     final effectiveMin = minAyah ?? 1;
     final effectiveMax = maxAyah ?? getVerseCount(surahNumber);
 
@@ -83,6 +91,8 @@ class ShareCubit extends Cubit<ShareState> {
         progressMessage: '',
         ayahs: null,
         errorMessage: null,
+        reciterOptions: const [],
+        isLoadingReciters: false,
         videoPageSpecs: result.videoPageSpecs,
       ),
     );
@@ -122,6 +132,9 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   Future<void> _fetchAyahs(int surahNumber, int fromAyah, int toAyah) async {
+    logger.d(
+      '[AppLaunch][ShareCubit._fetchAyahs]: Start in (${DateTime.now()})',
+    );
     try {
       final rangeAyahs = await _getShareAyahs(
         surahNumber: surahNumber,
@@ -137,7 +150,11 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   Future<void> loadReciterOptions() async {
+    logger.d(
+      '[AppLaunch][ShareCubit.loadReciterOptions]: Start in (${DateTime.now()})',
+    );
     if (state.surahNumber == null) return;
+    if (state.isLoadingReciters) return;
     emit(state.copyWith(isLoadingReciters: true));
 
     final result = await _getReciters();
@@ -169,7 +186,7 @@ class ShareCubit extends Cubit<ShareState> {
 
   /// Updates the screenshot layout.
   void updateScreenshotLayout(ShareScreenshotLayout layout) {
-    emit(state.copyWith(screenshotLayout: ShareScreenshotLayout.readerPage));
+    emit(state.copyWith(screenshotLayout: layout));
   }
 
   AudioClipConfig? _buildAudioConfig() {
@@ -277,6 +294,9 @@ class ShareCubit extends Cubit<ShareState> {
     Color? footerBackgroundColor,
     Color? footerForegroundColor,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareCubit.prepareScreenshot]: Start in (${DateTime.now()})',
+    );
     emit(
       state.copyWith(
         status: ShareStatus.capturing,
@@ -330,6 +350,9 @@ class ShareCubit extends Cubit<ShareState> {
     Color? footerBackgroundColor,
     Color? footerForegroundColor,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareCubit.captureAndShareScreenshot]: Start in (${DateTime.now()})',
+    );
     emit(state.copyWith(status: ShareStatus.sharing));
     try {
       await quranQcfLocator<QuranFontService>().ensureSingleFontLoaded(
@@ -367,6 +390,9 @@ class ShareCubit extends Cubit<ShareState> {
     required ShareProgressMessages progressMessages,
     int? maxDurationSeconds,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareCubit.prepareAudioClip]: Start in (${DateTime.now()})',
+    );
     final config = _buildAudioConfig();
     if (config == null) return;
 
@@ -454,6 +480,9 @@ class ShareCubit extends Cubit<ShareState> {
     required List<WidgetCaptureHandle> handles,
     int? maxDurationSeconds,
   }) async {
+    logger.d(
+      '[AppLaunch][ShareCubit.generateVideo]: Start in (${DateTime.now()})',
+    );
     final audioConfig = _buildAudioConfig();
 
     logger.d(
@@ -525,7 +554,10 @@ class ShareCubit extends Cubit<ShareState> {
           state.copyWith(
             status: ShareStatus.error,
             capturingIndex: null,
-            errorMessage: _userFacingError(e),
+            errorMessage: _userFacingError(
+              e,
+              videoMessages: progressMessages.video,
+            ),
           ),
         );
       } else {
@@ -589,7 +621,24 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   /// Returns a clean, user-facing error string without internal stack details.
-  String _userFacingError(Object e) {
+  String _userFacingError(Object e, {VideoProgressMessages? videoMessages}) {
+    if (e is VideoGenerationFailure) {
+      if (videoMessages == null) {
+        return e.message ?? 'Failed to generate reel.';
+      }
+
+      return switch (e.reason) {
+        VideoGenerationFailureReason.invalidFrameFormat =>
+          videoMessages.videoGenerationFailedInvalidFrame,
+        VideoGenerationFailureReason.missingScreenshot =>
+          videoMessages.videoGenerationFailedMissingScreenshot,
+        VideoGenerationFailureReason.invalidOutput =>
+          videoMessages.videoGenerationFailedInvalidOutput,
+        VideoGenerationFailureReason.encodingFailed =>
+          videoMessages.videoGenerationFailed,
+      };
+    }
+
     if (e is StateError) return e.message;
     final msg = e.toString();
     // Strip "Exception:" / "StateError:" prefixes that leak implementation detail.

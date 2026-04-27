@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran_image/core/design_tokens/design_tokens.dart';
 import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/domain/domain.dart';
@@ -46,7 +45,7 @@ class QuranImageReader extends StatefulWidget {
 }
 
 class _QuranImageReaderState extends State<QuranImageReader>
-    with WidgetsBindingObserver {
+    with WidgetsBindingObserver, RouteAware {
   late final PageController _pageController;
   late int _lastSettledPageIndex;
 
@@ -78,9 +77,15 @@ class _QuranImageReaderState extends State<QuranImageReader>
   bool _isAppVisible = true;
 
   // Throttle slider preview updates to avoid excessive rebuilds during drags.
-  // 50ms limit = max 20 updates/second, down from 30-60 updates/second.
+  // 150ms limit = max ~7 updates/second. Slider generates 30-60/second, so this
+  // significantly reduces rebuild pressure while maintaining good preview responsiveness.
   DateTime _lastPreviewUpdateTime = DateTime(2000);
-  static const _previewUpdateThrottle = Duration(milliseconds: 50);
+  static const _previewUpdateThrottle = Duration(milliseconds: 150);
+
+  // Cache recently previewed pages to avoid redundant updates during session.
+  // Prevents same page from appearing in logs multiple times.
+  final LinkedHashSet<int> _previewedPagesCache = LinkedHashSet<int>();
+  static const int _maxCachedPages = 50;
 
   // Last page number dispatched to prewarmCurrentTarget. Guards against
   // firing on every sub-pixel scroll tick when the rounded page hasn't changed.
@@ -136,6 +141,14 @@ class _QuranImageReaderState extends State<QuranImageReader>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    // Register for route changes so we can reapply system UI when returning from dialogs
+    final route = ModalRoute.of(context);
+    if (route != null) {
+      final routeObserver = RouteObserver<ModalRoute<dynamic>>();
+      routeObserver.subscribe(this, route as PageRoute<dynamic>);
+    }
+
     final view = View.of(context);
     final dpr = view.devicePixelRatio;
     // Quran line images are portrait-page-width images. Use the minimum of
@@ -240,6 +253,14 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   @override
+  void didPopNext() {
+    // Reapply system UI configuration when returning from a dialog or another route.
+    // This ensures the status bar and navigation bar colors are restored after the
+    // video reel generator or other overlay is dismissed.
+    _applySystemUiConfig();
+  }
+
+  @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _backgroundMarkerWarmUpTimer?.cancel();
@@ -290,12 +311,26 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
     // Ensure the status bar is transparent so content can flow behind it if necessary,
     // and icons are visible on the page background.
+    _applySystemUiOverlayStyle();
+  }
+
+  void _applySystemUiOverlayStyle() {
+    final scaffoldColor = Theme.of(context).scaffoldBackgroundColor;
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+
     SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+      SystemUiOverlayStyle(
+        statusBarColor: scaffoldColor,
+        systemNavigationBarColor: scaffoldColor,
+        statusBarIconBrightness: isDarkTheme
+            ? Brightness.light
+            : Brightness.dark,
+        statusBarBrightness: isDarkTheme ? Brightness.dark : Brightness.light,
+        systemNavigationBarIconBrightness: isDarkTheme
+            ? Brightness.light
+            : Brightness.dark,
+        systemNavigationBarContrastEnforced: false,
+        systemStatusBarContrastEnforced: false,
       ),
     );
   }
@@ -409,7 +444,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   void _updatePreviewPage(int displayPage) {
-    // Throttle: max 20 updates/second (50ms interval) to reduce rebuild pressure.
+    // Throttle: max ~7 updates/second (150ms interval) to reduce rebuild pressure.
     final now = DateTime.now();
     if (now.difference(_lastPreviewUpdateTime) < _previewUpdateThrottle) {
       return;
@@ -418,6 +453,11 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
     final currentState = context.read<NavigationBloc>().state;
     if (currentState is! NavigationLoaded) return;
+
+    // Skip if already cached during this session — avoids logging redundant previews
+    if (_previewedPagesCache.contains(displayPage)) {
+      return;
+    }
 
     final currentPreviewState = _previewPageStateNotifier.value;
     if (displayPage == currentState.pageState.currentPage &&
@@ -438,6 +478,13 @@ class _QuranImageReaderState extends State<QuranImageReader>
       pageNumber: displayPage,
       cacheWidth: _cacheWidth,
     );
+
+    // Add to cache with LRU eviction to prevent unbounded growth
+    _previewedPagesCache.add(displayPage);
+    if (_previewedPagesCache.length > _maxCachedPages) {
+      // Remove oldest entry (LinkedHashSet preserves insertion order)
+      _previewedPagesCache.remove(_previewedPagesCache.first);
+    }
   }
 
   void _clearPreviewPage() {
@@ -557,6 +604,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final pageIndex = pageNumber - 1;
     _lastSettledPageIndex = pageIndex;
     _clearPreviewPage();
+    // Clear preview cache on page change to allow re-previewing around new page
+    _previewedPagesCache.clear();
     PerfLogger.log(widgetName: 'PageView', message: 'swiped page=$pageNumber');
     context.read<NavigationBloc>().add(PageChanged(pageNumber));
     _imagePrewarmer.prewarmSettledWindow(
@@ -780,115 +829,133 @@ class _QuranImageReaderState extends State<QuranImageReader>
   @override
   Widget build(BuildContext context) {
     final sw = PerfLogger.startTimer();
-    final padding = MediaQuery.paddingOf(context);
-
     // If we are in an immersive mode, we want the content to be truly full-screen
     // and not be pushed down by the status bar or up by the navigation bar,
     // even if the OS hasn't fully hidden them yet (which avoids the visual gap).
     final bool isImmersive =
         widget.preferredSystemUiMode == SystemUiMode.immersive ||
         widget.preferredSystemUiMode == SystemUiMode.immersiveSticky;
+    final padding = _stableQuranPaddingFor(
+      MediaQuery.viewPaddingOf(context),
+      isImmersive: isImmersive,
+    );
 
     final scaffold = Scaffold(
-      backgroundColor: AppColors.pageBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           systemNavigationBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
           statusBarBrightness: Brightness.light,
+          systemNavigationBarIconBrightness: Brightness.dark,
           // Hide bars if immersive
           systemNavigationBarContrastEnforced: !isImmersive,
           systemStatusBarContrastEnforced: !isImmersive,
         ),
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: padding.top,
-            bottom: padding.bottom,
-            left: padding.left,
-            right: padding.right,
-          ),
-          child: Stack(
-            children: [
-              ValueListenableBuilder<Set<int>>(
-                valueListenable: _hiddenWarmupPagesNotifier,
-                builder: (context, pageNumbers, _) {
-                  if (pageNumbers.isEmpty) {
-                    return const SizedBox.shrink();
-                  }
-                  // Push the warmup subtree off-screen so it is fully painted
-                  // (raster layer exists — required for toImage()) but never
-                  // composited into the visible viewport.
-                  //
-                  // Offstage was previously used here but skips painting
-                  // entirely, causing toImage() to crash with a null layer.
-                  // Transform.translate with a large Y offset keeps the full
-                  // render pipeline running while ensuring the content is
-                  // outside the physical screen bounds.
-                  return Transform.translate(
-                    offset: const Offset(0, 100000),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        for (final pageNumber in pageNumbers)
-                          Positioned.fill(
-                            child: RepaintBoundary(
-                              key: _hiddenWarmupBoundaryKeys.putIfAbsent(
-                                pageNumber,
-                                GlobalKey.new,
-                              ),
-                              child: QuranImagePage(
-                                key: ValueKey<String>('warmup:$pageNumber'),
-                                pageNumber: pageNumber,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(padding: padding, viewPadding: padding),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: padding.top,
+                    bottom: padding.bottom,
+                    left: padding.left,
+                    right: padding.right,
+                  ),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ValueListenableBuilder<Set<int>>(
+                        valueListenable: _hiddenWarmupPagesNotifier,
+                        builder: (context, pageNumbers, _) {
+                          if (pageNumbers.isEmpty) {
+                            return const SizedBox.shrink();
+                          }
+                          // Push the warmup subtree off-screen so it is fully painted
+                          // (raster layer exists — required for toImage()) but never
+                          // composited into the visible viewport.
+                          //
+                          // Offstage was previously used here but skips painting
+                          // entirely, causing toImage() to crash with a null layer.
+                          // Transform.translate with a large Y offset keeps the full
+                          // render pipeline running while ensuring the content is
+                          // outside the physical screen bounds.
+                          return Transform.translate(
+                            offset: const Offset(0, 100000),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                for (final pageNumber in pageNumbers)
+                                  Positioned.fill(
+                                    child: RepaintBoundary(
+                                      key: _hiddenWarmupBoundaryKeys
+                                          .putIfAbsent(
+                                            pageNumber,
+                                            GlobalKey.new,
+                                          ),
+                                      child: QuranImagePage(
+                                        key: ValueKey<String>(
+                                          'warmup:$pageNumber',
+                                        ),
+                                        pageNumber: pageNumber,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      QuranReaderViewport(
+                        pageController: _pageController,
+                        onToggleNavigation: _toggleNavigation,
+                        onShowNavigation: _showNavigation,
+                        onPageChanged: _onReaderPageChanged,
+                      ),
+                      ValueListenableBuilder<_JumpTransitionSnapshot?>(
+                        valueListenable: _jumpTransitionSnapshotNotifier,
+                        builder: (context, snapshot, _) {
+                          if (snapshot == null) {
+                            return const SizedBox.shrink();
+                          }
+                          return Positioned.fill(
+                            child: IgnorePointer(
+                              child: RawImage(
+                                key: ValueKey<String>(
+                                  'jump-transition:${snapshot.pageNumber}',
+                                ),
+                                image: snapshot.image,
+                                fit: BoxFit.fill,
+                                filterQuality: FilterQuality.medium,
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-              QuranReaderViewport(
-                pageController: _pageController,
-                onToggleNavigation: _toggleNavigation,
-                onShowNavigation: _showNavigation,
-                onPageChanged: _onReaderPageChanged,
-              ),
-              ValueListenableBuilder<_JumpTransitionSnapshot?>(
-                valueListenable: _jumpTransitionSnapshotNotifier,
-                builder: (context, snapshot, _) {
-                  if (snapshot == null) {
-                    return const SizedBox.shrink();
-                  }
-                  return Positioned.fill(
-                    child: IgnorePointer(
-                      child: RawImage(
-                        key: ValueKey<String>(
-                          'jump-transition:${snapshot.pageNumber}',
-                        ),
-                        image: snapshot.image,
-                        fit: BoxFit.fill,
-                        filterQuality: FilterQuality.medium,
+                          );
+                        },
                       ),
-                    ),
-                  );
-                },
+                    ],
+                  ),
+                ),
               ),
-
-              PremiumNavigationOverlay(
-                previewStateListenable: _previewPageStateNotifier,
-                onPreviewPageChanged: _updatePreviewPage,
-                onPageNavigationRequested: _navigateToPage,
-                onPreviousPageRequested: _navigateToPreviousPage,
-                onNextPageRequested: _navigateToNextPage,
-                onInteractionStart: _onNavigationInteractionStarted,
-                onInteractionEnd: _onNavigationInteractionEnded,
-                onShareRequested: widget.onShareRequested != null
-                    ? () => widget.onShareRequested!(_lastSettledPageIndex + 1)
-                    : null,
-              ),
-            ],
-          ),
+            ),
+            PremiumNavigationOverlay(
+              previewStateListenable: _previewPageStateNotifier,
+              onPreviewPageChanged: _updatePreviewPage,
+              onPageNavigationRequested: _navigateToPage,
+              onPreviousPageRequested: _navigateToPreviousPage,
+              onNextPageRequested: _navigateToNextPage,
+              onInteractionStart: _onNavigationInteractionStarted,
+              onInteractionEnd: _onNavigationInteractionEnded,
+              onShareRequested: widget.onShareRequested != null
+                  ? () => widget.onShareRequested!(_lastSettledPageIndex + 1)
+                  : null,
+            ),
+          ],
         ),
       ),
     );
@@ -897,6 +964,21 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
     return Directionality(textDirection: TextDirection.rtl, child: scaffold);
   }
+}
+
+EdgeInsets _stableQuranPaddingFor(
+  EdgeInsets viewPadding, {
+  required bool isImmersive,
+}) {
+  if (!isImmersive) {
+    return viewPadding;
+  }
+  return EdgeInsets.fromLTRB(
+    viewPadding.left,
+    viewPadding.top,
+    viewPadding.right,
+    0,
+  );
 }
 
 class _JumpTransitionSnapshot {

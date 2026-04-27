@@ -46,6 +46,7 @@ class PageContent extends StatefulWidget {
     this.showSpecialBlocks = true,
     this.viewportSize,
     this.enableSnapshots = true,
+    this.isCapturing = false,
     required this.mushafService,
     required this.pageSnapshotService,
   });
@@ -105,6 +106,7 @@ class PageContent extends StatefulWidget {
   final bool showSpecialBlocks;
   final Size? viewportSize;
   final bool enableSnapshots;
+  final bool isCapturing;
   final void Function(
     int surahNumber,
     int verseNumber,
@@ -281,7 +283,8 @@ class _PageContentState extends State<PageContent>
   /// Schedules a bitmap snapshot capture via the [IdleScheduler] so the
   /// expensive `toImage()` call runs only when the GPU is idle.
   void _scheduleSnapshotCapture() {
-    if (!widget.enableSnapshots ||
+    if (widget.isCapturing ||
+        !widget.enableSnapshots ||
         _snapshotScheduled ||
         _snapshotCaptured ||
         _snapshotFailed) {
@@ -503,7 +506,7 @@ class _PageContentState extends State<PageContent>
     // During swipe animations, display a pre-rendered bitmap snapshot
     // instead of the full widget tree. This reduces raster cost from
     // ~25ms (15 TextPainters) to ~2ms (single texture blit).
-    final bool snapshotsEnabled = widget.enableSnapshots;
+    final bool snapshotsEnabled = widget.enableSnapshots && !widget.isCapturing;
     final bool isScrolling = widget.isScrollingListenable?.value ?? false;
     final ui.Image? snapshot = snapshotsEnabled && isScrolling
         ? widget.pageSnapshotService.getSnapshot(widget.pageNumber)

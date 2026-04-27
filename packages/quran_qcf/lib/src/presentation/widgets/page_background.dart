@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 /// A widget that renders the background of a Quran page.
@@ -32,7 +33,10 @@ class PageBackground extends StatelessWidget {
             Positioned.fill(
               child: RepaintBoundary(
                 child: CustomPaint(
-                  painter: _NoisePainter(seed: color.value, opacity: 0.015),
+                  painter: _NoisePainter(
+                    seed: color.toARGB32(),
+                    opacity: 0.015,
+                  ),
                 ),
               ),
             ),

@@ -11,14 +11,15 @@ class ShareControlsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    return TilawaCard(
-      backgroundColor: theme.colorScheme.surface.withValues(
-        alpha: tokens.opacitySubtle,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant,
+          width: tokens.borderWidthThin,
+        ),
       ),
-      borderColor: theme.colorScheme.outline.withValues(
-        alpha: tokens.opacitySubtle,
-      ),
-      padding: EdgeInsets.zero,
       child: Column(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
@@ -119,14 +120,14 @@ class AyahStepper extends StatelessWidget {
     final tokens = theme.tokens;
     final clamped = value.clamp(min, max);
 
-    return TilawaCard(
-      padding: EdgeInsets.zero,
-      backgroundColor: theme.colorScheme.surface.withValues(
-        alpha: tokens.opacitySubtle,
-      ),
-      borderRadius: tokens.radiusMedium,
-      borderColor: theme.colorScheme.outline.withValues(
-        alpha: tokens.opacitySubtle,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant,
+          width: tokens.borderWidthThin,
+        ),
       ),
       child: SizedBox(
         height: 36,

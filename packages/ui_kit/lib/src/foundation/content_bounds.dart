@@ -33,7 +33,7 @@ class TilawaContentBounds extends StatelessWidget {
     required this.child,
     this.kind = TilawaContentKind.form,
     this.maxWidth,
-    this.alignment = Alignment.topCenter,
+    this.alignment = .topCenter,
   });
 
   final Widget child;
