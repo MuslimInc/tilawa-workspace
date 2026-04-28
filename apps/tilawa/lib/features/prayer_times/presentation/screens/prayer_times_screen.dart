@@ -9,6 +9,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_times_bloc.dart';
+import '../prayer_notification_semantics_ids.dart';
 import '../widgets/widgets.dart';
 
 /// Screen for displaying prayer times.
@@ -60,13 +61,16 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             onPressed: () => context.push('/qibla'),
           ),
           SizedBox(width: tokens.spaceSmall),
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-              foregroundColor: colorScheme.onPrimary,
+          Semantics(
+            identifier: PrayerNotificationSemanticsIds.prayerSettingsButton,
+            child: IconButton(
+              style: IconButton.styleFrom(
+                backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
+                foregroundColor: colorScheme.onPrimary,
+              ),
+              icon: const Icon(Icons.settings, size: 22),
+              onPressed: () => _showSettingsDialog(context),
             ),
-            icon: const Icon(Icons.settings, size: 22),
-            onPressed: () => _showSettingsDialog(context),
           ),
           SizedBox(width: tokens.spaceExtraSmall),
         ],

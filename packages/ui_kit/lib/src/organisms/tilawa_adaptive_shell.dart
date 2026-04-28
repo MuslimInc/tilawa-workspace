@@ -28,12 +28,17 @@ class TilawaNavDestination {
     required this.icon,
     this.activeIcon,
     this.iconBuilder,
+    this.identifier,
   });
 
   final String label;
   final IconData icon;
   final IconData? activeIcon;
   final TilawaNavIconBuilder? iconBuilder;
+
+  /// Optional [Semantics.identifier] exposed to accessibility tools such as
+  /// Maestro. Prefer this over Flutter Keys for E2E test targeting.
+  final String? identifier;
 }
 
 /// A shell that adapts its navigation based on the window size.
@@ -321,7 +326,7 @@ class _NavButton extends StatelessWidget {
             color: isSelected ? selectedFg : unselectedFg,
           );
 
-    return Material(
+    final Widget button = Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
@@ -362,5 +367,10 @@ class _NavButton extends StatelessWidget {
         ),
       ),
     );
+
+    if (destination.identifier case final String id) {
+      return Semantics(identifier: id, child: button);
+    }
+    return button;
   }
 }

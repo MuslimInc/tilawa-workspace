@@ -5,6 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
+import '../prayer_notification_semantics_ids.dart';
 
 /// A bottom sheet for managing prayer time settings.
 class PrayerSettingsSheet extends StatefulWidget {
@@ -204,10 +205,14 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                         },
                       ),
                       SizedBox(height: tokens.spaceLarge),
-                      _SectionTitle(
-                        title: context.l10n.prayerNotifications,
-                        tokens: tokens,
-                        theme: theme,
+                      Semantics(
+                        identifier:
+                            PrayerNotificationSemanticsIds.notificationsSection,
+                        child: _SectionTitle(
+                          title: context.l10n.prayerNotifications,
+                          tokens: tokens,
+                          theme: theme,
+                        ),
                       ),
                       BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
                         buildWhen: (p, c) =>
@@ -248,6 +253,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       _SettingsSwitch(
                         title: context.l10n.prayerNotificationsEnabledAll,
                         value: _allNotificationsEnabled,
+                        identifier: PrayerNotificationSemanticsIds.globalToggle,
                         onChanged: (value) {
                           _updateSettings(
                             _settings.copyWith(
@@ -268,6 +274,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       _SettingsSwitch(
                         title: context.l10n.fajr,
                         value: _settings.fajrNotification.enabled,
+                        identifier: PrayerNotificationSemanticsIds.fajrToggle,
                         onChanged: (value) => _updateSettings(
                           _settings.copyWith(
                             fajrNotification: _settings.fajrNotification
@@ -278,6 +285,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       _SettingsSwitch(
                         title: context.l10n.dhuhr,
                         value: _settings.dhuhrNotification.enabled,
+                        identifier: PrayerNotificationSemanticsIds.dhuhrToggle,
                         onChanged: (value) => _updateSettings(
                           _settings.copyWith(
                             dhuhrNotification: _settings.dhuhrNotification
@@ -288,6 +296,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       _SettingsSwitch(
                         title: context.l10n.asr,
                         value: _settings.asrNotification.enabled,
+                        identifier: PrayerNotificationSemanticsIds.asrToggle,
                         onChanged: (value) => _updateSettings(
                           _settings.copyWith(
                             asrNotification: _settings.asrNotification.copyWith(
@@ -299,6 +308,8 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       _SettingsSwitch(
                         title: context.l10n.maghrib,
                         value: _settings.maghribNotification.enabled,
+                        identifier:
+                            PrayerNotificationSemanticsIds.maghribToggle,
                         onChanged: (value) => _updateSettings(
                           _settings.copyWith(
                             maghribNotification: _settings.maghribNotification
@@ -309,6 +320,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       _SettingsSwitch(
                         title: context.l10n.isha,
                         value: _settings.ishaNotification.enabled,
+                        identifier: PrayerNotificationSemanticsIds.ishaToggle,
                         onChanged: (value) => _updateSettings(
                           _settings.copyWith(
                             ishaNotification: _settings.ishaNotification
@@ -318,32 +330,37 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       ),
                       if (_allNotificationsEnabled) ...[
                         SizedBox(height: tokens.spaceSmall),
-                        _MinutesBeforePicker(
-                          value: _globalMinutesBefore,
-                          onChanged: (newValue) {
-                            _updateSettings(
-                              _settings.copyWith(
-                                fajrNotification: _settings.fajrNotification
-                                    .copyWith(minutesBefore: newValue),
-                                dhuhrNotification: _settings.dhuhrNotification
-                                    .copyWith(minutesBefore: newValue),
-                                asrNotification: _settings.asrNotification
-                                    .copyWith(minutesBefore: newValue),
-                                maghribNotification: _settings
-                                    .maghribNotification
-                                    .copyWith(minutesBefore: newValue),
-                                ishaNotification: _settings.ishaNotification
-                                    .copyWith(minutesBefore: newValue),
-                              ),
-                            );
-                          },
-                          tokens: tokens,
-                          theme: theme,
+                        Semantics(
+                          identifier:
+                              PrayerNotificationSemanticsIds.minutesBefore,
+                          child: _MinutesBeforePicker(
+                            value: _globalMinutesBefore,
+                            onChanged: (newValue) {
+                              _updateSettings(
+                                _settings.copyWith(
+                                  fajrNotification: _settings.fajrNotification
+                                      .copyWith(minutesBefore: newValue),
+                                  dhuhrNotification: _settings.dhuhrNotification
+                                      .copyWith(minutesBefore: newValue),
+                                  asrNotification: _settings.asrNotification
+                                      .copyWith(minutesBefore: newValue),
+                                  maghribNotification: _settings
+                                      .maghribNotification
+                                      .copyWith(minutesBefore: newValue),
+                                  ishaNotification: _settings.ishaNotification
+                                      .copyWith(minutesBefore: newValue),
+                                ),
+                              );
+                            },
+                            tokens: tokens,
+                            theme: theme,
+                          ),
                         ),
                       ],
                       _SettingsSwitch(
                         title: context.l10n.playAdhan,
                         value: _globalPlayAdhan,
+                        identifier: PrayerNotificationSemanticsIds.soundToggle,
                         onChanged: (value) {
                           _updateSettings(
                             _settings.copyWith(
@@ -520,16 +537,20 @@ class _SettingsSwitch extends StatelessWidget {
     required this.title,
     required this.value,
     required this.onChanged,
+    this.identifier,
   });
 
   final String title;
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  /// Optional [Semantics.identifier] for E2E test targeting via Maestro.
+  final String? identifier;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SwitchListTile(
+    final Widget tile = SwitchListTile(
       title: Text(
         title,
         style: theme.textTheme.bodyMedium?.copyWith(
@@ -541,6 +562,10 @@ class _SettingsSwitch extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
     );
+    if (identifier case final String id) {
+      return Semantics(identifier: id, child: tile);
+    }
+    return tile;
   }
 }
 

@@ -700,6 +700,76 @@ Google Play requires apps using `USE_EXACT_ALARM` to justify it in the Play Cons
 | `PrayerTimesBloc._onCheckAlarmCapability` → emits `alarmCapability` in state | same | BLoC |
 | `NoOpAdhanAlarmPlayer.isSupported` → false; scheduleAdhan completes without error | `noop_adhan_alarm_player_test.dart` | Phase 1 impl |
 
+### Widget Tests
+
+| Test | File | Coverage |
+|---|---|---|
+| Prayer Notifications section renders section title | `prayer_settings_sheet_notification_test.dart` | UI |
+| "All Prayer Notifications" global toggle visible and tappable | same | UI |
+| "Play Adhan" toggle visible and tappable | same | UI |
+| `checkAlarmCapability` event dispatched on `initState` | same | UI/BLoC |
+| No permission banner when fully capable | same | UI |
+| Notification permission banner shown when `hasNotificationPermission = false` | same | UI |
+| Exact alarm banner shown when `hasNotificationPermission = true`, `canScheduleExact = false` | same | UI |
+| RTL locale renders without overflow | same | UI |
+
+### Maestro E2E Smoke Tests
+
+> **Strategy**: Maestro targets Flutter through the Semantics tree using
+> `Semantics(identifier: ...)` on interactive elements. Keys (`ValueKey`,
+> `GlobalKey`) are invisible to Maestro — always use semantic identifiers.
+> All identifiers are defined in `PrayerNotificationSemanticsIds` and are
+> locale-independent.
+
+#### Identifiers map
+
+| Identifier constant | Semantic ID string | Widget |
+|---|---|---|
+| `prayerTimesTab` | `prayer_times_tab` | Bottom-nav Prayer Times tab |
+| `prayerSettingsButton` | `prayer_settings_button` | AppBar settings `IconButton` |
+| `notificationsSection` | `prayer_notifications_section` | Section header |
+| `globalToggle` | `prayer_notifications_global_toggle` | All-prayers switch |
+| `fajrToggle` | `prayer_notification_fajr_toggle` | Fajr switch |
+| `dhuhrToggle` | `prayer_notification_dhuhr_toggle` | Dhuhr switch |
+| `asrToggle` | `prayer_notification_asr_toggle` | Asr switch |
+| `maghribToggle` | `prayer_notification_maghrib_toggle` | Maghrib switch |
+| `ishaToggle` | `prayer_notification_isha_toggle` | Isha switch |
+| `minutesBefore` | `prayer_notifications_minutes_before` | `SegmentedButton` |
+| `soundToggle` | `prayer_notifications_sound_toggle` | Play Adhan switch |
+
+#### Flow files
+
+| File | Scenario |
+|---|---|
+| `.maestro/prayer_notifications_settings.yaml` | Happy path: navigate → open → toggle global + Fajr → no crash |
+| `.maestro/prayer_notifications_rtl.yaml` | RTL (Arabic locale): assert section + toggles visible without overflow |
+
+#### How to run
+
+```bash
+# Single flow
+maestro test .maestro/prayer_notifications_settings.yaml
+
+# RTL flow (set device locale to Arabic first — see file header for instructions)
+maestro test .maestro/prayer_notifications_rtl.yaml
+
+# All Maestro flows in the repo
+maestro test .maestro/
+```
+
+#### Android permission dialog handling
+
+The flows include `runFlow: when: visible: "Allow"` guards to dismiss the
+`POST_NOTIFICATIONS` system dialog if it appears. This uses Maestro's
+system-level interaction which in-app Dart frameworks cannot reach.
+
+#### Checklist
+
+- [x] `maestro test .maestro/prayer_notifications_settings.yaml` — passes on Android 13+ device/emulator
+- [ ] `maestro test .maestro/prayer_notifications_settings.yaml` — passes on iOS 16+ simulator
+- [x] `maestro test .maestro/prayer_notifications_rtl.yaml` — passes with device locale set to Arabic
+- [x] No overflow errors visible in Maestro screenshots for RTL flow
+
 ### Manual QA Checklist — Core
 
 - [ ] Android 14 (Pixel) — first launch: notification permission dialog shown; prayer alarms scheduled

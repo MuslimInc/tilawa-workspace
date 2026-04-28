@@ -77,6 +77,7 @@ class _MainScreenState extends State<MainScreen> {
         icon: FluentIcons.clock_24_regular,
         activeIcon: FluentIcons.clock_24_filled,
         label: context.l10n.prayerTimes,
+        identifier: 'prayer_times_tab',
       ),
       _NavDestination(
         icon: Icons.menu_book_rounded,
@@ -152,6 +153,7 @@ class _MainScreenState extends State<MainScreen> {
                         label: d.label,
                         icon: d.icon,
                         activeIcon: d.activeIcon,
+                        identifier: d.identifier,
                         iconBuilder: d.svgPath == null
                             ? null
                             : (context, {required isSelected, required color}) {
@@ -286,10 +288,12 @@ class _NavDestination {
     this.activeIcon,
     this.svgPath,
     this.index,
+    this.identifier,
   });
   final String label;
   final IconData icon;
   final IconData? activeIcon;
   final String? svgPath;
   final int? index;
+  final String? identifier;
 }
