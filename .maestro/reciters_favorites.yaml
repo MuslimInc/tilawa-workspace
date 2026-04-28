@@ -1,0 +1,83 @@
+# reciters_favorites.yaml
+# Smoke test: toggle the favourites filter and add/remove a reciter favourite.
+#
+# Semantics identifiers used (see reciter_semantics_ids.dart):
+#   reciters_tab                   – bottom-nav destination
+#   reciters_search_field          – used as a load-completion sentinel
+#   reciters_favorites_toggle      – heart / favourites filter button
+#   reciter_card_1                 – card for reciter id=1
+#   reciter_favorite_button_1      – heart button on that specific card
+#
+# Prerequisites:
+#   • App is installed as com.tilawa.app
+#   • Device/emulator has internet access
+
+appId: com.tilawa.app
+---
+
+# ── Launch ───────────────────────────────────────────────────────────────────
+- launchApp
+
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+
+# ── Navigate to Reciters tab ─────────────────────────────────────────────────
+- tapOn:
+    id: "reciters_tab"
+- waitForAnimationToEnd
+
+# Wait for the reciters list to load
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_field"
+    timeout: 10000
+- assertVisible:
+    id: "reciters_search_field"
+
+# ── Add reciter #1 to favourites ─────────────────────────────────────────────
+# Scroll until reciter_card_1 is on screen, then tap its heart button.
+- scrollUntilVisible:
+    element:
+      id: "reciter_card_1"
+    direction: DOWN
+    timeout: 8000
+
+- tapOn:
+    id: "reciter_favorite_button_1"
+- waitForAnimationToEnd
+
+# ── Open the favourites filter ───────────────────────────────────────────────
+- tapOn:
+    id: "reciters_favorites_toggle"
+- waitForAnimationToEnd
+
+# With at least one favourite the list should still show reciter card 1
+- extendedWaitUntil:
+    visible:
+      id: "reciter_card_1"
+    timeout: 5000
+- assertVisible:
+    id: "reciter_card_1"
+
+# ── Close the favourites filter ──────────────────────────────────────────────
+- tapOn:
+    id: "reciters_favorites_toggle"
+- waitForAnimationToEnd
+
+# ── Remove reciter #1 from favourites (restore state) ────────────────────────
+- scrollUntilVisible:
+    element:
+      id: "reciter_card_1"
+    direction: DOWN
+    timeout: 8000
+
+- tapOn:
+    id: "reciter_favorite_button_1"
+- waitForAnimationToEnd
+
+# Favourites filter toggle is still visible – screen is in original state
+- assertVisible:
+    id: "reciters_favorites_toggle"

@@ -1,0 +1,93 @@
+# reciters_rtl.yaml
+# RTL smoke test: browse reciters with the device locale set to Arabic.
+#
+# Because all semantic identifiers are locale-independent strings
+# (Semantics.identifier, not Semantics.label), this flow is identical in
+# structure to reciters_browse.yaml and does not require locale-specific
+# text assertions.
+#
+# Semantics identifiers used (see reciter_semantics_ids.dart):
+#   reciters_tab              – bottom-nav destination
+#   reciters_search_field     – used as a load-completion sentinel
+#   reciters_favorites_toggle – heart / favourites filter button
+#   reciter_card_1            – card for reciter id=1
+#   reciter_details_surah_search  – surah-filter field in ReciterDetails
+#   reciter_details_view_toggle   – list ↔ grid toggle in ReciterDetails
+#
+# How to run this test with Arabic locale on Android:
+#   adb shell settings put system system_locales ar-SA
+#   maestro test .maestro/reciters_rtl.yaml
+#
+# Prerequisites:
+#   • App is installed as com.tilawa.app
+#   • Device locale is Arabic (ar-SA or ar)
+#   • Device/emulator has internet access
+
+appId: com.tilawa.app
+---
+
+# ── Launch ───────────────────────────────────────────────────────────────────
+- launchApp
+
+# Arabic: "السماح" is "Allow" – guard handles both Arabic and English prompts.
+- runFlow:
+    when:
+      visible: "السماح"
+    commands:
+      - tapOn: "السماح"
+
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+
+# ── Navigate to Reciters tab ─────────────────────────────────────────────────
+- tapOn:
+    id: "reciters_tab"
+- waitForAnimationToEnd
+
+# Wait for list to load (identifier is locale-independent)
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_field"
+    timeout: 10000
+- assertVisible:
+    id: "reciters_search_field"
+
+# Assert structural elements are all visible in RTL layout
+- assertVisible:
+    id: "reciters_favorites_toggle"
+
+# ── Open reciter card ────────────────────────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: "reciter_card_1"
+    direction: DOWN
+    timeout: 8000
+
+- tapOn:
+    id: "reciter_card_1"
+- waitForAnimationToEnd
+
+# ── Assert Reciter Details renders without overflow in RTL ───────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciter_details_surah_search"
+    timeout: 8000
+- assertVisible:
+    id: "reciter_details_surah_search"
+
+- assertVisible:
+    id: "reciter_details_view_toggle"
+
+# ── Navigate back ────────────────────────────────────────────────────────────
+- back
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_field"
+    timeout: 5000
+- assertVisible:
+    id: "reciters_search_field"

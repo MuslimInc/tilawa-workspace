@@ -18,6 +18,7 @@ import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
+import '../reciter_semantics_ids.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -579,18 +580,23 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaSearchField(
-      controller: controller,
-      focusNode: focusNode,
-      hintText: context.l10n.searchReciters,
-      prefixIcon: FluentIcons.search_24_regular,
-      clearIcon: FluentIcons.dismiss_24_regular,
-      onChanged: onChanged,
-      onClear: onClear,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(Theme.of(context).tokens.radiusLarge),
-      showShadow: true,
-      onTapOutside: (_) => focusNode.unfocus(),
+    return Semantics(
+      identifier: ReciterSemanticsIds.recitersSearchField,
+      child: TilawaSearchField(
+        controller: controller,
+        focusNode: focusNode,
+        hintText: context.l10n.searchReciters,
+        prefixIcon: FluentIcons.search_24_regular,
+        clearIcon: FluentIcons.dismiss_24_regular,
+        onChanged: onChanged,
+        onClear: onClear,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(
+          Theme.of(context).tokens.radiusLarge,
+        ),
+        showShadow: true,
+        onTapOutside: (_) => focusNode.unfocus(),
+      ),
     );
   }
 }
@@ -608,64 +614,69 @@ class _FavoritesToggle extends StatelessWidget {
     final bool isActive =
         state is RecitersLoaded && (state as RecitersLoaded).showFavoritesOnly;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        TilawaIconActionButton(
-          icon: isActive
-              ? Icons.favorite_rounded
-              : Icons.favorite_border_rounded,
-          isActive: isActive,
-          onTap: onTap,
-        ),
-        PositionedDirectional(
-          top: -tokens.spaceExtraSmall,
-          end: -tokens.spaceExtraSmall,
-          child: BlocBuilder<FavoritesCubit, FavoritesState>(
-            builder: (context, favoritesState) {
-              final int count = favoritesState is FavoritesLoaded
-                  ? favoritesState.favoriteIds.length
-                  : 0;
-              if (count == 0) {
-                return const SizedBox.shrink();
-              }
+    return Semantics(
+      identifier: ReciterSemanticsIds.recitersFavoritesToggle,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          TilawaIconActionButton(
+            icon: isActive
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
+            isActive: isActive,
+            onTap: onTap,
+          ),
+          PositionedDirectional(
+            top: -tokens.spaceExtraSmall,
+            end: -tokens.spaceExtraSmall,
+            child: BlocBuilder<FavoritesCubit, FavoritesState>(
+              builder: (context, favoritesState) {
+                final int count = favoritesState is FavoritesLoaded
+                    ? favoritesState.favoriteIds.length
+                    : 0;
+                if (count == 0) {
+                  return const SizedBox.shrink();
+                }
 
-              return Container(
-                constraints: BoxConstraints(
-                  minWidth: tokens.iconSizeMedium - tokens.spaceTiny,
-                  minHeight: tokens.iconSizeMedium - tokens.spaceTiny,
-                ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceExtraSmall + tokens.spaceTiny,
-                ),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? theme.colorScheme.surface
-                      : theme.primaryColor,
-                  borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-                  border: Border.all(
-                    color: isActive
-                        ? theme.primaryColor
-                        : theme.colorScheme.surface,
-                    width: tokens.borderWidthThin + tokens.borderWidthThin,
+                return Container(
+                  constraints: BoxConstraints(
+                    minWidth: tokens.iconSizeMedium - tokens.spaceTiny,
+                    minHeight: tokens.iconSizeMedium - tokens.spaceTiny,
                   ),
-                ),
-                child: Center(
-                  child: Text(
-                    '$count',
-                    style: theme.textTheme.labelSmall?.copyWith(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceExtraSmall + tokens.spaceTiny,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? theme.colorScheme.surface
+                        : theme.primaryColor,
+                    borderRadius: BorderRadius.circular(
+                      tokens.radiusExtraLarge,
+                    ),
+                    border: Border.all(
                       color: isActive
                           ? theme.primaryColor
-                          : theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.w700,
+                          : theme.colorScheme.surface,
+                      width: tokens.borderWidthThin + tokens.borderWidthThin,
                     ),
                   ),
-                ),
-              );
-            },
+                  child: Center(
+                    child: Text(
+                      '$count',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isActive
+                            ? theme.primaryColor
+                            : theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

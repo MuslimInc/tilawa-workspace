@@ -71,6 +71,7 @@ class _MainScreenState extends State<MainScreen> {
         icon: FluentIcons.person_24_regular,
         activeIcon: FluentIcons.person_24_filled,
         label: context.l10n.reciters,
+        identifier: 'reciters_tab',
       ),
       _NavDestination(
         index: 1,
