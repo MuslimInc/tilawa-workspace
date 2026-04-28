@@ -1748,4 +1748,23 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get notificationPermissionRequired =>
       'إذن الإشعارات مطلوب لاستلام تذكيرات الصلاة.';
+
+  @override
+  String prayerNotificationBody(String prayerName) {
+    return 'حان وقت $prayerName';
+  }
+
+  @override
+  String get prayerNotificationsChannelName => 'أوقات الصلاة';
+
+  @override
+  String get prayerNotificationsChannelDescription =>
+      'تذكيرات بأوقات الصلوات الخمس';
+
+  @override
+  String get prayerNotificationsAdhanChannelName => 'أوقات الصلاة (الأذان)';
+
+  @override
+  String get prayerNotificationsAdhanChannelDescription =>
+      'تذكيرات الصلاة التي تشغل صوت الأذان';
 }

@@ -146,6 +146,20 @@ notification fires instead of the default notification tone.
 
 ---
 
+## Phase 8: Senior Review Remediation
+
+**Purpose**: Close code/spec gaps found during the production-readiness review.
+
+- [x] T048 [US3] Make Phase 3 startup perform a deduped schedule pass from saved prayer settings and saved location so cold start, reboot, date change, and timezone-change startup do not depend on opening the Prayer Times UI.
+- [x] T049 [US2] Add `RequestNotificationPermissionUseCase` and route the missing `POST_NOTIFICATIONS` permission banner to the notification permission flow instead of exact-alarm settings.
+- [x] T050 [US1] Suppress prayer notification scheduling when notification permission is denied and clear dedup keys so a later permission grant can schedule on the same day.
+- [x] T051 [US1] Localize prayer notification title/body and Android channel display strings using English/Arabic ARB keys.
+- [x] T052 [US1] Route `type=prayer` notification payloads deterministically to the Prayer Times route during generic notification resolution.
+- [x] T053 [US1] Remove `flutter_local_notifications` DTO exposure from the domain notification service interface.
+- [x] T054 [P] Add focused regression tests for notification permission request, scheduling suppression, and prayer notification route resolution.
+
+---
+
 ## Dependencies
 
 ```
@@ -210,6 +224,7 @@ T029 check_prayer_alarm_capability_use_case_test
 5. ✅ US4 Phase 1 → Adhan channel infrastructure + bundled sound
 6. [ ] US4 Phase 2 → Full `alarm` package adhan playback (after Phase 2 gate)
 7. [ ] Polish → Release gate cleared
+8. ✅ Review remediation → Code gaps closed; manual release gates still pending
 
 ---
 
@@ -219,12 +234,19 @@ T029 check_prayer_alarm_capability_use_case_test
 |---|---|---|---|
 | Phase 1: Setup | 4 | 4 | 0 |
 | Phase 2: Foundational | 5 | 5 | 0 |
-| Phase 3: US1 | 13 | 10 | 3 (T020, T022, service tests) |
-| Phase 4: US2 | 7 | 6 | 1 (T030 widget test) |
+| Phase 3: US1 | 14 | 14 | 0 |
+| Phase 4: US2 | 7 | 7 | 0 |
 | Phase 5: US3 | 3 | 3 | 0 |
-| Phase 6: US4 | 8 | 5 | 3 (T039 iOS, T040 noop test, T041 Phase 2) |
+| Phase 6: US4 | 8 | 6 | 2 (T039 iOS, T041 Phase 2) |
 | Phase 7: Polish | 6 | 3 | 3 (T045 Play Store, T046–T047 QA) |
-| **Total** | **46** | **36** | **10** |
+| Phase 8: Review Remediation | 7 | 7 | 0 |
+| **Total** | **54** | **49** | **5** |
+
+**Code completion**: 100% for Android MVP scope after T048–T054.
+**Release completion**: 90% overall; remaining items are manual release/QA gates:
+T039 (future iOS bundle resource), T041 (Phase 2 `alarm` package player), T045
+(Google Play exact-alarm justification), T046 (Android version/device QA), and
+T047 (OEM QA).
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Feature**: `003-prayer-times-notifications`
 **Created**: 2026-04-28
-**Status**: Implemented (Phase 1 complete)
+**Status**: Implemented — code complete, release QA pending
 
 ---
 
@@ -98,8 +98,10 @@ The primary service abstraction. BLoC depends on this only via use cases — nev
 | `cancelAllPrayerNotifications()` | `Future<void>` | Cancel all static (2001–2006) and dynamic (20M range) IDs |
 | `canScheduleExactAlarms()` | `Future<bool>` | Check exact alarm permission via FLN Android plugin |
 | `requestExactAlarmPermission()` | `Future<void>` | Open system settings for exact alarm permission |
-| `handleNotificationResponse(response)` | `Future<void>` | Handle tap → navigate to Prayer Times screen |
 | `fireTestNotification({prayer, playAdhan})` | `Future<void>` | Debug-only: fire immediate notification for testing |
+
+`NotificationResponse` stays in the app-layer implementation. The domain
+interface does not expose Flutter/plugin DTOs.
 
 ### `IAdhanAlarmPlayer`
 
@@ -195,7 +197,7 @@ All keys owned by `PrayerNotificationConfig`. Never changed after first release.
 | Key | Type | Description |
 |---|---|---|
 | `prayer_notifications_last_scheduled_date` | `String` (`'yyyy-MM-dd'`) | Date of last full schedule run |
-| `prayer_notifications_settings_fingerprint` | `String` (SHA-256 hex) | Hash of settings+location+method |
+| `prayer_notifications_settings_fingerprint` | `String` | Deterministic fingerprint of settings+location+method |
 | `prayer_notifications_adhan_channel_version` | `int` | Current adhan channel version; triggers channel recreate when stale |
 
 ---
@@ -212,7 +214,12 @@ All keys owned by `PrayerNotificationConfig`. Never changed after first release.
 ## Scheduling State Machine
 
 ```
-App start / settings change / location change / reboot
+App start / reboot ───────────────► AppStartupTasks.initializePrayerNotifications()
+       │                                          │
+       │                                          ▼
+       │                            SchedulePrayerNotificationsUseCase
+       │
+Settings change / location change / Prayer Times load
        │
        ▼
 PrayerTimesBloc._on* ──unawaited──► SchedulePrayerNotificationsUseCase

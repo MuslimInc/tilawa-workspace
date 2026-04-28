@@ -4,6 +4,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
+import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/core/services/prayer_adhan_notification_service.dart';
 import 'package:tilawa/core/services/prayer_notification_config.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
@@ -20,6 +21,7 @@ import 'prayer_adhan_notification_service_test.mocks.dart';
   NavigationService,
   AnalyticsService,
   IAdhanAlarmPlayer,
+  NotificationPermissionService,
 ])
 void main() {
   late PrayerAdhanNotificationService service;
@@ -29,6 +31,7 @@ void main() {
   late MockNavigationService mockNav;
   late MockAnalyticsService mockAnalytics;
   late MockIAdhanAlarmPlayer mockAdhanPlayer;
+  late MockNotificationPermissionService mockNotificationPermissions;
 
   // Prayer times all set 2 hours in the future so none are skipped as past.
   final DateTime now = DateTime.now();
@@ -59,6 +62,7 @@ void main() {
   void stubPrefsDefault() {
     when(mockPrefs.getString(any)).thenAnswer((_) async => null);
     when(mockPrefs.setString(any, any)).thenAnswer((_) async {});
+    when(mockPrefs.remove(any)).thenAnswer((_) async {});
     when(mockPrefs.getInt(any)).thenAnswer((_) async => null);
     when(mockPrefs.setInt(any, any)).thenAnswer((_) async {});
   }
@@ -95,6 +99,7 @@ void main() {
     mockNav = MockNavigationService();
     mockAnalytics = MockAnalyticsService();
     mockAdhanPlayer = MockIAdhanAlarmPlayer();
+    mockNotificationPermissions = MockNotificationPermissionService();
 
     when(mockDispatcher.notificationsPlugin).thenReturn(mockPlugin);
     when(
@@ -119,6 +124,9 @@ void main() {
 
     when(mockAdhanPlayer.isSupported).thenReturn(false);
     when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {});
+    when(
+      mockNotificationPermissions.isPermissionGranted(),
+    ).thenAnswer((_) async => true);
 
     stubPrefsDefault();
     stubPluginDefault();
@@ -129,6 +137,7 @@ void main() {
       mockNav,
       mockAnalytics,
       mockAdhanPlayer,
+      mockNotificationPermissions,
     );
   });
 
@@ -320,6 +329,41 @@ void main() {
           ),
         ).called(5);
       });
+
+      test(
+        'suppresses scheduling and clears dedup when notification permission is denied',
+        () async {
+          await initialize();
+          when(
+            mockNotificationPermissions.isPermissionGranted(),
+          ).thenAnswer((_) async => false);
+
+          await service.schedulePrayerNotifications(
+            settings: allEnabled,
+            prayerTimesForDays: [buildFutureDay(0)],
+            forceReschedule: true,
+          );
+
+          verifyNever(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: anyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+          verify(
+            mockPrefs.remove(PrayerNotificationConfig.dedupDateKey),
+          ).called(1);
+          verify(
+            mockPrefs.remove(PrayerNotificationConfig.settingsFingerprintKey),
+          ).called(1);
+        },
+      );
 
       test(
         'exception during zonedSchedule is caught and does not throw',

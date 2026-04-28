@@ -2361,5 +2361,31 @@
     "notificationPermissionRequired": "إذن الإشعارات مطلوب لاستلام تذكيرات الصلاة.",
     "@notificationPermissionRequired": {
         "description": "Banner shown when the Android POST_NOTIFICATIONS permission is not granted"
+    },
+    "prayerNotificationBody": "حان وقت {prayerName}",
+    "@prayerNotificationBody": {
+        "description": "Body text for prayer time notifications",
+        "placeholders": {
+            "prayerName": {
+                "type": "String",
+                "example": "الفجر"
+            }
+        }
+    },
+    "prayerNotificationsChannelName": "أوقات الصلاة",
+    "@prayerNotificationsChannelName": {
+        "description": "Android notification channel name for default prayer reminders"
+    },
+    "prayerNotificationsChannelDescription": "تذكيرات بأوقات الصلوات الخمس",
+    "@prayerNotificationsChannelDescription": {
+        "description": "Android notification channel description for default prayer reminders"
+    },
+    "prayerNotificationsAdhanChannelName": "أوقات الصلاة (الأذان)",
+    "@prayerNotificationsAdhanChannelName": {
+        "description": "Android notification channel name for prayer reminders with adhan sound"
+    },
+    "prayerNotificationsAdhanChannelDescription": "تذكيرات الصلاة التي تشغل صوت الأذان",
+    "@prayerNotificationsAdhanChannelDescription": {
+        "description": "Android notification channel description for prayer reminders with adhan sound"
     }
 }

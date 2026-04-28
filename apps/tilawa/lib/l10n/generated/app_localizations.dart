@@ -3247,6 +3247,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notification permission required to receive prayer alerts.'**
   String get notificationPermissionRequired;
+
+  /// Body text for prayer time notifications
+  ///
+  /// In en, this message translates to:
+  /// **'It is time for {prayerName}'**
+  String prayerNotificationBody(String prayerName);
+
+  /// Android notification channel name for default prayer reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Times'**
+  String get prayerNotificationsChannelName;
+
+  /// Android notification channel description for default prayer reminders
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders for the five daily prayer times'**
+  String get prayerNotificationsChannelDescription;
+
+  /// Android notification channel name for prayer reminders with adhan sound
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Times (Adhan)'**
+  String get prayerNotificationsAdhanChannelName;
+
+  /// Android notification channel description for prayer reminders with adhan sound
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer time reminders that play the adhan sound'**
+  String get prayerNotificationsAdhanChannelDescription;
 }
 
 class _AppLocalizationsDelegate

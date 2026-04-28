@@ -32,7 +32,9 @@ import 'package:tilawa/features/downloads/data/services/downloads_initialization
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
+import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
+import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
@@ -683,9 +685,9 @@ class AppStartupTasks {
   /// Initializes the prayer adhan notification service.
   ///
   /// Called in Phase 3 alongside athkar and notification service init.
-  /// The service performs its own dedup fingerprint check — no scheduling
-  /// happens here beyond initialization and channel setup. The BLoC triggers
-  /// the first real schedule pass once prayer times load.
+  /// Also performs a deduped schedule pass from saved settings/location so
+  /// cold start, reboot, date change, and timezone change do not depend on the
+  /// Prayer Times tab being opened.
   Future<void> initializePrayerNotifications() async {
     if (!_isEnabled(
       launchConfig.prayerNotificationsInit,
@@ -700,6 +702,33 @@ class AppStartupTasks {
       final IPrayerAdhanNotificationService service =
           getIt<IPrayerAdhanNotificationService>();
       await service.initialize();
+      final LoadPrayerSettingsUseCase loadSettings =
+          getIt<LoadPrayerSettingsUseCase>();
+      final SchedulePrayerNotificationsUseCase scheduleNotifications =
+          getIt<SchedulePrayerNotificationsUseCase>();
+      final result = await loadSettings.call();
+      await result.fold(
+        (failure) async {
+          logger.d(
+            '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Warning: Could not load prayer settings for startup schedule: ${failure.message}',
+          );
+        },
+        (PrayerSettingsEntity settings) async {
+          final double? latitude = settings.savedLatitude;
+          final double? longitude = settings.savedLongitude;
+          if (latitude == null || longitude == null) {
+            logger.d(
+              '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: No saved location; startup schedule skipped',
+            );
+            return;
+          }
+          await scheduleNotifications.call(
+            settings: settings,
+            latitude: latitude,
+            longitude: longitude,
+          );
+        },
+      );
       logger.d(
         '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Prayer notifications initialized at (${DateTime.now()})',
       );

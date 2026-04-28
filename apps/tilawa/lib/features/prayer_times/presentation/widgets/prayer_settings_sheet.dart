@@ -230,7 +230,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                                       .l10n
                                       .notificationPermissionRequired,
                                   onTap: () => context.read<PrayerTimesBloc>().add(
-                                    const PrayerTimesEvent.requestExactAlarmPermission(),
+                                    const PrayerTimesEvent.requestNotificationPermission(),
                                   ),
                                   tokens: tokens,
                                   theme: theme,

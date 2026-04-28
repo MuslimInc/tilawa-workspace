@@ -1,5 +1,3 @@
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 import '../entities/prayer_settings_entity.dart';
 import '../entities/prayer_time_entity.dart';
 
@@ -26,9 +24,6 @@ abstract interface class IPrayerAdhanNotificationService {
 
   /// Cancel every prayer notification scheduled by this service.
   Future<void> cancelAllPrayerNotifications();
-
-  /// Handle a notification tap (foreground or background).
-  Future<void> handleNotificationResponse(NotificationResponse response);
 
   /// Whether exact alarms can be scheduled on this device. Always `true` on
   /// Android < 12 and on non-Android platforms.

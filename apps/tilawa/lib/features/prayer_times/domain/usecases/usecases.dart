@@ -6,5 +6,6 @@ export 'get_monthly_prayer_times_use_case.dart';
 export 'get_prayer_times_use_case.dart';
 export 'load_prayer_settings_use_case.dart';
 export 'request_exact_alarm_permission_use_case.dart';
+export 'request_notification_permission_use_case.dart';
 export 'save_prayer_settings_use_case.dart';
 export 'schedule_prayer_notifications_use_case.dart';

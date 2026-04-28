@@ -27,6 +27,7 @@ import 'prayer_settings_sheet_notification_test.mocks.dart';
   CancelPrayerNotificationsUseCase,
   CheckPrayerAlarmCapabilityUseCase,
   RequestExactAlarmPermissionUseCase,
+  RequestNotificationPermissionUseCase,
 ])
 void main() {
   provideDummy<Either<Failure, PrayerSettingsEntity>>(
@@ -36,6 +37,7 @@ void main() {
     Right(LocationResult(latitude: 0, longitude: 0)),
   );
   provideDummy<Either<Failure, void>>(const Right(null));
+  provideDummy<Either<Failure, bool>>(const Right(true));
   provideDummy<Either<Failure, PrayerAlarmCapability>>(
     const Right(
       PrayerAlarmCapability(
@@ -73,6 +75,8 @@ void main() {
   late MockCancelPrayerNotificationsUseCase mockCancel;
   late MockCheckPrayerAlarmCapabilityUseCase mockCheckCapability;
   late MockRequestExactAlarmPermissionUseCase mockRequestPermission;
+  late MockRequestNotificationPermissionUseCase
+  mockRequestNotificationPermission;
 
   setUpAll(() async {
     await initializeHydratedStorageForTest();
@@ -89,6 +93,8 @@ void main() {
     mockCancel = MockCancelPrayerNotificationsUseCase();
     mockCheckCapability = MockCheckPrayerAlarmCapabilityUseCase();
     mockRequestPermission = MockRequestExactAlarmPermissionUseCase();
+    mockRequestNotificationPermission =
+        MockRequestNotificationPermissionUseCase();
 
     when(
       mockGetCountryCode.call(
@@ -109,6 +115,9 @@ void main() {
     when(
       mockRequestPermission.call(),
     ).thenAnswer((_) async => const Right<Failure, void>(null));
+    when(
+      mockRequestNotificationPermission.call(),
+    ).thenAnswer((_) async => const Right<Failure, bool>(true));
 
     when(
       mockSchedule.call(
@@ -131,6 +140,7 @@ void main() {
     mockCancel,
     mockCheckCapability,
     mockRequestPermission,
+    mockRequestNotificationPermission,
   );
 
   Widget buildSubject(PrayerTimesBloc bloc) {

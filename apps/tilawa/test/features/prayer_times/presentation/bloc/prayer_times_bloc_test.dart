@@ -23,6 +23,7 @@ import 'prayer_times_bloc_test.mocks.dart';
   CancelPrayerNotificationsUseCase,
   CheckPrayerAlarmCapabilityUseCase,
   RequestExactAlarmPermissionUseCase,
+  RequestNotificationPermissionUseCase,
 ])
 void main() {
   late PrayerTimesBloc bloc;
@@ -40,6 +41,8 @@ void main() {
   mockCheckPrayerAlarmCapabilityUseCase;
   late MockRequestExactAlarmPermissionUseCase
   mockRequestExactAlarmPermissionUseCase;
+  late MockRequestNotificationPermissionUseCase
+  mockRequestNotificationPermissionUseCase;
 
   setUp(() {
     mockGetPrayerTimesUseCase = MockGetPrayerTimesUseCase();
@@ -56,6 +59,8 @@ void main() {
         MockCheckPrayerAlarmCapabilityUseCase();
     mockRequestExactAlarmPermissionUseCase =
         MockRequestExactAlarmPermissionUseCase();
+    mockRequestNotificationPermissionUseCase =
+        MockRequestNotificationPermissionUseCase();
 
     bloc = PrayerTimesBloc(
       mockGetPrayerTimesUseCase,
@@ -68,6 +73,7 @@ void main() {
       mockCancelPrayerNotificationsUseCase,
       mockCheckPrayerAlarmCapabilityUseCase,
       mockRequestExactAlarmPermissionUseCase,
+      mockRequestNotificationPermissionUseCase,
     );
 
     // Default stub
@@ -94,6 +100,7 @@ void main() {
     Right(LocationResult(latitude: 0, longitude: 0)),
   );
   provideDummy<Either<Failure, void>>(const Right(null));
+  provideDummy<Either<Failure, bool>>(const Right(true));
   provideDummy<Either<Failure, PrayerTimeEntity>>(
     Right(
       PrayerTimeEntity(
@@ -466,6 +473,24 @@ void main() {
       act: (b) => b.add(const PrayerTimesEvent.requestExactAlarmPermission()),
       verify: (_) {
         verify(mockRequestExactAlarmPermissionUseCase.call()).called(1);
+        verify(mockCheckPrayerAlarmCapabilityUseCase.call()).called(1);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'requestNotificationPermission calls use case then re-checks capability',
+      build: () {
+        when(
+          mockRequestNotificationPermissionUseCase.call(),
+        ).thenAnswer((_) async => const Right(true));
+        when(
+          mockCheckPrayerAlarmCapabilityUseCase.call(),
+        ).thenAnswer((_) async => const Right(tCapability));
+        return bloc;
+      },
+      act: (b) => b.add(const PrayerTimesEvent.requestNotificationPermission()),
+      verify: (_) {
+        verify(mockRequestNotificationPermissionUseCase.call()).called(1);
         verify(mockCheckPrayerAlarmCapabilityUseCase.call()).called(1);
       },
     );

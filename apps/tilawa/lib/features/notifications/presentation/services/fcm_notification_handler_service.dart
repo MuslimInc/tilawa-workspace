@@ -116,6 +116,8 @@ class FCMNotificationHandlerService {
         return const QuranLastReadRoute().location;
       case 'settings':
         return const SettingsRoute().location;
+      case 'prayer':
+        return const PrayerTimesRoute().location;
       case 'home':
       default:
         return const HomeRoute().location;

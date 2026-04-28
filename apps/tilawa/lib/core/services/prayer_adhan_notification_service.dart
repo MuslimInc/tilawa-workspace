@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -7,6 +8,8 @@ import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
+import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -19,6 +22,7 @@ import '../../features/prayer_times/domain/services/adhan_alarm_player_interface
 import '../../features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
+import 'notification_permission_service.dart';
 import 'prayer_notification_config.dart';
 
 /// Five prayers that participate in scheduled notifications. Sunrise, midnight
@@ -41,6 +45,7 @@ class PrayerAdhanNotificationService
     this._navigationService,
     this._analytics,
     this._adhanPlayer,
+    this._notificationPermissionService,
   );
 
   final SharedPreferencesAsync _prefs;
@@ -48,6 +53,7 @@ class PrayerAdhanNotificationService
   final NavigationService _navigationService;
   final AnalyticsService _analytics;
   final IAdhanAlarmPlayer _adhanPlayer;
+  final NotificationPermissionService _notificationPermissionService;
 
   bool _initialized = false;
 
@@ -154,12 +160,14 @@ class PrayerAdhanNotificationService
     if (androidPlugin == null) {
       return;
     }
+    final AppLocalizations l10n = await _localizations();
+
     // Default-sound channel (unchanged)
     await androidPlugin.createNotificationChannel(
-      const AndroidNotificationChannel(
+      AndroidNotificationChannel(
         PrayerNotificationConfig.channelId,
-        PrayerNotificationConfig.channelName,
-        description: PrayerNotificationConfig.channelDescription,
+        l10n.prayerNotificationsChannelName,
+        description: l10n.prayerNotificationsChannelDescription,
         importance: Importance.high,
       ),
     );
@@ -181,8 +189,8 @@ class PrayerAdhanNotificationService
     await androidPlugin.createNotificationChannel(
       AndroidNotificationChannel(
         PrayerNotificationConfig.adhanChannelId,
-        PrayerNotificationConfig.adhanChannelName,
-        description: PrayerNotificationConfig.adhanChannelDescription,
+        l10n.prayerNotificationsAdhanChannelName,
+        description: l10n.prayerNotificationsAdhanChannelDescription,
         importance: Importance.high,
         sound: RawResourceAndroidNotificationSound(
           PrayerNotificationConfig.adhanSoundRawName,
@@ -227,6 +235,16 @@ class PrayerAdhanNotificationService
         return;
       }
 
+      final bool hasNotificationPermission =
+          await _notificationPermissionService.isPermissionGranted();
+      if (!hasNotificationPermission) {
+        await _clearDedupState();
+        logger.w(
+          '${PrayerNotificationConfig.logTag} Notification permission denied — scheduling suppressed',
+        );
+        return;
+      }
+
       // Dedup
       final String today = _todayDateKey();
       final String currentFingerprint = _computeFingerprint(
@@ -262,6 +280,7 @@ class PrayerAdhanNotificationService
       }
 
       final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+      final AppLocalizations l10n = await _localizations();
       final int dayCount =
           prayerTimesForDays.length < PrayerNotificationConfig.scheduleDaysAhead
           ? prayerTimesForDays.length
@@ -321,10 +340,10 @@ class PrayerAdhanNotificationService
           try {
             await _notifications.zonedSchedule(
               id: notificationId,
-              title: prayer.displayNameAr,
-              body: _bodyFor(prayer),
+              title: _titleFor(l10n, prayer),
+              body: _bodyFor(l10n, prayer),
               scheduledDate: tzTarget,
-              notificationDetails: _detailsFor(useAdhan),
+              notificationDetails: _detailsFor(l10n, useAdhan),
               androidScheduleMode: scheduleMode,
               matchDateTimeComponents: null,
               payload: payload,
@@ -511,6 +530,7 @@ class PrayerAdhanNotificationService
       final String soundFile = playAdhan
           ? PrayerNotificationConfig.adhanSoundRawName
           : 'default';
+      final AppLocalizations l10n = await _localizations();
       logger.d(
         '${PrayerNotificationConfig.logTag} [TEST] Firing test notification | '
         'prayer=${prayer.name} | playAdhan=$playAdhan | '
@@ -518,9 +538,9 @@ class PrayerAdhanNotificationService
       );
       await _notifications.show(
         id: testId,
-        title: prayer.displayNameAr,
-        body: _bodyFor(prayer),
-        notificationDetails: _detailsFor(playAdhan),
+        title: _titleFor(l10n, prayer),
+        body: _bodyFor(l10n, prayer),
+        notificationDetails: _detailsFor(l10n, playAdhan),
         payload: payload,
       );
       logger.d(
@@ -545,7 +565,6 @@ class PrayerAdhanNotificationService
     }
   }
 
-  @override
   Future<void> handleNotificationResponse(NotificationResponse response) async {
     try {
       final String? payload = response.payload;
@@ -657,22 +676,24 @@ class PrayerAdhanNotificationService
     }
   }
 
-  String _bodyFor(PrayerType prayer) {
-    // Phase 1 uses Arabic literals to match the athkar service convention.
-    // Phase 7 of the rollout introduces ARB-driven body text.
-    return 'حان وقت ${prayer.displayNameAr}';
+  String _titleFor(AppLocalizations l10n, PrayerType prayer) {
+    return _localizedPrayerName(l10n, prayer);
   }
 
-  NotificationDetails _detailsFor(bool playAdhan) {
+  String _bodyFor(AppLocalizations l10n, PrayerType prayer) {
+    return l10n.prayerNotificationBody(_localizedPrayerName(l10n, prayer));
+  }
+
+  NotificationDetails _detailsFor(AppLocalizations l10n, bool playAdhan) {
     final String channelId = playAdhan
         ? PrayerNotificationConfig.adhanChannelId
         : PrayerNotificationConfig.channelId;
     final String channelName = playAdhan
-        ? PrayerNotificationConfig.adhanChannelName
-        : PrayerNotificationConfig.channelName;
+        ? l10n.prayerNotificationsAdhanChannelName
+        : l10n.prayerNotificationsChannelName;
     final String channelDescription = playAdhan
-        ? PrayerNotificationConfig.adhanChannelDescription
-        : PrayerNotificationConfig.channelDescription;
+        ? l10n.prayerNotificationsAdhanChannelDescription
+        : l10n.prayerNotificationsChannelDescription;
 
     return NotificationDetails(
       android: AndroidNotificationDetails(
@@ -704,6 +725,51 @@ class PrayerAdhanNotificationService
   String _todayDateKey() {
     final DateTime now = DateTime.now();
     return _dateKey(now);
+  }
+
+  Future<void> _clearDedupState() async {
+    try {
+      await _prefs.remove(PrayerNotificationConfig.dedupDateKey);
+      await _prefs.remove(PrayerNotificationConfig.settingsFingerprintKey);
+    } catch (e) {
+      logger.w(
+        '${PrayerNotificationConfig.logTag} Failed to clear dedup state: $e',
+      );
+    }
+  }
+
+  Future<AppLocalizations> _localizations() async {
+    String languageCode = LanguageConfig.defaultLanguageCode;
+    try {
+      languageCode =
+          await _prefs.getString(LanguageConfig.languageKey) ?? languageCode;
+    } catch (e) {
+      logger.w(
+        '${PrayerNotificationConfig.logTag} Failed to read locale preference: $e',
+      );
+    }
+    return lookupAppLocalizations(Locale(languageCode));
+  }
+
+  String _localizedPrayerName(AppLocalizations l10n, PrayerType prayer) {
+    switch (prayer) {
+      case PrayerType.fajr:
+        return l10n.fajr;
+      case PrayerType.sunrise:
+        return l10n.sunrise;
+      case PrayerType.dhuhr:
+        return l10n.dhuhr;
+      case PrayerType.asr:
+        return l10n.asr;
+      case PrayerType.maghrib:
+        return l10n.maghrib;
+      case PrayerType.isha:
+        return l10n.isha;
+      case PrayerType.midnight:
+        return l10n.midnight;
+      case PrayerType.lastThird:
+        return l10n.lastThird;
+    }
   }
 
   String _dateKey(DateTime date) {

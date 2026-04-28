@@ -2,7 +2,7 @@
 
 **Feature Branch**: `003-prayer-times-notifications`
 **Created**: 2026-04-28
-**Status**: Draft
+**Status**: Implemented — code complete, release QA pending
 **Type**: Feature Specification
 **Platform Scope**: Android (Google Play). iOS documented as future work.
 **GitHub Tracking**: [GitHub Projects — tilawa-workspace](https://github.com/muhammadkamel/tilawa-workspace/projects) *(no project item created yet — see OD-6)*

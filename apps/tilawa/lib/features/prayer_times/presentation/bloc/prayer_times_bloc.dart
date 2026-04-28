@@ -33,6 +33,8 @@ class PrayerTimesEvent with _$PrayerTimesEvent {
   const factory PrayerTimesEvent.checkAlarmCapability() = _CheckAlarmCapability;
   const factory PrayerTimesEvent.requestExactAlarmPermission() =
       _RequestExactAlarmPermission;
+  const factory PrayerTimesEvent.requestNotificationPermission() =
+      _RequestNotificationPermission;
 }
 
 // States
@@ -69,6 +71,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._cancelPrayerNotificationsUseCase,
     this._checkPrayerAlarmCapabilityUseCase,
     this._requestExactAlarmPermissionUseCase,
+    this._requestNotificationPermissionUseCase,
   ) : super(const PrayerTimesState()) {
     on<_LoadPrayerTimes>(_onLoadPrayerTimes);
     on<_LoadMonthlyPrayerTimes>(_onLoadMonthlyPrayerTimes);
@@ -78,6 +81,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     on<_SetManualLocation>(_onSetManualLocation);
     on<_CheckAlarmCapability>(_onCheckAlarmCapability);
     on<_RequestExactAlarmPermission>(_onRequestExactAlarmPermission);
+    on<_RequestNotificationPermission>(_onRequestNotificationPermission);
   }
 
   final GetPrayerTimesUseCase _getPrayerTimesUseCase;
@@ -91,6 +95,8 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final CancelPrayerNotificationsUseCase _cancelPrayerNotificationsUseCase;
   final CheckPrayerAlarmCapabilityUseCase _checkPrayerAlarmCapabilityUseCase;
   final RequestExactAlarmPermissionUseCase _requestExactAlarmPermissionUseCase;
+  final RequestNotificationPermissionUseCase
+  _requestNotificationPermissionUseCase;
 
   /// Set to `true` by user-initiated handlers (settings change, location
   /// change, manual-location set) so that the next [_onLoadPrayerTimes]
@@ -329,6 +335,14 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     await _requestExactAlarmPermissionUseCase.call();
     // Re-check capability so the UI updates after the user returns from the
     // system settings screen.
+    add(const PrayerTimesEvent.checkAlarmCapability());
+  }
+
+  Future<void> _onRequestNotificationPermission(
+    _RequestNotificationPermission event,
+    Emitter<PrayerTimesState> emit,
+  ) async {
+    await _requestNotificationPermissionUseCase.call();
     add(const PrayerTimesEvent.checkAlarmCapability());
   }
 

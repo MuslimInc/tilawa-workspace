@@ -1757,4 +1757,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get notificationPermissionRequired =>
       'Notification permission required to receive prayer alerts.';
+
+  @override
+  String prayerNotificationBody(String prayerName) {
+    return 'It is time for $prayerName';
+  }
+
+  @override
+  String get prayerNotificationsChannelName => 'Prayer Times';
+
+  @override
+  String get prayerNotificationsChannelDescription =>
+      'Reminders for the five daily prayer times';
+
+  @override
+  String get prayerNotificationsAdhanChannelName => 'Prayer Times (Adhan)';
+
+  @override
+  String get prayerNotificationsAdhanChannelDescription =>
+      'Prayer time reminders that play the adhan sound';
 }
