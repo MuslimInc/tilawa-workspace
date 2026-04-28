@@ -50,4 +50,25 @@ abstract final class ReciterSemanticsIds {
 
   /// Toggle button that switches between list and grid view in Reciter Details.
   static const String reciterDetailsViewToggle = 'reciter_details_view_toggle';
+
+  // ── Download All button (Reciter Details screen) ─────────────────────────────
+
+  /// "Download All" button in the idle / ready-to-download state.
+  static const String reciterDetailsDownloadAllIdle =
+      'reciter_details_download_all_idle';
+
+  /// "Download All" button while a batch download is in progress.
+  static const String reciterDetailsDownloadAllDownloading =
+      'reciter_details_download_all_downloading';
+
+  /// "All downloaded" badge shown when every surah is already downloaded.
+  static const String reciterDetailsDownloadAllCompleted =
+      'reciter_details_download_all_completed';
+
+  // ── Per-surah download buttons ────────────────────────────────────────────────
+
+  /// Download button for an individual surah.
+  /// [surahId] is [SurahEntity.formattedId] (e.g. "001") or a fallback index.
+  static String surahDownloadButton(String surahId) =>
+      'surah_download_button_$surahId';
 }
