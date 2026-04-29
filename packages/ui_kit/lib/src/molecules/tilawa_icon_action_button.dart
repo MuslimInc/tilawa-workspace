@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 
-class TilawaIconActionButton extends StatelessWidget {
+class TilawaIconActionButton extends StatefulWidget {
   const TilawaIconActionButton({
     super.key,
     required this.icon,
@@ -20,12 +20,42 @@ class TilawaIconActionButton extends StatelessWidget {
   final double? iconSize;
 
   @override
+  State<TilawaIconActionButton> createState() => _TilawaIconActionButtonState();
+}
+
+class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _handlePress() {
+    _animationController.forward().then((_) {
+      _animationController.reverse();
+    });
+    widget.onTap();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.iconActionButton;
-    final effectiveSize = size ?? componentTokens.size;
-    final effectiveIconSize = iconSize ?? designTokens.iconSizeMedium;
+    final effectiveSize = widget.size ?? componentTokens.size;
+    final effectiveIconSize = widget.iconSize ?? designTokens.iconSizeMedium;
     final effectiveBorderRadius = BorderRadius.circular(
       componentTokens.borderRadius,
     );
@@ -34,33 +64,23 @@ class TilawaIconActionButton extends StatelessWidget {
       width: effectiveSize,
       height: effectiveSize,
       child: Material(
-        color: isActive
-            ? theme.primaryColor.withValues(
-                alpha: componentTokens.activeBackgroundOpacity,
-              )
-            : theme.colorScheme.surface,
+        color: theme.colorScheme.surface,
         borderRadius: effectiveBorderRadius,
-        child: InkWell(
-          borderRadius: effectiveBorderRadius,
-          onTap: onTap,
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: effectiveBorderRadius,
-              border: Border.all(
-                color: isActive
-                    ? theme.primaryColor.withValues(
-                        alpha: componentTokens.activeBorderOpacity,
-                      )
-                    : theme.colorScheme.outlineVariant.withValues(
-                        alpha: componentTokens.inactiveBorderOpacity,
-                      ),
-              ),
+        child: ScaleTransition(
+          scale: Tween<double>(begin: 1.0, end: 0.92).animate(
+            CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.easeInOut,
             ),
+          ),
+          child: InkWell(
+            borderRadius: effectiveBorderRadius,
+            onTap: _handlePress,
             child: Center(
               child: Icon(
-                icon,
+                widget.icon,
                 size: effectiveIconSize,
-                color: isActive
+                color: widget.isActive
                     ? theme.primaryColor
                     : theme.colorScheme.onSurfaceVariant,
               ),

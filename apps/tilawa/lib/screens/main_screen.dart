@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -282,7 +283,8 @@ class _MainShellPlaceholderScaffold extends StatelessWidget {
   }
 }
 
-class _NavDestination {
+@immutable
+class _NavDestination extends Equatable {
   const _NavDestination({
     required this.label,
     required this.icon,
@@ -297,4 +299,14 @@ class _NavDestination {
   final String? svgPath;
   final int? index;
   final String? identifier;
+
+  @override
+  List<Object?> get props => [
+    label,
+    icon,
+    activeIcon,
+    svgPath,
+    index,
+    identifier,
+  ];
 }

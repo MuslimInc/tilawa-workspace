@@ -74,7 +74,7 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
             body: Builder(
               builder: (context) {
                 if (state is AthkarLoading) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const TilawaLoadingIndicator();
                 } else if (state is AthkarError) {
                   return Center(
                     child: Text(
