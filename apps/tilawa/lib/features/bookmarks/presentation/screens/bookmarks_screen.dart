@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dart';
 import 'package:tilawa_core/entities/audio.dart';
 
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -11,8 +12,6 @@ import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/bookmark_entity.dart';
 import '../bloc/bookmarks_bloc.dart';
-import '../bloc/bookmarks_state.dart';
-import '../widgets/bookmark_item_card.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../widgets/bookmark_search_bar.dart';

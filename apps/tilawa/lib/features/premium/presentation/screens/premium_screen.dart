@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
 
