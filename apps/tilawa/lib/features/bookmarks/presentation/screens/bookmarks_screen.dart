@@ -11,7 +11,10 @@ import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/bookmark_entity.dart';
 import '../bloc/bookmarks_bloc.dart';
-import '../widgets/bookmark_card.dart';
+import '../bloc/bookmarks_state.dart';
+import '../widgets/bookmark_item_card.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../widgets/bookmark_search_bar.dart';
 
 /// Screen for displaying and managing bookmarks.
@@ -25,6 +28,7 @@ class BookmarksScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.bookmarks),
         actions: [
           IconButton(

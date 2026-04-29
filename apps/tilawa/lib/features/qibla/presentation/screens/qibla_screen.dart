@@ -1,10 +1,12 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../bloc/qibla_bloc.dart';
 import '../widgets/qibla_compass_widget.dart';
@@ -36,6 +38,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
           backgroundColor: colorScheme.surface,
           appBar: AppBar(
             elevation: 0,
+            leading: context.canPop() ? const TilawaBackButton() : null,
             title: Text(context.l10n.qiblaDirection),
             actions: [
               IconButton(

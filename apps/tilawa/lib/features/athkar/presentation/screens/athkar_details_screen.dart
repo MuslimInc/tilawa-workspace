@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -47,6 +49,7 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
         builder: (context, state) {
           return Scaffold(
             appBar: AppBar(
+              leading: context.canPop() ? const TilawaBackButton() : null,
               actions: [
                 if (state is AthkarItemsLoaded) ...[
                   Container(

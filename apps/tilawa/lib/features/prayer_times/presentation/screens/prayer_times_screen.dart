@@ -11,6 +11,7 @@ import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../prayer_notification_semantics_ids.dart';
 import '../widgets/widgets.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 
 /// Screen for displaying prayer times.
 ///
@@ -49,6 +50,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
     return Scaffold(
       appBar: AppBar(
+        leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.prayerTimes),
         actionsPadding: EdgeInsets.only(right: tokens.spaceMedium),
         actions: [

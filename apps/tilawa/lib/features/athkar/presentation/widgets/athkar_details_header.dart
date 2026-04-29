@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 
 class AthkarDetailsHeader extends StatelessWidget {
   const AthkarDetailsHeader({
@@ -23,6 +25,9 @@ class AthkarDetailsHeader extends StatelessWidget {
       stretch: true,
       backgroundColor: theme.primaryColor,
       foregroundColor: appBarForegroundColor,
+      leading: context.canPop()
+          ? TilawaBackButton(color: appBarForegroundColor)
+          : null,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(
           decoration: BoxDecoration(

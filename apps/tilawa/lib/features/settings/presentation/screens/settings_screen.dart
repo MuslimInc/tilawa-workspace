@@ -15,6 +15,10 @@ import '../../../color_picker/color_picker.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
+import '../widgets/settings_group.dart';
+import '../widgets/settings_item.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -44,7 +48,10 @@ class SettingsScreen extends StatelessWidget {
       ],
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(title: Text(context.l10n.settings)),
+        appBar: AppBar(
+          leading: context.canPop() ? const TilawaBackButton() : null,
+          title: Text(context.l10n.settings),
+        ),
         body: TilawaContentBounds(
           kind: TilawaContentKind.settings,
           child: SingleChildScrollView(
