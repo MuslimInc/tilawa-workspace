@@ -1,11 +1,20 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/entities.dart';
+import '../../domain/services/prayer_adhan_notification_service_interface.dart';
+import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
+import '../widgets/prayer_notification_settings_sheet.dart';
+import '../prayer_notification_semantics_ids.dart';
 import '../widgets/widgets.dart';
 
 /// Screen for displaying prayer times.
@@ -45,14 +54,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 72,
-        titleSpacing: tokens.spaceLarge + 4,
-        title: Text(
-          context.l10n.prayerTimes,
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        leading: context.canPop() ? const TilawaBackButton() : null,
+        title: Text(context.l10n.prayerTimes),
         actionsPadding: EdgeInsets.only(right: tokens.spaceMedium),
         actions: [
           IconButton(
@@ -69,8 +72,20 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
               foregroundColor: colorScheme.onPrimary,
             ),
-            icon: const Icon(Icons.settings, size: 22),
-            onPressed: () => _showSettingsDialog(context),
+            icon: const Icon(Icons.notifications_active_outlined, size: 22),
+            onPressed: () => _showNotificationDialog(context),
+          ),
+          SizedBox(width: tokens.spaceSmall),
+          Semantics(
+            identifier: PrayerNotificationSemanticsIds.prayerSettingsButton,
+            child: IconButton(
+              style: IconButton.styleFrom(
+                backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
+                foregroundColor: colorScheme.onPrimary,
+              ),
+              icon: const Icon(Icons.settings, size: 22),
+              onPressed: () => _showSettingsDialog(context),
+            ),
           ),
           SizedBox(width: tokens.spaceExtraSmall),
         ],
@@ -127,19 +142,20 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           ),
         ),
       ),
+      floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
       body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
         buildWhen: (previous, current) {
           return previous.status != current.status ||
               previous.todayPrayerTimes != current.todayPrayerTimes ||
               previous.monthlyPrayerTimes != current.monthlyPrayerTimes ||
-              previous.settings != current.settings ||
+              previous.settings.use24HourFormat !=
+                  current.settings.use24HourFormat ||
+              previous.settings.showSunrise != current.settings.showSunrise ||
               previous.latitude != current.latitude ||
               previous.longitude != current.longitude ||
               previous.locationName != current.locationName ||
               previous.errorMessage != current.errorMessage ||
-              previous.isLoadingLocation != current.isLoadingLocation ||
-              previous.currentOrNextPrayer?.type !=
-                  current.currentOrNextPrayer?.type;
+              previous.isLoadingLocation != current.isLoadingLocation;
         },
         builder: (context, state) {
           switch (state.status) {
@@ -285,9 +301,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           ),
           const _CountdownCardSection(),
           const _TodaySectionHeader(),
-          PrayerTimesGrid(
+          _TodayPrayerGrid(
             prayerTimes: state.todayPrayerTimes!,
-            currentPrayer: state.currentOrNextPrayer,
             use24HourFormat: state.settings.use24HourFormat,
           ),
         ],
@@ -311,12 +326,37 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     // Capture the bloc before opening the modal bottom sheet
     // because the modal's context doesn't have access to the bloc
     final PrayerTimesBloc bloc = context.read<PrayerTimesBloc>();
+    final PrayerPermissionsCubit permissionsCubit = context
+        .read<PrayerPermissionsCubit>();
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (modalContext) =>
-          BlocProvider.value(value: bloc, child: const PrayerSettingsSheet()),
+      builder: (modalContext) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: bloc),
+          BlocProvider.value(value: permissionsCubit),
+        ],
+        child: const PrayerSettingsSheet(),
+      ),
+    );
+  }
+
+  void _showNotificationDialog(BuildContext context) {
+    final PrayerTimesBloc bloc = context.read<PrayerTimesBloc>();
+    final PrayerPermissionsCubit permissionsCubit = context
+        .read<PrayerPermissionsCubit>();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (modalContext) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: bloc),
+          BlocProvider.value(value: permissionsCubit),
+        ],
+        child: const PrayerNotificationSettingsSheet(),
+      ),
     );
   }
 }
@@ -326,34 +366,128 @@ class _CountdownCardSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<
-      PrayerTimesBloc,
-      PrayerTimesState,
-      ({
-        PrayerTimeItem? nextPrayer,
-        Duration? timeUntilNextPrayer,
-        bool use24HourFormat,
-      })
-    >(
-      selector: (state) => (
-        nextPrayer: state.currentOrNextPrayer,
-        timeUntilNextPrayer: state.timeUntilNextPrayer,
-        use24HourFormat: state.settings.use24HourFormat,
-      ),
-      builder: (context, countdown) {
-        final PrayerTimeItem? nextPrayer = countdown.nextPrayer;
-        final Duration? timeUntilNextPrayer = countdown.timeUntilNextPrayer;
+    return BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
+      buildWhen: (previous, current) =>
+          previous.todayPrayerTimes != current.todayPrayerTimes ||
+          previous.settings.use24HourFormat != current.settings.use24HourFormat,
+      builder: (context, state) {
+        final todayTimes = state.todayPrayerTimes;
+        if (todayTimes == null) return const SizedBox.shrink();
 
-        if (nextPrayer == null || timeUntilNextPrayer == null) {
-          return const SizedBox.shrink();
-        }
-
-        return NextPrayerCountdownCard(
-          nextPrayer: nextPrayer,
-          timeUntil: timeUntilNextPrayer,
-          use24HourFormat: countdown.use24HourFormat,
+        return _CountdownTicker(
+          prayerTimes: todayTimes,
+          use24HourFormat: state.settings.use24HourFormat,
         );
       },
+    );
+  }
+}
+
+/// Rebuilds itself every second using a single owned [Timer.periodic].
+///
+/// Replaces an earlier `StreamBuilder` + inline `Stream.periodic` that crashed
+/// with "Stream has already been listened to" on rebuilds, since
+/// `Stream.periodic` is single-subscription and was being recreated each build.
+class _CountdownTicker extends StatefulWidget {
+  const _CountdownTicker({
+    required this.prayerTimes,
+    required this.use24HourFormat,
+  });
+
+  final PrayerTimeEntity prayerTimes;
+  final bool use24HourFormat;
+
+  @override
+  State<_CountdownTicker> createState() => _CountdownTickerState();
+}
+
+class _CountdownTickerState extends State<_CountdownTicker> {
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final nextPrayer = widget.prayerTimes.getCurrentOrNextPrayer();
+    final timeUntil = widget.prayerTimes.getTimeUntilNextPrayer();
+
+    if (nextPrayer == null || timeUntil == null) {
+      return const SizedBox.shrink();
+    }
+
+    return NextPrayerCountdownCard(
+      nextPrayer: nextPrayer,
+      timeUntil: timeUntil,
+      use24HourFormat: widget.use24HourFormat,
+    );
+  }
+}
+
+/// Wraps [PrayerTimesGrid] with a low-frequency timer that only rebuilds when
+/// the "current prayer" changes (checked once per minute — current prayer can
+/// only change a handful of times a day, so a 1s tick was wasteful).
+class _TodayPrayerGrid extends StatefulWidget {
+  const _TodayPrayerGrid({
+    required this.prayerTimes,
+    required this.use24HourFormat,
+  });
+
+  final PrayerTimeEntity prayerTimes;
+  final bool use24HourFormat;
+
+  @override
+  State<_TodayPrayerGrid> createState() => _TodayPrayerGridState();
+}
+
+class _TodayPrayerGridState extends State<_TodayPrayerGrid> {
+  Timer? _ticker;
+  PrayerTimeItem? _currentPrayer;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentPrayer = widget.prayerTimes.getCurrentOrNextPrayer();
+    _ticker = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (!mounted) return;
+      final next = widget.prayerTimes.getCurrentOrNextPrayer();
+      if (next != _currentPrayer) {
+        setState(() => _currentPrayer = next);
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _TodayPrayerGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.prayerTimes != widget.prayerTimes) {
+      _currentPrayer = widget.prayerTimes.getCurrentOrNextPrayer();
+    }
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PrayerTimesGrid(
+      prayerTimes: widget.prayerTimes,
+      currentPrayer: _currentPrayer,
+      use24HourFormat: widget.use24HourFormat,
     );
   }
 }
@@ -412,6 +546,124 @@ class _TodaySectionHeader extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Debug-only FAB that fires an immediate test prayer notification.
+/// Shown only in [kDebugMode] — stripped from release builds.
+class _DebugNotificationFab extends StatefulWidget {
+  const _DebugNotificationFab();
+
+  @override
+  State<_DebugNotificationFab> createState() => _DebugNotificationFabState();
+}
+
+class _DebugNotificationFabState extends State<_DebugNotificationFab> {
+  PrayerType _selectedPrayer = PrayerType.isha;
+  bool _playAdhan = true;
+  bool _firing = false;
+
+  static const List<PrayerType> _prayers = [
+    PrayerType.fajr,
+    PrayerType.dhuhr,
+    PrayerType.asr,
+    PrayerType.maghrib,
+    PrayerType.isha,
+  ];
+
+  Future<void> _fire() async {
+    if (_firing) return;
+    setState(() => _firing = true);
+    try {
+      await getIt<IPrayerAdhanNotificationService>().fireTestNotification(
+        prayer: _selectedPrayer,
+        playAdhan: _playAdhan,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '🔔 Test fired: ${_selectedPrayer.name} (adhan=$_playAdhan)',
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _firing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Options card
+        Card(
+          margin: const EdgeInsets.only(bottom: 8, right: 4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Debug: Test Notification',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                DropdownButton<PrayerType>(
+                  value: _selectedPrayer,
+                  isDense: true,
+                  underline: const SizedBox.shrink(),
+                  items: _prayers
+                      .map(
+                        (p) => DropdownMenuItem(
+                          value: p,
+                          child: Text(p.name, style: theme.textTheme.bodySmall),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setState(() => _selectedPrayer = v);
+                  },
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Adhan', style: theme.textTheme.bodySmall),
+                    Switch(
+                      value: _playAdhan,
+                      onChanged: (v) => setState(() => _playAdhan = v),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        FloatingActionButton.extended(
+          onPressed: _firing ? null : _fire,
+          label: _firing
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Fire'),
+          icon: const Icon(Icons.notifications_active_outlined),
+          backgroundColor: theme.colorScheme.errorContainer,
+          foregroundColor: theme.colorScheme.onErrorContainer,
+        ),
+      ],
     );
   }
 }

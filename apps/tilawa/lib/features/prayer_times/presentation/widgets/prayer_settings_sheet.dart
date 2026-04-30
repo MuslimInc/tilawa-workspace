@@ -4,6 +4,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
+import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 
 /// A bottom sheet for managing prayer time settings.
@@ -21,6 +22,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
   void initState() {
     super.initState();
     _settings = context.read<PrayerTimesBloc>().state.settings;
+    context.read<PrayerPermissionsCubit>().checkCapability();
   }
 
   void _updateSettings(PrayerSettingsEntity newSettings) {
@@ -189,6 +191,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           );
                         },
                       ),
+                      SizedBox(height: tokens.spaceLarge),
                     ],
                   ),
                 ),
@@ -348,16 +351,20 @@ class _SettingsSwitch extends StatelessWidget {
     required this.title,
     required this.value,
     required this.onChanged,
+    this.identifier,
   });
 
   final String title;
   final bool value;
   final ValueChanged<bool> onChanged;
 
+  /// Optional [Semantics.identifier] for E2E test targeting via Maestro.
+  final String? identifier;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SwitchListTile(
+    final Widget tile = SwitchListTile(
       title: Text(
         title,
         style: theme.textTheme.bodyMedium?.copyWith(
@@ -369,6 +376,10 @@ class _SettingsSwitch extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
     );
+    if (identifier case final String id) {
+      return Semantics(identifier: id, child: tile);
+    }
+    return tile;
   }
 }
 

@@ -2,6 +2,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/config/language_config.dart';
@@ -9,6 +10,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../router/app_router_config.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../color_picker/color_picker.dart';
@@ -44,7 +46,10 @@ class SettingsScreen extends StatelessWidget {
       ],
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: AppBar(title: Text(context.l10n.settings)),
+        appBar: AppBar(
+          leading: context.canPop() ? const TilawaBackButton() : null,
+          title: Text(context.l10n.settings),
+        ),
         body: TilawaContentBounds(
           kind: TilawaContentKind.settings,
           child: SingleChildScrollView(

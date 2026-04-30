@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -46,6 +47,20 @@ void main() {
 
       // Initialize timezone for tests
       tz.initializeTimeZones();
+
+      // Stub the flutter_timezone platform channel so getLocalTimezone() returns
+      // a deterministic IANA identifier. Without this the call throws
+      // MissingPluginException in unit tests, the service falls back to UTC, and
+      // tests that compare local-time hour/minute against scheduled TZDateTime
+      // would shift by the host's UTC offset.
+      const MethodChannel timezoneChannel = MethodChannel('flutter_timezone');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(timezoneChannel, (MethodCall call) async {
+            if (call.method == 'getLocalTimezone') {
+              return 'Africa/Cairo';
+            }
+            return null;
+          });
 
       mockNotificationsPlugin = MockFlutterLocalNotificationsPlugin();
       mockAndroidPlugin = MockAndroidFlutterLocalNotificationsPlugin();
@@ -163,6 +178,9 @@ void main() {
     // Reset config after tests
     tearDown(() {
       NotificationConfig.enableLocalNotifications = true;
+      const MethodChannel timezoneChannel = MethodChannel('flutter_timezone');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(timezoneChannel, null);
     });
 
     group('initialization', () {

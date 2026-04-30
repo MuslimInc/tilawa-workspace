@@ -1,0 +1,81 @@
+appId: com.tilawa.app
+---
+# ─── Reciter Details: Download All — state-machine E2E test ───────────────────
+#
+# Identifier map (ReciterSemanticsIds):
+#   reciter_details_download_all_idle        → idle/ready pill
+#   reciter_details_download_all_downloading → in-progress pill
+#   reciter_details_download_all_completed   → all-downloaded badge
+#
+# Flow:
+#   1. Navigate to the Reciters tab
+#   2. Open the first reciter card
+#   3. Scroll until the "Download All" idle pill is visible
+#   4. Assert idle state
+#   5. Tap → downloading state appears
+#   6. Assert downloading state (progress + count text visible)
+#   7. Tap again → cancel → idle state restored
+#   8. Assert idle state is restored
+
+# ── 1. Navigate to Reciters tab ───────────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciters_tab"
+    timeout: 10000
+- tapOn:
+    id: "reciters_tab"
+
+# ── 2. Wait for reciter list to load ──────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciter_card_1"
+    timeout: 15000
+- assertVisible:
+    id: "reciter_card_1"
+
+# ── 3. Open first reciter ─────────────────────────────────────────────────────
+- tapOn:
+    id: "reciter_card_1"
+
+# ── 4. Wait for Reciter Details screen ────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciter_details_surah_search"
+    timeout: 15000
+- assertVisible:
+    id: "reciter_details_surah_search"
+
+# ── 5. Scroll to the Download All button ──────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: "reciter_details_download_all_idle"
+    direction: DOWN
+    timeout: 10000
+
+# ── 6. Verify idle state ──────────────────────────────────────────────────────
+- assertVisible:
+    id: "reciter_details_download_all_idle"
+
+# ── 7. Start downloading all surahs ───────────────────────────────────────────
+- tapOn:
+    id: "reciter_details_download_all_idle"
+
+# ── 8. Verify downloading state appears ───────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciter_details_download_all_downloading"
+    timeout: 10000
+- assertVisible:
+    id: "reciter_details_download_all_downloading"
+
+# ── 9. Cancel the download ────────────────────────────────────────────────────
+- tapOn:
+    id: "reciter_details_download_all_downloading"
+
+# ── 10. Verify idle state is restored ─────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciter_details_download_all_idle"
+    timeout: 10000
+- assertVisible:
+    id: "reciter_details_download_all_idle"

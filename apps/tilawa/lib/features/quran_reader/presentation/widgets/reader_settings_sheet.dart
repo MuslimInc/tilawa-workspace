@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:tilawa/core/extensions.dart';
 import '../../domain/entities/entities.dart';
@@ -70,7 +71,7 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
                 ),
               ),
 
-              const Divider(height: 1),
+              const TilawaDivider(),
 
               // Settings list
               Expanded(

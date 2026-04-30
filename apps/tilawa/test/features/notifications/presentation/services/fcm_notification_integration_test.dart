@@ -60,5 +60,14 @@ void main() {
 
       expect(location, const SettingsRoute().location);
     });
+
+    test('routes prayer notification payloads to prayer times', () {
+      final location = FCMNotificationHandlerService.resolveLocation({
+        'type': 'prayer',
+        'prayer': 'fajr',
+      });
+
+      expect(location, const PrayerTimesRoute().location);
+    });
   });
 }

@@ -4,10 +4,10 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/entities.dart';
-import '../../domain/repositories/prayer_times_repository.dart';
 import '../../domain/usecases/usecases.dart';
 
 part 'prayer_times_bloc.freezed.dart';
@@ -15,7 +15,9 @@ part 'prayer_times_bloc.freezed.dart';
 // Events
 @freezed
 class PrayerTimesEvent with _$PrayerTimesEvent {
-  const factory PrayerTimesEvent.loadPrayerTimes() = _LoadPrayerTimes;
+  const factory PrayerTimesEvent.loadPrayerTimes({
+    @Default(false) bool forceReschedule,
+  }) = _LoadPrayerTimes;
   const factory PrayerTimesEvent.loadMonthlyPrayerTimes({
     required int year,
     required int month,
@@ -60,12 +62,13 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._getCountryCodeUseCase,
     this._savePrayerSettingsUseCase,
     this._loadPrayerSettingsUseCase,
+    this._schedulePrayerNotificationsUseCase,
+    this._cancelPrayerNotificationsUseCase,
   ) : super(const PrayerTimesState()) {
     on<_LoadPrayerTimes>(_onLoadPrayerTimes);
     on<_LoadMonthlyPrayerTimes>(_onLoadMonthlyPrayerTimes);
     on<_UpdateLocation>(_onUpdateLocation);
     on<_UpdateSettings>(_onUpdateSettings);
-    on<_RefreshCountdown>(_onRefreshCountdown);
     on<_SetManualLocation>(_onSetManualLocation);
   }
 
@@ -75,58 +78,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final GetCountryCodeUseCase _getCountryCodeUseCase;
   final SavePrayerSettingsUseCase _savePrayerSettingsUseCase;
   final LoadPrayerSettingsUseCase _loadPrayerSettingsUseCase;
-
-  Timer? _countdownTimer;
-  bool _isCountdownActive = false;
-
-  void _startCountdownTimer() {
-    if (_countdownTimer != null) {
-      return;
-    }
-
-    // Ensure the timer fires right on the second boundary to avoid drift
-    final now = DateTime.now();
-    final delayToNextSecond = 1000 - now.millisecond;
-
-    Future.delayed(Duration(milliseconds: delayToNextSecond), () {
-      if (!_isCountdownActive || isClosed) return;
-
-      // Fire immediately on the second mark
-      add(const PrayerTimesEvent.refreshCountdown());
-
-      // Then start periodic
-      _countdownTimer = Timer.periodic(
-        const Duration(seconds: 1),
-        (_) => add(const PrayerTimesEvent.refreshCountdown()),
-      );
-    });
-  }
-
-  void _stopCountdownTimer() {
-    _countdownTimer?.cancel();
-    _countdownTimer = null;
-  }
-
-  /// Controls countdown refresh activity based on Prayer Times tab visibility.
-  void setCountdownActive(bool isActive) {
-    if (_isCountdownActive == isActive || isClosed) {
-      return;
-    }
-
-    _isCountdownActive = isActive;
-    if (isActive) {
-      _startCountdownTimer();
-      add(const PrayerTimesEvent.refreshCountdown());
-    } else {
-      _stopCountdownTimer();
-    }
-  }
-
-  @override
-  Future<void> close() {
-    _stopCountdownTimer();
-    return super.close();
-  }
+  final SchedulePrayerNotificationsUseCase _schedulePrayerNotificationsUseCase;
+  // ignore: unused_field
+  final CancelPrayerNotificationsUseCase _cancelPrayerNotificationsUseCase;
 
   Future<void> _onLoadPrayerTimes(
     _LoadPrayerTimes event,
@@ -254,10 +208,6 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         ),
       ),
       (prayerTimes) {
-        final PrayerTimeItem? currentOrNext = prayerTimes
-            .getCurrentOrNextPrayer();
-        final Duration? timeUntil = prayerTimes.getTimeUntilNextPrayer();
-
         emit(
           state.copyWith(
             status: PrayerTimesStatus.loaded,
@@ -265,8 +215,15 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
             latitude: latitude,
             longitude: longitude,
             locationName: locationName,
-            currentOrNextPrayer: currentOrNext,
-            timeUntilNextPrayer: timeUntil,
+          ),
+        );
+
+        unawaited(
+          _schedulePrayerNotificationsUseCase.call(
+            settings: effectiveSettings,
+            latitude: latitude!,
+            longitude: longitude!,
+            forceReschedule: event.forceReschedule,
           ),
         );
       },
@@ -324,8 +281,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           ),
         );
 
-        // Reload prayer times with new location
-        add(const PrayerTimesEvent.loadPrayerTimes());
+        // Reload prayer times with new location; force reschedule on next
+        // schedule attempt because location materially changes timings.
+        add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
       },
     );
   }
@@ -334,42 +292,29 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     _UpdateSettings event,
     Emitter<PrayerTimesState> emit,
   ) async {
-    await _savePrayerSettingsUseCase.call(settings: event.settings);
+    final oldSettings = state.settings;
+    final newSettings = event.settings;
 
-    emit(state.copyWith(settings: event.settings));
+    await _savePrayerSettingsUseCase.call(settings: newSettings);
+    emit(state.copyWith(settings: newSettings));
 
-    // Reload prayer times with new settings
-    if (state.latitude != null && state.longitude != null) {
-      add(const PrayerTimesEvent.loadPrayerTimes());
-    }
-  }
-
-  void _onRefreshCountdown(
-    _RefreshCountdown event,
-    Emitter<PrayerTimesState> emit,
-  ) {
-    if (!_isCountdownActive) {
-      return;
-    }
-
-    if (state.todayPrayerTimes == null) {
-      return;
-    }
-
-    final PrayerTimeItem? currentOrNext = state.todayPrayerTimes!
-        .getCurrentOrNextPrayer();
-    final Duration? timeUntil = state.todayPrayerTimes!
-        .getTimeUntilNextPrayer();
-
-    // Only emit if values changed
-    if (currentOrNext?.type != state.currentOrNextPrayer?.type ||
-        timeUntil?.inSeconds != state.timeUntilNextPrayer?.inSeconds) {
-      emit(
-        state.copyWith(
-          currentOrNextPrayer: currentOrNext,
-          timeUntilNextPrayer: timeUntil,
-        ),
-      );
+    // Only reload prayer times if calculation-affecting settings changed.
+    // Otherwise, just reschedule notifications silently to avoid UI flicker.
+    if (newSettings.requiresRecalculation(oldSettings)) {
+      if (state.latitude != null && state.longitude != null) {
+        add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
+      }
+    } else {
+      if (state.latitude != null && state.longitude != null) {
+        unawaited(
+          _schedulePrayerNotificationsUseCase.call(
+            settings: newSettings,
+            latitude: state.latitude!,
+            longitude: state.longitude!,
+            forceReschedule: true,
+          ),
+        );
+      }
     }
   }
 
@@ -395,7 +340,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     await _savePrayerSettingsUseCase.call(settings: updatedSettings);
     emit(state.copyWith(settings: updatedSettings));
 
-    // Reload prayer times
-    add(const PrayerTimesEvent.loadPrayerTimes());
+    // Reload prayer times; manual location overrides force a reschedule.
+    add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
   }
 }

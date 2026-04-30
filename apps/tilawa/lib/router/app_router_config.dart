@@ -16,6 +16,7 @@ import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
@@ -247,10 +248,18 @@ class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BlocProvider(
-      create: (context) =>
-          getIt<PrayerTimesBloc>()
-            ..add(const PrayerTimesEvent.loadPrayerTimes()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              getIt<PrayerTimesBloc>()
+                ..add(const PrayerTimesEvent.loadPrayerTimes()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              getIt<PrayerPermissionsCubit>()..checkCapability(),
+        ),
+      ],
       child: const PrayerTimesScreen(),
     );
   }

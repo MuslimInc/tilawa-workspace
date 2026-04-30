@@ -1,0 +1,92 @@
+# Maestro E2E smoke test — Prayer Times Notifications settings in RTL locale.
+#
+# Verifies that the prayer notifications settings sheet renders without overflow
+# or layout errors when the device locale is set to Arabic (RTL).
+#
+# Covers:
+#   - Navigate to Prayer Times in an RTL locale
+#   - Open Prayer Settings sheet
+#   - Scroll to and assert the Prayer Notifications section is rendered
+#   - Assert global toggle and Fajr toggle are visible
+#   - Assert no overflow or crash
+#
+# Prerequisites:
+#   - Device / simulator locale is set to Arabic (ar) before running.
+#     On Android:  adb shell settings put system system_locales ar-SA
+#     On iOS Sim:  xcrun simctl spawn booted defaults write -g AppleLanguages '(ar)'
+#                  xcrun simctl spawn booted defaults write -g AppleLocale ar_SA
+#                  Then re-launch the app.
+#   - Or use Maestro's runWithPermissions to change locale if supported.
+#
+# Run:
+#   maestro test .maestro/prayer_notifications_rtl.yaml
+#
+# All element ids are locale-independent (Semantics.identifier).
+
+appId: com.tilawa.app
+
+---
+
+# ── 1. Launch (locale must already be Arabic on device) ───────────────────────
+- launchApp
+
+# ── 2. Handle Android POST_NOTIFICATIONS permission dialog (if shown) ─────────
+- runFlow:
+    when:
+      visible: "السماح"   # "Allow" in Arabic
+    commands:
+      - tapOn: "السماح"
+
+# Also handle English "Allow" on devices that may show English system dialogs.
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+
+# ── 3. Navigate to Prayer Times tab ──────────────────────────────────────────
+- tapOn:
+    id: "prayer_times_tab"
+
+- waitForAnimationToEnd
+
+# ── 4. Open Prayer Settings sheet ────────────────────────────────────────────
+- tapOn:
+    id: "prayer_settings_button"
+
+- waitForAnimationToEnd
+
+# ── 5. Scroll to Prayer Notifications section ─────────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: "prayer_notifications_section"
+    direction: DOWN
+    timeout: 5000
+
+- assertVisible:
+    id: "prayer_notifications_section"
+
+# ── 6. Assert global toggle visible in RTL layout ─────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: "prayer_notifications_global_toggle"
+    direction: DOWN
+    timeout: 5000
+
+- assertVisible:
+    id: "prayer_notifications_global_toggle"
+
+# ── 7. Assert Fajr toggle visible in RTL layout ──────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: "prayer_notification_fajr_toggle"
+    direction: DOWN
+    timeout: 5000
+
+- assertVisible:
+    id: "prayer_notification_fajr_toggle"
+
+# ── 8. Dismiss ────────────────────────────────────────────────────────────────
+- swipe:
+    direction: DOWN
+    duration: 400

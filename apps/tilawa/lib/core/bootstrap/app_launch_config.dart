@@ -25,6 +25,7 @@ class AppLaunchConfig extends Equatable {
     this.notificationServiceInit = true,
     this.notificationHandlersInit = true,
     this.athkarNotificationsInit = true,
+    this.prayerNotificationsInit = true,
     this.downloadsInit = true,
     this.audioServiceInit = true,
     this.quranDataLoad = true,
@@ -103,6 +104,10 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_ATHKAR_NOTIFICATIONS_INIT',
         defaultValue: true,
       ),
+      prayerNotificationsInit: bool.fromEnvironment(
+        'TILAWA_LAUNCH_PRAYER_NOTIFICATIONS_INIT',
+        defaultValue: true,
+      ),
       downloadsInit: bool.fromEnvironment(
         'TILAWA_LAUNCH_DOWNLOADS_INIT',
         defaultValue: true,
@@ -147,6 +152,7 @@ class AppLaunchConfig extends Equatable {
   final bool notificationServiceInit;
   final bool notificationHandlersInit;
   final bool athkarNotificationsInit;
+  final bool prayerNotificationsInit;
   final bool downloadsInit;
   final bool audioServiceInit;
   final bool quranDataLoad;
@@ -173,6 +179,7 @@ class AppLaunchConfig extends Equatable {
     notificationServiceInit,
     notificationHandlersInit,
     athkarNotificationsInit,
+    prayerNotificationsInit,
     downloadsInit,
     audioServiceInit,
     quranDataLoad,

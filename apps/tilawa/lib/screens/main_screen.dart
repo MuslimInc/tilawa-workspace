@@ -1,9 +1,11 @@
+import 'package:equatable/equatable.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -37,7 +39,6 @@ class _MainScreenState extends State<MainScreen> {
     final QiblaBloc qiblaBloc = context.read<QiblaBloc>();
 
     if (previous == 1 && next != 1) {
-      prayerTimesBloc.setCountdownActive(false);
       qiblaBloc.add(const StopQiblaStream());
     }
 
@@ -45,7 +46,6 @@ class _MainScreenState extends State<MainScreen> {
       return;
     }
 
-    prayerTimesBloc.setCountdownActive(true);
     if (!_prayerTimesLoadScheduled) {
       _prayerTimesLoadScheduled = true;
       Future<void>.delayed(_deferredPrayerTimesLoadDelay, () {
@@ -71,12 +71,14 @@ class _MainScreenState extends State<MainScreen> {
         icon: FluentIcons.person_24_regular,
         activeIcon: FluentIcons.person_24_filled,
         label: context.l10n.reciters,
+        identifier: 'reciters_tab',
       ),
       _NavDestination(
         index: 1,
         icon: FluentIcons.clock_24_regular,
         activeIcon: FluentIcons.clock_24_filled,
         label: context.l10n.prayerTimes,
+        identifier: 'prayer_times_tab',
       ),
       _NavDestination(
         icon: Icons.menu_book_rounded,
@@ -104,9 +106,12 @@ class _MainScreenState extends State<MainScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<MainScreenCubit>(create: (_) => MainScreenCubit()),
+        BlocProvider<PrayerPermissionsCubit>(
+          create: (_) => getIt<PrayerPermissionsCubit>()..checkCapability(),
+        ),
         BlocProvider<PrayerTimesBloc>(
           lazy: true,
-          create: (_) => getIt<PrayerTimesBloc>()..setCountdownActive(false),
+          create: (_) => getIt<PrayerTimesBloc>(),
         ),
         BlocProvider<QiblaBloc>(lazy: true, create: (_) => getIt<QiblaBloc>()),
         BlocProvider<InternetStatusBloc>(
@@ -152,6 +157,7 @@ class _MainScreenState extends State<MainScreen> {
                         label: d.label,
                         icon: d.icon,
                         activeIcon: d.activeIcon,
+                        identifier: d.identifier,
                         iconBuilder: d.svgPath == null
                             ? null
                             : (context, {required isSelected, required color}) {
@@ -279,17 +285,30 @@ class _MainShellPlaceholderScaffold extends StatelessWidget {
   }
 }
 
-class _NavDestination {
+@immutable
+class _NavDestination extends Equatable {
   const _NavDestination({
     required this.label,
     required this.icon,
     this.activeIcon,
     this.svgPath,
     this.index,
+    this.identifier,
   });
   final String label;
   final IconData icon;
   final IconData? activeIcon;
   final String? svgPath;
   final int? index;
+  final String? identifier;
+
+  @override
+  List<Object?> get props => [
+    label,
+    icon,
+    activeIcon,
+    svgPath,
+    index,
+    identifier,
+  ];
 }

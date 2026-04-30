@@ -2,8 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -58,7 +60,10 @@ class _TasbeehView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.tasbeehCategory)),
+      appBar: AppBar(
+        leading: context.canPop() ? const TilawaBackButton() : null,
+        title: Text(context.l10n.tasbeehCategory),
+      ),
       body: SafeArea(
         child: BlocBuilder<TasbeehCubit, TasbeehState>(
           builder: (context, state) {

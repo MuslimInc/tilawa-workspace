@@ -17,6 +17,7 @@ dependencies:
   skeletonizer: ^2.1.2
   gap: ^3.0.1
   fluentui_system_icons: ^1.1.273
+  animations: ^2.2.0
 
 dev_dependencies:
   flutter_test:

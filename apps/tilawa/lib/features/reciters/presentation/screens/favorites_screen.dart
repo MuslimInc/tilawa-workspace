@@ -10,6 +10,8 @@ import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import '../widgets/reciter_card.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -30,7 +32,10 @@ class FavoritesScreen extends StatelessWidget {
         child: Stack(
           children: [
             Scaffold(
-              appBar: AppBar(title: Text(context.l10n.favorites)),
+              appBar: AppBar(
+                leading: context.canPop() ? const TilawaBackButton() : null,
+                title: Text(context.l10n.favorites),
+              ),
               body: BlocBuilder<FavoritesCubit, FavoritesState>(
                 builder: (context, state) {
                   if (state is FavoritesLoading) {

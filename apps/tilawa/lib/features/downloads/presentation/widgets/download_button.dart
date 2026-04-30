@@ -22,6 +22,7 @@ class DownloadButton extends StatelessWidget {
     this.initialIsDownloaded,
     this.initialIsDownloading,
     this.initialProgress,
+    this.identifier,
   });
 
   final String url;
@@ -31,6 +32,30 @@ class DownloadButton extends StatelessWidget {
   final bool? initialIsDownloaded;
   final bool? initialIsDownloading;
   final double? initialProgress;
+
+  /// Semantics identifier prefix for this button.
+  ///
+  /// When set, a single `Semantics` node sits above the `AnimatedSwitcher`.
+  /// Its identifier is `"${identifier}_<suffix>"` where suffix is one of:
+  /// `ready`, `pending`, `downloading`, `paused`, `complete`.
+  /// Keeping it outside the switcher guarantees only one node exists at a
+  /// time — no animation-overlap ambiguity for Maestro.
+  final String? identifier;
+
+  String? _semanticId(DownloadButtonState state) {
+    if (identifier == null) return null;
+    return state.when(
+      initial: () => null,
+      readyToDownload: () => '${identifier}_ready',
+      pending: () => '${identifier}_pending',
+      downloading: (_, _, _) => '${identifier}_downloading',
+      completed: () => '${identifier}_complete',
+      failed: (_) => '${identifier}_ready',
+      cancelled: () => '${identifier}_ready',
+      paused: () => '${identifier}_paused',
+      networkError: (_) => '${identifier}_ready',
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,72 +95,121 @@ class DownloadButton extends StatelessWidget {
         buildWhen: (previous, current) =>
             current.hasSignificantProgressChange(previous),
         builder: (context, state) {
-          return RepaintBoundary(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: state.when(
-                initial: () => const _LoadingDownloadButton(),
-                readyToDownload: () => _DefaultDownloadButton(
-                  onDownload: () {
-                    context.read<DownloadButtonBloc>().add(
-                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
-                    );
-                  },
-                ),
-                pending: () => _PendingDownloadButton(
-                  onCancel: () {
-                    context.read<DownloadButtonBloc>().add(
-                      const DownloadButtonEvent.cancel(),
-                    );
-                  },
-                ),
-                downloading: (progress, downloadedBytes, totalBytes) =>
-                    _DownloadingProgressButton(
-                      progress: progress,
-                      onPause: () {
-                        context.read<DownloadButtonBloc>().add(
-                          const DownloadButtonEvent.requestPause(),
-                        );
-                      },
-                      onCancel: () {
-                        context.read<DownloadButtonBloc>().add(
-                          const DownloadButtonEvent.cancel(),
-                        );
-                      },
-                    ),
-                completed: () => const _CompletedDownloadButton(),
-                failed: (errorMessage) => _DefaultDownloadButton(
-                  onDownload: () {
-                    context.read<DownloadButtonBloc>().add(
-                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
-                    );
-                  },
-                ),
-                cancelled: () => _DefaultDownloadButton(
-                  onDownload: () {
-                    context.read<DownloadButtonBloc>().add(
-                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
-                    );
-                  },
-                ),
-                paused: () => _PausedDownloadButton(
-                  onResume: () {
-                    context.read<DownloadButtonBloc>().add(
-                      const DownloadButtonEvent.requestResume(),
-                    );
-                  },
-                  onCancel: () {
-                    context.read<DownloadButtonBloc>().add(
-                      const DownloadButtonEvent.cancel(),
-                    );
-                  },
-                ),
-                networkError: (errorMessage) => _DefaultDownloadButton(
-                  onDownload: () {
-                    context.read<DownloadButtonBloc>().add(
-                      DownloadButtonEvent.startDownload(surahTitle: surahTitle),
-                    );
-                  },
+          // Provide an explicit onTap on the Semantics node so that
+          // accessibility services (and Maestro) can invoke the primary action
+          // directly, without competing with the parent InkWell.
+          VoidCallback? semanticTap;
+          if (identifier != null) {
+            semanticTap = state.maybeWhen(
+              readyToDownload: () =>
+                  () => context.read<DownloadButtonBloc>().add(
+                    DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                  ),
+              failed: (_) =>
+                  () => context.read<DownloadButtonBloc>().add(
+                    DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                  ),
+              cancelled: () =>
+                  () => context.read<DownloadButtonBloc>().add(
+                    DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                  ),
+              networkError: (_) =>
+                  () => context.read<DownloadButtonBloc>().add(
+                    DownloadButtonEvent.startDownload(surahTitle: surahTitle),
+                  ),
+              pending: () =>
+                  () => context.read<DownloadButtonBloc>().add(
+                    const DownloadButtonEvent.cancel(),
+                  ),
+              downloading: (p, d, t) =>
+                  () => context.read<DownloadButtonBloc>().add(
+                    const DownloadButtonEvent.cancel(),
+                  ),
+              paused: () =>
+                  () => context.read<DownloadButtonBloc>().add(
+                    const DownloadButtonEvent.requestResume(),
+                  ),
+              orElse: () => null,
+            );
+          }
+          return Semantics(
+            identifier: _semanticId(state),
+            onTap: semanticTap,
+            child: RepaintBoundary(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: state.when(
+                  initial: () => const _LoadingDownloadButton(),
+                  readyToDownload: () => _DefaultDownloadButton(
+                    onDownload: () {
+                      context.read<DownloadButtonBloc>().add(
+                        DownloadButtonEvent.startDownload(
+                          surahTitle: surahTitle,
+                        ),
+                      );
+                    },
+                  ),
+                  pending: () => _PendingDownloadButton(
+                    onCancel: () {
+                      context.read<DownloadButtonBloc>().add(
+                        const DownloadButtonEvent.cancel(),
+                      );
+                    },
+                  ),
+                  downloading: (progress, downloadedBytes, totalBytes) =>
+                      _DownloadingProgressButton(
+                        progress: progress,
+                        onPause: () {
+                          context.read<DownloadButtonBloc>().add(
+                            const DownloadButtonEvent.requestPause(),
+                          );
+                        },
+                        onCancel: () {
+                          context.read<DownloadButtonBloc>().add(
+                            const DownloadButtonEvent.cancel(),
+                          );
+                        },
+                      ),
+                  completed: () => const _CompletedDownloadButton(),
+                  failed: (errorMessage) => _DefaultDownloadButton(
+                    onDownload: () {
+                      context.read<DownloadButtonBloc>().add(
+                        DownloadButtonEvent.startDownload(
+                          surahTitle: surahTitle,
+                        ),
+                      );
+                    },
+                  ),
+                  cancelled: () => _DefaultDownloadButton(
+                    onDownload: () {
+                      context.read<DownloadButtonBloc>().add(
+                        DownloadButtonEvent.startDownload(
+                          surahTitle: surahTitle,
+                        ),
+                      );
+                    },
+                  ),
+                  paused: () => _PausedDownloadButton(
+                    onResume: () {
+                      context.read<DownloadButtonBloc>().add(
+                        const DownloadButtonEvent.requestResume(),
+                      );
+                    },
+                    onCancel: () {
+                      context.read<DownloadButtonBloc>().add(
+                        const DownloadButtonEvent.cancel(),
+                      );
+                    },
+                  ),
+                  networkError: (errorMessage) => _DefaultDownloadButton(
+                    onDownload: () {
+                      context.read<DownloadButtonBloc>().add(
+                        DownloadButtonEvent.startDownload(
+                          surahTitle: surahTitle,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),

@@ -9,6 +9,11 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   const TilawaComponentTokens({
     required this.sectionTitle,
     required this.sheetHandle,
+    required this.card,
+    required this.iconBox,
+    required this.loadingIndicator,
+    required this.divider,
+    required this.emptyState,
     required this.alphabetScrollbar,
     required this.feedbackStrip,
     required this.glassPanel,
@@ -24,10 +29,19 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.adaptiveShell,
     required this.settingsGroup,
     required this.immersiveComposer,
+    required this.iconToggle,
+    required this.permissionBanner,
+    required this.prayerAlertRow,
+    required this.bottomSheetScaffold,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
   final TilawaSheetHandleTokens sheetHandle;
+  final TilawaCardTokens card;
+  final TilawaIconBoxTokens iconBox;
+  final TilawaLoadingIndicatorTokens loadingIndicator;
+  final TilawaDividerTokens divider;
+  final TilawaEmptyStateTokens emptyState;
   final TilawaAlphabetScrollbarTokens alphabetScrollbar;
   final TilawaFeedbackStripTokens feedbackStrip;
   final TilawaGlassPanelTokens glassPanel;
@@ -43,10 +57,19 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaAdaptiveShellTokens adaptiveShell;
   final TilawaSettingsGroupTokens settingsGroup;
   final TilawaImmersiveComposerTokens immersiveComposer;
+  final TilawaIconToggleTokens iconToggle;
+  final TilawaPermissionBannerTokens permissionBanner;
+  final TilawaPrayerAlertRowTokens prayerAlertRow;
+  final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
 
   factory TilawaComponentTokens.light() => TilawaComponentTokens(
     sectionTitle: TilawaSectionTitleTokens.defaults(),
     sheetHandle: TilawaSheetHandleTokens.defaults(),
+    card: TilawaCardTokens.defaults(),
+    iconBox: TilawaIconBoxTokens.defaults(),
+    loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
+    divider: TilawaDividerTokens.defaults(),
+    emptyState: TilawaEmptyStateTokens.defaults(),
     alphabetScrollbar: TilawaAlphabetScrollbarTokens.defaults(),
     feedbackStrip: TilawaFeedbackStripTokens.defaults(),
     glassPanel: TilawaGlassPanelTokens.defaults(),
@@ -62,6 +85,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     adaptiveShell: TilawaAdaptiveShellTokens.defaults(),
     settingsGroup: TilawaSettingsGroupTokens.defaults(),
     immersiveComposer: TilawaImmersiveComposerTokens.defaults(),
+    iconToggle: TilawaIconToggleTokens.defaults(),
+    permissionBanner: TilawaPermissionBannerTokens.defaults(),
+    prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(),
+    bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
   );
 
   factory TilawaComponentTokens.dark() => TilawaComponentTokens.light();
@@ -70,6 +97,11 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   TilawaComponentTokens copyWith({
     TilawaSectionTitleTokens? sectionTitle,
     TilawaSheetHandleTokens? sheetHandle,
+    TilawaCardTokens? card,
+    TilawaIconBoxTokens? iconBox,
+    TilawaLoadingIndicatorTokens? loadingIndicator,
+    TilawaDividerTokens? divider,
+    TilawaEmptyStateTokens? emptyState,
     TilawaAlphabetScrollbarTokens? alphabetScrollbar,
     TilawaFeedbackStripTokens? feedbackStrip,
     TilawaGlassPanelTokens? glassPanel,
@@ -85,10 +117,19 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaAdaptiveShellTokens? adaptiveShell,
     TilawaSettingsGroupTokens? settingsGroup,
     TilawaImmersiveComposerTokens? immersiveComposer,
+    TilawaIconToggleTokens? iconToggle,
+    TilawaPermissionBannerTokens? permissionBanner,
+    TilawaPrayerAlertRowTokens? prayerAlertRow,
+    TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
   }) {
     return TilawaComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
       sheetHandle: sheetHandle ?? this.sheetHandle,
+      card: card ?? this.card,
+      iconBox: iconBox ?? this.iconBox,
+      loadingIndicator: loadingIndicator ?? this.loadingIndicator,
+      divider: divider ?? this.divider,
+      emptyState: emptyState ?? this.emptyState,
       alphabetScrollbar: alphabetScrollbar ?? this.alphabetScrollbar,
       feedbackStrip: feedbackStrip ?? this.feedbackStrip,
       glassPanel: glassPanel ?? this.glassPanel,
@@ -104,6 +145,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       adaptiveShell: adaptiveShell ?? this.adaptiveShell,
       settingsGroup: settingsGroup ?? this.settingsGroup,
       immersiveComposer: immersiveComposer ?? this.immersiveComposer,
+      iconToggle: iconToggle ?? this.iconToggle,
+      permissionBanner: permissionBanner ?? this.permissionBanner,
+      prayerAlertRow: prayerAlertRow ?? this.prayerAlertRow,
+      bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
     );
   }
 
@@ -125,6 +170,15 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
         other.sheetHandle,
         t,
       ),
+      card: TilawaCardTokens.lerp(card, other.card, t),
+      iconBox: TilawaIconBoxTokens.lerp(iconBox, other.iconBox, t),
+      loadingIndicator: TilawaLoadingIndicatorTokens.lerp(
+        loadingIndicator,
+        other.loadingIndicator,
+        t,
+      ),
+      divider: TilawaDividerTokens.lerp(divider, other.divider, t),
+      emptyState: TilawaEmptyStateTokens.lerp(emptyState, other.emptyState, t),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.lerp(
         alphabetScrollbar,
         other.alphabetScrollbar,
@@ -182,6 +236,22 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       immersiveComposer: TilawaImmersiveComposerTokens.lerp(
         immersiveComposer,
         other.immersiveComposer,
+        t,
+      ),
+      iconToggle: TilawaIconToggleTokens.lerp(iconToggle, other.iconToggle, t),
+      permissionBanner: TilawaPermissionBannerTokens.lerp(
+        permissionBanner,
+        other.permissionBanner,
+        t,
+      ),
+      prayerAlertRow: TilawaPrayerAlertRowTokens.lerp(
+        prayerAlertRow,
+        other.prayerAlertRow,
+        t,
+      ),
+      bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.lerp(
+        bottomSheetScaffold,
+        other.bottomSheetScaffold,
         t,
       ),
     );

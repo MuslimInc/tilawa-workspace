@@ -6,6 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
+
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -18,6 +19,8 @@ import 'prayer_times_bloc_test.mocks.dart';
   GetCountryCodeUseCase,
   SavePrayerSettingsUseCase,
   LoadPrayerSettingsUseCase,
+  SchedulePrayerNotificationsUseCase,
+  CancelPrayerNotificationsUseCase,
 ])
 void main() {
   late PrayerTimesBloc bloc;
@@ -27,6 +30,10 @@ void main() {
   late MockGetCountryCodeUseCase mockGetCountryCodeUseCase;
   late MockSavePrayerSettingsUseCase mockSavePrayerSettingsUseCase;
   late MockLoadPrayerSettingsUseCase mockLoadPrayerSettingsUseCase;
+  late MockSchedulePrayerNotificationsUseCase
+  mockSchedulePrayerNotificationsUseCase;
+  late MockCancelPrayerNotificationsUseCase
+  mockCancelPrayerNotificationsUseCase;
 
   setUp(() {
     mockGetPrayerTimesUseCase = MockGetPrayerTimesUseCase();
@@ -35,6 +42,10 @@ void main() {
     mockGetCountryCodeUseCase = MockGetCountryCodeUseCase();
     mockSavePrayerSettingsUseCase = MockSavePrayerSettingsUseCase();
     mockLoadPrayerSettingsUseCase = MockLoadPrayerSettingsUseCase();
+    mockSchedulePrayerNotificationsUseCase =
+        MockSchedulePrayerNotificationsUseCase();
+    mockCancelPrayerNotificationsUseCase =
+        MockCancelPrayerNotificationsUseCase();
 
     bloc = PrayerTimesBloc(
       mockGetPrayerTimesUseCase,
@@ -43,6 +54,8 @@ void main() {
       mockGetCountryCodeUseCase,
       mockSavePrayerSettingsUseCase,
       mockLoadPrayerSettingsUseCase,
+      mockSchedulePrayerNotificationsUseCase,
+      mockCancelPrayerNotificationsUseCase,
     );
 
     // Default stub
@@ -52,6 +65,15 @@ void main() {
         longitude: anyNamed('longitude'),
       ),
     ).thenAnswer((_) async => null);
+
+    when(
+      mockSchedulePrayerNotificationsUseCase.call(
+        settings: anyNamed('settings'),
+        latitude: anyNamed('latitude'),
+        longitude: anyNamed('longitude'),
+        forceReschedule: anyNamed('forceReschedule'),
+      ),
+    ).thenAnswer((_) async => const Right(null));
   });
   provideDummy<Either<Failure, PrayerSettingsEntity>>(
     const Right(PrayerSettingsEntity()),
@@ -60,6 +82,7 @@ void main() {
     Right(LocationResult(latitude: 0, longitude: 0)),
   );
   provideDummy<Either<Failure, void>>(const Right(null));
+  provideDummy<Either<Failure, bool>>(const Right(true));
   provideDummy<Either<Failure, PrayerTimeEntity>>(
     Right(
       PrayerTimeEntity(
@@ -370,6 +393,46 @@ void main() {
                 capturedSettings, // Must match the saved (updated) settings
           ),
         ).called(1);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'updateSettings triggers internal loadPrayerTimes with forceReschedule=true',
+      build: () {
+        when(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        ).thenAnswer((_) async => const Right(null));
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(savedLatitude: 10.0, savedLongitude: 10.0),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      seed: () => const PrayerTimesState(
+        status: PrayerTimesStatus.loaded,
+        latitude: 10.0,
+        longitude: 10.0,
+      ),
+      act: (b) =>
+          b.add(const PrayerTimesEvent.updateSettings(PrayerSettingsEntity())),
+      verify: (_) {
+        verify(
+          mockSchedulePrayerNotificationsUseCase.call(
+            settings: anyNamed('settings'),
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            forceReschedule: true,
+          ),
+        ).called(greaterThanOrEqualTo(1));
       },
     );
   });

@@ -233,6 +233,7 @@ void main() {
           'maxConcurrentDownloads': 3,
           'restorePlaybackState': true,
           'isSleepTimerEnabled': true,
+          'prefetchQuranAssetsOnWifiOnly': true,
         });
       });
 

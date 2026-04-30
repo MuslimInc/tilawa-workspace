@@ -599,12 +599,14 @@ class DownloadsRepositoryImpl implements DownloadsRepository {
     final String downloadsDir = await pathResolver.getDownloadsDir();
 
     try {
-      final DownloadItem rawDownload = downloads.firstWhere(
+      final DownloadItem? rawDownload = downloads.firstWhereOrNull(
         (d) =>
             d.reciterName == reciterName &&
             d.url == trimmedUrl &&
             d.status == DownloadStatus.completed,
       );
+
+      if (rawDownload == null) return null;
 
       final DownloadItem download = pathResolver.resolveDownloadPath(
         rawDownload,

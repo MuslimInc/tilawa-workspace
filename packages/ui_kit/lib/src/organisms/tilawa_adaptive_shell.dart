@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -28,12 +29,17 @@ class TilawaNavDestination {
     required this.icon,
     this.activeIcon,
     this.iconBuilder,
+    this.identifier,
   });
 
   final String label;
   final IconData icon;
   final IconData? activeIcon;
   final TilawaNavIconBuilder? iconBuilder;
+
+  /// Optional [Semantics.identifier] exposed to accessibility tools such as
+  /// Maestro. Prefer this over Flutter Keys for E2E test targeting.
+  final String? identifier;
 }
 
 /// A shell that adapts its navigation based on the window size.
@@ -184,19 +190,22 @@ class _BottomNavBar extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: DecoratedBox(
             decoration: decoration ?? const BoxDecoration(),
-            child: Row(
-              spacing: tokens.bottomNavItemGap,
-              children: [
-                for (int i = 0; i < destinations.length; i++)
-                  Expanded(
-                    child: _NavButton(
-                      destination: destinations[i],
-                      isSelected: selectedIndex == i,
-                      onTap: () => onDestinationSelected(i),
-                      borderRadius: tokens.bottomNavInnerRadius,
+            child: Padding(
+              padding: EdgeInsets.all(tokens.bottomNavItemGap),
+              child: Row(
+                spacing: tokens.bottomNavItemGap,
+                children: [
+                  for (int i = 0; i < destinations.length; i++)
+                    Expanded(
+                      child: _NavButton(
+                        destination: destinations[i],
+                        isSelected: selectedIndex == i,
+                        onTap: () => onDestinationSelected(i),
+                        borderRadius: tokens.bottomNavInnerRadius,
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -300,17 +309,15 @@ class _NavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
-    final selectedBg = theme.colorScheme.primaryContainer;
-    final selectedFg = theme.colorScheme.onPrimaryContainer;
+    final selectedFg = theme.colorScheme.primary;
     final unselectedFg = theme.colorScheme.onSurfaceVariant;
-
-    final baseLabelStyle = theme.textTheme.labelSmall ?? const TextStyle();
+    final Color iconColor = isSelected ? selectedFg : unselectedFg;
 
     final Widget iconWidget = destination.iconBuilder != null
         ? destination.iconBuilder!(
             context,
             isSelected: isSelected,
-            color: isSelected ? selectedFg : unselectedFg,
+            color: iconColor,
           )
         : Icon(
             isSelected
@@ -318,43 +325,58 @@ class _NavButton extends StatelessWidget {
                 : destination.icon,
             key: ValueKey('${destination.icon.hashCode}_$isSelected'),
             size: tokens.navButtonIconSize,
-            color: isSelected ? selectedFg : unselectedFg,
+            color: iconColor,
           );
 
-    return Material(
+    final Widget button = Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
           HapticFeedback.selectionClick();
           onTap();
         },
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Container(
+        borderRadius: .circular(borderRadius),
+        child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
-          padding: EdgeInsets.symmetric(
-            vertical: tokens.navButtonVerticalPadding,
-          ),
-          decoration: BoxDecoration(
-            color: isSelected ? selectedBg : Colors.transparent,
-            borderRadius: BorderRadius.circular(borderRadius),
-          ),
           child: Column(
-            mainAxisSize: .min,
             mainAxisAlignment: .center,
             spacing: tokens.navButtonGap,
+            mainAxisSize: .min,
             children: [
-              iconWidget,
-              Text(
-                destination.label,
-                maxLines: 2,
-                overflow: .ellipsis,
-                textAlign: .center,
-                style: baseLabelStyle.copyWith(
-                  fontSize: tokens.navButtonLabelFontSize,
-                  fontWeight: isSelected
-                      ? tokens.navButtonSelectedLabelWeight
-                      : tokens.navButtonUnselectedLabelWeight,
-                  color: isSelected ? selectedFg : unselectedFg,
+              AnimatedScale(
+                scale: isSelected ? tokens.navButtonSelectedCenterScale : 1.0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutBack,
+                child: PageTransitionSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation, secondaryAnimation) =>
+                      FadeThroughTransition(
+                        animation: animation,
+                        secondaryAnimation: secondaryAnimation,
+                        fillColor: Colors.transparent,
+                        child: child,
+                      ),
+                  child: KeyedSubtree(
+                    key: ValueKey(isSelected),
+                    child: iconWidget,
+                  ),
+                ),
+              ),
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 200),
+                style: (theme.textTheme.labelSmall ?? const TextStyle())
+                    .copyWith(
+                      fontSize: tokens.navButtonLabelFontSize,
+                      fontWeight: isSelected
+                          ? tokens.navButtonSelectedLabelWeight
+                          : tokens.navButtonUnselectedLabelWeight,
+                      color: isSelected ? selectedFg : unselectedFg,
+                    ),
+                child: Text(
+                  destination.label,
+                  maxLines: 1,
+                  overflow: .ellipsis,
+                  textAlign: .center,
                 ),
               ),
             ],
@@ -362,5 +384,10 @@ class _NavButton extends StatelessWidget {
         ),
       ),
     );
+
+    if (destination.identifier case final String id) {
+      return Semantics(identifier: id, child: button);
+    }
+    return button;
   }
 }

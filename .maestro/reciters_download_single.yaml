@@ -1,0 +1,137 @@
+appId: com.tilawa.app
+---
+# ─── Reciter Details: Single Surah Download — state-machine E2E test ──────────
+#
+# Tests 3 independent surah download state-machines in a single flow:
+#   Surah 034 (~500 KB), Surah 035 (~400 KB), Surah 036 (~500 KB)
+#
+# Each surah exercises the full cycle: ready → downloading → cancel → ready.
+# Using surahs at different scroll depths that are unlikely to be pre-downloaded.
+# Large enough files (several hundred KB each) so _downloading is observable.
+#
+# Identifier suffixes:
+#   surah_download_button_<id>_ready       → DownloadButton.readyToDownload
+#   surah_download_button_<id>_downloading → DownloadButton.downloading
+#   surah_download_button_<id>_complete    → DownloadButton.completed
+
+# ── 0. Launch app ─────────────────────────────────────────────────────────────
+- launchApp
+
+# ── 1. Navigate to Reciters tab ───────────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciters_tab"
+    timeout: 10000
+- tapOn:
+    id: "reciters_tab"
+
+# ── 2. Open reciter_card_10 (Akram Al-Alaqmi) ─────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciter_card_10"
+    timeout: 15000
+- tapOn:
+    id: "reciter_card_10"
+
+# ── 3. Wait for Reciter Details screen ────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciter_details_surah_search"
+    timeout: 15000
+- assertVisible:
+    id: "reciter_details_surah_search"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CYCLE 1 — Surah 034 (Saba', ~500 KB)
+# ══════════════════════════════════════════════════════════════════════════════
+
+- scrollUntilVisible:
+    element:
+      id: "surah_download_button_034_ready"
+    direction: DOWN
+    timeout: 30000
+- assertVisible:
+    id: "surah_download_button_034_ready"
+
+- tapOn:
+    id: "surah_download_button_034_ready"
+
+- extendedWaitUntil:
+    visible:
+      id: "surah_download_button_034_downloading"
+    timeout: 15000
+- assertVisible:
+    id: "surah_download_button_034_downloading"
+
+- tapOn:
+    id: "surah_download_button_034_downloading"
+
+- extendedWaitUntil:
+    visible:
+      id: "surah_download_button_034_ready"
+    timeout: 10000
+- assertVisible:
+    id: "surah_download_button_034_ready"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CYCLE 2 — Surah 035 (Fatir, ~400 KB)
+# ══════════════════════════════════════════════════════════════════════════════
+
+- scrollUntilVisible:
+    element:
+      id: "surah_download_button_035_ready"
+    direction: DOWN
+    timeout: 20000
+- assertVisible:
+    id: "surah_download_button_035_ready"
+
+- tapOn:
+    id: "surah_download_button_035_ready"
+
+- extendedWaitUntil:
+    visible:
+      id: "surah_download_button_035_downloading"
+    timeout: 15000
+- assertVisible:
+    id: "surah_download_button_035_downloading"
+
+- tapOn:
+    id: "surah_download_button_035_downloading"
+
+- extendedWaitUntil:
+    visible:
+      id: "surah_download_button_035_ready"
+    timeout: 10000
+- assertVisible:
+    id: "surah_download_button_035_ready"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CYCLE 3 — Surah 036 (Ya-Sin, ~400 KB) — let it complete to verify _complete
+# ══════════════════════════════════════════════════════════════════════════════
+
+- scrollUntilVisible:
+    element:
+      id: "surah_download_button_036_ready"
+    direction: DOWN
+    timeout: 20000
+    speed: 30
+- assertVisible:
+    id: "surah_download_button_036_ready"
+
+- tapOn:
+    id: "surah_download_button_036_ready"
+
+- extendedWaitUntil:
+    visible:
+      id: "surah_download_button_036_downloading"
+    timeout: 15000
+- assertVisible:
+    id: "surah_download_button_036_downloading"
+
+# Let Ya-Sin complete (small enough to finish quickly, large enough to be seen)
+- extendedWaitUntil:
+    visible:
+      id: "surah_download_button_036_complete"
+    timeout: 60000
+- assertVisible:
+    id: "surah_download_button_036_complete"

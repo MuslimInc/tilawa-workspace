@@ -76,15 +76,43 @@ enum HighLatitudeMethod {
   angleBased,
 }
 
+/// Mode of prayer alert
+enum PrayerAlertMode {
+  /// No alert
+  none,
+
+  /// Visual notification only
+  notification,
+
+  /// Visual notification and Adhan sound
+  adhan;
+
+  bool get isNotificationEnabled => this != PrayerAlertMode.none;
+  bool get isAdhanEnabled => this == PrayerAlertMode.adhan;
+
+  /// Factory to create from bools, enforcing the dependency logic
+  static PrayerAlertMode fromBools({
+    required bool enabled,
+    required bool playAdhan,
+  }) {
+    if (!enabled) return PrayerAlertMode.none;
+    return playAdhan ? PrayerAlertMode.adhan : PrayerAlertMode.notification;
+  }
+}
+
 /// Notification settings for a specific prayer
 @freezed
 abstract class PrayerNotificationSettings with _$PrayerNotificationSettings {
   const factory PrayerNotificationSettings({
-    @Default(true) bool enabled,
+    @Default(PrayerAlertMode.adhan) PrayerAlertMode mode,
     @Default(0) int minutesBefore,
-    @Default(false) bool playAdhan,
     String? customAdhanUrl,
   }) = _PrayerNotificationSettings;
+
+  const PrayerNotificationSettings._();
+
+  bool get enabled => mode.isNotificationEnabled;
+  bool get playAdhan => mode.isAdhanEnabled;
 
   factory PrayerNotificationSettings.fromJson(Map<String, dynamic> json) =>
       _$PrayerNotificationSettingsFromJson(json);
@@ -120,6 +148,139 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
     String? savedLocationName,
   }) = _PrayerSettingsEntity;
   const PrayerSettingsEntity._();
+
+  /// Returns true if the settings that affect prayer time calculations have changed
+  /// compared to [other].
+  bool requiresRecalculation(PrayerSettingsEntity other) {
+    return calculationMethod != other.calculationMethod ||
+        asrJuristicMethod != other.asrJuristicMethod ||
+        highLatitudeMethod != other.highLatitudeMethod ||
+        fajrAdjustment != other.fajrAdjustment ||
+        sunriseAdjustment != other.sunriseAdjustment ||
+        dhuhrAdjustment != other.dhuhrAdjustment ||
+        asrAdjustment != other.asrAdjustment ||
+        maghribAdjustment != other.maghribAdjustment ||
+        ishaAdjustment != other.ishaAdjustment ||
+        savedLatitude != other.savedLatitude ||
+        savedLongitude != other.savedLongitude;
+  }
+
+  /// Check if all prayer notifications are enabled
+  bool get allNotificationsEnabled =>
+      fajrNotification.enabled &&
+      dhuhrNotification.enabled &&
+      asrNotification.enabled &&
+      maghribNotification.enabled &&
+      ishaNotification.enabled;
+
+  /// Check if all prayer adhans are enabled
+  bool get allAdhanEnabled =>
+      fajrNotification.playAdhan &&
+      dhuhrNotification.playAdhan &&
+      asrNotification.playAdhan &&
+      maghribNotification.playAdhan &&
+      ishaNotification.playAdhan;
+
+  /// Copy with all notifications enabled or disabled.
+  /// If notifications are disabled, Adhan is also disabled.
+  PrayerSettingsEntity copyWithToggledNotifications(bool enabled) {
+    // We preserve existing Adhan state if enabling, but the business rule
+    // from earlier says "If notifications are disabled, Adhan is also disabled."
+    // If enabling, we might want to restore to silent or adhan?
+    // Let's use a logic that makes sense:
+
+    PrayerNotificationSettings toggle(PrayerNotificationSettings current) {
+      if (!enabled) return current.copyWith(mode: PrayerAlertMode.none);
+      // If enabling, if it was none, we go to notification (silent).
+      // If it was already notification or adhan, we keep it.
+      if (current.mode == PrayerAlertMode.none) {
+        return current.copyWith(mode: PrayerAlertMode.notification);
+      }
+      return current;
+    }
+
+    return copyWith(
+      fajrNotification: toggle(fajrNotification),
+      dhuhrNotification: toggle(dhuhrNotification),
+      asrNotification: toggle(asrNotification),
+      maghribNotification: toggle(maghribNotification),
+      ishaNotification: toggle(ishaNotification),
+    );
+  }
+
+  /// Copy with all adhans enabled or disabled.
+  /// Adhan can only be enabled if notification is already enabled.
+  PrayerSettingsEntity copyWithToggledAdhan(bool enabled) {
+    PrayerNotificationSettings toggle(PrayerNotificationSettings current) {
+      if (enabled) {
+        // Can only enable adhan if notification is enabled
+        return current.copyWith(
+          mode: current.enabled ? PrayerAlertMode.adhan : current.mode,
+        );
+      } else {
+        // If disabling adhan, we go to notification (silent) if it was adhan
+        return current.copyWith(
+          mode: current.mode == PrayerAlertMode.adhan
+              ? PrayerAlertMode.notification
+              : current.mode,
+        );
+      }
+    }
+
+    return copyWith(
+      fajrNotification: toggle(fajrNotification),
+      dhuhrNotification: toggle(dhuhrNotification),
+      asrNotification: toggle(asrNotification),
+      maghribNotification: toggle(maghribNotification),
+      ishaNotification: toggle(ishaNotification),
+    );
+  }
+
+  /// Copy with global minutes before for all notifications
+  PrayerSettingsEntity copyWithGlobalMinutesBefore(int minutes) {
+    return copyWith(
+      fajrNotification: fajrNotification.copyWith(minutesBefore: minutes),
+      dhuhrNotification: dhuhrNotification.copyWith(minutesBefore: minutes),
+      asrNotification: asrNotification.copyWith(minutesBefore: minutes),
+      maghribNotification: maghribNotification.copyWith(minutesBefore: minutes),
+      ishaNotification: ishaNotification.copyWith(minutesBefore: minutes),
+    );
+  }
+
+  /// Copy with global play adhan for all notifications
+  PrayerSettingsEntity copyWithGlobalPlayAdhan(bool playAdhan) {
+    return copyWithToggledAdhan(playAdhan);
+  }
+
+  /// Update a specific prayer alert settings with dependency logic.
+  /// If notifications are disabled, Adhan is automatically disabled.
+  /// Adhan can only be enabled if notifications are enabled.
+  PrayerSettingsEntity updatePrayerAlert(
+    String prayerId, {
+    bool? notificationEnabled,
+    bool? adhanEnabled,
+  }) {
+    PrayerNotificationSettings update(PrayerNotificationSettings current) {
+      final newEnabled = notificationEnabled ?? current.enabled;
+      final newAdhan = adhanEnabled ?? current.playAdhan;
+
+      return current.copyWith(
+        mode: PrayerAlertMode.fromBools(
+          enabled: newEnabled,
+          playAdhan: newAdhan,
+        ),
+      );
+    }
+
+    return switch (prayerId) {
+      'fajr' => copyWith(fajrNotification: update(fajrNotification)),
+      'dhuhr' => copyWith(dhuhrNotification: update(dhuhrNotification)),
+      'asr' => copyWith(asrNotification: update(asrNotification)),
+      'maghrib' => copyWith(maghribNotification: update(maghribNotification)),
+      'isha' => copyWith(ishaNotification: update(ishaNotification)),
+      _ => this,
+    };
+  }
 
   factory PrayerSettingsEntity.fromJson(Map<String, dynamic> json) =>
       _$PrayerSettingsEntityFromJson(json);

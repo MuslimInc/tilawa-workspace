@@ -20,9 +20,6 @@ class VideoReviewPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
-    final headerButtonSize =
-        theme.componentTokens.immersiveComposer.headerButtonSize;
-
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceMedium,
@@ -32,22 +29,16 @@ class VideoReviewPanel extends StatelessWidget {
         spacing: tokens.spaceSmall,
         children: [
           Expanded(
-            child: SizedBox(
-              height: headerButtonSize,
-              child: OutlinedButton(
-                onPressed: onEdit,
-                child: Text(context.l10n.edit),
-              ),
+            child: OutlinedButton(
+              onPressed: onEdit,
+              child: Text(context.l10n.edit),
             ),
           ),
           Expanded(
-            child: SizedBox(
-              height: headerButtonSize,
-              child: FilledButton.icon(
-                onPressed: onShare,
-                icon: Icon(Icons.share_rounded, size: tokens.iconSizeSmall),
-                label: Text(context.l10n.shareReel),
-              ),
+            child: FilledButton.icon(
+              onPressed: onShare,
+              icon: Icon(Icons.share_rounded, size: tokens.iconSizeSmall),
+              label: Text(context.l10n.shareReel),
             ),
           ),
         ],
