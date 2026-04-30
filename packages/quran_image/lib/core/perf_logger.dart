@@ -72,7 +72,7 @@ abstract final class PerfLogger {
   ///
   /// Has no effect in release mode because [isEnabled] already returns `false`
   /// at compile time.
-  static bool instrumentationEnabled = true;
+  static bool instrumentationEnabled = false;
 
   /// `true` when instrumentation should run.
   ///

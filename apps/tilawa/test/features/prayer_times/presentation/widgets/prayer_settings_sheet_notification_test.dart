@@ -8,6 +8,7 @@ import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_capability.dart';
+import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import 'package:tilawa/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -17,6 +18,7 @@ import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'prayer_settings_sheet_notification_test.mocks.dart';
 
 @GenerateMocks([
+  PrayerPermissionsCubit,
   GetPrayerTimesUseCase,
   GetMonthlyPrayerTimesUseCase,
   GetCurrentLocationUseCase,
@@ -25,11 +27,9 @@ import 'prayer_settings_sheet_notification_test.mocks.dart';
   LoadPrayerSettingsUseCase,
   SchedulePrayerNotificationsUseCase,
   CancelPrayerNotificationsUseCase,
-  CheckPrayerAlarmCapabilityUseCase,
-  RequestExactAlarmPermissionUseCase,
-  RequestNotificationPermissionUseCase,
 ])
 void main() {
+  provideDummy<PrayerPermissionsState>(const PrayerPermissionsState());
   provideDummy<Either<Failure, PrayerSettingsEntity>>(
     const Right(PrayerSettingsEntity()),
   );
@@ -73,10 +73,7 @@ void main() {
   late MockLoadPrayerSettingsUseCase mockLoadPrayerSettings;
   late MockSchedulePrayerNotificationsUseCase mockSchedule;
   late MockCancelPrayerNotificationsUseCase mockCancel;
-  late MockCheckPrayerAlarmCapabilityUseCase mockCheckCapability;
-  late MockRequestExactAlarmPermissionUseCase mockRequestPermission;
-  late MockRequestNotificationPermissionUseCase
-  mockRequestNotificationPermission;
+  late MockPrayerPermissionsCubit mockPermissionsCubit;
 
   setUpAll(() async {
     await initializeHydratedStorageForTest();
@@ -91,10 +88,9 @@ void main() {
     mockLoadPrayerSettings = MockLoadPrayerSettingsUseCase();
     mockSchedule = MockSchedulePrayerNotificationsUseCase();
     mockCancel = MockCancelPrayerNotificationsUseCase();
-    mockCheckCapability = MockCheckPrayerAlarmCapabilityUseCase();
-    mockRequestPermission = MockRequestExactAlarmPermissionUseCase();
-    mockRequestNotificationPermission =
-        MockRequestNotificationPermissionUseCase();
+    mockPermissionsCubit = MockPrayerPermissionsCubit();
+    when(mockPermissionsCubit.state).thenReturn(const PrayerPermissionsState());
+    when(mockPermissionsCubit.stream).thenAnswer((_) => const Stream.empty());
 
     when(
       mockGetCountryCode.call(
@@ -102,22 +98,6 @@ void main() {
         longitude: anyNamed('longitude'),
       ),
     ).thenAnswer((_) async => null);
-
-    when(mockCheckCapability.call()).thenAnswer(
-      (_) async => const Right(
-        PrayerAlarmCapability(
-          canScheduleExact: true,
-          hasNotificationPermission: true,
-        ),
-      ),
-    );
-
-    when(
-      mockRequestPermission.call(),
-    ).thenAnswer((_) async => const Right<Failure, void>(null));
-    when(
-      mockRequestNotificationPermission.call(),
-    ).thenAnswer((_) async => const Right<Failure, bool>(true));
 
     when(
       mockSchedule.call(
@@ -138,9 +118,6 @@ void main() {
     mockLoadPrayerSettings,
     mockSchedule,
     mockCancel,
-    mockCheckCapability,
-    mockRequestPermission,
-    mockRequestNotificationPermission,
   );
 
   Widget buildSubject(PrayerTimesBloc bloc) {
@@ -148,188 +125,45 @@ void main() {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       // theme omitted in tests
-      home: BlocProvider.value(
-        value: bloc,
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: bloc),
+          BlocProvider<PrayerPermissionsCubit>.value(
+            value: mockPermissionsCubit,
+          ),
+        ],
         child: const Scaffold(body: PrayerSettingsSheet()),
       ),
     );
   }
 
-  group('PrayerSettingsSheet — notification section', () {
-    testWidgets('renders "Prayer Notifications" section title', (tester) async {
-      final bloc = buildBloc();
-      await tester.pumpWidget(buildSubject(bloc));
-      await tester.pump();
-
-      await tester.scrollUntilVisible(
-        find.text('Prayer Notifications'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      expect(find.text('Prayer Notifications'), findsOneWidget);
-      bloc.close();
-    });
-
-    testWidgets('renders "All Prayer Notifications" global toggle', (
+  group('PrayerSettingsSheet — structural refactor', () {
+    testWidgets('does NOT render "Prayer Notifications" section', (
       tester,
     ) async {
       final bloc = buildBloc();
       await tester.pumpWidget(buildSubject(bloc));
       await tester.pump();
 
-      await tester.scrollUntilVisible(
-        find.text('All Prayer Notifications'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      expect(find.text('All Prayer Notifications'), findsOneWidget);
+      expect(find.text('Prayer Notifications'), findsNothing);
       bloc.close();
     });
 
-    testWidgets('renders "Play Adhan" toggle', (tester) async {
+    testWidgets('does NOT render global notification toggle', (tester) async {
       final bloc = buildBloc();
       await tester.pumpWidget(buildSubject(bloc));
       await tester.pump();
 
-      await tester.scrollUntilVisible(
-        find.text('Play Adhan'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      expect(find.text('Play Adhan'), findsOneWidget);
+      expect(find.text('All Prayer Notifications'), findsNothing);
       bloc.close();
     });
 
-    testWidgets('dispatches checkAlarmCapability event on initState', (
-      tester,
-    ) async {
+    testWidgets('still renders "Calculation Method" section', (tester) async {
       final bloc = buildBloc();
       await tester.pumpWidget(buildSubject(bloc));
       await tester.pump();
 
-      verify(mockCheckCapability.call()).called(greaterThanOrEqualTo(1));
-      bloc.close();
-    });
-
-    testWidgets(
-      'does not show notification permission banner when fully capable',
-      (tester) async {
-        final bloc = buildBloc();
-        bloc.emit(
-          const PrayerTimesState(
-            alarmCapability: PrayerAlarmCapability(
-              canScheduleExact: true,
-              hasNotificationPermission: true,
-            ),
-          ),
-        );
-
-        await tester.pumpWidget(buildSubject(bloc));
-        await tester.pump();
-        await tester.drag(find.byType(ListView), const Offset(0, -600));
-        await tester.pump();
-
-        expect(
-          find.textContaining('Notification permission required'),
-          findsNothing,
-        );
-        bloc.close();
-      },
-    );
-
-    testWidgets(
-      'shows notification permission banner when POST_NOTIFICATIONS not granted',
-      (tester) async {
-        when(mockCheckCapability.call()).thenAnswer(
-          (_) async => const Right(
-            PrayerAlarmCapability(
-              canScheduleExact: true,
-              hasNotificationPermission: false,
-            ),
-          ),
-        );
-
-        final bloc = buildBloc();
-
-        await tester.pumpWidget(buildSubject(bloc));
-        await tester.pump(); // allow checkAlarmCapability event to complete
-        await tester.scrollUntilVisible(
-          find.text(
-            'Notification permission required to receive prayer alerts.',
-          ),
-          200,
-          scrollable: find.byType(Scrollable).first,
-        );
-
-        expect(
-          find.text(
-            'Notification permission required to receive prayer alerts.',
-          ),
-          findsOneWidget,
-        );
-        bloc.close();
-      },
-    );
-
-    testWidgets(
-      'shows exact alarm banner when POST_NOTIFICATIONS granted but exact alarm not granted',
-      (tester) async {
-        final bloc = buildBloc();
-
-        await tester.pumpWidget(buildSubject(bloc));
-        await tester.pump();
-
-        bloc.emit(
-          const PrayerTimesState(
-            alarmCapability: PrayerAlarmCapability(
-              canScheduleExact: false,
-              hasNotificationPermission: true,
-            ),
-          ),
-        );
-        await tester.pump();
-
-        await tester.scrollUntilVisible(
-          find.text(
-            'Exact alarm permission required for reliable prayer reminders.',
-          ),
-          200,
-          scrollable: find.byType(Scrollable).first,
-        );
-
-        expect(
-          find.text(
-            'Exact alarm permission required for reliable prayer reminders.',
-          ),
-          findsOneWidget,
-        );
-        bloc.close();
-      },
-    );
-
-    testWidgets('renders in RTL locale without overflow errors', (
-      tester,
-    ) async {
-      final bloc = buildBloc();
-      final widget = MaterialApp(
-        locale: const Locale('ar'),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        // theme omitted in tests
-        home: BlocProvider.value(
-          value: bloc,
-          child: const Scaffold(body: PrayerSettingsSheet()),
-        ),
-      );
-
-      await tester.pumpWidget(widget);
-      await tester.pump();
-
-      // No overflow errors — the layout adapts to RTL without throwing.
-      expect(tester.takeException(), isNull);
+      expect(find.text('Calculation Method'), findsOneWidget);
       bloc.close();
     });
   });

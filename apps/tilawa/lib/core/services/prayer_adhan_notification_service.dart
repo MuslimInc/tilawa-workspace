@@ -651,7 +651,7 @@ class PrayerAdhanNotificationService
       case PrayerType.sunrise:
       case PrayerType.midnight:
       case PrayerType.lastThird:
-        return const PrayerNotificationSettings(enabled: false);
+        return const PrayerNotificationSettings(mode: PrayerAlertMode.none);
     }
   }
 

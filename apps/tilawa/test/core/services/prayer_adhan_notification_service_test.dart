@@ -211,7 +211,7 @@ void main() {
         // Disable Fajr only.
         final PrayerSettingsEntity fajrDisabled = allEnabled.copyWith(
           fajrNotification: allEnabled.fajrNotification.copyWith(
-            enabled: false,
+            mode: PrayerAlertMode.none,
           ),
         );
 

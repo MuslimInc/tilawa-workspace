@@ -1,10 +1,8 @@
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 
-import '../../../../router/app_router_config.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/qibla_direction_entity.dart';
@@ -40,13 +38,6 @@ class _QiblaScreenState extends State<QiblaScreen> {
             elevation: 0,
             leading: context.canPop() ? const TilawaBackButton() : null,
             title: Text(context.l10n.qiblaDirection),
-            actions: [
-              IconButton(
-                icon: const Icon(FluentIcons.clock_24_regular),
-                tooltip: context.l10n.prayerTimes,
-                onPressed: () => const PrayerTimesRoute().push(context),
-              ),
-            ],
           ),
           body: SafeArea(
             child: CustomScrollView(

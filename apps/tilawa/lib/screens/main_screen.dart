@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -38,7 +39,6 @@ class _MainScreenState extends State<MainScreen> {
     final QiblaBloc qiblaBloc = context.read<QiblaBloc>();
 
     if (previous == 1 && next != 1) {
-      prayerTimesBloc.setCountdownActive(false);
       qiblaBloc.add(const StopQiblaStream());
     }
 
@@ -46,7 +46,6 @@ class _MainScreenState extends State<MainScreen> {
       return;
     }
 
-    prayerTimesBloc.setCountdownActive(true);
     if (!_prayerTimesLoadScheduled) {
       _prayerTimesLoadScheduled = true;
       Future<void>.delayed(_deferredPrayerTimesLoadDelay, () {
@@ -107,9 +106,12 @@ class _MainScreenState extends State<MainScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<MainScreenCubit>(create: (_) => MainScreenCubit()),
+        BlocProvider<PrayerPermissionsCubit>(
+          create: (_) => getIt<PrayerPermissionsCubit>()..checkCapability(),
+        ),
         BlocProvider<PrayerTimesBloc>(
           lazy: true,
-          create: (_) => getIt<PrayerTimesBloc>()..setCountdownActive(false),
+          create: (_) => getIt<PrayerTimesBloc>(),
         ),
         BlocProvider<QiblaBloc>(lazy: true, create: (_) => getIt<QiblaBloc>()),
         BlocProvider<InternetStatusBloc>(

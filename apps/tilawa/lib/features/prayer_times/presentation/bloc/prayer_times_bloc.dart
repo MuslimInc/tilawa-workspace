@@ -4,19 +4,20 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/entities.dart';
-import '../../domain/repositories/prayer_times_repository.dart';
 import '../../domain/usecases/usecases.dart';
-import '../../domain/value_objects/prayer_alarm_capability.dart';
 
 part 'prayer_times_bloc.freezed.dart';
 
 // Events
 @freezed
 class PrayerTimesEvent with _$PrayerTimesEvent {
-  const factory PrayerTimesEvent.loadPrayerTimes() = _LoadPrayerTimes;
+  const factory PrayerTimesEvent.loadPrayerTimes({
+    @Default(false) bool forceReschedule,
+  }) = _LoadPrayerTimes;
   const factory PrayerTimesEvent.loadMonthlyPrayerTimes({
     required int year,
     required int month,
@@ -30,11 +31,6 @@ class PrayerTimesEvent with _$PrayerTimesEvent {
     required double longitude,
     String? locationName,
   }) = _SetManualLocation;
-  const factory PrayerTimesEvent.checkAlarmCapability() = _CheckAlarmCapability;
-  const factory PrayerTimesEvent.requestExactAlarmPermission() =
-      _RequestExactAlarmPermission;
-  const factory PrayerTimesEvent.requestNotificationPermission() =
-      _RequestNotificationPermission;
 }
 
 // States
@@ -52,7 +48,6 @@ abstract class PrayerTimesState with _$PrayerTimesState {
     Duration? timeUntilNextPrayer,
     @Default('') String errorMessage,
     @Default(false) bool isLoadingLocation,
-    PrayerAlarmCapability? alarmCapability,
   }) = _PrayerTimesState;
 }
 
@@ -69,19 +64,12 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._loadPrayerSettingsUseCase,
     this._schedulePrayerNotificationsUseCase,
     this._cancelPrayerNotificationsUseCase,
-    this._checkPrayerAlarmCapabilityUseCase,
-    this._requestExactAlarmPermissionUseCase,
-    this._requestNotificationPermissionUseCase,
   ) : super(const PrayerTimesState()) {
     on<_LoadPrayerTimes>(_onLoadPrayerTimes);
     on<_LoadMonthlyPrayerTimes>(_onLoadMonthlyPrayerTimes);
     on<_UpdateLocation>(_onUpdateLocation);
     on<_UpdateSettings>(_onUpdateSettings);
-    on<_RefreshCountdown>(_onRefreshCountdown);
     on<_SetManualLocation>(_onSetManualLocation);
-    on<_CheckAlarmCapability>(_onCheckAlarmCapability);
-    on<_RequestExactAlarmPermission>(_onRequestExactAlarmPermission);
-    on<_RequestNotificationPermission>(_onRequestNotificationPermission);
   }
 
   final GetPrayerTimesUseCase _getPrayerTimesUseCase;
@@ -93,68 +81,6 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final SchedulePrayerNotificationsUseCase _schedulePrayerNotificationsUseCase;
   // ignore: unused_field
   final CancelPrayerNotificationsUseCase _cancelPrayerNotificationsUseCase;
-  final CheckPrayerAlarmCapabilityUseCase _checkPrayerAlarmCapabilityUseCase;
-  final RequestExactAlarmPermissionUseCase _requestExactAlarmPermissionUseCase;
-  final RequestNotificationPermissionUseCase
-  _requestNotificationPermissionUseCase;
-
-  /// Set to `true` by user-initiated handlers (settings change, location
-  /// change, manual-location set) so that the next [_onLoadPrayerTimes]
-  /// schedule call bypasses the same-day fingerprint dedup guard. Reset to
-  /// `false` once consumed.
-  bool _pendingForceReschedule = false;
-
-  Timer? _countdownTimer;
-  bool _isCountdownActive = false;
-
-  void _startCountdownTimer() {
-    if (_countdownTimer != null) {
-      return;
-    }
-
-    // Ensure the timer fires right on the second boundary to avoid drift
-    final now = DateTime.now();
-    final delayToNextSecond = 1000 - now.millisecond;
-
-    Future.delayed(Duration(milliseconds: delayToNextSecond), () {
-      if (!_isCountdownActive || isClosed) return;
-
-      // Fire immediately on the second mark
-      add(const PrayerTimesEvent.refreshCountdown());
-
-      // Then start periodic
-      _countdownTimer = Timer.periodic(
-        const Duration(seconds: 1),
-        (_) => add(const PrayerTimesEvent.refreshCountdown()),
-      );
-    });
-  }
-
-  void _stopCountdownTimer() {
-    _countdownTimer?.cancel();
-    _countdownTimer = null;
-  }
-
-  /// Controls countdown refresh activity based on Prayer Times tab visibility.
-  void setCountdownActive(bool isActive) {
-    if (_isCountdownActive == isActive || isClosed) {
-      return;
-    }
-
-    _isCountdownActive = isActive;
-    if (isActive) {
-      _startCountdownTimer();
-      add(const PrayerTimesEvent.refreshCountdown());
-    } else {
-      _stopCountdownTimer();
-    }
-  }
-
-  @override
-  Future<void> close() {
-    _stopCountdownTimer();
-    return super.close();
-  }
 
   Future<void> _onLoadPrayerTimes(
     _LoadPrayerTimes event,
@@ -282,10 +208,6 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         ),
       ),
       (prayerTimes) {
-        final PrayerTimeItem? currentOrNext = prayerTimes
-            .getCurrentOrNextPrayer();
-        final Duration? timeUntil = prayerTimes.getTimeUntilNextPrayer();
-
         emit(
           state.copyWith(
             status: PrayerTimesStatus.loaded,
@@ -293,57 +215,19 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
             latitude: latitude,
             longitude: longitude,
             locationName: locationName,
-            currentOrNextPrayer: currentOrNext,
-            timeUntilNextPrayer: timeUntil,
           ),
         );
 
-        // Single-source schedule trigger: every successful load triggers a
-        // (deduped) reschedule. Settings/location/manual-location handlers
-        // set `_pendingForceReschedule = true` before recursing here so the
-        // service's same-day fingerprint guard is bypassed.
-        final bool force = _pendingForceReschedule;
-        _pendingForceReschedule = false;
         unawaited(
           _schedulePrayerNotificationsUseCase.call(
             settings: effectiveSettings,
             latitude: latitude!,
             longitude: longitude!,
-            forceReschedule: force,
+            forceReschedule: event.forceReschedule,
           ),
         );
       },
     );
-  }
-
-  Future<void> _onCheckAlarmCapability(
-    _CheckAlarmCapability event,
-    Emitter<PrayerTimesState> emit,
-  ) async {
-    final Either<Failure, PrayerAlarmCapability> result =
-        await _checkPrayerAlarmCapabilityUseCase.call();
-    result.fold(
-      (_) {},
-      (capability) => emit(state.copyWith(alarmCapability: capability)),
-    );
-  }
-
-  Future<void> _onRequestExactAlarmPermission(
-    _RequestExactAlarmPermission event,
-    Emitter<PrayerTimesState> emit,
-  ) async {
-    await _requestExactAlarmPermissionUseCase.call();
-    // Re-check capability so the UI updates after the user returns from the
-    // system settings screen.
-    add(const PrayerTimesEvent.checkAlarmCapability());
-  }
-
-  Future<void> _onRequestNotificationPermission(
-    _RequestNotificationPermission event,
-    Emitter<PrayerTimesState> emit,
-  ) async {
-    await _requestNotificationPermissionUseCase.call();
-    add(const PrayerTimesEvent.checkAlarmCapability());
   }
 
   Future<void> _onLoadMonthlyPrayerTimes(
@@ -399,8 +283,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
         // Reload prayer times with new location; force reschedule on next
         // schedule attempt because location materially changes timings.
-        _pendingForceReschedule = true;
-        add(const PrayerTimesEvent.loadPrayerTimes());
+        add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
       },
     );
   }
@@ -409,45 +292,29 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     _UpdateSettings event,
     Emitter<PrayerTimesState> emit,
   ) async {
-    await _savePrayerSettingsUseCase.call(settings: event.settings);
+    final oldSettings = state.settings;
+    final newSettings = event.settings;
 
-    emit(state.copyWith(settings: event.settings));
+    await _savePrayerSettingsUseCase.call(settings: newSettings);
+    emit(state.copyWith(settings: newSettings));
 
-    // Reload prayer times with new settings; force reschedule on the next
-    // schedule pass because user-edited settings must propagate immediately
-    // even on the same day (bypasses the dedup fingerprint guard).
-    if (state.latitude != null && state.longitude != null) {
-      _pendingForceReschedule = true;
-      add(const PrayerTimesEvent.loadPrayerTimes());
-    }
-  }
-
-  void _onRefreshCountdown(
-    _RefreshCountdown event,
-    Emitter<PrayerTimesState> emit,
-  ) {
-    if (!_isCountdownActive) {
-      return;
-    }
-
-    if (state.todayPrayerTimes == null) {
-      return;
-    }
-
-    final PrayerTimeItem? currentOrNext = state.todayPrayerTimes!
-        .getCurrentOrNextPrayer();
-    final Duration? timeUntil = state.todayPrayerTimes!
-        .getTimeUntilNextPrayer();
-
-    // Only emit if values changed
-    if (currentOrNext?.type != state.currentOrNextPrayer?.type ||
-        timeUntil?.inSeconds != state.timeUntilNextPrayer?.inSeconds) {
-      emit(
-        state.copyWith(
-          currentOrNextPrayer: currentOrNext,
-          timeUntilNextPrayer: timeUntil,
-        ),
-      );
+    // Only reload prayer times if calculation-affecting settings changed.
+    // Otherwise, just reschedule notifications silently to avoid UI flicker.
+    if (newSettings.requiresRecalculation(oldSettings)) {
+      if (state.latitude != null && state.longitude != null) {
+        add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
+      }
+    } else {
+      if (state.latitude != null && state.longitude != null) {
+        unawaited(
+          _schedulePrayerNotificationsUseCase.call(
+            settings: newSettings,
+            latitude: state.latitude!,
+            longitude: state.longitude!,
+            forceReschedule: true,
+          ),
+        );
+      }
     }
   }
 
@@ -474,7 +341,6 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     emit(state.copyWith(settings: updatedSettings));
 
     // Reload prayer times; manual location overrides force a reschedule.
-    _pendingForceReschedule = true;
-    add(const PrayerTimesEvent.loadPrayerTimes());
+    add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
   }
 }

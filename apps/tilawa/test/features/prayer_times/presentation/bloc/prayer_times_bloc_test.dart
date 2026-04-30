@@ -6,7 +6,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
-import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_capability.dart';
+
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -21,9 +21,6 @@ import 'prayer_times_bloc_test.mocks.dart';
   LoadPrayerSettingsUseCase,
   SchedulePrayerNotificationsUseCase,
   CancelPrayerNotificationsUseCase,
-  CheckPrayerAlarmCapabilityUseCase,
-  RequestExactAlarmPermissionUseCase,
-  RequestNotificationPermissionUseCase,
 ])
 void main() {
   late PrayerTimesBloc bloc;
@@ -37,12 +34,6 @@ void main() {
   mockSchedulePrayerNotificationsUseCase;
   late MockCancelPrayerNotificationsUseCase
   mockCancelPrayerNotificationsUseCase;
-  late MockCheckPrayerAlarmCapabilityUseCase
-  mockCheckPrayerAlarmCapabilityUseCase;
-  late MockRequestExactAlarmPermissionUseCase
-  mockRequestExactAlarmPermissionUseCase;
-  late MockRequestNotificationPermissionUseCase
-  mockRequestNotificationPermissionUseCase;
 
   setUp(() {
     mockGetPrayerTimesUseCase = MockGetPrayerTimesUseCase();
@@ -55,12 +46,6 @@ void main() {
         MockSchedulePrayerNotificationsUseCase();
     mockCancelPrayerNotificationsUseCase =
         MockCancelPrayerNotificationsUseCase();
-    mockCheckPrayerAlarmCapabilityUseCase =
-        MockCheckPrayerAlarmCapabilityUseCase();
-    mockRequestExactAlarmPermissionUseCase =
-        MockRequestExactAlarmPermissionUseCase();
-    mockRequestNotificationPermissionUseCase =
-        MockRequestNotificationPermissionUseCase();
 
     bloc = PrayerTimesBloc(
       mockGetPrayerTimesUseCase,
@@ -71,9 +56,6 @@ void main() {
       mockLoadPrayerSettingsUseCase,
       mockSchedulePrayerNotificationsUseCase,
       mockCancelPrayerNotificationsUseCase,
-      mockCheckPrayerAlarmCapabilityUseCase,
-      mockRequestExactAlarmPermissionUseCase,
-      mockRequestNotificationPermissionUseCase,
     );
 
     // Default stub
@@ -115,14 +97,6 @@ void main() {
         lastThird: DateTime(2023, 1, 2, 2, 0),
         latitude: 0,
         longitude: 0,
-      ),
-    ),
-  );
-  provideDummy<Either<Failure, PrayerAlarmCapability>>(
-    Right(
-      PrayerAlarmCapability(
-        canScheduleExact: false,
-        hasNotificationPermission: false,
       ),
     ),
   );
@@ -419,79 +393,6 @@ void main() {
                 capturedSettings, // Must match the saved (updated) settings
           ),
         ).called(1);
-      },
-    );
-
-    // --- Notification event tests ---
-
-    const tCapability = PrayerAlarmCapability(
-      canScheduleExact: true,
-      hasNotificationPermission: true,
-    );
-
-    blocTest<PrayerTimesBloc, PrayerTimesState>(
-      'checkAlarmCapability emits state with alarmCapability on success',
-      build: () {
-        when(
-          mockCheckPrayerAlarmCapabilityUseCase.call(),
-        ).thenAnswer((_) async => const Right(tCapability));
-        return bloc;
-      },
-      act: (b) => b.add(const PrayerTimesEvent.checkAlarmCapability()),
-      expect: () => [
-        isA<PrayerTimesState>().having(
-          (s) => s.alarmCapability,
-          'alarmCapability',
-          tCapability,
-        ),
-      ],
-    );
-
-    blocTest<PrayerTimesBloc, PrayerTimesState>(
-      'checkAlarmCapability emits no state when use case returns Left',
-      build: () {
-        when(
-          mockCheckPrayerAlarmCapabilityUseCase.call(),
-        ).thenAnswer((_) async => Left(Failure.unexpectedError('error')));
-        return bloc;
-      },
-      act: (b) => b.add(const PrayerTimesEvent.checkAlarmCapability()),
-      expect: () => [],
-    );
-
-    blocTest<PrayerTimesBloc, PrayerTimesState>(
-      'requestExactAlarmPermission calls use case then re-checks capability',
-      build: () {
-        when(
-          mockRequestExactAlarmPermissionUseCase.call(),
-        ).thenAnswer((_) async => const Right(null));
-        when(
-          mockCheckPrayerAlarmCapabilityUseCase.call(),
-        ).thenAnswer((_) async => const Right(tCapability));
-        return bloc;
-      },
-      act: (b) => b.add(const PrayerTimesEvent.requestExactAlarmPermission()),
-      verify: (_) {
-        verify(mockRequestExactAlarmPermissionUseCase.call()).called(1);
-        verify(mockCheckPrayerAlarmCapabilityUseCase.call()).called(1);
-      },
-    );
-
-    blocTest<PrayerTimesBloc, PrayerTimesState>(
-      'requestNotificationPermission calls use case then re-checks capability',
-      build: () {
-        when(
-          mockRequestNotificationPermissionUseCase.call(),
-        ).thenAnswer((_) async => const Right(true));
-        when(
-          mockCheckPrayerAlarmCapabilityUseCase.call(),
-        ).thenAnswer((_) async => const Right(tCapability));
-        return bloc;
-      },
-      act: (b) => b.add(const PrayerTimesEvent.requestNotificationPermission()),
-      verify: (_) {
-        verify(mockRequestNotificationPermissionUseCase.call()).called(1);
-        verify(mockCheckPrayerAlarmCapabilityUseCase.call()).called(1);
       },
     );
 
