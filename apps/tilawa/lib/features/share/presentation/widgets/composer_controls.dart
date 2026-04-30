@@ -85,16 +85,6 @@ class ComposerControls extends StatelessWidget {
               ],
             ),
           ),
-          if (isBusy && (progressLabel?.isNotEmpty ?? false)) ...[
-            SizedBox(height: tokens.spaceSmall),
-            Text(
-              progressLabel!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
           if (errorMessage != null) ...[
             SizedBox(height: tokens.spaceSmall),
             Text(

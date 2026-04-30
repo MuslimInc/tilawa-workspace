@@ -16,15 +16,17 @@ Widget previewTilawaCard() {
     body: Padding(
       padding: const EdgeInsets.all(16),
       child: Center(
-        child: TilawaCard(
-          child: const Text('Tilawa card content'),
-        ),
+        child: TilawaCard(child: const Text('Tilawa card content')),
       ),
     ),
   );
 }
 
-@Preview(name: 'TilawaCard (tappable + gradient)', group: 'Atoms', theme: atomsPreviewTheme)
+@Preview(
+  name: 'TilawaCard (tappable + gradient)',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
 Widget previewTilawaCardGradient() {
   return Builder(
     builder: (context) {
@@ -57,11 +59,7 @@ Widget previewTilawaDivider() {
       padding: const EdgeInsets.all(24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Text('Above'),
-          TilawaDivider(),
-          Text('Below'),
-        ],
+        children: const [Text('Above'), TilawaDivider(), Text('Below')],
       ),
     ),
   );
@@ -86,13 +84,15 @@ Widget previewTilawaEmptyState() {
 @Preview(name: 'TilawaIconBox', group: 'Atoms', theme: atomsPreviewTheme)
 Widget previewTilawaIconBox() {
   return const Scaffold(
-    body: Center(
-      child: TilawaIconBox(icon: Icons.bookmark_rounded),
-    ),
+    body: Center(child: TilawaIconBox(icon: Icons.bookmark_rounded)),
   );
 }
 
-@Preview(name: 'TilawaLoadingIndicator', group: 'Atoms', theme: atomsPreviewTheme)
+@Preview(
+  name: 'TilawaLoadingIndicator',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
 Widget previewTilawaLoadingIndicator() {
   return const Scaffold(
     body: TilawaLoadingIndicator(semanticsLabel: 'Loading'),

@@ -237,6 +237,50 @@ class TilawaLoadingIndicatorTokens {
   }
 }
 
+/// Component tokens for [TilawaIconToggle].
+@immutable
+class TilawaIconToggleTokens {
+  const TilawaIconToggleTokens({
+    required this.iconSize,
+    required this.padding,
+    required this.borderRadius,
+  });
+
+  final double iconSize;
+  final double padding;
+  final double borderRadius;
+
+  factory TilawaIconToggleTokens.defaults() => const TilawaIconToggleTokens(
+    iconSize: 20.0,
+    padding: 8.0,
+    borderRadius: 12.0,
+  );
+
+  TilawaIconToggleTokens copyWith({
+    double? iconSize,
+    double? padding,
+    double? borderRadius,
+  }) {
+    return TilawaIconToggleTokens(
+      iconSize: iconSize ?? this.iconSize,
+      padding: padding ?? this.padding,
+      borderRadius: borderRadius ?? this.borderRadius,
+    );
+  }
+
+  static TilawaIconToggleTokens lerp(
+    TilawaIconToggleTokens a,
+    TilawaIconToggleTokens b,
+    double t,
+  ) {
+    return TilawaIconToggleTokens(
+      iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
+      padding: lerpTokenDouble(a.padding, b.padding, t),
+      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
+    );
+  }
+}
+
 /// Component tokens for [TilawaDivider].
 @immutable
 class TilawaDividerTokens {

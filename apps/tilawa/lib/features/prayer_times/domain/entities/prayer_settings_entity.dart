@@ -165,7 +165,6 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
         savedLongitude != other.savedLongitude;
   }
 
-
   /// Check if all prayer notifications are enabled
   bool get allNotificationsEnabled =>
       fajrNotification.enabled &&

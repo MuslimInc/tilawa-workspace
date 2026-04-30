@@ -29,6 +29,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.adaptiveShell,
     required this.settingsGroup,
     required this.immersiveComposer,
+    required this.iconToggle,
+    required this.permissionBanner,
+    required this.prayerAlertRow,
+    required this.bottomSheetScaffold,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -53,6 +57,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaAdaptiveShellTokens adaptiveShell;
   final TilawaSettingsGroupTokens settingsGroup;
   final TilawaImmersiveComposerTokens immersiveComposer;
+  final TilawaIconToggleTokens iconToggle;
+  final TilawaPermissionBannerTokens permissionBanner;
+  final TilawaPrayerAlertRowTokens prayerAlertRow;
+  final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
 
   factory TilawaComponentTokens.light() => TilawaComponentTokens(
     sectionTitle: TilawaSectionTitleTokens.defaults(),
@@ -77,6 +85,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     adaptiveShell: TilawaAdaptiveShellTokens.defaults(),
     settingsGroup: TilawaSettingsGroupTokens.defaults(),
     immersiveComposer: TilawaImmersiveComposerTokens.defaults(),
+    iconToggle: TilawaIconToggleTokens.defaults(),
+    permissionBanner: TilawaPermissionBannerTokens.defaults(),
+    prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(),
+    bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
   );
 
   factory TilawaComponentTokens.dark() => TilawaComponentTokens.light();
@@ -105,6 +117,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaAdaptiveShellTokens? adaptiveShell,
     TilawaSettingsGroupTokens? settingsGroup,
     TilawaImmersiveComposerTokens? immersiveComposer,
+    TilawaIconToggleTokens? iconToggle,
+    TilawaPermissionBannerTokens? permissionBanner,
+    TilawaPrayerAlertRowTokens? prayerAlertRow,
+    TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
   }) {
     return TilawaComponentTokens(
       sectionTitle: sectionTitle ?? this.sectionTitle,
@@ -129,6 +145,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       adaptiveShell: adaptiveShell ?? this.adaptiveShell,
       settingsGroup: settingsGroup ?? this.settingsGroup,
       immersiveComposer: immersiveComposer ?? this.immersiveComposer,
+      iconToggle: iconToggle ?? this.iconToggle,
+      permissionBanner: permissionBanner ?? this.permissionBanner,
+      prayerAlertRow: prayerAlertRow ?? this.prayerAlertRow,
+      bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
     );
   }
 
@@ -216,6 +236,22 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       immersiveComposer: TilawaImmersiveComposerTokens.lerp(
         immersiveComposer,
         other.immersiveComposer,
+        t,
+      ),
+      iconToggle: TilawaIconToggleTokens.lerp(iconToggle, other.iconToggle, t),
+      permissionBanner: TilawaPermissionBannerTokens.lerp(
+        permissionBanner,
+        other.permissionBanner,
+        t,
+      ),
+      prayerAlertRow: TilawaPrayerAlertRowTokens.lerp(
+        prayerAlertRow,
+        other.prayerAlertRow,
+        t,
+      ),
+      bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.lerp(
+        bottomSheetScaffold,
+        other.bottomSheetScaffold,
         t,
       ),
     );

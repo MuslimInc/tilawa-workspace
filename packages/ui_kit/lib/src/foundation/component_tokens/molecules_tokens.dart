@@ -784,3 +784,96 @@ class TilawaCountProgressRingTokens {
     );
   }
 }
+
+/// Component tokens for [TilawaPermissionBanner].
+@immutable
+class TilawaPermissionBannerTokens {
+  const TilawaPermissionBannerTokens({
+    required this.padding,
+    required this.borderRadius,
+    required this.iconSize,
+    required this.iconSpacing,
+    required this.actionSpacing,
+  });
+
+  final EdgeInsetsGeometry padding;
+  final double borderRadius;
+  final double iconSize;
+  final double iconSpacing;
+  final double actionSpacing;
+
+  factory TilawaPermissionBannerTokens.defaults() =>
+      const TilawaPermissionBannerTokens(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        borderRadius: 12,
+        iconSize: 16,
+        iconSpacing: 8,
+        actionSpacing: 8,
+      );
+
+  TilawaPermissionBannerTokens copyWith({
+    EdgeInsetsGeometry? padding,
+    double? borderRadius,
+    double? iconSize,
+    double? iconSpacing,
+    double? actionSpacing,
+  }) {
+    return TilawaPermissionBannerTokens(
+      padding: padding ?? this.padding,
+      borderRadius: borderRadius ?? this.borderRadius,
+      iconSize: iconSize ?? this.iconSize,
+      iconSpacing: iconSpacing ?? this.iconSpacing,
+      actionSpacing: actionSpacing ?? this.actionSpacing,
+    );
+  }
+
+  static TilawaPermissionBannerTokens lerp(
+    TilawaPermissionBannerTokens a,
+    TilawaPermissionBannerTokens b,
+    double t,
+  ) {
+    return TilawaPermissionBannerTokens(
+      padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t)!,
+      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
+      iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
+      iconSpacing: lerpTokenDouble(a.iconSpacing, b.iconSpacing, t),
+      actionSpacing: lerpTokenDouble(a.actionSpacing, b.actionSpacing, t),
+    );
+  }
+}
+
+/// Component tokens for [TilawaPrayerAlertRow].
+@immutable
+class TilawaPrayerAlertRowTokens {
+  const TilawaPrayerAlertRowTokens({
+    required this.verticalPadding,
+    required this.toggleSpacing,
+  });
+
+  final double verticalPadding;
+  final double toggleSpacing;
+
+  factory TilawaPrayerAlertRowTokens.defaults() =>
+      const TilawaPrayerAlertRowTokens(verticalPadding: 4, toggleSpacing: 8);
+
+  TilawaPrayerAlertRowTokens copyWith({
+    double? verticalPadding,
+    double? toggleSpacing,
+  }) {
+    return TilawaPrayerAlertRowTokens(
+      verticalPadding: verticalPadding ?? this.verticalPadding,
+      toggleSpacing: toggleSpacing ?? this.toggleSpacing,
+    );
+  }
+
+  static TilawaPrayerAlertRowTokens lerp(
+    TilawaPrayerAlertRowTokens a,
+    TilawaPrayerAlertRowTokens b,
+    double t,
+  ) {
+    return TilawaPrayerAlertRowTokens(
+      verticalPadding: lerpTokenDouble(a.verticalPadding, b.verticalPadding, t),
+      toggleSpacing: lerpTokenDouble(a.toggleSpacing, b.toggleSpacing, t),
+    );
+  }
+}

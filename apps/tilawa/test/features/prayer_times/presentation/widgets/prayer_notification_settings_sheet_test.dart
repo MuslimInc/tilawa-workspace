@@ -21,14 +21,14 @@ void main() {
       mockBloc = MockPrayerTimesBloc();
       mockPermissionsCubit = MockPrayerPermissionsCubit();
 
-      when(mockBloc.state).thenReturn(
-        const PrayerTimesState(
-          settings: PrayerSettingsEntity(),
-        ),
-      );
+      when(
+        mockBloc.state,
+      ).thenReturn(const PrayerTimesState(settings: PrayerSettingsEntity()));
       when(mockBloc.stream).thenAnswer((_) => const Stream.empty());
 
-      when(mockPermissionsCubit.state).thenReturn(const PrayerPermissionsState());
+      when(
+        mockPermissionsCubit.state,
+      ).thenReturn(const PrayerPermissionsState());
       when(mockPermissionsCubit.stream).thenAnswer((_) => const Stream.empty());
     });
 
@@ -39,11 +39,11 @@ void main() {
         home: MultiBlocProvider(
           providers: [
             BlocProvider<PrayerTimesBloc>.value(value: mockBloc),
-            BlocProvider<PrayerPermissionsCubit>.value(value: mockPermissionsCubit),
+            BlocProvider<PrayerPermissionsCubit>.value(
+              value: mockPermissionsCubit,
+            ),
           ],
-          child: const Scaffold(
-            body: PrayerNotificationSettingsSheet(),
-          ),
+          child: const Scaffold(body: PrayerNotificationSettingsSheet()),
         ),
       );
     }

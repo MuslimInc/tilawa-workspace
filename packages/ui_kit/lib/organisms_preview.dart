@@ -10,7 +10,11 @@ PreviewThemeData organismsPreviewTheme() {
   );
 }
 
-@Preview(name: 'TilawaMediaPlayerBar', group: 'Organisms', theme: organismsPreviewTheme)
+@Preview(
+  name: 'TilawaMediaPlayerBar',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
 Widget previewTilawaMediaPlayerBar() {
   return Scaffold(
     body: Padding(
@@ -33,7 +37,11 @@ Widget previewTilawaMediaPlayerBar() {
   );
 }
 
-@Preview(name: 'ImmersiveComposerScaffold', group: 'Organisms', theme: organismsPreviewTheme)
+@Preview(
+  name: 'ImmersiveComposerScaffold',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
 Widget previewImmersiveComposerScaffold() {
   return ImmersiveComposerScaffold(
     title: 'Compose',
@@ -68,7 +76,11 @@ Widget previewImmersiveComposerScaffold() {
   );
 }
 
-@Preview(name: 'TilawaAdaptiveShell', group: 'Organisms', theme: organismsPreviewTheme)
+@Preview(
+  name: 'TilawaAdaptiveShell',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
 Widget previewTilawaAdaptiveShell() {
   return TilawaAdaptiveShell(
     selectedIndex: 0,
@@ -84,7 +96,11 @@ Widget previewTilawaAdaptiveShell() {
   );
 }
 
-@Preview(name: 'TilawaBackdropImageLayer', group: 'Organisms', theme: organismsPreviewTheme)
+@Preview(
+  name: 'TilawaBackdropImageLayer',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
 Widget previewTilawaBackdropImageLayer() {
   return const Scaffold(
     body: TilawaBackdropImageLayer(
@@ -95,7 +111,11 @@ Widget previewTilawaBackdropImageLayer() {
   );
 }
 
-@Preview(name: 'TilawaSettingsGroup', group: 'Organisms', theme: organismsPreviewTheme)
+@Preview(
+  name: 'TilawaSettingsGroup',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
 Widget previewTilawaSettingsGroup() {
   return Scaffold(
     body: Padding(

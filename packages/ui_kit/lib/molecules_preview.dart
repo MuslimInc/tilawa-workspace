@@ -10,7 +10,11 @@ PreviewThemeData moleculesPreviewTheme() {
   );
 }
 
-@Preview(name: 'ArabicAlphabetScrollbar', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'ArabicAlphabetScrollbar',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewArabicAlphabetScrollbar() {
   return Scaffold(
     body: Center(
@@ -29,7 +33,11 @@ Widget previewArabicAlphabetScrollbar() {
   );
 }
 
-@Preview(name: 'LanguageSwitcher', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'LanguageSwitcher',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewLanguageSwitcher() {
   return Scaffold(
     body: Center(
@@ -72,7 +80,11 @@ Widget previewSeekBar() {
   );
 }
 
-@Preview(name: 'SelectionPill', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'SelectionPill',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewSelectionPill() {
   return Scaffold(
     body: Center(
@@ -105,7 +117,11 @@ Widget previewTilawaChip() {
   );
 }
 
-@Preview(name: 'TilawaCountProgressRing', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaCountProgressRing',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaCountProgressRing() {
   return const Scaffold(
     body: Center(
@@ -118,7 +134,11 @@ Widget previewTilawaCountProgressRing() {
   );
 }
 
-@Preview(name: 'TilawaCountProgressRing (done)', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaCountProgressRing (done)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaCountProgressRingDone() {
   return const Scaffold(
     body: Center(
@@ -131,7 +151,11 @@ Widget previewTilawaCountProgressRingDone() {
   );
 }
 
-@Preview(name: 'TilawaFeedbackStrip', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaFeedbackStrip',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaFeedbackStrip() {
   return Scaffold(
     body: Padding(
@@ -153,7 +177,11 @@ Widget previewTilawaFeedbackStrip() {
   );
 }
 
-@Preview(name: 'TilawaGlassPanel', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaGlassPanel',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaGlassPanel() {
   return Scaffold(
     backgroundColor: Colors.indigo,
@@ -173,7 +201,11 @@ Widget previewTilawaGlassPanel() {
   );
 }
 
-@Preview(name: 'TilawaIconActionButton', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaIconActionButton',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaIconActionButton() {
   return Scaffold(
     body: Center(
@@ -193,20 +225,25 @@ Widget previewTilawaIconActionButton() {
   );
 }
 
-@Preview(name: 'TilawaSearchField', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaSearchField',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaSearchField() {
   return Scaffold(
     body: Padding(
       padding: const EdgeInsets.all(16),
-      child: TilawaSearchField(
-        hintText: 'Search surahs',
-        onChanged: (_) {},
-      ),
+      child: TilawaSearchField(hintText: 'Search surahs', onChanged: (_) {}),
     ),
   );
 }
 
-@Preview(name: 'TilawaSettingsTile', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaSettingsTile',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaSettingsTile() {
   return Scaffold(
     body: Center(
@@ -223,7 +260,11 @@ Widget previewTilawaSettingsTile() {
   );
 }
 
-@Preview(name: 'TilawaSettingsSwitchTile', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaSettingsSwitchTile',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaSettingsSwitchTile() {
   return Scaffold(
     body: Center(
@@ -240,7 +281,11 @@ Widget previewTilawaSettingsSwitchTile() {
   );
 }
 
-@Preview(name: 'TilawaStatusChip', group: 'Molecules', theme: moleculesPreviewTheme)
+@Preview(
+  name: 'TilawaStatusChip',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
 Widget previewTilawaStatusChip() {
   return const Scaffold(
     body: Center(

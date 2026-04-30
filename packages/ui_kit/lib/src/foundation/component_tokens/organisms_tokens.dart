@@ -996,3 +996,58 @@ class TilawaImmersiveComposerTokens {
     );
   }
 }
+
+/// Component tokens for [TilawaBottomSheetScaffold].
+@immutable
+class TilawaBottomSheetScaffoldTokens {
+  const TilawaBottomSheetScaffoldTokens({
+    required this.topRadius,
+    required this.headerPadding,
+    required this.bodyPadding,
+    required this.closeButtonSize,
+  });
+
+  final double topRadius;
+  final EdgeInsetsGeometry headerPadding;
+  final EdgeInsetsGeometry bodyPadding;
+  final double closeButtonSize;
+
+  factory TilawaBottomSheetScaffoldTokens.defaults() =>
+      const TilawaBottomSheetScaffoldTokens(
+        topRadius: 28,
+        headerPadding: EdgeInsets.fromLTRB(20, 8, 12, 12),
+        bodyPadding: EdgeInsets.all(20),
+        closeButtonSize: 40,
+      );
+
+  TilawaBottomSheetScaffoldTokens copyWith({
+    double? topRadius,
+    EdgeInsetsGeometry? headerPadding,
+    EdgeInsetsGeometry? bodyPadding,
+    double? closeButtonSize,
+  }) {
+    return TilawaBottomSheetScaffoldTokens(
+      topRadius: topRadius ?? this.topRadius,
+      headerPadding: headerPadding ?? this.headerPadding,
+      bodyPadding: bodyPadding ?? this.bodyPadding,
+      closeButtonSize: closeButtonSize ?? this.closeButtonSize,
+    );
+  }
+
+  static TilawaBottomSheetScaffoldTokens lerp(
+    TilawaBottomSheetScaffoldTokens a,
+    TilawaBottomSheetScaffoldTokens b,
+    double t,
+  ) {
+    return TilawaBottomSheetScaffoldTokens(
+      topRadius: lerpTokenDouble(a.topRadius, b.topRadius, t),
+      headerPadding: EdgeInsetsGeometry.lerp(
+        a.headerPadding,
+        b.headerPadding,
+        t,
+      )!,
+      bodyPadding: EdgeInsetsGeometry.lerp(a.bodyPadding, b.bodyPadding, t)!,
+      closeButtonSize: lerpTokenDouble(a.closeButtonSize, b.closeButtonSize, t),
+    );
+  }
+}
