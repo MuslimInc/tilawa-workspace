@@ -447,7 +447,7 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.compactBottomNavBarBaseHeight, 88.0);
+      expect(tokens.compactBottomNavBarBaseHeight, 70.0);
       expect(tokens.bottomNavHorizontalMargin, 16.0);
       expect(tokens.navButtonMinHeight, 64.0);
     });
@@ -465,7 +465,6 @@ void main() {
         bottomNavHorizontalMargin: 16.0,
         bottomNavVerticalMargin: 4.0,
         bottomNavInternalPadding: 8.0,
-        bottomNavRadius: 32.0,
         bottomNavInnerRadius: 24.0,
         bottomNavBorderWidth: 1.0,
         bottomNavItemGap: 4.0,
@@ -490,7 +489,6 @@ void main() {
         bottomNavHorizontalMargin: 20.0,
         bottomNavVerticalMargin: 8.0,
         bottomNavInternalPadding: 12.0,
-        bottomNavRadius: 36.0,
         bottomNavInnerRadius: 28.0,
         bottomNavBorderWidth: 2.0,
         bottomNavItemGap: 6.0,
@@ -528,7 +526,7 @@ void main() {
       expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.compactHeightBreakpoint, 760.0);
       expect(tokens.compactPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, 44.0);
+      expect(tokens.headerButtonSize, 24.0);
     });
 
     test('copyWith updates numeric values', () {

@@ -18,6 +18,7 @@ import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
+import '../reciter_semantics_ids.dart';
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -340,8 +341,11 @@ class _RecitersSliverScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
+    final topPadding = MediaQuery.paddingOf(context).top;
     final double listTopOffset =
-        _recitersSearchHeaderExtent(context) + tokens.spaceSmall;
+        _recitersSearchHeaderExtent(context) +
+        tokens.spaceExtraLarge +
+        topPadding;
     final bool showScrollbar =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
@@ -512,37 +516,30 @@ class _RecitersSearchHeaderSliver extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final double extent = _recitersSearchHeaderExtent(context);
-    final double topPadding = MediaQuery.paddingOf(context).top;
 
-    return SliverPersistentHeader(
+    return SliverAppBar(
       pinned: true,
-      delegate: _PinnedSliverHeaderDelegate(
-        extent: extent,
-        child: _HeaderSurface(
-          child: _ConstrainedHeaderContent(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium)
-                  .copyWith(
-                    top: topPadding + tokens.spaceMedium,
-                    bottom: tokens.spaceMedium,
-                  ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _SearchField(
-                      controller: searchController,
-                      focusNode: focusNode,
-                      onChanged: onSearchChanged,
-                      onClear: onClearSearch,
-                    ),
-                  ),
-                  SizedBox(width: tokens.spaceSmall),
-                  _FavoritesToggle(state: state, onTap: onToggleFavorites),
-                  SizedBox(width: tokens.spaceSmall),
-                  const _DownloadsButton(),
-                ],
+      expandedHeight: extent,
+      collapsedHeight: extent,
+      backgroundColor: theme.primaryColor,
+      flexibleSpace: _ConstrainedHeaderContent(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
+          child: Row(
+            children: [
+              Expanded(
+                child: _SearchField(
+                  controller: searchController,
+                  focusNode: focusNode,
+                  onChanged: onSearchChanged,
+                  onClear: onClearSearch,
+                ),
               ),
-            ),
+              SizedBox(width: tokens.spaceSmall),
+              _FavoritesToggle(state: state, onTap: onToggleFavorites),
+              SizedBox(width: tokens.spaceSmall),
+              const _DownloadsButton(),
+            ],
           ),
         ),
       ),
@@ -568,59 +565,6 @@ class _ConstrainedHeaderContent extends StatelessWidget {
   }
 }
 
-class _HeaderSurface extends StatelessWidget {
-  const _HeaderSurface({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final Color dividerColor = theme.colorScheme.outlineVariant.withValues(
-      alpha: tokens.opacitySubtle + tokens.opacitySubtle,
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(bottom: BorderSide(color: dividerColor)),
-      ),
-      child: child,
-    );
-  }
-}
-
-class _PinnedSliverHeaderDelegate extends SliverPersistentHeaderDelegate {
-  const _PinnedSliverHeaderDelegate({
-    required this.extent,
-    required this.child,
-  });
-
-  final double extent;
-  final Widget child;
-
-  @override
-  double get minExtent => extent;
-
-  @override
-  double get maxExtent => extent;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return SizedBox.expand(child: child);
-  }
-
-  @override
-  bool shouldRebuild(covariant _PinnedSliverHeaderDelegate oldDelegate) {
-    return extent != oldDelegate.extent || child != oldDelegate.child;
-  }
-}
-
 class _SearchField extends StatelessWidget {
   const _SearchField({
     required this.controller,
@@ -636,18 +580,23 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaSearchField(
-      controller: controller,
-      focusNode: focusNode,
-      hintText: context.l10n.searchReciters,
-      prefixIcon: FluentIcons.search_24_regular,
-      clearIcon: FluentIcons.dismiss_24_regular,
-      onChanged: onChanged,
-      onClear: onClear,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(Theme.of(context).tokens.radiusLarge),
-      showShadow: true,
-      onTapOutside: (_) => focusNode.unfocus(),
+    return Semantics(
+      identifier: ReciterSemanticsIds.recitersSearchField,
+      child: TilawaSearchField(
+        controller: controller,
+        focusNode: focusNode,
+        hintText: context.l10n.searchReciters,
+        prefixIcon: FluentIcons.search_24_regular,
+        clearIcon: FluentIcons.dismiss_24_regular,
+        onChanged: onChanged,
+        onClear: onClear,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(
+          Theme.of(context).tokens.radiusLarge,
+        ),
+        showShadow: true,
+        onTapOutside: (_) => focusNode.unfocus(),
+      ),
     );
   }
 }
@@ -665,64 +614,69 @@ class _FavoritesToggle extends StatelessWidget {
     final bool isActive =
         state is RecitersLoaded && (state as RecitersLoaded).showFavoritesOnly;
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        TilawaIconActionButton(
-          icon: isActive
-              ? Icons.favorite_rounded
-              : Icons.favorite_border_rounded,
-          isActive: isActive,
-          onTap: onTap,
-        ),
-        PositionedDirectional(
-          top: -tokens.spaceExtraSmall,
-          end: -tokens.spaceExtraSmall,
-          child: BlocBuilder<FavoritesCubit, FavoritesState>(
-            builder: (context, favoritesState) {
-              final int count = favoritesState is FavoritesLoaded
-                  ? favoritesState.favoriteIds.length
-                  : 0;
-              if (count == 0) {
-                return const SizedBox.shrink();
-              }
+    return Semantics(
+      identifier: ReciterSemanticsIds.recitersFavoritesToggle,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          TilawaIconActionButton(
+            icon: isActive
+                ? Icons.favorite_rounded
+                : Icons.favorite_border_rounded,
+            isActive: isActive,
+            onTap: onTap,
+          ),
+          PositionedDirectional(
+            top: -tokens.spaceExtraSmall,
+            end: -tokens.spaceExtraSmall,
+            child: BlocBuilder<FavoritesCubit, FavoritesState>(
+              builder: (context, favoritesState) {
+                final int count = favoritesState is FavoritesLoaded
+                    ? favoritesState.favoriteIds.length
+                    : 0;
+                if (count == 0) {
+                  return const SizedBox.shrink();
+                }
 
-              return Container(
-                constraints: BoxConstraints(
-                  minWidth: tokens.iconSizeMedium - tokens.spaceTiny,
-                  minHeight: tokens.iconSizeMedium - tokens.spaceTiny,
-                ),
-                padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceExtraSmall + tokens.spaceTiny,
-                ),
-                decoration: BoxDecoration(
-                  color: isActive
-                      ? theme.colorScheme.surface
-                      : theme.primaryColor,
-                  borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-                  border: Border.all(
-                    color: isActive
-                        ? theme.primaryColor
-                        : theme.colorScheme.surface,
-                    width: tokens.borderWidthThin + tokens.borderWidthThin,
+                return Container(
+                  constraints: BoxConstraints(
+                    minWidth: tokens.iconSizeMedium - tokens.spaceTiny,
+                    minHeight: tokens.iconSizeMedium - tokens.spaceTiny,
                   ),
-                ),
-                child: Center(
-                  child: Text(
-                    '$count',
-                    style: theme.textTheme.labelSmall?.copyWith(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceExtraSmall + tokens.spaceTiny,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? theme.colorScheme.surface
+                        : theme.primaryColor,
+                    borderRadius: BorderRadius.circular(
+                      tokens.radiusExtraLarge,
+                    ),
+                    border: Border.all(
                       color: isActive
                           ? theme.primaryColor
-                          : theme.colorScheme.onPrimary,
-                      fontWeight: FontWeight.w700,
+                          : theme.colorScheme.surface,
+                      width: tokens.borderWidthThin + tokens.borderWidthThin,
                     ),
                   ),
-                ),
-              );
-            },
+                  child: Center(
+                    child: Text(
+                      '$count',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: isActive
+                            ? theme.primaryColor
+                            : theme.colorScheme.onPrimary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

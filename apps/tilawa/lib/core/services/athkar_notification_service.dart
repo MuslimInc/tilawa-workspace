@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -274,26 +275,20 @@ class AthkarNotificationService implements IAthkarNotificationService {
     }
   }
 
-  /// Get the local timezone name for the device
+  /// Get the local timezone name for the device.
+  ///
+  /// Uses `flutter_timezone` to read the device's IANA timezone identifier
+  /// (e.g. `Europe/London`, `Asia/Jakarta`). Returns `null` on failure so the
+  /// caller falls back to UTC.
   @visibleForTesting
   Future<String?> getLocalTimeZone() async {
     try {
-      // For Android and iOS, we can try to get the system timezone
-      // This is a simple approach - in production you might want to use
-      // a package like flutter_native_timezone for more accuracy
-
-      // Map common offsets to timezone names
-      final String offset = getTimeZoneOffsetString();
-
-      if (offset.contains('2:00:00')) {
-        return 'Africa/Cairo'; // EET (Egypt, common for Arabic users)
-      } else if (offset.contains('3:00:00')) {
-        return 'Asia/Riyadh'; // AST (Saudi Arabia)
-      } else if (offset.contains('4:00:00')) {
-        return 'Asia/Dubai'; // GST (UAE)
+      final TimezoneInfo info = await FlutterTimezone.getLocalTimezone();
+      final String identifier = info.identifier;
+      if (identifier.isEmpty) {
+        return null;
       }
-
-      return null; // Fallback to UTC
+      return identifier;
     } catch (e) {
       logger.w('[AthkarNotificationService] Error detecting timezone: $e');
       return null;

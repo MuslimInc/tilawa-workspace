@@ -2337,5 +2337,55 @@
     "edit": "Edit",
     "@edit": {
         "description": "Button label to go back and edit the share"
+    },
+    "prayerNotifications": "Prayer Notifications",
+    "@prayerNotifications": {
+        "description": "Section title for prayer time notification settings"
+    },
+    "prayerNotificationsEnabledAll": "All Prayer Notifications",
+    "@prayerNotificationsEnabledAll": {
+        "description": "Global toggle label for enabling/disabling all prayer notifications"
+    },
+    "playAdhan": "Play Adhan",
+    "@playAdhan": {
+        "description": "Toggle label for adhan sound playback on prayer notification"
+    },
+    "atPrayerTime": "At prayer time",
+    "@atPrayerTime": {
+        "description": "Label for the 0-minutes-before notification offset option"
+    },
+    "exactAlarmPermissionRequired": "Exact alarm permission required for reliable prayer reminders.",
+    "@exactAlarmPermissionRequired": {
+        "description": "Banner shown when the Android exact-alarm permission is not granted"
+    },
+    "notificationPermissionRequired": "Notification permission required to receive prayer alerts.",
+    "@notificationPermissionRequired": {
+        "description": "Banner shown when the Android POST_NOTIFICATIONS permission is not granted"
+    },
+    "prayerNotificationBody": "It is time for {prayerName}",
+    "@prayerNotificationBody": {
+        "description": "Body text for prayer time notifications",
+        "placeholders": {
+            "prayerName": {
+                "type": "String",
+                "example": "Fajr"
+            }
+        }
+    },
+    "prayerNotificationsChannelName": "Prayer Times",
+    "@prayerNotificationsChannelName": {
+        "description": "Android notification channel name for default prayer reminders"
+    },
+    "prayerNotificationsChannelDescription": "Reminders for the five daily prayer times",
+    "@prayerNotificationsChannelDescription": {
+        "description": "Android notification channel description for default prayer reminders"
+    },
+    "prayerNotificationsAdhanChannelName": "Prayer Times (Adhan)",
+    "@prayerNotificationsAdhanChannelName": {
+        "description": "Android notification channel name for prayer reminders with adhan sound"
+    },
+    "prayerNotificationsAdhanChannelDescription": "Prayer time reminders that play the adhan sound",
+    "@prayerNotificationsAdhanChannelDescription": {
+        "description": "Android notification channel description for prayer reminders with adhan sound"
     }
 }

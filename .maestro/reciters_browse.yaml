@@ -1,0 +1,91 @@
+# reciters_browse.yaml
+# Happy-path smoke test: browse the reciters list and open a reciter's details.
+#
+# Semantics identifiers used (see reciter_semantics_ids.dart):
+#   reciters_tab                  – bottom-nav destination
+#   reciters_search_field         – search text field
+#   reciters_favorites_toggle     – heart / favourites filter button
+#   reciter_card_1                – card for the reciter whose API id == 1
+#   reciter_details_surah_search  – surah-filter field in ReciterDetails
+#   reciter_details_view_toggle   – list ↔ grid toggle in ReciterDetails
+#
+# Prerequisites:
+#   • App is installed as com.tilawa.app
+#   • Device/emulator has internet access (reciters loaded from mp3quran.net API)
+
+appId: com.tilawa.app
+---
+
+# ── Launch ───────────────────────────────────────────────────────────────────
+- launchApp
+
+# Android: dismiss any runtime-permission dialogs (notifications / overlay)
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+
+# ── Navigate to Reciters tab ─────────────────────────────────────────────────
+# The app starts on the Reciters tab (index 0) by default.
+# Tap the tab explicitly to ensure we are on it regardless of app state.
+- tapOn:
+    id: "reciters_tab"
+- waitForAnimationToEnd
+
+# ── Wait for list to load ────────────────────────────────────────────────────
+# The RecitersScreen delays the API call by ~1.5 s after the startup-lite UI.
+# Poll until the search field is visible (means list has been populated).
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_field"
+    timeout: 10000
+- assertVisible:
+    id: "reciters_search_field"
+
+- assertVisible:
+    id: "reciters_favorites_toggle"
+
+# ── Open the first reciter card ──────────────────────────────────────────────
+# reciter_card_1 corresponds to the reciter with id=1 in the mp3quran.net API
+# (typically "عبد الباسط عبد الصمد" or similar).
+# scrollUntilVisible handles the case where the card is below the fold.
+- scrollUntilVisible:
+    element:
+      id: "reciter_card_1"
+    direction: DOWN
+    timeout: 8000
+- tapOn:
+    id: "reciter_card_1"
+- waitForAnimationToEnd
+
+# ── Assert Reciter Details screen ────────────────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciter_details_surah_search"
+    timeout: 8000
+- assertVisible:
+    id: "reciter_details_surah_search"
+
+- assertVisible:
+    id: "reciter_details_view_toggle"
+
+# ── Toggle list ↔ grid view and back ────────────────────────────────────────
+- tapOn:
+    id: "reciter_details_view_toggle"
+- waitForAnimationToEnd
+- tapOn:
+    id: "reciter_details_view_toggle"
+- waitForAnimationToEnd
+
+# ── Navigate back to Reciters list ──────────────────────────────────────────
+- back
+- waitForAnimationToEnd
+
+# ── Assert we are back on the Reciters list ──────────────────────────────────
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_field"
+    timeout: 5000
+- assertVisible:
+    id: "reciters_search_field"

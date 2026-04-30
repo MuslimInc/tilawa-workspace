@@ -4,10 +4,10 @@ import 'package:clock/clock.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
-import 'package:tilawa/core/logging/app_logger.dart';
 import '../../../domain/entities/download_item.dart';
 import '../../../domain/usecases/usecases.dart';
 
@@ -264,6 +264,17 @@ class DownloadButtonBloc
     int totalBytes,
     Emitter<DownloadButtonState> emit,
   ) {
+    // Discard stale progress events that arrive after the user cancelled or
+    // the download already failed — the stream fires one last event before
+    // the backend status transitions, which would briefly bounce the UI back
+    // to "downloading" and invalidate accessibility-layer state assertions.
+    final bool isTerminal = state.maybeWhen(
+      cancelled: () => true,
+      failed: (_) => true,
+      orElse: () => false,
+    );
+    if (isTerminal) return;
+
     emit(
       DownloadButtonState.downloading(
         progress: progress,

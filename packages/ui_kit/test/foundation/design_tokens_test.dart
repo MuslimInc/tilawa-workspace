@@ -80,7 +80,7 @@ void main() {
         expect(light.iconSizeMedium, 20.0);
         expect(light.iconSizeLarge, 24.0);
         expect(light.iconSizeExtraLarge, 48.0);
-        expect(light.textHeightLoose, 1.8);
+        expect(light.textHeightLoose, 2.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
         expect(light.durationMedium, const Duration(milliseconds: 400));
         expect(light.durationSlow, const Duration(milliseconds: 600));

@@ -7,6 +7,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 
 import '../../../../features/surah/domain/entities/surah_entity.dart';
 import '../bloc/reciter_download_bloc.dart';
+import '../reciter_semantics_ids.dart';
 
 /// Compact download button designed to sit inline inside a header
 /// row next to the surah count label.
@@ -37,112 +38,120 @@ class DownloadAllButton extends StatelessWidget {
 
         // All downloaded — small check badge
         if (isAllDownloaded) {
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: theme.primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.check_circle_rounded,
-                  color: theme.primaryColor,
-                  size: 14,
-                ),
-                SizedBox(width: 4),
-                Text(
-                  context.l10n.allDownloaded,
-                  style: TextStyle(
+          return Semantics(
+            identifier: ReciterSemanticsIds.reciterDetailsDownloadAllCompleted,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.check_circle_rounded,
                     color: theme.primaryColor,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 11,
+                    size: 14,
                   ),
-                ),
-              ],
+                  SizedBox(width: 4),
+                  Text(
+                    context.l10n.allDownloaded,
+                    style: TextStyle(
+                      color: theme.primaryColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
 
         // Download / Downloading — compact pill
-        return InkWell(
-          key: const Key('reciter_details_download_all_button'),
-          onTap: () {
-            if (state.isPending) return;
-            HapticFeedback.lightImpact();
-            if (isDownloading) {
-              context.read<ReciterDownloadBloc>().add(
-                CancelReciterDownloadAll(reciterName: reciter.name),
-              );
-            } else {
-              context.read<ReciterDownloadBloc>().add(
-                StartReciterDownloadAll(reciter: reciter, surahs: surahs),
-              );
-            }
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: isDownloading
-                  ? theme.primaryColor.withValues(alpha: 0.15)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
+        return Semantics(
+          identifier: isDownloading
+              ? ReciterSemanticsIds.reciterDetailsDownloadAllDownloading
+              : ReciterSemanticsIds.reciterDetailsDownloadAllIdle,
+          child: InkWell(
+            key: const Key('reciter_details_download_all_button'),
+            onTap: () {
+              if (state.isPending) return;
+              HapticFeedback.lightImpact();
+              if (isDownloading) {
+                context.read<ReciterDownloadBloc>().add(
+                  CancelReciterDownloadAll(reciterName: reciter.name),
+                );
+              } else {
+                context.read<ReciterDownloadBloc>().add(
+                  StartReciterDownloadAll(reciter: reciter, surahs: surahs),
+                );
+              }
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
                 color: isDownloading
-                    ? theme.primaryColor.withValues(alpha: 0.6)
-                    : theme.dividerColor.withValues(alpha: 0.5),
+                    ? theme.primaryColor.withValues(alpha: 0.15)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isDownloading
+                      ? theme.primaryColor.withValues(alpha: 0.6)
+                      : theme.dividerColor.withValues(alpha: 0.5),
+                ),
               ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (isDownloading) ...[
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      value: progress,
-                      color: theme.primaryColor,
-                      backgroundColor: theme.primaryColor.withValues(
-                        alpha: 0.2,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isDownloading) ...[
+                    SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        value: progress,
+                        color: theme.primaryColor,
+                        backgroundColor: theme.primaryColor.withValues(
+                          alpha: 0.2,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 6),
-                  Text(
-                    '${state.downloadedCount}/${state.totalCount}',
-                    style: TextStyle(
+                    SizedBox(width: 6),
+                    Text(
+                      '${state.downloadedCount}/${state.totalCount}',
+                      style: TextStyle(
+                        color: theme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                    SizedBox(width: 4),
+                    Icon(
+                      Icons.pause_rounded,
                       color: theme.primaryColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+                      size: 14,
                     ),
-                  ),
-                  SizedBox(width: 4),
-                  Icon(
-                    Icons.pause_rounded,
-                    color: theme.primaryColor,
-                    size: 14,
-                  ),
-                ] else ...[
-                  Icon(
-                    Icons.download_rounded,
-                    color: theme.textTheme.bodyMedium?.color,
-                    size: 14,
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    _buildLabel(context, state, isDownloading, progress),
-                    style: TextStyle(
+                  ] else ...[
+                    Icon(
+                      Icons.download_rounded,
                       color: theme.textTheme.bodyMedium?.color,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 11,
+                      size: 14,
                     ),
-                  ),
+                    SizedBox(width: 4),
+                    Text(
+                      _buildLabel(context, state, isDownloading, progress),
+                      style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         );

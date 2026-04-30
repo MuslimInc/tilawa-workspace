@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import '../foundation/design_tokens.dart';
+
+import '../foundation/component_tokens.dart';
 
 /// A standardized container for icons with background styling.
+///
+/// Reads default values from [TilawaIconBoxTokens] for consistent
+/// sizing, padding, and corner radius.
 class TilawaIconBox extends StatelessWidget {
   const TilawaIconBox({
     super.key,
@@ -25,17 +29,17 @@ class TilawaIconBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final tokens = theme.componentTokens.iconBox;
 
-    final double effectiveSize = size ?? tokens.iconSizeLarge;
-    final double effectivePadding = padding ?? tokens.spaceSmall;
+    final double effectiveSize = size ?? tokens.iconSize;
+    final double effectivePadding = padding ?? tokens.padding;
 
     return Container(
       padding: EdgeInsets.all(effectivePadding),
       decoration: BoxDecoration(
         color: backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(
-          borderRadius ?? tokens.radiusMedium,
+          borderRadius ?? tokens.borderRadius,
         ),
       ),
       child:

@@ -9,22 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Share / Reels**: Users can now share Quran recitations as short video reels — combines a Mushaf page screenshot with an audio clip of the selected ayah.
+- **Share / Screenshot**: Users can capture and share a screenshot of any Quran page directly from the reader.
+- **Custom Player Background**: Users can set a personalised background image (from gallery or camera) for the expanded audio player, persisted across sessions via `PlayerBackgroundCubit`.
 - **Release**: Added Android signing template and a Google Play release checklist to support safer production publishing.
 
 ### Changed
 
+- **Share**: Reel content rendering now fetches ayah text and integrates it with the captured frame for a polished output.
+- **Audio Player**: Playback failure toasts now fire reliably on all error transitions — `listenWhen` extended to include failure state changes.
+- **Audio Position Service**: Position polling timer is now gated on active playback; timer is cancelled when no media is loaded or playback is paused, reducing idle CPU and battery usage.
 - **Android**: Hardened release signing configuration to fail fast when production keystore values are missing.
 - **Security**: Disabled cleartext network traffic in the Android manifest for production-safe defaults.
-- **CI**: Corrected monorepo workflow paths for Flutter test and build jobs.
-- **Tests**: Stabilized settings, startup, share rendering, FFmpeg cancellation, and navigation layer tests for current behavior.
+- **CI**: Updated Flutter CI pin to 3.41.7 (Dart 3.11.5) to satisfy workspace SDK constraints; corrected monorepo workflow paths.
+- **Tests**: Stabilised settings, startup, share rendering, FFmpeg cancellation, and navigation layer tests for current behaviour.
 
 ### Fixed
 
-- **Rendering**: Prevented small-screen Quran page overflow in non-scrollable page text rendering by clipping non-scrollable layout output.
+- **Share**: `UserCancelledFailure` is now handled in `localizedMessage` — cancelling the image picker no longer causes an unhandled exhaustive-switch error.
+- **UI Kit**: `TilawaShareFooterBar` now correctly references `componentTokens.footerBar` instead of the non-existent `shareFooterBar` getter.
+- **Rendering**: Prevented small-screen Quran page overflow in non-scrollable page text rendering by clipping layout output.
 - **Testing**: Fixed SettingsCubit DI setup for SharedPreferencesAsync in unit tests.
 - **Testing**: Updated stale assertions in reciters startup and responsive mushaf renderer tests.
 - **Testing**: Fixed async FFmpeg fake to respect manual-completion plans and deterministic cancel flow tests.
-- **Tooling**: Removed unused reciter widget internals and scratch debug script to clear analyzer warnings.
+- **Tooling**: Removed tracked scratch debug script (`scratch/debug_page_data.dart`) to clear analyzer warnings.
 
 ## [0.1.3+20] - 2026-03-26
 

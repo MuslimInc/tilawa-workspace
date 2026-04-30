@@ -24,7 +24,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
         body: BlocBuilder<AthkarCubit, AthkarState>(
           builder: (context, state) {
             if (state is AthkarLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const TilawaLoadingIndicator();
             } else if (state is AthkarError) {
               return Center(
                 child: Text(

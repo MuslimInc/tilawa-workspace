@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/reciter_semantics_ids.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class ReciterSearchHeader extends StatelessWidget {
@@ -63,66 +64,73 @@ class ReciterSearchHeader extends StatelessWidget {
                 child: Row(
                   children: [
                     Expanded(
-                      child: TilawaSearchField(
-                        controller: controller,
-                        hintText: context.l10n.searchSurah,
-                        backgroundColor: theme.scaffoldBackgroundColor
-                            .withValues(alpha: 0.5),
-                        borderRadius: inputBorderRadius,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: inputHorizontalPadding,
-                          vertical: inputVerticalPadding,
+                      child: Semantics(
+                        identifier:
+                            ReciterSemanticsIds.reciterDetailsSurahSearch,
+                        child: TilawaSearchField(
+                          controller: controller,
+                          hintText: context.l10n.searchSurah,
+                          backgroundColor: theme.scaffoldBackgroundColor
+                              .withValues(alpha: 0.5),
+                          borderRadius: inputBorderRadius,
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: inputHorizontalPadding,
+                            vertical: inputVerticalPadding,
+                          ),
+                          hintStyle: TextStyle(
+                            color: theme.hintColor.withValues(alpha: 0.5),
+                          ),
+                          onClear: () {
+                            controller.clear();
+                            context.read<ReciterDetailsBloc>().add(
+                              const FilterSurahs(''),
+                            );
+                          },
+                          onChanged: (query) {
+                            context.read<ReciterDetailsBloc>().add(
+                              FilterSurahs(query),
+                            );
+                          },
+                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
                         ),
-                        hintStyle: TextStyle(
-                          color: theme.hintColor.withValues(alpha: 0.5),
-                        ),
-                        onClear: () {
-                          controller.clear();
-                          context.read<ReciterDetailsBloc>().add(
-                            const FilterSurahs(''),
-                          );
-                        },
-                        onChanged: (query) {
-                          context.read<ReciterDetailsBloc>().add(
-                            FilterSurahs(query),
-                          );
-                        },
-                        onTapOutside: (_) => FocusScope.of(context).unfocus(),
                       ),
                     ),
                     SizedBox(width: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: theme.scaffoldBackgroundColor.withValues(
-                          alpha: 0.5,
+                    Semantics(
+                      identifier: ReciterSemanticsIds.reciterDetailsViewToggle,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: theme.scaffoldBackgroundColor.withValues(
+                            alpha: 0.5,
+                          ),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: context.primaryColor.withValues(alpha: 0.1),
+                          ),
                         ),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: context.primaryColor.withValues(alpha: 0.1),
+                        child: IconButton(
+                          icon:
+                              BlocBuilder<
+                                ReciterDetailsBloc,
+                                ReciterDetailsState
+                              >(
+                                buildWhen: (previous, current) =>
+                                    previous.viewMode != current.viewMode,
+                                builder: (context, state) {
+                                  return Icon(
+                                    state.viewMode == ReciterViewMode.list
+                                        ? Icons.grid_view_rounded
+                                        : Icons.view_list_rounded,
+                                    color: context.primaryColor,
+                                  );
+                                },
+                              ),
+                          onPressed: () {
+                            context.read<ReciterDetailsBloc>().add(
+                              const ToggleViewMode(),
+                            );
+                          },
                         ),
-                      ),
-                      child: IconButton(
-                        icon:
-                            BlocBuilder<
-                              ReciterDetailsBloc,
-                              ReciterDetailsState
-                            >(
-                              buildWhen: (previous, current) =>
-                                  previous.viewMode != current.viewMode,
-                              builder: (context, state) {
-                                return Icon(
-                                  state.viewMode == ReciterViewMode.list
-                                      ? Icons.grid_view_rounded
-                                      : Icons.view_list_rounded,
-                                  color: context.primaryColor,
-                                );
-                              },
-                            ),
-                        onPressed: () {
-                          context.read<ReciterDetailsBloc>().add(
-                            const ToggleViewMode(),
-                          );
-                        },
                       ),
                     ),
                   ],

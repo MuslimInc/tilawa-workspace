@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -71,12 +72,14 @@ class _MainScreenState extends State<MainScreen> {
         icon: FluentIcons.person_24_regular,
         activeIcon: FluentIcons.person_24_filled,
         label: context.l10n.reciters,
+        identifier: 'reciters_tab',
       ),
       _NavDestination(
         index: 1,
         icon: FluentIcons.clock_24_regular,
         activeIcon: FluentIcons.clock_24_filled,
         label: context.l10n.prayerTimes,
+        identifier: 'prayer_times_tab',
       ),
       _NavDestination(
         icon: Icons.menu_book_rounded,
@@ -152,6 +155,7 @@ class _MainScreenState extends State<MainScreen> {
                         label: d.label,
                         icon: d.icon,
                         activeIcon: d.activeIcon,
+                        identifier: d.identifier,
                         iconBuilder: d.svgPath == null
                             ? null
                             : (context, {required isSelected, required color}) {
@@ -279,17 +283,30 @@ class _MainShellPlaceholderScaffold extends StatelessWidget {
   }
 }
 
-class _NavDestination {
+@immutable
+class _NavDestination extends Equatable {
   const _NavDestination({
     required this.label,
     required this.icon,
     this.activeIcon,
     this.svgPath,
     this.index,
+    this.identifier,
   });
   final String label;
   final IconData icon;
   final IconData? activeIcon;
   final String? svgPath;
   final int? index;
+  final String? identifier;
+
+  @override
+  List<Object?> get props => [
+    label,
+    icon,
+    activeIcon,
+    svgPath,
+    index,
+    identifier,
+  ];
 }

@@ -6,6 +6,8 @@ import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../reciter_semantics_ids.dart';
+
 class SurahGridItem extends StatelessWidget {
   const SurahGridItem({
     super.key,
@@ -208,6 +210,11 @@ class SurahGridItem extends StatelessWidget {
                             initialIsDownloaded: surah.isDownloaded,
                             initialIsDownloading: surah.isDownloading,
                             initialProgress: surah.downloadProgress,
+                            identifier: ReciterSemanticsIds.surahDownloadButton(
+                              surah.formattedId.isNotEmpty
+                                  ? surah.formattedId
+                                  : '${index + 1}',
+                            ),
                           ),
                         ),
                       ),

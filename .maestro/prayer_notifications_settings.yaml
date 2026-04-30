@@ -1,0 +1,102 @@
+# Maestro E2E smoke test — Prayer Times Notifications settings flow.
+#
+# Covers:
+#   - Navigate to Prayer Times tab
+#   - Open Prayer Settings sheet
+#   - Assert Prayer Notifications section is visible
+#   - Toggle the global "All Prayer Notifications" switch
+#   - Toggle the Fajr per-prayer switch
+#   - Assert no crash or blocking UI
+#
+# Prerequisites:
+#   - App is freshly installed or data is in a known state
+#   - Notifications are NOT already all-on (so first tap enables them)
+#
+# Run:
+#   maestro test .maestro/prayer_notifications_settings.yaml
+#
+# All element ids map to PrayerNotificationSemanticsIds in:
+#   apps/tilawa/lib/features/prayer_times/presentation/prayer_notification_semantics_ids.dart
+
+appId: com.tilawa.app
+
+---
+
+# ── 1. Launch ─────────────────────────────────────────────────────────────────
+- launchApp
+
+# ── 2. Handle Android POST_NOTIFICATIONS permission dialog (if shown) ─────────
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+
+# ── 3. Navigate to the Prayer Times tab ──────────────────────────────────────
+- tapOn:
+    id: "prayer_times_tab"
+
+# Give the Prayer Times screen time to load.
+- waitForAnimationToEnd
+
+# ── 4. Open Prayer Settings sheet ────────────────────────────────────────────
+- tapOn:
+    id: "prayer_settings_button"
+
+- waitForAnimationToEnd
+
+# ── 5. Assert Prayer Notifications section is visible ─────────────────────────
+# Scroll down the sheet until the notifications section header is visible,
+# then assert it exists.
+- scrollUntilVisible:
+    element:
+      id: "prayer_notifications_section"
+    direction: DOWN
+    timeout: 5000
+
+- assertVisible:
+    id: "prayer_notifications_section"
+
+# ── 6. Toggle global "All Prayer Notifications" switch ────────────────────────
+- scrollUntilVisible:
+    element:
+      id: "prayer_notifications_global_toggle"
+    direction: DOWN
+    timeout: 5000
+
+- tapOn:
+    id: "prayer_notifications_global_toggle"
+
+# Allow any permission dialog to surface (Android 13+ POST_NOTIFICATIONS).
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+
+# Toggle back so we leave the app in a consistent state.
+- tapOn:
+    id: "prayer_notifications_global_toggle"
+
+# ── 7. Toggle the Fajr per-prayer switch ─────────────────────────────────────
+- scrollUntilVisible:
+    element:
+      id: "prayer_notification_fajr_toggle"
+    direction: DOWN
+    timeout: 5000
+
+- tapOn:
+    id: "prayer_notification_fajr_toggle"
+
+# Toggle back to restore original state.
+- tapOn:
+    id: "prayer_notification_fajr_toggle"
+
+# ── 8. Assert no crash — sheet is still visible ───────────────────────────────
+- assertVisible:
+    id: "prayer_notifications_global_toggle"
+
+# ── 9. Dismiss the sheet without saving ──────────────────────────────────────
+- swipe:
+    direction: DOWN
+    duration: 400

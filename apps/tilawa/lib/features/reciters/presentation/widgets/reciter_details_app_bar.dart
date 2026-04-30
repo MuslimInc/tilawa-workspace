@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
@@ -18,7 +19,10 @@ class ReciterDetailsAppBar extends StatelessWidget {
       pinned: true,
       backgroundColor: theme.primaryColor,
       foregroundColor: appBarForegroundColor,
-      leading: BackButton(color: appBarForegroundColor),
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: appBarForegroundColor),
+        onPressed: () => context.pop(),
+      ),
       centerTitle: true,
       flexibleSpace: FlexibleSpaceBar(
         background: Container(

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
-import '../foundation/design_tokens.dart';
+
+import '../foundation/component_tokens.dart';
 
 /// A foundational card component with standardized styling.
+///
+/// Reads default values from [TilawaCardTokens] for consistent
+/// radius, border width, and padding across the application.
 class TilawaCard extends StatelessWidget {
   const TilawaCard({
     super.key,
@@ -27,7 +31,9 @@ class TilawaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final tokens = theme.componentTokens.card;
+
+    final double effectiveRadius = borderRadius ?? tokens.borderRadius;
 
     final Widget content = Container(
       decoration: BoxDecoration(
@@ -35,16 +41,13 @@ class TilawaCard extends StatelessWidget {
             ? (backgroundColor ?? theme.colorScheme.surface)
             : null,
         gradient: gradient,
-        borderRadius: BorderRadius.circular(borderRadius ?? tokens.radiusLarge),
+        borderRadius: BorderRadius.circular(effectiveRadius),
         border: Border.all(
           color: borderColor ?? theme.colorScheme.outlineVariant,
-          width: borderWidth ?? tokens.borderWidthThin,
+          width: borderWidth ?? tokens.borderWidth,
         ),
       ),
-      child: Padding(
-        padding: padding ?? EdgeInsets.all(tokens.spaceMedium),
-        child: child,
-      ),
+      child: Padding(padding: padding ?? tokens.padding, child: child),
     );
 
     if (onTap == null) {
@@ -53,10 +56,10 @@ class TilawaCard extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(borderRadius ?? tokens.radiusLarge),
+      borderRadius: BorderRadius.circular(effectiveRadius),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(borderRadius ?? tokens.radiusLarge),
+        borderRadius: BorderRadius.circular(effectiveRadius),
         child: content,
       ),
     );

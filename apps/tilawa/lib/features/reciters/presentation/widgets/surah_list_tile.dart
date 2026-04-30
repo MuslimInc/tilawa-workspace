@@ -7,6 +7,8 @@ import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa/router/router.dart';
 import 'package:tilawa_core/entities/audio.dart';
 
+import '../reciter_semantics_ids.dart';
+
 class SurahListTile extends StatelessWidget {
   const SurahListTile({
     super.key,
@@ -161,6 +163,11 @@ class SurahListTile extends StatelessWidget {
                       initialIsDownloaded: surah.isDownloaded,
                       initialIsDownloading: surah.isDownloading,
                       initialProgress: surah.downloadProgress,
+                      identifier: ReciterSemanticsIds.surahDownloadButton(
+                        surah.formattedId.isNotEmpty
+                            ? surah.formattedId
+                            : '${index + 1}',
+                      ),
                     ),
                     SizedBox(width: 10),
                     // Play/Pause button

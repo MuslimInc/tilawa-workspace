@@ -317,7 +317,6 @@ class TilawaAdaptiveShellTokens {
     required this.bottomNavHorizontalMargin,
     required this.bottomNavVerticalMargin,
     required this.bottomNavInternalPadding,
-    required this.bottomNavRadius,
     required this.bottomNavInnerRadius,
     required this.bottomNavBorderWidth,
     required this.bottomNavItemGap,
@@ -342,7 +341,7 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavHorizontalMargin;
   final double bottomNavVerticalMargin;
   final double bottomNavInternalPadding;
-  final double bottomNavRadius;
+  double get bottomNavRadius => bottomNavInnerRadius + bottomNavItemGap;
   final double bottomNavInnerRadius;
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
@@ -368,7 +367,6 @@ class TilawaAdaptiveShellTokens {
         bottomNavHorizontalMargin: 16,
         bottomNavVerticalMargin: 4,
         bottomNavInternalPadding: 8,
-        bottomNavRadius: 32,
         bottomNavInnerRadius: 24,
         bottomNavBorderWidth: 1,
         bottomNavItemGap: 4,
@@ -394,7 +392,6 @@ class TilawaAdaptiveShellTokens {
     double? bottomNavHorizontalMargin,
     double? bottomNavVerticalMargin,
     double? bottomNavInternalPadding,
-    double? bottomNavRadius,
     double? bottomNavInnerRadius,
     double? bottomNavBorderWidth,
     double? bottomNavItemGap,
@@ -423,7 +420,6 @@ class TilawaAdaptiveShellTokens {
           bottomNavVerticalMargin ?? this.bottomNavVerticalMargin,
       bottomNavInternalPadding:
           bottomNavInternalPadding ?? this.bottomNavInternalPadding,
-      bottomNavRadius: bottomNavRadius ?? this.bottomNavRadius,
       bottomNavInnerRadius: bottomNavInnerRadius ?? this.bottomNavInnerRadius,
       bottomNavBorderWidth: bottomNavBorderWidth ?? this.bottomNavBorderWidth,
       bottomNavItemGap: bottomNavItemGap ?? this.bottomNavItemGap,
@@ -481,7 +477,6 @@ class TilawaAdaptiveShellTokens {
         b.bottomNavInternalPadding,
         t,
       ),
-      bottomNavRadius: lerpTokenDouble(a.bottomNavRadius, b.bottomNavRadius, t),
       bottomNavInnerRadius: lerpTokenDouble(
         a.bottomNavInnerRadius,
         b.bottomNavInnerRadius,

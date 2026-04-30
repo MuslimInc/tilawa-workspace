@@ -2337,5 +2337,55 @@
     "edit": "تعديل",
     "@edit": {
         "description": "Button label to go back and edit the share"
+    },
+    "prayerNotifications": "إشعارات الصلاة",
+    "@prayerNotifications": {
+        "description": "Section title for prayer time notification settings"
+    },
+    "prayerNotificationsEnabledAll": "جميع إشعارات الصلاة",
+    "@prayerNotificationsEnabledAll": {
+        "description": "Global toggle label for enabling/disabling all prayer notifications"
+    },
+    "playAdhan": "تشغيل الأذان",
+    "@playAdhan": {
+        "description": "Toggle label for adhan sound playback on prayer notification"
+    },
+    "atPrayerTime": "عند وقت الصلاة",
+    "@atPrayerTime": {
+        "description": "Label for the 0-minutes-before notification offset option"
+    },
+    "exactAlarmPermissionRequired": "إذن التنبيه الدقيق مطلوب لضمان دقة إشعارات الصلاة.",
+    "@exactAlarmPermissionRequired": {
+        "description": "Banner shown when the Android exact-alarm permission is not granted"
+    },
+    "notificationPermissionRequired": "إذن الإشعارات مطلوب لاستلام تذكيرات الصلاة.",
+    "@notificationPermissionRequired": {
+        "description": "Banner shown when the Android POST_NOTIFICATIONS permission is not granted"
+    },
+    "prayerNotificationBody": "حان وقت {prayerName}",
+    "@prayerNotificationBody": {
+        "description": "Body text for prayer time notifications",
+        "placeholders": {
+            "prayerName": {
+                "type": "String",
+                "example": "الفجر"
+            }
+        }
+    },
+    "prayerNotificationsChannelName": "أوقات الصلاة",
+    "@prayerNotificationsChannelName": {
+        "description": "Android notification channel name for default prayer reminders"
+    },
+    "prayerNotificationsChannelDescription": "تذكيرات بأوقات الصلوات الخمس",
+    "@prayerNotificationsChannelDescription": {
+        "description": "Android notification channel description for default prayer reminders"
+    },
+    "prayerNotificationsAdhanChannelName": "أوقات الصلاة (الأذان)",
+    "@prayerNotificationsAdhanChannelName": {
+        "description": "Android notification channel name for prayer reminders with adhan sound"
+    },
+    "prayerNotificationsAdhanChannelDescription": "تذكيرات الصلاة التي تشغل صوت الأذان",
+    "@prayerNotificationsAdhanChannelDescription": {
+        "description": "Android notification channel description for prayer reminders with adhan sound"
     }
 }
