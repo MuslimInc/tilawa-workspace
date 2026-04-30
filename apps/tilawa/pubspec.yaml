@@ -116,6 +116,7 @@ flutter:
   generate: true
 
   assets:
+    - shorebird.yaml
     - assets/images/
     - assets/json/
     - assets/data/
