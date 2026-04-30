@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
+import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/logger.dart';
 
 class QuranRenderDemoScreen extends StatefulWidget {
@@ -106,6 +108,7 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
     return Scaffold(
       backgroundColor: readerTheme.pageBackground,
       appBar: AppBar(
+        leading: context.canPop() ? const TilawaBackButton() : null,
         title: const Text('PageView Render Benchmark (5-20)'),
         backgroundColor: Colors.transparent,
         elevation: 0,

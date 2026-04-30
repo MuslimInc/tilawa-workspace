@@ -10,6 +10,8 @@ import '../../domain/entities/athkar_category.dart';
 import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
 import '../widgets/athkar_category_card.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import 'tasbeeh_screen.dart';
 
 class AthkarCategoriesScreen extends StatelessWidget {
@@ -20,7 +22,10 @@ class AthkarCategoriesScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => getIt<AthkarCubit>()..loadCategories(),
       child: Scaffold(
-        appBar: AppBar(title: Text(context.l10n.athkar)),
+        appBar: AppBar(
+          leading: context.canPop() ? const TilawaBackButton() : null,
+          title: Text(context.l10n.athkar),
+        ),
         body: BlocBuilder<AthkarCubit, AthkarState>(
           builder: (context, state) {
             if (state is AthkarLoading) {

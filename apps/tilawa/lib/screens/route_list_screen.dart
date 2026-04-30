@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../shared/widgets/tilawa_back_button.dart';
 
 import '../router/app_router_config.dart';
 
@@ -13,7 +14,10 @@ class RouteListScreen extends StatelessWidget {
     final List<String> interactions = _getAllRoutes(routes ?? $appRoutes);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('All Routes')),
+      appBar: AppBar(
+        leading: context.canPop() ? const TilawaBackButton() : null,
+        title: const Text('All Routes'),
+      ),
       body: ListView.separated(
         itemCount: interactions.length,
         separatorBuilder: (context, index) => const Divider(height: 1),

@@ -4,9 +4,11 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../helpers/datetime_helper.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/history_entity.dart';
 import '../bloc/history_bloc.dart';
@@ -41,6 +43,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.listeningHistory),
         actions: [
           BlocBuilder<HistoryBloc, HistoryState>(
