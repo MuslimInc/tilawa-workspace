@@ -7,6 +7,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hive_ce/hive.dart';
@@ -53,6 +54,9 @@ abstract class ExternalDependenciesModule {
 
   @singleton
   FirebaseMessaging get firebaseMessaging => FirebaseMessaging.instance;
+
+  @singleton
+  FirebasePerformance get firebasePerformance => FirebasePerformance.instance;
 
   @singleton
   SharedPreferencesAsync get sharedPreferences => SharedPreferencesAsync();

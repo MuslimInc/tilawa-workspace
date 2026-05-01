@@ -127,6 +127,9 @@ void main() {
     when(
       mockNotificationPermissions.isPermissionGranted(),
     ).thenAnswer((_) async => true);
+    when(
+      mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+    ).thenAnswer((_) async {});
 
     stubPrefsDefault();
     stubPluginDefault();
@@ -330,6 +333,117 @@ void main() {
         ).called(5);
       });
 
+      test('skips Flutter Local Notification scheduling when native adhan '
+          'scheduling succeeds (XOR routing — AdhanPlaybackService '
+          'posts the foreground-service notification at fire time)', () async {
+        await initialize();
+        when(mockAdhanPlayer.isSupported).thenReturn(true);
+        when(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+          ),
+        ).thenAnswer((_) async => true);
+
+        final PrayerSettingsEntity playAdhan = allEnabled.copyWith(
+          fajrNotification: allEnabled.fajrNotification.copyWith(
+            mode: PrayerAlertMode.adhan,
+          ),
+        );
+
+        await service.schedulePrayerNotifications(
+          settings: playAdhan,
+          prayerTimesForDays: [buildFutureDay(0)],
+          forceReschedule: true,
+        );
+
+        // When the native adhan player accepts every prayer, the service
+        // intentionally does NOT schedule a parallel FLN notification —
+        // the native AdhanPlaybackService creates a mediaPlayback
+        // foreground-service notification at fire time. Scheduling an
+        // FLN here would cause duplicate visual notifications.
+        verifyNever(
+          mockPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        );
+        // And the native pipeline must have been invoked once per prayer.
+        verify(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+          ),
+        ).called(5);
+      });
+
+      test(
+        'falls back to adhan channel (with sound) when native adhan scheduling fails',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+            ),
+          ).thenAnswer((_) async => false);
+
+          final PrayerSettingsEntity playAdhan = allEnabled.copyWith(
+            fajrNotification: allEnabled.fajrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+          );
+
+          await service.schedulePrayerNotifications(
+            settings: playAdhan,
+            prayerTimesForDays: [buildFutureDay(0)],
+            forceReschedule: true,
+          );
+
+          // Verify zonedSchedule was called with the regular adhan channel (with sound).
+          final verification = verify(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: captureAnyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+
+          final captured = verification.captured;
+          bool foundAdhanWithSound = false;
+          for (final details in captured) {
+            if (details is NotificationDetails &&
+                details.android?.channelId ==
+                    PrayerNotificationConfig.adhanChannelId) {
+              foundAdhanWithSound = true;
+              break;
+            }
+          }
+          expect(foundAdhanWithSound, isTrue);
+          verify(
+            mockAnalytics.logEvent(
+              'adhan_fallback_used',
+              parameters: anyNamed('parameters'),
+            ),
+          ).called(5);
+        },
+      );
+
       test(
         'suppresses scheduling and clears dedup when notification permission is denied',
         () async {
@@ -361,6 +475,12 @@ void main() {
           ).called(1);
           verify(
             mockPrefs.remove(PrayerNotificationConfig.settingsFingerprintKey),
+          ).called(1);
+          verify(
+            mockAnalytics.logEvent(
+              'permission_revoked_cleanup_completed',
+              parameters: anyNamed('parameters'),
+            ),
           ).called(1);
         },
       );

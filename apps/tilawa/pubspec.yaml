@@ -30,6 +30,7 @@ dependencies:
   firebase_core: ^4.3.0
   firebase_crashlytics: ^5.0.6
   firebase_messaging: ^16.1.0
+  firebase_performance: ^0.11.3
   flex_color_scheme: ^8.4.0
   fluentui_system_icons: ^1.1.273
   flutter:

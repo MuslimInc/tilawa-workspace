@@ -1,114 +1,165 @@
 plugins {
     id "com.android.application"
-    // START: FlutterFire Configuration
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
-    // END: FlutterFire Configuration
     id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+    id "com.google.firebase.crashlytics"
+    id "com.google.firebase.firebase-perf"
+    id "jacoco"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
 }
 
 android {
-    namespace = "com.tilawa.app"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
-
-    buildFeatures {
-        buildConfig true
-    }
+    namespace "com.tilawa.app"
+    compileSdkVersion 36
+    ndkVersion flutter.ndkVersion
 
     compileOptions {
-        // Enable core library desugaring for flutter_local_notifications
         coreLibraryDesugaringEnabled true
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17
+        jvmTarget = "17"
     }
 
-    final def keystorePropertiesFile = rootProject.file("key.properties")
-    final def keystoreProperties = new Properties()
-    if (keystorePropertiesFile.exists()) {
-        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    }
-
-    final def hasReleaseSigning =
-        keystoreProperties['keyAlias'] &&
-        keystoreProperties['keyPassword'] &&
-        keystoreProperties['storeFile'] &&
-        keystoreProperties['storePassword']
-
-    final def isReleaseTask = gradle.startParameter.taskNames.any {
-        it.toLowerCase().contains('release') || it.toLowerCase().contains('bundle')
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
     }
 
     defaultConfig {
-        applicationId = "com.tilawa.app"
+        applicationId "com.tilawa.app"
         // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 24
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
-        
-        // Add multiDex support to handle large app initialization
-        multiDexEnabled = true
-        
-        ndk {
-            // x86_64 excluded: targets emulators/Chromebooks only, not production phones.
-            // Dropping it removes one full copy of FFmpeg native libs from user installs.
-            abiFilters 'armeabi-v7a', 'arm64-v8a'
-        }
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
+        minSdkVersion 24
+        targetSdkVersion 36
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
     }
 
     signingConfigs {
-        release {
-            if (hasReleaseSigning) {
-                keyAlias = keystoreProperties['keyAlias']
-                keyPassword = keystoreProperties['keyPassword']
-                storeFile = file(keystoreProperties['storeFile'])
-                storePassword = keystoreProperties['storePassword']
+        if (keystoreProperties['storeFile'] != null) {
+            release {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
             }
         }
     }
 
     buildTypes {
         release {
-            if (hasReleaseSigning) {
-                signingConfig = signingConfigs.release
-            } else if (isReleaseTask) {
-                throw new RuntimeException("Missing release signing config. Add apps/tilawa/android/key.properties before running release builds.")
+            if (signingConfigs.findByName('release') != null) {
+                signingConfig signingConfigs.release
+            } else {
+                throw new RuntimeException(
+                    "Release signing config missing: android/key.properties is absent or " +
+                    "does not define storeFile. Refusing to ship a debug-signed AAB."
+                )
             }
-            
-            // Enable code shrinking, obfuscation, and optimization
-            minifyEnabled true
-            shrinkResources true
-            
-            // Use ProGuard rules for code obfuscation
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            
-            // Remove debug information
-            debuggable false
-            
-            // Remove logging in release builds
-            buildConfigField "boolean", "ENABLE_LOGGING", "false"
+        }
+    }
+
+    testOptions {
+        unitTests.includeAndroidResources = true
+        unitTests.returnDefaultValues = true
+        unitTests.all {
+            jacoco {
+                includeNoLocationClasses = true
+                excludes = ['jdk.internal.*']
+            }
         }
     }
 }
 
 flutter {
-    source = "../.."
+    source "../.."
 }
 
 dependencies {
-    implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'com.google.android.gms:play-services-auth:20.7.0'
-    implementation 'com.google.firebase:firebase-auth:22.3.0'
-    implementation 'com.google.firebase:firebase-firestore:24.9.1'
-    // Core library desugaring for flutter_local_notifications
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
-    implementation 'androidx.core:core-splashscreen:1.2.0'
+    implementation "androidx.core:core-splashscreen:1.0.1"
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.6.2'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:18.6.4'
+    
+    // Testing Dependencies
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation "io.mockk:mockk:1.13.10"
+    testImplementation "org.robolectric:robolectric:4.12.1"
+    testImplementation "androidx.test:core:1.5.0"
+    testImplementation "androidx.test.ext:junit:1.1.5"
+    testImplementation "androidx.work:work-testing:2.9.0"
+    
+    // Core dependencies needed for tests
+    testImplementation "androidx.work:work-runtime-ktx:2.9.0"
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.register("jacocoTestReport", JacocoReport) {
+    dependsOn "testDebugUnitTest"
+
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    def fileFilter = [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*',
+        '**/*Test*.*',
+        'android/**/*.*',
+        '**/*$Lambda$*.*',
+        '**/*$Companion*.*',
+        '**/*$MethodHandlers*.*',
+        '**/*_MembersInjector.class',
+        '**/*_Factory.class',
+        '**/*_ProvideValueFactory.class',
+        '**/*ExtensionsKt.class'
+    ]
+
+    def kotlinTree = fileTree(
+            dir: "${project.buildDir}/intermediates/classes/debug/transformDebugClassesWithAsm/dirs",
+            excludes: fileFilter
+    )
+    def mainSrc = "${project.projectDir}/src/main/kotlin"
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([kotlinTree]))
+    executionData.setFrom(fileTree(dir: "${project.buildDir}", includes: [
+            "jacoco/testDebugUnitTest.exec"
+    ]))
 }

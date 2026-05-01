@@ -58,6 +58,10 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp.router(
+          // InkSparkle (the default Material 3 splash) loads a shader asset
+          // that is not available in the widget-test asset bundle. Use the
+          // simpler InkRipple to avoid `shaders/ink_sparkle.frag not found`.
+          theme: ThemeData(splashFactory: InkRipple.splashFactory),
           routerConfig: router,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,

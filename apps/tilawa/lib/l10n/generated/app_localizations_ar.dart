@@ -1750,6 +1750,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'إذن الإشعارات مطلوب لاستلام تذكيرات الصلاة.';
 
   @override
+  String get batteryOptimizationExemptionRequired =>
+      'أوقف تحسين البطارية حتى تصلك إشعارات الصلاة في وقتها أثناء إيقاف الشاشة.';
+
+  @override
+  String get oemAutostartHint =>
+      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+
+  @override
   String prayerNotificationBody(String prayerName) {
     return 'حان وقت $prayerName';
   }
@@ -1767,4 +1775,12 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get prayerNotificationsAdhanChannelDescription =>
       'تذكيرات الصلاة التي تشغل صوت الأذان';
+
+  @override
+  String get prayerNotificationsSilentAdhanChannelName =>
+      'مواقيت الصلاة (صامت)';
+
+  @override
+  String get prayerNotificationsSilentAdhanChannelDescription =>
+      'تنبيهات صامتة لمواقيت الصلاة عند تشغيل الأذان محلياً';
 }

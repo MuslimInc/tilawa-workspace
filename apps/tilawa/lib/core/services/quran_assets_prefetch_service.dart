@@ -4,6 +4,8 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:quran_image/domain/repositories/quran_image_cache_repository.dart';
 import 'package:quran_image/domain/usecases/prepare_quran_image_cache.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import '../logging/app_logger.dart';
 import 'quran_assets_prefetch_policy_service.dart';
@@ -87,7 +89,14 @@ class QuranAssetsPrefetchService {
     }
 
     logger.d('[QuranAssetsPrefetch] images prepare started');
-    final status = await _prepareQuranImageCacheUseCase();
+
+    // Performance trace for Quran image cache preparation (TEST TRACE)
+    final performance = getIt<PerformanceMonitoringService>();
+    final status = await performance.traceOperation(
+      'prepare_quran_images',
+      () async => await _prepareQuranImageCacheUseCase(),
+    );
+
     if (status.isReady) {
       _completedAssets.add(_QuranAssetKind.images);
       logger.d('[QuranAssetsPrefetch] images prepare completed');

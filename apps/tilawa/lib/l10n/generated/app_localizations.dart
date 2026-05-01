@@ -3248,6 +3248,18 @@ abstract class AppLocalizations {
   /// **'Notification permission required to receive prayer alerts.'**
   String get notificationPermissionRequired;
 
+  /// Banner shown when the app is not whitelisted from Doze / battery optimization
+  ///
+  /// In en, this message translates to:
+  /// **'Disable battery optimization to keep prayer reminders on time when the screen is off.'**
+  String get batteryOptimizationExemptionRequired;
+
+  /// Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually
+  ///
+  /// In en, this message translates to:
+  /// **'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.'**
+  String get oemAutostartHint;
+
   /// Body text for prayer time notifications
   ///
   /// In en, this message translates to:
@@ -3277,6 +3289,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Prayer time reminders that play the adhan sound'**
   String get prayerNotificationsAdhanChannelDescription;
+
+  /// Android notification channel name for prayer reminders when adhan is handled natively
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Times (Silent)'**
+  String get prayerNotificationsSilentAdhanChannelName;
+
+  /// Android notification channel description for prayer reminders when adhan is handled natively
+  ///
+  /// In en, this message translates to:
+  /// **'Silent prayer time reminders when Adhan plays natively'**
+  String get prayerNotificationsSilentAdhanChannelDescription;
 }
 
 class _AppLocalizationsDelegate

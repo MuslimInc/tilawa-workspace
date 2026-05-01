@@ -13,6 +13,17 @@ extension AppLang on BuildContext {
 
 extension BuildContextThemeX on BuildContext {
   bool get isDarkMode => theme.brightness == Brightness.dark;
+
+  /// Returns the system's bottom padding (like the home indicator or gesture bar).
+  /// If the system reports a zero bottom padding (e.g., an Android device with
+  /// a hidden gesture bar), this provides a fallback value so UI elements
+  /// aren't glued to the absolute bottom of the screen.
+  double get safeBottomPadding {
+    final bottomInset = MediaQuery.paddingOf(this).bottom;
+    final fallback = theme.tokens.spaceExtraLarge;
+    // Returns the system inset if it exists, otherwise provides the fallback
+    return bottomInset > 0 ? bottomInset : fallback;
+  }
 }
 
 extension FailureExtensions on Failure {

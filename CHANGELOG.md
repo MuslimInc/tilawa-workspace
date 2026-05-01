@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5+22] - 2026-05-01
+
+### Added
+
+- **Prayer Notifications & Adhan**: Native Android prayer alarm pipeline using `AlarmManager.setAlarmClock` for exact, Doze-bypassing prayer-time delivery, with a foreground `mediaPlayback` service (`AdhanPlaybackService`) for audio playback that survives app termination.
+- **Watchdog**: Native `WorkManager` periodic worker (12-hour cadence) that refreshes the rolling 14-day prayer alarm window, with a 15-second timeout, retry on failure, and analytics events (`watchdog_triggered`, `watchdog_completed`, `watchdog_failed`, `watchdog_timeout_occurred`).
+- **Boot recovery**: `PrayerBootReceiver` re-arms persisted alarms after `BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`, `TIMEZONE_CHANGED`, and `TIME_SET` without requiring a full Dart cold start.
+- **Monitoring**: Firebase Analytics events for the full prayer/adhan lifecycle (schedule started/success/failed, triggered, playback started/completed/failed, fallback used, duplicate-audio guard, permission cleanup, boot receiver, watchdog states) plus Crashlytics non-fatal context keys (manufacturer, exact-alarm grant, notification grant).
+
+### Changed
+
+- **Android signing**: Release builds now sign with the production upload keystore loaded from `android/key.properties`. The build fails fast if the keystore configuration is missing, refusing to ship a debug-signed AAB.
+- **Android manifest**: Added `USE_EXACT_ALARM`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`; removed the unused `FOREGROUND_SERVICE_DATA_SYNC` declaration.
+- **R8 keep rules**: Added explicit `-keep` rules for `com.tilawa.app.prayer.**` so the manifest-referenced receivers, services, and worker survive code shrinking when minification is enabled.
+- **Bootstrap**: Removed development-only block that toggled Firebase Performance `testMode` on debug startup.
+
+### Fixed
+
+- **Tests**: Resolved `app_router_test.dart` failure caused by Material 3 `InkSparkle` shader asset not being available in the widget-test bundle (switched the test theme to `InkRipple.splashFactory`).
+
 ## [0.1.4+21] - 2026-04-27
 
 ### Added

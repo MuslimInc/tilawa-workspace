@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
+import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/check_prayer_alarm_capability_use_case.dart';
 import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_capability.dart';
@@ -10,16 +11,30 @@ import 'package:tilawa_core/errors/failures.dart';
 
 import 'check_prayer_alarm_capability_use_case_test.mocks.dart';
 
-@GenerateMocks([IPrayerAdhanNotificationService, NotificationPermissionService])
+@GenerateMocks([
+  IPrayerAdhanNotificationService,
+  NotificationPermissionService,
+  IAdhanAlarmPlayer,
+])
 void main() {
   late CheckPrayerAlarmCapabilityUseCase useCase;
   late MockIPrayerAdhanNotificationService mockService;
   late MockNotificationPermissionService mockPermissions;
+  late MockIAdhanAlarmPlayer mockAdhanPlayer;
 
   setUp(() {
     mockService = MockIPrayerAdhanNotificationService();
     mockPermissions = MockNotificationPermissionService();
-    useCase = CheckPrayerAlarmCapabilityUseCase(mockService, mockPermissions);
+    mockAdhanPlayer = MockIAdhanAlarmPlayer();
+    when(
+      mockAdhanPlayer.isIgnoringBatteryOptimizations(),
+    ).thenAnswer((_) async => true);
+    when(mockAdhanPlayer.manufacturer()).thenAnswer((_) async => null);
+    useCase = CheckPrayerAlarmCapabilityUseCase(
+      mockService,
+      mockPermissions,
+      mockAdhanPlayer,
+    );
   });
 
   group('CheckPrayerAlarmCapabilityUseCase', () {

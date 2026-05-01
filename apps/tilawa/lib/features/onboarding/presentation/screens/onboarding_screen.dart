@@ -30,7 +30,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double bottomPadding = MediaQuery.paddingOf(context).bottom;
     final double indicatorHeight = tokens.spaceSmall - tokens.spaceTiny;
     final double activeIndicatorWidth = tokens.spaceExtraLarge;
     final double inactiveIndicatorWidth = tokens.spaceSmall;
@@ -65,113 +64,111 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         builder: (context, state) {
           return Scaffold(
             backgroundColor: theme.colorScheme.surface,
-            body: SafeArea(
-              child: Column(
-                spacing: tokens.spaceExtraLarge,
-                children: [
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: pages.length,
-                      onPageChanged: (index) {
-                        setState(() => _currentPage = index);
-                        context.read<OnboardingCubit>().pageChanged(index);
-                      },
-                      itemBuilder: (context, index) {
-                        return OnboardingPage(content: pages[index]);
-                      },
-                    ),
+            body: Column(
+              spacing: tokens.spaceExtraLarge,
+              children: [
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: pages.length,
+                    onPageChanged: (index) {
+                      setState(() => _currentPage = index);
+                      context.read<OnboardingCubit>().pageChanged(index);
+                    },
+                    itemBuilder: (context, index) {
+                      return OnboardingPage(content: pages[index]);
+                    },
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      pages.length,
-                      (index) => AnimatedContainer(
-                        duration: tokens.durationMedium,
-                        margin: EdgeInsets.symmetric(
-                          horizontal: tokens.spaceExtraSmall,
-                        ),
-                        height: indicatorHeight,
-                        width: _currentPage == index
-                            ? activeIndicatorWidth
-                            : inactiveIndicatorWidth,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(indicatorRadius),
-                        ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    pages.length,
+                    (index) => AnimatedContainer(
+                      duration: tokens.durationMedium,
+                      margin: EdgeInsets.symmetric(
+                        horizontal: tokens.spaceExtraSmall,
+                      ),
+                      height: indicatorHeight,
+                      width: _currentPage == index
+                          ? activeIndicatorWidth
+                          : inactiveIndicatorWidth,
+                      decoration: BoxDecoration(
+                        color: _currentPage == index
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(indicatorRadius),
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      tokens.spaceExtraLarge,
-                      0,
-                      tokens.spaceExtraLarge,
-                      bottomPadding,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (_currentPage > 0)
-                          IconButton(
-                            onPressed: () {
-                              _pageController.previousPage(
-                                duration: tokens.durationMedium,
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                            icon: const Icon(Icons.arrow_back_ios_new),
-                            style: IconButton.styleFrom(
-                              backgroundColor:
-                                  theme.colorScheme.surfaceContainerHighest,
-                            ),
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        if (_currentPage == pages.length - 1)
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.only(
-                                start: tokens.spaceLarge,
-                              ),
-                              child: FilledButton(
-                                onPressed: () {
-                                  context
-                                      .read<OnboardingCubit>()
-                                      .completeOnboarding();
-                                },
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(
-                                    kMinInteractiveDimension,
-                                  ),
-                                ),
-                                child: Text(context.l10n.startJourney),
-                              ),
-                            ),
-                          )
-                        else
-                          FilledButton(
-                            onPressed: () {
-                              _pageController.nextPage(
-                                duration: tokens.durationMedium,
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                            style: FilledButton.styleFrom(
-                              minimumSize: Size(
-                                tokens.spaceExtraLarge * 4,
-                                kMinInteractiveDimension,
-                              ),
-                            ),
-                            child: Text(context.l10n.next),
-                          ),
-                      ],
-                    ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    tokens.spaceExtraLarge,
+                    0,
+                    tokens.spaceExtraLarge,
+                    context.safeBottomPadding,
                   ),
-                ],
-              ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      if (_currentPage > 0)
+                        IconButton(
+                          onPressed: () {
+                            _pageController.previousPage(
+                              duration: tokens.durationMedium,
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          icon: const Icon(Icons.arrow_back_ios_new),
+                          style: IconButton.styleFrom(
+                            backgroundColor:
+                                theme.colorScheme.surfaceContainerHighest,
+                          ),
+                        )
+                      else
+                        const SizedBox.shrink(),
+                      if (_currentPage == pages.length - 1)
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsetsDirectional.only(
+                              start: tokens.spaceLarge,
+                            ),
+                            child: FilledButton(
+                              onPressed: () {
+                                context
+                                    .read<OnboardingCubit>()
+                                    .completeOnboarding();
+                              },
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size.fromHeight(
+                                  kMinInteractiveDimension,
+                                ),
+                              ),
+                              child: Text(context.l10n.startJourney),
+                            ),
+                          ),
+                        )
+                      else
+                        FilledButton(
+                          onPressed: () {
+                            _pageController.nextPage(
+                              duration: tokens.durationMedium,
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                          style: FilledButton.styleFrom(
+                            minimumSize: Size(
+                              tokens.spaceExtraLarge * 4,
+                              kMinInteractiveDimension,
+                            ),
+                          ),
+                          child: Text(context.l10n.next),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           );
         },

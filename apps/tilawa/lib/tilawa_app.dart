@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:device_preview/device_preview.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -236,7 +235,7 @@ class _PlayerApp extends StatelessWidget {
               PerfLogger.markBuild('ThemeBlocBuilder');
               return MaterialApp.router(
                 title: AppStrings.appName,
-                showPerformanceOverlay: kProfileMode,
+                showPerformanceOverlay: false,
                 debugShowCheckedModeBanner: false,
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
                 // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
