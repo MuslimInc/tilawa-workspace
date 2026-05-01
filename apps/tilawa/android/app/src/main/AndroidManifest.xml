@@ -105,7 +105,7 @@
         <receiver
             android:name=".prayer.PrayerBootReceiver"
             android:exported="true"
-            android:directBootAware="false">
+            android:directBootAware="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
                 <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED"/>
@@ -121,13 +121,15 @@
              foreground playback service. Internal only. -->
         <receiver
             android:name=".prayer.AdhanReceiver"
-            android:exported="false"/>
+            android:exported="false"
+            android:directBootAware="true"/>
 
         <!-- Adhan playback foreground service. mediaPlayback type is required
              on Android 14+ (API 34+) for the MediaPlayer-backed playback. -->
         <service
             android:name=".prayer.AdhanPlaybackService"
             android:exported="false"
+            android:directBootAware="true"
             android:foregroundServiceType="mediaPlayback"/>
 
         <meta-data

@@ -14,6 +14,7 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required int id,
     required DateTime scheduledTime,
     required String prayerName,
+    String? sound,
   }) async => false;
 
   @override

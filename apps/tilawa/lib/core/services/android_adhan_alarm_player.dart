@@ -32,6 +32,7 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required int id,
     required DateTime scheduledTime,
     required String prayerName,
+    String? sound,
   }) async {
     if (!isSupported) return false;
     try {
@@ -40,6 +41,7 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
             'id': id,
             'prayerName': prayerName,
             'triggerAtMillis': scheduledTime.millisecondsSinceEpoch,
+            'sound': ?sound,
           }) ??
           false;
       if (!ok) {
@@ -90,6 +92,7 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
                 'id': a.id,
                 'name': a.prayerName,
                 'triggerAtMillis': a.triggerAt.millisecondsSinceEpoch,
+                'sound': ?a.sound,
               },
             )
             .toList(),

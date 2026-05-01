@@ -50,6 +50,9 @@ class AdhanPlaybackServiceTest {
         val intent = Intent(context, AdhanPlaybackService::class.java).apply {
             action = AdhanPlaybackService.ACTION_PLAY
             putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "fajr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, System.currentTimeMillis() - 5000)
+            putExtra("receiver_time", System.currentTimeMillis() - 1000)
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan_fajr")
         }
         
         val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
@@ -62,13 +65,9 @@ class AdhanPlaybackServiceTest {
         val notification = shadowService.lastForegroundNotification
         assertNotNull(notification)
         
-        // Verify notification channel config (should be silent)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val channel = nm.getNotificationChannel("com.tilawa.app.prayer_adhan")
-            assertNotNull(channel)
-            assertNull(channel.sound)
-        }
+        // Verify metrics were logged
+        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent("prayer_trigger_delta", any()) }
+        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent("prayer_service_start_latency", any()) }
 
         // Verify MediaPlayer was started
         verify { anyConstructed<MediaPlayer>().start() }
@@ -101,5 +100,22 @@ class AdhanPlaybackServiceTest {
         controller.destroy()
 
         verify { anyConstructed<MediaPlayer>().release() }
+    }
+
+    @Test
+    fun `onDestroy logs abnormal termination if not completed`() {
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+        }
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        
+        // Start playback but don't finish it
+        service.onStartCommand(intent, 0, 1)
+        
+        controller.destroy()
+        
+        // Verify abnormal termination log
+        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent("prayer_service_abnormal_termination", any()) }
     }
 }

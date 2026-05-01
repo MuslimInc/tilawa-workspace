@@ -16,7 +16,7 @@ class MethodChannelLogicTest {
     @Test
     fun `scheduleAdhan logs events`() {
         val args = mapOf("id" to 1, "triggerAtMillis" to 1000L, "prayerName" to "fajr")
-        every { mockScheduler.schedule(any(), any(), any()) } returns true
+        every { mockScheduler.schedule(any(), any(), any(), any()) } returns true
         every { mockScheduler.canScheduleExact() } returns true
         
         logic.handleMethodCall("scheduleAdhan", args, mockResult)
@@ -28,11 +28,11 @@ class MethodChannelLogicTest {
     @Test
     fun `scheduleAdhan success`() {
         val args = mapOf("id" to 1, "triggerAtMillis" to 1000L, "prayerName" to "fajr")
-        every { mockScheduler.schedule(1, "fajr", 1000L) } returns true
+        every { mockScheduler.schedule(1, "fajr", 1000L, "adhan_fajr") } returns true
         
         logic.handleMethodCall("scheduleAdhan", args, mockResult)
         
-        verify { mockScheduler.schedule(1, "fajr", 1000L) }
+        verify { mockScheduler.schedule(1, "fajr", 1000L, "adhan_fajr") }
         verify { mockResult.success(true) }
     }
 
@@ -153,7 +153,7 @@ class MethodChannelLogicTest {
         val args = mapOf("id" to 999, "name" to "test", "delayMs" to 1000L)
         logic.handleMethodCall("testAdhanNotification", args, mockResult)
         
-        verify { mockScheduler.schedule(eq(999), eq("test"), any()) }
+        verify { mockScheduler.schedule(eq(999), eq("test"), any(), "adhan") }
         verify { mockResult.success(null) }
     }
 

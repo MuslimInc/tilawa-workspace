@@ -24,10 +24,11 @@ internal class BootLogic(
                 for (i in 0 until arr.length()) {
                     val obj = arr.getJSONObject(i)
                     add(
-                        Triple(
+                        AlarmEntry(
                             obj.getInt("id"),
                             obj.optString("name", ""),
-                            obj.getLong("trigger")
+                            obj.getLong("trigger"),
+                            obj.optString("sound", "adhan")
                         )
                     )
                 }
@@ -48,18 +49,18 @@ internal class BootLogic(
 
         if (pending.isEmpty()) return
 
-        for ((id, name, triggerMs) in pending) {
-            if (triggerMs <= now) continue
+        for (entry in pending) {
+            if (entry.trigger <= now) continue
             try {
-                val ok = scheduler.schedule(id, name, triggerMs)
+                val ok = scheduler.schedule(entry.id, entry.name, entry.trigger, entry.sound)
                 if (ok) {
                     analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, mapOf(
-                        "prayer_name" to name,
+                        "prayer_name" to entry.name,
                         "context" to "boot_rearm"
                     ))
                 } else {
                     analytics?.logEvent(PrayerEvents.SCHEDULE_FAILED, mapOf(
-                        "prayer_name" to name,
+                        "prayer_name" to entry.name,
                         "context" to "boot_rearm",
                         "reason" to "permission_denied"
                     ))
@@ -69,7 +70,7 @@ internal class BootLogic(
                     "Failed to schedule alarm during boot re-arm", 
                     t,
                     mapOf(
-                        "prayer_name" to name,
+                        "prayer_name" to entry.name,
                         "exact_alarm_permission_granted" to scheduler.canScheduleExact(),
                         "notification_permission_granted" to scheduler.areNotificationsEnabled(),
                         "device_manufacturer" to android.os.Build.MANUFACTURER,
@@ -79,12 +80,19 @@ internal class BootLogic(
             }
         }
     }
+
+    private data class AlarmEntry(
+        val id: Int,
+        val name: String,
+        val trigger: Long,
+        val sound: String
+    )
 }
 
 interface AdhanSchedulerProxy {
     fun canScheduleExact(): Boolean
     fun areNotificationsEnabled(): Boolean
-    fun schedule(id: Int, name: String, triggerMs: Long): Boolean
+    fun schedule(id: Int, name: String, triggerMs: Long, sound: String): Boolean
 }
 
 interface WatchdogProxy {

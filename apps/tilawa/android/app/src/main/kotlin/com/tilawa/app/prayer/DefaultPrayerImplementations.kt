@@ -9,56 +9,70 @@ import android.os.Build
 import androidx.core.content.edit
 
 class DefaultPrayerStorage(private val context: Context) : PrayerStorage {
-    private val prefs: SharedPreferences =
+    // Standard CPS storage for full runtime state
+    private val cpsPrefs: SharedPreferences =
         context.getSharedPreferences("prayer_adhan_alarms", Context.MODE_PRIVATE)
 
+    // Minimal DPS storage for boot re-arming
+    private val dpsPrefs: SharedPreferences by lazy {
+        val protectedContext = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.createDeviceProtectedStorageContext()
+        } else {
+            context
+        }
+        protectedContext.getSharedPreferences("prayer_adhan_boot", Context.MODE_PRIVATE)
+    }
+
     override fun getActiveIds(): Set<Int> {
-        val raw = prefs.getStringSet("active_ids", emptySet()) ?: emptySet()
+        val raw = cpsPrefs.getStringSet("active_ids", emptySet()) ?: emptySet()
         return raw.mapNotNull { it.toIntOrNull() }.toSet()
     }
 
     override fun addActiveId(id: Int) {
         val ids = getActiveIds().toMutableSet()
         ids.add(id)
-        prefs.edit { putStringSet("active_ids", ids.map { it.toString() }.toSet()) }
+        cpsPrefs.edit { putStringSet("active_ids", ids.map { it.toString() }.toSet()) }
     }
 
     override fun removeActiveId(id: Int) {
         val ids = getActiveIds().toMutableSet()
         if (ids.remove(id)) {
-            prefs.edit { putStringSet("active_ids", ids.map { it.toString() }.toSet()) }
+            cpsPrefs.edit { putStringSet("active_ids", ids.map { it.toString() }.toSet()) }
         }
     }
 
     override fun clearActiveIds() {
-        prefs.edit { remove("active_ids") }
+        cpsPrefs.edit { remove("active_ids") }
     }
 
-    override fun getPendingAlarmsJson(): String? =
-        prefs.getString("pending_alarms_json", null)
+    override fun getPendingAlarmsJson(): String? = dpsPrefs.getString("pending_alarms_json", null)
 
     override fun setPendingAlarmsJson(json: String?) {
-        prefs.edit {
+        dpsPrefs.edit {
             if (json == null) remove("pending_alarms_json")
             else putString("pending_alarms_json", json)
+        }
+        // Cleanup CPS key if it exists
+        if (cpsPrefs.contains("pending_alarms_json")) {
+            cpsPrefs.edit { remove("pending_alarms_json") }
         }
     }
 
     override fun setNeedsReschedule(needs: Boolean) {
-        prefs.edit { putBoolean("needs_reschedule_after_boot", needs) }
+        dpsPrefs.edit { putBoolean("needs_reschedule_after_boot", needs) }
     }
 
     override fun needsReschedule(): Boolean =
-        prefs.getBoolean("needs_reschedule_after_boot", false)
+        dpsPrefs.getBoolean("needs_reschedule_after_boot", false)
 }
 
 class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManager {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    override fun scheduleExact(id: Int, name: String, triggerMs: Long): Boolean {
+    override fun scheduleExact(id: Int, name: String, triggerMs: Long, sound: String): Boolean {
         if (!canScheduleExact()) return false
         
-        val pi = pendingIntent(id, name, triggerMs)
+        val pi = pendingIntent(id, name, triggerMs, sound)
         val showIntent = PendingIntent.getActivity(
             context,
             id,
@@ -76,7 +90,7 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
     }
 
     override fun cancel(id: Int) {
-        alarmManager.cancel(pendingIntent(id, "", 0L))
+        alarmManager.cancel(pendingIntent(id, "", 0L, "adhan"))
     }
 
     override fun cancelAll(ids: Set<Int>) {
@@ -97,12 +111,14 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
         notificationId: Int,
         prayerName: String,
         triggerAtMillis: Long,
+        sound: String,
     ): PendingIntent {
         val intent = Intent(context, AdhanReceiver::class.java).apply {
             action = "com.tilawa.app.prayer.ACTION_FIRE_ADHAN"
             putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, notificationId)
             putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, prayerName)
             putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, triggerAtMillis)
+            putExtra(AdhanScheduler.EXTRA_SOUND, sound)
         }
         return PendingIntent.getBroadcast(context, notificationId, intent, piFlags())
     }

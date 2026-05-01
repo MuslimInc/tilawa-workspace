@@ -37,6 +37,9 @@ internal class AdhanReceiver : BroadcastReceiver() {
             action = AdhanPlaybackService.ACTION_PLAY
             putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, notificationId)
             putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, prayerName)
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, scheduledMs)
+            putExtra(AdhanScheduler.EXTRA_SOUND, intent.getStringExtra(AdhanScheduler.EXTRA_SOUND) ?: "adhan")
+            putExtra("receiver_time", System.currentTimeMillis())
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(context, serviceIntent)

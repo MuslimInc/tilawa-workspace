@@ -17,6 +17,7 @@ class PlaybackLogicTest {
         val intent = mockk<Intent>()
         every { intent.action } returns "com.tilawa.app.prayer.ACTION_PLAY"
         every { intent.getStringExtra(any()) } returns "fajr"
+        every { intent.getLongExtra(any(), any()) } returns 0L
         
         logic.handleIntent(intent)
         verify { mockAnalytics.logEvent(PrayerEvents.PLAYBACK_STARTED, any()) }
@@ -35,10 +36,16 @@ class PlaybackLogicTest {
     fun `handleIntent PLAY`() {
         val intent = mockk<Intent>()
         every { intent.action } returns "com.tilawa.app.prayer.ACTION_PLAY"
-        every { intent.getStringExtra("prayer_name") } returns "fajr"
+        every { intent.getStringExtra(AdhanScheduler.EXTRA_PRAYER_NAME) } returns "fajr"
+        every { intent.getStringExtra(AdhanScheduler.EXTRA_SOUND) } returns "adhan_fajr"
+        every { intent.getLongExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, 0L) } returns 1000L
+        every { intent.getLongExtra("receiver_time", 0L) } returns 1100L
 
         val action = logic.handleIntent(intent) as PlaybackAction.PLAY
         assertEquals("fajr", action.prayerName)
+        assertEquals("adhan_fajr", action.sound)
+        assertEquals(1000L, action.scheduledMs)
+        assertEquals(1100L, action.receiverTime)
     }
 
     @Test

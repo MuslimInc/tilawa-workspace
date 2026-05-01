@@ -71,8 +71,11 @@ internal class AdhanPlaybackService : Service() {
     }
 
     private var isPlayingInternally = false
+    private var completedSuccessfully = false
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val startTime = System.currentTimeMillis()
+        
         if (intent?.action == ACTION_PLAY && isPlayingInternally) {
             Log.w(TAG, "Duplicate ACTION_PLAY ignored")
             analytics.logEvent(PrayerEvents.DUPLICATE_GUARD)
@@ -88,14 +91,29 @@ internal class AdhanPlaybackService : Service() {
             }
             is PlaybackAction.PLAY -> {
                 Log.d("AdhanPlaybackService", "ACTION_PLAY received")
-                startPlayback(action.prayerName)
+                
+                // Observability: Trigger Latency and Service Start Latency
+                if (action.scheduledMs > 0 && action.receiverTime > 0) {
+                    analytics.logEvent("prayer_trigger_delta", mapOf(
+                        "delta_ms" to (action.receiverTime - action.scheduledMs),
+                        "prayer_name" to action.prayerName
+                    ))
+                }
+                if (action.receiverTime > 0) {
+                    analytics.logEvent("prayer_service_start_latency", mapOf(
+                        "latency_ms" to (startTime - action.receiverTime),
+                        "prayer_name" to action.prayerName
+                    ))
+                }
+
+                startPlayback(action.prayerName, action.sound)
             }
             PlaybackAction.NONE -> Unit
         }
         return START_NOT_STICKY
     }
 
-    private fun startPlayback(prayerName: String) {
+    private fun startPlayback(prayerName: String, sound: String) {
         val notification = buildNotification(prayerName)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -109,9 +127,14 @@ internal class AdhanPlaybackService : Service() {
 
         acquireWakeLock()
         
-        Log.d(TAG, "startPlayback: initializing MediaPlayer")
+        Log.d(TAG, "startPlayback: initializing MediaPlayer for sound: $sound")
         try {
-            val adhanResId = resources.getIdentifier("adhan", "raw", packageName)
+            var adhanResId = resources.getIdentifier(sound, "raw", packageName)
+            if (adhanResId == 0) {
+                Log.w(TAG, "Sound resource '$sound' not found, falling back to 'adhan'")
+                adhanResId = resources.getIdentifier("adhan", "raw", packageName)
+            }
+            
             if (adhanResId == 0) {
                 Log.e(TAG, "Adhan resource not found")
                 stopSelf()
@@ -132,6 +155,7 @@ internal class AdhanPlaybackService : Service() {
                 setOnCompletionListener {
                     Log.i(TAG, "Playback completed")
                     analytics.logEvent(PrayerEvents.PLAYBACK_COMPLETED)
+                    completedSuccessfully = true
                     isPlayingInternally = false
                     // Keep the notification but stop the foreground service status
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -196,6 +220,7 @@ internal class AdhanPlaybackService : Service() {
                 e,
                 mapOf(
                     "prayer_name" to prayerName,
+                    "sound" to sound,
                     "exact_alarm_permission_granted" to AdhanScheduler.canScheduleExact(this),
                     "notification_permission_granted" to nm.areNotificationsEnabled(),
                     "device_manufacturer" to Build.MANUFACTURER,
@@ -221,6 +246,13 @@ internal class AdhanPlaybackService : Service() {
     }
 
     override fun onDestroy() {
+        if (!completedSuccessfully && isPlayingInternally) {
+            Log.w(TAG, "Abnormal termination: service destroyed before completion")
+            analytics.logEvent("prayer_service_abnormal_termination", mapOf(
+                "reason" to "onDestroy_without_completion",
+                "device_manufacturer" to Build.MANUFACTURER
+            ))
+        }
         stopPlayback()
         super.onDestroy()
     }

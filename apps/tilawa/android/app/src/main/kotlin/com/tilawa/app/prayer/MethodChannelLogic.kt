@@ -24,6 +24,7 @@ internal class MethodChannelLogic(
                 val id = (arguments?.get("id") as? Number)?.toInt()
                 val triggerMs = (arguments?.get("triggerAtMillis") as? Number)?.toLong()
                 val name = (arguments?.get("prayerName") as? String) ?: ""
+                val sound = (arguments?.get("sound") as? String) ?: (if (name.lowercase() == "fajr") "adhan_fajr" else "adhan")
                 
                 analytics?.logEvent(PrayerEvents.SCHEDULE_STARTED, commonProps + mapOf(
                     "prayer_name" to name,
@@ -33,7 +34,7 @@ internal class MethodChannelLogic(
                 if (id == null || triggerMs == null) {
                     result.error("BAD_ARGS", "id and triggerAtMillis required", null)
                 } else {
-                    val ok = scheduler.schedule(id, name, triggerMs)
+                    val ok = scheduler.schedule(id, name, triggerMs, sound)
                     if (ok) {
                         analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, commonProps + mapOf(
                             "prayer_name" to name,
@@ -64,14 +65,15 @@ internal class MethodChannelLogic(
             "persistPendingAlarms" -> {
                 @Suppress("UNCHECKED_CAST")
                 val items = arguments?.get("alarms") as? List<Map<String, Any>> ?: emptyList()
-                val triples = items.mapNotNull { entry ->
+                val alarms = items.mapNotNull { entry ->
                     val id = (entry["id"] as? Number)?.toInt() ?: return@mapNotNull null
                     val name = (entry["name"] as? String).orEmpty()
                     val trigger = (entry["triggerAtMillis"] as? Number)?.toLong()
                         ?: return@mapNotNull null
-                    Triple(id, name, trigger)
+                    val sound = (entry["sound"] as? String) ?: (if (name.lowercase() == "fajr") "adhan_fajr" else "adhan")
+                    AlarmMetadata(id, name, trigger, sound)
                 }
-                bootReceiver.persistPendingAlarms(triples)
+                bootReceiver.persistPendingAlarms(alarms)
                 result.success(null)
             }
             "clearPendingAlarms" -> {
@@ -96,6 +98,7 @@ internal class MethodChannelLogic(
                 // Manual test button (Debug/Profile only on Flutter side)
                 val id = (arguments?.get("id") as? Number)?.toInt() ?: 999999
                 val name = (arguments?.get("name") as? String) ?: "test"
+                val sound = (arguments?.get("sound") as? String) ?: "adhan"
                 val delayMs = (arguments?.get("delayMs") as? Number)?.toLong() ?: 10000L
                 val triggerAt = System.currentTimeMillis() + delayMs
                 
@@ -105,7 +108,7 @@ internal class MethodChannelLogic(
                     "is_manual_test" to true
                 ))
                 
-                scheduler.schedule(id, name, triggerAt)
+                scheduler.schedule(id, name, triggerAt, sound)
                 result.success(null)
             }
             else -> result.notImplemented()
@@ -114,7 +117,7 @@ internal class MethodChannelLogic(
 }
 
 interface BootReceiverProxy {
-    fun persistPendingAlarms(entries: List<Triple<Int, String, Long>>)
+    fun persistPendingAlarms(entries: List<AlarmMetadata>)
     fun clearPendingAlarms()
 }
 

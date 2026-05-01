@@ -26,6 +26,12 @@ internal class PrayerNotificationsWatchdogWorker(
         analytics.logEvent(PrayerEvents.WATCHDOG_TRIGGERED)
         Log.d(TAG, "Prayer notification watchdog started")
 
+        val nm = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (!nm.areNotificationsEnabled()) {
+            Log.i(TAG, "Notification permission revoked, canceling all native alarms")
+            AdhanScheduler.cancelAll(applicationContext)
+        }
+
         val completion = CountDownLatch(1)
         val workerResult = AtomicReference<Result>(Result.retry())
         val mainHandler = Handler(Looper.getMainLooper())

@@ -30,15 +30,15 @@ internal object PrayerAdhanMethodChannel {
                     val nm = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     return nm.areNotificationsEnabled()
                 }
-                override fun schedule(id: Int, name: String, triggerMs: Long) =
-                    AdhanScheduler.schedule(appContext, id, name, triggerMs)
+                override fun schedule(id: Int, name: String, triggerMs: Long, sound: String) =
+                    AdhanScheduler.schedule(appContext, id, name, triggerMs, sound)
                 override fun cancel(id: Int) =
                     AdhanScheduler.cancel(appContext, id)
                 override fun cancelAll() =
                     AdhanScheduler.cancelAll(appContext)
             },
             bootReceiver = object : BootReceiverProxy {
-                override fun persistPendingAlarms(entries: List<Triple<Int, String, Long>>) =
+                override fun persistPendingAlarms(entries: List<AlarmMetadata>) =
                     PrayerBootReceiver.persistPendingAlarms(appContext, entries)
                 override fun clearPendingAlarms() =
                     PrayerBootReceiver.clearPendingAlarms(appContext)

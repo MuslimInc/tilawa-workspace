@@ -34,10 +34,10 @@ class PrayerBootReceiverTest {
     fun `onReceive re-arms alarms on BOOT_COMPLETED`() {
         // Setup persisted alarms
         val triggerAt = System.currentTimeMillis() + 3600000
-        val entries = listOf(Triple(200, "fajr", triggerAt))
+        val entries = listOf(AlarmMetadata(200, "fajr", triggerAt, "adhan_fajr"))
         PrayerBootReceiver.persistPendingAlarms(context, entries)
         
-        every { AdhanScheduler.schedule(any(), any(), any(), any()) } returns true
+        every { AdhanScheduler.schedule(any(), any(), any(), any(), any()) } returns true
         every { PrayerNotificationsWatchdogScheduler.enqueuePeriodic(any()) } just Runs
         every { PrayerNotificationsWatchdogScheduler.enqueueOneTime(any()) } just Runs
 
@@ -45,15 +45,14 @@ class PrayerBootReceiverTest {
         receiver.onReceive(context, intent)
 
         // Verify re-arm
-        verify { AdhanScheduler.schedule(context, 200, "fajr", triggerAt) }
+        verify { AdhanScheduler.schedule(context, 200, "fajr", triggerAt, "adhan_fajr") }
         
         // Verify watchdog scheduling
         verify { PrayerNotificationsWatchdogScheduler.enqueuePeriodic(context) }
         verify { PrayerNotificationsWatchdogScheduler.enqueueOneTime(context) }
         
         // Verify needs_reschedule flag
-        val prefs = context.getSharedPreferences("prayer_adhan_alarms", Context.MODE_PRIVATE)
-        assertTrue(prefs.getBoolean("needs_reschedule_after_boot", false))
+        assertTrue(DefaultPrayerStorage(context).needsReschedule())
     }
 
     @Test
@@ -61,20 +60,20 @@ class PrayerBootReceiverTest {
         val pastTrigger = System.currentTimeMillis() - 1000
         val futureTrigger = System.currentTimeMillis() + 1000
         val entries = listOf(
-            Triple(201, "expired", pastTrigger),
-            Triple(202, "future", futureTrigger)
+            AlarmMetadata(201, "expired", pastTrigger, "adhan"),
+            AlarmMetadata(202, "future", futureTrigger, "adhan")
         )
         PrayerBootReceiver.persistPendingAlarms(context, entries)
 
-        every { AdhanScheduler.schedule(any(), any(), any(), any()) } returns true
+        every { AdhanScheduler.schedule(any(), any(), any(), any(), any()) } returns true
         every { PrayerNotificationsWatchdogScheduler.enqueuePeriodic(any()) } just Runs
         every { PrayerNotificationsWatchdogScheduler.enqueueOneTime(any()) } just Runs
 
         val intent = Intent(Intent.ACTION_TIMEZONE_CHANGED)
         receiver.onReceive(context, intent)
 
-        verify(exactly = 0) { AdhanScheduler.schedule(any(), 201, any(), any()) }
-        verify(exactly = 1) { AdhanScheduler.schedule(any(), 202, any(), any()) }
+        verify(exactly = 0) { AdhanScheduler.schedule(any(), 201, any(), any(), any()) }
+        verify(exactly = 1) { AdhanScheduler.schedule(any(), 202, any(), any(), any()) }
     }
 
     @Test

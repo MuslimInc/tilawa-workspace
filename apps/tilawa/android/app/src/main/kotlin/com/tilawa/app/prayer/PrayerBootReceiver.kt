@@ -27,19 +27,21 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
         private const val FIELD_ID = "id"
         private const val FIELD_NAME = "name"
         private const val FIELD_TRIGGER_MS = "trigger"
+        private const val FIELD_SOUND = "sound"
 
         @JvmStatic
         fun persistPendingAlarms(
             context: Context,
-            entries: List<Triple<Int, String, Long>>,
+            entries: List<AlarmMetadata>,
         ) {
             val arr = JSONArray()
             entries.forEach {
                 arr.put(
                     JSONObject().apply {
-                        put(FIELD_ID, it.first)
-                        put(FIELD_NAME, it.second)
-                        put(FIELD_TRIGGER_MS, it.third)
+                        put(FIELD_ID, it.id)
+                        put(FIELD_NAME, it.name)
+                        put(FIELD_TRIGGER_MS, it.triggerMs)
+                        put(FIELD_SOUND, it.sound)
                     },
                 )
             }
@@ -83,8 +85,8 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
                     val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     return nm.areNotificationsEnabled()
                 }
-                override fun schedule(id: Int, name: String, triggerMs: Long) =
-                    AdhanScheduler.schedule(context, id, name, triggerMs)
+                override fun schedule(id: Int, name: String, triggerMs: Long, sound: String) =
+                    AdhanScheduler.schedule(context, id, name, triggerMs, sound)
             },
             watchdog = object : WatchdogProxy {
                 override fun enqueuePeriodic() =

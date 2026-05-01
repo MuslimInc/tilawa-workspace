@@ -8,10 +8,7 @@ abstract class PerformanceMonitoringService {
   /// Auto-instrument an async operation with a trace.
   ///
   /// Handles start/stop automatically. Never throws.
-  Future<T> traceOperation<T>(
-    String name,
-    Future<T> Function() operation,
-  );
+  Future<T> traceOperation<T>(String name, Future<T> Function() operation);
 
   /// Start a manual trace. Returns null if collection is disabled.
   ///

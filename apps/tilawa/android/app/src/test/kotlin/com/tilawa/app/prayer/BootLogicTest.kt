@@ -21,7 +21,7 @@ class BootLogicTest {
     fun `reArmAlarms logs successes`() {
         val json = """[{"id": 2, "name": "dhuhr", "trigger": 1500}]"""
         every { mockStorage.getPendingAlarmsJson() } returns json
-        every { mockScheduler.schedule(any(), any(), any()) } returns true
+        every { mockScheduler.schedule(any(), any(), any(), any()) } returns true
         
         logic.reArmAlarms(1000L)
         
@@ -44,7 +44,7 @@ class BootLogicTest {
             [
                 {"id": 1, "name": "fajr", "trigger": 500},
                 {"id": 2, "name": "dhuhr", "trigger": 1500},
-                {"id": 3, "name": "asr", "trigger": 2500}
+                {"id": 3, "name": "asr", "trigger": 2500, "sound": "adhan_fajr"}
             ]
         """.trimIndent()
         
@@ -53,11 +53,11 @@ class BootLogicTest {
         logic.reArmAlarms(now)
         
         // id 1 is in the past (500 <= 1000), should NOT be scheduled
-        verify(exactly = 0) { mockScheduler.schedule(1, any(), any()) }
+        verify(exactly = 0) { mockScheduler.schedule(1, any(), any(), any()) }
         
         // id 2 and 3 are in the future
-        verify { mockScheduler.schedule(any(), any(), any()) }
-        verify { mockScheduler.schedule(any(), any(), any()) }
+        verify { mockScheduler.schedule(2, "dhuhr", 1500L, "adhan") }
+        verify { mockScheduler.schedule(3, "asr", 2500L, "adhan_fajr") }
     }
 
     @Test
@@ -67,7 +67,7 @@ class BootLogicTest {
         // Should not throw exception
         logic.reArmAlarms(1000L)
         
-        verify(exactly = 0) { mockScheduler.schedule(any(), any(), any()) }
+        verify(exactly = 0) { mockScheduler.schedule(any(), any(), any(), any()) }
     }
     
     @Test
@@ -76,6 +76,17 @@ class BootLogicTest {
         
         logic.reArmAlarms(1000L)
         
-        verify(exactly = 0) { mockScheduler.schedule(any(), any(), any()) }
+        verify(exactly = 0) { mockScheduler.schedule(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `reArmAlarms handles JSON without sound field (legacy)`() {
+        val json = """[{"id": 2, "name": "fajr", "trigger": 1500}]"""
+        every { mockStorage.getPendingAlarmsJson() } returns json
+        
+        logic.reArmAlarms(1000L)
+        
+        // Should default to "adhan"
+        verify { mockScheduler.schedule(2, "fajr", 1500L, "adhan") }
     }
 }

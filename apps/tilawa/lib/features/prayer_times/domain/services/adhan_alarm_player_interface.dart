@@ -22,6 +22,7 @@ abstract interface class IAdhanAlarmPlayer {
     required int id,
     required DateTime scheduledTime,
     required String prayerName,
+    String? sound,
   });
 
   /// Cancel a previously scheduled adhan by [id].
@@ -57,9 +58,11 @@ class PendingAdhanAlarm {
     required this.id,
     required this.prayerName,
     required this.triggerAt,
+    this.sound,
   });
 
   final int id;
   final String prayerName;
   final DateTime triggerAt;
+  final String? sound;
 }

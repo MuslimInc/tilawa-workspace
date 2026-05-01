@@ -25,6 +25,7 @@ internal object AdhanScheduler {
     const val EXTRA_PRAYER_NAME = "prayer_name"
     const val EXTRA_NOTIFICATION_ID = "notification_id"
     const val EXTRA_SCHEDULED_MS = "scheduled_ms"
+    const val EXTRA_SOUND = "sound"
 
     private var storage: PrayerStorage? = null
     private var alarmManager: PrayerAlarmManager? = null
@@ -58,7 +59,32 @@ internal object AdhanScheduler {
             return false
         }
 
-        if (am.scheduleExact(notificationId, prayerName, triggerAtMillis)) {
+        // Derive sound name: adhan_fajr for Fajr, else adhan
+        val sound = if (prayerName.lowercase() == "fajr") "adhan_fajr" else "adhan"
+
+        if (am.scheduleExact(notificationId, prayerName, triggerAtMillis, sound)) {
+            st.addActiveId(notificationId)
+            return true
+        }
+        return false
+    }
+
+    // Overload for manual sound specification (e.g. from boot re-arm)
+    fun schedule(
+        context: Context,
+        notificationId: Int,
+        prayerName: String,
+        triggerAtMillis: Long,
+        sound: String,
+    ): Boolean {
+        val am = getAlarmManager(context)
+        val st = getStorage(context)
+
+        if (!am.canScheduleExact()) {
+            return false
+        }
+
+        if (am.scheduleExact(notificationId, prayerName, triggerAtMillis, sound)) {
             st.addActiveId(notificationId)
             return true
         }
