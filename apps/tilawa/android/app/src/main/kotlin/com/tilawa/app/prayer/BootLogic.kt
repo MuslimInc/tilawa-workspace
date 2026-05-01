@@ -90,6 +90,7 @@ internal class BootLogic(
 }
 
 interface AdhanSchedulerProxy {
+    fun getContext(): Context
     fun canScheduleExact(): Boolean
     fun areNotificationsEnabled(): Boolean
     fun schedule(id: Int, name: String, triggerMs: Long, sound: String): Boolean

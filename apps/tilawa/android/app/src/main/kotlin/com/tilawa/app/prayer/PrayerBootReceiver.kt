@@ -68,6 +68,11 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
                     "action" to intent.action,
                     "uptime_millis" to android.os.SystemClock.elapsedRealtime()
                 ))
+                AdhanQALogger.logEvent(
+                    context = context,
+                    eventName = "BOOT_RECEIVED",
+                    details = "Action: ${intent.action}"
+                )
                 reArmAlarms(context)
             }
             else -> Unit
@@ -80,6 +85,7 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
         val logic = BootLogic(
             storage = storage,
             scheduler = object : AdhanSchedulerProxy {
+                override fun getContext() = context
                 override fun canScheduleExact() = AdhanScheduler.canScheduleExact(context)
                 override fun areNotificationsEnabled(): Boolean {
                     val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

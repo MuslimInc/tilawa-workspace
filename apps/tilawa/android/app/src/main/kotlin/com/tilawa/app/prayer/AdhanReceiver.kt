@@ -29,6 +29,16 @@ internal class AdhanReceiver : BroadcastReceiver() {
             "delay_from_scheduled_ms" to if (scheduledMs > 0) System.currentTimeMillis() - scheduledMs else 0
         ))
 
+        AdhanQALogger.logEvent(
+            context = context,
+            eventName = "RECEIVER_TRIGGERED",
+            alarmId = notificationId,
+            prayerName = prayerName,
+            scheduledMs = scheduledMs,
+            triggerMs = System.currentTimeMillis(),
+            deltaMs = if (scheduledMs > 0) System.currentTimeMillis() - scheduledMs else null
+        )
+
         Log.d("AdhanReceiver", "Alarm fired: id=$notificationId, name=$prayerName")
         if (notificationId < 0) {
             return

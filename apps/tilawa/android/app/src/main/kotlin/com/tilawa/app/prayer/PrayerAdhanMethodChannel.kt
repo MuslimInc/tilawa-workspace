@@ -25,6 +25,7 @@ internal object PrayerAdhanMethodChannel {
         val storage = DefaultPrayerStorage(appContext)
         val activeLogic = logic ?: MethodChannelLogic(
             scheduler = object : ExtendedAdhanSchedulerProxy {
+                override fun getContext() = appContext
                 override fun canScheduleExact() = AdhanScheduler.canScheduleExact(appContext)
                 override fun areNotificationsEnabled(): Boolean {
                     val nm = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

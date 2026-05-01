@@ -108,7 +108,51 @@ internal class MethodChannelLogic(
                     "is_manual_test" to true
                 ))
                 
-                scheduler.schedule(id, name, triggerAt, sound)
+                AdhanQALogger.logEvent(
+                    context = scheduler.getContext(),
+                    eventName = "QA_TEST_ADHAN_SCHEDULE_REQUESTED",
+                    alarmId = id,
+                    prayerName = name,
+                    scheduledMs = triggerAt,
+                    sound = sound
+                )
+
+                val ok = scheduler.schedule(id, name, triggerAt, sound)
+                if (ok) {
+                    AdhanQALogger.logEvent(
+                        context = scheduler.getContext(),
+                        eventName = "QA_TEST_ADHAN_SCHEDULED",
+                        alarmId = id,
+                        prayerName = name,
+                        scheduledMs = triggerAt,
+                        sound = sound
+                    )
+                }
+                result.success(ok)
+            }
+            "setQALoggingEnabled" -> {
+                val enabled = (arguments?.get("enabled") as? Boolean) ?: false
+                AdhanQALogger.isEnabled = enabled
+                result.success(null)
+            }
+            "logQAEvent" -> {
+                val event = (arguments?.get("event") as? String) ?: "unknown"
+                val prayer = (arguments?.get("prayer") as? String)
+                val details = (arguments?.get("details") as? String)
+                AdhanQALogger.logEvent(
+                    context = scheduler.getContext(),
+                    eventName = event,
+                    source = "Flutter",
+                    prayerName = prayer,
+                    details = details
+                )
+                result.success(null)
+            }
+            "getQALogs" -> {
+                result.success(AdhanQALogger.getLogs(scheduler.getContext()))
+            }
+            "clearQALogs" -> {
+                AdhanQALogger.clearLogs(scheduler.getContext())
                 result.success(null)
             }
             else -> result.notImplemented()

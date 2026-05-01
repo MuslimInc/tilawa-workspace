@@ -106,6 +106,16 @@ internal class AdhanPlaybackService : Service() {
                     ))
                 }
 
+                AdhanQALogger.logEvent(
+                    context = this,
+                    eventName = "SERVICE_STARTED",
+                    prayerName = action.prayerName,
+                    scheduledMs = action.scheduledMs,
+                    triggerMs = startTime,
+                    latencyMs = if (action.receiverTime > 0) startTime - action.receiverTime else null,
+                    sound = action.sound
+                )
+
                 startPlayback(action.prayerName, action.sound)
             }
             PlaybackAction.NONE -> Unit
@@ -155,6 +165,10 @@ internal class AdhanPlaybackService : Service() {
                 setOnCompletionListener {
                     Log.i(TAG, "Playback completed")
                     analytics.logEvent(PrayerEvents.PLAYBACK_COMPLETED)
+                    AdhanQALogger.logEvent(
+                        context = this@AdhanPlaybackService,
+                        eventName = "PLAYBACK_COMPLETED"
+                    )
                     completedSuccessfully = true
                     isPlayingInternally = false
                     // Keep the notification but stop the foreground service status
@@ -180,6 +194,11 @@ internal class AdhanPlaybackService : Service() {
 
                 prepare()
                 isPlayingInternally = true
+                AdhanQALogger.logEvent(
+                    context = this@AdhanPlaybackService,
+                    eventName = "PLAYBACK_STARTED",
+                    sound = sound
+                )
             }
 
             // Request focus as an ALARM
@@ -252,7 +271,16 @@ internal class AdhanPlaybackService : Service() {
                 "reason" to "onDestroy_without_completion",
                 "device_manufacturer" to Build.MANUFACTURER
             ))
+            AdhanQALogger.logEvent(
+                context = this,
+                eventName = "ABNORMAL_TERMINATION",
+                details = "onDestroy without completion"
+            )
         }
+        AdhanQALogger.logEvent(
+            context = this,
+            eventName = "SERVICE_DESTROYED"
+        )
         stopPlayback()
         super.onDestroy()
     }

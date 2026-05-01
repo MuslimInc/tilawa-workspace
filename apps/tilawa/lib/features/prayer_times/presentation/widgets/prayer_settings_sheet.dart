@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/services/adhan_qa_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
@@ -23,6 +24,9 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
     super.initState();
     _settings = context.read<PrayerTimesBloc>().state.settings;
     context.read<PrayerPermissionsCubit>().checkCapability();
+    if (AdhanQAService.isEnabled) {
+      AdhanQAService().init();
+    }
   }
 
   void _updateSettings(PrayerSettingsEntity newSettings) {
@@ -191,6 +195,10 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                           );
                         },
                       ),
+                      if (AdhanQAService.isEnabled) ...[
+                        SizedBox(height: tokens.spaceLarge),
+                        const _QASection(),
+                      ],
                       SizedBox(height: tokens.spaceLarge),
                     ],
                   ),
@@ -427,6 +435,159 @@ class _AdjustmentSlider extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _QASection extends StatefulWidget {
+  const _QASection();
+
+  @override
+  State<_QASection> createState() => _QASectionState();
+}
+
+class _QASectionState extends State<_QASection> {
+  final AdhanQAService _qaService = AdhanQAService();
+  bool _isLoading = false;
+
+  Future<void> _schedule(int minutes) async {
+    setState(() => _isLoading = true);
+    try {
+      await _qaService.scheduleTestAdhan(delayMinutes: minutes);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Scheduled Adhan in $minutes minutes')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _cancel() async {
+    setState(() => _isLoading = true);
+    try {
+      await _qaService.cancelTestAdhan();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Cancelled test Adhan')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _viewLogs() async {
+    final logs = await _qaService.getLogs();
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Adhan QA Logs'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: SingleChildScrollView(
+            child: SelectableText(
+              logs,
+              style: const TextStyle(fontSize: 10, fontFamily: 'monospace'),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await _qaService.clearLogs();
+              if (context.mounted) Navigator.pop(context);
+            },
+            child: const Text('Clear'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionTitle(
+          title: 'QA TOOLS (Adhan Native)',
+          tokens: tokens,
+          theme: theme,
+        ),
+        Container(
+          padding: EdgeInsets.all(tokens.spaceMedium),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.errorContainer.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(tokens.radiusMedium),
+            border: Border.all(
+              color: theme.colorScheme.error.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Column(
+            children: [
+              Wrap(
+                spacing: tokens.spaceSmall,
+                runSpacing: tokens.spaceSmall,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: _isLoading ? null : () => _schedule(2),
+                    child: const Text('Schedule 2m'),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: _isLoading ? null : () => _schedule(5),
+                    child: const Text('Schedule 5m'),
+                  ),
+                  OutlinedButton(
+                    onPressed: _isLoading ? null : _cancel,
+                    child: const Text('Cancel Test'),
+                  ),
+                  TextButton.icon(
+                    onPressed: _viewLogs,
+                    icon: const Icon(Icons.list_alt),
+                    label: const Text('Logs'),
+                  ),
+                ],
+              ),
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: LinearProgressIndicator(),
+                ),
+              const SizedBox(height: 8),
+              Text(
+                'Tests real AlarmManager pipeline. Close app/lock device to verify.',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.error,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
