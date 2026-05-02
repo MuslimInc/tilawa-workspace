@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
@@ -43,22 +44,48 @@ class AppRouter {
   /// Navigate to a notification destination from a cold start.
   /// Goes to Home first, then pushes the target so back button works.
   static void navigateFromColdStart(String location, {Object? extra}) {
-    disableStateRestoration = false;
-    pendingStartupNotificationLaunch = false;
-    final String homeLocation = const HomeRoute().location;
-    router.go(homeLocation);
-    if (location != homeLocation) {
-      router.push(location, extra: extra);
-    }
+    _navigateToNotificationLocation(location, extra: extra, coldStart: true);
   }
 
   /// Navigate to a notification destination while the app is already running
   /// (foreground or background tap). Goes to Home first, then pushes the target.
   static void navigateToNotification(String location, {Object? extra}) {
-    final String homeLocation = const HomeRoute().location;
-    router.go(homeLocation);
-    if (location != homeLocation) {
-      router.push(location, extra: extra);
+    _navigateToNotificationLocation(location, extra: extra, coldStart: false);
+  }
+
+  static void _navigateToNotificationLocation(
+    String location, {
+    Object? extra,
+    required bool coldStart,
+  }) {
+    final bool isPrayerStatus =
+        location == const PrayerNotificationStatusRoute().location;
+    if (isPrayerStatus) {
+      logger.d(
+        '[AppRouter] NAVIGATION_TO_PRAYER_STATUS_REQUESTED coldStart=$coldStart routerReady=${navigatorKey.currentContext != null}',
+      );
+    }
+
+    try {
+      disableStateRestoration = false;
+      pendingStartupNotificationLaunch = false;
+      final String homeLocation = const HomeRoute().location;
+      router.go(homeLocation);
+      if (location != homeLocation) {
+        router.push(location, extra: extra);
+      }
+      if (isPrayerStatus) {
+        logger.d('[AppRouter] NAVIGATION_TO_PRAYER_STATUS_SUCCESS');
+      }
+    } catch (e, stackTrace) {
+      if (isPrayerStatus) {
+        logger.e(
+          '[AppRouter] NAVIGATION_TO_PRAYER_STATUS_FAILED: $e',
+          error: e,
+          stackTrace: stackTrace,
+        );
+      }
+      rethrow;
     }
   }
 

@@ -82,20 +82,24 @@ apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/prayer/
 - **Notification Tap Deep Link**: Unified path from both native and local notifications.
 - **Prayer/Adhan Status Screen**: Real-time status UI using Tilawa UI Kit and atomic design.
 - **Stop Adhan Integration**: Native stop path invoked directly from the status screen.
-- **Cold-Start Buffer**: Implementation of a pending notification tap buffer in `PrayerAdhanMethodChannel.kt` to prevent tap loss during app launch.
+- **Cold-Start Buffer**: Native notification taps remain buffered until Dart consumes or acknowledges them.
+- **QA Blocker Fix**: Native payloads now match Flutter's prayer payload contract, startup initializes the prayer notification handler, duplicate launch processing no longer consumes unmatched taps, and Stop from the app uses native `ACTION_STOP`.
 - **Tilawa UI Kit Compliance**: 100% adherence to design tokens and component usage.
 
 ## Final Automated Test Evidence
 ### Flutter Tests
-- **Feature Tests**: `fvm flutter test test/features/prayer_times/` -> **102/102 PASSED**
-- **Service Tests**: `fvm flutter test test/core/services/prayer_adhan_notification_service_test.dart` -> **18/18 PASSED**
+- **Command**: `fvm flutter test test/features/prayer_times/ test/core/services/prayer_adhan_notification_service_test.dart test/main_test.dart`
+- **Status**: **146/146 PASSED**
+- **Key Coverage**: Native payload routing to `/prayer-notification-status`, native tap stream initialization, local payload parsing, status-screen payload rendering, and startup prayer handler registration.
 
 ### Native Android Tests
-- **Command**: `./gradlew clean :app:testDebugUnitTest`
-- **Status**: **PASSED**
-- **Key Coverage**: Added `notifyNotificationTapped buffers if channel not registered and flushes on register` test case.
+- **Command**: `./gradlew :app:testDebugUnitTest`
+- **Status**: **64/64 PASSED**
+- **Key Coverage**: `MainActivity.onNewIntent` action/payload routing, native tap buffer consume/ack behavior, and app Stop issuing `ACTION_STOP` to `AdhanPlaybackService`.
 
 ## Remaining Physical QA Blockers
+- **Notification Tap Smoke**: Killed/background/foreground notification taps must open the status screen with correct payload.
+- **Adhan Stop Smoke**: Stop from the status screen must stop playback and dismiss/update the foreground notification.
 - **Direct Boot**: Verified locked reboot behavior (Native re-arm).
 - **Screen-Off Behavior**: Survival of foreground service on aggressive OEMs (OPPO/ColorOS).
 - **App Swiped/Killed**: Playback survival and notification dismissal.
@@ -105,8 +109,8 @@ apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/prayer/
 - **Duplicate Prevention**: Verification of navigation stack hygiene.
 
 ## Release Decision
-- **Status**: **GO WITH CONDITIONS**
-- **Condition**: Only eligible for limited rollout after physical smoke QA passes.
+- **Status**: **LIMITED ROLLOUT BLOCKED**
+- **Condition**: Only eligible for limited rollout after notification tap / Adhan stop smoke QA passes on physical device.
 - **Full Production**: NO-GO until the full physical QA matrix passes.
 
 **Frozen commit**: `<TO_BE_FILLED_AFTER_COMMIT>`

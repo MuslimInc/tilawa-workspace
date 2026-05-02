@@ -2,19 +2,31 @@
 
 **Feature Branch**: `005-harden-prayer-notifications`  
 **Created**: 2026-05-02  
-**Status**: Frozen — Implementation Completed (2026-05-02)  
+**Status**: Frozen — QA Blocker Fix Completed (2026-05-02)
 **Input**: User description: "Harden Android prayer notifications and implement Direct Boot support"
 
 > [!IMPORTANT]
-> **FREEZE NOTE**: This feature branch is frozen after the cold-start notification tap fix and final automated verification. No further code, UI, architecture, or documentation changes should be made unless physical QA finds a real blocker.
+> **FREEZE NOTE**: This feature branch was temporarily unfrozen on 2026-05-02 only for the notification tap / Adhan stop redirect blocker. The targeted fix is complete, Flutter and native automated tests pass, and the branch is re-frozen. No further code, UI, architecture, or documentation changes should be made unless physical QA finds a real blocker.
 
 ## Final Verified Status
 - **Implementation**: Completed
-- **Automated Tests**: Passed (100% Flutter & Native)
+- **Automated Tests**: Passed (`146/146` Flutter prayer notification coverage, `64/64` native Android JVM tests)
 - **Physical QA**: Pending
-- **Branch**: Frozen
-- **Limited Rollout**: GO WITH CONDITIONS only after physical smoke QA
+- **Branch**: Re-frozen after blocker fix
+- **Limited Rollout**: BLOCKED until notification tap / Adhan stop smoke QA passes on device
 - **Full Production**: NO-GO until the full physical QA matrix passes
+
+## QA Blocker Fix - Notification Tap / Adhan Stop Redirect
+
+**Finding**: Native Adhan notification taps and some Flutter local prayer taps could fail to open `/prayer-notification-status`, especially on cold start.
+
+**Root cause**:
+- Native Adhan tap payloads did not match Flutter's prayer notification contract (`type`, `prayer`/`prayer_name`, `scheduled_time_ms`), so Flutter could reject or fail to parse them.
+- Cold-start native taps were emitted before Dart had attached the tap listener, so the pending tap could be dropped.
+- Launch notification processing could mark unhandled local prayer taps as consumed before the prayer handler was initialized.
+- The in-app Stop path stopped the service directly instead of sending the native `ACTION_STOP` command path.
+
+**Fix**: Payload keys are now normalized across native and Flutter local notifications, native taps are buffered until Dart explicitly consumes/acks them, the prayer handler is registered during startup launch handling, router readiness/navigation logging was added, and app Stop now routes through the native `ACTION_STOP` foreground-service path.
 
 ## User Scenarios & Testing *(mandatory)*
 

@@ -1,5 +1,7 @@
 package com.tilawa.app.prayer
+import android.content.ComponentName
 import android.content.Intent
+import android.util.Log
 
 interface MethodResultProxy {
     fun success(result: Any?)
@@ -164,12 +166,21 @@ internal class MethodChannelLogic(
             }
             "stopAdhan" -> {
                 val context = scheduler.getContext()
-                val stopIntent = Intent(context, AdhanPlaybackService::class.java).apply {
-                    action = AdhanPlaybackService.ACTION_STOP
+                val stopIntent = Intent(AdhanPlaybackService.ACTION_STOP)
+                stopIntent.component = ComponentName(
+                    context.packageName,
+                    AdhanPlaybackService::class.java.name
+                )
+                Log.d("MethodChannelLogic", "STOP_ADHAN_FROM_APP_REQUESTED")
+                try {
+                    context.startService(stopIntent)
+                    analytics?.logEvent("adhan_stop_tapped_from_app")
+                    Log.d("MethodChannelLogic", "STOP_ADHAN_FROM_APP_NATIVE_SUCCESS")
+                    result.success(true)
+                } catch (t: Throwable) {
+                    Log.e("MethodChannelLogic", "STOP_ADHAN_FROM_APP_NATIVE_FAILED", t)
+                    result.error("STOP_ADHAN_FAILED", t.message, null)
                 }
-                context.stopService(stopIntent)
-                analytics?.logEvent("adhan_stop_tapped_from_app")
-                result.success(true)
             }
             "isAdhanPlaying" -> {
                 result.success(AdhanPlaybackService.isRunning)

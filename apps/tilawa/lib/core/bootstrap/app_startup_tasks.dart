@@ -642,6 +642,10 @@ class AppStartupTasks {
             getIt<IAthkarNotificationService>();
         await athkarService.initialize();
 
+        final IPrayerAdhanNotificationService prayerService =
+            getIt<IPrayerAdhanNotificationService>();
+        await prayerService.initialize();
+
         final IDownloadNotificationService downloadNotificationService =
             getIt<IDownloadNotificationService>();
         await downloadNotificationService.initialize();

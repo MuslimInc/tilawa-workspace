@@ -139,6 +139,9 @@ class PrayerAdhanNotificationService
 
       // Handle native notification taps (from AdhanPlaybackService)
       _adhanPlayer.onNotificationTapped.listen((payload) {
+        logger.d(
+          '${PrayerNotificationConfig.logTag} FLUTTER_TAP_PAYLOAD_RECEIVED source=native_method_channel',
+        );
         handleNotificationResponse(
           NotificationResponse(
             notificationResponseType:
@@ -354,6 +357,7 @@ class PrayerAdhanNotificationService
             PrayerNotificationConfig.payloadTypeKey:
                 PrayerNotificationConfig.payloadTypeValue,
             PrayerNotificationConfig.payloadPrayerKey: prayer.name,
+            'prayer_name': prayer.name,
             'prayer_key': prayer.name.toLowerCase(),
             PrayerNotificationConfig.payloadDateKey: _dateKey(dayTimes.date),
             'scheduled_time_ms': targetTime.millisecondsSinceEpoch,
@@ -637,7 +641,12 @@ class PrayerAdhanNotificationService
         PrayerNotificationConfig.payloadTypeKey:
             PrayerNotificationConfig.payloadTypeValue,
         PrayerNotificationConfig.payloadPrayerKey: prayer.name,
+        'prayer_name': prayer.name,
+        'prayer_key': prayer.name.toLowerCase(),
         PrayerNotificationConfig.payloadDateKey: _todayDateKey(),
+        'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+        'adhan_enabled': playAdhan,
+        'notification_id': testId,
       });
       final String channelUsed = playAdhan
           ? PrayerNotificationConfig.adhanChannelId
@@ -772,6 +781,11 @@ class PrayerAdhanNotificationService
             PrayerNotificationConfig.payloadTypeKey:
                 PrayerNotificationConfig.payloadTypeValue,
             PrayerNotificationConfig.payloadPrayerKey: 'debug',
+            'prayer_name': 'DEBUG_ADHAN',
+            'prayer_key': 'debug',
+            'scheduled_time_ms': triggerAt.millisecondsSinceEpoch,
+            'adhan_enabled': true,
+            'notification_id': testId,
           }),
         );
       }
@@ -783,6 +797,9 @@ class PrayerAdhanNotificationService
   Future<void> handleNotificationResponse(NotificationResponse response) async {
     try {
       final String? payload = response.payload;
+      logger.d(
+        '${PrayerNotificationConfig.logTag} FLUTTER_TAP_PAYLOAD_RECEIVED id=${response.id} hasPayload=${payload != null}',
+      );
       if (payload == null || !_isPrayerPayload(payload)) {
         return;
       }
@@ -794,6 +811,11 @@ class PrayerAdhanNotificationService
           final dynamic v = decoded[PrayerNotificationConfig.payloadPrayerKey];
           if (v is String) {
             prayerName = v;
+          } else {
+            final dynamic fallback = decoded['prayer_name'];
+            if (fallback is String) {
+              prayerName = fallback;
+            }
           }
         }
       } catch (_) {
@@ -839,13 +861,19 @@ class PrayerAdhanNotificationService
 
   void _navigateToPrayerStatus(String payload) {
     try {
+      logger.d(
+        '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_REQUESTED route=${const PrayerNotificationStatusRoute().location}',
+      );
       _navigationService.navigateToNotification(
         const PrayerNotificationStatusRoute().location,
         extra: payload,
       );
+      logger.d(
+        '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_SUCCESS',
+      );
     } catch (e) {
       logger.w(
-        '${PrayerNotificationConfig.logTag} Navigation to status failed: $e',
+        '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_FAILED: $e',
       );
     }
   }

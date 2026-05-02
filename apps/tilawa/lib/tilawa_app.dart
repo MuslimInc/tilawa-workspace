@@ -49,6 +49,9 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     // Process launch notification after first frame when router is ready
     SchedulerBinding.instance.addPostFrameCallback((_) {
+      logger.d(
+        'ROUTER_READY navigatorContext=${AppRouter.navigatorKey.currentContext != null}',
+      );
       _processLaunchNotificationIfNeeded();
       _scheduleUpdateCheck(
         delay: _initialUpdateCheckDelay,

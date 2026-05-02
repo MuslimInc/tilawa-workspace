@@ -22,15 +22,26 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   AndroidAdhanAlarmPlayer() {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'onNotificationTapped') {
-        final payload = call.arguments['payload'] as String?;
+        final args = call.arguments;
+        final payload = args is Map ? args['payload'] as String? : null;
         if (payload != null) {
-          _onNotificationTappedController.add(payload);
+          if (_onNotificationTappedController.hasListener) {
+            _emitNotificationTap(payload);
+            unawaited(_ackNotificationTap(payload));
+          } else {
+            logger.d(
+              '[AndroidAdhanAlarmPlayer] METHOD_CHANNEL_TAP_BUFFERED reason=no_flutter_listener',
+            );
+          }
         }
       }
     });
   }
 
-  final _onNotificationTappedController = StreamController<String>.broadcast();
+  late final _onNotificationTappedController =
+      StreamController<String>.broadcast(
+        onListen: _drainPendingNotificationTap,
+      );
   @override
   Stream<String> get onNotificationTapped =>
       _onNotificationTappedController.stream;
@@ -41,6 +52,42 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
 
   @override
   bool get isSupported => Platform.isAndroid;
+
+  void _emitNotificationTap(String payload) {
+    logger.d('[AndroidAdhanAlarmPlayer] METHOD_CHANNEL_TAP_RECEIVED');
+    _onNotificationTappedController.add(payload);
+  }
+
+  Future<void> _drainPendingNotificationTap() async {
+    if (!isSupported) return;
+    try {
+      final pending = await _channel.invokeMethod<Object?>(
+        'consumePendingNotificationTap',
+      );
+      if (pending is! Map) return;
+      final payload = pending['payload'] as String?;
+      if (payload == null) return;
+      logger.d('[AndroidAdhanAlarmPlayer] METHOD_CHANNEL_TAP_FLUSHED');
+      _emitNotificationTap(payload);
+    } on PlatformException catch (e) {
+      logger.e(
+        '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap failed: ${e.message}',
+      );
+    }
+  }
+
+  Future<void> _ackNotificationTap(String payload) async {
+    if (!isSupported) return;
+    try {
+      await _channel.invokeMethod<void>('ackNotificationTap', {
+        'payload': payload,
+      });
+    } on PlatformException catch (e) {
+      logger.e(
+        '[AndroidAdhanAlarmPlayer] ackNotificationTap failed: ${e.message}',
+      );
+    }
+  }
 
   @override
   Future<bool> scheduleAdhan({
@@ -196,9 +243,13 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   Future<void> stopCurrentAdhan() async {
     if (!isSupported) return;
     try {
+      logger.d('[AndroidAdhanAlarmPlayer] STOP_ADHAN_FROM_APP_REQUESTED');
       await _channel.invokeMethod<void>('stopAdhan');
+      logger.d('[AndroidAdhanAlarmPlayer] STOP_ADHAN_FROM_APP_NATIVE_SUCCESS');
     } on PlatformException catch (e) {
-      logger.e('[AndroidAdhanAlarmPlayer] stopAdhan failed: ${e.message}');
+      logger.e(
+        '[AndroidAdhanAlarmPlayer] STOP_ADHAN_FROM_APP_NATIVE_FAILED: ${e.message}',
+      );
     }
   }
 

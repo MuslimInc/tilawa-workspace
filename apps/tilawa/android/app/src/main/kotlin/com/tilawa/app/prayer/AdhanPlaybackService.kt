@@ -340,9 +340,9 @@ internal class AdhanPlaybackService : Service() {
         val openIntent = PendingIntent.getActivity(
             this,
             notificationId,
-            Intent(this, Class.forName("com.tilawa.app.MainActivity")).apply {
+            Intent(this, MainActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                action = "com.tilawa.app.prayer.ACTION_OPEN_PRAYER_STATUS"
+                action = MainActivity.ACTION_OPEN_PRAYER_STATUS
                 putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, prayerName)
                 putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, prayerKey)
                 putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, notificationId)
@@ -352,6 +352,10 @@ internal class AdhanPlaybackService : Service() {
                 putExtra("is_adhan_playing", true)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        Log.d(
+            TAG,
+            "NATIVE_NOTIFICATION_TAP_INTENT_CREATED prayerKey=$prayerKey notificationId=$notificationId target=${MainActivity::class.java.simpleName}",
         )
         val stopIntent = PendingIntent.getService(
             this,

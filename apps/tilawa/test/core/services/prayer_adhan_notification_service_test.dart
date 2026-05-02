@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -9,6 +12,7 @@ import 'package:tilawa/core/services/prayer_adhan_notification_service.dart';
 import 'package:tilawa/core/services/prayer_notification_config.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
@@ -282,6 +286,75 @@ void main() {
             matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
             payload: anyNamed('payload'),
           ),
+        );
+      });
+
+      group('notification tap routing', () {
+        test(
+          'navigates native Adhan tap payload to prayer status route',
+          () async {
+            await initialize();
+
+            final payload = jsonEncode({
+              PrayerNotificationConfig.payloadTypeKey:
+                  PrayerNotificationConfig.payloadTypeValue,
+              PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+              'prayer_name': 'fajr',
+              'prayer_key': 'fajr',
+              'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+              'notification_id': 2001,
+              'adhan_enabled': true,
+            });
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: payload,
+              ),
+            );
+
+            verify(
+              mockNav.navigateToNotification(
+                const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
+            ).called(1);
+          },
+        );
+
+        test(
+          'native Adhan tap stream is routed after initialization',
+          () async {
+            final controller = StreamController<String>();
+            addTearDown(controller.close);
+            when(
+              mockAdhanPlayer.onNotificationTapped,
+            ).thenAnswer((_) => controller.stream);
+
+            await initialize();
+
+            final payload = jsonEncode({
+              PrayerNotificationConfig.payloadTypeKey:
+                  PrayerNotificationConfig.payloadTypeValue,
+              PrayerNotificationConfig.payloadPrayerKey: 'isha',
+              'prayer_name': 'isha',
+              'prayer_key': 'isha',
+              'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+              'notification_id': 2006,
+              'adhan_enabled': true,
+            });
+
+            controller.add(payload);
+            await Future<void>.delayed(Duration.zero);
+
+            verify(
+              mockNav.navigateToNotification(
+                const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
+            ).called(1);
+          },
         );
       });
 

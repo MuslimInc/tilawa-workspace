@@ -13,6 +13,12 @@ Use the table once per device/OS combination:
 | App state | Foreground, Adhan enabled | Notification appears at exact time, Adhan plays once, Stop works |  |  |  |
 | App state | Background, Adhan enabled | Alarm fires at exact time, FGS notification shown, Adhan plays once |  |  |  |
 | App state | Removed from recents | Alarm still fires unless app was force-stopped |  |  |  |
+| Notification tap | Native Adhan tap while app killed | Opens `/prayer-notification-status` with correct prayer payload and Stop visible while playback is active |  |  |  |
+| Notification tap | Native Adhan tap while app backgrounded | Opens `/prayer-notification-status` once with correct payload |  |  |  |
+| Notification tap | Native Adhan tap while app foregrounded, if notification is shown | Opens `/prayer-notification-status` once with correct payload |  |  |  |
+| Notification tap | Notification-only prayer tap | Opens status screen, shows prayer status, no Adhan Stop unless playback is active |  |  |  |
+| Notification tap | Prayer with Adhan enabled tap | Opens status screen with Adhan payload and active playback state |  |  |  |
+| Notification tap | Stop from app status screen | Sends native `ACTION_STOP`, stops audio, dismisses/updates FGS notification |  |  |  |
 | App state | Adhan disabled, notification enabled | Notification fires, no Adhan playback service/audio |  |  |  |
 | App state | Notifications disabled | No notification/audio; existing Adhan alarms cleared |  |  |  |
 | System | Screen off | Notification + Adhan fire at expected time |  |  |  |
@@ -27,6 +33,36 @@ Use the table once per device/OS combination:
 | Permissions | Exact alarm unavailable fallback build | User permission flow shown; denied state falls back to inexact FLN |  |  |  |
 | Debug/Profile | Manual 10s test in profile | Button appears and schedules one test Adhan |  |  |  |
 | Release | Manual 10s test in release | Button is absent |  |  |  |
+
+## Notification Tap Blocker Smoke
+
+Run this smoke set before any limited rollout:
+
+1. Schedule a native Adhan, kill the app, tap the foreground notification when it fires, and verify the status screen opens with the correct prayer and scheduled time.
+2. Repeat with the app backgrounded.
+3. If Android shows the notification while the app is foregrounded, tap it and verify only one status-screen navigation occurs.
+4. Schedule a notification-only prayer and verify tapping it opens the status screen without showing Stop unless native playback is active.
+5. Schedule a prayer with Adhan enabled and verify tapping it opens the same status screen with active Adhan state.
+6. Press Stop from the status screen and verify audio stops and the foreground notification is dismissed or updated.
+
+Required log evidence:
+
+```text
+NATIVE_NOTIFICATION_TAP_INTENT_CREATED
+MAIN_ACTIVITY_ON_CREATE_INTENT
+MAIN_ACTIVITY_ON_NEW_INTENT
+METHOD_CHANNEL_TAP_RECEIVED
+METHOD_CHANNEL_TAP_BUFFERED
+METHOD_CHANNEL_TAP_FLUSHED
+FLUTTER_TAP_PAYLOAD_RECEIVED
+ROUTER_READY
+NAVIGATION_TO_PRAYER_STATUS_REQUESTED
+NAVIGATION_TO_PRAYER_STATUS_SUCCESS
+NAVIGATION_TO_PRAYER_STATUS_FAILED
+STOP_ADHAN_FROM_APP_REQUESTED
+STOP_ADHAN_FROM_APP_NATIVE_SUCCESS
+STOP_ADHAN_FROM_APP_NATIVE_FAILED
+```
 
 ## Play Console Texts
 
@@ -66,4 +102,4 @@ If Jacoco still reports class mismatches, mark the Jacoco percentage non-blockin
 
 ## Release Gate
 
-Current status is NO-GO until this checklist is manually executed and the release build verification passes.
+Current status is NO-GO for full production until this checklist is manually executed and the release build verification passes. Limited rollout remains BLOCKED until the notification tap blocker smoke set passes on a physical Android device.

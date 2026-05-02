@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -46,13 +47,21 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
     emit(const PrayerStatusState.loading());
 
     try {
-      final Map<String, dynamic> data = jsonDecode(payloadJson);
-      final String? prayerName = data['prayer_name'];
-      final int? scheduledTimeMs = data['scheduled_time_ms'];
+      final decoded = jsonDecode(payloadJson);
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Payload is not a JSON object');
+      }
+      final Map<String, dynamic> data = decoded;
+      final String? prayerName = _stringValue(
+        data['prayer_name'] ?? data['prayer'],
+      );
+      final int? scheduledTimeMs = _intValue(
+        data['scheduled_time_ms'] ?? data['scheduled_ms'],
+      );
       final bool adhanEnabled = data['adhan_enabled'] ?? false;
       final String? soundName =
           data['sound_name'] ?? (adhanEnabled ? 'adhan' : null);
-      final int? notificationId = data['notification_id'];
+      final int? notificationId = _intValue(data['notification_id']);
 
       if (prayerName == null || scheduledTimeMs == null) {
         emit(
@@ -113,6 +122,7 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
   }
 
   Future<void> stopAdhan() async {
+    logger.d('[PrayerTimes] STOP_ADHAN_FROM_APP_REQUESTED');
     await _adhanPlayer.stopCurrentAdhan();
     final isPlaying = await _adhanPlayer.isAdhanPlaying();
     state.maybeWhen(
@@ -127,5 +137,14 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
   Future<void> close() {
     _statusPollTimer?.cancel();
     return super.close();
+  }
+
+  String? _stringValue(Object? value) => value is String ? value : null;
+
+  int? _intValue(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
   }
 }

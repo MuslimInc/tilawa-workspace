@@ -67,6 +67,24 @@ void main() {
     expect(find.text('adhan_makkah'), findsOneWidget);
   });
 
+  testWidgets('accepts local notification payload keys', (tester) async {
+    when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => false);
+
+    final localPayload = jsonEncode({
+      'type': 'prayer',
+      'prayer': 'isha',
+      'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+      'adhan_enabled': false,
+      'notification_id': 2006,
+    });
+
+    await tester.pumpWidget(createWidget(payloadJson: localPayload));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Isha'), findsOneWidget);
+    expect(find.text('Disabled'), findsOneWidget);
+  });
+
   testWidgets('shows Stop button only when Adhan is playing', (tester) async {
     // State 1: Not playing
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => false);

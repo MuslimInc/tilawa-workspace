@@ -4,10 +4,10 @@
 **Source Plan**: [plan.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/005-harden-prayer-notifications/plan.md)
 
 ## Implementation Strategy
-Implementation is **COMPLETED**. All native and Flutter tasks have been executed and verified via automated test suites. The branch is now frozen for Physical QA.
+Implementation is **COMPLETED**. The branch was temporarily unfrozen on 2026-05-02 only for the notification tap / Adhan stop redirect QA blocker. The blocker fix has been implemented, verified via automated Flutter and native suites, and the branch is re-frozen for Physical QA.
 
 > [!IMPORTANT]
-> **FREEZE NOTE**: This branch is frozen. No further code changes are permitted.
+> **FREEZE NOTE**: This branch is re-frozen after the targeted blocker fix. No further code changes are permitted unless physical QA finds a real blocker.
 
 - [x] T001 Initialize feature branch and project structure for hardening
 - [x] T002 Configure `AndroidManifest.xml` with `android:directBootAware="true"` for `PrayerBootReceiver`
@@ -29,9 +29,16 @@ Implementation is **COMPLETED**. All native and Flutter tasks have been executed
 - [x] T018 [US3] Verify notification permission revocation (Automated)
 - [x] T019 Final code review of native Kotlin implementation
 - [x] T020 Run full automated test suites (Flutter & Native)
+- [x] T021 Unfreeze only for notification tap / Adhan stop redirect QA blocker
+- [x] T022 Normalize native and Flutter prayer notification tap payload keys
+- [x] T023 Add native pending tap consume/ack buffering for cold-start delivery
+- [x] T024 Register prayer notification handler during startup launch notification handling
+- [x] T025 Route Stop from app screen through native `ACTION_STOP`
+- [x] T026 Add automated coverage for native tap routing, payload parsing, buffering, and Stop action
 
 ## Verification Status
 - **Implementation**: Completed
-- **Automated Tests**: PASSED
+- **Automated Tests**: PASSED (`146/146` Flutter, `64/64` native Android JVM)
 - **Physical QA**: PENDING
+- **Limited Rollout**: BLOCKED until notification tap / Adhan stop smoke QA passes on device
 - **Frozen commit**: `<TO_BE_FILLED_AFTER_COMMIT>`

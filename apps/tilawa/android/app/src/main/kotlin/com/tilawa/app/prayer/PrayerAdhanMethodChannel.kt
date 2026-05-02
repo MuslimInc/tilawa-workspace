@@ -13,6 +13,7 @@ import androidx.annotation.VisibleForTesting
 
 internal object PrayerAdhanMethodChannel {
     private const val CHANNEL = "com.tilawa.app/prayer_adhan"
+    private const val TAG = "PrayerAdhanMethodChannel"
 
     private var logic: MethodChannelLogic? = null
     private var methodChannel: MethodChannel? = null
@@ -68,32 +69,69 @@ internal object PrayerAdhanMethodChannel {
 
         val mc = MethodChannel(messenger, CHANNEL)
         mc.setMethodCallHandler { call, result ->
-                val proxy = object : MethodResultProxy {
-                    override fun success(res: Any?) = result.success(res)
-                    override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) =
-                        result.error(errorCode, errorMessage, errorDetails)
-                    override fun notImplemented() = result.notImplemented()
+            if (call.method == "consumePendingNotificationTap") {
+                val tap = pendingTap
+                if (tap == null) {
+                    result.success(null)
+                } else {
+                    pendingTap = null
+                    Log.d(TAG, "METHOD_CHANNEL_TAP_FLUSHED prayerKey=${tap.first}")
+                    result.success(
+                        mapOf(
+                            "prayer_key" to tap.first,
+                            "payload" to tap.second
+                        )
+                    )
                 }
-                @Suppress("UNCHECKED_CAST")
-                activeLogic.handleMethodCall(call.method, call.arguments as? Map<String, Any?>, proxy)
+                return@setMethodCallHandler
             }
-        this.methodChannel = mc
-        pendingTap?.let { (prayerKey, payload) ->
-            notifyNotificationTapped(prayerKey, payload)
-            pendingTap = null
+
+            if (call.method == "ackNotificationTap") {
+                @Suppress("UNCHECKED_CAST")
+                val args = call.arguments as? Map<String, Any?>
+                val payload = args?.get("payload") as? String
+                if (payload != null && pendingTap?.second == payload) {
+                    Log.d(
+                        TAG,
+                        "METHOD_CHANNEL_TAP_FLUSHED source=ack prayerKey=${pendingTap?.first}"
+                    )
+                    pendingTap = null
+                }
+                result.success(null)
+                return@setMethodCallHandler
+            }
+
+            val proxy = object : MethodResultProxy {
+                override fun success(res: Any?) = result.success(res)
+                override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) =
+                    result.error(errorCode, errorMessage, errorDetails)
+                override fun notImplemented() = result.notImplemented()
+            }
+            @Suppress("UNCHECKED_CAST")
+            activeLogic.handleMethodCall(call.method, call.arguments as? Map<String, Any?>, proxy)
         }
+        this.methodChannel = mc
     }
 
     fun notifyNotificationTapped(prayerKey: String, payload: String) {
+        Log.d(TAG, "METHOD_CHANNEL_TAP_RECEIVED prayerKey=$prayerKey")
+        pendingTap = Pair(prayerKey, payload)
         val mc = methodChannel
         if (mc == null) {
-            pendingTap = Pair(prayerKey, payload)
+            Log.d(TAG, "METHOD_CHANNEL_TAP_BUFFERED reason=no_channel prayerKey=$prayerKey")
             return
         }
-        mc.invokeMethod("onNotificationTapped", mapOf(
-            "prayer_key" to prayerKey,
-            "payload" to payload
-        ))
+        Log.d(
+            TAG,
+            "METHOD_CHANNEL_TAP_BUFFERED reason=awaiting_dart_ack prayerKey=$prayerKey"
+        )
+        mc.invokeMethod(
+            "onNotificationTapped",
+            mapOf(
+                "prayer_key" to prayerKey,
+                "payload" to payload
+            )
+        )
     }
 
     private fun requestIgnoreBatteryOptimizationsInternal(

@@ -1,9 +1,17 @@
 package com.tilawa.app.prayer
 
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import io.mockk.*
 import org.junit.Test
 import org.junit.Assert.*
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.S])
 class MethodChannelLogicTest {
     private val mockScheduler = mockk<ExtendedAdhanSchedulerProxy>(relaxed = true)
     private val mockBootReceiver = mockk<BootReceiverProxy>(relaxed = true)
@@ -156,6 +164,20 @@ class MethodChannelLogicTest {
         logic.handleMethodCall("testAdhanNotification", args, mockResult)
         
         verify { mockScheduler.schedule(999999, "qa_test_adhan", "qa_test_adhan", any(), "adhan") }
+        verify { mockResult.success(true) }
+    }
+
+    @Test
+    fun `stopAdhan starts service stop action`() {
+        val context = mockk<Context>(relaxed = true)
+        val intentSlot = slot<Intent>()
+        every { mockScheduler.getContext() } returns context
+        every { context.packageName } returns "com.tilawa.app"
+        every { context.startService(capture(intentSlot)) } returns null
+
+        logic.handleMethodCall("stopAdhan", null, mockResult)
+
+        assertEquals(AdhanPlaybackService.ACTION_STOP, intentSlot.captured.action)
         verify { mockResult.success(true) }
     }
 
