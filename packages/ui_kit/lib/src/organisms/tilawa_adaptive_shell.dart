@@ -193,19 +193,22 @@ class _BottomNavBar extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: DecoratedBox(
             decoration: decoration ?? const BoxDecoration(),
-            child: Row(
-              spacing: tokens.bottomNavItemGap,
-              children: [
-                for (int i = 0; i < destinations.length; i++)
-                  Expanded(
-                    child: _NavButton(
-                      destination: destinations[i],
-                      isSelected: selectedIndex == i,
-                      onTap: () => onDestinationSelected(i),
-                      borderRadius: tokens.bottomNavInnerRadius,
+            child: Padding(
+              padding: EdgeInsets.all(tokens.bottomNavItemGap),
+              child: Row(
+                spacing: tokens.bottomNavItemGap,
+                children: [
+                  for (int i = 0; i < destinations.length; i++)
+                    Expanded(
+                      child: _NavButton(
+                        destination: destinations[i],
+                        isSelected: selectedIndex == i,
+                        onTap: () => onDestinationSelected(i),
+                        borderRadius: tokens.bottomNavInnerRadius,
+                      ),
                     ),
-                  ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
