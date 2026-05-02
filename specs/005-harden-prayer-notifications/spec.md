@@ -2,8 +2,19 @@
 
 **Feature Branch**: `005-harden-prayer-notifications`  
 **Created**: 2026-05-02  
-**Status**: Draft  
+**Status**: Frozen — Implementation Completed (2026-05-02)  
 **Input**: User description: "Harden Android prayer notifications and implement Direct Boot support"
+
+> [!IMPORTANT]
+> **FREEZE NOTE**: This feature branch is frozen after the cold-start notification tap fix and final automated verification. No further code, UI, architecture, or documentation changes should be made unless physical QA finds a real blocker.
+
+## Final Verified Status
+- **Implementation**: Completed
+- **Automated Tests**: Passed (100% Flutter & Native)
+- **Physical QA**: Pending
+- **Branch**: Frozen
+- **Limited Rollout**: GO WITH CONDITIONS only after physical smoke QA
+- **Full Production**: NO-GO until the full physical QA matrix passes
 
 ## User Scenarios & Testing *(mandatory)*
 

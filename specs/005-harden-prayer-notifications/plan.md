@@ -74,13 +74,39 @@ apps/tilawa/android/app/src/main/kotlin/com/tilawa/app/prayer/
     - `BootLogicTest`: Verify parsing of old and new JSON schemas.
 2. **Manual QA**: Execute the high-impact QA matrix (Direct Boot, OPPO survival, Doze).
 
-## Verification Plan
+## Final Verified Changes
+- **Direct Boot + DPS/CPS Split Storage**: Robust scheduling metadata isolation in Device-Protected Storage.
+- **Native Adhan Pipeline Hardening**: Improved reliability and resource management.
+- **QA Persistent Logs**: File-based diagnostic logging for field debugging.
+- **Firebase Observability**: High-fidelity native analytics for scheduling and playback events.
+- **Notification Tap Deep Link**: Unified path from both native and local notifications.
+- **Prayer/Adhan Status Screen**: Real-time status UI using Tilawa UI Kit and atomic design.
+- **Stop Adhan Integration**: Native stop path invoked directly from the status screen.
+- **Cold-Start Buffer**: Implementation of a pending notification tap buffer in `PrayerAdhanMethodChannel.kt` to prevent tap loss during app launch.
+- **Tilawa UI Kit Compliance**: 100% adherence to design tokens and component usage.
 
-### Automated Tests
-- `cd apps/tilawa/android && ./gradlew test`
-- Focus on `com.tilawa.app.prayer` package tests.
+## Final Automated Test Evidence
+### Flutter Tests
+- **Feature Tests**: `fvm flutter test test/features/prayer_times/` -> **102/102 PASSED**
+- **Service Tests**: `fvm flutter test test/core/services/prayer_adhan_notification_service_test.dart` -> **18/18 PASSED**
 
-### Manual Verification
-- Physical device reboot test (Direct Boot).
-- "Deep Sleep" test on OPPO A98 5G.
-- Observability log inspection via Logcat.
+### Native Android Tests
+- **Command**: `./gradlew clean :app:testDebugUnitTest`
+- **Status**: **PASSED**
+- **Key Coverage**: Added `notifyNotificationTapped buffers if channel not registered and flushes on register` test case.
+
+## Remaining Physical QA Blockers
+- **Direct Boot**: Verified locked reboot behavior (Native re-arm).
+- **Screen-Off Behavior**: Survival of foreground service on aggressive OEMs (OPPO/ColorOS).
+- **App Swiped/Killed**: Playback survival and notification dismissal.
+- **Playback Lifecycle**: Full completion and abnormal termination logging.
+- **Permission Revocation**: Automated cleanup of pending alarms.
+- **Cold-Start Taps**: Tap from killed/background/foreground states.
+- **Duplicate Prevention**: Verification of navigation stack hygiene.
+
+## Release Decision
+- **Status**: **GO WITH CONDITIONS**
+- **Condition**: Only eligible for limited rollout after physical smoke QA passes.
+- **Full Production**: NO-GO until the full physical QA matrix passes.
+
+**Frozen commit**: `<TO_BE_FILLED_AFTER_COMMIT>`

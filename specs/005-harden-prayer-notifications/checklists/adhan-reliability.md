@@ -4,26 +4,25 @@
 **Created**: 2026-05-02
 **Feature**: [spec.md](../spec.md)
 
-## Requirement Completeness
-- [ ] CHK001 Are Direct Boot requirements defined for the entire re-arming lifecycle? [Completeness, Spec §FR-001]
-- [ ] CHK002 Is the minimal data schema for DPS explicitly defined? [Completeness, Data Model]
-- [ ] CHK003 Are fallback requirements defined for missing audio resources? [Completeness, Spec §FR-007]
-- [ ] CHK004 Are requirements for handling multiple rapid reboots specified? [Completeness, Edge Cases]
+## Physical QA Blockers (Mandatory for GO)
+- [ ] PQA001 **Direct Boot**: Reboot physical device, stay at lock screen, verify Adhan fires at scheduled time.
+- [ ] PQA002 **OEM Survival**: Verify full 3-minute playback on OPPO/ColorOS with screen off and battery optimization enabled.
+- [ ] PQA003 **App Lifecycle**: Swipe away app from recents and verify Adhan still fires.
+- [ ] PQA004 **Notification Taps**: 
+  - [ ] Tap from killed app (Cold start) -> Status Screen opens correctly.
+  - [ ] Tap from background app -> Status Screen opens correctly.
+  - [ ] Tap from foreground app -> Status Screen opens correctly.
+- [ ] PQA005 **Duplicate Prevention**: Tap same notification multiple times; ensure only one status screen instance is active.
+- [ ] PQA006 **Permission Revocation**: Revoke notification permission; verify native alarms are cleared immediately.
+- [ ] PQA007 **Playback Completion**: Verify `adhan_service_completed` event in Logcat/Firebase after full playback.
+- [ ] PQA008 **Abnormal Termination**: Force kill service during playback; verify `adhan_service_abnormal_termination` event is logged.
 
-## Requirement Clarity
-- [ ] CHK005 Is "aggressive OEM" defined with specific target devices/OS versions? [Clarity, Spec §Assumptions]
-- [ ] CHK006 Are the observability metrics (e.g., `TRIGGER_DELTA`) defined with measurable units? [Clarity, Spec §FR-006]
-- [ ] CHK007 Is the behavior for "Force Stop" clearly separated from implementation defects? [Clarity, Edge Cases]
-
-## Requirement Consistency
-- [ ] CHK008 Do DPS and CPS storage requirements align without duplication of state? [Consistency, Spec §FR-002]
-- [ ] CHK009 Are notification channel IDs consistent between native and Flutter layers? [Consistency, Gap]
-
-## Scenario Coverage
-- [ ] CHK010 Does the spec define requirements for "Ghost Adhan" prevention on permission revocation? [Coverage, Spec §US3]
-- [ ] CHK011 Are requirements specified for low-memory conditions during playback start? [Coverage, Gap]
-- [ ] CHK012 Is the recovery flow for corrupted DPS manifests defined? [Coverage, Gap]
-
-## Success Criteria Quality
-- [ ] CHK013 Are success criteria (e.g., SC-001) measurable without implementation knowledge? [Measurability, Spec §Success Criteria]
-- [ ] CHK014 Is the "100% reliability" target quantified with a specific sample size/period? [Clarity, Spec §SC-001]
+## Requirement Validation
+- [x] CHK001 Are Direct Boot requirements defined?
+- [x] CHK002 Is the minimal data schema for DPS explicitly defined?
+- [x] CHK003 Are fallback requirements defined?
+- [x] CHK004 Are requirements for multiple rapid reboots specified?
+- [x] CHK005 Is "aggressive OEM" defined?
+- [x] CHK006 Are observability metrics defined?
+- [x] CHK007 Is "Force Stop" behavior clearly separated?
+- [x] CHK010 Ghost Adhan prevention?
