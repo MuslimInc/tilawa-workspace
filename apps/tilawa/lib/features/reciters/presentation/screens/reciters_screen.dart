@@ -202,7 +202,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
             BlocListener<LocalizationBloc, LocalizationState>(
               listener: (context, state) {
                 _searchController.clear();
-                context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+                context.read<AlphabetScrollbarBloc>().add(
+                  const ClearSelection(),
+                );
                 context.read<RecitersBloc>().add(const LanguageChanged());
               },
             ),
@@ -936,44 +938,17 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
     widget.onLetterSelected(letter);
   }
 
-  void _handlePanUpdate(
-    Offset globalPosition,
-    AlphabetScrollbarState currentState,
-  ) {
-    if (!currentState.isDragging) return;
+  void _handleLetterSelection(String letter) {
+    context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
 
-    final box = context.findRenderObject()! as RenderBox;
-    final localPosition = box.globalToLocal(globalPosition);
-    final theme = Theme.of(context);
-    final componentTokens = theme.componentTokens.alphabetScrollbar;
-
-    final double contentHeight =
-        box.size.height - (componentTokens.verticalPadding.vertical);
-    final double letterHeight = contentHeight / _letters.length;
-
-    // Adjust localPosition by vertical padding
-    final double relativeY =
-        localPosition.dy - (componentTokens.verticalPadding.vertical / 2);
-
-    final letterIndex = (relativeY / letterHeight)
-        .clamp(0, _letters.length - 1)
-        .floor();
-
-    if (letterIndex >= 0 && letterIndex < _letters.length) {
-      final String letter = _letters[letterIndex];
-      if (currentState.selectedLetter != letter) {
-        context.read<AlphabetScrollbarBloc>().add(UpdateDragLetter(letter));
-
-        final int index = widget.allReciters.indexWhere(
-          (item) => item.letter == letter,
-        );
-        if (index != -1) {
-          widget.scrollController.jumpTo(0.0);
-        }
-
-        widget.onLetterSelected(letter);
-      }
+    final int index = widget.allReciters.indexWhere(
+      (item) => item.letter == letter,
+    );
+    if (index != -1) {
+      widget.scrollController.jumpTo(0.0);
     }
+
+    widget.onLetterSelected(letter);
   }
 
   @override
@@ -991,27 +966,15 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
       key: const ValueKey('alphabet_scrollbar'),
       letters: _letters,
       selectedLetter: selectedLetter,
-      onLetterSelected: (letter) =>
-          _handleLetterTap(letter, context.read<AlphabetScrollbarBloc>().state),
+      onLetterSelected: _handleLetterSelection,
       onPanStart: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
-      onPanUpdate: (details) => _handlePanUpdate(
-        details.globalPosition,
-        context.read<AlphabetScrollbarBloc>().state,
-      ),
+      onPanUpdate: (_) {},
       onPanEnd: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
-      onLongPressStart: (details) {
-        context.read<AlphabetScrollbarBloc>().add(const StartDragging());
-        _handlePanUpdate(
-          details.globalPosition,
-          context.read<AlphabetScrollbarBloc>().state,
-        );
-      },
-      onLongPressMoveUpdate: (details) => _handlePanUpdate(
-        details.globalPosition,
-        context.read<AlphabetScrollbarBloc>().state,
-      ),
+      onLongPressStart: (details) =>
+          context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
+      onLongPressMoveUpdate: (details) {},
       onLongPressEnd: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
     );

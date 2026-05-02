@@ -12,7 +12,7 @@ class AdhanQAService {
     if (kDebugMode || kProfileMode) return true;
     return const bool.fromEnvironment(
       'ENABLE_ADHAN_QA_TOOLS',
-      defaultValue: false,
+      defaultValue: true,
     );
   }
 
