@@ -15,6 +15,7 @@ internal object PrayerAdhanMethodChannel {
 
     private var logic: MethodChannelLogic? = null
     private var methodChannel: MethodChannel? = null
+    private var pendingTap: Pair<String, String>? = null
 
     @VisibleForTesting
     fun setLogic(logic: MethodChannelLogic?) {
@@ -70,10 +71,19 @@ internal object PrayerAdhanMethodChannel {
                 activeLogic.handleMethodCall(call.method, call.arguments as? Map<String, Any?>, proxy)
             }
         this.methodChannel = mc
+        pendingTap?.let { (prayerKey, payload) ->
+            notifyNotificationTapped(prayerKey, payload)
+            pendingTap = null
+        }
     }
 
     fun notifyNotificationTapped(prayerKey: String, payload: String) {
-        methodChannel?.invokeMethod("onNotificationTapped", mapOf(
+        val mc = methodChannel
+        if (mc == null) {
+            pendingTap = Pair(prayerKey, payload)
+            return
+        }
+        mc.invokeMethod("onNotificationTapped", mapOf(
             "prayer_key" to prayerKey,
             "payload" to payload
         ))
