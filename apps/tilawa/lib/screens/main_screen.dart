@@ -142,7 +142,7 @@ class _MainScreenState extends State<MainScreen> {
             final double bottomNavBarHeight = context.isCompact
                 ? (adaptiveShellTokens.compactBottomNavBarBaseHeight +
                       bottomPadding)
-                : 0;
+                : bottomPadding;
 
             final List<_NavDestination> navDestinations = _buildDestinations(
               context,

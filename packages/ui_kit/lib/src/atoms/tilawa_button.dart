@@ -36,7 +36,7 @@ enum TilawaButtonSize {
 ///
 /// Supports multiple variants, sizes, and states (including loading and disabled).
 ///
-/// [TilawaButton] handles its own internal layout, including icons and 
+/// [TilawaButton] handles its own internal layout, including icons and
 /// loading indicators, while ensuring a minimum touch target of 48x48.
 class TilawaButton extends StatelessWidget {
   /// Creates a [TilawaButton].
@@ -90,7 +90,9 @@ class TilawaButton extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     // Resolve colors based on variant
-    final (backgroundColor, foregroundColor, borderColor) = _getColors(colorScheme);
+    final (backgroundColor, foregroundColor, borderColor) = _getColors(
+      colorScheme,
+    );
 
     // Resolve dimensions based on size
     final (height, horizontalPadding, fontSize, iconSize) = _getDimensions();
@@ -129,12 +131,16 @@ class TilawaButton extends StatelessWidget {
       side: WidgetStateProperty.resolveWith((states) {
         if (borderColor == null) return BorderSide.none;
         if (states.contains(WidgetState.disabled)) {
-          return BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.12));
+          return BorderSide(
+            color: colorScheme.onSurface.withValues(alpha: 0.12),
+          );
         }
         return BorderSide(color: borderColor);
       }),
       shape: WidgetStateProperty.all(
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(borderRadius)),
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+        ),
       ),
       elevation: WidgetStateProperty.all(0),
     );
@@ -144,7 +150,7 @@ class TilawaButton extends StatelessWidget {
       leadingIcon: leadingIcon,
       trailingIcon: trailingIcon,
       isLoading: isLoading,
-      foregroundColor: _isDisabled 
+      foregroundColor: _isDisabled
           ? colorScheme.onSurface.withValues(alpha: 0.38)
           : foregroundColor,
       fontSize: fontSize,
@@ -152,7 +158,9 @@ class TilawaButton extends StatelessWidget {
     );
 
     return Semantics(
-      label: isLoading ? '${semanticLabel ?? text}, Loading' : (semanticLabel ?? text),
+      label: isLoading
+          ? '${semanticLabel ?? text}, Loading'
+          : (semanticLabel ?? text),
       button: true,
       enabled: !_isDisabled,
       child: ConstrainedBox(
@@ -168,31 +176,19 @@ class TilawaButton extends StatelessWidget {
 
   (Color, Color, Color?) _getColors(ColorScheme colors) {
     return switch (variant) {
-      TilawaButtonVariant.primary => (
-          colors.primary,
-          colors.onPrimary,
-          null,
-        ),
+      TilawaButtonVariant.primary => (colors.primary, colors.onPrimary, null),
       TilawaButtonVariant.secondary => (
-          colors.secondaryContainer,
-          colors.onSecondaryContainer,
-          null,
-        ),
+        colors.secondaryContainer,
+        colors.onSecondaryContainer,
+        null,
+      ),
       TilawaButtonVariant.outline => (
-          Colors.transparent,
-          colors.primary,
-          colors.outline,
-        ),
-      TilawaButtonVariant.ghost => (
-          Colors.transparent,
-          colors.primary,
-          null,
-        ),
-      TilawaButtonVariant.danger => (
-          colors.error,
-          colors.onError,
-          null,
-        ),
+        Colors.transparent,
+        colors.primary,
+        colors.outline,
+      ),
+      TilawaButtonVariant.ghost => (Colors.transparent, colors.primary, null),
+      TilawaButtonVariant.danger => (colors.error, colors.onError, null),
     };
   }
 
@@ -230,10 +226,7 @@ class _ButtonContent extends StatelessWidget {
       return SizedBox(
         height: iconSize,
         width: iconSize,
-        child: TilawaLoadingIndicator(
-          color: foregroundColor,
-          strokeWidth: 2,
-        ),
+        child: TilawaLoadingIndicator(color: foregroundColor, strokeWidth: 2),
       );
     }
 

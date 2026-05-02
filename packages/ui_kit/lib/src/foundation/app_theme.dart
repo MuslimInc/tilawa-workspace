@@ -41,9 +41,9 @@ class AppTheme {
   }
 
   /// Get the light theme for the given primary color.
-  /// 
-  /// [useGoogleFontsOverride] is a foundation API extension for 
-  /// preview/golden stability. It allows disabling font loading in headless 
+  ///
+  /// [useGoogleFontsOverride] is a foundation API extension for
+  /// preview/golden stability. It allows disabling font loading in headless
   /// test environments without modifying the production [useGoogleFonts] default.
   static ThemeData getLightTheme({
     required Color primaryColor,
@@ -76,9 +76,9 @@ class AppTheme {
   }
 
   /// Get the dark theme for the given primary color.
-  /// 
-  /// [useGoogleFontsOverride] is a foundation API extension for 
-  /// preview/golden stability. It allows disabling font loading in headless 
+  ///
+  /// [useGoogleFontsOverride] is a foundation API extension for
+  /// preview/golden stability. It allows disabling font loading in headless
   /// test environments without modifying the production [useGoogleFonts] default.
   static ThemeData getDarkTheme({
     required Color primaryColor,

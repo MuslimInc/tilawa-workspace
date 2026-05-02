@@ -13,6 +13,7 @@ import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/quran_image_reader.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa_core/logger.dart';
+import 'package:tilawa_core/services/app_orientation_service.dart';
 
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
@@ -275,12 +276,8 @@ class _ReaderShell extends StatelessWidget {
           return QuranImageReader(
             preferredSystemUiMode: SystemUiMode.edgeToEdge,
             restoreSystemUiMode: SystemUiMode.edgeToEdge,
-            preferredOrientations: const [
-              DeviceOrientation.portraitUp,
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ],
-            restoreOrientations: const [DeviceOrientation.portraitUp],
+            preferredOrientations: AppOrientationService.readerOrientations,
+            restoreOrientations: AppOrientationService.defaultOrientations,
             onShareRequested: onShareRequested,
           );
         }

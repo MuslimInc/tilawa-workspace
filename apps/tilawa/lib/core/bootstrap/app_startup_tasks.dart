@@ -6,7 +6,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +19,7 @@ import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa/core/observers/composite_bloc_observer.dart';
 import 'package:tilawa/core/observers/crashlytics_bloc_observer.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
@@ -150,7 +150,7 @@ class AppStartupTasks {
       '[AppLaunch][AppStartupTasks.configureSystemChrome]: Start in (${DateTime.now()})',
     );
     return Future.wait([
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
+      AppOrientationService.applyDefaultOrientations(),
     ]).timeout(const Duration(milliseconds: 1000));
   }
 

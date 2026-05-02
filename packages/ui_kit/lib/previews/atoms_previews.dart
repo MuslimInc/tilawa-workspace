@@ -72,9 +72,7 @@ Widget previewTilawaEmptyState() {
 @Preview(name: 'TilawaButton / All Variants', group: 'Atoms')
 Widget previewTilawaButton() {
   return const TilawaPreviewWrapper(
-    child: SingleChildScrollView(
-      child: ButtonPreviews(),
-    ),
+    child: SingleChildScrollView(child: ButtonPreviews()),
   );
 }
 
@@ -86,8 +84,10 @@ class ButtonPreviews extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Variants',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Variants',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 12,
@@ -95,26 +95,32 @@ class ButtonPreviews extends StatelessWidget {
           children: [
             TilawaButton(text: 'Primary', onPressed: () {}),
             TilawaButton(
-                text: 'Secondary',
-                variant: TilawaButtonVariant.secondary,
-                onPressed: () {}),
+              text: 'Secondary',
+              variant: TilawaButtonVariant.secondary,
+              onPressed: () {},
+            ),
             TilawaButton(
-                text: 'Outline',
-                variant: TilawaButtonVariant.outline,
-                onPressed: () {}),
+              text: 'Outline',
+              variant: TilawaButtonVariant.outline,
+              onPressed: () {},
+            ),
             TilawaButton(
-                text: 'Ghost',
-                variant: TilawaButtonVariant.ghost,
-                onPressed: () {}),
+              text: 'Ghost',
+              variant: TilawaButtonVariant.ghost,
+              onPressed: () {},
+            ),
             TilawaButton(
-                text: 'Danger',
-                variant: TilawaButtonVariant.danger,
-                onPressed: () {}),
+              text: 'Danger',
+              variant: TilawaButtonVariant.danger,
+              onPressed: () {},
+            ),
           ],
         ),
         const SizedBox(height: 32),
-        const Text('States',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'States',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 12,
@@ -125,8 +131,10 @@ class ButtonPreviews extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 32),
-        const Text('Icons & Width',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Icons & Width',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Column(
           children: [
@@ -150,22 +158,31 @@ class ButtonPreviews extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 32),
-        const Text('Sizes',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Sizes',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             TilawaButton(
-                text: 'Small', size: TilawaButtonSize.small, onPressed: () {}),
+              text: 'Small',
+              size: TilawaButtonSize.small,
+              onPressed: () {},
+            ),
             const SizedBox(width: 12),
             TilawaButton(
-                text: 'Medium',
-                size: TilawaButtonSize.medium,
-                onPressed: () {}),
+              text: 'Medium',
+              size: TilawaButtonSize.medium,
+              onPressed: () {},
+            ),
             const SizedBox(width: 12),
             TilawaButton(
-                text: 'Large', size: TilawaButtonSize.large, onPressed: () {}),
+              text: 'Large',
+              size: TilawaButtonSize.large,
+              onPressed: () {},
+            ),
           ],
         ),
       ],

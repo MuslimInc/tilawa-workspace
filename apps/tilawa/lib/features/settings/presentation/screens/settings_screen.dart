@@ -468,45 +468,48 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 16),
-            Text(
-              context.l10n.chooseTheme,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            _ThemeOption(
-              title: context.l10n.systemTheme,
-              value: ThemeMode.system,
-              groupValue: currentMode,
-              onChanged: (val) {
-                context.read<ThemeCubit>().setMode(val);
-                Navigator.pop(context);
-              },
-            ),
-            _ThemeOption(
-              title: context.l10n.lightTheme,
-              value: ThemeMode.light,
-              groupValue: currentMode,
-              onChanged: (val) {
-                context.read<ThemeCubit>().setMode(val);
-                Navigator.pop(context);
-              },
-            ),
-            _ThemeOption(
-              title: context.l10n.darkTheme,
-              value: ThemeMode.dark,
-              groupValue: currentMode,
-              onChanged: (val) {
-                context.read<ThemeCubit>().setMode(val);
-                Navigator.pop(context);
-              },
-            ),
-            SizedBox(height: 16),
-          ],
+      builder: (sheetContext) => MediaQuery(
+        data: MediaQuery.of(context),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 16),
+              Text(
+                context.l10n.chooseTheme,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              _ThemeOption(
+                title: context.l10n.systemTheme,
+                value: ThemeMode.system,
+                groupValue: currentMode,
+                onChanged: (val) {
+                  context.read<ThemeCubit>().setMode(val);
+                  Navigator.pop(context);
+                },
+              ),
+              _ThemeOption(
+                title: context.l10n.lightTheme,
+                value: ThemeMode.light,
+                groupValue: currentMode,
+                onChanged: (val) {
+                  context.read<ThemeCubit>().setMode(val);
+                  Navigator.pop(context);
+                },
+              ),
+              _ThemeOption(
+                title: context.l10n.darkTheme,
+                value: ThemeMode.dark,
+                groupValue: currentMode,
+                onChanged: (val) {
+                  context.read<ThemeCubit>().setMode(val);
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -559,11 +562,13 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
-      builder: (sheetContext) {
-        final height = MediaQuery.of(sheetContext).size.height;
-        return SafeArea(
+      builder: (sheetContext) => MediaQuery(
+        data: MediaQuery.of(context),
+        child: SafeArea(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: height * 0.85),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+            ),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -663,8 +668,8 @@ class SettingsScreen extends StatelessWidget {
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -711,48 +716,51 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 16),
-            Text(
-              context.l10n.chooseLanguage,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            ListTile(
-              title: Text("العربية"),
-              trailing: currentLocale.languageCode == arabicLanguageCode
-                  ? Icon(
-                      FluentIcons.checkmark_24_regular,
-                      color: Theme.of(context).primaryColor,
-                    )
-                  : null,
-              onTap: () {
-                context.read<LocalizationBloc>().add(
-                  const ChangeLanguage(Locale(arabicLanguageCode)),
-                );
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: Text(context.l10n.english),
-              trailing: currentLocale.languageCode == englishLanguageCode
-                  ? Icon(
-                      FluentIcons.checkmark_24_regular,
-                      color: Theme.of(context).primaryColor,
-                    )
-                  : null,
-              onTap: () {
-                context.read<LocalizationBloc>().add(
-                  const ChangeLanguage(Locale(englishLanguageCode)),
-                );
-                Navigator.pop(context);
-              },
-            ),
-            SizedBox(height: 16),
-          ],
+      builder: (sheetContext) => MediaQuery(
+        data: MediaQuery.of(context),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 16),
+              Text(
+                context.l10n.chooseLanguage,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              ListTile(
+                title: Text("العربية"),
+                trailing: currentLocale.languageCode == arabicLanguageCode
+                    ? Icon(
+                        FluentIcons.checkmark_24_regular,
+                        color: Theme.of(context).primaryColor,
+                      )
+                    : null,
+                onTap: () {
+                  context.read<LocalizationBloc>().add(
+                    const ChangeLanguage(Locale(arabicLanguageCode)),
+                  );
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: Text(context.l10n.english),
+                trailing: currentLocale.languageCode == englishLanguageCode
+                    ? Icon(
+                        FluentIcons.checkmark_24_regular,
+                        color: Theme.of(context).primaryColor,
+                      )
+                    : null,
+                onTap: () {
+                  context.read<LocalizationBloc>().add(
+                    const ChangeLanguage(Locale(englishLanguageCode)),
+                  );
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -764,32 +772,35 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 16),
-            Text(
-              context.l10n.concurrentDownloads,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            for (int i = 1; i <= 5; i++)
-              ListTile(
-                title: Text('$i'),
-                trailing: currentValue == i
-                    ? Icon(
-                        FluentIcons.checkmark_24_regular,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
-                onTap: () {
-                  context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
-                  Navigator.pop(context);
-                },
+      builder: (sheetContext) => MediaQuery(
+        data: MediaQuery.of(context),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 16),
+              Text(
+                context.l10n.concurrentDownloads,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            SizedBox(height: 16),
-          ],
+              SizedBox(height: 16),
+              for (int i = 1; i <= 5; i++)
+                ListTile(
+                  title: Text('$i'),
+                  trailing: currentValue == i
+                      ? Icon(
+                          FluentIcons.checkmark_24_regular,
+                          color: Theme.of(context).primaryColor,
+                        )
+                      : null,
+                  onTap: () {
+                    context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
+                    Navigator.pop(context);
+                  },
+                ),
+              SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
