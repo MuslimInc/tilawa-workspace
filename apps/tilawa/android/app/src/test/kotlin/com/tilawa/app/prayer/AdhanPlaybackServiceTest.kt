@@ -66,8 +66,7 @@ class AdhanPlaybackServiceTest {
         assertNotNull(notification)
         
         // Verify metrics were logged
-        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent("prayer_trigger_delta", any()) }
-        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent("prayer_service_start_latency", any()) }
+        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent(PrayerEvents.SERVICE_STARTED, any()) }
 
         // Verify MediaPlayer was started
         verify { anyConstructed<MediaPlayer>().start() }
@@ -116,6 +115,6 @@ class AdhanPlaybackServiceTest {
         controller.destroy()
         
         // Verify abnormal termination log
-        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent("prayer_service_abnormal_termination", any()) }
+        verify { anyConstructed<FirebasePrayerAnalytics>().logEvent(PrayerEvents.ABNORMAL_TERMINATION, any()) }
     }
 }

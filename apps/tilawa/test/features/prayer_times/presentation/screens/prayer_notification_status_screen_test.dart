@@ -21,12 +21,14 @@ void main() {
 
     // Stub default methods
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => false);
+    when(mockAdhanPlayer.stopCurrentAdhan()).thenAnswer((_) async {});
   });
 
   Widget createWidget({String? payloadJson}) {
     return MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
       home: PrayerNotificationStatusScreen(payloadJson: payloadJson),
     );
   }
@@ -44,8 +46,10 @@ void main() {
     );
 
     await tester.pumpWidget(createWidget(payloadJson: validPayload));
-    // Check for indicator or just verify it hasn't settled yet
     expect(find.byType(TilawaLoadingIndicator), findsOneWidget);
+
+    // Cleanup pending timer from Future.delayed
+    await tester.pumpAndSettle();
   });
 
   testWidgets('renders prayer details and status chips when loaded', (
@@ -58,7 +62,6 @@ void main() {
 
     expect(find.text('Fajr'), findsOneWidget);
     expect(find.text('Adhan'), findsOneWidget);
-    // Localization of 'Enabled' might be capitalized or not
     expect(find.text('Enabled'), findsOneWidget);
     expect(find.text('Sound'), findsOneWidget);
     expect(find.text('adhan_makkah'), findsOneWidget);
@@ -71,25 +74,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Stop Adhan'), findsNothing);
 
-    // State 2: Playing
+    // State 2: Playing - use a different key to force BlocProvider re-creation
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
-    // Re-create to force fresh Cubit init with playing state
-    await tester.pumpWidget(createWidget(payloadJson: validPayload));
+    await tester.pumpWidget(
+      Container(
+        key: const Key('state_playing'),
+        child: createWidget(payloadJson: validPayload),
+      ),
+    );
     await tester.pumpAndSettle();
+
     expect(find.text('Stop Adhan'), findsOneWidget);
   });
 
   testWidgets('calls stopCurrentAdhan when Stop button is pressed', (
     tester,
   ) async {
+    // Set a larger surface size to ensure button is on screen
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
     await tester.pumpWidget(createWidget(payloadJson: validPayload));
     await tester.pumpAndSettle();
 
     final stopBtn = find.text('Stop Adhan');
     expect(stopBtn, findsOneWidget);
+
     await tester.tap(stopBtn);
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     verify(mockAdhanPlayer.stopCurrentAdhan()).called(1);
   });

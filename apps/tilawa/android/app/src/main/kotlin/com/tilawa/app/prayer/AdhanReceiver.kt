@@ -27,7 +27,7 @@ internal class AdhanReceiver : BroadcastReceiver() {
         val deltaMs = if (scheduledMs > 0) triggerMs - scheduledMs else 0L
         
         val analytics = FirebasePrayerAnalytics(context)
-        analytics.logEvent("adhan_receiver_triggered", mapOf(
+        analytics.logEvent(PrayerEvents.RECEIVER_TRIGGERED, mapOf(
             "prayer_name" to prayerName,
             "prayer_key" to prayerKey,
             "alarm_id" to notificationId,

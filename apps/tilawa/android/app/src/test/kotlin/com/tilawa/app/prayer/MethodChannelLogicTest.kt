@@ -16,23 +16,23 @@ class MethodChannelLogicTest {
     @Test
     fun `scheduleAdhan logs events`() {
         val args = mapOf("id" to 1, "triggerAtMillis" to 1000L, "prayerName" to "fajr")
-        every { mockScheduler.schedule(any(), any(), any(), any()) } returns true
+        every { mockScheduler.schedule(any(), any(), any(), any(), any()) } returns true
         every { mockScheduler.canScheduleExact() } returns true
         
         logic.handleMethodCall("scheduleAdhan", args, mockResult)
         
-        verify { mockAnalytics.logEvent(PrayerEvents.SCHEDULE_STARTED, any()) }
+        verify { mockAnalytics.logEvent(PrayerEvents.ADHAN_SCHEDULED, any()) }
         verify { mockAnalytics.logEvent(PrayerEvents.SCHEDULE_SUCCESS, any()) }
     }
 
     @Test
     fun `scheduleAdhan success`() {
-        val args = mapOf("id" to 1, "triggerAtMillis" to 1000L, "prayerName" to "fajr")
-        every { mockScheduler.schedule(1, "fajr", 1000L, "adhan_fajr") } returns true
+        val args = mapOf("id" to 1, "triggerAtMillis" to 1000L, "prayerName" to "fajr", "prayerKey" to "fajr")
+        every { mockScheduler.schedule(1, "fajr", "fajr", 1000L, "adhan_fajr") } returns true
         
         logic.handleMethodCall("scheduleAdhan", args, mockResult)
         
-        verify { mockScheduler.schedule(1, "fajr", 1000L, "adhan_fajr") }
+        verify { mockScheduler.schedule(1, "fajr", "fajr", 1000L, "adhan_fajr") }
         verify { mockResult.success(true) }
     }
 
@@ -149,12 +149,14 @@ class MethodChannelLogicTest {
     }
 
     @Test
-    fun `testAdhanNotification`() {
-        val args = mapOf("id" to 999, "name" to "test", "delayMs" to 1000L)
+    fun `testAdhanNotification success`() {
+        val args = mapOf("id" to 999999, "name" to "qa_test_adhan", "delayMs" to 1000L)
+        every { mockScheduler.schedule(any(), any(), any(), any(), any()) } returns true
+        
         logic.handleMethodCall("testAdhanNotification", args, mockResult)
         
-        verify { mockScheduler.schedule(eq(999), eq("test"), any(), "adhan") }
-        verify { mockResult.success(null) }
+        verify { mockScheduler.schedule(999999, "qa_test_adhan", "qa_test_adhan", any(), "adhan") }
+        verify { mockResult.success(true) }
     }
 
     @Test

@@ -24,6 +24,8 @@ import 'prayer_adhan_notification_service_test.mocks.dart';
   NotificationPermissionService,
 ])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late PrayerAdhanNotificationService service;
   late MockINotificationDispatcher mockDispatcher;
   late MockFlutterLocalNotificationsPlugin mockPlugin;
@@ -122,6 +124,9 @@ void main() {
       ),
     ).thenReturn(null);
 
+    when(
+      mockAdhanPlayer.onNotificationTapped,
+    ).thenAnswer((_) => const Stream.empty());
     when(mockAdhanPlayer.isSupported).thenReturn(false);
     when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {});
     when(

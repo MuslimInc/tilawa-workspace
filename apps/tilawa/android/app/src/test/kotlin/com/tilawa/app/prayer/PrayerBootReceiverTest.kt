@@ -34,10 +34,10 @@ class PrayerBootReceiverTest {
     fun `onReceive re-arms alarms on BOOT_COMPLETED`() {
         // Setup persisted alarms
         val triggerAt = System.currentTimeMillis() + 3600000
-        val entries = listOf(AlarmMetadata(200, "fajr", triggerAt, "adhan_fajr"))
+        val entries = listOf(AlarmMetadata(200, "fajr", "fajr", triggerAt, "adhan_fajr"))
         PrayerBootReceiver.persistPendingAlarms(context, entries)
         
-        every { AdhanScheduler.schedule(any(), any(), any(), any(), any()) } returns true
+        every { AdhanScheduler.schedule(any(), any(), any(), any(), any(), any()) } returns true
         every { PrayerNotificationsWatchdogScheduler.enqueuePeriodic(any()) } just Runs
         every { PrayerNotificationsWatchdogScheduler.enqueueOneTime(any()) } just Runs
 
@@ -45,7 +45,7 @@ class PrayerBootReceiverTest {
         receiver.onReceive(context, intent)
 
         // Verify re-arm
-        verify { AdhanScheduler.schedule(context, 200, "fajr", triggerAt, "adhan_fajr") }
+        verify { AdhanScheduler.schedule(context, 200, "fajr", "fajr", triggerAt, "adhan_fajr") }
         
         // Verify watchdog scheduling
         verify { PrayerNotificationsWatchdogScheduler.enqueuePeriodic(context) }
@@ -60,8 +60,8 @@ class PrayerBootReceiverTest {
         val pastTrigger = System.currentTimeMillis() - 1000
         val futureTrigger = System.currentTimeMillis() + 1000
         val entries = listOf(
-            AlarmMetadata(201, "expired", pastTrigger, "adhan"),
-            AlarmMetadata(202, "future", futureTrigger, "adhan")
+            AlarmMetadata(201, "expired", "expired", pastTrigger, "adhan"),
+            AlarmMetadata(202, "future", "future", futureTrigger, "adhan")
         )
         PrayerBootReceiver.persistPendingAlarms(context, entries)
 
@@ -72,8 +72,8 @@ class PrayerBootReceiverTest {
         val intent = Intent(Intent.ACTION_TIMEZONE_CHANGED)
         receiver.onReceive(context, intent)
 
-        verify(exactly = 0) { AdhanScheduler.schedule(any(), 201, any(), any(), any()) }
-        verify(exactly = 1) { AdhanScheduler.schedule(any(), 202, any(), any(), any()) }
+        verify(exactly = 0) { AdhanScheduler.schedule(any(), 201, any(), any(), any(), any()) }
+        verify(exactly = 1) { AdhanScheduler.schedule(any(), 202, any(), any(), any(), any()) }
     }
 
     @Test

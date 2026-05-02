@@ -80,4 +80,8 @@ object PrayerEvents {
     const val WATCHDOG_FAILED = "watchdog_failed"
     const val WATCHDOG_TIMEOUT = "watchdog_timeout_occurred"
     const val BOOT_TRIGGERED = "boot_receiver_triggered"
+    const val SERVICE_STARTED = "adhan_service_started"
+    const val RECEIVER_TRIGGERED = "adhan_receiver_triggered"
+    const val ABNORMAL_TERMINATION = "adhan_service_abnormal_termination"
+    const val ADHAN_SCHEDULED = "adhan_alarm_scheduled"
 }

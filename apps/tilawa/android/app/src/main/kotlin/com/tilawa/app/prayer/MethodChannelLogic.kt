@@ -28,7 +28,7 @@ internal class MethodChannelLogic(
                 val key = (arguments?.get("prayerKey") as? String) ?: name.lowercase()
                 val sound = (arguments?.get("sound") as? String) ?: (if (key == "fajr") "adhan_fajr" else "adhan")
                 
-                analytics?.logEvent("adhan_alarm_scheduled", mapOf(
+                analytics?.logEvent(PrayerEvents.ADHAN_SCHEDULED, mapOf(
                     "prayer_name" to name,
                     "prayer_key" to key,
                     "alarm_id" to id,
@@ -40,6 +40,12 @@ internal class MethodChannelLogic(
                     result.error("BAD_ARGS", "id and triggerAtMillis required", null)
                 } else {
                     val ok = scheduler.schedule(id, name, key, triggerMs, sound)
+                    if (ok) {
+                        analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, commonProps + mapOf(
+                            "prayer_name" to name,
+                            "is_adhan" to true
+                        ))
+                    }
                     result.success(ok)
                 }
             }

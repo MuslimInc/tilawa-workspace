@@ -112,7 +112,7 @@ internal class AdhanPlaybackService : Service() {
                 val startMs = System.currentTimeMillis()
                 val latencyMs = if (action.receiverTime > 0) startMs - action.receiverTime else null
                 
-                analytics.logEvent("adhan_service_started", mapOf(
+                analytics.logEvent(PrayerEvents.SERVICE_STARTED, mapOf(
                     "prayer_name" to action.prayerName,
                     "prayer_key" to action.prayerKey,
                     "service_start_latency_ms" to latencyMs,
@@ -295,7 +295,7 @@ internal class AdhanPlaybackService : Service() {
     override fun onDestroy() {
         if (!completedSuccessfully && isPlayingInternally) {
             Log.w(TAG, "Abnormal termination: service destroyed before completion")
-            analytics.logEvent("adhan_playback_abnormal_termination", mapOf(
+            analytics.logEvent(PrayerEvents.ABNORMAL_TERMINATION, mapOf(
                 "reason" to "onDestroy_without_completion",
                 "device_brand" to Build.BRAND,
                 "android_sdk" to Build.VERSION.SDK_INT,

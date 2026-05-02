@@ -23,11 +23,13 @@ internal class BootLogic(
             buildList {
                 for (i in 0 until arr.length()) {
                     val obj = arr.getJSONObject(i)
+                    val name = obj.optString("name", "")
+                    val key = obj.optString("key", name.lowercase())
                     add(
                         AlarmEntry(
                             obj.getInt("id"),
-                            obj.optString("name", ""),
-                            obj.optString("key", ""),
+                            name,
+                            key,
                             obj.getLong("trigger"),
                             obj.optString("sound", "adhan")
                         )

@@ -21,12 +21,12 @@ class AdhanSchedulerTest {
         AdhanScheduler.setDependencies(mockST, mockAM)
         
         every { mockAM.canScheduleExact() } returns true
-        every { mockAM.scheduleExact(any(), any(), any(), any()) } returns true
+        every { mockAM.scheduleExact(any(), any(), any(), any(), any()) } returns true
         
-        val result = AdhanScheduler.schedule(context, 1, "fajr", 1000L, "adhan")
+        val result = AdhanScheduler.schedule(context, 1, "fajr", "fajr", 1000L, "adhan")
         
         assertTrue(result)
-        verify { mockAM.scheduleExact(1, "fajr", 1000L, "adhan") }
+        verify { mockAM.scheduleExact(1, "fajr", "fajr", 1000L, "adhan") }
         verify { mockST.addActiveId(1) }
     }
 
