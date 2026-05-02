@@ -13,6 +13,7 @@ import 'package:tilawa/core/services/firebase_initialization_service.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/features/downloads/data/services/downloads_initialization_service.dart';
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
+import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
 import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
@@ -56,6 +57,9 @@ class MockNotificationDispatcher extends Mock
 class MockDownloadNotificationService extends Mock
     implements IDownloadNotificationService {}
 
+class MockPrayerAdhanNotificationService extends Mock
+    implements IPrayerAdhanNotificationService {}
+
 class MockMushafService extends Mock implements MushafService {}
 
 void main() {
@@ -75,6 +79,7 @@ void main() {
   late MockAudioPlayerHandler mockAudioHandler;
   late MockNotificationDispatcher mockNotificationDispatcher;
   late MockDownloadNotificationService mockDownloadNotificationService;
+  late MockPrayerAdhanNotificationService mockPrayerNotificationService;
   late MockMushafService mockMushafService;
 
   setUpAll(() async {
@@ -136,6 +141,7 @@ void main() {
     mockAudioHandler = MockAudioPlayerHandler();
     mockNotificationDispatcher = MockNotificationDispatcher();
     mockDownloadNotificationService = MockDownloadNotificationService();
+    mockPrayerNotificationService = MockPrayerAdhanNotificationService();
     mockMushafService = MockMushafService();
 
     getIt.allowReassignment = true;
@@ -158,6 +164,9 @@ void main() {
     );
     getIt.registerSingleton<IDownloadNotificationService>(
       mockDownloadNotificationService,
+    );
+    getIt.registerSingleton<IPrayerAdhanNotificationService>(
+      mockPrayerNotificationService,
     );
     getIt.allowReassignment = true;
     if (getIt.isRegistered<MushafService>()) {
@@ -208,6 +217,9 @@ void main() {
     ).thenAnswer((_) async {});
     when(
       () => mockDownloadNotificationService.initialize(),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockPrayerNotificationService.initialize(),
     ).thenAnswer((_) async {});
     when(() => mockMushafService.ensureLoaded()).thenAnswer((_) async {});
 
@@ -339,6 +351,22 @@ void main() {
       await initializeAthkarNotifications();
       verify(() => mockAthkarService.scheduleAthkarNotifications()).called(1);
     });
+
+    test(
+      'initializeNotificationHandlers registers prayer notifications',
+      () async {
+        await initializeNotificationHandlers();
+
+        verify(
+          () => mockNotificationDispatcher.initialize(
+            createHighImportanceChannel: false,
+          ),
+        ).called(1);
+        verify(() => mockAthkarService.initialize()).called(1);
+        verify(() => mockPrayerNotificationService.initialize()).called(1);
+        verify(() => mockDownloadNotificationService.initialize()).called(1);
+      },
+    );
 
     // Test initializeNonCriticalServices
     // Using fakeAsync wouldn't work well with Future.microtask

@@ -1750,6 +1750,14 @@ class AppLocalizationsAr extends AppLocalizations {
       'إذن الإشعارات مطلوب لاستلام تذكيرات الصلاة.';
 
   @override
+  String get batteryOptimizationExemptionRequired =>
+      'أوقف تحسين البطارية حتى تصلك إشعارات الصلاة في وقتها أثناء إيقاف الشاشة.';
+
+  @override
+  String get oemAutostartHint =>
+      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+
+  @override
   String prayerNotificationBody(String prayerName) {
     return 'حان وقت $prayerName';
   }
@@ -1767,4 +1775,53 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get prayerNotificationsAdhanChannelDescription =>
       'تذكيرات الصلاة التي تشغل صوت الأذان';
+
+  @override
+  String get prayerNotificationsSilentAdhanChannelName =>
+      'مواقيت الصلاة (صامت)';
+
+  @override
+  String get prayerNotificationsSilentAdhanChannelDescription =>
+      'تنبيهات صامتة لمواقيت الصلاة عند تشغيل الأذان محلياً';
+
+  @override
+  String get adhanIsPlaying => 'الأذان يعمل الآن';
+
+  @override
+  String get stopAdhan => 'إيقاف الأذان';
+
+  @override
+  String get prayerNotificationReceived => 'تنبيه الصلاة';
+
+  @override
+  String get viewAllPrayerTimes => 'عرض جميع مواقيت الصلاة';
+
+  @override
+  String prayerTimeAt(String time) {
+    return 'الساعة $time';
+  }
+
+  @override
+  String get notificationStatus => 'التنبيه';
+
+  @override
+  String get adhanStatus => 'الأذان';
+
+  @override
+  String get received => 'تم الاستلام';
+
+  @override
+  String get sound => 'الصوت';
+
+  @override
+  String get enabled => 'مفعل';
+
+  @override
+  String get disabled => 'معطل';
+
+  @override
+  String get errorMissingNotificationPayload => 'بيانات التنبيه مفقودة.';
+
+  @override
+  String get errorInvalidNotificationPayload => 'بيانات التنبيه غير صالحة.';
 }

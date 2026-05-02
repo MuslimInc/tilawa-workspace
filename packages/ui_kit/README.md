@@ -1,0 +1,57 @@
+# Tilawa UI Kit
+
+A premium, design-system-driven UI library for the Tilawa application. Built with Flutter and Material 3, focusing on performance, accessibility, and high-fidelity aesthetics.
+
+## Atoms
+
+### TilawaButton
+A highly customizable button component supporting multiple variants, sizes, and states.
+
+#### Variants
+- **Primary**: High emphasis, used for the main action on a screen.
+- **Secondary**: Medium emphasis, used for secondary actions.
+- **Outline**: Medium emphasis with a border, useful for balanced actions.
+- **Ghost**: Low emphasis, used for subtle or tertiary actions.
+- **Danger**: High emphasis for destructive actions (e.g., Delete).
+
+#### Usage
+```dart
+TilawaButton(
+  text: 'Get Started',
+  onPressed: () => print('Tapped!'),
+  variant: TilawaButtonVariant.primary,
+  size: TilawaButtonSize.medium,
+)
+```
+
+#### Accessibility
+- **Touch Target**: Guaranteed minimum 48x48.
+- **States**: Correctly announces "Disabled" or "Loading" states to screen readers.
+- **Semantic Labels**: Supports custom labels for complex actions.
+
+### TilawaCard
+A versatile container with soft shadows and rounded corners.
+
+### TilawaLoadingIndicator
+A smooth, indeterminate progress indicator that matches the app's theme.
+
+## Visual Testing
+
+### Golden Tests
+This package uses `alchemist` for visual regression testing.
+To update goldens:
+```bash
+flutter test test/goldens/ --update-goldens
+```
+
+### Previews
+Interactive previews are available via the `Widget Previewer` (if configured) or by running the preview app:
+```bash
+flutter run lib/previews/preview_main.dart # If available
+```
+
+## Implementation Guidelines
+- **Do**: Use existing design tokens via `AppTheme`.
+- **Do**: Ensure all interactive elements have a minimum touch target of 48x48.
+- **Don't**: Add haptics directly to atoms; handle feedback at the interaction layer.
+- **Don't**: Modify production themes just for test stability; use `useGoogleFontsOverride`.

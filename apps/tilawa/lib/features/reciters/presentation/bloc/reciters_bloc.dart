@@ -326,8 +326,9 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
     LanguageChanged event,
     Emitter<RecitersState> emit,
   ) async {
-    // If we have loaded reciters, refetch them with the new language
     if (state is RecitersLoaded) {
+      final currentState = state as RecitersLoaded;
+      emit(currentState.copyWith(searchQuery: '', clearSelectedLetter: true));
       await _onLoadReciters(const LoadReciters(), emit);
     }
   }

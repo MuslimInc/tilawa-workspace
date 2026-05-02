@@ -39,4 +39,9 @@ abstract interface class IPrayerAdhanNotificationService {
     required PrayerType prayer,
     required bool playAdhan,
   });
+
+  /// DEBUG ONLY: Schedules a prayer notification and a native Adhan alarm
+  /// exactly 10 seconds from now. Intended for manual QA of the app-kill
+  /// scenario.
+  Future<void> debugScheduleTestAdhan();
 }

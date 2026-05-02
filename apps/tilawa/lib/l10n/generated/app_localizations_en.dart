@@ -1759,6 +1759,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Notification permission required to receive prayer alerts.';
 
   @override
+  String get batteryOptimizationExemptionRequired =>
+      'Disable battery optimization to keep prayer reminders on time when the screen is off.';
+
+  @override
+  String get oemAutostartHint =>
+      'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.';
+
+  @override
   String prayerNotificationBody(String prayerName) {
     return 'It is time for $prayerName';
   }
@@ -1776,4 +1784,53 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get prayerNotificationsAdhanChannelDescription =>
       'Prayer time reminders that play the adhan sound';
+
+  @override
+  String get prayerNotificationsSilentAdhanChannelName =>
+      'Prayer Times (Silent)';
+
+  @override
+  String get prayerNotificationsSilentAdhanChannelDescription =>
+      'Silent prayer time reminders when Adhan plays natively';
+
+  @override
+  String get adhanIsPlaying => 'Adhan is playing';
+
+  @override
+  String get stopAdhan => 'Stop Adhan';
+
+  @override
+  String get prayerNotificationReceived => 'Prayer notification received';
+
+  @override
+  String get viewAllPrayerTimes => 'View All Prayer Times';
+
+  @override
+  String prayerTimeAt(String time) {
+    return 'at $time';
+  }
+
+  @override
+  String get notificationStatus => 'Notification';
+
+  @override
+  String get adhanStatus => 'Adhan';
+
+  @override
+  String get received => 'Received';
+
+  @override
+  String get sound => 'Sound';
+
+  @override
+  String get enabled => 'Enabled';
+
+  @override
+  String get disabled => 'Disabled';
+
+  @override
+  String get errorMissingNotificationPayload => 'Missing notification payload.';
+
+  @override
+  String get errorInvalidNotificationPayload => 'Invalid notification payload.';
 }

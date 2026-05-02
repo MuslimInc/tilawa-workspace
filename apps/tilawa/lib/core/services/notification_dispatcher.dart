@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -191,8 +192,7 @@ class NotificationDispatcher implements INotificationDispatcher {
         logger.d(
           '[NotificationDispatcher] Processing launch notification: id=${response.id}, payload=${response.payload}',
         );
-        await _routeNotification(response);
-        return true;
+        return _routeNotification(response);
       }
 
       logger.d('[NotificationDispatcher] No launch notification to process');
@@ -213,11 +213,11 @@ class NotificationDispatcher implements INotificationDispatcher {
       '[NotificationDispatcher] _handleNotificationResponse called: id=${response.id}, payload=${response.payload}',
     );
     // Fire and forget - the async operation will complete in background
-    _routeNotification(response);
+    unawaited(_routeNotification(response));
   }
 
   /// Route notification to the appropriate handler
-  Future<void> _routeNotification(NotificationResponse response) async {
+  Future<bool> _routeNotification(NotificationResponse response) async {
     final int? notificationId = response.id;
     final String? payload = response.payload;
 
@@ -233,7 +233,7 @@ class NotificationDispatcher implements INotificationDispatcher {
           '[NotificationDispatcher] Matched handler: ${registration.serviceId}',
         );
         await registration.handler(response);
-        return;
+        return true;
       }
     }
 
@@ -244,13 +244,14 @@ class NotificationDispatcher implements INotificationDispatcher {
           '[NotificationDispatcher] Matched payload handler: ${registration.serviceId}',
         );
         await registration.handler(response);
-        return;
+        return true;
       }
     }
 
     logger.w(
       '[NotificationDispatcher] No handler found for notification: id=$notificationId',
     );
+    return false;
   }
 
   /// Check if running on Android (for platform-specific logic)

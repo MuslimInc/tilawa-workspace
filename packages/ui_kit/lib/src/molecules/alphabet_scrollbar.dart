@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
@@ -12,6 +13,9 @@ class ArabicAlphabetScrollbar extends StatefulWidget {
     required this.onPanUpdate,
     required this.onPanStart,
     required this.onPanEnd,
+    this.onLongPressStart,
+    this.onLongPressMoveUpdate,
+    this.onLongPressEnd,
   });
 
   final List<String> letters;
@@ -20,6 +24,9 @@ class ArabicAlphabetScrollbar extends StatefulWidget {
   final GestureDragUpdateCallback onPanUpdate;
   final GestureDragStartCallback onPanStart;
   final GestureDragEndCallback onPanEnd;
+  final GestureLongPressStartCallback? onLongPressStart;
+  final GestureLongPressMoveUpdateCallback? onLongPressMoveUpdate;
+  final GestureLongPressEndCallback? onLongPressEnd;
 
   @override
   State<ArabicAlphabetScrollbar> createState() =>
@@ -27,21 +34,106 @@ class ArabicAlphabetScrollbar extends StatefulWidget {
 }
 
 class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
-  String? _lastSelectedLetter;
   final Map<String, Widget> _itemCache = {};
+  final _overlayController = OverlayPortalController();
+  final _scrollController = ScrollController();
+  String? _draggedLetter;
+  Offset? _draggedOffset;
+  String? _lastNotifiedLetter;
+  String? _lastActiveLetter;
 
   @override
   void initState() {
     super.initState();
-    _lastSelectedLetter = widget.selectedLetter;
+    _lastActiveLetter = widget.selectedLetter;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
   void didUpdateWidget(covariant ArabicAlphabetScrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _lastSelectedLetter = oldWidget.selectedLetter;
-    // Clear cache when selection changes
-    _itemCache.clear();
+    if (widget.selectedLetter != oldWidget.selectedLetter) {
+      // Update last active if we're not dragging (to respect BLoC updates)
+      if (_draggedLetter == null) {
+        _lastActiveLetter = oldWidget.selectedLetter;
+      }
+
+      // Clear cache when selection changes to ensure fresh UI
+      _itemCache.clear();
+
+      // NOTE: Auto-scroll disabled for testing - uncomment to re-enable
+      if (widget.selectedLetter != null) {
+        _scrollToLetter(widget.selectedLetter!);
+      }
+    }
+  }
+
+  void _scrollToLetter(String letter) {
+    if (!_scrollController.hasClients) return;
+    final index = widget.letters.indexOf(letter);
+    if (index != -1) {
+      final theme = Theme.of(context);
+      final componentTokens = theme.componentTokens.alphabetScrollbar;
+      final target = index * componentTokens.itemExtent;
+      _scrollController.animateTo(
+        target.clamp(0.0, _scrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
+  String? _updateDraggedLetter(Offset globalPosition) {
+    if (!mounted) return null;
+    final renderObject = context.findRenderObject();
+    if (renderObject == null || renderObject is! RenderBox) return null;
+    final box = renderObject;
+
+    final localPosition = box.globalToLocal(globalPosition);
+    final theme = Theme.of(context);
+    final componentTokens = theme.componentTokens.alphabetScrollbar;
+
+    final double letterHeight = componentTokens.itemExtent;
+
+    // Adjust localPosition by vertical padding and scroll offset
+    final resolvedPadding = componentTokens.verticalPadding.resolve(
+      Directionality.of(context),
+    );
+    final double scrollOffset = _scrollController.hasClients
+        ? _scrollController.offset
+        : 0;
+    final double relativeY =
+        localPosition.dy - resolvedPadding.top + scrollOffset;
+
+    final letterIndex = (relativeY / letterHeight)
+        .clamp(0, widget.letters.length - 1)
+        .floor();
+
+    if (letterIndex >= 0 && letterIndex < widget.letters.length) {
+      final newLetter = widget.letters[letterIndex];
+      if (newLetter != _draggedLetter) {
+        debugPrint(
+          '[SelectedLetter] [${DateTime.now()}] Hovered: $newLetter at index $letterIndex (Current selected: ${widget.selectedLetter})',
+        );
+        HapticFeedback.selectionClick();
+        setState(() {
+          _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
+          _draggedLetter = newLetter;
+          _draggedOffset = localPosition;
+        });
+      } else if (_draggedOffset != localPosition) {
+        setState(() {
+          _draggedOffset = localPosition;
+        });
+      }
+      return newLetter;
+    }
+    return null;
   }
 
   @override
@@ -55,49 +147,211 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
     );
 
     return RepaintBoundary(
-      child: GestureDetector(
-        behavior: .opaque,
-        onPanStart: widget.onPanStart,
-        onPanUpdate: widget.onPanUpdate,
-        onPanEnd: widget.onPanEnd,
-        child: Container(
-          width: componentTokens.width,
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withValues(
-              alpha: tokens.opacityGlass,
+      child: OverlayPortal(
+        controller: _overlayController,
+        overlayChildBuilder: (context) {
+          if (_draggedLetter == null || _draggedOffset == null) {
+            return const SizedBox.shrink();
+          }
+
+          final RenderBox box = this.context.findRenderObject()! as RenderBox;
+          final Offset globalOffset = box.localToGlobal(Offset.zero);
+          final Size screenSize = MediaQuery.sizeOf(context);
+
+          // Determine if the scrollbar is on the left or right side of the screen
+          final bool isOnRightSide = globalOffset.dx > screenSize.width / 2;
+
+          return Positioned(
+            left: isOnRightSide
+                ? null
+                : globalOffset.dx +
+                      componentTokens.width +
+                      componentTokens.overlayOffset,
+            right: isOnRightSide
+                ? (screenSize.width - globalOffset.dx) +
+                      componentTokens.overlayOffset
+                : null,
+            top:
+                globalOffset.dy +
+                _draggedOffset!.dy -
+                (componentTokens.overlaySize / 2),
+            child: DefaultTextStyle(
+              style: theme.textTheme.displaySmall!.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.bold,
+                fontSize: componentTokens.overlayFontSize,
+              ),
+              child: TweenAnimationBuilder<double>(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutBack,
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Opacity(
+                      opacity: value.clamp(0.0, 1.0),
+                      child: child,
+                    ),
+                  );
+                },
+                child: Container(
+                  key: const Key('alphabet_scrollbar_overlay'),
+                  width: componentTokens.overlaySize,
+                  height: componentTokens.overlaySize,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(
+                      componentTokens.overlayRadius,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: tokens.blurShadow,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Center(child: Text(_draggedLetter!)),
+                ),
+              ),
             ),
-            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-          ),
-          child: ListView.builder(
-            padding: componentTokens.verticalPadding,
-            physics: const ClampingScrollPhysics(),
-            itemCount: widget.letters.length,
-            itemExtent: componentTokens.itemExtent,
-            itemBuilder: (context, index) {
-              final letter = widget.letters[index];
-              final isSelected = letter == widget.selectedLetter;
-              final wasSelected = letter == _lastSelectedLetter;
-
-              // Only create new widget if selection state changed for this item
-              // Otherwise reuse cached widget
-              if (isSelected != wasSelected ||
-                  !_itemCache.containsKey(letter)) {
-                _itemCache[letter] = _LetterItem(
-                  key: ValueKey(letter),
-                  letter: letter,
-                  isSelected: isSelected,
-                  onTap: widget.onLetterSelected,
-                  size: componentTokens.itemExtent,
-                  selectedIndicatorSize:
-                      componentTokens.selectedIndicatorExtent,
-                  fontSize: componentTokens.letterFontSize,
-                  primaryColor: primaryColor,
-                  unselectedColor: unselectedColor,
-                );
+          );
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (details) {
+            // Show overlay immediately on press
+            final letter = _updateDraggedLetter(details.globalPosition);
+            if (letter != null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _overlayController.show();
+              });
+            }
+          },
+          onTapUp: (details) {
+            // Brief delay to allow overlay to be seen, then hide
+            Future.delayed(const Duration(milliseconds: 100), () {
+              if (mounted) {
+                setState(() {
+                  _draggedLetter = null;
+                  _draggedOffset = null;
+                });
+                _overlayController.hide();
               }
+            });
+          },
+          onTapCancel: () {
+            if (mounted) {
+              setState(() {
+                _draggedLetter = null;
+                _draggedOffset = null;
+              });
+              _overlayController.hide();
+            }
+          },
+          onPanStart: (details) {
+            final letter = _updateDraggedLetter(details.globalPosition);
+            if (letter != null) {
+              _lastNotifiedLetter = letter;
+              widget.onLetterSelected(letter);
+            }
+            _overlayController.show();
+            widget.onPanStart(details);
+          },
+          onPanUpdate: (details) {
+            final letter = _updateDraggedLetter(details.globalPosition);
+            if (letter != null && letter != _lastNotifiedLetter) {
+              _lastNotifiedLetter = letter;
+              widget.onLetterSelected(letter);
+            }
+            widget.onPanUpdate(details);
+          },
+          onPanEnd: (details) {
+            setState(() {
+              _draggedLetter = null;
+              _draggedOffset = null;
+              _lastNotifiedLetter = null;
+            });
+            _overlayController.hide();
+            widget.onPanEnd(details);
+          },
+          onLongPressStart: (details) {
+            final letter = _updateDraggedLetter(details.globalPosition);
+            if (letter != null) {
+              _lastNotifiedLetter = letter;
+              debugPrint(
+                '[SelectedLetter] [${DateTime.now()}] LongPress Select: $letter (Current selected: ${widget.selectedLetter})',
+              );
+              widget.onLetterSelected(letter);
+            }
+            // Show overlay after state is updated (ensures _draggedLetter is set)
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _overlayController.show();
+            });
+            widget.onLongPressStart?.call(details);
+          },
+          onLongPressMoveUpdate: (details) {
+            final letter = _updateDraggedLetter(details.globalPosition);
+            if (letter != null && letter != _lastNotifiedLetter) {
+              _lastNotifiedLetter = letter;
+              debugPrint(
+                '[SelectedLetter] [${DateTime.now()}] LongPress Move: $letter (Current selected: ${widget.selectedLetter})',
+              );
+              widget.onLetterSelected(letter);
+            }
+            widget.onLongPressMoveUpdate?.call(details);
+          },
+          onLongPressEnd: (details) {
+            setState(() {
+              _draggedLetter = null;
+              _draggedOffset = null;
+              _lastNotifiedLetter = null;
+            });
+            _overlayController.hide();
+            widget.onLongPressEnd?.call(details);
+          },
+          child: Container(
+            width: componentTokens.width,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface.withValues(
+                alpha: tokens.opacityGlass,
+              ),
+              borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+            ),
+            child: ListView.builder(
+              controller: _scrollController,
+              padding: componentTokens.verticalPadding,
+              physics: const ClampingScrollPhysics(),
+              itemCount: widget.letters.length,
+              itemExtent: componentTokens.itemExtent,
+              itemBuilder: (context, index) {
+                final letter = widget.letters[index];
+                final activeLetter = _draggedLetter ?? widget.selectedLetter;
+                final isSelected = letter == activeLetter;
+                final wasActive = letter == _lastActiveLetter;
 
-              return _itemCache[letter]!;
-            },
+                // Only create new widget if selection state changed for this item
+                // Otherwise reuse cached widget
+                if (isSelected != wasActive ||
+                    !_itemCache.containsKey(letter)) {
+                  _itemCache[letter] = _LetterItem(
+                    key: ValueKey(letter),
+                    letter: letter,
+                    isSelected: isSelected,
+                    selectedLetter: activeLetter,
+                    onTap: widget.onLetterSelected,
+                    size: componentTokens.itemExtent,
+                    selectedIndicatorSize:
+                        componentTokens.selectedIndicatorExtent,
+                    fontSize: componentTokens.letterFontSize,
+                    primaryColor: primaryColor,
+                    unselectedColor: unselectedColor,
+                  );
+                }
+
+                return _itemCache[letter]!;
+              },
+            ),
           ),
         ),
       ),
@@ -110,6 +364,7 @@ class _LetterItem extends StatelessWidget {
     super.key,
     required this.letter,
     required this.isSelected,
+    required this.selectedLetter,
     required this.onTap,
     required this.size,
     required this.selectedIndicatorSize,
@@ -120,6 +375,7 @@ class _LetterItem extends StatelessWidget {
 
   final String letter;
   final bool isSelected;
+  final String? selectedLetter;
   final ValueChanged<String> onTap;
   final double size;
   final double selectedIndicatorSize;
@@ -129,38 +385,45 @@ class _LetterItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => onTap(letter),
-      borderRadius: BorderRadius.circular(size),
-      child: SizedBox(
-        height: size,
-        width: size,
-        child: Center(
+    return Center(
+      child: InkWell(
+        onTap: () {
+          debugPrint(
+            '[SelectedLetter] [${DateTime.now()}] ✓ TAP Select: $letter (Current selected: $selectedLetter)',
+          );
+          onTap(letter);
+        },
+        borderRadius: BorderRadius.circular(size),
+        child: SizedBox(
+          height: size,
+          width: size,
           child: isSelected
               ? Container(
                   width: selectedIndicatorSize,
                   height: selectedIndicatorSize,
                   decoration: BoxDecoration(
                     color: primaryColor,
-                    shape: .circle,
+                    shape: BoxShape.circle,
                   ),
                   child: Center(
                     child: Text(
                       letter,
                       style: TextStyle(
                         fontSize: fontSize,
-                        fontWeight: .bold,
+                        fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                   ),
                 )
-              : Text(
-                  letter,
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: .w500,
-                    color: unselectedColor,
+              : Center(
+                  child: Text(
+                    letter,
+                    style: TextStyle(
+                      fontSize: fontSize,
+                      fontWeight: FontWeight.w500,
+                      color: unselectedColor,
+                    ),
                   ),
                 ),
         ),

@@ -18,6 +18,7 @@ import '../features/history/presentation/screens/history_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
+import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
@@ -239,6 +240,21 @@ class HistoryRoute extends GoRouteData with $HistoryRoute {
           getIt<HistoryBloc>()..add(const HistoryEvent.loadAllHistory()),
       child: const HistoryScreen(),
     );
+  }
+}
+
+@TypedGoRoute<PrayerNotificationStatusRoute>(
+  path: '/prayer-notification-status',
+)
+class PrayerNotificationStatusRoute extends GoRouteData
+    with $PrayerNotificationStatusRoute {
+  const PrayerNotificationStatusRoute({this.$extra});
+
+  final String? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PrayerNotificationStatusScreen(payloadJson: $extra);
   }
 }
 

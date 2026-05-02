@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">تلاوة</string>
+    <string name="adhan_is_playing">الأذان يعمل الآن…</string>
+    <string name="stop_adhan">إيقاف الأذان</string>
+    <string name="prayer_fajr">الفجر</string>
+    <string name="prayer_dhuhr">الظهر</string>
+    <string name="prayer_asr">العصر</string>
+    <string name="prayer_maghrib">المغرب</string>
+    <string name="prayer_isha">العشاء</string>
+    <string name="prayer_sunrise">الشروق</string>
 </resources>

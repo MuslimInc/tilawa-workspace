@@ -20,8 +20,6 @@ class AppTheme {
   static const double _lightAppBarElevation = 0;
   static const FlexTabBarStyle _lightTabBarStyle = FlexTabBarStyle.forAppBar;
 
-  // Custom theme colors
-
   // Dark theme configuration constants
   static const FlexSurfaceMode _darkSurfaceMode =
       FlexSurfaceMode.levelSurfacesLowScaffold;
@@ -36,20 +34,23 @@ class AppTheme {
   static const bool _useMaterial3ErrorColors = true;
 
   // Shared text theme with slightly reduced sizes for a minimized look
-  static TextTheme get _textTheme {
+  static TextTheme _getTextTheme(bool useFonts) {
     // Use Alexandria if enabled, otherwise default to a standard text theme base
-    final TextTheme base = useGoogleFonts
-        ? GoogleFonts.alexandriaTextTheme()
-        : const TextTheme();
-
-    return base;
+    if (!useFonts) return const TextTheme();
+    return GoogleFonts.alexandriaTextTheme();
   }
 
-  /// Get the light theme for the given primary color
+  /// Get the light theme for the given primary color.
+  ///
+  /// [useGoogleFontsOverride] is a foundation API extension for
+  /// preview/golden stability. It allows disabling font loading in headless
+  /// test environments without modifying the production [useGoogleFonts] default.
   static ThemeData getLightTheme({
     required Color primaryColor,
+    bool? useGoogleFontsOverride,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
+    final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
     final scheme = FlexSchemeColor.from(primary: primaryColor);
 
     return FlexThemeData.light(
@@ -63,8 +64,8 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
-      fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
-      textTheme: _textTheme,
+      fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
+      textTheme: _getTextTheme(useFonts),
     ).copyWith(
       extensions: [
         TilawaDesignTokens.light(),
@@ -74,12 +75,18 @@ class AppTheme {
     );
   }
 
-  /// Get the dark theme for the given primary color
+  /// Get the dark theme for the given primary color.
+  ///
+  /// [useGoogleFontsOverride] is a foundation API extension for
+  /// preview/golden stability. It allows disabling font loading in headless
+  /// test environments without modifying the production [useGoogleFonts] default.
   static ThemeData getDarkTheme({
     required Color primaryColor,
+    bool? useGoogleFontsOverride,
     bool darkIsTrueBlack = false,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
+    final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
     final scheme = FlexSchemeColor.from(primary: primaryColor);
 
     return FlexThemeData.dark(
@@ -93,8 +100,8 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
-      fontFamily: useGoogleFonts ? GoogleFonts.alexandria().fontFamily : null,
-      textTheme: _textTheme,
+      fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
+      textTheme: _getTextTheme(useFonts),
     ).copyWith(
       extensions: [
         TilawaDesignTokens.dark(),

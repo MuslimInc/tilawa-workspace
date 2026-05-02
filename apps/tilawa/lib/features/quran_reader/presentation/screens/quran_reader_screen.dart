@@ -17,6 +17,7 @@ import 'package:tilawa/features/share/presentation/screens/screenshot_composer_s
 import 'package:tilawa/features/share/presentation/screens/video_reel_composer_screen.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
 import 'package:tilawa_core/logger.dart';
+import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
@@ -126,12 +127,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     super.initState();
     _screenshotBoundaryKey = GlobalKey();
     WidgetsBinding.instance.addObserver(this);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    unawaited(AppOrientationService.allowReaderOrientations());
 
     _uiVisibilityCubit = context.read<UiVisibilityCubit>();
     _uiVisibilityCubit.show();
@@ -250,10 +246,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _preparedWindowNotifier.dispose();
     _showOverlaysNotifier.dispose();
     _warmingNotifier.dispose();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
+    unawaited(AppOrientationService.restoreDefaultOrientations());
     if (_pendingExitPreparation == null) {
       _debugLog(() => '[READER_EXIT] dispose fallback restore');
       unawaited(_restoreAppSystemUiMode());

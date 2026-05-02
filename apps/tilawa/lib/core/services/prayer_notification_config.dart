@@ -12,12 +12,17 @@ final class PrayerNotificationConfig {
   // --- Notification Channels ---
   static const String channelId = 'com.tilawa.app.prayer';
   static const String adhanChannelId = 'com.tilawa.app.prayer_adhan';
+  static const String silentAdhanChannelId =
+      'com.tilawa.app.prayer_adhan_silent';
   static const String channelName = 'Prayer Times';
   static const String adhanChannelName = 'Prayer Times (Adhan)';
+  static const String silentAdhanChannelName = 'Prayer Times (Silent)';
   static const String channelDescription =
       'Reminders for the five daily prayer times';
   static const String adhanChannelDescription =
       'Prayer time reminders that play the adhan sound';
+  static const String silentAdhanChannelDescription =
+      'Silent prayer time reminders when Adhan plays natively';
 
   // --- Adhan sound ---
   /// Filename used in both `android/app/src/main/res/raw/` and the iOS bundle.
@@ -40,11 +45,20 @@ final class PrayerNotificationConfig {
   /// Prayer indexes mirror the `PrayerType` enum (fajr=0 ... isha=5).
   static const int dynamicIdBase = 20000000;
 
+  /// Reserved ID for manual debug/profile testing.
+  /// Guaranteed not to collide with static (2001-2010) or dynamic (20000000+) IDs.
+  static const int debugManualTestId = 3563;
+
   // --- Scheduling ---
   /// Number of days of prayer times to schedule ahead.
   /// 14 days × ~6 prayers ≈ 84 alarms — well under the iOS 64 limit per app
   /// which Tilawa does not yet target, and trivial for Android.
   static const int scheduleDaysAhead = 14;
+
+  /// WorkManager watchdog threshold. When the persisted schedule window has
+  /// less than this many days remaining, the watchdog rebuilds the next
+  /// [scheduleDaysAhead] days.
+  static const int watchdogRefreshThresholdDays = 7;
 
   // --- Deduplication & fingerprint ---
   // SharedPreferences keys — must not change after first release without a
@@ -53,6 +67,16 @@ final class PrayerNotificationConfig {
   static const String settingsFingerprintKey =
       'prayer_notifications_settings_fingerprint';
   static const String lastTimezoneKey = 'prayer_notifications_last_tz';
+
+  // --- Schedule watchdog metadata ---
+  static const String scheduledWindowStartMsKey =
+      'prayer_notifications_window_start_ms';
+  static const String scheduledWindowEndMsKey =
+      'prayer_notifications_window_end_ms';
+  static const String scheduleCompletedAtMsKey =
+      'prayer_notifications_schedule_completed_at_ms';
+  static const String scheduledNotificationCountKey =
+      'prayer_notifications_scheduled_count';
 
   // --- Payload keys ---
   static const String payloadTypeKey = 'type';

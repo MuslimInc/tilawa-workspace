@@ -378,63 +378,67 @@ class _MiniPlayerOrganism extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceLarge,
-        tokens.spaceTiny,
-        tokens.spaceLarge,
-        tokens.spaceTiny,
-      ),
-      child: TilawaMediaPlayerBar(
-        title: audio.title,
-        subtitle: audio.artist ?? context.l10n.unknownReciter,
-        artwork: audio.artUri == null
-            ? null
-            : CachedNetworkImage(
-                imageUrl: audio.artUri.toString(),
-                fit: BoxFit.cover,
-                errorWidget: (context, error, stackTrace) =>
-                    const SizedBox.shrink(),
-                placeholder: (context, url) => const SizedBox.shrink(),
-              ),
-        progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
-            ? 0.0
-            : (state.positionData?.position.inMilliseconds ?? 0) /
-                  (state.positionData?.duration.inMilliseconds ?? 1),
-        progressBarOverride: const _MiniPlayerProgressBar(),
-        isPlaying: state.isPlaying,
-        canGoPrevious: state.canGoPrevious,
-        canGoNext: state.canGoNext,
-        isSleepTimerActive: state.isSleepTimerActive,
-        isSleepTimerEnabled: context
-            .watch<SettingsCubit>()
-            .state
-            .isSleepTimerEnabled,
-        onPlayPause: () {
-          context.read<AudioPlayerBloc>().add(
-            state.isPlaying
-                ? const AudioPlayerEvent.pauseAudio()
-                : const AudioPlayerEvent.playAudio(),
-          );
-        },
-        onPrevious: () {
-          context.read<AudioPlayerBloc>().add(
-            const AudioPlayerEvent.skipToPrevious(),
-          );
-        },
-        onNext: () {
-          context.read<AudioPlayerBloc>().add(
-            const AudioPlayerEvent.skipToNext(),
-          );
-        },
-        onSleepTimerTap: () {
-          showDialog(
-            context: context,
-            builder: (_) => const SleepTimerDialog(),
-          );
-        },
-        onClose: onClose,
-        onTap: onTap,
+    return TilawaContentBounds(
+      kind: TilawaContentKind.settings,
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          tokens.spaceLarge,
+          tokens.spaceTiny,
+          tokens.spaceLarge,
+          tokens.spaceTiny,
+        ),
+        child: TilawaMediaPlayerBar(
+          title: audio.title,
+          subtitle: audio.artist ?? context.l10n.unknownReciter,
+          artwork: audio.artUri == null
+              ? null
+              : CachedNetworkImage(
+                  imageUrl: audio.artUri.toString(),
+                  fit: BoxFit.cover,
+                  errorWidget: (context, error, stackTrace) =>
+                      const SizedBox.shrink(),
+                  placeholder: (context, url) => const SizedBox.shrink(),
+                ),
+          progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
+              ? 0.0
+              : (state.positionData?.position.inMilliseconds ?? 0) /
+                    (state.positionData?.duration.inMilliseconds ?? 1),
+          progressBarOverride: const _MiniPlayerProgressBar(),
+          isPlaying: state.isPlaying,
+          canGoPrevious: state.canGoPrevious,
+          canGoNext: state.canGoNext,
+          isSleepTimerActive: state.isSleepTimerActive,
+          isSleepTimerEnabled: context
+              .watch<SettingsCubit>()
+              .state
+              .isSleepTimerEnabled,
+          onPlayPause: () {
+            context.read<AudioPlayerBloc>().add(
+              state.isPlaying
+                  ? const AudioPlayerEvent.pauseAudio()
+                  : const AudioPlayerEvent.playAudio(),
+            );
+          },
+          onPrevious: () {
+            context.read<AudioPlayerBloc>().add(
+              const AudioPlayerEvent.skipToPrevious(),
+            );
+          },
+          onNext: () {
+            context.read<AudioPlayerBloc>().add(
+              const AudioPlayerEvent.skipToNext(),
+            );
+          },
+          onSleepTimerTap: () {
+            showDialog(
+              context: context,
+              builder: (_) => const SleepTimerDialog(),
+            );
+          },
+          onClose: onClose,
+          onTap: onTap,
+        ),
       ),
     );
   }
@@ -458,6 +462,9 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -500,72 +507,258 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
             ),
 
             // Content
-            Positioned.fill(
-              child: SafeArea(
-                child: TilawaContentBounds(
-                  kind: TilawaContentKind.media,
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return SingleChildScrollView(
-                        physics: const NeverScrollableScrollPhysics(),
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight,
+            if (isLandscape)
+              _ExpandedPlayerLandscape(
+                state: state,
+                audio: audio,
+                onCollapse: onCollapse,
+                onDismiss: onDismiss,
+              )
+            else
+              Positioned.fill(
+                child: SafeArea(
+                  child: TilawaContentBounds(
+                    kind: TilawaContentKind.media,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _PlayerHeaderMolecule(
+                                  state: state,
+                                  onCollapse: onCollapse,
+                                  onDismiss: onDismiss,
+                                ),
+
+                                // Artwork
+                                _PlayerArtAtom(
+                                  artUri: audio.artUri,
+                                  maxHeight: constraints.maxHeight * 0.35,
+                                ),
+
+                                // Metadata
+                                _PlayerMetadataMolecule(
+                                  title: audio.title,
+                                  artist: audio.artist,
+                                ),
+
+                                // Progress & Controls (Thumb-friendly zone)
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const _ExpandedProgressBar(),
+                                    SizedBox(height: tokens.spaceLarge),
+                                    _PlayerMainControlsMolecule(
+                                      state: state,
+                                      isPlaying: state.isPlaying,
+                                    ),
+                                    SizedBox(height: tokens.spaceMedium),
+                                    _PlayerSecondaryControlsMolecule(
+                                      state: state,
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: tokens.spaceExtraLarge),
+                              ],
+                            ),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _PlayerHeaderMolecule(
-                                state: state,
-                                onCollapse: onCollapse,
-                                onDismiss: onDismiss,
-                              ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
 
-                              // Artwork
-                              _PlayerArtAtom(
-                                artUri: audio.artUri,
-                                maxHeight: constraints.maxHeight * 0.35,
-                              ),
+            // Drag handle
+            if (!isLandscape)
+              Positioned(
+                top: MediaQuery.paddingOf(context).top + 8,
+                left: 0,
+                right: 0,
+                child: const _PlayerSheetHandleAtom(),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-                              // Metadata
-                              _PlayerMetadataMolecule(
-                                title: audio.title,
-                                artist: audio.artist,
-                              ),
+class _ExpandedPlayerLandscape extends StatelessWidget {
+  const _ExpandedPlayerLandscape({
+    required this.state,
+    required this.audio,
+    required this.onCollapse,
+    required this.onDismiss,
+  });
 
-                              // Progress & Controls (Thumb-friendly zone)
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const _ExpandedProgressBar(),
-                                  SizedBox(height: tokens.spaceLarge),
-                                  _PlayerMainControlsMolecule(
-                                    state: state,
-                                    isPlaying: state.isPlaying,
-                                  ),
-                                  SizedBox(height: tokens.spaceMedium),
-                                  _PlayerSecondaryControlsMolecule(
-                                    state: state,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: tokens.spaceExtraLarge),
-                            ],
+  final AudioPlayerState state;
+  final AudioEntity audio;
+  final VoidCallback onCollapse;
+  final VoidCallback onDismiss;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+
+    return Positioned.fill(
+      child: SafeArea(
+        child: Stack(
+          children: [
+            // Header: Metadata and Navigation
+            Positioned(
+              top: tokens.spaceSmall,
+              left: isRtl ? null : tokens.spaceMedium,
+              right: isRtl ? tokens.spaceMedium : null,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      FluentIcons.chevron_down_24_regular,
+                      color: Colors.white,
+                      size: tokens.iconSizeLarge,
+                    ),
+                    onPressed: onCollapse,
+                  ),
+                  SizedBox(width: tokens.spaceSmall),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        audio.title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        audio.artist ?? context.l10n.unknownReciter,
+                        style: TextStyle(
+                          color: Colors.white.withValues(
+                            alpha: tokens.opacityEmphasis,
                           ),
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Actions: Dismiss and more
+            Positioned(
+              top: tokens.spaceSmall,
+              left: isRtl ? tokens.spaceMedium : null,
+              right: isRtl ? null : tokens.spaceMedium,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      FluentIcons.image_24_regular,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => BackgroundSourceDialog(
+                          onSourceSelected: (source) {
+                            context.read<PlayerBackgroundCubit>().pickImage(
+                              source,
+                            );
+                          },
                         ),
                       );
                     },
                   ),
-                ),
+                ],
               ),
             ),
 
-            // Drag handle
+            // Center: Primary Controls
+            Center(
+              child: _PlayerMainControlsMolecule(
+                state: state,
+                isPlaying: state.isPlaying,
+              ),
+            ),
+
+            // Bottom: Seek Bar and secondary actions
             Positioned(
-              top: MediaQuery.paddingOf(context).top + 8,
-              left: 0,
-              right: 0,
-              child: const _PlayerSheetHandleAtom(),
+              bottom: tokens.spaceSmall,
+              left: tokens.spaceLarge,
+              right: tokens.spaceLarge,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const _ExpandedProgressBar(),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceLarge,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TilawaIconActionButton(
+                          icon: FluentIcons.speaker_2_24_regular,
+                          onTap: () => showSliderDialog(
+                            context: context,
+                            title: context.l10n.adjustVolume,
+                            divisions: 10,
+                            min: 0.0,
+                            max: 1.0,
+                            value: state.volume,
+                            onChanged: (v) => context
+                                .read<AudioPlayerBloc>()
+                                .add(AudioPlayerEvent.setVolume(v)),
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            if (context
+                                .watch<SettingsCubit>()
+                                .state
+                                .isSleepTimerEnabled)
+                              IconButton(
+                                icon: Icon(
+                                  state.isSleepTimerActive
+                                      ? FluentIcons.timer_24_filled
+                                      : FluentIcons.timer_24_regular,
+                                  color: state.isSleepTimerActive
+                                      ? Theme.of(context).primaryColor
+                                      : Colors.white,
+                                ),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => const SleepTimerDialog(),
+                                  );
+                                },
+                              ),
+                            TilawaIconActionButton(
+                              icon: FluentIcons.more_horizontal_24_regular,
+                              onTap: () => _showPlaybackActions(context),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -608,11 +801,6 @@ class _PlayerHeaderMolecule extends StatelessWidget {
         style: TextStyle(color: Colors.white, fontSize: tokens.spaceLarge),
       ),
       actions: [
-        IconButton(
-          icon: const Icon(FluentIcons.dismiss_24_regular, color: Colors.white),
-          tooltip: context.l10n.close,
-          onPressed: onDismiss,
-        ),
         if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
           IconButton(
             icon: Icon(
@@ -822,49 +1010,47 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
       ],
     );
   }
+}
 
-  Future<void> _showPlaybackActions(BuildContext context) async {
-    final bool? shouldOpenStopConfirm = await showModalBottomSheet<bool>(
-      context: context,
-      showDragHandle: true,
-      builder: (sheetContext) {
-        return SafeArea(
-          child: ListTile(
-            leading: const Icon(FluentIcons.stop_24_regular),
-            title: Text(context.l10n.stopPlayback),
-            onTap: () => Navigator.of(sheetContext).pop(true),
+Future<void> _showPlaybackActions(BuildContext context) async {
+  final bool? shouldOpenStopConfirm = await showModalBottomSheet<bool>(
+    context: context,
+    showDragHandle: true,
+    builder: (sheetContext) {
+      return ListTile(
+        leading: const Icon(FluentIcons.stop_24_regular),
+        title: Text(context.l10n.stopPlayback),
+        onTap: () => Navigator.of(sheetContext).pop(true),
+      );
+    },
+  );
+
+  if (shouldOpenStopConfirm != true || !context.mounted) {
+    return;
+  }
+
+  final bool? shouldStop = await showDialog<bool>(
+    context: context,
+    builder: (dialogContext) {
+      return AlertDialog(
+        title: Text(context.l10n.stopPlayback),
+        content: Text(context.l10n.stopPlaybackConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(context.l10n.cancel),
           ),
-        );
-      },
-    );
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(context.l10n.stopPlayback),
+          ),
+        ],
+      );
+    },
+  );
 
-    if (shouldOpenStopConfirm != true || !context.mounted) {
-      return;
-    }
-
-    final bool? shouldStop = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(context.l10n.stopPlayback),
-          content: Text(context.l10n.stopPlaybackConfirmMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(false),
-              child: Text(context.l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(dialogContext).pop(true),
-              child: Text(context.l10n.stopPlayback),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (shouldStop == true && context.mounted) {
-      context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
-    }
+  if (shouldStop == true && context.mounted) {
+    context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
   }
 }
 

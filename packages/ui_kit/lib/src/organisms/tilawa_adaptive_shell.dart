@@ -113,29 +113,46 @@ class TilawaAdaptiveShell extends StatelessWidget {
         ? context.getHingeAvoidancePadding(.left)
         : EdgeInsetsDirectional.zero;
 
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final padding = MediaQuery.paddingOf(context);
+
     return Scaffold(
-      body: Row(
+      body: Stack(
         children: [
-          Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: hingePadding.start,
-              end: hingePadding.end,
-            ),
-            child: _SideNavRail(
-              destinations: destinations,
-              selectedIndex: displayIndex,
-              onDestinationSelected: onDestinationSelected,
-              extended: windowSize == TilawaWindowSize.expanded,
-            ),
+          Row(
+            children: [
+              Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: hingePadding.start,
+                  end: hingePadding.end,
+                ),
+                child: _SideNavRail(
+                  destinations: destinations,
+                  selectedIndex: displayIndex,
+                  onDestinationSelected: onDestinationSelected,
+                  extended: windowSize == TilawaWindowSize.large,
+                ),
+              ),
+              Expanded(
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    padding: padding.copyWith(
+                      left: isRtl ? padding.left : 0,
+                      right: isRtl ? 0 : padding.right,
+                    ),
+                  ),
+                  child: SafeArea(
+                    left: isRtl,
+                    right: !isRtl,
+                    top: false,
+                    bottom: false,
+                    child: child,
+                  ),
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: Stack(
-              children: [
-                child,
-                Positioned.fill(child: bottomPlayer),
-              ],
-            ),
-          ),
+          Positioned.fill(child: bottomPlayer),
         ],
       ),
     );
@@ -162,7 +179,10 @@ class _BottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
     final designTokens = theme.tokens;
-    final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+    final systemBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+    final bottomPadding = systemBottomPadding > 0
+        ? systemBottomPadding
+        : designTokens.spaceExtraLarge;
 
     return TilawaContentBounds(
       kind: TilawaContentKind.media,
@@ -259,33 +279,46 @@ class _SideNavRail extends StatelessWidget {
             ),
           ],
         ),
-        child: NavigationRail(
-          extended: extended,
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          backgroundColor: Colors.transparent,
-          indicatorColor: theme.colorScheme.primaryContainer,
-          labelType: extended ? .none : .all,
-          destinations: [
-            for (final d in destinations)
-              NavigationRailDestination(
-                icon: d.iconBuilder != null
-                    ? d.iconBuilder!(
-                        context,
-                        isSelected: false,
-                        color: inactiveColor,
-                      )
-                    : Icon(d.icon),
-                selectedIcon: d.iconBuilder != null
-                    ? d.iconBuilder!(
-                        context,
-                        isSelected: true,
-                        color: activeColor,
-                      )
-                    : Icon(d.activeIcon ?? d.icon),
-                label: Text(d.label),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: NavigationRail(
+                    extended: extended,
+                    selectedIndex: selectedIndex,
+                    onDestinationSelected: onDestinationSelected,
+                    backgroundColor: Colors.transparent,
+                    indicatorColor: theme.colorScheme.primaryContainer,
+                    labelType: extended
+                        ? NavigationRailLabelType.none
+                        : NavigationRailLabelType.all,
+                    destinations: [
+                      for (final d in destinations)
+                        NavigationRailDestination(
+                          icon: d.iconBuilder != null
+                              ? d.iconBuilder!(
+                                  context,
+                                  isSelected: false,
+                                  color: inactiveColor,
+                                )
+                              : Icon(d.icon),
+                          selectedIcon: d.iconBuilder != null
+                              ? d.iconBuilder!(
+                                  context,
+                                  isSelected: true,
+                                  color: activeColor,
+                                )
+                              : Icon(d.activeIcon ?? d.icon),
+                          label: Text(d.label),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -375,8 +408,8 @@ class _NavButton extends StatelessWidget {
                 child: Text(
                   destination.label,
                   maxLines: 1,
-                  overflow: .ellipsis,
-                  textAlign: .center,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
               ),
             ],

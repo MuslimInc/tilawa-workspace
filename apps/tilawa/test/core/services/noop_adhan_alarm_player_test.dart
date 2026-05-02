@@ -19,6 +19,7 @@ void main() {
           id: 1,
           scheduledTime: DateTime.now().add(const Duration(hours: 1)),
           prayerName: 'fajr',
+          prayerKey: 'fajr',
         ),
         returnsNormally,
       );
@@ -37,6 +38,7 @@ void main() {
         id: 42,
         scheduledTime: DateTime.now().add(const Duration(minutes: 30)),
         prayerName: 'isha',
+        prayerKey: 'isha',
       );
       await expectLater(result, completes);
     });
@@ -56,11 +58,13 @@ void main() {
             id: 1,
             scheduledTime: DateTime.now().add(const Duration(hours: 1)),
             prayerName: 'fajr',
+            prayerKey: 'fajr',
           ),
           player.scheduleAdhan(
             id: 2,
             scheduledTime: DateTime.now().add(const Duration(hours: 2)),
             prayerName: 'dhuhr',
+            prayerKey: 'dhuhr',
           ),
           player.cancelAdhan(1),
           player.cancelAllAdhans(),
