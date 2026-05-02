@@ -21,12 +21,21 @@ internal class AdhanReceiver : BroadcastReceiver() {
         }
         val notificationId = intent.getIntExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, -1)
         val prayerName = intent.getStringExtra(AdhanScheduler.EXTRA_PRAYER_NAME).orEmpty()
+        val prayerKey = intent.getStringExtra(AdhanScheduler.EXTRA_PRAYER_KEY).orEmpty()
         val scheduledMs = intent.getLongExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, 0L)
+        val triggerMs = System.currentTimeMillis()
+        val deltaMs = if (scheduledMs > 0) triggerMs - scheduledMs else 0L
         
         val analytics = FirebasePrayerAnalytics(context)
-        analytics.logEvent(PrayerEvents.TRIGGERED, mapOf(
+        analytics.logEvent("adhan_receiver_triggered", mapOf(
             "prayer_name" to prayerName,
-            "delay_from_scheduled_ms" to if (scheduledMs > 0) System.currentTimeMillis() - scheduledMs else 0
+            "prayer_key" to prayerKey,
+            "alarm_id" to notificationId,
+            "scheduled_time_ms" to scheduledMs,
+            "actual_trigger_time_ms" to triggerMs,
+            "trigger_delta_ms" to deltaMs,
+            "android_sdk" to Build.VERSION.SDK_INT,
+            "device_brand" to Build.BRAND
         ))
 
         AdhanQALogger.logEvent(
@@ -35,11 +44,11 @@ internal class AdhanReceiver : BroadcastReceiver() {
             alarmId = notificationId,
             prayerName = prayerName,
             scheduledMs = scheduledMs,
-            triggerMs = System.currentTimeMillis(),
-            deltaMs = if (scheduledMs > 0) System.currentTimeMillis() - scheduledMs else null
+            triggerMs = triggerMs,
+            deltaMs = if (scheduledMs > 0) deltaMs else null
         )
 
-        Log.d("AdhanReceiver", "Alarm fired: id=$notificationId, name=$prayerName")
+        Log.d("AdhanReceiver", "Alarm fired: id=$notificationId, name=$prayerName, key=$prayerKey")
         if (notificationId < 0) {
             return
         }
@@ -47,9 +56,10 @@ internal class AdhanReceiver : BroadcastReceiver() {
             action = AdhanPlaybackService.ACTION_PLAY
             putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, notificationId)
             putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, prayerName)
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, prayerKey)
             putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, scheduledMs)
             putExtra(AdhanScheduler.EXTRA_SOUND, intent.getStringExtra(AdhanScheduler.EXTRA_SOUND) ?: "adhan")
-            putExtra("receiver_time", System.currentTimeMillis())
+            putExtra("receiver_time", triggerMs)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             ContextCompat.startForegroundService(context, serviceIntent)

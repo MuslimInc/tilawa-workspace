@@ -1,4 +1,5 @@
 package com.tilawa.app.prayer
+import android.content.Intent
 
 interface MethodResultProxy {
     fun success(result: Any?)
@@ -24,41 +25,40 @@ internal class MethodChannelLogic(
                 val id = (arguments?.get("id") as? Number)?.toInt()
                 val triggerMs = (arguments?.get("triggerAtMillis") as? Number)?.toLong()
                 val name = (arguments?.get("prayerName") as? String) ?: ""
-                val sound = (arguments?.get("sound") as? String) ?: (if (name.lowercase() == "fajr") "adhan_fajr" else "adhan")
+                val key = (arguments?.get("prayerKey") as? String) ?: name.lowercase()
+                val sound = (arguments?.get("sound") as? String) ?: (if (key == "fajr") "adhan_fajr" else "adhan")
                 
-                analytics?.logEvent(PrayerEvents.SCHEDULE_STARTED, commonProps + mapOf(
+                analytics?.logEvent("adhan_alarm_scheduled", mapOf(
                     "prayer_name" to name,
-                    "is_adhan" to true
+                    "prayer_key" to key,
+                    "alarm_id" to id,
+                    "scheduled_time_ms" to triggerMs,
+                    "sound_name" to sound
                 ))
 
                 if (id == null || triggerMs == null) {
                     result.error("BAD_ARGS", "id and triggerAtMillis required", null)
                 } else {
-                    val ok = scheduler.schedule(id, name, triggerMs, sound)
-                    if (ok) {
-                        analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, commonProps + mapOf(
-                            "prayer_name" to name,
-                            "delay_seconds" to (triggerMs - System.currentTimeMillis()) / 1000
-                        ))
-                    } else {
-                        analytics?.logEvent(PrayerEvents.SCHEDULE_FAILED, commonProps + mapOf(
-                            "prayer_name" to name,
-                            "reason" to "permission_denied"
-                        ))
-                    }
+                    val ok = scheduler.schedule(id, name, key, triggerMs, sound)
                     result.success(ok)
                 }
             }
             "cancelAdhan" -> {
                 val id = (arguments?.get("id") as? Number)?.toInt()
+                val name = (arguments?.get("prayerName") as? String) ?: ""
                 if (id == null) {
                     result.error("BAD_ARGS", "id required", null)
                 } else {
+                    analytics?.logEvent("adhan_alarm_cancelled", mapOf(
+                        "prayer_name" to name,
+                        "alarm_id" to id
+                    ))
                     scheduler.cancel(id)
                     result.success(null)
                 }
             }
             "cancelAllAdhans" -> {
+                analytics?.logEvent("adhan_alarm_cancelled", mapOf("context" to "cancel_all"))
                 scheduler.cancelAll()
                 result.success(null)
             }
@@ -68,10 +68,11 @@ internal class MethodChannelLogic(
                 val alarms = items.mapNotNull { entry ->
                     val id = (entry["id"] as? Number)?.toInt() ?: return@mapNotNull null
                     val name = (entry["name"] as? String).orEmpty()
+                    val key = (entry["key"] as? String).orEmpty()
                     val trigger = (entry["triggerAtMillis"] as? Number)?.toLong()
                         ?: return@mapNotNull null
-                    val sound = (entry["sound"] as? String) ?: (if (name.lowercase() == "fajr") "adhan_fajr" else "adhan")
-                    AlarmMetadata(id, name, trigger, sound)
+                    val sound = (entry["sound"] as? String) ?: (if (key == "fajr") "adhan_fajr" else "adhan")
+                    AlarmMetadata(id, name, key, trigger, sound)
                 }
                 bootReceiver.persistPendingAlarms(alarms)
                 result.success(null)
@@ -117,7 +118,7 @@ internal class MethodChannelLogic(
                     sound = sound
                 )
 
-                val ok = scheduler.schedule(id, name, triggerAt, sound)
+                val ok = scheduler.schedule(id, name, "qa_test_adhan", triggerAt, sound)
                 if (ok) {
                     AdhanQALogger.logEvent(
                         context = scheduler.getContext(),
@@ -154,6 +155,18 @@ internal class MethodChannelLogic(
             "clearQALogs" -> {
                 AdhanQALogger.clearLogs(scheduler.getContext())
                 result.success(null)
+            }
+            "stopAdhan" -> {
+                val context = scheduler.getContext()
+                val stopIntent = Intent(context, AdhanPlaybackService::class.java).apply {
+                    action = AdhanPlaybackService.ACTION_STOP
+                }
+                context.stopService(stopIntent)
+                analytics?.logEvent("adhan_stop_tapped_from_app")
+                result.success(true)
+            }
+            "isAdhanPlaying" -> {
+                result.success(AdhanPlaybackService.isRunning)
             }
             else -> result.notImplemented()
         }

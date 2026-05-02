@@ -17,16 +17,14 @@ internal class PlaybackLogic(
             }
             "com.tilawa.app.prayer.ACTION_PLAY", null -> {
                 val name = intent?.getStringExtra(AdhanScheduler.EXTRA_PRAYER_NAME).orEmpty()
+                val key = intent?.getStringExtra(AdhanScheduler.EXTRA_PRAYER_KEY).orEmpty()
                 val sound = intent?.getStringExtra(AdhanScheduler.EXTRA_SOUND) ?: "adhan"
                 val scheduledMs = intent?.getLongExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, 0L) ?: 0L
                 val receiverTime = intent?.getLongExtra("receiver_time", 0L) ?: 0L
 
-                analytics?.logEvent(PrayerEvents.PLAYBACK_STARTED, mapOf(
-                    "prayer_name" to name,
-                    "sound" to sound
-                ))
                 PlaybackAction.PLAY(
                     prayerName = name,
+                    prayerKey = key,
                     sound = sound,
                     scheduledMs = scheduledMs,
                     receiverTime = receiverTime
@@ -67,6 +65,7 @@ sealed class PlaybackAction {
     object STOP : PlaybackAction()
     data class PLAY(
         val prayerName: String,
+        val prayerKey: String,
         val sound: String,
         val scheduledMs: Long,
         val receiverTime: Long

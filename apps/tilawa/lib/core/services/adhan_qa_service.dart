@@ -1,16 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:tilawa_core/di/injection.dart';
-import 'android_adhan_alarm_player.dart';
 
 /// Service for managing Adhan QA tools and logging.
 /// Only active in debug/profile modes or if ENABLE_ADHAN_QA_TOOLS is defined.
 class AdhanQAService {
-  static const MethodChannel _channel = MethodChannel('com.tilawa.app/prayer_adhan');
+  static const MethodChannel _channel = MethodChannel(
+    'com.tilawa.app/prayer_adhan',
+  );
 
   static bool get isEnabled {
     if (kDebugMode || kProfileMode) return true;
-    return const bool.fromEnvironment('ENABLE_ADHAN_QA_TOOLS', defaultValue: false);
+    return const bool.fromEnvironment(
+      'ENABLE_ADHAN_QA_TOOLS',
+      defaultValue: false,
+    );
   }
 
   /// Initialize QA tools (enable native logging if allowed).
@@ -41,11 +44,11 @@ class AdhanQAService {
   /// Schedule a test Adhan using the production native pipeline.
   Future<void> scheduleTestAdhan({required int delayMinutes}) async {
     if (!isEnabled) return;
-    
+
     // Unique ID for QA test (using a large constant to avoid collisions)
     const testId = 999999;
     final scheduledTime = DateTime.now().add(Duration(minutes: delayMinutes));
-    
+
     await logEvent(
       'QA_TEST_ADHAN_SCHEDULE_REQUESTED',
       details: 'delay=${delayMinutes}m, time=$scheduledTime',
@@ -59,7 +62,7 @@ class AdhanQAService {
         'sound': 'adhan',
         'delayMs': delayMinutes * 60 * 1000,
       });
-      
+
       await logEvent('QA_TEST_ADHAN_SCHEDULED_SUCCESS');
     } catch (e) {
       await logEvent('QA_TEST_ADHAN_SCHEDULED_FAILED', details: e.toString());
@@ -71,7 +74,7 @@ class AdhanQAService {
   Future<void> cancelTestAdhan() async {
     if (!isEnabled) return;
     const testId = 999999;
-    
+
     await logEvent('QA_TEST_ADHAN_CANCEL_REQUESTED');
     try {
       await _channel.invokeMethod('cancelAdhan', {'id': testId});

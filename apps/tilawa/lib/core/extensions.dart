@@ -57,6 +57,12 @@ extension FailureExtensions on Failure {
       PersistenceFailure() => l10n.persistenceError,
       UIError() => l10n.uiError,
       UserCancelledFailure() => '',
+      NotificationFailure(reason: final reason) => switch (reason) {
+        NotificationFailureReason.missingPayload =>
+          l10n.errorMissingNotificationPayload,
+        NotificationFailureReason.invalidPayload =>
+          l10n.errorInvalidNotificationPayload,
+      },
     };
   }
 }

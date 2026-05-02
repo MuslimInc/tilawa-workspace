@@ -69,10 +69,10 @@ class DefaultPrayerStorage(private val context: Context) : PrayerStorage {
 class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManager {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-    override fun scheduleExact(id: Int, name: String, triggerMs: Long, sound: String): Boolean {
+    override fun scheduleExact(id: Int, name: String, key: String, triggerMs: Long, sound: String): Boolean {
         if (!canScheduleExact()) return false
         
-        val pi = pendingIntent(id, name, triggerMs, sound)
+        val pi = pendingIntent(id, name, key, triggerMs, sound)
         val showIntent = PendingIntent.getActivity(
             context,
             id,
@@ -90,7 +90,7 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
     }
 
     override fun cancel(id: Int) {
-        alarmManager.cancel(pendingIntent(id, "", 0L, "adhan"))
+        alarmManager.cancel(pendingIntent(id, "", "", 0L, "adhan"))
     }
 
     override fun cancelAll(ids: Set<Int>) {
@@ -110,6 +110,7 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
     private fun pendingIntent(
         notificationId: Int,
         prayerName: String,
+        prayerKey: String,
         triggerAtMillis: Long,
         sound: String,
     ): PendingIntent {
@@ -117,6 +118,7 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
             action = "com.tilawa.app.prayer.ACTION_FIRE_ADHAN"
             putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, notificationId)
             putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, prayerName)
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, prayerKey)
             putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, triggerAtMillis)
             putExtra(AdhanScheduler.EXTRA_SOUND, sound)
         }

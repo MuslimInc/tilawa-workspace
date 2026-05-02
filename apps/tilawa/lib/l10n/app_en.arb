@@ -2403,5 +2403,62 @@
     "prayerNotificationsSilentAdhanChannelDescription": "Silent prayer time reminders when Adhan plays natively",
     "@prayerNotificationsSilentAdhanChannelDescription": {
         "description": "Android notification channel description for prayer reminders when adhan is handled natively"
+    },
+    "adhanIsPlaying": "Adhan is playing",
+    "@adhanIsPlaying": {
+        "description": "Text showing that Adhan audio is currently playing"
+    },
+    "stopAdhan": "Stop Adhan",
+    "@stopAdhan": {
+        "description": "Button label to stop Adhan playback"
+    },
+    "prayerNotificationReceived": "Prayer notification received",
+    "@prayerNotificationReceived": {
+        "description": "Status text when a prayer notification is opened"
+    },
+    "viewAllPrayerTimes": "View All Prayer Times",
+    "@viewAllPrayerTimes": {
+        "description": "Button label to navigate to the full prayer times screen"
+    },
+    "prayerTimeAt": "at {time}",
+    "@prayerTimeAt": {
+        "description": "Label showing a prayer time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationStatus": "Notification",
+    "@notificationStatus": {
+        "description": "Label for notification status"
+    },
+    "adhanStatus": "Adhan",
+    "@adhanStatus": {
+        "description": "Label for Adhan status"
+    },
+    "received": "Received",
+    "@received": {
+        "description": "Status text for received notification"
+    },
+    "sound": "Sound",
+    "@sound": {
+        "description": "Label for audio sound"
+    },
+    "enabled": "Enabled",
+    "@enabled": {
+        "description": "Generic enabled status"
+    },
+    "disabled": "Disabled",
+    "@disabled": {
+        "description": "Generic disabled status"
+    },
+    "errorMissingNotificationPayload": "Missing notification payload.",
+    "@errorMissingNotificationPayload": {
+        "description": "Error message when notification data is missing"
+    },
+    "errorInvalidNotificationPayload": "Invalid notification payload.",
+    "@errorInvalidNotificationPayload": {
+        "description": "Error message when notification data is corrupted or invalid"
     }
 }

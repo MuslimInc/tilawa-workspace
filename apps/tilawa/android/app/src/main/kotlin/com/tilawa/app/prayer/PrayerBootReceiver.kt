@@ -26,6 +26,7 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
 
         private const val FIELD_ID = "id"
         private const val FIELD_NAME = "name"
+        private const val FIELD_KEY = "key"
         private const val FIELD_TRIGGER_MS = "trigger"
         private const val FIELD_SOUND = "sound"
 
@@ -40,6 +41,7 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
                     JSONObject().apply {
                         put(FIELD_ID, it.id)
                         put(FIELD_NAME, it.name)
+                        put(FIELD_KEY, it.key)
                         put(FIELD_TRIGGER_MS, it.triggerMs)
                         put(FIELD_SOUND, it.sound)
                     },
@@ -91,8 +93,8 @@ internal class PrayerBootReceiver : BroadcastReceiver() {
                     val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     return nm.areNotificationsEnabled()
                 }
-                override fun schedule(id: Int, name: String, triggerMs: Long, sound: String) =
-                    AdhanScheduler.schedule(context, id, name, triggerMs, sound)
+                override fun schedule(id: Int, name: String, key: String, triggerMs: Long, sound: String) =
+                    AdhanScheduler.schedule(context, id, name, key, triggerMs, sound)
             },
             watchdog = object : WatchdogProxy {
                 override fun enqueuePeriodic() =

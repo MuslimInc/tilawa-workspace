@@ -12,6 +12,10 @@ abstract interface class IAdhanAlarmPlayer {
   /// absent (e.g. iOS, where this app does not currently ship).
   bool get isSupported;
 
+  /// Stream of notification tap payloads.
+  /// Fired when a native prayer notification is tapped.
+  Stream<String> get onNotificationTapped;
+
   /// Schedule adhan audio playback for [scheduledTime]. The [id] is the same
   /// notification ID used for the corresponding visual notification so the
   /// audio and notification can be cancelled together.
@@ -22,11 +26,12 @@ abstract interface class IAdhanAlarmPlayer {
     required int id,
     required DateTime scheduledTime,
     required String prayerName,
+    required String prayerKey,
     String? sound,
   });
 
   /// Cancel a previously scheduled adhan by [id].
-  Future<void> cancelAdhan(int id);
+  Future<void> cancelAdhan(int id, {String? prayerName});
 
   /// Cancel every adhan scheduled by this player.
   Future<void> cancelAllAdhans();
@@ -50,6 +55,12 @@ abstract interface class IAdhanAlarmPlayer {
 
   /// Returns the device manufacturer string (e.g., "Xiaomi", "Samsung").
   Future<String?> manufacturer();
+
+  /// Stops the currently playing adhan audio if it is active.
+  Future<void> stopCurrentAdhan();
+
+  /// Returns `true` if the adhan audio is currently playing.
+  Future<bool> isAdhanPlaying();
 }
 
 /// Tuple persisted for the boot receiver's re-arm path.
@@ -57,12 +68,14 @@ class PendingAdhanAlarm {
   const PendingAdhanAlarm({
     required this.id,
     required this.prayerName,
+    required this.prayerKey,
     required this.triggerAt,
     this.sound,
   });
 
   final int id;
   final String prayerName;
+  final String prayerKey;
   final DateTime triggerAt;
   final String? sound;
 }

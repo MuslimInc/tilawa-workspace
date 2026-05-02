@@ -23,6 +23,7 @@ import androidx.core.content.edit
  */
 internal object AdhanScheduler {
     const val EXTRA_PRAYER_NAME = "prayer_name"
+    const val EXTRA_PRAYER_KEY = "prayer_key"
     const val EXTRA_NOTIFICATION_ID = "notification_id"
     const val EXTRA_SCHEDULED_MS = "scheduled_ms"
     const val EXTRA_SOUND = "sound"
@@ -50,6 +51,7 @@ internal object AdhanScheduler {
         context: Context,
         notificationId: Int,
         prayerName: String,
+        prayerKey: String,
         triggerAtMillis: Long,
     ): Boolean {
         val am = getAlarmManager(context)
@@ -60,9 +62,9 @@ internal object AdhanScheduler {
         }
 
         // Derive sound name: adhan_fajr for Fajr, else adhan
-        val sound = if (prayerName.lowercase() == "fajr") "adhan_fajr" else "adhan"
+        val sound = if (prayerKey.lowercase() == "fajr") "adhan_fajr" else "adhan"
 
-        if (am.scheduleExact(notificationId, prayerName, triggerAtMillis, sound)) {
+        if (am.scheduleExact(notificationId, prayerName, prayerKey, triggerAtMillis, sound)) {
             st.addActiveId(notificationId)
             return true
         }
@@ -74,6 +76,7 @@ internal object AdhanScheduler {
         context: Context,
         notificationId: Int,
         prayerName: String,
+        prayerKey: String,
         triggerAtMillis: Long,
         sound: String,
     ): Boolean {
@@ -84,7 +87,7 @@ internal object AdhanScheduler {
             return false
         }
 
-        if (am.scheduleExact(notificationId, prayerName, triggerAtMillis, sound)) {
+        if (am.scheduleExact(notificationId, prayerName, prayerKey, triggerAtMillis, sound)) {
             st.addActiveId(notificationId)
             return true
         }

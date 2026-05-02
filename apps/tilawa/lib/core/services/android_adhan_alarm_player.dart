@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart';
@@ -18,7 +19,21 @@ import '../logging/app_logger.dart';
 /// the domain `PrayerAdhanNotificationService`.
 @lazySingleton
 class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
-  AndroidAdhanAlarmPlayer();
+  AndroidAdhanAlarmPlayer() {
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == 'onNotificationTapped') {
+        final payload = call.arguments['payload'] as String?;
+        if (payload != null) {
+          _onNotificationTappedController.add(payload);
+        }
+      }
+    });
+  }
+
+  final _onNotificationTappedController = StreamController<String>.broadcast();
+  @override
+  Stream<String> get onNotificationTapped =>
+      _onNotificationTappedController.stream;
 
   static const MethodChannel _channel = MethodChannel(
     'com.tilawa.app/prayer_adhan',
@@ -32,6 +47,7 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required int id,
     required DateTime scheduledTime,
     required String prayerName,
+    required String prayerKey,
     String? sound,
   }) async {
     if (!isSupported) return false;
@@ -40,8 +56,9 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
           await _channel.invokeMethod<bool>('scheduleAdhan', {
             'id': id,
             'prayerName': prayerName,
+            'prayerKey': prayerKey,
             'triggerAtMillis': scheduledTime.millisecondsSinceEpoch,
-            'sound': ?sound,
+            'sound': sound,
           }) ??
           false;
       if (!ok) {
@@ -58,10 +75,13 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   }
 
   @override
-  Future<void> cancelAdhan(int id) async {
+  Future<void> cancelAdhan(int id, {String? prayerName}) async {
     if (!isSupported) return;
     try {
-      await _channel.invokeMethod<void>('cancelAdhan', {'id': id});
+      await _channel.invokeMethod<void>('cancelAdhan', {
+        'id': id,
+        'prayerName': prayerName,
+      });
     } on PlatformException catch (e) {
       logger.e('[AndroidAdhanAlarmPlayer] cancelAdhan failed: ${e.message}');
     }
@@ -91,8 +111,9 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
               (a) => {
                 'id': a.id,
                 'name': a.prayerName,
+                'key': a.prayerKey,
                 'triggerAtMillis': a.triggerAt.millisecondsSinceEpoch,
-                'sound': ?a.sound,
+                'sound': a.sound,
               },
             )
             .toList(),
@@ -168,6 +189,27 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
       return await _channel.invokeMethod<String>('manufacturer');
     } on PlatformException {
       return null;
+    }
+  }
+
+  @override
+  Future<void> stopCurrentAdhan() async {
+    if (!isSupported) return;
+    try {
+      await _channel.invokeMethod<void>('stopAdhan');
+    } on PlatformException catch (e) {
+      logger.e('[AndroidAdhanAlarmPlayer] stopAdhan failed: ${e.message}');
+    }
+  }
+
+  @override
+  Future<bool> isAdhanPlaying() async {
+    if (!isSupported) return false;
+    try {
+      return await _channel.invokeMethod<bool>('isAdhanPlaying') ?? false;
+    } on PlatformException catch (e) {
+      logger.e('[AndroidAdhanAlarmPlayer] isAdhanPlaying failed: ${e.message}');
+      return false;
     }
   }
 }

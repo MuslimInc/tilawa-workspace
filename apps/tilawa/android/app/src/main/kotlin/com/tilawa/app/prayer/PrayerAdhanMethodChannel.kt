@@ -14,6 +14,7 @@ internal object PrayerAdhanMethodChannel {
     private const val CHANNEL = "com.tilawa.app/prayer_adhan"
 
     private var logic: MethodChannelLogic? = null
+    private var methodChannel: MethodChannel? = null
 
     @VisibleForTesting
     fun setLogic(logic: MethodChannelLogic?) {
@@ -31,8 +32,8 @@ internal object PrayerAdhanMethodChannel {
                     val nm = appContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     return nm.areNotificationsEnabled()
                 }
-                override fun schedule(id: Int, name: String, triggerMs: Long, sound: String) =
-                    AdhanScheduler.schedule(appContext, id, name, triggerMs, sound)
+                override fun schedule(id: Int, name: String, key: String, triggerMs: Long, sound: String) =
+                    AdhanScheduler.schedule(appContext, id, name, key, triggerMs, sound)
                 override fun cancel(id: Int) =
                     AdhanScheduler.cancel(appContext, id)
                 override fun cancelAll() =
@@ -57,8 +58,8 @@ internal object PrayerAdhanMethodChannel {
             analytics = FirebasePrayerAnalytics(appContext)
         )
 
-        MethodChannel(messenger, CHANNEL)
-            .setMethodCallHandler { call, result ->
+        val mc = MethodChannel(messenger, CHANNEL)
+        mc.setMethodCallHandler { call, result ->
                 val proxy = object : MethodResultProxy {
                     override fun success(res: Any?) = result.success(res)
                     override fun error(errorCode: String, errorMessage: String?, errorDetails: Any?) =
@@ -68,6 +69,14 @@ internal object PrayerAdhanMethodChannel {
                 @Suppress("UNCHECKED_CAST")
                 activeLogic.handleMethodCall(call.method, call.arguments as? Map<String, Any?>, proxy)
             }
+        this.methodChannel = mc
+    }
+
+    fun notifyNotificationTapped(prayerKey: String, payload: String) {
+        methodChannel?.invokeMethod("onNotificationTapped", mapOf(
+            "prayer_key" to prayerKey,
+            "payload" to payload
+        ))
     }
 
     private fun requestIgnoreBatteryOptimizationsInternal(

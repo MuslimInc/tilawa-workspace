@@ -343,6 +343,7 @@ void main() {
             id: anyNamed('id'),
             scheduledTime: anyNamed('scheduledTime'),
             prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
           ),
         ).thenAnswer((_) async => true);
 
@@ -381,6 +382,7 @@ void main() {
             id: anyNamed('id'),
             scheduledTime: anyNamed('scheduledTime'),
             prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
           ),
         ).called(5);
       });
@@ -395,6 +397,7 @@ void main() {
               id: anyNamed('id'),
               scheduledTime: anyNamed('scheduledTime'),
               prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
             ),
           ).thenAnswer((_) async => false);
 

@@ -1792,4 +1792,45 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get prayerNotificationsSilentAdhanChannelDescription =>
       'Silent prayer time reminders when Adhan plays natively';
+
+  @override
+  String get adhanIsPlaying => 'Adhan is playing';
+
+  @override
+  String get stopAdhan => 'Stop Adhan';
+
+  @override
+  String get prayerNotificationReceived => 'Prayer notification received';
+
+  @override
+  String get viewAllPrayerTimes => 'View All Prayer Times';
+
+  @override
+  String prayerTimeAt(String time) {
+    return 'at $time';
+  }
+
+  @override
+  String get notificationStatus => 'Notification';
+
+  @override
+  String get adhanStatus => 'Adhan';
+
+  @override
+  String get received => 'Received';
+
+  @override
+  String get sound => 'Sound';
+
+  @override
+  String get enabled => 'Enabled';
+
+  @override
+  String get disabled => 'Disabled';
+
+  @override
+  String get errorMissingNotificationPayload => 'Missing notification payload.';
+
+  @override
+  String get errorInvalidNotificationPayload => 'Invalid notification payload.';
 }

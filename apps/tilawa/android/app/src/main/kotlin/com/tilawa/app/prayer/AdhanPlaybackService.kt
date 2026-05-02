@@ -43,6 +43,9 @@ internal class AdhanPlaybackService : Service() {
         private const val CHANNEL_NAME = "Prayer Times (Adhan)"
         private const val WAKE_LOCK_TAG = "Tilawa::AdhanPlayback"
         private const val WAKE_LOCK_TIMEOUT_MS = 5L * 60L * 1000L
+
+        var isRunning = false
+            private set
     }
 
     private var mediaPlayer: MediaPlayer? = null
@@ -72,9 +75,14 @@ internal class AdhanPlaybackService : Service() {
 
     private var isPlayingInternally = false
     private var completedSuccessfully = false
+    private var startTimeMs: Long = 0
+
+    override fun onCreate() {
+        super.onCreate()
+        isRunning = true
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val startTime = System.currentTimeMillis()
         
         if (intent?.action == ACTION_PLAY && isPlayingInternally) {
             Log.w(TAG, "Duplicate ACTION_PLAY ignored")
@@ -96,35 +104,41 @@ internal class AdhanPlaybackService : Service() {
                 if (action.scheduledMs > 0 && action.receiverTime > 0) {
                     analytics.logEvent("prayer_trigger_delta", mapOf(
                         "delta_ms" to (action.receiverTime - action.scheduledMs),
+                        "prayer_key" to action.prayerKey,
                         "prayer_name" to action.prayerName
                     ))
                 }
-                if (action.receiverTime > 0) {
-                    analytics.logEvent("prayer_service_start_latency", mapOf(
-                        "latency_ms" to (startTime - action.receiverTime),
-                        "prayer_name" to action.prayerName
-                    ))
-                }
+                
+                val startMs = System.currentTimeMillis()
+                val latencyMs = if (action.receiverTime > 0) startMs - action.receiverTime else null
+                
+                analytics.logEvent("adhan_service_started", mapOf(
+                    "prayer_name" to action.prayerName,
+                    "prayer_key" to action.prayerKey,
+                    "service_start_latency_ms" to latencyMs,
+                    "android_sdk" to Build.VERSION.SDK_INT,
+                    "device_brand" to Build.BRAND
+                ))
 
                 AdhanQALogger.logEvent(
                     context = this,
                     eventName = "SERVICE_STARTED",
                     prayerName = action.prayerName,
                     scheduledMs = action.scheduledMs,
-                    triggerMs = startTime,
-                    latencyMs = if (action.receiverTime > 0) startTime - action.receiverTime else null,
+                    triggerMs = action.receiverTime,
+                    latencyMs = latencyMs,
                     sound = action.sound
                 )
 
-                startPlayback(action.prayerName, action.sound)
+                startPlayback(action.prayerName, action.prayerKey, action.sound, action.scheduledMs)
             }
             PlaybackAction.NONE -> Unit
         }
         return START_NOT_STICKY
     }
 
-    private fun startPlayback(prayerName: String, sound: String) {
-        val notification = buildNotification(prayerName)
+    private fun startPlayback(prayerName: String, prayerKey: String, sound: String, scheduledMs: Long) {
+        val notification = buildNotification(prayerName, prayerKey, FOREGROUND_NOTIFICATION_ID, scheduledMs)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 FOREGROUND_NOTIFICATION_ID,
@@ -136,6 +150,12 @@ internal class AdhanPlaybackService : Service() {
         }
 
         acquireWakeLock()
+        
+        analytics.logEvent("adhan_playback_started", mapOf(
+            "prayer_name" to prayerName,
+            "prayer_key" to prayerKey,
+            "sound_name" to sound
+        ))
         
         Log.d(TAG, "startPlayback: initializing MediaPlayer for sound: $sound")
         try {
@@ -164,7 +184,12 @@ internal class AdhanPlaybackService : Service() {
                 
                 setOnCompletionListener {
                     Log.i(TAG, "Playback completed")
-                    analytics.logEvent(PrayerEvents.PLAYBACK_COMPLETED)
+                    val durationMs = if (startTimeMs > 0) System.currentTimeMillis() - startTimeMs else null
+                    analytics.logEvent("adhan_playback_completed", mapOf(
+                        "prayer_name" to prayerName,
+                        "playback_duration_ms" to durationMs,
+                        "completed" to true
+                    ))
                     AdhanQALogger.logEvent(
                         context = this@AdhanPlaybackService,
                         eventName = "PLAYBACK_COMPLETED"
@@ -183,9 +208,11 @@ internal class AdhanPlaybackService : Service() {
                 
                 setOnErrorListener { _, what, extra ->
                     Log.e(TAG, "MediaPlayer error: what=$what, extra=$extra")
-                    analytics.logEvent(PrayerEvents.PLAYBACK_FAILED, mapOf(
+                    analytics.logEvent("adhan_playback_abnormal_termination", mapOf(
+                        "reason" to "mediaplayer_error_$what",
                         "error_what" to what,
-                        "error_extra" to extra
+                        "error_extra" to extra,
+                        "abnormal_termination" to true
                     ))
                     isPlayingInternally = false
                     stopSelf()
@@ -229,6 +256,7 @@ internal class AdhanPlaybackService : Service() {
             }
 
             mediaPlayer?.start()
+            startTimeMs = System.currentTimeMillis()
             Log.i(TAG, "MediaPlayer started successfully")
 
         } catch (e: Exception) {
@@ -267,9 +295,11 @@ internal class AdhanPlaybackService : Service() {
     override fun onDestroy() {
         if (!completedSuccessfully && isPlayingInternally) {
             Log.w(TAG, "Abnormal termination: service destroyed before completion")
-            analytics.logEvent("prayer_service_abnormal_termination", mapOf(
+            analytics.logEvent("adhan_playback_abnormal_termination", mapOf(
                 "reason" to "onDestroy_without_completion",
-                "device_manufacturer" to Build.MANUFACTURER
+                "device_brand" to Build.BRAND,
+                "android_sdk" to Build.VERSION.SDK_INT,
+                "abnormal_termination" to true
             ))
             AdhanQALogger.logEvent(
                 context = this,
@@ -282,10 +312,16 @@ internal class AdhanPlaybackService : Service() {
             eventName = "SERVICE_DESTROYED"
         )
         stopPlayback()
+        isRunning = false
         super.onDestroy()
     }
 
-    private fun buildNotification(prayerName: String): Notification {
+    private fun buildNotification(
+        prayerName: String,
+        prayerKey: String,
+        notificationId: Int,
+        scheduledMs: Long
+    ): Notification {
         val nm = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
             nm.getNotificationChannel(CHANNEL_ID) == null
@@ -303,9 +339,17 @@ internal class AdhanPlaybackService : Service() {
         }
         val openIntent = PendingIntent.getActivity(
             this,
-            0,
-            Intent(this, MainActivity::class.java).apply {
+            notificationId,
+            Intent(this, Class.forName("com.tilawa.app.MainActivity")).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                action = "com.tilawa.app.prayer.ACTION_OPEN_PRAYER_STATUS"
+                putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, prayerName)
+                putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, prayerKey)
+                putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, notificationId)
+                putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, scheduledMs)
+                putExtra("actual_trigger_time_ms", System.currentTimeMillis())
+                putExtra("adhan_enabled", true)
+                putExtra("is_adhan_playing", true)
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )

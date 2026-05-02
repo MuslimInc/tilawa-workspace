@@ -27,6 +27,7 @@ internal class BootLogic(
                         AlarmEntry(
                             obj.getInt("id"),
                             obj.optString("name", ""),
+                            obj.optString("key", ""),
                             obj.getLong("trigger"),
                             obj.optString("sound", "adhan")
                         )
@@ -52,7 +53,7 @@ internal class BootLogic(
         for (entry in pending) {
             if (entry.trigger <= now) continue
             try {
-                val ok = scheduler.schedule(entry.id, entry.name, entry.trigger, entry.sound)
+                val ok = scheduler.schedule(entry.id, entry.name, entry.key, entry.trigger, entry.sound)
                 if (ok) {
                     analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, mapOf(
                         "prayer_name" to entry.name,
@@ -84,6 +85,7 @@ internal class BootLogic(
     private data class AlarmEntry(
         val id: Int,
         val name: String,
+        val key: String,
         val trigger: Long,
         val sound: String
     )
@@ -93,7 +95,7 @@ interface AdhanSchedulerProxy {
     fun getContext(): Context
     fun canScheduleExact(): Boolean
     fun areNotificationsEnabled(): Boolean
-    fun schedule(id: Int, name: String, triggerMs: Long, sound: String): Boolean
+    fun schedule(id: Int, name: String, key: String, triggerMs: Long, sound: String): Boolean
 }
 
 interface WatchdogProxy {

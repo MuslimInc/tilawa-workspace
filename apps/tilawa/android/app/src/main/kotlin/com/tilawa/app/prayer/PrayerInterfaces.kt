@@ -22,7 +22,7 @@ interface PrayerStorage {
  * Interface for scheduling alarms.
  */
 interface PrayerAlarmManager {
-    fun scheduleExact(id: Int, name: String, triggerMs: Long, sound: String): Boolean
+    fun scheduleExact(id: Int, name: String, key: String, triggerMs: Long, sound: String): Boolean
     fun cancel(id: Int)
     fun cancelAll(ids: Set<Int>)
     fun canScheduleExact(): Boolean
@@ -31,6 +31,7 @@ interface PrayerAlarmManager {
 data class AlarmMetadata(
     val id: Int,
     val name: String,
+    val key: String,
     val triggerMs: Long,
     val sound: String
 )

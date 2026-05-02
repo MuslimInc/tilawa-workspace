@@ -137,6 +137,17 @@ class PrayerAdhanNotificationService
         handler: handleNotificationResponse,
       );
 
+      // Handle native notification taps (from AdhanPlaybackService)
+      _adhanPlayer.onNotificationTapped.listen((payload) {
+        handleNotificationResponse(
+          NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            payload: payload,
+          ),
+        );
+      });
+
       if (Platform.isAndroid) {
         await _createAndroidChannels();
       }
@@ -338,14 +349,17 @@ class PrayerAdhanNotificationService
             dayOffset,
             prayer,
           );
+          final bool useAdhan = prayerSettings.playAdhan;
           final String payload = jsonEncode({
             PrayerNotificationConfig.payloadTypeKey:
                 PrayerNotificationConfig.payloadTypeValue,
             PrayerNotificationConfig.payloadPrayerKey: prayer.name,
+            'prayer_key': prayer.name.toLowerCase(),
             PrayerNotificationConfig.payloadDateKey: _dateKey(dayTimes.date),
+            'scheduled_time_ms': targetTime.millisecondsSinceEpoch,
+            'adhan_enabled': useAdhan,
+            'notification_id': notificationId,
           });
-
-          final bool useAdhan = prayerSettings.playAdhan;
 
           logger.d(
             '${PrayerNotificationConfig.logTag} [SCHEDULE] ${prayer.name} '
@@ -364,12 +378,14 @@ class PrayerAdhanNotificationService
                 id: notificationId,
                 scheduledTime: targetTime,
                 prayerName: prayer.name,
+                prayerKey: prayer.name.toLowerCase(),
               );
               if (adhanHandledNatively) {
                 pendingAdhans.add(
                   PendingAdhanAlarm(
                     id: notificationId,
                     prayerName: prayer.name,
+                    prayerKey: prayer.name.toLowerCase(),
                     triggerAt: targetTime,
                   ),
                 );
@@ -542,6 +558,10 @@ class PrayerAdhanNotificationService
           await _notifications.cancel(
             id: PrayerNotificationConfig.dynamicId(dayOffset, prayer),
           );
+          await _adhanPlayer.cancelAdhan(
+            PrayerNotificationConfig.dynamicId(dayOffset, prayer),
+            prayerName: prayer.name,
+          );
           cancelled++;
         }
       }
@@ -634,6 +654,7 @@ class PrayerAdhanNotificationService
             id: testId,
             scheduledTime: DateTime.now().add(const Duration(seconds: 1)),
             prayerName: prayer.name,
+            prayerKey: prayer.name.toLowerCase(),
           );
         } catch (e) {
           logger.w(
@@ -712,6 +733,7 @@ class PrayerAdhanNotificationService
           id: testId,
           scheduledTime: triggerAt,
           prayerName: 'DEBUG_ADHAN',
+          prayerKey: 'debug',
         );
       }
 
@@ -781,21 +803,31 @@ class PrayerAdhanNotificationService
       try {
         final Map<String, Object> params = <String, Object>{};
         if (prayerName != null) {
-          params['prayer'] = prayerName;
+          params['prayer_name'] = prayerName;
+          params['prayer_key'] = prayerName.toLowerCase();
         }
         final int? id = response.id;
         if (id != null) {
           params['notification_id'] = id;
         }
+
+        // Check if it's a prayer notification
+        final dynamic decoded = jsonDecode(payload);
+        if (decoded is Map<String, dynamic>) {
+          params['adhan_enabled'] = decoded['adhan_enabled'] ?? false;
+          params['is_adhan'] = decoded['adhan_enabled'] ?? false;
+        }
+
         await _analytics.logEvent(
-          'prayer_notification_open',
+          'prayer_notification_tapped',
           parameters: params,
         );
       } catch (e) {
         logger.w('${PrayerNotificationConfig.logTag} Analytics log failed: $e');
       }
 
-      _navigateToPrayerTimes();
+      // Navigate to status screen with extras
+      _navigateToPrayerStatus(payload);
     } catch (e, stackTrace) {
       logger.e(
         '${PrayerNotificationConfig.logTag} handleNotificationResponse failed: $e',
@@ -805,13 +837,16 @@ class PrayerAdhanNotificationService
     }
   }
 
-  void _navigateToPrayerTimes() {
+  void _navigateToPrayerStatus(String payload) {
     try {
       _navigationService.navigateToNotification(
-        const PrayerTimesRoute().location,
+        const PrayerNotificationStatusRoute().location,
+        extra: payload,
       );
     } catch (e) {
-      logger.w('${PrayerNotificationConfig.logTag} Navigation failed: $e');
+      logger.w(
+        '${PrayerNotificationConfig.logTag} Navigation to status failed: $e',
+      );
     }
   }
 

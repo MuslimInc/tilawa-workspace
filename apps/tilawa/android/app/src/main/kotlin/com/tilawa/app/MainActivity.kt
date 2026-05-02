@@ -29,10 +29,23 @@ class MainActivity : AudioServiceActivity() {
             }
         }
         super.onCreate(savedInstanceState)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent == null) return
+        if (intent.action == "com.tilawa.app.prayer.ACTION_OPEN_PRAYER_STATUS") {
+            val prayerKey = intent.getStringExtra("prayer_key") ?: ""
+            val id = intent.getIntExtra("notification_id", -1)
+            // Construct a JSON-like payload that matches what PrayerAdhanNotificationService expects
+            val payload = """{"prayer_key":"$prayerKey","notification_id":$id,"adhan_enabled":true}"""
+            PrayerAdhanMethodChannel.notifyNotificationTapped(prayerKey, payload)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        handleIntent(intent)
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

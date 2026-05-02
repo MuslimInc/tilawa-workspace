@@ -475,9 +475,9 @@ class _QASectionState extends State<_QASection> {
     try {
       await _qaService.cancelTestAdhan();
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Cancelled test Adhan')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Cancelled test Adhan')));
       }
     } catch (e) {
       if (mounted) {

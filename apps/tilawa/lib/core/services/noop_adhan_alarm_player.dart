@@ -10,15 +10,19 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   bool get isSupported => false;
 
   @override
+  Stream<String> get onNotificationTapped => const Stream.empty();
+
+  @override
   Future<bool> scheduleAdhan({
     required int id,
     required DateTime scheduledTime,
     required String prayerName,
+    required String prayerKey,
     String? sound,
   }) async => false;
 
   @override
-  Future<void> cancelAdhan(int id) async {}
+  Future<void> cancelAdhan(int id, {String? prayerName}) async {}
 
   @override
   Future<void> cancelAllAdhans() async {}
@@ -37,4 +41,10 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
 
   @override
   Future<String?> manufacturer() async => null;
+
+  @override
+  Future<void> stopCurrentAdhan() async {}
+
+  @override
+  Future<bool> isAdhanPlaying() async => false;
 }
