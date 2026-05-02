@@ -41,4 +41,32 @@ class PrayerAdhanMethodChannelTest {
         
         unmockkConstructor(MethodChannel::class)
     }
+
+    @Test
+    fun `notifyNotificationTapped buffers if channel not registered and flushes on register`() {
+        val prayerKey = "fajr"
+        val payload = "{}"
+        
+        PrayerAdhanMethodChannel.resetForTesting()
+        
+        // 1. Notify before register
+        PrayerAdhanMethodChannel.notifyNotificationTapped(prayerKey, payload)
+        
+        // 2. Register
+        mockkConstructor(MethodChannel::class)
+        every { anyConstructed<MethodChannel>().setMethodCallHandler(any()) } returns Unit
+        every { anyConstructed<MethodChannel>().invokeMethod(any(), any()) } returns Unit
+        
+        PrayerAdhanMethodChannel.register(mockMessenger, mockContext)
+        
+        // 3. Verify it was flushed
+        verify { 
+            anyConstructed<MethodChannel>().invokeMethod("onNotificationTapped", mapOf(
+                "prayer_key" to prayerKey,
+                "payload" to payload
+            ))
+        }
+        
+        unmockkConstructor(MethodChannel::class)
+    }
 }

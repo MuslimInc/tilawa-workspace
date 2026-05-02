@@ -9,6 +9,7 @@ import android.provider.Settings
 import android.util.Log
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodChannel
+import androidx.annotation.VisibleForTesting
 
 internal object PrayerAdhanMethodChannel {
     private const val CHANNEL = "com.tilawa.app/prayer_adhan"
@@ -20,6 +21,12 @@ internal object PrayerAdhanMethodChannel {
     @VisibleForTesting
     fun setLogic(logic: MethodChannelLogic?) {
         this.logic = logic
+    }
+
+    @VisibleForTesting
+    fun resetForTesting() {
+        methodChannel = null
+        pendingTap = null
     }
 
     fun register(messenger: BinaryMessenger, context: Context) {

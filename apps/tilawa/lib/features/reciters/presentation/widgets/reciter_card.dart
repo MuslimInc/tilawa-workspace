@@ -83,26 +83,19 @@ class _ReciterInfo extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                reciter.name,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.1,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            // SizedBox(width: tokens.spaceSmall),
-            // _RecitationsBadge(count: reciter.moshaf.length),
-          ],
+        Text(
+          reciter.name,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.1,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         if (firstMoshaf.isNotEmpty) ...[
-          SizedBox(height: tokens.spaceExtraSmall),
+          SizedBox(height: tokens.spaceLarge),
           Row(
+            spacing: tokens.spaceExtraSmall,
             children: [
               Icon(
                 Icons.headphones_rounded,
@@ -111,7 +104,6 @@ class _ReciterInfo extends StatelessWidget {
                   alpha: 0.75,
                 ),
               ),
-              SizedBox(width: tokens.spaceExtraSmall),
               Expanded(
                 child: Text(
                   firstMoshaf,
