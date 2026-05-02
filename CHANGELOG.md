@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.1.6+23] - 2026-05-02
+
+### Added
+
+- **Prayer Notifications**: Added tap handling and routing — tapping a prayer notification now opens the app at the appropriate screen with full navigation context.
+- **Prayer Monitoring UI**: Implemented a dedicated prayer notification status screen showing current scheduling state, next alarm, and system permission health.
+- **Adhan Sound Selection**: Users can now select their preferred adhan sound from available options in the notification settings.
+- **Adhan QA Tools**: Built-in debug tools for testing adhan scheduling and playback, now enabled by default for development builds.
+- **Arabic Alphabet Scrollbar**: Added drag overlay for improved gesture handling with long-press support on the Quran reader surah index.
+
+### Changed
+
+- **Prayer Analytics**: Enhanced event tracking with standardized scheduling keys and richer playback telemetry (start time, latency, fallback usage, duplicate guards).
+- **ReciterCard**: Updated layout spacing for improved visual consistency.
+
+### Fixed
+
+- **Notification Taps**: Buffered tap events that arrive before the Android MethodChannel is initialized, preventing missed interactions.
+- **Tests**: Added comprehensive test suite for `ArabicAlphabetScrollbar` covering edge cases in gesture handling.
+
+### Docs
+
+- **Spec 005**: Frozen after completing implementation and automated verification.
+
 ## [0.1.5+22] - 2026-05-01
 
 ### Added
