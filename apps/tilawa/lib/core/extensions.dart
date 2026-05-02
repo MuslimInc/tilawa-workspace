@@ -19,7 +19,7 @@ extension BuildContextThemeX on BuildContext {
   /// a hidden gesture bar), this provides a fallback value so UI elements
   /// aren't glued to the absolute bottom of the screen.
   double get safeBottomPadding {
-    final bottomInset = MediaQuery.paddingOf(this).bottom;
+    final bottomInset = MediaQuery.viewPaddingOf(this).bottom;
     final fallback = theme.tokens.spaceExtraLarge;
     // Returns the system inset if it exists, otherwise provides the fallback
     return bottomInset > 0 ? bottomInset : fallback;

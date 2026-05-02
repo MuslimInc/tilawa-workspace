@@ -131,9 +131,7 @@ class _MainScreenState extends State<MainScreen> {
               return const _MainShellPlaceholderScaffold();
             }
 
-            final double bottomPadding = MediaQuery.viewPaddingOf(
-              context,
-            ).bottom;
+            final double bottomPadding = context.safeBottomPadding;
             final double keyboardHeight = MediaQuery.viewInsetsOf(
               context,
             ).bottom;

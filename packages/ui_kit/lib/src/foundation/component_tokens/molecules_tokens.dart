@@ -10,6 +10,10 @@ class TilawaAlphabetScrollbarTokens {
     required this.selectedIndicatorExtent,
     required this.letterFontSize,
     required this.verticalPadding,
+    required this.overlaySize,
+    required this.overlayFontSize,
+    required this.overlayRadius,
+    required this.overlayOffset,
   });
 
   final double width;
@@ -17,6 +21,10 @@ class TilawaAlphabetScrollbarTokens {
   final double selectedIndicatorExtent;
   final double letterFontSize;
   final EdgeInsetsGeometry verticalPadding;
+  final double overlaySize;
+  final double overlayFontSize;
+  final double overlayRadius;
+  final double overlayOffset;
 
   factory TilawaAlphabetScrollbarTokens.defaults() =>
       const TilawaAlphabetScrollbarTokens(
@@ -25,6 +33,10 @@ class TilawaAlphabetScrollbarTokens {
         selectedIndicatorExtent: 25.5,
         letterFontSize: 13,
         verticalPadding: EdgeInsets.symmetric(vertical: 12),
+        overlaySize: 64,
+        overlayFontSize: 32,
+        overlayRadius: 16,
+        overlayOffset: 48,
       );
 
   TilawaAlphabetScrollbarTokens copyWith({
@@ -33,6 +45,10 @@ class TilawaAlphabetScrollbarTokens {
     double? selectedIndicatorExtent,
     double? letterFontSize,
     EdgeInsetsGeometry? verticalPadding,
+    double? overlaySize,
+    double? overlayFontSize,
+    double? overlayRadius,
+    double? overlayOffset,
   }) {
     return TilawaAlphabetScrollbarTokens(
       width: width ?? this.width,
@@ -41,6 +57,10 @@ class TilawaAlphabetScrollbarTokens {
           selectedIndicatorExtent ?? this.selectedIndicatorExtent,
       letterFontSize: letterFontSize ?? this.letterFontSize,
       verticalPadding: verticalPadding ?? this.verticalPadding,
+      overlaySize: overlaySize ?? this.overlaySize,
+      overlayFontSize: overlayFontSize ?? this.overlayFontSize,
+      overlayRadius: overlayRadius ?? this.overlayRadius,
+      overlayOffset: overlayOffset ?? this.overlayOffset,
     );
   }
 
@@ -63,6 +83,10 @@ class TilawaAlphabetScrollbarTokens {
         b.verticalPadding,
         t,
       )!,
+      overlaySize: lerpTokenDouble(a.overlaySize, b.overlaySize, t),
+      overlayFontSize: lerpTokenDouble(a.overlayFontSize, b.overlayFontSize, t),
+      overlayRadius: lerpTokenDouble(a.overlayRadius, b.overlayRadius, t),
+      overlayOffset: lerpTokenDouble(a.overlayOffset, b.overlayOffset, t),
     );
   }
 }

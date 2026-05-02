@@ -201,6 +201,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
           listeners: [
             BlocListener<LocalizationBloc, LocalizationState>(
               listener: (context, state) {
+                _searchController.clear();
+                context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
                 context.read<RecitersBloc>().add(const LanguageChanged());
               },
             ),
@@ -209,16 +211,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   previous is! RecitersLoaded && current is RecitersLoaded,
               listener: (context, state) {
                 _scheduleLoadedResultsActivation();
-                final String? selectedLetter = context
-                    .read<AlphabetScrollbarBloc>()
-                    .state
-                    .selectedLetter;
-
-                if (selectedLetter != null) {
-                  context.read<RecitersBloc>().add(
-                    FilterByLetter(selectedLetter),
-                  );
-                }
               },
             ),
             BlocListener<FavoritesCubit, FavoritesState>(
@@ -945,15 +937,25 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
   }
 
   void _handlePanUpdate(
-    DragUpdateDetails details,
+    Offset globalPosition,
     AlphabetScrollbarState currentState,
   ) {
     if (!currentState.isDragging) return;
 
     final box = context.findRenderObject()! as RenderBox;
-    final localPosition = box.globalToLocal(details.globalPosition);
-    final letterHeight = box.size.height / _letters.length;
-    final letterIndex = (localPosition.dy / letterHeight)
+    final localPosition = box.globalToLocal(globalPosition);
+    final theme = Theme.of(context);
+    final componentTokens = theme.componentTokens.alphabetScrollbar;
+
+    final double contentHeight =
+        box.size.height - (componentTokens.verticalPadding.vertical);
+    final double letterHeight = contentHeight / _letters.length;
+
+    // Adjust localPosition by vertical padding
+    final double relativeY =
+        localPosition.dy - (componentTokens.verticalPadding.vertical / 2);
+
+    final letterIndex = (relativeY / letterHeight)
         .clamp(0, _letters.length - 1)
         .floor();
 
@@ -994,10 +996,23 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
       onPanStart: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const StartDragging()),
       onPanUpdate: (details) => _handlePanUpdate(
-        details,
+        details.globalPosition,
         context.read<AlphabetScrollbarBloc>().state,
       ),
       onPanEnd: (_) =>
+          context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
+      onLongPressStart: (details) {
+        context.read<AlphabetScrollbarBloc>().add(const StartDragging());
+        _handlePanUpdate(
+          details.globalPosition,
+          context.read<AlphabetScrollbarBloc>().state,
+        );
+      },
+      onLongPressMoveUpdate: (details) => _handlePanUpdate(
+        details.globalPosition,
+        context.read<AlphabetScrollbarBloc>().state,
+      ),
+      onLongPressEnd: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
     );
   }

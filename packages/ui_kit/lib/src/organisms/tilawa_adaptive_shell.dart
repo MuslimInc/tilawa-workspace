@@ -162,7 +162,10 @@ class _BottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
     final designTokens = theme.tokens;
-    final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+    final systemBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+    final bottomPadding = systemBottomPadding > 0
+        ? systemBottomPadding
+        : designTokens.spaceExtraLarge;
 
     return TilawaContentBounds(
       kind: TilawaContentKind.media,
@@ -190,22 +193,19 @@ class _BottomNavBar extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: DecoratedBox(
             decoration: decoration ?? const BoxDecoration(),
-            child: Padding(
-              padding: EdgeInsets.all(tokens.bottomNavItemGap),
-              child: Row(
-                spacing: tokens.bottomNavItemGap,
-                children: [
-                  for (int i = 0; i < destinations.length; i++)
-                    Expanded(
-                      child: _NavButton(
-                        destination: destinations[i],
-                        isSelected: selectedIndex == i,
-                        onTap: () => onDestinationSelected(i),
-                        borderRadius: tokens.bottomNavInnerRadius,
-                      ),
+            child: Row(
+              spacing: tokens.bottomNavItemGap,
+              children: [
+                for (int i = 0; i < destinations.length; i++)
+                  Expanded(
+                    child: _NavButton(
+                      destination: destinations[i],
+                      isSelected: selectedIndex == i,
+                      onTap: () => onDestinationSelected(i),
+                      borderRadius: tokens.bottomNavInnerRadius,
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
           ),
         ),
