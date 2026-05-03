@@ -84,6 +84,20 @@ Widget previewMetadataChip() {
   );
 }
 
+@Preview(
+  name: 'MetadataChip (dark)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewMetadataChipDark() {
+  return const Scaffold(
+    backgroundColor: Colors.black,
+    body: Center(
+      child: MetadataChip(label: '604 pages', icon: Icons.menu_book_rounded),
+    ),
+  );
+}
+
 @Preview(name: 'SeekBar', group: 'Molecules', theme: moleculesPreviewTheme)
 Widget previewSeekBar() {
   return Scaffold(
@@ -121,6 +135,20 @@ Widget previewSelectionPill() {
           ),
         ],
       ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'SelectionPill (dark)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewSelectionPillDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Center(
+      child: SelectionPill(label: 'All', selected: true, onTap: () {}),
     ),
   );
 }

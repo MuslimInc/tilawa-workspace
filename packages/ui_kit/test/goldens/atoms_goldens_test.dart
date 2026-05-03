@@ -57,6 +57,49 @@ void main() {
     );
 
     goldenTest(
+      'TilawaIconToggle',
+      fileName: 'tilawa_icon_toggle',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Off',
+            child: TilawaPreviewWrapper(
+              child: TilawaIconToggle(
+                icon: Icons.notifications_outlined,
+                activeIcon: Icons.notifications,
+                value: false,
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'On',
+            child: TilawaPreviewWrapper(
+              child: TilawaIconToggle(
+                icon: Icons.notifications_outlined,
+                activeIcon: Icons.notifications,
+                value: true,
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark on',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaIconToggle(
+                icon: Icons.notifications_outlined,
+                activeIcon: Icons.notifications,
+                value: true,
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaEmptyState',
       fileName: 'tilawa_empty_state',
       builder: () => GoldenTestGroup(

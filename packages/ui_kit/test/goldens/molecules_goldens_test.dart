@@ -124,6 +124,73 @@ void main() {
     );
 
     goldenTest(
+      'MetadataChip',
+      fileName: 'tilawa_metadata_chip',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default icon + label',
+            child: const TilawaPreviewWrapper(
+              child: MetadataChip(
+                label: '604 pages',
+                icon: Icons.menu_book_rounded,
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Label only',
+            child: const TilawaPreviewWrapper(
+              child: MetadataChip(label: '604 pages'),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: const TilawaPreviewWrapper(
+              isDark: true,
+              child: MetadataChip(
+                label: '604 pages',
+                icon: Icons.menu_book_rounded,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'SelectionPill',
+      fileName: 'tilawa_selection_pill',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Selected',
+            child: TilawaPreviewWrapper(
+              child: SelectionPill(label: 'All', selected: true, onTap: () {}),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Unselected with icon',
+            child: TilawaPreviewWrapper(
+              child: SelectionPill(
+                label: 'Recent',
+                selected: false,
+                icon: Icons.history,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark selected',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: SelectionPill(label: 'All', selected: true, onTap: () {}),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaIconActionButton',
       fileName: 'tilawa_icon_action_button',
       builder: () => GoldenTestGroup(

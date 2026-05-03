@@ -88,6 +88,57 @@ Widget previewTilawaIconBox() {
   );
 }
 
+@Preview(name: 'TilawaIconToggle', group: 'Atoms', theme: atomsPreviewTheme)
+Widget previewTilawaIconToggleOff() {
+  return Scaffold(
+    body: Center(
+      child: TilawaIconToggle(
+        icon: Icons.notifications_outlined,
+        activeIcon: Icons.notifications,
+        value: false,
+        onChanged: (_) {},
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaIconToggle (on)',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
+Widget previewTilawaIconToggleOn() {
+  return Scaffold(
+    body: Center(
+      child: TilawaIconToggle(
+        icon: Icons.notifications_outlined,
+        activeIcon: Icons.notifications,
+        value: true,
+        onChanged: (_) {},
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaIconToggle (dark on)',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
+Widget previewTilawaIconToggleDarkOn() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Center(
+      child: TilawaIconToggle(
+        icon: Icons.notifications_outlined,
+        activeIcon: Icons.notifications,
+        value: true,
+        onChanged: (_) {},
+      ),
+    ),
+  );
+}
+
 @Preview(
   name: 'TilawaLoadingIndicator',
   group: 'Atoms',

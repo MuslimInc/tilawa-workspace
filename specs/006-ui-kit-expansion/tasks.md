@@ -55,16 +55,31 @@
   - [x] `flutter test test/goldens/` → 42/42 passed
   - [x] `flutter test` → 243/243 passed
 
-## Deferred to Phase 2F
+## Phase 2F Completed Tasks
 
-- [ ] `TilawaLoadingIndicator` (animation stability — deterministic pump strategy needed)
-- [ ] `TilawaCountProgressRing` (TweenAnimationBuilder — deterministic elapsed fraction needed)
-- [ ] `SeekBar` (fixed viewport plan needed)
-- [ ] `MetadataChip` (low priority, batch into 2F)
-- [ ] `SelectionPill` (low priority, batch into 2F)
-- [ ] `TilawaIconToggle` (preview must be added first)
-- [ ] `TilawaAdaptiveShell` (3-viewport golden strategy — defer until nav shell stable)
-- [ ] `TilawaMediaPlayerBar` (MediaQuery + viewport setup)
-- [ ] `ArabicAlphabetScrollbar` (behavior tests sufficient; OverlayPortal complexity)
-- [ ] `TilawaBackdropImageLayer` (async image loading + dart:ui blur churn)
-- [ ] `ImmersiveComposerScaffold` (AnimationController + BackdropFilter blur)
+- [x] Cover static-only Phase 2F batch components:
+  - [x] `MetadataChip`
+  - [x] `SelectionPill`
+  - [x] `TilawaIconToggle`
+- [x] Add/update previews:
+  - [x] `packages/ui_kit/lib/atoms_preview.dart` (`TilawaIconToggle`: off, on, dark on)
+  - [x] `packages/ui_kit/lib/molecules_preview.dart` (`MetadataChip` dark, `SelectionPill` dark)
+- [x] Add golden scenarios:
+  - [x] `MetadataChip`: default icon + label, label only, dark
+  - [x] `SelectionPill`: selected, unselected with icon, dark selected
+  - [x] `TilawaIconToggle`: off, on, dark on
+- [x] Validation:
+  - [x] `flutter analyze` passed
+  - [x] `flutter test test/goldens/` passed: 48/48
+  - [x] `flutter test` passed: 249/249
+
+## Deferred Beyond Phase 2F
+
+- [ ] `TilawaLoadingIndicator`
+- [ ] `TilawaCountProgressRing`
+- [ ] `SeekBar`
+- [ ] `ArabicAlphabetScrollbar`
+- [ ] `TilawaAdaptiveShell`
+- [ ] `TilawaMediaPlayerBar`
+- [ ] `TilawaBackdropImageLayer`
+- [ ] `ImmersiveComposerScaffold`
