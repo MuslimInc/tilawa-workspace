@@ -153,10 +153,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                           (audioState.playbackState?.isPlaying ?? false);
 
                       return IconButton.filledTonal(
-                        style: IconButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.all(8),
-                        ),
+                        style: IconButton.styleFrom(padding: EdgeInsets.zero),
                         icon: Icon(
                           isPlaying
                               ? Icons.pause_rounded
@@ -171,16 +168,6 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                       );
                     },
                   ),
-                const SizedBox(width: 8),
-                // Expand Icon
-                AnimatedRotation(
-                  turns: _isExpanded ? 0.5 : 0.0,
-                  duration: const Duration(milliseconds: 300),
-                  child: Icon(
-                    Icons.expand_more_rounded,
-                    color: Theme.of(context).hintColor,
-                  ),
-                ),
                 const SizedBox(width: 4),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert_rounded),
