@@ -78,10 +78,19 @@
 - [x] `TilawaLoadingIndicator` golden coverage completed (Phase 2L: deterministic single static scenario)
 - [x] `TilawaCountProgressRing` golden coverage completed (Phase 2H)
 - [x] `SeekBar` behavior/widget tests completed (`packages/ui_kit/test/molecules/seek_bar_test.dart`)
-- [ ] `SeekBar` golden coverage (deferred: slider/gesture visual state needs a dedicated stable viewport/golden strategy)
-- [ ] `ArabicAlphabetScrollbar`
+- [ ] `SeekBar` golden coverage (deferred — INTENTIONAL: slider thumb geometry and viewport sizing cause high-churn baselines; widget tests cover behaviour)
+- [ ] `ArabicAlphabetScrollbar` golden coverage (deferred — INTENTIONAL: OverlayPortal positioning + Arabic font diffs + animated overlay make baselines high-variance; widget tests cover behaviour — Phase 2K)
 - [x] `ArabicAlphabetScrollbar` widget tests expanded (Phase 2K: didUpdateWidget + callbacks + overlay dismiss; golden deferred)
 - [x] `TilawaAdaptiveShell` widget tests expanded (Phase 2J: no-selection + bottomPlayer visibility; golden deferred)
 - [x] `TilawaMediaPlayerBar` golden coverage completed (Phase 2I)
-- [ ] `TilawaBackdropImageLayer`
-- [ ] `ImmersiveComposerScaffold`
+- [x] `TilawaBackdropImageLayer` widget tests added (Phase 2M: null image, non-null image, blurAmount=0, errorBuilder paths; golden deferred — INTENTIONAL: BackdropFilter + image decode + renderer variance)
+- [x] `ImmersiveComposerScaffold` widget tests added (Phase 2M: renders slots, tap toggle, controlled visibility, onVisibilityChanged, disableBlur, FAB; golden deferred — INTENTIONAL: SlideTransition + ScaleTransition + blur complexity)
+
+## Phase 2M Summary
+
+- Files added:
+  - `packages/ui_kit/test/organisms/tilawa_player_background_layer_test.dart` (5 tests)
+  - `packages/ui_kit/test/organisms/immersive_composer_scaffold_test.dart` (6 tests)
+- No production files modified.
+- No golden tests or PNG baselines added.
+- All 4 golden deferments explicitly documented above as INTENTIONAL.

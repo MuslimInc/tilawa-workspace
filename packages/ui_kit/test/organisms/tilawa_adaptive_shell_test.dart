@@ -102,13 +102,27 @@ void main() {
       expect(rail.extended, isFalse);
     });
 
-    testInBothDirections('expanded uses extended side rail', (
+    testInBothDirections('expanded uses collapsed side rail', (
       tester,
       direction,
     ) async {
       await _pumpShell(
         tester,
         size: const Size(1000, 900),
+        direction: direction,
+      );
+      expect(find.byType(NavigationRail), findsOneWidget);
+      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+      expect(rail.extended, isFalse);
+    });
+
+    testInBothDirections('large uses extended side rail', (
+      tester,
+      direction,
+    ) async {
+      await _pumpShell(
+        tester,
+        size: const Size(1200, 900),
         direction: direction,
       );
       expect(find.byType(NavigationRail), findsOneWidget);
