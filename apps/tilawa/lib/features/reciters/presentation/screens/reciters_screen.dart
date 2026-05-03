@@ -919,26 +919,13 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
     return reciters.map((r) => r.letter).toSet().toList()..sort();
   }
 
-  void _handleLetterTap(String letter, AlphabetScrollbarState currentState) {
-    if (currentState.selectedLetter == letter) {
+  void _handleLetterSelection(String? letter) {
+    if (letter == null) {
       context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
       widget.onLetterSelected(null);
       return;
     }
 
-    context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
-
-    final int index = widget.allReciters.indexWhere(
-      (item) => item.letter == letter,
-    );
-    if (index != -1) {
-      widget.scrollController.jumpTo(0.0);
-    }
-
-    widget.onLetterSelected(letter);
-  }
-
-  void _handleLetterSelection(String letter) {
     context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
 
     final int index = widget.allReciters.indexWhere(

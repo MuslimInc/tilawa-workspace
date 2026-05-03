@@ -60,7 +60,7 @@ void main() {
     });
 
     testWidgets('multiple taps select different letters', (tester) async {
-      final selections = <String>[];
+      final selections = <String?>[];
 
       await tester.pumpWidget(
         _wrap(
@@ -84,7 +84,7 @@ void main() {
     });
 
     testWidgets('drag gesture triggers multiple selections', (tester) async {
-      final selections = <String>[];
+      final selections = <String?>[];
 
       await tester.pumpWidget(
         SizedBox(
@@ -188,7 +188,7 @@ void main() {
     });
 
     testWidgets('long press move updates selected letter', (tester) async {
-      final selections = <String>[];
+      final selections = <String?>[];
 
       await tester.pumpWidget(
         SizedBox(
@@ -268,7 +268,7 @@ void main() {
     });
 
     testWidgets('tap callbacks work with GestureDetector', (tester) async {
-      final selections = <String>[];
+      final selections = <String?>[];
 
       await tester.pumpWidget(
         _wrap(
@@ -289,6 +289,28 @@ void main() {
       await tester.pump();
 
       expect(selections, contains('ث'));
+    });
+
+    testWidgets('tap on already selected letter unselects it', (tester) async {
+      String? selected = 'ب';
+
+      await tester.pumpWidget(
+        _wrap(
+          ArabicAlphabetScrollbar(
+            letters: letters,
+            selectedLetter: selected,
+            onLetterSelected: (letter) => selected = letter,
+            onPanUpdate: (_) {},
+            onPanStart: (_) {},
+            onPanEnd: (_) {},
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('ب'));
+      await tester.pump();
+
+      expect(selected, isNull);
     });
     testWidgets(
       'didUpdateWidget updates selected state when selectedLetter changes externally',

@@ -20,7 +20,7 @@ class ArabicAlphabetScrollbar extends StatefulWidget {
 
   final List<String> letters;
   final String? selectedLetter;
-  final ValueChanged<String> onLetterSelected;
+  final ValueChanged<String?> onLetterSelected;
   final GestureDragUpdateCallback onPanUpdate;
   final GestureDragStartCallback onPanStart;
   final GestureDragEndCallback onPanEnd;
@@ -233,6 +233,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
             Future.delayed(const Duration(milliseconds: 100), () {
               if (mounted) {
                 setState(() {
+                  _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
                   _draggedLetter = null;
                   _draggedOffset = null;
                 });
@@ -243,6 +244,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
           onTapCancel: () {
             if (mounted) {
               setState(() {
+                _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
                 _draggedLetter = null;
                 _draggedOffset = null;
               });
@@ -268,6 +270,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
           },
           onPanEnd: (details) {
             setState(() {
+              _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
               _draggedLetter = null;
               _draggedOffset = null;
               _lastNotifiedLetter = null;
@@ -303,6 +306,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
           },
           onLongPressEnd: (details) {
             setState(() {
+              _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
               _draggedLetter = null;
               _draggedOffset = null;
               _lastNotifiedLetter = null;
@@ -338,8 +342,8 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
                     key: ValueKey(letter),
                     letter: letter,
                     isSelected: isSelected,
-                    selectedLetter: activeLetter,
-                    onTap: widget.onLetterSelected,
+                    actualSelectedLetter: widget.selectedLetter,
+                    onLetterSelected: widget.onLetterSelected,
                     size: componentTokens.itemExtent,
                     selectedIndicatorSize:
                         componentTokens.selectedIndicatorExtent,
@@ -364,8 +368,8 @@ class _LetterItem extends StatelessWidget {
     super.key,
     required this.letter,
     required this.isSelected,
-    required this.selectedLetter,
-    required this.onTap,
+    required this.actualSelectedLetter,
+    required this.onLetterSelected,
     required this.size,
     required this.selectedIndicatorSize,
     required this.fontSize,
@@ -375,8 +379,8 @@ class _LetterItem extends StatelessWidget {
 
   final String letter;
   final bool isSelected;
-  final String? selectedLetter;
-  final ValueChanged<String> onTap;
+  final String? actualSelectedLetter;
+  final ValueChanged<String?> onLetterSelected;
   final double size;
   final double selectedIndicatorSize;
   final double fontSize;
@@ -389,9 +393,14 @@ class _LetterItem extends StatelessWidget {
       child: InkWell(
         onTap: () {
           debugPrint(
-            '[SelectedLetter] [${DateTime.now()}] ✓ TAP Select: $letter (Current selected: $selectedLetter)',
+            '[SelectedLetter] [${DateTime.now()}] ✓ TAP Toggle: $letter '
+            '(Actual selected: $actualSelectedLetter)',
           );
-          onTap(letter);
+          if (letter == actualSelectedLetter) {
+            onLetterSelected(null);
+          } else {
+            onLetterSelected(letter);
+          }
         },
         borderRadius: BorderRadius.circular(size),
         child: SizedBox(
