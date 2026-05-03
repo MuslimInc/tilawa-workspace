@@ -36,42 +36,58 @@ class TilawaSettingsTile extends StatelessWidget {
         Material(
           color: Colors.transparent,
           borderRadius: borderRadius,
-          child: ListTile(
+          child: InkWell(
             onTap: onTap,
-            contentPadding: tokens.tileContentPadding,
-            shape: RoundedRectangleBorder(borderRadius: borderRadius),
-            leading: _SettingsLeadingIcon(
-              icon: icon,
-              color: effectiveIconColor,
-              tokens: tokens,
-            ),
-            title: Text(
-              title,
-              style: TextStyle(
-                fontSize: tokens.tileTitleFontSize,
-                fontWeight: .w600,
-              ),
-            ),
-            subtitle: subtitle == null
-                ? null
-                : Text(
-                    subtitle!,
-                    style: TextStyle(
-                      fontSize: tokens.tileSubtitleFontSize,
-                      color: theme.textTheme.bodySmall?.color?.withValues(
-                        alpha: tokens.tileSubtitleOpacity,
-                      ),
+            borderRadius: borderRadius is BorderRadius
+                ? borderRadius as BorderRadius
+                : null,
+            child: Padding(
+              padding: tokens.tileContentPadding,
+              child: Row(
+                spacing: tokens.tileItemGap,
+                children: [
+                  _SettingsLeadingIcon(
+                    icon: icon,
+                    color: effectiveIconColor,
+                    tokens: tokens,
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: .start,
+                      spacing: tokens.tileSubtitleSpacing,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: tokens.tileTitleFontSize,
+                            fontWeight: .w600,
+                          ),
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
+                            style: TextStyle(
+                              fontSize: tokens.tileSubtitleFontSize,
+                              color: theme.textTheme.bodySmall?.color
+                                  ?.withValues(
+                                    alpha: tokens.tileSubtitleOpacity,
+                                  ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-            trailing:
-                trailing ??
-                Icon(
-                  FluentIcons.chevron_right_24_filled,
-                  size: tokens.tileTrailingSize,
-                  color: theme.textTheme.bodySmall?.color?.withValues(
-                    alpha: tokens.tileTrailingOpacity,
-                  ),
-                ),
+                  trailing ??
+                      Icon(
+                        FluentIcons.chevron_right_24_filled,
+                        size: tokens.tileTrailingSize,
+                        color: theme.textTheme.bodySmall?.color?.withValues(
+                          alpha: tokens.tileTrailingOpacity,
+                        ),
+                      ),
+                ],
+              ),
+            ),
           ),
         ),
         if (showDivider)

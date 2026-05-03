@@ -97,6 +97,11 @@ void main() {
                       title: 'Dark mode',
                       value: false,
                       onChanged: (_) {},
+                    ),
+                    TilawaSettingsTile(
+                      icon: Icons.notifications_outlined,
+                      title: 'Notifications',
+                      onTap: () {},
                       showDivider: false,
                     ),
                   ],
@@ -124,6 +129,11 @@ void main() {
                       title: 'Dark mode',
                       value: false,
                       onChanged: (_) {},
+                    ),
+                    TilawaSettingsTile(
+                      icon: Icons.notifications_outlined,
+                      title: 'Notifications',
+                      onTap: () {},
                       showDivider: false,
                     ),
                   ],
