@@ -1204,6 +1204,14 @@ class _ExpandedProgressBar extends StatelessWidget {
           ),
       builder: (context, positionData) {
         final tokens = Theme.of(context).tokens;
+        final seekActiveColor = Colors.white;
+        final seekThumbColor = Colors.white;
+        final seekBufferedColor = Colors.white.withValues(
+          alpha: tokens.opacityMedium,
+        );
+        final seekInactiveColor = Colors.white.withValues(
+          alpha: tokens.opacitySubtle,
+        );
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Column(
@@ -1212,6 +1220,10 @@ class _ExpandedProgressBar extends StatelessWidget {
                 duration: positionData.duration,
                 position: positionData.position,
                 bufferedPosition: positionData.bufferedPosition,
+                activeColor: seekActiveColor,
+                thumbColor: seekThumbColor,
+                bufferedColor: seekBufferedColor,
+                inactiveColor: seekInactiveColor,
                 onChangeEnd: (newPosition) {
                   context.read<AudioPlayerBloc>().add(
                     AudioPlayerEvent.seekTo(newPosition),
