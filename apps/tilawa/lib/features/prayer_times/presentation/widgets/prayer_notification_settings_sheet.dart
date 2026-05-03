@@ -1,12 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
-import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../prayer_notification_semantics_ids.dart';
@@ -268,33 +265,34 @@ class _PrayerNotificationSettingsSheetState
                         PrayerNotificationSemanticsIds.ishaToggle,
                   ),
 
-                  if (kDebugMode || kProfileMode) ...[
-                    SizedBox(height: tokens.spaceLarge),
-                    const Divider(),
-                    SizedBox(height: tokens.spaceMedium),
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () {
-                          getIt<IPrayerAdhanNotificationService>()
-                              .debugScheduleTestAdhan();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                'Adhan test scheduled for +10s. Close the app now!',
-                              ),
-                              duration: Duration(seconds: 5),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.bug_report_outlined),
-                        label: const Text('Test Adhan After 10 Seconds'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: theme.colorScheme.error,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: tokens.spaceMedium),
-                  ],
+                  /// TODO: Remove this code block when releasing the app
+                  // if (kDebugMode || kProfileMode) ...[
+                  //   SizedBox(height: tokens.spaceLarge),
+                  //   const Divider(),
+                  //   SizedBox(height: tokens.spaceMedium),
+                  //   Center(
+                  //     child: TextButton.icon(
+                  //       onPressed: () {
+                  //         getIt<IPrayerAdhanNotificationService>()
+                  //             .debugScheduleTestAdhan();
+                  //         ScaffoldMessenger.of(context).showSnackBar(
+                  //           const SnackBar(
+                  //             content: Text(
+                  //               'Adhan test scheduled for +10s. Close the app now!',
+                  //             ),
+                  //             duration: Duration(seconds: 5),
+                  //           ),
+                  //         );
+                  //       },
+                  //       icon: const Icon(Icons.bug_report_outlined),
+                  //       label: const Text('Test Adhan After 10 Seconds'),
+                  //       style: TextButton.styleFrom(
+                  //         foregroundColor: theme.colorScheme.error,
+                  //       ),
+                  //     ),
+                  //   ),
+                  //   SizedBox(height: tokens.spaceMedium),
+                  // ],
                 ],
               ),
             ),

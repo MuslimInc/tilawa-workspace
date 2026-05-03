@@ -9,11 +9,12 @@ class AdhanQAService {
   );
 
   static bool get isEnabled {
-    if (kDebugMode || kProfileMode) return true;
-    return const bool.fromEnvironment(
-      'ENABLE_ADHAN_QA_TOOLS',
-      defaultValue: true,
-    );
+    return false;
+    // if (kDebugMode || kProfileMode) return true;
+    // return const bool.fromEnvironment(
+    //   'ENABLE_ADHAN_QA_TOOLS',
+    //   defaultValue: true,
+    // );
   }
 
   /// Initialize QA tools (enable native logging if allowed).

@@ -78,7 +78,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                   theme: theme,
                 ),
                 const Divider(height: 1),
-                Expanded(
+                Flexible(
                   child: ListView(
                     controller: scrollController,
                     padding: EdgeInsets.all(tokens.spaceLarge),
@@ -198,8 +198,8 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       if (AdhanQAService.isEnabled) ...[
                         SizedBox(height: tokens.spaceLarge),
                         const _QASection(),
+                        SizedBox(height: tokens.spaceLarge),
                       ],
-                      SizedBox(height: tokens.spaceLarge),
                     ],
                   ),
                 ),
