@@ -42,6 +42,38 @@ void main() {
     );
 
     goldenTest(
+      'TilawaCard compact',
+      fileName: 'atoms/tilawa_card_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Light (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaCard(child: Text('Card Content')),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isDark: true,
+              child: TilawaCard(child: Text('Dark Card')),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isRTL: true,
+              child: TilawaCard(child: Text('بطاقة مدمجة')),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaIconBox',
       fileName: 'atoms/tilawa_icon_box',
       builder: () => GoldenTestGroup(

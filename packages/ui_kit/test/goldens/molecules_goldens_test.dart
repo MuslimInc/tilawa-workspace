@@ -46,6 +46,40 @@ void main() {
     );
 
     goldenTest(
+      'TilawaGlassPanel compact',
+      fileName: 'molecules/tilawa_glass_panel_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Light (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaGlassPanel(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('Glass Panel'),
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isDark: true,
+              child: TilawaGlassPanel(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text('Dark Glass Panel'),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaStatusChip',
       fileName: 'molecules/tilawa_status_chip',
       builder: () => GoldenTestGroup(
@@ -647,6 +681,72 @@ void main() {
           GoldenTestScenario(
             name: 'RTL Arabic',
             child: TilawaPreviewWrapper(
+              isRTL: true,
+              child: Builder(
+                builder: (context) {
+                  final scheme = Theme.of(context).colorScheme;
+                  return TilawaFeedbackStrip(
+                    icon: Icons.check_circle_rounded,
+                    message: 'تم الحفظ بنجاح',
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaFeedbackStrip compact',
+      fileName: 'molecules/tilawa_feedback_strip_compact',
+      pumpBeforeTest: (tester) async {
+        // Deterministic pump to settle spinner animation for stable capture.
+        await tester.pump(const Duration(milliseconds: 16));
+      },
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: Builder(
+                builder: (context) {
+                  final scheme = Theme.of(context).colorScheme;
+                  return TilawaFeedbackStrip(
+                    icon: Icons.check_circle_rounded,
+                    message: 'Saved successfully',
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                  );
+                },
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'With spinner (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: Builder(
+                builder: (context) {
+                  final scheme = Theme.of(context).colorScheme;
+                  return TilawaFeedbackStrip(
+                    icon: Icons.sync_rounded,
+                    message: 'Syncing...',
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                    showSpinner: true,
+                  );
+                },
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
               isRTL: true,
               child: Builder(
                 builder: (context) {
