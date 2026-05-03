@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../density.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -619,9 +620,27 @@ class TilawaSettingsGroupTokens {
   final double switchActiveTrackOpacity;
   final double tileItemGap;
 
-  factory TilawaSettingsGroupTokens.defaults() =>
-      const TilawaSettingsGroupTokens(
-        groupHeaderPadding: EdgeInsets.fromLTRB(12, 16, 16, 8),
+  /// Default tokens for the settings group.
+  ///
+  /// [density] controls compact-mode token values. Comfortable (default)
+  /// matches all pre-density values exactly. Compact (Phase 1A) changes only
+  /// three values: [groupHeaderPadding], [switchTileContentPadding], and
+  /// [tileSubtitleSpacing]. All other tokens remain identical to comfortable
+  /// to preserve typography, icon sizing, divider integrity, and minimum
+  /// touch targets.
+  factory TilawaSettingsGroupTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaSettingsGroupTokens(
+        // Phase 1A compact-only changes:
+        groupHeaderPadding: EdgeInsets.fromLTRB(12, 12, 16, 6),
+        switchTileContentPadding: EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        tileSubtitleSpacing: 2,
+        // Everything else identical to comfortable:
         groupBorderRadius: 20,
         groupShadowOpacity: 0.06,
         groupShadowBlur: 10,
@@ -629,17 +648,12 @@ class TilawaSettingsGroupTokens {
         groupTitleFontSize: 12.5,
         groupTitleLetterSpacing: 1.1,
         tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
-        switchTileContentPadding: EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
         tileIconPadding: EdgeInsets.all(10),
         tileIconBorderRadius: 12,
         tileIconSize: 22,
         tileTitleFontSize: 15.5,
         tileSubtitleFontSize: 12.5,
         tileSubtitleOpacity: 0.5,
-        tileSubtitleSpacing: 4,
         tileTrailingSize: 14,
         tileTrailingOpacity: 0.35,
         tileIconContainerOpacity: 0.1,
@@ -650,6 +664,40 @@ class TilawaSettingsGroupTokens {
         switchActiveTrackOpacity: 0.5,
         tileItemGap: 16,
       );
+    }
+
+    // Comfortable: byte-for-byte unchanged from pre-density defaults.
+    return const TilawaSettingsGroupTokens(
+      groupHeaderPadding: EdgeInsets.fromLTRB(12, 16, 16, 8),
+      groupBorderRadius: 20,
+      groupShadowOpacity: 0.06,
+      groupShadowBlur: 10,
+      groupShadowOffset: Offset(0, 4),
+      groupTitleFontSize: 12.5,
+      groupTitleLetterSpacing: 1.1,
+      tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      switchTileContentPadding: EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 12,
+      ),
+      tileIconPadding: EdgeInsets.all(10),
+      tileIconBorderRadius: 12,
+      tileIconSize: 22,
+      tileTitleFontSize: 15.5,
+      tileSubtitleFontSize: 12.5,
+      tileSubtitleOpacity: 0.5,
+      tileSubtitleSpacing: 4,
+      tileTrailingSize: 14,
+      tileTrailingOpacity: 0.35,
+      tileIconContainerOpacity: 0.1,
+      tileDividerPadding: EdgeInsets.only(left: 64, right: 16),
+      tileDividerHeight: 1,
+      tileDividerThickness: 0.5,
+      tileDividerOpacity: 0.05,
+      switchActiveTrackOpacity: 0.5,
+      tileItemGap: 16,
+    );
+  }
 
   TilawaSettingsGroupTokens copyWith({
     EdgeInsetsGeometry? groupHeaderPadding,

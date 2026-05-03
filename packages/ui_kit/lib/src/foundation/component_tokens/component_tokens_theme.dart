@@ -105,7 +105,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       footerBar: TilawaFooterBarTokens.defaults(),
       mediaPlayerBar: TilawaMediaPlayerBarTokens.defaults(),
       adaptiveShell: TilawaAdaptiveShellTokens.defaults(),
-      settingsGroup: TilawaSettingsGroupTokens.defaults(),
+      settingsGroup: TilawaSettingsGroupTokens.defaults(density: density),
       immersiveComposer: TilawaImmersiveComposerTokens.defaults(),
       iconToggle: TilawaIconToggleTokens.defaults(),
       permissionBanner: TilawaPermissionBannerTokens.defaults(),
