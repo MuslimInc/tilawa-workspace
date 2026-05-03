@@ -129,6 +129,23 @@ void main() {
     );
 
     goldenTest(
+      'TilawaLoadingIndicator',
+      fileName: 'atoms/tilawa_loading_indicator',
+      pumpBeforeTest: (tester) async {
+        // Deterministic fixed-time pump for a stable captured frame.
+        await tester.pump(const Duration(milliseconds: 16));
+      },
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default',
+            child: const TilawaPreviewWrapper(child: TilawaLoadingIndicator()),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaDivider',
       fileName: 'atoms/tilawa_divider',
       builder: () => GoldenTestGroup(
