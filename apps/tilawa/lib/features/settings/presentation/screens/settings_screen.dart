@@ -465,6 +465,7 @@ class SettingsScreen extends StatelessWidget {
   void _showThemePicker(BuildContext context, ThemeMode currentMode) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

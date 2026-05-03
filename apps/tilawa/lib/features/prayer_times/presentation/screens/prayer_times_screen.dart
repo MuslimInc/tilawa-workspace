@@ -13,8 +13,8 @@ import '../../domain/entities/entities.dart';
 import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
-import '../widgets/prayer_notification_settings_sheet.dart';
 import '../prayer_notification_semantics_ids.dart';
+import '../widgets/prayer_notification_settings_sheet.dart';
 import '../widgets/widgets.dart';
 
 /// Screen for displaying prayer times.
@@ -300,7 +300,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             isLoading: state.isLoadingLocation,
           ),
           const _CountdownCardSection(),
-          const _TodaySectionHeader(),
           _TodayPrayerGrid(
             prayerTimes: state.todayPrayerTimes!,
             use24HourFormat: state.settings.use24HourFormat,
@@ -488,64 +487,6 @@ class _TodayPrayerGridState extends State<_TodayPrayerGrid> {
       prayerTimes: widget.prayerTimes,
       currentPrayer: _currentPrayer,
       use24HourFormat: widget.use24HourFormat,
-    );
-  }
-}
-
-class _TodaySectionHeader extends StatelessWidget {
-  const _TodaySectionHeader();
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final ColorScheme colorScheme = theme.colorScheme;
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceLarge,
-        tokens.spaceSmall,
-        tokens.spaceLarge,
-        tokens.spaceMedium,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(tokens.radiusMedium),
-            ),
-            child: Icon(
-              Icons.schedule_rounded,
-              size: 20,
-              color: colorScheme.onPrimaryContainer,
-            ),
-          ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.prayerTimesTodaySchedule,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  context.l10n.prayerTimesTodayScheduleSubtitle,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
