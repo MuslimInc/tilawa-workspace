@@ -191,6 +191,81 @@ void main() {
     );
 
     goldenTest(
+      'TilawaCountProgressRing',
+      fileName: 'molecules/tilawa_count_progress_ring',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Progress default',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 140,
+                height: 160,
+                child: Center(
+                  child: TilawaCountProgressRing(
+                    currentCount: 4,
+                    totalCount: 7,
+                    isDone: false,
+                    showProgressLabel: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Done state',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 140,
+                height: 160,
+                child: Center(
+                  child: TilawaCountProgressRing(
+                    currentCount: 7,
+                    totalCount: 7,
+                    isDone: true,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Zero-total edge',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 140,
+                height: 160,
+                child: Center(
+                  child: TilawaCountProgressRing(
+                    currentCount: 0,
+                    totalCount: 0,
+                    isDone: false,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Label hidden',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 140,
+                height: 160,
+                child: Center(
+                  child: TilawaCountProgressRing(
+                    currentCount: 3,
+                    totalCount: 7,
+                    isDone: false,
+                    showProgressLabel: false,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaIconActionButton',
       fileName: 'molecules/tilawa_icon_action_button',
       builder: () => GoldenTestGroup(

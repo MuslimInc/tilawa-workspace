@@ -76,7 +76,7 @@
 ## Deferred Beyond Phase 2F
 
 - [ ] `TilawaLoadingIndicator`
-- [ ] `TilawaCountProgressRing`
+- [x] `TilawaCountProgressRing` golden coverage completed (Phase 2H)
 - [x] `SeekBar` behavior/widget tests completed (`packages/ui_kit/test/molecules/seek_bar_test.dart`)
 - [ ] `SeekBar` golden coverage (deferred: slider/gesture visual state needs a dedicated stable viewport/golden strategy)
 - [ ] `ArabicAlphabetScrollbar`
