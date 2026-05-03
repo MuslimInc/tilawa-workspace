@@ -108,14 +108,26 @@ class TilawaFeedbackStripTokens {
   final double spinnerStrokeWidth;
   final double contentGap;
 
-  factory TilawaFeedbackStripTokens.defaults() =>
-      const TilawaFeedbackStripTokens(
-        padding: EdgeInsets.all(14),
+  factory TilawaFeedbackStripTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaFeedbackStripTokens(
+        padding: EdgeInsets.all(10),
         borderRadius: 18,
         spinnerSize: 18,
         spinnerStrokeWidth: 2.2,
-        contentGap: 10,
+        contentGap: 8,
       );
+    }
+    return const TilawaFeedbackStripTokens(
+      padding: EdgeInsets.all(14),
+      borderRadius: 18,
+      spinnerSize: 18,
+      spinnerStrokeWidth: 2.2,
+      contentGap: 10,
+    );
+  }
 
   TilawaFeedbackStripTokens copyWith({
     EdgeInsetsGeometry? padding,
@@ -164,11 +176,22 @@ class TilawaGlassPanelTokens {
   final double borderRadiusOffset;
   final double backgroundOpacity;
 
-  factory TilawaGlassPanelTokens.defaults() => const TilawaGlassPanelTokens(
-    padding: EdgeInsets.all(16),
-    borderRadiusOffset: 8,
-    backgroundOpacity: 0.8,
-  );
+  factory TilawaGlassPanelTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaGlassPanelTokens(
+        padding: EdgeInsets.all(12),
+        borderRadiusOffset: 8,
+        backgroundOpacity: 0.8,
+      );
+    }
+    return const TilawaGlassPanelTokens(
+      padding: EdgeInsets.all(16),
+      borderRadiusOffset: 8,
+      backgroundOpacity: 0.8,
+    );
+  }
 
   TilawaGlassPanelTokens copyWith({
     EdgeInsetsGeometry? padding,

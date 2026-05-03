@@ -43,35 +43,24 @@ void main() {
       expect(comfortableTokens.density, TilawaDensity.comfortable);
     });
 
-    test(
-      'compact equals comfortable for non-settings-non-emptyState-non-iconBox-non-chip families',
-      () {
-        // Phase 1A: settingsGroup diverges. Phase 1C-A: emptyState diverges.
-        // Phase 1D-A: iconBox and chip diverge.
-        // All other component token families remain identical until they
-        // get their own dedicated compact phases.
-        final comfortableTokens = TilawaComponentTokens.light(
-          density: TilawaDensity.comfortable,
-        );
-        final compactTokens = TilawaComponentTokens.light(
-          density: TilawaDensity.compact,
-        );
+    test('compact equals comfortable for non-divergent families', () {
+      // Phase 1A: settingsGroup diverges. Phase 1C-A: emptyState diverges.
+      // Phase 1D-A: iconBox and chip diverge. Phase 1E-A: card, glassPanel, feedbackStrip diverge.
+      // All other component token families remain identical until they
+      // get their own dedicated compact phases.
+      final comfortableTokens = TilawaComponentTokens.light(
+        density: TilawaDensity.comfortable,
+      );
+      final compactTokens = TilawaComponentTokens.light(
+        density: TilawaDensity.compact,
+      );
 
-        expect(
-          compactTokens.card.padding,
-          equals(comfortableTokens.card.padding),
-        );
-        // chip.padding and iconBox.iconSize removed — they diverge in Phase 1D-A
-        expect(
-          compactTokens.searchField.borderRadius,
-          equals(comfortableTokens.searchField.borderRadius),
-        );
-        expect(
-          compactTokens.feedbackStrip.padding,
-          equals(comfortableTokens.feedbackStrip.padding),
-        );
-      },
-    );
+      // card.padding, glassPanel.padding, feedbackStrip.padding removed — they diverge in Phase 1E-A
+      expect(
+        compactTokens.searchField.borderRadius,
+        equals(comfortableTokens.searchField.borderRadius),
+      );
+    });
 
     test('dark theme supports density parameter', () {
       final darkComfortable = TilawaComponentTokens.dark(
@@ -84,8 +73,7 @@ void main() {
       expect(darkComfortable.density, TilawaDensity.comfortable);
       expect(darkCompact.density, TilawaDensity.compact);
 
-      // Non-settings families remain identical between density modes
-      expect(darkCompact.card.padding, equals(darkComfortable.card.padding));
+      // card.padding removed — it diverges in Phase 1E-A
     });
 
     test('copyWith preserves density by default', () {
@@ -627,5 +615,183 @@ void main() {
       );
       expect(tokens.chip.contentGap, 6.0);
     });
+  });
+
+  group('Card Compact Density (Phase 1E-A)', () {
+    test('comfortable card tokens equal default/current values', () {
+      final defaultTokens = TilawaCardTokens.defaults();
+      final comfortable = TilawaCardTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+
+      expect(comfortable.borderRadius, equals(defaultTokens.borderRadius));
+      expect(comfortable.borderWidth, equals(defaultTokens.borderWidth));
+      expect(comfortable.padding, equals(defaultTokens.padding));
+    });
+
+    test('compact changes padding to all(8)', () {
+      final compact = TilawaCardTokens.defaults(density: TilawaDensity.compact);
+      expect(compact.padding, const EdgeInsets.all(8.0));
+    });
+
+    test('compact changes borderRadius to 14', () {
+      final compact = TilawaCardTokens.defaults(density: TilawaDensity.compact);
+      expect(compact.borderRadius, 14.0);
+    });
+
+    test('compact does NOT change borderWidth', () {
+      final compact = TilawaCardTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaCardTokens.defaults();
+      expect(compact.borderWidth, equals(comfortable.borderWidth));
+    });
+
+    test('component tokens propagate compact density to card', () {
+      final tokens = TilawaComponentTokens.light(
+        density: TilawaDensity.compact,
+      );
+      expect(tokens.card.padding, const EdgeInsets.all(8.0));
+      expect(tokens.card.borderRadius, 14.0);
+    });
+
+    test('dark component tokens propagate compact density to card', () {
+      final tokens = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(tokens.card.padding, const EdgeInsets.all(8.0));
+      expect(tokens.card.borderRadius, 14.0);
+    });
+  });
+
+  group('GlassPanel Compact Density (Phase 1E-A)', () {
+    test('comfortable glassPanel tokens equal default/current values', () {
+      final defaultTokens = TilawaGlassPanelTokens.defaults();
+      final comfortable = TilawaGlassPanelTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+
+      expect(comfortable.padding, equals(defaultTokens.padding));
+      expect(
+        comfortable.borderRadiusOffset,
+        equals(defaultTokens.borderRadiusOffset),
+      );
+      expect(
+        comfortable.backgroundOpacity,
+        equals(defaultTokens.backgroundOpacity),
+      );
+    });
+
+    test('compact changes padding to all(12)', () {
+      final compact = TilawaGlassPanelTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.padding, const EdgeInsets.all(12));
+    });
+
+    test('compact does NOT change borderRadiusOffset', () {
+      final compact = TilawaGlassPanelTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaGlassPanelTokens.defaults();
+      expect(
+        compact.borderRadiusOffset,
+        equals(comfortable.borderRadiusOffset),
+      );
+    });
+
+    test('compact does NOT change backgroundOpacity', () {
+      final compact = TilawaGlassPanelTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaGlassPanelTokens.defaults();
+      expect(compact.backgroundOpacity, equals(comfortable.backgroundOpacity));
+    });
+
+    test('component tokens propagate compact density to glassPanel', () {
+      final tokens = TilawaComponentTokens.light(
+        density: TilawaDensity.compact,
+      );
+      expect(tokens.glassPanel.padding, const EdgeInsets.all(12));
+    });
+
+    test('dark component tokens propagate compact density to glassPanel', () {
+      final tokens = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(tokens.glassPanel.padding, const EdgeInsets.all(12));
+    });
+  });
+
+  group('FeedbackStrip Compact Density (Phase 1E-A)', () {
+    test('comfortable feedbackStrip tokens equal default/current values', () {
+      final defaultTokens = TilawaFeedbackStripTokens.defaults();
+      final comfortable = TilawaFeedbackStripTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+
+      expect(comfortable.padding, equals(defaultTokens.padding));
+      expect(comfortable.contentGap, equals(defaultTokens.contentGap));
+      expect(comfortable.borderRadius, equals(defaultTokens.borderRadius));
+      expect(comfortable.spinnerSize, equals(defaultTokens.spinnerSize));
+      expect(
+        comfortable.spinnerStrokeWidth,
+        equals(defaultTokens.spinnerStrokeWidth),
+      );
+    });
+
+    test('compact changes padding to all(10)', () {
+      final compact = TilawaFeedbackStripTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.padding, const EdgeInsets.all(10));
+    });
+
+    test('compact changes contentGap to 8', () {
+      final compact = TilawaFeedbackStripTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.contentGap, 8.0);
+    });
+
+    test('compact does NOT change borderRadius', () {
+      final compact = TilawaFeedbackStripTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaFeedbackStripTokens.defaults();
+      expect(compact.borderRadius, equals(comfortable.borderRadius));
+    });
+
+    test('compact does NOT change spinnerSize', () {
+      final compact = TilawaFeedbackStripTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaFeedbackStripTokens.defaults();
+      expect(compact.spinnerSize, equals(comfortable.spinnerSize));
+    });
+
+    test('compact does NOT change spinnerStrokeWidth', () {
+      final compact = TilawaFeedbackStripTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaFeedbackStripTokens.defaults();
+      expect(
+        compact.spinnerStrokeWidth,
+        equals(comfortable.spinnerStrokeWidth),
+      );
+    });
+
+    test('component tokens propagate compact density to feedbackStrip', () {
+      final tokens = TilawaComponentTokens.light(
+        density: TilawaDensity.compact,
+      );
+      expect(tokens.feedbackStrip.padding, const EdgeInsets.all(10));
+      expect(tokens.feedbackStrip.contentGap, 8.0);
+    });
+
+    test(
+      'dark component tokens propagate compact density to feedbackStrip',
+      () {
+        final tokens = TilawaComponentTokens.dark(
+          density: TilawaDensity.compact,
+        );
+        expect(tokens.feedbackStrip.padding, const EdgeInsets.all(10));
+        expect(tokens.feedbackStrip.contentGap, 8.0);
+      },
+    );
   });
 }

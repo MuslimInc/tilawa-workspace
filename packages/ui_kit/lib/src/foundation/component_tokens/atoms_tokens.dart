@@ -104,11 +104,22 @@ class TilawaCardTokens {
   /// Default inner padding.
   final EdgeInsets padding;
 
-  factory TilawaCardTokens.defaults() => const TilawaCardTokens(
-    borderRadius: 16.0,
-    borderWidth: 0.5,
-    padding: EdgeInsets.all(12.0),
-  );
+  factory TilawaCardTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaCardTokens(
+        borderRadius: 14.0,
+        borderWidth: 0.5,
+        padding: EdgeInsets.all(8.0),
+      );
+    }
+    return const TilawaCardTokens(
+      borderRadius: 16.0,
+      borderWidth: 0.5,
+      padding: EdgeInsets.all(12.0),
+    );
+  }
 
   TilawaCardTokens copyWith({
     double? borderRadius,
