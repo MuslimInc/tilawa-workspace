@@ -68,13 +68,6 @@ To update goldens:
 flutter test test/goldens/ --update-goldens
 ```
 
-### Test Status
-**Note**: Full UI Kit suite currently has 2 unrelated pre-existing failures in `tilawa_adaptive_shell_test.dart`:
-- `expanded uses extended side rail (LTR)`
-- `expanded uses extended side rail (RTL)`
-
-Phase 2B targeted tests and goldens pass. These adaptive shell failures existed before Phase 2B and are unrelated to TextField implementation.
-
 ### Previews
 Interactive previews are available via the `Widget Previewer` (if configured) or by running the preview app:
 ```bash
