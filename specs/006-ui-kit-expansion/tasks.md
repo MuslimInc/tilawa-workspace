@@ -80,6 +80,7 @@
 - [x] `SeekBar` behavior/widget tests completed (`packages/ui_kit/test/molecules/seek_bar_test.dart`)
 - [ ] `SeekBar` golden coverage (deferred: slider/gesture visual state needs a dedicated stable viewport/golden strategy)
 - [ ] `ArabicAlphabetScrollbar`
+- [x] `ArabicAlphabetScrollbar` widget tests expanded (Phase 2K: didUpdateWidget + callbacks + overlay dismiss; golden deferred)
 - [x] `TilawaAdaptiveShell` widget tests expanded (Phase 2J: no-selection + bottomPlayer visibility; golden deferred)
 - [x] `TilawaMediaPlayerBar` golden coverage completed (Phase 2I)
 - [ ] `TilawaBackdropImageLayer`

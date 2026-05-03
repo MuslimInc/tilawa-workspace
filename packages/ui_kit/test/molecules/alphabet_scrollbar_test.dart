@@ -290,5 +290,112 @@ void main() {
 
       expect(selections, contains('ث'));
     });
+    testWidgets(
+      'didUpdateWidget updates selected state when selectedLetter changes externally',
+      (tester) async {
+        String? currentLetter = 'ا';
+        late StateSetter outerSetState;
+
+        await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (context, setState) {
+              outerSetState = setState;
+              return _wrap(
+                ArabicAlphabetScrollbar(
+                  letters: letters,
+                  selectedLetter: currentLetter,
+                  onLetterSelected: (_) {},
+                  onPanUpdate: (_) {},
+                  onPanStart: (_) {},
+                  onPanEnd: (_) {},
+                ),
+              );
+            },
+          ),
+        );
+
+        // Initial: 'ا' has circle highlight, 'ب' does not.
+        Finder circleFor(String letter) => find.ancestor(
+          of: find.text(letter),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Container &&
+                w.decoration is BoxDecoration &&
+                (w.decoration as BoxDecoration).shape == BoxShape.circle,
+          ),
+        );
+        expect(circleFor('ا'), findsOneWidget);
+        expect(circleFor('ب'), findsNothing);
+
+        // Change selection externally via StatefulBuilder rebuild.
+        outerSetState(() => currentLetter = 'ب');
+        await tester.pump();
+
+        expect(circleFor('ب'), findsOneWidget);
+        expect(circleFor('ا'), findsNothing);
+      },
+    );
+
+    testWidgets('pan gesture forwards onPanStart and onPanEnd callbacks', (
+      tester,
+    ) async {
+      var panStartCount = 0;
+      var panEndCount = 0;
+
+      await tester.pumpWidget(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: _wrap(
+            ArabicAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: (_) {},
+              onPanUpdate: (_) {},
+              onPanStart: (_) => panStartCount++,
+              onPanEnd: (_) => panEndCount++,
+            ),
+          ),
+        ),
+      );
+
+      final gesture = await tester.press(find.text('ا'));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0, 30));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(panStartCount, 1);
+      expect(panEndCount, 1);
+    });
+
+    testWidgets('overlay is dismissed after tap completes', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          ArabicAlphabetScrollbar(
+            letters: letters,
+            selectedLetter: null,
+            onLetterSelected: (_) {},
+            onPanUpdate: (_) {},
+            onPanStart: (_) {},
+            onPanEnd: (_) {},
+          ),
+        ),
+      );
+
+      final gesture = await tester.press(find.text('ج'));
+      await tester.pump();
+      await gesture.up();
+      // Advance past the 100ms Future.delayed in onTapUp.
+      await tester.pump(const Duration(milliseconds: 150));
+
+      // _draggedLetter is null after tap, so overlayChildBuilder returns
+      // SizedBox.shrink() — the keyed overlay container is not in the tree.
+      expect(
+        find.byKey(const Key('alphabet_scrollbar_overlay')),
+        findsNothing,
+      );
+    });
   });
 }
