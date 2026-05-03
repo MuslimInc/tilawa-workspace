@@ -81,6 +81,6 @@
 - [ ] `SeekBar` golden coverage (deferred: slider/gesture visual state needs a dedicated stable viewport/golden strategy)
 - [ ] `ArabicAlphabetScrollbar`
 - [ ] `TilawaAdaptiveShell`
-- [ ] `TilawaMediaPlayerBar`
+- [x] `TilawaMediaPlayerBar` golden coverage completed (Phase 2I)
 - [ ] `TilawaBackdropImageLayer`
 - [ ] `ImmersiveComposerScaffold`

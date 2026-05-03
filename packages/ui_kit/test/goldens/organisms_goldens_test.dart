@@ -14,6 +14,66 @@ void main() {
 
   group('Organisms Golden Tests', () {
     goldenTest(
+      'TilawaMediaPlayerBar',
+      fileName: 'organisms/tilawa_media_player_bar',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Playing default',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 360,
+                child: TilawaMediaPlayerBar(
+                  title: 'Surah Al-Fatiha',
+                  subtitle: 'Abdul Basit',
+                  progress: 0.4,
+                  isPlaying: true,
+                  canGoPrevious: true,
+                  canGoNext: true,
+                  isSleepTimerActive: false,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Paused disabled nav',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 360,
+                child: TilawaMediaPlayerBar(
+                  title: 'Surah Al-Fatiha',
+                  subtitle: 'Abdul Basit',
+                  progress: 0.0,
+                  isPlaying: false,
+                  canGoPrevious: false,
+                  canGoNext: false,
+                  isSleepTimerActive: false,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Sleep timer active',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 360,
+                child: TilawaMediaPlayerBar(
+                  title: 'Surah Al-Fatiha',
+                  subtitle: 'Abdul Basit',
+                  progress: 0.6,
+                  isPlaying: true,
+                  canGoPrevious: true,
+                  canGoNext: true,
+                  isSleepTimerActive: true,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaSettingsGroup',
       fileName: 'organisms/tilawa_settings_group',
       builder: () => GoldenTestGroup(
