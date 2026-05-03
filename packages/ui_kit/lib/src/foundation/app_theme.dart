@@ -1,8 +1,7 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'component_tokens.dart';
-import 'design_tokens.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Centralized app theme configuration
 class AppTheme {
@@ -45,9 +44,13 @@ class AppTheme {
   /// [useGoogleFontsOverride] is a foundation API extension for
   /// preview/golden stability. It allows disabling font loading in headless
   /// test environments without modifying the production [useGoogleFonts] default.
+  ///
+  /// [density] controls the overall UI density. Defaults to [TilawaDensity.comfortable]
+  /// which matches all pre-density UI Kit values.
   static ThemeData getLightTheme({
     required Color primaryColor,
     bool? useGoogleFontsOverride,
+    TilawaDensity density = TilawaDensity.comfortable,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
@@ -68,8 +71,8 @@ class AppTheme {
       textTheme: _getTextTheme(useFonts),
     ).copyWith(
       extensions: [
-        TilawaDesignTokens.light(),
-        TilawaComponentTokens.light(),
+        TilawaDesignTokens.light(density: density),
+        TilawaComponentTokens.light(density: density),
         ...extensions,
       ],
     );

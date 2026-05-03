@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../lib/src/foundation/design_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 
 void main() {
   group('TilawaDesignTokens', () {
     const defaultTokens = TilawaDesignTokens(
+      density: TilawaDensity.comfortable,
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
@@ -182,6 +182,7 @@ void main() {
     group('lerp()', () {
       test('returns first value at t=0', () {
         const first = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -229,6 +230,7 @@ void main() {
           playerAlphaScalingFactor: 2.5,
         );
         const second = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -285,6 +287,7 @@ void main() {
       test('returns second value at t=1', () {
         final first = TilawaDesignTokens.light();
         const second = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -339,6 +342,7 @@ void main() {
 
       test('returns middle value at t=0.5', () {
         const first = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -386,6 +390,7 @@ void main() {
           playerAlphaScalingFactor: 2.5,
         );
         const second = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -446,6 +451,7 @@ void main() {
       test('interpolates Offset values', () {
         final first = TilawaDesignTokens.light();
         const second = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -501,6 +507,7 @@ void main() {
         'handles Duration differently (discrete at t<0.5 returns first)',
         () {
           const first = TilawaDesignTokens(
+            density: TilawaDensity.comfortable,
             spaceTiny: 4.0,
             spaceExtraSmall: 4.0,
             spaceSmall: 8.0,
@@ -548,6 +555,7 @@ void main() {
             playerAlphaScalingFactor: 2.5,
           );
           const second = TilawaDesignTokens(
+            density: TilawaDensity.comfortable,
             spaceTiny: 4.0,
             spaceExtraSmall: 8.0,
             spaceSmall: 16.0,

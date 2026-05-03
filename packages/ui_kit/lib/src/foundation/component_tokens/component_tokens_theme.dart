@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../density.dart';
 import 'atoms_tokens.dart';
 import 'molecules_tokens.dart';
 import 'organisms_tokens.dart';
@@ -7,6 +8,7 @@ import 'organisms_tokens.dart';
 @immutable
 class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   const TilawaComponentTokens({
+    required this.density,
     required this.sectionTitle,
     required this.sheetHandle,
     required this.card,
@@ -62,39 +64,59 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaPrayerAlertRowTokens prayerAlertRow;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
 
-  factory TilawaComponentTokens.light() => TilawaComponentTokens(
-    sectionTitle: TilawaSectionTitleTokens.defaults(),
-    sheetHandle: TilawaSheetHandleTokens.defaults(),
-    card: TilawaCardTokens.defaults(),
-    iconBox: TilawaIconBoxTokens.defaults(),
-    loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
-    divider: TilawaDividerTokens.defaults(),
-    emptyState: TilawaEmptyStateTokens.defaults(),
-    alphabetScrollbar: TilawaAlphabetScrollbarTokens.defaults(),
-    feedbackStrip: TilawaFeedbackStripTokens.defaults(),
-    glassPanel: TilawaGlassPanelTokens.defaults(),
-    iconActionButton: TilawaIconActionButtonTokens.defaults(),
-    chip: TilawaChipTokens.defaults(),
-    segmentedControl: TilawaSegmentedControlTokens.defaults(),
-    seekBar: TilawaSeekBarTokens.defaults(),
-    searchField: TilawaSearchFieldTokens.defaults(),
-    countProgressRing: TilawaCountProgressRingTokens.defaults(),
-    playerBackground: TilawaPlayerBackgroundTokens.defaults(),
-    footerBar: TilawaFooterBarTokens.defaults(),
-    mediaPlayerBar: TilawaMediaPlayerBarTokens.defaults(),
-    adaptiveShell: TilawaAdaptiveShellTokens.defaults(),
-    settingsGroup: TilawaSettingsGroupTokens.defaults(),
-    immersiveComposer: TilawaImmersiveComposerTokens.defaults(),
-    iconToggle: TilawaIconToggleTokens.defaults(),
-    permissionBanner: TilawaPermissionBannerTokens.defaults(),
-    prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(),
-    bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
-  );
+  /// The density mode for this component token set.
+  final TilawaDensity density;
 
-  factory TilawaComponentTokens.dark() => TilawaComponentTokens.light();
+  /// Creates light theme component tokens.
+  ///
+  /// [density] controls component sizing. In Phase 0, both modes produce
+  /// identical values. Future phases will implement compact-specific values
+  /// per component family.
+  factory TilawaComponentTokens.light({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) => TilawaComponentTokens._create(density: density);
+
+  factory TilawaComponentTokens.dark({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) => TilawaComponentTokens._create(density: density);
+
+  /// Internal factory for creating tokens with the given density.
+  /// Phase 0: All densities use the same comfortable defaults.
+  factory TilawaComponentTokens._create({required TilawaDensity density}) {
+    return TilawaComponentTokens(
+      density: density,
+      sectionTitle: TilawaSectionTitleTokens.defaults(),
+      sheetHandle: TilawaSheetHandleTokens.defaults(),
+      card: TilawaCardTokens.defaults(),
+      iconBox: TilawaIconBoxTokens.defaults(),
+      loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
+      divider: TilawaDividerTokens.defaults(),
+      emptyState: TilawaEmptyStateTokens.defaults(),
+      alphabetScrollbar: TilawaAlphabetScrollbarTokens.defaults(),
+      feedbackStrip: TilawaFeedbackStripTokens.defaults(),
+      glassPanel: TilawaGlassPanelTokens.defaults(),
+      iconActionButton: TilawaIconActionButtonTokens.defaults(),
+      chip: TilawaChipTokens.defaults(),
+      segmentedControl: TilawaSegmentedControlTokens.defaults(),
+      seekBar: TilawaSeekBarTokens.defaults(),
+      searchField: TilawaSearchFieldTokens.defaults(),
+      countProgressRing: TilawaCountProgressRingTokens.defaults(),
+      playerBackground: TilawaPlayerBackgroundTokens.defaults(),
+      footerBar: TilawaFooterBarTokens.defaults(),
+      mediaPlayerBar: TilawaMediaPlayerBarTokens.defaults(),
+      adaptiveShell: TilawaAdaptiveShellTokens.defaults(),
+      settingsGroup: TilawaSettingsGroupTokens.defaults(),
+      immersiveComposer: TilawaImmersiveComposerTokens.defaults(),
+      iconToggle: TilawaIconToggleTokens.defaults(),
+      permissionBanner: TilawaPermissionBannerTokens.defaults(),
+      prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(),
+      bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
+    );
+  }
 
   @override
   TilawaComponentTokens copyWith({
+    TilawaDensity? density,
     TilawaSectionTitleTokens? sectionTitle,
     TilawaSheetHandleTokens? sheetHandle,
     TilawaCardTokens? card,
@@ -123,6 +145,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
   }) {
     return TilawaComponentTokens(
+      density: density ?? this.density,
       sectionTitle: sectionTitle ?? this.sectionTitle,
       sheetHandle: sheetHandle ?? this.sheetHandle,
       card: card ?? this.card,
@@ -158,8 +181,9 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     double t,
   ) {
     if (other is! TilawaComponentTokens) return this;
-
+    // Preserve density of 'this' token during lerp.
     return TilawaComponentTokens(
+      density: density,
       sectionTitle: TilawaSectionTitleTokens.lerp(
         sectionTitle,
         other.sectionTitle,

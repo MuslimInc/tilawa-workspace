@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'density.dart';
+
 /// Design tokens for the Tilawa UI Kit to avoid magic numbers
 /// and ensure consistency across components.
 @immutable
 class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   const TilawaDesignTokens({
+    required this.density,
     required this.spaceTiny,
     required this.spaceExtraSmall,
     required this.spaceSmall,
@@ -51,6 +54,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.playerIgnorePointerThreshold,
     required this.playerAlphaScalingFactor,
   });
+
+  /// The density mode for this token set.
+  final TilawaDensity density;
 
   /// 2.0
   final double spaceTiny;
@@ -187,59 +193,77 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 2.5
   final double playerAlphaScalingFactor;
 
-  /// Default values for light/dark theme
-  factory TilawaDesignTokens.light() => const TilawaDesignTokens(
-    spaceTiny: 2.0,
-    spaceExtraSmall: 4.0,
-    spaceSmall: 8.0,
-    spaceMedium: 12.0,
-    spaceLarge: 16.0,
-    spaceExtraLarge: 24.0,
-    radiusSmall: 8.0,
-    radiusMedium: 12.0,
-    radiusLarge: 16.0,
-    radiusExtraLarge: 24.0,
-    opacitySubtle: 0.1,
-    opacityMedium: 0.3,
-    opacityEmphasis: 0.7,
-    opacityGlass: 0.8,
-    blurGlass: 12.0,
-    blurShadow: 16.0,
-    shadowOffsetSmall: Offset(0, 2),
-    shadowOffsetMedium: Offset(0, 4),
-    borderWidthThin: 0.5,
-    progressHeight: 3.0,
-    iconSizeExtraSmall: 12.0,
-    iconSizeSmall: 16.0,
-    iconSizeMedium: 20.0,
-    iconSizeLarge: 24.0,
-    iconSizeExtraLarge: 48.0,
-    textHeightLoose: 2.0,
-    durationFast: Duration(milliseconds: 200),
-    durationMedium: Duration(milliseconds: 400),
-    durationSlow: Duration(milliseconds: 600),
-    contentMaxWidthReader: 720,
-    contentMaxWidthForm: 560,
-    contentMaxWidthMedia: 1200,
-    contentMaxWidthSettings: 760,
-    cardCompactWidthThreshold: 180.0,
-    cardCompactHeightThreshold: 155.0,
-    cardTightHeightThreshold: 145.0,
-    playerCollapsedHeight: 80.0,
-    playerDismissThreshold: 80.0,
-    playerMaxDismissOffset: 200.0,
-    playerVelocityThreshold: 500.0,
-    playerDismissVelocityThreshold: 300.0,
-    playerDragSensitivity: 1.5,
-    playerProgressThreshold: 0.5,
-    playerIgnorePointerThreshold: 0.4,
-    playerAlphaScalingFactor: 2.5,
-  );
+  /// Default values for light/dark theme.
+  ///
+  /// [density] controls spacing and sizing. In Phase 0, both [comfortable]
+  /// and [compact] produce identical values. Future phases will implement
+  /// compact-specific value scaling.
+  factory TilawaDesignTokens.light({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) => TilawaDesignTokens._create(density: density);
 
-  factory TilawaDesignTokens.dark() => TilawaDesignTokens.light();
+  factory TilawaDesignTokens.dark({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) => TilawaDesignTokens._create(density: density);
+
+  /// Internal constructor for creating tokens with the given density.
+  /// In Phase 0, all density modes produce the same values.
+  factory TilawaDesignTokens._create({required TilawaDensity density}) {
+    // Phase 0: All densities use the same comfortable values.
+    // Future phases will adjust values based on density.
+    return TilawaDesignTokens(
+      density: density,
+      spaceTiny: 2.0,
+      spaceExtraSmall: 4.0,
+      spaceSmall: 8.0,
+      spaceMedium: 12.0,
+      spaceLarge: 16.0,
+      spaceExtraLarge: 24.0,
+      radiusSmall: 8.0,
+      radiusMedium: 12.0,
+      radiusLarge: 16.0,
+      radiusExtraLarge: 24.0,
+      opacitySubtle: 0.1,
+      opacityMedium: 0.3,
+      opacityEmphasis: 0.7,
+      opacityGlass: 0.8,
+      blurGlass: 12.0,
+      blurShadow: 16.0,
+      shadowOffsetSmall: const Offset(0, 2),
+      shadowOffsetMedium: const Offset(0, 4),
+      borderWidthThin: 0.5,
+      progressHeight: 3.0,
+      iconSizeExtraSmall: 12.0,
+      iconSizeSmall: 16.0,
+      iconSizeMedium: 20.0,
+      iconSizeLarge: 24.0,
+      iconSizeExtraLarge: 48.0,
+      textHeightLoose: 2.0,
+      durationFast: const Duration(milliseconds: 200),
+      durationMedium: const Duration(milliseconds: 400),
+      durationSlow: const Duration(milliseconds: 600),
+      contentMaxWidthReader: 720,
+      contentMaxWidthForm: 560,
+      contentMaxWidthMedia: 1200,
+      contentMaxWidthSettings: 760,
+      cardCompactWidthThreshold: 180.0,
+      cardCompactHeightThreshold: 155.0,
+      cardTightHeightThreshold: 145.0,
+      playerCollapsedHeight: 80.0,
+      playerDismissThreshold: 80.0,
+      playerMaxDismissOffset: 200.0,
+      playerVelocityThreshold: 500.0,
+      playerDismissVelocityThreshold: 300.0,
+      playerDragSensitivity: 1.5,
+      playerProgressThreshold: 0.5,
+      playerIgnorePointerThreshold: 0.4,
+      playerAlphaScalingFactor: 2.5,
+    );
+  }
 
   @override
   TilawaDesignTokens copyWith({
+    TilawaDensity? density,
     double? spaceTiny,
     double? spaceExtraSmall,
     double? spaceSmall,
@@ -287,6 +311,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? playerAlphaScalingFactor,
   }) {
     return TilawaDesignTokens(
+      density: density ?? this.density,
       spaceTiny: spaceTiny ?? this.spaceTiny,
       spaceExtraSmall: spaceExtraSmall ?? this.spaceExtraSmall,
       spaceSmall: spaceSmall ?? this.spaceSmall,
@@ -352,7 +377,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   @override
   TilawaDesignTokens lerp(ThemeExtension<TilawaDesignTokens>? other, double t) {
     if (other is! TilawaDesignTokens) return this;
+    // For lerp, preserve the density of 'this' token.
+    // Density-based value interpolation is handled per-property.
     return TilawaDesignTokens(
+      density: density,
       spaceTiny: lerpDouble(spaceTiny, other.spaceTiny, t)!,
       spaceExtraSmall: lerpDouble(spaceExtraSmall, other.spaceExtraSmall, t)!,
       spaceSmall: lerpDouble(spaceSmall, other.spaceSmall, t)!,
