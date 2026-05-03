@@ -1,19 +1,18 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dart';
 import 'package:tilawa_core/entities/audio.dart';
-
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/bookmark_entity.dart';
 import '../bloc/bookmarks_bloc.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../widgets/bookmark_search_bar.dart';
 
 /// Screen for displaying and managing bookmarks.
@@ -213,45 +212,14 @@ class BookmarksScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, bool isSearching) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            FluentIcons.bookmark_24_regular,
-            size: 80,
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.3),
-          ),
-          SizedBox(height: 16),
-          Text(
-            isSearching
-                ? context.l10n.noBookmarksFound
-                : context.l10n.noBookmarks,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            isSearching
-                ? context.l10n.tryDifferentSearch
-                : context.l10n.noBookmarksHint,
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+    return TilawaEmptyState(
+      icon: FluentIcons.bookmark_24_regular,
+      title: isSearching
+          ? context.l10n.noBookmarksFound
+          : context.l10n.noBookmarks,
+      subtitle: isSearching
+          ? context.l10n.tryDifferentSearch
+          : context.l10n.noBookmarksHint,
     );
   }
 
