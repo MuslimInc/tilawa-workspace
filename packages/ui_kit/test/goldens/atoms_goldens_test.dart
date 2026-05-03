@@ -57,6 +57,30 @@ void main() {
     );
 
     goldenTest(
+      'TilawaIconBox compact',
+      fileName: 'atoms/tilawa_icon_box_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaIconBox(icon: Icons.bookmark_rounded),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isDark: true,
+              child: TilawaIconBox(icon: Icons.bookmark_rounded),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaIconToggle',
       fileName: 'atoms/tilawa_icon_toggle',
       builder: () => GoldenTestGroup(

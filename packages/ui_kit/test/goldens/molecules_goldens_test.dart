@@ -125,6 +125,37 @@ void main() {
     );
 
     goldenTest(
+      'TilawaChip compact',
+      fileName: 'molecules/tilawa_chip_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaChip(label: 'Bookmarked', icon: Icons.bookmark),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Label only (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaChip(label: 'Favorite'),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isRTL: true,
+              child: TilawaChip(label: 'محفوظ', icon: Icons.bookmark),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'MetadataChip',
       fileName: 'molecules/tilawa_metadata_chip',
       builder: () => GoldenTestGroup(
@@ -185,6 +216,34 @@ void main() {
             child: TilawaPreviewWrapper(
               isDark: true,
               child: SelectionPill(label: 'All', selected: true, onTap: () {}),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'SelectionPill compact',
+      fileName: 'molecules/tilawa_selection_pill_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Selected (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SelectionPill(label: 'All', selected: true, onTap: () {}),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Unselected with icon (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SelectionPill(
+                label: 'Recent',
+                selected: false,
+                icon: Icons.history,
+                onTap: () {},
+              ),
             ),
           ),
         ],
