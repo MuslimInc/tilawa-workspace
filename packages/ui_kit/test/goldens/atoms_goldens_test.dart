@@ -106,6 +106,66 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaSectionTitle',
+      fileName: 'tilawa_section_title',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Light',
+            child: const TilawaPreviewWrapper(
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TilawaSectionTitle(title: 'Section title'),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: const TilawaPreviewWrapper(
+              isDark: true,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TilawaSectionTitle(title: 'Section title'),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic',
+            child: const TilawaPreviewWrapper(
+              isRTL: true,
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TilawaSectionTitle(title: 'عنوان القسم'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSheetHandle',
+      fileName: 'tilawa_sheet_handle',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Light',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(width: 220, child: TilawaSheetHandle()),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: const TilawaPreviewWrapper(
+              isDark: true,
+              child: SizedBox(width: 220, child: TilawaSheetHandle()),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 
   group('Button Golden Tests', () {

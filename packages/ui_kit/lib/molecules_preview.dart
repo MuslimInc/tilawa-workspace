@@ -118,6 +118,33 @@ Widget previewTilawaChip() {
 }
 
 @Preview(
+  name: 'TilawaChip (label only)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaChipLabelOnly() {
+  return const Scaffold(
+    body: Center(child: TilawaChip(label: 'Favorite')),
+  );
+}
+
+@Preview(
+  name: 'TilawaChip (RTL)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaChipRtl() {
+  return const Directionality(
+    textDirection: TextDirection.rtl,
+    child: Scaffold(
+      body: Center(
+        child: TilawaChip(label: 'محفوظ', icon: Icons.bookmark_rounded),
+      ),
+    ),
+  );
+}
+
+@Preview(
   name: 'TilawaCountProgressRing',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
@@ -226,12 +253,93 @@ Widget previewTilawaIconActionButton() {
 }
 
 @Preview(
+  name: 'TilawaIconActionButton (dark)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaIconActionButtonDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Center(
+      child: TilawaIconActionButton(icon: Icons.favorite_border, onTap: () {}),
+    ),
+  );
+}
+
+@Preview(
   name: 'TilawaSearchField',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
 )
 Widget previewTilawaSearchField() {
   return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: TilawaSearchField(hintText: 'Search surahs', onChanged: (_) {}),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaSearchField (with text)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaSearchFieldWithText() {
+  final controller = TextEditingController(text: 'Al-Baqarah');
+  return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: TilawaSearchField(
+        hintText: 'Search surahs',
+        controller: controller,
+        onChanged: (_) {},
+        onClear: controller.clear,
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaSearchField (RTL)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaSearchFieldRtl() {
+  return const Directionality(
+    textDirection: TextDirection.rtl,
+    child: Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: _SearchFieldRtlPreviewBody(),
+      ),
+    ),
+  );
+}
+
+class _SearchFieldRtlPreviewBody extends StatelessWidget {
+  const _SearchFieldRtlPreviewBody();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = TextEditingController(text: 'الفاتحة');
+    return TilawaSearchField(
+      hintText: 'ابحث في السور',
+      controller: controller,
+      onChanged: (_) {},
+      onClear: controller.clear,
+    );
+  }
+}
+
+@Preview(
+  name: 'TilawaSearchField (dark)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaSearchFieldDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
     body: Padding(
       padding: const EdgeInsets.all(16),
       child: TilawaSearchField(hintText: 'Search surahs', onChanged: (_) {}),
@@ -261,6 +369,51 @@ Widget previewTilawaSettingsTile() {
 }
 
 @Preview(
+  name: 'TilawaSettingsTile (no subtitle)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaSettingsTileNoSubtitle() {
+  return Scaffold(
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: TilawaSettingsTile(
+          icon: Icons.language,
+          title: 'Language',
+          onTap: () {},
+          showDivider: false,
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaSettingsTile (RTL)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaSettingsTileRtl() {
+  return const Directionality(
+    textDirection: TextDirection.rtl,
+    child: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: TilawaSettingsTile(
+            icon: Icons.notifications_outlined,
+            title: 'الإشعارات',
+            subtitle: 'تنبيهات الصلوات اليومية',
+            onTap: _noop,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
   name: 'TilawaSettingsSwitchTile',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
@@ -282,6 +435,54 @@ Widget previewTilawaSettingsSwitchTile() {
 }
 
 @Preview(
+  name: 'TilawaSettingsSwitchTile (off)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaSettingsSwitchTileOff() {
+  return Scaffold(
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: TilawaSettingsSwitchTile(
+          icon: Icons.dark_mode_outlined,
+          title: 'Dark mode',
+          value: false,
+          onChanged: (_) {},
+          showDivider: false,
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaSettingsSwitchTile (RTL)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaSettingsSwitchTileRtl() {
+  return const Directionality(
+    textDirection: TextDirection.rtl,
+    child: Scaffold(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: TilawaSettingsSwitchTile(
+            icon: Icons.notifications_outlined,
+            title: 'إشعارات الصلاة',
+            subtitle: 'تشغيل التنبيهات',
+            value: true,
+            onChanged: _noopBool,
+            showDivider: false,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
   name: 'TilawaStatusChip',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
@@ -296,3 +497,23 @@ Widget previewTilawaStatusChip() {
     ),
   );
 }
+
+@Preview(
+  name: 'TilawaStatusChip (dark)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaStatusChipDark() {
+  return const Scaffold(
+    backgroundColor: Colors.black,
+    body: Center(
+      child: TilawaStatusChip(
+        label: 'Live',
+        icon: Icons.wifi_tethering_rounded,
+      ),
+    ),
+  );
+}
+
+void _noop() {}
+void _noopBool(bool _) {}
