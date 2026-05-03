@@ -44,9 +44,10 @@ void main() {
     });
 
     test(
-      'compact equals comfortable for non-settings-non-emptyState families',
+      'compact equals comfortable for non-settings-non-emptyState-non-iconBox-non-chip families',
       () {
         // Phase 1A: settingsGroup diverges. Phase 1C-A: emptyState diverges.
+        // Phase 1D-A: iconBox and chip diverge.
         // All other component token families remain identical until they
         // get their own dedicated compact phases.
         final comfortableTokens = TilawaComponentTokens.light(
@@ -60,17 +61,10 @@ void main() {
           compactTokens.card.padding,
           equals(comfortableTokens.card.padding),
         );
-        expect(
-          compactTokens.chip.padding,
-          equals(comfortableTokens.chip.padding),
-        );
+        // chip.padding and iconBox.iconSize removed — they diverge in Phase 1D-A
         expect(
           compactTokens.searchField.borderRadius,
           equals(comfortableTokens.searchField.borderRadius),
-        );
-        expect(
-          compactTokens.iconBox.iconSize,
-          equals(comfortableTokens.iconBox.iconSize),
         );
         expect(
           compactTokens.feedbackStrip.padding,
@@ -430,6 +424,208 @@ void main() {
         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       );
       expect(tokens.settingsGroup.tileSubtitleSpacing, 2);
+    });
+  });
+
+  group('IconBox Compact Density (Phase 1D-A)', () {
+    test('comfortable iconBox tokens equal default/current values', () {
+      final defaultTokens = TilawaIconBoxTokens.defaults();
+      final comfortable = TilawaIconBoxTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+
+      expect(comfortable.iconSize, equals(defaultTokens.iconSize));
+      expect(comfortable.padding, equals(defaultTokens.padding));
+      expect(comfortable.borderRadius, equals(defaultTokens.borderRadius));
+    });
+
+    test('compact changes iconSize to 20', () {
+      final compact = TilawaIconBoxTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.iconSize, 20.0);
+    });
+
+    test('compact changes padding to 6', () {
+      final compact = TilawaIconBoxTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.padding, 6.0);
+    });
+
+    test('compact changes borderRadius to 10', () {
+      final compact = TilawaIconBoxTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.borderRadius, 10.0);
+    });
+
+    test('component tokens propagate compact density to iconBox', () {
+      final tokens = TilawaComponentTokens.light(
+        density: TilawaDensity.compact,
+      );
+      expect(tokens.iconBox.iconSize, 20.0);
+      expect(tokens.iconBox.padding, 6.0);
+      expect(tokens.iconBox.borderRadius, 10.0);
+    });
+
+    test('dark component tokens propagate compact density to iconBox', () {
+      final tokens = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(tokens.iconBox.iconSize, 20.0);
+      expect(tokens.iconBox.padding, 6.0);
+      expect(tokens.iconBox.borderRadius, 10.0);
+    });
+  });
+
+  group('Chip Compact Density (Phase 1D-A)', () {
+    test('comfortable chip tokens equal default/current values', () {
+      final defaultTokens = TilawaChipTokens.defaults();
+      final comfortable = TilawaChipTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+
+      expect(comfortable.padding, equals(defaultTokens.padding));
+      expect(comfortable.compactPadding, equals(defaultTokens.compactPadding));
+      expect(comfortable.contentGap, equals(defaultTokens.contentGap));
+      expect(comfortable.iconSize, equals(defaultTokens.iconSize));
+      expect(
+        comfortable.compactIconSize,
+        equals(defaultTokens.compactIconSize),
+      );
+      expect(comfortable.borderWidth, equals(defaultTokens.borderWidth));
+      expect(comfortable.pillRadius, equals(defaultTokens.pillRadius));
+      expect(comfortable.roundedRadius, equals(defaultTokens.roundedRadius));
+      expect(
+        comfortable.selectedShadowOpacity,
+        equals(defaultTokens.selectedShadowOpacity),
+      );
+      expect(
+        comfortable.selectedShadowBlur,
+        equals(defaultTokens.selectedShadowBlur),
+      );
+      expect(
+        comfortable.selectionFontWeight,
+        equals(defaultTokens.selectionFontWeight),
+      );
+      expect(
+        comfortable.statusFontWeight,
+        equals(defaultTokens.statusFontWeight),
+      );
+      expect(
+        comfortable.statusLetterSpacing,
+        equals(defaultTokens.statusLetterSpacing),
+      );
+    });
+
+    test('compact changes padding to h:12 v:6', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      expect(
+        compact.padding,
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      );
+    });
+
+    test('compact changes contentGap to 6', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      expect(compact.contentGap, 6.0);
+    });
+
+    test('compact does NOT change compactPadding', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(compact.compactPadding, equals(comfortable.compactPadding));
+    });
+
+    test('compact does NOT change compactIconSize', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(compact.compactIconSize, equals(comfortable.compactIconSize));
+    });
+
+    test('compact does NOT change iconSize', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(compact.iconSize, equals(comfortable.iconSize));
+    });
+
+    test('compact does NOT change borderWidth', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(compact.borderWidth, equals(comfortable.borderWidth));
+    });
+
+    test('compact does NOT change pillRadius', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(compact.pillRadius, equals(comfortable.pillRadius));
+    });
+
+    test('compact does NOT change roundedRadius', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(compact.roundedRadius, equals(comfortable.roundedRadius));
+    });
+
+    test('compact does NOT change selectedShadowOpacity', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(
+        compact.selectedShadowOpacity,
+        equals(comfortable.selectedShadowOpacity),
+      );
+    });
+
+    test('compact does NOT change selectedShadowBlur', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(
+        compact.selectedShadowBlur,
+        equals(comfortable.selectedShadowBlur),
+      );
+    });
+
+    test('compact does NOT change selectionFontWeight', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(
+        compact.selectionFontWeight,
+        equals(comfortable.selectionFontWeight),
+      );
+    });
+
+    test('compact does NOT change statusFontWeight', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(compact.statusFontWeight, equals(comfortable.statusFontWeight));
+    });
+
+    test('compact does NOT change statusLetterSpacing', () {
+      final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
+      final comfortable = TilawaChipTokens.defaults();
+      expect(
+        compact.statusLetterSpacing,
+        equals(comfortable.statusLetterSpacing),
+      );
+    });
+
+    test('component tokens propagate compact density to chip', () {
+      final tokens = TilawaComponentTokens.light(
+        density: TilawaDensity.compact,
+      );
+      expect(
+        tokens.chip.padding,
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      );
+      expect(tokens.chip.contentGap, 6.0);
+    });
+
+    test('dark component tokens propagate compact density to chip', () {
+      final tokens = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(
+        tokens.chip.padding,
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      );
+      expect(tokens.chip.contentGap, 6.0);
     });
   });
 }

@@ -157,11 +157,22 @@ class TilawaIconBoxTokens {
   /// Corner radius of the container.
   final double borderRadius;
 
-  factory TilawaIconBoxTokens.defaults() => const TilawaIconBoxTokens(
-    iconSize: 24.0,
-    padding: 8.0,
-    borderRadius: 12.0,
-  );
+  factory TilawaIconBoxTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaIconBoxTokens(
+        iconSize: 20.0,
+        padding: 6.0,
+        borderRadius: 10.0,
+      );
+    }
+    return const TilawaIconBoxTokens(
+      iconSize: 24.0,
+      padding: 8.0,
+      borderRadius: 12.0,
+    );
+  }
 
   TilawaIconBoxTokens copyWith({
     double? iconSize,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../density.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -304,21 +305,42 @@ class TilawaChipTokens {
   final FontWeight statusFontWeight;
   final double statusLetterSpacing;
 
-  factory TilawaChipTokens.defaults() => const TilawaChipTokens(
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-    contentGap: 8,
-    iconSize: 16,
-    compactIconSize: 14,
-    borderWidth: 0.5,
-    pillRadius: 999,
-    roundedRadius: 8,
-    selectedShadowOpacity: 0.3,
-    selectedShadowBlur: 16,
-    selectionFontWeight: FontWeight.w700,
-    statusFontWeight: FontWeight.w900,
-    statusLetterSpacing: 0.5,
-  );
+  factory TilawaChipTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaChipTokens(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        contentGap: 6,
+        iconSize: 16,
+        compactIconSize: 14,
+        borderWidth: 0.5,
+        pillRadius: 999,
+        roundedRadius: 8,
+        selectedShadowOpacity: 0.3,
+        selectedShadowBlur: 16,
+        selectionFontWeight: FontWeight.w700,
+        statusFontWeight: FontWeight.w900,
+        statusLetterSpacing: 0.5,
+      );
+    }
+    return const TilawaChipTokens(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      contentGap: 8,
+      iconSize: 16,
+      compactIconSize: 14,
+      borderWidth: 0.5,
+      pillRadius: 999,
+      roundedRadius: 8,
+      selectedShadowOpacity: 0.3,
+      selectedShadowBlur: 16,
+      selectionFontWeight: FontWeight.w700,
+      statusFontWeight: FontWeight.w900,
+      statusLetterSpacing: 0.5,
+    );
+  }
 
   TilawaChipTokens copyWith({
     EdgeInsetsGeometry? padding,
