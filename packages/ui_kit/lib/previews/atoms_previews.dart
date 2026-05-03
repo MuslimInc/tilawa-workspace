@@ -220,10 +220,7 @@ Widget previewTilawaDivider() {
 Widget previewTilawaTextFieldGallery() {
   return const TilawaPreviewWrapper(
     child: SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: TextFieldPreviews(),
-      ),
+      child: Padding(padding: EdgeInsets.all(16.0), child: TextFieldPreviews()),
     ),
   );
 }
@@ -284,10 +281,7 @@ class TextFieldPreviews extends StatelessWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        const TilawaTextField(
-          label: 'Password Field',
-          isPassword: true,
-        ),
+        const TilawaTextField(label: 'Password Field', isPassword: true),
         const SizedBox(height: 16),
         const TilawaTextField(
           label: 'Error State',
