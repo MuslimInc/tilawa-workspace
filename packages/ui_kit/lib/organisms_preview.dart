@@ -146,3 +146,35 @@ Widget previewTilawaSettingsGroup() {
     ),
   );
 }
+
+@Preview(
+  name: 'TilawaSettingsGroup (dark)',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
+Widget previewTilawaSettingsGroupDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: TilawaSettingsGroup(
+        title: 'Preferences',
+        children: [
+          TilawaSettingsTile(
+            icon: Icons.language,
+            title: 'Language',
+            subtitle: 'English',
+            onTap: () {},
+          ),
+          TilawaSettingsSwitchTile(
+            icon: Icons.dark_mode_outlined,
+            title: 'Dark mode',
+            value: false,
+            onChanged: (_) {},
+            showDivider: false,
+          ),
+        ],
+      ),
+    ),
+  );
+}

@@ -314,5 +314,125 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaFeedbackStrip',
+      fileName: 'tilawa_feedback_strip',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default',
+            child: TilawaPreviewWrapper(
+              child: Builder(
+                builder: (context) {
+                  final scheme = Theme.of(context).colorScheme;
+                  return TilawaFeedbackStrip(
+                    icon: Icons.check_circle_rounded,
+                    message: 'Saved successfully',
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                  );
+                },
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: Builder(
+                builder: (context) {
+                  final scheme = Theme.of(context).colorScheme;
+                  return TilawaFeedbackStrip(
+                    icon: Icons.check_circle_rounded,
+                    message: 'Saved successfully',
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                  );
+                },
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic',
+            child: TilawaPreviewWrapper(
+              isRTL: true,
+              child: Builder(
+                builder: (context) {
+                  final scheme = Theme.of(context).colorScheme;
+                  return TilawaFeedbackStrip(
+                    icon: Icons.check_circle_rounded,
+                    message: 'تم الحفظ بنجاح',
+                    backgroundColor: scheme.primaryContainer,
+                    foregroundColor: scheme.onPrimaryContainer,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaPermissionBanner',
+      fileName: 'tilawa_permission_banner',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default',
+            child: TilawaPreviewWrapper(
+              child: TilawaPermissionBanner(
+                message: 'Enable notifications to receive prayer alerts',
+                actionLabel: 'Enable',
+                onAction: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaPermissionBanner(
+                message: 'Enable notifications to receive prayer alerts',
+                actionLabel: 'Enable',
+                onAction: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'LanguageSwitcher',
+      fileName: 'tilawa_language_switcher',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'English selected',
+            child: TilawaPreviewWrapper(
+              child: LanguageSwitcher(
+                currentLanguage: 'en',
+                languages: const ['en', 'ar'],
+                getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
+                onLanguageChanged: (_) {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Arabic selected',
+            child: TilawaPreviewWrapper(
+              child: LanguageSwitcher(
+                currentLanguage: 'ar',
+                languages: const ['en', 'ar'],
+                getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
+                onLanguageChanged: (_) {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 }

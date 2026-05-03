@@ -54,6 +54,27 @@ Widget previewLanguageSwitcher() {
   );
 }
 
+@Preview(
+  name: 'LanguageSwitcher (Arabic selected)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewLanguageSwitcherArabicSelected() {
+  return Scaffold(
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: LanguageSwitcher(
+          currentLanguage: 'ar',
+          languages: const ['en', 'ar'],
+          getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
+          onLanguageChanged: (_) {},
+        ),
+      ),
+    ),
+  );
+}
+
 @Preview(name: 'MetadataChip', group: 'Molecules', theme: moleculesPreviewTheme)
 Widget previewMetadataChip() {
   return const Scaffold(
@@ -198,6 +219,98 @@ Widget previewTilawaFeedbackStrip() {
               foregroundColor: scheme.onPrimaryContainer,
             );
           },
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaFeedbackStrip (dark)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaFeedbackStripDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: TilawaFeedbackStrip(
+          icon: Icons.check_circle_rounded,
+          message: 'Saved successfully',
+          backgroundColor: const Color(0xFF1B3A5C),
+          foregroundColor: const Color(0xFF90CAF9),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaFeedbackStrip (RTL)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaFeedbackStripRtl() {
+  return Directionality(
+    textDirection: TextDirection.rtl,
+    child: Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: Builder(
+            builder: (context) {
+              final scheme = Theme.of(context).colorScheme;
+              return TilawaFeedbackStrip(
+                icon: Icons.check_circle_rounded,
+                message: 'تم الحفظ بنجاح',
+                backgroundColor: scheme.primaryContainer,
+                foregroundColor: scheme.onPrimaryContainer,
+              );
+            },
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaPermissionBanner',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaPermissionBanner() {
+  return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: TilawaPermissionBanner(
+          message: 'Enable notifications to receive prayer alerts',
+          actionLabel: 'Enable',
+          onAction: () {},
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaPermissionBanner (dark)',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaPermissionBannerDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: TilawaPermissionBanner(
+          message: 'Enable notifications to receive prayer alerts',
+          actionLabel: 'Enable',
+          onAction: () {},
         ),
       ),
     ),
