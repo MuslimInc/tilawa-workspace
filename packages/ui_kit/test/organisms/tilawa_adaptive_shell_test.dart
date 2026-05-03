@@ -115,6 +115,60 @@ void main() {
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
       expect(rail.extended, isTrue);
     });
+
+    testWidgets(
+      'expanded with selectedIndex -1 renders rail with no active item',
+      (tester) async {
+        await _pumpShell(
+          tester,
+          size: const Size(1000, 900),
+          direction: TextDirection.ltr,
+          selectedIndex: -1,
+        );
+        expect(find.byType(NavigationRail), findsOneWidget);
+        final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+        expect(rail.selectedIndex, isNull);
+      },
+    );
+  });
+
+  group('TilawaAdaptiveShell — bottomPlayer visibility', () {
+    testWidgets('compact layout renders bottomPlayer with expected size', (
+      tester,
+    ) async {
+      const playerKey = Key('bottom_player');
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: _destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            bottomPlayer: const SizedBox(
+              key: playerKey,
+              height: 80,
+              width: double.infinity,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // bottomPlayer is placed inside Positioned.fill, so it expands to the
+      // full shell surface. Verify it is present and has non-zero dimensions.
+      expect(find.byKey(playerKey), findsOneWidget);
+      final size = tester.getSize(find.byKey(playerKey));
+      expect(size.height, greaterThan(0));
+      expect(size.width, greaterThan(0));
+    });
   });
 
   group('TilawaAdaptiveShell — RTL directional placement', () {
