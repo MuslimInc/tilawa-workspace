@@ -15,7 +15,7 @@ void main() {
   group('Organisms Golden Tests', () {
     goldenTest(
       'TilawaSettingsGroup',
-      fileName: 'tilawa_settings_group',
+      fileName: 'organisms/tilawa_settings_group',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(

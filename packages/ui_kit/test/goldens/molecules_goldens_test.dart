@@ -14,7 +14,7 @@ void main() {
   group('Molecules Golden Tests', () {
     goldenTest(
       'TilawaGlassPanel',
-      fileName: 'tilawa_glass_panel',
+      fileName: 'molecules/tilawa_glass_panel',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -46,7 +46,7 @@ void main() {
 
     goldenTest(
       'TilawaStatusChip',
-      fileName: 'tilawa_status_chip',
+      fileName: 'molecules/tilawa_status_chip',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -87,7 +87,7 @@ void main() {
 
     goldenTest(
       'TilawaChip',
-      fileName: 'tilawa_chip',
+      fileName: 'molecules/tilawa_chip',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -125,7 +125,7 @@ void main() {
 
     goldenTest(
       'MetadataChip',
-      fileName: 'tilawa_metadata_chip',
+      fileName: 'molecules/tilawa_metadata_chip',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -159,7 +159,7 @@ void main() {
 
     goldenTest(
       'SelectionPill',
-      fileName: 'tilawa_selection_pill',
+      fileName: 'molecules/tilawa_selection_pill',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -192,7 +192,7 @@ void main() {
 
     goldenTest(
       'TilawaIconActionButton',
-      fileName: 'tilawa_icon_action_button',
+      fileName: 'molecules/tilawa_icon_action_button',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -230,7 +230,7 @@ void main() {
 
     goldenTest(
       'TilawaSearchField',
-      fileName: 'tilawa_search_field',
+      fileName: 'molecules/tilawa_search_field',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -300,7 +300,7 @@ void main() {
 
     goldenTest(
       'TilawaSettingsTiles',
-      fileName: 'tilawa_settings_tile',
+      fileName: 'molecules/tilawa_settings_tile',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -384,7 +384,7 @@ void main() {
 
     goldenTest(
       'TilawaFeedbackStrip',
-      fileName: 'tilawa_feedback_strip',
+      fileName: 'molecules/tilawa_feedback_strip',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -443,7 +443,7 @@ void main() {
 
     goldenTest(
       'TilawaPermissionBanner',
-      fileName: 'tilawa_permission_banner',
+      fileName: 'molecules/tilawa_permission_banner',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -473,7 +473,7 @@ void main() {
 
     goldenTest(
       'LanguageSwitcher',
-      fileName: 'tilawa_language_switcher',
+      fileName: 'molecules/tilawa_language_switcher',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(

@@ -14,7 +14,7 @@ void main() {
   group('Atoms Golden Tests', () {
     goldenTest(
       'TilawaCard',
-      fileName: 'tilawa_card',
+      fileName: 'atoms/tilawa_card',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -43,7 +43,7 @@ void main() {
 
     goldenTest(
       'TilawaIconBox',
-      fileName: 'tilawa_icon_box',
+      fileName: 'atoms/tilawa_icon_box',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -58,7 +58,7 @@ void main() {
 
     goldenTest(
       'TilawaIconToggle',
-      fileName: 'tilawa_icon_toggle',
+      fileName: 'atoms/tilawa_icon_toggle',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -101,7 +101,7 @@ void main() {
 
     goldenTest(
       'TilawaEmptyState',
-      fileName: 'tilawa_empty_state',
+      fileName: 'atoms/tilawa_empty_state',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -130,7 +130,7 @@ void main() {
 
     goldenTest(
       'TilawaDivider',
-      fileName: 'tilawa_divider',
+      fileName: 'atoms/tilawa_divider',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -152,7 +152,7 @@ void main() {
 
     goldenTest(
       'TilawaSectionTitle',
-      fileName: 'tilawa_section_title',
+      fileName: 'atoms/tilawa_section_title',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -190,7 +190,7 @@ void main() {
 
     goldenTest(
       'TilawaSheetHandle',
-      fileName: 'tilawa_sheet_handle',
+      fileName: 'atoms/tilawa_sheet_handle',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -214,7 +214,7 @@ void main() {
   group('Button Golden Tests', () {
     goldenTest(
       'TilawaButton - Variants',
-      fileName: 'tilawa_button_variants',
+      fileName: 'atoms/tilawa_button_variants',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -265,7 +265,7 @@ void main() {
 
     goldenTest(
       'TilawaButton - States & Icons',
-      fileName: 'tilawa_button_states',
+      fileName: 'atoms/tilawa_button_states',
       pumpBeforeTest: (tester) async {
         await tester.pump(const Duration(milliseconds: 100));
       },
@@ -313,7 +313,7 @@ void main() {
 
     goldenTest(
       'TilawaButton - Environment',
-      fileName: 'tilawa_button_env',
+      fileName: 'atoms/tilawa_button_env',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -351,7 +351,7 @@ void main() {
   group('TilawaTextField Goldens', () {
     goldenTest(
       'tilawa_text_field_variants',
-      fileName: 'tilawa_text_field_variants',
+      fileName: 'atoms/tilawa_text_field_variants',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
@@ -425,7 +425,7 @@ void main() {
 
     goldenTest(
       'tilawa_text_field_env',
-      fileName: 'tilawa_text_field_env',
+      fileName: 'atoms/tilawa_text_field_env',
       builder: () => GoldenTestGroup(
         children: [
           GoldenTestScenario(
