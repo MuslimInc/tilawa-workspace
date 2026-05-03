@@ -32,6 +32,7 @@ class AppLaunchConfig extends Equatable {
     this.quranAssetsPrefetch = true,
     this.firebaseDataInit = true,
     this.notificationPermissionRequest = true,
+    this.compactUiEnabled = false,
   });
 
   factory AppLaunchConfig.fromEnvironment() {
@@ -132,6 +133,10 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
         defaultValue: true,
       ),
+      compactUiEnabled: bool.fromEnvironment(
+        'TILAWA_COMPACT_UI',
+        defaultValue: false,
+      ),
     );
   }
 
@@ -159,6 +164,7 @@ class AppLaunchConfig extends Equatable {
   final bool quranAssetsPrefetch;
   final bool firebaseDataInit;
   final bool notificationPermissionRequest;
+  final bool compactUiEnabled;
 
   @override
   List<Object?> get props => [
@@ -186,5 +192,6 @@ class AppLaunchConfig extends Equatable {
     quranAssetsPrefetch,
     firebaseDataInit,
     notificationPermissionRequest,
+    compactUiEnabled,
   ];
 }

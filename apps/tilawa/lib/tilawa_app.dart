@@ -236,6 +236,10 @@ class _PlayerApp extends StatelessWidget {
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               PerfLogger.markBuild('ThemeBlocBuilder');
+              // Derive UI density from launch config (default: comfortable)
+              final density = appLaunchConfig.compactUiEnabled
+                  ? TilawaDensity.compact
+                  : TilawaDensity.comfortable;
               return MaterialApp.router(
                 title: AppStrings.appName,
                 showPerformanceOverlay: false,
@@ -255,9 +259,11 @@ class _PlayerApp extends StatelessWidget {
                 },
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
+                  density: density,
                 ),
                 darkTheme: AppTheme.getDarkTheme(
                   primaryColor: themeState.primaryColor,
+                  density: density,
                 ),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,

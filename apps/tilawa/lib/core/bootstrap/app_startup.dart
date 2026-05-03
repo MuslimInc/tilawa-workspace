@@ -37,6 +37,11 @@ void configureAppLaunch({AppLaunchConfig? launchConfig}) {
   _bootstrapper = AppBootstrapper(startupTasks: _startupTasks);
 }
 
+/// The current launch configuration.
+///
+/// Defaults to [AppLaunchConfig.fromEnvironment] if not explicitly configured.
+AppLaunchConfig get appLaunchConfig => _appLaunchConfig;
+
 Future<void> bootstrap({
   AppRunner? runner,
   DiConfigurator? diConfigurator,
