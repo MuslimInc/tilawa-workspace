@@ -43,42 +43,41 @@ void main() {
       expect(comfortableTokens.density, TilawaDensity.comfortable);
     });
 
-    test('compact equals comfortable for non-settings token families', () {
-      // Phase 1A: settingsGroup is the first family with compact divergence.
-      // All other component token families remain identical until they
-      // get their own dedicated compact phases.
-      final comfortableTokens = TilawaComponentTokens.light(
-        density: TilawaDensity.comfortable,
-      );
-      final compactTokens = TilawaComponentTokens.light(
-        density: TilawaDensity.compact,
-      );
+    test(
+      'compact equals comfortable for non-settings-non-emptyState families',
+      () {
+        // Phase 1A: settingsGroup diverges. Phase 1C-A: emptyState diverges.
+        // All other component token families remain identical until they
+        // get their own dedicated compact phases.
+        final comfortableTokens = TilawaComponentTokens.light(
+          density: TilawaDensity.comfortable,
+        );
+        final compactTokens = TilawaComponentTokens.light(
+          density: TilawaDensity.compact,
+        );
 
-      expect(
-        compactTokens.card.padding,
-        equals(comfortableTokens.card.padding),
-      );
-      expect(
-        compactTokens.emptyState.iconSize,
-        equals(comfortableTokens.emptyState.iconSize),
-      );
-      expect(
-        compactTokens.chip.padding,
-        equals(comfortableTokens.chip.padding),
-      );
-      expect(
-        compactTokens.searchField.borderRadius,
-        equals(comfortableTokens.searchField.borderRadius),
-      );
-      expect(
-        compactTokens.iconBox.iconSize,
-        equals(comfortableTokens.iconBox.iconSize),
-      );
-      expect(
-        compactTokens.feedbackStrip.padding,
-        equals(comfortableTokens.feedbackStrip.padding),
-      );
-    });
+        expect(
+          compactTokens.card.padding,
+          equals(comfortableTokens.card.padding),
+        );
+        expect(
+          compactTokens.chip.padding,
+          equals(comfortableTokens.chip.padding),
+        );
+        expect(
+          compactTokens.searchField.borderRadius,
+          equals(comfortableTokens.searchField.borderRadius),
+        );
+        expect(
+          compactTokens.iconBox.iconSize,
+          equals(comfortableTokens.iconBox.iconSize),
+        );
+        expect(
+          compactTokens.feedbackStrip.padding,
+          equals(comfortableTokens.feedbackStrip.padding),
+        );
+      },
+    );
 
     test('dark theme supports density parameter', () {
       final darkComfortable = TilawaComponentTokens.dark(
@@ -136,6 +135,88 @@ void main() {
       expect(tokens.emptyState, isNotNull);
       expect(tokens.chip, isNotNull);
       expect(tokens.searchField, isNotNull);
+    });
+  });
+
+  group('Empty State Compact Density (Phase 1C-A)', () {
+    test('comfortable emptyState tokens equal default/current values', () {
+      final defaultTokens = TilawaEmptyStateTokens.defaults();
+      final comfortable = TilawaEmptyStateTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+
+      expect(comfortable.iconSize, equals(defaultTokens.iconSize));
+      expect(comfortable.iconOpacity, equals(defaultTokens.iconOpacity));
+      expect(comfortable.titleSpacing, equals(defaultTokens.titleSpacing));
+      expect(
+        comfortable.subtitleSpacing,
+        equals(defaultTokens.subtitleSpacing),
+      );
+      expect(comfortable.actionSpacing, equals(defaultTokens.actionSpacing));
+      expect(comfortable.padding, equals(defaultTokens.padding));
+    });
+
+    test('compact changes padding to EdgeInsets.all(16)', () {
+      final compact = TilawaEmptyStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.padding, const EdgeInsets.all(16.0));
+    });
+
+    test('compact changes iconSize to 40', () {
+      final compact = TilawaEmptyStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.iconSize, 40.0);
+    });
+
+    test('compact changes titleSpacing to 12', () {
+      final compact = TilawaEmptyStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.titleSpacing, 12.0);
+    });
+
+    test('compact changes subtitleSpacing to 4', () {
+      final compact = TilawaEmptyStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.subtitleSpacing, 4.0);
+    });
+
+    test('compact changes actionSpacing to 16', () {
+      final compact = TilawaEmptyStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.actionSpacing, 16.0);
+    });
+
+    test('compact does NOT change iconOpacity', () {
+      final compact = TilawaEmptyStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaEmptyStateTokens.defaults();
+      expect(compact.iconOpacity, equals(comfortable.iconOpacity));
+    });
+
+    test('component tokens propagate compact density to emptyState', () {
+      final tokens = TilawaComponentTokens.light(
+        density: TilawaDensity.compact,
+      );
+      expect(tokens.emptyState.padding, const EdgeInsets.all(16.0));
+      expect(tokens.emptyState.iconSize, 40.0);
+      expect(tokens.emptyState.titleSpacing, 12.0);
+      expect(tokens.emptyState.subtitleSpacing, 4.0);
+      expect(tokens.emptyState.actionSpacing, 16.0);
+    });
+
+    test('dark component tokens propagate compact density to emptyState', () {
+      final tokens = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(tokens.emptyState.padding, const EdgeInsets.all(16.0));
+      expect(tokens.emptyState.iconSize, 40.0);
+      expect(tokens.emptyState.titleSpacing, 12.0);
+      expect(tokens.emptyState.subtitleSpacing, 4.0);
+      expect(tokens.emptyState.actionSpacing, 16.0);
     });
   });
 

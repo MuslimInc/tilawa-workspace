@@ -91,7 +91,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       iconBox: TilawaIconBoxTokens.defaults(),
       loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
       divider: TilawaDividerTokens.defaults(),
-      emptyState: TilawaEmptyStateTokens.defaults(),
+      emptyState: TilawaEmptyStateTokens.defaults(density: density),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.defaults(),
       feedbackStrip: TilawaFeedbackStripTokens.defaults(),
       glassPanel: TilawaGlassPanelTokens.defaults(),

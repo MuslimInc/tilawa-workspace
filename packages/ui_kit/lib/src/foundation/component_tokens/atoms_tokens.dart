@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../density.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -357,14 +358,28 @@ class TilawaEmptyStateTokens {
   /// Outer padding around the whole empty-state layout.
   final EdgeInsets padding;
 
-  factory TilawaEmptyStateTokens.defaults() => const TilawaEmptyStateTokens(
-    iconSize: 48.0,
-    iconOpacity: 0.4,
-    titleSpacing: 16.0,
-    subtitleSpacing: 8.0,
-    actionSpacing: 24.0,
-    padding: EdgeInsets.all(24.0),
-  );
+  factory TilawaEmptyStateTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaEmptyStateTokens(
+        iconSize: 40.0,
+        iconOpacity: 0.4,
+        titleSpacing: 12.0,
+        subtitleSpacing: 4.0,
+        actionSpacing: 16.0,
+        padding: EdgeInsets.all(16.0),
+      );
+    }
+    return const TilawaEmptyStateTokens(
+      iconSize: 48.0,
+      iconOpacity: 0.4,
+      titleSpacing: 16.0,
+      subtitleSpacing: 8.0,
+      actionSpacing: 24.0,
+      padding: EdgeInsets.all(24.0),
+    );
+  }
 
   TilawaEmptyStateTokens copyWith({
     double? iconSize,
