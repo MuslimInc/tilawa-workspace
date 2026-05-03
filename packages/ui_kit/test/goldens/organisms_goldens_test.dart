@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
+import 'package:tilawa_ui_kit/src/foundation/density.dart';
 import 'package:tilawa_ui_kit/src/molecules/molecules.dart';
 import 'package:tilawa_ui_kit/src/organisms/organisms.dart';
 
@@ -113,6 +114,80 @@ void main() {
             name: 'Dark',
             child: TilawaPreviewWrapper(
               isDark: true,
+              child: SizedBox(
+                width: 340,
+                child: TilawaSettingsGroup(
+                  title: 'Preferences',
+                  children: [
+                    TilawaSettingsTile(
+                      icon: Icons.language,
+                      title: 'Language',
+                      subtitle: 'English',
+                      onTap: () {},
+                    ),
+                    TilawaSettingsSwitchTile(
+                      icon: Icons.dark_mode_outlined,
+                      title: 'Dark mode',
+                      value: false,
+                      onChanged: (_) {},
+                    ),
+                    TilawaSettingsTile(
+                      icon: Icons.notifications_outlined,
+                      title: 'Notifications',
+                      onTap: () {},
+                      showDivider: false,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSettingsGroup compact',
+      fileName: 'organisms/tilawa_settings_group_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 340,
+                child: TilawaSettingsGroup(
+                  title: 'Preferences',
+                  children: [
+                    TilawaSettingsTile(
+                      icon: Icons.language,
+                      title: 'Language',
+                      subtitle: 'English',
+                      onTap: () {},
+                    ),
+                    TilawaSettingsSwitchTile(
+                      icon: Icons.dark_mode_outlined,
+                      title: 'Dark mode',
+                      value: false,
+                      onChanged: (_) {},
+                    ),
+                    TilawaSettingsTile(
+                      icon: Icons.notifications_outlined,
+                      title: 'Notifications',
+                      onTap: () {},
+                      showDivider: false,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              density: TilawaDensity.compact,
               child: SizedBox(
                 width: 340,
                 child: TilawaSettingsGroup(

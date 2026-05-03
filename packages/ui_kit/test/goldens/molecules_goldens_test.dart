@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
+import 'package:tilawa_ui_kit/src/foundation/density.dart';
 import 'package:tilawa_ui_kit/src/molecules/molecules.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
@@ -440,6 +441,95 @@ void main() {
             name: 'RTL Arabic',
             child: TilawaPreviewWrapper(
               isRTL: true,
+              child: SizedBox(
+                width: 340,
+                child: TilawaSettingsSwitchTile(
+                  icon: Icons.notifications_outlined,
+                  title: 'إشعارات الصلاة',
+                  subtitle: 'تشغيل التنبيهات',
+                  value: true,
+                  onChanged: (_) {},
+                  showDivider: false,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSettingsTiles compact',
+      fileName: 'molecules/tilawa_settings_tile_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Tile with subtitle (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 340,
+                child: TilawaSettingsTile(
+                  icon: Icons.notifications_outlined,
+                  title: 'Notifications',
+                  subtitle: 'Daily prayer alerts',
+                  onTap: () {},
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Tile no subtitle (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 340,
+                child: TilawaSettingsTile(
+                  icon: Icons.language,
+                  title: 'Language',
+                  onTap: () {},
+                  showDivider: false,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Switch off (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 340,
+                child: TilawaSettingsSwitchTile(
+                  icon: Icons.dark_mode_outlined,
+                  title: 'Dark mode',
+                  value: false,
+                  onChanged: (_) {},
+                  showDivider: false,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Switch on (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 340,
+                child: TilawaSettingsSwitchTile(
+                  icon: Icons.dark_mode_outlined,
+                  title: 'Dark mode',
+                  value: true,
+                  onChanged: (_) {},
+                  showDivider: false,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic (compact)',
+            child: TilawaPreviewWrapper(
+              isRTL: true,
+              density: TilawaDensity.compact,
               child: SizedBox(
                 width: 340,
                 child: TilawaSettingsSwitchTile(

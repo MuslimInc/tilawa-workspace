@@ -83,10 +83,14 @@ class AppTheme {
   /// [useGoogleFontsOverride] is a foundation API extension for
   /// preview/golden stability. It allows disabling font loading in headless
   /// test environments without modifying the production [useGoogleFonts] default.
+  ///
+  /// [density] controls the overall UI density. Defaults to [TilawaDensity.comfortable]
+  /// which matches all pre-density UI Kit values.
   static ThemeData getDarkTheme({
     required Color primaryColor,
     bool? useGoogleFontsOverride,
     bool darkIsTrueBlack = false,
+    TilawaDensity density = TilawaDensity.comfortable,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
@@ -107,8 +111,8 @@ class AppTheme {
       textTheme: _getTextTheme(useFonts),
     ).copyWith(
       extensions: [
-        TilawaDesignTokens.dark(),
-        TilawaComponentTokens.dark(),
+        TilawaDesignTokens.dark(density: density),
+        TilawaComponentTokens.dark(density: density),
         ...extensions,
       ],
     );
