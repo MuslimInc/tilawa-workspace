@@ -222,50 +222,57 @@ class SurahListTile extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: theme.dividerColor,
-                borderRadius: BorderRadius.circular(2),
+      builder: (sheetContext) {
+        final bottomPadding = MediaQuery.paddingOf(sheetContext).bottom;
+        return Padding(
+          padding: EdgeInsets.only(bottom: bottomPadding),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.dividerColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              surah.name,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Divider(height: 1, color: theme.dividerColor),
-            ListTile(
-              leading: Icon(Icons.menu_book_rounded, color: theme.primaryColor),
-              title: Text(context.l10n.quranReader),
-              subtitle: Text(context.l10n.continueReading),
-              onTap: () {
-                Navigator.pop(sheetContext);
-                QuranReaderRoute(surahNumber: surahNumber).push(context);
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.bookmark_outline_rounded,
-                color: theme.primaryColor,
+              SizedBox(height: 16),
+              Text(
+                surah.name,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              title: Text(context.l10n.addBookmark),
-              onTap: () {
-                Navigator.pop(sheetContext);
-                const BookmarksRoute().push(context);
-              },
-            ),
-            SizedBox(height: 16),
-          ],
-        ),
-      ),
+              SizedBox(height: 8),
+              Divider(height: 1, color: theme.dividerColor),
+              ListTile(
+                leading: Icon(
+                  Icons.menu_book_rounded,
+                  color: theme.primaryColor,
+                ),
+                title: Text(context.l10n.quranReader),
+                subtitle: Text(context.l10n.continueReading),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  QuranReaderRoute(surahNumber: surahNumber).push(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.bookmark_outline_rounded,
+                  color: theme.primaryColor,
+                ),
+                title: Text(context.l10n.addBookmark),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  const BookmarksRoute().push(context);
+                },
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
     );
   }
 }

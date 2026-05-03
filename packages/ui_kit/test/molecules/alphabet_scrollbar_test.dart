@@ -392,10 +392,7 @@ void main() {
 
       // _draggedLetter is null after tap, so overlayChildBuilder returns
       // SizedBox.shrink() — the keyed overlay container is not in the tree.
-      expect(
-        find.byKey(const Key('alphabet_scrollbar_overlay')),
-        findsNothing,
-      );
+      expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
     });
   });
 }

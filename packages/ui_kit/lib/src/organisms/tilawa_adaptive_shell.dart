@@ -130,7 +130,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
                   destinations: destinations,
                   selectedIndex: displayIndex,
                   onDestinationSelected: onDestinationSelected,
-                  extended: windowSize.index >= TilawaWindowSize.expanded.index,
+                  extended: windowSize.index >= TilawaWindowSize.large.index,
                 ),
               ),
               Expanded(

@@ -34,10 +34,22 @@ void main() {
 
       final sliders = tester.widgetList<Slider>(find.byType(Slider)).toList();
       expect(sliders.length, 2);
-      expect(sliders[0].value, const Duration(minutes: 3).inMilliseconds.toDouble());
-      expect(sliders[1].value, const Duration(minutes: 2).inMilliseconds.toDouble());
-      expect(sliders[0].max, const Duration(minutes: 5).inMilliseconds.toDouble());
-      expect(sliders[1].max, const Duration(minutes: 5).inMilliseconds.toDouble());
+      expect(
+        sliders[0].value,
+        const Duration(minutes: 3).inMilliseconds.toDouble(),
+      );
+      expect(
+        sliders[1].value,
+        const Duration(minutes: 2).inMilliseconds.toDouble(),
+      );
+      expect(
+        sliders[0].max,
+        const Duration(minutes: 5).inMilliseconds.toDouble(),
+      );
+      expect(
+        sliders[1].max,
+        const Duration(minutes: 5).inMilliseconds.toDouble(),
+      );
     });
 
     testWidgets('dragging calls onChanged with reasonable Duration values', (
@@ -91,28 +103,29 @@ void main() {
       expect(endedValue! <= const Duration(minutes: 5), isTrue);
     });
 
-    testWidgets('zero duration disables interaction and avoids invalid values', (
-      tester,
-    ) async {
-      final changedValues = <Duration>[];
+    testWidgets(
+      'zero duration disables interaction and avoids invalid values',
+      (tester) async {
+        final changedValues = <Duration>[];
 
-      await tester.pumpWidget(
-        _wrap(
-          SeekBar(
-            duration: Duration.zero,
-            position: Duration.zero,
-            bufferedPosition: Duration.zero,
-            onChanged: changedValues.add,
+        await tester.pumpWidget(
+          _wrap(
+            SeekBar(
+              duration: Duration.zero,
+              position: Duration.zero,
+              bufferedPosition: Duration.zero,
+              onChanged: changedValues.add,
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.drag(find.byType(Slider).last, const Offset(100, 0));
-      await tester.pumpAndSettle();
+        await tester.drag(find.byType(Slider).last, const Offset(100, 0));
+        await tester.pumpAndSettle();
 
-      expect(changedValues, isEmpty);
-      expect(tester.takeException(), isNull);
-    });
+        expect(changedValues, isEmpty);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('does not throw when position > duration', (tester) async {
       await tester.pumpWidget(
@@ -127,11 +140,16 @@ void main() {
 
       final sliders = tester.widgetList<Slider>(find.byType(Slider)).toList();
       expect(sliders.length, 2);
-      expect(sliders[1].value, const Duration(seconds: 30).inMilliseconds.toDouble());
+      expect(
+        sliders[1].value,
+        const Duration(seconds: 30).inMilliseconds.toDouble(),
+      );
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('does not throw when bufferedPosition > duration', (tester) async {
+    testWidgets('does not throw when bufferedPosition > duration', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _wrap(
           const SeekBar(
@@ -144,7 +162,10 @@ void main() {
 
       final sliders = tester.widgetList<Slider>(find.byType(Slider)).toList();
       expect(sliders.length, 2);
-      expect(sliders[0].value, const Duration(seconds: 30).inMilliseconds.toDouble());
+      expect(
+        sliders[0].value,
+        const Duration(seconds: 30).inMilliseconds.toDouble(),
+      );
       expect(tester.takeException(), isNull);
     });
 

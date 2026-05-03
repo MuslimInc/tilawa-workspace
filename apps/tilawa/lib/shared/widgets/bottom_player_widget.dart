@@ -1029,22 +1029,35 @@ Future<void> _showPlaybackActions(BuildContext context) async {
     return;
   }
 
-  final bool? shouldStop = await showDialog<bool>(
+  final bool? shouldStop = await showModalBottomSheet<bool>(
     context: context,
     builder: (dialogContext) {
-      return AlertDialog(
-        title: Text(context.l10n.stopPlayback),
-        content: Text(context.l10n.stopPlaybackConfirmMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(context.l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text(context.l10n.stopPlayback),
-          ),
-        ],
+      final bottomPadding = MediaQuery.paddingOf(dialogContext).bottom;
+      return Container(
+        color: Colors.green,
+        padding: EdgeInsets.only(bottom: bottomPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(FluentIcons.stop_24_regular),
+              title: Text(context.l10n.stopPlayback),
+              subtitle: Text(context.l10n.stopPlaybackConfirmMessage),
+            ),
+            OverflowBar(
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(false),
+                  child: Text(context.l10n.cancel),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(true),
+                  child: Text(context.l10n.stopPlayback),
+                ),
+              ],
+            ),
+          ],
+        ),
       );
     },
   );
