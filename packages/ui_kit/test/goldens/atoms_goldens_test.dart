@@ -244,4 +244,92 @@ void main() {
       ),
     );
   });
+
+  group('TilawaTextField Goldens', () {
+    goldenTest(
+      'tilawa_text_field_variants',
+      fileName: 'tilawa_text_field_variants',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default',
+            child: const TilawaPreviewWrapper(
+              child: TilawaTextField(
+                label: 'Label',
+                hintText: 'Hint text',
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Error',
+            child: const TilawaPreviewWrapper(
+              child: TilawaTextField(
+                label: 'Label',
+                errorText: 'Error message',
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Disabled',
+            child: const TilawaPreviewWrapper(
+              child: TilawaTextField(
+                label: 'Label',
+                enabled: false,
+                initialValue: 'Disabled text',
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Password',
+            child: const TilawaPreviewWrapper(
+              child: TilawaTextField(
+                label: 'Password',
+                isPassword: true,
+                initialValue: 'secret',
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Search (Prefix Icon)',
+            child: const TilawaPreviewWrapper(
+              child: TilawaTextField(
+                hintText: 'Search...',
+                prefixIcon: Icon(Icons.search),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic',
+            child: const TilawaPreviewWrapper(
+              isRTL: true,
+              child: TilawaTextField(
+                label: 'الاسم',
+                hintText: 'أدخل الاسم',
+                prefixIcon: Icon(Icons.person),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'tilawa_text_field_env',
+      fileName: 'tilawa_text_field_env',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Dark Mode',
+            child: const TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaTextField(
+                label: 'Dark Mode Label',
+                hintText: 'Dark mode hint',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  });
 }

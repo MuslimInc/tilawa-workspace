@@ -8,3 +8,4 @@ export 'tilawa_icon_toggle.dart';
 export 'tilawa_loading_indicator.dart';
 export 'tilawa_section_title.dart';
 export 'tilawa_sheet_handle.dart';
+export 'tilawa_text_field.dart';

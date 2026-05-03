@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../foundation/app_theme.dart';
+
 import '../foundation/app_colors.dart';
+import '../foundation/app_theme.dart';
 
 /// A wrapper widget for Widget Previews and Golden Tests to ensure
 /// consistent environment configuration across themes, locales, and scales.
@@ -37,8 +38,11 @@ class TilawaPreviewWrapper extends StatelessWidget {
             useGoogleFontsOverride: useGoogleFonts,
           );
 
+    final mediaQuery = MediaQuery.maybeOf(context);
+    final baseData = mediaQuery ?? const MediaQueryData();
+
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(
+      data: baseData.copyWith(
         platformBrightness: isDark ? Brightness.dark : Brightness.light,
         textScaler: TextScaler.linear(textScale),
       ),

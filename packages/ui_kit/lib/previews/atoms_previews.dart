@@ -213,3 +213,110 @@ Widget previewTilawaDivider() {
     ),
   );
 }
+
+// --- TilawaTextField Previews ---
+
+@Preview(name: 'TilawaTextField / Gallery', group: 'Atoms')
+Widget previewTilawaTextFieldGallery() {
+  return const TilawaPreviewWrapper(
+    child: SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: TextFieldPreviews(),
+      ),
+    ),
+  );
+}
+
+@Preview(name: 'TilawaTextField / RTL Arabic', group: 'Atoms')
+Widget previewTilawaTextFieldRtl() {
+  return const TilawaPreviewWrapper(
+    isRTL: true,
+    child: Padding(
+      padding: EdgeInsets.all(16.0),
+      child: TilawaTextField(
+        label: 'الاسم الكامل',
+        hintText: 'أدخل اسمك هنا',
+        prefixIcon: Icon(Icons.person_outline),
+      ),
+    ),
+  );
+}
+
+class TextFieldPreviews extends StatelessWidget {
+  const TextFieldPreviews({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Standard Variants',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        const TilawaTextField(
+          label: 'Default Field',
+          hintText: 'Enter text here',
+        ),
+        const SizedBox(height: 16),
+        const TilawaTextField(
+          label: 'With Helper',
+          hintText: 'Enter text',
+          helperText: 'This is a helper message',
+        ),
+        const SizedBox(height: 16),
+        const TilawaTextField(
+          label: 'With Prefix Icon',
+          hintText: 'Search...',
+          prefixIcon: Icon(Icons.search),
+        ),
+        const SizedBox(height: 16),
+        TilawaTextField(
+          label: 'With Clear Button',
+          initialValue: 'Clear me',
+          onClear: () {},
+        ),
+        const SizedBox(height: 32),
+        const Text(
+          'Special States',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        const TilawaTextField(
+          label: 'Password Field',
+          isPassword: true,
+        ),
+        const SizedBox(height: 16),
+        const TilawaTextField(
+          label: 'Error State',
+          errorText: 'This input is invalid',
+        ),
+        const SizedBox(height: 16),
+        const TilawaTextField(
+          label: 'Disabled Field',
+          enabled: false,
+          initialValue: 'Cannot edit this',
+        ),
+        const SizedBox(height: 16),
+        const TilawaTextField(
+          label: 'Read Only Field',
+          readOnly: true,
+          initialValue: 'Read only text',
+        ),
+        const SizedBox(height: 32),
+        const Text(
+          'Multiline',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        const TilawaTextField(
+          label: 'Multiline Field',
+          hintText: 'Type multiple lines...',
+          maxLines: 3,
+        ),
+      ],
+    );
+  }
+}
