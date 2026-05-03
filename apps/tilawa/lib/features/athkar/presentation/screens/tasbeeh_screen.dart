@@ -438,6 +438,10 @@ class _TasbeehCountingView extends StatelessWidget {
   }
 }
 
+/// Thin wrapper around TilawaTextField for Tasbeeh input fields.
+///
+/// Preserves the same API as the original implementation while adopting
+/// the UI Kit component for consistency.
 class _TilawaTextInputField extends StatelessWidget {
   const _TilawaTextInputField({
     required this.hint,
@@ -457,55 +461,14 @@ class _TilawaTextInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final searchTokens = theme.componentTokens.searchField;
-    final inputRadius = BorderRadius.circular(searchTokens.borderRadius);
-
-    return TextField(
+    return TilawaTextField(
+      hintText: hint,
+      prefixIcon: Icon(icon),
       onChanged: onChanged,
       keyboardType: keyboardType,
       maxLength: maxLength,
-      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-      decoration: InputDecoration(
-        hintText: hint,
-        counterText: counterText,
-        isDense: true,
-        filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest,
-        contentPadding: searchTokens.contentPadding,
-        prefixIcon: Icon(
-          icon,
-          size: searchTokens.iconSize,
-          color: theme.colorScheme.onSurfaceVariant.withValues(
-            alpha: searchTokens.iconOpacity,
-          ),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: inputRadius,
-          borderSide: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(
-              alpha: searchTokens.unfocusedBorderOpacity,
-            ),
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: inputRadius,
-          borderSide: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(
-              alpha: searchTokens.unfocusedBorderOpacity,
-            ),
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: inputRadius,
-          borderSide: BorderSide(
-            color: theme.primaryColor.withValues(
-              alpha: searchTokens.focusedBorderOpacity,
-            ),
-          ),
-        ),
-      ),
+      // Counter is hidden by default in TilawaTextField (showCounter: false)
+      // which matches the original behavior when counterText was ''
     );
   }
 }

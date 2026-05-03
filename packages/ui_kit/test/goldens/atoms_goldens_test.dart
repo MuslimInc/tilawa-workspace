@@ -254,10 +254,7 @@ void main() {
           GoldenTestScenario(
             name: 'Default',
             child: const TilawaPreviewWrapper(
-              child: TilawaTextField(
-                label: 'Label',
-                hintText: 'Hint text',
-              ),
+              child: TilawaTextField(label: 'Label', hintText: 'Hint text'),
             ),
           ),
           GoldenTestScenario(
@@ -306,6 +303,16 @@ void main() {
                 label: 'الاسم',
                 hintText: 'أدخل الاسم',
                 prefixIcon: Icon(Icons.person),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Max Length Hidden Counter',
+            child: const TilawaPreviewWrapper(
+              child: TilawaTextField(
+                hintText: 'Max 20 chars',
+                maxLength: 20,
+                initialValue: 'Hello',
               ),
             ),
           ),

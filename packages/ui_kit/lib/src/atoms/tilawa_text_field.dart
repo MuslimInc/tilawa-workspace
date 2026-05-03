@@ -31,6 +31,8 @@ class TilawaTextField extends StatefulWidget {
     this.semanticLabel,
     this.autofocus = false,
     this.initialValue,
+    this.maxLength,
+    this.showCounter = false,
   }) : assert(
          controller == null || initialValue == null,
          'controller and initialValue cannot both be provided.',
@@ -117,6 +119,18 @@ class TilawaTextField extends StatefulWidget {
 
   /// Initial text value if no controller is provided.
   final String? initialValue;
+
+  /// The maximum number of characters allowed in the field.
+  ///
+  /// When provided, input beyond this length is prevented. Use [showCounter]
+  /// to display a character count indicator.
+  final int? maxLength;
+
+  /// Whether to show the character counter when [maxLength] is set.
+  ///
+  /// Defaults to false to keep the UI minimal. When true, displays the
+  /// default Flutter counter (e.g., "5/100").
+  final bool showCounter;
 
   @override
   State<TilawaTextField> createState() => _TilawaTextFieldState();
@@ -233,6 +247,15 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
         validator: widget.validator,
         autofocus: widget.autofocus,
         style: theme.textTheme.bodyLarge,
+        maxLength: widget.maxLength,
+        buildCounter: widget.showCounter
+            ? null
+            : (
+                context, {
+                required currentLength,
+                required isFocused,
+                maxLength,
+              }) => const SizedBox.shrink(),
         decoration: InputDecoration(
           labelText: widget.label,
           hintText: widget.hintText,

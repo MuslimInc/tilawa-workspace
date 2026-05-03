@@ -36,6 +36,7 @@ A robust text input field with built-in support for validation, password togglin
 - **Strict API**: Only design-system-compliant properties are exposed.
 - **Password Toggle**: Built-in visibility management with `isPassword: true`.
 - **Clear Button**: Integrated clear action with `onClear` callback.
+- **Max Length**: Enforce character limits with optional counter display.
 - **Lifecycle Safety**: Manages internal controllers and focus nodes automatically.
 
 #### Usage
@@ -49,9 +50,19 @@ TilawaTextField(
 )
 ```
 
+With character limit (counter hidden by default):
+```dart
+TilawaTextField(
+  hintText: 'Enter name (max 50 chars)',
+  maxLength: 50,
+  onChanged: (val) => print(val),
+)
+```
+
 #### Constraints
 - `controller` and `initialValue` are mutually exclusive.
 - `suffixIcon` cannot be used when `isPassword` or `onClear` is enabled.
+- `maxLength` enforces input limit; set `showCounter: true` to display the counter.
 
 ### TilawaCard
 A versatile container with soft shadows and rounded corners.
