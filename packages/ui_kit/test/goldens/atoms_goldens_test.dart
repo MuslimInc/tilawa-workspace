@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/src/atoms/atoms.dart';
-import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
+import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
 
@@ -119,6 +119,49 @@ void main() {
             child: TilawaPreviewWrapper(
               textScale: 1.5,
               child: TilawaEmptyState(
+                icon: Icons.inbox_outlined,
+                title: 'Scaled Text',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaEmptyState compact',
+      fileName: 'atoms/tilawa_empty_state_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: const TilawaEmptyState(
+                icon: Icons.inbox_outlined,
+                title: 'No Data',
+                subtitle: 'Add something to get started.',
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'With action (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaEmptyState(
+                icon: Icons.inbox_outlined,
+                title: 'No Data',
+                subtitle: 'Add something to get started.',
+                action: const TilawaButton(text: 'Add Item'),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Scale 1.5 (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              textScale: 1.5,
+              child: const TilawaEmptyState(
                 icon: Icons.inbox_outlined,
                 title: 'Scaled Text',
               ),
