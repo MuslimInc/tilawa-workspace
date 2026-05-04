@@ -10,5 +10,7 @@ enum TilawaDensity {
   /// Condensed layout with reduced spacing (opt-in only).
   /// In Phase 0, this produces the same token values as comfortable.
   /// Future phases will implement explicit compact values per component family.
-  compact,
+  compact;
+
+  bool get isCompact => this == TilawaDensity.compact;
 }

@@ -89,7 +89,7 @@ class TilawaFooterBarTokens {
   factory TilawaFooterBarTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaFooterBarTokens(
         height: 52,
         horizontalPadding: 12,
@@ -660,7 +660,7 @@ class TilawaSettingsGroupTokens {
   factory TilawaSettingsGroupTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaSettingsGroupTokens(
         // Phase 1A compact-only changes:
         groupHeaderPadding: EdgeInsets.fromLTRB(12, 12, 16, 6),
@@ -1099,7 +1099,7 @@ class TilawaBottomSheetScaffoldTokens {
   factory TilawaBottomSheetScaffoldTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       // closeButtonSize 40 stays — already below 48dp; not making it worse.
       return const TilawaBottomSheetScaffoldTokens(
         topRadius: 24,

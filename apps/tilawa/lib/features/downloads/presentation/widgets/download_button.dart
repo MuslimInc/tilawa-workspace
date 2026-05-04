@@ -330,24 +330,32 @@ class _DownloadingProgressButton extends StatelessWidget {
               ),
             ),
             // Percentage text or icon
-            InkWell(
-              onTap: onPause,
-              borderRadius: BorderRadius.circular(18),
-              child: progress > 0
-                  ? Text(
-                      '${(progress * 100).toInt()}',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        color: theme.primaryColor,
-                        fontFeatures: const [FontFeature.tabularFigures()],
+            SizedBox(
+              width: 32,
+              height: 32,
+              child: InkWell(
+                onTap: onPause,
+                borderRadius: BorderRadius.circular(1000),
+                child: progress > 0
+                    ? Center(
+                        child: Text(
+                          '${(progress * 100).toInt()}',
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                            color: theme.primaryColor,
+                            fontFeatures: const [FontFeature.tabularFigures()],
+                          ),
+                        ),
+                      )
+                    : Center(
+                        child: Icon(
+                          Icons.pause_rounded,
+                          size: 14,
+                          color: theme.primaryColor,
+                        ),
                       ),
-                    )
-                  : Icon(
-                      Icons.pause_rounded,
-                      size: 14,
-                      color: theme.primaryColor,
-                    ),
+              ),
             ),
           ],
         ),

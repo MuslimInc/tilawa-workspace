@@ -116,7 +116,7 @@ class TilawaFeedbackStripTokens {
   factory TilawaFeedbackStripTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaFeedbackStripTokens(
         padding: EdgeInsets.all(10),
         borderRadius: 18,
@@ -184,7 +184,7 @@ class TilawaGlassPanelTokens {
   factory TilawaGlassPanelTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaGlassPanelTokens(
         padding: EdgeInsets.all(12),
         borderRadiusOffset: 8,
@@ -341,7 +341,7 @@ class TilawaChipTokens {
   factory TilawaChipTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaChipTokens(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -480,7 +480,7 @@ class TilawaSegmentedControlTokens {
   factory TilawaSegmentedControlTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaSegmentedControlTokens(
         containerPadding: EdgeInsets.all(2),
         itemPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -670,7 +670,7 @@ class TilawaSearchFieldTokens {
   factory TilawaSearchFieldTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       // Height stays at kMinInteractiveDimension (48dp) — non-negotiable.
       return const TilawaSearchFieldTokens(
         height: kMinInteractiveDimension,
@@ -930,7 +930,7 @@ class TilawaPermissionBannerTokens {
   factory TilawaPermissionBannerTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaPermissionBannerTokens(
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         borderRadius: 10,
@@ -993,7 +993,7 @@ class TilawaPrayerAlertRowTokens {
   factory TilawaPrayerAlertRowTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaPrayerAlertRowTokens(
         verticalPadding: 2,
         toggleSpacing: 6,

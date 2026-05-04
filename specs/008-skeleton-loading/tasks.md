@@ -40,53 +40,54 @@
 - [ ] Add export to `atoms.dart`
 
 ### S1-A-006: Validation
-- [ ] Run `flutter analyze` — zero issues
-- [ ] Run `flutter test` — existing tests pass
-- [ ] Component renders without errors
+- [x] Run `flutter analyze` — zero issues
+- [x] Run `flutter test` — existing tests pass
+- [x] Component renders without errors
 
 ---
 
 ## Phase S1-B: Tests and Goldens
 
 ### S1-B-001: Widget Tests
-- [ ] Create `tilawa_skeleton_block_test.dart`
-- [ ] Test renders with explicit width/height
-- [ ] Test supports circle shape (1:1 aspect ratio)
-- [ ] Test supports custom borderRadius override
-- [ ] Test respects `animate: false`
-- [ ] Test reduced motion disables animation
+- [x] Create `tilawa_skeleton_block_test.dart`
+- [x] Test renders with explicit width/height
+- [x] Test supports circle shape (1:1 aspect ratio)
+- [x] Test supports custom borderRadius override
+- [x] Test respects `animate: false`
+- [x] Test reduced motion disables animation
 
 ### S1-B-002: Token Tests
-- [ ] Create `skeleton_tokens_test.dart`
-- [ ] Test defaults factory creates valid tokens
-- [ ] Test density changes borderRadius
-- [ ] Test colors are from ColorScheme derivation
-- [ ] Test copyWith preserves values
-- [ ] Test copyWith can override values
-- [ ] Test lerp interpolates correctly
+- [x] Create `skeleton_tokens_test.dart`
+- [x] Test defaults factory creates valid tokens
+- [x] Test density changes borderRadius
+- [x] Test colors are from ColorScheme derivation
+- [x] Test copyWith preserves values
+- [x] Test copyWith can override values
+- [x] Test lerp interpolates correctly
 
 ### S1-B-003: Golden Tests
-- [ ] Append to `atoms_goldens_test.dart`
-- [ ] Scenario: Rectangle (light)
-- [ ] Scenario: Rectangle (dark)
-- [ ] Scenario: Rectangle (compact)
-- [ ] Scenario: Circle/avatar (light)
+- [x] Append to `atoms_goldens_test.dart`
+- [x] Scenario: Rectangle (light)
+- [x] Scenario: Rectangle (dark)
+- [x] Scenario: Rectangle (compact)
+- [x] Scenario: Circle/avatar (light)
 - [ ] Scenario: Circle/avatar (dark)
-- [ ] Scenario: Text line (light)
+- [x] Scenario: Text line (light)
 - [ ] Scenario: Text line (dark)
-- [ ] Scenario: Text line (compact)
+- [x] Scenario: Text line (compact)
 - [ ] Scenario: Reduced motion static (light)
-- [ ] Scenario: Multiple blocks composition (light)
+- [x] Scenario: Multiple blocks composition (light)
 
 ### S1-B-004: Generate Goldens
 - [ ] Run `flutter test --update-goldens test/goldens/atoms_goldens_test.dart`
+- [ ] Fix golden test failures (currently 9 tests failing)
 - [ ] Verify macOS variant images
 - [ ] Verify CI variant images
 - [ ] Manually review generated images
 
 ### S1-B-005: Validation
-- [ ] Run `flutter analyze` — zero issues
-- [ ] Run `flutter test` — all tests pass
+- [x] Run `flutter analyze` — zero issues
+- [ ] Run `flutter test` — 469 pass, 9 fail (golden issues pending)
 - [ ] Goldens match expectations
 
 ---
@@ -168,4 +169,4 @@
 | S1-C: Patterns | ⏳ PENDING | 0/5 | Waiting S1-B review |
 | S1-D: Integration | ⏳ PENDING | 0/4 | Waiting S1-C review |
 
-**Overall Status**: PLANNING COMPLETE — Ready for S1-A implementation
+**Overall Status**: S1-A COMPLETE, S1-B IN PROGRESS — Core component and tests done, goldens need fixes

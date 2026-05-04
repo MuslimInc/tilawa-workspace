@@ -36,6 +36,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.permissionBanner,
     required this.prayerAlertRow,
     required this.bottomSheetScaffold,
+    required this.skeleton,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -65,6 +66,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaPermissionBannerTokens permissionBanner;
   final TilawaPrayerAlertRowTokens prayerAlertRow;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
+  final TilawaSkeletonTokens skeleton;
 
   /// The density mode for this component token set.
   final TilawaDensity density;
@@ -76,15 +78,27 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   /// per component family.
   factory TilawaComponentTokens.light({
     TilawaDensity density = TilawaDensity.comfortable,
-  }) => TilawaComponentTokens._create(density: density);
+  }) => TilawaComponentTokens._create(
+    density: density,
+    brightness: Brightness.light,
+  );
 
   factory TilawaComponentTokens.dark({
     TilawaDensity density = TilawaDensity.comfortable,
-  }) => TilawaComponentTokens._create(density: density);
+  }) => TilawaComponentTokens._create(
+    density: density,
+    brightness: Brightness.dark,
+  );
 
-  /// Internal factory for creating tokens with the given density.
-  /// Phase 0: All densities use the same comfortable defaults.
-  factory TilawaComponentTokens._create({required TilawaDensity density}) {
+  /// Internal factory for creating tokens with the given density and brightness.
+  factory TilawaComponentTokens._create({
+    required TilawaDensity density,
+    required Brightness brightness,
+  }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: Colors.blue,
+      brightness: brightness,
+    );
     return TilawaComponentTokens(
       density: density,
       sectionTitle: TilawaSectionTitleTokens.defaults(density: density),
@@ -122,6 +136,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(
         density: density,
       ),
+      skeleton: TilawaSkeletonTokens.defaults(
+        colorScheme: colorScheme,
+        density: density,
+      ),
     );
   }
 
@@ -155,6 +173,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaPermissionBannerTokens? permissionBanner,
     TilawaPrayerAlertRowTokens? prayerAlertRow,
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
+    TilawaSkeletonTokens? skeleton,
   }) {
     return TilawaComponentTokens(
       density: density ?? this.density,
@@ -185,6 +204,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       permissionBanner: permissionBanner ?? this.permissionBanner,
       prayerAlertRow: prayerAlertRow ?? this.prayerAlertRow,
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
+      skeleton: skeleton ?? this.skeleton,
     );
   }
 
@@ -292,6 +312,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
         other.bottomSheetScaffold,
         t,
       ),
+      skeleton: TilawaSkeletonTokens.lerp(skeleton, other.skeleton, t),
     );
   }
 }
