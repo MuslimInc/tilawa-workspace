@@ -28,22 +28,13 @@ class PrayerTimesScreen extends StatefulWidget {
   State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
 }
 
-class _PrayerTimesScreenState extends State<PrayerTimesScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
+  int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    // Note: The PrayerTimesRoute already dispatches loadPrayerTimes event when creating the bloc.
-    // No need to dispatch it again here.
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void _onSegmentChanged(String value) {
+    setState(() {
+      _selectedIndex = value == 'today' ? 0 : 1;
+    });
   }
 
   @override
@@ -98,46 +89,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               tokens.spaceLarge,
               tokens.spaceMedium,
             ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.surface.withValues(alpha: 0.22),
-                borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                border: Border.all(
-                  color: colorScheme.surface.withValues(alpha: 0.34),
-                ),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                dividerColor: Colors.transparent,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: const EdgeInsets.all(4),
-                indicator: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(tokens.radiusLarge - 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                labelColor: colorScheme.onSurface,
-                unselectedLabelColor: colorScheme.onPrimary.withValues(
-                  alpha: 0.82,
-                ),
-                labelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-                unselectedLabelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                splashBorderRadius: BorderRadius.circular(tokens.radiusLarge),
-                tabs: [
-                  Tab(text: context.l10n.today),
-                  Tab(text: context.l10n.monthly),
-                ],
-              ),
+            child: TilawaSegmentedControl<String>(
+              segments: [
+                TilawaSegment(value: 'today', label: context.l10n.today),
+                TilawaSegment(value: 'monthly', label: context.l10n.monthly),
+              ],
+              selectedValue: _selectedIndex == 0 ? 'today' : 'monthly',
+              onValueChanged: _onSegmentChanged,
             ),
           ),
         ),
@@ -192,8 +150,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               return _buildLocationRequiredView(context, state);
 
             case PrayerTimesStatus.loaded:
-              return TabBarView(
-                controller: _tabController,
+              return IndexedStack(
+                index: _selectedIndex,
                 children: [
                   _buildTodayView(context, state),
                   _buildMonthlyView(context, state),

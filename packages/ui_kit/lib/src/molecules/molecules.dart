@@ -10,5 +10,6 @@ export 'tilawa_glass_panel.dart';
 export 'tilawa_icon_action_button.dart';
 export 'tilawa_permission_banner.dart';
 export 'tilawa_search_field.dart';
+export 'tilawa_segmented_control.dart';
 export 'tilawa_settings_tile.dart';
 export 'tilawa_status_chip.dart';

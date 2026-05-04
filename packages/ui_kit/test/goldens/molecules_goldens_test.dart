@@ -904,5 +904,107 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaSegmentedControl',
+      fileName: 'molecules/tilawa_segmented_control',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'First selected',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'today',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Second selected',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'monthly',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'today',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSegmentedControl compact',
+      fileName: 'molecules/tilawa_segmented_control_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'First selected (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'today',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isDark: true,
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'monthly',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 }
