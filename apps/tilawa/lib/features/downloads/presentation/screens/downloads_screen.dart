@@ -2,18 +2,19 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'package:tilawa/core/logging/app_logger.dart';
 import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
 import '../bloc/downloads_status.dart';
 import '../widgets/reciter_downloads_section.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 
 class DownloadsScreen extends StatefulWidget {
   const DownloadsScreen({super.key});
@@ -89,15 +90,14 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.downloads),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _loadDownloads,
-            tooltip: context.l10n.refreshDownloads,
+          TilawaIconActionButton(
+            icon: Icons.refresh_rounded,
+            onTap: _loadDownloads,
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_sweep_rounded),
-            onPressed: () => _showClearAllDialog(context),
-            tooltip: context.l10n.deleteAll,
+          SizedBox(width: 8),
+          TilawaIconActionButton(
+            icon: Icons.delete_sweep_rounded,
+            onTap: () => _showClearAllDialog(context),
           ),
         ],
       ),

@@ -29,9 +29,9 @@ class BookmarksScreen extends StatelessWidget {
         leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.bookmarks),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
+          TilawaIconActionButton(
+            icon: Icons.refresh,
+            onTap: () {
               context.read<BookmarksBloc>().add(const LoadBookmarksEvent());
             },
           ),

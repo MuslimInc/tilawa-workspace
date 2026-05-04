@@ -53,12 +53,7 @@ class TilawaSelectionTile extends StatelessWidget {
               spacing: tokens.tileItemGap,
               children: [
                 if (leading != null) leading!,
-                Expanded(
-                  child: Text(
-                    title,
-                    style: textStyle,
-                  ),
-                ),
+                Expanded(child: Text(title, style: textStyle)),
                 if (isSelected)
                   Icon(
                     Icons.check_rounded,

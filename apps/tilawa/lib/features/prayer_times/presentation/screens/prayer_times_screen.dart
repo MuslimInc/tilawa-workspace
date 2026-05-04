@@ -40,7 +40,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
 
     return Scaffold(
@@ -49,33 +48,21 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         title: Text(context.l10n.prayerTimes),
         actionsPadding: EdgeInsets.only(right: tokens.spaceMedium),
         actions: [
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-              foregroundColor: colorScheme.onPrimary,
-            ),
-            icon: const Icon(Icons.explore_outlined, size: 22),
-            onPressed: () => context.push('/qibla'),
+          TilawaIconActionButton(
+            icon: Icons.explore_outlined,
+            onTap: () => context.push('/qibla'),
           ),
           SizedBox(width: tokens.spaceSmall),
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-              foregroundColor: colorScheme.onPrimary,
-            ),
-            icon: const Icon(Icons.notifications_active_outlined, size: 22),
-            onPressed: () => _showNotificationDialog(context),
+          TilawaIconActionButton(
+            icon: Icons.notifications_active_outlined,
+            onTap: () => _showNotificationDialog(context),
           ),
           SizedBox(width: tokens.spaceSmall),
           Semantics(
             identifier: PrayerNotificationSemanticsIds.prayerSettingsButton,
-            child: IconButton(
-              style: IconButton.styleFrom(
-                backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-                foregroundColor: colorScheme.onPrimary,
-              ),
-              icon: const Icon(Icons.settings, size: 22),
-              onPressed: () => _showSettingsDialog(context),
+            child: TilawaIconActionButton(
+              icon: Icons.settings,
+              onTap: () => _showSettingsDialog(context),
             ),
           ),
           SizedBox(width: tokens.spaceExtraSmall),
