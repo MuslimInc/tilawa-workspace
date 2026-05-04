@@ -1088,5 +1088,186 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaSkeletonListTile',
+      fileName: 'molecules/tilawa_skeleton_list_tile',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: '1 line',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonListTile(lines: 1, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '2 lines',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonListTile(lines: 2, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '3 lines',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonListTile(lines: 3, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaSkeletonListTile(lines: 2, animate: false),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonListTile compact',
+      fileName: 'molecules/tilawa_skeleton_list_tile_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: '1 line (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonListTile(lines: 1, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '2 lines (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonListTile(lines: 2, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '3 lines (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonListTile(lines: 3, animate: false),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonCard',
+      fileName: 'molecules/tilawa_skeleton_card',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'With subtitle',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: true, animate: false),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Without subtitle',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: false, animate: false),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: true, animate: false),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonCard compact',
+      fileName: 'molecules/tilawa_skeleton_card_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'With subtitle (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: true, animate: false),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Without subtitle (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: false, animate: false),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonList',
+      fileName: 'molecules/tilawa_skeleton_list',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: '3 items',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonList(itemCount: 3, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '5 items',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonList(itemCount: 5, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaSkeletonList(itemCount: 3, animate: false),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonList compact',
+      fileName: 'molecules/tilawa_skeleton_list_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: '3 items (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonList(itemCount: 3, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '5 items (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonList(itemCount: 5, animate: false),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 }

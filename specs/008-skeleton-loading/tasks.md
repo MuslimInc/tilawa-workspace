@@ -92,34 +92,37 @@
 
 ---
 
-## Phase S1-C: Pattern Components (Later)
+## Phase S1-C: Pattern Components (Complete)
 
 ### S1-C-001: Design Review
-- [ ] UX review of pattern requirements
-- [ ] Design approved for `TilawaSkeletonListTile`
-- [ ] Design approved for `TilawaSkeletonCard`
-- [ ] Design approved for `TilawaSkeletonList`
+- [x] UX review of pattern requirements
+- [x] Design approved for `TilawaSkeletonListTile`
+- [x] Design approved for `TilawaSkeletonCard`
+- [x] Design approved for `TilawaSkeletonList`
 
 ### S1-C-002: Implement `TilawaSkeletonListTile`
-- [ ] Avatar circle + 2-3 text lines
-- [ ] Token-driven spacing
-- [ ] Density support
-- [ ] Golden tests
+- [x] Avatar circle + 2-3 text lines
+- [x] Token-driven spacing
+- [x] Density support
+- [x] Widget tests
+- [x] Golden tests
 
 ### S1-C-003: Implement `TilawaSkeletonCard`
-- [ ] Image block + title + subtitle
-- [ ] Token-driven spacing
-- [ ] Density support
-- [ ] Golden tests
+- [x] Image block + title + subtitle
+- [x] Token-driven spacing
+- [x] Density support
+- [x] Widget tests
+- [x] Golden tests
 
 ### S1-C-004: Implement `TilawaSkeletonList`
-- [ ] Multiple list tiles with gap
-- [ ] Configurable item count
-- [ ] Token-driven spacing
-- [ ] Golden tests
+- [x] Multiple list tiles with gap
+- [x] Configurable item count
+- [x] Token-driven spacing
+- [x] Widget tests
+- [x] Golden tests
 
 ### S1-C-005: Pattern Documentation
-- [ ] Usage examples in doc comments
+- [x] Usage examples in doc comments
 - [ ] Storybook/preview entries if applicable
 
 ---
@@ -164,9 +167,9 @@
 
 | Phase | Status | Tasks Complete | Blockers |
 |-------|--------|----------------|----------|
-| S1-A: Foundation | ⏳ PENDING | 0/6 | None |
-| S1-B: Tests | ⏳ PENDING | 0/5 | Waiting S1-A |
-| S1-C: Patterns | ⏳ PENDING | 0/5 | Waiting S1-B review |
+| S1-A: Foundation | ✅ COMPLETE | 6/6 | None |
+| S1-B: Tests | ✅ COMPLETE | 5/5 | Golden images generated |
+| S1-C: Patterns | ✅ COMPLETE | 5/5 | None |
 | S1-D: Integration | ⏳ PENDING | 0/4 | Waiting S1-C review |
 
-**Overall Status**: S1-A COMPLETE, S1-B IN PROGRESS — Core component and tests done, goldens need fixes
+**Overall Status**: S1-A, S1-B & S1-C COMPLETE — All skeleton components implemented with tests and goldens
