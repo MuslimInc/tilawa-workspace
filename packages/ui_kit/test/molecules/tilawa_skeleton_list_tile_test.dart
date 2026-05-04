@@ -9,9 +9,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonListTile(animate: false),
-            ),
+            home: Scaffold(body: TilawaSkeletonListTile(animate: false)),
           ),
         ),
       );
@@ -19,7 +17,10 @@ void main() {
       await tester.pump();
 
       expect(find.byType(TilawaSkeletonListTile), findsOneWidget);
-      expect(find.byType(TilawaSkeletonBlock), findsNWidgets(3)); // avatar + 2 lines
+      expect(
+        find.byType(TilawaSkeletonBlock),
+        findsNWidgets(3),
+      ); // avatar + 2 lines
     });
 
     testWidgets('renders with 1 line', (tester) async {
@@ -36,7 +37,10 @@ void main() {
 
       await tester.pump();
 
-      expect(find.byType(TilawaSkeletonBlock), findsNWidgets(2)); // avatar + 1 line
+      expect(
+        find.byType(TilawaSkeletonBlock),
+        findsNWidgets(2),
+      ); // avatar + 1 line
     });
 
     testWidgets('renders with 3 lines', (tester) async {
@@ -53,7 +57,10 @@ void main() {
 
       await tester.pump();
 
-      expect(find.byType(TilawaSkeletonBlock), findsNWidgets(4)); // avatar + 3 lines
+      expect(
+        find.byType(TilawaSkeletonBlock),
+        findsNWidgets(4),
+      ); // avatar + 3 lines
     });
 
     testWidgets('has circular avatar', (tester) async {
@@ -61,9 +68,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonListTile(animate: false),
-            ),
+            home: Scaffold(body: TilawaSkeletonListTile(animate: false)),
           ),
         ),
       );
@@ -80,9 +85,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonListTile(animate: false),
-            ),
+            home: Scaffold(body: TilawaSkeletonListTile(animate: false)),
           ),
         ),
       );
@@ -98,9 +101,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonListTile(animate: true),
-            ),
+            home: Scaffold(body: TilawaSkeletonListTile(animate: true)),
           ),
         ),
       );

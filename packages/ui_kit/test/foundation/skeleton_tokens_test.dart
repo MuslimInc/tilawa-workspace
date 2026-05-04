@@ -6,9 +6,7 @@ void main() {
   group('TilawaSkeletonTokens', () {
     test('defaults factory creates valid tokens', () {
       final colorScheme = const ColorScheme.light();
-      final tokens = TilawaSkeletonTokens.defaults(
-        colorScheme: colorScheme,
-      );
+      final tokens = TilawaSkeletonTokens.defaults(colorScheme: colorScheme);
 
       expect(tokens.baseColor, colorScheme.surfaceContainerHighest);
       expect(tokens.highlightColor, colorScheme.surfaceContainerHigh);
@@ -40,9 +38,7 @@ void main() {
         surfaceContainerHigh: Colors.grey.shade700,
       );
 
-      final tokens = TilawaSkeletonTokens.defaults(
-        colorScheme: colorScheme,
-      );
+      final tokens = TilawaSkeletonTokens.defaults(colorScheme: colorScheme);
 
       expect(tokens.baseColor, Colors.grey.shade800);
       expect(tokens.highlightColor, Colors.grey.shade700);
@@ -50,9 +46,7 @@ void main() {
 
     test('copyWith preserves values', () {
       final colorScheme = const ColorScheme.light();
-      final original = TilawaSkeletonTokens.defaults(
-        colorScheme: colorScheme,
-      );
+      final original = TilawaSkeletonTokens.defaults(colorScheme: colorScheme);
 
       final copy = original.copyWith();
 
@@ -65,9 +59,7 @@ void main() {
 
     test('copyWith can override values', () {
       final colorScheme = const ColorScheme.light();
-      final original = TilawaSkeletonTokens.defaults(
-        colorScheme: colorScheme,
-      );
+      final original = TilawaSkeletonTokens.defaults(colorScheme: colorScheme);
 
       final copy = original.copyWith(
         borderRadius: 20.0,
@@ -83,9 +75,7 @@ void main() {
     test('lerp interpolates colors correctly', () {
       final colorScheme = const ColorScheme.light();
       final a = TilawaSkeletonTokens.defaults(colorScheme: colorScheme);
-      final b = a.copyWith(
-        borderRadius: 24.0,
-      );
+      final b = a.copyWith(borderRadius: 24.0);
 
       final result = TilawaSkeletonTokens.lerp(a, b, 0.5);
 

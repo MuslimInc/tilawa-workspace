@@ -396,15 +396,17 @@ class _RecitersSliverScreen extends StatelessWidget {
   }) {
     if (state is RecitersLoading) {
       return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: _StatePanel(
-            key: const ValueKey('loading_state'),
-            icon: Icons.hourglass_top_rounded,
-            title: context.l10n.loadingReciters,
-            isLoading: true,
+        if (context.isCompact)
+          _ReciterSkeletonListSliver(
+            reserveScrollbarSpace: reserveScrollbarSpace,
+            reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+          )
+        else
+          ReciterSkeletonGridSliver(
+            reserveScrollbarSpace: reserveScrollbarSpace,
+            reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+            itemCount: 10,
           ),
-        ),
       ];
     }
 
@@ -412,7 +414,7 @@ class _RecitersSliverScreen extends StatelessWidget {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
-          child: _StatePanel(
+          child: StatePanel(
             key: const ValueKey('error_state'),
             icon: Icons.error_outline_rounded,
             title: (state as RecitersError).failure.localizedMessage(context),
@@ -429,15 +431,17 @@ class _RecitersSliverScreen extends StatelessWidget {
 
       if (!allowHeavyLoadedResults) {
         return [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: _StatePanel(
-              key: const ValueKey('deferred_loaded_state'),
-              icon: Icons.hourglass_top_rounded,
-              title: context.l10n.loadingReciters,
-              isLoading: true,
+          if (context.isCompact)
+            _ReciterSkeletonListSliver(
+              reserveScrollbarSpace: reserveScrollbarSpace,
+              reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+            )
+          else
+            ReciterSkeletonGridSliver(
+              reserveScrollbarSpace: reserveScrollbarSpace,
+              reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+              itemCount: 10,
             ),
-          ),
         ];
       }
 
@@ -448,7 +452,7 @@ class _RecitersSliverScreen extends StatelessWidget {
         return [
           SliverFillRemaining(
             hasScrollBody: false,
-            child: _StatePanel(
+            child: StatePanel(
               key: const ValueKey('empty_state'),
               icon: isFavoritesState
                   ? Icons.favorite_border_rounded
@@ -687,8 +691,8 @@ class _DownloadsButton extends StatelessWidget {
   }
 }
 
-class _StatePanel extends StatelessWidget {
-  const _StatePanel({
+class StatePanel extends StatelessWidget {
+  const StatePanel({
     super.key,
     required this.icon,
     required this.title,
@@ -872,6 +876,103 @@ class _ReciterGridSliver extends StatelessWidget {
             itemBuilder: (context, index) {
               final ReciterEntity reciter = state.filteredReciters[index];
               return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ReciterSkeletonListSliver extends StatelessWidget {
+  const _ReciterSkeletonListSliver({
+    required this.reserveScrollbarSpace,
+    required this.reserveScrollbarOnLeading,
+  });
+
+  final bool reserveScrollbarSpace;
+  final bool reserveScrollbarOnLeading;
+  final int itemCount = 10;
+
+  @override
+  Widget build(BuildContext context) {
+    PerfLogger.markBuild('_ReciterSkeletonListSliver');
+    final tokens = Theme.of(context).tokens;
+
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final padding = _recitersResultPadding(
+          context,
+          constraints,
+          top: tokens.spaceSmall,
+          bottom: tokens.spaceLarge,
+          reserveScrollbarSpace: reserveScrollbarSpace,
+          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+        );
+
+        return SliverPadding(
+          padding: padding,
+          sliver: SliverList.builder(
+            itemCount: itemCount + itemCount - 1,
+            itemBuilder: (context, index) {
+              if (index.isOdd) {
+                return SizedBox(height: tokens.spaceSmall);
+              }
+              return const TilawaSkeletonListTile(lines: 2);
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ReciterSkeletonGridSliver extends StatelessWidget {
+  const ReciterSkeletonGridSliver({
+    super.key,
+    required this.reserveScrollbarSpace,
+    required this.reserveScrollbarOnLeading,
+    required this.itemCount,
+  });
+
+  final bool reserveScrollbarSpace;
+  final bool reserveScrollbarOnLeading;
+  final int itemCount;
+
+  @override
+  Widget build(BuildContext context) {
+    PerfLogger.markBuild('_ReciterSkeletonGridSliver');
+    final tokens = Theme.of(context).tokens;
+    final double targetItemExtent =
+        tokens.cardCompactWidthThreshold +
+        tokens.spaceExtraLarge +
+        tokens.spaceLarge;
+    final double targetItemHeight =
+        tokens.playerCollapsedHeight + tokens.spaceExtraLarge;
+
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final padding = _recitersResultPadding(
+          context,
+          constraints,
+          top: tokens.spaceSmall,
+          bottom: tokens.spaceLarge,
+          reserveScrollbarSpace: reserveScrollbarSpace,
+          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+        );
+
+        return SliverPadding(
+          padding: padding,
+          sliver: SliverGrid.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: targetItemExtent,
+              mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+              crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+              childAspectRatio: targetItemExtent / targetItemHeight,
+            ),
+            itemCount: itemCount,
+            itemBuilder: (context, index) {
+              return const TilawaSkeletonCard(showSubtitle: true);
             },
           ),
         );

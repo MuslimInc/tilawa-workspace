@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../tilawa_ui_kit.dart';
-import '../foundation/design_tokens.dart';
-import '../foundation/density.dart';
 
 /// A skeleton placeholder for a list of items.
 ///
@@ -59,8 +57,10 @@ class TilawaSkeletonList extends StatelessWidget {
     this.itemPadding,
     this.animate = true,
   }) : assert(itemCount > 0, 'Item count must be positive'),
-       assert(linesPerItem >= 1 && linesPerItem <= 3,
-              'Lines per item must be between 1 and 3');
+       assert(
+         linesPerItem >= 1 && linesPerItem <= 3,
+         'Lines per item must be between 1 and 3',
+       );
 
   /// Number of skeleton items to render.
   ///
@@ -96,13 +96,12 @@ class TilawaSkeletonList extends StatelessWidget {
     final density = designTokens.density;
 
     // Default padding based on density
-    final effectivePadding = padding ??
-        EdgeInsets.all(
-          switch (density) {
-            TilawaDensity.compact => designTokens.spaceSmall,
-            _ => designTokens.spaceMedium,
-          },
-        );
+    final effectivePadding =
+        padding ??
+        EdgeInsets.all(switch (density) {
+          TilawaDensity.compact => designTokens.spaceSmall,
+          _ => designTokens.spaceMedium,
+        });
 
     // Gap between items based on density
     final itemGap = switch (density) {

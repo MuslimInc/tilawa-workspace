@@ -9,9 +9,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonList(animate: false),
-            ),
+            home: Scaffold(body: TilawaSkeletonList(animate: false)),
           ),
         ),
       );
@@ -28,10 +26,7 @@ void main() {
           data: const MediaQueryData(),
           child: MaterialApp(
             home: Scaffold(
-              body: TilawaSkeletonList(
-                itemCount: 5,
-                animate: false,
-              ),
+              body: TilawaSkeletonList(itemCount: 5, animate: false),
             ),
           ),
         ),
@@ -90,9 +85,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonList(animate: false),
-            ),
+            home: Scaffold(body: TilawaSkeletonList(animate: false)),
           ),
         ),
       );
@@ -108,9 +101,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonList(animate: true),
-            ),
+            home: Scaffold(body: TilawaSkeletonList(animate: true)),
           ),
         ),
       );

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../tilawa_ui_kit.dart';
-import '../foundation/design_tokens.dart';
-import '../foundation/density.dart';
 
 /// A skeleton placeholder for card items.
 ///

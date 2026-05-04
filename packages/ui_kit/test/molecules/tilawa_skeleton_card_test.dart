@@ -10,10 +10,7 @@ void main() {
           data: const MediaQueryData(),
           child: MaterialApp(
             home: Scaffold(
-              body: TilawaSkeletonCard(
-                width: 200,
-                animate: false,
-              ),
+              body: TilawaSkeletonCard(width: 200, animate: false),
             ),
           ),
         ),
@@ -22,10 +19,15 @@ void main() {
       await tester.pump();
 
       expect(find.byType(TilawaSkeletonCard), findsOneWidget);
-      expect(find.byType(TilawaSkeletonBlock), findsAtLeastNWidgets(2)); // image + title
+      expect(
+        find.byType(TilawaSkeletonBlock),
+        findsAtLeastNWidgets(2),
+      ); // image + title
     });
 
-    testWidgets('renders with subtitle when showSubtitle is true', (tester) async {
+    testWidgets('renders with subtitle when showSubtitle is true', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
@@ -47,7 +49,9 @@ void main() {
       expect(find.byType(TilawaSkeletonBlock), findsNWidgets(3));
     });
 
-    testWidgets('renders without subtitle when showSubtitle is false', (tester) async {
+    testWidgets('renders without subtitle when showSubtitle is false', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(),
@@ -75,10 +79,7 @@ void main() {
           data: const MediaQueryData(),
           child: MaterialApp(
             home: Scaffold(
-              body: TilawaSkeletonCard(
-                width: 200,
-                animate: false,
-              ),
+              body: TilawaSkeletonCard(width: 200, animate: false),
             ),
           ),
         ),
@@ -94,9 +95,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonCard(animate: false),
-            ),
+            home: Scaffold(body: TilawaSkeletonCard(animate: false)),
           ),
         ),
       );
@@ -112,9 +111,7 @@ void main() {
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonCard(animate: true),
-            ),
+            home: Scaffold(body: TilawaSkeletonCard(animate: true)),
           ),
         ),
       );
