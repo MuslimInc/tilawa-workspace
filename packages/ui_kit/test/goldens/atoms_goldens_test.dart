@@ -349,6 +349,113 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaErrorState',
+      fileName: 'atoms/tilawa_error_state',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default',
+            child: TilawaPreviewWrapper(
+              child: TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: 'Something went wrong',
+                subtitle: 'Please try again later.',
+                retryLabel: 'Retry',
+                onRetry: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: 'Something went wrong',
+                subtitle: 'Please try again later.',
+                retryLabel: 'Retry',
+                onRetry: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic',
+            child: TilawaPreviewWrapper(
+              isRTL: true,
+              child: TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: 'حدث خطأ ما',
+                subtitle: 'يرجى المحاولة مرة أخرى.',
+                retryLabel: 'إعادة المحاولة',
+                onRetry: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'No retry',
+            child: TilawaPreviewWrapper(
+              child: TilawaErrorState(
+                icon: Icons.signal_wifi_off_rounded,
+                title: 'No connection',
+                subtitle: 'Check your internet and try again.',
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaErrorState compact',
+      fileName: 'atoms/tilawa_error_state_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: 'Something went wrong',
+                subtitle: 'Please try again later.',
+                retryLabel: 'Retry',
+                onRetry: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isDark: true,
+              child: TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: 'Something went wrong',
+                subtitle: 'Please try again later.',
+                retryLabel: 'Retry',
+                onRetry: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'RTL Arabic (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isRTL: true,
+              child: TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: 'حدث خطأ ما',
+                subtitle: 'يرجى المحاولة مرة أخرى.',
+                retryLabel: 'إعادة المحاولة',
+                onRetry: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 
   group('Button Golden Tests', () {
