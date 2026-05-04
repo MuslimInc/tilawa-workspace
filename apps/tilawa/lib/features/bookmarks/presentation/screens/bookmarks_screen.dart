@@ -60,10 +60,8 @@ class BookmarksScreen extends StatelessWidget {
             return Stack(
               children: [
                 state.when(
-                  initial: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  initial: () => const TilawaLoadingIndicator(),
+                  loading: () => const TilawaLoadingIndicator(),
                   loaded: (bookmarks, filteredBookmarks, searchQuery) => Column(
                     children: [
                       BookmarkSearchBar(

@@ -147,8 +147,8 @@ class _DownloadsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (state.status) {
-      DownloadsStateStatus.initial || DownloadsStateStatus.loading =>
-        const Center(child: CircularProgressIndicator()),
+      DownloadsStateStatus.initial ||
+      DownloadsStateStatus.loading => const TilawaLoadingIndicator(),
       DownloadsStateStatus.loaded => _DownloadsList(
         downloadsByReciter: state.downloads,
         formattedSize: FileSizeFormatter.formatBytes(

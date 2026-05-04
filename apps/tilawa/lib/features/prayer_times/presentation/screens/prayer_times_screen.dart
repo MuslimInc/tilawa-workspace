@@ -106,7 +106,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           switch (state.status) {
             case PrayerTimesStatus.initial:
             case PrayerTimesStatus.loading:
-              return const Center(child: CircularProgressIndicator());
+              return const TilawaLoadingIndicator();
 
             case PrayerTimesStatus.error:
               return Center(
@@ -215,7 +215,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
   Widget _buildTodayView(BuildContext context, PrayerTimesState state) {
     if (state.todayPrayerTimes == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const TilawaLoadingIndicator();
     }
 
     final tokens = Theme.of(context).tokens;
