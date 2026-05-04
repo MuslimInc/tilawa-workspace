@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../lib/src/previews/preview_wrapper.dart';
+
 void main() {
   group('TilawaSkeletonList', () {
     testWidgets('renders with default 3 items', (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(body: TilawaSkeletonList(animate: false)),
-          ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(body: TilawaSkeletonList(animate: false)),
         ),
       );
 
@@ -22,12 +21,9 @@ void main() {
 
     testWidgets('renders with custom item count', (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonList(itemCount: 5, animate: false),
-            ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(
+            body: TilawaSkeletonList(itemCount: 5, animate: false),
           ),
         ),
       );
@@ -39,15 +35,12 @@ void main() {
 
     testWidgets('passes linesPerItem to tiles', (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonList(
-                itemCount: 1,
-                linesPerItem: 3,
-                animate: false,
-              ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(
+            body: TilawaSkeletonList(
+              itemCount: 1,
+              linesPerItem: 3,
+              animate: false,
             ),
           ),
         ),
@@ -61,15 +54,12 @@ void main() {
 
     testWidgets('applies custom padding', (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonList(
-                itemCount: 1,
-                padding: const EdgeInsets.all(20),
-                animate: false,
-              ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(
+            body: TilawaSkeletonList(
+              itemCount: 1,
+              padding: EdgeInsets.all(20),
+              animate: false,
             ),
           ),
         ),
@@ -82,11 +72,8 @@ void main() {
 
     testWidgets('respects animate: false', (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(body: TilawaSkeletonList(animate: false)),
-          ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(body: TilawaSkeletonList(animate: false)),
         ),
       );
 
@@ -100,8 +87,8 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
-          child: MaterialApp(
-            home: Scaffold(body: TilawaSkeletonList(animate: true)),
+          child: const TilawaPreviewWrapper(
+            child: Scaffold(body: TilawaSkeletonList(animate: true)),
           ),
         ),
       );

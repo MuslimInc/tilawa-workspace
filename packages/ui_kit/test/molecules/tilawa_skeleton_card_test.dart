@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../lib/src/previews/preview_wrapper.dart';
+
 void main() {
   group('TilawaSkeletonCard', () {
     testWidgets('renders with image and title', (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonCard(width: 200, animate: false),
-            ),
-          ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(body: TilawaSkeletonCard(width: 200, animate: false)),
         ),
       );
 
@@ -29,15 +26,12 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonCard(
-                width: 200,
-                showSubtitle: true,
-                animate: false,
-              ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(
+            body: TilawaSkeletonCard(
+              width: 200,
+              showSubtitle: true,
+              animate: false,
             ),
           ),
         ),
@@ -53,15 +47,12 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonCard(
-                width: 200,
-                showSubtitle: false,
-                animate: false,
-              ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(
+            body: TilawaSkeletonCard(
+              width: 200,
+              showSubtitle: false,
+              animate: false,
             ),
           ),
         ),
@@ -75,13 +66,8 @@ void main() {
 
     testWidgets('uses AspectRatio for image', (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(
-              body: TilawaSkeletonCard(width: 200, animate: false),
-            ),
-          ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(body: TilawaSkeletonCard(width: 200, animate: false)),
         ),
       );
 
@@ -92,11 +78,8 @@ void main() {
 
     testWidgets('respects animate: false', (tester) async {
       await tester.pumpWidget(
-        MediaQuery(
-          data: const MediaQueryData(),
-          child: MaterialApp(
-            home: Scaffold(body: TilawaSkeletonCard(animate: false)),
-          ),
+        const TilawaPreviewWrapper(
+          child: Scaffold(body: TilawaSkeletonCard(animate: false)),
         ),
       );
 
@@ -110,8 +93,8 @@ void main() {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
-          child: MaterialApp(
-            home: Scaffold(body: TilawaSkeletonCard(animate: true)),
+          child: const TilawaPreviewWrapper(
+            child: Scaffold(body: TilawaSkeletonCard(animate: true)),
           ),
         ),
       );

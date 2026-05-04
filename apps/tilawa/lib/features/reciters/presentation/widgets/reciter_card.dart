@@ -160,13 +160,13 @@ class _FavoriteButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
           child: SizedBox(
-            width: tokens.iconSizeExtraLarge - tokens.spaceSmall,
-            height: tokens.iconSizeExtraLarge - tokens.spaceSmall,
+            width: tokens.iconSizeLarge,
+            height: tokens.iconSizeLarge,
             child: Icon(
               isFavorite
                   ? Icons.favorite_rounded
                   : Icons.favorite_outline_rounded,
-              size: tokens.iconSizeMedium,
+              size: tokens.iconSizeSmall,
               color: isFavorite
                   ? Colors.redAccent
                   : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
