@@ -1,8 +1,7 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
-
-import '../foundation/component_tokens.dart';
-import '../foundation/design_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 
 /// UI-only widget for the bottom player that can be used in previews
 /// without any bloc dependencies.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/presentation/widgets/offline_indicator_widget.dart';
-import '../../shared/widgets/bottom_player_widget.dart';
+import '../../shared/widgets/quran_player_widget.dart';
 
 /// Composes deferred startup overlays rendered in the shell bottom slot.
 class MainBottomOverlay extends StatelessWidget {
@@ -22,7 +22,7 @@ class MainBottomOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final Widget playerWidget = isAudioBindingDeferred
         ? const SizedBox.shrink()
-        : BottomPlayerWidget(
+        : QuranPlayerWidget(
             bottomNavBarHeight: bottomNavBarHeight,
             isKeyboardOpen: isKeyboardOpen,
           );

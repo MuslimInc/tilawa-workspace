@@ -28,8 +28,8 @@ import '../models/position_data.dart';
 /// When collapsed, shows a mini player bar at the bottom.
 /// Tap or swipe up to expand to a full-screen player.
 /// Swipe down or tap the chevron to collapse back.
-class BottomPlayerWidget extends StatefulWidget {
-  const BottomPlayerWidget({
+class QuranPlayerWidget extends StatefulWidget {
+  const QuranPlayerWidget({
     super.key,
     this.bottomNavBarHeight = 0,
     this.isKeyboardOpen = false,
@@ -45,10 +45,10 @@ class BottomPlayerWidget extends StatefulWidget {
   final bool isKeyboardOpen;
 
   @override
-  State<BottomPlayerWidget> createState() => BottomPlayerWidgetState();
+  State<QuranPlayerWidget> createState() => QuranPlayerWidgetState();
 }
 
-class BottomPlayerWidgetState extends State<BottomPlayerWidget>
+class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     with TickerProviderStateMixin {
   bool _isDismissed = false;
 
@@ -62,7 +62,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
   /// The height of the mini player bar (excluding nav bar offset).
   /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
   /// inner padding (12+12) + row content (~48) = ~99.
-  double get _miniPlayerHeight => BottomPlayerWidget.collapsedHeight(context);
+  double get _miniPlayerHeight => QuranPlayerWidget.collapsedHeight(context);
 
   /// Whether the player is currently expanded.
   bool get isExpanded => _expandController.value == 1.0;
@@ -217,7 +217,8 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
 
   @override
   Widget build(BuildContext context) {
-    PerfLogger.markBuild('BottomPlayerWidget');
+    PerfLogger.markBuild('QuranPlayerWidget');
+
     return BlocListener<PlayerBackgroundCubit, PlayerBackgroundState>(
       listenWhen: (previous, current) => current is PlayerBackgroundError,
       listener: (context, state) {
@@ -255,7 +256,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
           final audio = state.currentAudio;
 
           logger.d(
-            'BottomPlayerWidget - shouldShowBottomPlayer: ${state.shouldShowBottomPlayer}, currentAudio: ${audio?.title}, isPlaying: ${state.isPlaying}',
+            'QuranPlayerWidget - shouldShowBottomPlayer: ${state.shouldShowBottomPlayer}, currentAudio: ${audio?.title}, isPlaying: ${state.isPlaying}',
           );
 
           if (!state.shouldShowBottomPlayer ||
@@ -272,8 +273,9 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
               animation: _expandController,
               builder: (context, _) {
                 final progress = _expandController.value;
+                final bottomPadding = MediaQuery.paddingOf(context).bottom;
                 final currentHeight = lerpDouble(
-                  _miniPlayerHeight + widget.bottomNavBarHeight,
+                  _miniPlayerHeight + widget.bottomNavBarHeight + bottomPadding,
                   screenHeight,
                   progress,
                 )!;
@@ -311,7 +313,7 @@ class BottomPlayerWidgetState extends State<BottomPlayerWidget>
                       if (progress < 0.99)
                         Positioned(
                           bottom: lerpDouble(
-                            widget.bottomNavBarHeight,
+                            widget.bottomNavBarHeight + bottomPadding,
                             0,
                             progress,
                           ),
@@ -464,6 +466,7 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
+    final topPadding = MediaQuery.paddingOf(context).top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -578,7 +581,7 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
             // Drag handle
             if (!isLandscape)
               Positioned(
-                top: MediaQuery.paddingOf(context).top + 8,
+                top: topPadding + 8,
                 left: 0,
                 right: 0,
                 child: const _PlayerSheetHandleAtom(),

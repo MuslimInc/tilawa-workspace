@@ -8,7 +8,7 @@ Phase 3 focused on refining the responsive architecture by implementing typograp
 ### 1. Typography Scaling
 - **Feature**: Implemented `TilawaResponsiveTypography` extension in `ui_kit`.
 - **Logic**: Scales font sizes for `medium` (600px+) and `expanded` (840px+) window sizes.
-- **Rollout**: Applied to `ReciterDetailsAppBar` and the expanded `BottomPlayerWidget` to ensure visual hierarchy remains strong on larger screens.
+- **Rollout**: Applied to `ReciterDetailsAppBar` and the expanded `QuranPlayerWidget` to ensure visual hierarchy remains strong on larger screens.
 - **File**: `packages/ui_kit/lib/src/foundation/responsive_typography.dart` [NEW]
 
 ### 2. MediaQuery Hygiene & Bounded Widths

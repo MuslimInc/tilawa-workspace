@@ -28,7 +28,7 @@ class MainScreenState extends Equatable {
   /// SVG icons such as the Athkar icon).
   final bool isStartupUiWarm;
 
-  /// False once the audio-binding delay has elapsed; gates [BottomPlayerWidget]
+  /// False once the audio-binding delay has elapsed; gates [QuranPlayerWidget]
   /// to avoid raster contention during startup.
   final bool isAudioBindingDeferred;
 

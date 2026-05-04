@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../bloc/qibla_bloc.dart';
@@ -56,7 +56,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
             ),
           ),
         ),
-        const Positioned.fill(child: BottomPlayerWidget()),
+        const Positioned.fill(child: QuranPlayerWidget()),
       ],
     );
   }

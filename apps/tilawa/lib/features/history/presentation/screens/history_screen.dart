@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../helpers/datetime_helper.dart';
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/history_entity.dart';
@@ -128,25 +128,42 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     // Content based on state
                     _buildContent(context, state),
 
-                    // Bottom padding for the player
-                    SliverToBoxAdapter(child: SizedBox(height: 120)),
+                    // Dynamic bottom padding based on player visibility
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: _calculateBottomPadding(context)),
+                    ),
                   ],
                 ),
               );
             },
           ),
-          const Positioned.fill(child: BottomPlayerWidget()),
+          const Positioned.fill(child: QuranPlayerWidget()),
         ],
       ),
     );
   }
 
   Widget _buildContent(BuildContext context, HistoryState state) {
+    final tokens = Theme.of(context).tokens;
     switch (state.status) {
       case HistoryStatus.initial:
       case HistoryStatus.loading:
-        return const SliverFillRemaining(
-          child: Center(child: CircularProgressIndicator()),
+        return SliverPadding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceSmall,
+          ),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                if (index.isOdd) {
+                  return SizedBox(height: tokens.spaceSmall);
+                }
+                return const TilawaSkeletonListTile(lines: 2);
+              },
+              childCount: 11, // 5 items + 5 gaps + 1 extra for bottom spacing
+            ),
+          ),
         );
 
       case HistoryStatus.error:
@@ -277,6 +294,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
         );
       }, childCount: dateKeys.length),
     );
+  }
+
+  /// Calculates the bottom padding needed for the scroll view.
+  /// When the player is visible, adds the player height plus safe area.
+  /// Otherwise, just adds the safe area padding.
+  double _calculateBottomPadding(BuildContext context) {
+    final audioPlayerState = context.read<AudioPlayerBloc>().state;
+    final safeAreaPadding = MediaQuery.paddingOf(context).bottom;
+
+    if (audioPlayerState.shouldShowBottomPlayer) {
+      // Player is visible: add collapsed height + safe area + small extra
+      return QuranPlayerWidget.collapsedHeight(context) +
+          safeAreaPadding; // Extra spacing
+    }
+
+    // Player not visible: just safe area
+    return safeAreaPadding;
   }
 
   String _getDateKey(BuildContext context, DateTime date) {

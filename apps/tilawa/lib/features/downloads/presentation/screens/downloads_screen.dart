@@ -9,7 +9,7 @@ import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
@@ -108,7 +108,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               return _DownloadsBody(state: state);
             },
           ),
-          const Positioned.fill(child: BottomPlayerWidget()),
+          const Positioned.fill(child: QuranPlayerWidget()),
         ],
       ),
     );

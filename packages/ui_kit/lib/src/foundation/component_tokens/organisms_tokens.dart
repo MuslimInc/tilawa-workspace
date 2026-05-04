@@ -392,7 +392,7 @@ class TilawaAdaptiveShellTokens {
     // No-op: app-wide bottom nav. Touching it shifts every screen and is the
     // highest-risk family in the kit. Defer until explicit nav-shell pass.
     return const TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: 70,
+      compactBottomNavBarBaseHeight: 55,
       bottomNavHorizontalMargin: 16,
       bottomNavVerticalMargin: 4,
       bottomNavInternalPadding: 8,
