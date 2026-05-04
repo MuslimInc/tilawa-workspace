@@ -78,11 +78,7 @@ class _PortraitContent extends StatelessWidget {
           builder: (context, state) {
             switch (state.status) {
               case QiblaStatus.loading:
-                return Center(
-                  child: CircularProgressIndicator(
-                    color: colorScheme.onSurface,
-                  ),
-                );
+                return TilawaLoadingIndicator(color: colorScheme.onSurface);
               case QiblaStatus.serviceDisabled:
                 return TilawaErrorState(
                   icon: Icons.location_off_rounded,

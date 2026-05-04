@@ -216,18 +216,22 @@ class _TasbeehCreateView extends StatelessWidget {
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: tokens.spaceMedium),
-                FilledButton(
+                TilawaButton(
+                  text: context.l10n.tasbeehGoToCounting,
                   onPressed:
                       state.draftText.trim().isEmpty ||
                           state.draftTargetText.trim().isEmpty
                       ? null
                       : cubit.saveDraftDhikr,
-                  child: Text(context.l10n.tasbeehGoToCounting),
+                  variant: TilawaButtonVariant.primary,
+                  isFullWidth: true,
                 ),
                 SizedBox(height: tokens.spaceSmall),
-                OutlinedButton(
+                TilawaButton(
+                  text: context.l10n.tasbeehBackToOptions,
                   onPressed: cubit.showOptionsView,
-                  child: Text(context.l10n.tasbeehBackToOptions),
+                  variant: TilawaButtonVariant.outline,
+                  isFullWidth: true,
                 ),
                 if (errorText != null) ...[
                   SizedBox(height: tokens.spaceSmall),
