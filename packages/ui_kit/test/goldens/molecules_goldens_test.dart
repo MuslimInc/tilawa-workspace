@@ -1006,5 +1006,87 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaSelectionTile',
+      fileName: 'molecules/tilawa_selection_tile',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Unselected',
+            child: TilawaPreviewWrapper(
+              child: TilawaSelectionTile(
+                title: 'Light Theme',
+                isSelected: false,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Selected',
+            child: TilawaPreviewWrapper(
+              child: TilawaSelectionTile(
+                title: 'Dark Theme',
+                isSelected: true,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'With leading',
+            child: TilawaPreviewWrapper(
+              child: TilawaSelectionTile(
+                leading: CircleAvatar(backgroundColor: Colors.blue, radius: 12),
+                title: 'Blue',
+                isSelected: true,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaSelectionTile(
+                title: 'System Default',
+                isSelected: false,
+                onTap: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSelectionTile compact',
+      fileName: 'molecules/tilawa_selection_tile_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Selected (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSelectionTile(
+                title: 'Arabic',
+                isSelected: true,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Unselected (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSelectionTile(
+                title: 'English',
+                isSelected: false,
+                onTap: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 }

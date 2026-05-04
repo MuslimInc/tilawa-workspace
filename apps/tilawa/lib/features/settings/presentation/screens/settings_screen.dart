@@ -481,30 +481,27 @@ class SettingsScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
-              _ThemeOption(
+              TilawaSelectionTile(
                 title: context.l10n.systemTheme,
-                value: ThemeMode.system,
-                groupValue: currentMode,
-                onChanged: (val) {
-                  context.read<ThemeCubit>().setMode(val);
+                isSelected: currentMode == ThemeMode.system,
+                onTap: () {
+                  context.read<ThemeCubit>().setMode(ThemeMode.system);
                   Navigator.pop(context);
                 },
               ),
-              _ThemeOption(
+              TilawaSelectionTile(
                 title: context.l10n.lightTheme,
-                value: ThemeMode.light,
-                groupValue: currentMode,
-                onChanged: (val) {
-                  context.read<ThemeCubit>().setMode(val);
+                isSelected: currentMode == ThemeMode.light,
+                onTap: () {
+                  context.read<ThemeCubit>().setMode(ThemeMode.light);
                   Navigator.pop(context);
                 },
               ),
-              _ThemeOption(
+              TilawaSelectionTile(
                 title: context.l10n.darkTheme,
-                value: ThemeMode.dark,
-                groupValue: currentMode,
-                onChanged: (val) {
-                  context.read<ThemeCubit>().setMode(val);
+                isSelected: currentMode == ThemeMode.dark,
+                onTap: () {
+                  context.read<ThemeCubit>().setMode(ThemeMode.dark);
                   Navigator.pop(context);
                 },
               ),
@@ -583,40 +580,23 @@ class SettingsScreen extends StatelessWidget {
                   ...ThemeCubit.colorOptions.map((option) {
                     final isSelected =
                         option.color.toARGB32() == currentColor.toARGB32();
-                    return ListTile(
+                    return TilawaSelectionTile(
+                      leading: CircleAvatar(
+                        backgroundColor: option.color,
+                        radius: 12,
+                      ),
+                      title: _getLocalizedColorName(context, option.name),
+                      isSelected: isSelected,
                       onTap: () {
                         context.read<ThemeCubit>().setPrimaryColor(
                           option.color,
                         );
                         Navigator.pop(sheetContext);
                       },
-                      leading: CircleAvatar(
-                        backgroundColor: option.color,
-                        radius: 12,
-                      ),
-                      title: Text(
-                        _getLocalizedColorName(context, option.name),
-                        style: TextStyle(
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: isSelected ? option.color : null,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? Icon(
-                              FluentIcons.checkmark_24_regular,
-                              color: option.color,
-                            )
-                          : null,
                     );
                   }),
                   // Custom Color Option
-                  ListTile(
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      _showCustomColorPicker(context, currentColor);
-                    },
+                  TilawaSelectionTile(
                     leading: Container(
                       width: 24,
                       height: 24,
@@ -632,37 +612,14 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    title: Text(
-                      context.l10n.custom,
-                      style: TextStyle(
-                        fontWeight:
-                            !ThemeCubit.colorOptions.any(
-                              (opt) =>
-                                  opt.color.toARGB32() ==
-                                  currentColor.toARGB32(),
-                            )
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color:
-                            !ThemeCubit.colorOptions.any(
-                              (opt) =>
-                                  opt.color.toARGB32() ==
-                                  currentColor.toARGB32(),
-                            )
-                            ? currentColor
-                            : null,
-                      ),
+                    title: context.l10n.custom,
+                    isSelected: !ThemeCubit.colorOptions.any(
+                      (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
                     ),
-                    trailing:
-                        !ThemeCubit.colorOptions.any(
-                          (opt) =>
-                              opt.color.toARGB32() == currentColor.toARGB32(),
-                        )
-                        ? Icon(
-                            FluentIcons.checkmark_24_regular,
-                            color: currentColor,
-                          )
-                        : null,
+                    onTap: () {
+                      Navigator.pop(sheetContext);
+                      _showCustomColorPicker(context, currentColor);
+                    },
                   ),
                   SizedBox(height: 16),
                 ],
@@ -729,14 +686,9 @@ class SettingsScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
-              ListTile(
-                title: Text("العربية"),
-                trailing: currentLocale.languageCode == arabicLanguageCode
-                    ? Icon(
-                        FluentIcons.checkmark_24_regular,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
+              TilawaSelectionTile(
+                title: "العربية",
+                isSelected: currentLocale.languageCode == arabicLanguageCode,
                 onTap: () {
                   context.read<LocalizationBloc>().add(
                     const ChangeLanguage(Locale(arabicLanguageCode)),
@@ -744,14 +696,9 @@ class SettingsScreen extends StatelessWidget {
                   Navigator.pop(context);
                 },
               ),
-              ListTile(
-                title: Text(context.l10n.english),
-                trailing: currentLocale.languageCode == englishLanguageCode
-                    ? Icon(
-                        FluentIcons.checkmark_24_regular,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
+              TilawaSelectionTile(
+                title: context.l10n.english,
+                isSelected: currentLocale.languageCode == englishLanguageCode,
                 onTap: () {
                   context.read<LocalizationBloc>().add(
                     const ChangeLanguage(Locale(englishLanguageCode)),
@@ -786,14 +733,9 @@ class SettingsScreen extends StatelessWidget {
               ),
               SizedBox(height: 16),
               for (int i = 1; i <= 5; i++)
-                ListTile(
-                  title: Text('$i'),
-                  trailing: currentValue == i
-                      ? Icon(
-                          FluentIcons.checkmark_24_regular,
-                          color: Theme.of(context).primaryColor,
-                        )
-                      : null,
+                TilawaSelectionTile(
+                  title: '$i',
+                  isSelected: currentValue == i,
                   onTap: () {
                     context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
                     Navigator.pop(context);
@@ -830,40 +772,6 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ThemeOption extends StatelessWidget {
-  const _ThemeOption({
-    required this.title,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-  final String title;
-  final ThemeMode value;
-  final ThemeMode groupValue;
-  final ValueChanged<ThemeMode> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final isSelected = value == groupValue;
-    return ListTile(
-      onTap: () => onChanged(value),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? Theme.of(context).primaryColor : null,
-        ),
-      ),
-      trailing: isSelected
-          ? Icon(
-              FluentIcons.checkmark_24_regular,
-              color: Theme.of(context).primaryColor,
-            )
-          : null,
     );
   }
 }
