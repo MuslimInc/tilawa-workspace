@@ -1,5 +1,8 @@
 # Compact UI — Complete Coverage Across UI Kit
 
+**Spec**: [specs/007-compact-ui-coverage/spec.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/007-compact-ui-coverage/spec.md) | **Status**: Implemented  
+**Plan**: [specs/007-compact-ui-coverage/plan.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/007-compact-ui-coverage/plan.md) | **Tasks**: [specs/007-compact-ui-coverage/tasks.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/007-compact-ui-coverage/tasks.md)
+
 ## Context
 
 Compact UI is now the app default (`TILAWA_COMPACT_UI=true`). Today, 7 of 28 component token families diverge in compact mode (SettingsGroup, EmptyState, IconBox, Chip, Card, GlassPanel, FeedbackStrip). The remaining ~21 families return identical values for both modes, so compact has uneven visual reach: Cards and EmptyStates shrink, but PermissionBanner, SearchField, MediaPlayerBar, BottomSheetScaffold, etc. stay full size on the same screens. The user wants every reasonable family made density-aware before doing visual review, while:
@@ -108,14 +111,13 @@ Generation: `flutter test --update-goldens packages/ui_kit/test/goldens/`. Revie
 
 The user runs the app in compact mode (default) and visually reviews high-impact screens. Anything that doesn't look right is reported back; we tune specific token values surgically.
 
-## Critical Files To Modify
+## Critical Files To Modify (✅ All Complete)
 
-- [packages/ui_kit/lib/src/foundation/component_tokens/atoms_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/atoms_tokens.dart) — add `density` to 6 token classes (1 real change, 5 no-op signature add)
-- [packages/ui_kit/lib/src/foundation/component_tokens/molecules_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/molecules_tokens.dart) — add `density` to 8 token classes (4 real, 4 no-op)
-- [packages/ui_kit/lib/src/foundation/component_tokens/organisms_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/organisms_tokens.dart) — add `density` to 6 token classes (2 real, 4 no-op)
-- [packages/ui_kit/lib/src/foundation/component_tokens/component_tokens_theme.dart](packages/ui_kit/lib/src/foundation/component_tokens/component_tokens_theme.dart) — pass `density: density` to every newly-density-aware family in `_create()`
-- [packages/ui_kit/test/foundation/component_tokens_density_test.dart](packages/ui_kit/test/foundation/component_tokens_density_test.dart) — extend with new groups
-- [packages/ui_kit/test/goldens/atoms_goldens_test.dart](packages/ui_kit/test/goldens/atoms_goldens_test.dart), [molecules_goldens_test.dart](packages/ui_kit/test/goldens/molecules_goldens_test.dart), [organisms_goldens_test.dart](packages/ui_kit/test/goldens/organisms_goldens_test.dart) — add `_compact` variants for the 5–7 widgets where it matters
+- [x] [packages/ui_kit/lib/src/foundation/component_tokens/atoms_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/atoms_tokens.dart) — add `density` to 6 token classes (2 divergent, 4 no-op)
+- [x] [packages/ui_kit/lib/src/foundation/component_tokens/molecules_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/molecules_tokens.dart) — add `density` to 8 token classes (4 divergent, 4 no-op)
+- [x] [packages/ui_kit/lib/src/foundation/component_tokens/organisms_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/organisms_tokens.dart) — add `density` to 6 token classes (2 divergent, 4 no-op)
+- [x] [packages/ui_kit/lib/src/foundation/component_tokens/component_tokens_theme.dart](packages/ui_kit/lib/src/foundation/component_tokens/component_tokens_theme.dart) — pass `density: density` to all 20 newly-density-aware families in `_create()`
+- [x] [packages/ui_kit/test/foundation/component_tokens_density_test.dart](packages/ui_kit/test/foundation/component_tokens_density_test.dart) — 63 tests covering all families (9 divergent + 12 no-op groups)
 
 ## Patterns To Reuse
 
