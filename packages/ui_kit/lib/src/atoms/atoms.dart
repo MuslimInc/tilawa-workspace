@@ -3,6 +3,7 @@ export 'tilawa_button.dart';
 export 'tilawa_card.dart';
 export 'tilawa_divider.dart';
 export 'tilawa_empty_state.dart';
+export 'tilawa_error_state.dart';
 export 'tilawa_icon_box.dart';
 export 'tilawa_icon_toggle.dart';
 export 'tilawa_loading_indicator.dart';

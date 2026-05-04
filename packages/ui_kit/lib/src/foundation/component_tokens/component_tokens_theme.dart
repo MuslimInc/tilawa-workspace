@@ -16,6 +16,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.loadingIndicator,
     required this.divider,
     required this.emptyState,
+    required this.errorState,
     required this.alphabetScrollbar,
     required this.feedbackStrip,
     required this.glassPanel,
@@ -44,6 +45,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaLoadingIndicatorTokens loadingIndicator;
   final TilawaDividerTokens divider;
   final TilawaEmptyStateTokens emptyState;
+  final TilawaErrorStateTokens errorState;
   final TilawaAlphabetScrollbarTokens alphabetScrollbar;
   final TilawaFeedbackStripTokens feedbackStrip;
   final TilawaGlassPanelTokens glassPanel;
@@ -85,32 +87,41 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   factory TilawaComponentTokens._create({required TilawaDensity density}) {
     return TilawaComponentTokens(
       density: density,
-      sectionTitle: TilawaSectionTitleTokens.defaults(),
-      sheetHandle: TilawaSheetHandleTokens.defaults(),
+      sectionTitle: TilawaSectionTitleTokens.defaults(density: density),
+      sheetHandle: TilawaSheetHandleTokens.defaults(density: density),
       card: TilawaCardTokens.defaults(density: density),
       iconBox: TilawaIconBoxTokens.defaults(density: density),
-      loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
-      divider: TilawaDividerTokens.defaults(),
+      loadingIndicator: TilawaLoadingIndicatorTokens.defaults(density: density),
+      divider: TilawaDividerTokens.defaults(density: density),
       emptyState: TilawaEmptyStateTokens.defaults(density: density),
-      alphabetScrollbar: TilawaAlphabetScrollbarTokens.defaults(),
+      errorState: TilawaErrorStateTokens.defaults(density: density),
+      alphabetScrollbar: TilawaAlphabetScrollbarTokens.defaults(
+        density: density,
+      ),
       feedbackStrip: TilawaFeedbackStripTokens.defaults(density: density),
       glassPanel: TilawaGlassPanelTokens.defaults(density: density),
-      iconActionButton: TilawaIconActionButtonTokens.defaults(),
+      iconActionButton: TilawaIconActionButtonTokens.defaults(density: density),
       chip: TilawaChipTokens.defaults(density: density),
-      segmentedControl: TilawaSegmentedControlTokens.defaults(),
-      seekBar: TilawaSeekBarTokens.defaults(),
-      searchField: TilawaSearchFieldTokens.defaults(),
-      countProgressRing: TilawaCountProgressRingTokens.defaults(),
-      playerBackground: TilawaPlayerBackgroundTokens.defaults(),
-      footerBar: TilawaFooterBarTokens.defaults(),
-      mediaPlayerBar: TilawaMediaPlayerBarTokens.defaults(),
-      adaptiveShell: TilawaAdaptiveShellTokens.defaults(),
+      segmentedControl: TilawaSegmentedControlTokens.defaults(density: density),
+      seekBar: TilawaSeekBarTokens.defaults(density: density),
+      searchField: TilawaSearchFieldTokens.defaults(density: density),
+      countProgressRing: TilawaCountProgressRingTokens.defaults(
+        density: density,
+      ),
+      playerBackground: TilawaPlayerBackgroundTokens.defaults(density: density),
+      footerBar: TilawaFooterBarTokens.defaults(density: density),
+      mediaPlayerBar: TilawaMediaPlayerBarTokens.defaults(density: density),
+      adaptiveShell: TilawaAdaptiveShellTokens.defaults(density: density),
       settingsGroup: TilawaSettingsGroupTokens.defaults(density: density),
-      immersiveComposer: TilawaImmersiveComposerTokens.defaults(),
-      iconToggle: TilawaIconToggleTokens.defaults(),
-      permissionBanner: TilawaPermissionBannerTokens.defaults(),
-      prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(),
-      bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
+      immersiveComposer: TilawaImmersiveComposerTokens.defaults(
+        density: density,
+      ),
+      iconToggle: TilawaIconToggleTokens.defaults(density: density),
+      permissionBanner: TilawaPermissionBannerTokens.defaults(density: density),
+      prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(density: density),
+      bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(
+        density: density,
+      ),
     );
   }
 
@@ -124,6 +135,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaLoadingIndicatorTokens? loadingIndicator,
     TilawaDividerTokens? divider,
     TilawaEmptyStateTokens? emptyState,
+    TilawaErrorStateTokens? errorState,
     TilawaAlphabetScrollbarTokens? alphabetScrollbar,
     TilawaFeedbackStripTokens? feedbackStrip,
     TilawaGlassPanelTokens? glassPanel,
@@ -153,6 +165,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       loadingIndicator: loadingIndicator ?? this.loadingIndicator,
       divider: divider ?? this.divider,
       emptyState: emptyState ?? this.emptyState,
+      errorState: errorState ?? this.errorState,
       alphabetScrollbar: alphabetScrollbar ?? this.alphabetScrollbar,
       feedbackStrip: feedbackStrip ?? this.feedbackStrip,
       glassPanel: glassPanel ?? this.glassPanel,
@@ -203,6 +216,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       ),
       divider: TilawaDividerTokens.lerp(divider, other.divider, t),
       emptyState: TilawaEmptyStateTokens.lerp(emptyState, other.emptyState, t),
+      errorState: TilawaErrorStateTokens.lerp(errorState, other.errorState, t),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.lerp(
         alphabetScrollbar,
         other.alphabetScrollbar,

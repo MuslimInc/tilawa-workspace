@@ -44,10 +44,9 @@ void main() {
     });
 
     test('compact equals comfortable for non-divergent families', () {
-      // Phase 1A: settingsGroup diverges. Phase 1C-A: emptyState diverges.
-      // Phase 1D-A: iconBox and chip diverge. Phase 1E-A: card, glassPanel, feedbackStrip diverge.
-      // All other component token families remain identical until they
-      // get their own dedicated compact phases.
+      // Witness: divider is intentionally no-op compact (1px display-only
+      // line; nothing meaningful to shrink). If this ever diverges, replace
+      // the witness with another permanently no-op family.
       final comfortableTokens = TilawaComponentTokens.light(
         density: TilawaDensity.comfortable,
       );
@@ -55,10 +54,13 @@ void main() {
         density: TilawaDensity.compact,
       );
 
-      // card.padding, glassPanel.padding, feedbackStrip.padding removed — they diverge in Phase 1E-A
       expect(
-        compactTokens.searchField.borderRadius,
-        equals(comfortableTokens.searchField.borderRadius),
+        compactTokens.divider.thickness,
+        equals(comfortableTokens.divider.thickness),
+      );
+      expect(
+        compactTokens.divider.height,
+        equals(comfortableTokens.divider.height),
       );
     });
 
@@ -793,5 +795,648 @@ void main() {
         expect(tokens.feedbackStrip.contentGap, 8.0);
       },
     );
+  });
+
+  // ----- Phase F-A divergent families -----
+
+  group('SheetHandle Compact Density (Phase F-A)', () {
+    test('comfortable equals legacy default', () {
+      final defaultTokens = TilawaSheetHandleTokens.defaults();
+      final comfortable = TilawaSheetHandleTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      expect(comfortable.width, equals(defaultTokens.width));
+      expect(comfortable.height, equals(defaultTokens.height));
+      expect(comfortable.marginBottom, equals(defaultTokens.marginBottom));
+      expect(comfortable.cornerRadius, equals(defaultTokens.cornerRadius));
+      expect(comfortable.colorOpacity, equals(defaultTokens.colorOpacity));
+    });
+
+    test('compact reduces marginBottom 16→12', () {
+      final compact = TilawaSheetHandleTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.marginBottom, 12.0);
+    });
+
+    test('compact preserves width, height, cornerRadius, colorOpacity', () {
+      final compact = TilawaSheetHandleTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaSheetHandleTokens.defaults();
+      expect(compact.width, equals(comfortable.width));
+      expect(compact.height, equals(comfortable.height));
+      expect(compact.cornerRadius, equals(comfortable.cornerRadius));
+      expect(compact.colorOpacity, equals(comfortable.colorOpacity));
+    });
+
+    test('component tokens propagate compact density (light + dark)', () {
+      final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
+      final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(light.sheetHandle.marginBottom, 12.0);
+      expect(dark.sheetHandle.marginBottom, 12.0);
+    });
+  });
+
+  group('ErrorState Compact Density (Phase F-A)', () {
+    test('comfortable equals legacy default', () {
+      final defaultTokens = TilawaErrorStateTokens.defaults();
+      final comfortable = TilawaErrorStateTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      expect(comfortable.iconSize, equals(defaultTokens.iconSize));
+      expect(comfortable.titleSpacing, equals(defaultTokens.titleSpacing));
+      expect(
+        comfortable.subtitleSpacing,
+        equals(defaultTokens.subtitleSpacing),
+      );
+      expect(comfortable.actionSpacing, equals(defaultTokens.actionSpacing));
+      expect(comfortable.padding, equals(defaultTokens.padding));
+      expect(
+        comfortable.retryButtonPadding,
+        equals(defaultTokens.retryButtonPadding),
+      );
+      expect(
+        comfortable.retryButtonBorderRadius,
+        equals(defaultTokens.retryButtonBorderRadius),
+      );
+    });
+
+    test('compact reduces iconSize 80→64', () {
+      final compact = TilawaErrorStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.iconSize, 64.0);
+    });
+
+    test('compact reduces titleSpacing 24→16', () {
+      final compact = TilawaErrorStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.titleSpacing, 16.0);
+    });
+
+    test('compact reduces subtitleSpacing 12→8', () {
+      final compact = TilawaErrorStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.subtitleSpacing, 8.0);
+    });
+
+    test('compact reduces actionSpacing 32→20', () {
+      final compact = TilawaErrorStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.actionSpacing, 20.0);
+    });
+
+    test('compact preserves typography, padding, retry button', () {
+      final compact = TilawaErrorStateTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaErrorStateTokens.defaults();
+      expect(compact.iconOpacity, equals(comfortable.iconOpacity));
+      expect(compact.titleFontSize, equals(comfortable.titleFontSize));
+      expect(compact.titleFontWeight, equals(comfortable.titleFontWeight));
+      expect(compact.subtitleFontSize, equals(comfortable.subtitleFontSize));
+      expect(compact.subtitleOpacity, equals(comfortable.subtitleOpacity));
+      expect(compact.padding, equals(comfortable.padding));
+      expect(
+        compact.retryButtonPadding,
+        equals(comfortable.retryButtonPadding),
+      );
+      expect(
+        compact.retryButtonBorderRadius,
+        equals(comfortable.retryButtonBorderRadius),
+      );
+    });
+
+    test('component tokens propagate compact density (light + dark)', () {
+      final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
+      final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(light.errorState.iconSize, 64.0);
+      expect(dark.errorState.iconSize, 64.0);
+    });
+  });
+
+  // ----- Phase F-B divergent families -----
+
+  group('SegmentedControl Compact Density (Phase F-B)', () {
+    test('comfortable equals legacy default', () {
+      final defaultTokens = TilawaSegmentedControlTokens.defaults();
+      final comfortable = TilawaSegmentedControlTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      expect(
+        comfortable.containerPadding,
+        equals(defaultTokens.containerPadding),
+      );
+      expect(comfortable.itemPadding, equals(defaultTokens.itemPadding));
+      expect(
+        comfortable.containerRadius,
+        equals(defaultTokens.containerRadius),
+      );
+      expect(comfortable.itemRadius, equals(defaultTokens.itemRadius));
+    });
+
+    test('compact tightens containerPadding all(4)→all(2)', () {
+      final compact = TilawaSegmentedControlTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.containerPadding, const EdgeInsets.all(2));
+    });
+
+    test('compact tightens itemPadding (h:16,v:8)→(h:12,v:6)', () {
+      final compact = TilawaSegmentedControlTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(
+        compact.itemPadding,
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      );
+    });
+
+    test('compact tightens containerRadius 12→10 and itemRadius 8→6', () {
+      final compact = TilawaSegmentedControlTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.containerRadius, 10.0);
+      expect(compact.itemRadius, 6.0);
+    });
+
+    test('compact preserves opacities, minItemWidth, font weights', () {
+      final compact = TilawaSegmentedControlTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaSegmentedControlTokens.defaults();
+      expect(compact.containerOpacity, equals(comfortable.containerOpacity));
+      expect(compact.minItemWidth, equals(comfortable.minItemWidth));
+      expect(
+        compact.selectedFontWeight,
+        equals(comfortable.selectedFontWeight),
+      );
+      expect(
+        compact.unselectedFontWeight,
+        equals(comfortable.unselectedFontWeight),
+      );
+    });
+
+    test('component tokens propagate compact density (light + dark)', () {
+      final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
+      final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(light.segmentedControl.itemRadius, 6.0);
+      expect(dark.segmentedControl.itemRadius, 6.0);
+    });
+  });
+
+  group('PermissionBanner Compact Density (Phase F-B)', () {
+    test('comfortable equals legacy default', () {
+      final defaultTokens = TilawaPermissionBannerTokens.defaults();
+      final comfortable = TilawaPermissionBannerTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      expect(comfortable.padding, equals(defaultTokens.padding));
+      expect(comfortable.borderRadius, equals(defaultTokens.borderRadius));
+      expect(comfortable.iconSize, equals(defaultTokens.iconSize));
+      expect(comfortable.iconSpacing, equals(defaultTokens.iconSpacing));
+      expect(comfortable.actionSpacing, equals(defaultTokens.actionSpacing));
+    });
+
+    test('compact tightens padding (h:12,v:8)→(h:10,v:6)', () {
+      final compact = TilawaPermissionBannerTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(
+        compact.padding,
+        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      );
+    });
+
+    test('compact tightens borderRadius 12→10', () {
+      final compact = TilawaPermissionBannerTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.borderRadius, 10.0);
+    });
+
+    test('compact tightens iconSpacing 8→6 and actionSpacing 8→6', () {
+      final compact = TilawaPermissionBannerTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.iconSpacing, 6.0);
+      expect(compact.actionSpacing, 6.0);
+    });
+
+    test('compact preserves iconSize', () {
+      final compact = TilawaPermissionBannerTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaPermissionBannerTokens.defaults();
+      expect(compact.iconSize, equals(comfortable.iconSize));
+    });
+
+    test('component tokens propagate compact density (light + dark)', () {
+      final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
+      final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(light.permissionBanner.borderRadius, 10.0);
+      expect(dark.permissionBanner.borderRadius, 10.0);
+    });
+  });
+
+  group('PrayerAlertRow Compact Density (Phase F-B)', () {
+    test('comfortable equals legacy default', () {
+      final defaultTokens = TilawaPrayerAlertRowTokens.defaults();
+      final comfortable = TilawaPrayerAlertRowTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      expect(
+        comfortable.verticalPadding,
+        equals(defaultTokens.verticalPadding),
+      );
+      expect(comfortable.toggleSpacing, equals(defaultTokens.toggleSpacing));
+    });
+
+    test('compact tightens verticalPadding 4→2 and toggleSpacing 8→6', () {
+      final compact = TilawaPrayerAlertRowTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.verticalPadding, 2.0);
+      expect(compact.toggleSpacing, 6.0);
+    });
+
+    test('component tokens propagate compact density (light + dark)', () {
+      final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
+      final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(light.prayerAlertRow.verticalPadding, 2.0);
+      expect(dark.prayerAlertRow.verticalPadding, 2.0);
+    });
+  });
+
+  // ----- Phase F-C divergent family -----
+
+  group('SearchField Compact Density (Phase F-C)', () {
+    test('comfortable equals legacy default', () {
+      final defaultTokens = TilawaSearchFieldTokens.defaults();
+      final comfortable = TilawaSearchFieldTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      expect(comfortable.height, equals(defaultTokens.height));
+      expect(comfortable.borderRadius, equals(defaultTokens.borderRadius));
+      expect(comfortable.contentPadding, equals(defaultTokens.contentPadding));
+      expect(comfortable.iconSize, equals(defaultTokens.iconSize));
+      expect(comfortable.shadowBlur, equals(defaultTokens.shadowBlur));
+      expect(comfortable.shadowOffset, equals(defaultTokens.shadowOffset));
+    });
+
+    test('compact preserves height at kMinInteractiveDimension (48dp)', () {
+      final compact = TilawaSearchFieldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaSearchFieldTokens.defaults();
+      expect(compact.height, equals(comfortable.height));
+      expect(compact.height, kMinInteractiveDimension);
+    });
+
+    test('compact tightens borderRadius 16→12', () {
+      final compact = TilawaSearchFieldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.borderRadius, 12.0);
+    });
+
+    test('compact tightens contentPadding vertical 12→10', () {
+      final compact = TilawaSearchFieldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.contentPadding, const EdgeInsets.symmetric(vertical: 10));
+    });
+
+    test('compact tightens iconSize 18→16', () {
+      final compact = TilawaSearchFieldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.iconSize, 16.0);
+    });
+
+    test('compact tightens shadowBlur 12→8 and shadowOffset (0,4)→(0,2)', () {
+      final compact = TilawaSearchFieldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.shadowBlur, 8.0);
+      expect(compact.shadowOffset, const Offset(0, 2));
+    });
+
+    test('compact preserves opacities', () {
+      final compact = TilawaSearchFieldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaSearchFieldTokens.defaults();
+      expect(
+        compact.focusedBorderOpacity,
+        equals(comfortable.focusedBorderOpacity),
+      );
+      expect(
+        compact.unfocusedBorderOpacity,
+        equals(comfortable.unfocusedBorderOpacity),
+      );
+      expect(compact.shadowOpacity, equals(comfortable.shadowOpacity));
+      expect(compact.hintOpacity, equals(comfortable.hintOpacity));
+      expect(compact.iconOpacity, equals(comfortable.iconOpacity));
+    });
+
+    test('component tokens propagate compact density (light + dark)', () {
+      final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
+      final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(light.searchField.borderRadius, 12.0);
+      expect(dark.searchField.borderRadius, 12.0);
+      expect(light.searchField.height, kMinInteractiveDimension);
+      expect(dark.searchField.height, kMinInteractiveDimension);
+    });
+  });
+
+  // ----- Phase F-D divergent families -----
+
+  group('FooterBar Compact Density (Phase F-D)', () {
+    test('comfortable equals legacy default', () {
+      final defaultTokens = TilawaFooterBarTokens.defaults();
+      final comfortable = TilawaFooterBarTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      expect(comfortable.height, equals(defaultTokens.height));
+      expect(
+        comfortable.horizontalPadding,
+        equals(defaultTokens.horizontalPadding),
+      );
+      expect(comfortable.contentGap, equals(defaultTokens.contentGap));
+    });
+
+    test('compact reduces height 56→52', () {
+      final compact = TilawaFooterBarTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.height, 52.0);
+    });
+
+    test('compact reduces horizontalPadding 16→12', () {
+      final compact = TilawaFooterBarTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.horizontalPadding, 12.0);
+    });
+
+    test('compact reduces contentGap 12→8', () {
+      final compact = TilawaFooterBarTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.contentGap, 8.0);
+    });
+
+    test('compact preserves typography', () {
+      final compact = TilawaFooterBarTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaFooterBarTokens.defaults();
+      expect(compact.labelFontSize, equals(comfortable.labelFontSize));
+      expect(compact.labelFontWeight, equals(comfortable.labelFontWeight));
+      expect(
+        compact.secondaryLabelFontSize,
+        equals(comfortable.secondaryLabelFontSize),
+      );
+      expect(
+        compact.secondaryLabelOpacity,
+        equals(comfortable.secondaryLabelOpacity),
+      );
+    });
+
+    test('component tokens propagate compact density (light + dark)', () {
+      final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
+      final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(light.footerBar.height, 52.0);
+      expect(dark.footerBar.height, 52.0);
+    });
+  });
+
+  group('BottomSheetScaffold Compact Density (Phase F-D)', () {
+    test('comfortable equals legacy default', () {
+      final defaultTokens = TilawaBottomSheetScaffoldTokens.defaults();
+      final comfortable = TilawaBottomSheetScaffoldTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      expect(comfortable.topRadius, equals(defaultTokens.topRadius));
+      expect(comfortable.headerPadding, equals(defaultTokens.headerPadding));
+      expect(comfortable.bodyPadding, equals(defaultTokens.bodyPadding));
+      expect(
+        comfortable.closeButtonSize,
+        equals(defaultTokens.closeButtonSize),
+      );
+    });
+
+    test('compact reduces topRadius 28→24', () {
+      final compact = TilawaBottomSheetScaffoldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.topRadius, 24.0);
+    });
+
+    test('compact tightens headerPadding (20,8,12,12)→(16,6,8,8)', () {
+      final compact = TilawaBottomSheetScaffoldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.headerPadding, const EdgeInsets.fromLTRB(16, 6, 8, 8));
+    });
+
+    test('compact tightens bodyPadding all(20)→all(16)', () {
+      final compact = TilawaBottomSheetScaffoldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(compact.bodyPadding, const EdgeInsets.all(16));
+    });
+
+    test('compact preserves closeButtonSize at 40 (already <48dp)', () {
+      final compact = TilawaBottomSheetScaffoldTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      final comfortable = TilawaBottomSheetScaffoldTokens.defaults();
+      expect(compact.closeButtonSize, equals(comfortable.closeButtonSize));
+      expect(compact.closeButtonSize, 40.0);
+    });
+
+    test('component tokens propagate compact density (light + dark)', () {
+      final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
+      final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
+      expect(light.bottomSheetScaffold.topRadius, 24.0);
+      expect(dark.bottomSheetScaffold.topRadius, 24.0);
+    });
+  });
+
+  // ----- No-op families (intentionally non-divergent) -----
+  //
+  // These tests pin every field of each no-op family. If a future engineer
+  // adds compact divergence to any of these without intending to, these
+  // tests will fail and force them to think about it.
+
+  group('No-op compact families (Phase F)', () {
+    test('SectionTitle: compact equals comfortable for every field', () {
+      final c = TilawaSectionTitleTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaSectionTitleTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(k.fontWeight, equals(c.fontWeight));
+    });
+
+    test('LoadingIndicator: compact equals comfortable for every field', () {
+      final c = TilawaLoadingIndicatorTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaLoadingIndicatorTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(k.defaultStrokeWidth, equals(c.defaultStrokeWidth));
+      expect(k.compactStrokeWidth, equals(c.compactStrokeWidth));
+    });
+
+    test('IconToggle: compact equals comfortable for every field', () {
+      final c = TilawaIconToggleTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaIconToggleTokens.defaults(density: TilawaDensity.compact);
+      expect(k.iconSize, equals(c.iconSize));
+      expect(k.padding, equals(c.padding));
+      expect(k.borderRadius, equals(c.borderRadius));
+    });
+
+    test('Divider: compact equals comfortable for every field', () {
+      final c = TilawaDividerTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaDividerTokens.defaults(density: TilawaDensity.compact);
+      expect(k.height, equals(c.height));
+      expect(k.thickness, equals(c.thickness));
+      expect(k.colorOpacity, equals(c.colorOpacity));
+    });
+
+    test('AlphabetScrollbar: compact equals comfortable for every field', () {
+      final c = TilawaAlphabetScrollbarTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaAlphabetScrollbarTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(k.width, equals(c.width));
+      expect(k.itemExtent, equals(c.itemExtent));
+      expect(k.selectedIndicatorExtent, equals(c.selectedIndicatorExtent));
+      expect(k.letterFontSize, equals(c.letterFontSize));
+      expect(k.verticalPadding, equals(c.verticalPadding));
+      expect(k.overlaySize, equals(c.overlaySize));
+      expect(k.overlayFontSize, equals(c.overlayFontSize));
+      expect(k.overlayRadius, equals(c.overlayRadius));
+      expect(k.overlayOffset, equals(c.overlayOffset));
+    });
+
+    test('IconActionButton: compact equals comfortable for every field', () {
+      final c = TilawaIconActionButtonTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaIconActionButtonTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(k.size, equals(c.size));
+      expect(k.borderRadius, equals(c.borderRadius));
+      expect(k.activeBackgroundOpacity, equals(c.activeBackgroundOpacity));
+      expect(k.activeBorderOpacity, equals(c.activeBorderOpacity));
+      expect(k.inactiveBorderOpacity, equals(c.inactiveBorderOpacity));
+    });
+
+    test('SeekBar: compact equals comfortable for every field', () {
+      final c = TilawaSeekBarTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaSeekBarTokens.defaults(density: TilawaDensity.compact);
+      expect(k.touchExtent, equals(c.touchExtent));
+      expect(k.horizontalMargin, equals(c.horizontalMargin));
+      expect(k.trackHeight, equals(c.trackHeight));
+      expect(k.thumbRadius, equals(c.thumbRadius));
+      expect(k.bufferedTrackOpacity, equals(c.bufferedTrackOpacity));
+      expect(k.inactiveTrackOpacity, equals(c.inactiveTrackOpacity));
+    });
+
+    test('CountProgressRing: compact equals comfortable for every field', () {
+      final c = TilawaCountProgressRingTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaCountProgressRingTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(k.outerSize, equals(c.outerSize));
+      expect(k.innerSize, equals(c.innerSize));
+      expect(k.ringStrokeWidth, equals(c.ringStrokeWidth));
+      expect(k.doneIconSize, equals(c.doneIconSize));
+      expect(k.countFontSize, equals(c.countFontSize));
+      expect(k.countLineHeight, equals(c.countLineHeight));
+      expect(k.progressLabelSpacing, equals(c.progressLabelSpacing));
+      expect(k.progressLabelPadding, equals(c.progressLabelPadding));
+      expect(k.progressLabelBorderRadius, equals(c.progressLabelBorderRadius));
+    });
+
+    test('PlayerBackground: compact equals comfortable for every field', () {
+      final c = TilawaPlayerBackgroundTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaPlayerBackgroundTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(k.cacheWidthScale, equals(c.cacheWidthScale));
+      expect(k.defaultBlurAmount, equals(c.defaultBlurAmount));
+      expect(k.defaultOverlayOpacity, equals(c.defaultOverlayOpacity));
+      expect(k.overlayColor, equals(c.overlayColor));
+    });
+
+    test('MediaPlayerBar: compact equals comfortable for every field', () {
+      final c = TilawaMediaPlayerBarTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaMediaPlayerBarTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(k.contentPadding, equals(c.contentPadding));
+      expect(k.borderRadius, equals(c.borderRadius));
+      expect(k.artworkSize, equals(c.artworkSize));
+      expect(k.controlButtonSize, equals(c.controlButtonSize));
+      expect(k.playPauseButtonSize, equals(c.playPauseButtonSize));
+    });
+
+    test('AdaptiveShell: compact equals comfortable for every field', () {
+      final c = TilawaAdaptiveShellTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaAdaptiveShellTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(
+        k.compactBottomNavBarBaseHeight,
+        equals(c.compactBottomNavBarBaseHeight),
+      );
+      expect(k.bottomNavInternalPadding, equals(c.bottomNavInternalPadding));
+      expect(k.navButtonMinHeight, equals(c.navButtonMinHeight));
+      expect(k.navButtonIconSize, equals(c.navButtonIconSize));
+      expect(k.navButtonLabelFontSize, equals(c.navButtonLabelFontSize));
+    });
+
+    test('ImmersiveComposer: compact equals comfortable for every field', () {
+      final c = TilawaImmersiveComposerTokens.defaults(
+        density: TilawaDensity.comfortable,
+      );
+      final k = TilawaImmersiveComposerTokens.defaults(
+        density: TilawaDensity.compact,
+      );
+      expect(k.compactHeightBreakpoint, equals(c.compactHeightBreakpoint));
+      expect(k.compactPanelHeightFactor, equals(c.compactPanelHeightFactor));
+      expect(k.regularPanelHeightFactor, equals(c.regularPanelHeightFactor));
+      expect(k.panelMinHeight, equals(c.panelMinHeight));
+      expect(k.previewMaxHeight, equals(c.previewMaxHeight));
+      expect(k.headerButtonSize, equals(c.headerButtonSize));
+    });
   });
 }

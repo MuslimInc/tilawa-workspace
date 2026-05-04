@@ -468,6 +468,53 @@ void main() {
     );
 
     goldenTest(
+      'TilawaSearchField compact',
+      fileName: 'molecules/tilawa_search_field_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSearchField(
+                hintText: 'Search surahs',
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'With text (compact)',
+            child: Builder(
+              builder: (context) {
+                final controller = TextEditingController(text: 'Al-Baqarah');
+                return TilawaPreviewWrapper(
+                  density: TilawaDensity.compact,
+                  child: TilawaSearchField(
+                    hintText: 'Search surahs',
+                    controller: controller,
+                    onChanged: (_) {},
+                    onClear: controller.clear,
+                  ),
+                );
+              },
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isDark: true,
+              child: TilawaSearchField(
+                hintText: 'Search surahs',
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
       'TilawaSettingsTiles',
       fileName: 'molecules/tilawa_settings_tile',
       builder: () => GoldenTestGroup(
@@ -783,6 +830,38 @@ void main() {
           GoldenTestScenario(
             name: 'Dark',
             child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaPermissionBanner(
+                message: 'Enable notifications to receive prayer alerts',
+                actionLabel: 'Enable',
+                onAction: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaPermissionBanner compact',
+      fileName: 'molecules/tilawa_permission_banner_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Default (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaPermissionBanner(
+                message: 'Enable notifications to receive prayer alerts',
+                actionLabel: 'Enable',
+                onAction: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
               isDark: true,
               child: TilawaPermissionBanner(
                 message: 'Enable notifications to receive prayer alerts',

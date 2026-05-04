@@ -17,13 +17,17 @@ class TilawaPlayerBackgroundTokens {
   final double defaultOverlayOpacity;
   final Color overlayColor;
 
-  factory TilawaPlayerBackgroundTokens.defaults() =>
-      const TilawaPlayerBackgroundTokens(
-        cacheWidthScale: 2,
-        defaultBlurAmount: 0,
-        defaultOverlayOpacity: 0.4,
-        overlayColor: Colors.black,
-      );
+  factory TilawaPlayerBackgroundTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: pure backdrop layer (cache scale, blur, overlay). No layout.
+    return const TilawaPlayerBackgroundTokens(
+      cacheWidthScale: 2,
+      defaultBlurAmount: 0,
+      defaultOverlayOpacity: 0.4,
+      overlayColor: Colors.black,
+    );
+  }
 
   TilawaPlayerBackgroundTokens copyWith({
     double? cacheWidthScale,
@@ -82,15 +86,30 @@ class TilawaFooterBarTokens {
   final double secondaryLabelFontSize;
   final double secondaryLabelOpacity;
 
-  factory TilawaFooterBarTokens.defaults() => const TilawaFooterBarTokens(
-    height: 56,
-    horizontalPadding: 16,
-    contentGap: 12,
-    labelFontSize: 16,
-    labelFontWeight: .bold,
-    secondaryLabelFontSize: 12,
-    secondaryLabelOpacity: 0.7,
-  );
+  factory TilawaFooterBarTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaFooterBarTokens(
+        height: 52,
+        horizontalPadding: 12,
+        contentGap: 8,
+        labelFontSize: 16,
+        labelFontWeight: FontWeight.bold,
+        secondaryLabelFontSize: 12,
+        secondaryLabelOpacity: 0.7,
+      );
+    }
+    return const TilawaFooterBarTokens(
+      height: 56,
+      horizontalPadding: 16,
+      contentGap: 12,
+      labelFontSize: 16,
+      labelFontWeight: FontWeight.bold,
+      secondaryLabelFontSize: 12,
+      secondaryLabelOpacity: 0.7,
+    );
+  }
 
   TilawaFooterBarTokens copyWith({
     double? height,
@@ -185,27 +204,32 @@ class TilawaMediaPlayerBarTokens {
   final double playPauseShadowOpacity;
   final double playPauseShadowBlur;
 
-  factory TilawaMediaPlayerBarTokens.defaults() =>
-      const TilawaMediaPlayerBarTokens(
-        contentPadding: EdgeInsets.all(12),
-        borderRadius: 16,
-        artworkSize: 48,
-        artworkRadius: 12,
-        titleFontWeight: FontWeight.w600,
-        subtitleOpacity: 0.7,
-        infoGap: 2,
-        artworkInfoGap: 12,
-        infoControlsGap: 8,
-        controlsGap: 4,
-        controlButtonSize: 32,
-        playPauseButtonSize: 36,
-        defaultIconSize: 24,
-        playPauseIconSize: 16,
-        disabledControlOpacity: 0.3,
-        shadowOpacity: 0.1,
-        playPauseShadowOpacity: 0.3,
-        playPauseShadowBlur: 8,
-      );
+  factory TilawaMediaPlayerBarTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: control buttons are already 32-36dp (below 48dp). Compacting
+    // would worsen accessibility; needs a separate accessibility refactor.
+    return const TilawaMediaPlayerBarTokens(
+      contentPadding: EdgeInsets.all(12),
+      borderRadius: 16,
+      artworkSize: 48,
+      artworkRadius: 12,
+      titleFontWeight: FontWeight.w600,
+      subtitleOpacity: 0.7,
+      infoGap: 2,
+      artworkInfoGap: 12,
+      infoControlsGap: 8,
+      controlsGap: 4,
+      controlButtonSize: 32,
+      playPauseButtonSize: 36,
+      defaultIconSize: 24,
+      playPauseIconSize: 16,
+      disabledControlOpacity: 0.3,
+      shadowOpacity: 0.1,
+      playPauseShadowOpacity: 0.3,
+      playPauseShadowBlur: 8,
+    );
+  }
 
   TilawaMediaPlayerBarTokens copyWith({
     EdgeInsetsGeometry? contentPadding,
@@ -362,31 +386,36 @@ class TilawaAdaptiveShellTokens {
   final FontWeight navButtonSelectedLabelWeight;
   final FontWeight navButtonUnselectedLabelWeight;
 
-  factory TilawaAdaptiveShellTokens.defaults() =>
-      const TilawaAdaptiveShellTokens(
-        compactBottomNavBarBaseHeight: 70,
-        bottomNavHorizontalMargin: 16,
-        bottomNavVerticalMargin: 4,
-        bottomNavInternalPadding: 8,
-        bottomNavInnerRadius: 24,
-        bottomNavBorderWidth: 1,
-        bottomNavItemGap: 4,
-        sideRailRadius: 16,
-        sideRailShadowOpacity: 0.05,
-        sideRailShadowBlur: 12,
-        sideRailShadowOffset: Offset(2, 0),
-        navButtonMinHeight: 64,
-        navButtonVerticalPadding: 4,
-        navButtonGap: 4,
-        navButtonIconSize: 22,
-        navButtonSelectedCenterScale: 1.1,
-        navButtonUnselectedScale: 0.95,
-        navButtonSelectedBackgroundOpacity: 0.2,
-        navButtonSelectedCenterOpacity: 0.25,
-        navButtonLabelFontSize: 10,
-        navButtonSelectedLabelWeight: FontWeight.w700,
-        navButtonUnselectedLabelWeight: FontWeight.w500,
-      );
+  factory TilawaAdaptiveShellTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: app-wide bottom nav. Touching it shifts every screen and is the
+    // highest-risk family in the kit. Defer until explicit nav-shell pass.
+    return const TilawaAdaptiveShellTokens(
+      compactBottomNavBarBaseHeight: 70,
+      bottomNavHorizontalMargin: 16,
+      bottomNavVerticalMargin: 4,
+      bottomNavInternalPadding: 8,
+      bottomNavInnerRadius: 24,
+      bottomNavBorderWidth: 1,
+      bottomNavItemGap: 4,
+      sideRailRadius: 16,
+      sideRailShadowOpacity: 0.05,
+      sideRailShadowBlur: 12,
+      sideRailShadowOffset: Offset(2, 0),
+      navButtonMinHeight: 64,
+      navButtonVerticalPadding: 4,
+      navButtonGap: 4,
+      navButtonIconSize: 22,
+      navButtonSelectedCenterScale: 1.1,
+      navButtonUnselectedScale: 0.95,
+      navButtonSelectedBackgroundOpacity: 0.2,
+      navButtonSelectedCenterOpacity: 0.25,
+      navButtonLabelFontSize: 10,
+      navButtonSelectedLabelWeight: FontWeight.w700,
+      navButtonUnselectedLabelWeight: FontWeight.w500,
+    );
+  }
 
   TilawaAdaptiveShellTokens copyWith({
     double? compactBottomNavBarBaseHeight,
@@ -916,23 +945,30 @@ class TilawaImmersiveComposerTokens {
   final double headerButtonSize;
   final double headerIconSizeOffset;
 
-  factory TilawaImmersiveComposerTokens.defaults() =>
-      const TilawaImmersiveComposerTokens(
-        defaultAutoHideDuration: Duration(seconds: 3),
-        transitionDuration: Duration(milliseconds: 300),
-        backgroundBlurScale: 0.9,
-        backgroundOverlayOpacity: 0.42,
-        overlayBorderOpacity: 0.1,
-        compactHeightBreakpoint: 760,
-        compactPanelHeightFactor: 0.5,
-        regularPanelHeightFactor: 0.44,
-        compactPreviewHeightFactor: 0.42,
-        regularPreviewHeightFactor: 0.5,
-        panelMinHeight: 220,
-        previewMaxHeight: 460,
-        headerButtonSize: 24,
-        headerIconSizeOffset: 2,
-      );
+  factory TilawaImmersiveComposerTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: this organism has its own `compactHeightBreakpoint` /
+    // `compactPanelHeightFactor` fields, but those are screen-size
+    // responsiveness — unrelated to TilawaDensity. Kept no-op to avoid
+    // semantic confusion.
+    return const TilawaImmersiveComposerTokens(
+      defaultAutoHideDuration: Duration(seconds: 3),
+      transitionDuration: Duration(milliseconds: 300),
+      backgroundBlurScale: 0.9,
+      backgroundOverlayOpacity: 0.42,
+      overlayBorderOpacity: 0.1,
+      compactHeightBreakpoint: 760,
+      compactPanelHeightFactor: 0.5,
+      regularPanelHeightFactor: 0.44,
+      compactPreviewHeightFactor: 0.42,
+      regularPreviewHeightFactor: 0.5,
+      panelMinHeight: 220,
+      previewMaxHeight: 460,
+      headerButtonSize: 24,
+      headerIconSizeOffset: 2,
+    );
+  }
 
   TilawaImmersiveComposerTokens copyWith({
     Duration? defaultAutoHideDuration,
@@ -1060,13 +1096,25 @@ class TilawaBottomSheetScaffoldTokens {
   final EdgeInsetsGeometry bodyPadding;
   final double closeButtonSize;
 
-  factory TilawaBottomSheetScaffoldTokens.defaults() =>
-      const TilawaBottomSheetScaffoldTokens(
-        topRadius: 28,
-        headerPadding: EdgeInsets.fromLTRB(20, 8, 12, 12),
-        bodyPadding: EdgeInsets.all(20),
+  factory TilawaBottomSheetScaffoldTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      // closeButtonSize 40 stays — already below 48dp; not making it worse.
+      return const TilawaBottomSheetScaffoldTokens(
+        topRadius: 24,
+        headerPadding: EdgeInsets.fromLTRB(16, 6, 8, 8),
+        bodyPadding: EdgeInsets.all(16),
         closeButtonSize: 40,
       );
+    }
+    return const TilawaBottomSheetScaffoldTokens(
+      topRadius: 28,
+      headerPadding: EdgeInsets.fromLTRB(20, 8, 12, 12),
+      bodyPadding: EdgeInsets.all(20),
+      closeButtonSize: 40,
+    );
+  }
 
   TilawaBottomSheetScaffoldTokens copyWith({
     double? topRadius,

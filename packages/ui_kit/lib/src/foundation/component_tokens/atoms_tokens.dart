@@ -9,8 +9,13 @@ class TilawaSectionTitleTokens {
 
   final FontWeight fontWeight;
 
-  factory TilawaSectionTitleTokens.defaults() =>
-      const TilawaSectionTitleTokens(fontWeight: .w800);
+  factory TilawaSectionTitleTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: TilawaSectionTitle has only a fontWeight; nothing dimensional
+    // to compact. Density param kept for API uniformity.
+    return const TilawaSectionTitleTokens(fontWeight: .w800);
+  }
 
   TilawaSectionTitleTokens copyWith({FontWeight? fontWeight}) {
     return TilawaSectionTitleTokens(fontWeight: fontWeight ?? this.fontWeight);
@@ -43,13 +48,26 @@ class TilawaSheetHandleTokens {
   final double cornerRadius;
   final double colorOpacity;
 
-  factory TilawaSheetHandleTokens.defaults() => const TilawaSheetHandleTokens(
-    width: 46,
-    height: 5,
-    marginBottom: 16,
-    cornerRadius: 999,
-    colorOpacity: 0.22,
-  );
+  factory TilawaSheetHandleTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaSheetHandleTokens(
+        width: 46,
+        height: 5,
+        marginBottom: 12,
+        cornerRadius: 999,
+        colorOpacity: 0.22,
+      );
+    }
+    return const TilawaSheetHandleTokens(
+      width: 46,
+      height: 5,
+      marginBottom: 16,
+      cornerRadius: 999,
+      colorOpacity: 0.22,
+    );
+  }
 
   TilawaSheetHandleTokens copyWith({
     double? width,
@@ -224,11 +242,16 @@ class TilawaLoadingIndicatorTokens {
   /// Compact stroke width used in smaller contexts.
   final double compactStrokeWidth;
 
-  factory TilawaLoadingIndicatorTokens.defaults() =>
-      const TilawaLoadingIndicatorTokens(
-        defaultStrokeWidth: 4.0,
-        compactStrokeWidth: 2.0,
-      );
+  factory TilawaLoadingIndicatorTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: stroke widths are already small/display-only. Density param kept
+    // for API uniformity.
+    return const TilawaLoadingIndicatorTokens(
+      defaultStrokeWidth: 4.0,
+      compactStrokeWidth: 2.0,
+    );
+  }
 
   TilawaLoadingIndicatorTokens copyWith({
     double? defaultStrokeWidth,
@@ -273,11 +296,18 @@ class TilawaIconToggleTokens {
   final double padding;
   final double borderRadius;
 
-  factory TilawaIconToggleTokens.defaults() => const TilawaIconToggleTokens(
-    iconSize: 20.0,
-    padding: 8.0,
-    borderRadius: 12.0,
-  );
+  factory TilawaIconToggleTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: total tap area today is 36dp (iconSize 20 + padding 8*2),
+    // already below the 48dp guideline. Do not shrink further; flagged for
+    // a separate accessibility refactor outside this work.
+    return const TilawaIconToggleTokens(
+      iconSize: 20.0,
+      padding: 8.0,
+      borderRadius: 12.0,
+    );
+  }
 
   TilawaIconToggleTokens copyWith({
     double? iconSize,
@@ -322,8 +352,17 @@ class TilawaDividerTokens {
   /// Opacity applied to the default divider color.
   final double colorOpacity;
 
-  factory TilawaDividerTokens.defaults() =>
-      const TilawaDividerTokens(height: 1.0, thickness: 0.5, colorOpacity: 1.0);
+  factory TilawaDividerTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: divider is a 1px line; nothing to compact. Density param kept
+    // for API uniformity.
+    return const TilawaDividerTokens(
+      height: 1.0,
+      thickness: 0.5,
+      colorOpacity: 1.0,
+    );
+  }
 
   TilawaDividerTokens copyWith({
     double? height,
@@ -433,6 +472,192 @@ class TilawaEmptyStateTokens {
       subtitleSpacing: lerpTokenDouble(a.subtitleSpacing, b.subtitleSpacing, t),
       actionSpacing: lerpTokenDouble(a.actionSpacing, b.actionSpacing, t),
       padding: EdgeInsets.lerp(a.padding, b.padding, t)!,
+    );
+  }
+}
+
+/// Component tokens for [TilawaErrorState].
+@immutable
+class TilawaErrorStateTokens {
+  const TilawaErrorStateTokens({
+    required this.iconSize,
+    required this.iconOpacity,
+    required this.titleSpacing,
+    required this.titleFontSize,
+    required this.titleFontWeight,
+    required this.subtitleSpacing,
+    required this.subtitleFontSize,
+    required this.subtitleOpacity,
+    required this.actionSpacing,
+    required this.padding,
+    required this.retryButtonPadding,
+    required this.retryButtonBorderRadius,
+    this.retryButtonBackgroundColor,
+    this.retryButtonForegroundColor,
+  });
+
+  /// Size of the error-state icon.
+  final double iconSize;
+
+  /// Opacity applied to the icon color.
+  final double iconOpacity;
+
+  /// Spacing between the icon and the title.
+  final double titleSpacing;
+
+  /// Font size of the title text.
+  final double titleFontSize;
+
+  /// Font weight of the title text.
+  final FontWeight titleFontWeight;
+
+  /// Spacing between the title and the subtitle.
+  final double subtitleSpacing;
+
+  /// Font size of the subtitle text.
+  final double subtitleFontSize;
+
+  /// Opacity applied to the subtitle color.
+  final double subtitleOpacity;
+
+  /// Spacing between the subtitle and the action button.
+  final double actionSpacing;
+
+  /// Outer padding around the whole error-state layout.
+  final EdgeInsets padding;
+
+  /// Padding inside the retry button.
+  final EdgeInsets retryButtonPadding;
+
+  /// Border radius of the retry button.
+  final double retryButtonBorderRadius;
+
+  /// Background color of the retry button. If null, uses colorScheme.onSurface.
+  final Color? retryButtonBackgroundColor;
+
+  /// Foreground color of the retry button. If null, uses colorScheme.surface.
+  final Color? retryButtonForegroundColor;
+
+  factory TilawaErrorStateTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaErrorStateTokens(
+        iconSize: 64.0,
+        iconOpacity: 0.8,
+        titleSpacing: 16.0,
+        titleFontSize: 24.0,
+        titleFontWeight: FontWeight.bold,
+        subtitleSpacing: 8.0,
+        subtitleFontSize: 16.0,
+        subtitleOpacity: 0.7,
+        actionSpacing: 20.0,
+        padding: EdgeInsets.symmetric(horizontal: 40.0),
+        retryButtonPadding: EdgeInsets.symmetric(
+          horizontal: 32.0,
+          vertical: 12.0,
+        ),
+        retryButtonBorderRadius: 30.0,
+      );
+    }
+    return const TilawaErrorStateTokens(
+      iconSize: 80.0,
+      iconOpacity: 0.8,
+      titleSpacing: 24.0,
+      titleFontSize: 24.0,
+      titleFontWeight: FontWeight.bold,
+      subtitleSpacing: 12.0,
+      subtitleFontSize: 16.0,
+      subtitleOpacity: 0.7,
+      actionSpacing: 32.0,
+      padding: EdgeInsets.symmetric(horizontal: 40.0),
+      retryButtonPadding: EdgeInsets.symmetric(
+        horizontal: 32.0,
+        vertical: 12.0,
+      ),
+      retryButtonBorderRadius: 30.0,
+    );
+  }
+
+  TilawaErrorStateTokens copyWith({
+    double? iconSize,
+    double? iconOpacity,
+    double? titleSpacing,
+    double? titleFontSize,
+    FontWeight? titleFontWeight,
+    double? subtitleSpacing,
+    double? subtitleFontSize,
+    double? subtitleOpacity,
+    double? actionSpacing,
+    EdgeInsets? padding,
+    EdgeInsets? retryButtonPadding,
+    double? retryButtonBorderRadius,
+    Color? retryButtonBackgroundColor,
+    Color? retryButtonForegroundColor,
+  }) {
+    return TilawaErrorStateTokens(
+      iconSize: iconSize ?? this.iconSize,
+      iconOpacity: iconOpacity ?? this.iconOpacity,
+      titleSpacing: titleSpacing ?? this.titleSpacing,
+      titleFontSize: titleFontSize ?? this.titleFontSize,
+      titleFontWeight: titleFontWeight ?? this.titleFontWeight,
+      subtitleSpacing: subtitleSpacing ?? this.subtitleSpacing,
+      subtitleFontSize: subtitleFontSize ?? this.subtitleFontSize,
+      subtitleOpacity: subtitleOpacity ?? this.subtitleOpacity,
+      actionSpacing: actionSpacing ?? this.actionSpacing,
+      padding: padding ?? this.padding,
+      retryButtonPadding: retryButtonPadding ?? this.retryButtonPadding,
+      retryButtonBorderRadius:
+          retryButtonBorderRadius ?? this.retryButtonBorderRadius,
+      retryButtonBackgroundColor:
+          retryButtonBackgroundColor ?? this.retryButtonBackgroundColor,
+      retryButtonForegroundColor:
+          retryButtonForegroundColor ?? this.retryButtonForegroundColor,
+    );
+  }
+
+  static TilawaErrorStateTokens lerp(
+    TilawaErrorStateTokens a,
+    TilawaErrorStateTokens b,
+    double t,
+  ) {
+    return TilawaErrorStateTokens(
+      iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
+      iconOpacity: lerpTokenDouble(a.iconOpacity, b.iconOpacity, t),
+      titleSpacing: lerpTokenDouble(a.titleSpacing, b.titleSpacing, t),
+      titleFontSize: lerpTokenDouble(a.titleFontSize, b.titleFontSize, t),
+      titleFontWeight:
+          FontWeight.lerp(a.titleFontWeight, b.titleFontWeight, t) ??
+          a.titleFontWeight,
+      subtitleSpacing: lerpTokenDouble(a.subtitleSpacing, b.subtitleSpacing, t),
+      subtitleFontSize: lerpTokenDouble(
+        a.subtitleFontSize,
+        b.subtitleFontSize,
+        t,
+      ),
+      subtitleOpacity: lerpTokenDouble(a.subtitleOpacity, b.subtitleOpacity, t),
+      actionSpacing: lerpTokenDouble(a.actionSpacing, b.actionSpacing, t),
+      padding: EdgeInsets.lerp(a.padding, b.padding, t)!,
+      retryButtonPadding: EdgeInsets.lerp(
+        a.retryButtonPadding,
+        b.retryButtonPadding,
+        t,
+      )!,
+      retryButtonBorderRadius: lerpTokenDouble(
+        a.retryButtonBorderRadius,
+        b.retryButtonBorderRadius,
+        t,
+      ),
+      retryButtonBackgroundColor: Color.lerp(
+        a.retryButtonBackgroundColor,
+        b.retryButtonBackgroundColor,
+        t,
+      ),
+      retryButtonForegroundColor: Color.lerp(
+        a.retryButtonForegroundColor,
+        b.retryButtonForegroundColor,
+        t,
+      ),
     );
   }
 }

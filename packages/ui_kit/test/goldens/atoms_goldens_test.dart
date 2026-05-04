@@ -325,6 +325,30 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaSheetHandle compact',
+      fileName: 'atoms/tilawa_sheet_handle_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Light (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(width: 220, child: TilawaSheetHandle()),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: const TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isDark: true,
+              child: SizedBox(width: 220, child: TilawaSheetHandle()),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 
   group('Button Golden Tests', () {

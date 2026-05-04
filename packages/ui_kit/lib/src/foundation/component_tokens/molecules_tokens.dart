@@ -27,18 +27,23 @@ class TilawaAlphabetScrollbarTokens {
   final double overlayRadius;
   final double overlayOffset;
 
-  factory TilawaAlphabetScrollbarTokens.defaults() =>
-      const TilawaAlphabetScrollbarTokens(
-        width: 36,
-        itemExtent: 30,
-        selectedIndicatorExtent: 25.5,
-        letterFontSize: 13,
-        verticalPadding: EdgeInsets.symmetric(vertical: 12),
-        overlaySize: 64,
-        overlayFontSize: 32,
-        overlayRadius: 16,
-        overlayOffset: 48,
-      );
+  factory TilawaAlphabetScrollbarTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: itemExtent (30) is already touch-marginal on the long surah
+    // list. Tightening risks misclicks. Kept for visual review.
+    return const TilawaAlphabetScrollbarTokens(
+      width: 36,
+      itemExtent: 30,
+      selectedIndicatorExtent: 25.5,
+      letterFontSize: 13,
+      verticalPadding: EdgeInsets.symmetric(vertical: 12),
+      overlaySize: 64,
+      overlayFontSize: 32,
+      overlayRadius: 16,
+      overlayOffset: 48,
+    );
+  }
 
   TilawaAlphabetScrollbarTokens copyWith({
     double? width,
@@ -242,14 +247,19 @@ class TilawaIconActionButtonTokens {
   final double activeBorderOpacity;
   final double inactiveBorderOpacity;
 
-  factory TilawaIconActionButtonTokens.defaults() =>
-      const TilawaIconActionButtonTokens(
-        size: kMinInteractiveDimension,
-        borderRadius: 16,
-        activeBackgroundOpacity: 0.12,
-        activeBorderOpacity: 0.35,
-        inactiveBorderOpacity: 0.26,
-      );
+  factory TilawaIconActionButtonTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: size = kMinInteractiveDimension (48dp). At the floor; do not
+    // shrink further.
+    return const TilawaIconActionButtonTokens(
+      size: kMinInteractiveDimension,
+      borderRadius: 16,
+      activeBackgroundOpacity: 0.12,
+      activeBorderOpacity: 0.35,
+      inactiveBorderOpacity: 0.26,
+    );
+  }
 
   TilawaIconActionButtonTokens copyWith({
     double? size,
@@ -467,17 +477,32 @@ class TilawaSegmentedControlTokens {
   final FontWeight selectedFontWeight;
   final FontWeight unselectedFontWeight;
 
-  factory TilawaSegmentedControlTokens.defaults() =>
-      const TilawaSegmentedControlTokens(
-        containerPadding: EdgeInsets.all(4),
-        itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        containerRadius: 12,
-        itemRadius: 8,
+  factory TilawaSegmentedControlTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaSegmentedControlTokens(
+        containerPadding: EdgeInsets.all(2),
+        itemPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        containerRadius: 10,
+        itemRadius: 6,
         containerOpacity: 0.3,
         minItemWidth: 100,
         selectedFontWeight: FontWeight.bold,
         unselectedFontWeight: FontWeight.normal,
       );
+    }
+    return const TilawaSegmentedControlTokens(
+      containerPadding: EdgeInsets.all(4),
+      itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      containerRadius: 12,
+      itemRadius: 8,
+      containerOpacity: 0.3,
+      minItemWidth: 100,
+      selectedFontWeight: FontWeight.bold,
+      unselectedFontWeight: FontWeight.normal,
+    );
+  }
 
   TilawaSegmentedControlTokens copyWith({
     EdgeInsetsGeometry? containerPadding,
@@ -553,14 +578,20 @@ class TilawaSeekBarTokens {
   final double bufferedTrackOpacity;
   final double inactiveTrackOpacity;
 
-  factory TilawaSeekBarTokens.defaults() => const TilawaSeekBarTokens(
-    touchExtent: 30,
-    horizontalMargin: 16,
-    trackHeight: 8,
-    thumbRadius: 12,
-    bufferedTrackOpacity: 0.3,
-    inactiveTrackOpacity: 0.1,
-  );
+  factory TilawaSeekBarTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: touchExtent (30) is already below 48dp; track is the main drag
+    // affordance. Keep no-op until proper UX review.
+    return const TilawaSeekBarTokens(
+      touchExtent: 30,
+      horizontalMargin: 16,
+      trackHeight: 8,
+      thumbRadius: 12,
+      bufferedTrackOpacity: 0.3,
+      inactiveTrackOpacity: 0.1,
+    );
+  }
 
   TilawaSeekBarTokens copyWith({
     double? touchExtent,
@@ -636,19 +667,39 @@ class TilawaSearchFieldTokens {
   final double shadowBlur;
   final Offset shadowOffset;
 
-  factory TilawaSearchFieldTokens.defaults() => const TilawaSearchFieldTokens(
-    height: kMinInteractiveDimension,
-    borderRadius: 16,
-    contentPadding: EdgeInsets.symmetric(vertical: 12),
-    iconSize: 18,
-    focusedBorderOpacity: 0.28,
-    unfocusedBorderOpacity: 0.26,
-    shadowOpacity: 0.04,
-    hintOpacity: 0.58,
-    iconOpacity: 0.72,
-    shadowBlur: 12,
-    shadowOffset: Offset(0, 4),
-  );
+  factory TilawaSearchFieldTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      // Height stays at kMinInteractiveDimension (48dp) — non-negotiable.
+      return const TilawaSearchFieldTokens(
+        height: kMinInteractiveDimension,
+        borderRadius: 12,
+        contentPadding: EdgeInsets.symmetric(vertical: 10),
+        iconSize: 16,
+        focusedBorderOpacity: 0.28,
+        unfocusedBorderOpacity: 0.26,
+        shadowOpacity: 0.04,
+        hintOpacity: 0.58,
+        iconOpacity: 0.72,
+        shadowBlur: 8,
+        shadowOffset: Offset(0, 2),
+      );
+    }
+    return const TilawaSearchFieldTokens(
+      height: kMinInteractiveDimension,
+      borderRadius: 16,
+      contentPadding: EdgeInsets.symmetric(vertical: 12),
+      iconSize: 18,
+      focusedBorderOpacity: 0.28,
+      unfocusedBorderOpacity: 0.26,
+      shadowOpacity: 0.04,
+      hintOpacity: 0.58,
+      iconOpacity: 0.72,
+      shadowBlur: 12,
+      shadowOffset: Offset(0, 4),
+    );
+  }
 
   TilawaSearchFieldTokens copyWith({
     double? height,
@@ -746,23 +797,28 @@ class TilawaCountProgressRingTokens {
   final double progressLabelBorderRadius;
   final double progressLabelBackgroundOpacity;
 
-  factory TilawaCountProgressRingTokens.defaults() =>
-      const TilawaCountProgressRingTokens(
-        outerSize: 72,
-        innerSize: 62,
-        ringStrokeWidth: 10,
-        doneIconSize: 50,
-        countFontSize: 36,
-        countLineHeight: 1,
-        doneBorderWidth: 2,
-        doneBorderOpacity: 0.3,
-        activeGradientEndOpacity: 0.8,
-        doneGradientEndOpacity: 0.7,
-        progressLabelSpacing: 16,
-        progressLabelPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        progressLabelBorderRadius: 24,
-        progressLabelBackgroundOpacity: 0.3,
-      );
+  factory TilawaCountProgressRingTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: display-only counter ring; sizes are calibrated for legibility
+    // of the count number (fontSize 36). Keep no-op.
+    return const TilawaCountProgressRingTokens(
+      outerSize: 72,
+      innerSize: 62,
+      ringStrokeWidth: 10,
+      doneIconSize: 50,
+      countFontSize: 36,
+      countLineHeight: 1,
+      doneBorderWidth: 2,
+      doneBorderOpacity: 0.3,
+      activeGradientEndOpacity: 0.8,
+      doneGradientEndOpacity: 0.7,
+      progressLabelSpacing: 16,
+      progressLabelPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      progressLabelBorderRadius: 24,
+      progressLabelBackgroundOpacity: 0.3,
+    );
+  }
 
   TilawaCountProgressRingTokens copyWith({
     double? outerSize,
@@ -871,14 +927,26 @@ class TilawaPermissionBannerTokens {
   final double iconSpacing;
   final double actionSpacing;
 
-  factory TilawaPermissionBannerTokens.defaults() =>
-      const TilawaPermissionBannerTokens(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        borderRadius: 12,
+  factory TilawaPermissionBannerTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaPermissionBannerTokens(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        borderRadius: 10,
         iconSize: 16,
-        iconSpacing: 8,
-        actionSpacing: 8,
+        iconSpacing: 6,
+        actionSpacing: 6,
       );
+    }
+    return const TilawaPermissionBannerTokens(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      borderRadius: 12,
+      iconSize: 16,
+      iconSpacing: 8,
+      actionSpacing: 8,
+    );
+  }
 
   TilawaPermissionBannerTokens copyWith({
     EdgeInsetsGeometry? padding,
@@ -922,8 +990,20 @@ class TilawaPrayerAlertRowTokens {
   final double verticalPadding;
   final double toggleSpacing;
 
-  factory TilawaPrayerAlertRowTokens.defaults() =>
-      const TilawaPrayerAlertRowTokens(verticalPadding: 4, toggleSpacing: 8);
+  factory TilawaPrayerAlertRowTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density == TilawaDensity.compact) {
+      return const TilawaPrayerAlertRowTokens(
+        verticalPadding: 2,
+        toggleSpacing: 6,
+      );
+    }
+    return const TilawaPrayerAlertRowTokens(
+      verticalPadding: 4,
+      toggleSpacing: 8,
+    );
+  }
 
   TilawaPrayerAlertRowTokens copyWith({
     double? verticalPadding,
