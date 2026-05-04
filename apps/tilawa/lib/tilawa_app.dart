@@ -236,7 +236,8 @@ class _PlayerApp extends StatelessWidget {
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               PerfLogger.markBuild('ThemeBlocBuilder');
-              // Derive UI density from launch config (default: comfortable)
+              // Derive UI density from launch config (default: compact).
+              // Override with --dart-define=TILAWA_COMPACT_UI=false for comfortable.
               final density = appLaunchConfig.compactUiEnabled
                   ? TilawaDensity.compact
                   : TilawaDensity.comfortable;
