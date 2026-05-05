@@ -30,6 +30,7 @@ void main() {
       iconSizeSmall: 16.0,
       iconSizeMedium: 20.0,
       iconSizeLarge: 24.0,
+      iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 48.0,
       textHeightLoose: 1.8,
       durationFast: Duration(milliseconds: 200),
@@ -79,6 +80,7 @@ void main() {
         expect(light.iconSizeSmall, 16.0);
         expect(light.iconSizeMedium, 20.0);
         expect(light.iconSizeLarge, 24.0);
+        expect(light.iconSizeLargePlus, 42.0);
         expect(light.iconSizeExtraLarge, 48.0);
         expect(light.textHeightLoose, 2.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
@@ -206,6 +208,7 @@ void main() {
           iconSizeSmall: 16.0,
           iconSizeMedium: 20.0,
           iconSizeLarge: 24.0,
+          iconSizeLargePlus: 42.0,
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
@@ -254,6 +257,7 @@ void main() {
           iconSizeSmall: 24.0,
           iconSizeMedium: 32.0,
           iconSizeLarge: 40.0,
+          iconSizeLargePlus: 56.0,
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
@@ -311,6 +315,7 @@ void main() {
           iconSizeSmall: 24.0,
           iconSizeMedium: 32.0,
           iconSizeLarge: 40.0,
+          iconSizeLargePlus: 56.0,
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
@@ -366,6 +371,7 @@ void main() {
           iconSizeSmall: 16.0,
           iconSizeMedium: 20.0,
           iconSizeLarge: 24.0,
+          iconSizeLargePlus: 42.0,
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
@@ -414,6 +420,7 @@ void main() {
           iconSizeSmall: 24.0,
           iconSizeMedium: 32.0,
           iconSizeLarge: 40.0,
+          iconSizeLargePlus: 56.0,
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
@@ -475,6 +482,7 @@ void main() {
           iconSizeSmall: 16.0,
           iconSizeMedium: 20.0,
           iconSizeLarge: 24.0,
+          iconSizeLargePlus: 42.0,
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
@@ -532,6 +540,7 @@ void main() {
             iconSizeSmall: 16.0,
             iconSizeMedium: 20.0,
             iconSizeLarge: 24.0,
+            iconSizeLargePlus: 42.0,
             iconSizeExtraLarge: 48.0,
             textHeightLoose: 1.8,
             durationFast: Duration(milliseconds: 200),
@@ -580,6 +589,7 @@ void main() {
             iconSizeSmall: 24.0,
             iconSizeMedium: 32.0,
             iconSizeLarge: 40.0,
+            iconSizeLargePlus: 56.0,
             iconSizeExtraLarge: 96.0,
             textHeightLoose: 2.0,
             durationFast: Duration(milliseconds: 300),

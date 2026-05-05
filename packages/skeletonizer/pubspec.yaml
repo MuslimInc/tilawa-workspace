@@ -9,6 +9,8 @@ topics:
   - skeleton-loader
   - loading
 
+resolution: workspace
+
 environment:
   sdk: ">=3.7.0 <4.0.0"
   flutter: ">=3.32.0"
