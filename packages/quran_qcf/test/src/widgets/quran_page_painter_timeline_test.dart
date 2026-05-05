@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:quran_qcf/src/presentation/widgets/quran_page_painter.dart';
 
 void main() {
-  final IntegrationTestWidgetsFlutterBinding binding =
-      IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
   testWidgets('QuranPagePainter timeline benchmark', (
     WidgetTester tester,
   ) async {
@@ -40,12 +36,10 @@ void main() {
 
     final Finder finder = find.byType(QuranPagePainter);
 
-    await binding.traceAction(() async {
-      for (var i = 0; i < 50; i++) {
-        // Force repaint without rebuild
-        tester.renderObject(finder).markNeedsPaint();
-        await tester.pump();
-      }
-    }, reportKey: 'quran_page_painter_repaint');
+    for (var i = 0; i < 50; i++) {
+      // Force repaint without rebuild to catch paint-path regressions.
+      tester.renderObject(finder).markNeedsPaint();
+      await tester.pump();
+    }
   });
 }
