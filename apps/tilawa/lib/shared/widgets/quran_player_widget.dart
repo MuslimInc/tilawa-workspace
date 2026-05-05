@@ -11,7 +11,6 @@ import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa_core/entities/audio.dart';
-import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -38,6 +37,26 @@ class QuranPlayerWidget extends StatefulWidget {
   static double collapsedHeight(BuildContext context) =>
       context.tokens.playerCollapsedHeight;
 
+  /// Vertical space above the screen bottom occupied by the collapsed
+  /// mini-player. Mirrors the player's own anchoring at
+  /// `Positioned(bottom: bottomNavBarHeight + safeAreaPadding)`, so:
+  ///
+  ///   footprint = collapsedHeight + bottomNavBarHeight + safeAreaPadding.
+  ///
+  /// Use this to inset content (lists, FABs, scrollbars) so it isn't
+  /// covered by the player.
+  ///
+  /// `bottomNavBarHeight` must match what the host shell passes to the
+  /// [QuranPlayerWidget] mounted on this route. Standalone routes that
+  /// mount their own player without a nav bar should pass 0.
+  static double collapsedFootprint(
+    BuildContext context, {
+    double bottomNavBarHeight = 0,
+  }) =>
+      collapsedHeight(context) +
+      bottomNavBarHeight +
+      MediaQuery.paddingOf(context).bottom;
+
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
 
@@ -50,8 +69,6 @@ class QuranPlayerWidget extends StatefulWidget {
 
 class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     with TickerProviderStateMixin {
-  bool _isDismissed = false;
-
   late AnimationController _expandController;
 
   /// Controls the swipe-down-to-dismiss offset for the mini player.
@@ -170,9 +187,10 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     _dismissAnimController.forward(from: 0).then((_) {
       if (!mounted) return;
       setState(() {
-        _isDismissed = true;
         _dismissOffsetY = 0;
+        _dismissAnimation = null;
       });
+      _dismissAnimController.value = 0;
       context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
     });
   }
@@ -192,7 +210,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 
   void _dismissWithUndo() {
     HapticFeedback.lightImpact();
-    setState(() => _isDismissed = true);
     context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
 
     final messenger = ScaffoldMessenger.of(context);
@@ -205,7 +222,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           label: context.l10n.undo,
           onPressed: () {
             if (!mounted) return;
-            setState(() => _isDismissed = false);
             context.read<AudioPlayerBloc>().add(
               const AudioPlayerEvent.playAudio(),
             );
@@ -245,8 +261,14 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             previous.speed != current.speed ||
             previous.dismissedAudioId != current.dismissedAudioId,
         listener: (context, state) {
-          if (_isDismissed) {
-            setState(() => _isDismissed = false);
+          // Reset dismiss animation so the mini player is not offset off-screen
+          // from a previous dismiss gesture.
+          if (_dismissAnimation != null ||
+              _dismissAnimController.value != 0 ||
+              _dismissOffsetY != 0) {
+            _dismissAnimation = null;
+            _dismissAnimController.value = 0;
+            _dismissOffsetY = 0;
           }
           if (state.failure != null) {
             ToastUtils.showErrorToast(state.failure!.localizedMessage(context));
@@ -254,10 +276,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         },
         builder: (context, state) {
           final audio = state.currentAudio;
-
-          logger.d(
-            'QuranPlayerWidget - shouldShowBottomPlayer: ${state.shouldShowBottomPlayer}, currentAudio: ${audio?.title}, isPlaying: ${state.isPlaying}',
-          );
 
           if (!state.shouldShowBottomPlayer ||
               audio == null ||
@@ -273,23 +291,15 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
               animation: _expandController,
               builder: (context, _) {
                 final progress = _expandController.value;
-                final bottomPadding = MediaQuery.paddingOf(context).bottom;
-                final currentHeight = lerpDouble(
-                  _miniPlayerHeight + widget.bottomNavBarHeight + bottomPadding,
-                  screenHeight,
-                  progress,
-                )!;
                 final sheetOffsetY = screenHeight * (1 - progress);
 
-                return SizedBox(
-                  height: progress > 0.01 ? screenHeight : currentHeight,
-                  width: double.infinity,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      // Expanded player slides up from the bottom and back down
-                      // on collapse, matching a media sheet transition.
-                      if (progress > 0.01)
+                if (progress > 0.01) {
+                  return SizedBox(
+                    height: screenHeight,
+                    width: double.infinity,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
                         Transform.translate(
                           offset: Offset(0, sheetOffsetY),
                           child: GestureDetector(
@@ -308,46 +318,64 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                             ),
                           ),
                         ),
-
-                      // Mini player (in front, fades out)
-                      if (progress < 0.99)
-                        Positioned(
-                          bottom: lerpDouble(
-                            widget.bottomNavBarHeight + bottomPadding,
-                            0,
-                            progress,
-                          ),
-                          left: 0,
-                          right: 0,
-                          child: IgnorePointer(
-                            ignoring:
-                                progress >
-                                context.tokens.playerIgnorePointerThreshold,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
+                        if (progress < 0.99)
+                          Positioned(
+                            bottom: lerpDouble(
+                              widget.bottomNavBarHeight,
+                              0,
+                              progress,
+                            ),
+                            left: 0,
+                            right: 0,
+                            child: _MiniPlayerTransition(
+                              progress: progress,
+                              state: state,
+                              audio: audio,
+                              dismissAnimController: _dismissAnimController,
+                              dismissAnimation: _dismissAnimation,
+                              dismissOffsetY: _dismissOffsetY,
                               onVerticalDragUpdate: _onVerticalDragUpdate,
                               onVerticalDragEnd: _onVerticalDragEnd,
-                              child: AnimatedBuilder(
-                                animation: _dismissAnimController,
-                                builder: (context, child) {
-                                  final dismissOffset =
-                                      _dismissAnimation?.value ??
-                                      _dismissOffsetY;
-                                  return Transform.translate(
-                                    offset: Offset(0, dismissOffset),
-                                    child: child,
-                                  );
-                                },
-                                child: _MiniPlayerOrganism(
-                                  state: state,
-                                  audio: audio,
-                                  onTap: expand,
-                                  onClose: _dismissWithUndo,
-                                ),
-                              ),
+                              onTap: expand,
+                              onClose: _dismissWithUndo,
                             ),
                           ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Collapsed state: Column-based layout for proper positioning
+                // above the bottom nav bar (if present) or screen edge.
+                // When there's no nav bar (e.g., reciter details), add
+                // extra breathing room so the mini player doesn't hug the
+                // screen edge.
+                final bottomInset = widget.bottomNavBarHeight > 0
+                    ? widget.bottomNavBarHeight
+                    : MediaQuery.paddingOf(context).bottom +
+                          context.tokens.spaceExtraLarge;
+                return SizedBox(
+                  height: _miniPlayerHeight + bottomInset,
+                  width: double.infinity,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      SizedBox(
+                        height: _miniPlayerHeight,
+                        child: _MiniPlayerTransition(
+                          progress: progress,
+                          state: state,
+                          audio: audio,
+                          dismissAnimController: _dismissAnimController,
+                          dismissAnimation: _dismissAnimation,
+                          dismissOffsetY: _dismissOffsetY,
+                          onVerticalDragUpdate: _onVerticalDragUpdate,
+                          onVerticalDragEnd: _onVerticalDragEnd,
+                          onTap: expand,
+                          onClose: _dismissWithUndo,
                         ),
+                      ),
+                      SizedBox(height: bottomInset),
                     ],
                   ),
                 );
@@ -363,6 +391,61 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 // ---------------------------------------------------------------------------
 // Organisms
 // ---------------------------------------------------------------------------
+
+/// Wraps the mini player organism with swipe-to-dismiss gesture handling
+/// and the dismiss translation animation. Kept separate so the heavy
+/// `AnimatedBuilder` subtree rebuilds only when the dismiss controller
+/// ticks, not on every state rebuild of the parent.
+class _MiniPlayerTransition extends StatelessWidget {
+  const _MiniPlayerTransition({
+    required this.progress,
+    required this.state,
+    required this.audio,
+    required this.dismissAnimController,
+    required this.dismissAnimation,
+    required this.dismissOffsetY,
+    required this.onVerticalDragUpdate,
+    required this.onVerticalDragEnd,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final double progress;
+  final AudioPlayerState state;
+  final AudioEntity audio;
+  final AnimationController dismissAnimController;
+  final Animation<double>? dismissAnimation;
+  final double dismissOffsetY;
+  final GestureDragUpdateCallback onVerticalDragUpdate;
+  final GestureDragEndCallback onVerticalDragEnd;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: progress > context.tokens.playerIgnorePointerThreshold,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragUpdate: onVerticalDragUpdate,
+        onVerticalDragEnd: onVerticalDragEnd,
+        child: AnimatedBuilder(
+          animation: dismissAnimController,
+          builder: (context, child) {
+            final offset = dismissAnimation?.value ?? dismissOffsetY;
+            return Transform.translate(offset: Offset(0, offset), child: child);
+          },
+          child: _MiniPlayerOrganism(
+            state: state,
+            audio: audio,
+            onTap: onTap,
+            onClose: onClose,
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class _MiniPlayerOrganism extends StatelessWidget {
   const _MiniPlayerOrganism({

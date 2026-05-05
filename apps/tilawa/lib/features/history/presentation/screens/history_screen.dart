@@ -296,21 +296,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  /// Calculates the bottom padding needed for the scroll view.
-  /// When the player is visible, adds the player height plus safe area.
-  /// Otherwise, just adds the safe area padding.
   double _calculateBottomPadding(BuildContext context) {
     final audioPlayerState = context.read<AudioPlayerBloc>().state;
-    final safeAreaPadding = MediaQuery.paddingOf(context).bottom;
-
     if (audioPlayerState.shouldShowBottomPlayer) {
-      // Player is visible: add collapsed height + safe area + small extra
-      return QuranPlayerWidget.collapsedHeight(context) +
-          safeAreaPadding; // Extra spacing
+      return QuranPlayerWidget.collapsedFootprint(context);
     }
-
-    // Player not visible: just safe area
-    return safeAreaPadding;
+    return MediaQuery.paddingOf(context).bottom;
   }
 
   String _getDateKey(BuildContext context, DateTime date) {

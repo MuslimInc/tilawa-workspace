@@ -139,9 +139,15 @@ class _MainScreenState extends State<MainScreen> {
             final adaptiveShellTokens = Theme.of(
               context,
             ).componentTokens.adaptiveShell;
+            // Total visual footprint of the floating bottom nav bar =
+            // base height + safe-area bottom + vertical margin + a visual
+            // gap so overlapping widgets (mini player, FABs) sit clearly
+            // above it rather than hugging its top edge.
             final double bottomNavBarHeight = context.isCompact
                 ? (adaptiveShellTokens.compactBottomNavBarBaseHeight +
-                      bottomPadding)
+                      bottomPadding +
+                      adaptiveShellTokens.bottomNavVerticalMargin +
+                      context.tokens.spaceExtraLarge)
                 : bottomPadding;
 
             final List<_NavDestination> navDestinations = _buildDestinations(
