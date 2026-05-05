@@ -44,7 +44,7 @@ class NavigationSliderOverlay extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
     final componentTokens = theme.extension<TilawaComponentTokens>();
-    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final bottomInset = context.systemBottomSafeArea;
     final panelRadius = BorderRadius.circular(
       tokens.radiusExtraLarge + tokens.spaceSmall,
     );

@@ -469,48 +469,42 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => MediaQuery(
-        data: MediaQuery.of(context),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                context.l10n.chooseTheme,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              _ThemeOption(
-                title: context.l10n.systemTheme,
-                value: ThemeMode.system,
-                groupValue: currentMode,
-                onChanged: (val) {
-                  context.read<ThemeCubit>().setMode(val);
-                  Navigator.pop(context);
-                },
-              ),
-              _ThemeOption(
-                title: context.l10n.lightTheme,
-                value: ThemeMode.light,
-                groupValue: currentMode,
-                onChanged: (val) {
-                  context.read<ThemeCubit>().setMode(val);
-                  Navigator.pop(context);
-                },
-              ),
-              _ThemeOption(
-                title: context.l10n.darkTheme,
-                value: ThemeMode.dark,
-                groupValue: currentMode,
-                onChanged: (val) {
-                  context.read<ThemeCubit>().setMode(val);
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 16),
-            ],
-          ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 16),
+            Text(
+              context.l10n.chooseTheme,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            TilawaSelectionTile(
+              title: context.l10n.systemTheme,
+              isSelected: currentMode == ThemeMode.system,
+              onTap: () {
+                context.read<ThemeCubit>().setMode(ThemeMode.system);
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: context.l10n.lightTheme,
+              isSelected: currentMode == ThemeMode.light,
+              onTap: () {
+                context.read<ThemeCubit>().setMode(ThemeMode.light);
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: context.l10n.darkTheme,
+              isSelected: currentMode == ThemeMode.dark,
+              onTap: () {
+                context.read<ThemeCubit>().setMode(ThemeMode.dark);
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: 16),
+          ],
         ),
       ),
     );
@@ -563,110 +557,65 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
-      builder: (sheetContext) => MediaQuery(
-        data: MediaQuery.of(context),
-        child: SafeArea(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 16),
-                  Text(
-                    context.l10n.choosePrimaryColor,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  ...ThemeCubit.colorOptions.map((option) {
-                    final isSelected =
-                        option.color.toARGB32() == currentColor.toARGB32();
-                    return ListTile(
-                      onTap: () {
-                        context.read<ThemeCubit>().setPrimaryColor(
-                          option.color,
-                        );
-                        Navigator.pop(sheetContext);
-                      },
-                      leading: CircleAvatar(
-                        backgroundColor: option.color,
-                        radius: 12,
-                      ),
-                      title: Text(
-                        _getLocalizedColorName(context, option.name),
-                        style: TextStyle(
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: isSelected ? option.color : null,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? Icon(
-                              FluentIcons.checkmark_24_regular,
-                              color: option.color,
-                            )
-                          : null,
-                    );
-                  }),
-                  // Custom Color Option
-                  ListTile(
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 16),
+                Text(
+                  context.l10n.choosePrimaryColor,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                ...ThemeCubit.colorOptions.map((option) {
+                  final isSelected =
+                      option.color.toARGB32() == currentColor.toARGB32();
+                  return TilawaSelectionTile(
+                    leading: CircleAvatar(
+                      backgroundColor: option.color,
+                      radius: 12,
+                    ),
+                    title: _getLocalizedColorName(context, option.name),
+                    isSelected: isSelected,
                     onTap: () {
+                      context.read<ThemeCubit>().setPrimaryColor(option.color);
                       Navigator.pop(sheetContext);
-                      _showCustomColorPicker(context, currentColor);
                     },
-                    leading: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: SweepGradient(
-                          colors: [
-                            Colors.red,
-                            Colors.blue,
-                            Colors.green,
-                            Colors.red,
-                          ],
-                        ),
+                  );
+                }),
+                // Custom Color Option
+                TilawaSelectionTile(
+                  leading: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: SweepGradient(
+                        colors: [
+                          Colors.red,
+                          Colors.blue,
+                          Colors.green,
+                          Colors.red,
+                        ],
                       ),
                     ),
-                    title: Text(
-                      context.l10n.custom,
-                      style: TextStyle(
-                        fontWeight:
-                            !ThemeCubit.colorOptions.any(
-                              (opt) =>
-                                  opt.color.toARGB32() ==
-                                  currentColor.toARGB32(),
-                            )
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color:
-                            !ThemeCubit.colorOptions.any(
-                              (opt) =>
-                                  opt.color.toARGB32() ==
-                                  currentColor.toARGB32(),
-                            )
-                            ? currentColor
-                            : null,
-                      ),
-                    ),
-                    trailing:
-                        !ThemeCubit.colorOptions.any(
-                          (opt) =>
-                              opt.color.toARGB32() == currentColor.toARGB32(),
-                        )
-                        ? Icon(
-                            FluentIcons.checkmark_24_regular,
-                            color: currentColor,
-                          )
-                        : null,
                   ),
-                  SizedBox(height: 16),
-                ],
-              ),
+                  title: context.l10n.custom,
+                  isSelected: !ThemeCubit.colorOptions.any(
+                    (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
+                  ),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _showCustomColorPicker(context, currentColor);
+                  },
+                ),
+                SizedBox(height: 16),
+              ],
             ),
           ),
         ),
@@ -717,51 +666,38 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => MediaQuery(
-        data: MediaQuery.of(context),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                context.l10n.chooseLanguage,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              ListTile(
-                title: Text("العربية"),
-                trailing: currentLocale.languageCode == arabicLanguageCode
-                    ? Icon(
-                        FluentIcons.checkmark_24_regular,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
-                onTap: () {
-                  context.read<LocalizationBloc>().add(
-                    const ChangeLanguage(Locale(arabicLanguageCode)),
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: Text(context.l10n.english),
-                trailing: currentLocale.languageCode == englishLanguageCode
-                    ? Icon(
-                        FluentIcons.checkmark_24_regular,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
-                onTap: () {
-                  context.read<LocalizationBloc>().add(
-                    const ChangeLanguage(Locale(englishLanguageCode)),
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 16),
-            ],
-          ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 16),
+            Text(
+              context.l10n.chooseLanguage,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            TilawaSelectionTile(
+              title: "العربية",
+              isSelected: currentLocale.languageCode == arabicLanguageCode,
+              onTap: () {
+                context.read<LocalizationBloc>().add(
+                  const ChangeLanguage(Locale(arabicLanguageCode)),
+                );
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: context.l10n.english,
+              isSelected: currentLocale.languageCode == englishLanguageCode,
+              onTap: () {
+                context.read<LocalizationBloc>().add(
+                  const ChangeLanguage(Locale(englishLanguageCode)),
+                );
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: 16),
+          ],
         ),
       ),
     );
@@ -773,35 +709,27 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => MediaQuery(
-        data: MediaQuery.of(context),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                context.l10n.concurrentDownloads,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 16),
+            Text(
+              context.l10n.concurrentDownloads,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            for (int i = 1; i <= 5; i++)
+              TilawaSelectionTile(
+                title: '$i',
+                isSelected: currentValue == i,
+                onTap: () {
+                  context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
+                  Navigator.pop(context);
+                },
               ),
-              SizedBox(height: 16),
-              for (int i = 1; i <= 5; i++)
-                ListTile(
-                  title: Text('$i'),
-                  trailing: currentValue == i
-                      ? Icon(
-                          FluentIcons.checkmark_24_regular,
-                          color: Theme.of(context).primaryColor,
-                        )
-                      : null,
-                  onTap: () {
-                    context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
-                    Navigator.pop(context);
-                  },
-                ),
-              SizedBox(height: 16),
-            ],
-          ),
+            SizedBox(height: 16),
+          ],
         ),
       ),
     );
@@ -830,40 +758,6 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ThemeOption extends StatelessWidget {
-  const _ThemeOption({
-    required this.title,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-  final String title;
-  final ThemeMode value;
-  final ThemeMode groupValue;
-  final ValueChanged<ThemeMode> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final isSelected = value == groupValue;
-    return ListTile(
-      onTap: () => onChanged(value),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? Theme.of(context).primaryColor : null,
-        ),
-      ),
-      trailing: isSelected
-          ? Icon(
-              FluentIcons.checkmark_24_regular,
-              color: Theme.of(context).primaryColor,
-            )
-          : null,
     );
   }
 }

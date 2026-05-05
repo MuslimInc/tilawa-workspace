@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -335,11 +337,9 @@ class _RecitersSliverScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
-    final topPadding = MediaQuery.paddingOf(context).top;
-    final double listTopOffset =
-        _recitersSearchHeaderExtent(context) +
-        tokens.spaceExtraLarge +
-        topPadding;
+    final double headerExtent = _recitersSearchHeaderExtent(context);
+    const double scrollbarVerticalMargin = 10;
+    final double scrollbarTopOffset = headerExtent + scrollbarVerticalMargin;
     final bool showScrollbar =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
@@ -348,34 +348,43 @@ class _RecitersSliverScreen extends StatelessWidget {
 
     return Stack(
       children: [
-        RefreshIndicator.adaptive(
-          onRefresh: onRetry,
-          child: CustomScrollView(
-            controller: scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
+        Column(
+          children: [
+            _RecitersSearchHeaderBar(
+              state: state,
+              searchController: searchController,
+              focusNode: focusNode,
+              onSearchChanged: onSearchChanged,
+              onClearSearch: onClearSearch,
+              onToggleFavorites: onToggleFavorites,
             ),
-            slivers: [
-              _RecitersSearchHeaderSliver(
-                state: state,
-                searchController: searchController,
-                focusNode: focusNode,
-                onSearchChanged: onSearchChanged,
-                onClearSearch: onClearSearch,
-                onToggleFavorites: onToggleFavorites,
+            Expanded(
+              child: RefreshIndicator.adaptive(
+                onRefresh: onRetry,
+                child: CustomScrollView(
+                  controller: scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  slivers: [
+                    _RecitersResultSection(
+                      state: state,
+                      allowHeavyLoadedResults: allowHeavyLoadedResults,
+                      reserveScrollbarSpace: showScrollbar,
+                      reserveScrollbarOnLeading: isRtl,
+                      onClearAll: onClearAll,
+                      onRetry: onRetry,
+                    ),
+                  ],
+                ),
               ),
-              ..._buildResultSlivers(
-                context,
-                reserveScrollbarSpace: showScrollbar,
-                reserveScrollbarOnLeading: isRtl,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
         if (showScrollbar)
           PositionedDirectional(
-            top: listTopOffset,
-            bottom: tokens.spaceLarge,
+            top: scrollbarTopOffset,
+            bottom: scrollbarVerticalMargin,
             start: isRtl ? tokens.spaceSmall : null,
             end: isRtl ? null : tokens.spaceSmall,
             child: ReciterAlphabetScrollbar(
@@ -388,108 +397,159 @@ class _RecitersSliverScreen extends StatelessWidget {
       ],
     );
   }
+}
 
-  List<Widget> _buildResultSlivers(
-    BuildContext context, {
-    required bool reserveScrollbarSpace,
-    required bool reserveScrollbarOnLeading,
-  }) {
+class _RecitersResultSection extends StatelessWidget {
+  const _RecitersResultSection({
+    required this.state,
+    required this.allowHeavyLoadedResults,
+    required this.reserveScrollbarSpace,
+    required this.reserveScrollbarOnLeading,
+    required this.onClearAll,
+    required this.onRetry,
+  });
+
+  final RecitersState state;
+  final bool allowHeavyLoadedResults;
+  final bool reserveScrollbarSpace;
+  final bool reserveScrollbarOnLeading;
+  final VoidCallback onClearAll;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
     if (state is RecitersLoading) {
-      return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: _StatePanel(
-            key: const ValueKey('loading_state'),
-            icon: Icons.hourglass_top_rounded,
-            title: context.l10n.loadingReciters,
-            isLoading: true,
-          ),
-        ),
-      ];
+      return _RecitersSkeletonSection(
+        reserveScrollbarSpace: reserveScrollbarSpace,
+        reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+      );
     }
 
     if (state is RecitersError) {
-      return [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: _StatePanel(
-            key: const ValueKey('error_state'),
-            icon: Icons.error_outline_rounded,
-            title: (state as RecitersError).failure.localizedMessage(context),
-            actionLabel: context.l10n.retry,
-            onAction: onRetry,
-            isError: true,
-          ),
+      return _RecitersErrorSliver(
+        failureMessage: (state as RecitersError).failure.localizedMessage(
+          context,
         ),
-      ];
+        onRetry: onRetry,
+      );
     }
 
     if (state is RecitersLoaded) {
       final RecitersLoaded loadedState = state as RecitersLoaded;
 
       if (!allowHeavyLoadedResults) {
-        return [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: _StatePanel(
-              key: const ValueKey('deferred_loaded_state'),
-              icon: Icons.hourglass_top_rounded,
-              title: context.l10n.loadingReciters,
-              isLoading: true,
-            ),
-          ),
-        ];
+        return _RecitersSkeletonSection(
+          reserveScrollbarSpace: reserveScrollbarSpace,
+          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+        );
       }
 
       if (loadedState.filteredReciters.isEmpty) {
-        final bool isSearchState = loadedState.searchQuery.isNotEmpty;
-        final bool isFavoritesState = loadedState.showFavoritesOnly;
-
-        return [
-          SliverFillRemaining(
-            hasScrollBody: false,
-            child: _StatePanel(
-              key: const ValueKey('empty_state'),
-              icon: isFavoritesState
-                  ? Icons.favorite_border_rounded
-                  : Icons.search_off_rounded,
-              title: isFavoritesState
-                  ? context.l10n.noFavorites
-                  : isSearchState
-                  ? context.l10n.noSearchResults
-                  : context.l10n.noRecitersFound,
-              subtitle: isSearchState ? context.l10n.tryDifferentSearch : null,
-              actionLabel: _hasActiveFilters(loadedState)
-                  ? context.l10n.clearAll
-                  : null,
-              onAction: _hasActiveFilters(loadedState) ? onClearAll : null,
-            ),
-          ),
-        ];
+        return _RecitersEmptySliver(state: loadedState, onClearAll: onClearAll);
       }
 
-      return [
-        if (context.isCompact)
-          _ReciterListSliver(
-            state: loadedState,
-            reserveScrollbarSpace: reserveScrollbarSpace,
-            reserveScrollbarOnLeading: reserveScrollbarOnLeading,
-          )
-        else
-          _ReciterGridSliver(
-            state: loadedState,
-            reserveScrollbarSpace: reserveScrollbarSpace,
-            reserveScrollbarOnLeading: reserveScrollbarOnLeading,
-          ),
-      ];
+      if (context.isCompact) {
+        return _ReciterListSliver(
+          state: loadedState,
+          reserveScrollbarSpace: reserveScrollbarSpace,
+          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+        );
+      }
+      return _ReciterGridSliver(
+        state: loadedState,
+        reserveScrollbarSpace: reserveScrollbarSpace,
+        reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+      );
     }
 
-    return const [SliverToBoxAdapter(child: SizedBox.shrink())];
+    return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 }
 
-class _RecitersSearchHeaderSliver extends StatelessWidget {
-  const _RecitersSearchHeaderSliver({
+class _RecitersSkeletonSection extends StatelessWidget {
+  const _RecitersSkeletonSection({
+    required this.reserveScrollbarSpace,
+    required this.reserveScrollbarOnLeading,
+  });
+
+  final bool reserveScrollbarSpace;
+  final bool reserveScrollbarOnLeading;
+
+  @override
+  Widget build(BuildContext context) {
+    if (context.isCompact) {
+      return _ReciterSkeletonListSliver(
+        reserveScrollbarSpace: reserveScrollbarSpace,
+        reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+      );
+    }
+    return ReciterSkeletonGridSliver(
+      reserveScrollbarSpace: reserveScrollbarSpace,
+      reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+      itemCount: 10,
+    );
+  }
+}
+
+class _RecitersErrorSliver extends StatelessWidget {
+  const _RecitersErrorSliver({
+    required this.failureMessage,
+    required this.onRetry,
+  });
+
+  final String failureMessage;
+  final Future<void> Function() onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: StatePanel(
+        key: const ValueKey('error_state'),
+        icon: Icons.error_outline_rounded,
+        title: failureMessage,
+        actionLabel: context.l10n.retry,
+        onAction: onRetry,
+        isError: true,
+      ),
+    );
+  }
+}
+
+class _RecitersEmptySliver extends StatelessWidget {
+  const _RecitersEmptySliver({required this.state, required this.onClearAll});
+
+  final RecitersLoaded state;
+  final VoidCallback onClearAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isSearchState = state.searchQuery.isNotEmpty;
+    final bool isFavoritesState = state.showFavoritesOnly;
+    final bool hasActiveFilters = _hasActiveFilters(state);
+
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: StatePanel(
+        key: const ValueKey('empty_state'),
+        icon: isFavoritesState
+            ? Icons.favorite_border_rounded
+            : Icons.search_off_rounded,
+        title: isFavoritesState
+            ? context.l10n.noFavorites
+            : isSearchState
+            ? context.l10n.noSearchResults
+            : context.l10n.noRecitersFound,
+        subtitle: isSearchState ? context.l10n.tryDifferentSearch : null,
+        actionLabel: hasActiveFilters ? context.l10n.clearAll : null,
+        onAction: hasActiveFilters ? onClearAll : null,
+      ),
+    );
+  }
+}
+
+class _RecitersSearchHeaderBar extends StatelessWidget {
+  const _RecitersSearchHeaderBar({
     required this.state,
     required this.searchController,
     required this.focusNode,
@@ -509,31 +569,39 @@ class _RecitersSearchHeaderSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double extent = _recitersSearchHeaderExtent(context);
+    final double searchFieldHeight = theme.componentTokens.searchField.height;
 
-    return SliverAppBar(
-      pinned: true,
-      expandedHeight: extent,
-      collapsedHeight: extent,
-      backgroundColor: theme.primaryColor,
-      flexibleSpace: _ConstrainedHeaderContent(
+    return SizedBox(
+      height: _recitersSearchHeaderExtent(context),
+      child: Material(
+        color: theme.primaryColor,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
-          child: Row(
-            children: [
-              Expanded(
-                child: _SearchField(
-                  controller: searchController,
-                  focusNode: focusNode,
-                  onChanged: onSearchChanged,
-                  onClear: onClearSearch,
+          padding: EdgeInsets.only(top: context.contentTopSafePadding),
+          child: Center(
+            child: SizedBox(
+              height: searchFieldHeight,
+              child: _ConstrainedHeaderContent(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _SearchField(
+                          controller: searchController,
+                          focusNode: focusNode,
+                          onChanged: onSearchChanged,
+                          onClear: onClearSearch,
+                        ),
+                      ),
+                      SizedBox(width: tokens.spaceSmall),
+                      _FavoritesToggle(state: state, onTap: onToggleFavorites),
+                      SizedBox(width: tokens.spaceSmall),
+                      const _DownloadsButton(),
+                    ],
+                  ),
                 ),
               ),
-              SizedBox(width: tokens.spaceSmall),
-              _FavoritesToggle(state: state, onTap: onToggleFavorites),
-              SizedBox(width: tokens.spaceSmall),
-              const _DownloadsButton(),
-            ],
+            ),
           ),
         ),
       ),
@@ -687,8 +755,8 @@ class _DownloadsButton extends StatelessWidget {
   }
 }
 
-class _StatePanel extends StatelessWidget {
-  const _StatePanel({
+class StatePanel extends StatelessWidget {
+  const StatePanel({
     super.key,
     required this.icon,
     required this.title,
@@ -880,6 +948,126 @@ class _ReciterGridSliver extends StatelessWidget {
   }
 }
 
+ReciterEntity _fakeReciter(int index) {
+  return ReciterEntity(
+    id: index,
+    name: 'Reciter Name',
+    letter: 'ا',
+    date: '2024-01-01',
+    moshaf: const [
+      MoshafEntity(
+        id: 1,
+        name: 'Hafs An Asim',
+        server: 'server',
+        surahTotal: 114,
+        moshafType: 1,
+        surahList: '1-114',
+      ),
+    ],
+  );
+}
+
+class _ReciterSkeletonListSliver extends StatelessWidget {
+  const _ReciterSkeletonListSliver({
+    required this.reserveScrollbarSpace,
+    required this.reserveScrollbarOnLeading,
+  });
+
+  final bool reserveScrollbarSpace;
+  final bool reserveScrollbarOnLeading;
+  final int itemCount = 10;
+
+  @override
+  Widget build(BuildContext context) {
+    PerfLogger.markBuild('_ReciterSkeletonListSliver');
+    final tokens = Theme.of(context).tokens;
+
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final padding = _recitersResultPadding(
+          context,
+          constraints,
+          top: tokens.spaceSmall,
+          bottom: tokens.spaceLarge,
+          reserveScrollbarSpace: reserveScrollbarSpace,
+          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+        );
+
+        return SliverPadding(
+          padding: padding,
+          sliver: SliverSkeletonizer(
+            child: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index.isOdd) {
+                  return SizedBox(height: tokens.spaceSmall);
+                }
+                final reciter = _fakeReciter(index ~/ 2);
+                return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
+              }, childCount: itemCount + itemCount - 1),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ReciterSkeletonGridSliver extends StatelessWidget {
+  const ReciterSkeletonGridSliver({
+    super.key,
+    required this.reserveScrollbarSpace,
+    required this.reserveScrollbarOnLeading,
+    required this.itemCount,
+  });
+
+  final bool reserveScrollbarSpace;
+  final bool reserveScrollbarOnLeading;
+  final int itemCount;
+
+  @override
+  Widget build(BuildContext context) {
+    PerfLogger.markBuild('_ReciterSkeletonGridSliver');
+    final tokens = Theme.of(context).tokens;
+    final double targetItemExtent =
+        tokens.cardCompactWidthThreshold +
+        tokens.spaceExtraLarge +
+        tokens.spaceLarge;
+    final double targetItemHeight =
+        tokens.playerCollapsedHeight + tokens.spaceExtraLarge;
+
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final padding = _recitersResultPadding(
+          context,
+          constraints,
+          top: tokens.spaceSmall,
+          bottom: tokens.spaceLarge,
+          reserveScrollbarSpace: reserveScrollbarSpace,
+          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
+        );
+
+        return SliverPadding(
+          padding: padding,
+          sliver: SliverSkeletonizer(
+            child: SliverGrid(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: targetItemExtent,
+                mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+                crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+                childAspectRatio: targetItemExtent / targetItemHeight,
+              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final reciter = _fakeReciter(index);
+                return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
+              }, childCount: itemCount),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class ReciterAlphabetScrollbar extends StatefulWidget {
   const ReciterAlphabetScrollbar({
     super.key,
@@ -970,7 +1158,7 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
 
 double _recitersSearchHeaderExtent(BuildContext context) {
   final theme = Theme.of(context);
-  final topPadding = MediaQuery.paddingOf(context).top;
+  final topPadding = context.contentTopSafePadding;
   return theme.componentTokens.searchField.height +
       topPadding +
       (theme.tokens.spaceMedium * 2);

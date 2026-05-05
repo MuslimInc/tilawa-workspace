@@ -4,7 +4,7 @@ Note: _This is purely the output of the chat conversation and does not contain a
 
 ### Planner Response
 
-Now I need to add the `isKeyboardOpen` parameter to [BottomPlayerWidget](cci:2://file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/shared/widgets/bottom_player_widget.dart:28:0-36:1) and use it there:
+Now I need to add the `isKeyboardOpen` parameter to [QuranPlayerWidget](cci:2://file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/shared/widgets/bottom_player_widget.dart:28:0-36:1) and use it there:
 
 _Edited relevant file_
 

@@ -7,6 +7,7 @@ import '../foundation/component_tokens.dart';
 import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/display_feature_insets.dart';
+import '../foundation/safe_area_ext.dart';
 
 /// Builds the icon widget for a nav destination. Receives selection state and
 /// the resolved tint the shell would apply to a material [Icon]; callers may
@@ -85,12 +86,19 @@ class TilawaAdaptiveShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final windowSize = context.windowSize;
     final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
-    final bool isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final bool isKeyboardOpen = context.isKeyboardVisible;
 
     if (windowSize == TilawaWindowSize.compact) {
       return Stack(
         children: [
-          Scaffold(extendBody: true, body: child),
+          Scaffold(
+            extendBody: true,
+            body: MediaQuery.removePadding(
+              context: context,
+              removeBottom: true,
+              child: child,
+            ),
+          ),
           if (!isKeyboardOpen)
             Positioned(
               bottom: 0,
@@ -114,7 +122,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
         : EdgeInsetsDirectional.zero;
 
     final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final padding = MediaQuery.paddingOf(context);
+    final padding = context.contentSafePadding;
 
     return Scaffold(
       body: Stack(
@@ -179,10 +187,7 @@ class _BottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
     final designTokens = theme.tokens;
-    final systemBottomPadding = MediaQuery.viewPaddingOf(context).bottom;
-    final bottomPadding = systemBottomPadding > 0
-        ? systemBottomPadding
-        : designTokens.spaceExtraLarge;
+    final bottomPadding = context.floatingBottomPadding;
 
     return TilawaContentBounds(
       kind: TilawaContentKind.media,

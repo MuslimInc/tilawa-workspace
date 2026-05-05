@@ -9,5 +9,6 @@ export 'density.dart';
 export 'design_tokens.dart';
 export 'display_feature_insets.dart';
 export 'responsive_typography.dart';
+export 'safe_area_ext.dart';
 export 'shell_padding.dart';
 export 'text_theme_ext.dart';

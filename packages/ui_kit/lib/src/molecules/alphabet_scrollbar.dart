@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -41,6 +43,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
   Offset? _draggedOffset;
   String? _lastNotifiedLetter;
   String? _lastActiveLetter;
+  Timer? _hideOverlayTimer;
 
   @override
   void initState() {
@@ -50,6 +53,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
 
   @override
   void dispose() {
+    _hideOverlayTimer?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -58,10 +62,22 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
   void didUpdateWidget(covariant ArabicAlphabetScrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedLetter != oldWidget.selectedLetter) {
-      // Update last active if we're not dragging (to respect BLoC updates)
-      if (_draggedLetter == null) {
-        _lastActiveLetter = oldWidget.selectedLetter;
+      // If no pan/long-press is actively driving updates, the selection change
+      // came from a tap that's already finished. The pending hide timer would
+      // otherwise keep _draggedLetter set for 600ms, painting the selection
+      // circle on the wrong letter. Reconcile immediately so the visual matches
+      // the BLoC state.
+      if (_lastNotifiedLetter == null) {
+        _hideOverlayTimer?.cancel();
+        _hideOverlayTimer = null;
+        _draggedLetter = null;
+        _draggedOffset = null;
+        // Defer overlay mutation to avoid asserting in persistentCallbacks phase.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _overlayController.hide();
+        });
       }
+      _lastActiveLetter = oldWidget.selectedLetter;
 
       // Clear cache when selection changes to ensure fresh UI
       _itemCache.clear();
@@ -110,9 +126,14 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
     final double relativeY =
         localPosition.dy - resolvedPadding.top + scrollOffset;
 
-    final letterIndex = (relativeY / letterHeight)
-        .clamp(0, widget.letters.length - 1)
-        .floor();
+    // Only select a letter when the pointer is inside an actual letter row.
+    // Tapping in the whitespace above the first row or below the last row
+    // should not select anything.
+    if (relativeY < 0 || relativeY >= widget.letters.length * letterHeight) {
+      return null;
+    }
+
+    final letterIndex = (relativeY / letterHeight).floor();
 
     if (letterIndex >= 0 && letterIndex < widget.letters.length) {
       final newLetter = widget.letters[letterIndex];
@@ -220,17 +241,24 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTapDown: (details) {
-            // Show overlay immediately on press
+            // Cancel any pending hide so a quick second tap keeps the overlay visible
+            _hideOverlayTimer?.cancel();
+            _hideOverlayTimer = null;
+            // Show overlay immediately on press, except when tapping the already-selected
+            // letter — that tap toggles selection off, so the overlay would just flash.
             final letter = _updateDraggedLetter(details.globalPosition);
-            if (letter != null) {
+            if (letter != null && letter != widget.selectedLetter) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _overlayController.show();
               });
             }
           },
           onTapUp: (details) {
-            // Brief delay to allow overlay to be seen, then hide
-            Future.delayed(const Duration(milliseconds: 100), () {
+            // Delay long enough that a follow-up tap (double press) cancels the hide
+            // before it fires, so the overlay stays visible across rapid presses.
+            _hideOverlayTimer?.cancel();
+            _hideOverlayTimer = Timer(const Duration(milliseconds: 600), () {
+              _hideOverlayTimer = null;
               if (mounted) {
                 setState(() {
                   _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
@@ -242,16 +270,29 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
             });
           },
           onTapCancel: () {
-            if (mounted) {
-              setState(() {
-                _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
-                _draggedLetter = null;
-                _draggedOffset = null;
-              });
-              _overlayController.hide();
-            }
+            // The outer tap can be cancelled because either (a) the inner letter
+            // InkWell won the gesture arena and consumed the tap, or (b) a long-press/pan
+            // is starting. In case (a) no further callback fires, so we must schedule
+            // the auto-hide here. In case (b) the upcoming onLongPressStart / onPanStart
+            // re-shows the overlay, and onLongPressEnd / onPanEnd hide it — but those
+            // handlers also cancel this timer, so it's safe to schedule it unconditionally.
+            _hideOverlayTimer?.cancel();
+            _hideOverlayTimer = Timer(const Duration(milliseconds: 600), () {
+              _hideOverlayTimer = null;
+              if (mounted) {
+                setState(() {
+                  _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
+                  _draggedLetter = null;
+                  _draggedOffset = null;
+                });
+                _overlayController.hide();
+              }
+            });
           },
           onPanStart: (details) {
+            // Cancel any auto-hide scheduled by the preceding onTapCancel
+            _hideOverlayTimer?.cancel();
+            _hideOverlayTimer = null;
             final letter = _updateDraggedLetter(details.globalPosition);
             if (letter != null) {
               _lastNotifiedLetter = letter;
@@ -279,6 +320,9 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
             widget.onPanEnd(details);
           },
           onLongPressStart: (details) {
+            // Cancel any auto-hide scheduled by the preceding onTapCancel
+            _hideOverlayTimer?.cancel();
+            _hideOverlayTimer = null;
             final letter = _updateDraggedLetter(details.globalPosition);
             if (letter != null) {
               _lastNotifiedLetter = letter;
@@ -390,7 +434,8 @@ class _LetterItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: InkWell(
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: () {
           debugPrint(
             '[SelectedLetter] [${DateTime.now()}] ✓ TAP Toggle: $letter '
@@ -402,7 +447,6 @@ class _LetterItem extends StatelessWidget {
             onLetterSelected(letter);
           }
         },
-        borderRadius: BorderRadius.circular(size),
         child: SizedBox(
           height: size,
           width: size,

@@ -89,7 +89,7 @@ class TilawaFooterBarTokens {
   factory TilawaFooterBarTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaFooterBarTokens(
         height: 52,
         horizontalPadding: 12,
@@ -392,7 +392,7 @@ class TilawaAdaptiveShellTokens {
     // No-op: app-wide bottom nav. Touching it shifts every screen and is the
     // highest-risk family in the kit. Defer until explicit nav-shell pass.
     return const TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: 70,
+      compactBottomNavBarBaseHeight: 55,
       bottomNavHorizontalMargin: 16,
       bottomNavVerticalMargin: 4,
       bottomNavInternalPadding: 8,
@@ -660,7 +660,7 @@ class TilawaSettingsGroupTokens {
   factory TilawaSettingsGroupTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       return const TilawaSettingsGroupTokens(
         // Phase 1A compact-only changes:
         groupHeaderPadding: EdgeInsets.fromLTRB(12, 12, 16, 6),
@@ -1099,7 +1099,7 @@ class TilawaBottomSheetScaffoldTokens {
   factory TilawaBottomSheetScaffoldTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    if (density == TilawaDensity.compact) {
+    if (density.isCompact) {
       // closeButtonSize 40 stays — already below 48dp; not making it worse.
       return const TilawaBottomSheetScaffoldTokens(
         topRadius: 24,

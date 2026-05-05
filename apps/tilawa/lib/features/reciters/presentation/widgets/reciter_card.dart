@@ -80,6 +80,7 @@ class _ReciterInfo extends StatelessWidget {
         : '';
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -93,9 +94,10 @@ class _ReciterInfo extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         ),
         if (firstMoshaf.isNotEmpty) ...[
-          SizedBox(height: tokens.spaceLarge),
+          SizedBox(height: tokens.spaceSmall),
           Row(
             spacing: tokens.spaceExtraSmall,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
                 Icons.headphones_rounded,
@@ -104,14 +106,14 @@ class _ReciterInfo extends StatelessWidget {
                   alpha: 0.75,
                 ),
               ),
-              Expanded(
+              Flexible(
                 child: Text(
                   firstMoshaf,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -158,13 +160,13 @@ class _FavoriteButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
           child: SizedBox(
-            width: tokens.iconSizeExtraLarge - tokens.spaceSmall,
-            height: tokens.iconSizeExtraLarge - tokens.spaceSmall,
+            width: tokens.iconSizeLarge,
+            height: tokens.iconSizeLarge,
             child: Icon(
               isFavorite
                   ? Icons.favorite_rounded
                   : Icons.favorite_outline_rounded,
-              size: tokens.iconSizeMedium,
+              size: tokens.iconSizeSmall,
               color: isFavorite
                   ? Colors.redAccent
                   : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),

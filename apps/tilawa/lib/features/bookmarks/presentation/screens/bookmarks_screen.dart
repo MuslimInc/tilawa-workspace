@@ -8,7 +8,7 @@ import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dar
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/bookmark_entity.dart';
@@ -29,9 +29,9 @@ class BookmarksScreen extends StatelessWidget {
         leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.bookmarks),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
+          TilawaIconActionButton(
+            icon: Icons.refresh,
+            onTap: () {
               context.read<BookmarksBloc>().add(const LoadBookmarksEvent());
             },
           ),
@@ -60,10 +60,8 @@ class BookmarksScreen extends StatelessWidget {
             return Stack(
               children: [
                 state.when(
-                  initial: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  initial: () => const TilawaLoadingIndicator(),
+                  loading: () => const TilawaLoadingIndicator(),
                   loaded: (bookmarks, filteredBookmarks, searchQuery) => Column(
                     children: [
                       BookmarkSearchBar(
@@ -159,7 +157,7 @@ class BookmarksScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Positioned.fill(child: BottomPlayerWidget()),
+                const Positioned.fill(child: QuranPlayerWidget()),
               ],
             );
           },

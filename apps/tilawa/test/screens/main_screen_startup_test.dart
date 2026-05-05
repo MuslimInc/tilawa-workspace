@@ -1,3 +1,4 @@
+import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -5,6 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
+import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
+import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa/features/localization/domain/usecases/get_current_language_use_case.dart';
 import 'package:tilawa/features/localization/domain/usecases/set_language_use_case.dart';
 import 'package:tilawa/features/localization/presentation/bloc/localization_bloc.dart';
@@ -36,6 +40,9 @@ class _MockGetRecitersUseCase extends Mock implements GetRecitersUseCase {}
 
 class _MockGetCurrentLanguageUseCase extends Mock
     implements GetCurrentLanguageUseCase {}
+
+class _MockPlayerBackgroundCubit extends MockCubit<PlayerBackgroundState>
+    implements PlayerBackgroundCubit {}
 
 class _MockSetLanguageUseCase extends Mock implements SetLanguageUseCase {}
 
@@ -104,10 +111,17 @@ void main() {
   });
 
   Widget buildTestApp() {
-    return MaterialApp(
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      home: const MainScreen(),
+    final mockPlayerBackgroundCubit = _MockPlayerBackgroundCubit();
+    when(() => mockPlayerBackgroundCubit.state).thenReturn(
+      const PlayerBackgroundInitial(PlayerBackgroundConfiguration()),
+    );
+    return BlocProvider<PlayerBackgroundCubit>.value(
+      value: mockPlayerBackgroundCubit,
+      child: MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: const MainScreen(),
+      ),
     );
   }
 

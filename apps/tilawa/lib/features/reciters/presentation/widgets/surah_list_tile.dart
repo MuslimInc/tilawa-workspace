@@ -6,6 +6,7 @@ import 'package:tilawa/features/downloads/presentation/widgets/download_button.d
 import 'package:tilawa/features/surah/domain/entities/surah_entity.dart';
 import 'package:tilawa/router/router.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../reciter_semantics_ids.dart';
 
@@ -223,7 +224,7 @@ class SurahListTile extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetContext) {
-        final bottomPadding = MediaQuery.paddingOf(sheetContext).bottom;
+        final bottomPadding = sheetContext.floatingBottomPadding;
         return Padding(
           padding: EdgeInsets.only(bottom: bottomPadding),
           child: Column(

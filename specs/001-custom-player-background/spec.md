@@ -101,5 +101,5 @@ As a user, I want to be able to remove my custom background and revert to the or
 ## Assumptions
 
 - We will use standard Flutter plugins for image picking and camera access.
-- The `BottomPlayerWidget` (expanded state) has enough screen real estate to showcase a background without obscuring controls.
+- The `QuranPlayerWidget` (expanded state) has enough screen real estate to showcase a background without obscuring controls.
 - The user's device supports at least basic image picking.

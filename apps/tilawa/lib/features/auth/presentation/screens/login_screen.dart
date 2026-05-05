@@ -80,7 +80,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
 
           // Language Switcher
-          const Positioned(top: 50, right: 16, child: _AppLanguageSwitcher()),
+          Positioned(
+            top: context.systemTopSafeArea + context.tokens.spaceSmall,
+            right: 16,
+            child: const _AppLanguageSwitcher(),
+          ),
 
           SafeArea(
             child: BlocConsumer<AuthBloc, AuthState>(

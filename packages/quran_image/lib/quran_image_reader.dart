@@ -13,6 +13,7 @@ import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/presentation.dart';
 import 'package:quran_image/quran_image_page.dart';
 import 'package:quran_image/verse_marker.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class QuranImageReader extends StatefulWidget {
   const QuranImageReader({
@@ -836,7 +837,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
         widget.preferredSystemUiMode == SystemUiMode.immersive ||
         widget.preferredSystemUiMode == SystemUiMode.immersiveSticky;
     final padding = _stableQuranPaddingFor(
-      MediaQuery.viewPaddingOf(context),
+      context.systemSafeArea,
       isImmersive: isImmersive,
     );
 

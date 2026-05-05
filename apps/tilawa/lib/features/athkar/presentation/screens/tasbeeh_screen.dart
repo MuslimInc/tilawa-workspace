@@ -201,33 +201,36 @@ class _TasbeehCreateView extends StatelessWidget {
                   style: theme.textTheme.titleLarge,
                 ),
                 SizedBox(height: tokens.spaceMedium),
-                _TilawaTextInputField(
-                  hint: context.l10n.tasbeehInputHint,
-                  icon: Icons.edit_note_rounded,
+                TilawaTextField(
+                  hintText: context.l10n.tasbeehInputHint,
+                  prefixIcon: Icon(Icons.edit_note_rounded),
                   onChanged: cubit.updateDraftText,
                   maxLength: TasbeehConstants.maxTextLength,
-                  counterText: '',
                 ),
                 SizedBox(height: tokens.spaceSmall),
-                _TilawaTextInputField(
-                  hint: '${TasbeehConstants.defaultTargetCount}',
-                  icon: Icons.flag_rounded,
+                TilawaTextField(
+                  hintText: '${TasbeehConstants.defaultTargetCount}',
+                  prefixIcon: Icon(Icons.flag_rounded),
                   onChanged: cubit.updateDraftTargetText,
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: tokens.spaceMedium),
-                FilledButton(
+                TilawaButton(
+                  text: context.l10n.tasbeehGoToCounting,
                   onPressed:
                       state.draftText.trim().isEmpty ||
                           state.draftTargetText.trim().isEmpty
                       ? null
                       : cubit.saveDraftDhikr,
-                  child: Text(context.l10n.tasbeehGoToCounting),
+                  variant: TilawaButtonVariant.primary,
+                  isFullWidth: true,
                 ),
                 SizedBox(height: tokens.spaceSmall),
-                OutlinedButton(
+                TilawaButton(
+                  text: context.l10n.tasbeehBackToOptions,
                   onPressed: cubit.showOptionsView,
-                  child: Text(context.l10n.tasbeehBackToOptions),
+                  variant: TilawaButtonVariant.outline,
+                  isFullWidth: true,
                 ),
                 if (errorText != null) ...[
                   SizedBox(height: tokens.spaceSmall),
@@ -434,41 +437,6 @@ class _TasbeehCountingView extends StatelessWidget {
           ],
         ],
       ),
-    );
-  }
-}
-
-/// Thin wrapper around TilawaTextField for Tasbeeh input fields.
-///
-/// Preserves the same API as the original implementation while adopting
-/// the UI Kit component for consistency.
-class _TilawaTextInputField extends StatelessWidget {
-  const _TilawaTextInputField({
-    required this.hint,
-    required this.icon,
-    required this.onChanged,
-    this.keyboardType,
-    this.maxLength,
-    this.counterText,
-  });
-
-  final String hint;
-  final IconData icon;
-  final ValueChanged<String> onChanged;
-  final TextInputType? keyboardType;
-  final int? maxLength;
-  final String? counterText;
-
-  @override
-  Widget build(BuildContext context) {
-    return TilawaTextField(
-      hintText: hint,
-      prefixIcon: Icon(icon),
-      onChanged: onChanged,
-      keyboardType: keyboardType,
-      maxLength: maxLength,
-      // Counter is hidden by default in TilawaTextField (showCounter: false)
-      // which matches the original behavior when counterText was ''
     );
   }
 }

@@ -904,5 +904,370 @@ void main() {
         ],
       ),
     );
+
+    goldenTest(
+      'TilawaSegmentedControl',
+      fileName: 'molecules/tilawa_segmented_control',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'First selected',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'today',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Second selected',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'monthly',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'today',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSegmentedControl compact',
+      fileName: 'molecules/tilawa_segmented_control_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'First selected (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'today',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              isDark: true,
+              child: SizedBox(
+                width: 300,
+                child: TilawaSegmentedControl<String>(
+                  segments: const [
+                    TilawaSegment(value: 'today', label: 'Today'),
+                    TilawaSegment(value: 'monthly', label: 'Monthly'),
+                  ],
+                  selectedValue: 'monthly',
+                  onValueChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSelectionTile',
+      fileName: 'molecules/tilawa_selection_tile',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Unselected',
+            child: TilawaPreviewWrapper(
+              child: TilawaSelectionTile(
+                title: 'Light Theme',
+                isSelected: false,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Selected',
+            child: TilawaPreviewWrapper(
+              child: TilawaSelectionTile(
+                title: 'Dark Theme',
+                isSelected: true,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'With leading',
+            child: TilawaPreviewWrapper(
+              child: TilawaSelectionTile(
+                leading: CircleAvatar(backgroundColor: Colors.blue, radius: 12),
+                title: 'Blue',
+                isSelected: true,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaSelectionTile(
+                title: 'System Default',
+                isSelected: false,
+                onTap: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSelectionTile compact',
+      fileName: 'molecules/tilawa_selection_tile_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'Selected (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSelectionTile(
+                title: 'Arabic',
+                isSelected: true,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Unselected (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSelectionTile(
+                title: 'English',
+                isSelected: false,
+                onTap: () {},
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonListTile',
+      fileName: 'molecules/tilawa_skeleton_list_tile',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: '1 line',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonListTile(lines: 1, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '2 lines',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonListTile(lines: 2, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '3 lines',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonListTile(lines: 3, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaSkeletonListTile(lines: 2, animate: false),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonListTile compact',
+      fileName: 'molecules/tilawa_skeleton_list_tile_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: '1 line (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonListTile(lines: 1, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '2 lines (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonListTile(lines: 2, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '3 lines (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonListTile(lines: 3, animate: false),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonCard',
+      fileName: 'molecules/tilawa_skeleton_card',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'With subtitle',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: true, animate: false),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Without subtitle',
+            child: TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: false, animate: false),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: true, animate: false),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonCard compact',
+      fileName: 'molecules/tilawa_skeleton_card_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: 'With subtitle (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: true, animate: false),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Without subtitle (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: SizedBox(
+                width: 200,
+                child: TilawaSkeletonCard(showSubtitle: false, animate: false),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonList',
+      fileName: 'molecules/tilawa_skeleton_list',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: '3 items',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonList(itemCount: 3, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '5 items',
+            child: TilawaPreviewWrapper(
+              child: TilawaSkeletonList(itemCount: 5, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Dark',
+            child: TilawaPreviewWrapper(
+              isDark: true,
+              child: TilawaSkeletonList(itemCount: 3, animate: false),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    goldenTest(
+      'TilawaSkeletonList compact',
+      fileName: 'molecules/tilawa_skeleton_list_compact',
+      builder: () => GoldenTestGroup(
+        children: [
+          GoldenTestScenario(
+            name: '3 items (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonList(itemCount: 3, animate: false),
+            ),
+          ),
+          GoldenTestScenario(
+            name: '5 items (compact)',
+            child: TilawaPreviewWrapper(
+              density: TilawaDensity.compact,
+              child: TilawaSkeletonList(itemCount: 5, animate: false),
+            ),
+          ),
+        ],
+      ),
+    );
   });
 }

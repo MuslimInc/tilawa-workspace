@@ -45,7 +45,7 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
     final int currentCount = widget.currentCount;
     final VoidCallback onTap = widget.onTap;
     final VoidCallback onReset = widget.onReset;
-    final double bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final double bottomInset = context.systemBottomSafeArea;
 
     final isDone = currentCount == 0;
     final ThemeData theme = Theme.of(context);

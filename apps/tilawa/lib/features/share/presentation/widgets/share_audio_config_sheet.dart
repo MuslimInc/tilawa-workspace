@@ -174,7 +174,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                   12,
                   8,
                   12,
-                  12 + MediaQuery.viewInsetsOf(context).bottom,
+                  12 + context.keyboardInset,
                 ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(

@@ -10,7 +10,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../bloc/reciter_details_bloc.dart';
@@ -159,7 +159,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double bottomPlayerOffset = MediaQuery.viewPaddingOf(context).bottom;
+    final double bottomPlayerOffset = context.floatingBottomPadding;
     final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
       final AudioPlayerState state = bloc.state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;
@@ -191,8 +191,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           floatingActionButtonLocation: showBottomPlayer
               ? _CustomFloatingActionButtonLocation(
                   offset:
-                      BottomPlayerWidget.collapsedHeight(context) +
-                      bottomPlayerOffset +
+                      QuranPlayerWidget.collapsedFootprint(context) +
                       tokens.spaceExtraLarge,
                 )
               : FloatingActionButtonLocation.endFloat,
@@ -333,10 +332,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             ),
           ),
         ),
-        if (showBottomPlayer)
-          Positioned.fill(
-            child: BottomPlayerWidget(bottomNavBarHeight: bottomPlayerOffset),
-          ),
+        const Positioned.fill(child: QuranPlayerWidget()),
       ],
     );
   }
@@ -422,7 +418,7 @@ class _ReciterDetailsContent extends StatelessWidget {
     final double bottomPadding =
         bottomPlayerOffset +
         (showBottomPlayer
-            ? BottomPlayerWidget.collapsedHeight(context) +
+            ? QuranPlayerWidget.collapsedHeight(context) +
                   tokens.spaceExtraLarge
             : tokens.spaceExtraLarge);
     final double emptyStateIconSize =

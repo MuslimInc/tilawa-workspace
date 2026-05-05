@@ -43,7 +43,7 @@ class _PrayerNotificationSettingsSheetState
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final bottomPadding = context.floatingBottomPadding;
 
     // We use context.select to listen only to the settings change
     final settings = context.select(

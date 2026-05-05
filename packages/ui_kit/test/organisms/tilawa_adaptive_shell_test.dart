@@ -58,6 +58,41 @@ void main() {
       expect(find.byType(NavigationRail), findsNothing);
     });
 
+    testWidgets('compact body has zero bottom MediaQuery padding', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.viewPadding = const FakeViewPadding(bottom: 34);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewPadding);
+
+      late EdgeInsets capturedPadding;
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: _destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            child: Builder(
+              builder: (context) {
+                capturedPadding = MediaQuery.paddingOf(context);
+                return const ColoredBox(color: Color(0xFFEEEEEE));
+              },
+            ),
+            bottomPlayer: const SizedBox.shrink(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(capturedPadding.bottom, 0.0);
+    });
+
     testWidgets('compact hides bottom nav while keyboard is open', (
       tester,
     ) async {

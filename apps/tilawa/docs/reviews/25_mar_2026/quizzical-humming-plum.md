@@ -68,7 +68,7 @@ Full codebase audit before publishing to Google Play. This combines my own findi
 
 ### LOW
 - Missing `const` in bottom player widgets
-- `BottomPlayerWidget` setState on every animation frame
+- `QuranPlayerWidget` setState on every animation frame
 - No user-facing retry for Quran data loading failure
 
 ---

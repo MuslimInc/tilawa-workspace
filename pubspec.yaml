@@ -11,6 +11,7 @@ workspace:
   - packages/ui_kit
   - packages/quran_qcf
   - packages/quran_image
+  - packages/skeletonizer
 
 dev_dependencies:
   melos: ^7.5.1

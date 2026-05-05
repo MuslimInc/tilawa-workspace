@@ -107,7 +107,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     tokens.spaceExtraLarge,
                     0,
                     tokens.spaceExtraLarge,
-                    context.safeBottomPadding,
+                    context.floatingBottomPadding,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -28,28 +28,18 @@ class PrayerTimesScreen extends StatefulWidget {
   State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
 }
 
-class _PrayerTimesScreenState extends State<PrayerTimesScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
+  int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    // Note: The PrayerTimesRoute already dispatches loadPrayerTimes event when creating the bloc.
-    // No need to dispatch it again here.
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void _onSegmentChanged(String value) {
+    setState(() {
+      _selectedIndex = value == 'today' ? 0 : 1;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
 
     return Scaffold(
@@ -58,33 +48,21 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
         title: Text(context.l10n.prayerTimes),
         actionsPadding: EdgeInsets.only(right: tokens.spaceMedium),
         actions: [
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-              foregroundColor: colorScheme.onPrimary,
-            ),
-            icon: const Icon(Icons.explore_outlined, size: 22),
-            onPressed: () => context.push('/qibla'),
+          TilawaIconActionButton(
+            icon: Icons.explore_outlined,
+            onTap: () => context.push('/qibla'),
           ),
           SizedBox(width: tokens.spaceSmall),
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-              foregroundColor: colorScheme.onPrimary,
-            ),
-            icon: const Icon(Icons.notifications_active_outlined, size: 22),
-            onPressed: () => _showNotificationDialog(context),
+          TilawaIconActionButton(
+            icon: Icons.notifications_active_outlined,
+            onTap: () => _showNotificationDialog(context),
           ),
           SizedBox(width: tokens.spaceSmall),
           Semantics(
             identifier: PrayerNotificationSemanticsIds.prayerSettingsButton,
-            child: IconButton(
-              style: IconButton.styleFrom(
-                backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-                foregroundColor: colorScheme.onPrimary,
-              ),
-              icon: const Icon(Icons.settings, size: 22),
-              onPressed: () => _showSettingsDialog(context),
+            child: TilawaIconActionButton(
+              icon: Icons.settings,
+              onTap: () => _showSettingsDialog(context),
             ),
           ),
           SizedBox(width: tokens.spaceExtraSmall),
@@ -98,46 +76,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               tokens.spaceLarge,
               tokens.spaceMedium,
             ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.surface.withValues(alpha: 0.22),
-                borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                border: Border.all(
-                  color: colorScheme.surface.withValues(alpha: 0.34),
-                ),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                dividerColor: Colors.transparent,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: const EdgeInsets.all(4),
-                indicator: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(tokens.radiusLarge - 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                labelColor: colorScheme.onSurface,
-                unselectedLabelColor: colorScheme.onPrimary.withValues(
-                  alpha: 0.82,
-                ),
-                labelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-                unselectedLabelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                splashBorderRadius: BorderRadius.circular(tokens.radiusLarge),
-                tabs: [
-                  Tab(text: context.l10n.today),
-                  Tab(text: context.l10n.monthly),
-                ],
-              ),
+            child: TilawaSegmentedControl<String>(
+              segments: [
+                TilawaSegment(value: 'today', label: context.l10n.today),
+                TilawaSegment(value: 'monthly', label: context.l10n.monthly),
+              ],
+              selectedValue: _selectedIndex == 0 ? 'today' : 'monthly',
+              onValueChanged: _onSegmentChanged,
             ),
           ),
         ),
@@ -161,7 +106,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           switch (state.status) {
             case PrayerTimesStatus.initial:
             case PrayerTimesStatus.loading:
-              return const Center(child: CircularProgressIndicator());
+              return const TilawaLoadingIndicator();
 
             case PrayerTimesStatus.error:
               return Center(
@@ -192,8 +137,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               return _buildLocationRequiredView(context, state);
 
             case PrayerTimesStatus.loaded:
-              return TabBarView(
-                controller: _tabController,
+              return IndexedStack(
+                index: _selectedIndex,
                 children: [
                   _buildTodayView(context, state),
                   _buildMonthlyView(context, state),
@@ -270,7 +215,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   Widget _buildTodayView(BuildContext context, PrayerTimesState state) {
     if (state.todayPrayerTimes == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const TilawaLoadingIndicator();
     }
 
     final tokens = Theme.of(context).tokens;

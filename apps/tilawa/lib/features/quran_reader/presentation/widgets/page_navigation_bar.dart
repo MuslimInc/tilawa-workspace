@@ -9,6 +9,7 @@ import 'package:tilawa/features/quran_reader/presentation/widgets/atoms/nav_acti
 import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/navigation_index_card.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/page_slider_section.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/slider_preview_pill.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class PageNavigationBar extends StatefulWidget {
   const PageNavigationBar({
@@ -245,7 +246,7 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
     final Color textColor = readerTheme.textColor;
     final Color mutedTextColor = readerTheme.textColor.withValues(alpha: 0.65);
 
-    final double bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+    final double bottomPadding = context.floatingBottomPadding;
     final _PagePreviewInfo currentInfo = _PagePreviewInfo.fromPage(
       context,
       widget.currentPage,

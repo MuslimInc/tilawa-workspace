@@ -5,11 +5,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
+import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/qibla/presentation/bloc/qibla_bloc.dart';
@@ -119,75 +122,94 @@ class _MainScreenState extends State<MainScreen> {
           create: (_) => getIt<InternetStatusBloc>(),
         ),
       ],
-      child: BlocListener<MainScreenCubit, MainScreenState>(
+      child: BlocListener<PlayerBackgroundCubit, PlayerBackgroundState>(
+        listenWhen: (previous, current) => current is PlayerBackgroundError,
         listener: (context, state) {
-          if (state.currentIndex == _lastHandledIndex) return;
-          _handleTabSideEffects(context, _lastHandledIndex, state.currentIndex);
-          _lastHandledIndex = state.currentIndex;
+          if (state is PlayerBackgroundError) {
+            ToastUtils.showErrorToast(state.failure.localizedMessage(context));
+          }
         },
-        child: BlocBuilder<MainScreenCubit, MainScreenState>(
-          builder: (context, state) {
-            if (!state.isShellActivated) {
-              return const _MainShellPlaceholderScaffold();
-            }
-
-            final double bottomPadding = context.safeBottomPadding;
-            final double keyboardHeight = MediaQuery.viewInsetsOf(
+        child: BlocListener<MainScreenCubit, MainScreenState>(
+          listener: (context, state) {
+            if (state.currentIndex == _lastHandledIndex) return;
+            _handleTabSideEffects(
               context,
-            ).bottom;
-            final bool isKeyboardOpen = keyboardHeight > 0;
-            final adaptiveShellTokens = Theme.of(
-              context,
-            ).componentTokens.adaptiveShell;
-            final double bottomNavBarHeight = context.isCompact
-                ? (adaptiveShellTokens.compactBottomNavBarBaseHeight +
-                      bottomPadding)
-                : bottomPadding;
-
-            final List<_NavDestination> navDestinations = _buildDestinations(
-              context,
-              state,
+              _lastHandledIndex,
+              state.currentIndex,
             );
-            final List<TilawaNavDestination> adaptiveDestinations =
-                navDestinations
-                    .map(
-                      (d) => TilawaNavDestination(
-                        label: d.label,
-                        icon: d.icon,
-                        activeIcon: d.activeIcon,
-                        identifier: d.identifier,
-                        iconBuilder: d.svgPath == null
-                            ? null
-                            : (context, {required isSelected, required color}) {
-                                return SvgPicture.asset(
-                                  d.svgPath!,
-                                  width: 22,
-                                  height: 22,
-                                  colorFilter: ColorFilter.mode(
-                                    color,
-                                    BlendMode.srcIn,
-                                  ),
-                                );
-                              },
-                      ),
-                    )
-                    .toList();
-
-            return PopScope(
-              canPop: state.currentIndex == 0,
-              onPopInvokedWithResult: (didPop, result) {
-                if (didPop) return;
-                context.read<MainScreenCubit>().selectTab(0);
-              },
-              child: _MainShellContent(
-                state: state,
-                adaptiveDestinations: adaptiveDestinations,
-                navDestinations: navDestinations,
-                bottomNavBarHeight: bottomNavBarHeight,
-                isKeyboardOpen: isKeyboardOpen,
-              ),
-            );
+            _lastHandledIndex = state.currentIndex;
           },
+          child: BlocBuilder<MainScreenCubit, MainScreenState>(
+            builder: (context, state) {
+              if (!state.isShellActivated) {
+                return const _MainShellPlaceholderScaffold();
+              }
+
+              final double bottomPadding = context.floatingBottomPadding;
+              final bool isKeyboardOpen = context.isKeyboardVisible;
+              final adaptiveShellTokens = Theme.of(
+                context,
+              ).componentTokens.adaptiveShell;
+              // Total visual footprint of the floating bottom nav bar =
+              // base height + safe-area bottom + vertical margin + a visual
+              // gap so overlapping widgets (mini player, FABs) sit clearly
+              // above it rather than hugging its top edge.
+              final double bottomNavBarHeight = context.isCompact
+                  ? (adaptiveShellTokens.compactBottomNavBarBaseHeight +
+                        bottomPadding +
+                        adaptiveShellTokens.bottomNavVerticalMargin +
+                        context.tokens.spaceExtraLarge)
+                  : bottomPadding;
+
+              final List<_NavDestination> navDestinations = _buildDestinations(
+                context,
+                state,
+              );
+              final List<TilawaNavDestination> adaptiveDestinations =
+                  navDestinations
+                      .map(
+                        (d) => TilawaNavDestination(
+                          label: d.label,
+                          icon: d.icon,
+                          activeIcon: d.activeIcon,
+                          identifier: d.identifier,
+                          iconBuilder: d.svgPath == null
+                              ? null
+                              : (
+                                  context, {
+                                  required isSelected,
+                                  required color,
+                                }) {
+                                  return SvgPicture.asset(
+                                    d.svgPath!,
+                                    width: 22,
+                                    height: 22,
+                                    colorFilter: ColorFilter.mode(
+                                      color,
+                                      BlendMode.srcIn,
+                                    ),
+                                  );
+                                },
+                        ),
+                      )
+                      .toList();
+
+              return PopScope(
+                canPop: state.currentIndex == 0,
+                onPopInvokedWithResult: (didPop, result) {
+                  if (didPop) return;
+                  context.read<MainScreenCubit>().selectTab(0);
+                },
+                child: _MainShellContent(
+                  state: state,
+                  adaptiveDestinations: adaptiveDestinations,
+                  navDestinations: navDestinations,
+                  bottomNavBarHeight: bottomNavBarHeight,
+                  isKeyboardOpen: isKeyboardOpen,
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

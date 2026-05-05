@@ -108,7 +108,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
         : view.physicalSize.height.round();
     final newCacheWidth = portraitPhysicalWidth;
 
-    final padding = MediaQuery.paddingOf(context);
+    final padding = context.contentSafePadding;
     final availableWidth = screenWidth - padding.left - padding.right;
     final availableHeight = screenHeight - padding.top - padding.bottom;
     final newIsLandscape = availableWidth > availableHeight;

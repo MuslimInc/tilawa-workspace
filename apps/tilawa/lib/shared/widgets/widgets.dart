@@ -1,1 +1,1 @@
-export 'bottom_player_widget.dart';
+export 'quran_player_widget.dart';

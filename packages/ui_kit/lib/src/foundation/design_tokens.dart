@@ -32,6 +32,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.iconSizeSmall,
     required this.iconSizeMedium,
     required this.iconSizeLarge,
+    required this.iconSizeLargePlus,
     required this.iconSizeExtraLarge,
     required this.textHeightLoose,
     required this.durationFast,
@@ -129,6 +130,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
   /// 24.0
   final double iconSizeLarge;
+
+  /// 42.0
+  final double iconSizeLargePlus;
 
   /// 48.0
   final double iconSizeExtraLarge;
@@ -237,6 +241,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeSmall: 16.0,
       iconSizeMedium: 20.0,
       iconSizeLarge: 24.0,
+      iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 48.0,
       textHeightLoose: 2.0,
       durationFast: const Duration(milliseconds: 200),
@@ -336,6 +341,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeSmall: iconSizeSmall ?? this.iconSizeSmall,
       iconSizeMedium: iconSizeMedium ?? this.iconSizeMedium,
       iconSizeLarge: iconSizeLarge ?? this.iconSizeLarge,
+      iconSizeLargePlus: iconSizeLargePlus ?? this.iconSizeLargePlus,
       iconSizeExtraLarge: iconSizeExtraLarge ?? this.iconSizeExtraLarge,
       textHeightLoose: textHeightLoose ?? this.textHeightLoose,
       durationFast: durationFast ?? this.durationFast,
@@ -421,6 +427,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeSmall: lerpDouble(iconSizeSmall, other.iconSizeSmall, t)!,
       iconSizeMedium: lerpDouble(iconSizeMedium, other.iconSizeMedium, t)!,
       iconSizeLarge: lerpDouble(iconSizeLarge, other.iconSizeLarge, t)!,
+      iconSizeLargePlus: lerpDouble(
+        iconSizeLargePlus,
+        other.iconSizeLargePlus,
+        t,
+      )!,
       iconSizeExtraLarge: lerpDouble(
         iconSizeExtraLarge,
         other.iconSizeExtraLarge,
