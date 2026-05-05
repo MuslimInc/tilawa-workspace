@@ -190,7 +190,8 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           ),
           floatingActionButtonLocation: showBottomPlayer
               ? _CustomFloatingActionButtonLocation(
-                  offset: QuranPlayerWidget.collapsedFootprint(context) +
+                  offset:
+                      QuranPlayerWidget.collapsedFootprint(context) +
                       tokens.spaceExtraLarge,
                 )
               : FloatingActionButtonLocation.endFloat,

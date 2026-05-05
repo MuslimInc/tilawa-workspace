@@ -235,155 +235,147 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranPlayerWidget');
 
-    return BlocListener<PlayerBackgroundCubit, PlayerBackgroundState>(
-      listenWhen: (previous, current) => current is PlayerBackgroundError,
+    return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
+      listenWhen: (previous, current) {
+        return previous.currentAudio?.id != current.currentAudio?.id ||
+            (!previous.shouldShowBottomPlayer &&
+                current.shouldShowBottomPlayer) ||
+            (previous.isPlaying != current.isPlaying && current.isPlaying) ||
+            previous.failure != current.failure;
+      },
+      buildWhen: (previous, current) =>
+          previous.currentAudio != current.currentAudio ||
+          previous.shouldShowBottomPlayer != current.shouldShowBottomPlayer ||
+          previous.isPlaying != current.isPlaying ||
+          previous.canGoPrevious != current.canGoPrevious ||
+          previous.canGoNext != current.canGoNext ||
+          previous.isSleepTimerActive != current.isSleepTimerActive ||
+          previous.volume != current.volume ||
+          previous.speed != current.speed ||
+          previous.dismissedAudioId != current.dismissedAudioId,
       listener: (context, state) {
-        if (state is PlayerBackgroundError) {
-          ToastUtils.showErrorToast(state.failure.localizedMessage(context));
+        // Reset dismiss animation so the mini player is not offset off-screen
+        // from a previous dismiss gesture.
+        if (_dismissAnimation != null ||
+            _dismissAnimController.value != 0 ||
+            _dismissOffsetY != 0) {
+          _dismissAnimation = null;
+          _dismissAnimController.value = 0;
+          _dismissOffsetY = 0;
+        }
+        if (state.failure != null) {
+          ToastUtils.showErrorToast(state.failure!.localizedMessage(context));
         }
       },
-      child: BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
-        listenWhen: (previous, current) {
-          return previous.currentAudio?.id != current.currentAudio?.id ||
-              (!previous.shouldShowBottomPlayer &&
-                  current.shouldShowBottomPlayer) ||
-              (previous.isPlaying != current.isPlaying && current.isPlaying) ||
-              previous.failure != current.failure;
-        },
-        buildWhen: (previous, current) =>
-            previous.currentAudio != current.currentAudio ||
-            previous.shouldShowBottomPlayer != current.shouldShowBottomPlayer ||
-            previous.isPlaying != current.isPlaying ||
-            previous.canGoPrevious != current.canGoPrevious ||
-            previous.canGoNext != current.canGoNext ||
-            previous.isSleepTimerActive != current.isSleepTimerActive ||
-            previous.volume != current.volume ||
-            previous.speed != current.speed ||
-            previous.dismissedAudioId != current.dismissedAudioId,
-        listener: (context, state) {
-          // Reset dismiss animation so the mini player is not offset off-screen
-          // from a previous dismiss gesture.
-          if (_dismissAnimation != null ||
-              _dismissAnimController.value != 0 ||
-              _dismissOffsetY != 0) {
-            _dismissAnimation = null;
-            _dismissAnimController.value = 0;
-            _dismissOffsetY = 0;
-          }
-          if (state.failure != null) {
-            ToastUtils.showErrorToast(state.failure!.localizedMessage(context));
-          }
-        },
-        builder: (context, state) {
-          final audio = state.currentAudio;
+      builder: (context, state) {
+        final audio = state.currentAudio;
 
-          if (!state.shouldShowBottomPlayer ||
-              audio == null ||
-              (widget.isKeyboardOpen && !isExpanding)) {
-            return const SizedBox.shrink();
-          }
+        if (!state.shouldShowBottomPlayer ||
+            audio == null ||
+            (widget.isKeyboardOpen && !isExpanding)) {
+          return const SizedBox.shrink();
+        }
 
-          final screenHeight = MediaQuery.sizeOf(context).height;
+        final screenHeight = MediaQuery.sizeOf(context).height;
 
-          return Align(
-            alignment: Alignment.bottomCenter,
-            child: AnimatedBuilder(
-              animation: _expandController,
-              builder: (context, _) {
-                final progress = _expandController.value;
-                final sheetOffsetY = screenHeight * (1 - progress);
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: AnimatedBuilder(
+            animation: _expandController,
+            builder: (context, _) {
+              final progress = _expandController.value;
+              final sheetOffsetY = screenHeight * (1 - progress);
 
-                if (progress > 0.01) {
-                  return SizedBox(
-                    height: screenHeight,
-                    width: double.infinity,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Transform.translate(
-                          offset: Offset(0, sheetOffsetY),
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onVerticalDragUpdate: _onVerticalDragUpdate,
-                            onVerticalDragEnd: _onVerticalDragEnd,
-                            child: ColoredBox(
-                              color: Colors.black,
-                              child: _ExpandedPlayerOrganism(
-                                state: state,
-                                audio: audio,
-                                onCollapse: collapse,
-                                onDismiss: _dismissWithUndo,
-                                expandProgress: progress,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (progress < 0.99)
-                          Positioned(
-                            bottom: lerpDouble(
-                              widget.bottomNavBarHeight,
-                              0,
-                              progress,
-                            ),
-                            left: 0,
-                            right: 0,
-                            child: _MiniPlayerTransition(
-                              progress: progress,
-                              state: state,
-                              audio: audio,
-                              dismissAnimController: _dismissAnimController,
-                              dismissAnimation: _dismissAnimation,
-                              dismissOffsetY: _dismissOffsetY,
-                              onVerticalDragUpdate: _onVerticalDragUpdate,
-                              onVerticalDragEnd: _onVerticalDragEnd,
-                              onTap: expand,
-                              onClose: _dismissWithUndo,
-                            ),
-                          ),
-                      ],
-                    ),
-                  );
-                }
-
-                // Collapsed state: Column-based layout for proper positioning
-                // above the bottom nav bar (if present) or screen edge.
-                // When there's no nav bar (e.g., reciter details), add
-                // extra breathing room so the mini player doesn't hug the
-                // screen edge.
-                final bottomInset = widget.bottomNavBarHeight > 0
-                    ? widget.bottomNavBarHeight
-                    : MediaQuery.paddingOf(context).bottom +
-                          context.tokens.spaceExtraLarge;
+              if (progress > 0.01) {
                 return SizedBox(
-                  height: _miniPlayerHeight + bottomInset,
+                  height: screenHeight,
                   width: double.infinity,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                  child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      SizedBox(
-                        height: _miniPlayerHeight,
-                        child: _MiniPlayerTransition(
-                          progress: progress,
-                          state: state,
-                          audio: audio,
-                          dismissAnimController: _dismissAnimController,
-                          dismissAnimation: _dismissAnimation,
-                          dismissOffsetY: _dismissOffsetY,
+                      Transform.translate(
+                        offset: Offset(0, sheetOffsetY),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
                           onVerticalDragUpdate: _onVerticalDragUpdate,
                           onVerticalDragEnd: _onVerticalDragEnd,
-                          onTap: expand,
-                          onClose: _dismissWithUndo,
+                          child: ColoredBox(
+                            color: Colors.black,
+                            child: _ExpandedPlayerOrganism(
+                              state: state,
+                              audio: audio,
+                              onCollapse: collapse,
+                              onDismiss: _dismissWithUndo,
+                              expandProgress: progress,
+                            ),
+                          ),
                         ),
                       ),
-                      SizedBox(height: bottomInset),
+                      if (progress < 0.99)
+                        Positioned(
+                          bottom: lerpDouble(
+                            widget.bottomNavBarHeight,
+                            0,
+                            progress,
+                          ),
+                          left: 0,
+                          right: 0,
+                          child: _MiniPlayerTransition(
+                            progress: progress,
+                            state: state,
+                            audio: audio,
+                            dismissAnimController: _dismissAnimController,
+                            dismissAnimation: _dismissAnimation,
+                            dismissOffsetY: _dismissOffsetY,
+                            onVerticalDragUpdate: _onVerticalDragUpdate,
+                            onVerticalDragEnd: _onVerticalDragEnd,
+                            onTap: expand,
+                            onClose: _dismissWithUndo,
+                          ),
+                        ),
                     ],
                   ),
                 );
-              },
-            ),
-          );
-        },
-      ),
+              }
+
+              // Collapsed state: Column-based layout for proper positioning
+              // above the bottom nav bar (if present) or screen edge.
+              // When there's no nav bar (e.g., reciter details), add
+              // extra breathing room so the mini player doesn't hug the
+              // screen edge.
+              final bottomInset = widget.bottomNavBarHeight > 0
+                  ? widget.bottomNavBarHeight
+                  : MediaQuery.paddingOf(context).bottom +
+                        context.tokens.spaceExtraLarge;
+              return SizedBox(
+                height: _miniPlayerHeight + bottomInset,
+                width: double.infinity,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    SizedBox(
+                      height: _miniPlayerHeight,
+                      child: _MiniPlayerTransition(
+                        progress: progress,
+                        state: state,
+                        audio: audio,
+                        dismissAnimController: _dismissAnimController,
+                        dismissAnimation: _dismissAnimation,
+                        dismissOffsetY: _dismissOffsetY,
+                        onVerticalDragUpdate: _onVerticalDragUpdate,
+                        onVerticalDragEnd: _onVerticalDragEnd,
+                        onTap: expand,
+                        onClose: _dismissWithUndo,
+                      ),
+                    ),
+                    SizedBox(height: bottomInset),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
