@@ -24,6 +24,10 @@ abstract final class PrayerNotificationSemanticsIds {
   /// bottom sheet.
   static const String prayerSettingsButton = 'prayer_settings_button';
 
+  /// In-screen entry point that opens the Prayer Notifications bottom sheet.
+  static const String prayerNotificationsEntryPoint =
+      'prayer_notifications_entry_point';
+
   /// The "Prayer Notifications" section header inside the settings sheet.
   static const String notificationsSection = 'prayer_notifications_section';
 

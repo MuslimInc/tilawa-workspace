@@ -46,16 +46,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
       appBar: AppBar(
         leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.prayerTimes),
-        actionsPadding: EdgeInsets.only(right: tokens.spaceMedium),
+        actionsPadding: EdgeInsetsDirectional.only(end: tokens.spaceMedium),
         actions: [
           TilawaIconActionButton(
             icon: Icons.explore_outlined,
             onTap: () => context.push('/qibla'),
-          ),
-          SizedBox(width: tokens.spaceSmall),
-          TilawaIconActionButton(
-            icon: Icons.notifications_active_outlined,
-            onTap: () => _showNotificationDialog(context),
           ),
           SizedBox(width: tokens.spaceSmall),
           Semantics(
@@ -87,7 +82,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           ),
         ),
       ),
-      floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
+      // floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
       body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
         buildWhen: (previous, current) {
           return previous.status != current.status ||
@@ -245,6 +240,9 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             isLoading: state.isLoadingLocation,
           ),
           const _CountdownCardSection(),
+          _PrayerNotificationsEntry(
+            onTap: () => _showNotificationDialog(context),
+          ),
           _TodayPrayerGrid(
             prayerTimes: state.todayPrayerTimes!,
             use24HourFormat: state.settings.use24HourFormat,
@@ -323,6 +321,104 @@ class _CountdownCardSection extends StatelessWidget {
           use24HourFormat: state.settings.use24HourFormat,
         );
       },
+    );
+  }
+}
+
+class _PrayerNotificationsEntry extends StatelessWidget {
+  const _PrayerNotificationsEntry({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final settings = context.select(
+      (PrayerTimesBloc bloc) => bloc.state.settings,
+    );
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final enabled =
+        settings.fajrNotification.enabled ||
+        settings.dhuhrNotification.enabled ||
+        settings.asrNotification.enabled ||
+        settings.maghribNotification.enabled ||
+        settings.ishaNotification.enabled;
+    final statusText = enabled ? context.l10n.enabled : context.l10n.disabled;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceSmall,
+      ),
+      child: Semantics(
+        identifier:
+            PrayerNotificationSemanticsIds.prayerNotificationsEntryPoint,
+        button: true,
+        label: context.l10n.prayerNotifications,
+        value: statusText,
+        child: TilawaCard(
+          onTap: onTap,
+          padding: EdgeInsets.all(tokens.spaceMedium),
+          backgroundColor: colorScheme.surface,
+          borderColor: colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacityMedium,
+          ),
+          borderRadius: tokens.radiusLarge,
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(tokens.spaceSmall),
+                decoration: BoxDecoration(
+                  color: enabled
+                      ? colorScheme.primaryContainer
+                      : colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(tokens.radiusMedium),
+                ),
+                child: Icon(
+                  enabled
+                      ? Icons.notifications_active_outlined
+                      : Icons.notifications_off_outlined,
+                  size: tokens.iconSizeMedium,
+                  color: enabled
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSurfaceVariant,
+                ),
+              ),
+              SizedBox(width: tokens.spaceMedium),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.prayerNotifications,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    SizedBox(height: tokens.spaceExtraSmall),
+                    Text(
+                      statusText,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: tokens.spaceMedium),
+              Icon(
+                Icons.chevron_right,
+                size: tokens.iconSizeLarge,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -536,19 +632,19 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
             ),
           ),
         ),
-        FloatingActionButton.extended(
-          onPressed: _firing ? null : _fire,
-          label: _firing
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('Fire'),
-          icon: const Icon(Icons.notifications_active_outlined),
-          backgroundColor: theme.colorScheme.errorContainer,
-          foregroundColor: theme.colorScheme.onErrorContainer,
-        ),
+        // FloatingActionButton.extended(
+        //   onPressed: _firing ? null : _fire,
+        //   label: _firing
+        //       ? const SizedBox(
+        //           width: 18,
+        //           height: 18,
+        //           child: CircularProgressIndicator(strokeWidth: 2),
+        //         )
+        //       : const Text('Fire'),
+        //   icon: const Icon(Icons.notifications_active_outlined),
+        //   backgroundColor: theme.colorScheme.errorContainer,
+        //   foregroundColor: theme.colorScheme.onErrorContainer,
+        // ),
       ],
     );
   }
