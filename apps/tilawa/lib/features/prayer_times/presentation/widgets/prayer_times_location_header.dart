@@ -46,7 +46,7 @@ class PrayerTimesLocationHeader extends StatelessWidget {
         tokens.spaceLarge,
         tokens.spaceExtraSmall,
         tokens.spaceLarge,
-        tokens.spaceSmall,
+        0,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
