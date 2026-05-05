@@ -2,12 +2,9 @@ import 'package:flutter/services.dart';
 
 /// Centralized service for managing device orientation across the Tilawa app.
 class AppOrientationService {
-  /// Default orientations for the general app (Portrait Up/Down).
+  /// Default orientations for the general app (Portrait Up only).
   static const List<DeviceOrientation> _defaultOrientations = [
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-    DeviceOrientation.landscapeLeft,
-    DeviceOrientation.landscapeRight,
   ];
 
   /// Full rotation orientations for the Quran Reader.
@@ -18,7 +15,7 @@ class AppOrientationService {
     DeviceOrientation.landscapeRight,
   ];
 
-  /// Applies the default app orientations (Portrait Up/Down).
+  /// Applies the default app orientations (Portrait Up only).
   static Future<void> applyDefaultOrientations() async {
     await SystemChrome.setPreferredOrientations(_defaultOrientations);
   }

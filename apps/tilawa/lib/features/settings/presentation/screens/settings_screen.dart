@@ -666,7 +666,8 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => SafeArea(
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.only(bottom: sheetContext.systemViewInsets.bottom),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -687,7 +688,7 @@ class SettingsScreen extends StatelessWidget {
               },
             ),
             TilawaSelectionTile(
-              title: context.l10n.english,
+              title: "English",
               isSelected: currentLocale.languageCode == englishLanguageCode,
               onTap: () {
                 context.read<LocalizationBloc>().add(

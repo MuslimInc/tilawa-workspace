@@ -57,108 +57,140 @@ class BookmarksScreen extends StatelessWidget {
             );
           },
           builder: (context, state) {
-            return Stack(
-              children: [
-                state.when(
-                  initial: () => const TilawaLoadingIndicator(),
-                  loading: () => const TilawaLoadingIndicator(),
-                  loaded: (bookmarks, filteredBookmarks, searchQuery) => Column(
-                    children: [
-                      BookmarkSearchBar(
-                        onSearchChanged: (query) {
-                          context.read<BookmarksBloc>().add(
-                            SearchBookmarksEvent(query: query),
-                          );
-                        },
-                        onClearSearch: () {
-                          context.read<BookmarksBloc>().add(
-                            const ClearBookmarksSearchEvent(),
-                          );
-                        },
-                      ),
-                      Expanded(
-                        child: filteredBookmarks.isEmpty
-                            ? _buildEmptyState(context, searchQuery.isNotEmpty)
-                            : ListView.separated(
-                                padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
-                                itemCount: filteredBookmarks.length,
-                                separatorBuilder: (context, index) =>
-                                    SizedBox(height: 8),
-                                itemBuilder: (context, index) {
-                                  final BookmarkEntity bookmark =
-                                      filteredBookmarks[index];
-                                  return Dismissible(
-                                    key: ValueKey(bookmark.id),
-                                    background: Container(
-                                      alignment: Alignment.centerRight,
-                                      padding: EdgeInsets.only(right: 20),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: const Icon(
-                                        Icons.delete_outline_rounded,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    onDismissed: (direction) {
-                                      context.read<BookmarksBloc>().add(
-                                        DeleteBookmarkEvent(id: bookmark.id),
-                                      );
-                                    },
-                                    child: BookmarkCard(
-                                      bookmark: bookmark,
-                                      onTap: () =>
-                                          _playFromBookmark(context, bookmark),
-                                      onEdit: () => _showEditLabelDialog(
-                                        context,
-                                        bookmark,
-                                      ),
-                                    ),
-                                  );
-                                },
+            return SafeArea(
+              child: Stack(
+                children: [
+                  state.when(
+                    initial: () => const TilawaLoadingIndicator(),
+                    loading: () => const TilawaLoadingIndicator(),
+                    loaded: (bookmarks, filteredBookmarks, searchQuery) =>
+                        Positioned.fill(
+                          child: CustomScrollView(
+                            slivers: [
+                              SliverToBoxAdapter(
+                                child: BookmarkSearchBar(
+                                  onSearchChanged: (query) {
+                                    context.read<BookmarksBloc>().add(
+                                      SearchBookmarksEvent(query: query),
+                                    );
+                                  },
+                                  onClearSearch: () {
+                                    context.read<BookmarksBloc>().add(
+                                      const ClearBookmarksSearchEvent(),
+                                    );
+                                  },
+                                ),
                               ),
-                      ),
-                    ],
-                  ),
-                  bookmarkCreated: (_, bookmarks) =>
-                      _buildLoadedList(context, bookmarks),
-                  bookmarkUpdated: (_, bookmarks) =>
-                      _buildLoadedList(context, bookmarks),
-                  bookmarkDeleted: (_, bookmarks) =>
-                      _buildLoadedList(context, bookmarks),
-                  error: (message) => Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          message,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Theme.of(context).colorScheme.error,
+                              SliverFillRemaining(
+                                hasScrollBody: filteredBookmarks.isNotEmpty,
+                                child: filteredBookmarks.isEmpty
+                                    ? _buildEmptyState(
+                                        context,
+                                        searchQuery.isNotEmpty,
+                                      )
+                                    : ListView.separated(
+                                        padding: EdgeInsets.fromLTRB(
+                                          16,
+                                          16,
+                                          16,
+                                          120,
+                                        ),
+                                        itemCount: filteredBookmarks.length,
+                                        separatorBuilder: (context, index) =>
+                                            SizedBox(height: 8),
+                                        itemBuilder: (context, index) {
+                                          final BookmarkEntity bookmark =
+                                              filteredBookmarks[index];
+                                          return Dismissible(
+                                            key: ValueKey(bookmark.id),
+                                            background: Container(
+                                              alignment: Alignment.centerRight,
+                                              padding: EdgeInsets.only(
+                                                right: 20,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.red,
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                              child: const Icon(
+                                                Icons.delete_outline_rounded,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            onDismissed: (direction) {
+                                              context.read<BookmarksBloc>().add(
+                                                DeleteBookmarkEvent(
+                                                  id: bookmark.id,
+                                                ),
+                                              );
+                                            },
+                                            child: BookmarkCard(
+                                              bookmark: bookmark,
+                                              onTap: () => _playFromBookmark(
+                                                context,
+                                                bookmark,
+                                              ),
+                                              onEdit: () =>
+                                                  _showEditLabelDialog(
+                                                    context,
+                                                    bookmark,
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<BookmarksBloc>().add(
-                              const LoadBookmarksEvent(),
-                            );
-                          },
-                          child: Text(context.l10n.retry),
+                    bookmarkCreated: (_, bookmarks) => Positioned.fill(
+                      child: _buildLoadedList(context, bookmarks),
+                    ),
+                    bookmarkUpdated: (_, bookmarks) => Positioned.fill(
+                      child: _buildLoadedList(context, bookmarks),
+                    ),
+                    bookmarkDeleted: (_, bookmarks) => Positioned.fill(
+                      child: _buildLoadedList(context, bookmarks),
+                    ),
+                    error: (message) => Positioned.fill(
+                      child: Center(
+                        child: SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.error_outline_rounded,
+                                size: 64,
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                              SizedBox(height: 16),
+                              Text(
+                                message,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Theme.of(context).colorScheme.error,
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: () {
+                                  context.read<BookmarksBloc>().add(
+                                    const LoadBookmarksEvent(),
+                                  );
+                                },
+                                child: Text(context.l10n.retry),
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                const Positioned.fill(child: QuranPlayerWidget()),
-              ],
+                  const Positioned.fill(child: QuranPlayerWidget()),
+                ],
+              ),
             );
           },
         ),
@@ -210,14 +242,19 @@ class BookmarksScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, bool isSearching) {
-    return TilawaEmptyState(
-      icon: FluentIcons.bookmark_24_regular,
-      title: isSearching
-          ? context.l10n.noBookmarksFound
-          : context.l10n.noBookmarks,
-      subtitle: isSearching
-          ? context.l10n.tryDifferentSearch
-          : context.l10n.noBookmarksHint,
+    return Center(
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: TilawaEmptyState(
+          icon: FluentIcons.bookmark_24_regular,
+          title: isSearching
+              ? context.l10n.noBookmarksFound
+              : context.l10n.noBookmarks,
+          subtitle: isSearching
+              ? context.l10n.tryDifferentSearch
+              : context.l10n.noBookmarksHint,
+        ),
+      ),
     );
   }
 

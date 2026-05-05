@@ -14,6 +14,7 @@ import 'package:quran_image/quran_image_reader.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
@@ -278,6 +279,7 @@ class _ReaderShell extends StatelessWidget {
             restoreSystemUiMode: SystemUiMode.edgeToEdge,
             preferredOrientations: AppOrientationService.readerOrientations,
             restoreOrientations: AppOrientationService.defaultOrientations,
+            restoreSystemUiOverlayStyle: AppSystemChromeStyle.defaultAppStyle,
             onShareRequested: onShareRequested,
           );
         }

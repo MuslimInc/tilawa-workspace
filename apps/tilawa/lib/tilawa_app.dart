@@ -8,7 +8,9 @@ import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:flutter/services.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -241,6 +243,32 @@ class _PlayerApp extends StatelessWidget {
               final density = appLaunchConfig.compactUiEnabled
                   ? TilawaDensity.compact
                   : TilawaDensity.comfortable;
+              final platformBrightness = MediaQuery.platformBrightnessOf(
+                context,
+              );
+              final bool isDark = switch (themeState.mode) {
+                ThemeMode.dark => true,
+                ThemeMode.light => false,
+                ThemeMode.system => platformBrightness == Brightness.dark,
+              };
+              final Brightness iconBrightness = isDark
+                  ? Brightness.light
+                  : Brightness.dark;
+              final Brightness statusBarBrightness = isDark
+                  ? Brightness.dark
+                  : Brightness.light;
+              AppSystemChromeStyle.updateDefaultAppStyle(
+                SystemUiOverlayStyle(
+                  statusBarColor: const Color(0x00000000),
+                  statusBarIconBrightness: iconBrightness,
+                  statusBarBrightness: statusBarBrightness,
+                  systemNavigationBarColor: const Color(0x00000000),
+                  systemNavigationBarDividerColor: const Color(0x00000000),
+                  systemNavigationBarIconBrightness: iconBrightness,
+                  systemStatusBarContrastEnforced: false,
+                  systemNavigationBarContrastEnforced: false,
+                ),
+              );
               return MaterialApp.router(
                 title: AppStrings.appName,
                 showPerformanceOverlay: false,
