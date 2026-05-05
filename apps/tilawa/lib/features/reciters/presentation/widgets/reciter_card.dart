@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -38,20 +39,19 @@ class ReciterCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(tokens.radiusLarge),
                 border: Border.all(
                   color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: 0.22,
+                    alpha: 0.30,
                   ),
+                  width: tokens.borderWidthThin,
                 ),
               ),
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceMedium,
-                  vertical: tokens.spaceSmall,
+                  horizontal: tokens.spaceLarge,
+                  vertical: tokens.spaceLarge,
                 ),
                 child: Row(
-                  crossAxisAlignment: .start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // _ReciterAvatar(reciter: reciter),
-                    // SizedBox(width: tokens.spaceMedium),
                     Expanded(child: _ReciterInfo(reciter: reciter)),
                     SizedBox(width: tokens.spaceSmall),
                     _FavoriteButton(reciter: reciter),
@@ -88,7 +88,6 @@ class _ReciterInfo extends StatelessWidget {
           reciter.name,
           style: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w700,
-            letterSpacing: 0.1,
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -100,8 +99,8 @@ class _ReciterInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(
-                Icons.headphones_rounded,
-                size: tokens.iconSizeExtraSmall + 2,
+                FluentIcons.headphones_20_regular,
+                size: tokens.iconSizeSmall,
                 color: theme.colorScheme.onSurfaceVariant.withValues(
                   alpha: 0.75,
                 ),
@@ -120,7 +119,7 @@ class _ReciterInfo extends StatelessWidget {
             ],
           ),
         ] else ...[
-          SizedBox(height: tokens.spaceExtraSmall),
+          SizedBox(height: tokens.spaceSmall),
           Text(
             context.l10n.recitationsAvailable(reciter.moshaf.length),
             style: theme.textTheme.bodySmall?.copyWith(
@@ -153,23 +152,27 @@ class _FavoriteButton extends StatelessWidget {
     return Semantics(
       identifier: ReciterSemanticsIds.reciterFavoriteButton(reciter.id),
       child: Material(
-        color: theme.primaryColor.withValues(alpha: 0.05),
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
         child: InkWell(
           radius: tokens.radiusExtraLarge,
           borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
           child: SizedBox(
-            width: tokens.iconSizeLarge,
-            height: tokens.iconSizeLarge,
-            child: Icon(
-              isFavorite
-                  ? Icons.favorite_rounded
-                  : Icons.favorite_outline_rounded,
-              size: tokens.iconSizeSmall,
-              color: isFavorite
-                  ? Colors.redAccent
-                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.45),
+            width: tokens.iconSizeLargePlus,
+            height: tokens.iconSizeLargePlus,
+            child: Center(
+              child: Icon(
+                isFavorite
+                    ? Icons.favorite_rounded
+                    : Icons.favorite_outline_rounded,
+                size: tokens.iconSizeMedium,
+                color: isFavorite
+                    ? theme.colorScheme.error
+                    : theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.45,
+                      ),
+              ),
             ),
           ),
         ),
