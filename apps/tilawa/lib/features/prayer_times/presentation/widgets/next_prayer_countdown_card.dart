@@ -3,6 +3,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
+import '../prayer_notification_semantics_ids.dart';
 import 'prayer_time_localizations.dart';
 
 class NextPrayerCountdownCard extends StatelessWidget {
@@ -11,11 +12,15 @@ class NextPrayerCountdownCard extends StatelessWidget {
     required this.nextPrayer,
     required this.timeUntil,
     this.use24HourFormat = true,
+    this.prayerNotificationsEnabled,
+    this.onPrayerNotificationsTap,
   });
 
   final PrayerTimeItem nextPrayer;
   final Duration timeUntil;
   final bool use24HourFormat;
+  final bool? prayerNotificationsEnabled;
+  final VoidCallback? onPrayerNotificationsTap;
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +122,97 @@ class NextPrayerCountdownCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (prayerNotificationsEnabled != null &&
+                onPrayerNotificationsTap != null) ...[
+              SizedBox(height: tokens.spaceMedium),
+              Divider(
+                height: tokens.spaceSmall,
+                color: colorScheme.outlineVariant.withValues(
+                  alpha: tokens.opacityMedium,
+                ),
+              ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              _PrayerNotificationsRow(
+                enabled: prayerNotificationsEnabled!,
+                onTap: onPrayerNotificationsTap!,
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PrayerNotificationsRow extends StatelessWidget {
+  const _PrayerNotificationsRow({required this.enabled, required this.onTap});
+
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final statusText = enabled ? context.l10n.enabled : context.l10n.disabled;
+
+    return Semantics(
+      identifier: PrayerNotificationSemanticsIds.prayerNotificationsEntryPoint,
+      button: true,
+      label: context.l10n.prayerNotifications,
+      value: statusText,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(tokens.radiusMedium),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: kMinInteractiveDimension,
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              child: Row(
+                children: [
+                  Icon(
+                    enabled
+                        ? Icons.notifications_active_outlined
+                        : Icons.notifications_off_outlined,
+                    size: tokens.iconSizeMedium,
+                    color: enabled
+                        ? colorScheme.primary
+                        : colorScheme.onSurfaceVariant,
+                  ),
+                  SizedBox(width: tokens.spaceSmall),
+                  Expanded(
+                    child: Text(
+                      context.l10n.prayerNotifications,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: tokens.spaceSmall),
+                  Text(
+                    statusText,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(width: tokens.spaceExtraSmall),
+                  Icon(
+                    Icons.chevron_right,
+                    size: tokens.iconSizeMedium,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );

@@ -239,9 +239,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
             },
             isLoading: state.isLoadingLocation,
           ),
-          const _CountdownCardSection(),
-          _PrayerNotificationsEntry(
-            onTap: () => _showNotificationDialog(context),
+          _CountdownCardSection(
+            onPrayerNotificationsTap: () => _showNotificationDialog(context),
           ),
           _TodayPrayerGrid(
             prayerTimes: state.todayPrayerTimes!,
@@ -304,14 +303,19 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 }
 
 class _CountdownCardSection extends StatelessWidget {
-  const _CountdownCardSection();
+  const _CountdownCardSection({required this.onPrayerNotificationsTap});
+
+  final VoidCallback onPrayerNotificationsTap;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
       buildWhen: (previous, current) =>
           previous.todayPrayerTimes != current.todayPrayerTimes ||
-          previous.settings.use24HourFormat != current.settings.use24HourFormat,
+          previous.settings.use24HourFormat !=
+              current.settings.use24HourFormat ||
+          _hasEnabledPrayerNotifications(previous.settings) !=
+              _hasEnabledPrayerNotifications(current.settings),
       builder: (context, state) {
         final todayTimes = state.todayPrayerTimes;
         if (todayTimes == null) return const SizedBox.shrink();
@@ -319,107 +323,21 @@ class _CountdownCardSection extends StatelessWidget {
         return _CountdownTicker(
           prayerTimes: todayTimes,
           use24HourFormat: state.settings.use24HourFormat,
+          prayerNotificationsEnabled: _hasEnabledPrayerNotifications(
+            state.settings,
+          ),
+          onPrayerNotificationsTap: onPrayerNotificationsTap,
         );
       },
     );
   }
-}
 
-class _PrayerNotificationsEntry extends StatelessWidget {
-  const _PrayerNotificationsEntry({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final settings = context.select(
-      (PrayerTimesBloc bloc) => bloc.state.settings,
-    );
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final enabled =
-        settings.fajrNotification.enabled ||
+  static bool _hasEnabledPrayerNotifications(PrayerSettingsEntity settings) {
+    return settings.fajrNotification.enabled ||
         settings.dhuhrNotification.enabled ||
         settings.asrNotification.enabled ||
         settings.maghribNotification.enabled ||
         settings.ishaNotification.enabled;
-    final statusText = enabled ? context.l10n.enabled : context.l10n.disabled;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceLarge,
-        vertical: tokens.spaceSmall,
-      ),
-      child: Semantics(
-        identifier:
-            PrayerNotificationSemanticsIds.prayerNotificationsEntryPoint,
-        button: true,
-        label: context.l10n.prayerNotifications,
-        value: statusText,
-        child: TilawaCard(
-          onTap: onTap,
-          padding: EdgeInsets.all(tokens.spaceMedium),
-          backgroundColor: colorScheme.surface,
-          borderColor: colorScheme.outlineVariant.withValues(
-            alpha: tokens.opacityMedium,
-          ),
-          borderRadius: tokens.radiusLarge,
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(tokens.spaceSmall),
-                decoration: BoxDecoration(
-                  color: enabled
-                      ? colorScheme.primaryContainer
-                      : colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                ),
-                child: Icon(
-                  enabled
-                      ? Icons.notifications_active_outlined
-                      : Icons.notifications_off_outlined,
-                  size: tokens.iconSizeMedium,
-                  color: enabled
-                      ? colorScheme.onPrimaryContainer
-                      : colorScheme.onSurfaceVariant,
-                ),
-              ),
-              SizedBox(width: tokens.spaceMedium),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      context.l10n.prayerNotifications,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    SizedBox(height: tokens.spaceExtraSmall),
-                    Text(
-                      statusText,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: tokens.spaceMedium),
-              Icon(
-                Icons.chevron_right,
-                size: tokens.iconSizeLarge,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -432,10 +350,14 @@ class _CountdownTicker extends StatefulWidget {
   const _CountdownTicker({
     required this.prayerTimes,
     required this.use24HourFormat,
+    required this.prayerNotificationsEnabled,
+    required this.onPrayerNotificationsTap,
   });
 
   final PrayerTimeEntity prayerTimes;
   final bool use24HourFormat;
+  final bool prayerNotificationsEnabled;
+  final VoidCallback onPrayerNotificationsTap;
 
   @override
   State<_CountdownTicker> createState() => _CountdownTickerState();
@@ -471,6 +393,8 @@ class _CountdownTickerState extends State<_CountdownTicker> {
       nextPrayer: nextPrayer,
       timeUntil: timeUntil,
       use24HourFormat: widget.use24HourFormat,
+      prayerNotificationsEnabled: widget.prayerNotificationsEnabled,
+      onPrayerNotificationsTap: widget.onPrayerNotificationsTap,
     );
   }
 }
@@ -554,6 +478,7 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
     PrayerType.isha,
   ];
 
+  // ignore: unused_element
   Future<void> _fire() async {
     if (_firing) return;
     setState(() => _firing = true);
