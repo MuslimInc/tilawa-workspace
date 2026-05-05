@@ -1,0 +1,261 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
+
+import '../../router/app_router.dart';
+import '../bootstrap/app_startup.dart';
+import '../logging/app_logger.dart';
+
+// ---------------------------------------------------------------------------
+// Minimal injectable wrappers for platform-level dependencies
+// ---------------------------------------------------------------------------
+
+/// Provides the current OS process ID.
+/// Wraps [dart:io.pid] to allow constructor injection and unit testing.
+@lazySingleton
+class ProcessIdProvider {
+  const ProcessIdProvider();
+
+  int get currentPid => pid;
+}
+
+/// Wraps [initializeNotificationHandlers] for constructor injection.
+/// Calling this registers all notification handlers (download, athkar, prayer)
+/// and is idempotent — [AppStartupTasks] memoises the underlying future.
+@lazySingleton
+class NotificationHandlersInitializer {
+  const NotificationHandlersInitializer();
+
+  Future<void> call() => initializeNotificationHandlers();
+}
+
+// ---------------------------------------------------------------------------
+// Service interface
+// ---------------------------------------------------------------------------
+
+/// Handles notification startup and resume routing for the app.
+///
+/// Owns:
+/// - the 900 ms deferred cold-start probe timer
+/// - the PID-based hot-restart dedup guard
+/// - SharedPreferences persistence of the last processed notification ID
+/// - notification dispatcher initialisation
+///
+/// [_TilawaAppState] is responsible only for lifecycle callbacks — it
+/// delegates all notification handling to this service.
+abstract interface class NotificationStartupService {
+  /// Call once after the first frame on app startup.
+  ///
+  /// If a startup notification is pending (FCM path), processes it immediately.
+  /// Otherwise schedules the 900 ms deferred probe for local-notification
+  /// cold-start detection.
+  Future<void> handleAppStartup();
+
+  /// Call on every [AppLifecycleState.resumed] event (after debounce).
+  ///
+  /// Checks whether the Android Intent notification has already been
+  /// processed and skips if it has.
+  Future<void> handleAppResume();
+
+  /// Cancel internal timers. Must be called from the widget's [dispose].
+  void dispose();
+}
+
+// ---------------------------------------------------------------------------
+// Implementation
+// ---------------------------------------------------------------------------
+
+@LazySingleton(as: NotificationStartupService)
+class NotificationStartupServiceImpl implements NotificationStartupService {
+  NotificationStartupServiceImpl(
+    this._dispatcher,
+    this._prefs,
+    this._pidProvider,
+    this._handlersInitializer,
+  );
+
+  final INotificationDispatcher _dispatcher;
+  final SharedPreferencesAsync _prefs;
+  final ProcessIdProvider _pidProvider;
+  final NotificationHandlersInitializer _handlersInitializer;
+
+  static const Duration _deferredColdStartProbeDelay = Duration(
+    milliseconds: 900,
+  );
+  static const String _lastNotifIdKey = '_last_notif_id';
+  static const String _lastNotifPidKey = '_last_notif_pid';
+
+  bool _hasProcessedStartup = false;
+  bool _hasPrimedDispatcher = false;
+  bool _isChecking = false;
+  Timer? _localLaunchProbeTimer;
+
+  // -------------------------------------------------------------------------
+  // Public API
+  // -------------------------------------------------------------------------
+
+  @override
+  Future<void> handleAppStartup() async {
+    if (_hasProcessedStartup) {
+      return;
+    }
+    _hasProcessedStartup = true;
+
+    // Large-scale startup pattern: avoid eager heavy notification wiring on
+    // every cold start. Only process immediately when startup was actually
+    // notification-driven (FCM path sets this flag during bootstrap).
+    if (AppRouter.pendingStartupNotificationLaunch) {
+      await _handlersInitializer();
+      AppRouter.pendingStartupNotificationLaunch = false;
+      return;
+    }
+
+    // Probe local-notification cold-start lazily so startup frames stay fast.
+    // The timer is cancelled in dispose() if the widget unmounts first.
+    _localLaunchProbeTimer?.cancel();
+    _localLaunchProbeTimer = Timer(_deferredColdStartProbeDelay, () {
+      unawaited(_checkForDeferredColdStart());
+    });
+  }
+
+  @override
+  Future<void> handleAppResume() async {
+    if (_isChecking) {
+      logger.d(
+        '[NotificationStartupService] handleAppResume: skipped – already checking',
+      );
+      return;
+    }
+    _isChecking = true;
+    logger.d(
+      '[NotificationStartupService] handleAppResume: started, lastProcessedId=${AppRouter.lastProcessedNotificationId}',
+    );
+
+    try {
+      // Ensure handlers are registered before querying launch details.
+      await _handlersInitializer();
+
+      // getNotificationAppLaunchDetails() returns the SAME Android-Intent data
+      // on every call, so we guard with lastProcessedNotificationId.
+      final launchDetails = await _dispatcher.getNotificationAppLaunchDetails();
+      final int? currentId = launchDetails?.notificationResponse?.id;
+      logger.d(
+        '[NotificationStartupService] handleAppResume: currentId=$currentId didLaunch=${launchDetails?.didNotificationLaunchApp}',
+      );
+      if (currentId == null ||
+          currentId == AppRouter.lastProcessedNotificationId) {
+        logger.d(
+          '[NotificationStartupService] handleAppResume: skipped – same id or null',
+        );
+        return;
+      }
+
+      logger.d(
+        '[NotificationStartupService] handleAppResume: processing notification id=$currentId',
+      );
+      final bool processed = await _dispatcher.processLaunchNotification();
+      if (processed) {
+        AppRouter.lastProcessedNotificationId = currentId;
+        logger.d(
+          '[NotificationStartupService] Launch notification processed on resume',
+        );
+      }
+    } catch (e) {
+      logger.d('[NotificationStartupService] Error on resume: $e');
+    } finally {
+      _isChecking = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _localLaunchProbeTimer?.cancel();
+    _localLaunchProbeTimer = null;
+  }
+
+  // -------------------------------------------------------------------------
+  // Internal
+  // -------------------------------------------------------------------------
+
+  Future<void> _checkForDeferredColdStart() async {
+    if (_isChecking) {
+      logger.d(
+        '[NotificationStartupService] _checkForDeferredColdStart: skipped – already checking',
+      );
+      return;
+    }
+    _isChecking = true;
+    logger.d(
+      '[NotificationStartupService] _checkForDeferredColdStart: started, lastProcessedId=${AppRouter.lastProcessedNotificationId}',
+    );
+
+    try {
+      // Prime the dispatcher (lightweight channel-only init) so
+      // getNotificationAppLaunchDetails() works. Full handler registration
+      // is deferred until we confirm there is actually a notification.
+      if (!_hasPrimedDispatcher) {
+        await _dispatcher.initialize(createHighImportanceChannel: false);
+        _hasPrimedDispatcher = true;
+      }
+
+      // Restore lastProcessedNotificationId from persistent storage to handle
+      // Dart VM restarts (hot restart) where static fields are cleared but the
+      // Android Activity's Intent—and therefore getNotificationAppLaunchDetails()
+      // —still returns the previously-processed notification.
+      if (AppRouter.lastProcessedNotificationId == null) {
+        final storedId = await _prefs.getInt(_lastNotifIdKey);
+        final storedPid = await _prefs.getInt(_lastNotifPidKey);
+        final currentPid = _pidProvider.currentPid;
+        logger.d(
+          '[NotificationStartupService] _checkForDeferredColdStart: prefs storedId=$storedId storedPid=$storedPid currentPid=$currentPid',
+        );
+        if (storedId != null && storedPid == currentPid) {
+          // Same process → hot restart. Suppress re-navigation.
+          AppRouter.lastProcessedNotificationId = storedId;
+          logger.d(
+            '[NotificationStartupService] _checkForDeferredColdStart: restored lastProcessedId=$storedId (hot restart)',
+          );
+        }
+      }
+
+      final launchDetails = await _dispatcher.getNotificationAppLaunchDetails();
+      final bool didLaunch = launchDetails?.didNotificationLaunchApp ?? false;
+      final int? currentId = launchDetails?.notificationResponse?.id;
+      logger.d(
+        '[NotificationStartupService] _checkForDeferredColdStart: didLaunch=$didLaunch currentId=$currentId lastProcessedId=${AppRouter.lastProcessedNotificationId}',
+      );
+
+      if (!didLaunch ||
+          currentId == null ||
+          currentId == AppRouter.lastProcessedNotificationId) {
+        logger.d(
+          '[NotificationStartupService] _checkForDeferredColdStart: skipped – didLaunch=$didLaunch currentId=$currentId lastProcessedId=${AppRouter.lastProcessedNotificationId}',
+        );
+        return;
+      }
+
+      logger.d(
+        '[NotificationStartupService] _checkForDeferredColdStart: processing notification id=$currentId',
+      );
+      await _handlersInitializer();
+      final bool processed = await _dispatcher.processLaunchNotification();
+      if (processed) {
+        AppRouter.lastProcessedNotificationId = currentId;
+        await _prefs.setInt(_lastNotifIdKey, currentId);
+        await _prefs.setInt(_lastNotifPidKey, _pidProvider.currentPid);
+        logger.d(
+          '[NotificationStartupService] Deferred cold-start local notification processed',
+        );
+      }
+    } catch (e) {
+      logger.d(
+        '[NotificationStartupService] Error processing deferred cold-start notification: $e',
+      );
+    } finally {
+      _isChecking = false;
+    }
+  }
+}

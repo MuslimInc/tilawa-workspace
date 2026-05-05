@@ -12,13 +12,31 @@ class UpdateService {
   /// Minimum interval between update checks to avoid interrupting the user
   /// on every app resume.
   static const Duration _minCheckInterval = Duration(hours: 6);
-  DateTime? _lastCheckTime;
+  static DateTime? _lastCheckTime;
+  static Future<void>? _inFlightCheck;
 
   /// Checks for an update and performs it if available.
   ///
   /// Throttled to at most once per [_minCheckInterval] to avoid repeatedly
   /// prompting the user with an immediate update dialog on every resume.
   Future<void> checkForUpdate() async {
+    if (_inFlightCheck != null) {
+      await _inFlightCheck;
+      return;
+    }
+
+    final Future<void> checkFuture = _checkForUpdateInternal();
+    _inFlightCheck = checkFuture;
+    try {
+      await checkFuture;
+    } finally {
+      if (identical(_inFlightCheck, checkFuture)) {
+        _inFlightCheck = null;
+      }
+    }
+  }
+
+  Future<void> _checkForUpdateInternal() async {
     final DateTime now = DateTime.now();
     if (_lastCheckTime != null &&
         now.difference(_lastCheckTime!) < _minCheckInterval) {
