@@ -12,6 +12,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
     required this.nextPrayer,
     required this.timeUntil,
     this.use24HourFormat = true,
+    this.dateMetaLabel,
     this.prayerNotificationsEnabled,
     this.onPrayerNotificationsTap,
   });
@@ -19,6 +20,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
   final PrayerTimeItem nextPrayer;
   final Duration timeUntil;
   final bool use24HourFormat;
+  final String? dateMetaLabel;
   final bool? prayerNotificationsEnabled;
   final VoidCallback? onPrayerNotificationsTap;
 
@@ -79,7 +81,20 @@ class NextPrayerCountdownCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: tokens.spaceLarge),
+            if (dateMetaLabel != null) ...[
+              SizedBox(height: tokens.spaceSmall),
+              Text(
+                dateMetaLabel!,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: tokens.spaceMedium),
+            ] else
+              SizedBox(height: tokens.spaceLarge),
             Text(
               prayerName,
               style: theme.textTheme.titleLarge?.copyWith(

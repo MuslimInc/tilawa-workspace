@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -319,6 +320,7 @@ class _CountdownCardSection extends StatelessWidget {
         return _CountdownTicker(
           prayerTimes: todayTimes,
           use24HourFormat: state.settings.use24HourFormat,
+          dateMetaLabel: _buildDateMetaLabel(context),
           prayerNotificationsEnabled: _hasEnabledPrayerNotifications(
             state.settings,
           ),
@@ -335,6 +337,30 @@ class _CountdownCardSection extends StatelessWidget {
         settings.maghribNotification.enabled ||
         settings.ishaNotification.enabled;
   }
+
+  static String _buildDateMetaLabel(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final locale = isArabic ? 'ar' : 'en';
+    final now = DateTime.now();
+    final dayName = DateFormat('EEEE', locale).format(now);
+    var fullDate = DateFormat.yMMMMd(locale).format(now);
+
+    if (isArabic) {
+      fullDate = _normalizeArabicDigits(fullDate);
+    }
+
+    return '${context.l10n.today} · $dayName, $fullDate';
+  }
+
+  static String _normalizeArabicDigits(String value) {
+    const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    var normalized = value;
+    for (var i = 0; i < arabicNumbers.length; i++) {
+      normalized = normalized.replaceAll(arabicNumbers[i], englishNumbers[i]);
+    }
+    return normalized;
+  }
 }
 
 /// Rebuilds itself every second using a single owned [Timer.periodic].
@@ -346,12 +372,14 @@ class _CountdownTicker extends StatefulWidget {
   const _CountdownTicker({
     required this.prayerTimes,
     required this.use24HourFormat,
+    required this.dateMetaLabel,
     required this.prayerNotificationsEnabled,
     required this.onPrayerNotificationsTap,
   });
 
   final PrayerTimeEntity prayerTimes;
   final bool use24HourFormat;
+  final String dateMetaLabel;
   final bool prayerNotificationsEnabled;
   final VoidCallback onPrayerNotificationsTap;
 
@@ -389,6 +417,7 @@ class _CountdownTickerState extends State<_CountdownTicker> {
       nextPrayer: nextPrayer,
       timeUntil: timeUntil,
       use24HourFormat: widget.use24HourFormat,
+      dateMetaLabel: widget.dateMetaLabel,
       prayerNotificationsEnabled: widget.prayerNotificationsEnabled,
       onPrayerNotificationsTap: widget.onPrayerNotificationsTap,
     );
