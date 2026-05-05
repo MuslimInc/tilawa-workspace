@@ -703,7 +703,7 @@ class TilawaSettingsGroupTokens {
       groupShadowOffset: Offset(0, 4),
       groupTitleFontSize: 12.5,
       groupTitleLetterSpacing: 1.1,
-      tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       switchTileContentPadding: EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 12,

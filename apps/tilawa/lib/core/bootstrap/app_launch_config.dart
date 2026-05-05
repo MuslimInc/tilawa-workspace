@@ -32,7 +32,7 @@ class AppLaunchConfig extends Equatable {
     this.quranAssetsPrefetch = true,
     this.firebaseDataInit = true,
     this.notificationPermissionRequest = true,
-    this.compactUiEnabled = true,
+    this.compactUiEnabled = false,
   });
 
   factory AppLaunchConfig.fromEnvironment() {
@@ -135,7 +135,7 @@ class AppLaunchConfig extends Equatable {
       ),
       compactUiEnabled: bool.fromEnvironment(
         'TILAWA_COMPACT_UI',
-        defaultValue: true,
+        defaultValue: false,
       ),
     );
   }

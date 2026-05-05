@@ -75,7 +75,6 @@ class SettingsScreen extends StatelessWidget {
                               icon: FluentIcons.dark_theme_24_regular,
                               iconColor: AppColors.settingsTheme,
                               title: context.l10n.theme,
-                              subtitle: _getThemeName(context, state.mode),
                               onTap: () =>
                                   _showThemePicker(context, state.mode),
                               borderRadius: BorderRadius.vertical(
@@ -86,10 +85,6 @@ class SettingsScreen extends StatelessWidget {
                               icon: FluentIcons.color_24_regular,
                               iconColor: AppColors.settingsColor,
                               title: context.l10n.primaryColor,
-                              subtitle: _getColorName(
-                                context,
-                                state.primaryColor,
-                              ),
                               onTap: () =>
                                   _showColorPicker(context, state.primaryColor),
                             ),
@@ -103,9 +98,6 @@ class SettingsScreen extends StatelessWidget {
                           icon: FluentIcons.local_language_24_regular,
                           iconColor: AppColors.settingsLanguage,
                           title: context.l10n.language,
-                          subtitle: state.locale.languageCode == 'ar'
-                              ? context.l10n.arabic
-                              : context.l10n.english,
                           onTap: () =>
                               _showLanguagePicker(context, state.locale),
                           showDivider: false,
@@ -132,8 +124,6 @@ class SettingsScreen extends StatelessWidget {
                               icon: FluentIcons.history_24_regular,
                               iconColor: AppColors.settingsPlayback,
                               title: context.l10n.restorePlaybackState,
-                              subtitle:
-                                  context.l10n.restorePlaybackStateSubtitle,
                               value: state.restorePlaybackState,
                               onChanged: (value) {
                                 context
@@ -148,8 +138,6 @@ class SettingsScreen extends StatelessWidget {
                               icon: FluentIcons.timer_24_regular,
                               iconColor: AppColors.settingsDuration,
                               title: context.l10n.enableRecitationDuration,
-                              subtitle:
-                                  context.l10n.enableRecitationDurationSubtitle,
                               value: state.isSleepTimerEnabled,
                               onChanged: (value) {
                                 context
@@ -178,7 +166,6 @@ class SettingsScreen extends StatelessWidget {
                       icon: FluentIcons.bookmark_24_regular,
                       iconColor: AppColors.settingsBookmarks,
                       title: context.l10n.bookmarks,
-                      subtitle: context.l10n.noBookmarksHint,
                       onTap: () => const BookmarksRoute().push(context),
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(16),
@@ -188,21 +175,18 @@ class SettingsScreen extends StatelessWidget {
                       icon: FluentIcons.history_24_regular,
                       iconColor: AppColors.settingsHistory,
                       title: context.l10n.listeningHistory,
-                      subtitle: context.l10n.noHistoryDescription,
                       onTap: () => const HistoryRoute().push(context),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.clock_24_regular,
                       iconColor: AppColors.settingsPrayer,
                       title: context.l10n.prayerTimes,
-                      subtitle: context.l10n.locationRequiredDescription,
                       onTap: () => const PrayerTimesRoute().push(context),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.book_24_regular,
                       iconColor: AppColors.settingsQuran,
                       title: context.l10n.quranReader,
-                      subtitle: context.l10n.continueReading,
                       onTap: () => const QuranLastReadRoute().push(context),
                       showDivider: false,
                       borderRadius: BorderRadius.vertical(
@@ -222,7 +206,6 @@ class SettingsScreen extends StatelessWidget {
                       icon: FluentIcons.folder_24_regular,
                       iconColor: AppColors.settingsStorage,
                       title: context.l10n.manageStorage,
-                      subtitle: context.l10n.manageStorageSubtitle,
                       onTap: () => const DownloadsRoute().push(context),
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(16),
@@ -232,26 +215,10 @@ class SettingsScreen extends StatelessWidget {
                       builder: (context, state) {
                         return Column(
                           children: [
-                            TilawaSettingsSwitchTile(
-                              icon: Icons.wifi_rounded,
-                              iconColor: AppColors.settingsDownloads,
-                              title: _getQuranAssetPrefetchTitle(context),
-                              subtitle: _getQuranAssetPrefetchSubtitle(context),
-                              value: state.prefetchQuranAssetsOnWifiOnly,
-                              onChanged: (value) {
-                                context
-                                    .read<SettingsCubit>()
-                                    .togglePrefetchQuranAssetsOnWifiOnly(value);
-                              },
-                            ),
                             TilawaSettingsTile(
                               icon: FluentIcons.arrow_download_24_regular,
                               iconColor: AppColors.settingsDownloads,
                               title: context.l10n.concurrentDownloads,
-                              subtitle: context.l10n
-                                  .concurrentDownloadsSubtitle(
-                                    state.maxConcurrentDownloads,
-                                  ),
                               onTap: () => _showConcurrentDownloadsPicker(
                                 context,
                                 state.maxConcurrentDownloads,
@@ -371,7 +338,7 @@ class SettingsScreen extends StatelessWidget {
           orElse: () => null,
         );
         return Container(
-          padding: EdgeInsets.all(24),
+          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -382,13 +349,6 @@ class SettingsScreen extends StatelessWidget {
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.profileGradientStart.withValues(alpha: 0.2),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
           ),
           child: Row(
             children: [
@@ -510,23 +470,6 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  String _getColorName(BuildContext context, Color color) {
-    // Check if the color is in options
-    final bool isKnownColor = ThemeCubit.colorOptions.any(
-      (element) => element.color.toARGB32() == color.toARGB32(),
-    );
-
-    if (!isKnownColor) {
-      return context.l10n.custom;
-    }
-
-    final AppColorOption option = ThemeCubit.colorOptions.firstWhere(
-      (element) => element.color.toARGB32() == color.toARGB32(),
-      orElse: () => ThemeCubit.colorOptions.first,
-    );
-    return _getLocalizedColorName(context, option.name);
-  }
-
   String _getLocalizedColorName(BuildContext context, String name) {
     final AppLocalizations l10n = context.l10n;
     return switch (name) {
@@ -536,18 +479,6 @@ class SettingsScreen extends StatelessWidget {
       'Purple' => l10n.colorPurple,
       _ => name,
     };
-  }
-
-  String _getQuranAssetPrefetchTitle(BuildContext context) {
-    return context.l10n.localeName == 'ar'
-        ? 'تهيئة أصول القرآن مسبقًا عبر الواي فاي فقط'
-        : 'Prefetch Quran assets on Wi-Fi only';
-  }
-
-  String _getQuranAssetPrefetchSubtitle(BuildContext context) {
-    return context.l10n.localeName == 'ar'
-        ? 'حمّل خطوط وصور المصحف في الخلفية قبل فتح القارئ عند الاتصال بالواي فاي.'
-        : 'Prepare Quran fonts and reader images in the background before opening the reader when connected to Wi-Fi.';
   }
 
   void _showColorPicker(BuildContext context, Color currentColor) {
