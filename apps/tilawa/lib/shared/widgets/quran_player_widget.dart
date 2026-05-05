@@ -214,24 +214,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   void _dismissWithUndo() {
     HapticFeedback.lightImpact();
     context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
-
-    final messenger = ScaffoldMessenger.of(context);
-    messenger.hideCurrentSnackBar();
-    messenger.showSnackBar(
-      SnackBar(
-        content: Text(context.l10n.playerDismissed),
-        duration: const Duration(seconds: 4),
-        action: SnackBarAction(
-          label: context.l10n.undo,
-          onPressed: () {
-            if (!mounted) return;
-            context.read<AudioPlayerBloc>().add(
-              const AudioPlayerEvent.playAudio(),
-            );
-          },
-        ),
-      ),
-    );
   }
 
   @override

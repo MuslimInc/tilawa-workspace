@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
@@ -117,9 +119,15 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   Future<void> _checkForNotificationOnResume() async {
     // Guard against concurrent checks
     if (_isCheckingNotification) {
+      logger.d(
+        '[QuranPlayerApp] _checkForNotificationOnResume: skipped – already checking',
+      );
       return;
     }
     _isCheckingNotification = true;
+    logger.d(
+      '[QuranPlayerApp] _checkForNotificationOnResume: started, lastProcessedId=${AppRouter.lastProcessedNotificationId}',
+    );
 
     try {
       await initializeNotificationHandlers();
@@ -132,11 +140,20 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
       // so we compare the notification ID to avoid re-processing.
       final launchDetails = await dispatcher.getNotificationAppLaunchDetails();
       final int? currentId = launchDetails?.notificationResponse?.id;
+      logger.d(
+        '[QuranPlayerApp] _checkForNotificationOnResume: currentId=$currentId didLaunch=${launchDetails?.didNotificationLaunchApp}',
+      );
       if (currentId == null ||
           currentId == AppRouter.lastProcessedNotificationId) {
+        logger.d(
+          '[QuranPlayerApp] _checkForNotificationOnResume: skipped – same id or null',
+        );
         return;
       }
 
+      logger.d(
+        '[QuranPlayerApp] _checkForNotificationOnResume: processing notification id=$currentId',
+      );
       final bool processed = await dispatcher.processLaunchNotification();
       if (processed) {
         AppRouter.lastProcessedNotificationId = currentId;
@@ -172,11 +189,25 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     });
   }
 
+  static const String _lastNotifIdKey = '_last_notif_id';
+  static const String _lastNotifPidKey = '_last_notif_pid';
+  // On hot restart the Dart VM resets all statics but the Android process
+  // (and its PID) stays alive. On a genuine cold start the OS assigns a new
+  // PID. Storing the PID alongside the notification ID lets us distinguish
+  // "same process, Dart restarted" from "brand-new launch" reliably, with no
+  // time-window guessing.
+
   Future<void> _checkForDeferredColdStartLocalNotification() async {
     if (_isCheckingNotification) {
+      logger.d(
+        '[QuranPlayerApp] _checkForDeferredColdStart: skipped – already checking',
+      );
       return;
     }
     _isCheckingNotification = true;
+    logger.d(
+      '[QuranPlayerApp] _checkForDeferredColdStart: started, lastProcessedId=${AppRouter.lastProcessedNotificationId}',
+    );
 
     try {
       final INotificationDispatcher dispatcher =
@@ -186,20 +217,53 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
         _hasPrimedNotificationDispatcher = true;
       }
 
+      // Restore lastProcessedNotificationId from persistent storage to handle
+      // Dart VM restarts (hot restart) where static fields are cleared but the
+      // Android Activity's Intent—and therefore getNotificationAppLaunchDetails()
+      // —still returns the previously-processed notification.
+      if (AppRouter.lastProcessedNotificationId == null) {
+        final prefs = SharedPreferencesAsync();
+        final storedId = await prefs.getInt(_lastNotifIdKey);
+        final storedPid = await prefs.getInt(_lastNotifPidKey);
+        final currentPid = pid;
+        logger.d(
+          '[QuranPlayerApp] _checkForDeferredColdStart: prefs storedId=$storedId storedPid=$storedPid currentPid=$currentPid',
+        );
+        if (storedId != null && storedPid == currentPid) {
+          // Same process → hot restart. Suppress re-navigation.
+          AppRouter.lastProcessedNotificationId = storedId;
+          logger.d(
+            '[QuranPlayerApp] _checkForDeferredColdStart: restored lastProcessedId=$storedId (hot restart)',
+          );
+        }
+      }
+
       final launchDetails = await dispatcher.getNotificationAppLaunchDetails();
       final bool didLaunch = launchDetails?.didNotificationLaunchApp ?? false;
       final int? currentId = launchDetails?.notificationResponse?.id;
+      logger.d(
+        '[QuranPlayerApp] _checkForDeferredColdStart: didLaunch=$didLaunch currentId=$currentId lastProcessedId=${AppRouter.lastProcessedNotificationId}',
+      );
 
       if (!didLaunch ||
           currentId == null ||
           currentId == AppRouter.lastProcessedNotificationId) {
+        logger.d(
+          '[QuranPlayerApp] _checkForDeferredColdStart: skipped – didLaunch=$didLaunch currentId=$currentId lastProcessedId=${AppRouter.lastProcessedNotificationId}',
+        );
         return;
       }
 
+      logger.d(
+        '[QuranPlayerApp] _checkForDeferredColdStart: processing notification id=$currentId',
+      );
       await initializeNotificationHandlers();
       final bool processed = await dispatcher.processLaunchNotification();
       if (processed) {
         AppRouter.lastProcessedNotificationId = currentId;
+        final prefs = SharedPreferencesAsync();
+        await prefs.setInt(_lastNotifIdKey, currentId);
+        await prefs.setInt(_lastNotifPidKey, pid);
         logger.d(
           '[QuranPlayerApp] Deferred cold-start local notification processed',
         );

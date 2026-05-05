@@ -8,7 +8,6 @@ import 'package:flutter_local_notifications_platform_interface/flutter_local_not
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
 import 'app_router_config.dart';
@@ -123,9 +122,7 @@ class AppRouter {
       debugLogDiagnostics: kDebugMode,
       // Disable restoration when launched from notification to prevent
       // the restored state from overriding notification navigation
-      restorationScopeId: disableStateRestoration
-          ? null
-          : AppStrings.routerRestorationScopeId,
+      restorationScopeId: null,
       redirect: redirect,
       routes: $appRoutes,
       errorBuilder: errorBuilder,
