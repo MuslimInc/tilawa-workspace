@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_compass_v2/flutter_compass_v2.dart';
+import 'package:compass/flutter_compass.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mocktail/mocktail.dart';

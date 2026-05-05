@@ -22,9 +22,18 @@ class _QiblaScreenState extends State<QiblaScreen> {
   @override
   void initState() {
     super.initState();
+    debugPrint('[CompassSensor] QiblaScreen.initState');
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint('[CompassSensor] QiblaScreen -> CheckLocationService');
       context.read<QiblaBloc>().add(const CheckLocationService());
     });
+  }
+
+  @override
+  void dispose() {
+    debugPrint('[CompassSensor] QiblaScreen.dispose -> StopQiblaStream');
+    context.read<QiblaBloc>().add(const StopQiblaStream());
+    super.dispose();
   }
 
   @override

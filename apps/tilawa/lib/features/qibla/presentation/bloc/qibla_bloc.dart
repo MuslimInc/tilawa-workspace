@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:qibla/qibla.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
@@ -35,6 +37,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
   final RequestLocationPermissionUseCase _requestLocationPermission;
 
   StreamSubscription<QiblaDirectionEntity>? _qiblaSubscription;
+  int _eventCounter = 0;
 
   /// Checks location service, permission, and starts the Qibla
   /// stream in a single pass — avoiding multiple event dispatches.
@@ -133,15 +136,34 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
 
   /// Subscribes to the Qibla direction stream.
   void _startListening() {
+    debugPrint('[CompassSensor] QiblaBloc._startListening begin');
     _qiblaSubscription?.cancel();
     try {
       _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
-        (direction) => add(UpdateQiblaDirection(direction)),
+        (direction) {
+          _eventCounter++;
+          if (_eventCounter <= 5 || _eventCounter % 20 == 0) {
+            debugPrint(
+              '[CompassSensor] stream event #$_eventCounter '
+              'heading=${direction.direction.toStringAsFixed(1)} '
+              'qibla=${direction.qibla.toStringAsFixed(1)} '
+              'offset=${direction.offset.toStringAsFixed(1)}',
+            );
+          }
+          add(UpdateQiblaDirection(direction));
+        },
         onError: (error) {
+          debugPrint('[CompassSensor] stream error: $error');
           add(QiblaErrorOccurred(error.toString()));
         },
+        onDone: () {
+          debugPrint('[CompassSensor] stream done');
+        },
+        cancelOnError: false,
       );
+      debugPrint('[CompassSensor] QiblaBloc._startListening subscribed');
     } catch (error) {
+      debugPrint('[CompassSensor] QiblaBloc._startListening catch: $error');
       add(QiblaErrorOccurred(error.toString()));
     }
   }
@@ -150,8 +172,11 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     StopQiblaStream event,
     Emitter<QiblaState> emit,
   ) async {
+    debugPrint('[CompassSensor] StopQiblaStream received');
     await _qiblaSubscription?.cancel();
     _qiblaSubscription = null;
+    Qibla.instance.dispose();
+    debugPrint('[CompassSensor] subscription canceled + Qibla.dispose()');
   }
 
   void _onUpdateQiblaDirection(
@@ -176,8 +201,12 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
   }
 
   @override
-  Future<void> close() {
-    _qiblaSubscription?.cancel();
+  Future<void> close() async {
+    debugPrint('[CompassSensor] QiblaBloc.close');
+    await _qiblaSubscription?.cancel();
+    _qiblaSubscription = null;
+    Qibla.instance.dispose();
+    debugPrint('[CompassSensor] QiblaBloc.close canceled + disposed');
     return super.close();
   }
 }

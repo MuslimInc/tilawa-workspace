@@ -12,6 +12,7 @@ workspace:
   - packages/quran_qcf
   - packages/quran_image
   - packages/skeletonizer
+  - packages/compass
 
 dev_dependencies:
   melos: ^7.5.1
