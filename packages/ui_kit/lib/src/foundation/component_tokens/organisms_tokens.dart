@@ -662,29 +662,28 @@ class TilawaSettingsGroupTokens {
   }) {
     if (density.isCompact) {
       return const TilawaSettingsGroupTokens(
-        // Phase 1A compact-only changes:
+        // Compact: tuned for breathability while staying denser than comfortable.
         groupHeaderPadding: EdgeInsets.fromLTRB(12, 12, 16, 6),
         switchTileContentPadding: EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 8,
+          vertical: 10,
         ),
         tileSubtitleSpacing: 2,
-        // Everything else identical to comfortable:
         groupBorderRadius: 20,
         groupShadowOpacity: 0.06,
         groupShadowBlur: 10,
         groupShadowOffset: Offset(0, 4),
         groupTitleFontSize: 12.5,
         groupTitleLetterSpacing: 1.1,
-        tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+        tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         tileIconPadding: EdgeInsets.all(10),
         tileIconBorderRadius: 12,
         tileIconSize: 22,
         tileTitleFontSize: 15.5,
-        tileSubtitleFontSize: 12.5,
-        tileSubtitleOpacity: 0.5,
-        tileTrailingSize: 14,
-        tileTrailingOpacity: 0.35,
+        tileSubtitleFontSize: 13,
+        tileSubtitleOpacity: 0.65,
+        tileTrailingSize: 18,
+        tileTrailingOpacity: 0.55,
         tileIconContainerOpacity: 0.1,
         tileDividerPadding: EdgeInsets.only(left: 64, right: 16),
         tileDividerHeight: 1,
