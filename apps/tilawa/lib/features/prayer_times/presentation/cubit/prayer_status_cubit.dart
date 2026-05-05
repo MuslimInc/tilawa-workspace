@@ -27,6 +27,7 @@ class PrayerStatusState with _$PrayerStatusState {
 class PrayerStatusCubit extends Cubit<PrayerStatusState> {
   final IAdhanAlarmPlayer _adhanPlayer;
   Timer? _statusPollTimer;
+  bool _isRefreshingPlayingStatus = false;
 
   PrayerStatusCubit(this._adhanPlayer)
     : super(const PrayerStatusState.initial());
@@ -75,20 +76,20 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
         return;
       }
 
-      final isPlaying = await _adhanPlayer.isAdhanPlaying();
-
       emit(
         PrayerStatusState.loaded(
           prayerName: prayerName,
           scheduledTime: DateTime.fromMillisecondsSinceEpoch(scheduledTimeMs),
-          isAdhanPlaying: isPlaying,
+          isAdhanPlaying: adhanEnabled,
           adhanEnabled: adhanEnabled,
           soundName: soundName,
           notificationId: notificationId,
         ),
       );
 
-      // Start polling status if Adhan is expected to be playing
+      unawaited(_refreshPlayingStatus());
+
+      // Start polling status if Adhan is expected to be playing.
       if (adhanEnabled) {
         _startPolling();
       }
@@ -104,20 +105,37 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
     }
   }
 
-  void _startPolling() {
-    _statusPollTimer?.cancel();
-    _statusPollTimer = Timer.periodic(const Duration(seconds: 2), (
-      timer,
-    ) async {
+  Future<void> _refreshPlayingStatus() async {
+    if (_isRefreshingPlayingStatus) return;
+    _isRefreshingPlayingStatus = true;
+    try {
       final isPlaying = await _adhanPlayer.isAdhanPlaying();
+      if (isClosed) return;
       state.maybeWhen(
         loaded: (name, time, currentPlaying, enabled, sound, id) {
           if (currentPlaying != isPlaying) {
             emit((state as _Loaded).copyWith(isAdhanPlaying: isPlaying));
           }
         },
-        orElse: () => timer.cancel(),
+        orElse: () {},
       );
+    } catch (e) {
+      logger.w('[PrayerTimes] Failed to refresh Adhan playback status: $e');
+    } finally {
+      _isRefreshingPlayingStatus = false;
+    }
+  }
+
+  void _startPolling() {
+    _statusPollTimer?.cancel();
+    _statusPollTimer = Timer.periodic(const Duration(seconds: 2), (
+      timer,
+    ) async {
+      if (isClosed) {
+        timer.cancel();
+        return;
+      }
+      await _refreshPlayingStatus();
     });
   }
 

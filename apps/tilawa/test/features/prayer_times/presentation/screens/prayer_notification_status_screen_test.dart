@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -40,17 +41,26 @@ void main() {
     'sound_name': 'adhan_makkah',
   });
 
-  testWidgets('renders loading state initially', (tester) async {
-    when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer(
-      (_) => Future.delayed(const Duration(milliseconds: 100), () => false),
-    );
+  testWidgets(
+    'renders payload content before playback status check completes',
+    (tester) async {
+      final playbackStatus = Completer<bool>();
+      when(
+        mockAdhanPlayer.isAdhanPlaying(),
+      ).thenAnswer((_) => playbackStatus.future);
 
-    await tester.pumpWidget(createWidget(payloadJson: validPayload));
-    expect(find.byType(TilawaLoadingIndicator), findsOneWidget);
+      await tester.pumpWidget(createWidget(payloadJson: validPayload));
+      await tester.pump();
 
-    // Cleanup pending timer from Future.delayed
-    await tester.pumpAndSettle();
-  });
+      expect(find.byType(TilawaLoadingIndicator), findsNothing);
+      expect(find.text('Fajr'), findsOneWidget);
+      expect(find.text('Stop Adhan'), findsOneWidget);
+
+      playbackStatus.complete(false);
+      await tester.pumpAndSettle();
+      expect(find.text('Stop Adhan'), findsNothing);
+    },
+  );
 
   testWidgets('renders prayer details and status chips when loaded', (
     tester,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
@@ -804,58 +805,59 @@ class PrayerAdhanNotificationService
         return;
       }
 
-      String? prayerName;
-      try {
-        final dynamic decoded = jsonDecode(payload);
-        if (decoded is Map<String, dynamic>) {
-          final dynamic v = decoded[PrayerNotificationConfig.payloadPrayerKey];
-          if (v is String) {
-            prayerName = v;
-          } else {
-            final dynamic fallback = decoded['prayer_name'];
-            if (fallback is String) {
-              prayerName = fallback;
-            }
-          }
-        }
-      } catch (_) {
-        // Best-effort decode; fall through with prayerName == null.
-      }
-
-      try {
-        final Map<String, Object> params = <String, Object>{};
-        if (prayerName != null) {
-          params['prayer_name'] = prayerName;
-          params['prayer_key'] = prayerName.toLowerCase();
-        }
-        final int? id = response.id;
-        if (id != null) {
-          params['notification_id'] = id;
-        }
-
-        // Check if it's a prayer notification
-        final dynamic decoded = jsonDecode(payload);
-        if (decoded is Map<String, dynamic>) {
-          params['adhan_enabled'] = decoded['adhan_enabled'] ?? false;
-          params['is_adhan'] = decoded['adhan_enabled'] ?? false;
-        }
-
-        await _analytics.logEvent(
-          'prayer_notification_tapped',
-          parameters: params,
-        );
-      } catch (e) {
-        logger.w('${PrayerNotificationConfig.logTag} Analytics log failed: $e');
-      }
-
       // Navigate to status screen with extras
       _navigateToPrayerStatus(payload);
+      unawaited(_logNotificationTapAnalytics(payload, response.id));
     } catch (e, stackTrace) {
       logger.e(
         '${PrayerNotificationConfig.logTag} handleNotificationResponse failed: $e',
         error: e,
         stackTrace: stackTrace,
       );
+    }
+  }
+
+  Future<void> _logNotificationTapAnalytics(
+    String payload,
+    int? notificationId,
+  ) async {
+    String? prayerName;
+
+    try {
+      final dynamic decoded = jsonDecode(payload);
+      final Map<String, Object> params = <String, Object>{};
+
+      if (decoded is Map<String, dynamic>) {
+        final dynamic prayerKey =
+            decoded[PrayerNotificationConfig.payloadPrayerKey];
+        final dynamic fallbackPrayerName = decoded['prayer_name'];
+        if (prayerKey is String) {
+          prayerName = prayerKey;
+        } else if (fallbackPrayerName is String) {
+          prayerName = fallbackPrayerName;
+        }
+
+        final dynamic adhanEnabled = decoded['adhan_enabled'];
+        if (adhanEnabled is bool) {
+          params['adhan_enabled'] = adhanEnabled;
+          params['is_adhan'] = adhanEnabled;
+        }
+      }
+
+      if (prayerName != null) {
+        params['prayer_name'] = prayerName;
+        params['prayer_key'] = prayerName.toLowerCase();
+      }
+      if (notificationId != null) {
+        params['notification_id'] = notificationId;
+      }
+
+      await _analytics.logEvent(
+        'prayer_notification_tapped',
+        parameters: params,
+      );
+    } catch (e) {
+      logger.w('${PrayerNotificationConfig.logTag} Analytics log failed: $e');
     }
   }
 

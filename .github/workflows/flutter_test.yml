@@ -48,7 +48,7 @@ jobs:
         run: melos run gen --no-select
 
       - name: Run Tests
-        run: melos exec --no-select -- "flutter test --reporter expanded"
+        run: melos exec --dir-exists=test --concurrency=1 -- 'bash "$MELOS_ROOT_PATH/.github/scripts/flutter_ci_test_package.sh"'
 
   build_android:
     name: Build & Deploy Android

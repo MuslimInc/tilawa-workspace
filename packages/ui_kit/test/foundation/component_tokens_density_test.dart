@@ -256,13 +256,13 @@ void main() {
       );
     });
 
-    test('compact changes switchTileContentPadding vertical to 8', () {
+    test('compact changes switchTileContentPadding vertical to 10', () {
       final compact = TilawaSettingsGroupTokens.defaults(
         density: TilawaDensity.compact,
       );
       expect(
         compact.switchTileContentPadding,
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       );
     });
 
@@ -273,14 +273,13 @@ void main() {
       expect(compact.tileSubtitleSpacing, 2);
     });
 
-    test('compact does NOT change tileContentPadding', () {
+    test('compact changes tileContentPadding vertical to 8', () {
       final compact = TilawaSettingsGroupTokens.defaults(
         density: TilawaDensity.compact,
       );
-      final comfortable = TilawaSettingsGroupTokens.defaults();
       expect(
         compact.tileContentPadding,
-        equals(comfortable.tileContentPadding),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       );
     });
 
@@ -298,10 +297,8 @@ void main() {
         equals(comfortable.groupTitleLetterSpacing),
       );
       expect(compact.tileTitleFontSize, equals(comfortable.tileTitleFontSize));
-      expect(
-        compact.tileSubtitleFontSize,
-        equals(comfortable.tileSubtitleFontSize),
-      );
+      // tileSubtitleFontSize changes to 13 in compact
+      expect(compact.tileSubtitleFontSize, 13.0);
     });
 
     test('compact does NOT change icon sizes or icon padding', () {
@@ -315,7 +312,8 @@ void main() {
         compact.tileIconBorderRadius,
         equals(comfortable.tileIconBorderRadius),
       );
-      expect(compact.tileTrailingSize, equals(comfortable.tileTrailingSize));
+      // tileTrailingSize changes to 18 in compact
+      expect(compact.tileTrailingSize, 18.0);
     });
 
     test('compact does NOT change divider values', () {
@@ -370,14 +368,10 @@ void main() {
       );
       expect(compact.groupShadowBlur, equals(comfortable.groupShadowBlur));
       expect(compact.groupShadowOffset, equals(comfortable.groupShadowOffset));
-      expect(
-        compact.tileSubtitleOpacity,
-        equals(comfortable.tileSubtitleOpacity),
-      );
-      expect(
-        compact.tileTrailingOpacity,
-        equals(comfortable.tileTrailingOpacity),
-      );
+      // tileSubtitleOpacity changes to 0.65 in compact
+      expect(compact.tileSubtitleOpacity, 0.65);
+      // tileTrailingOpacity changes to 0.55 in compact
+      expect(compact.tileTrailingOpacity, 0.55);
       expect(
         compact.tileIconContainerOpacity,
         equals(comfortable.tileIconContainerOpacity),
@@ -398,7 +392,7 @@ void main() {
       );
       expect(
         tokens.settingsGroup.switchTileContentPadding,
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       );
       expect(tokens.settingsGroup.tileSubtitleSpacing, 2);
     });
@@ -411,7 +405,7 @@ void main() {
       );
       expect(
         tokens.settingsGroup.switchTileContentPadding,
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       );
       expect(tokens.settingsGroup.tileSubtitleSpacing, 2);
     });

@@ -323,6 +323,150 @@ void main() {
           },
         );
 
+        test('does not wait for analytics before navigating', () async {
+          await initialize();
+
+          final analyticsLogged = Completer<void>();
+          when(
+            mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+          ).thenAnswer((_) => analyticsLogged.future);
+
+          final payload = jsonEncode({
+            PrayerNotificationConfig.payloadTypeKey:
+                PrayerNotificationConfig.payloadTypeValue,
+            PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+            'prayer_name': 'fajr',
+            'prayer_key': 'fajr',
+            'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+            'notification_id': 2001,
+            'adhan_enabled': true,
+          });
+
+          await service
+              .handleNotificationResponse(
+                NotificationResponse(
+                  notificationResponseType:
+                      NotificationResponseType.selectedNotification,
+                  payload: payload,
+                ),
+              )
+              .timeout(const Duration(milliseconds: 100));
+
+          verify(
+            mockNav.navigateToNotification(
+              const PrayerNotificationStatusRoute().location,
+              extra: payload,
+            ),
+          ).called(1);
+
+          analyticsLogged.complete();
+        });
+
+        test('navigates even when analytics logging fails', () async {
+          await initialize();
+
+          when(
+            mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+          ).thenAnswer((_) async => throw Exception('analytics unavailable'));
+
+          final payload = jsonEncode({
+            PrayerNotificationConfig.payloadTypeKey:
+                PrayerNotificationConfig.payloadTypeValue,
+            PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+            'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+            'notification_id': 2001,
+            'adhan_enabled': true,
+          });
+
+          await service.handleNotificationResponse(
+            NotificationResponse(
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: payload,
+              id: 2001,
+            ),
+          );
+          await untilCalled(
+            mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+          );
+
+          verify(
+            mockNav.navigateToNotification(
+              const PrayerNotificationStatusRoute().location,
+              extra: payload,
+            ),
+          ).called(1);
+        });
+
+        test(
+          'ignores non-prayer payloads without navigation or analytics',
+          () async {
+            await initialize();
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: jsonEncode({'type': 'downloads'}),
+                id: 9999,
+              ),
+            );
+            await Future<void>.delayed(Duration.zero);
+
+            verifyNever(
+              mockNav.navigateToNotification(any, extra: anyNamed('extra')),
+            );
+            verifyNever(
+              mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+            );
+          },
+        );
+
+        test(
+          'logs analytics with fallback prayer name and notification id',
+          () async {
+            await initialize();
+
+            final payload = jsonEncode({
+              PrayerNotificationConfig.payloadTypeKey:
+                  PrayerNotificationConfig.payloadTypeValue,
+              'prayer_name': 'maghrib',
+              'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+              'adhan_enabled': false,
+            });
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: payload,
+                id: 2004,
+              ),
+            );
+            await untilCalled(
+              mockAnalytics.logEvent(
+                'prayer_notification_tapped',
+                parameters: anyNamed('parameters'),
+              ),
+            );
+
+            final capturedParams =
+                verify(
+                      mockAnalytics.logEvent(
+                        'prayer_notification_tapped',
+                        parameters: captureAnyNamed('parameters'),
+                      ),
+                    ).captured.single
+                    as Map<String, Object>;
+
+            expect(capturedParams['prayer_name'], 'maghrib');
+            expect(capturedParams['prayer_key'], 'maghrib');
+            expect(capturedParams['notification_id'], 2004);
+            expect(capturedParams['adhan_enabled'], false);
+            expect(capturedParams['is_adhan'], false);
+          },
+        );
+
         test(
           'native Adhan tap stream is routed after initialization',
           () async {
