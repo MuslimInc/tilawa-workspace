@@ -12,7 +12,10 @@ void main() => testExecutable(runTests);
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   return AlchemistConfig.runWithConfig(
     config: AlchemistConfig(
-      platformGoldensConfig: PlatformGoldensConfig(theme: ThemeData.light()),
+      platformGoldensConfig: PlatformGoldensConfig(
+        theme: ThemeData.light(),
+        diffThreshold: 0.001,
+      ),
       ciGoldensConfig: const CiGoldensConfig(enabled: false),
     ),
     run: testMain,

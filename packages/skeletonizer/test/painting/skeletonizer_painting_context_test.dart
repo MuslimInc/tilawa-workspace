@@ -115,7 +115,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         ok = ctx.canvas is SkeletonizerCanvas;
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(ok, isTrue);
     });
 
@@ -129,7 +129,7 @@ void main() {
           canvas.drawPicture(r.endRecording());
         })),
       )));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -137,7 +137,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         ctx.canvas.drawRect(ui.Rect.zero, ui.Paint());
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -148,7 +148,7 @@ void main() {
         width: 200, height: 60,
         child: Skeletonizer(enabled: true, child: const Center(child: Text('X', style: TextStyle(fontSize: 24)))),
       ))));
-      await t.pumpAndSettle();
+      await t.pump();
       // ignore: invalid_use_of_protected_member
       final img = await _layerImage(t.renderObject(find.byType(RepaintBoundary)).layer!, const Size(200, 60));
       expect(img.width, 200);
@@ -161,7 +161,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawImage(img, ui.Offset.zero, ui.Paint());
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -170,7 +170,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawImageRect(img, ui.Rect.zero, const ui.Rect.fromLTWH(0, 0, 50, 50), ui.Paint());
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -179,7 +179,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawImageNine(img, ui.Rect.zero, const ui.Rect.fromLTWH(0, 0, 50, 50), ui.Paint());
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -190,7 +190,7 @@ void main() {
         width: 100, height: 100,
         child: Skeletonizer(enabled: true, ignoreContainers: false, child: Container(color: Colors.red)),
       ))));
-      await t.pumpAndSettle();
+      await t.pump();
       // ignore: invalid_use_of_protected_member
       final img = await _layerImage(t.renderObject(find.byType(RepaintBoundary)).layer!, const Size(100, 100));
       expect(await _redAtCenter(img), greaterThanOrEqualTo(0));
@@ -203,7 +203,7 @@ void main() {
           ui.Paint()..color = const ui.Color(0xFFFF0000),
         );
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -215,7 +215,7 @@ void main() {
           ui.Paint()..color = const ui.Color(0xFFFF0000),
         );
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -225,7 +225,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawCircle(const ui.Offset(25, 25), 20, ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -233,7 +233,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawOval(const ui.Rect.fromLTWH(0, 0, 50, 50), ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -241,7 +241,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawArc(const ui.Rect.fromLTWH(0, 0, 50, 50), 0, 1, false, ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -249,7 +249,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawLine(ui.Offset.zero, const ui.Offset(50, 50), ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -258,7 +258,7 @@ void main() {
         final p = ui.Path()..addRect(const ui.Rect.fromLTWH(0, 0, 50, 50));
         (ctx.canvas as SkeletonizerCanvas).drawPath(p, ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -266,7 +266,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawPoints(ui.PointMode.points, [ui.Offset.zero], ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -274,7 +274,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawRawPoints(ui.PointMode.points, Float32List.fromList([0, 0]), ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -295,15 +295,15 @@ void main() {
       final newCfg = cfg.copyWith(ignoreContainers: true);
       await t.pumpWidget(_wrap(SkeletonizerConfig(
         data: newCfg,
-        child: _Capture(onPaint: (ctx) {
+        child: Skeletonizer(child: _Capture(onPaint: (ctx) {
           final c = ctx.canvas as SkeletonizerCanvas;
           c.drawShadow(
             ui.Path()..addRect(const ui.Rect.fromLTWH(0, 0, 50, 50)),
             const ui.Color(0xFF000000), 2, false,
           );
-        }),
+        })),
       )));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -319,7 +319,7 @@ void main() {
           c.drawPicture(r.endRecording());
         })),
       )));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -329,7 +329,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawColor(const ui.Color(0xFFFF0000), ui.BlendMode.srcOver);
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -337,7 +337,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).drawPaint(ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -347,7 +347,7 @@ void main() {
           ui.Path()..addRect(const ui.Rect.fromLTWH(0, 0, 50, 50)), const ui.Color(0xFF000000), 2, false,
         );
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -364,7 +364,7 @@ void main() {
         c.transform(Matrix4.identity().storage);
         c.restore();
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
 
@@ -372,7 +372,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).saveLayer(null, ui.Paint());
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -385,7 +385,7 @@ void main() {
         c.clipRRect(ui.RRect.fromRectAndRadius(const ui.Rect.fromLTWH(0, 0, 50, 50), const ui.Radius.circular(8)));
         c.clipPath(ui.Path()..addRect(const ui.Rect.fromLTWH(0, 0, 50, 50)));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -397,7 +397,7 @@ void main() {
         final c = ctx.canvas as SkeletonizerCanvas;
         c.drawRawAtlas(img, Float32List(0), Float32List(0), null, null, null, ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -408,7 +408,7 @@ void main() {
         final verts = ui.Vertices(ui.VertexMode.triangles, [ui.Offset.zero, const ui.Offset(10, 0), const ui.Offset(0, 10)]);
         (ctx.canvas as SkeletonizerCanvas).drawVertices(verts, ui.BlendMode.srcOver, ui.Paint()..color = const ui.Color(0xFFFF0000));
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
@@ -418,7 +418,7 @@ void main() {
       await t.pumpWidget(_wrap(Skeletonizer(child: _Capture(onPaint: (ctx) {
         (ctx.canvas as SkeletonizerCanvas).getSaveCount();
       }))));
-      await t.pumpAndSettle();
+      await t.pump();
       expect(t.takeException(), isNull);
     });
   });
