@@ -293,6 +293,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? iconSizeSmall,
     double? iconSizeMedium,
     double? iconSizeLarge,
+    double? iconSizeLargePlus,
     double? iconSizeExtraLarge,
     double? textHeightLoose,
     Duration? durationFast,
