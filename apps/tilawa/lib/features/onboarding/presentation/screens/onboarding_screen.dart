@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
@@ -34,6 +35,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final double activeIndicatorWidth = tokens.spaceExtraLarge;
     final double inactiveIndicatorWidth = tokens.spaceSmall;
     final double indicatorRadius = tokens.radiusSmall / 2;
+    final Color statusBarColor = theme.colorScheme.surface;
+    final Brightness statusBarBrightness = ThemeData.estimateBrightnessForColor(
+      statusBarColor,
+    );
+    final Brightness statusBarIconBrightness =
+        statusBarBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
 
     final pages = <OnboardingContent>[
       OnboardingContent(
@@ -62,113 +71,120 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           }
         },
         builder: (context, state) {
-          return Scaffold(
-            backgroundColor: theme.colorScheme.surface,
-            body: Column(
-              spacing: tokens.spaceExtraLarge,
-              children: [
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: pages.length,
-                    onPageChanged: (index) {
-                      setState(() => _currentPage = index);
-                      context.read<OnboardingCubit>().pageChanged(index);
-                    },
-                    itemBuilder: (context, index) {
-                      return OnboardingPage(content: pages[index]);
-                    },
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              statusBarColor: statusBarColor,
+              statusBarIconBrightness: statusBarIconBrightness,
+              statusBarBrightness: statusBarBrightness,
+            ),
+            child: Scaffold(
+              backgroundColor: statusBarColor,
+              body: Column(
+                spacing: tokens.spaceExtraLarge,
+                children: [
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: pages.length,
+                      onPageChanged: (index) {
+                        setState(() => _currentPage = index);
+                        context.read<OnboardingCubit>().pageChanged(index);
+                      },
+                      itemBuilder: (context, index) {
+                        return OnboardingPage(content: pages[index]);
+                      },
+                    ),
                   ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    pages.length,
-                    (index) => AnimatedContainer(
-                      duration: tokens.durationMedium,
-                      margin: EdgeInsets.symmetric(
-                        horizontal: tokens.spaceExtraSmall,
-                      ),
-                      height: indicatorHeight,
-                      width: _currentPage == index
-                          ? activeIndicatorWidth
-                          : inactiveIndicatorWidth,
-                      decoration: BoxDecoration(
-                        color: _currentPage == index
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(indicatorRadius),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      pages.length,
+                      (index) => AnimatedContainer(
+                        duration: tokens.durationMedium,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: tokens.spaceExtraSmall,
+                        ),
+                        height: indicatorHeight,
+                        width: _currentPage == index
+                            ? activeIndicatorWidth
+                            : inactiveIndicatorWidth,
+                        decoration: BoxDecoration(
+                          color: _currentPage == index
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(indicatorRadius),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    tokens.spaceExtraLarge,
-                    0,
-                    tokens.spaceExtraLarge,
-                    context.floatingBottomPadding,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      if (_currentPage > 0)
-                        IconButton(
-                          onPressed: () {
-                            _pageController.previousPage(
-                              duration: tokens.durationMedium,
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          icon: const Icon(Icons.arrow_back_ios_new),
-                          style: IconButton.styleFrom(
-                            backgroundColor:
-                                theme.colorScheme.surfaceContainerHighest,
-                          ),
-                        )
-                      else
-                        const SizedBox.shrink(),
-                      if (_currentPage == pages.length - 1)
-                        Expanded(
-                          child: Padding(
-                            padding: EdgeInsetsDirectional.only(
-                              start: tokens.spaceLarge,
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      tokens.spaceExtraLarge,
+                      0,
+                      tokens.spaceExtraLarge,
+                      context.floatingBottomPadding,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (_currentPage > 0)
+                          IconButton(
+                            onPressed: () {
+                              _pageController.previousPage(
+                                duration: tokens.durationMedium,
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            icon: const Icon(Icons.arrow_back_ios_new),
+                            style: IconButton.styleFrom(
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainerHighest,
                             ),
-                            child: FilledButton(
-                              onPressed: () {
-                                context
-                                    .read<OnboardingCubit>()
-                                    .completeOnboarding();
-                              },
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size.fromHeight(
-                                  kMinInteractiveDimension,
-                                ),
+                          )
+                        else
+                          const SizedBox.shrink(),
+                        if (_currentPage == pages.length - 1)
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsetsDirectional.only(
+                                start: tokens.spaceLarge,
                               ),
-                              child: Text(context.l10n.startJourney),
+                              child: FilledButton(
+                                onPressed: () {
+                                  context
+                                      .read<OnboardingCubit>()
+                                      .completeOnboarding();
+                                },
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(
+                                    kMinInteractiveDimension,
+                                  ),
+                                ),
+                                child: Text(context.l10n.startJourney),
+                              ),
                             ),
-                          ),
-                        )
-                      else
-                        FilledButton(
-                          onPressed: () {
-                            _pageController.nextPage(
-                              duration: tokens.durationMedium,
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                          style: FilledButton.styleFrom(
-                            minimumSize: Size(
-                              tokens.spaceExtraLarge * 4,
-                              kMinInteractiveDimension,
+                          )
+                        else
+                          FilledButton(
+                            onPressed: () {
+                              _pageController.nextPage(
+                                duration: tokens.durationMedium,
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                            style: FilledButton.styleFrom(
+                              minimumSize: Size(
+                                tokens.spaceExtraLarge * 4,
+                                kMinInteractiveDimension,
+                              ),
                             ),
+                            child: Text(context.l10n.next),
                           ),
-                          child: Text(context.l10n.next),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

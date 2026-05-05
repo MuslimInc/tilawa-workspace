@@ -1192,6 +1192,10 @@
     "@qiblaCompassTip": {
         "description": "Tip message displayed on Qibla compass screen"
     },
+    "qiblaCompassAccuracyPoor": "دقة البوصلة منخفضة. حرّك هاتفك على شكل رقم 8 لمعايرتها.",
+    "@qiblaCompassAccuracyPoor": {
+        "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
+    },
     "onboardingTitle1": "دقائق من القرآن... تغير يومك كله",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title"

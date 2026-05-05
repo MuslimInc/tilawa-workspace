@@ -1640,6 +1640,12 @@ abstract class AppLocalizations {
   /// **'Make sure the arrow moves when you rotate your device'**
   String get qiblaCompassTip;
 
+  /// SnackBar message shown when Qibla compass sensor accuracy is poor
+  ///
+  /// In en, this message translates to:
+  /// **'Compass accuracy is low. Move your phone in a figure-eight motion to calibrate it.'**
+  String get qiblaCompassAccuracyPoor;
+
   /// Onboarding page 1 title
   ///
   /// In en, this message translates to:

@@ -866,6 +866,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get qiblaCompassTip => 'تأكد من أن السهم يتحرك عند تحريك الجهاز';
 
   @override
+  String get qiblaCompassAccuracyPoor =>
+      'دقة البوصلة منخفضة. حرّك هاتفك على شكل رقم 8 لمعايرتها.';
+
+  @override
   String get onboardingTitle1 => 'دقائق من القرآن... تغير يومك كله';
 
   @override

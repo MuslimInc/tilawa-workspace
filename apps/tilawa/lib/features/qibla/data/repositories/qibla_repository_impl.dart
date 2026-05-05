@@ -13,6 +13,8 @@ class QiblaRepositoryImpl implements QiblaRepository {
   QiblaRepositoryImpl(this._dataSource);
   final QiblaDataSource _dataSource;
   static const double _angleTolerance = 0.5;
+  static const double _maxSingleSampleHeadingJump = 35;
+  static const double _jumpConfirmationTolerance = 8;
 
   @override
   Stream<QiblaDirectionEntity> getQiblaDirection() {
@@ -23,14 +25,55 @@ class QiblaRepositoryImpl implements QiblaRepository {
             qibla: _normalizeAngle(qiblaDirection.qibla),
             direction: _normalizeAngle(qiblaDirection.direction),
             offset: _normalizeAngle(qiblaDirection.offset),
+            accuracy: qiblaDirection.accuracy,
           );
         })
+        .transform(_headingSpikeFilter())
         .distinct(
           (prev, curr) =>
               _isSimilarAngle(prev.qibla, curr.qibla) &&
               _isSimilarAngle(prev.direction, curr.direction) &&
-              _isSimilarAngle(prev.offset, curr.offset),
+              _isSimilarAngle(prev.offset, curr.offset) &&
+              prev.hasPoorCompassAccuracy == curr.hasPoorCompassAccuracy,
         );
+  }
+
+  StreamTransformer<QiblaDirectionEntity, QiblaDirectionEntity>
+  _headingSpikeFilter() {
+    QiblaDirectionEntity? lastEmitted;
+    QiblaDirectionEntity? pendingJump;
+
+    return StreamTransformer.fromHandlers(
+      handleData: (current, sink) {
+        if (lastEmitted == null) {
+          lastEmitted = current;
+          sink.add(current);
+          return;
+        }
+
+        final double distanceFromLast = _angleDistance(
+          lastEmitted!.direction,
+          current.direction,
+        );
+        if (distanceFromLast <= _maxSingleSampleHeadingJump) {
+          lastEmitted = current;
+          pendingJump = null;
+          sink.add(current);
+          return;
+        }
+
+        if (pendingJump != null &&
+            _angleDistance(pendingJump!.direction, current.direction) <=
+                _jumpConfirmationTolerance) {
+          lastEmitted = current;
+          pendingJump = null;
+          sink.add(current);
+          return;
+        }
+
+        pendingJump = current;
+      },
+    );
   }
 
   double _normalizeAngle(double value) {
@@ -38,9 +81,12 @@ class QiblaRepositoryImpl implements QiblaRepository {
   }
 
   bool _isSimilarAngle(double first, double second) {
+    return _angleDistance(first, second) < _angleTolerance;
+  }
+
+  double _angleDistance(double first, double second) {
     final double diff = (first - second).abs() % 360;
-    final double shortestDistance = diff > 180 ? 360 - diff : diff;
-    return shortestDistance < _angleTolerance;
+    return diff > 180 ? 360 - diff : diff;
   }
 
   @override

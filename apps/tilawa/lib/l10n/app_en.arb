@@ -1192,6 +1192,10 @@
     "@qiblaCompassTip": {
         "description": "Tip message displayed on Qibla compass screen"
     },
+    "qiblaCompassAccuracyPoor": "Compass accuracy is low. Move your phone in a figure-eight motion to calibrate it.",
+    "@qiblaCompassAccuracyPoor": {
+        "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
+    },
     "onboardingTitle1": "Minutes from the Quran... change your whole day",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title"

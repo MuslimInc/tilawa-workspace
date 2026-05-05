@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -22,16 +23,22 @@ class _QiblaScreenState extends State<QiblaScreen> {
   @override
   void initState() {
     super.initState();
-    debugPrint('[CompassSensor] QiblaScreen.initState');
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] QiblaScreen.initState');
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint('[CompassSensor] QiblaScreen -> CheckLocationService');
+      if (kDebugMode) {
+        debugPrint('[CompassSensor] QiblaScreen -> CheckLocationService');
+      }
       context.read<QiblaBloc>().add(const CheckLocationService());
     });
   }
 
   @override
   void dispose() {
-    debugPrint('[CompassSensor] QiblaScreen.dispose -> StopQiblaStream');
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] QiblaScreen.dispose -> StopQiblaStream');
+    }
     context.read<QiblaBloc>().add(const StopQiblaStream());
     super.dispose();
   }
@@ -45,23 +52,37 @@ class _QiblaScreenState extends State<QiblaScreen> {
 
     return Stack(
       children: [
-        Scaffold(
-          backgroundColor: colorScheme.surface,
-          appBar: AppBar(
-            elevation: 0,
-            leading: context.canPop() ? const TilawaBackButton() : null,
-            title: Text(context.l10n.qiblaDirection),
-          ),
-          body: SafeArea(
-            child: CustomScrollView(
-              slivers: [
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: isLandscape
-                      ? const _LandscapeContent()
-                      : const _PortraitContent(),
-                ),
-              ],
+        BlocListener<QiblaBloc, QiblaState>(
+          listenWhen: (previous, current) {
+            final bool wasPoor =
+                previous.direction?.hasPoorCompassAccuracy ?? false;
+            final bool isPoor =
+                current.direction?.hasPoorCompassAccuracy ?? false;
+            return !wasPoor && isPoor;
+          },
+          listener: (context, state) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(context.l10n.qiblaCompassAccuracyPoor)),
+            );
+          },
+          child: Scaffold(
+            backgroundColor: colorScheme.surface,
+            appBar: AppBar(
+              elevation: 0,
+              leading: context.canPop() ? const TilawaBackButton() : null,
+              title: Text(context.l10n.qiblaDirection),
+            ),
+            body: SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: isLandscape
+                        ? const _LandscapeContent()
+                        : const _PortraitContent(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

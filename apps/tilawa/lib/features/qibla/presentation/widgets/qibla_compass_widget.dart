@@ -202,7 +202,7 @@ class _AngleDisplay extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '${(angle % kFullCircleDegrees).toStringAsFixed(0)}°',
+          '${_displayAngle(angle)}°',
           style: theme.textTheme.displayLarge?.copyWith(
             fontSize: kAngleDisplayFontSize,
             fontWeight: kAngleDisplayFontWeight,
@@ -228,6 +228,12 @@ class _AngleDisplay extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  int _displayAngle(double value) {
+    final double normalized =
+        (value % kFullCircleDegrees + kFullCircleDegrees) % kFullCircleDegrees;
+    return normalized.round() % kFullCircleDegrees;
   }
 }
 

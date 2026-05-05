@@ -873,6 +873,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Make sure the arrow moves when you rotate your device';
 
   @override
+  String get qiblaCompassAccuracyPoor =>
+      'Compass accuracy is low. Move your phone in a figure-eight motion to calibrate it.';
+
+  @override
   String get onboardingTitle1 =>
       'Minutes from the Quran... change your whole day';
 

@@ -113,10 +113,16 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
     }
 
     private void registerListener() {
-        if (sensorManager == null) return;
+        if (sensorManager == null || sensorEventListener == null) return;
         if (isCompassSensorAvailable()) {
             // Does nothing if the sensors already registered.
             sensorManager.registerListener(sensorEventListener, compassSensor, SENSOR_DELAY_MICROS);
+            return;
+        }
+
+        if (!areFallbackSensorsAvailable()) {
+            Log.w(TAG, "Compass sensors not available on device.");
+            return;
         }
 
         sensorManager.registerListener(sensorEventListener, gravitySensor, SENSOR_DELAY_MICROS);
@@ -124,21 +130,33 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
     }
 
     private void unregisterListener() {
-        if (sensorManager == null) return;
+        if (sensorManager == null || sensorEventListener == null) return;
         if (isCompassSensorAvailable()) {
             sensorManager.unregisterListener(sensorEventListener, compassSensor);
         }
 
-        sensorManager.unregisterListener(sensorEventListener, gravitySensor);
-        sensorManager.unregisterListener(sensorEventListener, magneticFieldSensor);
+        if (gravitySensor != null) {
+            sensorManager.unregisterListener(sensorEventListener, gravitySensor);
+        }
+        if (magneticFieldSensor != null) {
+            sensorManager.unregisterListener(sensorEventListener, magneticFieldSensor);
+        }
     }
 
     private boolean isCompassSensorAvailable() {
         return compassSensor != null;
     }
 
+    private boolean areFallbackSensorsAvailable() {
+        return gravitySensor != null && magneticFieldSensor != null;
+    }
+
     SensorEventListener createSensorEventListener(final EventSink events) {
         return new SensorEventListener() {
+            private final float[] adjustedRotationMatrix = new float[9];
+            private final float[] orientation = new float[3];
+            private final double[] compassEvent = new double[3];
+
             @Override
             public void onSensorChanged(SensorEvent event) {
                 // Keep emitting heading updates even when unreliable; the unreliable
@@ -170,19 +188,28 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
                     return;
                 }
 
+                if (display == null) {
+                    return;
+                }
+
                 if (rotationVectorValue != null) {
                     SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationVectorValue);
                 } else {
                     // Get rotation matrix given the gravity and geomagnetic matrices
-                    SensorManager.getRotationMatrix(rotationMatrix, null, gravityValues, magneticValues);
+                    boolean rotationMatrixReady = SensorManager.getRotationMatrix(rotationMatrix, null, gravityValues,
+                            magneticValues);
+                    if (!rotationMatrixReady) {
+                        return;
+                    }
                 }
 
                 int worldAxisForDeviceAxisX;
                 int worldAxisForDeviceAxisY;
+                int displayRotation = display.getRotation();
 
                 // Assume the device screen was parallel to the ground,
                 // and adjust the rotation matrix for the device orientation.
-                switch (display.getRotation()) {
+                switch (displayRotation) {
                     case Surface.ROTATION_90:
                         worldAxisForDeviceAxisX = SensorManager.AXIS_Y;
                         worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_X;
@@ -202,18 +229,16 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
                         break;
                 }
 
-                float[] adjustedRotationMatrix = new float[9];
                 SensorManager.remapCoordinateSystem(rotationMatrix, worldAxisForDeviceAxisX, worldAxisForDeviceAxisY,
                         adjustedRotationMatrix);
 
                 // Transform rotation matrix into azimuth/pitch/roll
-                float[] orientation = new float[3];
                 SensorManager.getOrientation(adjustedRotationMatrix, orientation);
 
                 if (orientation[1] < -Math.PI / 4) {
                     // The pitch is less than -45 degrees.
                     // Remap the axes as if the device screen was the instrument panel.
-                    switch (display.getRotation()) {
+                    switch (displayRotation) {
                         case Surface.ROTATION_90:
                             worldAxisForDeviceAxisX = SensorManager.AXIS_Z;
                             worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_X;
@@ -235,7 +260,7 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
                 } else if (orientation[1] > Math.PI / 4) {
                     // The pitch is larger than 45 degrees.
                     // Remap the axes as if the device screen was upside down and facing back.
-                    switch (display.getRotation()) {
+                    switch (displayRotation) {
                         case Surface.ROTATION_90:
                             worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Z;
                             worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_X;
@@ -257,7 +282,7 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
                 } else if (Math.abs(orientation[2]) > Math.PI / 2) {
                     // The roll is less than -90 degrees, or is larger than 90 degrees.
                     // Remap the axes as if the device screen was face down.
-                    switch (display.getRotation()) {
+                    switch (displayRotation) {
                         case Surface.ROTATION_90:
                             worldAxisForDeviceAxisX = SensorManager.AXIS_MINUS_Y;
                             worldAxisForDeviceAxisY = SensorManager.AXIS_MINUS_X;
@@ -284,11 +309,11 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
                 // Transform rotation matrix into azimuth/pitch/roll
                 SensorManager.getOrientation(adjustedRotationMatrix, orientation);
 
-                double[] v = new double[3];
-                v[0] = Math.toDegrees(orientation[0]);
-                v[2] = getAccuracy();
+                compassEvent[0] = Math.toDegrees(orientation[0]);
+                compassEvent[1] = 0;
+                compassEvent[2] = getAccuracy();
                 // The x-axis is all we care about here.
-                notifyCompassChangeListeners(v);
+                notifyCompassChangeListeners(compassEvent);
 
                 // Update the compassUpdateNextTimestamp
                 compassUpdateNextTimestamp = currentTime + COMPASS_UPDATE_RATE_MS;
@@ -322,7 +347,8 @@ public final class FlutterCompassPlugin implements FlutterPlugin, StreamHandler 
                 if (smoothedValues == null) {
                     return newValues;
                 }
-                for (int i = 0; i < newValues.length; i++) {
+                int length = Math.min(newValues.length, smoothedValues.length);
+                for (int i = 0; i < length; i++) {
                     smoothedValues[i] = smoothedValues[i] + ALPHA * (newValues[i] - smoothedValues[i]);
                 }
                 return smoothedValues;

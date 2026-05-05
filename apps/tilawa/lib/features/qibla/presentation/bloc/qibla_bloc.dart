@@ -8,6 +8,7 @@ import 'package:injectable/injectable.dart';
 import 'package:qibla/qibla.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
+import 'package:vibration/vibration.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../../domain/usecases/check_location_service_use_case.dart';
@@ -38,6 +39,7 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
 
   StreamSubscription<QiblaDirectionEntity>? _qiblaSubscription;
   int _eventCounter = 0;
+  bool _wasAlignedWithQibla = false;
 
   /// Checks location service, permission, and starts the Qibla
   /// stream in a single pass — avoiding multiple event dispatches.
@@ -136,34 +138,45 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
 
   /// Subscribes to the Qibla direction stream.
   void _startListening() {
-    debugPrint('[CompassSensor] QiblaBloc._startListening begin');
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] QiblaBloc._startListening begin');
+    }
+    _wasAlignedWithQibla = false;
     _qiblaSubscription?.cancel();
     try {
       _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
         (direction) {
           _eventCounter++;
-          if (_eventCounter <= 5 || _eventCounter % 20 == 0) {
+          if (kDebugMode && (_eventCounter <= 5 || _eventCounter % 20 == 0)) {
             debugPrint(
               '[CompassSensor] stream event #$_eventCounter '
-              'heading=${direction.direction.toStringAsFixed(1)} '
-              'qibla=${direction.qibla.toStringAsFixed(1)} '
-              'offset=${direction.offset.toStringAsFixed(1)}',
+              'heading=${_formatAngle(direction.direction)} '
+              'qibla=${_formatAngle(direction.qibla)} '
+              'offset=${_formatAngle(direction.offset)}',
             );
           }
           add(UpdateQiblaDirection(direction));
         },
         onError: (error) {
-          debugPrint('[CompassSensor] stream error: $error');
+          if (kDebugMode) {
+            debugPrint('[CompassSensor] stream error: $error');
+          }
           add(QiblaErrorOccurred(error.toString()));
         },
         onDone: () {
-          debugPrint('[CompassSensor] stream done');
+          if (kDebugMode) {
+            debugPrint('[CompassSensor] stream done');
+          }
         },
         cancelOnError: false,
       );
-      debugPrint('[CompassSensor] QiblaBloc._startListening subscribed');
+      if (kDebugMode) {
+        debugPrint('[CompassSensor] QiblaBloc._startListening subscribed');
+      }
     } catch (error) {
-      debugPrint('[CompassSensor] QiblaBloc._startListening catch: $error');
+      if (kDebugMode) {
+        debugPrint('[CompassSensor] QiblaBloc._startListening catch: $error');
+      }
       add(QiblaErrorOccurred(error.toString()));
     }
   }
@@ -172,17 +185,28 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     StopQiblaStream event,
     Emitter<QiblaState> emit,
   ) async {
-    debugPrint('[CompassSensor] StopQiblaStream received');
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] StopQiblaStream received');
+    }
     await _qiblaSubscription?.cancel();
     _qiblaSubscription = null;
+    _wasAlignedWithQibla = false;
     Qibla.instance.dispose();
-    debugPrint('[CompassSensor] subscription canceled + Qibla.dispose()');
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] subscription canceled + Qibla.dispose()');
+    }
   }
 
   void _onUpdateQiblaDirection(
     UpdateQiblaDirection event,
     Emitter<QiblaState> emit,
   ) {
+    final bool isAlignedWithQibla = event.direction.isAligned;
+    if (isAlignedWithQibla && !_wasAlignedWithQibla) {
+      unawaited(_triggerQiblaAlignmentVibration());
+    }
+    _wasAlignedWithQibla = isAlignedWithQibla;
+
     emit(
       state.copyWith(status: QiblaStatus.success, direction: event.direction),
     );
@@ -202,11 +226,40 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
 
   @override
   Future<void> close() async {
-    debugPrint('[CompassSensor] QiblaBloc.close');
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] QiblaBloc.close');
+    }
     await _qiblaSubscription?.cancel();
     _qiblaSubscription = null;
+    _wasAlignedWithQibla = false;
     Qibla.instance.dispose();
-    debugPrint('[CompassSensor] QiblaBloc.close canceled + disposed');
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] QiblaBloc.close canceled + disposed');
+    }
     return super.close();
+  }
+
+  String _formatAngle(double value) {
+    final double normalized = (value % 360 + 360) % 360;
+    final int roundedTenths = (normalized * 10).round() % 3600;
+    return (roundedTenths / 10).toStringAsFixed(1);
+  }
+
+  Future<void> _triggerQiblaAlignmentVibration() async {
+    try {
+      final bool hasVibrator = await Vibration.hasVibrator();
+      if (!hasVibrator) {
+        return;
+      }
+
+      final bool hasAmplitude = await Vibration.hasAmplitudeControl();
+      await Vibration.vibrate(
+        duration: 180,
+        amplitude: hasAmplitude ? 160 : -1,
+      );
+    } catch (_) {
+      // Devices without vibration support, platform failures, and simulator
+      // gaps should never affect Qibla state updates.
+    }
   }
 }

@@ -75,10 +75,7 @@ class Qibla {
   }
 
   Stream<QiblaDirection> getQiblaStream() {
-    _qiblaStream ??= _merge<CompassEvent, Position>(
-      compassEvents,
-      locationStream.take(1),
-    );
+    _qiblaStream ??= _merge(compassEvents, locationStream.take(1));
 
     return _qiblaStream!;
   }
@@ -115,22 +112,29 @@ class Qibla {
         );
   }
 
-  Stream<QiblaDirection> _merge<A, B>(Stream<A> streamA, Stream<B> streamB) =>
-      streamA.combineLatest<B, QiblaDirection>(streamB, (dir, pos) {
-        final position = pos as Position;
-        final event = dir as CompassEvent;
+  Stream<QiblaDirection> _merge(
+    Stream<CompassEvent> compassStream,
+    Stream<Position> locationStream,
+  ) {
+    final Stream<double> offsetStream = locationStream.map((position) {
+      return Utils.getOffsetFromNorth(position.latitude, position.longitude);
+    });
 
-        // Calculate the Qibla offset to North
-        final double offSet = Utils.getOffsetFromNorth(
-          position.latitude,
-          position.longitude,
-        );
+    return compassStream.combineLatest<double, QiblaDirection>(offsetStream, (
+      event,
+      offSet,
+    ) {
+      // Adjust Qibla direction based on North direction
+      final double heading = _normalizeAngle(event.heading ?? 0.0);
+      final double qibla = _normalizeAngle(heading + (360 - offSet));
 
-        // Adjust Qibla direction based on North direction
-        final double qibla = (event.heading ?? 0.0) + (360 - offSet);
+      return QiblaDirection(qibla, heading, offSet, accuracy: event.accuracy);
+    });
+  }
 
-        return QiblaDirection(qibla, event.heading ?? 0.0, offSet);
-      });
+  double _normalizeAngle(double value) {
+    return (value % 360 + 360) % 360;
+  }
 
   /// Close compass stream, and set Qibla stream to null
   void dispose() {
@@ -147,8 +151,14 @@ class LocationStatus {
 
 /// Containing Qibla, Direction and offset
 class QiblaDirection {
-  const QiblaDirection(this.qibla, this.direction, this.offset);
+  const QiblaDirection(
+    this.qibla,
+    this.direction,
+    this.offset, {
+    this.accuracy,
+  });
   final double qibla;
   final double direction;
   final double offset;
+  final double? accuracy;
 }

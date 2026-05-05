@@ -11,6 +11,7 @@ import 'package:tilawa/features/qibla/domain/usecases/request_location_permissio
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
+import 'package:vibration_platform_interface/vibration_platform_interface.dart';
 
 class MockGetQiblaDirectionUseCase extends Mock
     implements GetQiblaDirectionUseCase {}
@@ -21,18 +22,61 @@ class MockCheckLocationServiceUseCase extends Mock
 class MockRequestLocationPermissionUseCase extends Mock
     implements RequestLocationPermissionUseCase {}
 
+class FakeVibrationPlatform extends VibrationPlatform {
+  bool hasVibratorValue = true;
+  bool hasAmplitudeControlValue = true;
+  final List<Map<String, Object>> vibrateCalls = <Map<String, Object>>[];
+
+  @override
+  Future<bool> hasVibrator() async => hasVibratorValue;
+
+  @override
+  Future<bool> hasAmplitudeControl() async => hasAmplitudeControlValue;
+
+  @override
+  Future<void> vibrate({
+    int duration = 500,
+    List<int> pattern = const [],
+    int repeat = -1,
+    List<int> intensities = const [],
+    int amplitude = -1,
+    double sharpness = 0.5,
+  }) async {
+    vibrateCalls.add(<String, Object>{
+      'duration': duration,
+      'pattern': pattern,
+      'repeat': repeat,
+      'intensities': intensities,
+      'amplitude': amplitude,
+      'sharpness': sharpness,
+    });
+  }
+
+  @override
+  Future<void> cancel() async {}
+}
+
 void main() {
   late QiblaBloc qiblaBloc;
   late MockGetQiblaDirectionUseCase mockGetQiblaDirectionUseCase;
   late MockCheckLocationServiceUseCase mockCheckLocationServiceUseCase;
   late MockRequestLocationPermissionUseCase
   mockRequestLocationPermissionUseCase;
+  late VibrationPlatform originalVibrationPlatform;
+  late FakeVibrationPlatform fakeVibrationPlatform;
 
   setUpAll(() {
     registerFallbackValue(const NoParams());
+    originalVibrationPlatform = VibrationPlatform.instance;
+  });
+
+  tearDownAll(() {
+    VibrationPlatform.instance = originalVibrationPlatform;
   });
 
   setUp(() {
+    fakeVibrationPlatform = FakeVibrationPlatform();
+    VibrationPlatform.instance = fakeVibrationPlatform;
     mockGetQiblaDirectionUseCase = MockGetQiblaDirectionUseCase();
     mockCheckLocationServiceUseCase = MockCheckLocationServiceUseCase();
     mockRequestLocationPermissionUseCase =
@@ -244,5 +288,52 @@ void main() {
       act: (bloc) => bloc.add(const StopQiblaStream()),
       expect: () => [],
     );
+  });
+
+  group('Qibla alignment vibration', () {
+    const alignedDirection = QiblaDirectionEntity(
+      qibla: 10,
+      direction: 10,
+      offset: 10,
+    );
+    const stillAlignedDirection = QiblaDirectionEntity(
+      qibla: 11,
+      direction: 11,
+      offset: 10,
+    );
+    const unalignedDirection = QiblaDirectionEntity(
+      qibla: 70,
+      direction: 70,
+      offset: 10,
+    );
+
+    test('vibrates once when entering the accepted Qibla range', () async {
+      qiblaBloc.add(const UpdateQiblaDirection(alignedDirection));
+      qiblaBloc.add(const UpdateQiblaDirection(stillAlignedDirection));
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeVibrationPlatform.vibrateCalls, hasLength(1));
+    });
+
+    test('vibrates again only after leaving and re-entering range', () async {
+      qiblaBloc.add(const UpdateQiblaDirection(alignedDirection));
+      qiblaBloc.add(const UpdateQiblaDirection(unalignedDirection));
+      qiblaBloc.add(const UpdateQiblaDirection(stillAlignedDirection));
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeVibrationPlatform.vibrateCalls, hasLength(2));
+    });
+
+    test('does not vibrate when device vibration is unsupported', () async {
+      fakeVibrationPlatform.hasVibratorValue = false;
+
+      qiblaBloc.add(const UpdateQiblaDirection(alignedDirection));
+
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      expect(fakeVibrationPlatform.vibrateCalls, isEmpty);
+    });
   });
 }
