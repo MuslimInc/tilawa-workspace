@@ -145,11 +145,8 @@ class _MainScreenState extends State<MainScreen> {
                 return const _MainShellPlaceholderScaffold();
               }
 
-              final double bottomPadding = context.safeBottomPadding;
-              final double keyboardHeight = MediaQuery.viewInsetsOf(
-                context,
-              ).bottom;
-              final bool isKeyboardOpen = keyboardHeight > 0;
+              final double bottomPadding = context.floatingBottomPadding;
+              final bool isKeyboardOpen = context.isKeyboardVisible;
               final adaptiveShellTokens = Theme.of(
                 context,
               ).componentTokens.adaptiveShell;

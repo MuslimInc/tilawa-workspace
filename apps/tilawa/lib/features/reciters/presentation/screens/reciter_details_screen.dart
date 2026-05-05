@@ -159,7 +159,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double bottomPlayerOffset = MediaQuery.viewPaddingOf(context).bottom;
+    final double bottomPlayerOffset = context.floatingBottomPadding;
     final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
       final AudioPlayerState state = bloc.state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;

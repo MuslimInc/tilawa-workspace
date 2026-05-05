@@ -469,15 +469,13 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => MediaQuery(
-        data: MediaQuery.of(context),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                context.l10n.chooseTheme,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 16),
+            Text(
+              context.l10n.chooseTheme,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
@@ -509,7 +507,6 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -560,20 +557,18 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       isScrollControlled: true,
-      builder: (sheetContext) => MediaQuery(
-        data: MediaQuery.of(context),
-        child: SafeArea(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 16),
-                  Text(
-                    context.l10n.choosePrimaryColor,
+      builder: (sheetContext) => SafeArea(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(height: 16),
+                Text(
+                  context.l10n.choosePrimaryColor,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
@@ -627,7 +622,6 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -674,15 +668,13 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => MediaQuery(
-        data: MediaQuery.of(context),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                context.l10n.chooseLanguage,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 16),
+            Text(
+              context.l10n.chooseLanguage,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
@@ -710,7 +702,6 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 
@@ -720,15 +711,13 @@ class SettingsScreen extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (sheetContext) => MediaQuery(
-        data: MediaQuery.of(context),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                context.l10n.concurrentDownloads,
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 16),
+            Text(
+              context.l10n.concurrentDownloads,
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
@@ -745,7 +734,6 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
         ),
-      ),
     );
   }
 

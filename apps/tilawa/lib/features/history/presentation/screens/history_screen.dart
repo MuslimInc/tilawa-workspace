@@ -301,7 +301,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     if (audioPlayerState.shouldShowBottomPlayer) {
       return QuranPlayerWidget.collapsedFootprint(context);
     }
-    return MediaQuery.paddingOf(context).bottom;
+    return context.floatingBottomPadding;
   }
 
   String _getDateKey(BuildContext context, DateTime date) {

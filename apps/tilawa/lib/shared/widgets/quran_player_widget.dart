@@ -53,7 +53,7 @@ class QuranPlayerWidget extends StatefulWidget {
   }) =>
       collapsedHeight(context) +
       bottomNavBarHeight +
-      MediaQuery.paddingOf(context).bottom;
+      context.floatingBottomPadding;
 
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
@@ -293,8 +293,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
               // is consistent during the collapse-to-collapsed transition.
               final bottomInset = widget.bottomNavBarHeight > 0
                   ? widget.bottomNavBarHeight
-                  : MediaQuery.paddingOf(context).bottom +
-                        context.tokens.spaceExtraLarge;
+                  : context.floatingBottomPadding;
 
               // Bottom sheet slide:
               // The expanded player translates from fully off-screen
@@ -542,10 +541,6 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
     final topPadding = MediaQuery.paddingOf(context).top;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
-    debugPrint(
-      '[MediaQueryBottomPadding] PORTRAIT: orientation=$isLandscape, topPadding=$topPadding, bottomPadding=$bottomPadding, spaceExtraLarge=${tokens.spaceExtraLarge}, expandProgress=${expandProgress.toStringAsFixed(3)}',
-    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -694,10 +689,6 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
-    debugPrint(
-      '[MediaQueryBottomPadding] LANDSCAPE: bottomPadding=$bottomPadding, spaceExtraLarge=${tokens.spaceExtraLarge}',
-    );
 
     return Positioned.fill(
       child: SafeArea(
@@ -794,9 +785,6 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
               right: tokens.spaceLarge,
               child: Builder(
                 builder: (context) {
-                  debugPrint(
-                    '[MediaQueryBottomPadding] LANDSCAPE_BOTTOM: Positioned.bottom=${tokens.spaceSmall + tokens.spaceExtraLarge}, viewPaddingBottom=$bottomPadding, totalFromEdge=${tokens.spaceSmall + tokens.spaceExtraLarge + bottomPadding}',
-                  );
                   return Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -1118,7 +1106,7 @@ Future<void> _showPlaybackActions(BuildContext context) async {
     showDragHandle: true,
     builder: (sheetContext) {
       return Padding(
-        padding: EdgeInsets.only(bottom: sheetContext.safeBottomPadding),
+        padding: EdgeInsets.only(bottom: sheetContext.floatingBottomPadding),
         child: ListTile(
           leading: const Icon(FluentIcons.stop_24_regular),
           title: Text(context.l10n.stopPlayback),
@@ -1137,7 +1125,7 @@ Future<void> _showPlaybackActions(BuildContext context) async {
     showDragHandle: true,
     builder: (dialogContext) {
       return Padding(
-        padding: EdgeInsets.only(bottom: dialogContext.safeBottomPadding),
+        padding: EdgeInsets.only(bottom: dialogContext.floatingBottomPadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

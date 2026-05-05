@@ -30,7 +30,7 @@ class ScreenshotComposerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final bottomPadding = context.floatingBottomPadding;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(

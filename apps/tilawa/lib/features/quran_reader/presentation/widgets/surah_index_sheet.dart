@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A bottom sheet widget that displays the Quran surah index.
 ///
@@ -113,7 +114,7 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
     final indexTheme = SurahIndexTheme.of(context);
 
     final Color bgColor = readerTheme.pageBackground;
-    final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final double keyboardInset = context.keyboardInset;
 
     return AnimatedPadding(
       duration: _sheetAnimationDuration,
@@ -212,9 +213,8 @@ class _IndexHeader extends StatelessWidget {
     final indexTheme = SurahIndexTheme.of(context);
     final l10n = context.l10n;
     final Color primaryColor = readerTheme.primaryColor;
-    final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
     final FocusNode? focusNode = FocusScope.of(context).focusedChild;
-    final bool compactHeader = focusNode != null || keyboardInset > 0;
+    final bool compactHeader = focusNode != null || context.isKeyboardVisible;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -289,7 +289,7 @@ class _IndexSearchBar extends StatelessWidget {
     final Color borderColor = primaryColor.withValues(
       alpha: isDark ? 0.15 : 0.1,
     );
-    final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final double keyboardInset = context.keyboardInset;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -378,7 +378,7 @@ class _IndexList extends StatelessWidget {
     final readerTheme = QuranReaderTheme.of(context);
     final l10n = context.l10n;
     final primaryColor = readerTheme.primaryColor;
-    final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+    final double keyboardInset = context.keyboardInset;
 
     return Expanded(
       child: ValueListenableBuilder<List<int>>(
