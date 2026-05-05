@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../tilawa_ui_kit.dart';
 
 /// A skeleton placeholder for card items.
@@ -117,13 +118,17 @@ class TilawaSkeletonCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           // Image block
-          AspectRatio(
-            aspectRatio: imageAspectRatio,
-            child: TilawaSkeletonBlock(
-              width: double.infinity,
-              height: double.infinity,
-              shape: TilawaSkeletonShape.rounded,
-              animate: animate,
+          Flexible(
+            fit: FlexFit.loose,
+            flex: 1,
+            child: AspectRatio(
+              aspectRatio: imageAspectRatio,
+              child: TilawaSkeletonBlock(
+                width: double.infinity,
+                height: double.infinity,
+                shape: TilawaSkeletonShape.rounded,
+                animate: animate,
+              ),
             ),
           ),
           SizedBox(height: padding),

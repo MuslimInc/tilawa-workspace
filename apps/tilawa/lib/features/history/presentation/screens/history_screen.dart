@@ -153,15 +153,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
             horizontal: tokens.spaceMedium,
             vertical: tokens.spaceSmall,
           ),
-          sliver: SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index.isOdd) {
-                  return SizedBox(height: tokens.spaceSmall);
-                }
-                return const TilawaSkeletonListTile(lines: 2);
-              },
-              childCount: 11, // 5 items + 5 gaps + 1 extra for bottom spacing
+          sliver: TilawaSliverSkeletonizer(
+            child: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index.isOdd) {
+                    return SizedBox(height: tokens.spaceSmall);
+                  }
+                  final history = _fakeHistory(index ~/ 2);
+                  return HistoryCard(history: history);
+                },
+                childCount: 11, // 5 items + 5 gaps + 1 extra for bottom spacing
+              ),
             ),
           ),
         );
@@ -377,4 +380,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
       context.read<HistoryBloc>().add(const HistoryEvent.clearAllHistory());
     }
   }
+}
+
+HistoryEntity _fakeHistory(int index) {
+  return HistoryEntity(
+    id: 'history_$index',
+    surahId: 1,
+    surahName: 'Al-Fatiha',
+    surahNameEn: 'The Opening',
+    reciterId: '1',
+    reciterName: 'Reciter Name',
+    moshafId: 1,
+    moshafName: 'Hafs An Asim',
+    lastPositionMs: 0,
+    durationMs: 300000,
+    audioUrl: '',
+    playedAt: DateTime.now(),
+    completed: false,
+    playCount: 1,
+  );
 }

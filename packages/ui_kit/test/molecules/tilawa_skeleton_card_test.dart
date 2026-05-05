@@ -64,7 +64,7 @@ void main() {
       expect(find.byType(TilawaSkeletonBlock), findsNWidgets(2));
     });
 
-    testWidgets('uses AspectRatio for image', (tester) async {
+    testWidgets('uses Flexible-wrapped AspectRatio for image', (tester) async {
       await tester.pumpWidget(
         const TilawaPreviewWrapper(
           child: Scaffold(body: TilawaSkeletonCard(width: 200, animate: false)),
@@ -73,7 +73,12 @@ void main() {
 
       await tester.pump();
 
-      expect(find.byType(AspectRatio), findsOneWidget);
+      final aspectRatioFinder = find.byType(AspectRatio);
+      expect(aspectRatioFinder, findsOneWidget);
+      expect(
+        find.ancestor(of: aspectRatioFinder, matching: find.byType(Flexible)),
+        findsOneWidget,
+      );
     });
 
     testWidgets('respects animate: false', (tester) async {

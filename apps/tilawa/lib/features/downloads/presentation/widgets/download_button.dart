@@ -4,9 +4,20 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/network/network_info.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/usecases/usecases.dart';
 import '../bloc/download_button/download_button_bloc.dart';
+
+// --- Download-button-specific layout constants ---
+// These are component-local dimensions that do not map to a global token.
+const double _kCircleSize = 36.0;
+const double _kInnerRingSize = 32.0;
+const double _kPulseBorderWidth = 2.0;
+const double _kPulseExpansion = 8.0;
+const double _kPercentageFontSize = 9.0;
+const double _kFullCircleRadius = 1000.0;
+const Duration _kPulseAnimationDuration = Duration(milliseconds: 1500);
 
 /// Download button with independent state management
 ///
@@ -137,7 +148,7 @@ class DownloadButton extends StatelessWidget {
             onTap: semanticTap,
             child: RepaintBoundary(
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+                duration: Theme.of(context).tokens.durationMedium,
                 child: state.when(
                   initial: () => const _LoadingDownloadButton(),
                   readyToDownload: () => _DefaultDownloadButton(
@@ -226,18 +237,26 @@ class _CompletedDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+
     return SizedBox(
-      width: 48,
-      height: 48,
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
       child: Center(
         child: Container(
-          width: 36,
-          height: 36,
+          width: _kCircleSize,
+          height: _kCircleSize,
           decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.1),
+            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.check_circle, color: Colors.green, size: 24),
+          child: Icon(
+            Icons.check_circle,
+            color: colorScheme.primary,
+            size: tokens.iconSizeLarge,
+          ),
         ),
       ),
     );
@@ -252,13 +271,15 @@ class _PendingDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
     return SizedBox(
-      width: 48,
-      height: 48,
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
       child: Center(
         child: InkWell(
           onTap: onCancel,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           child: const _PulsingPendingIcon(),
         ),
       ),
@@ -272,15 +293,13 @@ class _LoadingDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SizedBox(
-      width: 48,
-      height: 48,
-      child: Center(
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
+    final componentTokens = Theme.of(context).componentTokens;
+
+    return SizedBox(
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
+      child: TilawaLoadingIndicator(
+        strokeWidth: componentTokens.loadingIndicator.compactStrokeWidth,
       ),
     );
   }
@@ -300,50 +319,56 @@ class _DownloadingProgressButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return SizedBox(
-      width: 48,
-      height: 48,
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
       child: Center(
         child: Stack(
           alignment: Alignment.center,
           children: [
             // Background circle for better visibility
             Container(
-              width: 36,
-              height: 36,
+              width: _kCircleSize,
+              height: _kCircleSize,
               decoration: BoxDecoration(
-                color: theme.primaryColor.withValues(alpha: 0.05),
+                color: colorScheme.primary.withValues(
+                  alpha: tokens.opacitySubtle,
+                ),
                 shape: BoxShape.circle,
               ),
             ),
             // Circular progress indicator
             SizedBox(
-              width: 32,
-              height: 32,
+              width: _kInnerRingSize,
+              height: _kInnerRingSize,
               child: CircularProgressIndicator(
                 value: progress > 0 ? progress : null,
-                strokeWidth: 3,
-                backgroundColor: theme.primaryColor.withValues(alpha: 0.15),
-                valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
+                strokeWidth: tokens.progressHeight,
+                backgroundColor: colorScheme.primary.withValues(
+                  alpha: tokens.opacityMedium / 2,
+                ),
+                valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
               ),
             ),
             // Percentage text or icon
             SizedBox(
-              width: 32,
-              height: 32,
+              width: _kInnerRingSize,
+              height: _kInnerRingSize,
               child: InkWell(
                 onTap: onPause,
-                borderRadius: BorderRadius.circular(1000),
+                borderRadius: BorderRadius.circular(_kFullCircleRadius),
                 child: progress > 0
                     ? Center(
                         child: Text(
                           '${(progress * 100).toInt()}',
                           style: TextStyle(
-                            fontSize: 9,
+                            fontSize: _kPercentageFontSize,
                             fontWeight: FontWeight.bold,
-                            color: theme.primaryColor,
+                            color: colorScheme.primary,
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
@@ -351,8 +376,8 @@ class _DownloadingProgressButton extends StatelessWidget {
                     : Center(
                         child: Icon(
                           Icons.pause_rounded,
-                          size: 14,
-                          color: theme.primaryColor,
+                          size: tokens.iconSizeSmall,
+                          color: colorScheme.primary,
                         ),
                       ),
               ),
@@ -373,25 +398,31 @@ class _PausedDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return SizedBox(
-      width: 48,
-      height: 48,
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
       child: Center(
         child: Stack(
           alignment: Alignment.center,
           children: [
             // Background circle
             Container(
-              width: 36,
-              height: 36,
+              width: _kCircleSize,
+              height: _kCircleSize,
               decoration: BoxDecoration(
-                color: theme.primaryColor.withValues(alpha: 0.05),
+                color: colorScheme.primary.withValues(
+                  alpha: tokens.opacitySubtle,
+                ),
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: theme.primaryColor.withValues(alpha: 0.2),
-                  width: 1,
+                  color: colorScheme.primary.withValues(
+                    alpha: tokens.opacityMedium / 1.5,
+                  ),
+                  width: tokens.borderWidthThin,
                 ),
               ),
             ),
@@ -399,8 +430,8 @@ class _PausedDownloadButton extends StatelessWidget {
             IconButton(
               icon: Icon(
                 Icons.play_arrow_rounded,
-                size: 20,
-                color: theme.primaryColor,
+                size: tokens.iconSizeMedium,
+                color: colorScheme.primary,
               ),
               onPressed: onResume,
             ),
@@ -419,13 +450,19 @@ class _DefaultDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return SizedBox(
-      width: 48,
-      height: 48,
+      width: kMinInteractiveDimension,
+      height: kMinInteractiveDimension,
       child: IconButton(
-        icon: Icon(Icons.download_rounded, color: theme.primaryColor),
+        icon: Icon(
+          Icons.download_rounded,
+          color: colorScheme.primary,
+          size: tokens.iconSizeLarge,
+        ),
         tooltip: context.l10n.download,
         onPressed: onDownload,
       ),
@@ -450,7 +487,7 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: _kPulseAnimationDuration,
       vsync: this,
     )..repeat();
     _animation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
@@ -464,7 +501,9 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return RepaintBoundary(
       child: AnimatedBuilder(
@@ -475,15 +514,19 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
             children: [
               // Pulsing circle
               Container(
-                width: 24 + (_animation.value * 8),
-                height: 24 + (_animation.value * 8),
+                width:
+                    (tokens.iconSizeLarge) +
+                    (_animation.value * _kPulseExpansion),
+                height:
+                    (tokens.iconSizeLarge) +
+                    (_animation.value * _kPulseExpansion),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: theme.primaryColor.withValues(
+                    color: colorScheme.primary.withValues(
                       alpha: 1.0 - _animation.value,
                     ),
-                    width: 2,
+                    width: _kPulseBorderWidth,
                   ),
                 ),
               ),
@@ -495,8 +538,8 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
         // Pass static child to builder to prevent rebuilding it
         child: Icon(
           Icons.hourglass_empty_rounded,
-          size: 20,
-          color: theme.primaryColor,
+          size: tokens.iconSizeMedium,
+          color: colorScheme.primary,
         ),
       ),
     );

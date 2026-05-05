@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/safe_area_ext.dart';
 
 /// Immersive three-layer scaffold: full-bleed [preview] content with a
 /// top app bar overlay and a bottom panel overlay.
@@ -129,7 +130,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final padding = MediaQuery.paddingOf(context);
+    final padding = context.contentSafePadding;
     final overlayStyle = _buildSystemUiOverlayStyle(theme);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(

@@ -52,6 +52,9 @@ class _MainTabViewportState extends State<MainTabViewport> {
 
   @override
   Widget build(BuildContext context) {
+    // TilawaShellPadding is an InheritedWidget that publishes the bottom
+    // padding value so any descendant can call TilawaShellPadding.of(context).
+    // The explicit Padding widget below it applies the actual visual inset.
     return TilawaShellPadding(
       padding: widget.contentBottomPadding,
       child: Padding(

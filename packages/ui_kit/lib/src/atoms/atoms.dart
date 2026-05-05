@@ -11,4 +11,5 @@ export 'tilawa_section_title.dart';
 export 'tilawa_sheet_handle.dart';
 export 'tilawa_skeleton_block.dart';
 export 'tilawa_skeleton_shape.dart';
+export 'tilawa_skeletonizer.dart';
 export 'tilawa_text_field.dart';

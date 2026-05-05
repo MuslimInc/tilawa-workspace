@@ -476,37 +476,37 @@ class SettingsScreen extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               context.l10n.chooseTheme,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              TilawaSelectionTile(
-                title: context.l10n.systemTheme,
-                isSelected: currentMode == ThemeMode.system,
-                onTap: () {
-                  context.read<ThemeCubit>().setMode(ThemeMode.system);
-                  Navigator.pop(context);
-                },
-              ),
-              TilawaSelectionTile(
-                title: context.l10n.lightTheme,
-                isSelected: currentMode == ThemeMode.light,
-                onTap: () {
-                  context.read<ThemeCubit>().setMode(ThemeMode.light);
-                  Navigator.pop(context);
-                },
-              ),
-              TilawaSelectionTile(
-                title: context.l10n.darkTheme,
-                isSelected: currentMode == ThemeMode.dark,
-                onTap: () {
-                  context.read<ThemeCubit>().setMode(ThemeMode.dark);
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 16),
-            ],
-          ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            TilawaSelectionTile(
+              title: context.l10n.systemTheme,
+              isSelected: currentMode == ThemeMode.system,
+              onTap: () {
+                context.read<ThemeCubit>().setMode(ThemeMode.system);
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: context.l10n.lightTheme,
+              isSelected: currentMode == ThemeMode.light,
+              onTap: () {
+                context.read<ThemeCubit>().setMode(ThemeMode.light);
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: context.l10n.darkTheme,
+              isSelected: currentMode == ThemeMode.dark,
+              onTap: () {
+                context.read<ThemeCubit>().setMode(ThemeMode.dark);
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: 16),
+          ],
         ),
+      ),
     );
   }
 
@@ -569,59 +569,57 @@ class SettingsScreen extends StatelessWidget {
                 SizedBox(height: 16),
                 Text(
                   context.l10n.choosePrimaryColor,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  ...ThemeCubit.colorOptions.map((option) {
-                    final isSelected =
-                        option.color.toARGB32() == currentColor.toARGB32();
-                    return TilawaSelectionTile(
-                      leading: CircleAvatar(
-                        backgroundColor: option.color,
-                        radius: 12,
-                      ),
-                      title: _getLocalizedColorName(context, option.name),
-                      isSelected: isSelected,
-                      onTap: () {
-                        context.read<ThemeCubit>().setPrimaryColor(
-                          option.color,
-                        );
-                        Navigator.pop(sheetContext);
-                      },
-                    );
-                  }),
-                  // Custom Color Option
-                  TilawaSelectionTile(
-                    leading: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: SweepGradient(
-                          colors: [
-                            Colors.red,
-                            Colors.blue,
-                            Colors.green,
-                            Colors.red,
-                          ],
-                        ),
-                      ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 16),
+                ...ThemeCubit.colorOptions.map((option) {
+                  final isSelected =
+                      option.color.toARGB32() == currentColor.toARGB32();
+                  return TilawaSelectionTile(
+                    leading: CircleAvatar(
+                      backgroundColor: option.color,
+                      radius: 12,
                     ),
-                    title: context.l10n.custom,
-                    isSelected: !ThemeCubit.colorOptions.any(
-                      (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
-                    ),
+                    title: _getLocalizedColorName(context, option.name),
+                    isSelected: isSelected,
                     onTap: () {
+                      context.read<ThemeCubit>().setPrimaryColor(option.color);
                       Navigator.pop(sheetContext);
-                      _showCustomColorPicker(context, currentColor);
                     },
+                  );
+                }),
+                // Custom Color Option
+                TilawaSelectionTile(
+                  leading: Container(
+                    width: 24,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: SweepGradient(
+                        colors: [
+                          Colors.red,
+                          Colors.blue,
+                          Colors.green,
+                          Colors.red,
+                        ],
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 16),
-                ],
-              ),
+                  title: context.l10n.custom,
+                  isSelected: !ThemeCubit.colorOptions.any(
+                    (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
+                  ),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    _showCustomColorPicker(context, currentColor);
+                  },
+                ),
+                SizedBox(height: 16),
+              ],
             ),
           ),
         ),
+      ),
     );
   }
 
@@ -675,33 +673,33 @@ class SettingsScreen extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               context.l10n.chooseLanguage,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              TilawaSelectionTile(
-                title: "العربية",
-                isSelected: currentLocale.languageCode == arabicLanguageCode,
-                onTap: () {
-                  context.read<LocalizationBloc>().add(
-                    const ChangeLanguage(Locale(arabicLanguageCode)),
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-              TilawaSelectionTile(
-                title: context.l10n.english,
-                isSelected: currentLocale.languageCode == englishLanguageCode,
-                onTap: () {
-                  context.read<LocalizationBloc>().add(
-                    const ChangeLanguage(Locale(englishLanguageCode)),
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 16),
-            ],
-          ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            TilawaSelectionTile(
+              title: "العربية",
+              isSelected: currentLocale.languageCode == arabicLanguageCode,
+              onTap: () {
+                context.read<LocalizationBloc>().add(
+                  const ChangeLanguage(Locale(arabicLanguageCode)),
+                );
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: context.l10n.english,
+              isSelected: currentLocale.languageCode == englishLanguageCode,
+              onTap: () {
+                context.read<LocalizationBloc>().add(
+                  const ChangeLanguage(Locale(englishLanguageCode)),
+                );
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: 16),
+          ],
         ),
+      ),
     );
   }
 
@@ -718,22 +716,22 @@ class SettingsScreen extends StatelessWidget {
             SizedBox(height: 16),
             Text(
               context.l10n.concurrentDownloads,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16),
+            for (int i = 1; i <= 5; i++)
+              TilawaSelectionTile(
+                title: '$i',
+                isSelected: currentValue == i,
+                onTap: () {
+                  context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
+                  Navigator.pop(context);
+                },
               ),
-              SizedBox(height: 16),
-              for (int i = 1; i <= 5; i++)
-                TilawaSelectionTile(
-                  title: '$i',
-                  isSelected: currentValue == i,
-                  onTap: () {
-                    context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
-                    Navigator.pop(context);
-                  },
-                ),
-              SizedBox(height: 16),
-            ],
-          ),
+            SizedBox(height: 16),
+          ],
         ),
+      ),
     );
   }
 

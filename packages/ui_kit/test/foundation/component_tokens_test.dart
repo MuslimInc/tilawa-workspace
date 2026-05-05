@@ -447,7 +447,7 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.compactBottomNavBarBaseHeight, 70.0);
+      expect(tokens.compactBottomNavBarBaseHeight, 55.0);
       expect(tokens.bottomNavHorizontalMargin, 16.0);
       expect(tokens.navButtonMinHeight, 64.0);
     });

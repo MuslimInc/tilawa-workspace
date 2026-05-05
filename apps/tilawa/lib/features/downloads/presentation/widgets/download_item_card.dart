@@ -4,13 +4,18 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/download_item.dart';
 import '../../domain/services/download_queue_service_interface.dart';
 import '../bloc/downloads_bloc.dart';
 import '../extensions/download_item_extensions.dart';
+
+// Component-local constants that do not map to global tokens.
+const double _kStatusDotSize = 6.0;
+const double _kProgressMinHeight = 4.0;
+const int _kStuckThresholdSeconds = 30;
 
 class DownloadItemCard extends StatelessWidget {
   const DownloadItemCard({
@@ -24,12 +29,17 @@ class DownloadItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     final String surahName = download.getLocalizedSurahName(context);
 
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
       leading: _buildStatusIcon(context),
       title: Text(surahName, maxLines: 2, overflow: TextOverflow.ellipsis),
       subtitle: Column(
@@ -37,60 +47,53 @@ class DownloadItemCard extends StatelessWidget {
         children: [
           if (download.status == DownloadStatus.downloading)
             Padding(
-              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              padding: EdgeInsets.only(
+                top: tokens.spaceSmall,
+                bottom: tokens.spaceTiny,
+              ),
               child: LinearProgressIndicator(
                 value: download.progress,
-                backgroundColor: theme.dividerColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(4),
-                minHeight: 4,
-                valueColor: AlwaysStoppedAnimation<Color>(theme.primaryColor),
+                backgroundColor: colorScheme.outline.withValues(
+                  alpha: tokens.opacitySubtle,
+                ),
+                borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                minHeight: _kProgressMinHeight,
+                valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
               ),
             ),
-          const SizedBox(height: 4),
+          SizedBox(height: tokens.spaceTiny),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               if (download.status != DownloadStatus.downloading) ...[
                 Container(
-                  width: 6,
-                  height: 6,
+                  width: _kStatusDotSize,
+                  height: _kStatusDotSize,
                   decoration: BoxDecoration(
-                    color: _getStatusColor(),
+                    color: _getStatusColor(colorScheme),
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: _kStatusDotSize),
               ],
               Flexible(
                 child: Text(
                   _getStatusText(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: theme.textTheme.bodySmall?.color,
-                    fontSize: 12,
-                  ),
+                  style: theme.textTheme.bodySmall,
                 ),
               ),
               if (download.fileSize > 0) ...[
-                const SizedBox(width: 8),
-                Text(
-                  '•',
-                  style: TextStyle(
-                    color: theme.textTheme.bodySmall?.color,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(width: 8),
+                SizedBox(width: tokens.spaceSmall),
+                Text('•', style: theme.textTheme.bodySmall),
+                SizedBox(width: tokens.spaceSmall),
                 Expanded(
                   child: Text(
                     '${_formatFileSize(context, download.downloadedSize)} / ${_formatFileSize(context, download.fileSize)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: theme.textTheme.bodySmall?.color,
-                      fontSize: 12,
-                    ),
+                    style: theme.textTheme.bodySmall,
                   ),
                 ),
               ],
@@ -105,7 +108,7 @@ class DownloadItemCard extends StatelessWidget {
           if (download.status == DownloadStatus.failed ||
               _isDownloadStuck(download))
             IconButton(
-              icon: const Icon(Icons.refresh_rounded, color: Colors.orange),
+              icon: Icon(Icons.refresh_rounded, color: colorScheme.error),
               onPressed: () => _handleRetryDownload(context),
               tooltip: context.l10n.retryDownloadTooltip,
             ),
@@ -114,7 +117,7 @@ class DownloadItemCard extends StatelessWidget {
           if (download.status == DownloadStatus.downloading ||
               download.status == DownloadStatus.pending)
             IconButton(
-              icon: const Icon(Icons.close_rounded, color: Colors.grey),
+              icon: Icon(Icons.close_rounded, color: colorScheme.outline),
               onPressed: () => _showDeleteDialog(context),
               tooltip: context.l10n.cancel,
             ),
@@ -130,11 +133,13 @@ class DownloadItemCard extends StatelessWidget {
                 return IconButton.filled(
                   style: IconButton.styleFrom(
                     backgroundColor: isCurrentlyPlaying
-                        ? theme.primaryColor
-                        : theme.primaryColor.withValues(alpha: 0.1),
+                        ? colorScheme.primary
+                        : colorScheme.primary.withValues(
+                            alpha: tokens.opacitySubtle,
+                          ),
                     foregroundColor: isCurrentlyPlaying
-                        ? Colors.white
-                        : theme.primaryColor,
+                        ? colorScheme.onPrimary
+                        : colorScheme.primary,
                   ),
                   icon: Icon(
                     isCurrentlyPlaying &&
@@ -156,7 +161,7 @@ class DownloadItemCard extends StatelessWidget {
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_horiz_rounded),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(tokens.radiusLarge),
             ),
             onSelected: (value) {
               if (value == 'delete') {
@@ -170,13 +175,13 @@ class DownloadItemCard extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.delete_outline_rounded,
-                      color: theme.colorScheme.error,
-                      size: 20,
+                      color: colorScheme.error,
+                      size: tokens.iconSizeMedium,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: tokens.spaceSmall + tokens.spaceTiny),
                     Text(
                       context.l10n.delete,
-                      style: TextStyle(color: theme.colorScheme.error),
+                      style: TextStyle(color: colorScheme.error),
                     ),
                   ],
                 ),
@@ -189,82 +194,27 @@ class DownloadItemCard extends StatelessWidget {
   }
 
   Widget _buildStatusIcon(BuildContext context) {
-    switch (download.status) {
-      case DownloadStatus.completed:
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(Icons.check_rounded, color: Colors.green, size: 20),
-        );
-      case DownloadStatus.downloading:
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.blue.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.download_rounded,
-            color: Colors.blue,
-            size: 20,
-          ),
-        );
-      case DownloadStatus.failed:
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.red.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.error_outline_rounded,
-            color: Colors.red,
-            size: 20,
-          ),
-        );
-      case DownloadStatus.paused:
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.orange.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.pause_circle_outline_rounded,
-            color: Colors.orange,
-            size: 20,
-          ),
-        );
-      case DownloadStatus.cancelled:
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.cancel_outlined,
-            color: Colors.grey,
-            size: 20,
-          ),
-        );
-      case DownloadStatus.pending:
-        return Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.grey.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.schedule_rounded,
-            color: Colors.grey,
-            size: 20,
-          ),
-        );
-    }
+    final colorScheme = Theme.of(context).colorScheme;
+    final tokens = Theme.of(context).tokens;
+    final color = _getStatusColor(colorScheme);
+
+    final icon = switch (download.status) {
+      DownloadStatus.completed => Icons.check_rounded,
+      DownloadStatus.downloading => Icons.download_rounded,
+      DownloadStatus.failed => Icons.error_outline_rounded,
+      DownloadStatus.paused => Icons.pause_circle_outline_rounded,
+      DownloadStatus.cancelled => Icons.cancel_outlined,
+      DownloadStatus.pending => Icons.schedule_rounded,
+    };
+
+    return Container(
+      padding: EdgeInsets.all(tokens.spaceSmall),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: tokens.opacitySubtle),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: color, size: tokens.iconSizeMedium),
+    );
   }
 
   String _getStatusText(BuildContext context) {
@@ -291,21 +241,15 @@ class DownloadItemCard extends StatelessWidget {
     };
   }
 
-  Color _getStatusColor() {
-    switch (download.status) {
-      case DownloadStatus.completed:
-        return Colors.green;
-      case DownloadStatus.downloading:
-        return Colors.blue;
-      case DownloadStatus.failed:
-        return Colors.red;
-      case DownloadStatus.paused:
-        return Colors.orange;
-      case DownloadStatus.cancelled:
-        return Colors.grey;
-      case DownloadStatus.pending:
-        return Colors.grey;
-    }
+  Color _getStatusColor(ColorScheme colorScheme) {
+    return switch (download.status) {
+      DownloadStatus.completed => colorScheme.primary,
+      DownloadStatus.downloading => colorScheme.primary,
+      DownloadStatus.failed => colorScheme.error,
+      DownloadStatus.paused => colorScheme.secondary,
+      DownloadStatus.cancelled => colorScheme.outline,
+      DownloadStatus.pending => colorScheme.outline,
+    };
   }
 
   String _formatFileSize(BuildContext context, int bytes) {
@@ -315,28 +259,29 @@ class DownloadItemCard extends StatelessWidget {
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.deleteDownload),
-        content: Text(
-          AppLocalizations.of(
-            context,
-          )!.deleteDownloadConfirmation(download.title),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
+      builder: (context) {
+        final colorScheme = Theme.of(context).colorScheme;
+        return AlertDialog(
+          title: Text(context.l10n.deleteDownload),
+          content: Text(
+            context.l10n.deleteDownloadConfirmation(download.title),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              onDelete();
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(context.l10n.delete),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(context.l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                onDelete();
+              },
+              style: TextButton.styleFrom(foregroundColor: colorScheme.error),
+              child: Text(context.l10n.delete),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -396,6 +341,6 @@ class DownloadItemCard extends StatelessWidget {
     final Duration timeSinceCreated = DateTime.now().difference(
       download.createdAt,
     );
-    return timeSinceCreated.inSeconds > 30;
+    return timeSinceCreated.inSeconds > _kStuckThresholdSeconds;
   }
 }

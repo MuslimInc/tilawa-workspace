@@ -99,6 +99,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
             icon: Icons.delete_sweep_rounded,
             onTap: () => _showClearAllDialog(context),
           ),
+          SizedBox(width: 8),
         ],
       ),
       body: Stack(

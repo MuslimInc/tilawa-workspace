@@ -126,9 +126,14 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
     final double relativeY =
         localPosition.dy - resolvedPadding.top + scrollOffset;
 
-    final letterIndex = (relativeY / letterHeight)
-        .clamp(0, widget.letters.length - 1)
-        .floor();
+    // Only select a letter when the pointer is inside an actual letter row.
+    // Tapping in the whitespace above the first row or below the last row
+    // should not select anything.
+    if (relativeY < 0 || relativeY >= widget.letters.length * letterHeight) {
+      return null;
+    }
+
+    final letterIndex = (relativeY / letterHeight).floor();
 
     if (letterIndex >= 0 && letterIndex < widget.letters.length) {
       final newLetter = widget.letters[letterIndex];

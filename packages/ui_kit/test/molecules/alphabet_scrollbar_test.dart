@@ -392,6 +392,149 @@ void main() {
       expect(panEndCount, 1);
     });
 
+    testWidgets('tap on whitespace below last letter does not show overlay', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: _wrap(
+            ArabicAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: (_) {},
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final scrollbarRect = tester.getRect(
+        find.byType(ArabicAlphabetScrollbar),
+      );
+      final theme = Theme.of(
+        tester.element(find.byType(ArabicAlphabetScrollbar)),
+      );
+      final tokens = theme.componentTokens.alphabetScrollbar;
+      final letterHeight = tokens.itemExtent;
+      final totalLettersHeight = letters.length * letterHeight;
+
+      // Tap well below the last letter row
+      await tester.tapAt(
+        Offset(
+          scrollbarRect.center.dx,
+          scrollbarRect.top + totalLettersHeight + 50,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
+    });
+
+    testWidgets('pan into whitespace below last letter does not select it', (
+      tester,
+    ) async {
+      final selections = <String?>[];
+
+      await tester.pumpWidget(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: _wrap(
+            ArabicAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: selections.add,
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final scrollbarRect = tester.getRect(
+        find.byType(ArabicAlphabetScrollbar),
+      );
+      final theme = Theme.of(
+        tester.element(find.byType(ArabicAlphabetScrollbar)),
+      );
+      final tokens = theme.componentTokens.alphabetScrollbar;
+      final letterHeight = tokens.itemExtent;
+      final totalLettersHeight = letters.length * letterHeight;
+
+      // Start pan on the first letter
+      final gesture = await tester.startGesture(
+        Offset(scrollbarRect.center.dx, scrollbarRect.top + 10),
+      );
+      await tester.pump();
+
+      // Move into whitespace below all letters
+      await gesture.moveTo(
+        Offset(
+          scrollbarRect.center.dx,
+          scrollbarRect.top + totalLettersHeight + 50,
+        ),
+      );
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pump();
+
+      // The last letter should never have been selected because the pointer
+      // was in whitespace, not on an actual letter row.
+      expect(selections.contains('ر'), isFalse);
+    });
+
+    testWidgets('pan into whitespace above first letter does not select it', (
+      tester,
+    ) async {
+      final selections = <String?>[];
+
+      await tester.pumpWidget(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: _wrap(
+            ArabicAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: selections.add,
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final scrollbarRect = tester.getRect(
+        find.byType(ArabicAlphabetScrollbar),
+      );
+
+      // Start pan on the last letter
+      final gesture = await tester.startGesture(
+        Offset(scrollbarRect.center.dx, scrollbarRect.bottom - 10),
+      );
+      await tester.pump();
+
+      // Move into whitespace above all letters
+      await gesture.moveTo(
+        Offset(scrollbarRect.center.dx, scrollbarRect.top - 50),
+      );
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pump();
+
+      // The first letter should never have been selected
+      expect(selections.contains('ا'), isFalse);
+    });
+
     testWidgets('overlay is dismissed after tap completes', (tester) async {
       await tester.pumpWidget(
         _wrap(
@@ -409,12 +552,144 @@ void main() {
       final gesture = await tester.press(find.text('ج'));
       await tester.pump();
       await gesture.up();
-      // Advance past the 100ms Future.delayed in onTapUp.
-      await tester.pump(const Duration(milliseconds: 150));
+      // Advance past the 600ms Future.delayed in onTapUp.
+      await tester.pump(const Duration(milliseconds: 700));
 
       // _draggedLetter is null after tap, so overlayChildBuilder returns
       // SizedBox.shrink() — the keyed overlay container is not in the tree.
       expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
+    });
+
+    testWidgets('onTapCancel dismisses overlay immediately', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          ArabicAlphabetScrollbar(
+            letters: letters,
+            selectedLetter: null,
+            onLetterSelected: (_) {},
+            onPanUpdate: (_) {},
+            onPanStart: (_) {},
+            onPanEnd: (_) {},
+          ),
+        ),
+      );
+
+      final gesture = await tester.press(find.text('د'));
+      await tester.pump();
+      await gesture.cancel();
+      expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
+    });
+
+    testWidgets('long-press overlay stays visible until onLongPressEnd', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: _wrap(
+            ArabicAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: (_) {},
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('ث')),
+      );
+      await tester.pump(const Duration(milliseconds: 700));
+      // onLongPressStart schedules _overlayController.show() in a
+      // post-frame callback; pump once more so the overlay renders.
+      await tester.pump();
+      // Overlay visible during long-press
+      expect(
+        find.byKey(const Key('alphabet_scrollbar_overlay')),
+        findsOneWidget,
+      );
+
+      await gesture.up();
+      await tester.pump();
+      // Overlay hidden after long-press ends
+      expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
+    });
+
+    testWidgets('disposing widget while overlay is showing does not crash', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          ArabicAlphabetScrollbar(
+            letters: letters,
+            selectedLetter: null,
+            onLetterSelected: (_) {},
+            onPanUpdate: (_) {},
+            onPanStart: (_) {},
+            onPanEnd: (_) {},
+          ),
+        ),
+      );
+
+      await tester.press(find.text('ت'));
+      await tester.pump();
+
+      // Replace with empty widget while overlay is active
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump();
+
+      // Pump past the 600ms timer to ensure dispose handled it safely
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('didUpdateWidget scrolls to newly selected letter', (
+      tester,
+    ) async {
+      final manyLetters = List.generate(
+        30,
+        (i) => String.fromCharCode('ا'.codeUnitAt(0) + i),
+      );
+      String? currentLetter = manyLetters.first;
+      late StateSetter outerSetState;
+
+      await tester.pumpWidget(
+        StatefulBuilder(
+          builder: (context, setState) {
+            outerSetState = setState;
+            return _wrap(
+              SizedBox(
+                height: 120, // force scrollbar to scroll
+                child: ArabicAlphabetScrollbar(
+                  letters: manyLetters,
+                  selectedLetter: currentLetter,
+                  onLetterSelected: (_) {},
+                  onPanUpdate: (_) {},
+                  onPanStart: (_) {},
+                  onPanEnd: (_) {},
+                ),
+              ),
+            );
+          },
+        ),
+      );
+      await tester.pump();
+
+      final scrollbar = tester.widget<ListView>(find.byType(ListView));
+      final controller = scrollbar.controller;
+      expect(controller, isNotNull);
+      final initialOffset = controller!.offset;
+
+      // Select the last letter, which should be off-screen and trigger a scroll
+      outerSetState(() => currentLetter = manyLetters.last);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(controller.offset, greaterThan(initialOffset));
     });
   });
 }

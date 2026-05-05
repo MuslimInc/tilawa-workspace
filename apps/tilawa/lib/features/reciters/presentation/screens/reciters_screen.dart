@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -346,32 +348,38 @@ class _RecitersSliverScreen extends StatelessWidget {
 
     return Stack(
       children: [
-        RefreshIndicator.adaptive(
-          onRefresh: onRetry,
-          child: CustomScrollView(
-            controller: scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
+        Column(
+          children: [
+            _RecitersSearchHeaderBar(
+              state: state,
+              searchController: searchController,
+              focusNode: focusNode,
+              onSearchChanged: onSearchChanged,
+              onClearSearch: onClearSearch,
+              onToggleFavorites: onToggleFavorites,
             ),
-            slivers: [
-              _RecitersSearchHeaderSliver(
-                state: state,
-                searchController: searchController,
-                focusNode: focusNode,
-                onSearchChanged: onSearchChanged,
-                onClearSearch: onClearSearch,
-                onToggleFavorites: onToggleFavorites,
+            Expanded(
+              child: RefreshIndicator.adaptive(
+                onRefresh: onRetry,
+                child: CustomScrollView(
+                  controller: scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  slivers: [
+                    _RecitersResultSection(
+                      state: state,
+                      allowHeavyLoadedResults: allowHeavyLoadedResults,
+                      reserveScrollbarSpace: showScrollbar,
+                      reserveScrollbarOnLeading: isRtl,
+                      onClearAll: onClearAll,
+                      onRetry: onRetry,
+                    ),
+                  ],
+                ),
               ),
-              _RecitersResultSection(
-                state: state,
-                allowHeavyLoadedResults: allowHeavyLoadedResults,
-                reserveScrollbarSpace: showScrollbar,
-                reserveScrollbarOnLeading: isRtl,
-                onClearAll: onClearAll,
-                onRetry: onRetry,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
         if (showScrollbar)
           PositionedDirectional(
@@ -540,8 +548,8 @@ class _RecitersEmptySliver extends StatelessWidget {
   }
 }
 
-class _RecitersSearchHeaderSliver extends StatelessWidget {
-  const _RecitersSearchHeaderSliver({
+class _RecitersSearchHeaderBar extends StatelessWidget {
+  const _RecitersSearchHeaderBar({
     required this.state,
     required this.searchController,
     required this.focusNode,
@@ -559,70 +567,16 @@ class _RecitersSearchHeaderSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double extent = _recitersSearchHeaderExtent(context);
-
-    return SliverPersistentHeader(
-      pinned: true,
-      delegate: _RecitersSearchHeaderDelegate(
-        extent: extent,
-        topPadding: MediaQuery.paddingOf(context).top,
-        state: state,
-        searchController: searchController,
-        focusNode: focusNode,
-        onSearchChanged: onSearchChanged,
-        onClearSearch: onClearSearch,
-        onToggleFavorites: onToggleFavorites,
-      ),
-    );
-  }
-}
-
-class _RecitersSearchHeaderDelegate extends SliverPersistentHeaderDelegate {
-  const _RecitersSearchHeaderDelegate({
-    required this.extent,
-    required this.topPadding,
-    required this.state,
-    required this.searchController,
-    required this.focusNode,
-    required this.onSearchChanged,
-    required this.onClearSearch,
-    required this.onToggleFavorites,
-  });
-
-  final double extent;
-  final double topPadding;
-  final RecitersState state;
-  final TextEditingController searchController;
-  final FocusNode focusNode;
-  final ValueChanged<String> onSearchChanged;
-  final VoidCallback onClearSearch;
-  final VoidCallback onToggleFavorites;
-
-  @override
-  double get minExtent => extent;
-
-  @override
-  double get maxExtent => extent;
-
-  @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final double searchFieldHeight = theme.componentTokens.searchField.height;
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onVerticalDragStart: (_) {},
-      onVerticalDragUpdate: (_) {},
-      onVerticalDragEnd: (_) {},
+    return SizedBox(
+      height: _recitersSearchHeaderExtent(context),
       child: Material(
         color: theme.primaryColor,
         child: Padding(
-          padding: EdgeInsets.only(top: topPadding),
+          padding: EdgeInsets.only(top: context.contentTopSafePadding),
           child: Center(
             child: SizedBox(
               height: searchFieldHeight,
@@ -652,18 +606,6 @@ class _RecitersSearchHeaderDelegate extends SliverPersistentHeaderDelegate {
         ),
       ),
     );
-  }
-
-  @override
-  bool shouldRebuild(covariant _RecitersSearchHeaderDelegate oldDelegate) {
-    return extent != oldDelegate.extent ||
-        topPadding != oldDelegate.topPadding ||
-        state != oldDelegate.state ||
-        searchController != oldDelegate.searchController ||
-        focusNode != oldDelegate.focusNode ||
-        onSearchChanged != oldDelegate.onSearchChanged ||
-        onClearSearch != oldDelegate.onClearSearch ||
-        onToggleFavorites != oldDelegate.onToggleFavorites;
   }
 }
 
@@ -1006,6 +948,25 @@ class _ReciterGridSliver extends StatelessWidget {
   }
 }
 
+ReciterEntity _fakeReciter(int index) {
+  return ReciterEntity(
+    id: index,
+    name: 'Reciter Name',
+    letter: 'ا',
+    date: '2024-01-01',
+    moshaf: const [
+      MoshafEntity(
+        id: 1,
+        name: 'Hafs An Asim',
+        server: 'server',
+        surahTotal: 114,
+        moshafType: 1,
+        surahList: '1-114',
+      ),
+    ],
+  );
+}
+
 class _ReciterSkeletonListSliver extends StatelessWidget {
   const _ReciterSkeletonListSliver({
     required this.reserveScrollbarSpace,
@@ -1034,14 +995,16 @@ class _ReciterSkeletonListSliver extends StatelessWidget {
 
         return SliverPadding(
           padding: padding,
-          sliver: SliverList.builder(
-            itemCount: itemCount + itemCount - 1,
-            itemBuilder: (context, index) {
-              if (index.isOdd) {
-                return SizedBox(height: tokens.spaceSmall);
-              }
-              return const TilawaSkeletonListTile(lines: 2);
-            },
+          sliver: SliverSkeletonizer(
+            child: SliverList(
+              delegate: SliverChildBuilderDelegate((context, index) {
+                if (index.isOdd) {
+                  return SizedBox(height: tokens.spaceSmall);
+                }
+                final reciter = _fakeReciter(index ~/ 2);
+                return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
+              }, childCount: itemCount + itemCount - 1),
+            ),
           ),
         );
       },
@@ -1085,17 +1048,19 @@ class ReciterSkeletonGridSliver extends StatelessWidget {
 
         return SliverPadding(
           padding: padding,
-          sliver: SliverGrid.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: targetItemExtent,
-              mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
-              crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
-              childAspectRatio: targetItemExtent / targetItemHeight,
+          sliver: SliverSkeletonizer(
+            child: SliverGrid(
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: targetItemExtent,
+                mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+                crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+                childAspectRatio: targetItemExtent / targetItemHeight,
+              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final reciter = _fakeReciter(index);
+                return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
+              }, childCount: itemCount),
             ),
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              return const TilawaSkeletonCard(showSubtitle: true);
-            },
           ),
         );
       },
@@ -1193,7 +1158,7 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
 
 double _recitersSearchHeaderExtent(BuildContext context) {
   final theme = Theme.of(context);
-  final topPadding = MediaQuery.paddingOf(context).top;
+  final topPadding = context.contentTopSafePadding;
   return theme.componentTokens.searchField.height +
       topPadding +
       (theme.tokens.spaceMedium * 2);
