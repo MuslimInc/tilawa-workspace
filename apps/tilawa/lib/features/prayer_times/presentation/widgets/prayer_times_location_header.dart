@@ -10,11 +10,13 @@ class PrayerTimesLocationHeader extends StatelessWidget {
     required this.locationName,
     required this.isLoading,
     required this.onUpdateLocation,
+    this.onOpenQibla,
   });
 
   final String? locationName;
   final bool isLoading;
   final VoidCallback onUpdateLocation;
+  final VoidCallback? onOpenQibla;
 
   @override
   Widget build(BuildContext context) {
@@ -97,6 +99,7 @@ class PrayerTimesLocationHeader extends StatelessWidget {
             locationName: locationName,
             isLoading: isLoading,
             onUpdateLocation: onUpdateLocation,
+            onOpenQibla: onOpenQibla,
           ),
         ],
       ),

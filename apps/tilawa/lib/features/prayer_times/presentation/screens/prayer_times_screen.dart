@@ -48,11 +48,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         title: Text(context.l10n.prayerTimes),
         actionsPadding: EdgeInsetsDirectional.only(end: tokens.spaceMedium),
         actions: [
-          TilawaIconActionButton(
-            icon: Icons.explore_outlined,
-            onTap: () => context.push('/qibla'),
-          ),
-          SizedBox(width: tokens.spaceSmall),
           Semantics(
             identifier: PrayerNotificationSemanticsIds.prayerSettingsButton,
             child: TilawaIconActionButton(
@@ -238,6 +233,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               );
             },
             isLoading: state.isLoadingLocation,
+            onOpenQibla: () => context.push('/qibla'),
           ),
           _CountdownCardSection(
             onPrayerNotificationsTap: () => _showNotificationDialog(context),
