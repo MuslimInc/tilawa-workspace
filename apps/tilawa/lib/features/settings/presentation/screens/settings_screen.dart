@@ -18,6 +18,147 @@ import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
 
+// ── Layout constants (no matching design token) ──────────────────────────────
+const double _kAvatarSize = 60.0;
+const double _kPersonIconSize = 32.0;
+const double _kColorSwatchRadius = 12.0;
+const double _kCustomSwatchSize = 24.0;
+const int _kMaxConcurrentDownloads = 5;
+
+// ── Top-level sheet / dialog helpers ─────────────────────────────────────────
+
+void _showThemePicker(BuildContext context, ThemeMode currentMode) {
+  final tokens = Theme.of(context).tokens;
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(tokens.radiusExtraLarge),
+      ),
+    ),
+    builder: (_) => _ThemePickerSheet(currentMode: currentMode),
+  );
+}
+
+void _showColorPicker(BuildContext context, Color currentColor) {
+  final tokens = Theme.of(context).tokens;
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(tokens.radiusExtraLarge),
+      ),
+    ),
+    builder: (sheetContext) => _ColorPickerSheet(
+      currentColor: currentColor,
+      onCustomColorTap: () {
+        Navigator.pop(sheetContext);
+        _showCustomColorPicker(context, currentColor);
+      },
+    ),
+  );
+}
+
+void _showCustomColorPicker(BuildContext context, Color currentColor) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) {
+      var pickerColor = currentColor;
+      return AlertDialog(
+        title: Text(ctx.l10n.choosePrimaryColor),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: pickerColor,
+            onColorChanged: (color) => pickerColor = color,
+            pickerAreaHeightPercent: 0.8,
+            enableAlpha: false,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(ctx.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              ctx.read<ThemeCubit>().setPrimaryColor(pickerColor);
+              Navigator.of(ctx).pop();
+            },
+            child: Text(ctx.l10n.save),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _showLanguagePicker(BuildContext context, Locale currentLocale) {
+  final tokens = Theme.of(context).tokens;
+  showModalBottomSheet<void>(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(tokens.radiusExtraLarge),
+      ),
+    ),
+    builder: (_) => _LanguagePickerSheet(currentLocale: currentLocale),
+  );
+}
+
+void _showConcurrentDownloadsPicker(BuildContext context, int currentValue) {
+  final tokens = Theme.of(context).tokens;
+  showModalBottomSheet<void>(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(tokens.radiusExtraLarge),
+      ),
+    ),
+    builder: (_) => _ConcurrentDownloadsSheet(currentValue: currentValue),
+  );
+}
+
+void _showLogoutDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(ctx.l10n.logout),
+      content: Text(ctx.l10n.logoutConfirmation),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(ctx.l10n.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(ctx);
+            ctx.read<AuthBloc>().add(const SignOutEvent());
+          },
+          child: Text(
+            ctx.l10n.logout,
+            style: const TextStyle(color: AppColors.error),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+String _localizedColorName(BuildContext context, String name) {
+  final AppLocalizations l10n = context.l10n;
+  return switch (name) {
+    'Cyan' => l10n.colorCyan,
+    'Green' => l10n.colorGreen,
+    'Brown' => l10n.colorBrown,
+    'Purple' => l10n.colorPurple,
+    _ => name,
+  };
+}
+
+// ── Screen ────────────────────────────────────────────────────────────────────
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -33,13 +174,8 @@ class SettingsScreen extends StatelessWidget {
               initial: () {},
               loading: () {},
               authenticated: (_) {},
-              unauthenticated: () {
-                // Navigate to login on logout
-                const LoginRoute().go(context);
-              },
-              error: (message) {
-                ToastUtils.showErrorToast(message);
-              },
+              unauthenticated: () => const LoginRoute().go(context),
+              error: (message) => ToastUtils.showErrorToast(message),
             );
           },
         ),
@@ -56,14 +192,13 @@ class SettingsScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               horizontal: tokens.spaceLarge,
               vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
-            ).copyWith(bottom: 20),
+            ).copyWith(bottom: tokens.spaceExtraLarge),
             child: Column(
               children: [
-                // User Profile Section
-                _buildProfileSection(context),
+                const _SettingsProfileCard(),
                 SizedBox(height: tokens.spaceLarge * 2),
 
-                // General Group (Theme & Language)
+                // Appearance Group (Theme & Language)
                 TilawaSettingsGroup(
                   title: context.l10n.appearance.toUpperCase(),
                   children: [
@@ -78,7 +213,7 @@ class SettingsScreen extends StatelessWidget {
                               onTap: () =>
                                   _showThemePicker(context, state.mode),
                               borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(16),
+                                top: Radius.circular(tokens.radiusLarge),
                               ),
                             ),
                             TilawaSettingsTile(
@@ -102,7 +237,7 @@ class SettingsScreen extends StatelessWidget {
                               _showLanguagePicker(context, state.locale),
                           showDivider: false,
                           borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(16),
+                            bottom: Radius.circular(tokens.radiusLarge),
                           ),
                         );
                       },
@@ -125,13 +260,11 @@ class SettingsScreen extends StatelessWidget {
                               iconColor: AppColors.settingsPlayback,
                               title: context.l10n.restorePlaybackState,
                               value: state.restorePlaybackState,
-                              onChanged: (value) {
-                                context
-                                    .read<SettingsCubit>()
-                                    .toggleRestorePlaybackState(value);
-                              },
+                              onChanged: (value) => context
+                                  .read<SettingsCubit>()
+                                  .toggleRestorePlaybackState(value),
                               borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(16),
+                                top: Radius.circular(tokens.radiusLarge),
                               ),
                             ),
                             TilawaSettingsSwitchTile(
@@ -139,14 +272,12 @@ class SettingsScreen extends StatelessWidget {
                               iconColor: AppColors.settingsDuration,
                               title: context.l10n.enableRecitationDuration,
                               value: state.isSleepTimerEnabled,
-                              onChanged: (value) {
-                                context
-                                    .read<SettingsCubit>()
-                                    .toggleSleepTimerEnabled(value);
-                              },
+                              onChanged: (value) => context
+                                  .read<SettingsCubit>()
+                                  .toggleSleepTimerEnabled(value),
                               showDivider: false,
                               borderRadius: BorderRadius.vertical(
-                                bottom: Radius.circular(16),
+                                bottom: Radius.circular(tokens.radiusLarge),
                               ),
                             ),
                           ],
@@ -168,7 +299,7 @@ class SettingsScreen extends StatelessWidget {
                       title: context.l10n.bookmarks,
                       onTap: () => const BookmarksRoute().push(context),
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16),
+                        top: Radius.circular(tokens.radiusLarge),
                       ),
                     ),
                     TilawaSettingsTile(
@@ -190,7 +321,7 @@ class SettingsScreen extends StatelessWidget {
                       onTap: () => const QuranLastReadRoute().push(context),
                       showDivider: false,
                       borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(16),
+                        bottom: Radius.circular(tokens.radiusLarge),
                       ),
                     ),
                   ],
@@ -208,27 +339,23 @@ class SettingsScreen extends StatelessWidget {
                       title: context.l10n.manageStorage,
                       onTap: () => const DownloadsRoute().push(context),
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16),
+                        top: Radius.circular(tokens.radiusLarge),
                       ),
                     ),
                     BlocBuilder<SettingsCubit, SettingsState>(
                       builder: (context, state) {
-                        return Column(
-                          children: [
-                            TilawaSettingsTile(
-                              icon: FluentIcons.arrow_download_24_regular,
-                              iconColor: AppColors.settingsDownloads,
-                              title: context.l10n.concurrentDownloads,
-                              onTap: () => _showConcurrentDownloadsPicker(
-                                context,
-                                state.maxConcurrentDownloads,
-                              ),
-                              showDivider: false,
-                              borderRadius: BorderRadius.vertical(
-                                bottom: Radius.circular(16),
-                              ),
-                            ),
-                          ],
+                        return TilawaSettingsTile(
+                          icon: FluentIcons.arrow_download_24_regular,
+                          iconColor: AppColors.settingsDownloads,
+                          title: context.l10n.concurrentDownloads,
+                          onTap: () => _showConcurrentDownloadsPicker(
+                            context,
+                            state.maxConcurrentDownloads,
+                          ),
+                          showDivider: false,
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(tokens.radiusLarge),
+                          ),
                         );
                       },
                     ),
@@ -236,92 +363,21 @@ class SettingsScreen extends StatelessWidget {
                 ),
 
                 SizedBox(height: tokens.spaceLarge * 2),
+                const _LogoutButton(),
 
-                // Logout Button
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    if (state is AuthAuthenticated) {
-                      return Material(
-                        color: context.isDarkMode
-                            ? context.theme.cardColor
-                            : AppColors.logoutBackground,
-                        borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
-                          onTap: () => _showLogoutDialog(context),
-                          borderRadius: BorderRadius.circular(16),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  FluentIcons.sign_out_24_filled,
-                                  color: AppColors.error,
-                                  size: 20,
-                                ),
-                                SizedBox(width: 12),
-                                Text(
-                                  context.l10n.logout,
-                                  style: TextStyle(
-                                    color: AppColors.error,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-
-                // Route List (Dev)
                 if (kDebugMode) ...[
                   SizedBox(height: tokens.spaceLarge * 2),
                   TilawaSettingsTile(
                     icon: Icons.list_alt_rounded,
                     title: 'Route List (Dev)',
                     onTap: () => const RouteListRoute().push(context),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(tokens.radiusLarge),
                     showDivider: false,
                   ),
                 ],
 
-                SizedBox(height: 32),
-
-                // App Version Section
-                BlocBuilder<SettingsCubit, SettingsState>(
-                  builder: (context, state) {
-                    final version = state.appInfo?.version ?? '...';
-                    final buildNumber = state.appInfo?.buildNumber ?? '...';
-                    return Column(
-                      children: [
-                        Text(
-                          context.l10n.version(version),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: context.colorScheme.onSurface.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: tokens.spaceExtraSmall),
-                        Text(
-                          context.l10n.build(buildNumber),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.colorScheme.onSurface.withValues(
-                              alpha: 0.3,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                SizedBox(height: tokens.spaceLarge * 2),
+                const _AppVersionInfo(),
               ],
             ),
           ),
@@ -329,8 +385,17 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildProfileSection(BuildContext context) {
+// ── Private widgets ───────────────────────────────────────────────────────────
+
+class _SettingsProfileCard extends StatelessWidget {
+  const _SettingsProfileCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         final UserEntity? user = state.maybeWhen(
@@ -338,7 +403,10 @@ class SettingsScreen extends StatelessWidget {
           orElse: () => null,
         );
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceExtraLarge,
+            vertical: tokens.spaceLarge,
+          ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -348,48 +416,50 @@ class SettingsScreen extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           ),
           child: Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: _kAvatarSize,
+                height: _kAvatarSize,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Colors.white.withValues(
+                    alpha: tokens.opacitySubtle * 2,
+                  ),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 2,
+                    color: Colors.white.withValues(alpha: tokens.opacityMedium),
+                    width: tokens.spaceTiny,
                   ),
                 ),
                 child: Center(
                   child: Icon(
                     FluentIcons.person_32_filled,
-                    size: 32,
+                    size: _kPersonIconSize,
                     color: Colors.white,
                   ),
                 ),
               ),
-              SizedBox(width: 16),
+              SizedBox(width: tokens.spaceLarge),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       user?.displayName ?? context.l10n.guestUser,
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: context.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: tokens.spaceExtraSmall),
                     Text(
                       user?.email ?? context.l10n.signInToSync,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(
+                          alpha: tokens.opacityGlass,
+                        ),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -410,121 +480,194 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  String _getThemeName(BuildContext context, ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.system:
-        return context.l10n.systemTheme;
-      case ThemeMode.light:
-        return context.l10n.lightTheme;
-      case ThemeMode.dark:
-        return context.l10n.darkTheme;
-    }
+class _LogoutButton extends StatelessWidget {
+  const _LogoutButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is! AuthAuthenticated) return const SizedBox.shrink();
+        return Material(
+          color: context.isDarkMode
+              ? context.theme.cardColor
+              : AppColors.logoutBackground,
+          borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+          child: InkWell(
+            onTap: () => _showLogoutDialog(context),
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: tokens.spaceLarge),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    FluentIcons.sign_out_24_filled,
+                    color: AppColors.error,
+                    size: tokens.iconSizeMedium,
+                  ),
+                  SizedBox(width: tokens.spaceMedium),
+                  Text(
+                    context.l10n.logout,
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      color: AppColors.error,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
+}
 
-  void _showThemePicker(BuildContext context, ThemeMode currentMode) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+class _AppVersionInfo extends StatelessWidget {
+  const _AppVersionInfo();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) {
+        final version = state.appInfo?.version ?? '...';
+        final buildNumber = state.appInfo?.buildNumber ?? '...';
+        return Column(
           children: [
-            SizedBox(height: 16),
             Text(
-              context.l10n.chooseTheme,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              context.l10n.version(version),
+              style: context.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: context.colorScheme.onSurface.withValues(
+                  alpha: tokens.opacityMedium + tokens.opacitySubtle * 2,
+                ),
+              ),
             ),
-            SizedBox(height: 16),
-            TilawaSelectionTile(
-              title: context.l10n.systemTheme,
-              isSelected: currentMode == ThemeMode.system,
-              onTap: () {
-                context.read<ThemeCubit>().setMode(ThemeMode.system);
-                Navigator.pop(context);
-              },
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              context.l10n.build(buildNumber),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurface.withValues(
+                  alpha: tokens.opacityMedium,
+                ),
+              ),
             ),
-            TilawaSelectionTile(
-              title: context.l10n.lightTheme,
-              isSelected: currentMode == ThemeMode.light,
-              onTap: () {
-                context.read<ThemeCubit>().setMode(ThemeMode.light);
-                Navigator.pop(context);
-              },
-            ),
-            TilawaSelectionTile(
-              title: context.l10n.darkTheme,
-              isSelected: currentMode == ThemeMode.dark,
-              onTap: () {
-                context.read<ThemeCubit>().setMode(ThemeMode.dark);
-                Navigator.pop(context);
-              },
-            ),
-            SizedBox(height: 16),
           ],
-        ),
+        );
+      },
+    );
+  }
+}
+
+class _ThemePickerSheet extends StatelessWidget {
+  const _ThemePickerSheet({required this.currentMode});
+
+  final ThemeMode currentMode;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: tokens.spaceLarge),
+          Text(
+            context.l10n.chooseTheme,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: tokens.spaceLarge),
+          TilawaSelectionTile(
+            title: context.l10n.systemTheme,
+            isSelected: currentMode == ThemeMode.system,
+            onTap: () {
+              context.read<ThemeCubit>().setMode(ThemeMode.system);
+              Navigator.pop(context);
+            },
+          ),
+          TilawaSelectionTile(
+            title: context.l10n.lightTheme,
+            isSelected: currentMode == ThemeMode.light,
+            onTap: () {
+              context.read<ThemeCubit>().setMode(ThemeMode.light);
+              Navigator.pop(context);
+            },
+          ),
+          TilawaSelectionTile(
+            title: context.l10n.darkTheme,
+            isSelected: currentMode == ThemeMode.dark,
+            onTap: () {
+              context.read<ThemeCubit>().setMode(ThemeMode.dark);
+              Navigator.pop(context);
+            },
+          ),
+          SizedBox(height: tokens.spaceLarge),
+        ],
       ),
     );
   }
+}
 
-  String _getLocalizedColorName(BuildContext context, String name) {
-    final AppLocalizations l10n = context.l10n;
-    return switch (name) {
-      'Cyan' => l10n.colorCyan,
-      'Green' => l10n.colorGreen,
-      'Brown' => l10n.colorBrown,
-      'Purple' => l10n.colorPurple,
-      _ => name,
-    };
-  }
+class _ColorPickerSheet extends StatelessWidget {
+  const _ColorPickerSheet({
+    required this.currentColor,
+    required this.onCustomColorTap,
+  });
 
-  void _showColorPicker(BuildContext context, Color currentColor) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      isScrollControlled: true,
-      builder: (sheetContext) => SafeArea(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(height: 16),
-                Text(
-                  context.l10n.choosePrimaryColor,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  final Color currentColor;
+  final VoidCallback onCustomColorTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: tokens.spaceLarge),
+              Text(
+                context.l10n.choosePrimaryColor,
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
-                SizedBox(height: 16),
-                ...ThemeCubit.colorOptions.map((option) {
-                  final isSelected =
-                      option.color.toARGB32() == currentColor.toARGB32();
-                  return TilawaSelectionTile(
-                    leading: CircleAvatar(
-                      backgroundColor: option.color,
-                      radius: 12,
-                    ),
-                    title: _getLocalizedColorName(context, option.name),
-                    isSelected: isSelected,
-                    onTap: () {
-                      context.read<ThemeCubit>().setPrimaryColor(option.color);
-                      Navigator.pop(sheetContext);
-                    },
-                  );
-                }),
-                // Custom Color Option
-                TilawaSelectionTile(
-                  leading: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
+              ),
+              SizedBox(height: tokens.spaceLarge),
+              ...ThemeCubit.colorOptions.map((option) {
+                final isSelected =
+                    option.color.toARGB32() == currentColor.toARGB32();
+                return TilawaSelectionTile(
+                  leading: CircleAvatar(
+                    backgroundColor: option.color,
+                    radius: _kColorSwatchRadius,
+                  ),
+                  title: _localizedColorName(context, option.name),
+                  isSelected: isSelected,
+                  onTap: () {
+                    context.read<ThemeCubit>().setPrimaryColor(option.color);
+                    Navigator.pop(context);
+                  },
+                );
+              }),
+              TilawaSelectionTile(
+                leading: SizedBox.square(
+                  dimension: _kCustomSwatchSize,
+                  child: const DecoratedBox(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: SweepGradient(
                         colors: [
@@ -536,158 +679,102 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  title: context.l10n.custom,
-                  isSelected: !ThemeCubit.colorOptions.any(
-                    (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
-                  ),
-                  onTap: () {
-                    Navigator.pop(sheetContext);
-                    _showCustomColorPicker(context, currentColor);
-                  },
                 ),
-                SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showCustomColorPicker(BuildContext context, Color currentColor) {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        var pickerColor = currentColor;
-        return AlertDialog(
-          title: Text(ctx.l10n.choosePrimaryColor),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: pickerColor,
-              onColorChanged: (color) {
-                pickerColor = color;
-              },
-              pickerAreaHeightPercent: 0.8,
-              enableAlpha: false,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(ctx.l10n.cancel),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-            ),
-            TextButton(
-              child: Text(ctx.l10n.save),
-              onPressed: () {
-                ctx.read<ThemeCubit>().setPrimaryColor(pickerColor);
-                Navigator.of(ctx).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showLanguagePicker(BuildContext context, Locale currentLocale) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.only(bottom: sheetContext.systemViewInsets.bottom),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 16),
-            Text(
-              context.l10n.chooseLanguage,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            TilawaSelectionTile(
-              title: "العربية",
-              isSelected: currentLocale.languageCode == arabicLanguageCode,
-              onTap: () {
-                context.read<LocalizationBloc>().add(
-                  const ChangeLanguage(Locale(arabicLanguageCode)),
-                );
-                Navigator.pop(context);
-              },
-            ),
-            TilawaSelectionTile(
-              title: "English",
-              isSelected: currentLocale.languageCode == englishLanguageCode,
-              onTap: () {
-                context.read<LocalizationBloc>().add(
-                  const ChangeLanguage(Locale(englishLanguageCode)),
-                );
-                Navigator.pop(context);
-              },
-            ),
-            SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showConcurrentDownloadsPicker(BuildContext context, int currentValue) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 16),
-            Text(
-              context.l10n.concurrentDownloads,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            for (int i = 1; i <= 5; i++)
-              TilawaSelectionTile(
-                title: '$i',
-                isSelected: currentValue == i,
-                onTap: () {
-                  context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
-                  Navigator.pop(context);
-                },
+                title: context.l10n.custom,
+                isSelected: !ThemeCubit.colorOptions.any(
+                  (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
+                ),
+                onTap: onCustomColorTap,
               ),
-            SizedBox(height: 16),
-          ],
+              SizedBox(height: tokens.spaceLarge),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.logout),
-        content: Text(context.l10n.logoutConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<AuthBloc>().add(const SignOutEvent());
-            },
-            child: Text(
-              context.l10n.logout,
-              style: const TextStyle(color: Colors.red),
+class _LanguagePickerSheet extends StatelessWidget {
+  const _LanguagePickerSheet({required this.currentLocale});
+
+  final Locale currentLocale;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: context.systemViewInsets.bottom),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: tokens.spaceLarge),
+          Text(
+            context.l10n.chooseLanguage,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
+          SizedBox(height: tokens.spaceLarge),
+          TilawaSelectionTile(
+            title: 'العربية',
+            isSelected: currentLocale.languageCode == arabicLanguageCode,
+            onTap: () {
+              context.read<LocalizationBloc>().add(
+                const ChangeLanguage(Locale(arabicLanguageCode)),
+              );
+              Navigator.pop(context);
+            },
+          ),
+          TilawaSelectionTile(
+            title: 'English',
+            isSelected: currentLocale.languageCode == englishLanguageCode,
+            onTap: () {
+              context.read<LocalizationBloc>().add(
+                const ChangeLanguage(Locale(englishLanguageCode)),
+              );
+              Navigator.pop(context);
+            },
+          ),
+          SizedBox(height: tokens.spaceLarge),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConcurrentDownloadsSheet extends StatelessWidget {
+  const _ConcurrentDownloadsSheet({required this.currentValue});
+
+  final int currentValue;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: tokens.spaceLarge),
+          Text(
+            context.l10n.concurrentDownloads,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: tokens.spaceLarge),
+          for (int i = 1; i <= _kMaxConcurrentDownloads; i++)
+            TilawaSelectionTile(
+              title: '$i',
+              isSelected: currentValue == i,
+              onTap: () {
+                context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
+                Navigator.pop(context);
+              },
+            ),
+          SizedBox(height: tokens.spaceLarge),
         ],
       ),
     );
