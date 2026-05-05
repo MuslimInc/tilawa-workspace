@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +45,7 @@ class QuranPlayerWidget extends StatefulWidget {
   /// covered by the player.
   ///
   /// `bottomNavBarHeight` must match what the host shell passes to the
-  /// [QuranPlayerWidget] mounted on this route. Standalone routes that
+  /// [QPlayer] mounted on this route. Standalone routes that
   /// mount their own player without a nav bar should pass 0.
   static double collapsedFootprint(
     BuildContext context, {
@@ -99,6 +97,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
+
+    _expandController.addStatusListener((status) {
+      debugPrint(
+        '[QPlayer] expandController status=${status.name}, value=${_expandController.value.toStringAsFixed(3)}',
+      );
+    });
   }
 
   @override
@@ -109,26 +113,42 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   }
 
   /// Expand the player to full-screen.
+  ///
+  /// Uses [Curves.easeOutBack] for a spring-like overshoot that feels
+  /// like YouTube Music's player sheet expansion.
   void expand() {
     HapticFeedback.lightImpact();
+    debugPrint(
+      '[QPlayer] expand() called, current=${_expandController.value}, status=${_expandController.status}',
+    );
     _expandController.animateTo(
       1.0,
-      duration: const Duration(milliseconds: 360),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutBack,
     );
   }
 
   /// Collapse the player back to the mini bar.
+  ///
+  /// Uses [Curves.easeOutCubic] for a smooth, natural deceleration.
+  /// Avoids [Curves.easeInOutCubicEmphasized] which stalls visually
+  /// (lingers at ~0.8–0.9 then snaps to 0).
   void collapse() {
+    debugPrint(
+      '[QPlayer] collapse() called, current=${_expandController.value}, status=${_expandController.status}',
+    );
     _expandController.animateTo(
       0.0,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInCubic,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
     );
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     final primaryDelta = details.primaryDelta ?? 0;
+    debugPrint(
+      '[QPlayer] dragUpdate delta=$primaryDelta, expand=${_expandController.value.toStringAsFixed(3)}, dismissOffsetY=$_dismissOffsetY',
+    );
 
     if ((_expandController.value == 0 && primaryDelta > 0) ||
         _dismissOffsetY > 0) {
@@ -150,53 +170,36 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
-    final velocity = details.primaryVelocity ?? 0;
+    final tokens = context.tokens;
+    final primaryVelocity = details.primaryVelocity ?? 0;
+    debugPrint(
+      '[QPlayer] dragEnd velocity=$primaryVelocity, expand=${_expandController.value.toStringAsFixed(3)}, dismissOffsetY=$_dismissOffsetY',
+    );
 
-    // Handle dismiss gesture when swiping down on collapsed player
     if (_dismissOffsetY > 0) {
-      if (velocity > context.tokens.playerDismissVelocityThreshold ||
-          _dismissOffsetY > context.tokens.playerDismissThreshold) {
-        _dismiss();
+      if (primaryVelocity > tokens.playerDismissVelocityThreshold ||
+          _dismissOffsetY > tokens.playerDismissThreshold) {
+        debugPrint('[QPlayer] dragEnd → dismiss (velocity)');
+        _dismissWithUndo();
       } else {
-        _cancelDismiss();
+        debugPrint('[QPlayer] dragEnd → reset dismiss');
+        _animateDismissReset();
       }
       return;
     }
 
-    final negVelocity = -velocity;
-    if (negVelocity > context.tokens.playerVelocityThreshold ||
-        _expandController.value > context.tokens.playerProgressThreshold) {
+    final negVelocity = -primaryVelocity;
+    if (negVelocity > tokens.playerVelocityThreshold ||
+        _expandController.value > tokens.playerProgressThreshold) {
       expand();
-    } else if (negVelocity < -context.tokens.playerVelocityThreshold ||
-        _expandController.value <= context.tokens.playerProgressThreshold) {
+    } else if (negVelocity < -tokens.playerVelocityThreshold ||
+        _expandController.value <= tokens.playerProgressThreshold) {
       collapse();
     }
   }
 
-  /// Animate the mini player off-screen and stop audio.
-  void _dismiss() {
-    HapticFeedback.lightImpact();
-    final targetOffset = _miniPlayerHeight + widget.bottomNavBarHeight + 40;
-    _dismissAnimation = Tween<double>(begin: _dismissOffsetY, end: targetOffset)
-        .animate(
-          CurvedAnimation(
-            parent: _dismissAnimController,
-            curve: Curves.easeOut,
-          ),
-        );
-    _dismissAnimController.forward(from: 0).then((_) {
-      if (!mounted) return;
-      setState(() {
-        _dismissOffsetY = 0;
-        _dismissAnimation = null;
-      });
-      _dismissAnimController.value = 0;
-      context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
-    });
-  }
-
   /// Cancel the dismiss gesture and spring back.
-  void _cancelDismiss() {
+  void _animateDismissReset() {
     _dismissAnimation = Tween<double>(begin: _dismissOffsetY, end: 0).animate(
       CurvedAnimation(parent: _dismissAnimController, curve: Curves.easeOut),
     );
@@ -284,91 +287,88 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             animation: _expandController,
             builder: (context, _) {
               final progress = _expandController.value;
+
+              // Bottom inset above the screen edge / nav bar. Used in both
+              // expanded and collapsed layouts so the mini player position
+              // is consistent during the collapse-to-collapsed transition.
+              final bottomInset = widget.bottomNavBarHeight > 0
+                  ? widget.bottomNavBarHeight
+                  : MediaQuery.paddingOf(context).bottom +
+                        context.tokens.spaceExtraLarge;
+
+              // Bottom sheet slide:
+              // The expanded player translates from fully off-screen
+              // (progress=0, translateY=screenHeight) to fully on-screen
+              // (progress=1, translateY=0). This is the standard pattern
+              // used by YouTube Music and Spotify.
               final sheetOffsetY = screenHeight * (1 - progress);
 
-              if (progress > 0.01) {
-                return SizedBox(
-                  height: screenHeight,
-                  width: double.infinity,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
+              // Mini player fades and slides to avoid overlapping with the
+              // expanded player. During expand: slides down and fades out.
+              // During collapse: slides up from below and fades in.
+              final miniOpacity = (1 - progress * 2).clamp(0.0, 1.0);
+              final miniSlideY = (1 - miniOpacity) * _miniPlayerHeight;
+
+              return SizedBox(
+                height: screenHeight,
+                width: double.infinity,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    // Backdrop scrim — darkens the screen behind the
+                    // expanded player sheet, focusing attention on it.
+                    Positioned.fill(
+                      child: IgnorePointer(
+                        child: Container(
+                          color: Colors.black.withValues(alpha: progress * 0.5),
+                        ),
+                      ),
+                    ),
+                    // Expanded player — slides up from below during expand,
+                    // slides down below during collapse.
+                    if (progress > 0.01)
                       Transform.translate(
                         offset: Offset(0, sheetOffsetY),
                         child: GestureDetector(
                           behavior: HitTestBehavior.opaque,
                           onVerticalDragUpdate: _onVerticalDragUpdate,
                           onVerticalDragEnd: _onVerticalDragEnd,
-                          child: ColoredBox(
-                            color: Colors.black,
-                            child: _ExpandedPlayerOrganism(
+                          child: _ExpandedPlayerOrganism(
+                            state: state,
+                            audio: audio,
+                            onCollapse: collapse,
+                            onDismiss: _dismissWithUndo,
+                            expandProgress: progress,
+                          ),
+                        ),
+                      ),
+                    // Mini player — slides down and fades out during expand
+                    // to avoid overlapping with the arriving expanded player.
+                    // Slides up from below during collapse.
+                    if (progress < 0.55)
+                      Positioned(
+                        bottom: bottomInset - miniSlideY,
+                        left: 0,
+                        right: 0,
+                        child: Opacity(
+                          opacity: miniOpacity,
+                          child: SizedBox(
+                            height: _miniPlayerHeight,
+                            child: _MiniPlayerTransition(
+                              progress: progress,
                               state: state,
                               audio: audio,
-                              onCollapse: collapse,
-                              onDismiss: _dismissWithUndo,
-                              expandProgress: progress,
+                              dismissAnimController: _dismissAnimController,
+                              dismissAnimation: _dismissAnimation,
+                              dismissOffsetY: _dismissOffsetY,
+                              onVerticalDragUpdate: _onVerticalDragUpdate,
+                              onVerticalDragEnd: _onVerticalDragEnd,
+                              onTap: expand,
+                              onClose: _dismissWithUndo,
                             ),
                           ),
                         ),
                       ),
-                      if (progress < 0.99)
-                        Positioned(
-                          bottom: lerpDouble(
-                            widget.bottomNavBarHeight,
-                            0,
-                            progress,
-                          ),
-                          left: 0,
-                          right: 0,
-                          child: _MiniPlayerTransition(
-                            progress: progress,
-                            state: state,
-                            audio: audio,
-                            dismissAnimController: _dismissAnimController,
-                            dismissAnimation: _dismissAnimation,
-                            dismissOffsetY: _dismissOffsetY,
-                            onVerticalDragUpdate: _onVerticalDragUpdate,
-                            onVerticalDragEnd: _onVerticalDragEnd,
-                            onTap: expand,
-                            onClose: _dismissWithUndo,
-                          ),
-                        ),
-                    ],
-                  ),
-                );
-              }
-
-              // Collapsed state: Column-based layout for proper positioning
-              // above the bottom nav bar (if present) or screen edge.
-              // When there's no nav bar (e.g., reciter details), add
-              // extra breathing room so the mini player doesn't hug the
-              // screen edge.
-              final bottomInset = widget.bottomNavBarHeight > 0
-                  ? widget.bottomNavBarHeight
-                  : MediaQuery.paddingOf(context).bottom +
-                        context.tokens.spaceExtraLarge;
-              return SizedBox(
-                height: _miniPlayerHeight + bottomInset,
-                width: double.infinity,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    SizedBox(
-                      height: _miniPlayerHeight,
-                      child: _MiniPlayerTransition(
-                        progress: progress,
-                        state: state,
-                        audio: audio,
-                        dismissAnimController: _dismissAnimController,
-                        dismissAnimation: _dismissAnimation,
-                        dismissOffsetY: _dismissOffsetY,
-                        onVerticalDragUpdate: _onVerticalDragUpdate,
-                        onVerticalDragEnd: _onVerticalDragEnd,
-                        onTap: expand,
-                        onClose: _dismissWithUndo,
-                      ),
-                    ),
-                    SizedBox(height: bottomInset),
                   ],
                 ),
               );
@@ -542,6 +542,10 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
     final topPadding = MediaQuery.paddingOf(context).top;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    debugPrint(
+      '[MediaQueryBottomPadding] PORTRAIT: orientation=$isLandscape, topPadding=$topPadding, bottomPadding=$bottomPadding, spaceExtraLarge=${tokens.spaceExtraLarge}, expandProgress=${expandProgress.toStringAsFixed(3)}',
+    );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -553,6 +557,11 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
       ),
       child: Material(
         color: Colors.black,
+        elevation: expandProgress * 16,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(expandProgress * 24),
+        ),
+        clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -640,9 +649,9 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                                     _PlayerSecondaryControlsMolecule(
                                       state: state,
                                     ),
+                                    SizedBox(height: tokens.spaceExtraLarge),
                                   ],
                                 ),
-                                SizedBox(height: tokens.spaceExtraLarge),
                               ],
                             ),
                           ),
@@ -685,6 +694,10 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    debugPrint(
+      '[MediaQueryBottomPadding] LANDSCAPE: bottomPadding=$bottomPadding, spaceExtraLarge=${tokens.spaceExtraLarge}',
+    );
 
     return Positioned.fill(
       child: SafeArea(
@@ -776,66 +789,75 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
 
             // Bottom: Seek Bar and secondary actions
             Positioned(
-              bottom: tokens.spaceSmall,
+              bottom: tokens.spaceSmall + tokens.spaceExtraLarge,
               left: tokens.spaceLarge,
               right: tokens.spaceLarge,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const _ExpandedProgressBar(),
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceLarge,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TilawaIconActionButton(
-                          icon: FluentIcons.speaker_2_24_regular,
-                          onTap: () => showSliderDialog(
-                            context: context,
-                            title: context.l10n.adjustVolume,
-                            divisions: 10,
-                            min: 0.0,
-                            max: 1.0,
-                            value: state.volume,
-                            onChanged: (v) => context
-                                .read<AudioPlayerBloc>()
-                                .add(AudioPlayerEvent.setVolume(v)),
-                          ),
+              child: Builder(
+                builder: (context) {
+                  debugPrint(
+                    '[MediaQueryBottomPadding] LANDSCAPE_BOTTOM: Positioned.bottom=${tokens.spaceSmall + tokens.spaceExtraLarge}, viewPaddingBottom=$bottomPadding, totalFromEdge=${tokens.spaceSmall + tokens.spaceExtraLarge + bottomPadding}',
+                  );
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const _ExpandedProgressBar(),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: tokens.spaceLarge,
                         ),
-                        Row(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            if (context
-                                .watch<SettingsCubit>()
-                                .state
-                                .isSleepTimerEnabled)
-                              IconButton(
-                                icon: Icon(
-                                  state.isSleepTimerActive
-                                      ? FluentIcons.timer_24_filled
-                                      : FluentIcons.timer_24_regular,
-                                  color: state.isSleepTimerActive
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.white,
-                                ),
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (_) => const SleepTimerDialog(),
-                                  );
-                                },
-                              ),
                             TilawaIconActionButton(
-                              icon: FluentIcons.more_horizontal_24_regular,
-                              onTap: () => _showPlaybackActions(context),
+                              icon: FluentIcons.speaker_2_24_regular,
+                              onTap: () => showSliderDialog(
+                                context: context,
+                                title: context.l10n.adjustVolume,
+                                divisions: 10,
+                                min: 0.0,
+                                max: 1.0,
+                                value: state.volume,
+                                onChanged: (v) => context
+                                    .read<AudioPlayerBloc>()
+                                    .add(AudioPlayerEvent.setVolume(v)),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                if (context
+                                    .watch<SettingsCubit>()
+                                    .state
+                                    .isSleepTimerEnabled)
+                                  IconButton(
+                                    icon: Icon(
+                                      state.isSleepTimerActive
+                                          ? FluentIcons.timer_24_filled
+                                          : FluentIcons.timer_24_regular,
+                                      color: state.isSleepTimerActive
+                                          ? Theme.of(context).primaryColor
+                                          : Colors.white,
+                                    ),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (_) =>
+                                            const SleepTimerDialog(),
+                                      );
+                                    },
+                                  ),
+                                TilawaIconActionButton(
+                                  icon: FluentIcons.more_horizontal_24_regular,
+                                  onTap: () => _showPlaybackActions(context),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                ],
+                      ),
+                      SizedBox(height: tokens.spaceExtraLarge),
+                    ],
+                  );
+                },
               ),
             ),
           ],
@@ -1095,10 +1117,13 @@ Future<void> _showPlaybackActions(BuildContext context) async {
     context: context,
     showDragHandle: true,
     builder: (sheetContext) {
-      return ListTile(
-        leading: const Icon(FluentIcons.stop_24_regular),
-        title: Text(context.l10n.stopPlayback),
-        onTap: () => Navigator.of(sheetContext).pop(true),
+      return Padding(
+        padding: EdgeInsets.only(bottom: sheetContext.safeBottomPadding),
+        child: ListTile(
+          leading: const Icon(FluentIcons.stop_24_regular),
+          title: Text(context.l10n.stopPlayback),
+          onTap: () => Navigator.of(sheetContext).pop(true),
+        ),
       );
     },
   );
@@ -1109,20 +1134,19 @@ Future<void> _showPlaybackActions(BuildContext context) async {
 
   final bool? shouldStop = await showModalBottomSheet<bool>(
     context: context,
+    showDragHandle: true,
     builder: (dialogContext) {
-      final bottomPadding = MediaQuery.paddingOf(dialogContext).bottom;
-      return Container(
-        color: Colors.green,
-        padding: EdgeInsets.only(bottom: bottomPadding),
+      return Padding(
+        padding: EdgeInsets.only(bottom: dialogContext.safeBottomPadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: const Icon(FluentIcons.stop_24_regular),
               title: Text(context.l10n.stopPlayback),
               subtitle: Text(context.l10n.stopPlaybackConfirmMessage),
             ),
             OverflowBar(
+              spacing: 12,
               children: [
                 TextButton(
                   onPressed: () => Navigator.of(dialogContext).pop(false),

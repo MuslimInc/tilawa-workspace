@@ -24,6 +24,12 @@ extension BuildContextThemeX on BuildContext {
     // Returns the system inset if it exists, otherwise provides the fallback
     return bottomInset > 0 ? bottomInset : fallback;
   }
+
+  double get safeTopPadding {
+    final topInset = MediaQuery.viewPaddingOf(this).top;
+
+    return topInset;
+  }
 }
 
 extension FailureExtensions on Failure {
