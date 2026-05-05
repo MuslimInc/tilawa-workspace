@@ -1047,7 +1047,7 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: .spaceAround,
       children: [
         TilawaIconActionButton(
           icon: FluentIcons.speaker_2_24_regular,
@@ -1062,10 +1062,6 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
               AudioPlayerEvent.setVolume(v),
             ),
           ),
-        ),
-        TilawaIconActionButton(
-          icon: FluentIcons.more_horizontal_24_regular,
-          onTap: () => _showPlaybackActions(context),
         ),
         GestureDetector(
           onTap: () => showSliderDialog(

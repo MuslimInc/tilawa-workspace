@@ -45,13 +45,11 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
       final colorValue = json['primaryColor'] as int?;
 
       final ThemeMode mode = switch (modeValue) {
-        'light' => ThemeMode.light,
         'dark' => ThemeMode.dark,
         _ => ThemeMode.light,
       };
 
-      final bool useSystemTheme =
-          json['useSystemTheme'] as bool? ?? mode == ThemeMode.system;
+      final bool useSystemTheme = json['useSystemTheme'] as bool? ?? false;
 
       final Color primaryColor = colorValue != null
           ? Color(colorValue)
@@ -77,11 +75,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
   @override
   Map<String, dynamic>? toJson(ThemeState state) {
     return {
-      'mode': switch (state.mode) {
-        ThemeMode.light => 'light',
-        ThemeMode.dark => 'dark',
-        ThemeMode.system => 'system',
-      },
+      'mode': state.mode == ThemeMode.dark ? 'dark' : 'light',
       'primaryColor': state.primaryColor.toARGB32(),
       'useSystemTheme': state.useSystemTheme,
       'preset': state.preset.name,

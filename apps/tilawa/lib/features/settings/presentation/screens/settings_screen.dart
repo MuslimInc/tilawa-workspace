@@ -27,20 +27,6 @@ const int _kMaxConcurrentDownloads = 5;
 
 // ── Top-level sheet / dialog helpers ─────────────────────────────────────────
 
-void _showThemePicker(BuildContext context, ThemeMode currentMode) {
-  final tokens = Theme.of(context).tokens;
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens.radiusExtraLarge),
-      ),
-    ),
-    builder: (_) => _ThemePickerSheet(currentMode: currentMode),
-  );
-}
-
 void _showColorPicker(BuildContext context, Color currentColor) {
   final tokens = Theme.of(context).tokens;
   showModalBottomSheet<void>(
@@ -206,12 +192,13 @@ class SettingsScreen extends StatelessWidget {
                       builder: (context, state) {
                         return Column(
                           children: [
-                            TilawaSettingsTile(
+                            TilawaSettingsSwitchTile(
                               icon: FluentIcons.dark_theme_24_regular,
                               iconColor: AppColors.settingsTheme,
-                              title: context.l10n.theme,
-                              onTap: () =>
-                                  _showThemePicker(context, state.mode),
+                              title: context.l10n.darkTheme,
+                              value: state.mode == ThemeMode.dark,
+                              onChanged: (value) =>
+                                  context.read<ThemeCubit>().toggleDark(value),
                               borderRadius: BorderRadius.vertical(
                                 top: Radius.circular(tokens.radiusLarge),
                               ),
@@ -561,58 +548,6 @@ class _AppVersionInfo extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-class _ThemePickerSheet extends StatelessWidget {
-  const _ThemePickerSheet({required this.currentMode});
-
-  final ThemeMode currentMode;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-
-    return SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(height: tokens.spaceLarge),
-          Text(
-            context.l10n.chooseTheme,
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: tokens.spaceLarge),
-          TilawaSelectionTile(
-            title: context.l10n.systemTheme,
-            isSelected: currentMode == ThemeMode.system,
-            onTap: () {
-              context.read<ThemeCubit>().setMode(ThemeMode.system);
-              Navigator.pop(context);
-            },
-          ),
-          TilawaSelectionTile(
-            title: context.l10n.lightTheme,
-            isSelected: currentMode == ThemeMode.light,
-            onTap: () {
-              context.read<ThemeCubit>().setMode(ThemeMode.light);
-              Navigator.pop(context);
-            },
-          ),
-          TilawaSelectionTile(
-            title: context.l10n.darkTheme,
-            isSelected: currentMode == ThemeMode.dark,
-            onTap: () {
-              context.read<ThemeCubit>().setMode(ThemeMode.dark);
-              Navigator.pop(context);
-            },
-          ),
-          SizedBox(height: tokens.spaceLarge),
-        ],
-      ),
     );
   }
 }

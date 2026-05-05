@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:flutter/services.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
@@ -243,14 +243,7 @@ class _PlayerApp extends StatelessWidget {
               final density = appLaunchConfig.compactUiEnabled
                   ? TilawaDensity.compact
                   : TilawaDensity.comfortable;
-              final platformBrightness = MediaQuery.platformBrightnessOf(
-                context,
-              );
-              final bool isDark = switch (themeState.mode) {
-                ThemeMode.dark => true,
-                ThemeMode.light => false,
-                ThemeMode.system => platformBrightness == Brightness.dark,
-              };
+              final bool isDark = themeState.mode == ThemeMode.dark;
               final Brightness iconBrightness = isDark
                   ? Brightness.light
                   : Brightness.dark;
