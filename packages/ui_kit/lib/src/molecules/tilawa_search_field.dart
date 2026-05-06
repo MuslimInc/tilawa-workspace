@@ -133,7 +133,7 @@ class _SearchFieldBody extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final componentTokens = theme.componentTokens.searchField;
     final effectiveFillColor =
-        backgroundColor ?? colorScheme.surfaceContainerHighest;
+        backgroundColor ?? componentTokens.backgroundColor;
     final effectiveBorderRadius =
         borderRadius ?? BorderRadius.circular(componentTokens.borderRadius);
 

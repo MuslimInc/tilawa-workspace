@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app_colors.dart';
 import '../density.dart';
 import 'token_lerp.dart';
 
@@ -643,6 +644,7 @@ class TilawaSeekBarTokens {
 class TilawaSearchFieldTokens {
   const TilawaSearchFieldTokens({
     required this.height,
+    required this.backgroundColor,
     required this.borderRadius,
     required this.contentPadding,
     required this.iconSize,
@@ -656,6 +658,7 @@ class TilawaSearchFieldTokens {
   });
 
   final double height;
+  final Color backgroundColor;
   final double borderRadius;
   final EdgeInsetsGeometry contentPadding;
   final double iconSize;
@@ -670,10 +673,25 @@ class TilawaSearchFieldTokens {
   factory TilawaSearchFieldTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaSearchFieldTokens.fromColorScheme(
+      colorScheme,
+      density: density,
+    );
+  }
+
+  factory TilawaSearchFieldTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final backgroundColor = _backgroundColor(colorScheme);
     if (density.isCompact) {
       // Height stays at kMinInteractiveDimension (48dp) — non-negotiable.
-      return const TilawaSearchFieldTokens(
+      return TilawaSearchFieldTokens(
         height: kMinInteractiveDimension,
+        backgroundColor: backgroundColor,
         borderRadius: 12,
         contentPadding: EdgeInsets.symmetric(vertical: 10),
         iconSize: 16,
@@ -686,8 +704,9 @@ class TilawaSearchFieldTokens {
         shadowOffset: Offset(0, 2),
       );
     }
-    return const TilawaSearchFieldTokens(
+    return TilawaSearchFieldTokens(
       height: kMinInteractiveDimension,
+      backgroundColor: backgroundColor,
       borderRadius: 16,
       contentPadding: EdgeInsets.symmetric(vertical: 12),
       iconSize: 18,
@@ -701,8 +720,18 @@ class TilawaSearchFieldTokens {
     );
   }
 
+  static Color _backgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.24 : 0.42;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
   TilawaSearchFieldTokens copyWith({
     double? height,
+    Color? backgroundColor,
     double? borderRadius,
     EdgeInsetsGeometry? contentPadding,
     double? iconSize,
@@ -716,6 +745,7 @@ class TilawaSearchFieldTokens {
   }) {
     return TilawaSearchFieldTokens(
       height: height ?? this.height,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       contentPadding: contentPadding ?? this.contentPadding,
       iconSize: iconSize ?? this.iconSize,
@@ -737,6 +767,7 @@ class TilawaSearchFieldTokens {
   ) {
     return TilawaSearchFieldTokens(
       height: lerpTokenDouble(a.height, b.height, t),
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
       contentPadding: EdgeInsetsGeometry.lerp(
         a.contentPadding,

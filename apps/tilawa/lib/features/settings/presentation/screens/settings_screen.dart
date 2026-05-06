@@ -656,41 +656,43 @@ class _LanguagePickerSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: context.systemViewInsets.bottom),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(height: tokens.spaceLarge),
-          Text(
-            context.l10n.chooseLanguage,
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: context.systemViewInsets.bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: tokens.spaceLarge),
+            Text(
+              context.l10n.chooseLanguage,
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-          SizedBox(height: tokens.spaceLarge),
-          TilawaSelectionTile(
-            title: 'العربية',
-            isSelected: currentLocale.languageCode == arabicLanguageCode,
-            onTap: () {
-              context.read<LocalizationBloc>().add(
-                const ChangeLanguage(Locale(arabicLanguageCode)),
-              );
-              Navigator.pop(context);
-            },
-          ),
-          TilawaSelectionTile(
-            title: 'English',
-            isSelected: currentLocale.languageCode == englishLanguageCode,
-            onTap: () {
-              context.read<LocalizationBloc>().add(
-                const ChangeLanguage(Locale(englishLanguageCode)),
-              );
-              Navigator.pop(context);
-            },
-          ),
-          SizedBox(height: tokens.spaceLarge),
-        ],
+            SizedBox(height: tokens.spaceLarge),
+            TilawaSelectionTile(
+              title: 'العربية',
+              isSelected: currentLocale.languageCode == arabicLanguageCode,
+              onTap: () {
+                context.read<LocalizationBloc>().add(
+                  const ChangeLanguage(Locale(arabicLanguageCode)),
+                );
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: 'English',
+              isSelected: currentLocale.languageCode == englishLanguageCode,
+              onTap: () {
+                context.read<LocalizationBloc>().add(
+                  const ChangeLanguage(Locale(englishLanguageCode)),
+                );
+                Navigator.pop(context);
+              },
+            ),
+            SizedBox(height: tokens.spaceLarge),
+          ],
+        ),
       ),
     );
   }

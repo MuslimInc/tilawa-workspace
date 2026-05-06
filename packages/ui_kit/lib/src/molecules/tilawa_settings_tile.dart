@@ -31,9 +31,7 @@ class TilawaSettingsTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
     final effectiveIconColor = iconColor ?? colorScheme.primary;
-    final trailingIcon = Directionality.of(context) == TextDirection.rtl
-        ? FluentIcons.chevron_left_24_filled
-        : FluentIcons.chevron_right_24_filled;
+    final trailingIcon = FluentIcons.chevron_right_24_filled;
 
     return Column(
       children: [

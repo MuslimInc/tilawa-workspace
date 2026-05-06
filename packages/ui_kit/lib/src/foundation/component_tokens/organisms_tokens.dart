@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app_colors.dart';
 import '../density.dart';
 import 'token_lerp.dart';
 
@@ -345,6 +346,7 @@ class TilawaAdaptiveShellTokens {
     required this.bottomNavInnerRadius,
     required this.bottomNavBorderWidth,
     required this.bottomNavItemGap,
+    required this.bottomNavBackgroundColor,
     required this.bottomNavShadowOpacity,
     required this.bottomNavShadowBlur,
     required this.bottomNavShadowOffset,
@@ -358,6 +360,7 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonIconSize,
     required this.navButtonSelectedCenterScale,
     required this.navButtonUnselectedScale,
+    required this.navButtonSelectedBackgroundColor,
     required this.navButtonSelectedBackgroundOpacity,
     required this.navButtonSelectedCenterOpacity,
     required this.navButtonLabelFontSize,
@@ -373,6 +376,9 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavInnerRadius;
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
+
+  /// Primary-tinted elevated surface used by the compact bottom nav container.
+  final Color bottomNavBackgroundColor;
 
   /// Alpha for the soft shadow rendered under the floating bottom nav.
   /// Calibrated for visibility on real-device DPIs (~400 ppi).
@@ -394,6 +400,7 @@ class TilawaAdaptiveShellTokens {
   final double navButtonIconSize;
   final double navButtonSelectedCenterScale;
   final double navButtonUnselectedScale;
+  final Color navButtonSelectedBackgroundColor;
   final double navButtonSelectedBackgroundOpacity;
   final double navButtonSelectedCenterOpacity;
   final double navButtonLabelFontSize;
@@ -403,9 +410,24 @@ class TilawaAdaptiveShellTokens {
   factory TilawaAdaptiveShellTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    // No-op: app-wide bottom nav. Touching it shifts every screen and is the
-    // highest-risk family in the kit. Defer until explicit nav-shell pass.
-    return const TilawaAdaptiveShellTokens(
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaAdaptiveShellTokens.fromColorScheme(
+      colorScheme,
+      density: density,
+    );
+  }
+
+  factory TilawaAdaptiveShellTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // Sizing remains density-stable because this app-wide shell affects every
+    // screen. Color is derived here so every compact bottom nav follows the
+    // active theme without per-screen overrides.
+    final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
+    return TilawaAdaptiveShellTokens(
       compactBottomNavBarBaseHeight: 55,
       bottomNavHorizontalMargin: 16,
       bottomNavVerticalMargin: 4,
@@ -413,6 +435,7 @@ class TilawaAdaptiveShellTokens {
       bottomNavInnerRadius: 24,
       bottomNavBorderWidth: 1,
       bottomNavItemGap: 4,
+      bottomNavBackgroundColor: bottomNavBackgroundColor,
       bottomNavShadowOpacity: 0.12,
       bottomNavShadowBlur: 18,
       bottomNavShadowOffset: Offset(0, 6),
@@ -426,11 +449,42 @@ class TilawaAdaptiveShellTokens {
       navButtonIconSize: 22,
       navButtonSelectedCenterScale: 1.1,
       navButtonUnselectedScale: 0.95,
+      navButtonSelectedBackgroundColor: _navButtonSelectedBackgroundColor(
+        colorScheme,
+        bottomNavBackgroundColor,
+      ),
       navButtonSelectedBackgroundOpacity: 0.2,
       navButtonSelectedCenterOpacity: 0.25,
       navButtonLabelFontSize: 10,
       navButtonSelectedLabelWeight: FontWeight.w700,
       navButtonUnselectedLabelWeight: FontWeight.w500,
+    );
+  }
+
+  static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.42 : 0.72;
+    return Color.lerp(
+      colorScheme.surfaceContainerHigh,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
+  static Color _navButtonSelectedBackgroundColor(
+    ColorScheme colorScheme,
+    Color bottomNavBackgroundColor,
+  ) {
+    final containerBlend = colorScheme.brightness == Brightness.dark
+        ? 0.56
+        : 0.70;
+    final tintOpacity = colorScheme.brightness == Brightness.dark ? 0.10 : 0.08;
+    return Color.alphaBlend(
+      colorScheme.primary.withValues(alpha: tintOpacity),
+      Color.lerp(
+        bottomNavBackgroundColor,
+        colorScheme.primaryContainer,
+        containerBlend,
+      )!,
     );
   }
 
@@ -442,6 +496,7 @@ class TilawaAdaptiveShellTokens {
     double? bottomNavInnerRadius,
     double? bottomNavBorderWidth,
     double? bottomNavItemGap,
+    Color? bottomNavBackgroundColor,
     double? bottomNavShadowOpacity,
     double? bottomNavShadowBlur,
     Offset? bottomNavShadowOffset,
@@ -455,6 +510,7 @@ class TilawaAdaptiveShellTokens {
     double? navButtonIconSize,
     double? navButtonSelectedCenterScale,
     double? navButtonUnselectedScale,
+    Color? navButtonSelectedBackgroundColor,
     double? navButtonSelectedBackgroundOpacity,
     double? navButtonSelectedCenterOpacity,
     double? navButtonLabelFontSize,
@@ -473,6 +529,8 @@ class TilawaAdaptiveShellTokens {
       bottomNavInnerRadius: bottomNavInnerRadius ?? this.bottomNavInnerRadius,
       bottomNavBorderWidth: bottomNavBorderWidth ?? this.bottomNavBorderWidth,
       bottomNavItemGap: bottomNavItemGap ?? this.bottomNavItemGap,
+      bottomNavBackgroundColor:
+          bottomNavBackgroundColor ?? this.bottomNavBackgroundColor,
       bottomNavShadowOpacity:
           bottomNavShadowOpacity ?? this.bottomNavShadowOpacity,
       bottomNavShadowBlur: bottomNavShadowBlur ?? this.bottomNavShadowBlur,
@@ -492,6 +550,9 @@ class TilawaAdaptiveShellTokens {
           navButtonSelectedCenterScale ?? this.navButtonSelectedCenterScale,
       navButtonUnselectedScale:
           navButtonUnselectedScale ?? this.navButtonUnselectedScale,
+      navButtonSelectedBackgroundColor:
+          navButtonSelectedBackgroundColor ??
+          this.navButtonSelectedBackgroundColor,
       navButtonSelectedBackgroundOpacity:
           navButtonSelectedBackgroundOpacity ??
           this.navButtonSelectedBackgroundOpacity,
@@ -547,6 +608,11 @@ class TilawaAdaptiveShellTokens {
         b.bottomNavItemGap,
         t,
       ),
+      bottomNavBackgroundColor: Color.lerp(
+        a.bottomNavBackgroundColor,
+        b.bottomNavBackgroundColor,
+        t,
+      )!,
       bottomNavShadowOpacity: lerpTokenDouble(
         a.bottomNavShadowOpacity,
         b.bottomNavShadowOpacity,
@@ -604,6 +670,11 @@ class TilawaAdaptiveShellTokens {
         b.navButtonUnselectedScale,
         t,
       ),
+      navButtonSelectedBackgroundColor: Color.lerp(
+        a.navButtonSelectedBackgroundColor,
+        b.navButtonSelectedBackgroundColor,
+        t,
+      )!,
       navButtonSelectedBackgroundOpacity: lerpTokenDouble(
         a.navButtonSelectedBackgroundOpacity,
         b.navButtonSelectedBackgroundOpacity,

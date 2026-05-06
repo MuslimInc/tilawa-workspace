@@ -126,14 +126,20 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       chip: TilawaChipTokens.defaults(density: density),
       segmentedControl: TilawaSegmentedControlTokens.defaults(density: density),
       seekBar: TilawaSeekBarTokens.defaults(density: density),
-      searchField: TilawaSearchFieldTokens.defaults(density: density),
+      searchField: TilawaSearchFieldTokens.fromColorScheme(
+        effectiveColorScheme,
+        density: density,
+      ),
       countProgressRing: TilawaCountProgressRingTokens.defaults(
         density: density,
       ),
       playerBackground: TilawaPlayerBackgroundTokens.defaults(density: density),
       footerBar: TilawaFooterBarTokens.defaults(density: density),
       mediaPlayerBar: TilawaMediaPlayerBarTokens.defaults(density: density),
-      adaptiveShell: TilawaAdaptiveShellTokens.defaults(density: density),
+      adaptiveShell: TilawaAdaptiveShellTokens.fromColorScheme(
+        effectiveColorScheme,
+        density: density,
+      ),
       settingsGroup: TilawaSettingsGroupTokens.defaults(density: density),
       immersiveComposer: TilawaImmersiveComposerTokens.defaults(
         density: density,

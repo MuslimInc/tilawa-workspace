@@ -219,7 +219,7 @@ class _BottomNavBar extends StatelessWidget {
             ],
           ),
           child: Material(
-            color: theme.colorScheme.surfaceContainerHigh,
+            color: tokens.bottomNavBackgroundColor,
             shape: RoundedRectangleBorder(
               borderRadius: shellRadius,
               side: BorderSide(
@@ -396,9 +396,7 @@ class _NavButton extends StatelessWidget {
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: isSelected
-              ? selectedFg.withValues(
-                  alpha: tokens.navButtonSelectedBackgroundOpacity,
-                )
+              ? tokens.navButtonSelectedBackgroundColor
               : Colors.transparent,
           borderRadius: effectiveBorderRadius,
         ),
