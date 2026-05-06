@@ -431,6 +431,7 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
 
   @override
   Widget build(BuildContext context) {
+    final reelPalette = VideoReelPalette.fromContext(context);
     final specs = buildVideoPageSpecs(
       surahNumber: widget.surahNumber,
       fromAyah: widget.fromAyah,
@@ -451,10 +452,10 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
                   (s == widget.surahNumber &&
                       v >= widget.fromAyah &&
                       v <= widget.toAyah)
-                  ? VideoReelPalette.fromContext(context).verseHighlightColor
+                  ? reelPalette.verseHighlightColor
                   : null,
               verseTextColor: (s, v) => null,
-              textColor: VideoReelPalette.fromContext(context).mushafTextColor,
+              textColor: reelPalette.mushafTextColor,
               pageBackgroundColor: widget.backgroundColor,
               isCapturing: false,
             ),
