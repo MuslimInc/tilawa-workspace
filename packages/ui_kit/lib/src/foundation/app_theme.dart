@@ -71,12 +71,23 @@ class AppTheme {
   /// Thresholds (chosen so every current preset passes through unchanged):
   /// - saturation floor: 0.16
   /// - lightness band:   0.18 – 0.50
+  /// - co-clamp:         when input saturation > 0.85 AND input lightness >
+  ///                     0.40, saturation is also pulled down to 0.65 so the
+  ///                     result is not a fully-saturated mid-tone (which
+  ///                     defeats `onPrimary` contrast). No preset triggers
+  ///                     this — teal (the most saturated preset) sits at
+  ///                     S≈0.77.
   ///
   /// Do not loosen these without re-running the contrast tests in
   /// `app_theme_color_roles_test.dart`.
   static Color _safePrimaryForLight(Color color) {
     final hsl = HSLColor.fromColor(color);
-    final saturation = hsl.saturation < 0.16 ? 0.16 : hsl.saturation;
+    final coClampSaturation = hsl.saturation > 0.85 && hsl.lightness > 0.40;
+    final saturation = coClampSaturation
+        ? 0.65
+        : hsl.saturation < 0.16
+        ? 0.16
+        : hsl.saturation;
     final lightness = hsl.lightness > 0.50
         ? 0.50
         : hsl.lightness < 0.18
