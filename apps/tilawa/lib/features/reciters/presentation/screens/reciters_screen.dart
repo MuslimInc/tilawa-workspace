@@ -574,7 +574,7 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
     return SizedBox(
       height: _recitersSearchHeaderExtent(context),
       child: Material(
-        color: theme.primaryColor,
+        color: theme.colorScheme.primary,
         child: Padding(
           padding: EdgeInsets.only(top: context.contentTopSafePadding),
           child: Center(
@@ -711,13 +711,13 @@ class _FavoritesToggle extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isActive
                         ? theme.colorScheme.surface
-                        : theme.primaryColor,
+                        : theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(
                       tokens.radiusExtraLarge,
                     ),
                     border: Border.all(
                       color: isActive
-                          ? theme.primaryColor
+                          ? theme.colorScheme.primary
                           : theme.colorScheme.surface,
                       width: tokens.borderWidthThin + tokens.borderWidthThin,
                     ),
@@ -727,7 +727,7 @@ class _FavoritesToggle extends StatelessWidget {
                       '$count',
                       style: theme.textTheme.labelSmall?.copyWith(
                         color: isActive
-                            ? theme.primaryColor
+                            ? theme.colorScheme.primary
                             : theme.colorScheme.onPrimary,
                         fontWeight: FontWeight.w700,
                       ),

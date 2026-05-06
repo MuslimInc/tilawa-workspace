@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/history_entity.dart';
 
@@ -17,16 +18,31 @@ class HistoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final double progressPercent = history.progressPercentage;
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceExtraSmall,
+      ),
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacityMedium,
+          ),
+          width: tokens.borderWidthThin,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
         onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: EdgeInsets.all(tokens.spaceMedium),
           child: Row(
             children: [
               // Surah artwork or icon
@@ -35,7 +51,7 @@ class HistoryCard extends StatelessWidget {
                 height: 56,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: theme.colorScheme.primaryContainer,
+                  color: colorScheme.primaryContainer,
                 ),
                 child: history.artworkUrl != null
                     ? ClipRRect(
@@ -49,7 +65,7 @@ class HistoryCard extends StatelessWidget {
                     : _buildDefaultIcon(theme),
               ),
 
-              const SizedBox(width: 12),
+              SizedBox(width: tokens.spaceMedium),
 
               // Surah info
               Expanded(
@@ -73,24 +89,24 @@ class HistoryCard extends StatelessWidget {
                           Icon(
                             Icons.check_circle,
                             size: 16,
-                            color: theme.colorScheme.primary,
+                            color: colorScheme.primary,
                           ),
                       ],
                     ),
 
-                    const SizedBox(height: 2),
+                    SizedBox(height: tokens.spaceTiny),
 
                     // Reciter name
                     Text(
                       history.reciterName,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                        color: colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
 
-                    const SizedBox(height: 4),
+                    SizedBox(height: tokens.spaceExtraSmall),
 
                     // Progress and time info
                     Row(
@@ -100,29 +116,29 @@ class HistoryCard extends StatelessWidget {
                           Icon(
                             Icons.replay,
                             size: 12,
-                            color: theme.colorScheme.secondary,
+                            color: colorScheme.secondary,
                           ),
-                          const SizedBox(width: 2),
+                          SizedBox(width: tokens.spaceTiny),
                           Text(
                             '${history.playCount}',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.secondary,
+                              color: colorScheme.secondary,
                             ),
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: tokens.spaceSmall),
                         ],
 
                         // Duration info
                         Icon(
                           Icons.access_time,
                           size: 12,
-                          color: theme.colorScheme.outline,
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 2),
+                        SizedBox(width: tokens.spaceTiny),
                         Text(
                           '${history.formattedLastPosition} / ${history.formattedDuration}',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.outline,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
 
@@ -132,26 +148,25 @@ class HistoryCard extends StatelessWidget {
                         Text(
                           history.formattedPlayedAt,
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.outline,
+                            color: colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 6),
+                    SizedBox(height: tokens.spaceSmall),
 
                     // Progress bar
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(2),
+                      borderRadius: BorderRadius.circular(tokens.radiusSmall),
                       child: LinearProgressIndicator(
                         value: history.completed ? 1.0 : progressPercent / 100,
-                        minHeight: 3,
-                        backgroundColor:
-                            theme.colorScheme.surfaceContainerHighest,
+                        minHeight: tokens.progressHeight,
+                        backgroundColor: colorScheme.surfaceContainerHighest,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           history.completed
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.secondary,
+                              ? colorScheme.primary
+                              : colorScheme.secondary,
                         ),
                       ),
                     ),
@@ -159,17 +174,17 @@ class HistoryCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: 8),
+              SizedBox(width: tokens.spaceSmall),
 
               // Play button
               IconButton(
                 onPressed: onTap,
                 icon: Icon(
                   history.completed ? Icons.replay : Icons.play_arrow,
-                  color: theme.colorScheme.primary,
+                  color: colorScheme.primary,
                 ),
                 style: IconButton.styleFrom(
-                  backgroundColor: theme.colorScheme.primaryContainer,
+                  backgroundColor: colorScheme.primaryContainer,
                 ),
               ),
             ],

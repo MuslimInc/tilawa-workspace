@@ -130,9 +130,10 @@ class _SearchFieldBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final componentTokens = theme.componentTokens.searchField;
     final effectiveFillColor =
-        backgroundColor ?? theme.colorScheme.surfaceContainerHighest;
+        backgroundColor ?? colorScheme.surfaceContainerHighest;
     final effectiveBorderRadius =
         borderRadius ?? BorderRadius.circular(componentTokens.borderRadius);
 
@@ -144,17 +145,17 @@ class _SearchFieldBody extends StatelessWidget {
         borderRadius: effectiveBorderRadius,
         border: Border.all(
           color: isFocused
-              ? theme.primaryColor.withValues(
+              ? colorScheme.primary.withValues(
                   alpha: componentTokens.focusedBorderOpacity,
                 )
-              : theme.colorScheme.outlineVariant.withValues(
+              : colorScheme.outlineVariant.withValues(
                   alpha: componentTokens.unfocusedBorderOpacity,
                 ),
         ),
         boxShadow: showShadow
             ? [
                 BoxShadow(
-                  color: theme.primaryColor.withValues(
+                  color: colorScheme.primary.withValues(
                     alpha: componentTokens.shadowOpacity,
                   ),
                   blurRadius: componentTokens.shadowBlur,
@@ -190,8 +191,8 @@ class _SearchFieldBody extends StatelessWidget {
             prefixIcon,
             size: componentTokens.iconSize,
             color: isFocused
-                ? theme.primaryColor
-                : theme.colorScheme.onSurfaceVariant.withValues(
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant.withValues(
                     alpha: componentTokens.iconOpacity,
                   ),
           ),

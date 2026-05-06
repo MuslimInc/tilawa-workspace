@@ -179,11 +179,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 duration: const Duration(milliseconds: 250),
                 child: FloatingActionButton.small(
                   onPressed: _scrollToTop,
-                  backgroundColor: theme.primaryColor.withValues(alpha: 0.9),
-                  child: const Icon(
-                    Icons.arrow_upward_rounded,
-                    color: Colors.white,
-                  ),
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  child: const Icon(Icons.arrow_upward_rounded),
                 ),
               ),
             ),

@@ -5,6 +5,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../../shared/widgets/quran_player_widget.dart';
@@ -63,14 +64,16 @@ class FavoritesScreen extends StatelessWidget {
                           key: ValueKey(reciter.id),
                           background: Container(
                             alignment: Alignment.centerRight,
-                            padding: EdgeInsets.only(right: 20),
+                            padding: EdgeInsets.only(
+                              right: Theme.of(context).tokens.spaceLarge,
+                            ),
                             decoration: BoxDecoration(
-                              color: Colors.red,
+                              color: Theme.of(context).colorScheme.error,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.delete_outline_rounded,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onError,
                             ),
                           ),
                           onDismissed: (direction) {

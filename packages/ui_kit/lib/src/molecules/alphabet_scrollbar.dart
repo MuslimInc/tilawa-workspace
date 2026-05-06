@@ -162,7 +162,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final componentTokens = theme.componentTokens.alphabetScrollbar;
-    final primaryColor = theme.primaryColor;
+    final primaryColor = theme.colorScheme.primary;
     final unselectedColor = theme.colorScheme.onSurfaceVariant.withValues(
       alpha: tokens.opacityEmphasis,
     );

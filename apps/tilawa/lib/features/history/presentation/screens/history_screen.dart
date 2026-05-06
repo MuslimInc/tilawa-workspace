@@ -171,63 +171,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
       case HistoryStatus.error:
         return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(
-                  state.failure?.localizedMessage(context) ??
-                      context.l10n.unknownError,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    context.read<HistoryBloc>().add(
-                      const HistoryEvent.loadAllHistory(),
-                    );
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+          child: TilawaErrorState(
+            icon: Icons.error_outline,
+            title:
+                state.failure?.localizedMessage(context) ??
+                context.l10n.unknownError,
+            retryLabel: context.l10n.retry,
+            onRetry: () {
+              context.read<HistoryBloc>().add(
+                const HistoryEvent.loadAllHistory(),
+              );
+            },
           ),
         );
 
       case HistoryStatus.empty:
         if (state.searchQuery.isNotEmpty) {
           return SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.search_off, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(context.l10n.noSearchResults),
-                ],
-              ),
+            child: TilawaEmptyState(
+              icon: Icons.search_off,
+              title: context.l10n.noSearchResults,
             ),
           );
         }
         return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.history, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(context.l10n.noHistoryYet),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.noHistoryDescription,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                ),
-              ],
-            ),
+          child: TilawaEmptyState(
+            icon: Icons.history,
+            title: context.l10n.noHistoryYet,
+            subtitle: context.l10n.noHistoryDescription,
           ),
         );
 
@@ -276,10 +247,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 key: Key(item.id),
                 direction: DismissDirection.endToStart,
                 background: Container(
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                   alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: const Icon(Icons.delete, color: Colors.white),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Theme.of(context).tokens.spaceLarge,
+                  ),
+                  child: Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.onError,
+                  ),
                 ),
                 onDismissed: (_) {
                   context.read<HistoryBloc>().add(
@@ -365,7 +341,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             },
             child: Text(
               context.l10n.clearAll,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],

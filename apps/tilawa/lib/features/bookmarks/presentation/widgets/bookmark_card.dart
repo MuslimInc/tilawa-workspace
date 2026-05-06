@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/bookmark_entity.dart';
 
@@ -18,21 +19,32 @@ class BookmarkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
 
     return Card(
       margin: EdgeInsets.zero,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacityMedium,
+          ),
+          width: tokens.borderWidthThin,
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: Padding(
-          padding: EdgeInsets.all(12),
+          padding: EdgeInsets.all(tokens.spaceMedium),
           child: Row(
             children: [
               // Artwork
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(tokens.radiusMedium),
                 child: SizedBox(
                   width: 56,
                   height: 56,
@@ -65,7 +77,7 @@ class BookmarkCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: tokens.spaceExtraSmall),
                     // Reciter name
                     Text(
                       bookmark.reciterName,
@@ -76,7 +88,7 @@ class BookmarkCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: tokens.spaceExtraSmall),
                     // Position and label
                     Row(
                       children: [
@@ -85,7 +97,7 @@ class BookmarkCard extends StatelessWidget {
                           size: 14,
                           color: colorScheme.primary,
                         ),
-                        SizedBox(width: 4),
+                        SizedBox(width: tokens.spaceExtraSmall),
                         Text(
                           '${bookmark.formattedPosition} / ${bookmark.formattedDuration}',
                           style: TextStyle(
@@ -94,7 +106,7 @@ class BookmarkCard extends StatelessWidget {
                           ),
                         ),
                         if (bookmark.label != null) ...[
-                          SizedBox(width: 8),
+                          SizedBox(width: tokens.spaceSmall),
                           Expanded(
                             child: Container(
                               padding: EdgeInsets.symmetric(
@@ -103,7 +115,9 @@ class BookmarkCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: colorScheme.primaryContainer,
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(
+                                  tokens.radiusSmall,
+                                ),
                               ),
                               child: Text(
                                 bookmark.label!,

@@ -40,7 +40,9 @@ class LanguageSwitcher extends StatelessWidget {
               padding: tokens.itemPadding,
               constraints: BoxConstraints(minWidth: tokens.minItemWidth),
               decoration: BoxDecoration(
-                color: isSelected ? theme.primaryColor : Colors.transparent,
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(tokens.itemRadius),
               ),
               child: Center(

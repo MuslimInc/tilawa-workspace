@@ -106,16 +106,22 @@ class BookmarksScreen extends StatelessWidget {
                                             background: Container(
                                               alignment: Alignment.centerRight,
                                               padding: EdgeInsets.only(
-                                                right: 20,
+                                                right: Theme.of(
+                                                  context,
+                                                ).tokens.spaceLarge,
                                               ),
                                               decoration: BoxDecoration(
-                                                color: Colors.red,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.error,
                                                 borderRadius:
                                                     BorderRadius.circular(16),
                                               ),
-                                              child: const Icon(
+                                              child: Icon(
                                                 Icons.delete_outline_rounded,
-                                                color: Colors.white,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onError,
                                               ),
                                             ),
                                             onDismissed: (direction) {
@@ -154,37 +160,16 @@ class BookmarksScreen extends StatelessWidget {
                       child: _buildLoadedList(context, bookmarks),
                     ),
                     error: (message) => Positioned.fill(
-                      child: Center(
-                        child: SingleChildScrollView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.error_outline_rounded,
-                                size: 64,
-                                color: Theme.of(context).colorScheme.error,
-                              ),
-                              SizedBox(height: 16),
-                              Text(
-                                message,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ),
-                              SizedBox(height: 16),
-                              ElevatedButton(
-                                onPressed: () {
-                                  context.read<BookmarksBloc>().add(
-                                    const LoadBookmarksEvent(),
-                                  );
-                                },
-                                child: Text(context.l10n.retry),
-                              ),
-                            ],
-                          ),
-                        ),
+                      child: TilawaErrorState(
+                        icon: Icons.error_outline_rounded,
+                        title: message,
+                        retryLabel: context.l10n.retry,
+                        onRetry: () {
+                          context.read<BookmarksBloc>().add(
+                            const LoadBookmarksEvent(),
+                          );
+                        },
+                        iconColor: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ),
@@ -216,14 +201,16 @@ class BookmarksScreen extends StatelessWidget {
           key: ValueKey(bookmark.id),
           background: Container(
             alignment: Alignment.centerRight,
-            padding: EdgeInsets.only(right: 20),
+            padding: EdgeInsets.only(
+              right: Theme.of(context).tokens.spaceLarge,
+            ),
             decoration: BoxDecoration(
-              color: Colors.red,
+              color: Theme.of(context).colorScheme.error,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.delete_outline_rounded,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onError,
             ),
           ),
           onDismissed: (direction) {
