@@ -3,6 +3,16 @@ import 'package:flutter/material.dart';
 import 'breakpoints.dart';
 
 abstract final class _ResponsiveTypeScale {
+  // Compact (phones, < 600 dp): tiny size nudges plus explicit height
+  // and letterSpacing to add presence without inflating the scale. These
+  // close most of the perceived gap between "looks great on emulator"
+  // (which usually crosses into medium/expanded) and a real ~412 dp phone.
+  static const double compactTitleLarge = 23;
+  static const double compactBodyLarge = 16.5;
+  static const double compactHeadlineHeight = 1.25;
+  static const double compactBodyHeight = 1.4;
+  static const double compactDisplayLetterSpacing = -0.2;
+
   static const double mediumDisplayLarge = 60;
   static const double mediumDisplayMedium = 48;
   static const double mediumTitleLarge = 24;
@@ -95,7 +105,46 @@ extension TilawaResponsiveTypography on BuildContext {
       );
     }
 
-    return base;
+    // Compact (phones): close the asymmetry where only larger windows got
+    // typography love. Sub-pt size nudges plus explicit height/letterSpacing
+    // give headlines presence and body text breathing room on ~412 dp screens.
+    return base.copyWith(
+      displayLarge: base.displayLarge?.copyWith(
+        height: _ResponsiveTypeScale.compactHeadlineHeight,
+        letterSpacing: _ResponsiveTypeScale.compactDisplayLetterSpacing,
+      ),
+      displayMedium: base.displayMedium?.copyWith(
+        height: _ResponsiveTypeScale.compactHeadlineHeight,
+        letterSpacing: _ResponsiveTypeScale.compactDisplayLetterSpacing,
+      ),
+      displaySmall: base.displaySmall?.copyWith(
+        height: _ResponsiveTypeScale.compactHeadlineHeight,
+        letterSpacing: _ResponsiveTypeScale.compactDisplayLetterSpacing,
+      ),
+      headlineLarge: base.headlineLarge?.copyWith(
+        height: _ResponsiveTypeScale.compactHeadlineHeight,
+      ),
+      headlineMedium: base.headlineMedium?.copyWith(
+        height: _ResponsiveTypeScale.compactHeadlineHeight,
+      ),
+      headlineSmall: base.headlineSmall?.copyWith(
+        height: _ResponsiveTypeScale.compactHeadlineHeight,
+      ),
+      titleLarge: base.titleLarge?.copyWith(
+        fontSize: _ResponsiveTypeScale.compactTitleLarge,
+        height: _ResponsiveTypeScale.compactHeadlineHeight,
+      ),
+      bodyLarge: base.bodyLarge?.copyWith(
+        fontSize: _ResponsiveTypeScale.compactBodyLarge,
+        height: _ResponsiveTypeScale.compactBodyHeight,
+      ),
+      bodyMedium: base.bodyMedium?.copyWith(
+        height: _ResponsiveTypeScale.compactBodyHeight,
+      ),
+      bodySmall: base.bodySmall?.copyWith(
+        height: _ResponsiveTypeScale.compactBodyHeight,
+      ),
+    );
   }
 
   /// Helper to get a responsive [TextStyle] for a specific role.

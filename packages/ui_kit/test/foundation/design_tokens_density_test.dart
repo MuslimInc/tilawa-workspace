@@ -34,7 +34,7 @@ void main() {
       );
     });
 
-    test('Phase 0: compact stores density but equals comfortable values', () {
+    test('compact tightens medium/large spacing and radii', () {
       final comfortableTokens = TilawaDesignTokens.light(
         density: TilawaDensity.comfortable,
       );
@@ -42,18 +42,41 @@ void main() {
         density: TilawaDensity.compact,
       );
 
-      // Density field differs
+      // Density field differs.
       expect(compactTokens.density, TilawaDensity.compact);
       expect(comfortableTokens.density, TilawaDensity.comfortable);
 
-      // Phase 0: All values are identical (no compact scaling yet)
+      // Tiny/small spacing and small/medium radii are shared across
+      // densities — going further would erode hit margins.
       expect(compactTokens.spaceTiny, equals(comfortableTokens.spaceTiny));
       expect(compactTokens.spaceSmall, equals(comfortableTokens.spaceSmall));
-      expect(compactTokens.spaceMedium, equals(comfortableTokens.spaceMedium));
       expect(compactTokens.radiusSmall, equals(comfortableTokens.radiusSmall));
+      expect(
+        compactTokens.radiusMedium,
+        equals(comfortableTokens.radiusMedium),
+      );
       expect(
         compactTokens.iconSizeMedium,
         equals(comfortableTokens.iconSizeMedium),
+      );
+
+      // Medium/large spacing and large radii tighten on compact.
+      expect(
+        compactTokens.spaceMedium,
+        lessThan(comfortableTokens.spaceMedium),
+      );
+      expect(compactTokens.spaceLarge, lessThan(comfortableTokens.spaceLarge));
+      expect(
+        compactTokens.spaceExtraLarge,
+        lessThan(comfortableTokens.spaceExtraLarge),
+      );
+      expect(
+        compactTokens.radiusLarge,
+        lessThan(comfortableTokens.radiusLarge),
+      );
+      expect(
+        compactTokens.radiusExtraLarge,
+        lessThan(comfortableTokens.radiusExtraLarge),
       );
     });
 
@@ -68,8 +91,8 @@ void main() {
       expect(darkComfortable.density, TilawaDensity.comfortable);
       expect(darkCompact.density, TilawaDensity.compact);
 
-      // Phase 0: Same values
-      expect(darkCompact.spaceMedium, equals(darkComfortable.spaceMedium));
+      // Compact tightens medium spacing in dark theme too.
+      expect(darkCompact.spaceMedium, lessThan(darkComfortable.spaceMedium));
     });
 
     test('copyWith preserves density by default', () {

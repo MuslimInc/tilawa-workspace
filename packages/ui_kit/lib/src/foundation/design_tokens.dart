@@ -226,22 +226,26 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   }) => TilawaDesignTokens._create(density: density);
 
   /// Internal constructor for creating tokens with the given density.
-  /// In Phase 0, all density modes produce the same values.
+  ///
+  /// Compact density tightens medium/large spacing and radii so phones
+  /// (typically `TilawaWindowSize.compact`) make better use of vertical
+  /// real-estate without making everything feel cramped. Tiny/extra-small
+  /// spacing is shared across densities — reducing further would compromise
+  /// hit-target margins.
   factory TilawaDesignTokens._create({required TilawaDensity density}) {
-    // Phase 0: All densities use the same comfortable values.
-    // Future phases will adjust values based on density.
+    final isCompact = density.isCompact;
     return TilawaDesignTokens(
       density: density,
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
-      spaceMedium: 12.0,
-      spaceLarge: 16.0,
-      spaceExtraLarge: 24.0,
+      spaceMedium: isCompact ? 10.0 : 12.0,
+      spaceLarge: isCompact ? 14.0 : 16.0,
+      spaceExtraLarge: isCompact ? 20.0 : 24.0,
       radiusSmall: 8.0,
       radiusMedium: 12.0,
-      radiusLarge: 16.0,
-      radiusExtraLarge: 24.0,
+      radiusLarge: isCompact ? 14.0 : 16.0,
+      radiusExtraLarge: isCompact ? 20.0 : 24.0,
       opacitySubtle: 0.1,
       opacityShadow: 0.18,
       opacityShadowStrong: 0.28,

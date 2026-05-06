@@ -104,6 +104,33 @@ void main() {
         expect(dark.spaceSmall, light.spaceSmall);
         expect(dark.radiusSmall, light.radiusSmall);
       });
+
+      test('compact density tightens medium/large spacing and radii', () {
+        final comfortable = TilawaDesignTokens.light();
+        final compact = TilawaDesignTokens.light(
+          density: TilawaDensity.compact,
+        );
+
+        // Tiny/small spacing is shared: shrinking further would erode hit
+        // margins around touch targets.
+        expect(compact.spaceTiny, comfortable.spaceTiny);
+        expect(compact.spaceExtraSmall, comfortable.spaceExtraSmall);
+        expect(compact.spaceSmall, comfortable.spaceSmall);
+
+        // Medium and larger spacing tighten on compact.
+        expect(compact.spaceMedium, lessThan(comfortable.spaceMedium));
+        expect(compact.spaceLarge, lessThan(comfortable.spaceLarge));
+        expect(compact.spaceExtraLarge, lessThan(comfortable.spaceExtraLarge));
+
+        // Radii tighten only at the larger sizes.
+        expect(compact.radiusSmall, comfortable.radiusSmall);
+        expect(compact.radiusMedium, comfortable.radiusMedium);
+        expect(compact.radiusLarge, lessThan(comfortable.radiusLarge));
+        expect(
+          compact.radiusExtraLarge,
+          lessThan(comfortable.radiusExtraLarge),
+        );
+      });
     });
 
     group('copyWith()', () {
