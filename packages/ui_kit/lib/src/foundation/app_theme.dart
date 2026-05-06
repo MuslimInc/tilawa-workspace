@@ -40,9 +40,13 @@ class AppTheme {
   }
 
   static FlexSchemeColor _lightScheme(Color primaryColor) {
+    final primaryContainer = primaryColor == AppColors.defaultPrimary
+        ? const Color(0xFFD8F0EC)
+        : _containerForPrimary(primaryColor, brightness: Brightness.light);
+
     return FlexSchemeColor.from(
       primary: primaryColor,
-      primaryContainer: const Color(0xFFD8F0EC),
+      primaryContainer: primaryContainer,
       secondary: AppColors.brandSecondary,
       secondaryContainer: const Color(0xFFE4EBD5),
       tertiary: AppColors.brandTertiary,
@@ -57,10 +61,13 @@ class AppTheme {
     final darkPrimary = primaryColor == AppColors.defaultPrimary
         ? const Color(0xFF70C8BD)
         : _liftForDarkTheme(primaryColor);
+    final primaryContainer = primaryColor == AppColors.defaultPrimary
+        ? const Color(0xFF143E39)
+        : _containerForPrimary(primaryColor, brightness: Brightness.dark);
 
     return FlexSchemeColor.from(
       primary: darkPrimary,
-      primaryContainer: const Color(0xFF143E39),
+      primaryContainer: primaryContainer,
       primaryLightRef: primaryColor,
       secondary: const Color(0xFFB8C69A),
       secondaryContainer: const Color(0xFF2E3A28),
@@ -79,6 +86,24 @@ class AppTheme {
     return hsl
         .withLightness((hsl.lightness + 0.36).clamp(0.56, 0.78))
         .withSaturation((hsl.saturation * 0.82).clamp(0.24, 0.72))
+        .toColor();
+  }
+
+  static Color _containerForPrimary(
+    Color primaryColor, {
+    required Brightness brightness,
+  }) {
+    final hsl = HSLColor.fromColor(primaryColor);
+    if (brightness == Brightness.dark) {
+      return hsl
+          .withLightness((hsl.lightness * 0.42).clamp(0.16, 0.28))
+          .withSaturation((hsl.saturation * 0.74).clamp(0.22, 0.62))
+          .toColor();
+    }
+
+    return hsl
+        .withLightness((hsl.lightness + 0.38).clamp(0.84, 0.93))
+        .withSaturation((hsl.saturation * 0.52).clamp(0.18, 0.58))
         .toColor();
   }
 
