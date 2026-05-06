@@ -31,6 +31,7 @@ void main() {
       for (final entry in paletteCases.entries) {
         final theme = AppTheme.getLightTheme(
           primaryColor: entry.value,
+          isDefaultPreset: entry.value == AppColors.defaultPrimary,
           useGoogleFontsOverride: false,
         );
 
@@ -43,6 +44,7 @@ void main() {
       for (final entry in paletteCases.entries) {
         final theme = AppTheme.getDarkTheme(
           primaryColor: entry.value,
+          isDefaultPreset: entry.value == AppColors.defaultPrimary,
           useGoogleFontsOverride: false,
         );
 
@@ -57,6 +59,7 @@ void main() {
         for (final entry in presetNoOpCases.entries) {
           final theme = AppTheme.getLightTheme(
             primaryColor: entry.value,
+            isDefaultPreset: entry.value == AppColors.defaultPrimary,
             useGoogleFontsOverride: false,
           );
 
@@ -113,6 +116,7 @@ void main() {
     test('true black dark theme keeps chrome surfaces on black scaffold', () {
       final theme = AppTheme.getDarkTheme(
         primaryColor: AppColors.defaultPrimary,
+        isDefaultPreset: true,
         darkIsTrueBlack: true,
         useGoogleFontsOverride: false,
       );

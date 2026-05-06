@@ -39,9 +39,12 @@ class AppTheme {
     return GoogleFonts.alexandriaTextTheme();
   }
 
-  static FlexSchemeColor _lightScheme(Color primaryColor) {
+  static FlexSchemeColor _lightScheme(
+    Color primaryColor, {
+    required bool isDefaultPreset,
+  }) {
     final safePrimary = _safePrimaryForLight(primaryColor);
-    final primaryContainer = primaryColor == AppColors.defaultPrimary
+    final primaryContainer = isDefaultPreset
         ? const Color(0xFFD8F0EC)
         : _containerForPrimary(safePrimary, brightness: Brightness.light);
 
@@ -99,11 +102,14 @@ class AppTheme {
     return hsl.withSaturation(saturation).withLightness(lightness).toColor();
   }
 
-  static FlexSchemeColor _darkScheme(Color primaryColor) {
-    final darkPrimary = primaryColor == AppColors.defaultPrimary
+  static FlexSchemeColor _darkScheme(
+    Color primaryColor, {
+    required bool isDefaultPreset,
+  }) {
+    final darkPrimary = isDefaultPreset
         ? const Color(0xFF70C8BD)
         : _liftForDarkTheme(primaryColor);
-    final primaryContainer = primaryColor == AppColors.defaultPrimary
+    final primaryContainer = isDefaultPreset
         ? const Color(0xFF143E39)
         : _containerForPrimary(primaryColor, brightness: Brightness.dark);
 
@@ -249,12 +255,13 @@ class AppTheme {
   /// which matches all pre-density UI Kit values.
   static ThemeData getLightTheme({
     required Color primaryColor,
+    bool isDefaultPreset = false,
     bool? useGoogleFontsOverride,
     TilawaDensity density = TilawaDensity.comfortable,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
-    final scheme = _lightScheme(primaryColor);
+    final scheme = _lightScheme(primaryColor, isDefaultPreset: isDefaultPreset);
 
     final theme = FlexThemeData.light(
       colors: scheme,
@@ -296,13 +303,14 @@ class AppTheme {
   /// which matches all pre-density UI Kit values.
   static ThemeData getDarkTheme({
     required Color primaryColor,
+    bool isDefaultPreset = false,
     bool? useGoogleFontsOverride,
     bool darkIsTrueBlack = false,
     TilawaDensity density = TilawaDensity.comfortable,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
-    final scheme = _darkScheme(primaryColor);
+    final scheme = _darkScheme(primaryColor, isDefaultPreset: isDefaultPreset);
 
     final theme = FlexThemeData.dark(
       colors: scheme,

@@ -21,6 +21,7 @@ import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/theme/domain/entities/app_theme_preset.dart';
+import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
@@ -176,10 +177,20 @@ class _PlayerApp extends StatelessWidget {
                 },
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
+                  isDefaultPreset:
+                      themeState.primaryColorSource ==
+                          PrimaryColorSource.preset &&
+                      themeState.primaryPresetId ==
+                          PrimaryColorPreset.defaultPreset.id,
                   density: density,
                 ),
                 darkTheme: AppTheme.getDarkTheme(
                   primaryColor: themeState.primaryColor,
+                  isDefaultPreset:
+                      themeState.primaryColorSource ==
+                          PrimaryColorSource.preset &&
+                      themeState.primaryPresetId ==
+                          PrimaryColorPreset.defaultPreset.id,
                   darkIsTrueBlack:
                       themeState.preset == AppThemePreset.trueBlack,
                   density: density,
