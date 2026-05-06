@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'package:tilawa/core/extensions.dart';
 import '../../../../shared/models/position_data.dart';
@@ -11,11 +12,17 @@ class SleepTimerDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+      ),
+      backgroundColor: colorScheme.surface,
       child: Padding(
-        padding: EdgeInsets.all(24),
+        padding: EdgeInsets.all(tokens.spaceExtraLarge),
         child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
           builder: (context, state) {
             return Column(
@@ -28,50 +35,26 @@ class SleepTimerDialog extends StatelessWidget {
                   children: [
                     Text(
                       context.l10n.recitationDuration,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     if (state.isSleepTimerActive)
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).primaryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.timer,
-                              size: 14,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            SizedBox(width: 4),
-                            Text(
-                              context.l10n.sleepTimerActive,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                      TilawaStatusChip(
+                        icon: Icons.timer_rounded,
+                        label: context.l10n.sleepTimerActive,
+                        backgroundColor: colorScheme.primaryContainer,
+                        foregroundColor: colorScheme.onPrimaryContainer,
                       ),
                   ],
                 ),
-                SizedBox(height: 24),
+                SizedBox(height: tokens.spaceExtraLarge),
 
                 // Options Grid
                 Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
+                  spacing: tokens.spaceMedium,
+                  runSpacing: tokens.spaceMedium,
                   alignment: WrapAlignment.center,
                   children: [
                     _buildTimerChip(
@@ -97,7 +80,7 @@ class SleepTimerDialog extends StatelessWidget {
                   ],
                 ),
 
-                SizedBox(height: 24),
+                SizedBox(height: tokens.spaceExtraLarge),
 
                 // Cancel Button
                 if (state.isSleepTimerActive)
@@ -109,11 +92,15 @@ class SleepTimerDialog extends StatelessWidget {
                       context.pop();
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      foregroundColor: colorScheme.error,
+                      side: BorderSide(color: colorScheme.error),
+                      padding: EdgeInsets.symmetric(
+                        vertical: tokens.spaceMedium,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(
+                          tokens.radiusMedium,
+                        ),
                       ),
                     ),
                     icon: const Icon(Icons.timer_off_outlined),
@@ -141,25 +128,37 @@ class SleepTimerDialog extends StatelessWidget {
     final isActive =
         state.lastSleepTimerType == SleepTimerType.preset &&
         state.lastSleepTimerDuration == duration;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return ActionChip(
       label: Text(
         label,
-        style: TextStyle(
-          color: isActive ? Colors.white : null,
-          fontWeight: isActive ? FontWeight.bold : null,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: isActive
+              ? colorScheme.onPrimary
+              : colorScheme.onSurfaceVariant,
+          fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
         ),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
       backgroundColor: isActive
-          ? Theme.of(context).primaryColor
-          : Theme.of(context).cardColor,
+          ? colorScheme.primary
+          : colorScheme.surfaceContainerLow,
       side: BorderSide(
         color: isActive
-            ? Theme.of(context).primaryColor
-            : Theme.of(context).dividerColor.withValues(alpha: 0.5),
+            ? colorScheme.primary
+            : colorScheme.outlineVariant.withValues(
+                alpha: tokens.opacityMedium,
+              ),
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      ),
       onPressed: () {
         context.read<AudioPlayerBloc>().add(
           AudioPlayerEvent.setSleepTimer(duration),
@@ -175,30 +174,44 @@ class SleepTimerDialog extends StatelessWidget {
     final bool isActive =
         state.isSleepTimerActive &&
         state.lastSleepTimerType == SleepTimerType.endOfTrack;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return ActionChip(
       label: Text(
         context.l10n.endOfTrack,
-        style: TextStyle(
-          color: isActive ? Colors.white : null,
-          fontWeight: isActive ? FontWeight.bold : null,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: isActive
+              ? colorScheme.onPrimary
+              : colorScheme.onSurfaceVariant,
+          fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
         ),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
       backgroundColor: isActive
-          ? Theme.of(context).primaryColor
-          : Theme.of(context).cardColor,
+          ? colorScheme.primary
+          : colorScheme.surfaceContainerLow,
       side: BorderSide(
         color: isActive
-            ? Theme.of(context).primaryColor
-            : Theme.of(context).dividerColor.withValues(alpha: 0.5),
+            ? colorScheme.primary
+            : colorScheme.outlineVariant.withValues(
+                alpha: tokens.opacityMedium,
+              ),
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      ),
       avatar: canUse
           ? Icon(
               Icons.skip_next,
-              size: 16,
-              color: isActive ? Colors.white : null,
+              size: tokens.iconSizeSmall,
+              color: isActive
+                  ? colorScheme.onPrimary
+                  : colorScheme.onSurfaceVariant,
             )
           : null,
       onPressed: canUse
@@ -219,29 +232,41 @@ class SleepTimerDialog extends StatelessWidget {
     final bool isActive =
         state.isSleepTimerActive &&
         state.lastSleepTimerType == SleepTimerType.custom;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return ActionChip(
       label: Text(
         context.l10n.custom,
-        style: TextStyle(
-          color: isActive ? Colors.white : null,
-          fontWeight: isActive ? FontWeight.bold : null,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: isActive
+              ? colorScheme.onPrimary
+              : colorScheme.onSurfaceVariant,
+          fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
         ),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
       backgroundColor: isActive
-          ? Theme.of(context).primaryColor
-          : Theme.of(context).cardColor,
+          ? colorScheme.primary
+          : colorScheme.surfaceContainerLow,
       side: BorderSide(
         color: isActive
-            ? Theme.of(context).primaryColor
-            : Theme.of(context).dividerColor.withValues(alpha: 0.5),
+            ? colorScheme.primary
+            : colorScheme.outlineVariant.withValues(
+                alpha: tokens.opacityMedium,
+              ),
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      ),
       avatar: Icon(
         Icons.edit_outlined,
-        size: 16,
-        color: isActive ? Colors.white : null,
+        size: tokens.iconSizeSmall,
+        color: isActive ? colorScheme.onPrimary : colorScheme.onSurfaceVariant,
       ),
       onPressed: () => _pickCustomDuration(context),
     );
@@ -258,6 +283,9 @@ class SleepTimerDialog extends StatelessWidget {
 
   Future<void> _pickCustomDuration(BuildContext context) async {
     var tempDuration = const Duration(minutes: 15);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     final Duration? picked = await showModalBottomSheet<Duration>(
       context: context,
@@ -268,26 +296,20 @@ class SleepTimerDialog extends StatelessWidget {
             height: 350,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.vertical(
+                top: Radius.circular(tokens.radiusExtraLarge),
+              ),
             ),
             child: Column(
               children: [
                 // Handle bar
-                Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
+                TilawaSheetHandle(
+                  margin: EdgeInsets.only(top: tokens.spaceMedium),
                 ),
                 // Actions
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -297,9 +319,9 @@ class SleepTimerDialog extends StatelessWidget {
                       ),
                       Text(
                         context.l10n.setTimer,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                       TextButton(
@@ -311,7 +333,7 @@ class SleepTimerDialog extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Divider(height: 1),
+                const TilawaDivider(),
                 Expanded(
                   child: _DurationWheelPicker(
                     initialDuration: tempDuration,
@@ -380,6 +402,10 @@ class _DurationWheelPickerState extends State<_DurationWheelPicker> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -387,10 +413,10 @@ class _DurationWheelPickerState extends State<_DurationWheelPicker> {
         Container(
           height: 48,
           width: double.infinity,
-          margin: EdgeInsets.symmetric(horizontal: 16),
+          margin: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
+            color: colorScheme.primaryContainer.withValues(alpha: 0.72),
+            borderRadius: BorderRadius.circular(tokens.radiusMedium),
           ),
         ),
         Row(
@@ -439,18 +465,16 @@ class _DurationWheelPickerState extends State<_DurationWheelPicker> {
               children: [
                 Text(
                   index.toString().padLeft(2, '0'),
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                SizedBox(width: 8),
+                SizedBox(width: Theme.of(context).tokens.spaceSmall),
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
