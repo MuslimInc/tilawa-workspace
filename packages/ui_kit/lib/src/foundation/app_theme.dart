@@ -13,7 +13,7 @@ class AppTheme {
   // Light theme configuration constants
   static const FlexSurfaceMode _lightSurfaceMode =
       FlexSurfaceMode.levelSurfacesLowScaffold;
-  static const int _lightBlendLevel = 3;
+  static const int _lightBlendLevel = 0;
   static const FlexAppBarStyle _lightAppBarStyle = FlexAppBarStyle.surface;
   static const double _lightAppBarOpacity = 1;
   static const double _lightAppBarElevation = 1;
@@ -22,7 +22,7 @@ class AppTheme {
   // Dark theme configuration constants
   static const FlexSurfaceMode _darkSurfaceMode =
       FlexSurfaceMode.levelSurfacesLowScaffold;
-  static const int _darkBlendLevel = 7;
+  static const int _darkBlendLevel = 0;
   static const FlexAppBarStyle _darkAppBarStyle = FlexAppBarStyle.surface;
   static const double _darkAppBarOpacity = 1;
   static const double _darkAppBarElevation = 2;
@@ -163,6 +163,40 @@ class AppTheme {
     );
   }
 
+  static ThemeData _applySurfaceScale({
+    required ThemeData theme,
+    required ColorScheme colorScheme,
+    required Color scaffoldBackgroundColor,
+  }) {
+    const surfaceTintColor = Colors.transparent;
+
+    return theme.copyWith(
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      canvasColor: scaffoldBackgroundColor,
+      dividerColor: colorScheme.outlineVariant,
+      cardColor: colorScheme.surface,
+      appBarTheme: theme.appBarTheme.copyWith(
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
+        surfaceTintColor: surfaceTintColor,
+      ),
+      cardTheme: theme.cardTheme.copyWith(
+        color: colorScheme.surface,
+        surfaceTintColor: surfaceTintColor,
+      ),
+      dialogTheme: theme.dialogTheme.copyWith(
+        backgroundColor: colorScheme.surface,
+        surfaceTintColor: surfaceTintColor,
+      ),
+      bottomSheetTheme: theme.bottomSheetTheme.copyWith(
+        backgroundColor: colorScheme.surface,
+        modalBackgroundColor: colorScheme.surface,
+        surfaceTintColor: surfaceTintColor,
+      ),
+    );
+  }
+
   /// Get the light theme for the given primary color.
   ///
   /// [useGoogleFontsOverride] is a foundation API extension for
@@ -195,13 +229,13 @@ class AppTheme {
       textTheme: _getTextTheme(useFonts),
     );
     final colorScheme = _refineLightColorScheme(theme.colorScheme);
-
-    return theme.copyWith(
+    final themedSurfaces = _applySurfaceScale(
+      theme: theme,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: AppColors.lightBackground,
-      canvasColor: AppColors.lightBackground,
-      dividerColor: colorScheme.outlineVariant,
-      cardColor: colorScheme.surface,
+      scaffoldBackgroundColor: colorScheme.surfaceContainerLow,
+    );
+
+    return themedSurfaces.copyWith(
       extensions: [
         TilawaDesignTokens.light(density: density),
         TilawaComponentTokens.light(density: density, colorScheme: colorScheme),
@@ -248,18 +282,14 @@ class AppTheme {
     );
     final scaffoldBackgroundColor = darkIsTrueBlack
         ? colorScheme.surfaceContainerLowest
-        : AppColors.darkBackground;
-
-    return theme.copyWith(
+        : colorScheme.surfaceContainerLow;
+    final themedSurfaces = _applySurfaceScale(
+      theme: theme,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
-      canvasColor: scaffoldBackgroundColor,
-      dividerColor: colorScheme.outlineVariant,
-      cardColor: colorScheme.surface,
-      appBarTheme: theme.appBarTheme.copyWith(
-        backgroundColor: colorScheme.surface,
-        surfaceTintColor: colorScheme.surfaceTint,
-      ),
+    );
+
+    return themedSurfaces.copyWith(
       extensions: [
         TilawaDesignTokens.dark(density: density),
         TilawaComponentTokens.dark(density: density, colorScheme: colorScheme),
