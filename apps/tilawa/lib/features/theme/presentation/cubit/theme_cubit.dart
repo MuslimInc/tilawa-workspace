@@ -3,47 +3,73 @@ import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/theme/domain/entities/app_theme_preset.dart';
+import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+/// Whether the current primary color came from a [PrimaryColorPreset] or a
+/// user-picked custom HEX value.
+enum PrimaryColorSource { preset, custom }
 
 class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
-    this.primaryColor = AppColors.defaultPrimary,
+    this.primaryColor = AppColors.primaryTeal,
+    this.primaryColorSource = PrimaryColorSource.preset,
+    this.primaryPresetId = 'teal',
     this.useSystemTheme = false,
     this.preset = AppThemePreset.defaultMode,
   });
+
   final ThemeMode mode;
   final Color primaryColor;
+  final PrimaryColorSource primaryColorSource;
+
+  /// Set when [primaryColorSource] is [PrimaryColorSource.preset]. Null for
+  /// custom colors.
+  final String? primaryPresetId;
   final bool useSystemTheme;
   final AppThemePreset preset;
 
-  @override
-  List<Object?> get props => [mode, primaryColor, useSystemTheme, preset];
-}
+  ThemeState copyWith({
+    ThemeMode? mode,
+    Color? primaryColor,
+    PrimaryColorSource? primaryColorSource,
+    String? primaryPresetId,
+    bool clearPrimaryPresetId = false,
+    bool? useSystemTheme,
+    AppThemePreset? preset,
+  }) {
+    return ThemeState(
+      mode: mode ?? this.mode,
+      primaryColor: primaryColor ?? this.primaryColor,
+      primaryColorSource: primaryColorSource ?? this.primaryColorSource,
+      primaryPresetId: clearPrimaryPresetId
+          ? null
+          : (primaryPresetId ?? this.primaryPresetId),
+      useSystemTheme: useSystemTheme ?? this.useSystemTheme,
+      preset: preset ?? this.preset,
+    );
+  }
 
-class AppColorOption {
-  const AppColorOption({required this.name, required this.color});
-  final String name;
-  final Color color;
+  @override
+  List<Object?> get props => [
+    mode,
+    primaryColor,
+    primaryColorSource,
+    primaryPresetId,
+    useSystemTheme,
+    preset,
+  ];
 }
 
 @injectable
 class ThemeCubit extends HydratedCubit<ThemeState> {
   ThemeCubit() : super(const ThemeState(mode: ThemeMode.light));
 
-  static const List<AppColorOption> colorOptions = [
-    AppColorOption(name: 'Cyan', color: AppColors.primaryCyan),
-    AppColorOption(name: 'Green', color: AppColors.primaryGreen),
-    AppColorOption(name: 'Brown', color: AppColors.primaryBrown),
-    AppColorOption(name: 'Purple', color: AppColors.primaryPurple),
-  ];
-
   @override
   ThemeState? fromJson(Map<String, dynamic> json) {
     try {
       final modeValue = json['mode'] as String?;
-      final colorValue = json['primaryColor'] as int?;
-
       final ThemeMode mode = switch (modeValue) {
         'dark' => ThemeMode.dark,
         _ => ThemeMode.light,
@@ -51,24 +77,68 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
 
       final bool useSystemTheme = json['useSystemTheme'] as bool? ?? false;
 
-      final Color primaryColor = colorValue != null
-          ? Color(colorValue)
-          : AppColors.defaultPrimary;
-
       final presetName = json['preset'] as String?;
-      final preset = AppThemePreset.values.firstWhere(
+      final themePreset = AppThemePreset.values.firstWhere(
         (e) => e.name == presetName,
         orElse: () => AppThemePreset.defaultMode,
       );
 
+      final colorValue = json['primaryColor'] as int?;
+      final sourceValue = json['primaryColorSource'] as String?;
+      final storedPresetId = json['primaryPresetId'] as String?;
+
+      Color primaryColor;
+      PrimaryColorSource primaryColorSource;
+      String? primaryPresetId;
+
+      if (sourceValue == 'preset') {
+        // New shape, preset source. Preset is canonical — its color wins
+        // even if a stale `primaryColor` int was stored alongside.
+        final preset =
+            PrimaryColorPreset.findById(storedPresetId) ??
+            PrimaryColorPreset.defaultPreset;
+        primaryColor = preset.value;
+        primaryColorSource = PrimaryColorSource.preset;
+        primaryPresetId = preset.id;
+      } else if (sourceValue == 'custom' && colorValue != null) {
+        // New shape, custom HEX preserved verbatim.
+        primaryColor = Color(colorValue);
+        primaryColorSource = PrimaryColorSource.custom;
+        primaryPresetId = null;
+      } else if (colorValue != null) {
+        // Legacy payload (no source field). Migrate by ARGB lookup.
+        final match = PrimaryColorPreset.findByArgb(colorValue);
+        if (match != null) {
+          primaryColor = match.value;
+          primaryColorSource = PrimaryColorSource.preset;
+          primaryPresetId = match.id;
+        } else {
+          primaryColor = Color(colorValue);
+          primaryColorSource = PrimaryColorSource.custom;
+          primaryPresetId = null;
+        }
+      } else {
+        // Missing/unparseable color → full default.
+        primaryColor = PrimaryColorPreset.defaultPreset.value;
+        primaryColorSource = PrimaryColorSource.preset;
+        primaryPresetId = PrimaryColorPreset.defaultPreset.id;
+      }
+
       return ThemeState(
         mode: mode,
         primaryColor: primaryColor,
+        primaryColorSource: primaryColorSource,
+        primaryPresetId: primaryPresetId,
         useSystemTheme: useSystemTheme,
-        preset: preset,
+        preset: themePreset,
       );
-    } catch (e) {
-      return const ThemeState(mode: ThemeMode.light);
+    } catch (_) {
+      return ThemeState(
+        mode: ThemeMode.light,
+        primaryColor: PrimaryColorPreset.defaultPreset.value,
+        primaryColorSource: PrimaryColorSource.preset,
+        primaryPresetId: PrimaryColorPreset.defaultPreset.id,
+      );
     }
   }
 
@@ -77,53 +147,48 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     return {
       'mode': state.mode == ThemeMode.dark ? 'dark' : 'light',
       'primaryColor': state.primaryColor.toARGB32(),
+      'primaryColorSource': state.primaryColorSource == PrimaryColorSource.custom
+          ? 'custom'
+          : 'preset',
+      'primaryPresetId': state.primaryPresetId,
       'useSystemTheme': state.useSystemTheme,
       'preset': state.preset.name,
     };
   }
 
   Future<void> setPreset(AppThemePreset preset) async {
-    emit(
-      ThemeState(
-        mode: state.mode,
-        primaryColor: state.primaryColor,
-        useSystemTheme: state.useSystemTheme,
-        preset: preset,
-      ),
-    );
+    emit(state.copyWith(preset: preset));
   }
 
   Future<void> setMode(ThemeMode mode) async {
+    emit(state.copyWith(mode: mode));
+  }
+
+  /// Apply a predefined primary color from [PrimaryColorPreset].
+  Future<void> setPrimaryPreset(PrimaryColorPreset preset) async {
     emit(
-      ThemeState(
-        mode: mode,
-        primaryColor: state.primaryColor,
-        useSystemTheme: state.useSystemTheme,
-        preset: state.preset,
+      state.copyWith(
+        primaryColor: preset.value,
+        primaryColorSource: PrimaryColorSource.preset,
+        primaryPresetId: preset.id,
       ),
     );
   }
 
+  /// Apply a user-picked custom HEX color. Marks the source as
+  /// [PrimaryColorSource.custom] and clears the preset id.
   Future<void> setPrimaryColor(Color color) async {
     emit(
-      ThemeState(
-        mode: state.mode,
+      state.copyWith(
         primaryColor: color,
-        useSystemTheme: state.useSystemTheme,
-        preset: state.preset,
+        primaryColorSource: PrimaryColorSource.custom,
+        clearPrimaryPresetId: true,
       ),
     );
   }
 
   Future<void> setUseSystemTheme(bool useSystemTheme) async {
-    emit(
-      ThemeState(
-        mode: state.mode,
-        primaryColor: state.primaryColor,
-        useSystemTheme: useSystemTheme,
-        preset: state.preset,
-      ),
-    );
+    emit(state.copyWith(useSystemTheme: useSystemTheme));
   }
 
   Future<void> toggleDark(bool enabled) async {

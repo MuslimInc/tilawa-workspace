@@ -15,6 +15,7 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../color_picker/color_picker.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
+import '../../../theme/domain/primary_color_preset.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
 
@@ -27,7 +28,12 @@ const int _kMaxConcurrentDownloads = 5;
 
 // ── Top-level sheet / dialog helpers ─────────────────────────────────────────
 
-void _showColorPicker(BuildContext context, Color currentColor) {
+void _showColorPicker(
+  BuildContext context,
+  Color currentColor,
+  PrimaryColorSource currentSource,
+  String? currentPresetId,
+) {
   final tokens = Theme.of(context).tokens;
   showModalBottomSheet<void>(
     context: context,
@@ -39,6 +45,8 @@ void _showColorPicker(BuildContext context, Color currentColor) {
     ),
     builder: (sheetContext) => _ColorPickerSheet(
       currentColor: currentColor,
+      currentSource: currentSource,
+      currentPresetId: currentPresetId,
       onCustomColorTap: () {
         Navigator.pop(sheetContext);
         _showCustomColorPicker(context, currentColor);
@@ -132,14 +140,13 @@ void _showLogoutDialog(BuildContext context) {
   );
 }
 
-String _localizedColorName(BuildContext context, String name) {
+String _localizedPresetName(BuildContext context, PrimaryColorPreset preset) {
   final AppLocalizations l10n = context.l10n;
-  return switch (name) {
-    'Cyan' => l10n.colorCyan,
-    'Green' => l10n.colorGreen,
-    'Brown' => l10n.colorBrown,
-    'Purple' => l10n.colorPurple,
-    _ => name,
+  return switch (preset) {
+    PrimaryColorPreset.teal => l10n.colorCyan,
+    PrimaryColorPreset.sage => l10n.colorGreen,
+    PrimaryColorPreset.brown => l10n.colorBrown,
+    PrimaryColorPreset.purple => l10n.colorPurple,
   };
 }
 
@@ -207,8 +214,12 @@ class SettingsScreen extends StatelessWidget {
                               icon: FluentIcons.color_24_regular,
                               iconColor: AppColors.settingsColor,
                               title: context.l10n.primaryColor,
-                              onTap: () =>
-                                  _showColorPicker(context, state.primaryColor),
+                              onTap: () => _showColorPicker(
+                                context,
+                                state.primaryColor,
+                                state.primaryColorSource,
+                                state.primaryPresetId,
+                              ),
                             ),
                           ],
                         );
@@ -559,15 +570,20 @@ class _AppVersionInfo extends StatelessWidget {
 class _ColorPickerSheet extends StatelessWidget {
   const _ColorPickerSheet({
     required this.currentColor,
+    required this.currentSource,
+    required this.currentPresetId,
     required this.onCustomColorTap,
   });
 
   final Color currentColor;
+  final PrimaryColorSource currentSource;
+  final String? currentPresetId;
   final VoidCallback onCustomColorTap;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final isCustom = currentSource == PrimaryColorSource.custom;
 
     return SafeArea(
       child: ConstrainedBox(
@@ -586,18 +602,18 @@ class _ColorPickerSheet extends StatelessWidget {
                 ),
               ),
               SizedBox(height: tokens.spaceLarge),
-              ...ThemeCubit.colorOptions.map((option) {
+              ...PrimaryColorPreset.values.map((preset) {
                 final isSelected =
-                    option.color.toARGB32() == currentColor.toARGB32();
+                    !isCustom && currentPresetId == preset.id;
                 return TilawaSelectionTile(
                   leading: CircleAvatar(
-                    backgroundColor: option.color,
+                    backgroundColor: preset.value,
                     radius: _kColorSwatchRadius,
                   ),
-                  title: _localizedColorName(context, option.name),
+                  title: _localizedPresetName(context, preset),
                   isSelected: isSelected,
                   onTap: () {
-                    context.read<ThemeCubit>().setPrimaryColor(option.color);
+                    context.read<ThemeCubit>().setPrimaryPreset(preset);
                     Navigator.pop(context);
                   },
                 );
@@ -620,9 +636,7 @@ class _ColorPickerSheet extends StatelessWidget {
                   ),
                 ),
                 title: context.l10n.custom,
-                isSelected: !ThemeCubit.colorOptions.any(
-                  (opt) => opt.color.toARGB32() == currentColor.toARGB32(),
-                ),
+                isSelected: isCustom,
                 onTap: onCustomColorTap,
               ),
               SizedBox(height: tokens.spaceLarge),
