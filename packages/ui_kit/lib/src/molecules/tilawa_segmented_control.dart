@@ -41,7 +41,7 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
   /// Text color for the selected segment. Defaults to onSurface.
   final Color? selectedTextColor;
 
-  /// Text color for unselected segments. Defaults to onPrimary with opacity.
+  /// Text color for unselected segments. Defaults to onSurfaceVariant.
   final Color? unselectedTextColor;
 
   @override
@@ -51,19 +51,24 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
     final tokens = theme.componentTokens.segmentedControl;
 
     final effectiveBackground =
-        backgroundColor ?? colorScheme.surface.withValues(alpha: 0.22);
+        backgroundColor ??
+        colorScheme.surfaceContainerHighest.withValues(
+          alpha: tokens.containerOpacity,
+        );
     final effectiveSelectedColor = selectedColor ?? colorScheme.surface;
     final effectiveSelectedTextColor =
         selectedTextColor ?? colorScheme.onSurface;
     final effectiveUnselectedTextColor =
-        unselectedTextColor ?? colorScheme.onPrimary.withValues(alpha: 0.82);
+        unselectedTextColor ?? colorScheme.onSurfaceVariant;
 
     return Container(
       padding: tokens.containerPadding,
       decoration: BoxDecoration(
         color: effectiveBackground,
         borderRadius: BorderRadius.circular(tokens.containerRadius),
-        border: Border.all(color: colorScheme.surface.withValues(alpha: 0.34)),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.72),
+        ),
       ),
       child: Row(
         children: segments.map((segment) {

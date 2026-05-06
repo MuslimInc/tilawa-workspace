@@ -73,37 +73,37 @@ abstract final class AppColors {
 
   // Settings Category Colors
   /// Color for theme settings
-  static const Color settingsTheme = Color(0xFF2196F3);
+  static const Color settingsTheme = primaryTeal;
 
   /// Color for color picker settings
-  static const Color settingsColor = Color(0xFF009688);
+  static const Color settingsColor = Color(0xFF2D8C80);
 
   /// Color for language settings
-  static const Color settingsLanguage = Color(0xFF3F51B5);
+  static const Color settingsLanguage = Color(0xFF5E6F82);
 
   /// Color for playback settings
-  static const Color settingsPlayback = Color(0xFF00BCD4);
+  static const Color settingsPlayback = Color(0xFF4F8F8A);
 
   /// Color for duration settings
-  static const Color settingsDuration = Color(0xFFF4511E);
+  static const Color settingsDuration = Color(0xFF9D6B3A);
 
   /// Color for bookmarks settings
-  static const Color settingsBookmarks = Color(0xFFFFC107);
+  static const Color settingsBookmarks = primaryGold;
 
   /// Color for history settings
-  static const Color settingsHistory = Color(0xFF673AB7);
+  static const Color settingsHistory = primaryPurple;
 
   /// Color for prayer times settings
-  static const Color settingsPrayer = Color(0xFF03A9F4);
+  static const Color settingsPrayer = Color(0xFF3D7D73);
 
   /// Color for Quran reader settings
-  static const Color settingsQuran = Color(0xFF607D8B);
+  static const Color settingsQuran = Color(0xFF8B6F47);
 
   /// Color for storage settings
-  static const Color settingsStorage = Color(0xFFFB8C00);
+  static const Color settingsStorage = Color(0xFF9C7A3E);
 
   /// Color for downloads settings
-  static const Color settingsDownloads = Color(0xFF4CAF50);
+  static const Color settingsDownloads = primarySage;
 
   // Notification colors
   /// Color used for notification icons and accents
