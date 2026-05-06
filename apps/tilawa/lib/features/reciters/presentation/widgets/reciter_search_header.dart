@@ -15,6 +15,8 @@ class ReciterSearchHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final InputBorder? themedInputBorder =
         theme.inputDecorationTheme.focusedBorder ??
         theme.inputDecorationTheme.enabledBorder ??
@@ -22,7 +24,7 @@ class ReciterSearchHeader extends StatelessWidget {
     final BorderRadius inputBorderRadius =
         themedInputBorder is OutlineInputBorder
         ? themedInputBorder.borderRadius
-        : BorderRadius.circular(16);
+        : BorderRadius.circular(tokens.radiusLarge);
     final double screenWidth = context.resolveContentWidth(
       TilawaContentKind.media,
     );
@@ -45,6 +47,7 @@ class ReciterSearchHeader extends StatelessWidget {
         (lerpDouble(10, 12, widthFactor)! / textScaleFactor)
             .clamp(8.0, 12.0)
             .toDouble();
+    final double headerBlur = tokens.blurGlass;
 
     return SliverPersistentHeader(
       pinned: true,
@@ -53,9 +56,11 @@ class ReciterSearchHeader extends StatelessWidget {
         maxHeight: headerHeight,
         child: ClipRRect(
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+            filter: ImageFilter.blur(sigmaX: headerBlur, sigmaY: headerBlur),
             child: Container(
-              color: theme.scaffoldBackgroundColor.withValues(alpha: 0.85),
+              color: colorScheme.surface.withValues(
+                alpha: tokens.opacityEmphasis,
+              ),
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: horizontalPadding,
@@ -70,15 +75,17 @@ class ReciterSearchHeader extends StatelessWidget {
                         child: TilawaSearchField(
                           controller: controller,
                           hintText: context.l10n.searchSurah,
-                          backgroundColor: theme.scaffoldBackgroundColor
-                              .withValues(alpha: 0.5),
+                          backgroundColor: colorScheme.surfaceContainerLow
+                              .withValues(alpha: tokens.opacityEmphasis),
                           borderRadius: inputBorderRadius,
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: inputHorizontalPadding,
                             vertical: inputVerticalPadding,
                           ),
                           hintStyle: TextStyle(
-                            color: theme.hintColor.withValues(alpha: 0.5),
+                            color: colorScheme.onSurfaceVariant.withValues(
+                              alpha: tokens.opacityMedium,
+                            ),
                           ),
                           onClear: () {
                             controller.clear();
@@ -95,17 +102,19 @@ class ReciterSearchHeader extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    SizedBox(width: tokens.spaceSmall),
                     Semantics(
                       identifier: ReciterSemanticsIds.reciterDetailsViewToggle,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: theme.scaffoldBackgroundColor.withValues(
-                            alpha: 0.5,
+                          color: colorScheme.surfaceContainerLow.withValues(
+                            alpha: tokens.opacityEmphasis,
                           ),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: context.primaryColor.withValues(alpha: 0.1),
+                            color: colorScheme.primary.withValues(
+                              alpha: tokens.opacitySubtle,
+                            ),
                           ),
                         ),
                         child: IconButton(
@@ -121,7 +130,7 @@ class ReciterSearchHeader extends StatelessWidget {
                                     state.viewMode == ReciterViewMode.list
                                         ? Icons.grid_view_rounded
                                         : Icons.view_list_rounded,
-                                    color: context.primaryColor,
+                                    color: colorScheme.primary,
                                   );
                                 },
                               ),

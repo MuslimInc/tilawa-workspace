@@ -19,12 +19,13 @@ class ReciterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return Semantics(
       identifier: ReciterSemanticsIds.reciterCard(reciter.id),
       child: RepaintBoundary(
         child: Material(
-          color: theme.colorScheme.surface,
+          color: colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(tokens.radiusLarge),
           child: InkWell(
             borderRadius: BorderRadius.circular(tokens.radiusLarge),
@@ -38,8 +39,8 @@ class ReciterCard extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(tokens.radiusLarge),
                 border: Border.all(
-                  color: theme.colorScheme.outlineVariant.withValues(
-                    alpha: 0.30,
+                  color: colorScheme.outlineVariant.withValues(
+                    alpha: tokens.opacityMedium,
                   ),
                   width: tokens.borderWidthThin,
                 ),
@@ -75,6 +76,7 @@ class _ReciterInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final String firstMoshaf = reciter.moshaf.isNotEmpty
         ? reciter.moshaf.first.name
         : '';
@@ -101,15 +103,15 @@ class _ReciterInfo extends StatelessWidget {
               Icon(
                 FluentIcons.headphones_20_regular,
                 size: tokens.iconSizeSmall,
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: 0.75,
+                color: colorScheme.onSurfaceVariant.withValues(
+                  alpha: tokens.opacityEmphasis,
                 ),
               ),
               Flexible(
                 child: Text(
                   firstMoshaf,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 1,
@@ -123,7 +125,7 @@ class _ReciterInfo extends StatelessWidget {
           Text(
             context.l10n.recitationsAvailable(reciter.moshaf.length),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,
@@ -144,6 +146,7 @@ class _FavoriteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final bool isFavorite = context.select<FavoritesCubit, bool>((cubit) {
       final FavoritesState state = cubit.state;
       return state is FavoritesLoaded && state.favoriteIds.contains(reciter.id);
@@ -168,9 +171,9 @@ class _FavoriteButton extends StatelessWidget {
                     : Icons.favorite_outline_rounded,
                 size: tokens.iconSizeMedium,
                 color: isFavorite
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.45,
+                    ? colorScheme.error
+                    : colorScheme.onSurfaceVariant.withValues(
+                        alpha: tokens.opacityMedium,
                       ),
               ),
             ),

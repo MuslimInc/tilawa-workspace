@@ -372,17 +372,20 @@ class _SurahHeaderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceSmall,
+      ),
       child: Row(
         children: [
           Text(
             '${context.l10n.surahs} ($count)',
-            style: TextStyle(
+            style: theme.textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              fontSize: 13,
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const Spacer(),
