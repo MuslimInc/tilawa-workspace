@@ -350,6 +350,9 @@ class _NavButton extends StatelessWidget {
     final selectedFg = theme.colorScheme.primary;
     final unselectedFg = theme.colorScheme.onSurfaceVariant;
     final Color iconColor = isSelected ? selectedFg : unselectedFg;
+    final BorderRadius effectiveBorderRadius = BorderRadius.circular(
+      borderRadius,
+    );
 
     final Widget iconWidget = destination.iconBuilder != null
         ? destination.iconBuilder!(
@@ -368,56 +371,91 @@ class _NavButton extends StatelessWidget {
 
     final Widget button = Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        borderRadius: .circular(borderRadius),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
-          child: Column(
-            mainAxisAlignment: .center,
-            spacing: tokens.navButtonGap,
-            mainAxisSize: .min,
-            children: [
-              AnimatedScale(
-                scale: isSelected ? tokens.navButtonSelectedCenterScale : 1.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutBack,
-                child: PageTransitionSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation, secondaryAnimation) =>
-                      FadeThroughTransition(
-                        animation: animation,
-                        secondaryAnimation: secondaryAnimation,
-                        fillColor: Colors.transparent,
-                        child: child,
+      borderRadius: effectiveBorderRadius,
+      clipBehavior: Clip.antiAlias,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? selectedFg.withValues(
+                  alpha: tokens.navButtonSelectedBackgroundOpacity,
+                )
+              : Colors.transparent,
+          borderRadius: effectiveBorderRadius,
+        ),
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          borderRadius: effectiveBorderRadius,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: tokens.navButtonVerticalPadding,
+              ),
+              child: Column(
+                mainAxisAlignment: .center,
+                spacing: tokens.navButtonGap,
+                mainAxisSize: .min,
+                children: [
+                  AnimatedScale(
+                    scale: isSelected
+                        ? tokens.navButtonSelectedCenterScale
+                        : tokens.navButtonUnselectedScale,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutBack,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOutCubic,
+                      padding: const EdgeInsets.all(3),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isSelected
+                            ? selectedFg.withValues(
+                                alpha: tokens.navButtonSelectedCenterOpacity,
+                              )
+                            : Colors.transparent,
                       ),
-                  child: KeyedSubtree(
-                    key: ValueKey(isSelected),
-                    child: iconWidget,
-                  ),
-                ),
-              ),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: (theme.textTheme.labelSmall ?? const TextStyle())
-                    .copyWith(
-                      fontSize: tokens.navButtonLabelFontSize,
-                      fontWeight: isSelected
-                          ? tokens.navButtonSelectedLabelWeight
-                          : tokens.navButtonUnselectedLabelWeight,
-                      color: isSelected ? selectedFg : unselectedFg,
+                      child: PageTransitionSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        transitionBuilder:
+                            (child, animation, secondaryAnimation) =>
+                                FadeThroughTransition(
+                                  animation: animation,
+                                  secondaryAnimation: secondaryAnimation,
+                                  fillColor: Colors.transparent,
+                                  child: child,
+                                ),
+                        child: KeyedSubtree(
+                          key: ValueKey(isSelected),
+                          child: iconWidget,
+                        ),
+                      ),
                     ),
-                child: Text(
-                  destination.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                ),
+                  ),
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: (theme.textTheme.labelSmall ?? const TextStyle())
+                        .copyWith(
+                          fontSize: tokens.navButtonLabelFontSize,
+                          fontWeight: isSelected
+                              ? tokens.navButtonSelectedLabelWeight
+                              : tokens.navButtonUnselectedLabelWeight,
+                          color: isSelected ? selectedFg : unselectedFg,
+                        ),
+                    child: Text(
+                      destination.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
