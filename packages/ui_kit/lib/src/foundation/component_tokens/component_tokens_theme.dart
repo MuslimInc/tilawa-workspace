@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app_colors.dart';
 import '../density.dart';
 import 'atoms_tokens.dart';
 import 'molecules_tokens.dart';
@@ -96,7 +97,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required Brightness brightness,
   }) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: Colors.blue,
+      seedColor: AppColors.defaultPrimary,
       brightness: brightness,
     );
     return TilawaComponentTokens(

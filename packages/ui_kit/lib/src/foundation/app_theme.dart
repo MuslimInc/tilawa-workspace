@@ -13,18 +13,18 @@ class AppTheme {
   // Light theme configuration constants
   static const FlexSurfaceMode _lightSurfaceMode =
       FlexSurfaceMode.levelSurfacesLowScaffold;
-  static const int _lightBlendLevel = 7;
-  static const FlexAppBarStyle _lightAppBarStyle = FlexAppBarStyle.primary;
-  static const double _lightAppBarOpacity = 0.95;
+  static const int _lightBlendLevel = 3;
+  static const FlexAppBarStyle _lightAppBarStyle = FlexAppBarStyle.surface;
+  static const double _lightAppBarOpacity = 1;
   static const double _lightAppBarElevation = 0;
   static const FlexTabBarStyle _lightTabBarStyle = FlexTabBarStyle.forAppBar;
 
   // Dark theme configuration constants
   static const FlexSurfaceMode _darkSurfaceMode =
       FlexSurfaceMode.levelSurfacesLowScaffold;
-  static const int _darkBlendLevel = 13;
-  static const FlexAppBarStyle _darkAppBarStyle = FlexAppBarStyle.primary;
-  static const double _darkAppBarOpacity = 0.90;
+  static const int _darkBlendLevel = 7;
+  static const FlexAppBarStyle _darkAppBarStyle = FlexAppBarStyle.surface;
+  static const double _darkAppBarOpacity = 1;
   static const double _darkAppBarElevation = 0;
   static const FlexTabBarStyle _darkTabBarStyle = FlexTabBarStyle.forAppBar;
 
@@ -37,6 +37,79 @@ class AppTheme {
     // Use Alexandria if enabled, otherwise default to a standard text theme base
     if (!useFonts) return const TextTheme();
     return GoogleFonts.alexandriaTextTheme();
+  }
+
+  static FlexSchemeColor _lightScheme(Color primaryColor) {
+    return FlexSchemeColor.from(
+      primary: primaryColor,
+      primaryContainer: const Color(0xFFD8F0EC),
+      secondary: AppColors.brandSecondary,
+      secondaryContainer: const Color(0xFFE4EBD5),
+      tertiary: AppColors.brandTertiary,
+      tertiaryContainer: const Color(0xFFF3E3BD),
+      appBarColor: AppColors.lightSurface,
+      error: AppColors.error,
+      brightness: Brightness.light,
+    );
+  }
+
+  static FlexSchemeColor _darkScheme(Color primaryColor) {
+    final darkPrimary = primaryColor == AppColors.defaultPrimary
+        ? const Color(0xFF70C8BD)
+        : _liftForDarkTheme(primaryColor);
+
+    return FlexSchemeColor.from(
+      primary: darkPrimary,
+      primaryContainer: const Color(0xFF143E39),
+      primaryLightRef: primaryColor,
+      secondary: const Color(0xFFB8C69A),
+      secondaryContainer: const Color(0xFF2E3A28),
+      secondaryLightRef: AppColors.brandSecondary,
+      tertiary: const Color(0xFFD8B76C),
+      tertiaryContainer: const Color(0xFF4B3B18),
+      tertiaryLightRef: AppColors.brandTertiary,
+      appBarColor: AppColors.darkSurface,
+      error: const Color(0xFFFFB4AB),
+      brightness: Brightness.dark,
+    );
+  }
+
+  static Color _liftForDarkTheme(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    return hsl
+        .withLightness((hsl.lightness + 0.36).clamp(0.56, 0.78))
+        .withSaturation((hsl.saturation * 0.82).clamp(0.24, 0.72))
+        .toColor();
+  }
+
+  static ColorScheme _refineLightColorScheme(ColorScheme scheme) {
+    return scheme.copyWith(
+      surface: AppColors.lightSurface,
+      surfaceContainerLowest: Colors.white,
+      surfaceContainerLow: AppColors.lightBackground,
+      surfaceContainer: AppColors.lightSurfaceContainer,
+      surfaceContainerHigh: const Color(0xFFEAE6DC),
+      surfaceContainerHighest: const Color(0xFFE2DDD1),
+      outline: AppColors.lightOutline,
+      outlineVariant: const Color(0xFFE6DED0),
+      shadow: const Color(0xFF1F2926),
+      scrim: const Color(0xFF1F2926),
+    );
+  }
+
+  static ColorScheme _refineDarkColorScheme(ColorScheme scheme) {
+    return scheme.copyWith(
+      surface: AppColors.darkSurface,
+      surfaceContainerLowest: const Color(0xFF0B1210),
+      surfaceContainerLow: AppColors.darkBackground,
+      surfaceContainer: AppColors.darkSurfaceContainer,
+      surfaceContainerHigh: const Color(0xFF24332F),
+      surfaceContainerHighest: const Color(0xFF2D3E39),
+      outline: AppColors.darkOutline,
+      outlineVariant: const Color(0xFF2F3E39),
+      shadow: Colors.black,
+      scrim: Colors.black,
+    );
   }
 
   /// Get the light theme for the given primary color.
@@ -54,9 +127,9 @@ class AppTheme {
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
-    final scheme = FlexSchemeColor.from(primary: primaryColor);
+    final scheme = _lightScheme(primaryColor);
 
-    return FlexThemeData.light(
+    final theme = FlexThemeData.light(
       colors: scheme,
       surfaceMode: _lightSurfaceMode,
       blendLevel: _lightBlendLevel,
@@ -69,7 +142,15 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _getTextTheme(useFonts),
-    ).copyWith(
+    );
+    final colorScheme = _refineLightColorScheme(theme.colorScheme);
+
+    return theme.copyWith(
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: AppColors.lightBackground,
+      canvasColor: AppColors.lightBackground,
+      dividerColor: colorScheme.outlineVariant,
+      cardColor: colorScheme.surface,
       extensions: [
         TilawaDesignTokens.light(density: density),
         TilawaComponentTokens.light(density: density),
@@ -94,9 +175,9 @@ class AppTheme {
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
-    final scheme = FlexSchemeColor.from(primary: primaryColor);
+    final scheme = _darkScheme(primaryColor);
 
-    return FlexThemeData.dark(
+    final theme = FlexThemeData.dark(
       colors: scheme,
       surfaceMode: _darkSurfaceMode,
       blendLevel: _darkBlendLevel,
@@ -109,7 +190,15 @@ class AppTheme {
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _getTextTheme(useFonts),
-    ).copyWith(
+    );
+    final colorScheme = _refineDarkColorScheme(theme.colorScheme);
+
+    return theme.copyWith(
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: AppColors.darkBackground,
+      canvasColor: AppColors.darkBackground,
+      dividerColor: colorScheme.outlineVariant,
+      cardColor: colorScheme.surface,
       extensions: [
         TilawaDesignTokens.dark(density: density),
         TilawaComponentTokens.dark(density: density),
