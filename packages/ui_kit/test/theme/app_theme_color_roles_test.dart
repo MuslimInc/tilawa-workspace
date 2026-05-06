@@ -13,6 +13,18 @@ void main() {
       'muted gold': AppColors.primaryGold,
       'purple': AppColors.primaryPurple,
       'warm brown': AppColors.primaryBrown,
+      // Pathological custom HEX values — protected by _safePrimaryForLight.
+      'pure white': Color(0xFFFFFFFF),
+      'pure black': Color(0xFF000000),
+      'mid gray': Color(0xFF888888),
+      'light pink': Color(0xFFFFB3D9),
+    };
+
+    const presetNoOpCases = <String, Color>{
+      'teal': AppColors.primaryTeal,
+      'sage': AppColors.primarySage,
+      'brown': AppColors.primaryBrown,
+      'purple': AppColors.primaryPurple,
     };
 
     test('light themes keep accessible contrast on core color roles', () {
@@ -38,6 +50,26 @@ void main() {
         _expectSecondaryTextContrast(theme.colorScheme, label: entry.key);
       }
     });
+
+    test(
+      'light-mode clamp is a no-op for every PrimaryColorPreset value',
+      () {
+        for (final entry in presetNoOpCases.entries) {
+          final theme = AppTheme.getLightTheme(
+            primaryColor: entry.value,
+            useGoogleFontsOverride: false,
+          );
+
+          expect(
+            theme.colorScheme.primary,
+            entry.value,
+            reason:
+                '${entry.key} preset must pass through the light-mode clamp '
+                'unchanged',
+          );
+        }
+      },
+    );
 
     test('custom primary colors derive matching primary containers', () {
       final greenTheme = AppTheme.getLightTheme(

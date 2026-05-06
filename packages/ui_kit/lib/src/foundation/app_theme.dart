@@ -40,12 +40,13 @@ class AppTheme {
   }
 
   static FlexSchemeColor _lightScheme(Color primaryColor) {
+    final safePrimary = _safePrimaryForLight(primaryColor);
     final primaryContainer = primaryColor == AppColors.defaultPrimary
         ? const Color(0xFFD8F0EC)
-        : _containerForPrimary(primaryColor, brightness: Brightness.light);
+        : _containerForPrimary(safePrimary, brightness: Brightness.light);
 
     return FlexSchemeColor.from(
-      primary: primaryColor,
+      primary: safePrimary,
       primaryContainer: primaryContainer,
       secondary: AppColors.brandSecondary,
       secondaryContainer: const Color(0xFFE4EBD5),
@@ -55,6 +56,36 @@ class AppTheme {
       error: AppColors.error,
       brightness: Brightness.light,
     );
+  }
+
+  /// Pulls pathological custom HEX values back into a renderable band so the
+  /// light theme's primary stays visible against cream surfaces and produces
+  /// readable on-primary contrast.
+  ///
+  /// This is **intentionally a no-op for the four [PrimaryColorPreset] values
+  /// and for any reasonable custom color** — only colors that would render as
+  /// near-white, near-black, or pure gray are pulled into the band. The user's
+  /// stored color is never mutated; only the value handed to FlexColorScheme
+  /// for the light theme is adjusted.
+  ///
+  /// Thresholds (chosen so every current preset passes through unchanged):
+  /// - saturation floor: 0.16
+  /// - lightness band:   0.18 – 0.50
+  ///
+  /// Do not loosen these without re-running the contrast tests in
+  /// `app_theme_color_roles_test.dart`.
+  static Color _safePrimaryForLight(Color color) {
+    final hsl = HSLColor.fromColor(color);
+    final saturation = hsl.saturation < 0.16 ? 0.16 : hsl.saturation;
+    final lightness = hsl.lightness > 0.50
+        ? 0.50
+        : hsl.lightness < 0.18
+        ? 0.18
+        : hsl.lightness;
+    if (saturation == hsl.saturation && lightness == hsl.lightness) {
+      return color;
+    }
+    return hsl.withSaturation(saturation).withLightness(lightness).toColor();
   }
 
   static FlexSchemeColor _darkScheme(Color primaryColor) {
