@@ -603,8 +603,7 @@ class _ColorPickerSheet extends StatelessWidget {
               ),
               SizedBox(height: tokens.spaceLarge),
               ...PrimaryColorPreset.values.map((preset) {
-                final isSelected =
-                    !isCustom && currentPresetId == preset.id;
+                final isSelected = !isCustom && currentPresetId == preset.id;
                 return TilawaSelectionTile(
                   leading: CircleAvatar(
                     backgroundColor: preset.value,

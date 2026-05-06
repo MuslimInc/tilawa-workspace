@@ -147,7 +147,8 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     return {
       'mode': state.mode == ThemeMode.dark ? 'dark' : 'light',
       'primaryColor': state.primaryColor.toARGB32(),
-      'primaryColorSource': state.primaryColorSource == PrimaryColorSource.custom
+      'primaryColorSource':
+          state.primaryColorSource == PrimaryColorSource.custom
           ? 'custom'
           : 'preset',
       'primaryPresetId': state.primaryPresetId,

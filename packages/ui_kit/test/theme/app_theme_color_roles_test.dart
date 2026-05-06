@@ -53,26 +53,23 @@ void main() {
       }
     });
 
-    test(
-      'light-mode clamp is a no-op for every PrimaryColorPreset value',
-      () {
-        for (final entry in presetNoOpCases.entries) {
-          final theme = AppTheme.getLightTheme(
-            primaryColor: entry.value,
-            isDefaultPreset: entry.value == AppColors.defaultPrimary,
-            useGoogleFontsOverride: false,
-          );
+    test('light-mode clamp is a no-op for every PrimaryColorPreset value', () {
+      for (final entry in presetNoOpCases.entries) {
+        final theme = AppTheme.getLightTheme(
+          primaryColor: entry.value,
+          isDefaultPreset: entry.value == AppColors.defaultPrimary,
+          useGoogleFontsOverride: false,
+        );
 
-          expect(
-            theme.colorScheme.primary,
-            entry.value,
-            reason:
-                '${entry.key} preset must pass through the light-mode clamp '
-                'unchanged',
-          );
-        }
-      },
-    );
+        expect(
+          theme.colorScheme.primary,
+          entry.value,
+          reason:
+              '${entry.key} preset must pass through the light-mode clamp '
+              'unchanged',
+        );
+      }
+    });
 
     test('custom primary colors derive matching primary containers', () {
       final greenTheme = AppTheme.getLightTheme(

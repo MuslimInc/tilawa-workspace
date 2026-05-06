@@ -301,7 +301,7 @@ class SkeletonSurahListTile extends StatelessWidget {
           TilawaSkeletonBlock(
             width: tokens.iconSizeExtraLarge,
             height: tokens.iconSizeExtraLarge,
-            shape: TilawaSkeletonShape.circle,
+            shape: TilawaSkeletonShape.rounded,
           ),
           SizedBox(width: tokens.spaceLarge),
           Expanded(
