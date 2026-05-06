@@ -98,6 +98,27 @@ void main() {
       );
     });
 
+    test('FA1.09d: GIVEN named constructors created at runtime '
+        'EXPECT constructors to create their documented presets.', () {
+      final List<FlexAdaptive> presets = <FlexAdaptive>[
+        FlexAdaptive.all(),
+        FlexAdaptive.apple(),
+        FlexAdaptive.appleWeb(),
+        FlexAdaptive.desktop(),
+        FlexAdaptive.iOSAndDesktop(),
+        FlexAdaptive.excludeAndroidFuchsia(),
+        FlexAdaptive.excludeWebAndroidFuchsia(),
+      ];
+
+      expect(presets[0], const FlexAdaptive.all());
+      expect(presets[1], const FlexAdaptive.apple());
+      expect(presets[2], const FlexAdaptive.appleWeb());
+      expect(presets[3], const FlexAdaptive.desktop());
+      expect(presets[4], const FlexAdaptive.iOSAndDesktop());
+      expect(presets[5], const FlexAdaptive.excludeAndroidFuchsia());
+      expect(presets[6], const FlexAdaptive.excludeWebAndroidFuchsia());
+    });
+
     //**************************************************************************
     // FlexAdaptive unit tests.
     //

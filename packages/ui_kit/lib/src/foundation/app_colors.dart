@@ -16,7 +16,7 @@ abstract final class AppColors {
   static const Color primarySage = Color(0xFF6F7F58);
 
   /// Muted gold theme option.
-  static const Color primaryGold = Color(0xFFB88A2E);
+  static const Color primaryGold = Color(0xFF8C681F);
 
   /// Warm brown theme option.
   static const Color primaryBrown = Color(0xFF7B5E3B);
@@ -32,7 +32,7 @@ abstract final class AppColors {
 
   // Brand color roles
   /// Secondary brand color for calm supporting accents.
-  static const Color brandSecondary = primarySage;
+  static const Color brandSecondary = Color(0xFF65734F);
 
   /// Tertiary brand color for respectful Quran/prayer highlights.
   static const Color brandTertiary = primaryGold;

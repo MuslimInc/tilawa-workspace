@@ -62,4 +62,48 @@ void main() {
       await tester.pumpAndSettle();
     }
   });
+
+  testWidgets('InkResponse with FlexHighlightSplash uses rect callback '
+      'for contained ink radius.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(useMaterial3: false),
+        home: Scaffold(
+          body: Center(
+            child: Material(
+              child: _RectCallbackInkResponse(
+                onTap: () {},
+                splashFactory: FlexInstantSplash.splashFactory,
+                child: const SizedBox(width: 72, height: 48),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(_RectCallbackInkResponse)),
+    );
+    final MaterialInkController material = Material.of(
+      tester.element(find.byType(_RectCallbackInkResponse)),
+    );
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(material, paintsExactlyCountTimes(#drawCircle, 2));
+    await gesture.up();
+    await tester.pumpAndSettle();
+  });
+}
+
+class _RectCallbackInkResponse extends InkResponse {
+  const _RectCallbackInkResponse({
+    required super.onTap,
+    required super.splashFactory,
+    required super.child,
+  }) : super(containedInkWell: true);
+
+  @override
+  RectCallback? getRectCallback(RenderBox referenceBox) {
+    return () => const Rect.fromLTWH(0, 0, 24, 24);
+  }
 }
