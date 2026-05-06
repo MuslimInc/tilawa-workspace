@@ -204,7 +204,7 @@ class AppTheme {
       cardColor: colorScheme.surface,
       extensions: [
         TilawaDesignTokens.light(density: density),
-        TilawaComponentTokens.light(density: density),
+        TilawaComponentTokens.light(density: density, colorScheme: colorScheme),
         ...extensions,
       ],
     );
@@ -262,7 +262,7 @@ class AppTheme {
       ),
       extensions: [
         TilawaDesignTokens.dark(density: density),
-        TilawaComponentTokens.dark(density: density),
+        TilawaComponentTokens.dark(density: density, colorScheme: colorScheme),
         ...extensions,
       ],
     );

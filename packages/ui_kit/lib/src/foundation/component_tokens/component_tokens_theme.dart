@@ -79,27 +79,34 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   /// per component family.
   factory TilawaComponentTokens.light({
     TilawaDensity density = TilawaDensity.comfortable,
+    ColorScheme? colorScheme,
   }) => TilawaComponentTokens._create(
     density: density,
     brightness: Brightness.light,
+    colorScheme: colorScheme,
   );
 
   factory TilawaComponentTokens.dark({
     TilawaDensity density = TilawaDensity.comfortable,
+    ColorScheme? colorScheme,
   }) => TilawaComponentTokens._create(
     density: density,
     brightness: Brightness.dark,
+    colorScheme: colorScheme,
   );
 
   /// Internal factory for creating tokens with the given density and brightness.
   factory TilawaComponentTokens._create({
     required TilawaDensity density,
     required Brightness brightness,
+    ColorScheme? colorScheme,
   }) {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.defaultPrimary,
-      brightness: brightness,
-    );
+    final effectiveColorScheme =
+        colorScheme ??
+        ColorScheme.fromSeed(
+          seedColor: AppColors.defaultPrimary,
+          brightness: brightness,
+        );
     return TilawaComponentTokens(
       density: density,
       sectionTitle: TilawaSectionTitleTokens.defaults(density: density),
@@ -138,7 +145,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
         density: density,
       ),
       skeleton: TilawaSkeletonTokens.defaults(
-        colorScheme: colorScheme,
+        colorScheme: effectiveColorScheme,
         density: density,
       ),
     );
