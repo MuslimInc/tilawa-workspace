@@ -54,6 +54,12 @@ class VideoReviewPanel extends StatelessWidget {
     final tokens = theme.tokens;
     final headerButtonSize =
         theme.componentTokens.immersiveComposer.headerButtonSize;
+    final shareLabel = switch (content) {
+      ShareScreenshot() => context.l10n.shareScreenshot,
+      ShareVideo() => context.l10n.shareReel,
+      ShareAudioClip() => context.l10n.shareAudio,
+      ShareText() => context.l10n.share,
+    };
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -78,7 +84,7 @@ class VideoReviewPanel extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: onShare,
                 icon: Icon(Icons.share_rounded, size: tokens.iconSizeSmall),
-                label: Text(context.l10n.shareReel),
+                label: Text(shareLabel),
               ),
             ),
           ),

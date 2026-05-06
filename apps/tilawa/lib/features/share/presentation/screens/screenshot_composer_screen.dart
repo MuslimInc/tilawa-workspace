@@ -15,6 +15,7 @@ import '../widgets/reader_page_content_renderer.dart';
 import '../widgets/screenshot_composer_widgets.dart';
 import '../widgets/share_poster_renderer.dart';
 import '../widgets/share_preview_widgets.dart';
+import '../widgets/video_reel_design.dart';
 
 class ScreenshotComposerScreen extends StatefulWidget {
   const ScreenshotComposerScreen({
@@ -220,7 +221,7 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
     ShareState state,
     WidgetCaptureHandle handle,
   ) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final mediaPalette = VideoReelPalette.fromContext(context);
     return context.read<ShareCubit>().prepareScreenshot(
       handle: handle,
       surahName: getSurahNameArabic(widget.surahNumber),
@@ -228,8 +229,8 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
       appName: 'Tilawa',
       sharedViaLabel: context.l10n.sharedViaTilawa,
       preparingImageLabel: context.l10n.preparingScreenshot,
-      footerBackgroundColor: colorScheme.secondaryContainer,
-      footerForegroundColor: colorScheme.onSecondaryContainer,
+      footerBackgroundColor: mediaPalette.frameSurfaceColor,
+      footerForegroundColor: mediaPalette.frameStrongTextColor,
     );
   }
 

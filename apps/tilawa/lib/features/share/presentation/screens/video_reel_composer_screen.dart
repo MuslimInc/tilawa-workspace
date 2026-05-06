@@ -131,7 +131,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                   state.status == ShareStatus.generating ||
                   state.status == ShareStatus.sharing;
               final reciterName = state.reciterName ?? widget.reciterName;
-              final backgroundColor = VideoReelDesign.mushafBackgroundColor;
+              final reelPalette = VideoReelPalette.fromContext(context);
+              final backgroundColor = reelPalette.mushafBackgroundColor;
 
               return Stack(
                 children: [
@@ -164,6 +165,9 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 state.reciterName ?? widget.reciterName,
                           ),
                           builder: (context, bState) {
+                            final reelPalette = VideoReelPalette.fromContext(
+                              context,
+                            );
                             final isReviewing =
                                 bState.status == ShareStatus.reviewing;
                             final isScreenshotReview =
@@ -207,7 +211,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                         bState.reciterName ??
                                         widget.reciterName,
                                     backgroundColor:
-                                        VideoReelDesign.mushafBackgroundColor,
+                                        reelPalette.mushafBackgroundColor,
                                   );
 
                             return child;
@@ -447,10 +451,10 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
                   (s == widget.surahNumber &&
                       v >= widget.fromAyah &&
                       v <= widget.toAyah)
-                  ? VideoReelDesign.verseHighlightColor
+                  ? VideoReelPalette.fromContext(context).verseHighlightColor
                   : null,
               verseTextColor: (s, v) => null,
-              textColor: VideoReelDesign.mushafTextColor,
+              textColor: VideoReelPalette.fromContext(context).mushafTextColor,
               pageBackgroundColor: widget.backgroundColor,
               isCapturing: false,
             ),
@@ -484,6 +488,8 @@ class _OffScreenRenderers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final reelPalette = VideoReelPalette.fromContext(context);
+
     return Stack(
       children: videoPageSpecs.map((spec) {
         final key = videoBoundaryKeys[spec.pageNumber];
@@ -508,10 +514,10 @@ class _OffScreenRenderers extends StatelessWidget {
                           (s == surahNumber &&
                               v >= spec.fromAyah &&
                               v <= spec.toAyah)
-                          ? VideoReelDesign.verseHighlightColor
+                          ? reelPalette.verseHighlightColor
                           : null,
                       verseTextColor: (s, v) => null,
-                      textColor: VideoReelDesign.mushafTextColor,
+                      textColor: reelPalette.mushafTextColor,
                       pageBackgroundColor: backgroundColor,
                       isCapturing: isCapturing,
                     ),

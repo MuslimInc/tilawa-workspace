@@ -140,6 +140,8 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
         child: Stack(
           clipBehavior: .none,
           children: [
+            Positioned.fill(child: ColoredBox(color: theme.colorScheme.surface)),
+
             // 1. Background Layer (Isolated)
             if (widget.backgroundGradient != null)
               Positioned.fill(

@@ -406,6 +406,7 @@ class _ReelTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isArabic = context.l10n.localeName == 'ar';
+    final palette = VideoReelPalette.fromContext(context);
     final double height = (pageHeight * VideoReelDesign.topBarHeightFactor)
         .clamp(VideoReelDesign.topBarMinHeight, VideoReelDesign.topBarMaxHeight)
         .toDouble();
@@ -426,10 +427,10 @@ class _ReelTopBar extends StatelessWidget {
                   surahNames.join(' '),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: VideoReelDesign.topBarTitleFontSize,
                     fontWeight: FontWeight.w600,
-                    color: VideoReelDesign.frameTextColor,
+                    color: palette.frameTextColor,
                     decoration: TextDecoration.none,
                   ),
                 ),
@@ -437,10 +438,10 @@ class _ReelTopBar extends StatelessWidget {
               const SizedBox(width: VideoReelDesign.topBarGap),
               Text(
                 '${context.l10n.juzPart} $localizedJuzNumber',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: VideoReelDesign.topBarMetaFontSize,
                   fontWeight: FontWeight.w500,
-                  color: VideoReelDesign.frameSecondaryTextColor,
+                  color: palette.frameSecondaryTextColor,
                   decoration: TextDecoration.none,
                 ),
               ),
@@ -469,6 +470,7 @@ class _ReelBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isArabic = context.l10n.localeName == 'ar';
+    final palette = VideoReelPalette.fromContext(context);
     final double circleSize = (pageHeight * VideoReelDesign.pageBadgeSizeFactor)
         .clamp(
           VideoReelDesign.pageBadgeMinSize,
@@ -497,10 +499,10 @@ class _ReelBottomBar extends StatelessWidget {
             .toDouble(),
       ),
       decoration: BoxDecoration(
-        color: VideoReelDesign.frameSurfaceColor,
+        color: palette.frameSurfaceColor,
         borderRadius: BorderRadius.circular(VideoReelDesign.bottomBarRadius),
         border: Border.all(
-          color: VideoReelDesign.frameAccentColor.withValues(
+          color: palette.frameAccentColor.withValues(
             alpha: VideoReelDesign.bottomBarBorderAlpha,
           ),
         ),
@@ -513,10 +515,10 @@ class _ReelBottomBar extends StatelessWidget {
             const Spacer(),
             Text(
               '${context.l10n.hizb} $localizedHizbNumber',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: VideoReelDesign.bottomBarMetaFontSize,
                 fontWeight: FontWeight.bold,
-                color: VideoReelDesign.frameStrongTextColor,
+                color: palette.frameStrongTextColor,
               ),
             ),
           ],
@@ -535,25 +537,27 @@ class _ReelPageNumberBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = VideoReelPalette.fromContext(context);
+
     return Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       padding: const EdgeInsets.all(VideoReelDesign.pageBadgePadding),
       decoration: BoxDecoration(
-        color: VideoReelDesign.frameAccentColor.withValues(
+        color: palette.frameAccentColor.withValues(
           alpha: VideoReelDesign.pageBadgeAccentAlpha,
         ),
         shape: BoxShape.circle,
-        border: Border.all(color: VideoReelDesign.frameAccentColor),
+        border: Border.all(color: palette.frameAccentColor),
       ),
       child: Text(
         _localizedQuranNumber(context, pageNumber),
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: VideoReelDesign.frameStrongTextColor,
+          color: palette.frameStrongTextColor,
         ),
       ),
     );

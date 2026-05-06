@@ -20,6 +20,13 @@ class VideoReviewPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final bottomPadding = context.floatingBottomPadding;
+    final shareLabel = switch (content) {
+      ShareScreenshot() => context.l10n.shareScreenshot,
+      ShareVideo() => context.l10n.shareReel,
+      ShareAudioClip() => context.l10n.shareAudio,
+      ShareText() => context.l10n.share,
+    };
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceMedium,
@@ -38,7 +45,7 @@ class VideoReviewPanel extends StatelessWidget {
             child: FilledButton.icon(
               onPressed: onShare,
               icon: Icon(Icons.share_rounded, size: tokens.iconSizeSmall),
-              label: Text(context.l10n.shareReel),
+              label: Text(shareLabel),
             ),
           ),
         ],

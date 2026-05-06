@@ -29,8 +29,10 @@ class MediaPreviewFrame extends StatelessWidget {
         constraints: const BoxConstraints(maxWidth: 460, maxHeight: 760),
         child: TilawaCard(
           padding: EdgeInsets.all(padding ?? tokens.spaceLarge),
-          backgroundColor: Colors.white.withValues(alpha: 0.08),
-          borderColor: Colors.white.withValues(alpha: 0.12),
+          backgroundColor: theme.colorScheme.surfaceContainerHigh,
+          borderColor: theme.colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacitySubtle,
+          ),
           borderRadius: 34,
           child: DecoratedBox(
             decoration: BoxDecoration(
@@ -133,15 +135,18 @@ class _GeneratedImagePreviewState extends State<GeneratedImagePreview> {
           child: ColoredBox(
             color: theme.colorScheme.surfaceContainerHighest,
             child: Center(
-              child: Image.file(
-                File(widget.filePath),
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => ColoredBox(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  child: Center(
-                    child: Icon(
-                      Icons.broken_image_outlined,
-                      color: theme.colorScheme.onSurfaceVariant,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.file(
+                  File(widget.filePath),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => ColoredBox(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    child: Center(
+                      child: Icon(
+                        Icons.broken_image_outlined,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                 ),
