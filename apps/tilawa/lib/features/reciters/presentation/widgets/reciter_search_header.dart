@@ -75,17 +75,10 @@ class ReciterSearchHeader extends StatelessWidget {
                         child: TilawaSearchField(
                           controller: controller,
                           hintText: context.l10n.searchSurah,
-                          backgroundColor: colorScheme.surfaceContainerLow
-                              .withValues(alpha: tokens.opacityEmphasis),
                           borderRadius: inputBorderRadius,
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: inputHorizontalPadding,
                             vertical: inputVerticalPadding,
-                          ),
-                          hintStyle: TextStyle(
-                            color: colorScheme.onSurfaceVariant.withValues(
-                              alpha: tokens.opacityMedium,
-                            ),
                           ),
                           onClear: () {
                             controller.clear();

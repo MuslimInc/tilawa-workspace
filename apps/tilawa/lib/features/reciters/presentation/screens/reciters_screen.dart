@@ -652,7 +652,6 @@ class _SearchField extends StatelessWidget {
         clearIcon: FluentIcons.dismiss_24_regular,
         onChanged: onChanged,
         onClear: onClear,
-        backgroundColor: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(
           Theme.of(context).tokens.radiusLarge,
         ),
