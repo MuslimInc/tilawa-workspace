@@ -46,8 +46,8 @@ class TilawaIconToggle extends StatelessWidget {
 
     final double effectiveRadius = borderRadius ?? tokens.borderRadius;
     final Color background = value
-        ? (activeBackgroundColor ?? colorScheme.primaryContainer)
-        : (inactiveBackgroundColor ?? colorScheme.surfaceContainerHigh);
+        ? (activeBackgroundColor ?? tokens.activeBackgroundColor)
+        : (inactiveBackgroundColor ?? tokens.inactiveBackgroundColor);
     final Color iconColor = value
         ? (activeIconColor ?? colorScheme.onPrimaryContainer)
         : (inactiveIconColor ?? colorScheme.onSurfaceVariant);

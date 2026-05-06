@@ -40,7 +40,7 @@ class TilawaChip extends StatelessWidget {
     final componentTokens = theme.componentTokens.chip;
     final designTokens = theme.tokens;
     final effectiveBackground =
-        backgroundColor ?? colorScheme.surfaceContainerHigh;
+        backgroundColor ?? componentTokens.backgroundColor;
     final effectiveForeground = foregroundColor ?? colorScheme.onSurfaceVariant;
     final effectiveRadius = borderRadius ?? componentTokens.roundedRadius;
     final effectiveBorderColor =

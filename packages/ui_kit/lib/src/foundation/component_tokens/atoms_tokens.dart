@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../app_colors.dart';
 import '../density.dart';
 import 'token_lerp.dart';
 
@@ -173,12 +174,16 @@ class TilawaCardTokens {
 class TilawaIconBoxTokens {
   const TilawaIconBoxTokens({
     required this.iconSize,
+    required this.backgroundColor,
     required this.padding,
     required this.borderRadius,
   });
 
   /// Default icon size inside the box.
   final double iconSize;
+
+  /// Default background color for icon containers.
+  final Color backgroundColor;
 
   /// Inner padding around the icon.
   final double padding;
@@ -189,27 +194,51 @@ class TilawaIconBoxTokens {
   factory TilawaIconBoxTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaIconBoxTokens.fromColorScheme(colorScheme, density: density);
+  }
+
+  factory TilawaIconBoxTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final backgroundColor = _backgroundColor(colorScheme);
     if (density.isCompact) {
-      return const TilawaIconBoxTokens(
+      return TilawaIconBoxTokens(
         iconSize: 20.0,
+        backgroundColor: backgroundColor,
         padding: 6.0,
         borderRadius: 10.0,
       );
     }
-    return const TilawaIconBoxTokens(
+    return TilawaIconBoxTokens(
       iconSize: 24.0,
+      backgroundColor: backgroundColor,
       padding: 8.0,
       borderRadius: 12.0,
     );
   }
 
+  static Color _backgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.26 : 0.44;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
   TilawaIconBoxTokens copyWith({
     double? iconSize,
+    Color? backgroundColor,
     double? padding,
     double? borderRadius,
   }) {
     return TilawaIconBoxTokens(
       iconSize: iconSize ?? this.iconSize,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
       padding: padding ?? this.padding,
       borderRadius: borderRadius ?? this.borderRadius,
     );
@@ -222,6 +251,7 @@ class TilawaIconBoxTokens {
   ) {
     return TilawaIconBoxTokens(
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       padding: lerpTokenDouble(a.padding, b.padding, t),
       borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
     );
@@ -288,34 +318,77 @@ class TilawaLoadingIndicatorTokens {
 class TilawaIconToggleTokens {
   const TilawaIconToggleTokens({
     required this.iconSize,
+    required this.activeBackgroundColor,
+    required this.inactiveBackgroundColor,
     required this.padding,
     required this.borderRadius,
   });
 
   final double iconSize;
+  final Color activeBackgroundColor;
+  final Color inactiveBackgroundColor;
   final double padding;
   final double borderRadius;
 
   factory TilawaIconToggleTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaIconToggleTokens.fromColorScheme(
+      colorScheme,
+      density: density,
+    );
+  }
+
+  factory TilawaIconToggleTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
     // No-op: total tap area today is 36dp (iconSize 20 + padding 8*2),
     // already below the 48dp guideline. Do not shrink further; flagged for
     // a separate accessibility refactor outside this work.
-    return const TilawaIconToggleTokens(
+    return TilawaIconToggleTokens(
       iconSize: 20.0,
+      activeBackgroundColor: _activeBackgroundColor(colorScheme),
+      inactiveBackgroundColor: _inactiveBackgroundColor(colorScheme),
       padding: 8.0,
       borderRadius: 12.0,
     );
   }
 
+  static Color _activeBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.10 : 0.08;
+    return Color.lerp(
+      colorScheme.primaryContainer,
+      colorScheme.primary,
+      blendAmount,
+    )!;
+  }
+
+  static Color _inactiveBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.24 : 0.40;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
   TilawaIconToggleTokens copyWith({
     double? iconSize,
+    Color? activeBackgroundColor,
+    Color? inactiveBackgroundColor,
     double? padding,
     double? borderRadius,
   }) {
     return TilawaIconToggleTokens(
       iconSize: iconSize ?? this.iconSize,
+      activeBackgroundColor:
+          activeBackgroundColor ?? this.activeBackgroundColor,
+      inactiveBackgroundColor:
+          inactiveBackgroundColor ?? this.inactiveBackgroundColor,
       padding: padding ?? this.padding,
       borderRadius: borderRadius ?? this.borderRadius,
     );
@@ -328,6 +401,16 @@ class TilawaIconToggleTokens {
   ) {
     return TilawaIconToggleTokens(
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
+      activeBackgroundColor: Color.lerp(
+        a.activeBackgroundColor,
+        b.activeBackgroundColor,
+        t,
+      )!,
+      inactiveBackgroundColor: Color.lerp(
+        a.inactiveBackgroundColor,
+        b.inactiveBackgroundColor,
+        t,
+      )!,
       padding: lerpTokenDouble(a.padding, b.padding, t),
       borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
     );

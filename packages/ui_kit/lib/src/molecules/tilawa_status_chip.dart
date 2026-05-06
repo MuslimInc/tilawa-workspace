@@ -30,7 +30,7 @@ class TilawaStatusChip extends StatelessWidget {
     return TilawaChip(
       label: label,
       icon: icon,
-      backgroundColor: backgroundColor ?? colorScheme.surfaceContainerHigh,
+      backgroundColor: backgroundColor ?? tokens.backgroundColor,
       foregroundColor: effectiveForeground,
       padding: padding ?? tokens.compactPadding,
       borderRadius: tokens.roundedRadius,

@@ -37,7 +37,7 @@ class TilawaIconBox extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(effectivePadding),
       decoration: BoxDecoration(
-        color: backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
+        color: backgroundColor ?? tokens.backgroundColor,
         borderRadius: BorderRadius.circular(
           borderRadius ?? tokens.borderRadius,
         ),

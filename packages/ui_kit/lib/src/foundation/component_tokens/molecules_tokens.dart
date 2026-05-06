@@ -312,6 +312,9 @@ class TilawaChipTokens {
   const TilawaChipTokens({
     required this.padding,
     required this.compactPadding,
+    required this.backgroundColor,
+    required this.selectionSelectedBackgroundColor,
+    required this.selectionUnselectedBackgroundColor,
     required this.contentGap,
     required this.iconSize,
     required this.compactIconSize,
@@ -327,6 +330,9 @@ class TilawaChipTokens {
 
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry compactPadding;
+  final Color backgroundColor;
+  final Color selectionSelectedBackgroundColor;
+  final Color selectionUnselectedBackgroundColor;
   final double contentGap;
   final double iconSize;
   final double compactIconSize;
@@ -342,10 +348,29 @@ class TilawaChipTokens {
   factory TilawaChipTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaChipTokens.fromColorScheme(colorScheme, density: density);
+  }
+
+  factory TilawaChipTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final backgroundColor = _backgroundColor(colorScheme);
+    final selectionSelectedBackgroundColor = _selectionSelectedBackgroundColor(
+      colorScheme,
+    );
+    final selectionUnselectedBackgroundColor =
+        _selectionUnselectedBackgroundColor(colorScheme);
     if (density.isCompact) {
-      return const TilawaChipTokens(
+      return TilawaChipTokens(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        backgroundColor: backgroundColor,
+        selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
+        selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
         contentGap: 6,
         iconSize: 16,
         compactIconSize: 14,
@@ -359,9 +384,12 @@ class TilawaChipTokens {
         statusLetterSpacing: 0.5,
       );
     }
-    return const TilawaChipTokens(
+    return TilawaChipTokens(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      backgroundColor: backgroundColor,
+      selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
+      selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
       contentGap: 8,
       iconSize: 16,
       compactIconSize: 14,
@@ -376,9 +404,39 @@ class TilawaChipTokens {
     );
   }
 
+  static Color _backgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
+  static Color _selectionSelectedBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
+    return Color.lerp(
+      colorScheme.primaryContainer,
+      colorScheme.primary,
+      blendAmount,
+    )!;
+  }
+
+  static Color _selectionUnselectedBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.22 : 0.38;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
   TilawaChipTokens copyWith({
     EdgeInsetsGeometry? padding,
     EdgeInsetsGeometry? compactPadding,
+    Color? backgroundColor,
+    Color? selectionSelectedBackgroundColor,
+    Color? selectionUnselectedBackgroundColor,
     double? contentGap,
     double? iconSize,
     double? compactIconSize,
@@ -394,6 +452,13 @@ class TilawaChipTokens {
     return TilawaChipTokens(
       padding: padding ?? this.padding,
       compactPadding: compactPadding ?? this.compactPadding,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      selectionSelectedBackgroundColor:
+          selectionSelectedBackgroundColor ??
+          this.selectionSelectedBackgroundColor,
+      selectionUnselectedBackgroundColor:
+          selectionUnselectedBackgroundColor ??
+          this.selectionUnselectedBackgroundColor,
       contentGap: contentGap ?? this.contentGap,
       iconSize: iconSize ?? this.iconSize,
       compactIconSize: compactIconSize ?? this.compactIconSize,
@@ -419,6 +484,17 @@ class TilawaChipTokens {
       compactPadding: EdgeInsetsGeometry.lerp(
         a.compactPadding,
         b.compactPadding,
+        t,
+      )!,
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
+      selectionSelectedBackgroundColor: Color.lerp(
+        a.selectionSelectedBackgroundColor,
+        b.selectionSelectedBackgroundColor,
+        t,
+      )!,
+      selectionUnselectedBackgroundColor: Color.lerp(
+        a.selectionUnselectedBackgroundColor,
+        b.selectionUnselectedBackgroundColor,
         t,
       )!,
       contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
@@ -461,6 +537,8 @@ class TilawaSegmentedControlTokens {
   const TilawaSegmentedControlTokens({
     required this.containerPadding,
     required this.itemPadding,
+    required this.containerBackgroundColor,
+    required this.selectedBackgroundColor,
     required this.containerRadius,
     required this.itemRadius,
     required this.containerOpacity,
@@ -471,6 +549,8 @@ class TilawaSegmentedControlTokens {
 
   final EdgeInsetsGeometry containerPadding;
   final EdgeInsetsGeometry itemPadding;
+  final Color containerBackgroundColor;
+  final Color selectedBackgroundColor;
   final double containerRadius;
   final double itemRadius;
   final double containerOpacity;
@@ -481,10 +561,27 @@ class TilawaSegmentedControlTokens {
   factory TilawaSegmentedControlTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaSegmentedControlTokens.fromColorScheme(
+      colorScheme,
+      density: density,
+    );
+  }
+
+  factory TilawaSegmentedControlTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final containerBackgroundColor = _containerBackgroundColor(colorScheme);
+    final selectedBackgroundColor = _selectedBackgroundColor(colorScheme);
     if (density.isCompact) {
-      return const TilawaSegmentedControlTokens(
+      return TilawaSegmentedControlTokens(
         containerPadding: EdgeInsets.all(2),
         itemPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        containerBackgroundColor: containerBackgroundColor,
+        selectedBackgroundColor: selectedBackgroundColor,
         containerRadius: 10,
         itemRadius: 6,
         containerOpacity: 0.3,
@@ -493,9 +590,11 @@ class TilawaSegmentedControlTokens {
         unselectedFontWeight: FontWeight.normal,
       );
     }
-    return const TilawaSegmentedControlTokens(
+    return TilawaSegmentedControlTokens(
       containerPadding: EdgeInsets.all(4),
       itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      containerBackgroundColor: containerBackgroundColor,
+      selectedBackgroundColor: selectedBackgroundColor,
       containerRadius: 12,
       itemRadius: 8,
       containerOpacity: 0.3,
@@ -505,9 +604,29 @@ class TilawaSegmentedControlTokens {
     );
   }
 
+  static Color _containerBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
+  static Color _selectedBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.34 : 0.62;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
   TilawaSegmentedControlTokens copyWith({
     EdgeInsetsGeometry? containerPadding,
     EdgeInsetsGeometry? itemPadding,
+    Color? containerBackgroundColor,
+    Color? selectedBackgroundColor,
     double? containerRadius,
     double? itemRadius,
     double? containerOpacity,
@@ -518,6 +637,10 @@ class TilawaSegmentedControlTokens {
     return TilawaSegmentedControlTokens(
       containerPadding: containerPadding ?? this.containerPadding,
       itemPadding: itemPadding ?? this.itemPadding,
+      containerBackgroundColor:
+          containerBackgroundColor ?? this.containerBackgroundColor,
+      selectedBackgroundColor:
+          selectedBackgroundColor ?? this.selectedBackgroundColor,
       containerRadius: containerRadius ?? this.containerRadius,
       itemRadius: itemRadius ?? this.itemRadius,
       containerOpacity: containerOpacity ?? this.containerOpacity,
@@ -539,6 +662,16 @@ class TilawaSegmentedControlTokens {
         t,
       )!,
       itemPadding: EdgeInsetsGeometry.lerp(a.itemPadding, b.itemPadding, t)!,
+      containerBackgroundColor: Color.lerp(
+        a.containerBackgroundColor,
+        b.containerBackgroundColor,
+        t,
+      )!,
+      selectedBackgroundColor: Color.lerp(
+        a.selectedBackgroundColor,
+        b.selectedBackgroundColor,
+        t,
+      )!,
       containerRadius: lerpTokenDouble(a.containerRadius, b.containerRadius, t),
       itemRadius: lerpTokenDouble(a.itemRadius, b.itemRadius, t),
       containerOpacity: lerpTokenDouble(

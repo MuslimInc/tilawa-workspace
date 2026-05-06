@@ -112,7 +112,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       sectionTitle: TilawaSectionTitleTokens.defaults(density: density),
       sheetHandle: TilawaSheetHandleTokens.defaults(density: density),
       card: TilawaCardTokens.defaults(density: density),
-      iconBox: TilawaIconBoxTokens.defaults(density: density),
+      iconBox: TilawaIconBoxTokens.fromColorScheme(
+        effectiveColorScheme,
+        density: density,
+      ),
       loadingIndicator: TilawaLoadingIndicatorTokens.defaults(density: density),
       divider: TilawaDividerTokens.defaults(density: density),
       emptyState: TilawaEmptyStateTokens.defaults(density: density),
@@ -123,8 +126,14 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       feedbackStrip: TilawaFeedbackStripTokens.defaults(density: density),
       glassPanel: TilawaGlassPanelTokens.defaults(density: density),
       iconActionButton: TilawaIconActionButtonTokens.defaults(density: density),
-      chip: TilawaChipTokens.defaults(density: density),
-      segmentedControl: TilawaSegmentedControlTokens.defaults(density: density),
+      chip: TilawaChipTokens.fromColorScheme(
+        effectiveColorScheme,
+        density: density,
+      ),
+      segmentedControl: TilawaSegmentedControlTokens.fromColorScheme(
+        effectiveColorScheme,
+        density: density,
+      ),
       seekBar: TilawaSeekBarTokens.defaults(density: density),
       searchField: TilawaSearchFieldTokens.fromColorScheme(
         effectiveColorScheme,
@@ -144,7 +153,10 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       immersiveComposer: TilawaImmersiveComposerTokens.defaults(
         density: density,
       ),
-      iconToggle: TilawaIconToggleTokens.defaults(density: density),
+      iconToggle: TilawaIconToggleTokens.fromColorScheme(
+        effectiveColorScheme,
+        density: density,
+      ),
       permissionBanner: TilawaPermissionBannerTokens.defaults(density: density),
       prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(density: density),
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(

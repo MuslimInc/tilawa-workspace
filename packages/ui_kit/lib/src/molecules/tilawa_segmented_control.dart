@@ -51,13 +51,11 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
     final tokens = theme.componentTokens.segmentedControl;
 
     final effectiveBackground =
-        backgroundColor ??
-        colorScheme.surfaceContainerHighest.withValues(
-          alpha: tokens.containerOpacity,
-        );
-    final effectiveSelectedColor = selectedColor ?? colorScheme.surface;
+        backgroundColor ?? tokens.containerBackgroundColor;
+    final effectiveSelectedColor =
+        selectedColor ?? tokens.selectedBackgroundColor;
     final effectiveSelectedTextColor =
-        selectedTextColor ?? colorScheme.onSurface;
+        selectedTextColor ?? colorScheme.onPrimaryContainer;
     final effectiveUnselectedTextColor =
         unselectedTextColor ?? colorScheme.onSurfaceVariant;
 
