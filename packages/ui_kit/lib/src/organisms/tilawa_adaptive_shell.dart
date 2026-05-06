@@ -189,6 +189,10 @@ class _BottomNavBar extends StatelessWidget {
     final designTokens = theme.tokens;
     final bottomPadding = context.floatingBottomPadding;
 
+    final BorderRadius shellRadius = BorderRadius.circular(
+      tokens.bottomNavRadius,
+    );
+
     return TilawaContentBounds(
       kind: TilawaContentKind.media,
       alignment: .bottomCenter,
@@ -201,35 +205,49 @@ class _BottomNavBar extends StatelessWidget {
               tokens.bottomNavHorizontalMargin,
               bottomPadding,
             ),
-        child: Material(
-          color: theme.colorScheme.surfaceContainerHigh,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tokens.bottomNavRadius),
-            side: BorderSide(
-              color: theme.colorScheme.outlineVariant.withValues(
-                alpha: designTokens.opacitySubtle,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: shellRadius,
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.shadow.withValues(
+                  alpha: tokens.bottomNavShadowOpacity,
+                ),
+                blurRadius: tokens.bottomNavShadowBlur,
+                offset: tokens.bottomNavShadowOffset,
               ),
-              width: tokens.bottomNavBorderWidth,
-            ),
+            ],
           ),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
-            decoration: decoration ?? const BoxDecoration(),
-            child: Padding(
-              padding: EdgeInsets.all(tokens.bottomNavItemGap),
-              child: Row(
-                spacing: tokens.bottomNavItemGap,
-                children: [
-                  for (int i = 0; i < destinations.length; i++)
-                    Expanded(
-                      child: _NavButton(
-                        destination: destinations[i],
-                        isSelected: selectedIndex == i,
-                        onTap: () => onDestinationSelected(i),
-                        borderRadius: tokens.bottomNavInnerRadius,
+          child: Material(
+            color: theme.colorScheme.surfaceContainerHigh,
+            shape: RoundedRectangleBorder(
+              borderRadius: shellRadius,
+              side: BorderSide(
+                color: theme.colorScheme.outlineVariant.withValues(
+                  alpha: designTokens.opacitySubtle,
+                ),
+                width: tokens.bottomNavBorderWidth,
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: DecoratedBox(
+              decoration: decoration ?? const BoxDecoration(),
+              child: Padding(
+                padding: EdgeInsets.all(tokens.bottomNavItemGap),
+                child: Row(
+                  spacing: tokens.bottomNavItemGap,
+                  children: [
+                    for (int i = 0; i < destinations.length; i++)
+                      Expanded(
+                        child: _NavButton(
+                          destination: destinations[i],
+                          isSelected: selectedIndex == i,
+                          onTap: () => onDestinationSelected(i),
+                          borderRadius: tokens.bottomNavInnerRadius,
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -407,32 +425,19 @@ class _NavButton extends StatelessWidget {
                         : tokens.navButtonUnselectedScale,
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeOutBack,
-                    child: AnimatedContainer(
+                    child: PageTransitionSwitcher(
                       duration: const Duration(milliseconds: 200),
-                      curve: Curves.easeOutCubic,
-                      padding: const EdgeInsets.all(3),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isSelected
-                            ? selectedFg.withValues(
-                                alpha: tokens.navButtonSelectedCenterOpacity,
-                              )
-                            : Colors.transparent,
-                      ),
-                      child: PageTransitionSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        transitionBuilder:
-                            (child, animation, secondaryAnimation) =>
-                                FadeThroughTransition(
-                                  animation: animation,
-                                  secondaryAnimation: secondaryAnimation,
-                                  fillColor: Colors.transparent,
-                                  child: child,
-                                ),
-                        child: KeyedSubtree(
-                          key: ValueKey(isSelected),
-                          child: iconWidget,
-                        ),
+                      transitionBuilder:
+                          (child, animation, secondaryAnimation) =>
+                              FadeThroughTransition(
+                                animation: animation,
+                                secondaryAnimation: secondaryAnimation,
+                                fillColor: Colors.transparent,
+                                child: child,
+                              ),
+                      child: KeyedSubtree(
+                        key: ValueKey(isSelected),
+                        child: iconWidget,
                       ),
                     ),
                   ),

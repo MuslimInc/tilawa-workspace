@@ -345,6 +345,9 @@ class TilawaAdaptiveShellTokens {
     required this.bottomNavInnerRadius,
     required this.bottomNavBorderWidth,
     required this.bottomNavItemGap,
+    required this.bottomNavShadowOpacity,
+    required this.bottomNavShadowBlur,
+    required this.bottomNavShadowOffset,
     required this.sideRailRadius,
     required this.sideRailShadowOpacity,
     required this.sideRailShadowBlur,
@@ -370,6 +373,17 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavInnerRadius;
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
+
+  /// Alpha for the soft shadow rendered under the floating bottom nav.
+  /// Calibrated for visibility on real-device DPIs (~400 ppi).
+  final double bottomNavShadowOpacity;
+
+  /// Blur radius for the floating bottom nav shadow.
+  final double bottomNavShadowBlur;
+
+  /// Offset for the floating bottom nav shadow.
+  final Offset bottomNavShadowOffset;
+
   final double sideRailRadius;
   final double sideRailShadowOpacity;
   final double sideRailShadowBlur;
@@ -399,6 +413,9 @@ class TilawaAdaptiveShellTokens {
       bottomNavInnerRadius: 24,
       bottomNavBorderWidth: 1,
       bottomNavItemGap: 4,
+      bottomNavShadowOpacity: 0.12,
+      bottomNavShadowBlur: 18,
+      bottomNavShadowOffset: Offset(0, 6),
       sideRailRadius: 16,
       sideRailShadowOpacity: 0.05,
       sideRailShadowBlur: 12,
@@ -425,6 +442,9 @@ class TilawaAdaptiveShellTokens {
     double? bottomNavInnerRadius,
     double? bottomNavBorderWidth,
     double? bottomNavItemGap,
+    double? bottomNavShadowOpacity,
+    double? bottomNavShadowBlur,
+    Offset? bottomNavShadowOffset,
     double? sideRailRadius,
     double? sideRailShadowOpacity,
     double? sideRailShadowBlur,
@@ -453,6 +473,11 @@ class TilawaAdaptiveShellTokens {
       bottomNavInnerRadius: bottomNavInnerRadius ?? this.bottomNavInnerRadius,
       bottomNavBorderWidth: bottomNavBorderWidth ?? this.bottomNavBorderWidth,
       bottomNavItemGap: bottomNavItemGap ?? this.bottomNavItemGap,
+      bottomNavShadowOpacity:
+          bottomNavShadowOpacity ?? this.bottomNavShadowOpacity,
+      bottomNavShadowBlur: bottomNavShadowBlur ?? this.bottomNavShadowBlur,
+      bottomNavShadowOffset:
+          bottomNavShadowOffset ?? this.bottomNavShadowOffset,
       sideRailRadius: sideRailRadius ?? this.sideRailRadius,
       sideRailShadowOpacity:
           sideRailShadowOpacity ?? this.sideRailShadowOpacity,
@@ -522,6 +547,21 @@ class TilawaAdaptiveShellTokens {
         b.bottomNavItemGap,
         t,
       ),
+      bottomNavShadowOpacity: lerpTokenDouble(
+        a.bottomNavShadowOpacity,
+        b.bottomNavShadowOpacity,
+        t,
+      ),
+      bottomNavShadowBlur: lerpTokenDouble(
+        a.bottomNavShadowBlur,
+        b.bottomNavShadowBlur,
+        t,
+      ),
+      bottomNavShadowOffset: Offset.lerp(
+        a.bottomNavShadowOffset,
+        b.bottomNavShadowOffset,
+        t,
+      )!,
       sideRailRadius: lerpTokenDouble(a.sideRailRadius, b.sideRailRadius, t),
       sideRailShadowOpacity: lerpTokenDouble(
         a.sideRailShadowOpacity,
