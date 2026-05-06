@@ -39,28 +39,35 @@ class TilawaSelectionTile extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
 
     final textStyle = theme.textTheme.bodyLarge?.copyWith(
-      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      color: isSelected ? colorScheme.primary : null,
+      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+      color: isSelected ? colorScheme.primary : colorScheme.onSurface,
     );
 
     return Column(
       children: [
-        InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: tokens.tileContentPadding,
-            child: Row(
-              spacing: tokens.tileItemGap,
-              children: [
-                if (leading != null) leading!,
-                Expanded(child: Text(title, style: textStyle)),
-                if (isSelected)
-                  Icon(
-                    Icons.check_rounded,
-                    color: colorScheme.primary,
-                    size: tokens.tileTrailingSize,
-                  ),
-              ],
+        Material(
+          color: isSelected
+              ? colorScheme.primaryContainer.withValues(
+                  alpha: tokens.tileIconContainerOpacity * 3,
+                )
+              : Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: Padding(
+              padding: tokens.tileContentPadding,
+              child: Row(
+                spacing: tokens.tileItemGap,
+                children: [
+                  if (leading != null) leading!,
+                  Expanded(child: Text(title, style: textStyle)),
+                  if (isSelected)
+                    Icon(
+                      Icons.check_rounded,
+                      color: colorScheme.primary,
+                      size: tokens.tileTrailingSize,
+                    ),
+                ],
+              ),
             ),
           ),
         ),
@@ -70,7 +77,7 @@ class TilawaSelectionTile extends StatelessWidget {
             child: Divider(
               height: tokens.tileDividerHeight,
               thickness: tokens.tileDividerThickness,
-              color: theme.dividerColor.withValues(
+              color: colorScheme.outlineVariant.withValues(
                 alpha: tokens.tileDividerOpacity,
               ),
             ),

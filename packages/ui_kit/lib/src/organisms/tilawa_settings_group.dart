@@ -15,6 +15,7 @@ class TilawaSettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
 
     return Column(
@@ -27,18 +28,24 @@ class TilawaSettingsGroup extends StatelessWidget {
             style: TextStyle(
               fontSize: tokens.groupTitleFontSize,
               fontWeight: .w800,
-              color: theme.primaryColor,
+              color: colorScheme.primary,
               letterSpacing: tokens.groupTitleLetterSpacing,
             ),
           ),
         ),
         Container(
           decoration: BoxDecoration(
-            color: theme.cardColor,
+            color: colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(tokens.groupBorderRadius),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(
+                alpha: tokens.tileDividerOpacity * 2,
+              ),
+              width: tokens.tileDividerThickness,
+            ),
             boxShadow: [
               BoxShadow(
-                color: theme.colorScheme.shadow.withValues(
+                color: colorScheme.shadow.withValues(
                   alpha: tokens.groupShadowOpacity,
                 ),
                 blurRadius: tokens.groupShadowBlur,

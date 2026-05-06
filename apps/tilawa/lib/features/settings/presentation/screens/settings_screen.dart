@@ -382,6 +382,8 @@ class _SettingsProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final colorScheme = context.colorScheme;
+    final foregroundColor = colorScheme.onPrimary;
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
@@ -396,10 +398,7 @@ class _SettingsProfileCard extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                context.colorScheme.primary,
-                context.colorScheme.secondary,
-              ],
+              colors: [colorScheme.primary, colorScheme.secondary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -411,12 +410,14 @@ class _SettingsProfileCard extends StatelessWidget {
                 width: _kAvatarSize,
                 height: _kAvatarSize,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(
+                  color: foregroundColor.withValues(
                     alpha: tokens.opacitySubtle * 2,
                   ),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: tokens.opacityMedium),
+                    color: foregroundColor.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
                     width: tokens.spaceTiny,
                   ),
                 ),
@@ -424,7 +425,7 @@ class _SettingsProfileCard extends StatelessWidget {
                   child: Icon(
                     FluentIcons.person_32_filled,
                     size: _kPersonIconSize,
-                    color: Colors.white,
+                    color: foregroundColor,
                   ),
                 ),
               ),
@@ -437,14 +438,14 @@ class _SettingsProfileCard extends StatelessWidget {
                       user?.displayName ?? context.l10n.guestUser,
                       style: context.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: foregroundColor,
                       ),
                     ),
                     SizedBox(height: tokens.spaceExtraSmall),
                     Text(
                       user?.email ?? context.l10n.signInToSync,
                       style: context.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(
+                        color: foregroundColor.withValues(
                           alpha: tokens.opacityGlass,
                         ),
                         fontWeight: FontWeight.w500,
@@ -456,9 +457,11 @@ class _SettingsProfileCard extends StatelessWidget {
               if (user == null)
                 IconButton(
                   onPressed: () => const LoginRoute().push(context),
-                  icon: const Icon(
-                    FluentIcons.arrow_right_24_filled,
-                    color: Colors.white,
+                  icon: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? FluentIcons.arrow_left_24_filled
+                        : FluentIcons.arrow_right_24_filled,
+                    color: foregroundColor,
                   ),
                 ),
             ],
@@ -475,14 +478,15 @@ class _LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final colorScheme = context.colorScheme;
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         if (state is! AuthAuthenticated) return const SizedBox.shrink();
         return Material(
-          color: context.isDarkMode
-              ? context.theme.cardColor
-              : AppColors.logoutBackground,
+          color: colorScheme.errorContainer.withValues(
+            alpha: context.isDarkMode ? 0.16 : 0.58,
+          ),
           borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           child: InkWell(
             onTap: () => _showLogoutDialog(context),
@@ -494,14 +498,14 @@ class _LogoutButton extends StatelessWidget {
                 children: [
                   Icon(
                     FluentIcons.sign_out_24_filled,
-                    color: AppColors.error,
+                    color: colorScheme.error,
                     size: tokens.iconSizeMedium,
                   ),
                   SizedBox(width: tokens.spaceMedium),
                   Text(
                     context.l10n.logout,
                     style: context.textTheme.bodyLarge?.copyWith(
-                      color: AppColors.error,
+                      color: colorScheme.error,
                     ),
                   ),
                 ],

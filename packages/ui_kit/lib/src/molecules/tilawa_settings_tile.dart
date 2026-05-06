@@ -28,8 +28,12 @@ class TilawaSettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
-    final effectiveIconColor = iconColor ?? theme.primaryColor;
+    final effectiveIconColor = iconColor ?? colorScheme.primary;
+    final trailingIcon = Directionality.of(context) == TextDirection.rtl
+        ? FluentIcons.chevron_left_24_filled
+        : FluentIcons.chevron_right_24_filled;
 
     return Column(
       children: [
@@ -61,6 +65,7 @@ class TilawaSettingsTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: tokens.tileTitleFontSize,
                             fontWeight: .w600,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                         if (subtitle != null)
@@ -68,10 +73,9 @@ class TilawaSettingsTile extends StatelessWidget {
                             subtitle!,
                             style: TextStyle(
                               fontSize: tokens.tileSubtitleFontSize,
-                              color: theme.textTheme.bodySmall?.color
-                                  ?.withValues(
-                                    alpha: tokens.tileSubtitleOpacity,
-                                  ),
+                              color: colorScheme.onSurfaceVariant.withValues(
+                                alpha: tokens.tileSubtitleOpacity,
+                              ),
                             ),
                           ),
                       ],
@@ -79,9 +83,9 @@ class TilawaSettingsTile extends StatelessWidget {
                   ),
                   trailing ??
                       Icon(
-                        FluentIcons.chevron_right_24_filled,
+                        trailingIcon,
                         size: tokens.tileTrailingSize,
-                        color: theme.textTheme.bodySmall?.color?.withValues(
+                        color: colorScheme.onSurfaceVariant.withValues(
                           alpha: tokens.tileTrailingOpacity,
                         ),
                       ),
@@ -96,7 +100,7 @@ class TilawaSettingsTile extends StatelessWidget {
             child: Divider(
               height: tokens.tileDividerHeight,
               thickness: tokens.tileDividerThickness,
-              color: theme.dividerColor.withValues(
+              color: colorScheme.outlineVariant.withValues(
                 alpha: tokens.tileDividerOpacity,
               ),
             ),
@@ -131,8 +135,9 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
-    final effectiveIconColor = iconColor ?? theme.primaryColor;
+    final effectiveIconColor = iconColor ?? colorScheme.primary;
 
     return Column(
       children: [
@@ -164,6 +169,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                           style: TextStyle(
                             fontSize: tokens.tileTitleFontSize,
                             fontWeight: .w600,
+                            color: colorScheme.onSurface,
                           ),
                         ),
                         if (subtitle != null)
@@ -171,10 +177,9 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                             subtitle!,
                             style: TextStyle(
                               fontSize: tokens.tileSubtitleFontSize,
-                              color: theme.textTheme.bodySmall?.color
-                                  ?.withValues(
-                                    alpha: tokens.tileSubtitleOpacity,
-                                  ),
+                              color: colorScheme.onSurfaceVariant.withValues(
+                                alpha: tokens.tileSubtitleOpacity,
+                              ),
                             ),
                           ),
                       ],
@@ -183,10 +188,10 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                   Switch.adaptive(
                     value: value,
                     onChanged: onChanged,
-                    activeTrackColor: theme.primaryColor.withValues(
+                    activeTrackColor: colorScheme.primary.withValues(
                       alpha: tokens.switchActiveTrackOpacity,
                     ),
-                    activeThumbColor: theme.primaryColor,
+                    activeThumbColor: colorScheme.primary,
                   ),
                 ],
               ),
@@ -199,7 +204,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
             child: Divider(
               height: tokens.tileDividerHeight,
               thickness: tokens.tileDividerThickness,
-              color: theme.dividerColor.withValues(
+              color: colorScheme.outlineVariant.withValues(
                 alpha: tokens.tileDividerOpacity,
               ),
             ),
