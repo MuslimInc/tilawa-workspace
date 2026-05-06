@@ -22,9 +22,6 @@ class HistorySearchBar extends StatelessWidget {
       hintText: context.l10n.searchHistory,
       onChanged: onChanged,
       onClear: onClear,
-      backgroundColor: Theme.of(
-        context,
-      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       borderRadius: BorderRadius.circular(12),
     );
   }
