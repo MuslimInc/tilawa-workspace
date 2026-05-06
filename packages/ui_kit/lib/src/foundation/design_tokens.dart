@@ -19,6 +19,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.radiusLarge,
     required this.radiusExtraLarge,
     required this.opacitySubtle,
+    required this.opacityShadow,
+    required this.opacityShadowStrong,
     required this.opacityMedium,
     required this.opacityEmphasis,
     required this.opacityGlass,
@@ -89,8 +91,21 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 24.0
   final double radiusExtraLarge;
 
-  /// 0.1
+  /// 0.1 — generic faint tint alpha for surface fills, painter strokes,
+  /// and tinted backgrounds. Do not use as the alpha for `BoxShadow.color`
+  /// — pick [opacityShadow] or [opacityShadowStrong] instead, which are
+  /// calibrated for visible depth on real-device DPIs.
   final double opacitySubtle;
+
+  /// 0.18 — default alpha for `BoxShadow.color` on small/elevated surfaces
+  /// (cards, chips, search fields). Calibrated to remain visible at ~400 ppi
+  /// while staying soft enough not to look like a hard drop shadow.
+  final double opacityShadow;
+
+  /// 0.28 — alpha for `BoxShadow.color` on hero/floating surfaces (glass
+  /// panels, floating bottom nav, raised app bars) where stronger depth
+  /// is desired.
+  final double opacityShadowStrong;
 
   /// 0.3
   final double opacityMedium;
@@ -228,6 +243,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       radiusLarge: 16.0,
       radiusExtraLarge: 24.0,
       opacitySubtle: 0.1,
+      opacityShadow: 0.18,
+      opacityShadowStrong: 0.28,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,
       opacityGlass: 0.8,
@@ -280,6 +297,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? radiusLarge,
     double? radiusExtraLarge,
     double? opacitySubtle,
+    double? opacityShadow,
+    double? opacityShadowStrong,
     double? opacityMedium,
     double? opacityEmphasis,
     double? opacityGlass,
@@ -329,6 +348,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       radiusLarge: radiusLarge ?? this.radiusLarge,
       radiusExtraLarge: radiusExtraLarge ?? this.radiusExtraLarge,
       opacitySubtle: opacitySubtle ?? this.opacitySubtle,
+      opacityShadow: opacityShadow ?? this.opacityShadow,
+      opacityShadowStrong: opacityShadowStrong ?? this.opacityShadowStrong,
       opacityMedium: opacityMedium ?? this.opacityMedium,
       opacityEmphasis: opacityEmphasis ?? this.opacityEmphasis,
       opacityGlass: opacityGlass ?? this.opacityGlass,
@@ -403,6 +424,12 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         t,
       )!,
       opacitySubtle: lerpDouble(opacitySubtle, other.opacitySubtle, t)!,
+      opacityShadow: lerpDouble(opacityShadow, other.opacityShadow, t)!,
+      opacityShadowStrong: lerpDouble(
+        opacityShadowStrong,
+        other.opacityShadowStrong,
+        t,
+      )!,
       opacityMedium: lerpDouble(opacityMedium, other.opacityMedium, t)!,
       opacityEmphasis: lerpDouble(opacityEmphasis, other.opacityEmphasis, t)!,
       opacityGlass: lerpDouble(opacityGlass, other.opacityGlass, t)!,

@@ -59,7 +59,7 @@ class TilawaGlassPanel extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: theme.colorScheme.shadow.withValues(
-              alpha: designTokens.opacitySubtle,
+              alpha: designTokens.opacityShadowStrong,
             ),
             blurRadius: designTokens.blurShadow,
             offset: designTokens.shadowOffsetMedium,

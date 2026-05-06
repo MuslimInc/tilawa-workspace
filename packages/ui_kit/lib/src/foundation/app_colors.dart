@@ -46,8 +46,9 @@ abstract final class AppColors {
   /// Light elevated/contained surface.
   static const Color lightSurfaceContainer = Color(0xFFF1EEE6);
 
-  /// Light outline/divider color.
-  static const Color lightOutline = Color(0xFFD6CEC0);
+  /// Light outline/divider color. Calibrated for visibility on real-device
+  /// DPIs (~400 ppi); avoid going lighter than this.
+  static const Color lightOutline = Color(0xFFC8BDA8);
 
   /// Dark app background.
   static const Color darkBackground = Color(0xFF101816);
@@ -58,8 +59,9 @@ abstract final class AppColors {
   /// Dark elevated/contained surface.
   static const Color darkSurfaceContainer = Color(0xFF1C2925);
 
-  /// Dark outline/divider color.
-  static const Color darkOutline = Color(0xFF3B4A45);
+  /// Dark outline/divider color. Calibrated for visibility on real-device
+  /// DPIs (~400 ppi); avoid going darker than this.
+  static const Color darkOutline = Color(0xFF4B5B55);
 
   // Status colors
   /// Error/failure color

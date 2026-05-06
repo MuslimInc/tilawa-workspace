@@ -16,7 +16,7 @@ class AppTheme {
   static const int _lightBlendLevel = 3;
   static const FlexAppBarStyle _lightAppBarStyle = FlexAppBarStyle.surface;
   static const double _lightAppBarOpacity = 1;
-  static const double _lightAppBarElevation = 0;
+  static const double _lightAppBarElevation = 1;
   static const FlexTabBarStyle _lightTabBarStyle = FlexTabBarStyle.forAppBar;
 
   // Dark theme configuration constants
@@ -25,7 +25,7 @@ class AppTheme {
   static const int _darkBlendLevel = 7;
   static const FlexAppBarStyle _darkAppBarStyle = FlexAppBarStyle.surface;
   static const double _darkAppBarOpacity = 1;
-  static const double _darkAppBarElevation = 0;
+  static const double _darkAppBarElevation = 2;
   static const FlexTabBarStyle _darkTabBarStyle = FlexTabBarStyle.forAppBar;
 
   // Shared configuration constants
@@ -87,9 +87,12 @@ class AppTheme {
       surface: AppColors.lightSurface,
       surfaceContainerLowest: Colors.white,
       surfaceContainerLow: AppColors.lightBackground,
-      surfaceContainer: AppColors.lightSurfaceContainer,
-      surfaceContainerHigh: const Color(0xFFEAE6DC),
-      surfaceContainerHighest: const Color(0xFFE2DDD1),
+      // Phase 1: deepen the upper container tiers so elevation reads clearly
+      // on real-device DPIs. Lower tiers stay close to scaffold to preserve
+      // existing flat backgrounds.
+      surfaceContainer: const Color(0xFFEBE6D7),
+      surfaceContainerHigh: const Color(0xFFE2DBC7),
+      surfaceContainerHighest: const Color(0xFFD7CFB9),
       outline: AppColors.lightOutline,
       outlineVariant: const Color(0xFFE6DED0),
       shadow: const Color(0xFF1F2926),
@@ -103,8 +106,11 @@ class AppTheme {
       surfaceContainerLowest: const Color(0xFF0B1210),
       surfaceContainerLow: AppColors.darkBackground,
       surfaceContainer: AppColors.darkSurfaceContainer,
-      surfaceContainerHigh: const Color(0xFF24332F),
-      surfaceContainerHighest: const Color(0xFF2D3E39),
+      // Phase 1: lift the upper container tiers so floating elements
+      // (bottom nav, sheets, raised cards) separate from the page on
+      // real-device DPIs.
+      surfaceContainerHigh: const Color(0xFF2A3A35),
+      surfaceContainerHighest: const Color(0xFF34463F),
       outline: AppColors.darkOutline,
       outlineVariant: const Color(0xFF2F3E39),
       shadow: Colors.black,
