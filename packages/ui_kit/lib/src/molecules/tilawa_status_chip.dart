@@ -24,13 +24,13 @@ class TilawaStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.chip;
-    final effectiveForeground = foregroundColor ?? theme.colorScheme.onSurface;
+    final colorScheme = theme.colorScheme;
+    final effectiveForeground = foregroundColor ?? colorScheme.onSurfaceVariant;
 
     return TilawaChip(
       label: label,
       icon: icon,
-      backgroundColor:
-          backgroundColor ?? theme.colorScheme.surfaceContainerHigh,
+      backgroundColor: backgroundColor ?? colorScheme.surfaceContainerHigh,
       foregroundColor: effectiveForeground,
       padding: padding ?? tokens.compactPadding,
       borderRadius: tokens.roundedRadius,

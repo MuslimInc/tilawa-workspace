@@ -36,18 +36,25 @@ class TilawaChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final componentTokens = theme.componentTokens.chip;
     final designTokens = theme.tokens;
     final effectiveBackground =
-        backgroundColor ?? theme.colorScheme.surfaceContainerHigh;
-    final effectiveForeground = foregroundColor ?? theme.colorScheme.onSurface;
+        backgroundColor ?? colorScheme.surfaceContainerHigh;
+    final effectiveForeground = foregroundColor ?? colorScheme.onSurfaceVariant;
     final effectiveRadius = borderRadius ?? componentTokens.roundedRadius;
+    final effectiveBorderColor =
+        borderColor ??
+        colorScheme.outlineVariant.withValues(
+          alpha: designTokens.opacityMedium,
+        );
 
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(effectiveRadius),
-      side: borderColor == null
-          ? BorderSide.none
-          : BorderSide(color: borderColor!, width: componentTokens.borderWidth),
+      side: BorderSide(
+        color: effectiveBorderColor,
+        width: componentTokens.borderWidth,
+      ),
     );
 
     final content = Container(

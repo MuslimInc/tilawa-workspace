@@ -25,18 +25,26 @@ class MetadataChip extends StatelessWidget {
     final theme = Theme.of(context);
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.chip;
-    final color = foregroundColor ?? theme.colorScheme.onSurface;
+    final colorScheme = theme.colorScheme;
+    final color = foregroundColor ?? colorScheme.onSurfaceVariant;
 
     return TilawaChip(
       label: label,
       icon: icon,
-      backgroundColor: backgroundColor ?? Colors.transparent,
+      backgroundColor: backgroundColor ?? colorScheme.surfaceContainerLow,
       foregroundColor: color,
-      borderColor: borderColor,
-      padding: EdgeInsets.zero,
+      borderColor:
+          borderColor ??
+          colorScheme.outlineVariant.withValues(
+            alpha: designTokens.opacityMedium,
+          ),
+      padding: componentTokens.compactPadding,
       borderRadius: componentTokens.roundedRadius,
       iconSize: designTokens.iconSizeSmall,
-      textStyle: theme.textTheme.bodyMedium?.copyWith(color: color),
+      textStyle: theme.textTheme.labelMedium?.copyWith(
+        color: color,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 }
