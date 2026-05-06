@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
 import '../shared/widgets/tilawa_back_button.dart';
 
 import '../router/app_router_config.dart';
@@ -12,6 +14,9 @@ class RouteListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<String> interactions = _getAllRoutes(routes ?? $appRoutes);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -20,7 +25,7 @@ class RouteListScreen extends StatelessWidget {
       ),
       body: ListView.separated(
         itemCount: interactions.length,
-        separatorBuilder: (context, index) => const Divider(height: 1),
+        separatorBuilder: (context, index) => const TilawaDivider(height: 1),
         itemBuilder: (context, index) {
           final String path = interactions[index];
           final bool isClickable = !path.contains(':');
@@ -28,17 +33,25 @@ class RouteListScreen extends StatelessWidget {
           return ListTile(
             title: Text(
               path,
-              style: const TextStyle(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontFamily: 'Courier',
                 fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface,
               ),
             ),
             trailing: isClickable
-                ? const Icon(Icons.chevron_right, color: Colors.grey)
-                : const Chip(
+                ? Icon(Icons.chevron_right, color: colorScheme.onSurfaceVariant)
+                : Chip(
+                    backgroundColor: colorScheme.surfaceContainerHighest,
+                    side: BorderSide(
+                      color: colorScheme.outlineVariant,
+                      width: tokens.borderWidthThin,
+                    ),
                     label: Text(
                       'Parameterized',
-                      style: TextStyle(fontSize: 10),
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
             onTap: isClickable ? () => context.push(path) : null,

@@ -6,6 +6,7 @@ import 'package:tilawa/features/quran_reader/presentation/screens/quran_image_re
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_render_demo_screen.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
@@ -125,20 +126,11 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(context.l10n.pageNotFound(state.uri.toString())),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => const HomeRoute().go(context),
-              child: Text(context.l10n.goHome),
-            ),
-          ],
-        ),
+      body: TilawaErrorState(
+        icon: Icons.error_outline_rounded,
+        title: context.l10n.pageNotFound(state.uri.toString()),
+        retryLabel: context.l10n.goHome,
+        onRetry: () => const HomeRoute().go(context),
       ),
     );
   }

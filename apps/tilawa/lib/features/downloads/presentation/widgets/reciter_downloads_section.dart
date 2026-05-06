@@ -223,6 +223,10 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
   }
 
   Widget _buildDownloadsList(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     if (widget.downloadsByNarrative.length == 1) {
       // Single narrative: just show the list
       final List<DownloadItem> downloads =
@@ -243,12 +247,12 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               ),
               if (index != downloads.length - 1)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Divider(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+                  child: TilawaDivider(
                     height: 1,
-                    color: Theme.of(
-                      context,
-                    ).dividerColor.withValues(alpha: 0.1),
+                    color: colorScheme.outlineVariant.withValues(
+                      alpha: tokens.opacitySubtle,
+                    ),
                   ),
                 ),
             ],
@@ -269,13 +273,16 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
             // Narrative Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceLarge,
+                vertical: tokens.spaceMedium,
+              ),
+              color: colorScheme.surfaceContainerLowest,
               child: Text(
                 narrativeName,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+                  color: colorScheme.primary,
                 ),
               ),
             ),
@@ -296,12 +303,14 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                   // Show divider unless it's the last item in this narrative
                   if (index != narrativeDownloads.length - 1)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Divider(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: tokens.spaceLarge,
+                      ),
+                      child: TilawaDivider(
                         height: 1,
-                        color: Theme.of(
-                          context,
-                        ).dividerColor.withValues(alpha: 0.1),
+                        color: colorScheme.outlineVariant.withValues(
+                          alpha: tokens.opacitySubtle,
+                        ),
                       ),
                     ),
                 ],
@@ -312,8 +321,8 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               TilawaDivider(
                 height: 1,
                 thickness: 4,
-                color: Theme.of(context).colorScheme.outlineVariant.withValues(
-                  alpha: Theme.of(context).tokens.opacitySubtle,
+                color: colorScheme.outlineVariant.withValues(
+                  alpha: tokens.opacitySubtle,
                 ),
               ),
           ],

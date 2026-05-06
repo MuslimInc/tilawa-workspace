@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'app_router_config.dart';
 import 'json_type_registry.dart';
@@ -95,20 +96,11 @@ class AppRouter {
 
   static Widget errorBuilder(BuildContext context, GoRouterState state) =>
       Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(context.l10n.pageNotFound(state.uri.toString())),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => const HomeRoute().go(context),
-                child: Text(context.l10n.goHome),
-              ),
-            ],
-          ),
+        body: TilawaErrorState(
+          icon: Icons.error_outline_rounded,
+          title: context.l10n.pageNotFound(state.uri.toString()),
+          retryLabel: context.l10n.goHome,
+          onRetry: () => const HomeRoute().go(context),
         ),
       );
 

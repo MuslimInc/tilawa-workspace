@@ -99,7 +99,7 @@ class _SourceOption extends StatelessWidget {
     final tokens = theme.tokens;
 
     return ListTile(
-      leading: Icon(icon, color: theme.primaryColor),
+      leading: Icon(icon, color: theme.colorScheme.primary),
       title: Text(label),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(tokens.radiusMedium),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
 import '../../domain/entities/subscription_plan.dart';
 
 class SubscriptionPlanCard extends StatelessWidget {
@@ -7,159 +9,158 @@ class SubscriptionPlanCard extends StatelessWidget {
     required this.plan,
     required this.onSelect,
   });
+
   final SubscriptionPlan plan;
   final VoidCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final Color accent = plan.isPopular
+        ? colorScheme.tertiary
+        : colorScheme.primary;
+    final Color surface = plan.isPopular
+        ? colorScheme.tertiaryContainer.withValues(alpha: 0.55)
+        : colorScheme.surfaceContainerLow;
+
     return Card(
-      elevation: plan.isPopular ? 6 : 2,
+      elevation: 0,
+      color: surface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: plan.isPopular
-            ? const BorderSide(color: Colors.amber, width: 2)
-            : BorderSide.none,
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: plan.isPopular
-              ? LinearGradient(
-                  colors: [Colors.amber.shade50, Colors.amber.shade100],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        side: BorderSide(
+          color: plan.isPopular
+              ? accent.withValues(alpha: tokens.opacityEmphasis)
+              : colorScheme.outlineVariant.withValues(
+                  alpha: tokens.opacityMedium,
+                ),
+          width: plan.isPopular ? 2 : tokens.borderWidthThin,
         ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
                 Expanded(
                   child: Text(
                     plan.name,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: plan.isPopular ? Colors.amber.shade800 : null,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: plan.isPopular ? accent : colorScheme.onSurface,
                     ),
                   ),
                 ),
                 if (plan.isPopular)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceSmall,
+                      vertical: tokens.spaceTiny,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.amber,
-                      borderRadius: BorderRadius.circular(12),
+                      color: colorScheme.tertiary,
+                      borderRadius: BorderRadius.circular(tokens.radiusMedium),
                     ),
-                    child: const Text(
+                    child: Text(
                       'POPULAR',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: colorScheme.onTertiary,
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 8),
-
-            // Description
+            SizedBox(height: tokens.spaceSmall),
             Text(
               plan.description,
-              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
-            const SizedBox(height: 12),
-
-            // Price
+            SizedBox(height: tokens.spaceMedium),
             Row(
-              spacing: 8,
+              spacing: tokens.spaceSmall,
               children: [
                 Text(
                   plan.formattedPrice,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 Text(
                   plan.durationText,
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
                 if (plan.discountText.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceSmall,
+                      vertical: tokens.spaceTiny,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(8),
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(tokens.radiusMedium),
                     ),
                     child: Text(
                       plan.discountText,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: colorScheme.onPrimaryContainer,
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 16),
-
-            // Features
+            SizedBox(height: tokens.spaceLarge),
             ...plan.features.map(
               (feature) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2),
+                padding: EdgeInsets.symmetric(vertical: tokens.spaceTiny),
                 child: Row(
-                  spacing: 8,
+                  spacing: tokens.spaceSmall,
                   children: [
-                    const Icon(
-                      Icons.check_circle,
-                      size: 16,
-                      color: Colors.green,
+                    Icon(
+                      Icons.check_circle_rounded,
+                      size: tokens.iconSizeSmall,
+                      color: colorScheme.primary,
                     ),
                     Expanded(
-                      child: Text(
-                        feature,
-                        style: const TextStyle(fontSize: 14),
-                      ),
+                      child: Text(feature, style: theme.textTheme.bodyMedium),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Select Button
+            SizedBox(height: tokens.spaceLarge),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: FilledButton(
                 onPressed: onSelect,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: plan.isPopular ? Colors.amber : Colors.blue,
-                  foregroundColor: plan.isPopular ? Colors.black : Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                style: FilledButton.styleFrom(
+                  backgroundColor: accent,
+                  foregroundColor: plan.isPopular
+                      ? colorScheme.onTertiary
+                      : colorScheme.onPrimary,
+                  padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(tokens.radiusMedium),
                   ),
                 ),
                 child: Text(
                   plan.type == SubscriptionType.lifetime
                       ? 'Buy Now'
                       : 'Subscribe',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: plan.isPopular
+                        ? colorScheme.onTertiary
+                        : colorScheme.onPrimary,
                   ),
                 ),
               ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/playlists/domain/entities/playlist.dart';
 import '../features/playlists/presentation/bloc/playlists_bloc.dart';
@@ -57,7 +58,7 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                 msg: playlist.isFavorite
                     ? l10n.addedToFavorites
                     : l10n.removedFromFavorites,
-                backgroundColor: Colors.blue,
+                backgroundColor: Theme.of(context).colorScheme.primary,
               );
             },
             error: (message) {
@@ -108,32 +109,13 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
                 ),
               ],
             ),
-            error: (message) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    message,
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<PlaylistsBloc>().add(
-                        const LoadPlaylistsEvent(),
-                      );
-                    },
-                    child: Text(l10n.retry),
-                  ),
-                ],
-              ),
+            error: (message) => TilawaErrorState(
+              icon: Icons.error_outline_rounded,
+              title: message,
+              retryLabel: l10n.retry,
+              onRetry: () {
+                context.read<PlaylistsBloc>().add(const LoadPlaylistsEvent());
+              },
             ),
             playlistCreated: (playlist, playlists) =>
                 _buildPlaylistsList(context, l10n, playlists),
@@ -163,35 +145,14 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.playlist_add,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.noPlaylistsYet,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.createFirstPlaylistMessage,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => _showCreatePlaylistDialog(context),
-            icon: const Icon(Icons.add),
-            label: Text(l10n.createPlaylist),
-          ),
-        ],
+    return TilawaEmptyState(
+      icon: Icons.playlist_add_rounded,
+      title: l10n.noPlaylistsYet,
+      subtitle: l10n.createFirstPlaylistMessage,
+      action: ElevatedButton.icon(
+        onPressed: () => _showCreatePlaylistDialog(context),
+        icon: const Icon(Icons.add_rounded),
+        label: Text(l10n.createPlaylist),
       ),
     );
   }
@@ -273,8 +234,8 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             child: Text(l10n.delete),
           ),

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
@@ -58,7 +59,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 trialNotEligible: (message) {
                   ToastUtils.showToast(
                     msg: message,
-                    backgroundColor: Colors.orange,
+                    backgroundColor: Theme.of(context).colorScheme.tertiary,
                   );
                 },
               );
@@ -93,24 +94,19 @@ class _PremiumScreenState extends State<PremiumScreen> {
     List<SubscriptionPlan> plans,
     bool canDownload,
   ) {
+    final tokens = Theme.of(context).tokens;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16).copyWith(bottom: 120),
+      padding: EdgeInsets.all(tokens.spaceLarge).copyWith(bottom: 120),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Premium Status Card
           _buildStatusCard(context, status, canDownload),
-          const SizedBox(height: 24),
-
-          // Premium Features
-          _buildFeaturesSection(),
-          const SizedBox(height: 24),
-
-          // Subscription Plans
+          SizedBox(height: tokens.spaceExtraLarge),
+          _buildFeaturesSection(context),
+          SizedBox(height: tokens.spaceExtraLarge),
           _buildPlansSection(context, plans),
-          const SizedBox(height: 24),
-
-          // Trial Section
+          SizedBox(height: tokens.spaceExtraLarge),
           if (!status.isTrialUsed && !status.isSubscriptionActive)
             _buildTrialSection(context),
         ],
@@ -123,108 +119,112 @@ class _PremiumScreenState extends State<PremiumScreen> {
     PremiumStatus status,
     bool canDownload,
   ) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final accent = canDownload ? colorScheme.primary : colorScheme.tertiary;
+    final container = canDownload
+        ? colorScheme.primaryContainer
+        : colorScheme.tertiaryContainer;
+    final onContainer = canDownload
+        ? colorScheme.onPrimaryContainer
+        : colorScheme.onTertiaryContainer;
+
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: canDownload
-                ? [Colors.green.shade400, Colors.green.shade600]
-                : [Colors.amber.shade400, Colors.amber.shade600],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+      elevation: 0,
+      color: container,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        side: BorderSide(
+          color: accent.withValues(alpha: tokens.opacitySubtle),
+          width: tokens.borderWidthThin,
         ),
+      ),
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Icon(
-                  canDownload ? Icons.star : Icons.star_border,
-                  color: Colors.white,
-                  size: 28,
+                  canDownload ? Icons.star_rounded : Icons.star_border_rounded,
+                  color: accent,
+                  size: tokens.iconSizeLarge,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  status.statusText,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                SizedBox(width: tokens.spaceSmall),
+                Expanded(
+                  child: Text(
+                    status.statusText,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: onContainer,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: tokens.spaceSmall),
             if (status.daysRemaining > 0)
               Text(
                 context.l10n.daysRemaining(status.daysRemaining),
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: onContainer.withValues(alpha: tokens.opacityEmphasis),
+                ),
               ),
-            if (canDownload)
-              Text(
-                context.l10n.premiumAccessMessage,
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
-              )
-            else
-              Text(
-                context.l10n.upgradeMessage,
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
+            Text(
+              canDownload
+                  ? context.l10n.premiumAccessMessage
+                  : context.l10n.upgradeMessage,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: onContainer.withValues(alpha: tokens.opacityEmphasis),
               ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFeaturesSection() {
-    // We cannot use context here because it is not passed to the method.
-    // However, this method is called from _buildLoadedContent, which has context.
-    // Wait, I need to pass context or use a builder.
-    // The previous implementation did not use context.
-    // I will refactor to use context from the call site or pass it.
-    // But since I'm using multi_replace, I can't easily change signature and call site in one go IF the call site is far away.
-    // Fortunately, _buildFeaturesSection is called at line 95: _buildFeaturesSection(), inside _buildLoadedContent(context...).
-    // I will change the method to accept BuildContext context.
-    return Builder(
-      builder: (context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            context.l10n.premiumFeatures,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  Widget _buildFeaturesSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.l10n.premiumFeatures,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
           ),
-          const SizedBox(height: 12),
-          _PremiumFeatureItem(
-            icon: Icons.download,
-            text: context.l10n.unlimitedDownloads,
-          ),
-          _PremiumFeatureItem(
-            icon: Icons.offline_bolt,
-            text: context.l10n.offlineMode,
-          ),
-          _PremiumFeatureItem(
-            icon: Icons.high_quality,
-            text: context.l10n.highQualityAudio,
-          ),
-          _PremiumFeatureItem(
-            icon: Icons.block,
-            text: context.l10n.adFreeExperience,
-          ),
-          _PremiumFeatureItem(
-            icon: Icons.support_agent,
-            text: context.l10n.prioritySupport,
-          ),
-          _PremiumFeatureItem(
-            icon: Icons.star,
-            text: context.l10n.exclusiveContent,
-          ),
-        ],
-      ),
+        ),
+        SizedBox(height: tokens.spaceMedium),
+        _PremiumFeatureItem(
+          icon: Icons.download_rounded,
+          text: context.l10n.unlimitedDownloads,
+        ),
+        _PremiumFeatureItem(
+          icon: Icons.offline_bolt_rounded,
+          text: context.l10n.offlineMode,
+        ),
+        _PremiumFeatureItem(
+          icon: Icons.high_quality_rounded,
+          text: context.l10n.highQualityAudio,
+        ),
+        _PremiumFeatureItem(
+          icon: Icons.block_rounded,
+          text: context.l10n.adFreeExperience,
+        ),
+        _PremiumFeatureItem(
+          icon: Icons.support_agent_rounded,
+          text: context.l10n.prioritySupport,
+        ),
+        _PremiumFeatureItem(
+          icon: Icons.star_rounded,
+          text: context.l10n.exclusiveContent,
+        ),
+      ],
     );
   }
 
@@ -232,14 +232,19 @@ class _PremiumScreenState extends State<PremiumScreen> {
     BuildContext context,
     List<SubscriptionPlan> plans,
   ) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           context.l10n.chooseYourPlan,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
+          ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: tokens.spaceMedium),
         ...plans.map(
           (plan) => SubscriptionPlanCard(
             plan: plan,
@@ -251,43 +256,59 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   Widget _buildTrialSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 0,
+      color: colorScheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        side: BorderSide(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacityMedium,
+          ),
+          width: tokens.borderWidthThin,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(tokens.spaceLarge),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                const Icon(Icons.free_breakfast, color: Colors.green),
-                const SizedBox(width: 8),
-                Text(
-                  context.l10n.freeTrialTitle,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Icon(
+                  Icons.free_breakfast_rounded,
+                  color: colorScheme.primary,
+                  size: tokens.iconSizeMedium,
+                ),
+                SizedBox(width: tokens.spaceSmall),
+                Expanded(
+                  child: Text(
+                    context.l10n.freeTrialTitle,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: tokens.spaceSmall),
             Text(
               context.l10n.freeTrialDescription,
-              style: const TextStyle(fontSize: 14),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: tokens.spaceMedium),
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: FilledButton.icon(
                 onPressed: () => _startTrial(context),
-                icon: const Icon(Icons.play_arrow),
+                icon: const Icon(Icons.play_arrow_rounded),
                 label: Text(context.l10n.startFreeTrial),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                ),
               ),
             ),
           ],
@@ -297,49 +318,26 @@ class _PremiumScreenState extends State<PremiumScreen> {
   }
 
   Widget _buildErrorContent(BuildContext context, String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error, size: 64, color: Colors.red),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              context.read<PremiumBloc>().add(const LoadPremiumStatus());
-            },
-            child: Text(context.l10n.retry),
-          ),
-        ],
-      ),
+    return TilawaErrorState(
+      icon: Icons.error_outline_rounded,
+      title: message,
+      retryLabel: context.l10n.retry,
+      onRetry: () {
+        context.read<PremiumBloc>().add(const LoadPremiumStatus());
+      },
     );
   }
 
   Widget _buildSuccessContent(BuildContext context, String message) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.check_circle, size: 64, color: Colors.green),
-          const SizedBox(height: 16),
-          Text(
-            message,
-            style: const TextStyle(fontSize: 16),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () {
-              context.read<PremiumBloc>().add(const LoadPremiumStatus());
-            },
-            child: Text(context.l10n.continueButton),
-          ),
-        ],
+    return TilawaEmptyState(
+      icon: Icons.check_circle_outline_rounded,
+      iconColor: Theme.of(context).colorScheme.primary,
+      title: message,
+      action: ElevatedButton(
+        onPressed: () {
+          context.read<PremiumBloc>().add(const LoadPremiumStatus());
+        },
+        child: Text(context.l10n.continueButton),
       ),
     );
   }
@@ -355,18 +353,33 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
 class _PremiumFeatureItem extends StatelessWidget {
   const _PremiumFeatureItem({required this.icon, required this.text});
+
   final IconData icon;
   final String text;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: Colors.green),
-          const SizedBox(width: 12),
-          Text(text),
+          Icon(
+            icon,
+            size: tokens.iconSizeMedium,
+            color: theme.colorScheme.primary,
+          ),
+          SizedBox(width: tokens.spaceMedium),
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ],
       ),
     );

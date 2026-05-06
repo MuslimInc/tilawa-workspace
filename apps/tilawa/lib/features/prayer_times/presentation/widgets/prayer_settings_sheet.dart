@@ -77,7 +77,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                   tokens: tokens,
                   theme: theme,
                 ),
-                const Divider(height: 1),
+                const TilawaDivider(height: 1),
                 Flexible(
                   child: ListView(
                     controller: scrollController,
@@ -462,7 +462,10 @@ class _QASectionState extends State<_QASection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Failed: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
         );
       }
     } finally {
@@ -482,7 +485,10 @@ class _QASectionState extends State<_QASection> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Failed: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
         );
       }
     } finally {
