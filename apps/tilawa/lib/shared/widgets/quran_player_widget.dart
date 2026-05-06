@@ -1244,7 +1244,7 @@ class _MiniPlayerProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final primaryColor = theme.primaryColor;
+    final colorScheme = theme.colorScheme;
     return BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
       selector: (state) {
         final PositionData pos =
@@ -1261,8 +1261,10 @@ class _MiniPlayerProgressBar extends StatelessWidget {
       builder: (context, progress) {
         return LinearProgressIndicator(
           value: progress,
-          backgroundColor: primaryColor.withValues(alpha: tokens.opacitySubtle),
-          valueColor: AlwaysStoppedAnimation<Color>(primaryColor),
+          backgroundColor: colorScheme.primaryContainer.withValues(
+            alpha: tokens.opacitySubtle,
+          ),
+          valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
           minHeight: tokens.progressHeight,
         );
       },

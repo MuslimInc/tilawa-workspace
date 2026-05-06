@@ -46,22 +46,23 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.mediaPlayerBar;
-    final disabledControlColor = theme.colorScheme.onSurfaceVariant.withValues(
+    final disabledControlColor = colorScheme.onSurfaceVariant.withValues(
       alpha: componentTokens.disabledControlOpacity,
     );
 
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
           fontWeight: componentTokens.titleFontWeight,
-          color: theme.textTheme.bodyLarge?.color,
+          color: colorScheme.onSurface,
           decoration: .none,
           decorationColor: Colors.transparent,
         );
     final TextStyle subtitleStyle =
         (theme.textTheme.bodySmall ?? const TextStyle()).copyWith(
-          color: theme.textTheme.bodyMedium?.color?.withValues(
+          color: colorScheme.onSurfaceVariant.withValues(
             alpha: componentTokens.subtitleOpacity,
           ),
           decoration: .none,
@@ -71,11 +72,11 @@ class TilawaMediaPlayerBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: colorScheme.surfaceContainerLow,
         borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
-            color: theme.colorScheme.shadow.withValues(
+            color: colorScheme.shadow.withValues(
               alpha: componentTokens.shadowOpacity,
             ),
             blurRadius: designTokens.blurShadow,
@@ -83,7 +84,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: theme.dividerColor.withValues(
+          color: colorScheme.outlineVariant.withValues(
             alpha: designTokens.opacitySubtle,
           ),
           width: designTokens.borderWidthThin,
@@ -101,11 +102,11 @@ class TilawaMediaPlayerBar extends StatelessWidget {
               progressBarOverride ??
                   LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: theme.primaryColor.withValues(
+                    backgroundColor: colorScheme.primaryContainer.withValues(
                       alpha: designTokens.opacitySubtle,
                     ),
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      theme.primaryColor,
+                      colorScheme.primary,
                     ),
                     minHeight: designTokens.progressHeight,
                   ),
@@ -123,9 +124,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(
                             componentTokens.artworkRadius,
                           ),
-                          color: theme.primaryColor.withValues(
-                            alpha: designTokens.opacitySubtle,
-                          ),
+                          color: colorScheme.primaryContainer,
                         ),
                         child: artwork == null
                             ? _buildDefaultIcon(context)
@@ -183,7 +182,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                                 FluentIcons.previous_20_filled,
                                 size: designTokens.iconSizeMedium,
                                 color: canGoPrevious
-                                    ? theme.iconTheme.color
+                                    ? colorScheme.onSurfaceVariant
                                     : disabledControlColor,
                               ),
                               onPressed: canGoPrevious ? onPrevious : null,
@@ -196,10 +195,10 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                             height: componentTokens.playPauseButtonSize,
                             decoration: BoxDecoration(
                               shape: .circle,
-                              color: theme.primaryColor,
+                              color: colorScheme.primary,
                               boxShadow: [
                                 BoxShadow(
-                                  color: theme.primaryColor.withValues(
+                                  color: colorScheme.primary.withValues(
                                     alpha:
                                         componentTokens.playPauseShadowOpacity,
                                   ),
@@ -215,7 +214,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                                 isPlaying
                                     ? FluentIcons.pause_16_filled
                                     : FluentIcons.play_16_filled,
-                                color: theme.colorScheme.onPrimary,
+                                color: colorScheme.onPrimary,
                                 size: componentTokens.playPauseIconSize,
                               ),
                               onPressed: onPlayPause,
@@ -232,7 +231,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                                 FluentIcons.next_20_filled,
                                 size: designTokens.iconSizeMedium,
                                 color: canGoNext
-                                    ? theme.iconTheme.color
+                                    ? colorScheme.onSurfaceVariant
                                     : disabledControlColor,
                               ),
                               onPressed: canGoNext ? onNext : null,
@@ -252,7 +251,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                                       : FluentIcons.timer_20_regular,
                                   size: designTokens.iconSizeMedium,
                                   color: isSleepTimerActive
-                                      ? theme.primaryColor
+                                      ? colorScheme.primary
                                       : disabledControlColor,
                                 ),
                                 onPressed: onSleepTimerTap,
@@ -272,11 +271,12 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   }
 
   Widget _buildDefaultIcon(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Icon(
         FluentIcons.music_note_2_24_filled,
-        color: Theme.of(context).primaryColor,
-        size: Theme.of(context).componentTokens.mediaPlayerBar.defaultIconSize,
+        color: theme.colorScheme.onPrimaryContainer,
+        size: theme.componentTokens.mediaPlayerBar.defaultIconSize,
       ),
     );
   }
