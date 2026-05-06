@@ -186,8 +186,7 @@ class _VideoMushafPage extends StatelessWidget {
       surahNumber: surahNumber,
       verseBackgroundColor: (surah, verse) =>
           _verseBackgroundColor(surah, verse, palette),
-      verseTextColor: (surah, verse) =>
-          _verseTextColor(surah, verse, palette),
+      verseTextColor: (surah, verse) => _verseTextColor(surah, verse, palette),
       textColor: palette.mushafTextColor,
       pageBackgroundColor: backgroundColor,
       isCapturing: isCapturing,
