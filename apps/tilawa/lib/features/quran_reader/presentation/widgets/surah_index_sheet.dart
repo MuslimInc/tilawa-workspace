@@ -272,14 +272,8 @@ class _IndexSearchBar extends StatelessWidget {
     final readerTheme = QuranReaderTheme.of(context);
     final indexTheme = SurahIndexTheme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final l10n = context.l10n;
 
-    final Color primaryColor = readerTheme.primaryColor;
-    final Color cardColor = colorScheme.surfaceContainerLow;
-    final Color borderColor = colorScheme.outlineVariant.withValues(
-      alpha: 0.72,
-    );
     final double keyboardInset = context.keyboardInset;
 
     return Padding(
@@ -287,66 +281,20 @@ class _IndexSearchBar extends StatelessWidget {
         horizontal: tokens.spaceExtraLarge,
         vertical: tokens.spaceSmall,
       ),
-      child: TextField(
+      child: TilawaSearchField(
         controller: controller,
         focusNode: focusNode,
+        hintText: l10n.searchSurah,
         textInputAction: TextInputAction.search,
         scrollPadding: EdgeInsets.only(bottom: keyboardInset + 24),
         onChanged: onChanged,
-        style: theme.textTheme.bodyMedium?.copyWith(
+        onClear: onClear,
+        textStyle: theme.textTheme.bodyMedium?.copyWith(
           color: readerTheme.textColor,
         ),
-        decoration: InputDecoration(
-          hintText: l10n.searchSurah,
-          hintStyle: TextStyle(
-            color: colorScheme.onSurfaceVariant,
-            fontSize: theme.textTheme.bodyMedium?.fontSize,
-          ),
-          prefixIcon: Icon(
-            Icons.search_rounded,
-            color: colorScheme.onSurfaceVariant,
-            size: indexTheme.searchBarIconSize,
-          ),
-          suffixIcon: ListenableBuilder(
-            listenable: controller,
-            builder: (context, _) {
-              if (controller.text.isEmpty) return const SizedBox.shrink();
-              return IconButton(
-                icon: Icon(
-                  Icons.close_rounded,
-                  color: colorScheme.onSurfaceVariant,
-                  size: tokens.iconSizeMedium,
-                ),
-                onPressed: onClear,
-              );
-            },
-          ),
-          filled: true,
-          fillColor: cardColor,
-          contentPadding: EdgeInsets.symmetric(
-            vertical: indexTheme.searchBarVerticalPadding,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(indexTheme.searchBarRadius),
-            borderSide: BorderSide(
-              color: borderColor,
-              width: indexTheme.searchBarBorderWidth,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(indexTheme.searchBarRadius),
-            borderSide: BorderSide(
-              color: borderColor,
-              width: indexTheme.searchBarBorderWidth,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(indexTheme.searchBarRadius),
-            borderSide: BorderSide(
-              color: primaryColor,
-              width: indexTheme.searchBarBorderWidth + tokens.borderWidthThin,
-            ),
-          ),
+        borderRadius: BorderRadius.circular(indexTheme.searchBarRadius),
+        contentPadding: EdgeInsets.symmetric(
+          vertical: indexTheme.searchBarVerticalPadding,
         ),
       ),
     );
