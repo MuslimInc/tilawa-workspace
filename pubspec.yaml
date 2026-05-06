@@ -12,6 +12,7 @@ workspace:
   - packages/quran_qcf
   - packages/quran_image
   - packages/skeletonizer
+  - packages/flex_color_scheme
   - packages/compass
 
 dev_dependencies:
