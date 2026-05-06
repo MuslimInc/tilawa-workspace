@@ -83,9 +83,11 @@ class AppTheme {
 
   static Color _liftForDarkTheme(Color color) {
     final hsl = HSLColor.fromColor(color);
+    final lightnessLift = hsl.lightness > 0.5 ? 0.18 : 0.32;
+    final saturationScale = hsl.saturation > 0.65 ? 0.68 : 0.82;
     return hsl
-        .withLightness((hsl.lightness + 0.36).clamp(0.56, 0.78))
-        .withSaturation((hsl.saturation * 0.82).clamp(0.24, 0.72))
+        .withLightness((hsl.lightness + lightnessLift).clamp(0.50, 0.72))
+        .withSaturation((hsl.saturation * saturationScale).clamp(0.22, 0.58))
         .toColor();
   }
 
@@ -125,7 +127,25 @@ class AppTheme {
     );
   }
 
-  static ColorScheme _refineDarkColorScheme(ColorScheme scheme) {
+  static ColorScheme _refineDarkColorScheme(
+    ColorScheme scheme, {
+    required bool trueBlack,
+  }) {
+    if (trueBlack) {
+      return scheme.copyWith(
+        surface: const Color(0xFF050807),
+        surfaceContainerLowest: Colors.black,
+        surfaceContainerLow: Colors.black,
+        surfaceContainer: const Color(0xFF080D0B),
+        surfaceContainerHigh: const Color(0xFF101714),
+        surfaceContainerHighest: const Color(0xFF19211D),
+        outline: AppColors.darkOutline,
+        outlineVariant: const Color(0xFF2B3934),
+        shadow: Colors.black,
+        scrim: Colors.black,
+      );
+    }
+
     return scheme.copyWith(
       surface: AppColors.darkSurface,
       surfaceContainerLowest: const Color(0xFF0B1210),
@@ -222,14 +242,24 @@ class AppTheme {
       fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
       textTheme: _getTextTheme(useFonts),
     );
-    final colorScheme = _refineDarkColorScheme(theme.colorScheme);
+    final colorScheme = _refineDarkColorScheme(
+      theme.colorScheme,
+      trueBlack: darkIsTrueBlack,
+    );
+    final scaffoldBackgroundColor = darkIsTrueBlack
+        ? colorScheme.surfaceContainerLowest
+        : AppColors.darkBackground;
 
     return theme.copyWith(
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: AppColors.darkBackground,
-      canvasColor: AppColors.darkBackground,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      canvasColor: scaffoldBackgroundColor,
       dividerColor: colorScheme.outlineVariant,
       cardColor: colorScheme.surface,
+      appBarTheme: theme.appBarTheme.copyWith(
+        backgroundColor: colorScheme.surface,
+        surfaceTintColor: colorScheme.surfaceTint,
+      ),
       extensions: [
         TilawaDesignTokens.dark(density: density),
         TilawaComponentTokens.dark(density: density),
