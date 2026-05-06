@@ -28,7 +28,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final ColorScheme colorScheme = theme.colorScheme;
-    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final bool isArabic = context.isArabic;
     final Duration remaining = timeUntil.isNegative ? Duration.zero : timeUntil;
     final Color accentColor = colorScheme.primary;
 

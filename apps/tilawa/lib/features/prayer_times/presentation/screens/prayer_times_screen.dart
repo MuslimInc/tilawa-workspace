@@ -317,7 +317,7 @@ class _CountdownCardSection extends StatelessWidget {
   }
 
   static String _buildDateMetaLabel(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final isArabic = context.isArabic;
     final locale = isArabic ? 'ar' : 'en';
     final now = DateTime.now();
     final dayName = DateFormat('EEEE', locale).format(now);

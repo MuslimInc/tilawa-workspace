@@ -13,6 +13,8 @@ extension AppLang on BuildContext {
 
 extension BuildContextThemeX on BuildContext {
   bool get isDarkMode => theme.brightness == Brightness.dark;
+
+  bool get isArabic => Localizations.localeOf(this).languageCode == 'ar';
 }
 
 extension FailureExtensions on Failure {

@@ -58,12 +58,6 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  String _quranNavLabel(BuildContext context) {
-    return Localizations.localeOf(context).languageCode == 'ar'
-        ? 'المصحف'
-        : 'Quran';
-  }
-
   List<_NavDestination> _buildDestinations(
     BuildContext context,
     MainScreenState state,
@@ -83,10 +77,7 @@ class _MainScreenState extends State<MainScreen> {
         label: context.l10n.prayerTimes,
         identifier: 'prayer_times_tab',
       ),
-      _NavDestination(
-        icon: Icons.menu_book_rounded,
-        label: _quranNavLabel(context),
-      ),
+      _NavDestination(icon: Icons.menu_book_rounded, label: context.l10n.quran),
       _NavDestination(
         index: 2,
         icon: FluentIcons.book_open_24_regular,

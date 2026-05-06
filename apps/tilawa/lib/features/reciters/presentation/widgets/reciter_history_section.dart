@@ -90,28 +90,28 @@ class _HistoryChip extends StatelessWidget {
     final chipTokens = theme.componentTokens.chip;
     final bool isComplete = history.progress >= 1.0;
     final int percent = (history.progress * 100).clamp(0, 100).toInt();
-    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final String displayName = isArabic
+    final String displayName = context.isArabic
         ? history.surahName
         : history.surahNameEn;
 
+    final BorderRadius borderRadius = .circular(chipTokens.pillRadius);
+
     return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(chipTokens.pillRadius),
+      color: isComplete
+          ? colorScheme.primaryContainer
+          : colorScheme.surfaceContainerLow,
+      borderRadius: borderRadius,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(chipTokens.pillRadius),
+        borderRadius: borderRadius,
         child: Container(
-          padding: EdgeInsets.symmetric(
+          padding: .symmetric(
             horizontal: tokens.spaceMedium,
             vertical: tokens.spaceSmall,
           ),
           decoration: BoxDecoration(
-            color: isComplete
-                ? colorScheme.primaryContainer
-                : colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(chipTokens.pillRadius),
-            border: Border.all(
+            borderRadius: borderRadius,
+            border: .all(
               color: isComplete
                   ? colorScheme.primary.withValues(alpha: 0.34)
                   : colorScheme.outlineVariant.withValues(
@@ -121,7 +121,7 @@ class _HistoryChip extends StatelessWidget {
             ),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisSize: .min,
             children: [
               Icon(
                 isComplete
@@ -147,7 +147,7 @@ class _HistoryChip extends StatelessWidget {
                 Text(
                   '$percent%',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
+                    fontWeight: .w600,
                     color: colorScheme.primary,
                   ),
                 ),
