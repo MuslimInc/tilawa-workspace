@@ -131,6 +131,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final padding = context.contentSafePadding;
+    final systemSafeArea = context.systemSafeArea;
     final overlayStyle = _buildSystemUiOverlayStyle(theme);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -143,6 +144,24 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
             Positioned.fill(
               child: ColoredBox(color: theme.colorScheme.surface),
             ),
+
+            if (systemSafeArea.top > 0)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: systemSafeArea.top,
+                child: ColoredBox(color: theme.colorScheme.surface),
+              ),
+
+            if (systemSafeArea.bottom > 0)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: systemSafeArea.bottom,
+                child: ColoredBox(color: theme.colorScheme.surface),
+              ),
 
             // 1. Background Layer (Isolated)
             if (widget.backgroundGradient != null)
@@ -164,7 +183,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                 child: GestureDetector(
                   behavior: .translucent,
                   onTap: () => _setVisible(!_isVisible),
-                  child: widget.preview,
+                  child: SafeArea(child: widget.preview),
                 ),
               ),
             ),
