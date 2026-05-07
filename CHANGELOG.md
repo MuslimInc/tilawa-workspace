@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **System UI Overlay Ownership (Phase SUI-1)**: Added app-level default declarative `AnnotatedRegion<SystemUiOverlayStyle>` scope for standard routes (commit `fd304b9`).
+
+### QA
+
+- **Phase SUI-1 Verdict**: CONDITIONAL PASS.
+- **Directly validated (PASS)**: Reciters (light/dark), main tabs, Prayer Times (light/dark), Settings (light/dark), Qibla, Quran Image Reader entry/exit.
+- **Not directly proven yet (coverage gaps, not observed regressions)**: `PrayerNotificationStatusScreen` from real Prayer/Adhan notification tap; `PrayerNotificationStatusScreen` light/dark/custom theme; Screenshot/Reel composer enter/exit; custom primary color; distinct non-image Quran Reader path (if still reachable separately).
+- **Decision**: No local screen-specific `AnnotatedRegion` override is justified yet.
+- **Next validation focus**: real notification tap path to `PrayerNotificationStatusScreen`, then composer enter/exit paths.
+
 ## [0.1.6+24] - 2026-05-05
 
 ### Added
