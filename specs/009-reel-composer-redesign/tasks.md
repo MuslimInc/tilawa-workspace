@@ -61,12 +61,13 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-006: Mode-aware Save/Share emphasis
 
-- [ ] In [video_review_panel.dart](apps/tilawa/lib/features/share/presentation/widgets/video_review_panel.dart), add a `ShareMode mode` enum prop.
-- [ ] On `ShareMode.screenshot`: render `Save` as `FilledButton.icon`; render `Share` as `FilledButton.tonalIcon` (or `OutlinedButton.icon` if tonal is not in the design system).
-- [ ] On `ShareMode.reel`: render `Share` as `FilledButton.icon`; render `Save` as `OutlinedButton.icon` (current behavior).
-- [ ] `Edit` stays `OutlinedButton` in both modes.
-- [ ] Update both call sites in [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart) and [screenshot_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/screenshot_composer_screen.dart) to pass the correct mode.
-- [ ] Widget test (extend [video_review_panel_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_review_panel_test.dart)): screenshot mode has filled Save; reel mode has filled Share.
+- [x] In [video_review_panel.dart](apps/tilawa/lib/features/share/presentation/widgets/video_review_panel.dart), added `ShareMode mode` prop (defaults to `ShareMode.video` to preserve existing behaviour for any uncovered consumers).
+- [x] On `ShareMode.screenshot`: `Save` is `FilledButton.icon`; `Share` is `FilledButton.tonalIcon`. *(`FilledButton.tonalIcon` is already used elsewhere in the app, so it's part of the design system.)*
+- [x] On `ShareMode.video`: `Share` stays `FilledButton.icon`; `Save` stays `OutlinedButton.icon` (current behaviour preserved).
+- [x] `Edit` is `OutlinedButton` in both modes.
+- [x] [screenshot_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/screenshot_composer_screen.dart) passes `mode: ShareMode.screenshot`; [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart) takes the default (`ShareMode.video`).
+- [x] Widget tests rewritten in [video_review_panel_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_review_panel_test.dart): video-mode Save is OutlinedButton + callback fires + spinner-while-saving; screenshot-mode Save is FilledButton + callback fires + spinner-while-saving; share-button label parity for both modes.
+- [x] All 64 share tests pass; analyzer clean for the new code (4 pre-existing `use_build_context_synchronously` infos in the screenshot screen's `_handleSavePreparedContent` are unchanged).
 
 ### P1-007: Live preview unmounted during capture (single-tree invariant)
 

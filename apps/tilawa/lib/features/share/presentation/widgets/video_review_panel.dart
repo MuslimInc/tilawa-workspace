@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/share/domain/entities/share_content.dart';
+import 'package:tilawa/features/share/domain/entities/share_mode.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class VideoReviewPanel extends StatelessWidget {
@@ -11,6 +12,7 @@ class VideoReviewPanel extends StatelessWidget {
     required this.onSave,
     required this.onShare,
     this.isSaving = false,
+    this.mode = ShareMode.video,
   });
 
   final ShareContent content;
@@ -18,6 +20,10 @@ class VideoReviewPanel extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onShare;
   final bool isSaving;
+
+  /// Drives Save/Share emphasis: on [ShareMode.screenshot], Save is the
+  /// filled primary; on [ShareMode.video], Share keeps that role.
+  final ShareMode mode;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +36,51 @@ class VideoReviewPanel extends StatelessWidget {
       ShareAudioClip() => context.l10n.shareAudio,
       ShareText() => context.l10n.share,
     };
+    final isScreenshotMode = mode == ShareMode.screenshot;
+
+    final Widget saveIcon = isSaving
+        ? SizedBox(
+            width: tokens.iconSizeSmall,
+            height: tokens.iconSizeSmall,
+            child: const CircularProgressIndicator(strokeWidth: 2),
+          )
+        : Icon(Icons.download_rounded, size: tokens.iconSizeSmall);
+    final Text saveLabel = Text(context.l10n.save);
+    final VoidCallback? savePressed = isSaving ? null : onSave;
+
+    final Widget saveButton = isScreenshotMode
+        ? FilledButton.icon(
+            onPressed: savePressed,
+            icon: saveIcon,
+            label: saveLabel,
+          )
+        : OutlinedButton.icon(
+            onPressed: savePressed,
+            icon: saveIcon,
+            label: saveLabel,
+          );
+
+    final Icon shareIcon = Icon(
+      Icons.share_rounded,
+      size: tokens.iconSizeSmall,
+    );
+    final Text shareText = Text(
+      shareLabel,
+      maxLines: 1,
+      overflow: TextOverflow.fade,
+    );
+
+    final Widget shareButton = isScreenshotMode
+        ? FilledButton.tonalIcon(
+            onPressed: onShare,
+            icon: shareIcon,
+            label: shareText,
+          )
+        : FilledButton.icon(
+            onPressed: onShare,
+            icon: shareIcon,
+            label: shareText,
+          );
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -49,32 +100,11 @@ class VideoReviewPanel extends StatelessWidget {
                 ),
               ),
               SizedBox(width: tokens.spaceSmall),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: isSaving ? null : onSave,
-                  icon: isSaving
-                      ? SizedBox(
-                          width: tokens.iconSizeSmall,
-                          height: tokens.iconSizeSmall,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Icon(
-                          Icons.download_rounded,
-                          size: tokens.iconSizeSmall,
-                        ),
-                  label: Text(context.l10n.save),
-                ),
-              ),
+              Expanded(child: saveButton),
             ],
           ),
           SizedBox(height: tokens.spaceSmall),
-          FilledButton.icon(
-            onPressed: onShare,
-            icon: Icon(Icons.share_rounded, size: tokens.iconSizeSmall),
-            label: Text(shareLabel, maxLines: 1, overflow: TextOverflow.fade),
-          ),
+          shareButton,
         ],
       ),
     );

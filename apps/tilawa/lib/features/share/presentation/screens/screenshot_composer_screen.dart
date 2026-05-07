@@ -8,6 +8,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
 import '../../domain/entities/share_content.dart';
+import '../../domain/entities/share_mode.dart';
 import '../../domain/entities/widget_capture_handle.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
@@ -206,6 +207,7 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
                       child: isReviewing
                           ? VideoReviewPanel(
                               content: state.content!,
+                              mode: ShareMode.screenshot,
                               onEdit: () => context
                                   .read<ShareCubit>()
                                   .discardPreparedContent(),
