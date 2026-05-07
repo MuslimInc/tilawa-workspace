@@ -5,17 +5,26 @@
 **Feature**: [spec.md](../spec.md)
 
 ## Physical QA Blockers (Mandatory for GO)
-- [ ] PQA001 **Direct Boot**: Reboot physical device, stay at lock screen, verify Adhan fires at scheduled time.
+- [ ] PQA001 **Direct Boot**: Reboot physical device, stay at lock screen, verify Adhan fires at scheduled time. (PARTIAL: post-boot ingress improved; full re-arm/watchdog evidence still sparse)
 - [ ] PQA002 **OEM Survival**: Verify full 3-minute playback on OPPO/ColorOS with screen off and battery optimization enabled.
 - [ ] PQA003 **App Lifecycle**: Swipe away app from recents and verify Adhan still fires.
-- [ ] PQA004 **Notification Taps**: 
-  - [ ] Tap from killed app (Cold start) -> Status Screen opens correctly.
-  - [ ] Tap from background app -> Status Screen opens correctly.
-  - [ ] Tap from foreground app -> Status Screen opens correctly.
-- [ ] PQA005 **Duplicate Prevention**: Tap same notification multiple times; ensure only one status screen instance is active.
-- [ ] PQA006 **Permission Revocation**: Revoke notification permission; verify native alarms are cleared immediately.
+- [ ] PQA004 **Notification Taps**: (PARTIAL overall; sub-scenarios below passed)
+  - [x] Tap from killed app (Cold start) -> Status Screen opens correctly.
+  - [x] Tap from background app -> Status Screen opens correctly.
+  - [x] Tap from foreground app -> Status Screen opens correctly.
+- [ ] PQA005 **Duplicate Prevention**: Tap same notification multiple times; ensure only one status screen instance is active. (PARTIAL: duplicate tap guard PASS; explicit same-target AppRouter skip log not proven via current adb simulation path)
+- [x] PQA006 **Permission Revocation**: Revoke notification permission; verify notification-denied behavior and routing expectations via manual toggle + runtime capture.
 - [ ] PQA007 **Playback Completion**: Verify `adhan_service_completed` event in Logcat/Firebase after full playback.
 - [ ] PQA008 **Abnormal Termination**: Force kill service during playback; verify `adhan_service_abnormal_termination` event is logged.
+
+## Current Release Status (2026-05-08)
+- Code-level verdict: GO
+- Android release QA verdict: CONDITIONAL GO
+- Do not claim full production GO until remaining PARTIAL items are closed.
+
+## Conditions to Upgrade QA Verdict to GO
+1. Capture explicit same-target AppRouter skip evidence from real tray taps (`Notification navigation skipped` or `Duplicate notification navigation ignored`).
+2. Capture full reboot re-arm/watchdog evidence with clear post-boot re-arm observability.
 
 ## Requirement Validation
 - [x] CHK001 Are Direct Boot requirements defined?

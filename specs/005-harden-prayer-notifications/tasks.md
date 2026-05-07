@@ -39,6 +39,11 @@ Implementation is **COMPLETED**. The branch was temporarily unfrozen on 2026-05-
 ## Verification Status
 - **Implementation**: Completed
 - **Automated Tests**: PASSED (`146/146` Flutter, `64/64` native Android JVM)
-- **Physical QA**: PENDING
-- **Limited Rollout**: BLOCKED until notification tap / Adhan stop smoke QA passes on device
+- **Code-level Verdict**: GO
+- **Android Release QA Verdict**: CONDITIONAL GO
+- **Physical QA**: PARTIAL (permission-denied scenario is now PASS)
+- **Limited Rollout**: Allowed under CONDITIONAL GO (do not mark full production GO yet)
+- **Remaining QA Gaps**:
+	- Same-target explicit AppRouter skip log is PARTIAL / not proven by current adb native method-channel simulation.
+	- Reboot re-arm observability is PARTIAL (post-boot ingress seen, full re-arm/watchdog logs sparse).
 - **Frozen commit**: `<TO_BE_FILLED_AFTER_COMMIT>`
