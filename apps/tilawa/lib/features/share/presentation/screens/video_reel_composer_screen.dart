@@ -139,24 +139,26 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
         builder: (context, captureVisible, _) {
           return BlocBuilder<ShareCubit, ShareState>(
             buildWhen: (p, c) =>
-                p.videoPageSpecs != c.videoPageSpecs || p.status != c.status,
+                p.videoPageSpecs != c.videoPageSpecs ||
+                p.status != c.status ||
+                p.capturingIndex != c.capturingIndex,
             builder: (context, state) {
-              final isBusy =
+              final isGeneratingVisuals =
                   state.status == ShareStatus.capturing ||
-                  state.status == ShareStatus.generating ||
-                  state.status == ShareStatus.sharing;
+                  state.status == ShareStatus.generating;
               final reciterName = state.reciterName ?? widget.reciterName;
               final reelPalette = VideoReelPalette.fromContext(context);
               final backgroundColor = reelPalette.mushafBackgroundColor;
 
               return Stack(
                 children: [
-                  if (state.videoPageSpecs.length > 1 || captureVisible)
+                  if (captureVisible || isGeneratingVisuals)
                     Offstage(
-                      offstage: !isBusy,
+                      offstage: !isGeneratingVisuals,
                       child: _OffScreenRenderers(
                         videoBoundaryKeys: _videoBoundaryKeys,
                         videoPageSpecs: state.videoPageSpecs,
+                        capturingIndex: state.capturingIndex,
                         surahNumber: widget.surahNumber,
                         reciterName: reciterName,
                         backgroundColor: backgroundColor,
@@ -236,6 +238,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                     bottomPanel: BlocBuilder<ShareCubit, ShareState>(
                       buildWhen: (p, c) =>
                           p.status != c.status ||
+                          p.progress != c.progress ||
+                          p.progressMessage != c.progressMessage ||
                           p.fromAyah != c.fromAyah ||
                           p.toAyah != c.toAyah ||
                           p.reciterName != c.reciterName ||
@@ -372,7 +376,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
       for (final page in capturePages)
         quranQcfLocator<QuranFontService>().ensureSingleFontLoaded(page),
     ]);
-    if (!mounted) return;
+    if (!mounted) {
+      _isGenerateRequestInFlight = false;
+      return;
+    }
 
     _singleVideoCaptureSurfaceVisible.value = true;
 
@@ -498,6 +505,7 @@ class _OffScreenRenderers extends StatelessWidget {
   const _OffScreenRenderers({
     required this.videoBoundaryKeys,
     required this.videoPageSpecs,
+    required this.capturingIndex,
     required this.surahNumber,
     required this.reciterName,
     required this.backgroundColor,
@@ -506,6 +514,7 @@ class _OffScreenRenderers extends StatelessWidget {
 
   final Map<int, GlobalKey> videoBoundaryKeys;
   final List<VideoPageSpec> videoPageSpecs;
+  final int? capturingIndex;
   final int surahNumber;
   final String reciterName;
   final Color backgroundColor;
@@ -517,46 +526,52 @@ class _OffScreenRenderers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (videoPageSpecs.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     final reelPalette = VideoReelPalette.fromContext(context);
+    final int safeIndex = (capturingIndex ?? 0).clamp(
+      0,
+      videoPageSpecs.length - 1,
+    );
+    final VideoPageSpec spec = videoPageSpecs[safeIndex];
+    final GlobalKey? key = videoBoundaryKeys[spec.pageNumber];
+    if (key == null) {
+      return const SizedBox.shrink();
+    }
 
-    return Stack(
-      children: videoPageSpecs.map((spec) {
-        final key = videoBoundaryKeys[spec.pageNumber];
-        if (key == null) return const SizedBox.shrink();
-
-        return Positioned.fill(
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: RepaintBoundary(
-                key: key,
-                child: SizedBox(
-                  width: VideoContentRenderer.videoWidth,
-                  height: VideoContentRenderer.videoHeight,
-                  child: ColoredBox(
-                    color: backgroundColor,
-                    child: _renderer.build(
-                      context: context,
-                      pageSpec: spec,
-                      surahNumber: surahNumber,
-                      verseBackgroundColor: (s, v) =>
-                          (s == surahNumber &&
-                              v >= spec.fromAyah &&
-                              v <= spec.toAyah)
-                          ? reelPalette.verseHighlightColor
-                          : null,
-                      verseTextColor: (s, v) => null,
-                      textColor: reelPalette.mushafTextColor,
-                      pageBackgroundColor: backgroundColor,
-                      isCapturing: isCapturing,
-                    ),
-                  ),
+    return SizedBox.expand(
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: RepaintBoundary(
+            key: key,
+            child: SizedBox(
+              width: VideoContentRenderer.videoWidth,
+              height: VideoContentRenderer.videoHeight,
+              child: ColoredBox(
+                color: backgroundColor,
+                child: _renderer.build(
+                  context: context,
+                  pageSpec: spec,
+                  surahNumber: surahNumber,
+                  verseBackgroundColor: (s, v) =>
+                      (s == surahNumber &&
+                          v >= spec.fromAyah &&
+                          v <= spec.toAyah)
+                      ? reelPalette.verseHighlightColor
+                      : null,
+                  verseTextColor: (s, v) => null,
+                  textColor: reelPalette.mushafTextColor,
+                  pageBackgroundColor: backgroundColor,
+                  isCapturing: isCapturing,
                 ),
               ),
             ),
           ),
-        );
-      }).toList(),
+        ),
+      ),
     );
   }
 }
