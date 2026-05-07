@@ -44,9 +44,10 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-004: `MediaPreviewFrame` radius → token
 
-- [ ] In [share_preview_widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/share_preview_widgets.dart), replace `borderRadius: 34` (line 36) with `tokens.radiusExtraLarge`.
-- [ ] Visually verify the review preview corner is the same as before (within ±2 dp).
-- [ ] If the difference is larger than 2 dp: revert and add a Phase 4 followup token note.
+- [x] Inspected [share_preview_widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/share_preview_widgets.dart): outer `TilawaCard.borderRadius: 34` is paired with inner `DecoratedBox` already at `tokens.radiusExtraLarge` (24 dp comfortable / 20 dp compact). The nested two-radius design is **intentional** — a 10 dp rounding gradient between outer card and inner media surface.
+- [x] Token swap evaluated: `tokens.radiusExtraLarge` would close that gradient (outer radius 24, inner radius 24 — visually flat). Delta to current value is 10 dp, well outside the spec's ±2 dp tolerance.
+- [x] **Decision: defer to Phase 4.** Leave the literal `34` in place; add a `mediaPreviewFrameRadius` field to `TilawaShareCanvasTokens` during the token-migration phase, where design owns the visual decision (keep the gradient, flatten it, or pick a third value).
+- [x] No source change in Phase 1. No new tests required.
 
 ### P1-005: `_ReelTopBar` font sizes → tokens
 
@@ -148,6 +149,7 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 - [ ] Add `TilawaShareCanvasTokens` to [organisms_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/organisms_tokens.dart) with all the share-canvas factors and minima.
 - [ ] Migrate every consumer of `VideoReelDesign` to the new tokens.
+- [ ] Add `mediaPreviewFrameRadius` to `TilawaShareCanvasTokens` and replace the literal `borderRadius: 34` in [share_preview_widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/share_preview_widgets.dart). *(Carried over from P1-004: the 10 dp delta vs `tokens.radiusExtraLarge` was deemed a design decision — owns by design, not a Phase 1 swap.)*
 - [ ] Delete `VideoReelDesign` and [video_reel_design.dart](apps/tilawa/lib/features/share/presentation/widgets/video_reel_design.dart).
 - [ ] Verify goldens pass in light, dark, and compact density.
 - [ ] Decide on `_ReelBottomBar` re-introduction (token-driven organism) or finalize deletion.
