@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 
 import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
+import '../utils/selected_quran_range_page.dart';
 import '../utils/share_ayah_range_utils.dart';
-import '../utils/selection_crop_window.dart';
 
 final ValueNotifier<bool> _hiddenSharePosterOverlays = ValueNotifier<bool>(
   false,
@@ -11,11 +11,12 @@ final ValueNotifier<bool> _hiddenSharePosterOverlays = ValueNotifier<bool>(
 
 const double _sharePosterViewportOverflowGuard = 4.0;
 const double _sharePosterMaxWidthToHeightRatio = 0.56;
+const double _sharePosterHeaderFontSizeMultiplier = 0.57;
 
-/// Renders the selected ayah slice using prepared QCF page blocks.
+/// Renders the selected ayah range using prepared QCF page blocks.
 ///
-/// This keeps the original Mushaf line geometry and font size instead of
-/// reflowing the selected verses into a custom poster composition.
+/// The screenshot path builds a dedicated selected-range composition instead
+/// of cropping the source Mushaf page at the original vertical offset.
 class SharePosterRenderer extends StatelessWidget {
   const SharePosterRenderer({
     super.key,
@@ -79,22 +80,28 @@ class SharePosterRenderer extends StatelessWidget {
                 .preparePage(
                   pageNumber: pageNumber,
                   metrics: metrics,
-                  viewportWidth: constraints.maxWidth,
+                  viewportWidth: pageWidth,
                   textColor: readerTheme.textColor,
                   mushafService: quranQcfLocator<MushafService>(),
                 );
 
-            final cropWindow = selectedCropWindow(
-              preparedPage.blocks,
-              metrics: metrics,
+            final selectedComposition = buildSelectedQuranRangeComposition(
+              sourcePage: preparedPage,
               surahNumber: surahNumber,
               fromAyah: ayahRange.fromAyah,
               toAyah: ayahRange.toAyah,
+              viewportSize: pageViewportSize,
+              headerFontSizeMultiplier: _sharePosterHeaderFontSizeMultiplier,
             );
 
-            if (cropWindow == null) {
+            if (selectedComposition == null) {
               return const SizedBox.shrink();
             }
+
+            final compositionHeight = selectedComposition.estimatedHeight.clamp(
+              0.0,
+              pageHeight,
+            ).toDouble();
 
             return DecoratedBox(
               decoration: BoxDecoration(color: readerTheme.pageBackground),
@@ -106,59 +113,29 @@ class SharePosterRenderer extends StatelessWidget {
                 ),
                 child: Directionality(
                   textDirection: TextDirection.rtl,
-                  child: ClipRect(
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        width: pageWidth,
-                        height: cropWindow.height.clamp(0.0, pageHeight),
-                        child: OverflowBox(
-                          alignment: Alignment.topCenter,
-                          minWidth: pageWidth,
-                          maxWidth: pageWidth,
-                          minHeight: pageHeight,
-                          maxHeight: pageHeight,
-                          child: Transform.translate(
-                            offset: Offset(
-                              0,
-                              -(metrics.padding.top + cropWindow.top),
-                            ),
-                            child: SizedBox(
-                              width: pageWidth,
-                              height: pageHeight,
-                              child: PageContent(
-                                mushafService: quranQcfLocator<MushafService>(),
-                                pageSnapshotService:
-                                    quranQcfLocator<PageSnapshotService>(),
-                                pageNumber: pageNumber,
-                                preparedPage: preparedPage,
-                                textColor: readerTheme.textColor,
-                                verseTextColor:
-                                    (verseSurahNumber, verseNumber) {
-                                      final isSelected =
-                                          verseSurahNumber == surahNumber &&
-                                          verseNumber >= ayahRange.fromAyah &&
-                                          verseNumber <= ayahRange.toAyah;
-                                      return isSelected
-                                          ? readerTheme.textColor
-                                          : Colors.transparent;
-                                    },
-                                pageBackgroundColor: readerTheme.pageBackground,
-                                headerImageFilter:
-                                    readerTheme.headerImageFilter,
-                                headerTextColor: readerTheme.headerTextColor,
-                                headerFontSizeMultiplier: 0.57,
-                                uiTextDirection: TextDirection.rtl,
-                                showOverlaysListenable:
-                                    _hiddenSharePosterOverlays,
-                                alignTextToTop: true,
-                                showSpecialBlocks: false,
-                                viewportSize: pageViewportSize,
-                                enableSnapshots: false,
-                              ),
-                            ),
-                          ),
-                        ),
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      width: pageWidth,
+                      height: compositionHeight,
+                      child: PageContent(
+                        mushafService: quranQcfLocator<MushafService>(),
+                        pageSnapshotService:
+                            quranQcfLocator<PageSnapshotService>(),
+                        pageNumber: pageNumber,
+                        preparedPage: selectedComposition.page,
+                        textColor: readerTheme.textColor,
+                        pageBackgroundColor: readerTheme.pageBackground,
+                        headerImageFilter: readerTheme.headerImageFilter,
+                        headerTextColor: readerTheme.headerTextColor,
+                        headerFontSizeMultiplier:
+                            _sharePosterHeaderFontSizeMultiplier,
+                        uiTextDirection: TextDirection.rtl,
+                        showOverlaysListenable: _hiddenSharePosterOverlays,
+                        alignTextToTop: true,
+                        showSpecialBlocks: true,
+                        viewportSize: pageViewportSize,
+                        enableSnapshots: false,
                       ),
                     ),
                   ),

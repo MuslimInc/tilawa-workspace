@@ -78,6 +78,16 @@ apps/tilawa/lib/features/share/presentation/
     └── mushaf_page_renderer.dart             # apply crop window to the reel path
 ```
 
+**Screenshot correction track (selected-range composition)** — additions:
+
+```text
+apps/tilawa/lib/features/share/presentation/
+├── utils/
+│   └── selected_quran_range_page.dart        # NEW — builds a synthetic PreparedQuranPage from selected QCF blocks
+└── widgets/
+    └── share_poster_renderer.dart            # replace crop/translate internals with selected composition
+```
+
 **Phase 3 (Single composition widget)** — additions:
 
 ```text
@@ -117,6 +127,18 @@ apps/tilawa/lib/features/share/data/services/
 ### A. Phase 1 keeps the render pipeline untouched
 
 The audit found render-pipeline issues (transparent-text trick, capture-time `FittedBox`, banner rule), but those changes are large and risky. Phase 1 deliberately avoids them. The user's directive is "before starting Phase 1, update the spec kit docs" — this plan reflects exactly that scoping: Phase 1 = polish, Phase 2 = pipeline.
+
+### A2. Screenshot selected-range composition correction
+
+The screenshot path is no longer allowed to behave as a crop of the original Mushaf page. `SharePosterRenderer` remains the public source-of-truth widget for preview and export, but its internals switch to a selected-range composition. Phase S1 builds a synthetic `PreparedQuranPage` from public QCF prepared blocks:
+
+1. prepend `PreparedHeaderBlock` for the selected surah;
+2. prepend `PreparedBismillahBlock` for surahs other than 1 and 9;
+3. append only text blocks whose metadata intersects the selected ayah range;
+4. render via `PageContent` prepared mode with `showSpecialBlocks: true`;
+5. avoid `OverflowBox` + `Transform.translate` and avoid `verseTextColor` so the full-page highlight path does not re-enter.
+
+Phase S1 is line/block-granular. If a selected range starts or ends in the middle of a QCF line that also contains adjacent ayahs, exact word-level clipping requires a small public `quran_qcf` API that prepares selected ranges using package-internal span logic. That is Phase S2 and should not duplicate QCF shaping code in the app layer.
 
 ### B. Stepper hit-area without visual change
 
@@ -165,6 +187,8 @@ Replace literal `fontSize: 16/14/12` with `theme.textTheme.titleSmall?.fontSize`
 | Phase | Goal | Risk | Behind a flag? | Goldens? |
 |---|---|---|---|---|
 | **1** | Quick UI fixes — retry parity, hit-area, inline reason, token wiring, dead code, single tree during capture | Low | No | Existing tests only |
+| **S1** | Screenshot selected-range composition — banner first, selected QCF blocks from top, no full-page crop | Medium | No | Widget tests first |
+| S2 | Precise screenshot mid-line filtering via quran_qcf selected-range preparation API if S1 line granularity leaks adjacent ayahs | Medium-high | No | Yes |
 | 2 | Crop-and-compose — `SelectionCropWindow` shared, reel top-anchored, banner rule explicit | Medium | `kReelComposerV2` | Yes (5 scenarios) |
 | 3 | Single composition widget — preview and capture share one widget tree | Medium | `kReelComposerSingleTree` | Yes (preview-vs-capture pixel diff) |
 | 4 | Token migration — delete `VideoReelDesign`, introduce `TilawaShareCanvasTokens` | Low | No | Yes (light/dark/compact) |
