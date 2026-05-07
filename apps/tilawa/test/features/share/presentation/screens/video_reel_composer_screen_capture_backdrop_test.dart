@@ -122,23 +122,19 @@ void main() {
       await tester.pumpWidget(buildSubject());
       await tester.pump();
 
-      expect(
-        find.byKey(const ValueKey('generating_backdrop')),
-        findsOneWidget,
-      );
+      expect(find.byKey(const ValueKey('generating_backdrop')), findsOneWidget);
       expect(find.byKey(const ValueKey('live_preview')), findsNothing);
     },
   );
 
-  testWidgets(
-    'shows the cubit progress message inside the backdrop',
-    (tester) async {
-      when(() => cubit.state).thenReturn(generatingState);
+  testWidgets('shows the cubit progress message inside the backdrop', (
+    tester,
+  ) async {
+    when(() => cubit.state).thenReturn(generatingState);
 
-      await tester.pumpWidget(buildSubject());
-      await tester.pump();
+    await tester.pumpWidget(buildSubject());
+    await tester.pump();
 
-      expect(find.text('Encoding video'), findsOneWidget);
-    },
-  );
+    expect(find.text('Encoding video'), findsOneWidget);
+  });
 }

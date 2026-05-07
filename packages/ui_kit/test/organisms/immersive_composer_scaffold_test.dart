@@ -209,26 +209,25 @@ void main() {
       },
     );
 
-    testWidgets(
-      'explicit disableBlur=false overrides backgroundIntent=media',
-      (tester) async {
-        await tester.pumpWidget(
-          _wrap(
-            ImmersiveComposerScaffold(
-              title: 'Override',
-              backgroundIntent: BackgroundIntent.media,
-              disableBlur: false,
-              overlaysVisible: true,
-              preview: const SizedBox.shrink(),
-              bottomPanel: const SizedBox.shrink(),
-            ),
+    testWidgets('explicit disableBlur=false overrides backgroundIntent=media', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          ImmersiveComposerScaffold(
+            title: 'Override',
+            backgroundIntent: BackgroundIntent.media,
+            disableBlur: false,
+            overlaysVisible: true,
+            preview: const SizedBox.shrink(),
+            bottomPanel: const SizedBox.shrink(),
           ),
-        );
-        await tester.pump();
+        ),
+      );
+      await tester.pump();
 
-        expect(find.byType(BackdropFilter), findsWidgets);
-      },
-    );
+      expect(find.byType(BackdropFilter), findsWidgets);
+    });
 
     testWidgets('floatingActionButton is rendered when overlays are visible', (
       tester,

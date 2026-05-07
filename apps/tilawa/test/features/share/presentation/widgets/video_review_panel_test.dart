@@ -102,62 +102,57 @@ void main() {
     },
   );
 
-  testWidgets(
-    'video mode: share is the FilledButton primary',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        _buildHarness(
-          content: _videoContent,
-          onEdit: () {},
-          onSave: () {},
-          onShare: () {},
-        ),
-      );
+  testWidgets('video mode: share is the FilledButton primary', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _buildHarness(
+        content: _videoContent,
+        onEdit: () {},
+        onSave: () {},
+        onShare: () {},
+      ),
+    );
 
-      // Filled (non-tonal) Share Reel exists
-      expect(find.widgetWithText(FilledButton, 'Share Reel'), findsOneWidget);
-      // No tonal share button in video mode
-      expect(
-        find.byWidgetPredicate(
-          (w) =>
-              w is FilledButton &&
-              (w.style?.backgroundColor != null) == false &&
-              false,
-        ),
-        findsNothing,
-      );
-    },
-  );
+    // Filled (non-tonal) Share Reel exists
+    expect(find.widgetWithText(FilledButton, 'Share Reel'), findsOneWidget);
+    // No tonal share button in video mode
+    expect(
+      find.byWidgetPredicate(
+        (w) =>
+            w is FilledButton &&
+            (w.style?.backgroundColor != null) == false &&
+            false,
+      ),
+      findsNothing,
+    );
+  });
 
-  testWidgets(
-    'screenshot mode: save is the FilledButton primary',
-    (WidgetTester tester) async {
-      int saveTaps = 0;
+  testWidgets('screenshot mode: save is the FilledButton primary', (
+    WidgetTester tester,
+  ) async {
+    int saveTaps = 0;
 
-      await tester.pumpWidget(
-        _buildHarness(
-          content: _screenshotContent,
-          onEdit: () {},
-          onSave: () => saveTaps++,
-          onShare: () {},
-          mode: ShareMode.screenshot,
-        ),
-      );
+    await tester.pumpWidget(
+      _buildHarness(
+        content: _screenshotContent,
+        onEdit: () {},
+        onSave: () => saveTaps++,
+        onShare: () {},
+        mode: ShareMode.screenshot,
+      ),
+    );
 
-      final Finder saveButtonFinder = find.widgetWithText(
-        FilledButton,
-        'Save',
-      );
-      expect(saveButtonFinder, findsOneWidget);
-      // Save must NOT be an OutlinedButton in screenshot mode
-      expect(find.widgetWithText(OutlinedButton, 'Save'), findsNothing);
+    final Finder saveButtonFinder = find.widgetWithText(FilledButton, 'Save');
+    expect(saveButtonFinder, findsOneWidget);
+    // Save must NOT be an OutlinedButton in screenshot mode
+    expect(find.widgetWithText(OutlinedButton, 'Save'), findsNothing);
 
-      await tester.tap(saveButtonFinder);
-      await tester.pump();
+    await tester.tap(saveButtonFinder);
+    await tester.pump();
 
-      expect(saveTaps, 1);
-    },
-  );
+    expect(saveTaps, 1);
+  });
 
   testWidgets(
     'screenshot mode: share is rendered via FilledButton.tonalIcon, not the '
@@ -201,10 +196,7 @@ void main() {
         ),
       );
 
-      final Finder saveButtonFinder = find.widgetWithText(
-        FilledButton,
-        'Save',
-      );
+      final Finder saveButtonFinder = find.widgetWithText(FilledButton, 'Save');
       final FilledButton saveButton = tester.widget<FilledButton>(
         saveButtonFinder,
       );
