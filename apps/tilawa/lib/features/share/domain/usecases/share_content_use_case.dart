@@ -11,4 +11,8 @@ class ShareContentUseCase {
   Future<void> call(ShareContent content) {
     return _repository.shareContent(content);
   }
+
+  Future<void> cleanup() {
+    return _repository.cleanup();
+  }
 }

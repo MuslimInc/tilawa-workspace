@@ -255,6 +255,18 @@ class ShareRepositoryImpl implements ShareRepository {
           // Best-effort cleanup.
         }
       }
+      for (final path in screenshotPaths) {
+        try {
+          await _fileManager.deleteShareFile(path);
+        } catch (_) {
+          // Best-effort cleanup.
+        }
+      }
+      try {
+        await _fileManager.deleteShareFile(audioContent.filePath);
+      } catch (_) {
+        // Best-effort cleanup.
+      }
     }
   }
 
@@ -307,6 +319,8 @@ class ShareRepositoryImpl implements ShareRepository {
         text: text,
       ),
     );
+
+    await _fileManager.cleanup();
   }
 
   @override

@@ -84,6 +84,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   final ValueNotifier<bool> _videoIsMuted = ValueNotifier<bool>(true);
   final ValueNotifier<bool> _singleVideoCaptureSurfaceVisible =
       ValueNotifier<bool>(false);
+  bool _isGenerateRequestInFlight = false;
 
   @override
   void dispose() {
@@ -126,6 +127,9 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                 state.status == ShareStatus.generating;
             if (!isGenerating && _singleVideoCaptureSurfaceVisible.value) {
               _singleVideoCaptureSurfaceVisible.value = false;
+            }
+            if (!isGenerating) {
+              _isGenerateRequestInFlight = false;
             }
           },
         ),
@@ -349,9 +353,13 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     ShareState state,
     int maxAyah,
   ) async {
+    if (_isGenerateRequestInFlight) return;
+
     final from = state.fromAyah ?? widget.initialFromAyah;
     final to = state.toAyah ?? widget.initialToAyah;
     if (!_isValidRange(from, to, maxAyah)) return;
+
+    _isGenerateRequestInFlight = true;
 
     final cubit = context.read<ShareCubit>();
     final messages = context.shareProgressMessages;
@@ -369,20 +377,30 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     _singleVideoCaptureSurfaceVisible.value = true;
 
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted) return;
+    if (!mounted) {
+      _isGenerateRequestInFlight = false;
+      return;
+    }
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted) return;
+    if (!mounted) {
+      _isGenerateRequestInFlight = false;
+      return;
+    }
 
-    cubit.generateVideo(
-      surahName: getSurahNameArabic(widget.surahNumber),
-      progressMessages: messages,
-      appName: 'Tilawa',
-      sharedViaLabel: viaLabel,
-      handles: _videoBoundaryKeys.values
-          .map((key) => WidgetCaptureHandle(key))
-          .toList(),
-      maxDurationSeconds: null,
-    );
+    try {
+      await cubit.generateVideo(
+        surahName: getSurahNameArabic(widget.surahNumber),
+        progressMessages: messages,
+        appName: 'Tilawa',
+        sharedViaLabel: viaLabel,
+        handles: _videoBoundaryKeys.values
+            .map((key) => WidgetCaptureHandle(key))
+            .toList(),
+        maxDurationSeconds: null,
+      );
+    } finally {
+      _isGenerateRequestInFlight = false;
+    }
   }
 
   Future<void> _showReciterPicker(BuildContext context) async {

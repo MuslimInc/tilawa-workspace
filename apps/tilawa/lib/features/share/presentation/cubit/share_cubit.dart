@@ -368,6 +368,7 @@ class ShareCubit extends Cubit<ShareState> {
         footerForegroundColor: footerForegroundColor,
       );
       await _shareContent(content);
+      await _shareContent.cleanup();
       emit(state.copyWith(status: ShareStatus.idle));
     } catch (e, st) {
       logger.e(
@@ -567,6 +568,7 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   void discardPreparedContent() {
+    unawaited(_shareContent.cleanup());
     emit(
       state.copyWith(
         status: ShareStatus.idle,
@@ -584,6 +586,7 @@ class ShareCubit extends Cubit<ShareState> {
     emit(state.copyWith(status: ShareStatus.sharing));
     try {
       await _shareContent(state.content!);
+      await _shareContent.cleanup();
       emit(state.copyWith(status: ShareStatus.idle, content: null));
     } catch (e, st) {
       logger.e('[SHARE_CUBIT] shareContent failed', error: e, stackTrace: st);
