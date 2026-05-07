@@ -51,10 +51,13 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-005: `_ReelTopBar` font sizes → tokens
 
-- [ ] In [mushaf_page_renderer.dart](apps/tilawa/lib/features/share/presentation/widgets/mushaf_page_renderer.dart), replace `VideoReelDesign.topBarTitleFontSize` (16) with `theme.textTheme.titleSmall?.fontSize` (or named token if available).
-- [ ] Replace `VideoReelDesign.topBarMetaFontSize` (14) with `theme.textTheme.bodySmall?.fontSize`.
-- [ ] Keep `VideoReelDesign` constants in place for now (Phase 4 deletes them).
-- [ ] Manual visual check: top bar reads the same as before in light + dark.
+- [x] In [mushaf_page_renderer.dart](apps/tilawa/lib/features/share/presentation/widgets/mushaf_page_renderer.dart), replace `VideoReelDesign.topBarTitleFontSize` (16) with `theme.textTheme.titleMedium?.fontSize`. *(Material 3 base `titleMedium = 16`, exact match; `titleSmall` would have been 14 — a regression.)*
+- [x] Replace `VideoReelDesign.topBarMetaFontSize` (14) with `theme.textTheme.bodyMedium?.fontSize`. *(Material 3 base `bodyMedium = 14`, exact match; `bodySmall` would have been 12.)*
+- [x] Each token-driven size has a `?? VideoReelDesign.topBar*FontSize` fallback to guarantee no regression if the textTheme is unexpectedly null.
+- [x] Verified `responsiveTextTheme` is not applied app-wide (no production callers) — `Theme.of(context).textTheme` returns Material 3 base sizes regardless of window size, so capture output stays stable across phones and tablets.
+- [x] Keep `VideoReelDesign.topBar*FontSize` constants in place for now (Phase 4 deletes them).
+- [x] All 60 share tests pass; analyzer clean.
+- [ ] Manual visual check: top bar reads the same as before in light + dark. *(Pending pre-PR sweep on real device.)*
 
 ### P1-006: Mode-aware Save/Share emphasis
 

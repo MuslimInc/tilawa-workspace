@@ -406,11 +406,20 @@ class _ReelTopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isArabic = context.l10n.localeName == 'ar';
+    final theme = Theme.of(context);
     final palette = VideoReelPalette.fromContext(context);
     final double height = (pageHeight * VideoReelDesign.topBarHeightFactor)
         .clamp(VideoReelDesign.topBarMinHeight, VideoReelDesign.topBarMaxHeight)
         .toDouble();
     final String localizedJuzNumber = _localizedQuranNumber(context, juzNumber);
+    // Material 3 base sizes — titleMedium=16, bodyMedium=14 — match the
+    // values previously held in VideoReelDesign.topBar*FontSize literals.
+    final double titleFontSize =
+        theme.textTheme.titleMedium?.fontSize ??
+        VideoReelDesign.topBarTitleFontSize;
+    final double metaFontSize =
+        theme.textTheme.bodyMedium?.fontSize ??
+        VideoReelDesign.topBarMetaFontSize;
 
     return SizedBox(
       height: height,
@@ -428,7 +437,7 @@ class _ReelTopBar extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                   style: TextStyle(
-                    fontSize: VideoReelDesign.topBarTitleFontSize,
+                    fontSize: titleFontSize,
                     fontWeight: FontWeight.w600,
                     color: palette.frameTextColor,
                     decoration: TextDecoration.none,
@@ -439,7 +448,7 @@ class _ReelTopBar extends StatelessWidget {
               Text(
                 '${context.l10n.juzPart} $localizedJuzNumber',
                 style: TextStyle(
-                  fontSize: VideoReelDesign.topBarMetaFontSize,
+                  fontSize: metaFontSize,
                   fontWeight: FontWeight.w500,
                   color: palette.frameSecondaryTextColor,
                   decoration: TextDecoration.none,
