@@ -71,11 +71,13 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-007: Live preview unmounted during capture (single-tree invariant)
 
-- [ ] In [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart), in the `background:` selector inside `ImmersiveComposerScaffold`, when `bState.status == ShareStatus.capturing || bState.status == ShareStatus.generating`, render a `_GeneratingBackdrop` widget instead of `_VideoLivePreview`.
-- [ ] `_GeneratingBackdrop` is a simple `ColoredBox` (use `reelPalette.mushafBackgroundColor`) with a centered staged progress label fed from the cubit's `progressMessage`.
-- [ ] Verify with widget inspector / `find.byType(_VideoLivePreview)` that it is **not** in the tree during capture.
-- [ ] Widget test: while in `ShareStatus.generating`, `find.byType(_VideoLivePreview)` returns zero matches.
-- [ ] Smoke test on a real device: generate a 3-page reel and confirm no jank during the capture phase.
+- [x] In [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart), the `background:` selector inside `ImmersiveComposerScaffold` now renders `_GeneratingBackdrop` whenever `bState.status` is `capturing` or `generating`. The live `_VideoLivePreview` only mounts in the idle/error state.
+- [x] `_GeneratingBackdrop` is a `ColoredBox` (`reelPalette.mushafBackgroundColor`) with a centered `theme.textTheme.bodyMedium` label that pulls `state.progressMessage` from the cubit via a focused `BlocSelector`.
+- [x] Widget test: while in `ShareStatus.generating`, `find.byKey(ValueKey('live_preview'))` returns zero matches and `find.byKey(ValueKey('generating_backdrop'))` returns one — see [video_reel_composer_screen_capture_backdrop_test.dart](apps/tilawa/test/features/share/presentation/screens/video_reel_composer_screen_capture_backdrop_test.dart).
+- [x] Same assertion verified for `ShareStatus.capturing`.
+- [x] Widget test: backdrop renders the cubit's `progressMessage` so the user has a visible status while busy.
+- [x] All 67 share tests pass; analyzer clean for new code.
+- [ ] Smoke test on a real device: generate a 3-page reel and confirm no jank during the capture phase. *(Pending pre-PR sweep.)*
 
 ### P1-008: `disableBlur` becomes a context-aware default
 

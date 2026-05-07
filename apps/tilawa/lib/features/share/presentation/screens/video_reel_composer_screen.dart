@@ -213,6 +213,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 isReviewing &&
                                 bState.content is ShareScreenshot;
 
+                            final isBusyGenerating =
+                                bState.status == ShareStatus.capturing ||
+                                bState.status == ShareStatus.generating;
+
                             final child =
                                 isReviewing && bState.content is ShareVideo
                                 ? MediaPreviewFrame(
@@ -240,6 +244,12 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                           (bState.content as ShareScreenshot)
                                               .filePath,
                                     ),
+                                  )
+                                : isBusyGenerating
+                                ? _GeneratingBackdrop(
+                                    key: const ValueKey('generating_backdrop'),
+                                    backgroundColor:
+                                        reelPalette.mushafBackgroundColor,
                                   )
                                 : _VideoLivePreview(
                                     key: const ValueKey('live_preview'),
@@ -541,6 +551,47 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
           message,
           style: TextStyle(color: colorScheme.onErrorContainer),
         ),
+      ),
+    );
+  }
+}
+
+/// Lightweight backdrop shown in place of [_VideoLivePreview] while the
+/// composer is capturing frames or encoding the video. Renders only a
+/// colored canvas plus the cubit's progress label — no mushaf tree — so
+/// only the offstage capture surface is paying for layout/raster during
+/// generation.
+class _GeneratingBackdrop extends StatelessWidget {
+  const _GeneratingBackdrop({super.key, required this.backgroundColor});
+
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return ColoredBox(
+      color: backgroundColor,
+      child: BlocSelector<ShareCubit, ShareState, String>(
+        selector: (state) => state.progressMessage,
+        builder: (context, progressMessage) {
+          if (progressMessage.isEmpty) {
+            return const SizedBox.expand();
+          }
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+              child: Text(
+                progressMessage,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
