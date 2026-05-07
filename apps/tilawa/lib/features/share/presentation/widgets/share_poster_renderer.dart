@@ -1,9 +1,14 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 
 import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
 import '../utils/selected_quran_range_page.dart';
 import '../utils/share_ayah_range_utils.dart';
+
+const String _shareBismillahText = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
 final ValueNotifier<bool> _hiddenSharePosterOverlays = ValueNotifier<bool>(
   false,
@@ -11,7 +16,8 @@ final ValueNotifier<bool> _hiddenSharePosterOverlays = ValueNotifier<bool>(
 
 const double _sharePosterViewportOverflowGuard = 4.0;
 const double _sharePosterMaxWidthToHeightRatio = 0.56;
-const double _sharePosterHeaderFontSizeMultiplier = 0.57;
+const double _sharePosterHeaderFontSizeMultiplier =
+    SurahHeaderBannerConstants.defaultFontSizeMultiplier;
 
 /// Renders the selected ayah range using prepared QCF page blocks.
 ///
@@ -98,44 +104,57 @@ class SharePosterRenderer extends StatelessWidget {
               return const SizedBox.shrink();
             }
 
-            final compositionHeight = selectedComposition.estimatedHeight.clamp(
-              0.0,
-              pageHeight,
-            ).toDouble();
+            final compositionHeight = selectedComposition.estimatedHeight;
+            final outputHeight = math.min(compositionHeight, pageHeight);
 
-            return DecoratedBox(
-              decoration: BoxDecoration(color: readerTheme.pageBackground),
-              child: MediaQuery(
-                data: mediaQuery.copyWith(
-                  padding: EdgeInsets.zero,
-                  viewPadding: EdgeInsets.zero,
-                  viewInsets: EdgeInsets.zero,
-                ),
-                child: Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Align(
-                    alignment: Alignment.topCenter,
+            return Align(
+              alignment: Alignment.topCenter,
+              widthFactor: 1,
+              heightFactor: 1,
+              child: DecoratedBox(
+                decoration: BoxDecoration(color: readerTheme.pageBackground),
+                child: MediaQuery(
+                  data: mediaQuery.copyWith(
+                    padding: EdgeInsets.zero,
+                    viewPadding: EdgeInsets.zero,
+                    viewInsets: EdgeInsets.zero,
+                  ),
+                  child: Directionality(
+                    textDirection: TextDirection.rtl,
                     child: SizedBox(
                       width: pageWidth,
-                      height: compositionHeight,
-                      child: PageContent(
-                        mushafService: quranQcfLocator<MushafService>(),
-                        pageSnapshotService:
-                            quranQcfLocator<PageSnapshotService>(),
-                        pageNumber: pageNumber,
-                        preparedPage: selectedComposition.page,
-                        textColor: readerTheme.textColor,
-                        pageBackgroundColor: readerTheme.pageBackground,
-                        headerImageFilter: readerTheme.headerImageFilter,
-                        headerTextColor: readerTheme.headerTextColor,
-                        headerFontSizeMultiplier:
-                            _sharePosterHeaderFontSizeMultiplier,
-                        uiTextDirection: TextDirection.rtl,
-                        showOverlaysListenable: _hiddenSharePosterOverlays,
-                        alignTextToTop: true,
-                        showSpecialBlocks: true,
-                        viewportSize: pageViewportSize,
-                        enableSnapshots: false,
+                      height: outputHeight,
+                      child: FittedBox(
+                        alignment: Alignment.topCenter,
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: pageWidth,
+                          height: compositionHeight,
+                          child: PageContent(
+                            mushafService: quranQcfLocator<MushafService>(),
+                            pageSnapshotService:
+                                quranQcfLocator<PageSnapshotService>(),
+                            pageNumber: pageNumber,
+                            preparedPage: selectedComposition.page,
+                            textColor: readerTheme.textColor,
+                            pageBackgroundColor: readerTheme.pageBackground,
+                            headerImageFilter: readerTheme.headerImageFilter,
+                            headerTextColor: readerTheme.headerTextColor,
+                            headerFontSizeMultiplier:
+                                _sharePosterHeaderFontSizeMultiplier,
+                            uiTextDirection: TextDirection.rtl,
+                            showOverlaysListenable: _hiddenSharePosterOverlays,
+                            alignTextToTop: true,
+                            showSpecialBlocks: true,
+                            viewportSize: pageViewportSize,
+                            enableSnapshots: false,
+                            bismillahBuilder: (context, page, fontSize) =>
+                                _buildShareBismillah(
+                                  fontSize: fontSize,
+                                  color: readerTheme.textColor,
+                                ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -145,6 +164,29 @@ class SharePosterRenderer extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Widget _buildShareBismillah({
+    required double fontSize,
+    required Color color,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          _shareBismillahText,
+          textDirection: TextDirection.rtl,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.amiri(
+            fontSize: fontSize * 1.15,
+            fontWeight: FontWeight.w700,
+            color: color,
+            height: 1.4,
+          ),
+        ),
+      ),
     );
   }
 }

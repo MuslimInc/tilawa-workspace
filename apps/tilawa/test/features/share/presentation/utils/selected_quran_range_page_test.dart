@@ -37,9 +37,14 @@ void main() {
         composition.page.blocks.whereType<PreparedBismillahBlock>(),
         hasLength(1),
       );
-      expect(composition.page.blocks.whereType<PreparedTextBlock>().toList(), [
-        selectedBlock,
-      ]);
+      final selectedTextBlocks = composition.page.blocks
+          .whereType<PreparedTextBlock>()
+          .toList();
+      expect(selectedTextBlocks, hasLength(1));
+      expect(
+        selectedTextBlocks.single.painter.text!.toPlainText(),
+        selectedBlock.painter.text!.toPlainText(),
+      );
       expect(composition.estimatedHeight, lessThan(viewportSize.height));
     });
 
@@ -83,8 +88,8 @@ void main() {
       expect(composition, isNotNull);
       expect(composition!.page.metrics.padding.left, metrics.padding.left);
       expect(composition.page.metrics.padding.right, metrics.padding.right);
-      expect(composition.page.metrics.padding.top, lessThan(20));
-      expect(composition.page.metrics.padding.bottom, lessThan(20));
+      expect(composition.page.metrics.padding.top, 0);
+      expect(composition.page.metrics.padding.bottom, 0);
     });
 
     test(
@@ -104,6 +109,37 @@ void main() {
         expect(composition, isNull);
       },
     );
+
+    test('trims a shared line to the selected ayah text and marker', () {
+      final composition = buildSelectedQuranRangeComposition(
+        sourcePage: PreparedQuranPage(
+          metrics: metrics,
+          blocks: [
+            _multiVerseTextBlock(
+              entries: [
+                _VerseText(surah: 41, verse: 46, text: 'before'),
+                _VerseText(surah: 41, verse: 47, text: 'selected_ayah_marker'),
+                _VerseText(surah: 41, verse: 48, text: 'after'),
+              ],
+            ),
+          ],
+        ),
+        surahNumber: 41,
+        fromAyah: 47,
+        toAyah: 47,
+        viewportSize: viewportSize,
+      );
+
+      expect(composition, isNotNull);
+      final selectedText = composition!.page.blocks
+          .whereType<PreparedTextBlock>()
+          .single
+          .painter
+          .text!
+          .toPlainText();
+
+      expect(selectedText, 'selected_ayah_marker');
+    });
   });
 }
 
@@ -124,4 +160,46 @@ PreparedTextBlock _textBlock({required int surah, required int verse}) {
       ),
     ],
   );
+}
+
+PreparedTextBlock _multiVerseTextBlock({required List<_VerseText> entries}) {
+  var offset = 0;
+  final children = <InlineSpan>[];
+  final metadata = <QuranWordMetadata>[];
+
+  for (final entry in entries) {
+    children.add(
+      TextSpan(text: entry.text, style: const TextStyle(fontSize: 18)),
+    );
+    metadata.add(
+      QuranWordMetadata(
+        surah: entry.surah,
+        verse: entry.verse,
+        startOffset: offset,
+        endOffset: offset + entry.text.length,
+      ),
+    );
+    offset += entry.text.length;
+  }
+
+  final painter = TextPainter(
+    text: TextSpan(children: children),
+    textDirection: TextDirection.rtl,
+    textAlign: TextAlign.center,
+    textWidthBasis: TextWidthBasis.longestLine,
+  )..layout(maxWidth: 200);
+
+  return PreparedTextBlock(painter: painter, metadata: metadata);
+}
+
+class _VerseText {
+  const _VerseText({
+    required this.surah,
+    required this.verse,
+    required this.text,
+  });
+
+  final int surah;
+  final int verse;
+  final String text;
 }
