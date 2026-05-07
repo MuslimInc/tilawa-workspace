@@ -22,10 +22,12 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-002: Touch target compliance for stepper buttons
 
-- [ ] In [share_composer_widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/share_composer_widgets.dart), wrap `_StepperButton`'s tappable area in a `SizedBox(width: 48, height: 48)` while keeping the visual icon at 36×36 via inner `Center` + `SizedBox(36×36)`.
-- [ ] Confirm `InkWell` ripple matches the visual square (use `borderRadius` clamped to the inner size).
-- [ ] Widget test: `find.byType(_StepperButton).first.size` reports ≥ 48 dp on both axes.
-- [ ] Manual test on Pixel 6 + iPhone SE (small device): adjacent steppers do not overlap in hit area.
+- [x] In [share_composer_widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/share_composer_widgets.dart), wrap `_StepperButton`'s tappable area in a `SizedBox(width: 48, height: 48)` while keeping the visual icon at 36×36 via inner `Center` + `SizedBox(36×36)`.
+- [x] `AyahStepper`'s outer `SizedBox(height: 36)` grew to `48` so the wider buttons aren't clipped vertically. *Visual height of the bordered stepper grew by 12 dp; design can token-tune in Phase 4 if needed.*
+- [x] `InkWell` ripple stays circular via the existing `Material(shape: CircleBorder, clipBehavior: Clip.antiAlias)` — clipped to the 48-diameter circle, which is the recommended Material behaviour for round icon buttons.
+- [x] Widget test: each `InkWell` inside `AyahStepper` reports ≥ 48 dp on both axes — see [ayah_stepper_hit_area_test.dart](apps/tilawa/test/features/share/presentation/widgets/ayah_stepper_hit_area_test.dart).
+- [x] Widget test: a tap 22 dp from the visual centre (outside the visible 36×36 icon, inside the 48-circle) fires the callback.
+- [ ] Manual test on Pixel 6 + iPhone SE (small device): adjacent steppers do not overlap in hit area. *(Pending real-device pass before PR.)*
 
 ### P1-003: Inline reason for invalid range
 
