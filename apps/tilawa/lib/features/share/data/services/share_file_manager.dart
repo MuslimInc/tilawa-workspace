@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 @lazySingleton
 class ShareFileManager {
   static const _shareDirName = 'tilawa_share';
+  static const _exportDirName = 'tilawa_exports';
   static const _verseCacheDirName = 'verse_cache';
   static const _maxCacheSizeBytes = 100 * 1024 * 1024; // 100 MB
 
@@ -32,6 +33,16 @@ class ShareFileManager {
       await cacheDir.create(recursive: true);
     }
     return cacheDir;
+  }
+
+  /// Returns the persistent export directory, creating it if needed.
+  Future<Directory> getExportDirectory() async {
+    final docsDir = await getApplicationDocumentsDirectory();
+    final exportDir = Directory(p.join(docsDir.path, _exportDirName));
+    if (!exportDir.existsSync()) {
+      await exportDir.create(recursive: true);
+    }
+    return exportDir;
   }
 
   /// Saves [bytes] to a uniquely named file in the share temp directory.
@@ -103,6 +114,27 @@ class ShareFileManager {
     } catch (_) {
       // Best-effort deletion — do not crash.
     }
+  }
+
+  /// Copies a generated share file into persistent app storage.
+  /// Returns the absolute path of the exported copy.
+  Future<String> exportShareFile({
+    required String sourcePath,
+    String? preferredFileName,
+  }) async {
+    final sourceFile = File(sourcePath);
+    if (!sourceFile.existsSync()) {
+      throw StateError('Source file does not exist: $sourcePath');
+    }
+
+    final exportDir = await getExportDirectory();
+    final sourceName = preferredFileName ?? p.basename(sourcePath);
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final uniqueName = '${timestamp}_$sourceName';
+    final targetPath = p.join(exportDir.path, uniqueName);
+
+    await sourceFile.copy(targetPath);
+    return targetPath;
   }
 
   /// Evicts least-recently-used verse cache files when the cache exceeds

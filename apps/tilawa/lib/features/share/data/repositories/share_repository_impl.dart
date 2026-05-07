@@ -324,6 +324,18 @@ class ShareRepositoryImpl implements ShareRepository {
   }
 
   @override
+  Future<String> exportContent(ShareContent content) async {
+    final String sourcePath = switch (content) {
+      ShareScreenshot(:final filePath) => filePath,
+      ShareAudioClip(:final filePath) => filePath,
+      ShareVideo(:final filePath) => filePath,
+      ShareText() => throw StateError('Text content cannot be exported.'),
+    };
+
+    return _fileManager.exportShareFile(sourcePath: sourcePath);
+  }
+
+  @override
   Future<void> cleanup() {
     logger.d(
       '[AppLaunch][ShareRepositoryImpl.cleanup]: Start in (${DateTime.now()})',

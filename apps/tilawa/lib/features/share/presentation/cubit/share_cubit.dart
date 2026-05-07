@@ -583,19 +583,52 @@ class ShareCubit extends Cubit<ShareState> {
   /// Shares the currently reviewed content.
   Future<void> shareContent() async {
     if (state.content == null) return;
+    final int tShare = DateTime.now().millisecondsSinceEpoch;
+    logger.d('[SHARE_FLOW] shareContent start | t=${tShare}ms');
     emit(state.copyWith(status: ShareStatus.sharing));
     try {
       await _shareContent(state.content!);
       await _shareContent.cleanup();
+      logger.d(
+        '[SHARE_FLOW] shareContent success | took=${DateTime.now().millisecondsSinceEpoch - tShare}ms',
+      );
       emit(state.copyWith(status: ShareStatus.idle, content: null));
     } catch (e, st) {
       logger.e('[SHARE_CUBIT] shareContent failed', error: e, stackTrace: st);
+      logger.e(
+        '[SHARE_FLOW] shareContent failure after ${DateTime.now().millisecondsSinceEpoch - tShare}ms',
+        error: e,
+        stackTrace: st,
+      );
       emit(
         state.copyWith(
           status: ShareStatus.error,
           errorMessage: _userFacingError(e),
         ),
       );
+    }
+  }
+
+  /// Exports the currently reviewed media as a persistent copy.
+  Future<String?> savePreparedContent() async {
+    final content = state.content;
+    if (content == null || content is ShareText) return null;
+
+    final int tSave = DateTime.now().millisecondsSinceEpoch;
+    logger.d('[SHARE_FLOW] savePreparedContent start | t=${tSave}ms');
+    try {
+      final exportedPath = await _shareContent.exportContent(content);
+      logger.d(
+        '[SHARE_FLOW] savePreparedContent success | took=${DateTime.now().millisecondsSinceEpoch - tSave}ms | path=$exportedPath',
+      );
+      return exportedPath;
+    } catch (e, st) {
+      logger.e(
+        '[SHARE_FLOW] savePreparedContent failure after ${DateTime.now().millisecondsSinceEpoch - tSave}ms',
+        error: e,
+        stackTrace: st,
+      );
+      rethrow;
     }
   }
 

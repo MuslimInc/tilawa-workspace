@@ -12,6 +12,10 @@ class ShareContentUseCase {
     return _repository.shareContent(content);
   }
 
+  Future<String> exportContent(ShareContent content) {
+    return _repository.exportContent(content);
+  }
+
   Future<void> cleanup() {
     return _repository.cleanup();
   }

@@ -8,12 +8,16 @@ class VideoReviewPanel extends StatelessWidget {
     super.key,
     required this.content,
     required this.onEdit,
+    required this.onSave,
     required this.onShare,
+    this.isSaving = false,
   });
 
   final ShareContent content;
   final VoidCallback onEdit;
+  final VoidCallback onSave;
   final VoidCallback onShare;
+  final bool isSaving;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +43,19 @@ class VideoReviewPanel extends StatelessWidget {
             child: OutlinedButton(
               onPressed: onEdit,
               child: Text(context.l10n.edit),
+            ),
+          ),
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: isSaving ? null : onSave,
+              icon: isSaving
+                  ? SizedBox(
+                      width: tokens.iconSizeSmall,
+                      height: tokens.iconSizeSmall,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Icon(Icons.download_rounded, size: tokens.iconSizeSmall),
+              label: Text(context.l10n.save),
             ),
           ),
           Expanded(

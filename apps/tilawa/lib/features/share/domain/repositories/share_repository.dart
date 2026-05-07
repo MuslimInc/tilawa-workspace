@@ -45,6 +45,9 @@ abstract class ShareRepository {
   /// Shares the given content via the native share sheet.
   Future<void> shareContent(ShareContent content);
 
+  /// Exports a persistent copy of generated media and returns its new path.
+  Future<String> exportContent(ShareContent content);
+
   /// Cleans up temporary share files.
   Future<void> cleanup();
 }

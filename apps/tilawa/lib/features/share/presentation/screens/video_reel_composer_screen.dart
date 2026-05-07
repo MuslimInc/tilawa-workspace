@@ -85,6 +85,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   final ValueNotifier<bool> _singleVideoCaptureSurfaceVisible =
       ValueNotifier<bool>(false);
   bool _isGenerateRequestInFlight = false;
+  bool _isSavingPreparedContent = false;
 
   @override
   void dispose() {
@@ -130,6 +131,27 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
             }
             if (!isGenerating) {
               _isGenerateRequestInFlight = false;
+            }
+          },
+        ),
+        BlocListener<ShareCubit, ShareState>(
+          listenWhen: (previous, current) {
+            final completedShare =
+                previous.status == ShareStatus.sharing &&
+                current.status == ShareStatus.idle &&
+                current.content == null;
+            final failedShare =
+                previous.status == ShareStatus.sharing &&
+                current.status == ShareStatus.error;
+            return completedShare || failedShare;
+          },
+          listener: (context, state) {
+            if (!mounted) return;
+            if (state.status == ShareStatus.idle && state.content == null) {
+              _showInfoSnackBar(context, context.l10n.shareReadyTitle);
+            } else if (state.status == ShareStatus.error &&
+                state.errorMessage != null) {
+              _showErrorSnackBar(context, state.errorMessage!);
             }
           },
         ),
@@ -279,6 +301,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 onEdit: () => context
                                     .read<ShareCubit>()
                                     .discardPreparedContent(),
+                                isSaving: _isSavingPreparedContent,
+                                onSave: _isSavingPreparedContent
+                                    ? () {}
+                                    : () => _handleSavePreparedContent(context),
                                 onShare: () =>
                                     context.read<ShareCubit>().shareContent(),
                               )
@@ -447,6 +473,50 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
       return context.l10n.preparingVideoEncoding;
     }
     return null;
+  }
+
+  Future<void> _handleSavePreparedContent(BuildContext context) async {
+    if (_isSavingPreparedContent) return;
+    setState(() => _isSavingPreparedContent = true);
+
+    try {
+      final exportedPath = await context
+          .read<ShareCubit>()
+          .savePreparedContent();
+      if (!mounted || exportedPath == null) return;
+      _showInfoSnackBar(
+        context,
+        '${context.l10n.save} ${context.l10n.completed}: ${exportedPath.split('/').last}',
+      );
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString().replaceFirst(RegExp(r'^[\w]+:\s*'), '');
+      _showErrorSnackBar(context, msg);
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingPreparedContent = false);
+      }
+    }
+  }
+
+  void _showInfoSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(behavior: SnackBarBehavior.floating, content: Text(message)),
+    );
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    final colorScheme = Theme.of(context).colorScheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: colorScheme.errorContainer,
+        content: Text(
+          message,
+          style: TextStyle(color: colorScheme.onErrorContainer),
+        ),
+      ),
+    );
   }
 }
 
