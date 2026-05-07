@@ -25,16 +25,12 @@ class PremiumBottomBar extends StatelessWidget {
       container: true,
       label: '$pageLabel, $hizbLabel',
       child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          tokens.spaceExtraLarge,
-          tokens.spaceTiny,
-          tokens.spaceExtraLarge,
-          tokens.spaceTiny,
-        ),
+        padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraLarge),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Row(
             spacing: tokens.spaceMedium,
+            mainAxisSize: .min,
             children: [
               const Expanded(child: _MushafFooterRule(dotNearMedallion: true)),
               _PageNumberMedallion(pageNumber: state.displayPage),
@@ -97,36 +93,27 @@ class _PageNumberMedallion extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final medallionSize = tokens.iconSizeLarge;
 
-    return SizedBox.square(
-      dimension: medallionSize,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
-            width: tokens.borderWidthThin,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.shadow.withValues(alpha: tokens.opacitySubtle),
-              blurRadius: tokens.blurGlass,
-              offset: tokens.shadowOffsetSmall,
-            ),
-          ],
+    return Container(
+      constraints: BoxConstraints(minWidth: tokens.iconSizeLargePlus),
+      padding: EdgeInsets.all(tokens.spaceSmall),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+          width: tokens.borderWidthThin,
         ),
-        child: Center(
-          child: Text(
-            _toEasternArabicDigits(pageNumber),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.labelLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.primary,
-            ),
+      ),
+      child: Center(
+        child: Text(
+          _toEasternArabicDigits(pageNumber),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: colorScheme.primary,
           ),
         ),
       ),
