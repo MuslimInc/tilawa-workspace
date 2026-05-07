@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
@@ -62,13 +63,57 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       matcher: (payload) {
         if (payload == null) return false;
         try {
-          final data = jsonDecode(payload);
-          return data['type'] != null || data['actionType'] != null;
+          final dynamic decoded = jsonDecode(payload);
+          if (decoded is! Map) return false;
+          final Map<String, dynamic> data = Map<String, dynamic>.from(decoded);
+          return _isFcmPayload(data);
         } catch (_) {
           return false;
         }
       },
       handler: (response) => _handler.handleNotificationResponse(response),
     );
+  }
+
+  bool _isFcmPayload(Map<String, dynamic> data) {
+    final String? type = _normalizedType(data);
+    if (type == null) {
+      return false;
+    }
+
+    // Keep local prayer/adhan payloads owned by PrayerAdhanNotificationService.
+    if (type == 'prayer' && _isLocalPrayerPayload(data)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  String? _normalizedType(Map<String, dynamic> data) {
+    final dynamic rawType = data['type'] ?? data['actionType'];
+    final String? type = rawType?.toString().trim();
+    if (type == null || type.isEmpty) {
+      return null;
+    }
+    return type.toLowerCase();
+  }
+
+  bool _isLocalPrayerPayload(Map<String, dynamic> data) {
+    const Set<String> localPrayerKeys = <String>{
+      'scheduled_time_ms',
+      'scheduled_ms',
+      'notification_id',
+      'adhan_enabled',
+      'is_adhan_playing',
+      'prayer_key',
+      'date',
+    };
+
+    for (final String key in localPrayerKeys) {
+      if (data.containsKey(key)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -41,6 +41,10 @@ class AppRouter {
   /// launch notification that the splash screen already handled.
   static int? lastProcessedNotificationId;
 
+  static const Duration _notificationNavDedupWindow = Duration(seconds: 3);
+  static String? _lastNotificationNavigationSignature;
+  static DateTime? _lastNotificationNavigationAt;
+
   /// Navigate to a notification destination from a cold start.
   /// Goes to Home first, then pushes the target so back button works.
   static void navigateFromColdStart(String location, {Object? extra}) {
@@ -67,6 +71,22 @@ class AppRouter {
     }
 
     try {
+      if (_isDuplicateNotificationNavigation(location, extra)) {
+        logger.d('[AppRouter] Duplicate notification navigation ignored');
+        return;
+      }
+
+      final String? currentLocation = _currentLocation();
+      if (_isSameTargetNavigation(
+        currentLocation: currentLocation,
+        targetLocation: location,
+      )) {
+        logger.d(
+          '[AppRouter] Notification navigation skipped (already on target): $location',
+        );
+        return;
+      }
+
       disableStateRestoration = false;
       pendingStartupNotificationLaunch = false;
       final String homeLocation = const HomeRoute().location;
@@ -131,6 +151,55 @@ class AppRouter {
       // In tests or if Firebase is not initialized, return an empty list
       return [];
     }
+  }
+
+  static bool _isDuplicateNotificationNavigation(
+    String location,
+    Object? extra,
+  ) {
+    final DateTime now = DateTime.now();
+    final String signature = '$location|${extra?.hashCode ?? 0}';
+
+    if (_lastNotificationNavigationSignature == signature &&
+        _lastNotificationNavigationAt != null &&
+        now.difference(_lastNotificationNavigationAt!) <=
+            _notificationNavDedupWindow) {
+      return true;
+    }
+
+    _lastNotificationNavigationSignature = signature;
+    _lastNotificationNavigationAt = now;
+    return false;
+  }
+
+  static String? _currentLocation() {
+    try {
+      final List<RouteMatchBase> matches =
+          router.routerDelegate.currentConfiguration.matches;
+      if (matches.isEmpty) return null;
+      return matches.last.matchedLocation;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static bool _isSameTargetNavigation({
+    required String? currentLocation,
+    required String targetLocation,
+  }) {
+    if (currentLocation == null || currentLocation.isEmpty) {
+      return false;
+    }
+
+    final String targetPath = Uri.parse(targetLocation).path;
+    final String currentPath = Uri.parse(currentLocation).path;
+
+    // For prayer status, path-level comparison is safest for phase-1 hotfix.
+    if (targetPath == const PrayerNotificationStatusRoute().location) {
+      return currentPath == targetPath;
+    }
+
+    return currentLocation == targetLocation;
   }
 
   static void init() {
