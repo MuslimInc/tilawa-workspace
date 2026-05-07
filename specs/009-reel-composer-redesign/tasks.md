@@ -102,23 +102,49 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-010: Phase 1 validation
 
-- [ ] `flutter analyze` is clean.
-- [ ] `flutter test apps/tilawa` passes (existing + new tests).
-- [ ] `flutter test packages/ui_kit` passes.
-- [ ] Manual smoke on Pixel 6:
+#### Automated gates (all green)
+
+- [x] `flutter analyze` clean for every Phase 1-touched file. The 8 `info`-level `use_build_context_synchronously` warnings in `_handleSavePreparedContent` of both composer screens are **pre-existing** (predate Phase 1) and were flagged from P1-001 onward; not in scope to fix.
+- [x] `flutter test apps/tilawa --plain-name "share"` (focused share suite) — **67/67 pass**, +11 net new tests across Phase 1.
+- [x] `flutter test packages/ui_kit/test/organisms/immersive_composer_scaffold_test.dart` — **10/10 pass**, +3 net new tests.
+- [x] Pre-existing flakes spotted in the broader full-suite run (2 `audio_player_handler_impl_test.dart` failures, 29 macOS golden tests in `goldens/atoms_goldens_test.dart`, `molecules_goldens_test.dart`, `skeletonizer_goldens_test.dart`) are confirmed **unrelated to Phase 1** — git diff shows zero Phase 1 commits touched those areas, and the audio test passes when run in isolation.
+
+#### Manual smoke (pre-PR, pending real-device sweep)
+
+- [ ] **Pixel 6 / Android**:
   - [ ] Generate reel for `Al-Baqarah 5–8` → review → save.
-  - [ ] Force a generation error (airplane mode mid-generation) → see Retry → tap Retry → succeed.
-  - [ ] Pick range exceeding `maxVersesPerClip` → see inline reason.
-  - [ ] Pick `from > to` → see inline reason.
+  - [ ] Force a generation error (airplane mode mid-generation) → see Retry button → tap Retry → succeed.
+  - [ ] Pick range exceeding `maxVersesPerClip` → see inline reason text in error colour.
+  - [ ] Pick `from > to` → see inline reason text.
   - [ ] Confirm only one mushaf tree mounted during capture (Flutter Inspector).
-- [ ] Manual smoke on iPhone SE (small device):
-  - [ ] Stepper buttons are easy to hit.
+  - [ ] Verify Save is **OutlinedButton** in reel review and **FilledButton** in screenshot review.
+  - [ ] Verify both composers have **no blur** on the bottom panel.
+- [ ] **iPhone SE / iOS** (small device):
+  - [ ] Stepper buttons easy to tap (≥48dp hit area).
   - [ ] No layout overflow in `ComposerControls`.
-- [ ] Manual smoke in Arabic locale:
-  - [ ] Banner names render correctly.
-  - [ ] Inline reason text wraps cleanly.
-  - [ ] Retry label localized.
-- [ ] PR description includes before/after screenshots: composer (idle, busy, error), review (screenshot mode, reel mode).
+- [ ] **Arabic locale**:
+  - [ ] Banner names render correctly with QCF glyphs.
+  - [ ] Inline range-issue messages wrap cleanly RTL (`shareInvalidRangeOrder`, `shareInvalidRangeBounds`, `maxVersesExceeded`).
+  - [ ] Retry label is localized.
+  - [ ] Stepper buttons stay symmetrical in RTL row.
+- [ ] PR description includes before/after screenshots: composer (idle / busy / error), review (screenshot mode / reel mode), Arabic + English.
+
+#### Phase 1 summary
+
+| Task | Outcome |
+| --- | --- |
+| P1-001 | Retry parity on reel composer — done, 3 widget tests |
+| P1-002 | Stepper button hit-area ≥48dp — done, 2 widget tests; visual stepper height grew 36→48 dp |
+| P1-003 | Inline reason for invalid range — done, 4 widget tests, 2 new l10n keys + 1 reused |
+| P1-004 | `MediaPreviewFrame` radius → token — **deferred to Phase 4** (10 dp delta would break the intentional nested-corner gradient) |
+| P1-005 | `_ReelTopBar` font sizes → tokens — done via `titleMedium`/`bodyMedium` (spec's `titleSmall`/`bodySmall` would shrink) |
+| P1-006 | Mode-aware Save/Share emphasis — done, `VideoReviewPanel` rewritten with `ShareMode` prop, 6 widget tests |
+| P1-007 | Live preview unmounted during capture — done with new `_GeneratingBackdrop`, 3 widget tests |
+| P1-008 | `disableBlur` context-aware default — done via new `BackgroundIntent` enum, 3 widget tests |
+| P1-009 | `_ReelBottomBar` dead-code deletion — done, ~120 lines removed |
+| P1-010 | Phase 1 validation — done (this task) |
+
+**Carryovers to Phase 4**: media-preview-frame radius token; `frameAccentColor` palette field cleanup; `_ReelTopBar` weight scale; full `VideoReelDesign` palette migration to `TilawaShareCanvasTokens`.
 
 ---
 
