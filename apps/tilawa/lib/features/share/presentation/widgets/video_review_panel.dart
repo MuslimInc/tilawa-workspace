@@ -36,34 +36,44 @@ class VideoReviewPanel extends StatelessWidget {
         horizontal: tokens.spaceMedium,
         vertical: tokens.spaceMedium,
       ).copyWith(bottom: tokens.spaceMedium + bottomPadding),
-      child: Row(
-        spacing: tokens.spaceSmall,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: onEdit,
-              child: Text(context.l10n.edit),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onEdit,
+                  child: Text(context.l10n.edit),
+                ),
+              ),
+              SizedBox(width: tokens.spaceSmall),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: isSaving ? null : onSave,
+                  icon: isSaving
+                      ? SizedBox(
+                          width: tokens.iconSizeSmall,
+                          height: tokens.iconSizeSmall,
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Icon(
+                          Icons.download_rounded,
+                          size: tokens.iconSizeSmall,
+                        ),
+                  label: Text(context.l10n.save),
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: isSaving ? null : onSave,
-              icon: isSaving
-                  ? SizedBox(
-                      width: tokens.iconSizeSmall,
-                      height: tokens.iconSizeSmall,
-                      child: const CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Icon(Icons.download_rounded, size: tokens.iconSizeSmall),
-              label: Text(context.l10n.save),
-            ),
-          ),
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: onShare,
-              icon: Icon(Icons.share_rounded, size: tokens.iconSizeSmall),
-              label: Text(shareLabel),
-            ),
+          SizedBox(height: tokens.spaceSmall),
+          FilledButton.icon(
+            onPressed: onShare,
+            icon: Icon(Icons.share_rounded, size: tokens.iconSizeSmall),
+            label: Text(shareLabel, maxLines: 1, overflow: TextOverflow.fade),
           ),
         ],
       ),

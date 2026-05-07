@@ -161,10 +161,10 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
                 ),
               ImmersiveComposerScaffold(
                 title: isReviewing
-                    ? context.l10n.shareReadyTitle
+                    ? context.l10n.shareReviewTitle
                     : context.l10n.shareScreenshot,
                 subtitle: isReviewing
-                    ? null
+                    ? context.l10n.shareReviewScreenshot
                     : context.l10n.shareComposerSubtitle,
                 onClose: () => Navigator.of(context).maybePop(),
                 background: _buildBackdrop(),
