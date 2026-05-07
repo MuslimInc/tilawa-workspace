@@ -2048,6 +2048,14 @@
             }
         }
     },
+    "shareInvalidRangeOrder": "يجب أن تكون الآية الأولى قبل الأخيرة أو مساوية لها.",
+    "@shareInvalidRangeOrder": {
+        "description": "Inline reason shown when the user picks fromAyah > toAyah in the share composer"
+    },
+    "shareInvalidRangeBounds": "النطاق المحدد خارج هذه السورة.",
+    "@shareInvalidRangeBounds": {
+        "description": "Inline reason shown when the share composer range falls outside [1, maxAyah]"
+    },
     "sharing": "جاري المشاركة...",
     "@sharing": {
         "description": "Status message while sharing"

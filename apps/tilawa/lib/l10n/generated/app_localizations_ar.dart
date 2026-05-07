@@ -1502,6 +1502,13 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get shareInvalidRangeOrder =>
+      'يجب أن تكون الآية الأولى قبل الأخيرة أو مساوية لها.';
+
+  @override
+  String get shareInvalidRangeBounds => 'النطاق المحدد خارج هذه السورة.';
+
+  @override
   String get sharing => 'جاري المشاركة...';
 
   @override

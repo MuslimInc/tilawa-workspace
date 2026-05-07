@@ -2804,6 +2804,18 @@ abstract class AppLocalizations {
   /// **'Maximum {count} verses per clip.'**
   String maxVersesExceeded(int count);
 
+  /// Inline reason shown when the user picks fromAyah > toAyah in the share composer
+  ///
+  /// In en, this message translates to:
+  /// **'First ayah must be before or equal to the last.'**
+  String get shareInvalidRangeOrder;
+
+  /// Inline reason shown when the share composer range falls outside [1, maxAyah]
+  ///
+  /// In en, this message translates to:
+  /// **'Selected range is outside this surah.'**
+  String get shareInvalidRangeBounds;
+
   /// Status message while sharing
   ///
   /// In en, this message translates to:

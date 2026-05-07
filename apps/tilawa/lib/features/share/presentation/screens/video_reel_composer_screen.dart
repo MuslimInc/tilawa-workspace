@@ -333,6 +333,12 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 errorMessage: state.status == ShareStatus.error
                                     ? state.errorMessage
                                     : null,
+                                rangeIssue: _rangeIssueLabel(
+                                  context,
+                                  from: fromAyah,
+                                  to: toAyah,
+                                  max: maxAyah,
+                                ),
                                 progressLabel: _progressLabelForState(
                                   context,
                                   state,
@@ -377,6 +383,25 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
         to >= from &&
         to <= max &&
         count <= ShareLimits.maxVersesPerClip;
+  }
+
+  String? _rangeIssueLabel(
+    BuildContext context, {
+    required int from,
+    required int to,
+    required int max,
+  }) {
+    if (from < 1 || to > max) {
+      return context.l10n.shareInvalidRangeBounds;
+    }
+    if (to < from) {
+      return context.l10n.shareInvalidRangeOrder;
+    }
+    final count = to - from + 1;
+    if (count > ShareLimits.maxVersesPerClip) {
+      return context.l10n.maxVersesExceeded(ShareLimits.maxVersesPerClip);
+    }
+    return null;
   }
 
   Future<void> _handleGenerateVideo(

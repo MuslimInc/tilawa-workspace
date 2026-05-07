@@ -31,15 +31,16 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-003: Inline reason for invalid range
 
-- [ ] In [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart), derive a local `String? rangeIssue` from `(fromAyah, toAyah, maxAyah, ShareLimits.maxVersesPerClip)`:
+- [x] In [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart), derive a local `String? rangeIssue` from `(fromAyah, toAyah, maxAyah, ShareLimits.maxVersesPerClip)` via `_rangeIssueLabel`:
+  - `from < 1 || to > maxAyah` → `context.l10n.shareInvalidRangeBounds`
   - `to < from` → `context.l10n.shareInvalidRangeOrder`
-  - `to - from + 1 > maxVersesPerClip` → `context.l10n.shareInvalidRangeTooLong`
-  - `to > maxAyah || from < 1` → `context.l10n.shareInvalidRangeBounds`
-- [ ] Pass `rangeIssue` into [composer_controls.dart](apps/tilawa/lib/features/share/presentation/widgets/composer_controls.dart) as a new optional prop.
-- [ ] Render `rangeIssue` as `bodySmall` text in `theme.colorScheme.error` below the controls card, only when `rangeIssue != null && !isBusy`.
-- [ ] Add new l10n keys in `app_en.arb` / `app_ar.arb` for the three messages.
-- [ ] Widget test: range `(5, 4, 50)` shows the order message.
-- [ ] Widget test: range exceeding `maxVersesPerClip` shows the too-long message.
+  - `to - from + 1 > maxVersesPerClip` → `context.l10n.maxVersesExceeded(maxVersesPerClip)` *(reused existing key, not a new "too-long" key — copy was already perfect)*
+- [x] Pass `rangeIssue` into [composer_controls.dart](apps/tilawa/lib/features/share/presentation/widgets/composer_controls.dart) as a new optional prop.
+- [x] Render `rangeIssue` as `bodySmall` text in `theme.colorScheme.error` below the controls card, only when `rangeIssue != null && !isBusy`. *Hidden when `errorMessage` is set so the cubit-level error takes precedence.*
+- [x] Add new l10n keys in `app_en.arb` / `app_ar.arb` for the order and bounds messages (the too-long message reuses `maxVersesExceeded`). Regenerated via `flutter gen-l10n`.
+- [x] Widget test: setting a `rangeIssue` renders the inline text — see [composer_controls_range_issue_test.dart](apps/tilawa/test/features/share/presentation/widgets/composer_controls_range_issue_test.dart).
+- [x] Widget test: invalid range disables the primary button.
+- [x] Widget test: range issue is hidden while busy and when `errorMessage` is set.
 
 ### P1-004: `MediaPreviewFrame` radius → token
 

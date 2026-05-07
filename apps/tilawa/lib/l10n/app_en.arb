@@ -2048,6 +2048,14 @@
             }
         }
     },
+    "shareInvalidRangeOrder": "First ayah must be before or equal to the last.",
+    "@shareInvalidRangeOrder": {
+        "description": "Inline reason shown when the user picks fromAyah > toAyah in the share composer"
+    },
+    "shareInvalidRangeBounds": "Selected range is outside this surah.",
+    "@shareInvalidRangeBounds": {
+        "description": "Inline reason shown when the share composer range falls outside [1, maxAyah]"
+    },
     "sharing": "Sharing...",
     "@sharing": {
         "description": "Status message while sharing"

@@ -21,6 +21,7 @@ class ComposerControls extends StatelessWidget {
     required this.canSelectReciter,
     required this.arabicSurahName,
     this.errorMessage,
+    this.rangeIssue,
     this.progressLabel,
     this.progressPercent,
     required this.onReciterTap,
@@ -40,7 +41,7 @@ class ComposerControls extends StatelessWidget {
       isLoadingReciters,
       canSelectReciter;
   final String reciterName, arabicSurahName;
-  final String? errorMessage, progressLabel;
+  final String? errorMessage, rangeIssue, progressLabel;
   final double? progressPercent;
   final VoidCallback onReciterTap, onPrimaryAction, onCancel;
   final ValueChanged<ShareDurationPreset> onDurationChanged;
@@ -93,6 +94,15 @@ class ComposerControls extends StatelessWidget {
             SizedBox(height: tokens.spaceSmall),
             Text(
               errorMessage!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ] else if (rangeIssue != null && !isBusy) ...[
+            SizedBox(height: tokens.spaceSmall),
+            Text(
+              rangeIssue!,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.error,
               ),

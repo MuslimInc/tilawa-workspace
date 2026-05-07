@@ -1512,6 +1512,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get shareInvalidRangeOrder =>
+      'First ayah must be before or equal to the last.';
+
+  @override
+  String get shareInvalidRangeBounds => 'Selected range is outside this surah.';
+
+  @override
   String get sharing => 'Sharing...';
 
   @override

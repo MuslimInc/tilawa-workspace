@@ -38,23 +38,22 @@ void main() {
     );
   }
 
-  testWidgets(
-    'shows Retry label on the primary button when isError is true',
-    (tester) async {
-      await tester.pumpWidget(buildSubject(isError: true));
-      await tester.pump();
+  testWidgets('shows Retry label on the primary button when isError is true', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildSubject(isError: true));
+    await tester.pump();
 
-      expect(find.widgetWithText(FilledButton, 'Retry'), findsOneWidget);
-      expect(
-        find.widgetWithIcon(FilledButton, Icons.refresh_rounded),
-        findsOneWidget,
-      );
-      expect(
-        find.widgetWithIcon(FilledButton, Icons.movie_creation_rounded),
-        findsNothing,
-      );
-    },
-  );
+    expect(find.widgetWithText(FilledButton, 'Retry'), findsOneWidget);
+    expect(
+      find.widgetWithIcon(FilledButton, Icons.refresh_rounded),
+      findsOneWidget,
+    );
+    expect(
+      find.widgetWithIcon(FilledButton, Icons.movie_creation_rounded),
+      findsNothing,
+    );
+  });
 
   testWidgets(
     'shows Generate Reel label on the primary button when not in error',
@@ -70,19 +69,18 @@ void main() {
     },
   );
 
-  testWidgets(
-    'tapping Retry invokes the same primary-action callback',
-    (tester) async {
-      var taps = 0;
-      await tester.pumpWidget(
-        buildSubject(isError: true, onPrimaryAction: () => taps++),
-      );
-      await tester.pump();
+  testWidgets('tapping Retry invokes the same primary-action callback', (
+    tester,
+  ) async {
+    var taps = 0;
+    await tester.pumpWidget(
+      buildSubject(isError: true, onPrimaryAction: () => taps++),
+    );
+    await tester.pump();
 
-      await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
-      await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+    await tester.pump();
 
-      expect(taps, 1);
-    },
-  );
+    expect(taps, 1);
+  });
 }
