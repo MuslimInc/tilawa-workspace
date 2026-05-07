@@ -58,7 +58,8 @@ void main() {
           brightness: Brightness.light,
           primaryKey: m3BaseSeed,
           // TODO(rydmike): Change to default/true when MCU 12 is minimum.
-          useExpressiveOnContainerColors: false,
+          // TODO(rydmike): Changed to true now that MCU 12 is minimum.
+          useExpressiveOnContainerColors: true,
         ),
         equals(
           ColorScheme.fromSeed(
@@ -519,8 +520,7 @@ void main() {
           brightness: Brightness.light,
         ).copyWith(
           // TODO(rydmike): Monitor change when Flutter goes to MCU 12
-          // These values are off by one now, rounding diff!? Investigate later.
-          onPrimaryContainer: const Color(0xff211047),
+          // Rounding diffs removed with MCU 12 expressive colors enabled.
           onPrimaryFixed: const Color(0xff211047),
           secondary: const Color(0xff625b70),
           secondaryFixedDim: const Color(0xffccc2db),

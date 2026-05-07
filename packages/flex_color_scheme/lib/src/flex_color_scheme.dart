@@ -3042,8 +3042,9 @@ class FlexColorScheme with Diagnosticable {
               ),
         variant: seed.useKeyColors ? variant : null,
         contrastLevel: seed.useKeyColors ? seed.contrastLevel : 0.0,
+        // TODO(rydmike): Changed to default true when MCU 12 is minimum.
         useExpressiveOnContainerColors:
-            seed.useExpressiveOnContainerColors ?? false,
+            seed.useExpressiveOnContainerColors ?? true,
         respectMonochromeSeed: !(seed.useLegacyMonochromeSeedBehavior ?? false),
       );
       // Update effective main colors to seed colors, keeping configured

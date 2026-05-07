@@ -832,7 +832,7 @@ void main() {
       error: Color(0xFFBA1A1A),
       onError: Color(0xffffffff),
       errorContainer: Color(0xFFFFDAD6),
-      onErrorContainer: Color(0xFF410002),
+      onErrorContainer: Color(0xFF93000A),
       surface: Color(0xfffcfcfc),
       onSurface: Color(0xff111111),
       onSurfaceVariant: Color(0xff393939),

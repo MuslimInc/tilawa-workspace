@@ -378,22 +378,38 @@ void main() {
       expect(scheme.primary, const Color(0xff36618e)); // OLD was: 0xff0061a4
       expect(scheme.onPrimary, const Color(0xffffffff));
       expect(scheme.primaryContainer, const Color(0xffd1e4ff));
-      expect(scheme.onPrimaryContainer, const Color(0xff001d36));
+      // TODO(rydmike): onPrimaryContainer changed with MCU 12 expressive tones!
+      expect(
+        scheme.onPrimaryContainer,
+        const Color(0xff194975),
+      ); // OLD: 0xff001d36
       expect(scheme.secondary, const Color(0xff535f70));
       expect(scheme.onSecondary, const Color(0xffffffff));
       expect(scheme.secondaryContainer, const Color(0xffd7e3f7));
-      expect(scheme.onSecondaryContainer, const Color(0xff101c2b));
+      // TODO(rydmike): onSecondaryContainer changed with MCU 12 expressive tones!
+      expect(
+        scheme.onSecondaryContainer,
+        const Color(0xff3b4858),
+      ); // OLD: 0xff101c2b
       expect(scheme.tertiary, const Color(0xff6b5778));
       expect(scheme.onTertiary, const Color(0xffffffff));
       expect(scheme.tertiaryContainer, const Color(0xfff2daff));
-      expect(scheme.onTertiaryContainer, const Color(0xff251431));
+      // TODO(rydmike): onTertiaryContainer changed with MCU 12 expressive tones!
+      expect(
+        scheme.onTertiaryContainer,
+        const Color(0xff523f5f),
+      ); // OLD: 0xff251431
       expect(scheme.error, const Color(0xffba1a1a));
       expect(scheme.error, FlexColor.material3LightError);
       expect(scheme.onError, const Color(0xffffffff));
       expect(scheme.onError, FlexColor.material3LightOnError);
       expect(scheme.errorContainer, const Color(0xffffdad6));
       expect(scheme.errorContainer, FlexColor.material3LightErrorContainer);
-      expect(scheme.onErrorContainer, const Color(0xff410002));
+      // TODO(rydmike): onErrorContainer changed with MCU 12 expressive tones!
+      expect(
+        scheme.onErrorContainer,
+        const Color(0xff93000a),
+      ); // OLD: 0xff410002
       expect(scheme.onErrorContainer, FlexColor.material3LightOnErrorContainer);
       expect(scheme.outline, const Color(0xff73777f));
       // TODO(rydmike): surface changed from Flutter version 3.19 to 3.22!
@@ -539,10 +555,10 @@ void main() {
       );
     });
     test('FC5 colors FlexColor is material3LightOnErrorContainer '
-        'EXPECT color is Color(0xFF410002)', () {
+        'EXPECT color is Color(0xFF93000A)', () {
       expect(
         FlexColor.material3LightOnErrorContainer,
-        equals(const Color(0xFF410002)),
+        equals(const Color(0xFF93000A)),
       );
     });
     //

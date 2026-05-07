@@ -241,7 +241,8 @@ abstract final class FlexColor {
   /// INFO: v0.1.5 of material_color_utilities changed this color.
   /// Before version 0.1.5. the color value was:
   /// static const Color material3LightOnErrorContainer = Color(0xFF410001);
-  static const Color material3LightOnErrorContainer = Color(0xFF410002);
+  // TODO(rydmike): Updated to MCU 12 expressive tone 30 from tone 10 (0xFF410002).
+  static const Color material3LightOnErrorContainer = Color(0xFF93000A);
 
   /// Material 2 standard dark error color.
   static const Color materialDarkError = Color(0xFFCF6679);
