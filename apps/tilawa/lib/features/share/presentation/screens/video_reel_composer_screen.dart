@@ -256,6 +256,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                     surahNumber: widget.surahNumber,
                                     fromAyah: bState.fromAyah,
                                     toAyah: bState.toAyah,
+                                    initialFromAyah: widget.initialFromAyah,
+                                    initialToAyah: widget.initialToAyah,
                                     reciterName:
                                         bState.reciterName ??
                                         widget.reciterName,
@@ -515,17 +517,17 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     if (_isSavingPreparedContent) return;
     setState(() => _isSavingPreparedContent = true);
 
+    final cubit = context.read<ShareCubit>();
+    final l10n = context.l10n;
     try {
-      final exportedPath = await context
-          .read<ShareCubit>()
-          .savePreparedContent();
-      if (!mounted || exportedPath == null) return;
+      final exportedPath = await cubit.savePreparedContent();
+      if (!context.mounted || exportedPath == null) return;
       _showInfoSnackBar(
         context,
-        '${context.l10n.save} ${context.l10n.completed}: ${exportedPath.split('/').last}',
+        '${l10n.save} ${l10n.completed}: ${exportedPath.split('/').last}',
       );
     } catch (e) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       final msg = e.toString().replaceFirst(RegExp(r'^[\w]+:\s*'), '');
       _showErrorSnackBar(context, msg);
     } finally {
@@ -603,6 +605,8 @@ class _VideoLivePreview extends StatefulWidget {
     required this.surahNumber,
     required this.fromAyah,
     required this.toAyah,
+    required this.initialFromAyah,
+    required this.initialToAyah,
     required this.reciterName,
     required this.backgroundColor,
   });
@@ -610,6 +614,8 @@ class _VideoLivePreview extends StatefulWidget {
   final int surahNumber;
   final int fromAyah;
   final int toAyah;
+  final int initialFromAyah;
+  final int initialToAyah;
   final String reciterName;
   final Color backgroundColor;
 
@@ -624,6 +630,9 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
       surahNumber: widget.surahNumber,
       fromAyah: widget.fromAyah,
       toAyah: widget.toAyah,
+      isInitialSelection:
+          widget.fromAyah == widget.initialFromAyah &&
+          widget.toAyah == widget.initialToAyah,
     );
 
     return Container(

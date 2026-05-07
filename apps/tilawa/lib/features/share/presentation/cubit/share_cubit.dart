@@ -74,6 +74,7 @@ class ShareCubit extends Cubit<ShareState> {
       surahNumber: surahNumber,
       fromAyah: fromAyah.clamp(effectiveMin, effectiveMax),
       toAyah: toAyah.clamp(effectiveMin, effectiveMax),
+      isInitialSelection: true,
     );
 
     emit(

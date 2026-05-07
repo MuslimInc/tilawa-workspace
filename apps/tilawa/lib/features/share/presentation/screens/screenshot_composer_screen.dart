@@ -254,17 +254,18 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
   Future<void> _handleSavePreparedContent(BuildContext context) async {
     if (_isSavingPreparedContent) return;
     setState(() => _isSavingPreparedContent = true);
+
+    final cubit = context.read<ShareCubit>();
+    final l10n = context.l10n;
     try {
-      final exportedPath = await context
-          .read<ShareCubit>()
-          .savePreparedContent();
-      if (!mounted || exportedPath == null) return;
+      final exportedPath = await cubit.savePreparedContent();
+      if (!context.mounted || exportedPath == null) return;
       _showInfoSnackBar(
         context,
-        '${context.l10n.save} ${context.l10n.completed}: ${exportedPath.split('/').last}',
+        '${l10n.save} ${l10n.completed}: ${exportedPath.split('/').last}',
       );
     } catch (e) {
-      if (!mounted) return;
+      if (!context.mounted) return;
       final msg = e.toString().replaceFirst(RegExp(r'^[\w]+:\s*'), '');
       _showErrorSnackBar(context, msg);
     } finally {

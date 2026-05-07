@@ -11,6 +11,7 @@ class PrepareShareRangeUseCase {
     required int surahNumber,
     required int fromAyah,
     required int toAyah,
+    bool isInitialSelection = false,
   }) {
     final range = normalizeShareAyahRange(
       surahNumber: surahNumber,
@@ -22,6 +23,7 @@ class PrepareShareRangeUseCase {
       surahNumber: surahNumber,
       fromAyah: range.fromAyah,
       toAyah: range.toAyah,
+      isInitialSelection: isInitialSelection,
     );
 
     return ShareRangeResult(

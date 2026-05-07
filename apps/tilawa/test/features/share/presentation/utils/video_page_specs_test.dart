@@ -1,8 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/share/presentation/utils/share_feature_flags.dart';
 import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
 
 void main() {
   group('buildVideoPageSpecs', () {
+    test('uses conservative reel feature flag defaults', () {
+      expect(kReelComposerV2, isFalse);
+      expect(reelCanvasWidth, 1080);
+      expect(reelCanvasHeight, 1920);
+      expect(reelSafeZoneTopFraction, 0.08);
+      expect(reelSafeZoneBottomFraction, 0.14);
+    });
+
     test(
       'returns one page spec when the selected range fits a single page',
       () {
@@ -16,6 +25,7 @@ void main() {
         expect(specs.single.pageNumber, 1);
         expect(specs.single.fromAyah, 1);
         expect(specs.single.toAyah, 7);
+        expect(specs.single.isInitialSelection, isFalse);
       },
     );
 
@@ -55,5 +65,16 @@ void main() {
         expect(specs[1].toAyah, 10);
       },
     );
+
+    test('marks specs that represent the initial untouched selection', () {
+      final List<VideoPageSpec> specs = buildVideoPageSpecs(
+        surahNumber: 1,
+        fromAyah: 1,
+        toAyah: 7,
+        isInitialSelection: true,
+      );
+
+      expect(specs.single.isInitialSelection, isTrue);
+    });
   });
 }

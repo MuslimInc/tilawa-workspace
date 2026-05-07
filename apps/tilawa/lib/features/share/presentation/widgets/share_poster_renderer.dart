@@ -3,6 +3,7 @@ import 'package:quran_qcf/quran_qcf.dart';
 
 import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
 import '../utils/share_ayah_range_utils.dart';
+import '../utils/selection_crop_window.dart';
 
 final ValueNotifier<bool> _hiddenSharePosterOverlays = ValueNotifier<bool>(
   false,
@@ -83,7 +84,7 @@ class SharePosterRenderer extends StatelessWidget {
                   mushafService: quranQcfLocator<MushafService>(),
                 );
 
-            final cropWindow = _selectedCropWindow(
+            final cropWindow = selectedCropWindow(
               preparedPage.blocks,
               metrics: metrics,
               surahNumber: surahNumber,
@@ -169,68 +170,4 @@ class SharePosterRenderer extends StatelessWidget {
       },
     );
   }
-}
-
-_SelectionCropWindow? _selectedCropWindow(
-  List<PreparedPageBlock> blocks, {
-  required QuranLayoutMetrics metrics,
-  required int surahNumber,
-  required int fromAyah,
-  required int toAyah,
-}) {
-  double yOffset = 0;
-  double? top;
-  double? bottom;
-  var previousWasTextBlock = false;
-
-  for (final block in blocks) {
-    if (block is PreparedHeaderBlock || block is PreparedBismillahBlock) {
-      previousWasTextBlock = false;
-      continue;
-    }
-
-    if (block is PreparedSpacerBlock) {
-      yOffset += block.height;
-      previousWasTextBlock = false;
-      continue;
-    }
-
-    if (block is! PreparedTextBlock) {
-      continue;
-    }
-
-    if (previousWasTextBlock) {
-      yOffset += metrics.lineSpacing;
-    }
-
-    final blockTop = yOffset;
-    final blockBottom = blockTop + block.painter.height;
-    final hasSelectedVerse = block.metadata.any(
-      (word) =>
-          word.surah == surahNumber &&
-          word.verse >= fromAyah &&
-          word.verse <= toAyah,
-    );
-
-    if (hasSelectedVerse) {
-      top ??= blockTop;
-      bottom = blockBottom;
-    }
-
-    yOffset = blockBottom;
-    previousWasTextBlock = true;
-  }
-
-  if (top == null || bottom == null || bottom <= top) {
-    return null;
-  }
-
-  return _SelectionCropWindow(top: top, height: bottom - top);
-}
-
-class _SelectionCropWindow {
-  const _SelectionCropWindow({required this.top, required this.height});
-
-  final double top;
-  final double height;
 }

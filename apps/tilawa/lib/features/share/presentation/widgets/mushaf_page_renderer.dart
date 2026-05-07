@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 
+import '../utils/selection_crop_window.dart';
+import '../utils/share_feature_flags.dart';
+import '../utils/surah_header_policy.dart';
 import '../utils/video_page_specs.dart';
 import 'video_reel_design.dart';
 
@@ -133,10 +136,30 @@ class _QcfPageState extends State<_QcfPage> {
                   Expanded(
                     child: LayoutBuilder(
                       builder: (context, bodyConstraints) {
+                        final double safeZoneTop = kReelComposerV2
+                            ? bodyConstraints.maxHeight *
+                                  reelSafeZoneTopFraction
+                            : 0;
+                        final double safeZoneBottom = kReelComposerV2
+                            ? bodyConstraints.maxHeight *
+                                  reelSafeZoneBottomFraction
+                            : 0;
+                        final double contentHeight =
+                            (bodyConstraints.maxHeight -
+                                    safeZoneTop -
+                                    safeZoneBottom)
+                                .clamp(0.0, bodyConstraints.maxHeight)
+                                .toDouble();
+                        final contentConstraints = kReelComposerV2
+                            ? BoxConstraints.tightFor(
+                                width: bodyConstraints.maxWidth,
+                                height: contentHeight,
+                              )
+                            : bodyConstraints;
                         final metrics = StandardQuranLayoutStrategy()
                             .calculateMetrics(
                               context,
-                              bodyConstraints,
+                              contentConstraints,
                               widget.pageSpec.pageNumber,
                               mushafService,
                             );
@@ -147,8 +170,11 @@ class _QcfPageState extends State<_QcfPage> {
                           toAyah: widget.pageSpec.toAyah,
                           fontSize: metrics.fontSize,
                           fontHeight: metrics.fontHeight,
-                          viewportWidth: bodyConstraints.maxWidth,
+                          viewportWidth: contentConstraints.maxWidth,
+                          viewportHeight: contentConstraints.maxHeight,
                           textColorValue: widget.textColor.toARGB32(),
+                          isInitialSelection:
+                              widget.pageSpec.isInitialSelection,
                         );
                         PreparedQuranPage? fixedPreparedPage =
                             _preparedPageKey == cacheKey ? _preparedPage : null;
@@ -158,20 +184,20 @@ class _QcfPageState extends State<_QcfPage> {
                                   .preparePage(
                                     pageNumber: widget.pageSpec.pageNumber,
                                     metrics: metrics,
-                                    viewportWidth: bodyConstraints.maxWidth,
+                                    viewportWidth: contentConstraints.maxWidth,
                                     textColor: widget.textColor,
                                     verseBackgroundColor:
                                         widget.verseBackgroundColor,
                                     mushafService: mushafService,
                                   );
-                          fixedPreparedPage = _injectMissingSurahHeaders(
-                            preparedPage,
-                          );
+                          fixedPreparedPage = kReelComposerV2
+                              ? _selectedCompositionPage(preparedPage)
+                              : _injectMissingSurahHeaders(preparedPage);
                           _preparedPageKey = cacheKey;
                           _preparedPage = fixedPreparedPage;
                         }
 
-                        return PageContent(
+                        final pageContent = PageContent(
                           mushafService: mushafService,
                           pageSnapshotService:
                               quranQcfLocator<PageSnapshotService>(),
@@ -180,17 +206,40 @@ class _QcfPageState extends State<_QcfPage> {
                           textColor: widget.textColor,
                           pageBackgroundColor: widget.pageBackgroundColor,
                           alignTextToTop: true,
-                          verseBackgroundColor: widget.verseBackgroundColor,
-                          verseTextColor: widget.verseTextColor,
-                          showSpecialBlocks: false,
+                          verseBackgroundColor: kReelComposerV2
+                              ? null
+                              : widget.verseBackgroundColor,
+                          verseTextColor: kReelComposerV2
+                              ? null
+                              : widget.verseTextColor,
+                          showSpecialBlocks: kReelComposerV2,
                           uiTextDirection: TextDirection.rtl,
                           showOverlaysListenable: _kHiddenOverlaysListenable,
                           viewportSize: Size(
-                            bodyConstraints.maxWidth,
-                            bodyConstraints.maxHeight,
+                            contentConstraints.maxWidth,
+                            contentConstraints.maxHeight,
                           ),
                           enableSnapshots: !widget.isCapturing,
                           isCapturing: widget.isCapturing,
+                        );
+
+                        if (!kReelComposerV2) {
+                          return pageContent;
+                        }
+
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            top: safeZoneTop,
+                            bottom: safeZoneBottom,
+                          ),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: SizedBox(
+                              width: contentConstraints.maxWidth,
+                              height: contentConstraints.maxHeight,
+                              child: pageContent,
+                            ),
+                          ),
                         );
                       },
                     ),
@@ -257,6 +306,50 @@ class _QcfPageState extends State<_QcfPage> {
     );
 
     return PreparedQuranPage(metrics: page.metrics, blocks: blocksWithSpacing);
+  }
+
+  PreparedQuranPage _selectedCompositionPage(PreparedQuranPage page) {
+    final decision = decideSurahHeader(
+      surahNumber: widget.surahNumber,
+      selectionTouchesOpeningAyah:
+          widget.pageSpec.fromAyah <= 1 && widget.pageSpec.toAyah >= 1,
+      isInitialSelection: widget.pageSpec.isInitialSelection,
+    );
+
+    final blocks = <PreparedPageBlock>[];
+    if (decision.includeBanner) {
+      blocks.add(PreparedHeaderBlock(surahNumber: decision.surahNumber));
+      if (decision.includeBismillah) {
+        blocks.add(const PreparedBismillahBlock());
+      }
+    }
+
+    var hasSelectedTextBlock = false;
+    for (final block in page.blocks) {
+      if (block is! PreparedTextBlock) continue;
+      final hasSelectedVerse = textBlockHasSelectedVerse(
+        block,
+        surahNumber: widget.surahNumber,
+        fromAyah: widget.pageSpec.fromAyah,
+        toAyah: widget.pageSpec.toAyah,
+      );
+      if (!hasSelectedVerse) continue;
+
+      if (hasSelectedTextBlock) {
+        blocks.add(PreparedSpacerBlock(height: page.metrics.lineSpacing));
+      }
+      blocks.add(block);
+      hasSelectedTextBlock = true;
+    }
+
+    if (!hasSelectedTextBlock) {
+      return page;
+    }
+
+    return PreparedQuranPage(
+      metrics: page.metrics,
+      blocks: _applySurahLeadSpacing(blocks, page.metrics),
+    );
   }
 
   List<PreparedPageBlock> _applySurahLeadSpacing(
@@ -359,10 +452,13 @@ class _PreparedVideoPageCacheKey extends Equatable {
     required double fontSize,
     required double fontHeight,
     required double viewportWidth,
+    required double viewportHeight,
     required this.textColorValue,
+    required this.isInitialSelection,
   }) : fontSizeKey = (fontSize * _dimensionPrecision).round(),
        fontHeightKey = (fontHeight * _dimensionPrecision).round(),
-       viewportWidthKey = (viewportWidth * _dimensionPrecision).round();
+       viewportWidthKey = (viewportWidth * _dimensionPrecision).round(),
+       viewportHeightKey = (viewportHeight * _dimensionPrecision).round();
 
   final int pageNumber;
   final int surahNumber;
@@ -371,7 +467,9 @@ class _PreparedVideoPageCacheKey extends Equatable {
   final int fontSizeKey;
   final int fontHeightKey;
   final int viewportWidthKey;
+  final int viewportHeightKey;
   final int textColorValue;
+  final bool isInitialSelection;
 
   @override
   List<Object> get props => [
@@ -382,7 +480,9 @@ class _PreparedVideoPageCacheKey extends Equatable {
     fontSizeKey,
     fontHeightKey,
     viewportWidthKey,
+    viewportHeightKey,
     textColorValue,
+    isInitialSelection,
   ];
 }
 

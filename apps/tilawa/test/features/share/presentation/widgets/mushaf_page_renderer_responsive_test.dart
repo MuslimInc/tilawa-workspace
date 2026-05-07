@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+import 'package:tilawa/features/share/presentation/utils/share_feature_flags.dart';
 import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
 import 'package:tilawa/features/share/presentation/widgets/mushaf_page_renderer.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -147,10 +148,16 @@ Future<Uint8List> _readRepoAssetBytes(List<String> candidates) async {
   );
 }
 
-Widget _buildRendererHarness({required int pageNumber}) {
+Widget _buildRendererHarness({
+  required int pageNumber,
+  int? surahNumber,
+  int fromAyah = 1,
+  int toAyah = 1,
+}) {
   final MushafPageRenderer renderer = MushafPageRenderer.defaultRenderer();
   final List<PageSurahEntry> pageEntries = getPageData(pageNumber);
-  final int surahNumber = pageEntries.isNotEmpty ? pageEntries.first.surah : 1;
+  final int resolvedSurahNumber =
+      surahNumber ?? (pageEntries.isNotEmpty ? pageEntries.first.surah : 1);
 
   return MaterialApp(
     theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
@@ -166,10 +173,10 @@ Widget _buildRendererHarness({required int pageNumber}) {
                   context: context,
                   pageSpec: VideoPageSpec(
                     pageNumber: pageNumber,
-                    fromAyah: 1,
-                    toAyah: 1,
+                    fromAyah: fromAyah,
+                    toAyah: toAyah,
                   ),
-                  surahNumber: surahNumber,
+                  surahNumber: resolvedSurahNumber,
                   verseBackgroundColor: (_, _) => null,
                   verseTextColor: (_, _) => null,
                   textColor: const Color(0xFF2E2116),
@@ -182,6 +189,19 @@ Widget _buildRendererHarness({required int pageNumber}) {
       ),
     ),
   );
+}
+
+List<int> _preparedVerses(PageContent pageContent) {
+  final preparedPage = pageContent.preparedPage;
+  if (preparedPage == null) return const <int>[];
+
+  return preparedPage.blocks
+      .whereType<PreparedTextBlock>()
+      .expand((block) => block.metadata)
+      .map((metadata) => metadata.verse)
+      .toSet()
+      .toList(growable: false)
+    ..sort();
 }
 
 List<String> _drainFrameworkExceptions(WidgetTester tester) {
@@ -241,6 +261,44 @@ void main() {
   });
 
   group('QcfMushafPageRenderer responsive layout', () {
+    testWidgets('crops selected text metadata under the reel composer flag', (
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = _devices['iPhone15Pro']!;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      const pageNumber = 3;
+      quranQcfLocator<QuranFontService>().debugMarkFontLoaded(pageNumber);
+
+      await tester.pumpWidget(
+        _buildRendererHarness(
+          pageNumber: pageNumber,
+          surahNumber: 2,
+          fromAyah: 6,
+          toAyah: 8,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final pageContent = tester.widget<PageContent>(find.byType(PageContent));
+      final verses = _preparedVerses(pageContent);
+
+      expect(verses, isNotEmpty);
+      if (kReelComposerV2) {
+        expect(verses.every((verse) => verse >= 6 && verse <= 8), isTrue);
+      } else {
+        expect(verses.any((verse) => verse < 6 || verse > 8), isTrue);
+      }
+
+      final classified = _classifyOverflows(_drainFrameworkExceptions(tester));
+      expect(classified.blocking, isEmpty);
+    });
+
     for (final MapEntry<String, Size> device in _devices.entries) {
       for (final int pageNumber in _pages) {
         testWidgets(
