@@ -118,6 +118,17 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
           listener: (context, state) =>
               _syncVideoBoundaryKeys(state.videoPageSpecs),
         ),
+        BlocListener<ShareCubit, ShareState>(
+          listenWhen: (prev, curr) => prev.status != curr.status,
+          listener: (context, state) {
+            final bool isGenerating =
+                state.status == ShareStatus.capturing ||
+                state.status == ShareStatus.generating;
+            if (!isGenerating && _singleVideoCaptureSurfaceVisible.value) {
+              _singleVideoCaptureSurfaceVisible.value = false;
+            }
+          },
+        ),
       ],
       child: ValueListenableBuilder<bool>(
         valueListenable: _singleVideoCaptureSurfaceVisible,
@@ -249,7 +260,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            VideoStepIndicator(status: state.status),
+                            VideoStepIndicator(
+                              status: state.status,
+                              progress: state.progress,
+                            ),
                             if (isReviewing && !isBusy)
                               VideoReviewPanel(
                                 key: const ValueKey('review_panel'),
@@ -288,6 +302,9 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                   context,
                                   state,
                                 ),
+                                progressPercent: isGeneratingVideo
+                                    ? state.progress
+                                    : null,
                                 onFromChanged: (v) => context
                                     .read<ShareCubit>()
                                     .updateVerseRange(fromAyah: v),
@@ -392,6 +409,9 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   }
 
   String? _progressLabelForState(BuildContext context, ShareState state) {
+    if (state.progressMessage.isNotEmpty) {
+      return state.progressMessage;
+    }
     if (state.status == ShareStatus.capturing) {
       return context.l10n.capturingReaderVisuals;
     }
@@ -426,12 +446,8 @@ class _VideoLivePreview extends StatefulWidget {
 }
 
 class _VideoLivePreviewState extends State<_VideoLivePreview> {
-  late final MushafPageRenderer _renderer =
-      MushafPageRenderer.defaultRenderer();
-
   @override
   Widget build(BuildContext context) {
-    final reelPalette = VideoReelPalette.fromContext(context);
     final specs = buildVideoPageSpecs(
       surahNumber: widget.surahNumber,
       fromAyah: widget.fromAyah,
@@ -444,20 +460,14 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
         child: AspectRatio(
           aspectRatio: 9 / 16,
           child: RepaintBoundary(
-            child: _renderer.build(
-              context: context,
-              pageSpec: specs.first,
+            child: VideoContentRenderer(
               surahNumber: widget.surahNumber,
-              verseBackgroundColor: (s, v) =>
-                  (s == widget.surahNumber &&
-                      v >= widget.fromAyah &&
-                      v <= widget.toAyah)
-                  ? reelPalette.verseHighlightColor
-                  : null,
-              verseTextColor: (s, v) => null,
-              textColor: reelPalette.mushafTextColor,
-              pageBackgroundColor: widget.backgroundColor,
+              fromAyah: widget.fromAyah,
+              toAyah: widget.toAyah,
+              reciterName: widget.reciterName,
+              pageSpecs: specs,
               isCapturing: false,
+              backgroundColor: widget.backgroundColor,
             ),
           ),
         ),

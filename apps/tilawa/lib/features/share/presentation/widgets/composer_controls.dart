@@ -21,6 +21,7 @@ class ComposerControls extends StatelessWidget {
     required this.arabicSurahName,
     this.errorMessage,
     this.progressLabel,
+    this.progressPercent,
     required this.onReciterTap,
     required this.onDurationChanged,
     required this.onFromChanged,
@@ -38,6 +39,7 @@ class ComposerControls extends StatelessWidget {
       canSelectReciter;
   final String reciterName, arabicSurahName;
   final String? errorMessage, progressLabel;
+  final double? progressPercent;
   final VoidCallback onReciterTap, onPrimaryAction, onCancel;
   final ValueChanged<ShareDurationPreset> onDurationChanged;
   final ValueChanged<int> onFromChanged, onToChanged;
@@ -95,6 +97,18 @@ class ComposerControls extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
           ],
+          if (isGeneratingVideo && progressLabel != null) ...[
+            SizedBox(height: tokens.spaceSmall),
+            Text(
+              progressPercent != null && progressPercent! > 0
+                  ? '$progressLabel (${(progressPercent! * 100).toStringAsFixed(0)}%)'
+                  : progressLabel!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
           SizedBox(height: tokens.spaceMedium),
           FilledButton.icon(
             onPressed: (!isBusy && rangeIsValid) ? onPrimaryAction : null,
@@ -114,6 +128,14 @@ class ComposerControls extends StatelessWidget {
                   : context.l10n.generateReel,
             ),
           ),
+          if (isGeneratingVideo) ...[
+            SizedBox(height: tokens.spaceSmall),
+            OutlinedButton.icon(
+              onPressed: onCancel,
+              icon: const Icon(Icons.close_rounded),
+              label: Text(context.l10n.cancel),
+            ),
+          ],
         ],
       ),
     );

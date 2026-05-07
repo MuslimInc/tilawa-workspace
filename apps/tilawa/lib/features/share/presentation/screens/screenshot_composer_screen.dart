@@ -11,7 +11,6 @@ import '../../domain/entities/share_content.dart';
 import '../../domain/entities/widget_capture_handle.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
-import '../widgets/reader_page_content_renderer.dart';
 import '../widgets/screenshot_composer_widgets.dart';
 import '../widgets/share_poster_renderer.dart';
 import '../widgets/share_preview_widgets.dart';
@@ -72,7 +71,6 @@ class ScreenshotComposerScreen extends StatefulWidget {
 
 class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
   final GlobalKey _posterBoundaryKey = GlobalKey();
-  final GlobalKey _readerPageBoundaryKey = GlobalKey();
   bool _isPosterCaptureMounted = false;
 
   @override
@@ -157,10 +155,9 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
                       )
                     : _ScreenshotLivePreview(
                         surahNumber: widget.surahNumber,
-                        currentPage: widget.currentPage,
                         fromAyah: fromAyah,
                         toAyah: toAyah,
-                        readerPageBoundaryKey: _readerPageBoundaryKey,
+                        reciterName: widget.reciterName,
                       ),
               ),
               bottomPanel: Column(
@@ -197,6 +194,12 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
                             minAyah: minAyah,
                             maxAyah: maxAyah,
                             isBusy: isBusy,
+                            errorMessage: state.status == ShareStatus.error
+                                ? state.errorMessage
+                                : null,
+                            primaryLabel: state.status == ShareStatus.error
+                                ? context.l10n.retry
+                                : context.l10n.shareScreenshot,
                             onFromChanged: (value) => context
                                 .read<ShareCubit>()
                                 .updateVerseRange(fromAyah: value),
@@ -284,17 +287,15 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
 class _ScreenshotLivePreview extends StatelessWidget {
   const _ScreenshotLivePreview({
     required this.surahNumber,
-    required this.currentPage,
     required this.fromAyah,
     required this.toAyah,
-    required this.readerPageBoundaryKey,
+    required this.reciterName,
   });
 
   final int surahNumber;
-  final int currentPage;
   final int fromAyah;
   final int toAyah;
-  final GlobalKey readerPageBoundaryKey;
+  final String reciterName;
 
   @override
   Widget build(BuildContext context) {
@@ -306,28 +307,14 @@ class _ScreenshotLivePreview extends StatelessWidget {
       color: readerTheme.pageBackground,
       child: SafeArea(
         bottom: false,
-        child: Column(
-          children: [
-            MetadataChip(
-              icon: Icons.auto_stories_rounded,
-              label: getSurahNameArabic(surahNumber),
-            ),
-            SizedBox(height: tokens.spaceMedium),
-            Expanded(
-              child: RepaintBoundary(
-                key: readerPageBoundaryKey,
-                child: SizedBox.expand(
-                  child: ReaderPageContentRenderer(
-                    pageNumber: currentPage,
-                    surahNumber: surahNumber,
-                    fromAyah: fromAyah,
-                    toAyah: toAyah,
-                    uiTextDirection: Directionality.of(context),
-                  ),
-                ),
-              ),
-            ),
-          ],
+        child: Padding(
+          padding: EdgeInsets.only(top: tokens.spaceSmall),
+          child: SharePosterRenderer(
+            surahNumber: surahNumber,
+            fromAyah: fromAyah,
+            toAyah: toAyah,
+            reciterName: reciterName,
+          ),
         ),
       ),
     );
