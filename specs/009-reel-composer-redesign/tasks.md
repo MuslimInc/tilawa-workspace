@@ -13,12 +13,12 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-001: Retry parity on the reel composer
 
-- [ ] In [composer_controls.dart](apps/tilawa/lib/features/share/presentation/widgets/composer_controls.dart), add a `bool isError` derived from the cubit `ShareStatus.error` state via the call site.
-- [ ] When `isError` is true, swap the primary button label to `context.l10n.retry`, icon to `Icons.refresh_rounded`, and keep the same `onPrimaryAction` callback.
-- [ ] Update [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart) to pass the error state into the controls.
-- [ ] Tap on retry calls the existing `_handleGenerateVideo`.
-- [ ] Widget test: when `state.status == ShareStatus.error`, the primary button reads "Retry".
-- [ ] Widget test: tapping retry invokes the same generate handler.
+- [x] In [composer_controls.dart](apps/tilawa/lib/features/share/presentation/widgets/composer_controls.dart), add a `bool isError` derived from the cubit `ShareStatus.error` state via the call site.
+- [x] When `isError` is true, swap the primary button label to `context.l10n.retry`, icon to `Icons.refresh_rounded`, and keep the same `onPrimaryAction` callback.
+- [x] Update [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart) to pass the error state into the controls.
+- [x] Tap on retry calls the existing `_handleGenerateVideo`.
+- [x] Widget test: when `state.status == ShareStatus.error`, the primary button reads "Retry". *(Implemented as a focused `ComposerControls` test in [composer_controls_retry_test.dart](apps/tilawa/test/features/share/presentation/widgets/composer_controls_retry_test.dart) — testing the screen directly trips a GetIt lookup for `MushafService` from the live preview tree.)*
+- [x] Widget test: tapping retry invokes the same generate handler.
 
 ### P1-002: Touch target compliance for stepper buttons
 

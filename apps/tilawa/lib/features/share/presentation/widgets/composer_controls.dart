@@ -15,6 +15,7 @@ class ComposerControls extends StatelessWidget {
     required this.isBusy,
     required this.isGeneratingVideo,
     required this.rangeIsValid,
+    this.isError = false,
     required this.reciterName,
     required this.isLoadingReciters,
     required this.canSelectReciter,
@@ -35,6 +36,7 @@ class ComposerControls extends StatelessWidget {
   final bool isBusy,
       isGeneratingVideo,
       rangeIsValid,
+      isError,
       isLoadingReciters,
       canSelectReciter;
   final String reciterName, arabicSurahName;
@@ -121,10 +123,16 @@ class ComposerControls extends StatelessWidget {
                       color: theme.colorScheme.onPrimary,
                     ),
                   )
-                : const Icon(Icons.movie_creation_rounded),
+                : Icon(
+                    isError
+                        ? Icons.refresh_rounded
+                        : Icons.movie_creation_rounded,
+                  ),
             label: Text(
               isGeneratingVideo
                   ? context.l10n.preparingReelStatus
+                  : isError
+                  ? context.l10n.retry
                   : context.l10n.generateReel,
             ),
           ),

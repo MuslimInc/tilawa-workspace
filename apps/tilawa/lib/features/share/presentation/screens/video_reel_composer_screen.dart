@@ -318,6 +318,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 maxAyah: maxAyah,
                                 isBusy: isBusy,
                                 isGeneratingVideo: isGeneratingVideo,
+                                isError: state.status == ShareStatus.error,
                                 rangeIsValid: _isValidRange(
                                   fromAyah,
                                   toAyah,
