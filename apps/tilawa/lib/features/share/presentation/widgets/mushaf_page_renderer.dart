@@ -195,12 +195,6 @@ class _QcfPageState extends State<_QcfPage> {
                       },
                     ),
                   ),
-                  // _ReelBottomBar(
-                  //   pageWidth: constraints.maxWidth,
-                  //   pageHeight: constraints.maxHeight,
-                  //   pageNumber: pageSpec.pageNumber,
-                  //   hizbNumber: meta.hizb,
-                  // ),
                 ],
               ),
             );
@@ -456,117 +450,6 @@ class _ReelTopBar extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ignore: unused_element
-class _ReelBottomBar extends StatelessWidget {
-  const _ReelBottomBar({
-    required this.pageWidth,
-    required this.pageHeight,
-    required this.pageNumber,
-    required this.hizbNumber,
-  });
-
-  final double pageWidth;
-  final double pageHeight;
-  final int pageNumber;
-  final int hizbNumber;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isArabic = context.l10n.localeName == 'ar';
-    final palette = VideoReelPalette.fromContext(context);
-    final double circleSize = (pageHeight * VideoReelDesign.pageBadgeSizeFactor)
-        .clamp(
-          VideoReelDesign.pageBadgeMinSize,
-          VideoReelDesign.pageBadgeMaxSize,
-        )
-        .toDouble();
-    final String localizedHizbNumber = _localizedQuranNumber(
-      context,
-      hizbNumber,
-    );
-
-    return Container(
-      margin: EdgeInsets.fromLTRB(
-        pageWidth * VideoReelDesign.bottomBarHorizontalMarginFactor,
-        pageHeight * VideoReelDesign.bottomBarTopMarginFactor,
-        pageWidth * VideoReelDesign.bottomBarHorizontalMarginFactor,
-        pageHeight * VideoReelDesign.bottomBarBottomMarginFactor,
-      ),
-      padding: EdgeInsets.symmetric(
-        horizontal: VideoReelDesign.bottomBarHorizontalPadding,
-        vertical: (pageHeight * VideoReelDesign.bottomBarVerticalPaddingFactor)
-            .clamp(
-              VideoReelDesign.bottomBarMinVerticalPadding,
-              VideoReelDesign.bottomBarMaxVerticalPadding,
-            )
-            .toDouble(),
-      ),
-      decoration: BoxDecoration(
-        color: palette.frameSurfaceColor,
-        borderRadius: BorderRadius.circular(VideoReelDesign.bottomBarRadius),
-        border: Border.all(
-          color: palette.frameAccentColor.withValues(
-            alpha: VideoReelDesign.bottomBarBorderAlpha,
-          ),
-        ),
-      ),
-      child: Directionality(
-        textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-        child: Row(
-          children: [
-            _ReelPageNumberBadge(size: circleSize, pageNumber: pageNumber),
-            const Spacer(),
-            Text(
-              '${context.l10n.hizb} $localizedHizbNumber',
-              style: TextStyle(
-                fontSize: VideoReelDesign.bottomBarMetaFontSize,
-                fontWeight: FontWeight.bold,
-                color: palette.frameStrongTextColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ignore: unused_element
-class _ReelPageNumberBadge extends StatelessWidget {
-  const _ReelPageNumberBadge({required this.size, required this.pageNumber});
-
-  final double size;
-  final int pageNumber;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = VideoReelPalette.fromContext(context);
-
-    return Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.all(VideoReelDesign.pageBadgePadding),
-      decoration: BoxDecoration(
-        color: palette.frameAccentColor.withValues(
-          alpha: VideoReelDesign.pageBadgeAccentAlpha,
-        ),
-        shape: BoxShape.circle,
-        border: Border.all(color: palette.frameAccentColor),
-      ),
-      child: Text(
-        _localizedQuranNumber(context, pageNumber),
-        overflow: TextOverflow.ellipsis,
-        maxLines: 1,
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: palette.frameStrongTextColor,
         ),
       ),
     );

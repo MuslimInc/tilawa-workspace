@@ -91,13 +91,14 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-009: Delete `_ReelBottomBar` dead code
 
-- [ ] In [mushaf_page_renderer.dart](apps/tilawa/lib/features/share/presentation/widgets/mushaf_page_renderer.dart), delete:
+- [x] In [mushaf_page_renderer.dart](apps/tilawa/lib/features/share/presentation/widgets/mushaf_page_renderer.dart), deleted:
   - `_ReelBottomBar` class.
   - `_ReelPageNumberBadge` class.
   - The `// _ReelBottomBar(...)` commented call site.
-  - Any imports unique to it.
-- [ ] In [video_reel_design.dart](apps/tilawa/lib/features/share/presentation/widgets/video_reel_design.dart), delete the unused constants: `bottomBarHorizontalMarginFactor`, `bottomBarTopMarginFactor`, `bottomBarBottomMarginFactor`, `bottomBarHorizontalPadding`, `bottomBarVerticalPaddingFactor`, `bottomBarMinVerticalPadding`, `bottomBarMaxVerticalPadding`, `bottomBarRadius`, `bottomBarMetaFontSize`, `bottomBarBorderAlpha`, `pageBadgeSizeFactor`, `pageBadgeMinSize`, `pageBadgeMaxSize`, `pageBadgePadding`, `pageBadgeAccentAlpha`.
-- [ ] Verify `flutter analyze` is clean (no unused-import or unused-element warnings).
+  - No imports were unique to the deleted classes — `_localizedQuranNumber` is still used by `_ReelTopBar`'s juz number, so the helper stays.
+- [x] In [video_reel_design.dart](apps/tilawa/lib/features/share/presentation/widgets/video_reel_design.dart), deleted the unused constants: `bottomBarHorizontalMarginFactor`, `bottomBarTopMarginFactor`, `bottomBarBottomMarginFactor`, `bottomBarHorizontalPadding`, `bottomBarVerticalPaddingFactor`, `bottomBarMinVerticalPadding`, `bottomBarMaxVerticalPadding`, `bottomBarRadius`, `bottomBarMetaFontSize`, `bottomBarBorderAlpha`, `pageBadgeSizeFactor`, `pageBadgeMinSize`, `pageBadgeMaxSize`, `pageBadgePadding`, `pageBadgeAccentAlpha`.
+- [x] `frameAccentColor` (palette) is now unused outside the palette class itself but was **not** in the spec's deletion list — left for Phase 4's full palette/token migration so the deletion stays in scope.
+- [x] All 67 share tests pass; `flutter analyze` clean on both touched files.
 
 ### P1-010: Phase 1 validation
 

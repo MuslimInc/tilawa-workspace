@@ -21,23 +21,6 @@ abstract final class VideoReelDesign {
   static const double topBarTitleFontSize = 16;
   static const double topBarMetaFontSize = 14;
 
-  static const double bottomBarHorizontalMarginFactor = 0.04;
-  static const double bottomBarTopMarginFactor = 0.006;
-  static const double bottomBarBottomMarginFactor = 0.010;
-  static const double bottomBarHorizontalPadding = 16;
-  static const double bottomBarVerticalPaddingFactor = 0.002;
-  static const double bottomBarMinVerticalPadding = 2;
-  static const double bottomBarMaxVerticalPadding = 6;
-  static const double bottomBarRadius = 32;
-  static const double bottomBarMetaFontSize = 12;
-  static const double bottomBarBorderAlpha = 0.30;
-
-  static const double pageBadgeSizeFactor = 0.05;
-  static const double pageBadgeMinSize = 34;
-  static const double pageBadgeMaxSize = 46;
-  static const double pageBadgePadding = 1;
-  static const double pageBadgeAccentAlpha = 0.10;
-
   static const double surahHeaderToBismillahGapFactor = 0.08;
   static const double surahHeaderToBismillahMinGap = 3;
   static const double surahHeaderToBismillahMaxGap = 6;
