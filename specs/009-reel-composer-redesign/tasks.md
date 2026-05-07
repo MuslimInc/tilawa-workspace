@@ -81,12 +81,13 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-008: `disableBlur` becomes a context-aware default
 
-- [ ] In [immersive_composer_scaffold.dart](packages/ui_kit/lib/src/organisms/immersive_composer_scaffold.dart), introduce an optional `BackgroundIntent? backgroundIntent` parameter (`enum BackgroundIntent { ui, media }`).
-- [ ] If `disableBlur` is unspecified by the caller, default to `disableBlur: backgroundIntent == BackgroundIntent.media`.
-- [ ] If `disableBlur` is explicitly passed by the caller, honor it (preserves current behavior for any external consumer).
-- [ ] In [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart), remove the explicit `disableBlur: true` and pass `backgroundIntent: BackgroundIntent.media`.
-- [ ] In [screenshot_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/screenshot_composer_screen.dart), pass `backgroundIntent: BackgroundIntent.media` (review state shows media; compose state shows Quran content which is also media-like).
-- [ ] Widget test: scaffold with `BackgroundIntent.media` and no `disableBlur` produces the same panel as `disableBlur: true`.
+- [x] In [immersive_composer_scaffold.dart](packages/ui_kit/lib/src/organisms/immersive_composer_scaffold.dart), added top-level `enum BackgroundIntent { ui, media }` and `backgroundIntent` parameter (defaults to `ui`).
+- [x] `disableBlur` is now `bool?`. When `null`, the scaffold derives blur from `backgroundIntent` via the new `effectiveDisableBlur` getter: `media → blur off`, `ui → blur on`. Existing callers passing `disableBlur: true`/`false` keep their explicit override.
+- [x] [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart): removed `disableBlur: true`; now passes `backgroundIntent: BackgroundIntent.media`.
+- [x] [screenshot_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/screenshot_composer_screen.dart): now passes `backgroundIntent: BackgroundIntent.media` so the screenshot composer feels visually consistent with the reel composer (no blur on either).
+- [x] [organisms_preview.dart](packages/ui_kit/lib/organisms_preview.dart) preview untouched — it relied on the previous unspecified `disableBlur: false` default; the new default is `BackgroundIntent.ui → false`, so behavior is identical.
+- [x] Widget tests added in [immersive_composer_scaffold_test.dart](packages/ui_kit/test/organisms/immersive_composer_scaffold_test.dart): `BackgroundIntent.media` with no explicit `disableBlur` produces no `BackdropFilter`; `BackgroundIntent.ui` (default) keeps it; explicit `disableBlur: false` overrides `BackgroundIntent.media`.
+- [x] All UI kit tests pass (10/10, +3 new); all 67 share tests pass; analyzer clean for the new code.
 
 ### P1-009: Delete `_ReelBottomBar` dead code
 

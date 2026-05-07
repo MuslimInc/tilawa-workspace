@@ -189,7 +189,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                     ),
                   ImmersiveComposerScaffold(
                     key: const ValueKey('immersive_composer_scaffold'),
-                    disableBlur: true,
+                    backgroundIntent: BackgroundIntent.media,
                     title: context.l10n.shareModeReel,
                     subtitle: context.l10n.shareComposerSubtitle,
                     onClose: () => Navigator.of(context).maybePop(),

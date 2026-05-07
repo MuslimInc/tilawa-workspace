@@ -170,6 +170,66 @@ void main() {
       expect(find.byType(BackdropFilter), findsNothing);
     });
 
+    testWidgets(
+      'backgroundIntent=media defaults to disabled blur (no BackdropFilter)',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrap(
+            ImmersiveComposerScaffold(
+              title: 'Media',
+              backgroundIntent: BackgroundIntent.media,
+              overlaysVisible: true,
+              preview: const SizedBox.shrink(),
+              bottomPanel: const SizedBox.shrink(),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byType(BackdropFilter), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'backgroundIntent=ui (default) keeps BackdropFilter on the overlays',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrap(
+            ImmersiveComposerScaffold(
+              title: 'UI',
+              overlaysVisible: true,
+              preview: const SizedBox.shrink(),
+              bottomPanel: const SizedBox.shrink(),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byType(BackdropFilter), findsWidgets);
+      },
+    );
+
+    testWidgets(
+      'explicit disableBlur=false overrides backgroundIntent=media',
+      (tester) async {
+        await tester.pumpWidget(
+          _wrap(
+            ImmersiveComposerScaffold(
+              title: 'Override',
+              backgroundIntent: BackgroundIntent.media,
+              disableBlur: false,
+              overlaysVisible: true,
+              preview: const SizedBox.shrink(),
+              bottomPanel: const SizedBox.shrink(),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byType(BackdropFilter), findsWidgets);
+      },
+    );
+
     testWidgets('floatingActionButton is rendered when overlays are visible', (
       tester,
     ) async {

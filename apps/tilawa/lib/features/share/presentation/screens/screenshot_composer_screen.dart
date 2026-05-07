@@ -161,6 +161,7 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
                   ),
                 ),
               ImmersiveComposerScaffold(
+                backgroundIntent: BackgroundIntent.media,
                 title: isReviewing
                     ? context.l10n.shareReviewTitle
                     : context.l10n.shareScreenshot,
