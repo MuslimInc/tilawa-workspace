@@ -1,19 +1,77 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/share/domain/entities/share_content.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_state.dart';
 import 'package:tilawa/features/share/presentation/screens/video_reel_composer_screen.dart';
+import 'package:tilawa/features/share/presentation/utils/share_feature_flags.dart';
+import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
+import 'package:tilawa/features/share/presentation/widgets/video_composition.dart';
+import 'package:tilawa/features/share/presentation/widgets/video_content_renderer.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class _MockShareCubit extends Mock implements ShareCubit {}
 
+final ByteData _kEmptyAssetManifestBin = const StandardMessageCodec()
+    .encodeMessage(<Object?, Object?>{})!;
+
+Uint8List? _qpcV4Bytes;
+Uint8List? _pageIndexBytes;
+
+Future<void> _registerRealMushafAssets() async {
+  _qpcV4Bytes ??= await _readRepoAssetBytes(const <String>[
+    'packages/quran_qcf/assets/quran_fonts/qpc-v4.json',
+    '../packages/quran_qcf/assets/quran_fonts/qpc-v4.json',
+    '../../packages/quran_qcf/assets/quran_fonts/qpc-v4.json',
+  ]);
+  _pageIndexBytes ??= await _readRepoAssetBytes(const <String>[
+    'packages/quran_qcf/assets/quran_fonts/quran_page_index.json',
+    '../packages/quran_qcf/assets/quran_fonts/quran_page_index.json',
+    '../../packages/quran_qcf/assets/quran_fonts/quran_page_index.json',
+  ]);
+
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.instance;
+  binding.defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (
+    ByteData? message,
+  ) async {
+    if (message == null) return null;
+
+    final String key = utf8.decode(message.buffer.asUint8List());
+    if (key == 'AssetManifest.bin') return _kEmptyAssetManifestBin;
+    if (key == 'packages/quran_qcf/assets/quran_fonts/qpc-v4.json') {
+      return ByteData.sublistView(_qpcV4Bytes!);
+    }
+    if (key == 'packages/quran_qcf/assets/quran_fonts/quran_page_index.json') {
+      return ByteData.sublistView(_pageIndexBytes!);
+    }
+    return null;
+  });
+}
+
+Future<Uint8List> _readRepoAssetBytes(List<String> candidates) async {
+  for (final String candidate in candidates) {
+    final File file = File(candidate);
+    if (await file.exists()) {
+      return file.readAsBytes();
+    }
+  }
+  throw StateError(
+    'Unable to locate asset file. Tried: ${candidates.join(', ')}',
+  );
+}
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late _MockShareCubit cubit;
   late StreamController<ShareState> controller;
 
@@ -30,9 +88,21 @@ void main() {
     videoPageSpecs: [],
   );
 
-  setUp(() {
+  setUpAll(() async {
+    if (kReelComposerSingleTree) {
+      await _registerRealMushafAssets();
+    }
+  });
+
+  setUp(() async {
     cubit = _MockShareCubit();
     controller = StreamController<ShareState>.broadcast();
+
+    if (kReelComposerSingleTree) {
+      await QuranQcfLocator.resetForTests();
+      QuranQcfLocator.setup();
+      await quranQcfLocator<MushafService>().ensureLoaded();
+    }
 
     when(() => cubit.state).thenReturn(reviewingState);
     when(() => cubit.stream).thenAnswer((_) => controller.stream);
@@ -51,6 +121,9 @@ void main() {
 
   tearDown(() async {
     await controller.close();
+    if (kReelComposerSingleTree) {
+      await QuranQcfLocator.resetForTests();
+    }
   });
 
   Widget buildSubject() {
@@ -104,5 +177,35 @@ void main() {
     await tester.pump(const Duration(milliseconds: 350));
 
     expect(saveSpinnerFinder, findsNothing);
+  });
+
+  testWidgets('live preview uses VideoComposition under the single-tree flag', (
+    tester,
+  ) async {
+    if (!kReelComposerSingleTree) {
+      return;
+    }
+
+    const idleState = ShareState(
+      status: ShareStatus.idle,
+      fromAyah: 1,
+      toAyah: 7,
+      reciterName: 'Test Reciter',
+      videoPageSpecs: [
+        VideoPageSpec(
+          pageNumber: 1,
+          fromAyah: 1,
+          toAyah: 7,
+          isInitialSelection: true,
+        ),
+      ],
+    );
+    when(() => cubit.state).thenReturn(idleState);
+
+    await tester.pumpWidget(buildSubject());
+    await tester.pump();
+
+    expect(find.byType(VideoComposition), findsOneWidget);
+    expect(find.byType(VideoContentRenderer), findsNothing);
   });
 }

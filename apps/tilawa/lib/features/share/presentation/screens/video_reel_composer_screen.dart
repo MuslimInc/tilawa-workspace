@@ -12,12 +12,14 @@ import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_state.dart';
 import 'package:tilawa/features/share/presentation/share_progress_messages_l10n.dart';
 import 'package:tilawa/features/share/presentation/utils/share_reciter_options.dart';
+import 'package:tilawa/features/share/presentation/utils/share_feature_flags.dart';
 import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
 import 'package:tilawa/features/share/presentation/utils/video_reel_composer_presets.dart';
 import 'package:tilawa/features/share/presentation/widgets/composer_controls.dart';
 import 'package:tilawa/features/share/presentation/widgets/mushaf_page_renderer.dart';
 import 'package:tilawa/features/share/presentation/widgets/reciter_picker_sheet.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_preview_widgets.dart';
+import 'package:tilawa/features/share/presentation/widgets/video_composition.dart';
 import 'package:tilawa/features/share/presentation/widgets/video_content_renderer.dart';
 import 'package:tilawa/features/share/presentation/widgets/video_reel_design.dart';
 import 'package:tilawa/features/share/presentation/widgets/video_review_panel.dart';
@@ -635,6 +637,23 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
           widget.toAyah == widget.initialToAyah,
     );
 
+    if (kReelComposerSingleTree) {
+      return ColoredBox(
+        color: widget.backgroundColor,
+        child: specs.length == 1
+            ? _buildCompositionPage(context, specs.single, 0, specs.length)
+            : PageView.builder(
+                itemCount: specs.length,
+                itemBuilder: (context, index) => _buildCompositionPage(
+                  context,
+                  specs[index],
+                  index,
+                  specs.length,
+                ),
+              ),
+      );
+    }
+
     return Container(
       color: widget.backgroundColor,
       child: Center(
@@ -650,6 +669,31 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
               isCapturing: false,
               backgroundColor: widget.backgroundColor,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompositionPage(
+    BuildContext context,
+    VideoPageSpec spec,
+    int index,
+    int totalPages,
+  ) {
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: VideoComposition(
+          spec: VideoCompositionSpec(
+            surahNumber: widget.surahNumber,
+            pageSpec: spec,
+            pageIndex: index,
+            totalPages: totalPages,
+            reciterName: widget.reciterName,
+            mode: VideoCompositionMode.edit,
+            localeName: context.l10n.localeName,
+            backgroundColor: widget.backgroundColor,
           ),
         ),
       ),
@@ -695,6 +739,32 @@ class _OffScreenRenderers extends StatelessWidget {
     final GlobalKey? key = videoBoundaryKeys[spec.pageNumber];
     if (key == null) {
       return const SizedBox.shrink();
+    }
+
+    if (kReelComposerSingleTree) {
+      return SizedBox.expand(
+        child: Center(
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            maxHeight: double.infinity,
+            child: RepaintBoundary(
+              key: key,
+              child: VideoComposition(
+                spec: VideoCompositionSpec(
+                  surahNumber: surahNumber,
+                  pageSpec: spec,
+                  pageIndex: safeIndex,
+                  totalPages: videoPageSpecs.length,
+                  reciterName: reciterName,
+                  mode: VideoCompositionMode.capture,
+                  localeName: context.l10n.localeName,
+                  backgroundColor: backgroundColor,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     return SizedBox.expand(

@@ -227,29 +227,29 @@ Goal: Make preview and export share one intrinsic 1080x1920 composition widget. 
 
 ### P3-001: Feature flag and composition contract
 
-- [ ] Add `const bool kReelComposerSingleTree = bool.fromEnvironment('REEL_COMPOSER_SINGLE_TREE');` in [share_feature_flags.dart](apps/tilawa/lib/features/share/presentation/utils/share_feature_flags.dart).
-- [ ] Add a `VideoCompositionSpec` value object in [video_composition.dart](apps/tilawa/lib/features/share/presentation/widgets/video_composition.dart) or [video_page_specs.dart](apps/tilawa/lib/features/share/presentation/utils/video_page_specs.dart) that carries selected ayahs, page specs, banner policy, capture mode, locale, and canvas metrics.
-- [ ] Add tests in [video_composition_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_composition_test.dart) proving the spec is immutable/equatable enough for stable rebuilds.
+- [x] Add `const bool kReelComposerSingleTree = bool.fromEnvironment('REEL_COMPOSER_SINGLE_TREE');` in [share_feature_flags.dart](apps/tilawa/lib/features/share/presentation/utils/share_feature_flags.dart).
+- [x] Add a `VideoCompositionSpec` value object in [video_composition.dart](apps/tilawa/lib/features/share/presentation/widgets/video_composition.dart) or [video_page_specs.dart](apps/tilawa/lib/features/share/presentation/utils/video_page_specs.dart) that carries selected ayahs, page specs, banner policy, capture mode, locale, and canvas metrics.
+- [x] Add tests in [video_composition_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_composition_test.dart) proving the spec is immutable/equatable enough for stable rebuilds.
 
 ### P3-002: Build `VideoComposition`
 
-- [ ] Create [video_composition.dart](apps/tilawa/lib/features/share/presentation/widgets/video_composition.dart) with a widget that renders at intrinsic 1080x1920 without depending on parent constraints.
-- [ ] Move the reel frame structure currently in [mushaf_page_renderer.dart](apps/tilawa/lib/features/share/presentation/widgets/mushaf_page_renderer.dart) into `VideoComposition` behind `kReelComposerSingleTree`.
-- [ ] Ensure `VideoComposition` uses `MushafPageRenderer` or lower-level renderers as children without adding `FittedBox` inside the export boundary.
-- [ ] Export `VideoComposition` from [widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/widgets.dart).
-- [ ] Add widget tests in [video_composition_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_composition_test.dart): intrinsic size is 1080x1920, safe-zone guides can be enabled for edit mode, and safe-zone guides are hidden for review/export mode.
+- [x] Create [video_composition.dart](apps/tilawa/lib/features/share/presentation/widgets/video_composition.dart) with a widget that renders at intrinsic 1080x1920 without depending on parent constraints.
+- [x] Move the reel frame structure currently in [mushaf_page_renderer.dart](apps/tilawa/lib/features/share/presentation/widgets/mushaf_page_renderer.dart) into `VideoComposition` behind `kReelComposerSingleTree`.
+- [x] Ensure `VideoComposition` uses `MushafPageRenderer` or lower-level renderers as children without adding `FittedBox` inside the export boundary.
+- [x] Export `VideoComposition` from [widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/widgets.dart).
+- [x] Add widget tests in [video_composition_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_composition_test.dart): intrinsic size is 1080x1920, safe-zone guides can be enabled for edit mode, and safe-zone guides are hidden for review/export mode.
 
 ### P3-003: Use `VideoComposition` in live preview
 
-- [ ] Update `_VideoLivePreview` in [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart) to render `VideoComposition` inside `FittedBox(fit: BoxFit.contain)` when `kReelComposerSingleTree == true`.
-- [ ] Keep the Phase 2 preview path when `kReelComposerSingleTree == false`.
-- [ ] Add tests in [video_reel_composer_screen_save_state_test.dart](apps/tilawa/test/features/share/presentation/screens/video_reel_composer_screen_save_state_test.dart) or [video_composition_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_composition_test.dart) that the live preview contains one `VideoComposition` under the flag.
+- [x] Update `_VideoLivePreview` in [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart) to render `VideoComposition` inside `FittedBox(fit: BoxFit.contain)` when `kReelComposerSingleTree == true`.
+- [x] Keep the Phase 2 preview path when `kReelComposerSingleTree == false`.
+- [x] Add tests in [video_reel_composer_screen_save_state_test.dart](apps/tilawa/test/features/share/presentation/screens/video_reel_composer_screen_save_state_test.dart) or [video_composition_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_composition_test.dart) that the live preview contains one `VideoComposition` under the flag.
 
 ### P3-004: Use `VideoComposition` in offstage capture
 
-- [ ] Update `_OffScreenRenderers` in [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart) to render `VideoComposition` at native 1080x1920 with no `FittedBox` between `RepaintBoundary` and the composition when `kReelComposerSingleTree == true`.
-- [ ] Ensure every `WidgetCaptureHandle` in [widget_capture_handle.dart](apps/tilawa/lib/features/share/domain/entities/widget_capture_handle.dart) still resolves the correct boundary key for each page.
-- [ ] Add a widget test in [video_composition_capture_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_composition_capture_test.dart) that fails if a `FittedBox` exists between the export boundary and `VideoComposition`.
+- [x] Update `_OffScreenRenderers` in [video_reel_composer_screen.dart](apps/tilawa/lib/features/share/presentation/screens/video_reel_composer_screen.dart) to render `VideoComposition` at native 1080x1920 with no `FittedBox` between `RepaintBoundary` and the composition when `kReelComposerSingleTree == true`.
+- [x] Ensure every `WidgetCaptureHandle` in [widget_capture_handle.dart](apps/tilawa/lib/features/share/domain/entities/widget_capture_handle.dart) still resolves the correct boundary key for each page.
+- [x] Add a widget test in [video_composition_capture_test.dart](apps/tilawa/test/features/share/presentation/widgets/video_composition_capture_test.dart) that fails if a `FittedBox` exists between the export boundary and `VideoComposition`.
 
 ### P3-005: Raster equivalence and performance gates
 
@@ -260,10 +260,10 @@ Goal: Make preview and export share one intrinsic 1080x1920 composition widget. 
 
 ### P3-006: Phase 3 validation
 
-- [ ] Run `fvm flutter test test/features/share/presentation/widgets/video_composition_test.dart` in [apps/tilawa](apps/tilawa).
-- [ ] Run `fvm flutter test test/features/share/presentation/widgets/video_composition_capture_test.dart` in [apps/tilawa](apps/tilawa).
+- [x] Run `fvm flutter test test/features/share/presentation/widgets/video_composition_test.dart` in [apps/tilawa](apps/tilawa).
+- [x] Run `fvm flutter test test/features/share/presentation/widgets/video_composition_capture_test.dart` in [apps/tilawa](apps/tilawa).
 - [ ] Run the pixel-diff suite with `REEL_COMPOSER_V2=true` and `REEL_COMPOSER_SINGLE_TREE=true`.
-- [ ] Run `fvm flutter analyze lib/features/share/presentation test/features/share/presentation` in [apps/tilawa](apps/tilawa).
+- [x] Run `fvm flutter analyze lib/features/share/presentation test/features/share/presentation` in [apps/tilawa](apps/tilawa).
 - [ ] Manual QA on Pixel 6 and iPhone SE: preview and exported frame visually match for the five canonical selections.
 
 ---
