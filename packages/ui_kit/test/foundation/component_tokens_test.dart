@@ -399,6 +399,11 @@ void main() {
           scheme.surface,
         ),
       );
+      expect(tokens.groupSurfaceColor, scheme.surfaceContainerLow);
+      expect(
+        tokens.groupContainerBorderColor,
+        scheme.outlineVariant.withValues(alpha: 0.05 * 2),
+      );
     });
 
     test('copyWith updates nested EdgeInsets and numeric values', () {
@@ -445,6 +450,8 @@ void main() {
         switchActiveTrackOpacity: 0.4,
         tileItemGap: 14.0,
         selectionTileSelectedBackgroundColor: Color(0xFFE8D4C8),
+        groupSurfaceColor: Color(0xFFE0E0E0),
+        groupContainerBorderColor: Color(0xFFCCCCCC),
       );
       const second = TilawaSettingsGroupTokens(
         groupHeaderPadding: EdgeInsets.fromLTRB(14, 18, 18, 10),
@@ -476,6 +483,8 @@ void main() {
         switchActiveTrackOpacity: 0.6,
         tileItemGap: 18.0,
         selectionTileSelectedBackgroundColor: Color(0xFFC8B8A8),
+        groupSurfaceColor: Color(0xFFD0D0D0),
+        groupContainerBorderColor: Color(0xFFAAAAAA),
       );
 
       final result = TilawaSettingsGroupTokens.lerp(first, second, 0.5);
@@ -487,6 +496,18 @@ void main() {
         Color.lerp(
           first.selectionTileSelectedBackgroundColor,
           second.selectionTileSelectedBackgroundColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.groupSurfaceColor,
+        Color.lerp(first.groupSurfaceColor, second.groupSurfaceColor, 0.5),
+      );
+      expect(
+        result.groupContainerBorderColor,
+        Color.lerp(
+          first.groupContainerBorderColor,
+          second.groupContainerBorderColor,
           0.5,
         ),
       );
@@ -531,6 +552,14 @@ void main() {
             scheme.primary.withValues(alpha: 0.14),
             scheme.surfaceContainerHigh,
           ),
+        );
+        expect(
+          tokens.navButtonSplashColor,
+          scheme.onSurface.withValues(alpha: 0.06),
+        );
+        expect(
+          tokens.navButtonHighlightColor,
+          scheme.onSurface.withValues(alpha: 0.04),
         );
       },
     );
@@ -630,6 +659,8 @@ void main() {
         navButtonLabelFontSize: 10.0,
         navButtonSelectedLabelWeight: FontWeight.w700,
         navButtonUnselectedLabelWeight: FontWeight.w500,
+        navButtonSplashColor: Color(0x33000000),
+        navButtonHighlightColor: Color(0x22000000),
       );
       const second = TilawaAdaptiveShellTokens(
         compactBottomNavBarBaseHeight: 96.0,
@@ -660,6 +691,8 @@ void main() {
         navButtonLabelFontSize: 11.0,
         navButtonSelectedLabelWeight: FontWeight.w800,
         navButtonUnselectedLabelWeight: FontWeight.w600,
+        navButtonSplashColor: Color(0x66000000),
+        navButtonHighlightColor: Color(0x44000000),
       );
 
       final result = TilawaAdaptiveShellTokens.lerp(first, second, 0.5);
@@ -687,6 +720,22 @@ void main() {
         Color.lerp(
           first.sideRailIndicatorColor,
           second.sideRailIndicatorColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.navButtonSplashColor,
+        Color.lerp(
+          first.navButtonSplashColor,
+          second.navButtonSplashColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.navButtonHighlightColor,
+        Color.lerp(
+          first.navButtonHighlightColor,
+          second.navButtonHighlightColor,
           0.5,
         ),
       );

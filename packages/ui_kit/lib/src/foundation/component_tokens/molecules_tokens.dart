@@ -593,6 +593,7 @@ class TilawaSegmentedControlTokens {
     required this.itemPadding,
     required this.containerBackgroundColor,
     required this.selectedBackgroundColor,
+    required this.containerBorderColor,
     required this.containerRadius,
     required this.itemRadius,
     required this.containerOpacity,
@@ -608,6 +609,10 @@ class TilawaSegmentedControlTokens {
   final EdgeInsetsGeometry itemPadding;
   final Color containerBackgroundColor;
   final Color selectedBackgroundColor;
+
+  /// Outer border ([Border.all]) around the control track.
+  final Color containerBorderColor;
+
   final double containerRadius;
   final double itemRadius;
   final double containerOpacity;
@@ -637,12 +642,14 @@ class TilawaSegmentedControlTokens {
   }) {
     final containerBackgroundColor = _containerBackgroundColor(colorScheme);
     final selectedBackgroundColor = _selectedBackgroundColor(colorScheme);
+    final containerBorderColor = _containerBorderColor(colorScheme);
     if (density.isCompact) {
       return TilawaSegmentedControlTokens(
         containerPadding: EdgeInsets.all(2),
         itemPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         containerBackgroundColor: containerBackgroundColor,
         selectedBackgroundColor: selectedBackgroundColor,
+        containerBorderColor: containerBorderColor,
         containerRadius: 10,
         itemRadius: 6,
         containerOpacity: 0.3,
@@ -660,6 +667,7 @@ class TilawaSegmentedControlTokens {
       itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       containerBackgroundColor: containerBackgroundColor,
       selectedBackgroundColor: selectedBackgroundColor,
+      containerBorderColor: containerBorderColor,
       containerRadius: 12,
       itemRadius: 8,
       containerOpacity: 0.3,
@@ -690,11 +698,16 @@ class TilawaSegmentedControlTokens {
     );
   }
 
+  static Color _containerBorderColor(ColorScheme colorScheme) {
+    return colorScheme.outlineVariant.withValues(alpha: 0.72);
+  }
+
   TilawaSegmentedControlTokens copyWith({
     EdgeInsetsGeometry? containerPadding,
     EdgeInsetsGeometry? itemPadding,
     Color? containerBackgroundColor,
     Color? selectedBackgroundColor,
+    Color? containerBorderColor,
     double? containerRadius,
     double? itemRadius,
     double? containerOpacity,
@@ -712,6 +725,7 @@ class TilawaSegmentedControlTokens {
           containerBackgroundColor ?? this.containerBackgroundColor,
       selectedBackgroundColor:
           selectedBackgroundColor ?? this.selectedBackgroundColor,
+      containerBorderColor: containerBorderColor ?? this.containerBorderColor,
       containerRadius: containerRadius ?? this.containerRadius,
       itemRadius: itemRadius ?? this.itemRadius,
       containerOpacity: containerOpacity ?? this.containerOpacity,
@@ -747,6 +761,11 @@ class TilawaSegmentedControlTokens {
       selectedBackgroundColor: Color.lerp(
         a.selectedBackgroundColor,
         b.selectedBackgroundColor,
+        t,
+      )!,
+      containerBorderColor: Color.lerp(
+        a.containerBorderColor,
+        b.containerBorderColor,
         t,
       )!,
       containerRadius: lerpTokenDouble(a.containerRadius, b.containerRadius, t),

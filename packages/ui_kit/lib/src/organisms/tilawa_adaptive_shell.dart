@@ -397,8 +397,8 @@ class _NavButton extends StatelessWidget {
           onTap();
         },
         borderRadius: effectiveBorderRadius,
-        splashColor: theme.colorScheme.onSurface.withValues(alpha: 0.06),
-        highlightColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
+        splashColor: tokens.navButtonSplashColor,
+        highlightColor: tokens.navButtonHighlightColor,
         child: AnimatedContainer(
           duration: isSelected
               ? const Duration(milliseconds: 200)

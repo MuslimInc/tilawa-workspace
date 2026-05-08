@@ -412,6 +412,8 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonLabelFontSize,
     required this.navButtonSelectedLabelWeight,
     required this.navButtonUnselectedLabelWeight,
+    required this.navButtonSplashColor,
+    required this.navButtonHighlightColor,
   });
 
   final double compactBottomNavBarBaseHeight;
@@ -460,6 +462,12 @@ class TilawaAdaptiveShellTokens {
   final double navButtonLabelFontSize;
   final FontWeight navButtonSelectedLabelWeight;
   final FontWeight navButtonUnselectedLabelWeight;
+
+  /// [InkWell.splashColor] for shell nav destinations (bottom + rail).
+  final Color navButtonSplashColor;
+
+  /// [InkWell.highlightColor] for shell nav destinations.
+  final Color navButtonHighlightColor;
 
   factory TilawaAdaptiveShellTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
@@ -513,7 +521,17 @@ class TilawaAdaptiveShellTokens {
       navButtonLabelFontSize: 10,
       navButtonSelectedLabelWeight: FontWeight.w700,
       navButtonUnselectedLabelWeight: FontWeight.w500,
+      navButtonSplashColor: _navButtonSplashColor(colorScheme),
+      navButtonHighlightColor: _navButtonHighlightColor(colorScheme),
     );
+  }
+
+  static Color _navButtonSplashColor(ColorScheme colorScheme) {
+    return colorScheme.onSurface.withValues(alpha: 0.06);
+  }
+
+  static Color _navButtonHighlightColor(ColorScheme colorScheme) {
+    return colorScheme.onSurface.withValues(alpha: 0.04);
   }
 
   static Color _sideRailIndicatorColor(ColorScheme colorScheme) {
@@ -569,6 +587,8 @@ class TilawaAdaptiveShellTokens {
     double? navButtonLabelFontSize,
     FontWeight? navButtonSelectedLabelWeight,
     FontWeight? navButtonUnselectedLabelWeight,
+    Color? navButtonSplashColor,
+    Color? navButtonHighlightColor,
   }) {
     return TilawaAdaptiveShellTokens(
       compactBottomNavBarBaseHeight:
@@ -619,6 +639,9 @@ class TilawaAdaptiveShellTokens {
           navButtonSelectedLabelWeight ?? this.navButtonSelectedLabelWeight,
       navButtonUnselectedLabelWeight:
           navButtonUnselectedLabelWeight ?? this.navButtonUnselectedLabelWeight,
+      navButtonSplashColor: navButtonSplashColor ?? this.navButtonSplashColor,
+      navButtonHighlightColor:
+          navButtonHighlightColor ?? this.navButtonHighlightColor,
     );
   }
 
@@ -760,6 +783,16 @@ class TilawaAdaptiveShellTokens {
         b.navButtonUnselectedLabelWeight,
         t,
       )!,
+      navButtonSplashColor: Color.lerp(
+        a.navButtonSplashColor,
+        b.navButtonSplashColor,
+        t,
+      )!,
+      navButtonHighlightColor: Color.lerp(
+        a.navButtonHighlightColor,
+        b.navButtonHighlightColor,
+        t,
+      )!,
     );
   }
 }
@@ -793,6 +826,8 @@ class TilawaSettingsGroupTokens {
     required this.switchActiveTrackOpacity,
     required this.tileItemGap,
     required this.selectionTileSelectedBackgroundColor,
+    required this.groupSurfaceColor,
+    required this.groupContainerBorderColor,
   });
 
   final EdgeInsetsGeometry groupHeaderPadding;
@@ -824,6 +859,12 @@ class TilawaSettingsGroupTokens {
   /// Selected row fill for [TilawaSelectionTile] (primary tint on surface).
   final Color selectionTileSelectedBackgroundColor;
 
+  /// Rounded panel fill behind settings rows ([TilawaSettingsGroup]).
+  final Color groupSurfaceColor;
+
+  /// Hairline border around the group panel (`outlineVariant` × `tileDividerOpacity` × 2).
+  final Color groupContainerBorderColor;
+
   /// Default tokens for the settings group.
   ///
   /// [density] controls compact-mode token values. Comfortable (default)
@@ -850,6 +891,12 @@ class TilawaSettingsGroupTokens {
         _selectionTileSelectedRowBackground(
       colorScheme,
       tileIconContainerOpacity,
+    );
+    const tileDividerOpacity = 0.05;
+    final groupSurfaceColor = colorScheme.surfaceContainerLow;
+    final groupContainerBorderColor = _groupContainerBorderColor(
+      colorScheme,
+      tileDividerOpacity,
     );
     if (density.isCompact) {
       return TilawaSettingsGroupTokens(
@@ -880,11 +927,13 @@ class TilawaSettingsGroupTokens {
         tileDividerPadding: const EdgeInsets.only(left: 64, right: 16),
         tileDividerHeight: 1,
         tileDividerThickness: 0.5,
-        tileDividerOpacity: 0.05,
+        tileDividerOpacity: tileDividerOpacity,
         switchActiveTrackOpacity: 0.5,
         tileItemGap: 16,
         selectionTileSelectedBackgroundColor:
             selectionTileSelectedBackgroundColor,
+        groupSurfaceColor: groupSurfaceColor,
+        groupContainerBorderColor: groupContainerBorderColor,
       );
     }
 
@@ -915,11 +964,22 @@ class TilawaSettingsGroupTokens {
       tileDividerPadding: const EdgeInsets.only(left: 64, right: 16),
       tileDividerHeight: 1,
       tileDividerThickness: 0.5,
-      tileDividerOpacity: 0.05,
+      tileDividerOpacity: tileDividerOpacity,
       switchActiveTrackOpacity: 0.5,
       tileItemGap: 16,
       selectionTileSelectedBackgroundColor:
           selectionTileSelectedBackgroundColor,
+      groupSurfaceColor: groupSurfaceColor,
+      groupContainerBorderColor: groupContainerBorderColor,
+    );
+  }
+
+  static Color _groupContainerBorderColor(
+    ColorScheme colorScheme,
+    double tileDividerOpacity,
+  ) {
+    return colorScheme.outlineVariant.withValues(
+      alpha: tileDividerOpacity * 2,
     );
   }
 
@@ -960,6 +1020,8 @@ class TilawaSettingsGroupTokens {
     double? switchActiveTrackOpacity,
     double? tileItemGap,
     Color? selectionTileSelectedBackgroundColor,
+    Color? groupSurfaceColor,
+    Color? groupContainerBorderColor,
   }) {
     return TilawaSettingsGroupTokens(
       groupHeaderPadding: groupHeaderPadding ?? this.groupHeaderPadding,
@@ -994,6 +1056,9 @@ class TilawaSettingsGroupTokens {
       selectionTileSelectedBackgroundColor:
           selectionTileSelectedBackgroundColor ??
           this.selectionTileSelectedBackgroundColor,
+      groupSurfaceColor: groupSurfaceColor ?? this.groupSurfaceColor,
+      groupContainerBorderColor:
+          groupContainerBorderColor ?? this.groupContainerBorderColor,
     );
   }
 
@@ -1119,6 +1184,16 @@ class TilawaSettingsGroupTokens {
       selectionTileSelectedBackgroundColor: Color.lerp(
         a.selectionTileSelectedBackgroundColor,
         b.selectionTileSelectedBackgroundColor,
+        t,
+      )!,
+      groupSurfaceColor: Color.lerp(
+        a.groupSurfaceColor,
+        b.groupSurfaceColor,
+        t,
+      )!,
+      groupContainerBorderColor: Color.lerp(
+        a.groupContainerBorderColor,
+        b.groupContainerBorderColor,
         t,
       )!,
     );
