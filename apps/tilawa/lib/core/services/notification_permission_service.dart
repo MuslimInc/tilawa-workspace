@@ -43,6 +43,18 @@ class NotificationPermissionService {
     return status.isGranted;
   }
 
+  /// Check if the app is ignoring battery optimizations
+  Future<bool> isIgnoringBatteryOptimizations() async {
+    if (!Platform.isAndroid) {
+      // Battery optimizations are an Android-only concept
+      return true;
+    }
+
+    final PermissionStatus status =
+        await Permission.ignoreBatteryOptimizations.status;
+    return status.isGranted;
+  }
+
   /// Request notification permission (only on Android 13+)
   /// Returns true if permission is granted, false otherwise
   Future<bool> requestPermission() async {
