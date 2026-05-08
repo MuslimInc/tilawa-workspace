@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **System UI Overlay Ownership (Phase SUI-1)**: Added app-level default declarative `AnnotatedRegion<SystemUiOverlayStyle>` scope for standard routes (commit `fd304b9`).
+- **Theme State (T3.1 Guardrail)**: Kept deferred theme fields (`useSystemTheme`, `AppThemePreset.highContrast`, `AppThemePreset.trueBlack`) persisted for backward-compatible state restoration; these remain intentionally not fully wired end-to-end and must be either fully implemented or removed with explicit migration in a future phase.
 
 ### QA
 

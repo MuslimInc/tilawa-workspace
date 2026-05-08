@@ -214,7 +214,7 @@ void main() {
     });
   });
 
-  group('mode, preset and useSystemTheme fields', () {
+  group('mode and deferred theme fields', () {
     test('mode serialization/restoration works', () {
       final darkState = cubit.state.copyWith(mode: ThemeMode.dark);
       final json = cubit.toJson(darkState);
@@ -225,26 +225,50 @@ void main() {
       expect(restored!.mode, ThemeMode.dark);
     });
 
-    for (final appPreset in AppThemePreset.values) {
-      test('app preset ${appPreset.name} serialization/restoration works', () {
-        final state = cubit.state.copyWith(preset: appPreset);
+    test(
+      'useSystemTheme is persisted/restored as deferred compatibility field',
+      () {
+        final state = cubit.state.copyWith(useSystemTheme: true);
         final json = cubit.toJson(state);
         final restored = cubit.fromJson(json!);
 
-        expect(json['preset'], appPreset.name);
+        expect(json['useSystemTheme'], isTrue);
         expect(restored, isNotNull);
-        expect(restored!.preset, appPreset);
-      });
-    }
+        expect(restored!.useSystemTheme, isTrue);
+      },
+    );
 
-    test('useSystemTheme is preserved through serialization/restoration', () {
-      final state = cubit.state.copyWith(useSystemTheme: true);
+    test('defaultMode preset is serialized/restored', () {
+      final state = cubit.state.copyWith(preset: AppThemePreset.defaultMode);
       final json = cubit.toJson(state);
       final restored = cubit.fromJson(json!);
 
-      expect(json['useSystemTheme'], isTrue);
+      expect(json['preset'], AppThemePreset.defaultMode.name);
       expect(restored, isNotNull);
-      expect(restored!.useSystemTheme, isTrue);
+      expect(restored!.preset, AppThemePreset.defaultMode);
     });
+
+    test('trueBlack preset is serialized/restored (UI exposure deferred)', () {
+      final state = cubit.state.copyWith(preset: AppThemePreset.trueBlack);
+      final json = cubit.toJson(state);
+      final restored = cubit.fromJson(json!);
+
+      expect(json['preset'], AppThemePreset.trueBlack.name);
+      expect(restored, isNotNull);
+      expect(restored!.preset, AppThemePreset.trueBlack);
+    });
+
+    test(
+      'highContrast preset is serialized/restored (runtime effect deferred)',
+      () {
+        final state = cubit.state.copyWith(preset: AppThemePreset.highContrast);
+        final json = cubit.toJson(state);
+        final restored = cubit.fromJson(json!);
+
+        expect(json['preset'], AppThemePreset.highContrast.name);
+        expect(restored, isNotNull);
+        expect(restored!.preset, AppThemePreset.highContrast);
+      },
+    );
   });
 }
