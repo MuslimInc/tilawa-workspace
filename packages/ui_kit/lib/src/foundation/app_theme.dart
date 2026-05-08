@@ -243,6 +243,40 @@ class AppTheme {
     );
   }
 
+  /// M3 switch: OFF track uses a neutral outline tint on [ColorScheme.surfaceContainerLow]
+  /// instead of primary-colored `surfaceContainerHighest` (avoids a muddy lavender
+  /// track when the user picks a purple or teal primary). ON/disabled tracks stay
+  /// Flex defaults.
+  static SwitchThemeData _switchTheme(ColorScheme colorScheme) {
+    final SwitchThemeData base = FlexSubThemes.switchTheme(
+      colorScheme: colorScheme,
+      unselectedIsColored: false,
+      useMaterial3: true,
+    );
+    final WidgetStateProperty<Color?>? origTrack = base.trackColor;
+    if (origTrack == null) return base;
+
+    Color offTrack({required bool interaction}) => Color.alphaBlend(
+      colorScheme.outline.withValues(alpha: interaction ? 0.16 : 0.11),
+      colorScheme.surfaceContainerLow,
+    );
+
+    return base.copyWith(
+      trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled) ||
+            states.contains(WidgetState.selected)) {
+          return origTrack.resolve(states);
+        }
+        if (states.contains(WidgetState.pressed) ||
+            states.contains(WidgetState.hovered) ||
+            states.contains(WidgetState.focused)) {
+          return offTrack(interaction: true);
+        }
+        return offTrack(interaction: false);
+      }),
+    );
+  }
+
   static ThemeData _applySurfaceScale({
     required ThemeData theme,
     required ColorScheme colorScheme,
@@ -256,11 +290,7 @@ class AppTheme {
       canvasColor: scaffoldBackgroundColor,
       dividerColor: colorScheme.outlineVariant,
       cardColor: colorScheme.surface,
-      switchTheme: FlexSubThemes.switchTheme(
-        colorScheme: colorScheme,
-        unselectedIsColored: true,
-        useMaterial3: true,
-      ),
+      switchTheme: _switchTheme(colorScheme),
       appBarTheme: theme.appBarTheme.copyWith(
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
