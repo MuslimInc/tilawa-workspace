@@ -78,6 +78,7 @@ class PrayerAdhanNotificationService
 
     if (_initialized) {
       logger.d('${PrayerNotificationConfig.logTag} Already initialized');
+      await _flushPendingTapBestEffort();
       return;
     }
 
@@ -153,6 +154,7 @@ class PrayerAdhanNotificationService
           ),
         );
       });
+      await _flushPendingTapBestEffort();
 
       if (Platform.isAndroid) {
         await _createAndroidChannels();
@@ -388,6 +390,12 @@ class PrayerAdhanNotificationService
                 prayerKey: prayer.name.toLowerCase(),
               );
               if (adhanHandledNatively) {
+                logger.d(
+                  '${PrayerNotificationConfig.logTag} ADHAN_AUDIT source=flutter_fallback '
+                  'event=skip_fallback_native_success prayerKey=${prayer.name.toLowerCase()} '
+                  'prayerName=${prayer.name} scheduledMs=${targetTime.millisecondsSinceEpoch} '
+                  'notificationId=$notificationId channelId=${PrayerNotificationConfig.adhanChannelId}',
+                );
                 pendingAdhans.add(
                   PendingAdhanAlarm(
                     id: notificationId,
@@ -415,6 +423,13 @@ class PrayerAdhanNotificationService
           // 4. If native scheduling is disabled (user setting) or fails (fallback),
           //    we schedule a standard FLN notification.
           if (!adhanHandledNatively) {
+            logger.d(
+              '${PrayerNotificationConfig.logTag} ADHAN_AUDIT source=flutter_fallback '
+              'event=schedule_fallback prayerKey=${prayer.name.toLowerCase()} '
+              'prayerName=${prayer.name} scheduledMs=${targetTime.millisecondsSinceEpoch} '
+              'notificationId=$notificationId channelId='
+              '${useAdhan ? PrayerNotificationConfig.adhanChannelId : PrayerNotificationConfig.channelId}',
+            );
             try {
               await _notifications.zonedSchedule(
                 id: notificationId,
@@ -680,21 +695,30 @@ class PrayerAdhanNotificationService
         'prayer=${prayer.name} | playAdhan=$playAdhan | native=$adhanHandledNatively | '
         'id=$testId',
       );
-      await _notifications.show(
-        id: testId,
-        title: _titleFor(l10n, prayer),
-        body: _bodyFor(l10n, prayer),
-        notificationDetails: _detailsFor(
-          l10n,
-          playAdhan,
-          adhanHandledNatively: adhanHandledNatively,
-        ),
-        payload: payload,
-      );
-      logger.d(
-        '${PrayerNotificationConfig.logTag} [TEST OK] Notification delivered to system | '
-        'prayer=${prayer.name} | channel=$channelUsed | sound=$soundFile',
-      );
+      // Keep debug behavior aligned with production XOR routing:
+      // when native adhan is scheduled successfully, avoid a second FLN card.
+      if (!adhanHandledNatively) {
+        await _notifications.show(
+          id: testId,
+          title: _titleFor(l10n, prayer),
+          body: _bodyFor(l10n, prayer),
+          notificationDetails: _detailsFor(
+            l10n,
+            playAdhan,
+            adhanHandledNatively: adhanHandledNatively,
+          ),
+          payload: payload,
+        );
+        logger.d(
+          '${PrayerNotificationConfig.logTag} [TEST OK] Notification delivered to system | '
+          'prayer=${prayer.name} | channel=$channelUsed | sound=$soundFile',
+        );
+      } else {
+        logger.d(
+          '${PrayerNotificationConfig.logTag} [TEST OK] Native adhan scheduled; FLN suppressed to avoid duplicate card | '
+          'prayer=${prayer.name} | id=$testId',
+        );
+      }
       logger.d(
         '${PrayerNotificationConfig.logTag} [ADHAN CHECK] adhanPlayer.isSupported=${_adhanPlayer.isSupported} | '
         'playAdhan=$playAdhan — '
@@ -1093,5 +1117,17 @@ class PrayerAdhanNotificationService
       settings.calculationMethod.name,
     ].join('|');
     return fingerprint;
+  }
+
+  Future<void> _flushPendingTapBestEffort() async {
+    try {
+      final dynamic result = (_adhanPlayer as dynamic)
+          .flushPendingNotificationTap();
+      if (result is Future<void>) {
+        await result;
+      } else if (result is Future) {
+        await result;
+      }
+    } catch (_) {}
   }
 }

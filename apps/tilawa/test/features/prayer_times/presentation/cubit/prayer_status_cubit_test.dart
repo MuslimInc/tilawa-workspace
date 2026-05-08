@@ -170,6 +170,9 @@ class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   Stream<String> get onNotificationTapped => const Stream.empty();
 
   @override
+  Future<void> flushPendingNotificationTap() async {}
+
+  @override
   Future<bool> isAdhanPlaying() {
     isAdhanPlayingCallCount += 1;
     return _onIsAdhanPlaying();

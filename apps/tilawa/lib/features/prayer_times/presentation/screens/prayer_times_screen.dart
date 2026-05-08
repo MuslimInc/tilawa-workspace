@@ -78,7 +78,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           ),
         ),
       ),
-      // floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
+      floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
       body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
         buildWhen: (previous, current) {
           return previous.status != current.status ||

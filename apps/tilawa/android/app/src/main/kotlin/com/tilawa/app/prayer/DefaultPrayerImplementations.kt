@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Build
+import android.util.Log
 import androidx.core.content.edit
 
 class DefaultPrayerStorage(private val context: Context) : PrayerStorage {
@@ -68,6 +69,12 @@ class DefaultPrayerStorage(private val context: Context) : PrayerStorage {
 
 class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManager {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val isDebuggable: Boolean =
+        (context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+
+    private fun logDebug(message: String) {
+        if (isDebuggable) Log.d("AdhanScheduler", message)
+    }
 
     override fun scheduleExact(id: Int, name: String, key: String, triggerMs: Long, sound: String): Boolean {
         if (!canScheduleExact()) return false
@@ -86,10 +93,17 @@ class DefaultPrayerAlarmManager(private val context: Context) : PrayerAlarmManag
             AlarmManager.AlarmClockInfo(triggerMs, showIntent),
             pi
         )
+        logDebug(
+            "ADHAN_AUDIT source=alarm_scheduler event=schedule prayerKey=$key prayerName=$name " +
+                "scheduledMs=$triggerMs notificationId=$id requestCode=$id sound=$sound"
+        )
         return true
     }
 
     override fun cancel(id: Int) {
+        logDebug(
+            "ADHAN_AUDIT source=alarm_scheduler event=cancel notificationId=$id requestCode=$id"
+        )
         alarmManager.cancel(pendingIntent(id, "", "", 0L, "adhan"))
     }
 
