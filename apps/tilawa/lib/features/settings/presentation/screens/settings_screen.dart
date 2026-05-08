@@ -26,6 +26,26 @@ const double _kColorSwatchRadius = 12.0;
 const double _kCustomSwatchSize = 24.0;
 const int _kMaxConcurrentDownloads = 5;
 
+// Hue offsets (degrees) spread around the wheel so rows stay distinguishable
+// while following the user-selected primary — avoids fixed teal/mint fills
+// from `AppColors.settings*` that read like [AppColors.lightDefaultPrimaryContainer].
+const double _kHueSettingsTheme = 0;
+const double _kHueSettingsPrimaryColor = 10;
+const double _kHueSettingsLanguage = -24;
+const double _kHueSettingsPlayback = 20;
+const double _kHueSettingsDuration = 44;
+const double _kHueSettingsBookmarks = 28;
+const double _kHueSettingsHistory = -38;
+const double _kHueSettingsPrayer = 16;
+const double _kHueSettingsQuran = 52;
+const double _kHueSettingsStorage = -12;
+const double _kHueSettingsDownloads = 36;
+
+Color _settingsRowIconAccent(Color primary, double hueShiftDegrees) {
+  final hsl = HSLColor.fromColor(primary);
+  return hsl.withHue((hsl.hue + hueShiftDegrees) % 360.0).toColor();
+}
+
 // ── Top-level sheet / dialog helpers ─────────────────────────────────────────
 
 void _showColorPicker(
@@ -256,11 +276,15 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     BlocBuilder<ThemeCubit, ThemeState>(
                       builder: (context, state) {
+                        final primary = context.colorScheme.primary;
                         return Column(
                           children: [
                             TilawaSettingsSwitchTile(
                               icon: FluentIcons.dark_theme_24_regular,
-                              iconColor: AppColors.settingsTheme,
+                              iconColor: _settingsRowIconAccent(
+                                primary,
+                                _kHueSettingsTheme,
+                              ),
                               title: context.l10n.darkTheme,
                               value: state.mode == ThemeMode.dark,
                               onChanged: (value) =>
@@ -271,7 +295,10 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             TilawaSettingsTile(
                               icon: FluentIcons.color_24_regular,
-                              iconColor: AppColors.settingsColor,
+                              iconColor: _settingsRowIconAccent(
+                                primary,
+                                _kHueSettingsPrimaryColor,
+                              ),
                               title: context.l10n.primaryColor,
                               subtitle: _primaryColorTileSubtitle(
                                 context,
@@ -295,7 +322,10 @@ class SettingsScreen extends StatelessWidget {
                       builder: (context, state) {
                         return TilawaSettingsTile(
                           icon: FluentIcons.local_language_24_regular,
-                          iconColor: AppColors.settingsLanguage,
+                          iconColor: _settingsRowIconAccent(
+                            context.colorScheme.primary,
+                            _kHueSettingsLanguage,
+                          ),
                           title: context.l10n.language,
                           onTap: () =>
                               _showLanguagePicker(context, state.locale),
@@ -317,11 +347,15 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     BlocBuilder<SettingsCubit, SettingsState>(
                       builder: (context, state) {
+                        final primary = context.colorScheme.primary;
                         return Column(
                           children: [
                             TilawaSettingsSwitchTile(
                               icon: FluentIcons.history_24_regular,
-                              iconColor: AppColors.settingsPlayback,
+                              iconColor: _settingsRowIconAccent(
+                                primary,
+                                _kHueSettingsPlayback,
+                              ),
                               title: context.l10n.restorePlaybackState,
                               value: state.restorePlaybackState,
                               onChanged: (value) => context
@@ -333,7 +367,10 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             TilawaSettingsSwitchTile(
                               icon: FluentIcons.timer_24_regular,
-                              iconColor: AppColors.settingsDuration,
+                              iconColor: _settingsRowIconAccent(
+                                primary,
+                                _kHueSettingsDuration,
+                              ),
                               title: context.l10n.enableRecitationDuration,
                               value: state.isSleepTimerEnabled,
                               onChanged: (value) => context
@@ -359,7 +396,10 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     TilawaSettingsTile(
                       icon: FluentIcons.bookmark_24_regular,
-                      iconColor: AppColors.settingsBookmarks,
+                      iconColor: _settingsRowIconAccent(
+                        context.colorScheme.primary,
+                        _kHueSettingsBookmarks,
+                      ),
                       title: context.l10n.bookmarks,
                       onTap: () => const BookmarksRoute().push(context),
                       borderRadius: BorderRadius.vertical(
@@ -368,19 +408,28 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.history_24_regular,
-                      iconColor: AppColors.settingsHistory,
+                      iconColor: _settingsRowIconAccent(
+                        context.colorScheme.primary,
+                        _kHueSettingsHistory,
+                      ),
                       title: context.l10n.listeningHistory,
                       onTap: () => const HistoryRoute().push(context),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.clock_24_regular,
-                      iconColor: AppColors.settingsPrayer,
+                      iconColor: _settingsRowIconAccent(
+                        context.colorScheme.primary,
+                        _kHueSettingsPrayer,
+                      ),
                       title: context.l10n.prayerTimes,
                       onTap: () => const PrayerTimesRoute().push(context),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.book_24_regular,
-                      iconColor: AppColors.settingsQuran,
+                      iconColor: _settingsRowIconAccent(
+                        context.colorScheme.primary,
+                        _kHueSettingsQuran,
+                      ),
                       title: context.l10n.quranReader,
                       onTap: () => const QuranLastReadRoute().push(context),
                       showDivider: false,
@@ -399,7 +448,10 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     TilawaSettingsTile(
                       icon: FluentIcons.folder_24_regular,
-                      iconColor: AppColors.settingsStorage,
+                      iconColor: _settingsRowIconAccent(
+                        context.colorScheme.primary,
+                        _kHueSettingsStorage,
+                      ),
                       title: context.l10n.manageStorage,
                       onTap: () => const DownloadsRoute().push(context),
                       borderRadius: BorderRadius.vertical(
@@ -410,7 +462,10 @@ class SettingsScreen extends StatelessWidget {
                       builder: (context, state) {
                         return TilawaSettingsTile(
                           icon: FluentIcons.arrow_download_24_regular,
-                          iconColor: AppColors.settingsDownloads,
+                          iconColor: _settingsRowIconAccent(
+                            context.colorScheme.primary,
+                            _kHueSettingsDownloads,
+                          ),
                           title: context.l10n.concurrentDownloads,
                           onTap: () => _showConcurrentDownloadsPicker(
                             context,

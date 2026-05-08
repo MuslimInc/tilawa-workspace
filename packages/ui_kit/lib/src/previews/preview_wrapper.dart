@@ -43,7 +43,6 @@ class TilawaPreviewWrapper extends StatelessWidget {
           )
         : AppTheme.getLightTheme(
             primaryColor: AppColors.primaryCyan,
-            isDefaultPreset: true,
             useGoogleFontsOverride: useGoogleFonts,
             density: density,
           );

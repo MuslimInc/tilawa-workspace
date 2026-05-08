@@ -214,18 +214,15 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
   }
 
   /// Whether the cubit's current primary color is the brand default preset.
-  /// Used to opt into the hand-tuned default-primary container/dark-lift in
-  /// [AppTheme].
+  /// Used to opt into the hand-tuned default **dark** primary on surface in
+  /// [AppTheme]. Light `primaryContainer` always follows `_containerForPrimary`.
   bool get _isDefaultPreset =>
       state.primaryColorSource == PrimaryColorSource.preset &&
       state.primaryPresetId == PrimaryColorPreset.defaultPreset.id;
 
   /// Get the current light theme
   ThemeData getLightTheme() {
-    return AppTheme.getLightTheme(
-      primaryColor: state.primaryColor,
-      isDefaultPreset: _isDefaultPreset,
-    );
+    return AppTheme.getLightTheme(primaryColor: state.primaryColor);
   }
 
   /// Get the current dark theme

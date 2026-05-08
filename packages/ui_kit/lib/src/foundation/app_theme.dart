@@ -39,14 +39,12 @@ class AppTheme {
     return GoogleFonts.alexandriaTextTheme();
   }
 
-  static FlexSchemeColor _lightScheme(
-    Color primaryColor, {
-    required bool isDefaultPreset,
-  }) {
+  static FlexSchemeColor _lightScheme(Color primaryColor) {
     final safePrimary = _safePrimaryForLight(primaryColor);
-    final primaryContainer = isDefaultPreset
-        ? AppColors.lightDefaultPrimaryContainer
-        : _containerForPrimary(safePrimary, brightness: Brightness.light);
+    final primaryContainer = _containerForPrimary(
+      safePrimary,
+      brightness: Brightness.light,
+    );
 
     return FlexSchemeColor.from(
       primary: safePrimary,
@@ -109,9 +107,10 @@ class AppTheme {
     final darkPrimary = isDefaultPreset
         ? AppColors.darkDefaultPrimary
         : _liftForDarkTheme(primaryColor);
-    final primaryContainer = isDefaultPreset
-        ? AppColors.darkDefaultPrimaryContainer
-        : _containerForPrimary(primaryColor, brightness: Brightness.dark);
+    final primaryContainer = _containerForPrimary(
+      primaryColor,
+      brightness: Brightness.dark,
+    );
 
     return FlexSchemeColor.from(
       primary: darkPrimary,
@@ -293,13 +292,12 @@ class AppTheme {
   /// which matches all pre-density UI Kit values.
   static ThemeData getLightTheme({
     required Color primaryColor,
-    bool isDefaultPreset = false,
     bool? useGoogleFontsOverride,
     TilawaDensity density = TilawaDensity.comfortable,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
-    final scheme = _lightScheme(primaryColor, isDefaultPreset: isDefaultPreset);
+    final scheme = _lightScheme(primaryColor);
 
     final theme = FlexThemeData.light(
       colors: scheme,

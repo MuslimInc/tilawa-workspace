@@ -5,10 +5,7 @@ import 'tilawa_ui_kit.dart';
 
 PreviewThemeData organismsPreviewTheme() {
   return PreviewThemeData(
-    materialLight: AppTheme.getLightTheme(
-      primaryColor: AppColors.primaryCyan,
-      isDefaultPreset: true,
-    ),
+    materialLight: AppTheme.getLightTheme(primaryColor: AppColors.primaryCyan),
     materialDark: AppTheme.getDarkTheme(
       primaryColor: AppColors.primaryCyan,
       isDefaultPreset: true,

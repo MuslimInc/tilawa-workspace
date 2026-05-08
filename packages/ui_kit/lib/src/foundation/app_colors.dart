@@ -86,7 +86,9 @@ abstract final class AppColors {
 
   // --- AppTheme: light FlexSchemeColor / refinement (single source of truth) ---
 
-  /// Light preset [FlexSchemeColor.primaryContainer] when using default primary.
+  /// Historical reference: hand-tuned light primary container for the default
+  /// teal preset. [AppTheme] derives `ColorScheme.primaryContainer` from the
+  /// selected primary instead; unused at runtime.
   static const Color lightDefaultPrimaryContainer = Color(0xFFD8F0EC);
 
   /// Light [FlexSchemeColor.secondaryContainer].
@@ -109,7 +111,9 @@ abstract final class AppColors {
   /// Dark preset primary on surface when [isDefaultPreset] (Flex dark scheme).
   static const Color darkDefaultPrimary = Color(0xFF70C8BD);
 
-  /// Dark preset [FlexSchemeColor.primaryContainer] for default primary.
+  /// Historical reference: dark primary container paired with [darkDefaultPrimary].
+  /// [AppTheme] derives `ColorScheme.primaryContainer` from the selected primary
+  /// instead; unused at runtime.
   static const Color darkDefaultPrimaryContainer = Color(0xFF143E39);
 
   /// Dark [FlexSchemeColor.secondary].
