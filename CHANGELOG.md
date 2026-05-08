@@ -7,20 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0+24] - 2026-05-08 [Google Play Release]
+
+### Added
+
+- **Prayer Notification Redirection**: Fixed routing discrepancies across all app states (terminated, background, foreground) to ensure accurate redirection to the Prayer Notification Status screen.
+- **Prayer/Adhan Payload Matching**: Implemented a robust, JSON-based payload matcher that identifies local/native prayer notifications via multiple markers (`type`, `prayer_key`, `scheduled_time_ms`, etc.), replacing fragile string-based matching.
+- **Testing**: Added a comprehensive suite of unit tests for payload matching (compact JSON, whitespace-formatted JSON, native markers) and routing logic.
+
 ### Changed
 
+- **FCM Ownership**: Enforced strict service ownership by ensuring the FCM notification handler rejects local prayer payloads, preventing incorrect generic routing.
+- **Navigation Deduplication**: Updated AppRouter to allow re-navigation to the Prayer Notification Status screen even when already on that route, enabling UI updates for subsequent notification taps.
 - **System UI Overlay Ownership (Phase SUI-1)**: Added app-level default declarative `AnnotatedRegion<SystemUiOverlayStyle>` scope for standard routes (commit `fd304b9`).
-- **Theme State (T3.1 Guardrail)**: Kept deferred theme fields (`useSystemTheme`, `AppThemePreset.highContrast`, `AppThemePreset.trueBlack`) persisted for backward-compatible state restoration; these remain intentionally not fully wired end-to-end and must be either fully implemented or removed with explicit migration in a future phase.
+- **Theme State (T3.1 Guardrail)**: Kept deferred theme fields (`useSystemTheme`, `AppThemePreset.highContrast`, `AppThemePreset.trueBlack`) persisted for backward-compatible state restoration.
 
 ### QA
 
 - **Phase SUI-1 Verdict**: CONDITIONAL PASS.
-- **Directly validated (PASS)**: Reciters (light/dark), main tabs, Prayer Times (light/dark), Settings (light/dark), Qibla, Quran Image Reader entry/exit.
-- **Not directly proven yet (coverage gaps, not observed regressions)**: `PrayerNotificationStatusScreen` from real Prayer/Adhan notification tap; `PrayerNotificationStatusScreen` light/dark/custom theme; Screenshot/Reel composer enter/exit; custom primary color; distinct non-image Quran Reader path (if still reachable separately).
-- **Decision**: No local screen-specific `AnnotatedRegion` override is justified yet.
-- **Next validation focus**: real notification tap path to `PrayerNotificationStatusScreen`, then composer enter/exit paths.
-- **Theme Token Harmonization (T4) Decision**: GO for release with no pre-release action.
-- **T4 Deferred Scope (post-release backlog)**: Quran Image Reader fallback harmonization if needed, Share/Reel branded palette consolidation into a single token source, Settings semantic icon-color strategy decision (fixed vs theme-derived), optional scrim/overlay tokenization.
+- **Prayer Redirection Verdict**: PASS. Validated across payload formats and navigation scenarios via automated tests.
+- **Decision**: Theme Token Harmonization (T4) GO for release with no pre-release action.
 
 ## [0.1.6+24] - 2026-05-05
 

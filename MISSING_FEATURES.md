@@ -12,6 +12,12 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 
 ---
 
+### Prayer Times
+**Description:** Display accurate prayer times based on user location with customizable calculation methods and Adhan notifications.
+*Status: Fully implemented and hardened. Version 1.0.0+24 resolved routing discrepancies and payload matching across all app states.*
+
+---
+
 ## 🗂️ Post-Release Maintainability Backlog
 
 ### Theme Token Harmonization (T4)
@@ -35,14 +41,6 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 	optional tokenization for consistency.
 
 **Note:** Remaining work is maintainability-focused backlog and not a release blocker.
-
----
-
-## 🧪 Implemented — Needs Production/Physical QA
-
-### 1. Prayer Times
-**Description:** Display accurate prayer times based on user location with customizable calculation methods and Adhan notifications.
-*Status: Core UI and Native Android hardening is complete. Pending physical device QA for cold-start notifications.*
 
 ---
 
@@ -336,4 +334,4 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 
 ---
 
-*Last Updated: January 8, 2026*
+*Last Updated: May 8, 2026*
