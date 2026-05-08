@@ -75,9 +75,7 @@ class TilawaSelectionTile extends StatelessWidget {
             child: Divider(
               height: tokens.tileDividerHeight,
               thickness: tokens.tileDividerThickness,
-              color: colorScheme.outlineVariant.withValues(
-                alpha: tokens.tileDividerOpacity,
-              ),
+              color: tokens.selectionTileDividerColor,
             ),
           ),
       ],

@@ -167,7 +167,12 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
           clipBehavior: .none,
           children: [
             Positioned.fill(
-              child: ColoredBox(color: theme.colorScheme.surface),
+              child: ColoredBox(
+                color: theme
+                    .componentTokens
+                    .immersiveComposer
+                    .composerSurfaceColor,
+              ),
             ),
 
             if (systemSafeArea.top > 0)
@@ -176,7 +181,12 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                 left: 0,
                 right: 0,
                 height: systemSafeArea.top,
-                child: ColoredBox(color: theme.colorScheme.surface),
+                child: ColoredBox(
+                  color: theme
+                      .componentTokens
+                      .immersiveComposer
+                      .composerSurfaceColor,
+                ),
               ),
 
             if (systemSafeArea.bottom > 0)
@@ -185,7 +195,12 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                 right: 0,
                 bottom: 0,
                 height: systemSafeArea.bottom,
-                child: ColoredBox(color: theme.colorScheme.surface),
+                child: ColoredBox(
+                  color: theme
+                      .componentTokens
+                      .immersiveComposer
+                      .composerSurfaceColor,
+                ),
               ),
 
             // 1. Background Layer (Isolated)
@@ -292,7 +307,8 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   }
 
   SystemUiOverlayStyle _buildSystemUiOverlayStyle(ThemeData theme) {
-    final barColor = theme.colorScheme.surface;
+    final barColor =
+        theme.componentTokens.immersiveComposer.composerSurfaceColor;
     final barBrightness = ThemeData.estimateBrightnessForColor(barColor);
     final iconBrightness = barBrightness == Brightness.dark
         ? Brightness.light
@@ -324,18 +340,13 @@ class _OverlayPanel extends StatelessWidget {
     final tokens = theme.tokens;
     final componentTokens = theme.componentTokens.immersiveComposer;
 
-    // Cache border color calculation to avoid per-frame recalculation
-    final borderColor = theme.colorScheme.outlineVariant.withValues(
-      alpha: componentTokens.overlayBorderOpacity,
-    );
-
     final panel = DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(
-          alpha: disableBlur ? 1 : componentTokens.backgroundOverlayOpacity,
-        ),
+        color: disableBlur
+            ? componentTokens.composerSurfaceColor
+            : componentTokens.overlayPanelTranslucentFillColor,
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        border: Border.all(color: borderColor),
+        border: Border.all(color: componentTokens.panelBorderColor),
       ),
       child: child,
     );
@@ -376,20 +387,16 @@ class _TopAppBar extends StatelessWidget {
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.immersiveComposer;
 
-    // Cache border color and text style to avoid per-frame recalculation
-    final borderColor = theme.colorScheme.outlineVariant.withValues(
-      alpha: componentTokens.overlayBorderOpacity,
-    );
     final titleStyle = theme.textTheme.titleMedium?.copyWith(fontWeight: .bold);
     final subtitleStyle = theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
+      color: componentTokens.topBarSubtitleColor,
     );
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: componentTokens.composerSurfaceColor,
         borderRadius: BorderRadius.circular(designTokens.radiusLarge),
-        border: Border.all(color: borderColor),
+        border: Border.all(color: componentTokens.panelBorderColor),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
@@ -447,7 +454,7 @@ class _RoundHeaderButton extends StatelessWidget {
       height: componentTokens.headerButtonSize,
       decoration: BoxDecoration(
         shape: .circle,
-        color: theme.colorScheme.surfaceContainerHighest, // Opaque
+        color: componentTokens.headerIconButtonFillColor,
       ),
       child: IconButton(
         onPressed: onPressed,

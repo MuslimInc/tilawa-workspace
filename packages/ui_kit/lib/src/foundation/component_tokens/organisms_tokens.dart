@@ -317,8 +317,8 @@ class TilawaMediaPlayerBarTokens {
           playPauseShadowOpacity ?? this.playPauseShadowOpacity,
       playPauseShadowBlur: playPauseShadowBlur ?? this.playPauseShadowBlur,
       shellBackgroundColor: shellBackgroundColor ?? this.shellBackgroundColor,
-      progressTrackBackgroundColor: progressTrackBackgroundColor ??
-          this.progressTrackBackgroundColor,
+      progressTrackBackgroundColor:
+          progressTrackBackgroundColor ?? this.progressTrackBackgroundColor,
       artworkPlaceholderColor:
           artworkPlaceholderColor ?? this.artworkPlaceholderColor,
       shellOutlineColor: shellOutlineColor ?? this.shellOutlineColor,
@@ -908,6 +908,7 @@ class TilawaSettingsGroupTokens {
     required this.selectionTileSelectedBackgroundColor,
     required this.groupSurfaceColor,
     required this.groupContainerBorderColor,
+    required this.selectionTileDividerColor,
   });
 
   final EdgeInsetsGeometry groupHeaderPadding;
@@ -945,6 +946,9 @@ class TilawaSettingsGroupTokens {
   /// Hairline border around the group panel (`outlineVariant` × `tileDividerOpacity` × 2).
   final Color groupContainerBorderColor;
 
+  /// Divider under [TilawaSelectionTile] rows (`outlineVariant` × [tileDividerOpacity]).
+  final Color selectionTileDividerColor;
+
   /// Default tokens for the settings group.
   ///
   /// [density] controls compact-mode token values. Comfortable (default)
@@ -969,14 +973,17 @@ class TilawaSettingsGroupTokens {
     const tileIconContainerOpacity = 0.1;
     final selectionTileSelectedBackgroundColor =
         _selectionTileSelectedRowBackground(
-      colorScheme,
-      tileIconContainerOpacity,
-    );
+          colorScheme,
+          tileIconContainerOpacity,
+        );
     const tileDividerOpacity = 0.05;
     final groupSurfaceColor = colorScheme.surfaceContainerLow;
     final groupContainerBorderColor = _groupContainerBorderColor(
       colorScheme,
       tileDividerOpacity,
+    );
+    final selectionTileDividerColor = colorScheme.outlineVariant.withValues(
+      alpha: tileDividerOpacity,
     );
     if (density.isCompact) {
       return TilawaSettingsGroupTokens(
@@ -993,8 +1000,10 @@ class TilawaSettingsGroupTokens {
         groupShadowOffset: const Offset(0, 4),
         groupTitleFontSize: 12.5,
         groupTitleLetterSpacing: 1.1,
-        tileContentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tileContentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
         tileIconPadding: const EdgeInsets.all(10),
         tileIconBorderRadius: 12,
         tileIconSize: 22,
@@ -1014,6 +1023,7 @@ class TilawaSettingsGroupTokens {
             selectionTileSelectedBackgroundColor,
         groupSurfaceColor: groupSurfaceColor,
         groupContainerBorderColor: groupContainerBorderColor,
+        selectionTileDividerColor: selectionTileDividerColor,
       );
     }
 
@@ -1025,8 +1035,10 @@ class TilawaSettingsGroupTokens {
       groupShadowOffset: const Offset(0, 4),
       groupTitleFontSize: 12.5,
       groupTitleLetterSpacing: 1.1,
-      tileContentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      tileContentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 12,
+      ),
       switchTileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 12,
@@ -1051,6 +1063,7 @@ class TilawaSettingsGroupTokens {
           selectionTileSelectedBackgroundColor,
       groupSurfaceColor: groupSurfaceColor,
       groupContainerBorderColor: groupContainerBorderColor,
+      selectionTileDividerColor: selectionTileDividerColor,
     );
   }
 
@@ -1058,9 +1071,7 @@ class TilawaSettingsGroupTokens {
     ColorScheme colorScheme,
     double tileDividerOpacity,
   ) {
-    return colorScheme.outlineVariant.withValues(
-      alpha: tileDividerOpacity * 2,
-    );
+    return colorScheme.outlineVariant.withValues(alpha: tileDividerOpacity * 2);
   }
 
   static Color _selectionTileSelectedRowBackground(
@@ -1102,6 +1113,7 @@ class TilawaSettingsGroupTokens {
     Color? selectionTileSelectedBackgroundColor,
     Color? groupSurfaceColor,
     Color? groupContainerBorderColor,
+    Color? selectionTileDividerColor,
   }) {
     return TilawaSettingsGroupTokens(
       groupHeaderPadding: groupHeaderPadding ?? this.groupHeaderPadding,
@@ -1139,6 +1151,8 @@ class TilawaSettingsGroupTokens {
       groupSurfaceColor: groupSurfaceColor ?? this.groupSurfaceColor,
       groupContainerBorderColor:
           groupContainerBorderColor ?? this.groupContainerBorderColor,
+      selectionTileDividerColor:
+          selectionTileDividerColor ?? this.selectionTileDividerColor,
     );
   }
 
@@ -1276,6 +1290,11 @@ class TilawaSettingsGroupTokens {
         b.groupContainerBorderColor,
         t,
       )!,
+      selectionTileDividerColor: Color.lerp(
+        a.selectionTileDividerColor,
+        b.selectionTileDividerColor,
+        t,
+      )!,
     );
   }
 }
@@ -1297,6 +1316,11 @@ class TilawaImmersiveComposerTokens {
     required this.previewMaxHeight,
     required this.headerButtonSize,
     required this.headerIconSizeOffset,
+    required this.composerSurfaceColor,
+    required this.overlayPanelTranslucentFillColor,
+    required this.panelBorderColor,
+    required this.topBarSubtitleColor,
+    required this.headerIconButtonFillColor,
   });
 
   final Duration defaultAutoHideDuration;
@@ -1314,6 +1338,21 @@ class TilawaImmersiveComposerTokens {
   final double headerButtonSize;
   final double headerIconSizeOffset;
 
+  /// Full-bleed scaffold fill and opaque overlay panels ([ColorScheme.surface]).
+  final Color composerSurfaceColor;
+
+  /// Bottom/top overlay panel fill when blur is on ([composerSurfaceColor] at [backgroundOverlayOpacity]).
+  final Color overlayPanelTranslucentFillColor;
+
+  /// Border on overlay panels and top bar ([ColorScheme.outlineVariant] at [overlayBorderOpacity]).
+  final Color panelBorderColor;
+
+  /// Subtitle text on [_TopAppBar].
+  final Color topBarSubtitleColor;
+
+  /// Opaque circle behind header icon buttons (e.g. close).
+  final Color headerIconButtonFillColor;
+
   factory TilawaImmersiveComposerTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
@@ -1321,12 +1360,24 @@ class TilawaImmersiveComposerTokens {
     // `compactPanelHeightFactor` fields, but those are screen-size
     // responsiveness — unrelated to TilawaDensity. Kept no-op to avoid
     // semantic confusion.
-    return const TilawaImmersiveComposerTokens(
-      defaultAutoHideDuration: Duration(seconds: 3),
-      transitionDuration: Duration(milliseconds: 300),
-      backgroundBlurScale: 0.9,
-      backgroundOverlayOpacity: 0.42,
-      overlayBorderOpacity: 0.1,
+    return TilawaImmersiveComposerTokens.fromColorScheme(
+      ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+    );
+  }
+
+  factory TilawaImmersiveComposerTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
+    const backgroundBlurScale = 0.9;
+    const backgroundOverlayOpacity = 0.42;
+    const overlayBorderOpacity = 0.1;
+    final surface = colorScheme.surface;
+    return TilawaImmersiveComposerTokens(
+      defaultAutoHideDuration: const Duration(seconds: 3),
+      transitionDuration: const Duration(milliseconds: 300),
+      backgroundBlurScale: backgroundBlurScale,
+      backgroundOverlayOpacity: backgroundOverlayOpacity,
+      overlayBorderOpacity: overlayBorderOpacity,
       compactHeightBreakpoint: 760,
       compactPanelHeightFactor: 0.5,
       regularPanelHeightFactor: 0.44,
@@ -1336,6 +1387,15 @@ class TilawaImmersiveComposerTokens {
       previewMaxHeight: 460,
       headerButtonSize: 24,
       headerIconSizeOffset: 2,
+      composerSurfaceColor: surface,
+      overlayPanelTranslucentFillColor: surface.withValues(
+        alpha: backgroundOverlayOpacity,
+      ),
+      panelBorderColor: colorScheme.outlineVariant.withValues(
+        alpha: overlayBorderOpacity,
+      ),
+      topBarSubtitleColor: colorScheme.onSurfaceVariant,
+      headerIconButtonFillColor: colorScheme.surfaceContainerHighest,
     );
   }
 
@@ -1354,6 +1414,11 @@ class TilawaImmersiveComposerTokens {
     double? previewMaxHeight,
     double? headerButtonSize,
     double? headerIconSizeOffset,
+    Color? composerSurfaceColor,
+    Color? overlayPanelTranslucentFillColor,
+    Color? panelBorderColor,
+    Color? topBarSubtitleColor,
+    Color? headerIconButtonFillColor,
   }) {
     return TilawaImmersiveComposerTokens(
       defaultAutoHideDuration:
@@ -1377,6 +1442,14 @@ class TilawaImmersiveComposerTokens {
       previewMaxHeight: previewMaxHeight ?? this.previewMaxHeight,
       headerButtonSize: headerButtonSize ?? this.headerButtonSize,
       headerIconSizeOffset: headerIconSizeOffset ?? this.headerIconSizeOffset,
+      composerSurfaceColor: composerSurfaceColor ?? this.composerSurfaceColor,
+      overlayPanelTranslucentFillColor:
+          overlayPanelTranslucentFillColor ??
+          this.overlayPanelTranslucentFillColor,
+      panelBorderColor: panelBorderColor ?? this.panelBorderColor,
+      topBarSubtitleColor: topBarSubtitleColor ?? this.topBarSubtitleColor,
+      headerIconButtonFillColor:
+          headerIconButtonFillColor ?? this.headerIconButtonFillColor,
     );
   }
 
@@ -1446,6 +1519,27 @@ class TilawaImmersiveComposerTokens {
         b.headerIconSizeOffset,
         t,
       ),
+      composerSurfaceColor: Color.lerp(
+        a.composerSurfaceColor,
+        b.composerSurfaceColor,
+        t,
+      )!,
+      overlayPanelTranslucentFillColor: Color.lerp(
+        a.overlayPanelTranslucentFillColor,
+        b.overlayPanelTranslucentFillColor,
+        t,
+      )!,
+      panelBorderColor: Color.lerp(a.panelBorderColor, b.panelBorderColor, t)!,
+      topBarSubtitleColor: Color.lerp(
+        a.topBarSubtitleColor,
+        b.topBarSubtitleColor,
+        t,
+      )!,
+      headerIconButtonFillColor: Color.lerp(
+        a.headerIconButtonFillColor,
+        b.headerIconButtonFillColor,
+        t,
+      )!,
     );
   }
 }

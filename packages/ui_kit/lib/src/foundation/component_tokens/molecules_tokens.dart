@@ -51,7 +51,9 @@ class TilawaAlphabetScrollbarTokens {
     );
   }
 
-  factory TilawaAlphabetScrollbarTokens.fromColorScheme(ColorScheme colorScheme) {
+  factory TilawaAlphabetScrollbarTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
     // No-op: itemExtent (30) is already touch-marginal on the long surah
     // list. Tightening risks misclicks. Kept for visual review.
     return TilawaAlphabetScrollbarTokens(
@@ -656,8 +658,9 @@ class TilawaSegmentedControlTokens {
         minItemWidth: 100,
         selectedFontWeight: FontWeight.bold,
         unselectedFontWeight: FontWeight.normal,
-        selectedItemShadowColor:
-            const Color(0xFF000000).withValues(alpha: 0.05),
+        selectedItemShadowColor: const Color(
+          0xFF000000,
+        ).withValues(alpha: 0.05),
         selectedItemShadowBlur: 4,
         selectedItemShadowOffset: const Offset(0, 2),
       );
@@ -674,8 +677,7 @@ class TilawaSegmentedControlTokens {
       minItemWidth: 100,
       selectedFontWeight: FontWeight.bold,
       unselectedFontWeight: FontWeight.normal,
-      selectedItemShadowColor:
-          const Color(0xFF000000).withValues(alpha: 0.05),
+      selectedItemShadowColor: const Color(0xFF000000).withValues(alpha: 0.05),
       selectedItemShadowBlur: 4,
       selectedItemShadowOffset: const Offset(0, 2),
     );

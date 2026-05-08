@@ -156,8 +156,8 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
         effectiveColorScheme,
         density: density,
       ),
-      immersiveComposer: TilawaImmersiveComposerTokens.defaults(
-        density: density,
+      immersiveComposer: TilawaImmersiveComposerTokens.fromColorScheme(
+        effectiveColorScheme,
       ),
       iconToggle: TilawaIconToggleTokens.fromColorScheme(
         effectiveColorScheme,
@@ -362,10 +362,7 @@ extension TilawaComponentTokensX on ThemeData {
     final TilawaDensity density =
         extension<TilawaDesignTokens>()?.density ?? TilawaDensity.comfortable;
     return colorScheme.brightness == Brightness.dark
-        ? TilawaComponentTokens.dark(
-            density: density,
-            colorScheme: colorScheme,
-          )
+        ? TilawaComponentTokens.dark(density: density, colorScheme: colorScheme)
         : TilawaComponentTokens.light(
             density: density,
             colorScheme: colorScheme,

@@ -422,6 +422,10 @@ void main() {
         tokens.groupContainerBorderColor,
         scheme.outlineVariant.withValues(alpha: 0.05 * 2),
       );
+      expect(
+        tokens.selectionTileDividerColor,
+        scheme.outlineVariant.withValues(alpha: 0.05),
+      );
     });
 
     test('copyWith updates nested EdgeInsets and numeric values', () {
@@ -470,6 +474,7 @@ void main() {
         selectionTileSelectedBackgroundColor: Color(0xFFE8D4C8),
         groupSurfaceColor: Color(0xFFE0E0E0),
         groupContainerBorderColor: Color(0xFFCCCCCC),
+        selectionTileDividerColor: Color(0xFFBBBBBB),
       );
       const second = TilawaSettingsGroupTokens(
         groupHeaderPadding: EdgeInsets.fromLTRB(14, 18, 18, 10),
@@ -503,6 +508,7 @@ void main() {
         selectionTileSelectedBackgroundColor: Color(0xFFC8B8A8),
         groupSurfaceColor: Color(0xFFD0D0D0),
         groupContainerBorderColor: Color(0xFFAAAAAA),
+        selectionTileDividerColor: Color(0xFF999999),
       );
 
       final result = TilawaSettingsGroupTokens.lerp(first, second, 0.5);
@@ -529,6 +535,14 @@ void main() {
           0.5,
         ),
       );
+      expect(
+        result.selectionTileDividerColor,
+        Color.lerp(
+          first.selectionTileDividerColor,
+          second.selectionTileDividerColor,
+          0.5,
+        ),
+      );
     });
   });
 
@@ -542,57 +556,54 @@ void main() {
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());
     });
 
-    test(
-      'fromColorScheme uses stable neutral light bottom nav chrome',
-      () {
-        const scheme = ColorScheme.light(
-          primary: Color(0xFF006A60),
-          primaryContainer: Color(0xFFD8F0EC),
-          surfaceContainerHigh: Color(0xFFFF0000),
-          surfaceContainerHighest: Color(0xFF00FF00),
-        );
-        final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
+    test('fromColorScheme uses stable neutral light bottom nav chrome', () {
+      const scheme = ColorScheme.light(
+        primary: Color(0xFF006A60),
+        primaryContainer: Color(0xFFD8F0EC),
+        surfaceContainerHigh: Color(0xFFFF0000),
+        surfaceContainerHighest: Color(0xFF00FF00),
+      );
+      final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-        expect(
+      expect(
+        tokens.bottomNavBackgroundColor,
+        AppColors.lightSurfaceContainerHighBase,
+      );
+      expect(
+        tokens.navButtonSelectedBackgroundColor,
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.10),
           tokens.bottomNavBackgroundColor,
-          AppColors.lightSurfaceContainerHighBase,
-        );
-        expect(
-          tokens.navButtonSelectedBackgroundColor,
-          Color.alphaBlend(
-            scheme.primary.withValues(alpha: 0.10),
-            tokens.bottomNavBackgroundColor,
-          ),
-        );
-        expect(
-          tokens.sideRailIndicatorColor,
-          Color.alphaBlend(
-            scheme.primary.withValues(alpha: 0.14),
-            scheme.surfaceContainerHigh,
-          ),
-        );
-        expect(
-          tokens.navButtonSplashColor,
-          scheme.onSurface.withValues(alpha: 0.06),
-        );
-        expect(
-          tokens.navButtonHighlightColor,
-          scheme.onSurface.withValues(alpha: 0.04),
-        );
-        expect(
-          tokens.bottomNavOutlineColor,
-          scheme.outlineVariant.withValues(alpha: 0.1),
-        );
-        expect(
-          tokens.sideRailBackgroundColor,
-          scheme.surface.withValues(alpha: 0.8),
-        );
-        expect(
-          tokens.sideRailOutlineColor,
-          scheme.outlineVariant.withValues(alpha: 0.1),
-        );
-      },
-    );
+        ),
+      );
+      expect(
+        tokens.sideRailIndicatorColor,
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.14),
+          scheme.surfaceContainerHigh,
+        ),
+      );
+      expect(
+        tokens.navButtonSplashColor,
+        scheme.onSurface.withValues(alpha: 0.06),
+      );
+      expect(
+        tokens.navButtonHighlightColor,
+        scheme.onSurface.withValues(alpha: 0.04),
+      );
+      expect(
+        tokens.bottomNavOutlineColor,
+        scheme.outlineVariant.withValues(alpha: 0.1),
+      );
+      expect(
+        tokens.sideRailBackgroundColor,
+        scheme.surface.withValues(alpha: 0.8),
+      );
+      expect(
+        tokens.sideRailOutlineColor,
+        scheme.outlineVariant.withValues(alpha: 0.1),
+      );
+    });
 
     test(
       'fromColorScheme light bottom nav ignores scheme container colors',
@@ -618,8 +629,9 @@ void main() {
           ).bottomNavBackgroundColor,
         );
         expect(
-          TilawaAdaptiveShellTokens.fromColorScheme(tealScheme)
-              .bottomNavBackgroundColor,
+          TilawaAdaptiveShellTokens.fromColorScheme(
+            tealScheme,
+          ).bottomNavBackgroundColor,
           AppColors.lightSurfaceContainerHighBase,
         );
       },
@@ -634,7 +646,10 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, AppColors.darkSurfaceContainerHighBase);
+      expect(
+        tokens.bottomNavBackgroundColor,
+        AppColors.darkSurfaceContainerHighBase,
+      );
       expect(
         tokens.navButtonSelectedBackgroundColor,
         Color.alphaBlend(
@@ -813,6 +828,29 @@ void main() {
       expect(tokens.compactHeightBreakpoint, 760.0);
       expect(tokens.compactPanelHeightFactor, 0.5);
       expect(tokens.headerButtonSize, 24.0);
+      expect(tokens.composerSurfaceColor, isA<Color>());
+      expect(tokens.panelBorderColor, isA<Color>());
+    });
+
+    test('fromColorScheme derives panel and bar colors', () {
+      const scheme = ColorScheme.light(
+        surface: Color(0xFFFFEEDD),
+        onSurfaceVariant: Color(0xFF554433),
+        outlineVariant: Color(0xFF887766),
+        surfaceContainerHighest: Color(0xFFE0D0C0),
+      );
+      final tokens = TilawaImmersiveComposerTokens.fromColorScheme(scheme);
+      expect(tokens.composerSurfaceColor, scheme.surface);
+      expect(
+        tokens.overlayPanelTranslucentFillColor,
+        scheme.surface.withValues(alpha: 0.42),
+      );
+      expect(
+        tokens.panelBorderColor,
+        scheme.outlineVariant.withValues(alpha: 0.1),
+      );
+      expect(tokens.topBarSubtitleColor, scheme.onSurfaceVariant);
+      expect(tokens.headerIconButtonFillColor, scheme.surfaceContainerHighest);
     });
 
     test('copyWith updates numeric values', () {
@@ -842,6 +880,11 @@ void main() {
         previewMaxHeight: 400.0,
         headerButtonSize: 40.0,
         headerIconSizeOffset: 1.0,
+        composerSurfaceColor: Color(0xFFE8E0D8),
+        overlayPanelTranslucentFillColor: Color(0x99E8E0D8),
+        panelBorderColor: Color(0x88665544),
+        topBarSubtitleColor: Color(0xFF443322),
+        headerIconButtonFillColor: Color(0xFFD0C8C0),
       );
       const second = TilawaImmersiveComposerTokens(
         defaultAutoHideDuration: Duration(seconds: 4),
@@ -858,12 +901,25 @@ void main() {
         previewMaxHeight: 500.0,
         headerButtonSize: 48.0,
         headerIconSizeOffset: 3.0,
+        composerSurfaceColor: Color(0xFFD0C8C0),
+        overlayPanelTranslucentFillColor: Color(0x99D0C8C0),
+        panelBorderColor: Color(0xAA554433),
+        topBarSubtitleColor: Color(0xFF665544),
+        headerIconButtonFillColor: Color(0xFFC0B8B0),
       );
 
       final result = TilawaImmersiveComposerTokens.lerp(first, second, 0.5);
       expect(result.backgroundBlurScale, closeTo(0.875, 0.01));
       expect(result.compactHeightBreakpoint, closeTo(750.0, 0.1));
       expect(result.headerButtonSize, closeTo(44.0, 0.01));
+      expect(
+        result.composerSurfaceColor,
+        Color.lerp(
+          first.composerSurfaceColor,
+          second.composerSurfaceColor,
+          0.5,
+        ),
+      );
     });
   });
 

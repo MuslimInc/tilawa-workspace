@@ -100,7 +100,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
               progressBarOverride ??
                   LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: componentTokens.progressTrackBackgroundColor,
+                    backgroundColor:
+                        componentTokens.progressTrackBackgroundColor,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       colorScheme.primary,
                     ),
@@ -194,8 +195,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                               color: colorScheme.primary,
                               boxShadow: [
                                 BoxShadow(
-                                  color:
-                                      componentTokens.playPauseButtonShadowColor,
+                                  color: componentTokens
+                                      .playPauseButtonShadowColor,
                                   blurRadius:
                                       componentTokens.playPauseShadowBlur,
                                   offset: designTokens.shadowOffsetSmall,

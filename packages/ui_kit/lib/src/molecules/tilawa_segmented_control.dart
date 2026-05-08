@@ -64,9 +64,7 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveBackground,
         borderRadius: BorderRadius.circular(tokens.containerRadius),
-        border: Border.all(
-          color: tokens.containerBorderColor,
-        ),
+        border: Border.all(color: tokens.containerBorderColor),
       ),
       child: Row(
         children: segments.map((segment) {

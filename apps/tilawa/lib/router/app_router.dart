@@ -12,8 +12,6 @@ import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'package:tilawa_core/constants/app_strings.dart';
-
 import 'app_router_config.dart';
 import 'json_type_registry.dart';
 
