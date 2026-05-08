@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
-import 'package:meta/meta.dart';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
+import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
@@ -26,6 +26,7 @@ import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
 import 'notification_permission_service.dart';
 import 'prayer_notification_config.dart';
+import 'prayer_notification_payload_classifier.dart';
 
 /// Five prayers that participate in scheduled notifications. Sunrise, midnight
 /// and lastThird have no [PrayerNotificationSettings] field on
@@ -799,10 +800,12 @@ class PrayerAdhanNotificationService
   Future<void> handleNotificationResponse(NotificationResponse response) async {
     try {
       final String? payload = response.payload;
+      final NotificationPayloadKind payloadKind = classifyPayloadKind(payload);
       logger.d(
-        '${PrayerNotificationConfig.logTag} FLUTTER_TAP_PAYLOAD_RECEIVED id=${response.id} hasPayload=${payload != null}',
+        '${PrayerNotificationConfig.logTag} FLUTTER_TAP_PAYLOAD_RECEIVED id=${response.id} kind=$payloadKind hasPayload=${payload != null}',
       );
-      if (payload == null || !isPrayerPayload(payload)) {
+      if (!isPrayerPayloadOwnedByPrayerService(payloadKind) ||
+          payload == null) {
         return;
       }
 
@@ -884,91 +887,48 @@ class PrayerAdhanNotificationService
   // -- helpers ----------------------------------------------------------------
 
   @visibleForTesting
+  NotificationPayloadKind classifyPayloadKind(String? payload) {
+    return classifyPrayerNotificationPayload(payload);
+  }
+
+  @visibleForTesting
   bool isPrayerPayload(String? payload) {
-    if (payload == null || payload.isEmpty) return false;
-
-    // Try robust JSON parsing first.
-    try {
-      final dynamic decoded = jsonDecode(payload);
-      if (decoded is! Map) return false;
-      final Map<String, dynamic> data = Map<String, dynamic>.from(decoded);
-
-      // 1. Standard type check
-      final String? type = data[PrayerNotificationConfig.payloadTypeKey]
-          ?.toString();
-      if (type == PrayerNotificationConfig.payloadTypeValue) {
-        return true;
-      }
-
-      // 2. Local/Native markers fallback
-      const Set<String> localMarkers = {
-        'prayer',
-        'prayer_key',
-        'scheduled_time_ms',
-        'scheduled_ms',
-        'notification_id',
-        'adhan_enabled',
-        'is_adhan_playing',
-        'date',
-      };
-
-      for (final String key in localMarkers) {
-        if (data.containsKey(key)) {
-          return true;
-        }
-      }
-    } catch (_) {
-      // If JSON parsing fails, fall back to the cheap structural check.
-      return payload.contains(
-        '"${PrayerNotificationConfig.payloadTypeKey}":"'
-        '${PrayerNotificationConfig.payloadTypeValue}"',
-      );
-    }
-
-    return false;
+    return isPrayerPayloadOwnedByPrayerService(classifyPayloadKind(payload));
   }
 
   PrayerNotificationSettings _settingsFor(
     PrayerSettingsEntity settings,
     PrayerType prayer,
   ) {
-    switch (prayer) {
-      case PrayerType.fajr:
-        return settings.fajrNotification;
-      case PrayerType.dhuhr:
-        return settings.dhuhrNotification;
-      case PrayerType.asr:
-        return settings.asrNotification;
-      case PrayerType.maghrib:
-        return settings.maghribNotification;
-      case PrayerType.isha:
-        return settings.ishaNotification;
-      case PrayerType.sunrise:
-      case PrayerType.midnight:
-      case PrayerType.lastThird:
-        return const PrayerNotificationSettings(mode: PrayerAlertMode.none);
-    }
+    return switch (prayer) {
+      PrayerType.fajr => settings.fajrNotification,
+      PrayerType.dhuhr => settings.dhuhrNotification,
+      PrayerType.asr => settings.asrNotification,
+      PrayerType.maghrib => settings.maghribNotification,
+      PrayerType.isha => settings.ishaNotification,
+      PrayerType.sunrise => const PrayerNotificationSettings(
+        mode: PrayerAlertMode.none,
+      ),
+      PrayerType.midnight => const PrayerNotificationSettings(
+        mode: PrayerAlertMode.none,
+      ),
+      PrayerType.lastThird => const PrayerNotificationSettings(
+        mode: PrayerAlertMode.none,
+      ),
+    };
   }
 
   DateTime _prayerDateTime(PrayerTimeEntity day, PrayerType prayer) {
-    switch (prayer) {
-      case PrayerType.fajr:
-        return day.fajr;
-      case PrayerType.sunrise:
-        return day.sunrise;
-      case PrayerType.dhuhr:
-        return day.dhuhr;
-      case PrayerType.asr:
-        return day.asr;
-      case PrayerType.maghrib:
-        return day.maghrib;
-      case PrayerType.isha:
-        return day.isha;
-      case PrayerType.midnight:
-        return day.midnight;
-      case PrayerType.lastThird:
-        return day.lastThird;
-    }
+    return switch (prayer) {
+      PrayerType.fajr => day.fajr,
+      PrayerType.sunrise => day.sunrise,
+      PrayerType.dhuhr => day.dhuhr,
+      PrayerType.asr => day.asr,
+      PrayerType.maghrib => day.maghrib,
+      PrayerType.isha => day.isha,
+      PrayerType.midnight => day.midnight,
+      PrayerType.lastThird => day.lastThird,
+    };
   }
 
   String _titleFor(AppLocalizations l10n, PrayerType prayer) {
@@ -1097,24 +1057,16 @@ class PrayerAdhanNotificationService
   }
 
   String _localizedPrayerName(AppLocalizations l10n, PrayerType prayer) {
-    switch (prayer) {
-      case PrayerType.fajr:
-        return l10n.fajr;
-      case PrayerType.sunrise:
-        return l10n.sunrise;
-      case PrayerType.dhuhr:
-        return l10n.dhuhr;
-      case PrayerType.asr:
-        return l10n.asr;
-      case PrayerType.maghrib:
-        return l10n.maghrib;
-      case PrayerType.isha:
-        return l10n.isha;
-      case PrayerType.midnight:
-        return l10n.midnight;
-      case PrayerType.lastThird:
-        return l10n.lastThird;
-    }
+    return switch (prayer) {
+      PrayerType.fajr => l10n.fajr,
+      PrayerType.sunrise => l10n.sunrise,
+      PrayerType.dhuhr => l10n.dhuhr,
+      PrayerType.asr => l10n.asr,
+      PrayerType.maghrib => l10n.maghrib,
+      PrayerType.isha => l10n.isha,
+      PrayerType.midnight => l10n.midnight,
+      PrayerType.lastThird => l10n.lastThird,
+    };
   }
 
   String _dateKey(DateTime date) {

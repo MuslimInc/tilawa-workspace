@@ -61,8 +61,8 @@ class CheckPrayerAlarmCapabilityUseCase {
 
     bool isIgnoringBatteryOptimizations;
     try {
-      isIgnoringBatteryOptimizations =
-          await _permissions.isIgnoringBatteryOptimizations();
+      isIgnoringBatteryOptimizations = await _permissions
+          .isIgnoringBatteryOptimizations();
     } catch (_) {
       isIgnoringBatteryOptimizations = true;
     }

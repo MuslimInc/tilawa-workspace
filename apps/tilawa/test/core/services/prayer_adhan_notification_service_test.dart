@@ -323,12 +323,43 @@ void main() {
           },
         );
 
+        test('does not navigate for generic FCM prayer payload', () async {
+          await initialize();
+
+          const payload = '{ "type": "prayer", "prayer": "fajr" }';
+
+          await service.handleNotificationResponse(
+            NotificationResponse(
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: payload,
+            ),
+          );
+
+          verifyNever(
+            mockNav.navigateToNotification(
+              const PrayerNotificationStatusRoute().location,
+              extra: payload,
+            ),
+          );
+        });
+
         test(
-          'navigates whitespace-formatted JSON payload to prayer status route',
+          'navigates native Adhan payload from MainActivity shape',
           () async {
             await initialize();
 
-            const payload = '{ "type": "prayer", "prayer": "fajr" }';
+            final payload = jsonEncode({
+              'type': 'prayer',
+              'prayer': 'fajr',
+              'prayer_name': 'fajr',
+              'prayer_key': 'fajr',
+              'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+              'scheduled_ms': DateTime.now().millisecondsSinceEpoch,
+              'notification_id': 2001,
+              'adhan_enabled': true,
+              'is_adhan_playing': true,
+            });
 
             await service.handleNotificationResponse(
               NotificationResponse(
@@ -346,27 +377,6 @@ void main() {
             ).called(1);
           },
         );
-
-        test('navigates native Adhan payload with prayer_key marker', () async {
-          await initialize();
-
-          final payload = jsonEncode({'prayer_key': 'fajr'});
-
-          await service.handleNotificationResponse(
-            NotificationResponse(
-              notificationResponseType:
-                  NotificationResponseType.selectedNotification,
-              payload: payload,
-            ),
-          );
-
-          verify(
-            mockNav.navigateToNotification(
-              const PrayerNotificationStatusRoute().location,
-              extra: payload,
-            ),
-          ).called(1);
-        });
 
         test('does not wait for analytics before navigating', () async {
           await initialize();
