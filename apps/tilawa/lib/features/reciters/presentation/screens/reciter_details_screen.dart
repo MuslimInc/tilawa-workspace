@@ -10,7 +10,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
 import '../bloc/reciter_details_bloc.dart';
@@ -159,7 +159,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double bottomPlayerOffset = MediaQuery.viewPaddingOf(context).bottom;
+    final double bottomPlayerOffset = context.floatingBottomPadding;
     final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
       final AudioPlayerState state = bloc.state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;
@@ -179,11 +179,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                 duration: const Duration(milliseconds: 250),
                 child: FloatingActionButton.small(
                   onPressed: _scrollToTop,
-                  backgroundColor: theme.primaryColor.withValues(alpha: 0.9),
-                  child: const Icon(
-                    Icons.arrow_upward_rounded,
-                    color: Colors.white,
-                  ),
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  child: const Icon(Icons.arrow_upward_rounded),
                 ),
               ),
             ),
@@ -191,8 +189,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           floatingActionButtonLocation: showBottomPlayer
               ? _CustomFloatingActionButtonLocation(
                   offset:
-                      BottomPlayerWidget.collapsedHeight(context) +
-                      bottomPlayerOffset +
+                      QuranPlayerWidget.collapsedFootprint(context) +
                       tokens.spaceExtraLarge,
                 )
               : FloatingActionButtonLocation.endFloat,
@@ -333,10 +330,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             ),
           ),
         ),
-        if (showBottomPlayer)
-          Positioned.fill(
-            child: BottomPlayerWidget(bottomNavBarHeight: bottomPlayerOffset),
-          ),
+        const Positioned.fill(child: QuranPlayerWidget()),
       ],
     );
   }
@@ -378,17 +372,20 @@ class _SurahHeaderRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceSmall,
+      ),
       child: Row(
         children: [
           Text(
             '${context.l10n.surahs} ($count)',
-            style: TextStyle(
+            style: theme.textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.w600,
-              fontSize: 13,
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
           const Spacer(),
@@ -422,7 +419,7 @@ class _ReciterDetailsContent extends StatelessWidget {
     final double bottomPadding =
         bottomPlayerOffset +
         (showBottomPlayer
-            ? BottomPlayerWidget.collapsedHeight(context) +
+            ? QuranPlayerWidget.collapsedHeight(context) +
                   tokens.spaceExtraLarge
             : tokens.spaceExtraLarge);
     final double emptyStateIconSize =

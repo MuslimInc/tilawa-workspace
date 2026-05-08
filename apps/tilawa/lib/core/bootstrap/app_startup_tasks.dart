@@ -6,7 +6,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +19,7 @@ import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa/core/observers/composite_bloc_observer.dart';
 import 'package:tilawa/core/observers/crashlytics_bloc_observer.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
@@ -33,7 +33,9 @@ import 'package:tilawa/features/downloads/domain/services/download_notification_
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
+import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
+import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_watchdog_scheduler.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:tilawa/router/app_router.dart';
@@ -148,7 +150,7 @@ class AppStartupTasks {
       '[AppLaunch][AppStartupTasks.configureSystemChrome]: Start in (${DateTime.now()})',
     );
     return Future.wait([
-      SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
+      AppOrientationService.applyDefaultOrientations(),
     ]).timeout(const Duration(milliseconds: 1000));
   }
 
@@ -237,6 +239,30 @@ class AppStartupTasks {
       unawaited(initializeCrashlytics());
     } else {
       _logDisabled('CRASHLYTICS_INIT');
+    }
+
+    if (launchConfig.prayerNotificationsInit) {
+      unawaited(_ensurePrayerNotificationWatchdogScheduled());
+    } else {
+      _logDisabled('PRAYER_NOTIFICATION_WATCHDOG');
+    }
+  }
+
+  Future<void> _ensurePrayerNotificationWatchdogScheduled() async {
+    logger.d(
+      '[AppLaunch][AppStartupTasks._ensurePrayerNotificationWatchdogScheduled]: Start in (${DateTime.now()})',
+    );
+    try {
+      final PrayerNotificationWatchdogScheduler scheduler =
+          getIt<PrayerNotificationWatchdogScheduler>();
+      await scheduler.ensurePeriodicWatchdogScheduled();
+      logger.d(
+        '[AppLaunch][AppStartupTasks._ensurePrayerNotificationWatchdogScheduled]: Scheduled at (${DateTime.now()})',
+      );
+    } catch (e) {
+      logger.d(
+        '[AppLaunch][AppStartupTasks._ensurePrayerNotificationWatchdogScheduled]: Warning: Could not schedule watchdog at (${DateTime.now()}): $e',
+      );
     }
   }
 
@@ -616,6 +642,10 @@ class AppStartupTasks {
             getIt<IAthkarNotificationService>();
         await athkarService.initialize();
 
+        final IPrayerAdhanNotificationService prayerService =
+            getIt<IPrayerAdhanNotificationService>();
+        await prayerService.initialize();
+
         final IDownloadNotificationService downloadNotificationService =
             getIt<IDownloadNotificationService>();
         await downloadNotificationService.initialize();
@@ -706,6 +736,23 @@ class AppStartupTasks {
           getIt<LoadPrayerSettingsUseCase>();
       final SchedulePrayerNotificationsUseCase scheduleNotifications =
           getIt<SchedulePrayerNotificationsUseCase>();
+      final IAdhanAlarmPlayer adhanPlayer = getIt<IAdhanAlarmPlayer>();
+
+      // If the device booted (or the package was replaced/timezone changed)
+      // since the last time we ran, the dedup fingerprint is stale relative
+      // to AlarmManager state. Force a reschedule so the schedule is rebuilt
+      // from scratch instead of being skipped.
+      bool forceReschedule = false;
+      try {
+        forceReschedule = await adhanPlayer.consumeNeedsRescheduleAfterBoot();
+        if (forceReschedule) {
+          logger.d(
+            '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: '
+            'Boot/timezone change detected — forcing reschedule',
+          );
+        }
+      } catch (_) {}
+
       final result = await loadSettings.call();
       await result.fold(
         (failure) async {
@@ -726,6 +773,7 @@ class AppStartupTasks {
             settings: settings,
             latitude: latitude,
             longitude: longitude,
+            forceReschedule: forceReschedule,
           );
         },
       );

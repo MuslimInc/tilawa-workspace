@@ -5,8 +5,14 @@ import 'tilawa_ui_kit.dart';
 
 PreviewThemeData atomsPreviewTheme() {
   return PreviewThemeData(
-    materialLight: AppTheme.getLightTheme(primaryColor: AppColors.primaryCyan),
-    materialDark: AppTheme.getDarkTheme(primaryColor: AppColors.primaryCyan),
+    materialLight: AppTheme.getLightTheme(
+      primaryColor: AppColors.primaryCyan,
+      isDefaultPreset: true,
+    ),
+    materialDark: AppTheme.getDarkTheme(
+      primaryColor: AppColors.primaryCyan,
+      isDefaultPreset: true,
+    ),
   );
 }
 
@@ -88,6 +94,57 @@ Widget previewTilawaIconBox() {
   );
 }
 
+@Preview(name: 'TilawaIconToggle', group: 'Atoms', theme: atomsPreviewTheme)
+Widget previewTilawaIconToggleOff() {
+  return Scaffold(
+    body: Center(
+      child: TilawaIconToggle(
+        icon: Icons.notifications_outlined,
+        activeIcon: Icons.notifications,
+        value: false,
+        onChanged: (_) {},
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaIconToggle (on)',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
+Widget previewTilawaIconToggleOn() {
+  return Scaffold(
+    body: Center(
+      child: TilawaIconToggle(
+        icon: Icons.notifications_outlined,
+        activeIcon: Icons.notifications,
+        value: true,
+        onChanged: (_) {},
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaIconToggle (dark on)',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
+Widget previewTilawaIconToggleDarkOn() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Center(
+      child: TilawaIconToggle(
+        icon: Icons.notifications_outlined,
+        activeIcon: Icons.notifications,
+        value: true,
+        onChanged: (_) {},
+      ),
+    ),
+  );
+}
+
 @Preview(
   name: 'TilawaLoadingIndicator',
   group: 'Atoms',
@@ -112,6 +169,44 @@ Widget previewTilawaSectionTitle() {
   );
 }
 
+@Preview(
+  name: 'TilawaSectionTitle (dark)',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
+Widget previewTilawaSectionTitleDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: const Padding(
+      padding: EdgeInsets.all(24),
+      child: Align(
+        alignment: AlignmentDirectional.centerStart,
+        child: TilawaSectionTitle(title: 'Section title'),
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaSectionTitle (RTL)',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
+Widget previewTilawaSectionTitleRtl() {
+  return const Directionality(
+    textDirection: TextDirection.rtl,
+    child: Scaffold(
+      body: Padding(
+        padding: EdgeInsets.all(24),
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TilawaSectionTitle(title: 'عنوان القسم'),
+        ),
+      ),
+    ),
+  );
+}
+
 @Preview(name: 'TilawaSheetHandle', group: 'Atoms', theme: atomsPreviewTheme)
 Widget previewTilawaSheetHandle() {
   return Scaffold(
@@ -122,6 +217,30 @@ Widget previewTilawaSheetHandle() {
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             color: Colors.black12,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const TilawaSheetHandle(),
+        ),
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaSheetHandle (dark)',
+  group: 'Atoms',
+  theme: atomsPreviewTheme,
+)
+Widget previewTilawaSheetHandleDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Center(
+      child: SizedBox(
+        width: 240,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white12,
             borderRadius: BorderRadius.circular(16),
           ),
           child: const TilawaSheetHandle(),

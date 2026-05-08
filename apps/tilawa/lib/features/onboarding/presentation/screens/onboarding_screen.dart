@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
@@ -30,11 +31,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double bottomPadding = MediaQuery.paddingOf(context).bottom;
     final double indicatorHeight = tokens.spaceSmall - tokens.spaceTiny;
     final double activeIndicatorWidth = tokens.spaceExtraLarge;
     final double inactiveIndicatorWidth = tokens.spaceSmall;
     final double indicatorRadius = tokens.radiusSmall / 2;
+    final Color statusBarColor = theme.colorScheme.surface;
+    final Brightness statusBarBrightness = ThemeData.estimateBrightnessForColor(
+      statusBarColor,
+    );
+    final Brightness statusBarIconBrightness =
+        statusBarBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
 
     final pages = <OnboardingContent>[
       OnboardingContent(
@@ -63,10 +71,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           }
         },
         builder: (context, state) {
-          return Scaffold(
-            backgroundColor: theme.colorScheme.surface,
-            body: SafeArea(
-              child: Column(
+          return AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              statusBarColor: statusBarColor,
+              statusBarIconBrightness: statusBarIconBrightness,
+              statusBarBrightness: statusBarBrightness,
+            ),
+            child: Scaffold(
+              backgroundColor: statusBarColor,
+              body: Column(
                 spacing: tokens.spaceExtraLarge,
                 children: [
                   Expanded(
@@ -109,7 +122,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       tokens.spaceExtraLarge,
                       0,
                       tokens.spaceExtraLarge,
-                      bottomPadding,
+                      context.floatingBottomPadding,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

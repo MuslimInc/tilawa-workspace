@@ -2,12 +2,15 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import 'package:tilawa/core/logging/app_logger.dart';
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
 import '../bloc/downloads_status.dart';
@@ -89,16 +92,16 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.downloads),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            onPressed: _loadDownloads,
-            tooltip: context.l10n.refreshDownloads,
+          TilawaIconActionButton(
+            icon: Icons.refresh_rounded,
+            onTap: _loadDownloads,
           ),
-          IconButton(
-            icon: const Icon(Icons.delete_sweep_rounded),
-            onPressed: () => _showClearAllDialog(context),
-            tooltip: context.l10n.deleteAll,
+          SizedBox(width: 8),
+          TilawaIconActionButton(
+            icon: Icons.delete_sweep_rounded,
+            onTap: () => _showClearAllDialog(context),
           ),
+          SizedBox(width: 8),
         ],
       ),
       body: Stack(
@@ -108,7 +111,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               return _DownloadsBody(state: state);
             },
           ),
-          const Positioned.fill(child: BottomPlayerWidget()),
+          const Positioned.fill(child: QuranPlayerWidget()),
         ],
       ),
     );
@@ -130,7 +133,9 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               Navigator.of(context).pop();
               context.read<DownloadsBloc>().add(const ClearAllDownloads());
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: Text(context.l10n.deleteAll),
           ),
         ],
@@ -147,8 +152,8 @@ class _DownloadsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return switch (state.status) {
-      DownloadsStateStatus.initial || DownloadsStateStatus.loading =>
-        const Center(child: CircularProgressIndicator()),
+      DownloadsStateStatus.initial ||
+      DownloadsStateStatus.loading => const TilawaLoadingIndicator(),
       DownloadsStateStatus.loaded => _DownloadsList(
         downloadsByReciter: state.downloads,
         formattedSize: FileSizeFormatter.formatBytes(
@@ -171,31 +176,14 @@ class _ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 64,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              style: const TextStyle(fontSize: 16, color: Colors.red),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: () {
-                context.read<DownloadsBloc>().add(const LoadDownloads());
-              },
-              icon: const Icon(Icons.refresh),
-              label: Text(context.l10n.retry),
-            ),
-          ],
-        ),
+      child: TilawaErrorState(
+        icon: Icons.error_outline_rounded,
+        title: message,
+        retryLabel: context.l10n.retry,
+        onRetry: () {
+          context.read<DownloadsBloc>().add(const LoadDownloads());
+        },
+        iconColor: Theme.of(context).colorScheme.error,
       ),
     );
   }
@@ -250,39 +238,11 @@ class _EmptyDownloadsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.download_done_rounded,
-              size: 64,
-              color: Theme.of(context).primaryColor,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            context.l10n.noDownloadsYet,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.l10n.downloadSurahsOffline,
-            style: TextStyle(
-              fontSize: 16,
-              color: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
-      ),
+    return TilawaEmptyState(
+      icon: Icons.download_done_rounded,
+      title: context.l10n.noDownloadsYet,
+      subtitle: context.l10n.downloadSurahsOffline,
+      iconColor: Theme.of(context).colorScheme.primary,
     );
   }
 }
@@ -295,26 +255,41 @@ class _DownloadsSizeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final TextTheme textTheme = theme.textTheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceSmall,
+      ),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceLarge,
+          vertical: tokens.spaceMedium,
+        ),
         decoration: BoxDecoration(
-          color: theme.primaryColor.withValues(alpha: 0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: theme.primaryColor.withValues(alpha: 0.1)),
+          color: colorScheme.primaryContainer.withValues(alpha: 0.46),
+          borderRadius: BorderRadius.circular(tokens.radiusMedium),
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            width: tokens.borderWidthThin,
+          ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sd_storage_rounded, size: 20, color: theme.primaryColor),
-            const SizedBox(width: 8),
+            Icon(
+              Icons.sd_storage_rounded,
+              size: tokens.iconSizeMedium,
+              color: colorScheme.primary,
+            ),
+            SizedBox(width: tokens.spaceSmall),
             Text(
               context.l10n.storageUsed(formattedSize),
               style: textTheme.bodyMedium?.copyWith(
-                color: theme.textTheme.bodyMedium?.color,
+                color: colorScheme.onSurface,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -9,9 +9,12 @@ class TilawaSearchField extends StatelessWidget {
     this.controller,
     this.focusNode,
     this.onChanged,
+    this.onSubmitted,
     this.onClear,
     this.margin,
     this.height,
+    this.textInputAction,
+    this.scrollPadding,
     this.prefixIcon = Icons.search_rounded,
     this.clearIcon = Icons.clear_rounded,
     this.backgroundColor,
@@ -28,9 +31,12 @@ class TilawaSearchField extends StatelessWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final VoidCallback? onClear;
   final EdgeInsetsGeometry? margin;
   final double? height;
+  final TextInputAction? textInputAction;
+  final EdgeInsets? scrollPadding;
   final IconData prefixIcon;
   final IconData clearIcon;
   final Color? backgroundColor;
@@ -55,9 +61,12 @@ class TilawaSearchField extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         onChanged: onChanged,
+        onSubmitted: onSubmitted,
         onClear: onClear,
         margin: margin,
         height: height,
+        textInputAction: textInputAction,
+        scrollPadding: scrollPadding,
         prefixIcon: prefixIcon,
         clearIcon: clearIcon,
         backgroundColor: backgroundColor,
@@ -90,9 +99,12 @@ class _SearchFieldBody extends StatelessWidget {
     required this.controller,
     required this.focusNode,
     required this.onChanged,
+    required this.onSubmitted,
     required this.onClear,
     required this.margin,
     required this.height,
+    required this.textInputAction,
+    required this.scrollPadding,
     required this.prefixIcon,
     required this.clearIcon,
     required this.backgroundColor,
@@ -111,9 +123,12 @@ class _SearchFieldBody extends StatelessWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
   final VoidCallback? onClear;
   final EdgeInsetsGeometry? margin;
   final double? height;
+  final TextInputAction? textInputAction;
+  final EdgeInsets? scrollPadding;
   final IconData prefixIcon;
   final IconData clearIcon;
   final Color? backgroundColor;
@@ -130,9 +145,10 @@ class _SearchFieldBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final componentTokens = theme.componentTokens.searchField;
     final effectiveFillColor =
-        backgroundColor ?? theme.colorScheme.surfaceContainerHighest;
+        backgroundColor ?? componentTokens.backgroundColor;
     final effectiveBorderRadius =
         borderRadius ?? BorderRadius.circular(componentTokens.borderRadius);
 
@@ -144,17 +160,17 @@ class _SearchFieldBody extends StatelessWidget {
         borderRadius: effectiveBorderRadius,
         border: Border.all(
           color: isFocused
-              ? theme.primaryColor.withValues(
+              ? colorScheme.primary.withValues(
                   alpha: componentTokens.focusedBorderOpacity,
                 )
-              : theme.colorScheme.outlineVariant.withValues(
+              : colorScheme.outlineVariant.withValues(
                   alpha: componentTokens.unfocusedBorderOpacity,
                 ),
         ),
         boxShadow: showShadow
             ? [
                 BoxShadow(
-                  color: theme.primaryColor.withValues(
+                  color: colorScheme.primary.withValues(
                     alpha: componentTokens.shadowOpacity,
                   ),
                   blurRadius: componentTokens.shadowBlur,
@@ -168,7 +184,10 @@ class _SearchFieldBody extends StatelessWidget {
         focusNode: focusNode,
         enabled: enabled,
         onChanged: onChanged,
+        onSubmitted: onSubmitted,
         onTapOutside: onTapOutside,
+        textInputAction: textInputAction,
+        scrollPadding: scrollPadding ?? const EdgeInsets.all(20),
         textAlignVertical: .center,
         style:
             textStyle ??
@@ -190,8 +209,8 @@ class _SearchFieldBody extends StatelessWidget {
             prefixIcon,
             size: componentTokens.iconSize,
             color: isFocused
-                ? theme.primaryColor
-                : theme.colorScheme.onSurfaceVariant.withValues(
+                ? colorScheme.primary
+                : colorScheme.onSurfaceVariant.withValues(
                     alpha: componentTokens.iconOpacity,
                   ),
           ),

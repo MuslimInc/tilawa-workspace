@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../../lib/src/foundation/design_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 
 void main() {
   group('TilawaDesignTokens', () {
     const defaultTokens = TilawaDesignTokens(
+      density: TilawaDensity.comfortable,
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
@@ -17,6 +17,8 @@ void main() {
       radiusLarge: 16.0,
       radiusExtraLarge: 24.0,
       opacitySubtle: 0.1,
+      opacityShadow: 0.18,
+      opacityShadowStrong: 0.28,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,
       opacityGlass: 0.8,
@@ -30,6 +32,7 @@ void main() {
       iconSizeSmall: 16.0,
       iconSizeMedium: 20.0,
       iconSizeLarge: 24.0,
+      iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 48.0,
       textHeightLoose: 1.8,
       durationFast: Duration(milliseconds: 200),
@@ -79,6 +82,7 @@ void main() {
         expect(light.iconSizeSmall, 16.0);
         expect(light.iconSizeMedium, 20.0);
         expect(light.iconSizeLarge, 24.0);
+        expect(light.iconSizeLargePlus, 42.0);
         expect(light.iconSizeExtraLarge, 48.0);
         expect(light.textHeightLoose, 2.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
@@ -99,6 +103,33 @@ void main() {
         expect(dark.spaceExtraSmall, light.spaceExtraSmall);
         expect(dark.spaceSmall, light.spaceSmall);
         expect(dark.radiusSmall, light.radiusSmall);
+      });
+
+      test('compact density tightens medium/large spacing and radii', () {
+        final comfortable = TilawaDesignTokens.light();
+        final compact = TilawaDesignTokens.light(
+          density: TilawaDensity.compact,
+        );
+
+        // Tiny/small spacing is shared: shrinking further would erode hit
+        // margins around touch targets.
+        expect(compact.spaceTiny, comfortable.spaceTiny);
+        expect(compact.spaceExtraSmall, comfortable.spaceExtraSmall);
+        expect(compact.spaceSmall, comfortable.spaceSmall);
+
+        // Medium and larger spacing tighten on compact.
+        expect(compact.spaceMedium, lessThan(comfortable.spaceMedium));
+        expect(compact.spaceLarge, lessThan(comfortable.spaceLarge));
+        expect(compact.spaceExtraLarge, lessThan(comfortable.spaceExtraLarge));
+
+        // Radii tighten only at the larger sizes.
+        expect(compact.radiusSmall, comfortable.radiusSmall);
+        expect(compact.radiusMedium, comfortable.radiusMedium);
+        expect(compact.radiusLarge, lessThan(comfortable.radiusLarge));
+        expect(
+          compact.radiusExtraLarge,
+          lessThan(comfortable.radiusExtraLarge),
+        );
       });
     });
 
@@ -138,6 +169,8 @@ void main() {
       test('updates opacity values', () {
         final updated = defaultTokens.copyWith(
           opacitySubtle: 0.15,
+          opacityShadow: 0.2,
+          opacityShadowStrong: 0.3,
           opacityMedium: 0.35,
         );
         expect(updated.opacitySubtle, 0.15);
@@ -182,6 +215,7 @@ void main() {
     group('lerp()', () {
       test('returns first value at t=0', () {
         const first = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -193,6 +227,8 @@ void main() {
           radiusLarge: 16.0,
           radiusExtraLarge: 24.0,
           opacitySubtle: 0.1,
+          opacityShadow: 0.18,
+          opacityShadowStrong: 0.28,
           opacityMedium: 0.3,
           opacityEmphasis: 0.7,
           opacityGlass: 0.8,
@@ -205,6 +241,7 @@ void main() {
           iconSizeSmall: 16.0,
           iconSizeMedium: 20.0,
           iconSizeLarge: 24.0,
+          iconSizeLargePlus: 42.0,
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
@@ -229,6 +266,7 @@ void main() {
           playerAlphaScalingFactor: 2.5,
         );
         const second = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -240,6 +278,8 @@ void main() {
           radiusLarge: 32.0,
           radiusExtraLarge: 48.0,
           opacitySubtle: 0.2,
+          opacityShadow: 0.3,
+          opacityShadowStrong: 0.45,
           opacityMedium: 0.6,
           opacityEmphasis: 0.9,
           opacityGlass: 0.9,
@@ -252,6 +292,7 @@ void main() {
           iconSizeSmall: 24.0,
           iconSizeMedium: 32.0,
           iconSizeLarge: 40.0,
+          iconSizeLargePlus: 56.0,
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
@@ -285,6 +326,7 @@ void main() {
       test('returns second value at t=1', () {
         final first = TilawaDesignTokens.light();
         const second = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -296,6 +338,8 @@ void main() {
           radiusLarge: 32.0,
           radiusExtraLarge: 48.0,
           opacitySubtle: 0.2,
+          opacityShadow: 0.3,
+          opacityShadowStrong: 0.45,
           opacityMedium: 0.6,
           opacityEmphasis: 0.9,
           opacityGlass: 0.9,
@@ -308,6 +352,7 @@ void main() {
           iconSizeSmall: 24.0,
           iconSizeMedium: 32.0,
           iconSizeLarge: 40.0,
+          iconSizeLargePlus: 56.0,
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
@@ -339,6 +384,7 @@ void main() {
 
       test('returns middle value at t=0.5', () {
         const first = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -350,6 +396,8 @@ void main() {
           radiusLarge: 16.0,
           radiusExtraLarge: 24.0,
           opacitySubtle: 0.1,
+          opacityShadow: 0.18,
+          opacityShadowStrong: 0.28,
           opacityMedium: 0.3,
           opacityEmphasis: 0.7,
           opacityGlass: 0.8,
@@ -362,6 +410,7 @@ void main() {
           iconSizeSmall: 16.0,
           iconSizeMedium: 20.0,
           iconSizeLarge: 24.0,
+          iconSizeLargePlus: 42.0,
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
@@ -386,6 +435,7 @@ void main() {
           playerAlphaScalingFactor: 2.5,
         );
         const second = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -397,6 +447,8 @@ void main() {
           radiusLarge: 32.0,
           radiusExtraLarge: 48.0,
           opacitySubtle: 0.2,
+          opacityShadow: 0.3,
+          opacityShadowStrong: 0.45,
           opacityMedium: 0.6,
           opacityEmphasis: 0.9,
           opacityGlass: 0.9,
@@ -409,6 +461,7 @@ void main() {
           iconSizeSmall: 24.0,
           iconSizeMedium: 32.0,
           iconSizeLarge: 40.0,
+          iconSizeLargePlus: 56.0,
           durationFast: Duration(milliseconds: 300),
           durationMedium: Duration(milliseconds: 600),
           durationSlow: Duration(milliseconds: 900),
@@ -446,6 +499,7 @@ void main() {
       test('interpolates Offset values', () {
         final first = TilawaDesignTokens.light();
         const second = TilawaDesignTokens(
+          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -457,6 +511,8 @@ void main() {
           radiusLarge: 16.0,
           radiusExtraLarge: 24.0,
           opacitySubtle: 0.1,
+          opacityShadow: 0.18,
+          opacityShadowStrong: 0.28,
           opacityMedium: 0.3,
           opacityEmphasis: 0.7,
           opacityGlass: 0.8,
@@ -469,6 +525,7 @@ void main() {
           iconSizeSmall: 16.0,
           iconSizeMedium: 20.0,
           iconSizeLarge: 24.0,
+          iconSizeLargePlus: 42.0,
           durationFast: Duration(milliseconds: 200),
           durationMedium: Duration(milliseconds: 400),
           durationSlow: Duration(milliseconds: 600),
@@ -501,6 +558,7 @@ void main() {
         'handles Duration differently (discrete at t<0.5 returns first)',
         () {
           const first = TilawaDesignTokens(
+            density: TilawaDensity.comfortable,
             spaceTiny: 4.0,
             spaceExtraSmall: 4.0,
             spaceSmall: 8.0,
@@ -512,6 +570,8 @@ void main() {
             radiusLarge: 16.0,
             radiusExtraLarge: 24.0,
             opacitySubtle: 0.1,
+            opacityShadow: 0.18,
+            opacityShadowStrong: 0.28,
             opacityMedium: 0.3,
             opacityEmphasis: 0.7,
             opacityGlass: 0.8,
@@ -525,6 +585,7 @@ void main() {
             iconSizeSmall: 16.0,
             iconSizeMedium: 20.0,
             iconSizeLarge: 24.0,
+            iconSizeLargePlus: 42.0,
             iconSizeExtraLarge: 48.0,
             textHeightLoose: 1.8,
             durationFast: Duration(milliseconds: 200),
@@ -548,6 +609,7 @@ void main() {
             playerAlphaScalingFactor: 2.5,
           );
           const second = TilawaDesignTokens(
+            density: TilawaDensity.comfortable,
             spaceTiny: 4.0,
             spaceExtraSmall: 8.0,
             spaceSmall: 16.0,
@@ -559,6 +621,8 @@ void main() {
             radiusLarge: 32.0,
             radiusExtraLarge: 48.0,
             opacitySubtle: 0.2,
+            opacityShadow: 0.3,
+            opacityShadowStrong: 0.45,
             opacityMedium: 0.6,
             opacityEmphasis: 0.9,
             opacityGlass: 0.9,
@@ -572,6 +636,7 @@ void main() {
             iconSizeSmall: 24.0,
             iconSizeMedium: 32.0,
             iconSizeLarge: 40.0,
+            iconSizeLargePlus: 56.0,
             iconSizeExtraLarge: 96.0,
             textHeightLoose: 2.0,
             durationFast: Duration(milliseconds: 300),

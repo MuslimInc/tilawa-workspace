@@ -10,12 +10,14 @@ class QuranReaderViewport extends StatelessWidget {
     required this.onToggleNavigation,
     required this.onShowNavigation,
     required this.onPageChanged,
+    this.headerImageFilter,
   });
 
   final PageController pageController;
   final VoidCallback onToggleNavigation;
   final VoidCallback onShowNavigation;
   final ValueChanged<int> onPageChanged;
+  final ColorFilter? headerImageFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +43,7 @@ class QuranReaderViewport extends StatelessWidget {
             itemBuilder: (_, index) => QuranImagePage(
               key: ValueKey<int>(index + 1),
               pageNumber: index + 1,
+              headerImageFilter: headerImageFilter,
             ),
           ),
         );

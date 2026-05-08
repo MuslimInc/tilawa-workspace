@@ -43,7 +43,6 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
         widget.onClearSearch();
       },
       margin: const EdgeInsets.all(16),
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
     );
   }

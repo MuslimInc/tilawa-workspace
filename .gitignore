@@ -54,3 +54,26 @@ pubspec.lock
 /backgroundDownloaderResumeData/
 /coverage/
 
+apks/*
+
+# Custom/Large files to ignore
+*.hprof
+*.db
+*.dill
+*.cache.dill
+test_results.json
+test_results.txt
+test_output.txt
+final_results*.txt
+screenshots/
+/*.png
+/apps/tilawa/*.png
+/packages/quran_image/*.png
+!**/assets/**/*.png
+!**/res/**/*.png
+!**/Assets.xcassets/**/*.png
+apks/
+apps/tilawa/android/app/java_pid35914.hprof
+
+# Golden test failure artifacts (temporary output, not baseline images)
+packages/ui_kit/test/goldens/failures/

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 
+import 'density.dart';
+
 /// Design tokens for the Tilawa UI Kit to avoid magic numbers
 /// and ensure consistency across components.
 @immutable
 class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   const TilawaDesignTokens({
+    required this.density,
     required this.spaceTiny,
     required this.spaceExtraSmall,
     required this.spaceSmall,
@@ -16,6 +19,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.radiusLarge,
     required this.radiusExtraLarge,
     required this.opacitySubtle,
+    required this.opacityShadow,
+    required this.opacityShadowStrong,
     required this.opacityMedium,
     required this.opacityEmphasis,
     required this.opacityGlass,
@@ -29,6 +34,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.iconSizeSmall,
     required this.iconSizeMedium,
     required this.iconSizeLarge,
+    required this.iconSizeLargePlus,
     required this.iconSizeExtraLarge,
     required this.textHeightLoose,
     required this.durationFast,
@@ -51,6 +57,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.playerIgnorePointerThreshold,
     required this.playerAlphaScalingFactor,
   });
+
+  /// The density mode for this token set.
+  final TilawaDensity density;
 
   /// 2.0
   final double spaceTiny;
@@ -82,8 +91,21 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 24.0
   final double radiusExtraLarge;
 
-  /// 0.1
+  /// 0.1 — generic faint tint alpha for surface fills, painter strokes,
+  /// and tinted backgrounds. Do not use as the alpha for `BoxShadow.color`
+  /// — pick [opacityShadow] or [opacityShadowStrong] instead, which are
+  /// calibrated for visible depth on real-device DPIs.
   final double opacitySubtle;
+
+  /// 0.18 — default alpha for `BoxShadow.color` on small/elevated surfaces
+  /// (cards, chips, search fields). Calibrated to remain visible at ~400 ppi
+  /// while staying soft enough not to look like a hard drop shadow.
+  final double opacityShadow;
+
+  /// 0.28 — alpha for `BoxShadow.color` on hero/floating surfaces (glass
+  /// panels, floating bottom nav, raised app bars) where stronger depth
+  /// is desired.
+  final double opacityShadowStrong;
 
   /// 0.3
   final double opacityMedium;
@@ -123,6 +145,9 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
   /// 24.0
   final double iconSizeLarge;
+
+  /// 42.0
+  final double iconSizeLargePlus;
 
   /// 48.0
   final double iconSizeExtraLarge;
@@ -187,59 +212,84 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 2.5
   final double playerAlphaScalingFactor;
 
-  /// Default values for light/dark theme
-  factory TilawaDesignTokens.light() => const TilawaDesignTokens(
-    spaceTiny: 2.0,
-    spaceExtraSmall: 4.0,
-    spaceSmall: 8.0,
-    spaceMedium: 12.0,
-    spaceLarge: 16.0,
-    spaceExtraLarge: 24.0,
-    radiusSmall: 8.0,
-    radiusMedium: 12.0,
-    radiusLarge: 16.0,
-    radiusExtraLarge: 24.0,
-    opacitySubtle: 0.1,
-    opacityMedium: 0.3,
-    opacityEmphasis: 0.7,
-    opacityGlass: 0.8,
-    blurGlass: 12.0,
-    blurShadow: 16.0,
-    shadowOffsetSmall: Offset(0, 2),
-    shadowOffsetMedium: Offset(0, 4),
-    borderWidthThin: 0.5,
-    progressHeight: 3.0,
-    iconSizeExtraSmall: 12.0,
-    iconSizeSmall: 16.0,
-    iconSizeMedium: 20.0,
-    iconSizeLarge: 24.0,
-    iconSizeExtraLarge: 48.0,
-    textHeightLoose: 2.0,
-    durationFast: Duration(milliseconds: 200),
-    durationMedium: Duration(milliseconds: 400),
-    durationSlow: Duration(milliseconds: 600),
-    contentMaxWidthReader: 720,
-    contentMaxWidthForm: 560,
-    contentMaxWidthMedia: 1200,
-    contentMaxWidthSettings: 760,
-    cardCompactWidthThreshold: 180.0,
-    cardCompactHeightThreshold: 155.0,
-    cardTightHeightThreshold: 145.0,
-    playerCollapsedHeight: 80.0,
-    playerDismissThreshold: 80.0,
-    playerMaxDismissOffset: 200.0,
-    playerVelocityThreshold: 500.0,
-    playerDismissVelocityThreshold: 300.0,
-    playerDragSensitivity: 1.5,
-    playerProgressThreshold: 0.5,
-    playerIgnorePointerThreshold: 0.4,
-    playerAlphaScalingFactor: 2.5,
-  );
+  /// Default values for light/dark theme.
+  ///
+  /// [density] controls spacing and sizing. In Phase 0, both [comfortable]
+  /// and [compact] produce identical values. Future phases will implement
+  /// compact-specific value scaling.
+  factory TilawaDesignTokens.light({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) => TilawaDesignTokens._create(density: density);
 
-  factory TilawaDesignTokens.dark() => TilawaDesignTokens.light();
+  factory TilawaDesignTokens.dark({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) => TilawaDesignTokens._create(density: density);
+
+  /// Internal constructor for creating tokens with the given density.
+  ///
+  /// Compact density tightens medium/large spacing and radii so phones
+  /// (typically `TilawaWindowSize.compact`) make better use of vertical
+  /// real-estate without making everything feel cramped. Tiny/extra-small
+  /// spacing is shared across densities — reducing further would compromise
+  /// hit-target margins.
+  factory TilawaDesignTokens._create({required TilawaDensity density}) {
+    final isCompact = density.isCompact;
+    return TilawaDesignTokens(
+      density: density,
+      spaceTiny: 2.0,
+      spaceExtraSmall: 4.0,
+      spaceSmall: 8.0,
+      spaceMedium: isCompact ? 10.0 : 12.0,
+      spaceLarge: isCompact ? 14.0 : 16.0,
+      spaceExtraLarge: isCompact ? 20.0 : 24.0,
+      radiusSmall: 8.0,
+      radiusMedium: 12.0,
+      radiusLarge: isCompact ? 14.0 : 16.0,
+      radiusExtraLarge: isCompact ? 20.0 : 24.0,
+      opacitySubtle: 0.1,
+      opacityShadow: 0.18,
+      opacityShadowStrong: 0.28,
+      opacityMedium: 0.3,
+      opacityEmphasis: 0.7,
+      opacityGlass: 0.8,
+      blurGlass: 12.0,
+      blurShadow: 16.0,
+      shadowOffsetSmall: const Offset(0, 2),
+      shadowOffsetMedium: const Offset(0, 4),
+      borderWidthThin: 0.5,
+      progressHeight: 3.0,
+      iconSizeExtraSmall: 12.0,
+      iconSizeSmall: 16.0,
+      iconSizeMedium: 20.0,
+      iconSizeLarge: 24.0,
+      iconSizeLargePlus: 42.0,
+      iconSizeExtraLarge: 48.0,
+      textHeightLoose: 2.0,
+      durationFast: const Duration(milliseconds: 200),
+      durationMedium: const Duration(milliseconds: 400),
+      durationSlow: const Duration(milliseconds: 600),
+      contentMaxWidthReader: 720,
+      contentMaxWidthForm: 560,
+      contentMaxWidthMedia: 1200,
+      contentMaxWidthSettings: 760,
+      cardCompactWidthThreshold: 180.0,
+      cardCompactHeightThreshold: 155.0,
+      cardTightHeightThreshold: 145.0,
+      playerCollapsedHeight: 80.0,
+      playerDismissThreshold: 80.0,
+      playerMaxDismissOffset: 200.0,
+      playerVelocityThreshold: 500.0,
+      playerDismissVelocityThreshold: 300.0,
+      playerDragSensitivity: 1.5,
+      playerProgressThreshold: 0.5,
+      playerIgnorePointerThreshold: 0.4,
+      playerAlphaScalingFactor: 2.5,
+    );
+  }
 
   @override
   TilawaDesignTokens copyWith({
+    TilawaDensity? density,
     double? spaceTiny,
     double? spaceExtraSmall,
     double? spaceSmall,
@@ -251,6 +301,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? radiusLarge,
     double? radiusExtraLarge,
     double? opacitySubtle,
+    double? opacityShadow,
+    double? opacityShadowStrong,
     double? opacityMedium,
     double? opacityEmphasis,
     double? opacityGlass,
@@ -264,6 +316,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? iconSizeSmall,
     double? iconSizeMedium,
     double? iconSizeLarge,
+    double? iconSizeLargePlus,
     double? iconSizeExtraLarge,
     double? textHeightLoose,
     Duration? durationFast,
@@ -287,6 +340,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? playerAlphaScalingFactor,
   }) {
     return TilawaDesignTokens(
+      density: density ?? this.density,
       spaceTiny: spaceTiny ?? this.spaceTiny,
       spaceExtraSmall: spaceExtraSmall ?? this.spaceExtraSmall,
       spaceSmall: spaceSmall ?? this.spaceSmall,
@@ -298,6 +352,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       radiusLarge: radiusLarge ?? this.radiusLarge,
       radiusExtraLarge: radiusExtraLarge ?? this.radiusExtraLarge,
       opacitySubtle: opacitySubtle ?? this.opacitySubtle,
+      opacityShadow: opacityShadow ?? this.opacityShadow,
+      opacityShadowStrong: opacityShadowStrong ?? this.opacityShadowStrong,
       opacityMedium: opacityMedium ?? this.opacityMedium,
       opacityEmphasis: opacityEmphasis ?? this.opacityEmphasis,
       opacityGlass: opacityGlass ?? this.opacityGlass,
@@ -311,6 +367,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeSmall: iconSizeSmall ?? this.iconSizeSmall,
       iconSizeMedium: iconSizeMedium ?? this.iconSizeMedium,
       iconSizeLarge: iconSizeLarge ?? this.iconSizeLarge,
+      iconSizeLargePlus: iconSizeLargePlus ?? this.iconSizeLargePlus,
       iconSizeExtraLarge: iconSizeExtraLarge ?? this.iconSizeExtraLarge,
       textHeightLoose: textHeightLoose ?? this.textHeightLoose,
       durationFast: durationFast ?? this.durationFast,
@@ -352,7 +409,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   @override
   TilawaDesignTokens lerp(ThemeExtension<TilawaDesignTokens>? other, double t) {
     if (other is! TilawaDesignTokens) return this;
+    // For lerp, preserve the density of 'this' token.
+    // Density-based value interpolation is handled per-property.
     return TilawaDesignTokens(
+      density: density,
       spaceTiny: lerpDouble(spaceTiny, other.spaceTiny, t)!,
       spaceExtraSmall: lerpDouble(spaceExtraSmall, other.spaceExtraSmall, t)!,
       spaceSmall: lerpDouble(spaceSmall, other.spaceSmall, t)!,
@@ -368,6 +428,12 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         t,
       )!,
       opacitySubtle: lerpDouble(opacitySubtle, other.opacitySubtle, t)!,
+      opacityShadow: lerpDouble(opacityShadow, other.opacityShadow, t)!,
+      opacityShadowStrong: lerpDouble(
+        opacityShadowStrong,
+        other.opacityShadowStrong,
+        t,
+      )!,
       opacityMedium: lerpDouble(opacityMedium, other.opacityMedium, t)!,
       opacityEmphasis: lerpDouble(opacityEmphasis, other.opacityEmphasis, t)!,
       opacityGlass: lerpDouble(opacityGlass, other.opacityGlass, t)!,
@@ -393,6 +459,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeSmall: lerpDouble(iconSizeSmall, other.iconSizeSmall, t)!,
       iconSizeMedium: lerpDouble(iconSizeMedium, other.iconSizeMedium, t)!,
       iconSizeLarge: lerpDouble(iconSizeLarge, other.iconSizeLarge, t)!,
+      iconSizeLargePlus: lerpDouble(
+        iconSizeLargePlus,
+        other.iconSizeLargePlus,
+        t,
+      )!,
       iconSizeExtraLarge: lerpDouble(
         iconSizeExtraLarge,
         other.iconSizeExtraLarge,

@@ -10,6 +10,7 @@ class CachedOrRemoteImage extends StatelessWidget {
     required this.fit,
     required this.gaplessPlayback,
     this.cacheWidth,
+    this.colorFilter,
   });
 
   final String? localPath;
@@ -17,24 +18,33 @@ class CachedOrRemoteImage extends StatelessWidget {
   final BoxFit fit;
   final bool gaplessPlayback;
   final int? cacheWidth;
+  final ColorFilter? colorFilter;
 
   @override
   Widget build(BuildContext context) {
     final path = localPath;
+    final Widget image;
+
     if (path != null) {
-      return Image(
+      image = Image(
         image: cachedFileImageProvider(imagePath: path, cacheWidth: cacheWidth),
+        fit: fit,
+        gaplessPlayback: gaplessPlayback,
+        errorBuilder: (_, _, _) => const SizedBox.shrink(),
+      );
+    } else {
+      image = Image.network(
+        remoteUrl,
         fit: fit,
         gaplessPlayback: gaplessPlayback,
         errorBuilder: (_, _, _) => const SizedBox.shrink(),
       );
     }
 
-    return Image.network(
-      remoteUrl,
-      fit: fit,
-      gaplessPlayback: gaplessPlayback,
-      errorBuilder: (_, _, _) => const SizedBox.shrink(),
-    );
+    if (colorFilter != null) {
+      return ColorFiltered(colorFilter: colorFilter!, child: image);
+    }
+
+    return image;
   }
 }

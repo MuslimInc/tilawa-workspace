@@ -59,35 +59,51 @@ class _TasbeehView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: context.canPop() ? const TilawaBackButton() : null,
-        title: Text(context.l10n.tasbeehCategory),
-      ),
-      body: SafeArea(
-        child: BlocBuilder<TasbeehCubit, TasbeehState>(
-          builder: (context, state) {
-            final cubit = context.read<TasbeehCubit>();
-            late final Widget content;
-            switch (state.viewMode) {
-              case TasbeehViewMode.options:
-                content = _TasbeehOptionsView(cubit: cubit);
-              case TasbeehViewMode.create:
-                content = _TasbeehCreateView(cubit: cubit, state: state);
-              case TasbeehViewMode.history:
-                content = _TasbeehHistoryView(cubit: cubit, state: state);
-              case TasbeehViewMode.counting:
-                content = _TasbeehCountingView(cubit: cubit, state: state);
-            }
+    return BlocBuilder<TasbeehCubit, TasbeehState>(
+      builder: (context, state) {
+        final cubit = context.read<TasbeehCubit>();
+        late final Widget content;
+        Widget? bottomActions;
 
-            return GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-              child: content,
-            );
-          },
-        ),
-      ),
+        switch (state.viewMode) {
+          case TasbeehViewMode.options:
+            content = _TasbeehOptionsView(cubit: cubit);
+          case TasbeehViewMode.create:
+            content = _TasbeehCreateView(cubit: cubit, state: state);
+            bottomActions = _TasbeehCreateActions(cubit: cubit, state: state);
+          case TasbeehViewMode.history:
+            content = _TasbeehHistoryView(cubit: cubit, state: state);
+          case TasbeehViewMode.counting:
+            content = _TasbeehCountingView(cubit: cubit, state: state);
+            bottomActions = _TasbeehCountingActions(cubit: cubit, state: state);
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            leading: state.viewMode != TasbeehViewMode.options
+                ? TilawaBackButton(onPressed: cubit.showOptionsView)
+                : context.canPop()
+                ? const TilawaBackButton()
+                : null,
+            title: Text(context.l10n.tasbeehCategory),
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+                    child: content,
+                  ),
+                ),
+                if (bottomActions != null)
+                  _TasbeehBottomActionArea(child: bottomActions),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -184,7 +200,6 @@ class _TasbeehCreateView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final errorText = _resolveTasbeehErrorText(context, state);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -201,43 +216,19 @@ class _TasbeehCreateView extends StatelessWidget {
                   style: theme.textTheme.titleLarge,
                 ),
                 SizedBox(height: tokens.spaceMedium),
-                _TilawaTextInputField(
-                  hint: context.l10n.tasbeehInputHint,
-                  icon: Icons.edit_note_rounded,
+                TilawaTextField(
+                  hintText: context.l10n.tasbeehInputHint,
+                  prefixIcon: Icon(Icons.edit_note_rounded),
                   onChanged: cubit.updateDraftText,
                   maxLength: TasbeehConstants.maxTextLength,
-                  counterText: '',
                 ),
                 SizedBox(height: tokens.spaceSmall),
-                _TilawaTextInputField(
-                  hint: '${TasbeehConstants.defaultTargetCount}',
-                  icon: Icons.flag_rounded,
+                TilawaTextField(
+                  hintText: '${TasbeehConstants.defaultTargetCount}',
+                  prefixIcon: Icon(Icons.flag_rounded),
                   onChanged: cubit.updateDraftTargetText,
                   keyboardType: TextInputType.number,
                 ),
-                SizedBox(height: tokens.spaceMedium),
-                FilledButton(
-                  onPressed:
-                      state.draftText.trim().isEmpty ||
-                          state.draftTargetText.trim().isEmpty
-                      ? null
-                      : cubit.saveDraftDhikr,
-                  child: Text(context.l10n.tasbeehGoToCounting),
-                ),
-                SizedBox(height: tokens.spaceSmall),
-                OutlinedButton(
-                  onPressed: cubit.showOptionsView,
-                  child: Text(context.l10n.tasbeehBackToOptions),
-                ),
-                if (errorText != null) ...[
-                  SizedBox(height: tokens.spaceSmall),
-                  Text(
-                    errorText,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
@@ -263,11 +254,13 @@ class _TasbeehHistoryView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            context.l10n.tasbeehChooseSavedDhikr,
-            style: theme.textTheme.titleLarge,
-          ),
-          SizedBox(height: tokens.spaceSmall),
+          if (state.savedDhikr.isNotEmpty) ...[
+            Text(
+              context.l10n.tasbeehChooseSavedDhikr,
+              style: theme.textTheme.titleLarge,
+            ),
+            SizedBox(height: tokens.spaceSmall),
+          ],
           Expanded(
             child: state.savedDhikr.isEmpty
                 ? Center(
@@ -329,11 +322,6 @@ class _TasbeehHistoryView extends StatelessWidget {
                     },
                   ),
           ),
-          SizedBox(height: tokens.spaceSmall),
-          OutlinedButton(
-            onPressed: cubit.showOptionsView,
-            child: Text(context.l10n.tasbeehBackToOptions),
-          ),
         ],
       ),
     );
@@ -351,7 +339,6 @@ class _TasbeehCountingView extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final selected = state.selectedDhikr;
-    final errorText = _resolveTasbeehErrorText(context, state);
 
     return Padding(
       padding: EdgeInsets.all(tokens.spaceLarge),
@@ -413,99 +400,102 @@ class _TasbeehCountingView extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: tokens.spaceLarge),
-          OutlinedButton(
-            onPressed: selected == null ? null : cubit.resetSelected,
-            child: Text(context.l10n.reset),
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          OutlinedButton(
-            onPressed: cubit.showOptionsView,
-            child: Text(context.l10n.tasbeehBackToOptions),
-          ),
-          if (errorText != null) ...[
-            SizedBox(height: tokens.spaceSmall),
-            Text(
-              errorText,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-            ),
-          ],
         ],
       ),
     );
   }
 }
 
-class _TilawaTextInputField extends StatelessWidget {
-  const _TilawaTextInputField({
-    required this.hint,
-    required this.icon,
-    required this.onChanged,
-    this.keyboardType,
-    this.maxLength,
-    this.counterText,
-  });
+class _TasbeehBottomActionArea extends StatelessWidget {
+  const _TasbeehBottomActionArea({required this.child});
 
-  final String hint;
-  final IconData icon;
-  final ValueChanged<String> onChanged;
-  final TextInputType? keyboardType;
-  final int? maxLength;
-  final String? counterText;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        tokens.spaceLarge,
+        tokens.spaceSmall,
+        tokens.spaceLarge,
+        tokens.spaceLarge,
+      ),
+      child: child,
+    );
+  }
+}
+
+class _TasbeehCreateActions extends StatelessWidget {
+  const _TasbeehCreateActions({required this.cubit, required this.state});
+
+  final TasbeehCubit cubit;
+  final TasbeehState state;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final searchTokens = theme.componentTokens.searchField;
-    final inputRadius = BorderRadius.circular(searchTokens.borderRadius);
+    final tokens = theme.tokens;
+    final errorText = _resolveTasbeehErrorText(context, state);
+    final canSave =
+        state.draftText.trim().isNotEmpty &&
+        state.draftTargetText.trim().isNotEmpty;
 
-    return TextField(
-      onChanged: onChanged,
-      keyboardType: keyboardType,
-      maxLength: maxLength,
-      onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-      decoration: InputDecoration(
-        hintText: hint,
-        counterText: counterText,
-        isDense: true,
-        filled: true,
-        fillColor: theme.colorScheme.surfaceContainerHighest,
-        contentPadding: searchTokens.contentPadding,
-        prefixIcon: Icon(
-          icon,
-          size: searchTokens.iconSize,
-          color: theme.colorScheme.onSurfaceVariant.withValues(
-            alpha: searchTokens.iconOpacity,
-          ),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: inputRadius,
-          borderSide: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(
-              alpha: searchTokens.unfocusedBorderOpacity,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (errorText != null) ...[
+          Text(
+            errorText,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
             ),
           ),
+          SizedBox(height: tokens.spaceSmall),
+        ],
+        TilawaButton(
+          text: context.l10n.tasbeehGoToCounting,
+          onPressed: canSave ? cubit.saveDraftDhikr : null,
+          variant: TilawaButtonVariant.primary,
+          isFullWidth: true,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: inputRadius,
-          borderSide: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(
-              alpha: searchTokens.unfocusedBorderOpacity,
+      ],
+    );
+  }
+}
+
+class _TasbeehCountingActions extends StatelessWidget {
+  const _TasbeehCountingActions({required this.cubit, required this.state});
+
+  final TasbeehCubit cubit;
+  final TasbeehState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final errorText = _resolveTasbeehErrorText(context, state);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (errorText != null) ...[
+          Text(
+            errorText,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.error,
             ),
           ),
+          SizedBox(height: tokens.spaceSmall),
+        ],
+        OutlinedButton(
+          onPressed: state.selectedDhikr == null ? null : cubit.resetSelected,
+          child: Text(context.l10n.reset),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: inputRadius,
-          borderSide: BorderSide(
-            color: theme.primaryColor.withValues(
-              alpha: searchTokens.focusedBorderOpacity,
-            ),
-          ),
-        ),
-      ),
+      ],
     );
   }
 }

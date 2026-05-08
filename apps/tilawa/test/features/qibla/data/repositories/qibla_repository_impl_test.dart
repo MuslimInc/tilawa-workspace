@@ -34,7 +34,7 @@ void main() {
       'should return stream of QiblaDirectionEntity mapped from QiblaDirection',
       () async {
         // Arrange
-        const qiblaDirection = QiblaDirection(-10, 370, 725);
+        const qiblaDirection = QiblaDirection(-10, 370, 725, accuracy: 45);
         when(
           mockDataSource.qiblaStream,
         ).thenAnswer((_) => timedQiblaStream([qiblaDirection]));
@@ -47,8 +47,14 @@ void main() {
         // Assert
         expect(
           result,
-          const QiblaDirectionEntity(qibla: 350, direction: 10, offset: 5),
+          const QiblaDirectionEntity(
+            qibla: 350,
+            direction: 10,
+            offset: 5,
+            accuracy: 45,
+          ),
         );
+        expect(result.hasPoorCompassAccuracy, isTrue);
       },
     );
   });
@@ -203,5 +209,70 @@ void main() {
         expect(emissions[1].qibla, closeTo(1.2, 0.0001));
       },
     );
+
+    test('emits when compass accuracy changes from good to poor', () async {
+      // Arrange
+      const direction1 = QiblaDirection(100, 200, 300, accuracy: 15);
+      const direction2 = QiblaDirection(100.1, 200.1, 300.1, accuracy: 45);
+
+      when(
+        mockDataSource.qiblaStream,
+      ).thenAnswer((_) => timedQiblaStream([direction1, direction2]));
+
+      // Act
+      final List<QiblaDirectionEntity> emissions = await repository
+          .getQiblaDirection()
+          .toList();
+
+      // Assert
+      expect(emissions.length, 2);
+      expect(emissions[0].hasPoorCompassAccuracy, isFalse);
+      expect(emissions[1].hasPoorCompassAccuracy, isTrue);
+    });
+
+    test(
+      'filters isolated heading spike without blocking nearby updates',
+      () async {
+        // Arrange
+        const direction1 = QiblaDirection(276.9, 52.8, 135.9);
+        const spike = QiblaDirection(224.1, 0.0, 135.9);
+        const direction2 = QiblaDirection(275.5, 51.4, 135.9);
+
+        when(
+          mockDataSource.qiblaStream,
+        ).thenAnswer((_) => timedQiblaStream([direction1, spike, direction2]));
+
+        // Act
+        final List<QiblaDirectionEntity> emissions = await repository
+            .getQiblaDirection()
+            .toList();
+
+        // Assert
+        expect(emissions.length, 2);
+        expect(emissions[0].direction, closeTo(52.8, 0.0001));
+        expect(emissions[1].direction, closeTo(51.4, 0.0001));
+      },
+    );
+
+    test('emits large heading jump after consecutive confirmation', () async {
+      // Arrange
+      const direction1 = QiblaDirection(276.9, 52.8, 135.9);
+      const jump1 = QiblaDirection(224.1, 0.0, 135.9);
+      const jump2 = QiblaDirection(225.1, 1.0, 135.9);
+
+      when(
+        mockDataSource.qiblaStream,
+      ).thenAnswer((_) => timedQiblaStream([direction1, jump1, jump2]));
+
+      // Act
+      final List<QiblaDirectionEntity> emissions = await repository
+          .getQiblaDirection()
+          .toList();
+
+      // Assert
+      expect(emissions.length, 2);
+      expect(emissions[0].direction, closeTo(52.8, 0.0001));
+      expect(emissions[1].direction, closeTo(1.0, 0.0001));
+    });
   });
 }

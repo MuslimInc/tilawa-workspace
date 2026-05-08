@@ -5,8 +5,14 @@ import 'tilawa_ui_kit.dart';
 
 PreviewThemeData organismsPreviewTheme() {
   return PreviewThemeData(
-    materialLight: AppTheme.getLightTheme(primaryColor: AppColors.primaryCyan),
-    materialDark: AppTheme.getDarkTheme(primaryColor: AppColors.primaryCyan),
+    materialLight: AppTheme.getLightTheme(
+      primaryColor: AppColors.primaryCyan,
+      isDefaultPreset: true,
+    ),
+    materialDark: AppTheme.getDarkTheme(
+      primaryColor: AppColors.primaryCyan,
+      isDefaultPreset: true,
+    ),
   );
 }
 
@@ -139,6 +145,38 @@ Widget previewTilawaSettingsGroup() {
             icon: Icons.notifications_outlined,
             title: 'Notifications',
             onTap: () {},
+            showDivider: false,
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+@Preview(
+  name: 'TilawaSettingsGroup (dark)',
+  group: 'Organisms',
+  theme: organismsPreviewTheme,
+)
+Widget previewTilawaSettingsGroupDark() {
+  return Scaffold(
+    backgroundColor: Colors.black,
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: TilawaSettingsGroup(
+        title: 'Preferences',
+        children: [
+          TilawaSettingsTile(
+            icon: Icons.language,
+            title: 'Language',
+            subtitle: 'English',
+            onTap: () {},
+          ),
+          TilawaSettingsSwitchTile(
+            icon: Icons.dark_mode_outlined,
+            title: 'Dark mode',
+            value: false,
+            onChanged: (_) {},
             showDivider: false,
           ),
         ],

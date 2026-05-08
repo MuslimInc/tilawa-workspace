@@ -87,7 +87,7 @@ Validated points:
   - `lib/core/bootstrap/app_startup.dart:258-262`
 - The audio notification channel ID is still the example value:
   - `lib/core/bootstrap/app_startup.dart:554-560`
-- `BottomPlayerWidget` does call `setState()` from animation listeners every frame:
+- `QuranPlayerWidget` does call `setState()` from animation listeners every frame:
   - `lib/shared/widgets/bottom_player_widget.dart:68-84`
 
 Incorrect or not validated:

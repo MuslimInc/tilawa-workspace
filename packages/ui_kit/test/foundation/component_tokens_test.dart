@@ -202,6 +202,7 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaSearchFieldTokens.defaults();
       expect(tokens.height, kMinInteractiveDimension);
+      expect(tokens.backgroundColor, isA<Color>());
       expect(tokens.borderRadius, 16.0);
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
       expect(tokens.iconSize, 18.0);
@@ -214,18 +215,34 @@ void main() {
       final original = TilawaSearchFieldTokens.defaults();
       final updated = original.copyWith(
         height: 52.0,
+        backgroundColor: const Color(0xFFE8EFE9),
         borderRadius: 20.0,
         focusedBorderOpacity: 0.3,
         shadowOffset: const Offset(0, 6),
       );
       expect(updated.height, 52.0);
+      expect(updated.backgroundColor, const Color(0xFFE8EFE9));
       expect(updated.focusedBorderOpacity, 0.3);
       expect(updated.shadowOffset, const Offset(0, 6));
+    });
+
+    test('fromColorScheme derives theme-aware background color', () {
+      const scheme = ColorScheme.light(
+        surface: Color(0xFFFCFAF5),
+        primaryContainer: Color(0xFFE3D4E9),
+      );
+      final tokens = TilawaSearchFieldTokens.fromColorScheme(scheme);
+
+      expect(
+        tokens.backgroundColor,
+        Color.lerp(scheme.surface, scheme.primaryContainer, 0.42),
+      );
     });
 
     test('lerp interpolates all numeric values and EdgeInsets', () {
       const first = TilawaSearchFieldTokens(
         height: 48.0,
+        backgroundColor: Color(0xFFF1EFE8),
         borderRadius: 14.0,
         contentPadding: EdgeInsets.symmetric(vertical: 10),
         iconSize: 16.0,
@@ -239,6 +256,7 @@ void main() {
       );
       const second = TilawaSearchFieldTokens(
         height: 56.0,
+        backgroundColor: Color(0xFFE3D4E9),
         borderRadius: 18.0,
         contentPadding: EdgeInsets.symmetric(vertical: 14),
         iconSize: 20.0,
@@ -252,6 +270,10 @@ void main() {
       );
       final result = TilawaSearchFieldTokens.lerp(first, second, 0.5);
       expect(result.height, closeTo(52.0, 0.01));
+      expect(
+        result.backgroundColor,
+        Color.lerp(first.backgroundColor, second.backgroundColor, 0.5),
+      );
       expect(result.shadowBlur, closeTo(12.0, 0.01));
       expect(result.focusedBorderOpacity, closeTo(0.285, 0.01));
     });
@@ -447,15 +469,118 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.compactBottomNavBarBaseHeight, 70.0);
+      expect(tokens.compactBottomNavBarBaseHeight, 55.0);
       expect(tokens.bottomNavHorizontalMargin, 16.0);
       expect(tokens.navButtonMinHeight, 64.0);
+      expect(tokens.bottomNavBackgroundColor, isA<Color>());
+      expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());
+    });
+
+    test(
+      'fromColorScheme derives subtle primary-tinted bottom nav background',
+      () {
+        const scheme = ColorScheme.light(
+          primary: Color(0xFF006A60),
+          primaryContainer: Color(0xFFD8F0EC),
+          surfaceContainerHigh: Color(0xFFE2DBC7),
+        );
+        final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
+
+        expect(
+          tokens.bottomNavBackgroundColor,
+          Color.lerp(
+            scheme.surfaceContainerHigh,
+            scheme.primaryContainer,
+            0.72,
+          ),
+        );
+        expect(
+          tokens.navButtonSelectedBackgroundColor,
+          Color.alphaBlend(
+            scheme.primary.withValues(alpha: 0.08),
+            Color.lerp(
+              tokens.bottomNavBackgroundColor,
+              scheme.primaryContainer,
+              0.70,
+            )!,
+          ),
+        );
+      },
+    );
+
+    test(
+      'fromColorScheme shifts purple away from the warm neutral surface',
+      () {
+        const scheme = ColorScheme.light(
+          primary: Color(0xFF7A5C89),
+          primaryContainer: Color(0xFFE3D4E9),
+          surfaceContainerHigh: Color(0xFFE2DBC7),
+        );
+        final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
+
+        expect(
+          tokens.bottomNavBackgroundColor,
+          Color.lerp(
+            scheme.surfaceContainerHigh,
+            scheme.primaryContainer,
+            0.72,
+          ),
+        );
+        expect(
+          tokens.bottomNavBackgroundColor,
+          isNot(equals(scheme.surfaceContainerHigh)),
+        );
+        expect(
+          tokens.navButtonSelectedBackgroundColor,
+          Color.alphaBlend(
+            scheme.primary.withValues(alpha: 0.08),
+            Color.lerp(
+              tokens.bottomNavBackgroundColor,
+              scheme.primaryContainer,
+              0.70,
+            )!,
+          ),
+        );
+      },
+    );
+
+    test('fromColorScheme uses a calmer dark-mode container blend', () {
+      const scheme = ColorScheme.dark(
+        primary: Color(0xFF70C8BD),
+        primaryContainer: Color(0xFF143E39),
+        surfaceContainerHigh: Color(0xFF2A3A35),
+      );
+      final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
+
+      expect(
+        tokens.bottomNavBackgroundColor,
+        Color.lerp(scheme.surfaceContainerHigh, scheme.primaryContainer, 0.42),
+      );
+      expect(
+        tokens.navButtonSelectedBackgroundColor,
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.10),
+          Color.lerp(
+            tokens.bottomNavBackgroundColor,
+            scheme.primaryContainer,
+            0.56,
+          )!,
+        ),
+      );
     });
 
     test('copyWith updates compact bottom nav bar base height', () {
       final original = TilawaAdaptiveShellTokens.defaults();
-      final updated = original.copyWith(compactBottomNavBarBaseHeight: 92.0);
+      const backgroundColor = Color(0xFFEEE5D2);
+      const selectedBackgroundColor = Color(0xFFD8EFEA);
+      final updated = original.copyWith(
+        compactBottomNavBarBaseHeight: 92.0,
+        bottomNavBackgroundColor: backgroundColor,
+        navButtonSelectedBackgroundColor: selectedBackgroundColor,
+      );
       expect(updated.compactBottomNavBarBaseHeight, 92.0);
+      expect(updated.bottomNavBackgroundColor, backgroundColor);
+      expect(updated.navButtonSelectedBackgroundColor, selectedBackgroundColor);
       expect(updated.bottomNavRadius, original.bottomNavRadius);
     });
 
@@ -468,6 +593,10 @@ void main() {
         bottomNavInnerRadius: 24.0,
         bottomNavBorderWidth: 1.0,
         bottomNavItemGap: 4.0,
+        bottomNavBackgroundColor: Color(0xFFE2DBC7),
+        bottomNavShadowOpacity: 0.12,
+        bottomNavShadowBlur: 18.0,
+        bottomNavShadowOffset: Offset(0, 6),
         sideRailRadius: 16.0,
         sideRailShadowOpacity: 0.05,
         sideRailShadowBlur: 12.0,
@@ -478,6 +607,7 @@ void main() {
         navButtonIconSize: 22.0,
         navButtonSelectedCenterScale: 1.1,
         navButtonUnselectedScale: 0.95,
+        navButtonSelectedBackgroundColor: Color(0xFFD7E4DC),
         navButtonSelectedBackgroundOpacity: 0.2,
         navButtonSelectedCenterOpacity: 0.25,
         navButtonLabelFontSize: 10.0,
@@ -492,6 +622,10 @@ void main() {
         bottomNavInnerRadius: 28.0,
         bottomNavBorderWidth: 2.0,
         bottomNavItemGap: 6.0,
+        bottomNavBackgroundColor: Color(0xFFD8CDB0),
+        bottomNavShadowOpacity: 0.18,
+        bottomNavShadowBlur: 24.0,
+        bottomNavShadowOffset: Offset(0, 8),
         sideRailRadius: 20.0,
         sideRailShadowOpacity: 0.08,
         sideRailShadowBlur: 16.0,
@@ -502,6 +636,7 @@ void main() {
         navButtonIconSize: 24.0,
         navButtonSelectedCenterScale: 1.2,
         navButtonUnselectedScale: 1.0,
+        navButtonSelectedBackgroundColor: Color(0xFFC0D7CB),
         navButtonSelectedBackgroundOpacity: 0.25,
         navButtonSelectedCenterOpacity: 0.3,
         navButtonLabelFontSize: 11.0,
@@ -513,6 +648,22 @@ void main() {
       expect(result.compactBottomNavBarBaseHeight, closeTo(92.0, 0.01));
       expect(result.bottomNavHorizontalMargin, closeTo(18.0, 0.01));
       expect(result.navButtonIconSize, closeTo(23.0, 0.01));
+      expect(
+        result.bottomNavBackgroundColor,
+        Color.lerp(
+          first.bottomNavBackgroundColor,
+          second.bottomNavBackgroundColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.navButtonSelectedBackgroundColor,
+        Color.lerp(
+          first.navButtonSelectedBackgroundColor,
+          second.navButtonSelectedBackgroundColor,
+          0.5,
+        ),
+      );
     });
   });
 

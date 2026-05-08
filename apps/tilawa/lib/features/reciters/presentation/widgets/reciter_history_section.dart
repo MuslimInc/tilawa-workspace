@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Compact horizontal carousel of recently listened surahs for
 /// quick resume playback. Uses chip-style cards to minimize
@@ -22,35 +23,40 @@ class ReciterHistorySection extends StatelessWidget {
 
     final displayList = historyList.take(5).toList();
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Row(
             children: [
-              Icon(Icons.history_rounded, size: 16, color: theme.primaryColor),
-              SizedBox(width: 6),
+              Icon(
+                Icons.history_rounded,
+                size: tokens.iconSizeMedium,
+                color: colorScheme.primary,
+              ),
+              SizedBox(width: tokens.spaceSmall),
               Text(
                 context.l10n.continueListening,
-                style: TextStyle(
+                style: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                  color: theme.textTheme.bodyLarge?.color,
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: tokens.spaceSmall),
         SizedBox(
           height: 40,
           child: ListView.separated(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
             scrollDirection: Axis.horizontal,
             itemCount: displayList.length,
-            separatorBuilder: (_, _) => SizedBox(width: 8),
+            separatorBuilder: (_, _) => SizedBox(width: tokens.spaceSmall),
             itemBuilder: (context, index) {
               final history = displayList[index];
               return _HistoryChip(
@@ -79,61 +85,75 @@ class _HistoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final chipTokens = theme.componentTokens.chip;
     final bool isComplete = history.progress >= 1.0;
     final int percent = (history.progress * 100).clamp(0, 100).toInt();
-    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final String displayName = isArabic
+    final String displayName = context.isArabic
         ? history.surahName
         : history.surahNameEn;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: isComplete
-              ? theme.primaryColor.withValues(alpha: 0.08)
-              : theme.cardColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isComplete
-                ? theme.primaryColor.withValues(alpha: 0.3)
-                : theme.dividerColor.withValues(alpha: 0.3),
+    final BorderRadius borderRadius = .circular(chipTokens.pillRadius);
+
+    return Material(
+      color: isComplete
+          ? colorScheme.primaryContainer
+          : colorScheme.surfaceContainerLow,
+      borderRadius: borderRadius,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: borderRadius,
+        child: Container(
+          padding: .symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceSmall,
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isComplete
-                  ? Icons.check_circle_rounded
-                  : Icons.play_circle_fill_rounded,
-              color: theme.primaryColor,
-              size: 18,
+          decoration: BoxDecoration(
+            borderRadius: borderRadius,
+            border: .all(
+              color: isComplete
+                  ? colorScheme.primary.withValues(alpha: 0.34)
+                  : colorScheme.outlineVariant.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+              width: chipTokens.borderWidth,
             ),
-            SizedBox(width: 6),
-            Text(
-              displayName,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
+          ),
+          child: Row(
+            mainAxisSize: .min,
+            children: [
+              Icon(
+                isComplete
+                    ? Icons.check_circle_rounded
+                    : Icons.play_circle_fill_rounded,
                 color: isComplete
-                    ? theme.primaryColor
-                    : theme.textTheme.bodyLarge?.color,
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.primary,
+                size: tokens.iconSizeMedium,
               ),
-            ),
-            if (!isComplete && percent >= 5) ...[
-              SizedBox(width: 6),
+              SizedBox(width: tokens.spaceSmall),
               Text(
-                '$percent%',
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.w500,
-                  color: theme.primaryColor.withValues(alpha: 0.7),
+                displayName,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isComplete
+                      ? colorScheme.onPrimaryContainer
+                      : colorScheme.onSurface,
                 ),
               ),
+              if (!isComplete && percent >= 5) ...[
+                SizedBox(width: tokens.spaceSmall),
+                Text(
+                  '$percent%',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: .w600,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

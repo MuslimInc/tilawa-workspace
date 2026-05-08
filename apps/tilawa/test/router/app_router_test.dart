@@ -42,7 +42,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.error), findsOneWidget);
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
       expect(find.textContaining('/not-found'), findsOneWidget);
       expect(find.byType(ElevatedButton), findsOneWidget);
     });
@@ -58,13 +58,17 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp.router(
+          // InkSparkle (the default Material 3 splash) loads a shader asset
+          // that is not available in the widget-test asset bundle. Use the
+          // simpler InkRipple to avoid `shaders/ink_sparkle.frag not found`.
+          theme: ThemeData(splashFactory: InkRipple.splashFactory),
           routerConfig: router,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
         ),
       );
 
-      expect(find.byIcon(Icons.error), findsOneWidget);
+      expect(find.byIcon(Icons.error_outline_rounded), findsOneWidget);
 
       // Tap Go Home button (line 27)
       await tester.tap(find.byType(ElevatedButton));

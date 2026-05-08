@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:meta/meta.dart';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -133,9 +135,23 @@ class PrayerAdhanNotificationService
       );
       _dispatcher.registerPayloadHandler(
         serviceId: 'prayer_notifications',
-        matcher: _isPrayerPayload,
+        matcher: isPrayerPayload,
         handler: handleNotificationResponse,
       );
+
+      // Handle native notification taps (from AdhanPlaybackService)
+      _adhanPlayer.onNotificationTapped.listen((payload) {
+        logger.d(
+          '${PrayerNotificationConfig.logTag} FLUTTER_TAP_PAYLOAD_RECEIVED source=native_method_channel',
+        );
+        handleNotificationResponse(
+          NotificationResponse(
+            notificationResponseType:
+                NotificationResponseType.selectedNotification,
+            payload: payload,
+          ),
+        );
+      });
 
       if (Platform.isAndroid) {
         await _createAndroidChannels();
@@ -198,6 +214,15 @@ class PrayerAdhanNotificationService
         playSound: true,
       ),
     );
+    await androidPlugin.createNotificationChannel(
+      AndroidNotificationChannel(
+        PrayerNotificationConfig.silentAdhanChannelId,
+        l10n.prayerNotificationsSilentAdhanChannelName,
+        description: l10n.prayerNotificationsSilentAdhanChannelDescription,
+        importance: Importance.high,
+        playSound: false,
+      ),
+    );
     await _prefs.setInt(
       PrayerNotificationConfig.adhanChannelVersionKey,
       PrayerNotificationConfig.adhanChannelVersion,
@@ -238,9 +263,16 @@ class PrayerAdhanNotificationService
       final bool hasNotificationPermission =
           await _notificationPermissionService.isPermissionGranted();
       if (!hasNotificationPermission) {
+        await cancelAllPrayerNotifications();
         await _clearDedupState();
+        await _analytics.logEvent(
+          'permission_revoked_cleanup_completed',
+          parameters: <String, Object>{
+            'reason': 'notification_permission_denied',
+          },
+        );
         logger.w(
-          '${PrayerNotificationConfig.logTag} Notification permission denied — scheduling suppressed',
+          '${PrayerNotificationConfig.logTag} Notification permission denied — scheduling suppressed and existing cancelled',
         );
         return;
       }
@@ -287,6 +319,9 @@ class PrayerAdhanNotificationService
           : PrayerNotificationConfig.scheduleDaysAhead;
 
       int scheduled = 0;
+      DateTime? earliestScheduledTarget;
+      DateTime? latestScheduledTarget;
+      final List<PendingAdhanAlarm> pendingAdhans = <PendingAdhanAlarm>[];
       for (int dayOffset = 0; dayOffset < dayCount; dayOffset++) {
         final PrayerTimeEntity dayTimes = prayerTimesForDays[dayOffset];
 
@@ -319,73 +354,136 @@ class PrayerAdhanNotificationService
             dayOffset,
             prayer,
           );
+          final bool useAdhan = prayerSettings.playAdhan;
           final String payload = jsonEncode({
             PrayerNotificationConfig.payloadTypeKey:
                 PrayerNotificationConfig.payloadTypeValue,
             PrayerNotificationConfig.payloadPrayerKey: prayer.name,
+            'prayer_name': prayer.name,
+            'prayer_key': prayer.name.toLowerCase(),
             PrayerNotificationConfig.payloadDateKey: _dateKey(dayTimes.date),
+            'scheduled_time_ms': targetTime.millisecondsSinceEpoch,
+            'adhan_enabled': useAdhan,
+            'notification_id': notificationId,
           });
 
-          final bool useAdhan = prayerSettings.playAdhan;
-          final String channelUsed = useAdhan
-              ? PrayerNotificationConfig.adhanChannelId
-              : PrayerNotificationConfig.channelId;
           logger.d(
             '${PrayerNotificationConfig.logTag} [SCHEDULE] ${prayer.name} '
             'day+$dayOffset id=$notificationId at $tzTarget | '
-            'channel=$channelUsed | adhan=$useAdhan | '
+            'channel=${useAdhan ? PrayerNotificationConfig.adhanChannelId : PrayerNotificationConfig.channelId} | adhan=$useAdhan | '
             'mode=${canScheduleExact ? 'exact' : 'inexact'}',
           );
-
-          try {
-            await _notifications.zonedSchedule(
-              id: notificationId,
-              title: _titleFor(l10n, prayer),
-              body: _bodyFor(l10n, prayer),
-              scheduledDate: tzTarget,
-              notificationDetails: _detailsFor(l10n, useAdhan),
-              androidScheduleMode: scheduleMode,
-              matchDateTimeComponents: null,
-              payload: payload,
-            );
-            scheduled++;
-            logger.d(
-              '${PrayerNotificationConfig.logTag} [SCHEDULE OK] ${prayer.name} '
-              '${_dateKey(dayTimes.date)} scheduled successfully '
-              '(${canScheduleExact ? 'exact' : 'inexact'} | adhan=$useAdhan)',
-            );
-          } catch (e) {
-            logger.e(
-              '${PrayerNotificationConfig.logTag} [SCHEDULE FAIL] ${prayer.name} '
-              '${_dateKey(dayTimes.date)} id=$notificationId: $e',
-            );
-          }
-
+          bool adhanHandledNatively = false;
           logger.d(
             '${PrayerNotificationConfig.logTag} [ADHAN CHECK] ${prayer.name} '
             'playAdhan=$useAdhan | adhanPlayer.isSupported=${_adhanPlayer.isSupported}',
           );
           if (useAdhan && _adhanPlayer.isSupported) {
             try {
-              await _adhanPlayer.scheduleAdhan(
+              adhanHandledNatively = await _adhanPlayer.scheduleAdhan(
                 id: notificationId,
                 scheduledTime: targetTime,
                 prayerName: prayer.name,
+                prayerKey: prayer.name.toLowerCase(),
               );
-              logger.d(
-                '${PrayerNotificationConfig.logTag} [ADHAN SCHEDULED] ${prayer.name} via adhanPlayer',
-              );
+              if (adhanHandledNatively) {
+                pendingAdhans.add(
+                  PendingAdhanAlarm(
+                    id: notificationId,
+                    prayerName: prayer.name,
+                    prayerKey: prayer.name.toLowerCase(),
+                    triggerAt: targetTime,
+                  ),
+                );
+                logger.d(
+                  '${PrayerNotificationConfig.logTag} [ADHAN SCHEDULED] ${prayer.name} via adhanPlayer',
+                );
+              }
             } catch (e) {
               logger.e(
                 '${PrayerNotificationConfig.logTag} [ADHAN FAIL] adhanPlayer.scheduleAdhan failed for ${prayer.name}: $e',
               );
             }
-          } else if (useAdhan) {
+          }
+
+          // XOR Routing Logic:
+          // 1. We first attempt to schedule the Adhan via the Native player (Android only).
+          // 2. If the native player succeeds (adhanHandledNatively == true), it will
+          //    manage its own notification and playback in a foreground service.
+          // 3. To avoid duplicate notifications, we SKIP the Flutter Local Notification (FLN).
+          // 4. If native scheduling is disabled (user setting) or fails (fallback),
+          //    we schedule a standard FLN notification.
+          if (!adhanHandledNatively) {
+            try {
+              await _notifications.zonedSchedule(
+                id: notificationId,
+                title: _titleFor(l10n, prayer),
+                body: _bodyFor(l10n, prayer),
+                scheduledDate: tzTarget,
+                notificationDetails: _detailsFor(
+                  l10n,
+                  useAdhan,
+                  adhanHandledNatively: adhanHandledNatively,
+                ),
+                androidScheduleMode: scheduleMode,
+                matchDateTimeComponents: null,
+                payload: payload,
+              );
+              scheduled++;
+              earliestScheduledTarget =
+                  earliestScheduledTarget == null ||
+                      targetTime.isBefore(earliestScheduledTarget)
+                  ? targetTime
+                  : earliestScheduledTarget;
+              latestScheduledTarget =
+                  latestScheduledTarget == null ||
+                      targetTime.isAfter(latestScheduledTarget)
+                  ? targetTime
+                  : latestScheduledTarget;
+              logger.d(
+                '${PrayerNotificationConfig.logTag} [SCHEDULE OK] ${prayer.name} '
+                '${_dateKey(dayTimes.date)} scheduled successfully '
+                '(${canScheduleExact ? 'exact' : 'inexact'} | '
+                'adhan=$useAdhan | native=$adhanHandledNatively)',
+              );
+            } catch (e) {
+              logger.e(
+                '${PrayerNotificationConfig.logTag} [SCHEDULE FAIL] ${prayer.name} '
+                '${_dateKey(dayTimes.date)} id=$notificationId: $e',
+              );
+            }
+          } else {
+            // Native handled it, just update counters for logging
+            scheduled++;
+            earliestScheduledTarget =
+                earliestScheduledTarget == null ||
+                    targetTime.isBefore(earliestScheduledTarget)
+                ? targetTime
+                : earliestScheduledTarget;
+            latestScheduledTarget =
+                latestScheduledTarget == null ||
+                    targetTime.isAfter(latestScheduledTarget)
+                ? targetTime
+                : latestScheduledTarget;
+          }
+
+          if (useAdhan && !adhanHandledNatively) {
+            await _analytics.logEvent(
+              'adhan_fallback_used',
+              parameters: <String, Object>{
+                'prayer_name': prayer.name,
+                'notification_id': notificationId,
+                'reason': _adhanPlayer.isSupported
+                    ? 'native_schedule_failed'
+                    : 'native_not_supported',
+                'exact_alarm_permission_granted': canScheduleExact,
+              },
+            );
             logger.d(
-              '${PrayerNotificationConfig.logTag} [ADHAN] ${prayer.name}: adhanPlayer not supported — '
+              '${PrayerNotificationConfig.logTag} [ADHAN] ${prayer.name}: adhanPlayer not supported or failed — '
               'relying on notification channel sound (${PrayerNotificationConfig.adhanSoundRawName})',
             );
-          } else {
+          } else if (!useAdhan) {
             logger.d(
               '${PrayerNotificationConfig.logTag} [ADHAN] ${prayer.name}: adhan disabled — '
               'default notification sound will play',
@@ -406,14 +504,32 @@ class PrayerAdhanNotificationService
           PrayerNotificationConfig.settingsFingerprintKey,
           currentFingerprint,
         );
+        await _persistScheduleSnapshot(
+          scheduledCount: scheduled,
+          windowStart: earliestScheduledTarget,
+          windowEnd: latestScheduledTarget,
+        );
       } catch (e) {
         logger.w(
-          '${PrayerNotificationConfig.logTag} Failed to persist dedup state: $e',
+          '${PrayerNotificationConfig.logTag} Failed to persist schedule state: $e',
+        );
+      }
+
+      // Persist the next-window adhan tuples so the platform boot receiver
+      // can re-arm AlarmManager entries after a reboot without bringing up
+      // a Dart isolate. Best-effort — failures here only weaken the post-
+      // boot path; the next app launch's full reschedule still recovers.
+      try {
+        await _adhanPlayer.persistPendingAlarms(pendingAdhans);
+      } catch (e) {
+        logger.w(
+          '${PrayerNotificationConfig.logTag} persistPendingAlarms failed: $e',
         );
       }
 
       logger.d(
-        '${PrayerNotificationConfig.logTag} Scheduled $scheduled prayer notifications',
+        '${PrayerNotificationConfig.logTag} Scheduled $scheduled prayer notifications '
+        '(${pendingAdhans.length} adhan alarms persisted for boot recovery)',
       );
     } catch (e, stackTrace) {
       logger.e(
@@ -448,6 +564,10 @@ class PrayerAdhanNotificationService
           await _notifications.cancel(
             id: PrayerNotificationConfig.dynamicId(dayOffset, prayer),
           );
+          await _adhanPlayer.cancelAdhan(
+            PrayerNotificationConfig.dynamicId(dayOffset, prayer),
+            prayerName: prayer.name,
+          );
           cancelled++;
         }
       }
@@ -458,6 +578,7 @@ class PrayerAdhanNotificationService
           '${PrayerNotificationConfig.logTag} Adhan player cancelAll failed: $e',
         );
       }
+      await _clearScheduleSnapshot();
       logger.d(
         '${PrayerNotificationConfig.logTag} Cancelled $cancelled dynamic alarm IDs',
       );
@@ -522,7 +643,12 @@ class PrayerAdhanNotificationService
         PrayerNotificationConfig.payloadTypeKey:
             PrayerNotificationConfig.payloadTypeValue,
         PrayerNotificationConfig.payloadPrayerKey: prayer.name,
+        'prayer_name': prayer.name,
+        'prayer_key': prayer.name.toLowerCase(),
         PrayerNotificationConfig.payloadDateKey: _todayDateKey(),
+        'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+        'adhan_enabled': playAdhan,
+        'notification_id': testId,
       });
       final String channelUsed = playAdhan
           ? PrayerNotificationConfig.adhanChannelId
@@ -531,16 +657,37 @@ class PrayerAdhanNotificationService
           ? PrayerNotificationConfig.adhanSoundRawName
           : 'default';
       final AppLocalizations l10n = await _localizations();
+
+      bool adhanHandledNatively = false;
+      if (playAdhan && _adhanPlayer.isSupported) {
+        try {
+          adhanHandledNatively = await _adhanPlayer.scheduleAdhan(
+            id: testId,
+            scheduledTime: DateTime.now().add(const Duration(seconds: 1)),
+            prayerName: prayer.name,
+            prayerKey: prayer.name.toLowerCase(),
+          );
+        } catch (e) {
+          logger.w(
+            '${PrayerNotificationConfig.logTag} [TEST] Native adhan schedule failed: $e',
+          );
+        }
+      }
+
       logger.d(
         '${PrayerNotificationConfig.logTag} [TEST] Firing test notification | '
-        'prayer=${prayer.name} | playAdhan=$playAdhan | '
-        'channel=$channelUsed | sound=$soundFile | id=$testId',
+        'prayer=${prayer.name} | playAdhan=$playAdhan | native=$adhanHandledNatively | '
+        'id=$testId',
       );
       await _notifications.show(
         id: testId,
         title: _titleFor(l10n, prayer),
         body: _bodyFor(l10n, prayer),
-        notificationDetails: _detailsFor(l10n, playAdhan),
+        notificationDetails: _detailsFor(
+          l10n,
+          playAdhan,
+          adhanHandledNatively: adhanHandledNatively,
+        ),
         payload: payload,
       );
       logger.d(
@@ -565,44 +712,103 @@ class PrayerAdhanNotificationService
     }
   }
 
-  Future<void> handleNotificationResponse(NotificationResponse response) async {
+  @override
+  Future<void> debugScheduleTestAdhan() async {
+    const String tag = '[AdhanManualTest]';
     try {
-      final String? payload = response.payload;
-      if (payload == null || !_isPrayerPayload(payload)) {
+      final bool isIgnoringBattery = await _adhanPlayer
+          .isIgnoringBatteryOptimizations();
+      logger.i(
+        '$tag Starting test schedule sequence (delay=10s) | batteryOptimizationsIgnored=$isIgnoringBattery',
+      );
+
+      final DateTime now = DateTime.now();
+      final DateTime triggerAt = now.add(const Duration(seconds: 10));
+      final int testId = PrayerNotificationConfig.debugManualTestId;
+
+      final bool hasPermission = await _notificationPermissionService
+          .isPermissionGranted();
+      if (!hasPermission) {
+        logger.w('$tag Permission missing: POST_NOTIFICATIONS');
         return;
       }
 
-      String? prayerName;
-      try {
-        final dynamic decoded = jsonDecode(payload);
-        if (decoded is Map<String, dynamic>) {
-          final dynamic v = decoded[PrayerNotificationConfig.payloadPrayerKey];
-          if (v is String) {
-            prayerName = v;
-          }
-        }
-      } catch (_) {
-        // Best-effort decode; fall through with prayerName == null.
+      final bool canExact = await canScheduleExactAlarms();
+      if (!canExact) {
+        logger.w('$tag Permission missing: USE_EXACT_ALARM');
       }
 
-      try {
-        final Map<String, Object> params = <String, Object>{};
-        if (prayerName != null) {
-          params['prayer'] = prayerName;
-        }
-        final int? id = response.id;
-        if (id != null) {
-          params['notification_id'] = id;
-        }
-        await _analytics.logEvent(
-          'prayer_notification_open',
-          parameters: params,
+      bool nativeSuccess = false;
+      if (_adhanPlayer.isSupported) {
+        nativeSuccess = await _adhanPlayer.scheduleAdhan(
+          id: testId,
+          scheduledTime: triggerAt,
+          prayerName: 'DEBUG_ADHAN',
+          prayerKey: 'debug',
         );
-      } catch (e) {
-        logger.w('${PrayerNotificationConfig.logTag} Analytics log failed: $e');
       }
 
-      _navigateToPrayerTimes();
+      final AppLocalizations l10n = await _localizations();
+      final tz.TZDateTime tzTarget = tz.TZDateTime.from(triggerAt, tz.local);
+
+      final String channelId = nativeSuccess
+          ? PrayerNotificationConfig.silentAdhanChannelId
+          : PrayerNotificationConfig.adhanChannelId;
+
+      logger.d(
+        '$tag Scheduled test adhan:\n'
+        '- scheduledAt: $now\n'
+        '- triggerAt: $triggerAt\n'
+        '- nativeScheduleSuccess: $nativeSuccess\n'
+        '- selectedNotificationChannel: $channelId\n'
+        '- FLN is: ${nativeSuccess ? 'silent' : 'audible'}\n'
+        '- id: $testId',
+      );
+
+      if (!nativeSuccess) {
+        await _notifications.zonedSchedule(
+          id: testId,
+          title: 'Tilawa Debug',
+          body: 'Manual Adhan Test (10s) - Fallback',
+          scheduledDate: tzTarget,
+          notificationDetails: _detailsFor(
+            l10n,
+            true, // playAdhan
+            adhanHandledNatively: nativeSuccess,
+          ),
+          androidScheduleMode: canExact
+              ? AndroidScheduleMode.exactAllowWhileIdle
+              : AndroidScheduleMode.inexact,
+          payload: jsonEncode({
+            PrayerNotificationConfig.payloadTypeKey:
+                PrayerNotificationConfig.payloadTypeValue,
+            PrayerNotificationConfig.payloadPrayerKey: 'debug',
+            'prayer_name': 'DEBUG_ADHAN',
+            'prayer_key': 'debug',
+            'scheduled_time_ms': triggerAt.millisecondsSinceEpoch,
+            'adhan_enabled': true,
+            'notification_id': testId,
+          }),
+        );
+      }
+    } catch (e, st) {
+      logger.e('$tag Failed: $e', error: e, stackTrace: st);
+    }
+  }
+
+  Future<void> handleNotificationResponse(NotificationResponse response) async {
+    try {
+      final String? payload = response.payload;
+      logger.d(
+        '${PrayerNotificationConfig.logTag} FLUTTER_TAP_PAYLOAD_RECEIVED id=${response.id} hasPayload=${payload != null}',
+      );
+      if (payload == null || !isPrayerPayload(payload)) {
+        return;
+      }
+
+      // Navigate to status screen with extras
+      _navigateToPrayerStatus(payload);
+      unawaited(_logNotificationTapAnalytics(payload, response.id));
     } catch (e, stackTrace) {
       logger.e(
         '${PrayerNotificationConfig.logTag} handleNotificationResponse failed: $e',
@@ -612,25 +818,114 @@ class PrayerAdhanNotificationService
     }
   }
 
-  void _navigateToPrayerTimes() {
+  Future<void> _logNotificationTapAnalytics(
+    String payload,
+    int? notificationId,
+  ) async {
+    String? prayerName;
+
     try {
-      _navigationService.navigateToNotification(
-        const PrayerTimesRoute().location,
+      final dynamic decoded = jsonDecode(payload);
+      final Map<String, Object> params = <String, Object>{};
+
+      if (decoded is Map<String, dynamic>) {
+        final dynamic prayerKey =
+            decoded[PrayerNotificationConfig.payloadPrayerKey];
+        final dynamic fallbackPrayerName = decoded['prayer_name'];
+        if (prayerKey is String) {
+          prayerName = prayerKey;
+        } else if (fallbackPrayerName is String) {
+          prayerName = fallbackPrayerName;
+        }
+
+        final dynamic adhanEnabled = decoded['adhan_enabled'];
+        if (adhanEnabled is bool) {
+          params['adhan_enabled'] = adhanEnabled;
+          params['is_adhan'] = adhanEnabled;
+        }
+      }
+
+      if (prayerName != null) {
+        params['prayer_name'] = prayerName;
+        params['prayer_key'] = prayerName.toLowerCase();
+      }
+      if (notificationId != null) {
+        params['notification_id'] = notificationId;
+      }
+
+      await _analytics.logEvent(
+        'prayer_notification_tapped',
+        parameters: params,
       );
     } catch (e) {
-      logger.w('${PrayerNotificationConfig.logTag} Navigation failed: $e');
+      logger.w('${PrayerNotificationConfig.logTag} Analytics log failed: $e');
+    }
+  }
+
+  void _navigateToPrayerStatus(String payload) {
+    try {
+      logger.d(
+        '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_REQUESTED route=${const PrayerNotificationStatusRoute().location}',
+      );
+      _navigationService.navigateToNotification(
+        const PrayerNotificationStatusRoute().location,
+        extra: payload,
+      );
+      logger.d(
+        '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_SUCCESS',
+      );
+    } catch (e) {
+      logger.w(
+        '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_FAILED: $e',
+      );
     }
   }
 
   // -- helpers ----------------------------------------------------------------
 
-  bool _isPrayerPayload(String? payload) {
+  @visibleForTesting
+  bool isPrayerPayload(String? payload) {
     if (payload == null || payload.isEmpty) return false;
-    // Cheap structural check; keeps the dispatcher matcher allocation-free.
-    return payload.contains(
-      '"${PrayerNotificationConfig.payloadTypeKey}":"'
-      '${PrayerNotificationConfig.payloadTypeValue}"',
-    );
+
+    // Try robust JSON parsing first.
+    try {
+      final dynamic decoded = jsonDecode(payload);
+      if (decoded is! Map) return false;
+      final Map<String, dynamic> data = Map<String, dynamic>.from(decoded);
+
+      // 1. Standard type check
+      final String? type = data[PrayerNotificationConfig.payloadTypeKey]
+          ?.toString();
+      if (type == PrayerNotificationConfig.payloadTypeValue) {
+        return true;
+      }
+
+      // 2. Local/Native markers fallback
+      const Set<String> localMarkers = {
+        'prayer',
+        'prayer_key',
+        'scheduled_time_ms',
+        'scheduled_ms',
+        'notification_id',
+        'adhan_enabled',
+        'is_adhan_playing',
+        'date',
+      };
+
+      for (final String key in localMarkers) {
+        if (data.containsKey(key)) {
+          return true;
+        }
+      }
+    } catch (_) {
+      // If JSON parsing fails, fall back to the cheap structural check.
+      return payload.contains(
+        '"${PrayerNotificationConfig.payloadTypeKey}":"'
+        '${PrayerNotificationConfig.payloadTypeValue}"',
+      );
+    }
+
+    return false;
   }
 
   PrayerNotificationSettings _settingsFor(
@@ -684,15 +979,25 @@ class PrayerAdhanNotificationService
     return l10n.prayerNotificationBody(_localizedPrayerName(l10n, prayer));
   }
 
-  NotificationDetails _detailsFor(AppLocalizations l10n, bool playAdhan) {
+  NotificationDetails _detailsFor(
+    AppLocalizations l10n,
+    bool playAdhan, {
+    bool adhanHandledNatively = false,
+  }) {
     final String channelId = playAdhan
-        ? PrayerNotificationConfig.adhanChannelId
+        ? (adhanHandledNatively
+              ? PrayerNotificationConfig.silentAdhanChannelId
+              : PrayerNotificationConfig.adhanChannelId)
         : PrayerNotificationConfig.channelId;
     final String channelName = playAdhan
-        ? l10n.prayerNotificationsAdhanChannelName
+        ? (adhanHandledNatively
+              ? l10n.prayerNotificationsSilentAdhanChannelName
+              : l10n.prayerNotificationsAdhanChannelName)
         : l10n.prayerNotificationsChannelName;
     final String channelDescription = playAdhan
-        ? l10n.prayerNotificationsAdhanChannelDescription
+        ? (adhanHandledNatively
+              ? l10n.prayerNotificationsSilentAdhanChannelDescription
+              : l10n.prayerNotificationsAdhanChannelDescription)
         : l10n.prayerNotificationsChannelDescription;
 
     return NotificationDetails(
@@ -704,12 +1009,12 @@ class PrayerAdhanNotificationService
         priority: Priority.high,
         icon: 'ic_launcher_monochrome',
         color: AppColors.notificationAccent,
-        sound: playAdhan
+        sound: playAdhan && !adhanHandledNatively
             ? RawResourceAndroidNotificationSound(
                 PrayerNotificationConfig.adhanSoundRawName,
               )
             : null,
-        playSound: true,
+        playSound: !playAdhan || !adhanHandledNatively,
       ),
       iOS: DarwinNotificationDetails(
         presentAlert: true,
@@ -731,11 +1036,51 @@ class PrayerAdhanNotificationService
     try {
       await _prefs.remove(PrayerNotificationConfig.dedupDateKey);
       await _prefs.remove(PrayerNotificationConfig.settingsFingerprintKey);
+      await _clearScheduleSnapshot();
     } catch (e) {
       logger.w(
         '${PrayerNotificationConfig.logTag} Failed to clear dedup state: $e',
       );
     }
+  }
+
+  Future<void> _persistScheduleSnapshot({
+    required int scheduledCount,
+    required DateTime? windowStart,
+    required DateTime? windowEnd,
+  }) async {
+    if (scheduledCount <= 0 || windowEnd == null) {
+      await _clearScheduleSnapshot();
+      return;
+    }
+
+    if (windowStart == null) {
+      await _prefs.remove(PrayerNotificationConfig.scheduledWindowStartMsKey);
+    } else {
+      await _prefs.setInt(
+        PrayerNotificationConfig.scheduledWindowStartMsKey,
+        windowStart.millisecondsSinceEpoch,
+      );
+    }
+    await _prefs.setInt(
+      PrayerNotificationConfig.scheduledWindowEndMsKey,
+      windowEnd.millisecondsSinceEpoch,
+    );
+    await _prefs.setInt(
+      PrayerNotificationConfig.scheduleCompletedAtMsKey,
+      DateTime.now().millisecondsSinceEpoch,
+    );
+    await _prefs.setInt(
+      PrayerNotificationConfig.scheduledNotificationCountKey,
+      scheduledCount,
+    );
+  }
+
+  Future<void> _clearScheduleSnapshot() async {
+    await _prefs.remove(PrayerNotificationConfig.scheduledWindowStartMsKey);
+    await _prefs.remove(PrayerNotificationConfig.scheduledWindowEndMsKey);
+    await _prefs.remove(PrayerNotificationConfig.scheduleCompletedAtMsKey);
+    await _prefs.remove(PrayerNotificationConfig.scheduledNotificationCountKey);
   }
 
   Future<AppLocalizations> _localizations() async {

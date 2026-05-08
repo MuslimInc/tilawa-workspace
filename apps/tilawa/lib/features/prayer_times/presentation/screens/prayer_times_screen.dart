@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -13,8 +14,8 @@ import '../../domain/entities/entities.dart';
 import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
-import '../widgets/prayer_notification_settings_sheet.dart';
 import '../prayer_notification_semantics_ids.dart';
+import '../widgets/prayer_notification_settings_sheet.dart';
 import '../widgets/widgets.dart';
 
 /// Screen for displaying prayer times.
@@ -28,63 +29,31 @@ class PrayerTimesScreen extends StatefulWidget {
   State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
 }
 
-class _PrayerTimesScreenState extends State<PrayerTimesScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
+  int _selectedIndex = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    // Note: The PrayerTimesRoute already dispatches loadPrayerTimes event when creating the bloc.
-    // No need to dispatch it again here.
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void _onSegmentChanged(String value) {
+    setState(() {
+      _selectedIndex = value == 'today' ? 0 : 1;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
 
     return Scaffold(
       appBar: AppBar(
         leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.prayerTimes),
-        actionsPadding: EdgeInsets.only(right: tokens.spaceMedium),
+        actionsPadding: EdgeInsetsDirectional.only(end: tokens.spaceMedium),
         actions: [
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-              foregroundColor: colorScheme.onPrimary,
-            ),
-            icon: const Icon(Icons.explore_outlined, size: 22),
-            onPressed: () => context.push('/qibla'),
-          ),
-          SizedBox(width: tokens.spaceSmall),
-          IconButton(
-            style: IconButton.styleFrom(
-              backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-              foregroundColor: colorScheme.onPrimary,
-            ),
-            icon: const Icon(Icons.notifications_active_outlined, size: 22),
-            onPressed: () => _showNotificationDialog(context),
-          ),
-          SizedBox(width: tokens.spaceSmall),
           Semantics(
             identifier: PrayerNotificationSemanticsIds.prayerSettingsButton,
-            child: IconButton(
-              style: IconButton.styleFrom(
-                backgroundColor: colorScheme.surface.withValues(alpha: 0.30),
-                foregroundColor: colorScheme.onPrimary,
-              ),
-              icon: const Icon(Icons.settings, size: 22),
-              onPressed: () => _showSettingsDialog(context),
+            child: TilawaIconActionButton(
+              icon: Icons.settings,
+              onTap: () => _showSettingsDialog(context),
             ),
           ),
           SizedBox(width: tokens.spaceExtraSmall),
@@ -98,51 +67,18 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               tokens.spaceLarge,
               tokens.spaceMedium,
             ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colorScheme.surface.withValues(alpha: 0.22),
-                borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                border: Border.all(
-                  color: colorScheme.surface.withValues(alpha: 0.34),
-                ),
-              ),
-              child: TabBar(
-                controller: _tabController,
-                dividerColor: Colors.transparent,
-                indicatorSize: TabBarIndicatorSize.tab,
-                indicatorPadding: const EdgeInsets.all(4),
-                indicator: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(tokens.radiusLarge - 4),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                labelColor: colorScheme.onSurface,
-                unselectedLabelColor: colorScheme.onPrimary.withValues(
-                  alpha: 0.82,
-                ),
-                labelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-                unselectedLabelStyle: theme.textTheme.labelLarge?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
-                splashBorderRadius: BorderRadius.circular(tokens.radiusLarge),
-                tabs: [
-                  Tab(text: context.l10n.today),
-                  Tab(text: context.l10n.monthly),
-                ],
-              ),
+            child: TilawaSegmentedControl<String>(
+              segments: [
+                TilawaSegment(value: 'today', label: context.l10n.today),
+                TilawaSegment(value: 'monthly', label: context.l10n.monthly),
+              ],
+              selectedValue: _selectedIndex == 0 ? 'today' : 'monthly',
+              onValueChanged: _onSegmentChanged,
             ),
           ),
         ),
       ),
-      floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
+      // floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
       body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
         buildWhen: (previous, current) {
           return previous.status != current.status ||
@@ -161,39 +97,26 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           switch (state.status) {
             case PrayerTimesStatus.initial:
             case PrayerTimesStatus.loading:
-              return const Center(child: CircularProgressIndicator());
+              return const TilawaLoadingIndicator();
 
             case PrayerTimesStatus.error:
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.grey,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(state.errorMessage, textAlign: TextAlign.center),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<PrayerTimesBloc>().add(
-                          const PrayerTimesEvent.loadPrayerTimes(),
-                        );
-                      },
-                      child: Text(context.l10n.retry),
-                    ),
-                  ],
-                ),
+              return TilawaErrorState(
+                icon: Icons.error_outline_rounded,
+                title: state.errorMessage,
+                retryLabel: context.l10n.retry,
+                onRetry: () {
+                  context.read<PrayerTimesBloc>().add(
+                    const PrayerTimesEvent.loadPrayerTimes(),
+                  );
+                },
               );
 
             case PrayerTimesStatus.locationRequired:
               return _buildLocationRequiredView(context, state);
 
             case PrayerTimesStatus.loaded:
-              return TabBarView(
-                controller: _tabController,
+              return IndexedStack(
+                index: _selectedIndex,
                 children: [
                   _buildTodayView(context, state),
                   _buildMonthlyView(context, state),
@@ -209,68 +132,55 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     BuildContext context,
     PrayerTimesState state,
   ) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.location_off,
-              size: 80,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            const SizedBox(height: 24),
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return TilawaEmptyState(
+      icon: Icons.location_off_rounded,
+      iconColor: theme.colorScheme.outline,
+      title: context.l10n.locationRequired,
+      subtitle: context.l10n.locationRequiredDescription,
+      action: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (state.errorMessage.isNotEmpty) ...[
             Text(
-              context.l10n.locationRequired,
-              style: Theme.of(context).textTheme.headlineSmall,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              context.l10n.locationRequiredDescription,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              state.errorMessage,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-            if (state.errorMessage.isNotEmpty) ...[
-              Text(
-                state.errorMessage,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.error,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 16),
-            ],
-            FilledButton.icon(
-              onPressed: state.isLoadingLocation
-                  ? null
-                  : () {
-                      context.read<PrayerTimesBloc>().add(
-                        const PrayerTimesEvent.updateLocation(),
-                      );
-                    },
-              icon: state.isLoadingLocation
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.my_location),
-              label: Text(context.l10n.enableLocation),
-            ),
+            SizedBox(height: tokens.spaceMedium),
           ],
-        ),
+          FilledButton.icon(
+            onPressed: state.isLoadingLocation
+                ? null
+                : () {
+                    context.read<PrayerTimesBloc>().add(
+                      const PrayerTimesEvent.updateLocation(),
+                    );
+                  },
+            icon: state.isLoadingLocation
+                ? SizedBox.square(
+                    dimension: tokens.iconSizeSmall,
+                    child: TilawaLoadingIndicator(
+                      centered: false,
+                      strokeWidth: tokens.borderWidthThin * 4,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  )
+                : const Icon(Icons.my_location_rounded),
+            label: Text(context.l10n.enableLocation),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildTodayView(BuildContext context, PrayerTimesState state) {
     if (state.todayPrayerTimes == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const TilawaLoadingIndicator();
     }
 
     final tokens = Theme.of(context).tokens;
@@ -298,9 +208,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               );
             },
             isLoading: state.isLoadingLocation,
+            onOpenQibla: () => context.push('/qibla'),
           ),
-          const _CountdownCardSection(),
-          const _TodaySectionHeader(),
+          _CountdownCardSection(
+            onPrayerNotificationsTap: () => _showNotificationDialog(context),
+          ),
           _TodayPrayerGrid(
             prayerTimes: state.todayPrayerTimes!,
             use24HourFormat: state.settings.use24HourFormat,
@@ -312,7 +224,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   Widget _buildMonthlyView(BuildContext context, PrayerTimesState state) {
     if (state.latitude == null || state.longitude == null) {
-      return Center(child: Text(context.l10n.locationRequired));
+      return TilawaEmptyState(
+        icon: Icons.location_off_rounded,
+        title: context.l10n.locationRequired,
+        subtitle: context.l10n.locationRequiredDescription,
+      );
     }
 
     return MonthlyPrayerTimesView(
@@ -362,14 +278,19 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 }
 
 class _CountdownCardSection extends StatelessWidget {
-  const _CountdownCardSection();
+  const _CountdownCardSection({required this.onPrayerNotificationsTap});
+
+  final VoidCallback onPrayerNotificationsTap;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
       buildWhen: (previous, current) =>
           previous.todayPrayerTimes != current.todayPrayerTimes ||
-          previous.settings.use24HourFormat != current.settings.use24HourFormat,
+          previous.settings.use24HourFormat !=
+              current.settings.use24HourFormat ||
+          _hasEnabledPrayerNotifications(previous.settings) !=
+              _hasEnabledPrayerNotifications(current.settings),
       builder: (context, state) {
         final todayTimes = state.todayPrayerTimes;
         if (todayTimes == null) return const SizedBox.shrink();
@@ -377,9 +298,46 @@ class _CountdownCardSection extends StatelessWidget {
         return _CountdownTicker(
           prayerTimes: todayTimes,
           use24HourFormat: state.settings.use24HourFormat,
+          dateMetaLabel: _buildDateMetaLabel(context),
+          prayerNotificationsEnabled: _hasEnabledPrayerNotifications(
+            state.settings,
+          ),
+          onPrayerNotificationsTap: onPrayerNotificationsTap,
         );
       },
     );
+  }
+
+  static bool _hasEnabledPrayerNotifications(PrayerSettingsEntity settings) {
+    return settings.fajrNotification.enabled ||
+        settings.dhuhrNotification.enabled ||
+        settings.asrNotification.enabled ||
+        settings.maghribNotification.enabled ||
+        settings.ishaNotification.enabled;
+  }
+
+  static String _buildDateMetaLabel(BuildContext context) {
+    final isArabic = context.isArabic;
+    final locale = isArabic ? 'ar' : 'en';
+    final now = DateTime.now();
+    final dayName = DateFormat('EEEE', locale).format(now);
+    var fullDate = DateFormat.yMMMMd(locale).format(now);
+
+    if (isArabic) {
+      fullDate = _normalizeArabicDigits(fullDate);
+    }
+
+    return '${context.l10n.today} · $dayName, $fullDate';
+  }
+
+  static String _normalizeArabicDigits(String value) {
+    const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    var normalized = value;
+    for (var i = 0; i < arabicNumbers.length; i++) {
+      normalized = normalized.replaceAll(arabicNumbers[i], englishNumbers[i]);
+    }
+    return normalized;
   }
 }
 
@@ -392,10 +350,16 @@ class _CountdownTicker extends StatefulWidget {
   const _CountdownTicker({
     required this.prayerTimes,
     required this.use24HourFormat,
+    required this.dateMetaLabel,
+    required this.prayerNotificationsEnabled,
+    required this.onPrayerNotificationsTap,
   });
 
   final PrayerTimeEntity prayerTimes;
   final bool use24HourFormat;
+  final String dateMetaLabel;
+  final bool prayerNotificationsEnabled;
+  final VoidCallback onPrayerNotificationsTap;
 
   @override
   State<_CountdownTicker> createState() => _CountdownTickerState();
@@ -431,6 +395,9 @@ class _CountdownTickerState extends State<_CountdownTicker> {
       nextPrayer: nextPrayer,
       timeUntil: timeUntil,
       use24HourFormat: widget.use24HourFormat,
+      dateMetaLabel: widget.dateMetaLabel,
+      prayerNotificationsEnabled: widget.prayerNotificationsEnabled,
+      onPrayerNotificationsTap: widget.onPrayerNotificationsTap,
     );
   }
 }
@@ -492,60 +459,121 @@ class _TodayPrayerGridState extends State<_TodayPrayerGrid> {
   }
 }
 
-class _TodaySectionHeader extends StatelessWidget {
-  const _TodaySectionHeader();
+/// Debug-only FAB that fires an immediate test prayer notification.
+/// Shown only in [kDebugMode] — stripped from release builds.
+class _DebugNotificationFab extends StatefulWidget {
+  const _DebugNotificationFab();
+
+  @override
+  State<_DebugNotificationFab> createState() => _DebugNotificationFabState();
+}
+
+class _DebugNotificationFabState extends State<_DebugNotificationFab> {
+  PrayerType _selectedPrayer = PrayerType.isha;
+  bool _playAdhan = true;
+  bool _firing = false;
+
+  static const List<PrayerType> _prayers = [
+    PrayerType.fajr,
+    PrayerType.dhuhr,
+    PrayerType.asr,
+    PrayerType.maghrib,
+    PrayerType.isha,
+  ];
+
+  // ignore: unused_element
+  Future<void> _fire() async {
+    if (_firing) return;
+    setState(() => _firing = true);
+    try {
+      await getIt<IPrayerAdhanNotificationService>().fireTestNotification(
+        prayer: _selectedPrayer,
+        playAdhan: _playAdhan,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '🔔 Test fired: ${_selectedPrayer.name} (adhan=$_playAdhan)',
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _firing = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final ColorScheme colorScheme = theme.colorScheme;
+    final theme = Theme.of(context);
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceLarge,
-        tokens.spaceSmall,
-        tokens.spaceLarge,
-        tokens.spaceMedium,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(tokens.radiusMedium),
-            ),
-            child: Icon(
-              Icons.schedule_rounded,
-              size: 20,
-              color: colorScheme.onPrimaryContainer,
-            ),
-          ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        // Options card
+        Card(
+          margin: const EdgeInsets.only(bottom: 8, right: 4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  context.l10n.prayerTimesTodaySchedule,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                  'Debug: Test Notification',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  context.l10n.prayerTimesTodayScheduleSubtitle,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
+                const SizedBox(height: 4),
+                DropdownButton<PrayerType>(
+                  value: _selectedPrayer,
+                  isDense: true,
+                  underline: const SizedBox.shrink(),
+                  items: _prayers
+                      .map(
+                        (p) => DropdownMenuItem(
+                          value: p,
+                          child: Text(p.name, style: theme.textTheme.bodySmall),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (v) {
+                    if (v != null) setState(() => _selectedPrayer = v);
+                  },
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Adhan', style: theme.textTheme.bodySmall),
+                    Switch(
+                      value: _playAdhan,
+                      onChanged: (v) => setState(() => _playAdhan = v),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-        ],
-      ),
+        ),
+        // FloatingActionButton.extended(
+        //   onPressed: _firing ? null : _fire,
+        //   label: _firing
+        //       ? const SizedBox(
+        //           width: 18,
+        //           height: 18,
+        //           child: CircularProgressIndicator(strokeWidth: 2),
+        //         )
+        //       : const Text('Fire'),
+        //   icon: const Icon(Icons.notifications_active_outlined),
+        //   backgroundColor: theme.colorScheme.errorContainer,
+        //   foregroundColor: theme.colorScheme.onErrorContainer,
+        // ),
+      ],
     );
   }
 }

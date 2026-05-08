@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -50,6 +51,9 @@ class NotificationDispatcher implements INotificationDispatcher {
 
   bool _initialized = false;
   bool _highImportanceChannelCreated = false;
+
+  static const Duration _tapDedupWindow = Duration(seconds: 3);
+  final Map<String, DateTime> _recentTapSignatures = <String, DateTime>{};
 
   @override
   Future<void> initialize({bool createHighImportanceChannel = true}) async {
@@ -191,8 +195,7 @@ class NotificationDispatcher implements INotificationDispatcher {
         logger.d(
           '[NotificationDispatcher] Processing launch notification: id=${response.id}, payload=${response.payload}',
         );
-        await _routeNotification(response);
-        return true;
+        return _routeNotification(response);
       }
 
       logger.d('[NotificationDispatcher] No launch notification to process');
@@ -213,11 +216,16 @@ class NotificationDispatcher implements INotificationDispatcher {
       '[NotificationDispatcher] _handleNotificationResponse called: id=${response.id}, payload=${response.payload}',
     );
     // Fire and forget - the async operation will complete in background
-    _routeNotification(response);
+    unawaited(_routeNotification(response));
   }
 
   /// Route notification to the appropriate handler
-  Future<void> _routeNotification(NotificationResponse response) async {
+  Future<bool> _routeNotification(NotificationResponse response) async {
+    if (_isDuplicateTap(response)) {
+      logger.d('[NotificationDispatcher] Duplicate tap ignored');
+      return true;
+    }
+
     final int? notificationId = response.id;
     final String? payload = response.payload;
 
@@ -233,29 +241,81 @@ class NotificationDispatcher implements INotificationDispatcher {
           '[NotificationDispatcher] Matched handler: ${registration.serviceId}',
         );
         await registration.handler(response);
-        return;
+        return true;
       }
     }
 
-    // If no ID match, try payload handlers
+    // If no ID match, evaluate all payload handlers and pick deterministically.
+    final List<_PayloadHandlerRegistration> matchedPayloadHandlers =
+        <_PayloadHandlerRegistration>[];
     for (final _PayloadHandlerRegistration registration in _payloadHandlers) {
       if (registration.matcher(payload)) {
-        logger.d(
-          '[NotificationDispatcher] Matched payload handler: ${registration.serviceId}',
-        );
-        await registration.handler(response);
-        return;
+        matchedPayloadHandlers.add(registration);
       }
+    }
+
+    if (matchedPayloadHandlers.isNotEmpty) {
+      matchedPayloadHandlers.sort((a, b) {
+        final int aPriority = _servicePriority(a.serviceId);
+        final int bPriority = _servicePriority(b.serviceId);
+        if (aPriority != bPriority) {
+          return aPriority.compareTo(bPriority);
+        }
+        return a.serviceId.compareTo(b.serviceId);
+      });
+
+      final _PayloadHandlerRegistration selected = matchedPayloadHandlers.first;
+      logger.d(
+        '[NotificationDispatcher] Matched payload handler: ${selected.serviceId}',
+      );
+      await selected.handler(response);
+      return true;
     }
 
     logger.w(
       '[NotificationDispatcher] No handler found for notification: id=$notificationId',
     );
+    return false;
   }
 
   /// Check if running on Android (for platform-specific logic)
   @visibleForTesting
   bool get isAndroid => Platform.isAndroid;
+
+  int _servicePriority(String serviceId) {
+    switch (serviceId) {
+      case 'prayer_notifications':
+        return 0;
+      case 'athkar':
+        return 1;
+      case 'downloads':
+        return 2;
+      case 'fcm_service':
+        return 3;
+      default:
+        return 100;
+    }
+  }
+
+  bool _isDuplicateTap(NotificationResponse response) {
+    final DateTime now = DateTime.now();
+    _recentTapSignatures.removeWhere(
+      (_, seenAt) => now.difference(seenAt) > _tapDedupWindow,
+    );
+
+    final String signature = [
+      response.notificationResponseType.name,
+      response.id?.toString() ?? 'null',
+      response.payload ?? 'null',
+    ].join('|');
+
+    if (_recentTapSignatures.containsKey(signature)) {
+      return true;
+    }
+
+    _recentTapSignatures[signature] = now;
+    return false;
+  }
 
   /// Get the notifications plugin (for services that need to schedule notifications)
   @override

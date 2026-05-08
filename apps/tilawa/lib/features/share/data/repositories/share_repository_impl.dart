@@ -255,6 +255,18 @@ class ShareRepositoryImpl implements ShareRepository {
           // Best-effort cleanup.
         }
       }
+      for (final path in screenshotPaths) {
+        try {
+          await _fileManager.deleteShareFile(path);
+        } catch (_) {
+          // Best-effort cleanup.
+        }
+      }
+      try {
+        await _fileManager.deleteShareFile(audioContent.filePath);
+      } catch (_) {
+        // Best-effort cleanup.
+      }
     }
   }
 
@@ -307,6 +319,20 @@ class ShareRepositoryImpl implements ShareRepository {
         text: text,
       ),
     );
+
+    await _fileManager.cleanup();
+  }
+
+  @override
+  Future<String> exportContent(ShareContent content) async {
+    final String sourcePath = switch (content) {
+      ShareScreenshot(:final filePath) => filePath,
+      ShareAudioClip(:final filePath) => filePath,
+      ShareVideo(:final filePath) => filePath,
+      ShareText() => throw StateError('Text content cannot be exported.'),
+    };
+
+    return _fileManager.exportShareFile(sourcePath: sourcePath);
   }
 
   @override

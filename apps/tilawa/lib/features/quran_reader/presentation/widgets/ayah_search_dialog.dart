@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/ayah_entity.dart';
 import '../bloc/quran_reader_bloc.dart';
@@ -38,24 +39,17 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
             const SizedBox(height: 16),
 
             // Search field
-            TextField(
+            TilawaSearchField(
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: context.l10n.searchAyahsHint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    context.read<QuranReaderBloc>().add(
-                      const QuranReaderEvent.clearSearch(),
-                    );
-                  },
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+              hintText: context.l10n.searchAyahsHint,
+              textInputAction: TextInputAction.search,
+              borderRadius: BorderRadius.circular(12),
+              onClear: () {
+                _searchController.clear();
+                context.read<QuranReaderBloc>().add(
+                  const QuranReaderEvent.clearSearch(),
+                );
+              },
               onSubmitted: (query) {
                 context.read<QuranReaderBloc>().add(
                   QuranReaderEvent.searchAyahs(query),

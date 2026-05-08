@@ -130,7 +130,7 @@ class AyahStepper extends StatelessWidget {
         ),
       ),
       child: SizedBox(
-        height: 36,
+        height: 48,
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -168,6 +168,10 @@ class _StepperButton extends StatelessWidget {
     required this.enabled,
     required this.onTap,
   });
+
+  static const double _hitAreaSize = 48;
+  static const double _visualSize = 36;
+
   final IconData icon;
   final bool enabled;
   final VoidCallback onTap;
@@ -181,15 +185,21 @@ class _StepperButton extends StatelessWidget {
         : theme.colorScheme.onSurface.withValues(alpha: tokens.opacityMedium);
 
     return SizedBox(
-      width: 36,
-      height: 36,
+      width: _hitAreaSize,
+      height: _hitAreaSize,
       child: Material(
         color: Colors.transparent,
         shape: const CircleBorder(),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: enabled ? onTap : null,
-          child: Icon(icon, size: tokens.iconSizeSmall, color: color),
+          child: Center(
+            child: SizedBox(
+              width: _visualSize,
+              height: _visualSize,
+              child: Icon(icon, size: tokens.iconSizeSmall, color: color),
+            ),
+          ),
         ),
       ),
     );

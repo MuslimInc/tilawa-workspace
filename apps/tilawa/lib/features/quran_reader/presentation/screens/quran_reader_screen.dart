@@ -17,6 +17,8 @@ import 'package:tilawa/features/share/presentation/screens/screenshot_composer_s
 import 'package:tilawa/features/share/presentation/screens/video_reel_composer_screen.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
 import 'package:tilawa_core/logger.dart';
+import 'package:tilawa_core/services/app_orientation_service.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
@@ -119,19 +121,13 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   ThemeData? _cachedAppTheme;
   QuranReaderTheme? _cachedReaderTheme;
   SystemUiOverlayStyle? _cachedReaderSystemUiStyle;
-  SystemUiOverlayStyle? _cachedAppSystemUiStyle;
 
   @override
   void initState() {
     super.initState();
     _screenshotBoundaryKey = GlobalKey();
     WidgetsBinding.instance.addObserver(this);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    unawaited(AppOrientationService.allowReaderOrientations());
 
     _uiVisibilityCubit = context.read<UiVisibilityCubit>();
     _uiVisibilityCubit.show();
@@ -216,10 +212,10 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       _lastPreparedOrientation = currentOrientation;
       quranQcfLocator<QuranPagePreparationService>().clear();
     }
-    _cachedAppSystemUiStyle = _buildAppSystemUiOverlayStyle(incomingTheme);
     _cachedReaderSystemUiStyle = _buildReaderSystemUiOverlayStyle(
       incomingReaderTheme,
     );
+    AppSystemChromeStyle.updateQuranReaderStyle(_cachedReaderSystemUiStyle!);
     if (!_didInitDependencies) {
       _didInitDependencies = true;
       _updateSystemUiConfig(_uiVisibilityCubit.state);
@@ -250,14 +246,8 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _preparedWindowNotifier.dispose();
     _showOverlaysNotifier.dispose();
     _warmingNotifier.dispose();
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-    if (_pendingExitPreparation == null) {
-      _debugLog(() => '[READER_EXIT] dispose fallback restore');
-      unawaited(_restoreAppSystemUiMode());
-    }
+    unawaited(AppOrientationService.restoreDefaultOrientations());
+    AppSystemChromeStyle.applyDefault();
     _uiVisibilityCubit.show();
     disposeSideEffects();
     super.dispose();
@@ -274,10 +264,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   }
 
   void _updateSystemUiConfig(bool isVisible) {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    SystemChrome.setSystemUIOverlayStyle(
-      _cachedReaderSystemUiStyle ?? const SystemUiOverlayStyle(),
-    );
+    AppSystemChromeStyle.applyQuranReader();
   }
 
   SystemUiOverlayStyle _buildReaderSystemUiOverlayStyle(
@@ -289,28 +276,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       statusBarBrightness: readerTheme.statusBarBrightness,
       systemNavigationBarColor: const Color(0x00000000),
       systemNavigationBarDividerColor: const Color(0x00000000),
-      systemNavigationBarIconBrightness: readerTheme.statusBarIconBrightness,
-      systemStatusBarContrastEnforced: false,
-      systemNavigationBarContrastEnforced: false,
-    );
-  }
-
-  SystemUiOverlayStyle _buildAppSystemUiOverlayStyle(ThemeData theme) {
-    final bool isDark = theme.brightness == Brightness.dark;
-    final Brightness iconBrightness = isDark
-        ? Brightness.light
-        : Brightness.dark;
-    final Brightness statusBarBrightness = isDark
-        ? Brightness.dark
-        : Brightness.light;
-
-    return SystemUiOverlayStyle(
-      statusBarColor: const Color(0x00000000),
-      statusBarIconBrightness: iconBrightness,
-      statusBarBrightness: statusBarBrightness,
-      systemNavigationBarColor: const Color(0x00000000),
-      systemNavigationBarDividerColor: const Color(0x00000000),
-      systemNavigationBarIconBrightness: iconBrightness,
       systemStatusBarContrastEnforced: false,
       systemNavigationBarContrastEnforced: false,
     );
@@ -368,9 +333,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   Future<void> _restoreAppSystemUiMode({
     bool waitForSystemUiFrame = false,
   }) async {
-    SystemChrome.setSystemUIOverlayStyle(
-      _cachedAppSystemUiStyle ?? const SystemUiOverlayStyle(),
-    );
+    AppSystemChromeStyle.applyDefault();
     if (waitForSystemUiFrame) {
       await SchedulerBinding.instance.endOfFrame;
     }
@@ -914,8 +877,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     final navigator = Navigator.of(context);
     final theme = Theme.of(context);
-    final readerOverlayStyle =
-        _cachedReaderSystemUiStyle ?? const SystemUiOverlayStyle();
+    final readerOverlayStyle = AppSystemChromeStyle.quranReaderStyle;
 
     // Capture preview bytes concurrently with the route transition so the
     // push is not blocked by GPU readback + PNG encoding (~50–100ms on

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class QuranReaderAppBar extends StatelessWidget {
   const QuranReaderAppBar({
@@ -19,27 +20,48 @@ class QuranReaderAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            theme.colorScheme.surface.withValues(alpha: 0.95),
-            theme.colorScheme.surface.withValues(alpha: 0.9),
+            colorScheme.surface.withValues(alpha: 0.96),
+            colorScheme.surfaceContainerLow.withValues(alpha: 0.92),
           ],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
         ),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 4),
+          BoxShadow(
+            color: colorScheme.shadow.withValues(alpha: tokens.opacitySubtle),
+            blurRadius: tokens.blurGlass / 2,
+            offset: tokens.shadowOffsetSmall,
+          ),
         ],
+        border: Border(
+          bottom: BorderSide(
+            color: colorScheme.outlineVariant.withValues(
+              alpha: tokens.opacitySubtle,
+            ),
+            width: tokens.borderWidthThin,
+          ),
+        ),
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceSmall,
+            vertical: tokens.spaceExtraSmall,
+          ),
           child: Row(
             children: [
-              IconButton(onPressed: onBack, icon: const Icon(Icons.arrow_back)),
+              IconButton(
+                onPressed: onBack,
+                color: colorScheme.onSurfaceVariant,
+                icon: const Icon(Icons.arrow_back),
+              ),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -47,21 +69,29 @@ class QuranReaderAppBar extends StatelessWidget {
                     if (title.isNotEmpty) ...[
                       Text(
                         title,
-                        style: theme.textTheme.titleMedium?.copyWith(),
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       Text(
                         subtitle,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ],
                 ),
               ),
-              IconButton(onPressed: onSearch, icon: const Icon(Icons.search)),
+              IconButton(
+                onPressed: onSearch,
+                color: colorScheme.onSurfaceVariant,
+                icon: const Icon(Icons.search),
+              ),
               IconButton(
                 onPressed: onSettings,
+                color: colorScheme.onSurfaceVariant,
                 icon: const Icon(Icons.settings),
               ),
             ],

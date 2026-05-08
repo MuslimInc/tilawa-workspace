@@ -11,6 +11,9 @@ workspace:
   - packages/ui_kit
   - packages/quran_qcf
   - packages/quran_image
+  - packages/skeletonizer
+  - packages/flex_color_scheme
+  - packages/compass
 
 dev_dependencies:
   melos: ^7.5.1
@@ -60,11 +63,15 @@ melos:
         dirExists: test
 
     # -- Code Generation -----------------------------------------------
-    build_runner:
+    gen:
       description: Run build_runner in packages that depend on it.
       run: melos exec -- "dart run build_runner build --delete-conflicting-outputs"
       packageFilters:
         dependsOn: build_runner
+
+    build_runner:
+      description: Alias for gen.
+      run: melos run gen
 
     build_runner:watch:
       description: Run build_runner in watch mode.

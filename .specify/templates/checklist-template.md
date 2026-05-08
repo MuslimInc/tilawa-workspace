@@ -46,6 +46,10 @@
 - [ ] CHK019 **UI Kit Components**: Shared UI from `packages/ui_kit`, not custom reimplemented
 - [ ] CHK020 **Component Classification**: Used components classified (foundation/atoms/molecules/organisms)
 - [ ] CHK021 **Design Tokens**: Colors, typography, spacing from design tokens (not hardcoded)
+- [ ] CHK021a **Component Tokens**: New UI Kit components include `TilawaComponentTokens` integration (density, theme support)
+- [ ] CHK021b **Golden Tests**: New UI Kit components have golden tests (light, dark, compact variants)
+- [ ] CHK021c **Accessibility**: UI Kit components respect reduced motion, support screen reader semantics
+- [ ] CHK021d **RTL**: UI Kit components support RTL layouts where applicable
 - [ ] CHK022 **Localization**: i18n support via l10n.yaml, not English-only strings
 - [ ] CHK023 **Dart/Flutter UI Idioms**: Simple fixed gaps use `Row`/`Column`/`Flex.spacing`; Dart dot shorthands used where receiver type is obvious
 - [ ] CHK024 **Theme Support**: Dark mode tested and working (if app supports dark theme)

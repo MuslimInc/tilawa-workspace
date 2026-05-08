@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
 import '../cubit/reciter_details_loader_cubit.dart';
@@ -25,24 +26,16 @@ class ReciterDetailsLoader extends StatelessWidget {
             }
 
             if (state is ReciterDetailsLoaderFailure) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 64, color: Colors.red),
-                    SizedBox(height: 16),
-                    Text(state.message),
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<ReciterDetailsLoaderCubit>().loadReciter(
-                          reciterId,
-                        );
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+              return TilawaErrorState(
+                icon: Icons.error_outline,
+                title: state.message,
+                retryLabel: 'Retry',
+                onRetry: () {
+                  context.read<ReciterDetailsLoaderCubit>().loadReciter(
+                    reciterId,
+                  );
+                },
+                iconColor: Theme.of(context).colorScheme.error,
               );
             }
 

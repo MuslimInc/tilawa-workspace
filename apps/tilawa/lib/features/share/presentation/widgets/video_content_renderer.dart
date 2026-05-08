@@ -52,8 +52,9 @@ class _VideoContentRendererState extends State<VideoContentRenderer> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = VideoReelPalette.fromContext(context);
     final Color backgroundColor =
-        widget.backgroundColor ?? Theme.of(context).colorScheme.surface;
+        widget.backgroundColor ?? palette.mushafBackgroundColor;
     final List<VideoPageSpec> effectivePageSpecs =
         widget.pageSpecs ??
         buildVideoPageSpecs(
@@ -148,20 +149,28 @@ class _VideoMushafPage extends StatelessWidget {
   final Color backgroundColor;
   final bool isCapturing;
 
-  Color? _verseBackgroundColor(int currentSurah, int verseNumber) {
+  Color? _verseBackgroundColor(
+    int currentSurah,
+    int verseNumber,
+    VideoReelPalette palette,
+  ) {
     if (currentSurah != surahNumber ||
         verseNumber < pageSpec.fromAyah ||
         verseNumber > pageSpec.toAyah) {
       return null;
     }
-    return VideoReelDesign.verseHighlightColor;
+    return palette.verseHighlightColor;
   }
 
-  Color? _verseTextColor(int currentSurah, int verseNumber) {
+  Color? _verseTextColor(
+    int currentSurah,
+    int verseNumber,
+    VideoReelPalette palette,
+  ) {
     if (currentSurah == surahNumber &&
         verseNumber >= pageSpec.fromAyah &&
         verseNumber <= pageSpec.toAyah) {
-      return VideoReelDesign.mushafTextColor;
+      return palette.mushafTextColor;
     }
 
     return Colors.transparent;
@@ -169,13 +178,16 @@ class _VideoMushafPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = VideoReelPalette.fromContext(context);
+
     return pageRenderer.build(
       context: context,
       pageSpec: pageSpec,
       surahNumber: surahNumber,
-      verseBackgroundColor: _verseBackgroundColor,
-      verseTextColor: _verseTextColor,
-      textColor: VideoReelDesign.mushafTextColor,
+      verseBackgroundColor: (surah, verse) =>
+          _verseBackgroundColor(surah, verse, palette),
+      verseTextColor: (surah, verse) => _verseTextColor(surah, verse, palette),
+      textColor: palette.mushafTextColor,
       pageBackgroundColor: backgroundColor,
       isCapturing: isCapturing,
     );

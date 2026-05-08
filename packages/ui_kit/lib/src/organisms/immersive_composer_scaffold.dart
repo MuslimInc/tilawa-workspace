@@ -5,6 +5,17 @@ import 'package:flutter/services.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/safe_area_ext.dart';
+
+/// Hint about the kind of content the scaffold's [preview] is showing.
+///
+/// Drives the default value of [ImmersiveComposerScaffold.disableBlur]
+/// when the caller doesn't pass an explicit override:
+///
+/// * [ui] — the preview is a UI surface (default). Blur stays on.
+/// * [media] — the preview is a photo, image, or video. Blur turns off
+///   so the bottom panel reads clearly against varying media tones.
+enum BackgroundIntent { ui, media }
 
 /// Immersive three-layer scaffold: full-bleed [preview] content with a
 /// top app bar overlay and a bottom panel overlay.
@@ -27,7 +38,8 @@ class ImmersiveComposerScaffold extends StatefulWidget {
     this.floatingActionButton,
     this.overlaysVisible,
     this.onVisibilityChanged,
-    this.disableBlur = false,
+    this.disableBlur,
+    this.backgroundIntent = BackgroundIntent.ui,
   });
 
   final String title;
@@ -50,7 +62,21 @@ class ImmersiveComposerScaffold extends StatefulWidget {
   /// Always fires, whether controlled or not.
   final ValueChanged<bool>? onVisibilityChanged;
 
-  final bool disableBlur;
+  /// Whether to skip the backdrop blur on the overlays.
+  ///
+  /// When `null` (default), the value is derived from [backgroundIntent]:
+  /// blur is disabled for [BackgroundIntent.media] and enabled for
+  /// [BackgroundIntent.ui]. Pass an explicit `true`/`false` to override.
+  final bool? disableBlur;
+
+  /// Hints what kind of content the [preview] is showing. Drives the
+  /// default value of [disableBlur] when not explicitly set.
+  final BackgroundIntent backgroundIntent;
+
+  /// Resolved blur preference: explicit [disableBlur] wins; otherwise
+  /// derived from [backgroundIntent].
+  bool get effectiveDisableBlur =>
+      disableBlur ?? backgroundIntent == BackgroundIntent.media;
 
   @override
   State<ImmersiveComposerScaffold> createState() =>
@@ -129,7 +155,8 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final padding = MediaQuery.paddingOf(context);
+    final padding = context.contentSafePadding;
+    final systemSafeArea = context.systemSafeArea;
     final overlayStyle = _buildSystemUiOverlayStyle(theme);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -139,6 +166,28 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
         child: Stack(
           clipBehavior: .none,
           children: [
+            Positioned.fill(
+              child: ColoredBox(color: theme.colorScheme.surface),
+            ),
+
+            if (systemSafeArea.top > 0)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                height: systemSafeArea.top,
+                child: ColoredBox(color: theme.colorScheme.surface),
+              ),
+
+            if (systemSafeArea.bottom > 0)
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: systemSafeArea.bottom,
+                child: ColoredBox(color: theme.colorScheme.surface),
+              ),
+
             // 1. Background Layer (Isolated)
             if (widget.backgroundGradient != null)
               Positioned.fill(
@@ -159,7 +208,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                 child: GestureDetector(
                   behavior: .translucent,
                   onTap: () => _setVisible(!_isVisible),
-                  child: widget.preview,
+                  child: SafeArea(child: widget.preview),
                 ),
               ),
             ),
@@ -178,7 +227,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                       onPointerDown: (_) => _setVisible(true),
                       child: _hasBeenShown
                           ? _OverlayPanel(
-                              disableBlur: widget.disableBlur,
+                              disableBlur: widget.effectiveDisableBlur,
                               child: SafeArea(
                                 bottom: false,
                                 child: _TopAppBar(
@@ -213,7 +262,7 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
                         padding: EdgeInsets.only(bottom: padding.bottom),
                         child: _hasBeenShown
                             ? _OverlayPanel(
-                                disableBlur: widget.disableBlur,
+                                disableBlur: widget.effectiveDisableBlur,
                                 child: widget.bottomPanel,
                               )
                             : const SizedBox.shrink(),

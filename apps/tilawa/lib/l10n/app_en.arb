@@ -1192,6 +1192,10 @@
     "@qiblaCompassTip": {
         "description": "Tip message displayed on Qibla compass screen"
     },
+    "qiblaCompassAccuracyPoor": "Compass accuracy is low. Move your phone in a figure-eight motion to calibrate it.",
+    "@qiblaCompassAccuracyPoor": {
+        "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
+    },
     "onboardingTitle1": "Minutes from the Quran... change your whole day",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title"
@@ -2044,6 +2048,14 @@
             }
         }
     },
+    "shareInvalidRangeOrder": "First ayah must be before or equal to the last.",
+    "@shareInvalidRangeOrder": {
+        "description": "Inline reason shown when the user picks fromAyah > toAyah in the share composer"
+    },
+    "shareInvalidRangeBounds": "Selected range is outside this surah.",
+    "@shareInvalidRangeBounds": {
+        "description": "Inline reason shown when the share composer range falls outside [1, maxAyah]"
+    },
     "sharing": "Sharing...",
     "@sharing": {
         "description": "Status message while sharing"
@@ -2362,6 +2374,14 @@
     "@notificationPermissionRequired": {
         "description": "Banner shown when the Android POST_NOTIFICATIONS permission is not granted"
     },
+    "batteryOptimizationExemptionRequired": "Disable battery optimization to keep prayer reminders on time when the screen is off.",
+    "@batteryOptimizationExemptionRequired": {
+        "description": "Banner shown when the app is not whitelisted from Doze / battery optimization"
+    },
+    "oemAutostartHint": "On this device, also enable Autostart for Tilawa in your phone's settings so reminders are not stopped in the background.",
+    "@oemAutostartHint": {
+        "description": "Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually"
+    },
     "prayerNotificationBody": "It is time for {prayerName}",
     "@prayerNotificationBody": {
         "description": "Body text for prayer time notifications",
@@ -2387,5 +2407,70 @@
     "prayerNotificationsAdhanChannelDescription": "Prayer time reminders that play the adhan sound",
     "@prayerNotificationsAdhanChannelDescription": {
         "description": "Android notification channel description for prayer reminders with adhan sound"
+    },
+    "prayerNotificationsSilentAdhanChannelName": "Prayer Times (Silent)",
+    "@prayerNotificationsSilentAdhanChannelName": {
+        "description": "Android notification channel name for prayer reminders when adhan is handled natively"
+    },
+    "prayerNotificationsSilentAdhanChannelDescription": "Silent prayer time reminders when Adhan plays natively",
+    "@prayerNotificationsSilentAdhanChannelDescription": {
+        "description": "Android notification channel description for prayer reminders when adhan is handled natively"
+    },
+    "adhanIsPlaying": "Adhan is playing",
+    "@adhanIsPlaying": {
+        "description": "Text showing that Adhan audio is currently playing"
+    },
+    "stopAdhan": "Stop Adhan",
+    "@stopAdhan": {
+        "description": "Button label to stop Adhan playback"
+    },
+    "prayerNotificationReceived": "Prayer notification received",
+    "@prayerNotificationReceived": {
+        "description": "Status text when a prayer notification is opened"
+    },
+    "viewAllPrayerTimes": "View All Prayer Times",
+    "@viewAllPrayerTimes": {
+        "description": "Button label to navigate to the full prayer times screen"
+    },
+    "prayerTimeAt": "at {time}",
+    "@prayerTimeAt": {
+        "description": "Label showing a prayer time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationStatus": "Notification",
+    "@notificationStatus": {
+        "description": "Label for notification status"
+    },
+    "adhanStatus": "Adhan",
+    "@adhanStatus": {
+        "description": "Label for Adhan status"
+    },
+    "received": "Received",
+    "@received": {
+        "description": "Status text for received notification"
+    },
+    "sound": "Sound",
+    "@sound": {
+        "description": "Label for audio sound"
+    },
+    "enabled": "Enabled",
+    "@enabled": {
+        "description": "Generic enabled status"
+    },
+    "disabled": "Disabled",
+    "@disabled": {
+        "description": "Generic disabled status"
+    },
+    "errorMissingNotificationPayload": "Missing notification payload.",
+    "@errorMissingNotificationPayload": {
+        "description": "Error message when notification data is missing"
+    },
+    "errorInvalidNotificationPayload": "Invalid notification payload.",
+    "@errorInvalidNotificationPayload": {
+        "description": "Error message when notification data is corrupted or invalid"
     }
 }

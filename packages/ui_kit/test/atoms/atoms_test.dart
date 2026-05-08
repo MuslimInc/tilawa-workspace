@@ -275,16 +275,22 @@ void main() {
     test('lerp interpolates all values', () {
       const a = TilawaIconBoxTokens(
         iconSize: 20.0,
+        backgroundColor: Color(0xFFE8EFE9),
         padding: 6.0,
         borderRadius: 10.0,
       );
       const b = TilawaIconBoxTokens(
         iconSize: 30.0,
+        backgroundColor: Color(0xFFD8F0EC),
         padding: 12.0,
         borderRadius: 16.0,
       );
       final result = TilawaIconBoxTokens.lerp(a, b, 0.5);
       expect(result.iconSize, closeTo(25.0, 0.01));
+      expect(
+        result.backgroundColor,
+        Color.lerp(a.backgroundColor, b.backgroundColor, 0.5),
+      );
       expect(result.padding, closeTo(9.0, 0.01));
       expect(result.borderRadius, closeTo(13.0, 0.01));
     });

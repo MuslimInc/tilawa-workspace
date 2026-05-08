@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../app_colors.dart';
+import '../density.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -10,6 +12,10 @@ class TilawaAlphabetScrollbarTokens {
     required this.selectedIndicatorExtent,
     required this.letterFontSize,
     required this.verticalPadding,
+    required this.overlaySize,
+    required this.overlayFontSize,
+    required this.overlayRadius,
+    required this.overlayOffset,
   });
 
   final double width;
@@ -17,15 +23,28 @@ class TilawaAlphabetScrollbarTokens {
   final double selectedIndicatorExtent;
   final double letterFontSize;
   final EdgeInsetsGeometry verticalPadding;
+  final double overlaySize;
+  final double overlayFontSize;
+  final double overlayRadius;
+  final double overlayOffset;
 
-  factory TilawaAlphabetScrollbarTokens.defaults() =>
-      const TilawaAlphabetScrollbarTokens(
-        width: 36,
-        itemExtent: 30,
-        selectedIndicatorExtent: 25.5,
-        letterFontSize: 13,
-        verticalPadding: EdgeInsets.symmetric(vertical: 12),
-      );
+  factory TilawaAlphabetScrollbarTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: itemExtent (30) is already touch-marginal on the long surah
+    // list. Tightening risks misclicks. Kept for visual review.
+    return const TilawaAlphabetScrollbarTokens(
+      width: 36,
+      itemExtent: 30,
+      selectedIndicatorExtent: 25.5,
+      letterFontSize: 13,
+      verticalPadding: EdgeInsets.symmetric(vertical: 12),
+      overlaySize: 64,
+      overlayFontSize: 32,
+      overlayRadius: 16,
+      overlayOffset: 48,
+    );
+  }
 
   TilawaAlphabetScrollbarTokens copyWith({
     double? width,
@@ -33,6 +52,10 @@ class TilawaAlphabetScrollbarTokens {
     double? selectedIndicatorExtent,
     double? letterFontSize,
     EdgeInsetsGeometry? verticalPadding,
+    double? overlaySize,
+    double? overlayFontSize,
+    double? overlayRadius,
+    double? overlayOffset,
   }) {
     return TilawaAlphabetScrollbarTokens(
       width: width ?? this.width,
@@ -41,6 +64,10 @@ class TilawaAlphabetScrollbarTokens {
           selectedIndicatorExtent ?? this.selectedIndicatorExtent,
       letterFontSize: letterFontSize ?? this.letterFontSize,
       verticalPadding: verticalPadding ?? this.verticalPadding,
+      overlaySize: overlaySize ?? this.overlaySize,
+      overlayFontSize: overlayFontSize ?? this.overlayFontSize,
+      overlayRadius: overlayRadius ?? this.overlayRadius,
+      overlayOffset: overlayOffset ?? this.overlayOffset,
     );
   }
 
@@ -63,6 +90,10 @@ class TilawaAlphabetScrollbarTokens {
         b.verticalPadding,
         t,
       )!,
+      overlaySize: lerpTokenDouble(a.overlaySize, b.overlaySize, t),
+      overlayFontSize: lerpTokenDouble(a.overlayFontSize, b.overlayFontSize, t),
+      overlayRadius: lerpTokenDouble(a.overlayRadius, b.overlayRadius, t),
+      overlayOffset: lerpTokenDouble(a.overlayOffset, b.overlayOffset, t),
     );
   }
 }
@@ -83,14 +114,26 @@ class TilawaFeedbackStripTokens {
   final double spinnerStrokeWidth;
   final double contentGap;
 
-  factory TilawaFeedbackStripTokens.defaults() =>
-      const TilawaFeedbackStripTokens(
-        padding: EdgeInsets.all(14),
+  factory TilawaFeedbackStripTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density.isCompact) {
+      return const TilawaFeedbackStripTokens(
+        padding: EdgeInsets.all(10),
         borderRadius: 18,
         spinnerSize: 18,
         spinnerStrokeWidth: 2.2,
-        contentGap: 10,
+        contentGap: 8,
       );
+    }
+    return const TilawaFeedbackStripTokens(
+      padding: EdgeInsets.all(14),
+      borderRadius: 18,
+      spinnerSize: 18,
+      spinnerStrokeWidth: 2.2,
+      contentGap: 10,
+    );
+  }
 
   TilawaFeedbackStripTokens copyWith({
     EdgeInsetsGeometry? padding,
@@ -139,11 +182,22 @@ class TilawaGlassPanelTokens {
   final double borderRadiusOffset;
   final double backgroundOpacity;
 
-  factory TilawaGlassPanelTokens.defaults() => const TilawaGlassPanelTokens(
-    padding: EdgeInsets.all(16),
-    borderRadiusOffset: 8,
-    backgroundOpacity: 0.8,
-  );
+  factory TilawaGlassPanelTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density.isCompact) {
+      return const TilawaGlassPanelTokens(
+        padding: EdgeInsets.all(12),
+        borderRadiusOffset: 8,
+        backgroundOpacity: 0.8,
+      );
+    }
+    return const TilawaGlassPanelTokens(
+      padding: EdgeInsets.all(16),
+      borderRadiusOffset: 8,
+      backgroundOpacity: 0.8,
+    );
+  }
 
   TilawaGlassPanelTokens copyWith({
     EdgeInsetsGeometry? padding,
@@ -194,14 +248,19 @@ class TilawaIconActionButtonTokens {
   final double activeBorderOpacity;
   final double inactiveBorderOpacity;
 
-  factory TilawaIconActionButtonTokens.defaults() =>
-      const TilawaIconActionButtonTokens(
-        size: kMinInteractiveDimension,
-        borderRadius: 16,
-        activeBackgroundOpacity: 0.12,
-        activeBorderOpacity: 0.35,
-        inactiveBorderOpacity: 0.26,
-      );
+  factory TilawaIconActionButtonTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: size = kMinInteractiveDimension (48dp). At the floor; do not
+    // shrink further.
+    return const TilawaIconActionButtonTokens(
+      size: kMinInteractiveDimension,
+      borderRadius: 16,
+      activeBackgroundOpacity: 0.12,
+      activeBorderOpacity: 0.35,
+      inactiveBorderOpacity: 0.26,
+    );
+  }
 
   TilawaIconActionButtonTokens copyWith({
     double? size,
@@ -253,6 +312,9 @@ class TilawaChipTokens {
   const TilawaChipTokens({
     required this.padding,
     required this.compactPadding,
+    required this.backgroundColor,
+    required this.selectionSelectedBackgroundColor,
+    required this.selectionUnselectedBackgroundColor,
     required this.contentGap,
     required this.iconSize,
     required this.compactIconSize,
@@ -268,6 +330,9 @@ class TilawaChipTokens {
 
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry compactPadding;
+  final Color backgroundColor;
+  final Color selectionSelectedBackgroundColor;
+  final Color selectionUnselectedBackgroundColor;
   final double contentGap;
   final double iconSize;
   final double compactIconSize;
@@ -280,25 +345,98 @@ class TilawaChipTokens {
   final FontWeight statusFontWeight;
   final double statusLetterSpacing;
 
-  factory TilawaChipTokens.defaults() => const TilawaChipTokens(
-    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-    compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-    contentGap: 8,
-    iconSize: 16,
-    compactIconSize: 14,
-    borderWidth: 0.5,
-    pillRadius: 999,
-    roundedRadius: 8,
-    selectedShadowOpacity: 0.3,
-    selectedShadowBlur: 16,
-    selectionFontWeight: FontWeight.w700,
-    statusFontWeight: FontWeight.w900,
-    statusLetterSpacing: 0.5,
-  );
+  factory TilawaChipTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaChipTokens.fromColorScheme(colorScheme, density: density);
+  }
+
+  factory TilawaChipTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final backgroundColor = _backgroundColor(colorScheme);
+    final selectionSelectedBackgroundColor = _selectionSelectedBackgroundColor(
+      colorScheme,
+    );
+    final selectionUnselectedBackgroundColor =
+        _selectionUnselectedBackgroundColor(colorScheme);
+    if (density.isCompact) {
+      return TilawaChipTokens(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        backgroundColor: backgroundColor,
+        selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
+        selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
+        contentGap: 6,
+        iconSize: 16,
+        compactIconSize: 14,
+        borderWidth: 0.5,
+        pillRadius: 999,
+        roundedRadius: 8,
+        selectedShadowOpacity: 0.18,
+        selectedShadowBlur: 12,
+        selectionFontWeight: FontWeight.w700,
+        statusFontWeight: FontWeight.w900,
+        statusLetterSpacing: 0.5,
+      );
+    }
+    return TilawaChipTokens(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      backgroundColor: backgroundColor,
+      selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
+      selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
+      contentGap: 8,
+      iconSize: 16,
+      compactIconSize: 14,
+      borderWidth: 0.5,
+      pillRadius: 999,
+      roundedRadius: 8,
+      selectedShadowOpacity: 0.18,
+      selectedShadowBlur: 12,
+      selectionFontWeight: FontWeight.w700,
+      statusFontWeight: FontWeight.w900,
+      statusLetterSpacing: 0.5,
+    );
+  }
+
+  static Color _backgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
+  static Color _selectionSelectedBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
+    return Color.lerp(
+      colorScheme.primaryContainer,
+      colorScheme.primary,
+      blendAmount,
+    )!;
+  }
+
+  static Color _selectionUnselectedBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.22 : 0.38;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
 
   TilawaChipTokens copyWith({
     EdgeInsetsGeometry? padding,
     EdgeInsetsGeometry? compactPadding,
+    Color? backgroundColor,
+    Color? selectionSelectedBackgroundColor,
+    Color? selectionUnselectedBackgroundColor,
     double? contentGap,
     double? iconSize,
     double? compactIconSize,
@@ -314,6 +452,13 @@ class TilawaChipTokens {
     return TilawaChipTokens(
       padding: padding ?? this.padding,
       compactPadding: compactPadding ?? this.compactPadding,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      selectionSelectedBackgroundColor:
+          selectionSelectedBackgroundColor ??
+          this.selectionSelectedBackgroundColor,
+      selectionUnselectedBackgroundColor:
+          selectionUnselectedBackgroundColor ??
+          this.selectionUnselectedBackgroundColor,
       contentGap: contentGap ?? this.contentGap,
       iconSize: iconSize ?? this.iconSize,
       compactIconSize: compactIconSize ?? this.compactIconSize,
@@ -339,6 +484,17 @@ class TilawaChipTokens {
       compactPadding: EdgeInsetsGeometry.lerp(
         a.compactPadding,
         b.compactPadding,
+        t,
+      )!,
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
+      selectionSelectedBackgroundColor: Color.lerp(
+        a.selectionSelectedBackgroundColor,
+        b.selectionSelectedBackgroundColor,
+        t,
+      )!,
+      selectionUnselectedBackgroundColor: Color.lerp(
+        a.selectionUnselectedBackgroundColor,
+        b.selectionUnselectedBackgroundColor,
         t,
       )!,
       contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
@@ -381,6 +537,8 @@ class TilawaSegmentedControlTokens {
   const TilawaSegmentedControlTokens({
     required this.containerPadding,
     required this.itemPadding,
+    required this.containerBackgroundColor,
+    required this.selectedBackgroundColor,
     required this.containerRadius,
     required this.itemRadius,
     required this.containerOpacity,
@@ -391,6 +549,8 @@ class TilawaSegmentedControlTokens {
 
   final EdgeInsetsGeometry containerPadding;
   final EdgeInsetsGeometry itemPadding;
+  final Color containerBackgroundColor;
+  final Color selectedBackgroundColor;
   final double containerRadius;
   final double itemRadius;
   final double containerOpacity;
@@ -398,21 +558,75 @@ class TilawaSegmentedControlTokens {
   final FontWeight selectedFontWeight;
   final FontWeight unselectedFontWeight;
 
-  factory TilawaSegmentedControlTokens.defaults() =>
-      const TilawaSegmentedControlTokens(
-        containerPadding: EdgeInsets.all(4),
-        itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        containerRadius: 12,
-        itemRadius: 8,
+  factory TilawaSegmentedControlTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaSegmentedControlTokens.fromColorScheme(
+      colorScheme,
+      density: density,
+    );
+  }
+
+  factory TilawaSegmentedControlTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final containerBackgroundColor = _containerBackgroundColor(colorScheme);
+    final selectedBackgroundColor = _selectedBackgroundColor(colorScheme);
+    if (density.isCompact) {
+      return TilawaSegmentedControlTokens(
+        containerPadding: EdgeInsets.all(2),
+        itemPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        containerBackgroundColor: containerBackgroundColor,
+        selectedBackgroundColor: selectedBackgroundColor,
+        containerRadius: 10,
+        itemRadius: 6,
         containerOpacity: 0.3,
         minItemWidth: 100,
         selectedFontWeight: FontWeight.bold,
         unselectedFontWeight: FontWeight.normal,
       );
+    }
+    return TilawaSegmentedControlTokens(
+      containerPadding: EdgeInsets.all(4),
+      itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      containerBackgroundColor: containerBackgroundColor,
+      selectedBackgroundColor: selectedBackgroundColor,
+      containerRadius: 12,
+      itemRadius: 8,
+      containerOpacity: 0.3,
+      minItemWidth: 100,
+      selectedFontWeight: FontWeight.bold,
+      unselectedFontWeight: FontWeight.normal,
+    );
+  }
+
+  static Color _containerBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
+
+  static Color _selectedBackgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.34 : 0.62;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
 
   TilawaSegmentedControlTokens copyWith({
     EdgeInsetsGeometry? containerPadding,
     EdgeInsetsGeometry? itemPadding,
+    Color? containerBackgroundColor,
+    Color? selectedBackgroundColor,
     double? containerRadius,
     double? itemRadius,
     double? containerOpacity,
@@ -423,6 +637,10 @@ class TilawaSegmentedControlTokens {
     return TilawaSegmentedControlTokens(
       containerPadding: containerPadding ?? this.containerPadding,
       itemPadding: itemPadding ?? this.itemPadding,
+      containerBackgroundColor:
+          containerBackgroundColor ?? this.containerBackgroundColor,
+      selectedBackgroundColor:
+          selectedBackgroundColor ?? this.selectedBackgroundColor,
       containerRadius: containerRadius ?? this.containerRadius,
       itemRadius: itemRadius ?? this.itemRadius,
       containerOpacity: containerOpacity ?? this.containerOpacity,
@@ -444,6 +662,16 @@ class TilawaSegmentedControlTokens {
         t,
       )!,
       itemPadding: EdgeInsetsGeometry.lerp(a.itemPadding, b.itemPadding, t)!,
+      containerBackgroundColor: Color.lerp(
+        a.containerBackgroundColor,
+        b.containerBackgroundColor,
+        t,
+      )!,
+      selectedBackgroundColor: Color.lerp(
+        a.selectedBackgroundColor,
+        b.selectedBackgroundColor,
+        t,
+      )!,
       containerRadius: lerpTokenDouble(a.containerRadius, b.containerRadius, t),
       itemRadius: lerpTokenDouble(a.itemRadius, b.itemRadius, t),
       containerOpacity: lerpTokenDouble(
@@ -484,14 +712,20 @@ class TilawaSeekBarTokens {
   final double bufferedTrackOpacity;
   final double inactiveTrackOpacity;
 
-  factory TilawaSeekBarTokens.defaults() => const TilawaSeekBarTokens(
-    touchExtent: 30,
-    horizontalMargin: 16,
-    trackHeight: 8,
-    thumbRadius: 12,
-    bufferedTrackOpacity: 0.3,
-    inactiveTrackOpacity: 0.1,
-  );
+  factory TilawaSeekBarTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: touchExtent (30) is already below 48dp; track is the main drag
+    // affordance. Keep no-op until proper UX review.
+    return const TilawaSeekBarTokens(
+      touchExtent: 30,
+      horizontalMargin: 16,
+      trackHeight: 8,
+      thumbRadius: 12,
+      bufferedTrackOpacity: 0.3,
+      inactiveTrackOpacity: 0.1,
+    );
+  }
 
   TilawaSeekBarTokens copyWith({
     double? touchExtent,
@@ -543,6 +777,7 @@ class TilawaSeekBarTokens {
 class TilawaSearchFieldTokens {
   const TilawaSearchFieldTokens({
     required this.height,
+    required this.backgroundColor,
     required this.borderRadius,
     required this.contentPadding,
     required this.iconSize,
@@ -556,6 +791,7 @@ class TilawaSearchFieldTokens {
   });
 
   final double height;
+  final Color backgroundColor;
   final double borderRadius;
   final EdgeInsetsGeometry contentPadding;
   final double iconSize;
@@ -567,22 +803,68 @@ class TilawaSearchFieldTokens {
   final double shadowBlur;
   final Offset shadowOffset;
 
-  factory TilawaSearchFieldTokens.defaults() => const TilawaSearchFieldTokens(
-    height: kMinInteractiveDimension,
-    borderRadius: 16,
-    contentPadding: EdgeInsets.symmetric(vertical: 12),
-    iconSize: 18,
-    focusedBorderOpacity: 0.28,
-    unfocusedBorderOpacity: 0.26,
-    shadowOpacity: 0.04,
-    hintOpacity: 0.58,
-    iconOpacity: 0.72,
-    shadowBlur: 12,
-    shadowOffset: Offset(0, 4),
-  );
+  factory TilawaSearchFieldTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.defaultPrimary,
+    );
+    return TilawaSearchFieldTokens.fromColorScheme(
+      colorScheme,
+      density: density,
+    );
+  }
+
+  factory TilawaSearchFieldTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    final backgroundColor = _backgroundColor(colorScheme);
+    if (density.isCompact) {
+      // Height stays at kMinInteractiveDimension (48dp) — non-negotiable.
+      return TilawaSearchFieldTokens(
+        height: kMinInteractiveDimension,
+        backgroundColor: backgroundColor,
+        borderRadius: 12,
+        contentPadding: EdgeInsets.symmetric(vertical: 10),
+        iconSize: 16,
+        focusedBorderOpacity: 0.28,
+        unfocusedBorderOpacity: 0.26,
+        shadowOpacity: 0.04,
+        hintOpacity: 0.58,
+        iconOpacity: 0.72,
+        shadowBlur: 8,
+        shadowOffset: Offset(0, 2),
+      );
+    }
+    return TilawaSearchFieldTokens(
+      height: kMinInteractiveDimension,
+      backgroundColor: backgroundColor,
+      borderRadius: 16,
+      contentPadding: EdgeInsets.symmetric(vertical: 12),
+      iconSize: 18,
+      focusedBorderOpacity: 0.28,
+      unfocusedBorderOpacity: 0.26,
+      shadowOpacity: 0.04,
+      hintOpacity: 0.58,
+      iconOpacity: 0.72,
+      shadowBlur: 12,
+      shadowOffset: Offset(0, 4),
+    );
+  }
+
+  static Color _backgroundColor(ColorScheme colorScheme) {
+    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.24 : 0.42;
+    return Color.lerp(
+      colorScheme.surface,
+      colorScheme.primaryContainer,
+      blendAmount,
+    )!;
+  }
 
   TilawaSearchFieldTokens copyWith({
     double? height,
+    Color? backgroundColor,
     double? borderRadius,
     EdgeInsetsGeometry? contentPadding,
     double? iconSize,
@@ -596,6 +878,7 @@ class TilawaSearchFieldTokens {
   }) {
     return TilawaSearchFieldTokens(
       height: height ?? this.height,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       contentPadding: contentPadding ?? this.contentPadding,
       iconSize: iconSize ?? this.iconSize,
@@ -617,6 +900,7 @@ class TilawaSearchFieldTokens {
   ) {
     return TilawaSearchFieldTokens(
       height: lerpTokenDouble(a.height, b.height, t),
+      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
       contentPadding: EdgeInsetsGeometry.lerp(
         a.contentPadding,
@@ -677,23 +961,28 @@ class TilawaCountProgressRingTokens {
   final double progressLabelBorderRadius;
   final double progressLabelBackgroundOpacity;
 
-  factory TilawaCountProgressRingTokens.defaults() =>
-      const TilawaCountProgressRingTokens(
-        outerSize: 72,
-        innerSize: 62,
-        ringStrokeWidth: 10,
-        doneIconSize: 50,
-        countFontSize: 36,
-        countLineHeight: 1,
-        doneBorderWidth: 2,
-        doneBorderOpacity: 0.3,
-        activeGradientEndOpacity: 0.8,
-        doneGradientEndOpacity: 0.7,
-        progressLabelSpacing: 16,
-        progressLabelPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        progressLabelBorderRadius: 24,
-        progressLabelBackgroundOpacity: 0.3,
-      );
+  factory TilawaCountProgressRingTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    // No-op: display-only counter ring; sizes are calibrated for legibility
+    // of the count number (fontSize 36). Keep no-op.
+    return const TilawaCountProgressRingTokens(
+      outerSize: 72,
+      innerSize: 62,
+      ringStrokeWidth: 10,
+      doneIconSize: 50,
+      countFontSize: 36,
+      countLineHeight: 1,
+      doneBorderWidth: 2,
+      doneBorderOpacity: 0.3,
+      activeGradientEndOpacity: 0.8,
+      doneGradientEndOpacity: 0.7,
+      progressLabelSpacing: 16,
+      progressLabelPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      progressLabelBorderRadius: 24,
+      progressLabelBackgroundOpacity: 0.3,
+    );
+  }
 
   TilawaCountProgressRingTokens copyWith({
     double? outerSize,
@@ -802,14 +1091,26 @@ class TilawaPermissionBannerTokens {
   final double iconSpacing;
   final double actionSpacing;
 
-  factory TilawaPermissionBannerTokens.defaults() =>
-      const TilawaPermissionBannerTokens(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        borderRadius: 12,
+  factory TilawaPermissionBannerTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density.isCompact) {
+      return const TilawaPermissionBannerTokens(
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        borderRadius: 10,
         iconSize: 16,
-        iconSpacing: 8,
-        actionSpacing: 8,
+        iconSpacing: 6,
+        actionSpacing: 6,
       );
+    }
+    return const TilawaPermissionBannerTokens(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      borderRadius: 12,
+      iconSize: 16,
+      iconSpacing: 8,
+      actionSpacing: 8,
+    );
+  }
 
   TilawaPermissionBannerTokens copyWith({
     EdgeInsetsGeometry? padding,
@@ -853,8 +1154,20 @@ class TilawaPrayerAlertRowTokens {
   final double verticalPadding;
   final double toggleSpacing;
 
-  factory TilawaPrayerAlertRowTokens.defaults() =>
-      const TilawaPrayerAlertRowTokens(verticalPadding: 4, toggleSpacing: 8);
+  factory TilawaPrayerAlertRowTokens.defaults({
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    if (density.isCompact) {
+      return const TilawaPrayerAlertRowTokens(
+        verticalPadding: 2,
+        toggleSpacing: 6,
+      );
+    }
+    return const TilawaPrayerAlertRowTokens(
+      verticalPadding: 4,
+      toggleSpacing: 8,
+    );
+  }
 
   TilawaPrayerAlertRowTokens copyWith({
     double? verticalPadding,

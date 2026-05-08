@@ -12,6 +12,8 @@ class ScreenshotComposerControls extends StatelessWidget {
     required this.minAyah,
     required this.maxAyah,
     required this.isBusy,
+    this.errorMessage,
+    this.primaryLabel,
     required this.onFromChanged,
     required this.onToChanged,
     required this.onPrimaryAction,
@@ -22,6 +24,8 @@ class ScreenshotComposerControls extends StatelessWidget {
   final int minAyah;
   final int maxAyah;
   final bool isBusy;
+  final String? errorMessage;
+  final String? primaryLabel;
   final ValueChanged<int> onFromChanged;
   final ValueChanged<int> onToChanged;
   final VoidCallback onPrimaryAction;
@@ -30,7 +34,7 @@ class ScreenshotComposerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final bottomPadding = context.floatingBottomPadding;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -57,11 +61,21 @@ class ScreenshotComposerControls extends StatelessWidget {
               ),
             ],
           ),
+          if (errorMessage != null) ...[
+            SizedBox(height: tokens.spaceSmall),
+            Text(
+              errorMessage!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
           SizedBox(height: tokens.spaceMedium),
           FilledButton.icon(
             onPressed: isBusy ? null : onPrimaryAction,
             icon: const Icon(Icons.screenshot_rounded),
-            label: Text(context.l10n.shareScreenshot),
+            label: Text(primaryLabel ?? context.l10n.shareScreenshot),
           ),
         ],
       ),

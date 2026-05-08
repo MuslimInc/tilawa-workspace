@@ -13,6 +13,7 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
 import 'package:tilawa/core/bootstrap/critical_init_coordinator.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../firebase_options.dart';
 import '../../router/app_router.dart';
@@ -36,6 +37,11 @@ void configureAppLaunch({AppLaunchConfig? launchConfig}) {
   _startupTasks = AppStartupTasks(launchConfig: _appLaunchConfig);
   _bootstrapper = AppBootstrapper(startupTasks: _startupTasks);
 }
+
+/// The current launch configuration.
+///
+/// Defaults to [AppLaunchConfig.fromEnvironment] if not explicitly configured.
+AppLaunchConfig get appLaunchConfig => _appLaunchConfig;
 
 Future<void> bootstrap({
   AppRunner? runner,

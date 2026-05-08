@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
@@ -37,15 +38,21 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
   @override
   Widget build(BuildContext context) {
     final List<DownloadItem> downloads = _allDownloads;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return Card(
       elevation: 0,
       shadowColor: Colors.transparent,
-      color: Theme.of(context).cardColor,
+      color: colorScheme.surfaceContainerLow,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         side: BorderSide(
-          color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+          color: colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacityMedium,
+          ),
+          width: tokens.borderWidthThin,
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -60,7 +67,9 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               children: [
                 Divider(
                   height: 1,
-                  color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                  color: colorScheme.outlineVariant.withValues(
+                    alpha: tokens.opacityMedium,
+                  ),
                 ),
                 _buildDownloadsList(context),
               ],
@@ -79,6 +88,10 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
     BuildContext context,
     List<DownloadItem> downloads,
   ) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     return InkWell(
       onTap: () {
         setState(() {
@@ -86,37 +99,36 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
         });
       },
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(tokens.spaceLarge),
         child: Row(
           children: [
             // Reciter Avatar
             Container(
-              padding: const EdgeInsets.all(2),
+              padding: EdgeInsets.all(tokens.spaceTiny),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+                  color: colorScheme.primary.withValues(
+                    alpha: tokens.opacitySubtle,
+                  ),
                   width: 2,
                 ),
               ),
               child: CircleAvatar(
                 radius: 20,
-                backgroundColor: Theme.of(
-                  context,
-                ).primaryColor.withValues(alpha: 0.1),
+                backgroundColor: colorScheme.primaryContainer,
                 child: Text(
                   widget.reciterName.isNotEmpty
                       ? widget.reciterName[0].toUpperCase()
                       : 'R',
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: colorScheme.onPrimaryContainer,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: tokens.spaceLarge),
             // Info
             Expanded(
               child: Column(
@@ -124,14 +136,17 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                 children: [
                   Text(
                     widget.reciterName,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: tokens.spaceExtraSmall),
                   Text(
                     '${downloads.length} ${context.l10n.surahs}${widget.downloadsByNarrative.length > 1 ? " • ${widget.downloadsByNarrative.length} narratives" : ""}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -153,10 +168,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                           (audioState.playbackState?.isPlaying ?? false);
 
                       return IconButton.filledTonal(
-                        style: IconButton.styleFrom(
-                          visualDensity: VisualDensity.compact,
-                          padding: const EdgeInsets.all(8),
-                        ),
+                        style: IconButton.styleFrom(padding: EdgeInsets.zero),
                         icon: Icon(
                           isPlaying
                               ? Icons.pause_rounded
@@ -171,21 +183,11 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                       );
                     },
                   ),
-                const SizedBox(width: 8),
-                // Expand Icon
-                AnimatedRotation(
-                  turns: _isExpanded ? 0.5 : 0.0,
-                  duration: const Duration(milliseconds: 300),
-                  child: Icon(
-                    Icons.expand_more_rounded,
-                    color: Theme.of(context).hintColor,
-                  ),
-                ),
-                const SizedBox(width: 4),
+                SizedBox(width: tokens.spaceExtraSmall),
                 PopupMenuButton<String>(
                   icon: const Icon(Icons.more_vert_rounded),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(tokens.radiusMedium),
                   ),
                   onSelected: (value) {
                     if (value == 'delete_all') {
@@ -199,15 +201,13 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                         children: [
                           Icon(
                             Icons.delete_outline_rounded,
-                            color: Theme.of(context).colorScheme.error,
-                            size: 20,
+                            color: colorScheme.error,
+                            size: tokens.iconSizeMedium,
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: tokens.spaceMedium),
                           Text(
                             context.l10n.deleteAll,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                            ),
+                            style: TextStyle(color: colorScheme.error),
                           ),
                         ],
                       ),
@@ -223,6 +223,10 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
   }
 
   Widget _buildDownloadsList(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     if (widget.downloadsByNarrative.length == 1) {
       // Single narrative: just show the list
       final List<DownloadItem> downloads =
@@ -243,12 +247,12 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               ),
               if (index != downloads.length - 1)
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Divider(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+                  child: TilawaDivider(
                     height: 1,
-                    color: Theme.of(
-                      context,
-                    ).dividerColor.withValues(alpha: 0.1),
+                    color: colorScheme.outlineVariant.withValues(
+                      alpha: tokens.opacitySubtle,
+                    ),
                   ),
                 ),
             ],
@@ -269,13 +273,16 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
             // Narrative Header
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              color: Theme.of(context).colorScheme.surfaceContainerLowest,
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceLarge,
+                vertical: tokens.spaceMedium,
+              ),
+              color: colorScheme.surfaceContainerLowest,
               child: Text(
                 narrativeName,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).primaryColor,
+                  color: colorScheme.primary,
                 ),
               ),
             ),
@@ -296,12 +303,14 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                   // Show divider unless it's the last item in this narrative
                   if (index != narrativeDownloads.length - 1)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Divider(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: tokens.spaceLarge,
+                      ),
+                      child: TilawaDivider(
                         height: 1,
-                        color: Theme.of(
-                          context,
-                        ).dividerColor.withValues(alpha: 0.1),
+                        color: colorScheme.outlineVariant.withValues(
+                          alpha: tokens.opacitySubtle,
+                        ),
                       ),
                     ),
                 ],
@@ -309,10 +318,12 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
             }),
             // Divider between narrative sections (except after the last one)
             if (entry.key != widget.downloadsByNarrative.keys.last)
-              Divider(
+              TilawaDivider(
                 height: 1,
                 thickness: 4,
-                color: Theme.of(context).dividerColor.withValues(alpha: 0.05),
+                color: colorScheme.outlineVariant.withValues(
+                  alpha: tokens.opacitySubtle,
+                ),
               ),
           ],
         );
@@ -342,7 +353,9 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                 DeleteReciterDownloads(reciterName: widget.reciterName),
               );
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: Text(context.l10n.deleteAll),
           ),
         ],

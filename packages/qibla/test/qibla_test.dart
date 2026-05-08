@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_compass_v2/flutter_compass_v2.dart';
+import 'package:compass/flutter_compass.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mocktail/mocktail.dart';
@@ -110,6 +110,7 @@ void main() {
 
       final event1 = MockCompassEvent();
       when(() => event1.heading).thenReturn(0.0);
+      when(() => event1.accuracy).thenReturn(45.0);
 
       locationController.add(pos);
       compassController.add(event1); // North
@@ -122,10 +123,12 @@ void main() {
       expect(results[0].qibla, closeTo(241, 1));
       expect(results[0].direction, 0.0);
       expect(results[0].offset, closeTo(119, 1));
+      expect(results[0].accuracy, 45.0);
 
       // Update heading to 90 (East)
       final event2 = MockCompassEvent();
       when(() => event2.heading).thenReturn(90.0);
+      when(() => event2.accuracy).thenReturn(15.0);
 
       compassController.add(event2);
       await Future.delayed(Duration.zero);
@@ -133,6 +136,7 @@ void main() {
       expect(results.length, 2);
       // qibla = 90 + (360 - 119) = 90 + 241 = 331
       expect(results[1].qibla, closeTo(331, 1));
+      expect(results[1].accuracy, 15.0);
 
       await subscription.cancel();
       await compassController.close();

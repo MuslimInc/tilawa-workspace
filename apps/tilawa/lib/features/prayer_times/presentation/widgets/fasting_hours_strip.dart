@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
 import '../../domain/entities/entities.dart';
 
 class FastingHoursStrip extends StatelessWidget {
@@ -11,7 +13,7 @@ class FastingHoursStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final isArabic = context.isArabic;
 
     // Calculate duration
     final Duration fastingDuration = prayerTimes.maghrib.difference(

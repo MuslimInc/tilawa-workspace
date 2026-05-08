@@ -27,6 +27,7 @@ class SurahGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
     final borderRadius = BorderRadius.circular(tokens.radiusLarge);
 
@@ -69,13 +70,15 @@ class SurahGridItem extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             color: isCurrentItem
-                ? theme.primaryColor.withValues(alpha: tokens.opacitySubtle)
-                : theme.cardColor,
+                ? colorScheme.primaryContainer.withValues(alpha: 0.42)
+                : colorScheme.surfaceContainerLow,
             borderRadius: borderRadius,
             border: Border.all(
               color: isCurrentItem
-                  ? theme.primaryColor.withValues(alpha: tokens.opacityEmphasis)
-                  : theme.dividerColor.withValues(alpha: tokens.opacitySubtle),
+                  ? colorScheme.primary.withValues(alpha: tokens.opacityMedium)
+                  : colorScheme.outlineVariant.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
               width: isCurrentItem
                   ? tokens.borderWidthThin * 3
                   : tokens.borderWidthThin * 2,
@@ -83,13 +86,19 @@ class SurahGridItem extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: isCurrentItem
-                    ? theme.primaryColor.withValues(alpha: tokens.opacitySubtle)
-                    : Colors.black.withValues(alpha: tokens.opacitySubtle / 2),
+                    ? colorScheme.primary.withValues(
+                        alpha: tokens.opacitySubtle,
+                      )
+                    : colorScheme.shadow.withValues(
+                        alpha: tokens.opacitySubtle / 2,
+                      ),
                 blurRadius: tokens.blurGlass,
                 offset: tokens.shadowOffsetMedium,
               ),
               BoxShadow(
-                color: Colors.black.withValues(alpha: tokens.opacitySubtle / 4),
+                color: colorScheme.shadow.withValues(
+                  alpha: tokens.opacitySubtle / 4,
+                ),
                 blurRadius: tokens.spaceExtraSmall,
                 offset: tokens.shadowOffsetSmall,
               ),
@@ -129,8 +138,7 @@ class SurahGridItem extends StatelessWidget {
                             vertical: tokens.spaceExtraSmall,
                           ),
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: tokens.opacityMedium),
+                            color: colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(
                               tokens.radiusMedium,
                             ),
@@ -140,7 +148,7 @@ class SurahGridItem extends StatelessWidget {
                                 ? surah.formattedId
                                 : '${index + 1}',
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: theme.primaryColor,
+                              color: colorScheme.onPrimaryContainer,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -150,7 +158,7 @@ class SurahGridItem extends StatelessWidget {
                             isPlaying
                                 ? Icons.pause_circle_filled_rounded
                                 : Icons.play_circle_fill_rounded,
-                            color: theme.primaryColor,
+                            color: colorScheme.primary,
                             size: tokens.iconSizeMedium,
                           ),
                       ],
@@ -174,8 +182,8 @@ class SurahGridItem extends StatelessWidget {
                                   style: theme.textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.bold,
                                     color: isCurrentItem
-                                        ? theme.primaryColor
-                                        : theme.textTheme.bodyLarge?.color,
+                                        ? colorScheme.primary
+                                        : colorScheme.onSurface,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -184,7 +192,7 @@ class SurahGridItem extends StatelessWidget {
                                   surah.nameAr,
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w400,
-                                    color: theme.hintColor,
+                                    color: colorScheme.onSurfaceVariant,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,

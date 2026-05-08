@@ -13,11 +13,13 @@ class ReciterDetailsAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final Color appBarForegroundColor = theme.colorScheme.onPrimary;
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final Color appBarForegroundColor = colorScheme.onPrimary;
 
     return SliverAppBar(
       pinned: true,
-      backgroundColor: theme.primaryColor,
+      backgroundColor: colorScheme.primary,
       foregroundColor: appBarForegroundColor,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: appBarForegroundColor),
@@ -30,7 +32,7 @@ class ReciterDetailsAppBar extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [theme.primaryColor, theme.colorScheme.secondary],
+              colors: [colorScheme.primary, colorScheme.secondary],
             ),
           ),
           child: Stack(
@@ -59,14 +61,13 @@ class ReciterDetailsAppBar extends StatelessWidget {
             backgroundColor: appBarForegroundColor.withValues(alpha: 0.2),
             child: Text(
               reciter.name[0],
-              style: TextStyle(
+              style: theme.textTheme.labelLarge?.copyWith(
                 color: appBarForegroundColor,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ),
-          SizedBox(width: 10),
+          SizedBox(width: tokens.spaceSmall + tokens.spaceTiny),
           Flexible(
             child: Text(
               reciter.name,

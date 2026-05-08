@@ -26,49 +26,51 @@ class BackgroundSourceDialog extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
       ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _SourceOption(
-            icon: FluentIcons.image_24_regular,
-            label: context.l10n.gallery,
-            onTap: () {
-              Navigator.pop(context);
-              onSourceSelected(ImageSource.gallery);
-            },
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          _SourceOption(
-            icon: FluentIcons.camera_24_regular,
-            label: context.l10n.camera,
-            onTap: () {
-              Navigator.pop(context);
-              onSourceSelected(ImageSource.camera);
-            },
-          ),
-          BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
-            builder: (context, state) {
-              if (state.config.type == PlayerBackgroundType.defaultType) {
-                return const SizedBox.shrink();
-              }
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _SourceOption(
+              icon: FluentIcons.image_24_regular,
+              label: context.l10n.gallery,
+              onTap: () {
+                Navigator.pop(context);
+                onSourceSelected(ImageSource.gallery);
+              },
+            ),
+            SizedBox(height: tokens.spaceSmall),
+            _SourceOption(
+              icon: FluentIcons.camera_24_regular,
+              label: context.l10n.camera,
+              onTap: () {
+                Navigator.pop(context);
+                onSourceSelected(ImageSource.camera);
+              },
+            ),
+            BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
+              builder: (context, state) {
+                if (state.config.type == PlayerBackgroundType.defaultType) {
+                  return const SizedBox.shrink();
+                }
 
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Divider(),
-                  _SourceOption(
-                    icon: FluentIcons.delete_24_regular,
-                    label: context.l10n.resetToDefault,
-                    onTap: () {
-                      Navigator.pop(context);
-                      context.read<PlayerBackgroundCubit>().resetToDefault();
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Divider(),
+                    _SourceOption(
+                      icon: FluentIcons.delete_24_regular,
+                      label: context.l10n.resetToDefault,
+                      onTap: () {
+                        Navigator.pop(context);
+                        context.read<PlayerBackgroundCubit>().resetToDefault();
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -97,7 +99,7 @@ class _SourceOption extends StatelessWidget {
     final tokens = theme.tokens;
 
     return ListTile(
-      leading: Icon(icon, color: theme.primaryColor),
+      leading: Icon(icon, color: theme.colorScheme.primary),
       title: Text(label),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(tokens.radiusMedium),

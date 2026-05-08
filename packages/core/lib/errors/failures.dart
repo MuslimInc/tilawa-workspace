@@ -123,3 +123,17 @@ final class UIError extends Failure {
 final class UserCancelledFailure extends Failure {
   const UserCancelledFailure([super.message]);
 }
+
+enum NotificationFailureReason { missingPayload, invalidPayload }
+
+final class NotificationFailure extends Failure {
+  const NotificationFailure([
+    super.message,
+    this.reason = NotificationFailureReason.missingPayload,
+  ]);
+
+  final NotificationFailureReason reason;
+
+  @override
+  List<Object?> get props => [message, reason];
+}

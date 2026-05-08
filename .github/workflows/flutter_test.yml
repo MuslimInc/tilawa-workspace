@@ -3,13 +3,14 @@ name: Flutter Test & Deploy
 env:
   FLUTTER_VERSION: "3.41.7"
   PACKAGE_NAME: "com.tilawa.app"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 on:
   push:
-    branches: ["master"]
-    tags: ["v*"]
+    branches: [ "master" ]
+    tags: [ "v*" ]
   pull_request:
-    branches: ["master"]
+    branches: [ "master" ]
 
 jobs:
   test:
@@ -43,8 +44,11 @@ jobs:
       - name: Bootstrap Workspace
         run: melos bootstrap
 
+      - name: Generate Code
+        run: melos run gen --no-select
+
       - name: Run Tests
-        run: melos run test --no-select
+        run: melos exec --dir-exists=test --concurrency=1 -- 'bash "$MELOS_ROOT_PATH/.github/scripts/flutter_ci_test_package.sh"'
 
   build_android:
     name: Build & Deploy Android
@@ -56,9 +60,9 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
 
       - uses: subosito/flutter-action@v2
         with:
@@ -105,6 +109,7 @@ jobs:
       - name: Build with Shorebird (Split APKs)
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        working-directory: apps/tilawa
         run: |
           shorebird release android \
             --artifact apk \
@@ -121,71 +126,73 @@ jobs:
       - name: Deploy to Firebase App Distribution
         uses: w9jds/firebase-action@master
         with:
-          args: appdistribution:distribute apps/tilawa/build/app/outputs/flutter-apk/app-release.apk --app ${{ secrets.FIREBASE_ANDROID_APP_ID || '1:181575856185:android:d43fb05037208139381de8' }} --groups testers
+          args: appdistribution:distribute
+            apps/tilawa/build/app/outputs/flutter-apk/app-release.apk --app ${{
+            secrets.FIREBASE_ANDROID_APP_ID ||
+            '1:181575856185:android:d43fb05037208139381de8' }} --groups testers
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-
-# iOS Build disabled due to lack of Apple Developer Account
-# To enable: Create a paid Apple Developer account and add required secrets (P12, Provisioning Profile)
-#  build_ios:
-#    name: Build & Deploy iOS
-#    needs: test
-#    runs-on: macos-latest
-#    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-#    steps:
-#      - uses: actions/checkout@v4
-#
-#      - uses: subosito/flutter-action@v2
-#        with:
-#          flutter-version: ${{ env.FLUTTER_VERSION }}
-#          channel: "stable"
-#          cache: true
-#
-#      - name: Cache Pub packages
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            ~/.pub-cache
-#            ~/.flutter-plugins-dependencies
-#          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
-#          restore-keys: |
-#            ${{ runner.os }}-pub-
-#
-#      - name: Install dependencies
-#        run: flutter pub get
-#
-#      - name: Install iOS Certificates & Provisioning Profile
-#        env:
-#          P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
-#          P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
-#          PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
-#          KEYCHAIN_PASSWORD: "temporary_password"
-#        run: |
-#          # Create temporary keychain
-#          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-#          security default-keychain -s build.keychain
-#          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-#          security set-keychain-settings -t 3600 -u build.keychain
-#
-#          # Import certificate
-#          echo "$P12_BASE64" | base64 --decode > certificate.p12
-#          security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
-#          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-#
-#          # Import provisioning profile
-#          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-#          echo "$PROVISION_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
-#
-#      - name: Build IPA
-#        run: flutter build ipa --release --export-method ad-hoc
-#
-#      - name: Deploy to Firebase App Distribution
-#        uses: w9jds/firebase-action@master
-#        with:
-#          args: appdistribution:distribute build/ios/ipa/*.ipa --app ${{ secrets.IOS_FIREBASE_APP_ID || '1:181575856185:ios:3f02220381ba118d381de8' }} --groups testers
-#        env:
-#          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+  # iOS Build disabled due to lack of Apple Developer Account
+  # To enable: Create a paid Apple Developer account and add required secrets (P12, Provisioning Profile)
+  #  build_ios:
+  #    name: Build & Deploy iOS
+  #    needs: test
+  #    runs-on: macos-latest
+  #    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+  #    steps:
+  #      - uses: actions/checkout@v4
+  #
+  #      - uses: subosito/flutter-action@v2
+  #        with:
+  #          flutter-version: ${{ env.FLUTTER_VERSION }}
+  #          channel: "stable"
+  #          cache: true
+  #
+  #      - name: Cache Pub packages
+  #        uses: actions/cache@v4
+  #        with:
+  #          path: |
+  #            ~/.pub-cache
+  #            ~/.flutter-plugins-dependencies
+  #          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+  #          restore-keys: |
+  #            ${{ runner.os }}-pub-
+  #
+  #      - name: Install dependencies
+  #        run: flutter pub get
+  #
+  #      - name: Install iOS Certificates & Provisioning Profile
+  #        env:
+  #          P12_BASE64: ${{ secrets.IOS_P12_BASE64 }}
+  #          P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
+  #          PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+  #          KEYCHAIN_PASSWORD: "temporary_password"
+  #        run: |
+  #          # Create temporary keychain
+  #          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+  #          security default-keychain -s build.keychain
+  #          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+  #          security set-keychain-settings -t 3600 -u build.keychain
+  #
+  #          # Import certificate
+  #          echo "$P12_BASE64" | base64 --decode > certificate.p12
+  #          security import certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+  #          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+  #
+  #          # Import provisioning profile
+  #          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+  #          echo "$PROVISION_PROFILE_BASE64" | base64 --decode > ~/Library/MobileDevice/Provisioning\ Profiles/profile.mobileprovision
+  #
+  #      - name: Build IPA
+  #        run: flutter build ipa --release --export-method ad-hoc
+  #
+  #      - name: Deploy to Firebase App Distribution
+  #        uses: w9jds/firebase-action@master
+  #        with:
+  #          args: appdistribution:distribute build/ios/ipa/*.ipa --app ${{ secrets.IOS_FIREBASE_APP_ID || '1:181575856185:ios:3f02220381ba118d381de8' }} --groups testers
+  #        env:
+  #          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
   deploy_google_play:
     name: Build & Deploy Google Play
@@ -197,9 +204,9 @@ jobs:
 
       - uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
+          distribution: "zulu"
+          java-version: "17"
+          cache: "gradle"
 
       - uses: subosito/flutter-action@v2
         with:
@@ -246,6 +253,7 @@ jobs:
       - name: Build AAB with Shorebird
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        working-directory: apps/tilawa
         run: |
           shorebird release android \
             --artifact aab \
@@ -261,4 +269,3 @@ jobs:
           releaseFiles: apps/tilawa/build/app/outputs/bundle/release/app-release.aab
           track: production
           status: completed
-

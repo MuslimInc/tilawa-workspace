@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import '../widgets/reciter_card.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
@@ -18,6 +21,10 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
     return BlocProvider(
       create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
       child: BlocListener<FavoritesCubit, FavoritesState>(
@@ -41,36 +48,40 @@ class FavoritesScreen extends StatelessWidget {
                   if (state is FavoritesLoading) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (state is FavoritesError) {
-                    return Center(
-                      child: Text(
-                        state.failure.localizedMessage(context),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
+                    return TilawaErrorState(
+                      icon: Icons.error_outline_rounded,
+                      title: state.failure.localizedMessage(context),
                     );
                   } else if (state is FavoritesLoaded) {
                     if (state.favorites.isEmpty) {
                       return _buildEmptyState(context, context.l10n);
                     }
                     return ListView.separated(
-                      padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
+                      padding: EdgeInsets.fromLTRB(
+                        tokens.spaceLarge,
+                        tokens.spaceLarge,
+                        tokens.spaceLarge,
+                        120,
+                      ),
                       itemCount: state.favorites.length,
-                      separatorBuilder: (context, index) => SizedBox(height: 8),
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: tokens.spaceSmall),
                       itemBuilder: (context, index) {
                         final ReciterEntity reciter = state.favorites[index];
                         return Dismissible(
                           key: ValueKey(reciter.id),
                           background: Container(
                             alignment: Alignment.centerRight,
-                            padding: EdgeInsets.only(right: 20),
+                            padding: EdgeInsets.only(right: tokens.spaceLarge),
                             decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(20),
+                              color: colorScheme.error,
+                              borderRadius: BorderRadius.circular(
+                                tokens.radiusLarge,
+                              ),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.delete_outline_rounded,
-                              color: Colors.white,
+                              color: colorScheme.onError,
                             ),
                           ),
                           onDismissed: (direction) {
@@ -87,7 +98,7 @@ class FavoritesScreen extends StatelessWidget {
                 },
               ),
             ),
-            const Positioned.fill(child: BottomPlayerWidget()),
+            const Positioned.fill(child: QuranPlayerWidget()),
           ],
         ),
       ),
@@ -95,25 +106,9 @@ class FavoritesScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.favorite_border_rounded,
-            size: 80,
-            color: Theme.of(context).disabledColor,
-          ),
-          SizedBox(height: 16),
-          Text(
-            l10n.noFavorites,
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).disabledColor,
-            ),
-          ),
-        ],
-      ),
+    return TilawaEmptyState(
+      icon: Icons.favorite_border_rounded,
+      title: l10n.noFavorites,
     );
   }
 }

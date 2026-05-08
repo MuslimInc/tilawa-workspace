@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../../../core/services/android_adhan_alarm_player.dart';
 import '../../domain/usecases/check_prayer_alarm_capability_use_case.dart';
 import '../../domain/usecases/request_exact_alarm_permission_use_case.dart';
 import '../../domain/usecases/request_notification_permission_use_case.dart';
@@ -21,11 +22,13 @@ class PrayerPermissionsCubit extends Cubit<PrayerPermissionsState> {
     this._checkCapabilityUseCase,
     this._requestExactAlarmUseCase,
     this._requestNotificationUseCase,
+    this._adhanPlayer,
   ) : super(const PrayerPermissionsState());
 
   final CheckPrayerAlarmCapabilityUseCase _checkCapabilityUseCase;
   final RequestExactAlarmPermissionUseCase _requestExactAlarmUseCase;
   final RequestNotificationPermissionUseCase _requestNotificationUseCase;
+  final AndroidAdhanAlarmPlayer _adhanPlayer;
 
   Future<void> checkCapability() async {
     final result = await _checkCapabilityUseCase.call();
@@ -46,6 +49,18 @@ class PrayerPermissionsCubit extends Cubit<PrayerPermissionsState> {
 
   Future<void> requestNotificationPermission() async {
     await _requestNotificationUseCase.call();
+    final result = await _checkCapabilityUseCase.call();
+    result.fold(
+      (_) {},
+      (capability) => emit(state.copyWith(capability: capability)),
+    );
+  }
+
+  /// Opens the system dialog asking the user to whitelist the app from
+  /// battery-optimisation Doze. The dialog is fire-and-forget; we re-check
+  /// the capability when the user returns to the app.
+  Future<void> requestIgnoreBatteryOptimizations() async {
+    await _adhanPlayer.requestIgnoreBatteryOptimizations();
     final result = await _checkCapabilityUseCase.call();
     result.fold(
       (_) {},

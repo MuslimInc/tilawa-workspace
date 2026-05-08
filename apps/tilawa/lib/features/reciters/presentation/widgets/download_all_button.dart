@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../features/surah/domain/entities/surah_entity.dart';
 import '../bloc/reciter_download_bloc.dart';
@@ -23,6 +24,9 @@ class DownloadAllButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final chipTokens = theme.componentTokens.chip;
 
     return BlocConsumer<ReciterDownloadBloc, ReciterDownloadState>(
       listenWhen: (previous, current) => current.shouldShowError(previous),
@@ -41,26 +45,33 @@ class DownloadAllButton extends StatelessWidget {
           return Semantics(
             identifier: ReciterSemanticsIds.reciterDetailsDownloadAllCompleted,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              padding: chipTokens.compactPadding.add(
+                EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              ),
               decoration: BoxDecoration(
-                color: theme.primaryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
+                color: colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(chipTokens.pillRadius),
+                border: Border.all(
+                  color: colorScheme.outlineVariant.withValues(
+                    alpha: tokens.opacityMedium,
+                  ),
+                  width: chipTokens.borderWidth,
+                ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.check_circle_rounded,
-                    color: theme.primaryColor,
-                    size: 14,
+                    color: colorScheme.onPrimaryContainer,
+                    size: chipTokens.compactIconSize,
                   ),
-                  SizedBox(width: 4),
+                  SizedBox(width: tokens.spaceExtraSmall),
                   Text(
                     context.l10n.allDownloaded,
-                    style: TextStyle(
-                      color: theme.primaryColor,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 11,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
@@ -89,18 +100,23 @@ class DownloadAllButton extends StatelessWidget {
                 );
               }
             },
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(chipTokens.pillRadius),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: chipTokens.compactPadding.add(
+                EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              ),
               decoration: BoxDecoration(
                 color: isDownloading
-                    ? theme.primaryColor.withValues(alpha: 0.15)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
+                    ? colorScheme.primaryContainer.withValues(alpha: 0.74)
+                    : colorScheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(chipTokens.pillRadius),
                 border: Border.all(
                   color: isDownloading
-                      ? theme.primaryColor.withValues(alpha: 0.6)
-                      : theme.dividerColor.withValues(alpha: 0.5),
+                      ? colorScheme.primary.withValues(alpha: 0.5)
+                      : colorScheme.outlineVariant.withValues(
+                          alpha: tokens.opacityMedium,
+                        ),
+                  width: chipTokens.borderWidth,
                 ),
               ),
               child: Row(
@@ -113,40 +129,36 @@ class DownloadAllButton extends StatelessWidget {
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         value: progress,
-                        color: theme.primaryColor,
-                        backgroundColor: theme.primaryColor.withValues(
-                          alpha: 0.2,
-                        ),
+                        color: colorScheme.primary,
+                        backgroundColor: colorScheme.primaryContainer,
                       ),
                     ),
-                    SizedBox(width: 6),
+                    SizedBox(width: tokens.spaceSmall),
                     Text(
                       '${state.downloadedCount}/${state.totalCount}',
-                      style: TextStyle(
-                        color: theme.primaryColor,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(width: 4),
+                    SizedBox(width: tokens.spaceExtraSmall),
                     Icon(
                       Icons.pause_rounded,
-                      color: theme.primaryColor,
-                      size: 14,
+                      color: colorScheme.primary,
+                      size: chipTokens.compactIconSize,
                     ),
                   ] else ...[
                     Icon(
                       Icons.download_rounded,
-                      color: theme.textTheme.bodyMedium?.color,
-                      size: 14,
+                      color: colorScheme.onSurfaceVariant,
+                      size: chipTokens.compactIconSize,
                     ),
-                    SizedBox(width: 4),
+                    SizedBox(width: tokens.spaceExtraSmall),
                     Text(
                       _buildLabel(context, state, isDownloading, progress),
-                      style: TextStyle(
-                        color: theme.textTheme.bodyMedium?.color,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500,
-                        fontSize: 11,
                       ),
                     ),
                   ],

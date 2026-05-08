@@ -13,6 +13,8 @@ import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/quran_image_reader.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa_core/logger.dart';
+import 'package:tilawa_core/services/app_orientation_service.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
@@ -21,6 +23,7 @@ import '../../../../features/share/presentation/screens/screenshot_composer_scre
 import '../../../../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
 import '../bloc/quran_font_loader_bloc.dart';
+import '../theme/quran_reader_theme.dart';
 
 /// Wraps `quran_image`'s reader flow inside the Tilawa app.
 ///
@@ -275,13 +278,13 @@ class _ReaderShell extends StatelessWidget {
           return QuranImageReader(
             preferredSystemUiMode: SystemUiMode.edgeToEdge,
             restoreSystemUiMode: SystemUiMode.edgeToEdge,
-            preferredOrientations: const [
-              DeviceOrientation.portraitUp,
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ],
-            restoreOrientations: const [DeviceOrientation.portraitUp],
+            preferredOrientations: AppOrientationService.readerOrientations,
+            restoreOrientations: AppOrientationService.defaultOrientations,
+            restoreSystemUiOverlayStyle: AppSystemChromeStyle.defaultAppStyle,
             onShareRequested: onShareRequested,
+            headerImageFilter: Theme.of(
+              context,
+            ).extension<QuranReaderTheme>()?.headerImageFilter,
           );
         }
 

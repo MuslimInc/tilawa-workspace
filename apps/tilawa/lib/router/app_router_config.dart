@@ -6,6 +6,7 @@ import 'package:tilawa/features/quran_reader/presentation/screens/quran_image_re
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_render_demo_screen.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
@@ -18,6 +19,7 @@ import '../features/history/presentation/screens/history_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
+import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../features/premium/presentation/screens/premium_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
@@ -124,20 +126,11 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error, size: 64, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(context.l10n.pageNotFound(state.uri.toString())),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => const HomeRoute().go(context),
-              child: Text(context.l10n.goHome),
-            ),
-          ],
-        ),
+      body: TilawaErrorState(
+        icon: Icons.error_outline_rounded,
+        title: context.l10n.pageNotFound(state.uri.toString()),
+        retryLabel: context.l10n.goHome,
+        onRetry: () => const HomeRoute().go(context),
       ),
     );
   }
@@ -239,6 +232,21 @@ class HistoryRoute extends GoRouteData with $HistoryRoute {
           getIt<HistoryBloc>()..add(const HistoryEvent.loadAllHistory()),
       child: const HistoryScreen(),
     );
+  }
+}
+
+@TypedGoRoute<PrayerNotificationStatusRoute>(
+  path: '/prayer-notification-status',
+)
+class PrayerNotificationStatusRoute extends GoRouteData
+    with $PrayerNotificationStatusRoute {
+  const PrayerNotificationStatusRoute({this.$extra});
+
+  final String? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PrayerNotificationStatusScreen(payloadJson: $extra);
   }
 }
 

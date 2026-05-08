@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
@@ -9,6 +12,7 @@ import 'package:tilawa/core/services/prayer_adhan_notification_service.dart';
 import 'package:tilawa/core/services/prayer_notification_config.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
@@ -24,6 +28,8 @@ import 'prayer_adhan_notification_service_test.mocks.dart';
   NotificationPermissionService,
 ])
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late PrayerAdhanNotificationService service;
   late MockINotificationDispatcher mockDispatcher;
   late MockFlutterLocalNotificationsPlugin mockPlugin;
@@ -122,11 +128,17 @@ void main() {
       ),
     ).thenReturn(null);
 
+    when(
+      mockAdhanPlayer.onNotificationTapped,
+    ).thenAnswer((_) => const Stream.empty());
     when(mockAdhanPlayer.isSupported).thenReturn(false);
     when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {});
     when(
       mockNotificationPermissions.isPermissionGranted(),
     ).thenAnswer((_) async => true);
+    when(
+      mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+    ).thenAnswer((_) async {});
 
     stubPrefsDefault();
     stubPluginDefault();
@@ -277,6 +289,264 @@ void main() {
         );
       });
 
+      group('notification tap routing', () {
+        test(
+          'navigates native Adhan tap payload to prayer status route',
+          () async {
+            await initialize();
+
+            final payload = jsonEncode({
+              PrayerNotificationConfig.payloadTypeKey:
+                  PrayerNotificationConfig.payloadTypeValue,
+              PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+              'prayer_name': 'fajr',
+              'prayer_key': 'fajr',
+              'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+              'notification_id': 2001,
+              'adhan_enabled': true,
+            });
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: payload,
+              ),
+            );
+
+            verify(
+              mockNav.navigateToNotification(
+                const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
+            ).called(1);
+          },
+        );
+
+        test(
+          'navigates whitespace-formatted JSON payload to prayer status route',
+          () async {
+            await initialize();
+
+            const payload = '{ "type": "prayer", "prayer": "fajr" }';
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: payload,
+              ),
+            );
+
+            verify(
+              mockNav.navigateToNotification(
+                const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
+            ).called(1);
+          },
+        );
+
+        test('navigates native Adhan payload with prayer_key marker', () async {
+          await initialize();
+
+          final payload = jsonEncode({'prayer_key': 'fajr'});
+
+          await service.handleNotificationResponse(
+            NotificationResponse(
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: payload,
+            ),
+          );
+
+          verify(
+            mockNav.navigateToNotification(
+              const PrayerNotificationStatusRoute().location,
+              extra: payload,
+            ),
+          ).called(1);
+        });
+
+        test('does not wait for analytics before navigating', () async {
+          await initialize();
+
+          final analyticsLogged = Completer<void>();
+          when(
+            mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+          ).thenAnswer((_) => analyticsLogged.future);
+
+          final payload = jsonEncode({
+            PrayerNotificationConfig.payloadTypeKey:
+                PrayerNotificationConfig.payloadTypeValue,
+            PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+            'prayer_name': 'fajr',
+            'prayer_key': 'fajr',
+            'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+            'notification_id': 2001,
+            'adhan_enabled': true,
+          });
+
+          await service
+              .handleNotificationResponse(
+                NotificationResponse(
+                  notificationResponseType:
+                      NotificationResponseType.selectedNotification,
+                  payload: payload,
+                ),
+              )
+              .timeout(const Duration(milliseconds: 100));
+
+          verify(
+            mockNav.navigateToNotification(
+              const PrayerNotificationStatusRoute().location,
+              extra: payload,
+            ),
+          ).called(1);
+
+          analyticsLogged.complete();
+        });
+
+        test('navigates even when analytics logging fails', () async {
+          await initialize();
+
+          when(
+            mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+          ).thenAnswer((_) async => throw Exception('analytics unavailable'));
+
+          final payload = jsonEncode({
+            PrayerNotificationConfig.payloadTypeKey:
+                PrayerNotificationConfig.payloadTypeValue,
+            PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+            'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+            'notification_id': 2001,
+            'adhan_enabled': true,
+          });
+
+          await service.handleNotificationResponse(
+            NotificationResponse(
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: payload,
+              id: 2001,
+            ),
+          );
+          await untilCalled(
+            mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+          );
+
+          verify(
+            mockNav.navigateToNotification(
+              const PrayerNotificationStatusRoute().location,
+              extra: payload,
+            ),
+          ).called(1);
+        });
+
+        test(
+          'ignores non-prayer payloads without navigation or analytics',
+          () async {
+            await initialize();
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: jsonEncode({'type': 'downloads'}),
+                id: 9999,
+              ),
+            );
+            await Future<void>.delayed(Duration.zero);
+
+            verifyNever(
+              mockNav.navigateToNotification(any, extra: anyNamed('extra')),
+            );
+            verifyNever(
+              mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
+            );
+          },
+        );
+
+        test(
+          'logs analytics with fallback prayer name and notification id',
+          () async {
+            await initialize();
+
+            final payload = jsonEncode({
+              PrayerNotificationConfig.payloadTypeKey:
+                  PrayerNotificationConfig.payloadTypeValue,
+              'prayer_name': 'maghrib',
+              'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+              'adhan_enabled': false,
+            });
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: payload,
+                id: 2004,
+              ),
+            );
+            await untilCalled(
+              mockAnalytics.logEvent(
+                'prayer_notification_tapped',
+                parameters: anyNamed('parameters'),
+              ),
+            );
+
+            final capturedParams =
+                verify(
+                      mockAnalytics.logEvent(
+                        'prayer_notification_tapped',
+                        parameters: captureAnyNamed('parameters'),
+                      ),
+                    ).captured.single
+                    as Map<String, Object>;
+
+            expect(capturedParams['prayer_name'], 'maghrib');
+            expect(capturedParams['prayer_key'], 'maghrib');
+            expect(capturedParams['notification_id'], 2004);
+            expect(capturedParams['adhan_enabled'], false);
+            expect(capturedParams['is_adhan'], false);
+          },
+        );
+
+        test(
+          'native Adhan tap stream is routed after initialization',
+          () async {
+            final controller = StreamController<String>();
+            addTearDown(controller.close);
+            when(
+              mockAdhanPlayer.onNotificationTapped,
+            ).thenAnswer((_) => controller.stream);
+
+            await initialize();
+
+            final payload = jsonEncode({
+              PrayerNotificationConfig.payloadTypeKey:
+                  PrayerNotificationConfig.payloadTypeValue,
+              PrayerNotificationConfig.payloadPrayerKey: 'isha',
+              'prayer_name': 'isha',
+              'prayer_key': 'isha',
+              'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+              'notification_id': 2006,
+              'adhan_enabled': true,
+            });
+
+            controller.add(payload);
+            await Future<void>.delayed(Duration.zero);
+
+            verify(
+              mockNav.navigateToNotification(
+                const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
+            ).called(1);
+          },
+        );
+      });
+
       test('uses minutesBefore offset to compute scheduled time', () async {
         await initialize();
 
@@ -330,6 +600,120 @@ void main() {
         ).called(5);
       });
 
+      test('skips Flutter Local Notification scheduling when native adhan '
+          'scheduling succeeds (XOR routing — AdhanPlaybackService '
+          'posts the foreground-service notification at fire time)', () async {
+        await initialize();
+        when(mockAdhanPlayer.isSupported).thenReturn(true);
+        when(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
+          ),
+        ).thenAnswer((_) async => true);
+
+        final PrayerSettingsEntity playAdhan = allEnabled.copyWith(
+          fajrNotification: allEnabled.fajrNotification.copyWith(
+            mode: PrayerAlertMode.adhan,
+          ),
+        );
+
+        await service.schedulePrayerNotifications(
+          settings: playAdhan,
+          prayerTimesForDays: [buildFutureDay(0)],
+          forceReschedule: true,
+        );
+
+        // When the native adhan player accepts every prayer, the service
+        // intentionally does NOT schedule a parallel FLN notification —
+        // the native AdhanPlaybackService creates a mediaPlayback
+        // foreground-service notification at fire time. Scheduling an
+        // FLN here would cause duplicate visual notifications.
+        verifyNever(
+          mockPlugin.zonedSchedule(
+            id: anyNamed('id'),
+            title: anyNamed('title'),
+            body: anyNamed('body'),
+            scheduledDate: anyNamed('scheduledDate'),
+            notificationDetails: anyNamed('notificationDetails'),
+            androidScheduleMode: anyNamed('androidScheduleMode'),
+            matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+            payload: anyNamed('payload'),
+          ),
+        );
+        // And the native pipeline must have been invoked once per prayer.
+        verify(
+          mockAdhanPlayer.scheduleAdhan(
+            id: anyNamed('id'),
+            scheduledTime: anyNamed('scheduledTime'),
+            prayerName: anyNamed('prayerName'),
+            prayerKey: anyNamed('prayerKey'),
+          ),
+        ).called(5);
+      });
+
+      test(
+        'falls back to adhan channel (with sound) when native adhan scheduling fails',
+        () async {
+          await initialize();
+          when(mockAdhanPlayer.isSupported).thenReturn(true);
+          when(
+            mockAdhanPlayer.scheduleAdhan(
+              id: anyNamed('id'),
+              scheduledTime: anyNamed('scheduledTime'),
+              prayerName: anyNamed('prayerName'),
+              prayerKey: anyNamed('prayerKey'),
+            ),
+          ).thenAnswer((_) async => false);
+
+          final PrayerSettingsEntity playAdhan = allEnabled.copyWith(
+            fajrNotification: allEnabled.fajrNotification.copyWith(
+              mode: PrayerAlertMode.adhan,
+            ),
+          );
+
+          await service.schedulePrayerNotifications(
+            settings: playAdhan,
+            prayerTimesForDays: [buildFutureDay(0)],
+            forceReschedule: true,
+          );
+
+          // Verify zonedSchedule was called with the regular adhan channel (with sound).
+          final verification = verify(
+            mockPlugin.zonedSchedule(
+              id: anyNamed('id'),
+              title: anyNamed('title'),
+              body: anyNamed('body'),
+              scheduledDate: anyNamed('scheduledDate'),
+              notificationDetails: captureAnyNamed('notificationDetails'),
+              androidScheduleMode: anyNamed('androidScheduleMode'),
+              matchDateTimeComponents: anyNamed('matchDateTimeComponents'),
+              payload: anyNamed('payload'),
+            ),
+          );
+
+          final captured = verification.captured;
+          bool foundAdhanWithSound = false;
+          for (final details in captured) {
+            if (details is NotificationDetails &&
+                details.android?.channelId ==
+                    PrayerNotificationConfig.adhanChannelId) {
+              foundAdhanWithSound = true;
+              break;
+            }
+          }
+          expect(foundAdhanWithSound, isTrue);
+          verify(
+            mockAnalytics.logEvent(
+              'adhan_fallback_used',
+              parameters: anyNamed('parameters'),
+            ),
+          ).called(5);
+        },
+      );
+
       test(
         'suppresses scheduling and clears dedup when notification permission is denied',
         () async {
@@ -361,6 +745,12 @@ void main() {
           ).called(1);
           verify(
             mockPrefs.remove(PrayerNotificationConfig.settingsFingerprintKey),
+          ).called(1);
+          verify(
+            mockAnalytics.logEvent(
+              'permission_revoked_cleanup_completed',
+              parameters: anyNamed('parameters'),
+            ),
           ).called(1);
         },
       );

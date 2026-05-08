@@ -81,7 +81,7 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
                 widget.icon,
                 size: effectiveIconSize,
                 color: widget.isActive
-                    ? theme.primaryColor
+                    ? theme.colorScheme.primary
                     : theme.colorScheme.onSurfaceVariant,
               ),
             ),

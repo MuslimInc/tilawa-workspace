@@ -58,6 +58,41 @@ void main() {
       expect(find.byType(NavigationRail), findsNothing);
     });
 
+    testWidgets('compact body has zero bottom MediaQuery padding', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.viewPadding = const FakeViewPadding(bottom: 34);
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetViewPadding);
+
+      late EdgeInsets capturedPadding;
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: _destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            child: Builder(
+              builder: (context) {
+                capturedPadding = MediaQuery.paddingOf(context);
+                return const ColoredBox(color: Color(0xFFEEEEEE));
+              },
+            ),
+            bottomPlayer: const SizedBox.shrink(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(capturedPadding.bottom, 0.0);
+    });
+
     testWidgets('compact hides bottom nav while keyboard is open', (
       tester,
     ) async {
@@ -102,7 +137,7 @@ void main() {
       expect(rail.extended, isFalse);
     });
 
-    testInBothDirections('expanded uses extended side rail', (
+    testInBothDirections('expanded uses collapsed side rail', (
       tester,
       direction,
     ) async {
@@ -113,7 +148,75 @@ void main() {
       );
       expect(find.byType(NavigationRail), findsOneWidget);
       final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+      expect(rail.extended, isFalse);
+    });
+
+    testInBothDirections('large uses extended side rail', (
+      tester,
+      direction,
+    ) async {
+      await _pumpShell(
+        tester,
+        size: const Size(1200, 900),
+        direction: direction,
+      );
+      expect(find.byType(NavigationRail), findsOneWidget);
+      final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
       expect(rail.extended, isTrue);
+    });
+
+    testWidgets(
+      'expanded with selectedIndex -1 renders rail with no active item',
+      (tester) async {
+        await _pumpShell(
+          tester,
+          size: const Size(1000, 900),
+          direction: TextDirection.ltr,
+          selectedIndex: -1,
+        );
+        expect(find.byType(NavigationRail), findsOneWidget);
+        final rail = tester.widget<NavigationRail>(find.byType(NavigationRail));
+        expect(rail.selectedIndex, isNull);
+      },
+    );
+  });
+
+  group('TilawaAdaptiveShell — bottomPlayer visibility', () {
+    testWidgets('compact layout renders bottomPlayer with expected size', (
+      tester,
+    ) async {
+      const playerKey = Key('bottom_player');
+      await tester.binding.setSurfaceSize(const Size(400, 800));
+      tester.view.physicalSize = const Size(400, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: _destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            bottomPlayer: const SizedBox(
+              key: playerKey,
+              height: 80,
+              width: double.infinity,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      // bottomPlayer is placed inside Positioned.fill, so it expands to the
+      // full shell surface. Verify it is present and has non-zero dimensions.
+      expect(find.byKey(playerKey), findsOneWidget);
+      final size = tester.getSize(find.byKey(playerKey));
+      expect(size.height, greaterThan(0));
+      expect(size.width, greaterThan(0));
     });
   });
 

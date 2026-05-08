@@ -47,6 +47,8 @@ class PageContent extends StatefulWidget {
     this.viewportSize,
     this.enableSnapshots = true,
     this.isCapturing = false,
+    this.headerBuilder,
+    this.bismillahBuilder,
     required this.mushafService,
     required this.pageSnapshotService,
   });
@@ -107,6 +109,17 @@ class PageContent extends StatefulWidget {
   final Size? viewportSize;
   final bool enableSnapshots;
   final bool isCapturing;
+
+  /// Optional override that replaces the default [SurahHeaderBanner] with a
+  /// caller-supplied widget. Used by share/export paths that need a different
+  /// visual style for the surah header.
+  final Widget Function(BuildContext context, int surahNumber)? headerBuilder;
+
+  /// Optional override that replaces the default [BismillahWidget] with a
+  /// caller-supplied widget. Used by share/export paths that need a different
+  /// visual style for the bismillah.
+  final Widget Function(BuildContext context, int pageNumber, double fontSize)?
+  bismillahBuilder;
   final void Function(
     int surahNumber,
     int verseNumber,
@@ -880,16 +893,18 @@ class _PageContentState extends State<PageContent>
         if (!widget.showSpecialBlocks) {
           continue;
         }
-        final Widget banner = SurahHeaderBanner(
-          surahNumber: block.surahNumber,
-          lineHeight: metrics.fontSize * metrics.fontHeight,
-          viewportWidth: viewportWidth,
-          viewportHeight: viewportHeight,
-          isLandscape: !isPortrait,
-          headerImageFilter: widget.headerImageFilter,
-          headerTextColor: widget.headerTextColor,
-          headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
-        );
+        final Widget banner =
+            widget.headerBuilder?.call(context, block.surahNumber) ??
+            SurahHeaderBanner(
+              surahNumber: block.surahNumber,
+              lineHeight: metrics.fontSize * metrics.fontHeight,
+              viewportWidth: viewportWidth,
+              viewportHeight: viewportHeight,
+              isLandscape: !isPortrait,
+              headerImageFilter: widget.headerImageFilter,
+              headerTextColor: widget.headerTextColor,
+              headerFontSizeMultiplier: widget.headerFontSizeMultiplier,
+            );
         result.add(
           widget.onSurahSelected == null
               ? banner
@@ -907,12 +922,17 @@ class _PageContentState extends State<PageContent>
           continue;
         }
         result.add(
-          BismillahWidget(
-            fontSize: metrics.fontSize,
-            pageNumber: widget.pageNumber,
-            color: widget.textColor,
-            fontFamily: pageFont,
-          ),
+          widget.bismillahBuilder?.call(
+                context,
+                widget.pageNumber,
+                metrics.fontSize,
+              ) ??
+              BismillahWidget(
+                fontSize: metrics.fontSize,
+                pageNumber: widget.pageNumber,
+                color: widget.textColor,
+                fontFamily: pageFont,
+              ),
         );
         continue;
       }

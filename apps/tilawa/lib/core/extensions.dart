@@ -13,6 +13,8 @@ extension AppLang on BuildContext {
 
 extension BuildContextThemeX on BuildContext {
   bool get isDarkMode => theme.brightness == Brightness.dark;
+
+  bool get isArabic => Localizations.localeOf(this).languageCode == 'ar';
 }
 
 extension FailureExtensions on Failure {
@@ -46,6 +48,12 @@ extension FailureExtensions on Failure {
       PersistenceFailure() => l10n.persistenceError,
       UIError() => l10n.uiError,
       UserCancelledFailure() => '',
+      NotificationFailure(reason: final reason) => switch (reason) {
+        NotificationFailureReason.missingPayload =>
+          l10n.errorMissingNotificationPayload,
+        NotificationFailureReason.invalidPayload =>
+          l10n.errorInvalidNotificationPayload,
+      },
     };
   }
 }

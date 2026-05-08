@@ -37,6 +37,8 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
@@ -46,28 +48,35 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(tokens.radiusExtraLarge),
+            ),
+            border: Border(
+              top: BorderSide(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.35),
+                width: tokens.borderWidthThin,
+              ),
+            ),
           ),
           child: Column(
             children: [
-              // Handle
-              Container(
-                margin: const EdgeInsets.only(top: 12),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
+              TilawaSheetHandle(
+                margin: EdgeInsets.only(top: tokens.spaceMedium),
               ),
-
-              // Header
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.fromLTRB(
+                  tokens.spaceLarge,
+                  tokens.spaceSmall,
+                  tokens.spaceLarge,
+                  tokens.spaceMedium,
+                ),
                 child: Text(
                   context.l10n.readerSettings,
-                  style: theme.textTheme.titleLarge,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
 
@@ -77,7 +86,7 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(tokens.spaceLarge),
                   children: [
                     // Font size
                     _buildSectionTitle(context, context.l10n.fontSize),
@@ -92,7 +101,7 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
                       },
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: tokens.spaceLarge),
 
                     // Line height
                     _buildSectionTitle(context, context.l10n.lineHeight),
@@ -107,7 +116,7 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
                       },
                     ),
 
-                    const SizedBox(height: 16),
+                    SizedBox(height: tokens.spaceLarge),
 
                     // Font type
                     _buildSectionTitle(context, context.l10n.fontType),
@@ -126,7 +135,7 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
                       },
                     ),
 
-                    const SizedBox(height: 24),
+                    SizedBox(height: tokens.spaceExtraLarge),
 
                     // Display options
                     _buildSectionTitle(context, context.l10n.displayOptions),
@@ -168,13 +177,15 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-          color: Theme.of(context).colorScheme.primary,
-          fontWeight: FontWeight.bold,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

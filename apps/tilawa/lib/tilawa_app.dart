@@ -1,24 +1,28 @@
 import 'dart:async';
 
 import 'package:device_preview/device_preview.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
-import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/di/injection.dart';
 import 'core/providers/app_providers.dart';
+import 'core/services/notification_startup_service.dart';
 import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
+import 'features/theme/domain/entities/app_theme_preset.dart';
+import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
@@ -33,24 +37,22 @@ class TilawaApp extends StatefulWidget {
 class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   static const Duration _initialUpdateCheckDelay = Duration(seconds: 8);
   static const Duration _resumeUpdateCheckDelay = Duration(seconds: 2);
-  static const Duration _deferredColdStartLocalProbeDelay = Duration(
-    milliseconds: 900,
-  );
 
-  bool _hasProcessedLaunchNotification = false;
-  bool _hasPrimedNotificationDispatcher = false;
   Timer? _resumeDebounceTimer;
   Timer? _updateCheckTimer;
-  Timer? _localLaunchProbeTimer;
-  bool _isCheckingNotification = false;
+
+  late final NotificationStartupService _notificationStartupService =
+      getIt<NotificationStartupService>();
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Process launch notification after first frame when router is ready
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      _processLaunchNotificationIfNeeded();
+      logger.d(
+        'ROUTER_READY navigatorContext=${AppRouter.navigatorKey.currentContext != null}',
+      );
+      unawaited(_notificationStartupService.handleAppStartup());
       _scheduleUpdateCheck(
         delay: _initialUpdateCheckDelay,
         reason: 'initial-startup',
@@ -62,7 +64,7 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   void dispose() {
     _resumeDebounceTimer?.cancel();
     _updateCheckTimer?.cancel();
-    _localLaunchProbeTimer?.cancel();
+    _notificationStartupService.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -75,10 +77,8 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
 
     if (state == AppLifecycleState.resumed) {
       logger.d('[QuranPlayerApp] App resumed - checking for notification');
-      // When app is resumed (warm start from notification), check for launch notification
-      // Use debounce to prevent excessive checks when rapidly switching states
       _resumeDebounceTimer = Timer(const Duration(milliseconds: 100), () {
-        _checkForNotificationOnResume();
+        unawaited(_notificationStartupService.handleAppResume());
         _scheduleUpdateCheck(
           delay: _resumeUpdateCheckDelay,
           reason: 'app-resumed',
@@ -110,105 +110,6 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _checkForNotificationOnResume() async {
-    // Guard against concurrent checks
-    if (_isCheckingNotification) {
-      return;
-    }
-    _isCheckingNotification = true;
-
-    try {
-      await initializeNotificationHandlers();
-
-      final INotificationDispatcher dispatcher =
-          getIt<INotificationDispatcher>();
-
-      // Check if the launch notification is the same one we already handled.
-      // getNotificationAppLaunchDetails() returns the SAME data on every call,
-      // so we compare the notification ID to avoid re-processing.
-      final launchDetails = await dispatcher.getNotificationAppLaunchDetails();
-      final int? currentId = launchDetails?.notificationResponse?.id;
-      if (currentId == null ||
-          currentId == AppRouter.lastProcessedNotificationId) {
-        return;
-      }
-
-      final bool processed = await dispatcher.processLaunchNotification();
-      if (processed) {
-        AppRouter.lastProcessedNotificationId = currentId;
-        logger.d('[QuranPlayerApp] Launch notification processed on resume');
-      }
-    } catch (e) {
-      logger.d('[QuranPlayerApp] Error checking notification on resume: $e');
-    } finally {
-      _isCheckingNotification = false;
-    }
-  }
-
-  Future<void> _processLaunchNotificationIfNeeded() async {
-    if (_hasProcessedLaunchNotification) {
-      return;
-    }
-    _hasProcessedLaunchNotification = true;
-
-    // Large-scale startup pattern: avoid eager heavy notification wiring on
-    // every cold start. Only process immediately when startup was actually
-    // notification-driven.
-    if (AppRouter.pendingStartupNotificationLaunch) {
-      await initializeNotificationHandlers();
-      AppRouter.pendingStartupNotificationLaunch = false;
-      return;
-    }
-
-    // Probe local-notification cold-start lazily so startup frames stay fast.
-    _localLaunchProbeTimer?.cancel();
-    _localLaunchProbeTimer = Timer(_deferredColdStartLocalProbeDelay, () {
-      if (!mounted) return;
-      unawaited(_checkForDeferredColdStartLocalNotification());
-    });
-  }
-
-  Future<void> _checkForDeferredColdStartLocalNotification() async {
-    if (_isCheckingNotification) {
-      return;
-    }
-    _isCheckingNotification = true;
-
-    try {
-      final INotificationDispatcher dispatcher =
-          getIt<INotificationDispatcher>();
-      if (!_hasPrimedNotificationDispatcher) {
-        await dispatcher.initialize(createHighImportanceChannel: false);
-        _hasPrimedNotificationDispatcher = true;
-      }
-
-      final launchDetails = await dispatcher.getNotificationAppLaunchDetails();
-      final bool didLaunch = launchDetails?.didNotificationLaunchApp ?? false;
-      final int? currentId = launchDetails?.notificationResponse?.id;
-
-      if (!didLaunch ||
-          currentId == null ||
-          currentId == AppRouter.lastProcessedNotificationId) {
-        return;
-      }
-
-      await initializeNotificationHandlers();
-      final bool processed = await dispatcher.processLaunchNotification();
-      if (processed) {
-        AppRouter.lastProcessedNotificationId = currentId;
-        logger.d(
-          '[QuranPlayerApp] Deferred cold-start local notification processed',
-        );
-      }
-    } catch (e) {
-      logger.d(
-        '[QuranPlayerApp] Error processing deferred cold-start notification: $e',
-      );
-    } finally {
-      _isCheckingNotification = false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('TilawaAppRoot');
@@ -234,28 +135,48 @@ class _PlayerApp extends StatelessWidget {
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               PerfLogger.markBuild('ThemeBlocBuilder');
+              final density = appLaunchConfig.compactUiEnabled
+                  ? TilawaDensity.compact
+                  : TilawaDensity.comfortable;
               return MaterialApp.router(
                 title: AppStrings.appName,
-                showPerformanceOverlay: kProfileMode,
+                showPerformanceOverlay: false,
                 debugShowCheckedModeBanner: false,
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
                 // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
                 builder: (context, child) {
-                  final Widget app = DevicePreview.appBuilder(context, child);
+                  final app = DevicePreview.appBuilder(context, child);
+                  final routedChild = _DefaultRouteSystemUiOverlay(child: app);
                   return MediaQuery(
                     data: MediaQuery.of(context).copyWith(
                       textScaler: MediaQuery.textScalerOf(
                         context,
                       ).clamp(minScaleFactor: 1.0, maxScaleFactor: 1.4),
                     ),
-                    child: app,
+                    child: routedChild,
                   );
                 },
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
+                  isDefaultPreset:
+                      themeState.primaryColorSource ==
+                          PrimaryColorSource.preset &&
+                      themeState.primaryPresetId ==
+                          PrimaryColorPreset.defaultPreset.id,
+                  density: density,
+                  extensions: [QuranReaderTheme.light],
                 ),
                 darkTheme: AppTheme.getDarkTheme(
                   primaryColor: themeState.primaryColor,
+                  isDefaultPreset:
+                      themeState.primaryColorSource ==
+                          PrimaryColorSource.preset &&
+                      themeState.primaryPresetId ==
+                          PrimaryColorPreset.defaultPreset.id,
+                  darkIsTrueBlack:
+                      themeState.preset == AppThemePreset.trueBlack,
+                  density: density,
+                  extensions: [QuranReaderTheme.dark],
                 ),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,
@@ -274,6 +195,25 @@ class _PlayerApp extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _DefaultRouteSystemUiOverlay extends StatelessWidget {
+  const _DefaultRouteSystemUiOverlay({required this.child});
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final overlayStyle = AppSystemChromeStyle.buildDefaultAppStyle(
+      Theme.of(context),
+    );
+    AppSystemChromeStyle.updateDefaultAppStyle(overlayStyle);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: child ?? const SizedBox.shrink(),
     );
   }
 }

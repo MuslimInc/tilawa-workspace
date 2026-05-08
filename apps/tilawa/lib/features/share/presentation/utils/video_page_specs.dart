@@ -5,23 +5,31 @@ import 'package:quran_qcf/quran_qcf.dart';
 
 import 'share_ayah_range_utils.dart';
 
+const double reelCanvasWidth = 1080;
+const double reelCanvasHeight = 1920;
+const double reelSafeZoneTopFraction = 0.08;
+const double reelSafeZoneBottomFraction = 0.14;
+
 @immutable
 class VideoPageSpec {
   const VideoPageSpec({
     required this.pageNumber,
     required this.fromAyah,
     required this.toAyah,
+    this.isInitialSelection = false,
   });
 
   final int pageNumber;
   final int fromAyah;
   final int toAyah;
+  final bool isInitialSelection;
 }
 
 List<VideoPageSpec> buildVideoPageSpecs({
   required int surahNumber,
   required int fromAyah,
   required int toAyah,
+  bool isInitialSelection = false,
 }) {
   final ayahRange = normalizeShareAyahRange(
     surahNumber: surahNumber,
@@ -51,6 +59,7 @@ List<VideoPageSpec> buildVideoPageSpecs({
             pageNumber: pageNumber,
             fromAyah: pageFromAyah,
             toAyah: pageToAyah,
+            isInitialSelection: isInitialSelection,
           ),
         );
       }

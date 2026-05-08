@@ -42,7 +42,7 @@ Future<BuildContext> _pump(
 void main() {
   group('TilawaResponsiveTypography', () {
     group('responsiveTextTheme on compact screens', () {
-      testInBothDirections('does not scale font sizes below 600px width', (
+      testInBothDirections('preserves display/headline font sizes', (
         tester,
         direction,
       ) async {
@@ -52,14 +52,49 @@ void main() {
         final responsive = ctx.responsiveTextTheme;
         final base = Theme.of(ctx).textTheme;
 
-        // Compact screen should use base theme (no scaling)
+        // Compact does not change display/headline font sizes — it only
+        // tunes height and letterSpacing for presence on small screens.
         expect(responsive.displayLarge?.fontSize, base.displayLarge?.fontSize);
         expect(
           responsive.headlineLarge?.fontSize,
           base.headlineLarge?.fontSize,
         );
-        expect(responsive.bodyLarge?.fontSize, base.bodyLarge?.fontSize);
       });
+
+      testInBothDirections(
+        'nudges titleLarge and bodyLarge sub-pt for presence on phones',
+        (tester, direction) async {
+          const size = Size(412, 800);
+          final ctx = await _pump(tester, size, direction);
+
+          final responsive = ctx.responsiveTextTheme;
+
+          expect(responsive.titleLarge?.fontSize, 23);
+          expect(responsive.bodyLarge?.fontSize, 16.5);
+        },
+      );
+
+      testInBothDirections(
+        'applies explicit height and letterSpacing on compact',
+        (tester, direction) async {
+          const size = Size(412, 800);
+          final ctx = await _pump(tester, size, direction);
+
+          final responsive = ctx.responsiveTextTheme;
+
+          // Headlines/displays get tighter line height for presence.
+          expect(responsive.displayLarge?.height, 1.25);
+          expect(responsive.headlineLarge?.height, 1.25);
+          expect(responsive.titleLarge?.height, 1.25);
+
+          // Body styles get a relaxed line height for readability.
+          expect(responsive.bodyLarge?.height, 1.4);
+          expect(responsive.bodyMedium?.height, 1.4);
+
+          // Display sizes get a tightened letterSpacing.
+          expect(responsive.displayLarge?.letterSpacing, -0.2);
+        },
+      );
     });
 
     group('responsiveTextTheme on medium screens', () {

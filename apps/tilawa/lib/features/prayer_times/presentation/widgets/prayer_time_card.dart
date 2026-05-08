@@ -248,7 +248,7 @@ class _PrayerTimeValue extends StatelessWidget {
     final double fontSize =
         (theme.textTheme.titleLarge?.fontSize ?? 22) -
         (theme.tokens.spaceExtraSmall / 2);
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final isArabic = context.isArabic;
 
     return Text(
       use24HourFormat

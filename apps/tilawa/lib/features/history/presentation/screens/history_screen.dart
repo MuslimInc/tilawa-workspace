@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../helpers/datetime_helper.dart';
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/history_entity.dart';
@@ -128,86 +128,77 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     // Content based on state
                     _buildContent(context, state),
 
-                    // Bottom padding for the player
-                    SliverToBoxAdapter(child: SizedBox(height: 120)),
+                    // Dynamic bottom padding based on player visibility
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: _calculateBottomPadding(context)),
+                    ),
                   ],
                 ),
               );
             },
           ),
-          const Positioned.fill(child: BottomPlayerWidget()),
+          const Positioned.fill(child: QuranPlayerWidget()),
         ],
       ),
     );
   }
 
   Widget _buildContent(BuildContext context, HistoryState state) {
+    final tokens = Theme.of(context).tokens;
     switch (state.status) {
       case HistoryStatus.initial:
       case HistoryStatus.loading:
-        return const SliverFillRemaining(
-          child: Center(child: CircularProgressIndicator()),
+        return SliverPadding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceMedium,
+            vertical: tokens.spaceSmall,
+          ),
+          sliver: TilawaSliverSkeletonizer(
+            child: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index.isOdd) {
+                    return SizedBox(height: tokens.spaceSmall);
+                  }
+                  final history = _fakeHistory(index ~/ 2);
+                  return HistoryCard(history: history);
+                },
+                childCount: 11, // 5 items + 5 gaps + 1 extra for bottom spacing
+              ),
+            ),
+          ),
         );
 
       case HistoryStatus.error:
         return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(
-                  state.failure?.localizedMessage(context) ??
-                      context.l10n.unknownError,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    context.read<HistoryBloc>().add(
-                      const HistoryEvent.loadAllHistory(),
-                    );
-                  },
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
+          child: TilawaErrorState(
+            icon: Icons.error_outline,
+            title:
+                state.failure?.localizedMessage(context) ??
+                context.l10n.unknownError,
+            retryLabel: context.l10n.retry,
+            onRetry: () {
+              context.read<HistoryBloc>().add(
+                const HistoryEvent.loadAllHistory(),
+              );
+            },
           ),
         );
 
       case HistoryStatus.empty:
         if (state.searchQuery.isNotEmpty) {
           return SliverFillRemaining(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.search_off, size: 64, color: Colors.grey),
-                  const SizedBox(height: 16),
-                  Text(context.l10n.noSearchResults),
-                ],
-              ),
+            child: TilawaEmptyState(
+              icon: Icons.search_off,
+              title: context.l10n.noSearchResults,
             ),
           );
         }
         return SliverFillRemaining(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.history, size: 64, color: Colors.grey),
-                const SizedBox(height: 16),
-                Text(context.l10n.noHistoryYet),
-                const SizedBox(height: 8),
-                Text(
-                  context.l10n.noHistoryDescription,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyMedium?.copyWith(color: Colors.grey),
-                ),
-              ],
-            ),
+          child: TilawaEmptyState(
+            icon: Icons.history,
+            title: context.l10n.noHistoryYet,
+            subtitle: context.l10n.noHistoryDescription,
           ),
         );
 
@@ -256,10 +247,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 key: Key(item.id),
                 direction: DismissDirection.endToStart,
                 background: Container(
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                   alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: const Icon(Icons.delete, color: Colors.white),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: Theme.of(context).tokens.spaceLarge,
+                  ),
+                  child: Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.onError,
+                  ),
                 ),
                 onDismissed: (_) {
                   context.read<HistoryBloc>().add(
@@ -277,6 +273,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
         );
       }, childCount: dateKeys.length),
     );
+  }
+
+  double _calculateBottomPadding(BuildContext context) {
+    final audioPlayerState = context.read<AudioPlayerBloc>().state;
+    if (audioPlayerState.shouldShowBottomPlayer) {
+      return QuranPlayerWidget.collapsedFootprint(context);
+    }
+    return context.floatingBottomPadding;
   }
 
   String _getDateKey(BuildContext context, DateTime date) {
@@ -337,7 +341,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             },
             child: Text(
               context.l10n.clearAll,
-              style: const TextStyle(color: Colors.red),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
           ),
         ],
@@ -352,4 +356,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
       context.read<HistoryBloc>().add(const HistoryEvent.clearAllHistory());
     }
   }
+}
+
+HistoryEntity _fakeHistory(int index) {
+  return HistoryEntity(
+    id: 'history_$index',
+    surahId: 1,
+    surahName: 'Al-Fatiha',
+    surahNameEn: 'The Opening',
+    reciterId: '1',
+    reciterName: 'Reciter Name',
+    moshafId: 1,
+    moshafName: 'Hafs An Asim',
+    lastPositionMs: 0,
+    durationMs: 300000,
+    audioUrl: '',
+    playedAt: DateTime.now(),
+    completed: false,
+    playCount: 1,
+  );
 }

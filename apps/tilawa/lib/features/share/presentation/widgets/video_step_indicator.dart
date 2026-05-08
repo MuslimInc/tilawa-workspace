@@ -3,8 +3,9 @@ import 'package:tilawa/features/share/presentation/cubit/share_state.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class VideoStepIndicator extends StatelessWidget {
-  const VideoStepIndicator({super.key, required this.status});
+  const VideoStepIndicator({super.key, required this.status, this.progress});
   final ShareStatus status;
+  final double? progress;
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +24,11 @@ class VideoStepIndicator extends StatelessWidget {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(tokens.radiusSmall),
           child: LinearProgressIndicator(
-            // Use a fixed value or very slow update to avoid constant raster pressure
-            value: status == ShareStatus.sharing ? null : 0.7,
+            value: status == ShareStatus.sharing
+                ? null
+                : (progress == null || progress! <= 0)
+                ? null
+                : progress!.clamp(0, 1),
             backgroundColor: theme.colorScheme.surface.withValues(
               alpha: tokens.opacitySubtle,
             ),

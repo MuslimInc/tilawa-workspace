@@ -365,7 +365,7 @@ class _BrandIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final primary = theme.primaryColor;
+    final primary = theme.colorScheme.primary;
     final tokens = theme.tokens;
 
     return Container(
@@ -414,7 +414,7 @@ class _DownloadView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final primary = theme.primaryColor;
+    final primary = theme.colorScheme.primary;
 
     final int displayPercent = (progress * 100).toInt();
     final String eta = _formatEta(etaSeconds);

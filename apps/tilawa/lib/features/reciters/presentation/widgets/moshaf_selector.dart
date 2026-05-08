@@ -16,36 +16,46 @@ class MoshafSelector extends StatelessWidget {
     final MoshafEntity selectedMoshaf =
         state.selectedMoshaf ?? uniqueMoshaf.first;
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceExtraSmall,
+      ),
       child: Container(
         decoration: BoxDecoration(
-          color: context.primaryColor.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(16),
+          color: colorScheme.primaryContainer.withValues(alpha: 0.54),
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+          border: Border.all(
+            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            width: tokens.borderWidthThin,
+          ),
         ),
         child: ButtonTheme(
           alignedDropdown: true,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<MoshafEntity>(
               isExpanded: true,
-              dropdownColor: theme.cardColor,
-              borderRadius: BorderRadius.circular(16),
+              dropdownColor: colorScheme.surface,
+              borderRadius: BorderRadius.circular(tokens.radiusLarge),
               icon: Icon(
                 Icons.keyboard_arrow_down_rounded,
-                size: 24,
-                color: theme.primaryColor,
+                size: tokens.iconSizeLarge,
+                color: colorScheme.primary,
               ),
               value: uniqueMoshaf.contains(selectedMoshaf)
                   ? selectedMoshaf
                   : uniqueMoshaf.first,
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
               ),
-              padding: EdgeInsets.symmetric(horizontal: 8),
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
               items: uniqueMoshaf.map((moshaf) {
                 return DropdownMenuItem<MoshafEntity>(
                   value: moshaf,

@@ -25,12 +25,14 @@ import 'core/constants/surah_names.dart';
 class QuranImagePage extends StatefulWidget {
   final int pageNumber;
   final SurahHeaderBannerLayoutPolicy surahHeaderLayoutPolicy;
+  final ColorFilter? headerImageFilter;
 
   const QuranImagePage({
     super.key,
     required this.pageNumber,
     this.surahHeaderLayoutPolicy =
         const CalibratedSurahHeaderBannerLayoutPolicy(),
+    this.headerImageFilter,
   });
 
   @override
@@ -108,7 +110,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
         : view.physicalSize.height.round();
     final newCacheWidth = portraitPhysicalWidth;
 
-    final padding = MediaQuery.paddingOf(context);
+    final padding = context.contentSafePadding;
     final availableWidth = screenWidth - padding.left - padding.right;
     final availableHeight = screenHeight - padding.top - padding.bottom;
     final newIsLandscape = availableWidth > availableHeight;
@@ -224,6 +226,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
                 imageCacheRepository: _imageCacheRepository,
                 devicePixelRatio: _devicePixelRatio,
                 isLandscape: _isLandscape,
+                headerImageFilter: widget.headerImageFilter,
               );
             },
           ),

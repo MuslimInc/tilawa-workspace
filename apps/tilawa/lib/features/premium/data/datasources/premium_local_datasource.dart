@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:tilawa/core/logging/app_logger.dart';
+
 import '../../domain/entities/premium_status.dart';
 
 abstract class PremiumLocalDataSource {
@@ -21,7 +21,19 @@ class PremiumLocalDataSourceImpl implements PremiumLocalDataSource {
 
   @override
   Future<PremiumStatus> getPremiumStatus() async {
-    final String statusJson = await _prefs.getString(_premiumStatusKey) ?? '';
+    final String? statusJson = await _prefs.getString(_premiumStatusKey);
+
+    if (statusJson == null || statusJson.isEmpty) {
+      return const PremiumStatus(
+        isPremium: false,
+        subscriptionStartDate: null,
+        subscriptionEndDate: null,
+        subscriptionType: null,
+        isTrialUsed: false,
+        trialStartDate: null,
+        trialEndDate: null,
+      );
+    }
 
     try {
       final statusMap = jsonDecode(statusJson) as Map<String, dynamic>;

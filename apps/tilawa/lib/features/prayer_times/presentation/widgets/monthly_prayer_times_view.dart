@@ -256,7 +256,7 @@ class _TableRow extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final isArabic = context.isArabic;
 
     return Container(
       color: isToday

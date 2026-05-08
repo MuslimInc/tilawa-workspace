@@ -43,7 +43,7 @@ class _PrayerNotificationSettingsSheetState
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final bottomPadding = context.floatingBottomPadding;
 
     // We use context.select to listen only to the settings change
     final settings = context.select(
@@ -117,6 +117,34 @@ class _PrayerNotificationSettingsSheetState
                                   );
                                 }
                               },
+                              tokens: tokens,
+                              theme: theme,
+                            ),
+                          if (capability.hasNotificationPermission &&
+                              !capability.isIgnoringBatteryOptimizations)
+                            _PermissionBanner(
+                              message: context
+                                  .l10n
+                                  .batteryOptimizationExemptionRequired,
+                              onTap: () async {
+                                await context
+                                    .read<PrayerPermissionsCubit>()
+                                    .requestIgnoreBatteryOptimizations();
+                                if (context.mounted) {
+                                  context.read<PrayerTimesBloc>().add(
+                                    const PrayerTimesEvent.loadPrayerTimes(
+                                      forceReschedule: true,
+                                    ),
+                                  );
+                                }
+                              },
+                              tokens: tokens,
+                              theme: theme,
+                            ),
+                          if (capability.hasNotificationPermission &&
+                              capability.oemRequiresAutostart)
+                            _InfoBanner(
+                              message: context.l10n.oemAutostartHint,
                               tokens: tokens,
                               theme: theme,
                             ),
@@ -236,6 +264,35 @@ class _PrayerNotificationSettingsSheetState
                     notificationIdentifier:
                         PrayerNotificationSemanticsIds.ishaToggle,
                   ),
+
+                  /// TODO: Remove this code block when releasing the app
+                  // if (kDebugMode || kProfileMode) ...[
+                  //   SizedBox(height: tokens.spaceLarge),
+                  //   const Divider(),
+                  //   SizedBox(height: tokens.spaceMedium),
+                  //   Center(
+                  //     child: TextButton.icon(
+                  //       onPressed: () {
+                  //         getIt<IPrayerAdhanNotificationService>()
+                  //             .debugScheduleTestAdhan();
+                  //         ScaffoldMessenger.of(context).showSnackBar(
+                  //           const SnackBar(
+                  //             content: Text(
+                  //               'Adhan test scheduled for +10s. Close the app now!',
+                  //             ),
+                  //             duration: Duration(seconds: 5),
+                  //           ),
+                  //         );
+                  //       },
+                  //       icon: const Icon(Icons.bug_report_outlined),
+                  //       label: const Text('Test Adhan After 10 Seconds'),
+                  //       style: TextButton.styleFrom(
+                  //         foregroundColor: theme.colorScheme.error,
+                  //       ),
+                  //     ),
+                  //   ),
+                  //   SizedBox(height: tokens.spaceMedium),
+                  // ],
                 ],
               ),
             ),
@@ -343,7 +400,6 @@ class _PrayerAlertTile extends StatelessWidget {
     required this.onNotificationChanged,
     required this.onAdhanChanged,
     this.notificationIdentifier,
-    this.adhanIdentifier,
   });
 
   final String title;
@@ -352,7 +408,6 @@ class _PrayerAlertTile extends StatelessWidget {
   final ValueChanged<bool> onNotificationChanged;
   final ValueChanged<bool> onAdhanChanged;
   final String? notificationIdentifier;
-  final String? adhanIdentifier;
 
   @override
   Widget build(BuildContext context) {
@@ -386,7 +441,6 @@ class _PrayerAlertTile extends StatelessWidget {
             activeIcon: Icons.volume_up,
             value: adhanEnabled,
             onChanged: onAdhanChanged,
-            identifier: adhanIdentifier,
             tokens: tokens,
             theme: theme,
           ),
@@ -507,42 +561,45 @@ class _PermissionBanner extends StatelessWidget {
   }
 }
 
-class _MinutesBeforePicker extends StatelessWidget {
-  const _MinutesBeforePicker({
-    required this.value,
-    required this.onChanged,
+class _InfoBanner extends StatelessWidget {
+  const _InfoBanner({
+    required this.message,
     required this.tokens,
     required this.theme,
   });
-  final int value;
-  final ValueChanged<int> onChanged;
+  final String message;
   final TilawaDesignTokens tokens;
   final ThemeData theme;
-  static const List<int> _options = [0, 5, 10, 15];
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
-      child: SegmentedButton<int>(
-        segments: _options
-            .map(
-              (minutes) => ButtonSegment<int>(
-                value: minutes,
-                label: Text(
-                  minutes == 0
-                      ? context.l10n.atPrayerTime
-                      : context.l10n.minutesBefore(minutes),
-                  style: theme.textTheme.labelSmall,
-                  textAlign: TextAlign.center,
-                ),
+    final colorScheme = theme.colorScheme;
+    return Container(
+      margin: EdgeInsets.only(bottom: tokens.spaceSmall),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            size: 16,
+            color: colorScheme.onSecondaryContainer,
+          ),
+          SizedBox(width: tokens.spaceSmall),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSecondaryContainer,
               ),
-            )
-            .toList(),
-        selected: {value},
-        onSelectionChanged: (selected) {
-          if (selected.isNotEmpty) onChanged(selected.first);
-        },
-        showSelectedIcon: false,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:quran_image/core/design_tokens/colors.dart';
 import 'package:quran_image/core/perf_logger.dart';
@@ -28,10 +30,12 @@ class PreloadingScreen extends StatefulWidget {
 
 class _PreloadingScreenState extends State<PreloadingScreen> {
   static const String _logSource = 'PreloadingScreen';
+  static const Duration _statusPollInterval = Duration(milliseconds: 200);
 
   QuranImageCacheStatus _cacheStatus = const QuranImageCacheStatus.checking();
   AppMessage? _errorAppMessage;
   bool _isPreparing = false;
+  Timer? _statusPollTimer;
 
   @override
   void initState() {
@@ -43,6 +47,12 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
       _log('preload starting afterFirstFrameDelayMs=100');
       _waitForPreload();
     });
+  }
+
+  @override
+  void dispose() {
+    _stopStatusPolling();
+    super.dispose();
   }
 
   Future<void> _waitForPreload() async {
@@ -73,6 +83,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
       _errorAppMessage = null;
       _isPreparing = true;
     });
+    _startStatusPolling();
 
     // ── Step 1: prepare image cache ─────────────────────────────────────────
     final cacheTimer = PerfLogger.startTimer();
@@ -108,6 +119,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
           _isPreparing = false;
         });
       }
+      _stopStatusPolling();
       PerfLogger.logElapsed(
         preloadTimer,
         widgetName: _logSource,
@@ -137,6 +149,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
           _isPreparing = false;
         });
       }
+      _stopStatusPolling();
       PerfLogger.logElapsed(
         preloadTimer,
         widgetName: _logSource,
@@ -156,6 +169,7 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
     );
 
     if (mounted) {
+      _stopStatusPolling();
       PerfLogger.logElapsed(
         preloadTimer,
         widgetName: _logSource,
@@ -163,6 +177,21 @@ class _PreloadingScreenState extends State<PreloadingScreen> {
       );
       widget.onPreloadComplete();
     }
+  }
+
+  void _startStatusPolling() {
+    if (_statusPollTimer != null) return;
+    _statusPollTimer = Timer.periodic(_statusPollInterval, (_) {
+      if (!mounted || !_isPreparing) return;
+      final latestStatus = sl<QuranImageCacheRepository>().status;
+      if (latestStatus.isReady || latestStatus == _cacheStatus) return;
+      setState(() => _cacheStatus = latestStatus);
+    });
+  }
+
+  void _stopStatusPolling() {
+    _statusPollTimer?.cancel();
+    _statusPollTimer = null;
   }
 
   /// Prewarms all 15 line images for the initial page before the reader opens.

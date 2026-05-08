@@ -7,6 +7,7 @@ import '../foundation/component_tokens.dart';
 import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/display_feature_insets.dart';
+import '../foundation/safe_area_ext.dart';
 
 /// Builds the icon widget for a nav destination. Receives selection state and
 /// the resolved tint the shell would apply to a material [Icon]; callers may
@@ -85,12 +86,19 @@ class TilawaAdaptiveShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final windowSize = context.windowSize;
     final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
-    final bool isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+    final bool isKeyboardOpen = context.isKeyboardVisible;
 
     if (windowSize == TilawaWindowSize.compact) {
       return Stack(
         children: [
-          Scaffold(extendBody: true, body: child),
+          Scaffold(
+            extendBody: true,
+            body: MediaQuery.removePadding(
+              context: context,
+              removeBottom: true,
+              child: child,
+            ),
+          ),
           if (!isKeyboardOpen)
             Positioned(
               bottom: 0,
@@ -113,29 +121,46 @@ class TilawaAdaptiveShell extends StatelessWidget {
         ? context.getHingeAvoidancePadding(.left)
         : EdgeInsetsDirectional.zero;
 
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final padding = context.contentSafePadding;
+
     return Scaffold(
-      body: Row(
+      body: Stack(
         children: [
-          Padding(
-            padding: EdgeInsetsDirectional.only(
-              start: hingePadding.start,
-              end: hingePadding.end,
-            ),
-            child: _SideNavRail(
-              destinations: destinations,
-              selectedIndex: displayIndex,
-              onDestinationSelected: onDestinationSelected,
-              extended: windowSize == TilawaWindowSize.expanded,
-            ),
+          Row(
+            children: [
+              Padding(
+                padding: EdgeInsetsDirectional.only(
+                  start: hingePadding.start,
+                  end: hingePadding.end,
+                ),
+                child: _SideNavRail(
+                  destinations: destinations,
+                  selectedIndex: displayIndex,
+                  onDestinationSelected: onDestinationSelected,
+                  extended: windowSize.index >= TilawaWindowSize.large.index,
+                ),
+              ),
+              Expanded(
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    padding: padding.copyWith(
+                      left: isRtl ? padding.left : 0,
+                      right: isRtl ? 0 : padding.right,
+                    ),
+                  ),
+                  child: SafeArea(
+                    left: isRtl,
+                    right: !isRtl,
+                    top: false,
+                    bottom: false,
+                    child: child,
+                  ),
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: Stack(
-              children: [
-                child,
-                Positioned.fill(child: bottomPlayer),
-              ],
-            ),
-          ),
+          Positioned.fill(child: bottomPlayer),
         ],
       ),
     );
@@ -162,7 +187,11 @@ class _BottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
     final designTokens = theme.tokens;
-    final bottomPadding = MediaQuery.viewPaddingOf(context).bottom;
+    final bottomPadding = context.floatingBottomPadding;
+
+    final BorderRadius shellRadius = BorderRadius.circular(
+      tokens.bottomNavRadius,
+    );
 
     return TilawaContentBounds(
       kind: TilawaContentKind.media,
@@ -176,35 +205,49 @@ class _BottomNavBar extends StatelessWidget {
               tokens.bottomNavHorizontalMargin,
               bottomPadding,
             ),
-        child: Material(
-          color: theme.colorScheme.surfaceContainerHigh,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tokens.bottomNavRadius),
-            side: BorderSide(
-              color: theme.colorScheme.outlineVariant.withValues(
-                alpha: designTokens.opacitySubtle,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: shellRadius,
+            boxShadow: [
+              BoxShadow(
+                color: theme.colorScheme.shadow.withValues(
+                  alpha: tokens.bottomNavShadowOpacity,
+                ),
+                blurRadius: tokens.bottomNavShadowBlur,
+                offset: tokens.bottomNavShadowOffset,
               ),
-              width: tokens.bottomNavBorderWidth,
-            ),
+            ],
           ),
-          clipBehavior: Clip.antiAlias,
-          child: DecoratedBox(
-            decoration: decoration ?? const BoxDecoration(),
-            child: Padding(
-              padding: EdgeInsets.all(tokens.bottomNavItemGap),
-              child: Row(
-                spacing: tokens.bottomNavItemGap,
-                children: [
-                  for (int i = 0; i < destinations.length; i++)
-                    Expanded(
-                      child: _NavButton(
-                        destination: destinations[i],
-                        isSelected: selectedIndex == i,
-                        onTap: () => onDestinationSelected(i),
-                        borderRadius: tokens.bottomNavInnerRadius,
+          child: Material(
+            color: tokens.bottomNavBackgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: shellRadius,
+              side: BorderSide(
+                color: theme.colorScheme.outlineVariant.withValues(
+                  alpha: designTokens.opacitySubtle,
+                ),
+                width: tokens.bottomNavBorderWidth,
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: DecoratedBox(
+              decoration: decoration ?? const BoxDecoration(),
+              child: Padding(
+                padding: EdgeInsets.all(tokens.bottomNavItemGap),
+                child: Row(
+                  spacing: tokens.bottomNavItemGap,
+                  children: [
+                    for (int i = 0; i < destinations.length; i++)
+                      Expanded(
+                        child: _NavButton(
+                          destination: destinations[i],
+                          isSelected: selectedIndex == i,
+                          onTap: () => onDestinationSelected(i),
+                          borderRadius: tokens.bottomNavInnerRadius,
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -259,33 +302,46 @@ class _SideNavRail extends StatelessWidget {
             ),
           ],
         ),
-        child: NavigationRail(
-          extended: extended,
-          selectedIndex: selectedIndex,
-          onDestinationSelected: onDestinationSelected,
-          backgroundColor: Colors.transparent,
-          indicatorColor: theme.colorScheme.primaryContainer,
-          labelType: extended ? .none : .all,
-          destinations: [
-            for (final d in destinations)
-              NavigationRailDestination(
-                icon: d.iconBuilder != null
-                    ? d.iconBuilder!(
-                        context,
-                        isSelected: false,
-                        color: inactiveColor,
-                      )
-                    : Icon(d.icon),
-                selectedIcon: d.iconBuilder != null
-                    ? d.iconBuilder!(
-                        context,
-                        isSelected: true,
-                        color: activeColor,
-                      )
-                    : Icon(d.activeIcon ?? d.icon),
-                label: Text(d.label),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: NavigationRail(
+                    extended: extended,
+                    selectedIndex: selectedIndex,
+                    onDestinationSelected: onDestinationSelected,
+                    backgroundColor: Colors.transparent,
+                    indicatorColor: theme.colorScheme.primaryContainer,
+                    labelType: extended
+                        ? NavigationRailLabelType.none
+                        : NavigationRailLabelType.all,
+                    destinations: [
+                      for (final d in destinations)
+                        NavigationRailDestination(
+                          icon: d.iconBuilder != null
+                              ? d.iconBuilder!(
+                                  context,
+                                  isSelected: false,
+                                  color: inactiveColor,
+                                )
+                              : Icon(d.icon),
+                          selectedIcon: d.iconBuilder != null
+                              ? d.iconBuilder!(
+                                  context,
+                                  isSelected: true,
+                                  color: activeColor,
+                                )
+                              : Icon(d.activeIcon ?? d.icon),
+                          label: Text(d.label),
+                        ),
+                    ],
+                  ),
+                ),
               ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -312,6 +368,9 @@ class _NavButton extends StatelessWidget {
     final selectedFg = theme.colorScheme.primary;
     final unselectedFg = theme.colorScheme.onSurfaceVariant;
     final Color iconColor = isSelected ? selectedFg : unselectedFg;
+    final BorderRadius effectiveBorderRadius = BorderRadius.circular(
+      borderRadius,
+    );
 
     final Widget iconWidget = destination.iconBuilder != null
         ? destination.iconBuilder!(
@@ -330,56 +389,76 @@ class _NavButton extends StatelessWidget {
 
     final Widget button = Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        borderRadius: .circular(borderRadius),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
-          child: Column(
-            mainAxisAlignment: .center,
-            spacing: tokens.navButtonGap,
-            mainAxisSize: .min,
-            children: [
-              AnimatedScale(
-                scale: isSelected ? tokens.navButtonSelectedCenterScale : 1.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutBack,
-                child: PageTransitionSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation, secondaryAnimation) =>
-                      FadeThroughTransition(
-                        animation: animation,
-                        secondaryAnimation: secondaryAnimation,
-                        fillColor: Colors.transparent,
-                        child: child,
+      borderRadius: effectiveBorderRadius,
+      clipBehavior: Clip.antiAlias,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOutCubic,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? tokens.navButtonSelectedBackgroundColor
+              : Colors.transparent,
+          borderRadius: effectiveBorderRadius,
+        ),
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.selectionClick();
+            onTap();
+          },
+          borderRadius: effectiveBorderRadius,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: tokens.navButtonVerticalPadding,
+              ),
+              child: Column(
+                mainAxisAlignment: .center,
+                spacing: tokens.navButtonGap,
+                mainAxisSize: .min,
+                children: [
+                  AnimatedScale(
+                    scale: isSelected
+                        ? tokens.navButtonSelectedCenterScale
+                        : tokens.navButtonUnselectedScale,
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOutBack,
+                    child: PageTransitionSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder:
+                          (child, animation, secondaryAnimation) =>
+                              FadeThroughTransition(
+                                animation: animation,
+                                secondaryAnimation: secondaryAnimation,
+                                fillColor: Colors.transparent,
+                                child: child,
+                              ),
+                      child: KeyedSubtree(
+                        key: ValueKey(isSelected),
+                        child: iconWidget,
                       ),
-                  child: KeyedSubtree(
-                    key: ValueKey(isSelected),
-                    child: iconWidget,
-                  ),
-                ),
-              ),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: (theme.textTheme.labelSmall ?? const TextStyle())
-                    .copyWith(
-                      fontSize: tokens.navButtonLabelFontSize,
-                      fontWeight: isSelected
-                          ? tokens.navButtonSelectedLabelWeight
-                          : tokens.navButtonUnselectedLabelWeight,
-                      color: isSelected ? selectedFg : unselectedFg,
                     ),
-                child: Text(
-                  destination.label,
-                  maxLines: 1,
-                  overflow: .ellipsis,
-                  textAlign: .center,
-                ),
+                  ),
+                  AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 200),
+                    style: (theme.textTheme.labelSmall ?? const TextStyle())
+                        .copyWith(
+                          fontSize: tokens.navButtonLabelFontSize,
+                          fontWeight: isSelected
+                              ? tokens.navButtonSelectedLabelWeight
+                              : tokens.navButtonUnselectedLabelWeight,
+                          color: isSelected ? selectedFg : unselectedFg,
+                        ),
+                    child: Text(
+                      destination.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

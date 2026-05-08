@@ -15,12 +15,15 @@ class ComposerControls extends StatelessWidget {
     required this.isBusy,
     required this.isGeneratingVideo,
     required this.rangeIsValid,
+    this.isError = false,
     required this.reciterName,
     required this.isLoadingReciters,
     required this.canSelectReciter,
     required this.arabicSurahName,
     this.errorMessage,
+    this.rangeIssue,
     this.progressLabel,
+    this.progressPercent,
     required this.onReciterTap,
     required this.onDurationChanged,
     required this.onFromChanged,
@@ -34,10 +37,12 @@ class ComposerControls extends StatelessWidget {
   final bool isBusy,
       isGeneratingVideo,
       rangeIsValid,
+      isError,
       isLoadingReciters,
       canSelectReciter;
   final String reciterName, arabicSurahName;
-  final String? errorMessage, progressLabel;
+  final String? errorMessage, rangeIssue, progressLabel;
+  final double? progressPercent;
   final VoidCallback onReciterTap, onPrimaryAction, onCancel;
   final ValueChanged<ShareDurationPreset> onDurationChanged;
   final ValueChanged<int> onFromChanged, onToChanged;
@@ -46,7 +51,7 @@ class ComposerControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final bottomPadding = MediaQuery.paddingOf(context).bottom;
+    final bottomPadding = context.floatingBottomPadding;
 
     return Container(
       decoration: BoxDecoration(
@@ -94,6 +99,27 @@ class ComposerControls extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
+          ] else if (rangeIssue != null && !isBusy) ...[
+            SizedBox(height: tokens.spaceSmall),
+            Text(
+              rangeIssue!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+          if (isGeneratingVideo && progressLabel != null) ...[
+            SizedBox(height: tokens.spaceSmall),
+            Text(
+              progressPercent != null && progressPercent! > 0
+                  ? '$progressLabel (${(progressPercent! * 100).toStringAsFixed(0)}%)'
+                  : progressLabel!,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
           SizedBox(height: tokens.spaceMedium),
           FilledButton.icon(
@@ -107,13 +133,27 @@ class ComposerControls extends StatelessWidget {
                       color: theme.colorScheme.onPrimary,
                     ),
                   )
-                : const Icon(Icons.movie_creation_rounded),
+                : Icon(
+                    isError
+                        ? Icons.refresh_rounded
+                        : Icons.movie_creation_rounded,
+                  ),
             label: Text(
               isGeneratingVideo
                   ? context.l10n.preparingReelStatus
+                  : isError
+                  ? context.l10n.retry
                   : context.l10n.generateReel,
             ),
           ),
+          if (isGeneratingVideo) ...[
+            SizedBox(height: tokens.spaceSmall),
+            OutlinedButton.icon(
+              onPressed: onCancel,
+              icon: const Icon(Icons.close_rounded),
+              label: Text(context.l10n.cancel),
+            ),
+          ],
         ],
       ),
     );

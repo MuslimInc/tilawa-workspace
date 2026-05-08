@@ -24,11 +24,15 @@ class QuranImageApp extends StatefulWidget {
 }
 
 class _QuranImageAppState extends State<QuranImageApp> {
+  static final ColorScheme _colorScheme = ColorScheme.fromSeed(
+    seedColor: Colors.green,
+  );
+
   static final ThemeData _appTheme = ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+    colorScheme: _colorScheme,
     extensions: <ThemeExtension<dynamic>>[
       TilawaDesignTokens.light(),
-      TilawaComponentTokens.light(),
+      TilawaComponentTokens.light(colorScheme: _colorScheme),
     ],
     useMaterial3: true,
   );

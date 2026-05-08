@@ -12,12 +12,14 @@ import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
 import 'package:tilawa/features/share/presentation/cubit/share_state.dart';
 import 'package:tilawa/features/share/presentation/share_progress_messages_l10n.dart';
 import 'package:tilawa/features/share/presentation/utils/share_reciter_options.dart';
+import 'package:tilawa/features/share/presentation/utils/share_feature_flags.dart';
 import 'package:tilawa/features/share/presentation/utils/video_page_specs.dart';
 import 'package:tilawa/features/share/presentation/utils/video_reel_composer_presets.dart';
 import 'package:tilawa/features/share/presentation/widgets/composer_controls.dart';
 import 'package:tilawa/features/share/presentation/widgets/mushaf_page_renderer.dart';
 import 'package:tilawa/features/share/presentation/widgets/reciter_picker_sheet.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_preview_widgets.dart';
+import 'package:tilawa/features/share/presentation/widgets/video_composition.dart';
 import 'package:tilawa/features/share/presentation/widgets/video_content_renderer.dart';
 import 'package:tilawa/features/share/presentation/widgets/video_reel_design.dart';
 import 'package:tilawa/features/share/presentation/widgets/video_review_panel.dart';
@@ -84,6 +86,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   final ValueNotifier<bool> _videoIsMuted = ValueNotifier<bool>(true);
   final ValueNotifier<bool> _singleVideoCaptureSurfaceVisible =
       ValueNotifier<bool>(false);
+  bool _isGenerateRequestInFlight = false;
+  bool _isSavingPreparedContent = false;
 
   @override
   void dispose() {
@@ -118,29 +122,67 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
           listener: (context, state) =>
               _syncVideoBoundaryKeys(state.videoPageSpecs),
         ),
+        BlocListener<ShareCubit, ShareState>(
+          listenWhen: (prev, curr) => prev.status != curr.status,
+          listener: (context, state) {
+            final bool isGenerating =
+                state.status == ShareStatus.capturing ||
+                state.status == ShareStatus.generating;
+            if (!isGenerating && _singleVideoCaptureSurfaceVisible.value) {
+              _singleVideoCaptureSurfaceVisible.value = false;
+            }
+            if (!isGenerating) {
+              _isGenerateRequestInFlight = false;
+            }
+          },
+        ),
+        BlocListener<ShareCubit, ShareState>(
+          listenWhen: (previous, current) {
+            final completedShare =
+                previous.status == ShareStatus.sharing &&
+                current.status == ShareStatus.idle &&
+                current.content == null;
+            final failedShare =
+                previous.status == ShareStatus.sharing &&
+                current.status == ShareStatus.error;
+            return completedShare || failedShare;
+          },
+          listener: (context, state) {
+            if (!mounted) return;
+            if (state.status == ShareStatus.idle && state.content == null) {
+              _showInfoSnackBar(context, context.l10n.shareReadyTitle);
+            } else if (state.status == ShareStatus.error &&
+                state.errorMessage != null) {
+              _showErrorSnackBar(context, state.errorMessage!);
+            }
+          },
+        ),
       ],
       child: ValueListenableBuilder<bool>(
         valueListenable: _singleVideoCaptureSurfaceVisible,
         builder: (context, captureVisible, _) {
           return BlocBuilder<ShareCubit, ShareState>(
             buildWhen: (p, c) =>
-                p.videoPageSpecs != c.videoPageSpecs || p.status != c.status,
+                p.videoPageSpecs != c.videoPageSpecs ||
+                p.status != c.status ||
+                p.capturingIndex != c.capturingIndex,
             builder: (context, state) {
-              final isBusy =
+              final isGeneratingVisuals =
                   state.status == ShareStatus.capturing ||
-                  state.status == ShareStatus.generating ||
-                  state.status == ShareStatus.sharing;
+                  state.status == ShareStatus.generating;
               final reciterName = state.reciterName ?? widget.reciterName;
-              final backgroundColor = VideoReelDesign.mushafBackgroundColor;
+              final reelPalette = VideoReelPalette.fromContext(context);
+              final backgroundColor = reelPalette.mushafBackgroundColor;
 
               return Stack(
                 children: [
-                  if (state.videoPageSpecs.length > 1 || captureVisible)
+                  if (captureVisible || isGeneratingVisuals)
                     Offstage(
-                      offstage: !isBusy,
+                      offstage: !isGeneratingVisuals,
                       child: _OffScreenRenderers(
                         videoBoundaryKeys: _videoBoundaryKeys,
                         videoPageSpecs: state.videoPageSpecs,
+                        capturingIndex: state.capturingIndex,
                         surahNumber: widget.surahNumber,
                         reciterName: reciterName,
                         backgroundColor: backgroundColor,
@@ -149,7 +191,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                     ),
                   ImmersiveComposerScaffold(
                     key: const ValueKey('immersive_composer_scaffold'),
-                    disableBlur: true,
+                    backgroundIntent: BackgroundIntent.media,
                     title: context.l10n.shareModeReel,
                     subtitle: context.l10n.shareComposerSubtitle,
                     onClose: () => Navigator.of(context).maybePop(),
@@ -164,11 +206,18 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 state.reciterName ?? widget.reciterName,
                           ),
                           builder: (context, bState) {
+                            final reelPalette = VideoReelPalette.fromContext(
+                              context,
+                            );
                             final isReviewing =
                                 bState.status == ShareStatus.reviewing;
                             final isScreenshotReview =
                                 isReviewing &&
                                 bState.content is ShareScreenshot;
+
+                            final isBusyGenerating =
+                                bState.status == ShareStatus.capturing ||
+                                bState.status == ShareStatus.generating;
 
                             final child =
                                 isReviewing && bState.content is ShareVideo
@@ -198,16 +247,24 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                               .filePath,
                                     ),
                                   )
+                                : isBusyGenerating
+                                ? _GeneratingBackdrop(
+                                    key: const ValueKey('generating_backdrop'),
+                                    backgroundColor:
+                                        reelPalette.mushafBackgroundColor,
+                                  )
                                 : _VideoLivePreview(
                                     key: const ValueKey('live_preview'),
                                     surahNumber: widget.surahNumber,
                                     fromAyah: bState.fromAyah,
                                     toAyah: bState.toAyah,
+                                    initialFromAyah: widget.initialFromAyah,
+                                    initialToAyah: widget.initialToAyah,
                                     reciterName:
                                         bState.reciterName ??
                                         widget.reciterName,
                                     backgroundColor:
-                                        VideoReelDesign.mushafBackgroundColor,
+                                        reelPalette.mushafBackgroundColor,
                                   );
 
                             return child;
@@ -217,6 +274,8 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                     bottomPanel: BlocBuilder<ShareCubit, ShareState>(
                       buildWhen: (p, c) =>
                           p.status != c.status ||
+                          p.progress != c.progress ||
+                          p.progressMessage != c.progressMessage ||
                           p.fromAyah != c.fromAyah ||
                           p.toAyah != c.toAyah ||
                           p.reciterName != c.reciterName ||
@@ -245,7 +304,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            VideoStepIndicator(status: state.status),
+                            VideoStepIndicator(
+                              status: state.status,
+                              progress: state.progress,
+                            ),
                             if (isReviewing && !isBusy)
                               VideoReviewPanel(
                                 key: const ValueKey('review_panel'),
@@ -253,6 +315,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 onEdit: () => context
                                     .read<ShareCubit>()
                                     .discardPreparedContent(),
+                                isSaving: _isSavingPreparedContent,
+                                onSave: _isSavingPreparedContent
+                                    ? () {}
+                                    : () => _handleSavePreparedContent(context),
                                 onShare: () =>
                                     context.read<ShareCubit>().shareContent(),
                               )
@@ -266,6 +332,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 maxAyah: maxAyah,
                                 isBusy: isBusy,
                                 isGeneratingVideo: isGeneratingVideo,
+                                isError: state.status == ShareStatus.error,
                                 rangeIsValid: _isValidRange(
                                   fromAyah,
                                   toAyah,
@@ -280,10 +347,19 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
                                 errorMessage: state.status == ShareStatus.error
                                     ? state.errorMessage
                                     : null,
+                                rangeIssue: _rangeIssueLabel(
+                                  context,
+                                  from: fromAyah,
+                                  to: toAyah,
+                                  max: maxAyah,
+                                ),
                                 progressLabel: _progressLabelForState(
                                   context,
                                   state,
                                 ),
+                                progressPercent: isGeneratingVideo
+                                    ? state.progress
+                                    : null,
                                 onFromChanged: (v) => context
                                     .read<ShareCubit>()
                                     .updateVerseRange(fromAyah: v),
@@ -323,14 +399,37 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
         count <= ShareLimits.maxVersesPerClip;
   }
 
+  String? _rangeIssueLabel(
+    BuildContext context, {
+    required int from,
+    required int to,
+    required int max,
+  }) {
+    if (from < 1 || to > max) {
+      return context.l10n.shareInvalidRangeBounds;
+    }
+    if (to < from) {
+      return context.l10n.shareInvalidRangeOrder;
+    }
+    final count = to - from + 1;
+    if (count > ShareLimits.maxVersesPerClip) {
+      return context.l10n.maxVersesExceeded(ShareLimits.maxVersesPerClip);
+    }
+    return null;
+  }
+
   Future<void> _handleGenerateVideo(
     BuildContext context,
     ShareState state,
     int maxAyah,
   ) async {
+    if (_isGenerateRequestInFlight) return;
+
     final from = state.fromAyah ?? widget.initialFromAyah;
     final to = state.toAyah ?? widget.initialToAyah;
     if (!_isValidRange(from, to, maxAyah)) return;
+
+    _isGenerateRequestInFlight = true;
 
     final cubit = context.read<ShareCubit>();
     final messages = context.shareProgressMessages;
@@ -343,25 +442,38 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
       for (final page in capturePages)
         quranQcfLocator<QuranFontService>().ensureSingleFontLoaded(page),
     ]);
-    if (!mounted) return;
+    if (!mounted) {
+      _isGenerateRequestInFlight = false;
+      return;
+    }
 
     _singleVideoCaptureSurfaceVisible.value = true;
 
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted) return;
+    if (!mounted) {
+      _isGenerateRequestInFlight = false;
+      return;
+    }
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted) return;
+    if (!mounted) {
+      _isGenerateRequestInFlight = false;
+      return;
+    }
 
-    cubit.generateVideo(
-      surahName: getSurahNameArabic(widget.surahNumber),
-      progressMessages: messages,
-      appName: 'Tilawa',
-      sharedViaLabel: viaLabel,
-      handles: _videoBoundaryKeys.values
-          .map((key) => WidgetCaptureHandle(key))
-          .toList(),
-      maxDurationSeconds: null,
-    );
+    try {
+      await cubit.generateVideo(
+        surahName: getSurahNameArabic(widget.surahNumber),
+        progressMessages: messages,
+        appName: 'Tilawa',
+        sharedViaLabel: viaLabel,
+        handles: _videoBoundaryKeys.values
+            .map((key) => WidgetCaptureHandle(key))
+            .toList(),
+        maxDurationSeconds: null,
+      );
+    } finally {
+      _isGenerateRequestInFlight = false;
+    }
   }
 
   Future<void> _showReciterPicker(BuildContext context) async {
@@ -388,6 +500,9 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   }
 
   String? _progressLabelForState(BuildContext context, ShareState state) {
+    if (state.progressMessage.isNotEmpty) {
+      return state.progressMessage;
+    }
     if (state.status == ShareStatus.capturing) {
       return context.l10n.capturingReaderVisuals;
     }
@@ -399,6 +514,91 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     }
     return null;
   }
+
+  Future<void> _handleSavePreparedContent(BuildContext context) async {
+    if (_isSavingPreparedContent) return;
+    setState(() => _isSavingPreparedContent = true);
+
+    final cubit = context.read<ShareCubit>();
+    final l10n = context.l10n;
+    try {
+      final exportedPath = await cubit.savePreparedContent();
+      if (!context.mounted || exportedPath == null) return;
+      _showInfoSnackBar(
+        context,
+        '${l10n.save} ${l10n.completed}: ${exportedPath.split('/').last}',
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      final msg = e.toString().replaceFirst(RegExp(r'^[\w]+:\s*'), '');
+      _showErrorSnackBar(context, msg);
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingPreparedContent = false);
+      }
+    }
+  }
+
+  void _showInfoSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(behavior: SnackBarBehavior.floating, content: Text(message)),
+    );
+  }
+
+  void _showErrorSnackBar(BuildContext context, String message) {
+    final colorScheme = Theme.of(context).colorScheme;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: colorScheme.errorContainer,
+        content: Text(
+          message,
+          style: TextStyle(color: colorScheme.onErrorContainer),
+        ),
+      ),
+    );
+  }
+}
+
+/// Lightweight backdrop shown in place of [_VideoLivePreview] while the
+/// composer is capturing frames or encoding the video. Renders only a
+/// colored canvas plus the cubit's progress label — no mushaf tree — so
+/// only the offstage capture surface is paying for layout/raster during
+/// generation.
+class _GeneratingBackdrop extends StatelessWidget {
+  const _GeneratingBackdrop({super.key, required this.backgroundColor});
+
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return ColoredBox(
+      color: backgroundColor,
+      child: BlocSelector<ShareCubit, ShareState, String>(
+        selector: (state) => state.progressMessage,
+        builder: (context, progressMessage) {
+          if (progressMessage.isEmpty) {
+            return const SizedBox.expand();
+          }
+          return Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+              child: Text(
+                progressMessage,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
 
 class _VideoLivePreview extends StatefulWidget {
@@ -407,6 +607,8 @@ class _VideoLivePreview extends StatefulWidget {
     required this.surahNumber,
     required this.fromAyah,
     required this.toAyah,
+    required this.initialFromAyah,
+    required this.initialToAyah,
     required this.reciterName,
     required this.backgroundColor,
   });
@@ -414,6 +616,8 @@ class _VideoLivePreview extends StatefulWidget {
   final int surahNumber;
   final int fromAyah;
   final int toAyah;
+  final int initialFromAyah;
+  final int initialToAyah;
   final String reciterName;
   final Color backgroundColor;
 
@@ -422,16 +626,33 @@ class _VideoLivePreview extends StatefulWidget {
 }
 
 class _VideoLivePreviewState extends State<_VideoLivePreview> {
-  late final MushafPageRenderer _renderer =
-      MushafPageRenderer.defaultRenderer();
-
   @override
   Widget build(BuildContext context) {
     final specs = buildVideoPageSpecs(
       surahNumber: widget.surahNumber,
       fromAyah: widget.fromAyah,
       toAyah: widget.toAyah,
+      isInitialSelection:
+          widget.fromAyah == widget.initialFromAyah &&
+          widget.toAyah == widget.initialToAyah,
     );
+
+    if (kReelComposerSingleTree) {
+      return ColoredBox(
+        color: widget.backgroundColor,
+        child: specs.length == 1
+            ? _buildCompositionPage(context, specs.single, 0, specs.length)
+            : PageView.builder(
+                itemCount: specs.length,
+                itemBuilder: (context, index) => _buildCompositionPage(
+                  context,
+                  specs[index],
+                  index,
+                  specs.length,
+                ),
+              ),
+      );
+    }
 
     return Container(
       color: widget.backgroundColor,
@@ -439,21 +660,40 @@ class _VideoLivePreviewState extends State<_VideoLivePreview> {
         child: AspectRatio(
           aspectRatio: 9 / 16,
           child: RepaintBoundary(
-            child: _renderer.build(
-              context: context,
-              pageSpec: specs.first,
+            child: VideoContentRenderer(
               surahNumber: widget.surahNumber,
-              verseBackgroundColor: (s, v) =>
-                  (s == widget.surahNumber &&
-                      v >= widget.fromAyah &&
-                      v <= widget.toAyah)
-                  ? VideoReelDesign.verseHighlightColor
-                  : null,
-              verseTextColor: (s, v) => null,
-              textColor: VideoReelDesign.mushafTextColor,
-              pageBackgroundColor: widget.backgroundColor,
+              fromAyah: widget.fromAyah,
+              toAyah: widget.toAyah,
+              reciterName: widget.reciterName,
+              pageSpecs: specs,
               isCapturing: false,
+              backgroundColor: widget.backgroundColor,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompositionPage(
+    BuildContext context,
+    VideoPageSpec spec,
+    int index,
+    int totalPages,
+  ) {
+    return Center(
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: VideoComposition(
+          spec: VideoCompositionSpec(
+            surahNumber: widget.surahNumber,
+            pageSpec: spec,
+            pageIndex: index,
+            totalPages: totalPages,
+            reciterName: widget.reciterName,
+            mode: VideoCompositionMode.edit,
+            localeName: context.l10n.localeName,
+            backgroundColor: widget.backgroundColor,
           ),
         ),
       ),
@@ -465,6 +705,7 @@ class _OffScreenRenderers extends StatelessWidget {
   const _OffScreenRenderers({
     required this.videoBoundaryKeys,
     required this.videoPageSpecs,
+    required this.capturingIndex,
     required this.surahNumber,
     required this.reciterName,
     required this.backgroundColor,
@@ -473,6 +714,7 @@ class _OffScreenRenderers extends StatelessWidget {
 
   final Map<int, GlobalKey> videoBoundaryKeys;
   final List<VideoPageSpec> videoPageSpecs;
+  final int? capturingIndex;
   final int surahNumber;
   final String reciterName;
   final Color backgroundColor;
@@ -484,44 +726,78 @@ class _OffScreenRenderers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: videoPageSpecs.map((spec) {
-        final key = videoBoundaryKeys[spec.pageNumber];
-        if (key == null) return const SizedBox.shrink();
+    if (videoPageSpecs.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
-        return Positioned.fill(
-          child: Center(
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: RepaintBoundary(
-                key: key,
-                child: SizedBox(
-                  width: VideoContentRenderer.videoWidth,
-                  height: VideoContentRenderer.videoHeight,
-                  child: ColoredBox(
-                    color: backgroundColor,
-                    child: _renderer.build(
-                      context: context,
-                      pageSpec: spec,
-                      surahNumber: surahNumber,
-                      verseBackgroundColor: (s, v) =>
-                          (s == surahNumber &&
-                              v >= spec.fromAyah &&
-                              v <= spec.toAyah)
-                          ? VideoReelDesign.verseHighlightColor
-                          : null,
-                      verseTextColor: (s, v) => null,
-                      textColor: VideoReelDesign.mushafTextColor,
-                      pageBackgroundColor: backgroundColor,
-                      isCapturing: isCapturing,
-                    ),
-                  ),
+    final reelPalette = VideoReelPalette.fromContext(context);
+    final int safeIndex = (capturingIndex ?? 0).clamp(
+      0,
+      videoPageSpecs.length - 1,
+    );
+    final VideoPageSpec spec = videoPageSpecs[safeIndex];
+    final GlobalKey? key = videoBoundaryKeys[spec.pageNumber];
+    if (key == null) {
+      return const SizedBox.shrink();
+    }
+
+    if (kReelComposerSingleTree) {
+      return SizedBox.expand(
+        child: Center(
+          child: OverflowBox(
+            maxWidth: double.infinity,
+            maxHeight: double.infinity,
+            child: RepaintBoundary(
+              key: key,
+              child: VideoComposition(
+                spec: VideoCompositionSpec(
+                  surahNumber: surahNumber,
+                  pageSpec: spec,
+                  pageIndex: safeIndex,
+                  totalPages: videoPageSpecs.length,
+                  reciterName: reciterName,
+                  mode: VideoCompositionMode.capture,
+                  localeName: context.l10n.localeName,
+                  backgroundColor: backgroundColor,
                 ),
               ),
             ),
           ),
-        );
-      }).toList(),
+        ),
+      );
+    }
+
+    return SizedBox.expand(
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: RepaintBoundary(
+            key: key,
+            child: SizedBox(
+              width: VideoContentRenderer.videoWidth,
+              height: VideoContentRenderer.videoHeight,
+              child: ColoredBox(
+                color: backgroundColor,
+                child: _renderer.build(
+                  context: context,
+                  pageSpec: spec,
+                  surahNumber: surahNumber,
+                  verseBackgroundColor: (s, v) =>
+                      (s == surahNumber &&
+                          v >= spec.fromAyah &&
+                          v <= spec.toAyah)
+                      ? reelPalette.verseHighlightColor
+                      : null,
+                  verseTextColor: (s, v) => null,
+                  textColor: reelPalette.mushafTextColor,
+                  pageBackgroundColor: backgroundColor,
+                  isCapturing: isCapturing,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

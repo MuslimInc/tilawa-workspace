@@ -1,19 +1,18 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dart';
 import 'package:tilawa_core/entities/audio.dart';
-
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/bottom_player_widget.dart';
+import '../../../../shared/widgets/quran_player_widget.dart';
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/bookmark_entity.dart';
 import '../bloc/bookmarks_bloc.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../widgets/bookmark_search_bar.dart';
 
 /// Screen for displaying and managing bookmarks.
@@ -30,9 +29,9 @@ class BookmarksScreen extends StatelessWidget {
         leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(context.l10n.bookmarks),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
+          TilawaIconActionButton(
+            icon: Icons.refresh,
+            onTap: () {
               context.read<BookmarksBloc>().add(const LoadBookmarksEvent());
             },
           ),
@@ -58,110 +57,125 @@ class BookmarksScreen extends StatelessWidget {
             );
           },
           builder: (context, state) {
-            return Stack(
-              children: [
-                state.when(
-                  initial: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  loaded: (bookmarks, filteredBookmarks, searchQuery) => Column(
-                    children: [
-                      BookmarkSearchBar(
-                        onSearchChanged: (query) {
-                          context.read<BookmarksBloc>().add(
-                            SearchBookmarksEvent(query: query),
-                          );
-                        },
-                        onClearSearch: () {
-                          context.read<BookmarksBloc>().add(
-                            const ClearBookmarksSearchEvent(),
-                          );
-                        },
-                      ),
-                      Expanded(
-                        child: filteredBookmarks.isEmpty
-                            ? _buildEmptyState(context, searchQuery.isNotEmpty)
-                            : ListView.separated(
-                                padding: EdgeInsets.fromLTRB(16, 16, 16, 120),
-                                itemCount: filteredBookmarks.length,
-                                separatorBuilder: (context, index) =>
-                                    SizedBox(height: 8),
-                                itemBuilder: (context, index) {
-                                  final BookmarkEntity bookmark =
-                                      filteredBookmarks[index];
-                                  return Dismissible(
-                                    key: ValueKey(bookmark.id),
-                                    background: Container(
-                                      alignment: Alignment.centerRight,
-                                      padding: EdgeInsets.only(right: 20),
-                                      decoration: BoxDecoration(
-                                        color: Colors.red,
-                                        borderRadius: BorderRadius.circular(16),
-                                      ),
-                                      child: const Icon(
-                                        Icons.delete_outline_rounded,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    onDismissed: (direction) {
-                                      context.read<BookmarksBloc>().add(
-                                        DeleteBookmarkEvent(id: bookmark.id),
-                                      );
-                                    },
-                                    child: BookmarkCard(
-                                      bookmark: bookmark,
-                                      onTap: () =>
-                                          _playFromBookmark(context, bookmark),
-                                      onEdit: () => _showEditLabelDialog(
-                                        context,
-                                        bookmark,
-                                      ),
-                                    ),
-                                  );
-                                },
+            return SafeArea(
+              child: Stack(
+                children: [
+                  state.when(
+                    initial: () => const TilawaLoadingIndicator(),
+                    loading: () => const TilawaLoadingIndicator(),
+                    loaded: (bookmarks, filteredBookmarks, searchQuery) =>
+                        Positioned.fill(
+                          child: CustomScrollView(
+                            slivers: [
+                              SliverToBoxAdapter(
+                                child: BookmarkSearchBar(
+                                  onSearchChanged: (query) {
+                                    context.read<BookmarksBloc>().add(
+                                      SearchBookmarksEvent(query: query),
+                                    );
+                                  },
+                                  onClearSearch: () {
+                                    context.read<BookmarksBloc>().add(
+                                      const ClearBookmarksSearchEvent(),
+                                    );
+                                  },
+                                ),
                               ),
-                      ),
-                    ],
-                  ),
-                  bookmarkCreated: (_, bookmarks) =>
-                      _buildLoadedList(context, bookmarks),
-                  bookmarkUpdated: (_, bookmarks) =>
-                      _buildLoadedList(context, bookmarks),
-                  bookmarkDeleted: (_, bookmarks) =>
-                      _buildLoadedList(context, bookmarks),
-                  error: (message) => Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline_rounded,
-                          size: 64,
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          message,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Theme.of(context).colorScheme.error,
+                              SliverFillRemaining(
+                                hasScrollBody: filteredBookmarks.isNotEmpty,
+                                child: filteredBookmarks.isEmpty
+                                    ? _buildEmptyState(
+                                        context,
+                                        searchQuery.isNotEmpty,
+                                      )
+                                    : ListView.separated(
+                                        padding: EdgeInsets.fromLTRB(
+                                          16,
+                                          16,
+                                          16,
+                                          120,
+                                        ),
+                                        itemCount: filteredBookmarks.length,
+                                        separatorBuilder: (context, index) =>
+                                            SizedBox(height: 8),
+                                        itemBuilder: (context, index) {
+                                          final BookmarkEntity bookmark =
+                                              filteredBookmarks[index];
+                                          return Dismissible(
+                                            key: ValueKey(bookmark.id),
+                                            background: Container(
+                                              alignment: Alignment.centerRight,
+                                              padding: EdgeInsets.only(
+                                                right: Theme.of(
+                                                  context,
+                                                ).tokens.spaceLarge,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.error,
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                              child: Icon(
+                                                Icons.delete_outline_rounded,
+                                                color: Theme.of(
+                                                  context,
+                                                ).colorScheme.onError,
+                                              ),
+                                            ),
+                                            onDismissed: (direction) {
+                                              context.read<BookmarksBloc>().add(
+                                                DeleteBookmarkEvent(
+                                                  id: bookmark.id,
+                                                ),
+                                              );
+                                            },
+                                            child: BookmarkCard(
+                                              bookmark: bookmark,
+                                              onTap: () => _playFromBookmark(
+                                                context,
+                                                bookmark,
+                                              ),
+                                              onEdit: () =>
+                                                  _showEditLabelDialog(
+                                                    context,
+                                                    bookmark,
+                                                  ),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<BookmarksBloc>().add(
-                              const LoadBookmarksEvent(),
-                            );
-                          },
-                          child: Text(context.l10n.retry),
-                        ),
-                      ],
+                    bookmarkCreated: (_, bookmarks) => Positioned.fill(
+                      child: _buildLoadedList(context, bookmarks),
+                    ),
+                    bookmarkUpdated: (_, bookmarks) => Positioned.fill(
+                      child: _buildLoadedList(context, bookmarks),
+                    ),
+                    bookmarkDeleted: (_, bookmarks) => Positioned.fill(
+                      child: _buildLoadedList(context, bookmarks),
+                    ),
+                    error: (message) => Positioned.fill(
+                      child: TilawaErrorState(
+                        icon: Icons.error_outline_rounded,
+                        title: message,
+                        retryLabel: context.l10n.retry,
+                        onRetry: () {
+                          context.read<BookmarksBloc>().add(
+                            const LoadBookmarksEvent(),
+                          );
+                        },
+                        iconColor: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                   ),
-                ),
-                const Positioned.fill(child: BottomPlayerWidget()),
-              ],
+                  const Positioned.fill(child: QuranPlayerWidget()),
+                ],
+              ),
             );
           },
         ),
@@ -187,14 +201,16 @@ class BookmarksScreen extends StatelessWidget {
           key: ValueKey(bookmark.id),
           background: Container(
             alignment: Alignment.centerRight,
-            padding: EdgeInsets.only(right: 20),
+            padding: EdgeInsets.only(
+              right: Theme.of(context).tokens.spaceLarge,
+            ),
             decoration: BoxDecoration(
-              color: Colors.red,
+              color: Theme.of(context).colorScheme.error,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.delete_outline_rounded,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onError,
             ),
           ),
           onDismissed: (direction) {
@@ -214,43 +230,17 @@ class BookmarksScreen extends StatelessWidget {
 
   Widget _buildEmptyState(BuildContext context, bool isSearching) {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            FluentIcons.bookmark_24_regular,
-            size: 80,
-            color: Theme.of(
-              context,
-            ).colorScheme.onSurface.withValues(alpha: 0.3),
-          ),
-          SizedBox(height: 16),
-          Text(
-            isSearching
-                ? context.l10n.noBookmarksFound
-                : context.l10n.noBookmarks,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.7),
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            isSearching
-                ? context.l10n.tryDifferentSearch
-                : context.l10n.noBookmarksHint,
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(
-                context,
-              ).colorScheme.onSurface.withValues(alpha: 0.5),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: TilawaEmptyState(
+          icon: FluentIcons.bookmark_24_regular,
+          title: isSearching
+              ? context.l10n.noBookmarksFound
+              : context.l10n.noBookmarks,
+          subtitle: isSearching
+              ? context.l10n.tryDifferentSearch
+              : context.l10n.noBookmarksHint,
+        ),
       ),
     );
   }

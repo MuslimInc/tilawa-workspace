@@ -144,6 +144,26 @@
 # ============================================
 -keep class com.tilawa.app.MainActivity { *; }
 -keep class com.tilawa.app.MainActivity$* { *; }
+-keep class com.tilawa.app.ManageStorageActivity { *; }
+
+# ============================================
+# Prayer notifications: native receivers, services, and worker referenced
+# from AndroidManifest.xml by string name. Without explicit -keep rules,
+# R8 will rename or strip these classes when minification is enabled,
+# breaking the AlarmManager/WorkManager/BootReceiver wiring.
+# ============================================
+-keep class com.tilawa.app.prayer.AdhanReceiver { *; }
+-keep class com.tilawa.app.prayer.AdhanPlaybackService { *; }
+-keep class com.tilawa.app.prayer.PrayerBootReceiver { *; }
+-keep class com.tilawa.app.prayer.PrayerNotificationsWatchdogWorker { *; }
+# Companion objects, lambdas, and inner classes used by the above
+-keep class com.tilawa.app.prayer.AdhanScheduler { *; }
+-keep class com.tilawa.app.prayer.AdhanScheduler$* { *; }
+-keep class com.tilawa.app.prayer.PrayerAdhanMethodChannel { *; }
+-keep class com.tilawa.app.prayer.PrayerAdhanMethodChannel$* { *; }
+-keep class com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler { *; }
+-keep class com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler$* { *; }
+-keepclassmembers class com.tilawa.app.prayer.** { *; }
 
 # ============================================
 # Obfuscation optimizations

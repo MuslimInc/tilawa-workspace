@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:qibla/qibla.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
+import 'package:vibration/vibration.dart';
 
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../../domain/usecases/check_location_service_use_case.dart';
@@ -35,6 +38,8 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
   final RequestLocationPermissionUseCase _requestLocationPermission;
 
   StreamSubscription<QiblaDirectionEntity>? _qiblaSubscription;
+  int _eventCounter = 0;
+  bool _wasAlignedWithQibla = false;
 
   /// Checks location service, permission, and starts the Qibla
   /// stream in a single pass — avoiding multiple event dispatches.
@@ -133,15 +138,45 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
 
   /// Subscribes to the Qibla direction stream.
   void _startListening() {
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] QiblaBloc._startListening begin');
+    }
+    _wasAlignedWithQibla = false;
     _qiblaSubscription?.cancel();
     try {
       _qiblaSubscription = _getQiblaDirection(const NoParams()).listen(
-        (direction) => add(UpdateQiblaDirection(direction)),
+        (direction) {
+          _eventCounter++;
+          if (kDebugMode && (_eventCounter <= 5 || _eventCounter % 20 == 0)) {
+            debugPrint(
+              '[CompassSensor] stream event #$_eventCounter '
+              'heading=${_formatAngle(direction.direction)} '
+              'qibla=${_formatAngle(direction.qibla)} '
+              'offset=${_formatAngle(direction.offset)}',
+            );
+          }
+          add(UpdateQiblaDirection(direction));
+        },
         onError: (error) {
+          if (kDebugMode) {
+            debugPrint('[CompassSensor] stream error: $error');
+          }
           add(QiblaErrorOccurred(error.toString()));
         },
+        onDone: () {
+          if (kDebugMode) {
+            debugPrint('[CompassSensor] stream done');
+          }
+        },
+        cancelOnError: false,
       );
+      if (kDebugMode) {
+        debugPrint('[CompassSensor] QiblaBloc._startListening subscribed');
+      }
     } catch (error) {
+      if (kDebugMode) {
+        debugPrint('[CompassSensor] QiblaBloc._startListening catch: $error');
+      }
       add(QiblaErrorOccurred(error.toString()));
     }
   }
@@ -150,14 +185,28 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
     StopQiblaStream event,
     Emitter<QiblaState> emit,
   ) async {
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] StopQiblaStream received');
+    }
     await _qiblaSubscription?.cancel();
     _qiblaSubscription = null;
+    _wasAlignedWithQibla = false;
+    Qibla.instance.dispose();
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] subscription canceled + Qibla.dispose()');
+    }
   }
 
   void _onUpdateQiblaDirection(
     UpdateQiblaDirection event,
     Emitter<QiblaState> emit,
   ) {
+    final bool isAlignedWithQibla = event.direction.isAligned;
+    if (isAlignedWithQibla && !_wasAlignedWithQibla) {
+      unawaited(_triggerQiblaAlignmentVibration());
+    }
+    _wasAlignedWithQibla = isAlignedWithQibla;
+
     emit(
       state.copyWith(status: QiblaStatus.success, direction: event.direction),
     );
@@ -176,8 +225,41 @@ class QiblaBloc extends Bloc<QiblaEvent, QiblaState> {
   }
 
   @override
-  Future<void> close() {
-    _qiblaSubscription?.cancel();
+  Future<void> close() async {
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] QiblaBloc.close');
+    }
+    await _qiblaSubscription?.cancel();
+    _qiblaSubscription = null;
+    _wasAlignedWithQibla = false;
+    Qibla.instance.dispose();
+    if (kDebugMode) {
+      debugPrint('[CompassSensor] QiblaBloc.close canceled + disposed');
+    }
     return super.close();
+  }
+
+  String _formatAngle(double value) {
+    final double normalized = (value % 360 + 360) % 360;
+    final int roundedTenths = (normalized * 10).round() % 3600;
+    return (roundedTenths / 10).toStringAsFixed(1);
+  }
+
+  Future<void> _triggerQiblaAlignmentVibration() async {
+    try {
+      final bool hasVibrator = await Vibration.hasVibrator();
+      if (!hasVibrator) {
+        return;
+      }
+
+      final bool hasAmplitude = await Vibration.hasAmplitudeControl();
+      await Vibration.vibrate(
+        duration: 180,
+        amplitude: hasAmplitude ? 160 : -1,
+      );
+    } catch (_) {
+      // Devices without vibration support, platform failures, and simulator
+      // gaps should never affect Qibla state updates.
+    }
   }
 }

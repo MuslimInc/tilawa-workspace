@@ -1192,6 +1192,10 @@
     "@qiblaCompassTip": {
         "description": "Tip message displayed on Qibla compass screen"
     },
+    "qiblaCompassAccuracyPoor": "دقة البوصلة منخفضة. حرّك هاتفك على شكل رقم 8 لمعايرتها.",
+    "@qiblaCompassAccuracyPoor": {
+        "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
+    },
     "onboardingTitle1": "دقائق من القرآن... تغير يومك كله",
     "@onboardingTitle1": {
         "description": "Onboarding page 1 title"
@@ -2044,6 +2048,14 @@
             }
         }
     },
+    "shareInvalidRangeOrder": "يجب أن تكون الآية الأولى قبل الأخيرة أو مساوية لها.",
+    "@shareInvalidRangeOrder": {
+        "description": "Inline reason shown when the user picks fromAyah > toAyah in the share composer"
+    },
+    "shareInvalidRangeBounds": "النطاق المحدد خارج هذه السورة.",
+    "@shareInvalidRangeBounds": {
+        "description": "Inline reason shown when the share composer range falls outside [1, maxAyah]"
+    },
     "sharing": "جاري المشاركة...",
     "@sharing": {
         "description": "Status message while sharing"
@@ -2362,6 +2374,14 @@
     "@notificationPermissionRequired": {
         "description": "Banner shown when the Android POST_NOTIFICATIONS permission is not granted"
     },
+    "batteryOptimizationExemptionRequired": "أوقف تحسين البطارية حتى تصلك إشعارات الصلاة في وقتها أثناء إيقاف الشاشة.",
+    "@batteryOptimizationExemptionRequired": {
+        "description": "Banner shown when the app is not whitelisted from Doze / battery optimization"
+    },
+    "oemAutostartHint": "في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
+    "@oemAutostartHint": {
+        "description": "Informational banner shown on aggressive OEM ROMs"
+    },
     "prayerNotificationBody": "حان وقت {prayerName}",
     "@prayerNotificationBody": {
         "description": "Body text for prayer time notifications",
@@ -2387,5 +2407,70 @@
     "prayerNotificationsAdhanChannelDescription": "تذكيرات الصلاة التي تشغل صوت الأذان",
     "@prayerNotificationsAdhanChannelDescription": {
         "description": "Android notification channel description for prayer reminders with adhan sound"
+    },
+    "prayerNotificationsSilentAdhanChannelName": "مواقيت الصلاة (صامت)",
+    "@prayerNotificationsSilentAdhanChannelName": {
+        "description": "Android notification channel name for prayer reminders when adhan is handled natively"
+    },
+    "prayerNotificationsSilentAdhanChannelDescription": "تنبيهات صامتة لمواقيت الصلاة عند تشغيل الأذان محلياً",
+    "@prayerNotificationsSilentAdhanChannelDescription": {
+        "description": "Android notification channel description for prayer reminders when adhan is handled natively"
+    },
+    "adhanIsPlaying": "الأذان يعمل الآن",
+    "@adhanIsPlaying": {
+        "description": "Text showing that Adhan audio is currently playing"
+    },
+    "stopAdhan": "إيقاف الأذان",
+    "@stopAdhan": {
+        "description": "Button label to stop Adhan playback"
+    },
+    "prayerNotificationReceived": "تنبيه الصلاة",
+    "@prayerNotificationReceived": {
+        "description": "Status text when a prayer notification is opened"
+    },
+    "viewAllPrayerTimes": "عرض جميع مواقيت الصلاة",
+    "@viewAllPrayerTimes": {
+        "description": "Button label to navigate to the full prayer times screen"
+    },
+    "prayerTimeAt": "الساعة {time}",
+    "@prayerTimeAt": {
+        "description": "Label showing a prayer time",
+        "placeholders": {
+            "time": {
+                "type": "String"
+            }
+        }
+    },
+    "notificationStatus": "التنبيه",
+    "@notificationStatus": {
+        "description": "Label for notification status"
+    },
+    "adhanStatus": "الأذان",
+    "@adhanStatus": {
+        "description": "Label for Adhan status"
+    },
+    "received": "تم الاستلام",
+    "@received": {
+        "description": "Status text for received notification"
+    },
+    "sound": "الصوت",
+    "@sound": {
+        "description": "Label for audio sound"
+    },
+    "enabled": "مفعل",
+    "@enabled": {
+        "description": "Generic enabled status"
+    },
+    "disabled": "معطل",
+    "@disabled": {
+        "description": "Generic disabled status"
+    },
+    "errorMissingNotificationPayload": "بيانات التنبيه مفقودة.",
+    "@errorMissingNotificationPayload": {
+        "description": "Error message when notification data is missing"
+    },
+    "errorInvalidNotificationPayload": "بيانات التنبيه غير صالحة.",
+    "@errorInvalidNotificationPayload": {
+        "description": "Error message when notification data is corrupted or invalid"
     }
 }

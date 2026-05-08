@@ -19,7 +19,14 @@ class ReciterPickerSheet extends StatefulWidget {
 }
 
 class _ReciterPickerSheetState extends State<ReciterPickerSheet> {
+  final TextEditingController _searchController = TextEditingController();
   String _query = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,12 +44,14 @@ class _ReciterPickerSheetState extends State<ReciterPickerSheet> {
         height: MediaQuery.sizeOf(context).height * 0.8,
         child: Column(
           children: [
-            TextField(
+            TilawaSearchField(
+              controller: _searchController,
+              hintText: context.l10n.searchReciters,
               onChanged: (v) => setState(() => _query = v),
-              decoration: InputDecoration(
-                hintText: context.l10n.searchReciters,
-                prefixIcon: const Icon(Icons.search_rounded),
-              ),
+              onClear: () {
+                _searchController.clear();
+                setState(() => _query = '');
+              },
             ),
             SizedBox(height: tokens.spaceMedium),
             Expanded(

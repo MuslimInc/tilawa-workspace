@@ -1,11 +1,11 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
-import 'package:tilawa/core/logging/app_logger.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../reciters/domain/repositories/reciters_repository.dart';
 import '../../domain/services/download_notification_navigator.dart';

@@ -32,13 +32,11 @@ class SelectionPill extends StatelessWidget {
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.chip;
     final background = selected
-        ? (selectedColor ?? theme.colorScheme.primary)
+        ? (selectedColor ?? componentTokens.selectionSelectedBackgroundColor)
         : (unselectedColor ??
-              theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: designTokens.opacityMedium,
-              ));
+              componentTokens.selectionUnselectedBackgroundColor);
     final foreground = selected
-        ? (selectedForegroundColor ?? theme.colorScheme.onPrimary)
+        ? (selectedForegroundColor ?? theme.colorScheme.onPrimaryContainer)
         : (unselectedForegroundColor ?? theme.colorScheme.onSurface);
 
     return TilawaChip(

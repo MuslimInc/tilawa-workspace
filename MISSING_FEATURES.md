@@ -4,91 +4,63 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 
 ---
 
-## 🔴 High Priority
+## ✅ Implemented Features
 
-### 1. Prayer Times
-**Description:** Display accurate prayer times (Fajr, Dhuhr, Asr, Maghrib, Isha) based on user location with customizable calculation methods and notifications.
-
-**Key Features:**
-- [ ] Location-based prayer times calculation
-- [ ] Multiple calculation methods (MWL, ISNA, Egypt, Makkah, etc.)
-- [ ] Prayer time notifications with adhan audio
-- [ ] Countdown to next prayer
-- [ ] Monthly prayer timetable view
-- [ ] Qibla integration
-
-**Dependencies:** `adhan_dart` or similar package
+### Share Functionality
+**Description:** Share surah links, ayat, or audio clips via social media.
+*Status: Implemented in codebase.*
 
 ---
+
+### Prayer Times
+**Description:** Display accurate prayer times based on user location with customizable calculation methods and Adhan notifications.
+*Status: Fully implemented and hardened. Version 1.0.0+24 resolved routing discrepancies and payload matching across all app states.*
+
+---
+
+## 🗂️ Post-Release Maintainability Backlog
+
+### Theme Token Harmonization (T4)
+**Release decision:** GO for current release, no pre-release implementation required.
+
+**Why deferred:**
+- No blocker found in T4 audit.
+- Current theme behavior is release-viable.
+- Broad harmonization now would introduce avoidable visual churn.
+
+**Backlog items:**
+- [ ] Quran Image Reader fallback/error/loading colors:
+	make mode-aware and `ColorScheme`-derived if visual issues appear.
+- [ ] Share/Reel palette:
+	consolidate duplicated branded constants into one feature token source.
+- [ ] Share/Reel branding strategy:
+	keep branded identity unless product decides to harmonize with app primary.
+- [ ] Settings semantic icon colors:
+	decide whether they remain fixed semantic colors or become theme-derived tokens.
+- [ ] Overlay/scrim constants:
+	optional tokenization for consistency.
+
+**Note:** Remaining work is maintainability-focused backlog and not a release blocker.
+
+---
+
+## 🧪 Implemented — Needs Verification
 
 ### 2. Quran Text Reader
 **Description:** Display Quran text with Arabic script, allowing users to read along with audio.
-
-**Key Features:**
-- [ ] Display Quran text with proper Arabic typography
-- [ ] Tajweed color coding
-- [ ] Verse-by-verse highlighting synchronized with audio
-- [ ] Font size customization
-- [ ] Multiple Quran scripts (Uthmani, IndoPak, etc.)
-- [ ] Page-by-page or continuous scroll mode
-
-**Dependencies:** Quran text API or bundled JSON data
-
----
+*Status: Implemented in codebase, pending feature-completeness verification (e.g., Tajweed color coding).*
 
 ### 3. Bookmarks
 **Description:** Allow users to save positions in surahs to resume later.
-
-**Key Features:**
-- [ ] Bookmark current playback position
-- [ ] Name/label bookmarks
-- [ ] View all bookmarks list
-- [ ] Quick resume from bookmark
-- [ ] Sync bookmarks to cloud (for logged-in users)
-- [ ] Export/import bookmarks
-
-**Data Model:**
-```dart
-class Bookmark {
-  final String id;
-  final int surahId;
-  final String surahName;
-  final String reciterName;
-  final Duration position;
-  final DateTime createdAt;
-  final String? label;
-}
-```
-
----
+*Status: Implemented in codebase, pending feature-completeness verification.*
 
 ### 4. Listening History
 **Description:** Track recently played surahs with timestamps for easy access.
-
-**Key Features:**
-- [ ] Auto-save listening history
-- [ ] Display recent plays with date/time
-- [ ] Resume from last position
-- [ ] Clear history option
-- [ ] History search/filter
-- [ ] Sync history across devices
-
-**Data Model:**
-```dart
-class ListeningHistoryItem {
-  final String id;
-  final int surahId;
-  final String surahName;
-  final String reciterId;
-  final String reciterName;
-  final Duration lastPosition;
-  final Duration totalDuration;
-  final DateTime playedAt;
-  final bool completed;
-}
-```
+*Status: Implemented in codebase, pending feature-completeness verification.*
 
 ---
+
+## ⏳ Still Missing / Deferred
 
 ## 🟡 Medium Priority
 
@@ -104,18 +76,7 @@ class ListeningHistoryItem {
 
 ---
 
-### 6. Share Functionality
-**Description:** Share surah links, ayat, or audio clips via social media.
 
-**Key Features:**
-- [ ] Share surah deep link
-- [ ] Share ayat as image with beautiful design
-- [ ] Share audio clip (portion of surah)
-- [ ] Copy ayat text
-- [ ] Share to WhatsApp, Twitter, Facebook, etc.
-- [ ] Generate shareable cards
-
----
 
 ### 7. Extended Athkar Categories
 **Description:** Add more athkar/dua categories beyond morning and evening.
@@ -325,11 +286,6 @@ class ListeningHistoryItem {
 
 | Feature | User Impact | Dev Effort | Priority Score |
 |---------|-------------|------------|----------------|
-| Prayer Times | High | Medium | 🔴 9/10 |
-| Quran Text Reader | High | High | 🔴 9/10 |
-| Bookmarks | High | Low | 🔴 9/10 |
-| Listening History | Medium | Low | 🔴 8/10 |
-| Share Functionality | Medium | Low | 🟡 7/10 |
 | Cloud Sync | Medium | Medium | 🟡 7/10 |
 | Extended Athkar | Medium | Low | 🟡 6/10 |
 | Tafsir/Translation | High | High | 🟡 6/10 |
@@ -345,18 +301,13 @@ class ListeningHistoryItem {
 ## 🚀 Suggested Implementation Phases
 
 ### Phase 1: Core Enhancements (1-2 months)
-- Bookmarks
-- Listening History
-- Share Functionality
 - Extended Athkar Categories
 
 ### Phase 2: Major Features (2-3 months)
-- Prayer Times with Notifications
 - Cloud Backup & Sync
 - Juz Browser
 
 ### Phase 3: Reading Experience (3-4 months)
-- Quran Text Reader
 - Tafsir & Translation
 - Offline Quran Text
 
@@ -383,4 +334,4 @@ class ListeningHistoryItem {
 
 ---
 
-*Last Updated: January 8, 2026*
+*Last Updated: May 8, 2026*

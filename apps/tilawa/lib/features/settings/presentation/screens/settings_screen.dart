@@ -15,8 +15,201 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../color_picker/color_picker.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
+import '../../../theme/domain/primary_color_preset.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
+
+// ── Layout constants (no matching design token) ──────────────────────────────
+const double _kAvatarSize = 60.0;
+const double _kPersonIconSize = 32.0;
+const double _kColorSwatchRadius = 12.0;
+const double _kCustomSwatchSize = 24.0;
+const int _kMaxConcurrentDownloads = 5;
+
+// ── Top-level sheet / dialog helpers ─────────────────────────────────────────
+
+void _showColorPicker(
+  BuildContext context,
+  Color currentColor,
+  PrimaryColorSource currentSource,
+  String? currentPresetId,
+) {
+  final tokens = Theme.of(context).tokens;
+  showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(tokens.radiusExtraLarge),
+      ),
+    ),
+    builder: (sheetContext) => _ColorPickerSheet(
+      currentColor: currentColor,
+      currentSource: currentSource,
+      currentPresetId: currentPresetId,
+      onCustomColorTap: () {
+        Navigator.pop(sheetContext);
+        _showCustomColorPicker(context, currentColor);
+      },
+    ),
+  );
+}
+
+void _showCustomColorPicker(BuildContext context, Color currentColor) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) {
+      var pickerColor = currentColor;
+      return AlertDialog(
+        title: Text(ctx.l10n.choosePrimaryColor),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: pickerColor,
+            onColorChanged: (color) => pickerColor = color,
+            pickerAreaHeightPercent: 0.8,
+            enableAlpha: false,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(ctx.l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              ctx.read<ThemeCubit>().setPrimaryColor(pickerColor);
+              Navigator.of(ctx).pop();
+            },
+            child: Text(ctx.l10n.save),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void _showLanguagePicker(BuildContext context, Locale currentLocale) {
+  final tokens = Theme.of(context).tokens;
+  showModalBottomSheet<void>(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(tokens.radiusExtraLarge),
+      ),
+    ),
+    builder: (_) => _LanguagePickerSheet(currentLocale: currentLocale),
+  );
+}
+
+void _showConcurrentDownloadsPicker(BuildContext context, int currentValue) {
+  final tokens = Theme.of(context).tokens;
+  showModalBottomSheet<void>(
+    context: context,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(tokens.radiusExtraLarge),
+      ),
+    ),
+    builder: (_) => _ConcurrentDownloadsSheet(currentValue: currentValue),
+  );
+}
+
+void _showLogoutDialog(BuildContext context) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(ctx.l10n.logout),
+      content: Text(ctx.l10n.logoutConfirmation),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(ctx.l10n.cancel),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(ctx);
+            ctx.read<AuthBloc>().add(const SignOutEvent());
+          },
+          child: Text(
+            ctx.l10n.logout,
+            style: const TextStyle(color: AppColors.error),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+String _localizedPresetName(BuildContext context, PrimaryColorPreset preset) {
+  final AppLocalizations l10n = context.l10n;
+  return switch (preset) {
+    PrimaryColorPreset.teal => l10n.colorCyan,
+    PrimaryColorPreset.sage => l10n.colorGreen,
+    PrimaryColorPreset.brown => l10n.colorBrown,
+    PrimaryColorPreset.purple => l10n.colorPurple,
+  };
+}
+
+String _formatPrimaryColorHex(Color color) {
+  final int rgb = color.toARGB32() & 0x00FFFFFF;
+  final String hex = rgb.toRadixString(16).padLeft(6, '0').toUpperCase();
+  return '#$hex';
+}
+
+String _primaryColorTileSubtitle(BuildContext context, ThemeState state) {
+  if (state.primaryColorSource == PrimaryColorSource.custom) {
+    return '${context.l10n.custom} · ${_formatPrimaryColorHex(state.primaryColor)}';
+  }
+
+  final preset =
+      PrimaryColorPreset.findById(state.primaryPresetId) ??
+      PrimaryColorPreset.defaultPreset;
+  return _localizedPresetName(context, preset);
+}
+
+class _PrimaryColorTileTrailing extends StatelessWidget {
+  const _PrimaryColorTileTrailing({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final designTokens = theme.tokens;
+    final settingsTokens = theme.componentTokens.settingsGroup;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: settingsTokens.tileIconSize,
+          height: settingsTokens.tileIconSize,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(
+                alpha: designTokens.opacityMedium,
+              ),
+              width: designTokens.spaceTiny,
+            ),
+          ),
+        ),
+        SizedBox(width: designTokens.spaceSmall),
+        Icon(
+          FluentIcons.chevron_right_24_filled,
+          size: settingsTokens.tileTrailingSize,
+          color: colorScheme.onSurfaceVariant.withValues(
+            alpha: settingsTokens.tileTrailingOpacity,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Screen ────────────────────────────────────────────────────────────────────
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -33,13 +226,8 @@ class SettingsScreen extends StatelessWidget {
               initial: () {},
               loading: () {},
               authenticated: (_) {},
-              unauthenticated: () {
-                // Navigate to login on logout
-                const LoginRoute().go(context);
-              },
-              error: (message) {
-                ToastUtils.showErrorToast(message);
-              },
+              unauthenticated: () => const LoginRoute().go(context),
+              error: (message) => ToastUtils.showErrorToast(message),
             );
           },
         ),
@@ -56,14 +244,13 @@ class SettingsScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               horizontal: tokens.spaceLarge,
               vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
-            ).copyWith(bottom: 20),
+            ).copyWith(bottom: tokens.spaceExtraLarge),
             child: Column(
               children: [
-                // User Profile Section
-                _buildProfileSection(context),
+                const _SettingsProfileCard(),
                 SizedBox(height: tokens.spaceLarge * 2),
 
-                // General Group (Theme & Language)
+                // Appearance Group (Theme & Language)
                 TilawaSettingsGroup(
                   title: context.l10n.appearance.toUpperCase(),
                   children: [
@@ -71,27 +258,34 @@ class SettingsScreen extends StatelessWidget {
                       builder: (context, state) {
                         return Column(
                           children: [
-                            TilawaSettingsTile(
+                            TilawaSettingsSwitchTile(
                               icon: FluentIcons.dark_theme_24_regular,
                               iconColor: AppColors.settingsTheme,
-                              title: context.l10n.theme,
-                              subtitle: _getThemeName(context, state.mode),
-                              onTap: () =>
-                                  _showThemePicker(context, state.mode),
+                              title: context.l10n.darkTheme,
+                              value: state.mode == ThemeMode.dark,
+                              onChanged: (value) =>
+                                  context.read<ThemeCubit>().toggleDark(value),
                               borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(16),
+                                top: Radius.circular(tokens.radiusLarge),
                               ),
                             ),
                             TilawaSettingsTile(
                               icon: FluentIcons.color_24_regular,
                               iconColor: AppColors.settingsColor,
                               title: context.l10n.primaryColor,
-                              subtitle: _getColorName(
+                              subtitle: _primaryColorTileSubtitle(
+                                context,
+                                state,
+                              ),
+                              trailing: _PrimaryColorTileTrailing(
+                                color: state.primaryColor,
+                              ),
+                              onTap: () => _showColorPicker(
                                 context,
                                 state.primaryColor,
+                                state.primaryColorSource,
+                                state.primaryPresetId,
                               ),
-                              onTap: () =>
-                                  _showColorPicker(context, state.primaryColor),
                             ),
                           ],
                         );
@@ -103,14 +297,11 @@ class SettingsScreen extends StatelessWidget {
                           icon: FluentIcons.local_language_24_regular,
                           iconColor: AppColors.settingsLanguage,
                           title: context.l10n.language,
-                          subtitle: state.locale.languageCode == 'ar'
-                              ? context.l10n.arabic
-                              : context.l10n.english,
                           onTap: () =>
                               _showLanguagePicker(context, state.locale),
                           showDivider: false,
                           borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(16),
+                            bottom: Radius.circular(tokens.radiusLarge),
                           ),
                         );
                       },
@@ -132,33 +323,25 @@ class SettingsScreen extends StatelessWidget {
                               icon: FluentIcons.history_24_regular,
                               iconColor: AppColors.settingsPlayback,
                               title: context.l10n.restorePlaybackState,
-                              subtitle:
-                                  context.l10n.restorePlaybackStateSubtitle,
                               value: state.restorePlaybackState,
-                              onChanged: (value) {
-                                context
-                                    .read<SettingsCubit>()
-                                    .toggleRestorePlaybackState(value);
-                              },
+                              onChanged: (value) => context
+                                  .read<SettingsCubit>()
+                                  .toggleRestorePlaybackState(value),
                               borderRadius: BorderRadius.vertical(
-                                top: Radius.circular(16),
+                                top: Radius.circular(tokens.radiusLarge),
                               ),
                             ),
                             TilawaSettingsSwitchTile(
                               icon: FluentIcons.timer_24_regular,
                               iconColor: AppColors.settingsDuration,
                               title: context.l10n.enableRecitationDuration,
-                              subtitle:
-                                  context.l10n.enableRecitationDurationSubtitle,
                               value: state.isSleepTimerEnabled,
-                              onChanged: (value) {
-                                context
-                                    .read<SettingsCubit>()
-                                    .toggleSleepTimerEnabled(value);
-                              },
+                              onChanged: (value) => context
+                                  .read<SettingsCubit>()
+                                  .toggleSleepTimerEnabled(value),
                               showDivider: false,
                               borderRadius: BorderRadius.vertical(
-                                bottom: Radius.circular(16),
+                                bottom: Radius.circular(tokens.radiusLarge),
                               ),
                             ),
                           ],
@@ -178,35 +361,31 @@ class SettingsScreen extends StatelessWidget {
                       icon: FluentIcons.bookmark_24_regular,
                       iconColor: AppColors.settingsBookmarks,
                       title: context.l10n.bookmarks,
-                      subtitle: context.l10n.noBookmarksHint,
                       onTap: () => const BookmarksRoute().push(context),
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16),
+                        top: Radius.circular(tokens.radiusLarge),
                       ),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.history_24_regular,
                       iconColor: AppColors.settingsHistory,
                       title: context.l10n.listeningHistory,
-                      subtitle: context.l10n.noHistoryDescription,
                       onTap: () => const HistoryRoute().push(context),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.clock_24_regular,
                       iconColor: AppColors.settingsPrayer,
                       title: context.l10n.prayerTimes,
-                      subtitle: context.l10n.locationRequiredDescription,
                       onTap: () => const PrayerTimesRoute().push(context),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.book_24_regular,
                       iconColor: AppColors.settingsQuran,
                       title: context.l10n.quranReader,
-                      subtitle: context.l10n.continueReading,
                       onTap: () => const QuranLastReadRoute().push(context),
                       showDivider: false,
                       borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(16),
+                        bottom: Radius.circular(tokens.radiusLarge),
                       ),
                     ),
                   ],
@@ -222,46 +401,25 @@ class SettingsScreen extends StatelessWidget {
                       icon: FluentIcons.folder_24_regular,
                       iconColor: AppColors.settingsStorage,
                       title: context.l10n.manageStorage,
-                      subtitle: context.l10n.manageStorageSubtitle,
                       onTap: () => const DownloadsRoute().push(context),
                       borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(16),
+                        top: Radius.circular(tokens.radiusLarge),
                       ),
                     ),
                     BlocBuilder<SettingsCubit, SettingsState>(
                       builder: (context, state) {
-                        return Column(
-                          children: [
-                            TilawaSettingsSwitchTile(
-                              icon: Icons.wifi_rounded,
-                              iconColor: AppColors.settingsDownloads,
-                              title: _getQuranAssetPrefetchTitle(context),
-                              subtitle: _getQuranAssetPrefetchSubtitle(context),
-                              value: state.prefetchQuranAssetsOnWifiOnly,
-                              onChanged: (value) {
-                                context
-                                    .read<SettingsCubit>()
-                                    .togglePrefetchQuranAssetsOnWifiOnly(value);
-                              },
-                            ),
-                            TilawaSettingsTile(
-                              icon: FluentIcons.arrow_download_24_regular,
-                              iconColor: AppColors.settingsDownloads,
-                              title: context.l10n.concurrentDownloads,
-                              subtitle: context.l10n
-                                  .concurrentDownloadsSubtitle(
-                                    state.maxConcurrentDownloads,
-                                  ),
-                              onTap: () => _showConcurrentDownloadsPicker(
-                                context,
-                                state.maxConcurrentDownloads,
-                              ),
-                              showDivider: false,
-                              borderRadius: BorderRadius.vertical(
-                                bottom: Radius.circular(16),
-                              ),
-                            ),
-                          ],
+                        return TilawaSettingsTile(
+                          icon: FluentIcons.arrow_download_24_regular,
+                          iconColor: AppColors.settingsDownloads,
+                          title: context.l10n.concurrentDownloads,
+                          onTap: () => _showConcurrentDownloadsPicker(
+                            context,
+                            state.maxConcurrentDownloads,
+                          ),
+                          showDivider: false,
+                          borderRadius: BorderRadius.vertical(
+                            bottom: Radius.circular(tokens.radiusLarge),
+                          ),
                         );
                       },
                     ),
@@ -269,92 +427,21 @@ class SettingsScreen extends StatelessWidget {
                 ),
 
                 SizedBox(height: tokens.spaceLarge * 2),
+                const _LogoutButton(),
 
-                // Logout Button
-                BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) {
-                    if (state is AuthAuthenticated) {
-                      return Material(
-                        color: context.isDarkMode
-                            ? context.theme.cardColor
-                            : AppColors.logoutBackground,
-                        borderRadius: BorderRadius.circular(20),
-                        child: InkWell(
-                          onTap: () => _showLogoutDialog(context),
-                          borderRadius: BorderRadius.circular(16),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  FluentIcons.sign_out_24_filled,
-                                  color: AppColors.error,
-                                  size: 20,
-                                ),
-                                SizedBox(width: 12),
-                                Text(
-                                  context.l10n.logout,
-                                  style: TextStyle(
-                                    color: AppColors.error,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return const SizedBox.shrink();
-                  },
-                ),
-
-                // Route List (Dev)
                 if (kDebugMode) ...[
                   SizedBox(height: tokens.spaceLarge * 2),
                   TilawaSettingsTile(
                     icon: Icons.list_alt_rounded,
                     title: 'Route List (Dev)',
                     onTap: () => const RouteListRoute().push(context),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(tokens.radiusLarge),
                     showDivider: false,
                   ),
                 ],
 
-                SizedBox(height: 32),
-
-                // App Version Section
-                BlocBuilder<SettingsCubit, SettingsState>(
-                  builder: (context, state) {
-                    final version = state.appInfo?.version ?? '...';
-                    final buildNumber = state.appInfo?.buildNumber ?? '...';
-                    return Column(
-                      children: [
-                        Text(
-                          context.l10n.version(version),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: context.colorScheme.onSurface.withValues(
-                              alpha: 0.5,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: tokens.spaceExtraSmall),
-                        Text(
-                          context.l10n.build(buildNumber),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: context.colorScheme.onSurface.withValues(
-                              alpha: 0.3,
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
+                SizedBox(height: tokens.spaceLarge * 2),
+                const _AppVersionInfo(),
               ],
             ),
           ),
@@ -362,8 +449,19 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildProfileSection(BuildContext context) {
+// ── Private widgets ───────────────────────────────────────────────────────────
+
+class _SettingsProfileCard extends StatelessWidget {
+  const _SettingsProfileCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final colorScheme = context.colorScheme;
+    final foregroundColor = colorScheme.onPrimary;
+
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         final UserEntity? user = state.maybeWhen(
@@ -371,65 +469,62 @@ class SettingsScreen extends StatelessWidget {
           orElse: () => null,
         );
         return Container(
-          padding: EdgeInsets.all(24),
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceExtraLarge,
+            vertical: tokens.spaceLarge,
+          ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [
-                context.colorScheme.primary,
-                context.colorScheme.secondary,
-              ],
+              colors: [colorScheme.primary, colorScheme.secondary],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.profileGradientStart.withValues(alpha: 0.2),
-                blurRadius: 15,
-                offset: const Offset(0, 8),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           ),
           child: Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: _kAvatarSize,
+                height: _kAvatarSize,
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: foregroundColor.withValues(
+                    alpha: tokens.opacitySubtle * 2,
+                  ),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    width: 2,
+                    color: foregroundColor.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+                    width: tokens.spaceTiny,
                   ),
                 ),
                 child: Center(
                   child: Icon(
                     FluentIcons.person_32_filled,
-                    size: 32,
-                    color: Colors.white,
+                    size: _kPersonIconSize,
+                    color: foregroundColor,
                   ),
                 ),
               ),
-              SizedBox(width: 16),
+              SizedBox(width: tokens.spaceLarge),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       user?.displayName ?? context.l10n.guestUser,
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: context.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: Colors.white,
+                        color: foregroundColor,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    SizedBox(height: tokens.spaceExtraSmall),
                     Text(
                       user?.email ?? context.l10n.signInToSync,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        color: foregroundColor.withValues(
+                          alpha: tokens.opacityGlass,
+                        ),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -439,9 +534,11 @@ class SettingsScreen extends StatelessWidget {
               if (user == null)
                 IconButton(
                   onPressed: () => const LoginRoute().push(context),
-                  icon: const Icon(
-                    FluentIcons.arrow_right_24_filled,
-                    color: Colors.white,
+                  icon: Icon(
+                    Directionality.of(context) == TextDirection.rtl
+                        ? FluentIcons.arrow_left_24_filled
+                        : FluentIcons.arrow_right_24_filled,
+                    color: foregroundColor,
                   ),
                 ),
             ],
@@ -450,215 +547,44 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  String _getThemeName(BuildContext context, ThemeMode mode) {
-    switch (mode) {
-      case ThemeMode.system:
-        return context.l10n.systemTheme;
-      case ThemeMode.light:
-        return context.l10n.lightTheme;
-      case ThemeMode.dark:
-        return context.l10n.darkTheme;
-    }
-  }
+class _LogoutButton extends StatelessWidget {
+  const _LogoutButton();
 
-  void _showThemePicker(BuildContext context, ThemeMode currentMode) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 16),
-            Text(
-              context.l10n.chooseTheme,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            _ThemeOption(
-              title: context.l10n.systemTheme,
-              value: ThemeMode.system,
-              groupValue: currentMode,
-              onChanged: (val) {
-                context.read<ThemeCubit>().setMode(val);
-                Navigator.pop(context);
-              },
-            ),
-            _ThemeOption(
-              title: context.l10n.lightTheme,
-              value: ThemeMode.light,
-              groupValue: currentMode,
-              onChanged: (val) {
-                context.read<ThemeCubit>().setMode(val);
-                Navigator.pop(context);
-              },
-            ),
-            _ThemeOption(
-              title: context.l10n.darkTheme,
-              value: ThemeMode.dark,
-              groupValue: currentMode,
-              onChanged: (val) {
-                context.read<ThemeCubit>().setMode(val);
-                Navigator.pop(context);
-              },
-            ),
-            SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final colorScheme = context.colorScheme;
 
-  String _getColorName(BuildContext context, Color color) {
-    // Check if the color is in options
-    final bool isKnownColor = ThemeCubit.colorOptions.any(
-      (element) => element.color.toARGB32() == color.toARGB32(),
-    );
-
-    if (!isKnownColor) {
-      return context.l10n.custom;
-    }
-
-    final AppColorOption option = ThemeCubit.colorOptions.firstWhere(
-      (element) => element.color.toARGB32() == color.toARGB32(),
-      orElse: () => ThemeCubit.colorOptions.first,
-    );
-    return _getLocalizedColorName(context, option.name);
-  }
-
-  String _getLocalizedColorName(BuildContext context, String name) {
-    final AppLocalizations l10n = context.l10n;
-    return switch (name) {
-      'Cyan' => l10n.colorCyan,
-      'Green' => l10n.colorGreen,
-      'Brown' => l10n.colorBrown,
-      'Purple' => l10n.colorPurple,
-      _ => name,
-    };
-  }
-
-  String _getQuranAssetPrefetchTitle(BuildContext context) {
-    return context.l10n.localeName == 'ar'
-        ? 'تهيئة أصول القرآن مسبقًا عبر الواي فاي فقط'
-        : 'Prefetch Quran assets on Wi-Fi only';
-  }
-
-  String _getQuranAssetPrefetchSubtitle(BuildContext context) {
-    return context.l10n.localeName == 'ar'
-        ? 'حمّل خطوط وصور المصحف في الخلفية قبل فتح القارئ عند الاتصال بالواي فاي.'
-        : 'Prepare Quran fonts and reader images in the background before opening the reader when connected to Wi-Fi.';
-  }
-
-  void _showColorPicker(BuildContext context, Color currentColor) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        final height = MediaQuery.of(sheetContext).size.height;
-        return SafeArea(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: height * 0.85),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is! AuthAuthenticated) return const SizedBox.shrink();
+        return Material(
+          color: colorScheme.errorContainer.withValues(
+            alpha: context.isDarkMode ? 0.16 : 0.58,
+          ),
+          borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+          child: InkWell(
+            onTap: () => _showLogoutDialog(context),
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: tokens.spaceLarge),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(height: 16),
+                  Icon(
+                    FluentIcons.sign_out_24_filled,
+                    color: colorScheme.error,
+                    size: tokens.iconSizeMedium,
+                  ),
+                  SizedBox(width: tokens.spaceMedium),
                   Text(
-                    context.l10n.choosePrimaryColor,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  ...ThemeCubit.colorOptions.map((option) {
-                    final isSelected =
-                        option.color.toARGB32() == currentColor.toARGB32();
-                    return ListTile(
-                      onTap: () {
-                        context.read<ThemeCubit>().setPrimaryColor(
-                          option.color,
-                        );
-                        Navigator.pop(sheetContext);
-                      },
-                      leading: CircleAvatar(
-                        backgroundColor: option.color,
-                        radius: 12,
-                      ),
-                      title: Text(
-                        _getLocalizedColorName(context, option.name),
-                        style: TextStyle(
-                          fontWeight: isSelected
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          color: isSelected ? option.color : null,
-                        ),
-                      ),
-                      trailing: isSelected
-                          ? Icon(
-                              FluentIcons.checkmark_24_regular,
-                              color: option.color,
-                            )
-                          : null,
-                    );
-                  }),
-                  // Custom Color Option
-                  ListTile(
-                    onTap: () {
-                      Navigator.pop(sheetContext);
-                      _showCustomColorPicker(context, currentColor);
-                    },
-                    leading: Container(
-                      width: 24,
-                      height: 24,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: SweepGradient(
-                          colors: [
-                            Colors.red,
-                            Colors.blue,
-                            Colors.green,
-                            Colors.red,
-                          ],
-                        ),
-                      ),
+                    context.l10n.logout,
+                    style: context.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.error,
                     ),
-                    title: Text(
-                      context.l10n.custom,
-                      style: TextStyle(
-                        fontWeight:
-                            !ThemeCubit.colorOptions.any(
-                              (opt) =>
-                                  opt.color.toARGB32() ==
-                                  currentColor.toARGB32(),
-                            )
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color:
-                            !ThemeCubit.colorOptions.any(
-                              (opt) =>
-                                  opt.color.toARGB32() ==
-                                  currentColor.toARGB32(),
-                            )
-                            ? currentColor
-                            : null,
-                      ),
-                    ),
-                    trailing:
-                        !ThemeCubit.colorOptions.any(
-                          (opt) =>
-                              opt.color.toARGB32() == currentColor.toARGB32(),
-                        )
-                        ? Icon(
-                            FluentIcons.checkmark_24_regular,
-                            color: currentColor,
-                          )
-                        : null,
                   ),
-                  SizedBox(height: 16),
                 ],
               ),
             ),
@@ -667,68 +593,152 @@ class SettingsScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  void _showCustomColorPicker(BuildContext context, Color currentColor) {
-    showDialog(
-      context: context,
-      builder: (ctx) {
-        var pickerColor = currentColor;
-        return AlertDialog(
-          title: Text(ctx.l10n.choosePrimaryColor),
-          content: SingleChildScrollView(
-            child: ColorPicker(
-              pickerColor: pickerColor,
-              onColorChanged: (color) {
-                pickerColor = color;
-              },
-              pickerAreaHeightPercent: 0.8,
-              enableAlpha: false,
+class _AppVersionInfo extends StatelessWidget {
+  const _AppVersionInfo();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, state) {
+        final version = state.appInfo?.version ?? '...';
+        final buildNumber = state.appInfo?.buildNumber ?? '...';
+        return Column(
+          children: [
+            Text(
+              context.l10n.version(version),
+              style: context.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: context.colorScheme.onSurface.withValues(
+                  alpha: tokens.opacityMedium + tokens.opacitySubtle * 2,
+                ),
+              ),
             ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(ctx.l10n.cancel),
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-            ),
-            TextButton(
-              child: Text(ctx.l10n.save),
-              onPressed: () {
-                ctx.read<ThemeCubit>().setPrimaryColor(pickerColor);
-                Navigator.of(ctx).pop();
-              },
+            SizedBox(height: tokens.spaceExtraSmall),
+            Text(
+              context.l10n.build(buildNumber),
+              style: context.textTheme.bodySmall?.copyWith(
+                color: context.colorScheme.onSurface.withValues(
+                  alpha: tokens.opacityMedium,
+                ),
+              ),
             ),
           ],
         );
       },
     );
   }
+}
 
-  void _showLanguagePicker(BuildContext context, Locale currentLocale) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+class _ColorPickerSheet extends StatelessWidget {
+  const _ColorPickerSheet({
+    required this.currentColor,
+    required this.currentSource,
+    required this.currentPresetId,
+    required this.onCustomColorTap,
+  });
+
+  final Color currentColor;
+  final PrimaryColorSource currentSource;
+  final String? currentPresetId;
+  final VoidCallback onCustomColorTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final isCustom = currentSource == PrimaryColorSource.custom;
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
+        ),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: tokens.spaceLarge),
+              Text(
+                context.l10n.choosePrimaryColor,
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: tokens.spaceLarge),
+              ...PrimaryColorPreset.values.map((preset) {
+                final isSelected = !isCustom && currentPresetId == preset.id;
+                return TilawaSelectionTile(
+                  leading: CircleAvatar(
+                    backgroundColor: preset.value,
+                    radius: _kColorSwatchRadius,
+                  ),
+                  title: _localizedPresetName(context, preset),
+                  isSelected: isSelected,
+                  onTap: () {
+                    context.read<ThemeCubit>().setPrimaryPreset(preset);
+                    Navigator.pop(context);
+                  },
+                );
+              }),
+              TilawaSelectionTile(
+                leading: SizedBox.square(
+                  dimension: _kCustomSwatchSize,
+                  child: const DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: SweepGradient(
+                        colors: [
+                          Colors.red,
+                          Colors.blue,
+                          Colors.green,
+                          Colors.red,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                title: context.l10n.custom,
+                isSelected: isCustom,
+                onTap: onCustomColorTap,
+              ),
+              SizedBox(height: tokens.spaceLarge),
+            ],
+          ),
+        ),
       ),
-      builder: (context) => SafeArea(
+    );
+  }
+}
+
+class _LanguagePickerSheet extends StatelessWidget {
+  const _LanguagePickerSheet({required this.currentLocale});
+
+  final Locale currentLocale;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: context.systemViewInsets.bottom),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: 16),
+            SizedBox(height: tokens.spaceLarge),
             Text(
               context.l10n.chooseLanguage,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            SizedBox(height: 16),
-            ListTile(
-              title: Text("العربية"),
-              trailing: currentLocale.languageCode == arabicLanguageCode
-                  ? Icon(
-                      FluentIcons.checkmark_24_regular,
-                      color: Theme.of(context).primaryColor,
-                    )
-                  : null,
+            SizedBox(height: tokens.spaceLarge),
+            TilawaSelectionTile(
+              title: 'العربية',
+              isSelected: currentLocale.languageCode == arabicLanguageCode,
               onTap: () {
                 context.read<LocalizationBloc>().add(
                   const ChangeLanguage(Locale(arabicLanguageCode)),
@@ -736,14 +746,9 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            ListTile(
-              title: Text(context.l10n.english),
-              trailing: currentLocale.languageCode == englishLanguageCode
-                  ? Icon(
-                      FluentIcons.checkmark_24_regular,
-                      color: Theme.of(context).primaryColor,
-                    )
-                  : null,
+            TilawaSelectionTile(
+              title: 'English',
+              isSelected: currentLocale.languageCode == englishLanguageCode,
               onTap: () {
                 context.read<LocalizationBloc>().add(
                   const ChangeLanguage(Locale(englishLanguageCode)),
@@ -751,107 +756,47 @@ class SettingsScreen extends StatelessWidget {
                 Navigator.pop(context);
               },
             ),
-            SizedBox(height: 16),
+            SizedBox(height: tokens.spaceLarge),
           ],
         ),
-      ),
-    );
-  }
-
-  void _showConcurrentDownloadsPicker(BuildContext context, int currentValue) {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(height: 16),
-            Text(
-              context.l10n.concurrentDownloads,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 16),
-            for (int i = 1; i <= 5; i++)
-              ListTile(
-                title: Text('$i'),
-                trailing: currentValue == i
-                    ? Icon(
-                        FluentIcons.checkmark_24_regular,
-                        color: Theme.of(context).primaryColor,
-                      )
-                    : null,
-                onTap: () {
-                  context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
-                  Navigator.pop(context);
-                },
-              ),
-            SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.logout),
-        content: Text(context.l10n.logoutConfirmation),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(context.l10n.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<AuthBloc>().add(const SignOutEvent());
-            },
-            child: Text(
-              context.l10n.logout,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
       ),
     );
   }
 }
 
-class _ThemeOption extends StatelessWidget {
-  const _ThemeOption({
-    required this.title,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-  final String title;
-  final ThemeMode value;
-  final ThemeMode groupValue;
-  final ValueChanged<ThemeMode> onChanged;
+class _ConcurrentDownloadsSheet extends StatelessWidget {
+  const _ConcurrentDownloadsSheet({required this.currentValue});
+
+  final int currentValue;
 
   @override
   Widget build(BuildContext context) {
-    final isSelected = value == groupValue;
-    return ListTile(
-      onTap: () => onChanged(value),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          color: isSelected ? Theme.of(context).primaryColor : null,
-        ),
+    final tokens = Theme.of(context).tokens;
+
+    return SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: tokens.spaceLarge),
+          Text(
+            context.l10n.concurrentDownloads,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: tokens.spaceLarge),
+          for (int i = 1; i <= _kMaxConcurrentDownloads; i++)
+            TilawaSelectionTile(
+              title: '$i',
+              isSelected: currentValue == i,
+              onTap: () {
+                context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
+                Navigator.pop(context);
+              },
+            ),
+          SizedBox(height: tokens.spaceLarge),
+        ],
       ),
-      trailing: isSelected
-          ? Icon(
-              FluentIcons.checkmark_24_regular,
-              color: Theme.of(context).primaryColor,
-            )
-          : null,
     );
   }
 }

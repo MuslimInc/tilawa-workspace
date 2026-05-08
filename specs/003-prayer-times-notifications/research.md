@@ -32,14 +32,18 @@
 
 ### 1.3 Android Manifest Permissions (no changes required)
 
-All required permissions are already declared:
+All required permissions are declared (current production manifest):
 ```xml
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />          <!-- API 33+ -->
-<uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />        <!-- API 31+ -->
-<uses-permission android:name="android.permission.USE_EXACT_ALARM" />             <!-- API 34+ -->
+<uses-permission android:name="android.permission.USE_EXACT_ALARM" />             <!-- API 33+, auto-granted for alarm/calendar/religious-observance apps -->
 <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>       <!-- Reboot rescheduling -->
 <uses-permission android:name="android.permission.WAKE_LOCK" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 ```
+
+`SCHEDULE_EXACT_ALARM` is intentionally NOT declared — Tilawa qualifies for the auto-grant `USE_EXACT_ALARM` category, which avoids prompting the user for the exact-alarm permission. A Play-rejection fallback to `SCHEDULE_EXACT_ALARM` is documented in [plan.md §Permission Strategy](plan.md).
 
 ### 1.4 Bootstrap Pattern
 

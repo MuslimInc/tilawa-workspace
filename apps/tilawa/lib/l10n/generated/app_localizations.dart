@@ -1640,6 +1640,12 @@ abstract class AppLocalizations {
   /// **'Make sure the arrow moves when you rotate your device'**
   String get qiblaCompassTip;
 
+  /// SnackBar message shown when Qibla compass sensor accuracy is poor
+  ///
+  /// In en, this message translates to:
+  /// **'Compass accuracy is low. Move your phone in a figure-eight motion to calibrate it.'**
+  String get qiblaCompassAccuracyPoor;
+
   /// Onboarding page 1 title
   ///
   /// In en, this message translates to:
@@ -2798,6 +2804,18 @@ abstract class AppLocalizations {
   /// **'Maximum {count} verses per clip.'**
   String maxVersesExceeded(int count);
 
+  /// Inline reason shown when the user picks fromAyah > toAyah in the share composer
+  ///
+  /// In en, this message translates to:
+  /// **'First ayah must be before or equal to the last.'**
+  String get shareInvalidRangeOrder;
+
+  /// Inline reason shown when the share composer range falls outside [1, maxAyah]
+  ///
+  /// In en, this message translates to:
+  /// **'Selected range is outside this surah.'**
+  String get shareInvalidRangeBounds;
+
   /// Status message while sharing
   ///
   /// In en, this message translates to:
@@ -3248,6 +3266,18 @@ abstract class AppLocalizations {
   /// **'Notification permission required to receive prayer alerts.'**
   String get notificationPermissionRequired;
 
+  /// Banner shown when the app is not whitelisted from Doze / battery optimization
+  ///
+  /// In en, this message translates to:
+  /// **'Disable battery optimization to keep prayer reminders on time when the screen is off.'**
+  String get batteryOptimizationExemptionRequired;
+
+  /// Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually
+  ///
+  /// In en, this message translates to:
+  /// **'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.'**
+  String get oemAutostartHint;
+
   /// Body text for prayer time notifications
   ///
   /// In en, this message translates to:
@@ -3277,6 +3307,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Prayer time reminders that play the adhan sound'**
   String get prayerNotificationsAdhanChannelDescription;
+
+  /// Android notification channel name for prayer reminders when adhan is handled natively
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer Times (Silent)'**
+  String get prayerNotificationsSilentAdhanChannelName;
+
+  /// Android notification channel description for prayer reminders when adhan is handled natively
+  ///
+  /// In en, this message translates to:
+  /// **'Silent prayer time reminders when Adhan plays natively'**
+  String get prayerNotificationsSilentAdhanChannelDescription;
+
+  /// Text showing that Adhan audio is currently playing
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan is playing'**
+  String get adhanIsPlaying;
+
+  /// Button label to stop Adhan playback
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Adhan'**
+  String get stopAdhan;
+
+  /// Status text when a prayer notification is opened
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer notification received'**
+  String get prayerNotificationReceived;
+
+  /// Button label to navigate to the full prayer times screen
+  ///
+  /// In en, this message translates to:
+  /// **'View All Prayer Times'**
+  String get viewAllPrayerTimes;
+
+  /// Label showing a prayer time
+  ///
+  /// In en, this message translates to:
+  /// **'at {time}'**
+  String prayerTimeAt(String time);
+
+  /// Label for notification status
+  ///
+  /// In en, this message translates to:
+  /// **'Notification'**
+  String get notificationStatus;
+
+  /// Label for Adhan status
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan'**
+  String get adhanStatus;
+
+  /// Status text for received notification
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get received;
+
+  /// Label for audio sound
+  ///
+  /// In en, this message translates to:
+  /// **'Sound'**
+  String get sound;
+
+  /// Generic enabled status
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabled;
+
+  /// Generic disabled status
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get disabled;
+
+  /// Error message when notification data is missing
+  ///
+  /// In en, this message translates to:
+  /// **'Missing notification payload.'**
+  String get errorMissingNotificationPayload;
+
+  /// Error message when notification data is corrupted or invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid notification payload.'**
+  String get errorInvalidNotificationPayload;
 }
 
 class _AppLocalizationsDelegate

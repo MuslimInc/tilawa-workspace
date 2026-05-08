@@ -18,6 +18,7 @@ class SurahHeaderBanner extends StatelessWidget {
     required this.lineHeight,
     required this.bannerLocalPath,
     required this.devicePixelRatio,
+    this.colorFilter,
   });
 
   final SurahHeaderData header;
@@ -27,6 +28,7 @@ class SurahHeaderBanner extends StatelessWidget {
   final double lineHeight;
   final String? bannerLocalPath;
   final double devicePixelRatio;
+  final ColorFilter? colorFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +55,7 @@ class SurahHeaderBanner extends StatelessWidget {
               fit: BoxFit.fill,
               gaplessPlayback: true,
               cacheWidth: (metrics.bannerWidth * devicePixelRatio).round(),
+              colorFilter: colorFilter,
             ),
           ),
         ),

@@ -58,7 +58,7 @@ class _BootGate extends StatefulWidget {
 }
 
 class _BootGateState extends State<_BootGate> {
-  static const Color _launchBackgroundColor = Color(0xFF1AADC5);
+  static const Color _launchBackgroundColor = AppColors.defaultPrimary;
   static const String _launchWordmarkAsset =
       'assets/images/launch_wordmark.png';
   static const double _wordmarkBoxSize = 288;

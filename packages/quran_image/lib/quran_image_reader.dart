@@ -13,6 +13,7 @@ import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/presentation.dart';
 import 'package:quran_image/quran_image_page.dart';
 import 'package:quran_image/verse_marker.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class QuranImageReader extends StatefulWidget {
   const QuranImageReader({
@@ -21,7 +22,9 @@ class QuranImageReader extends StatefulWidget {
     this.restoreSystemUiMode,
     this.preferredOrientations,
     this.restoreOrientations,
+    this.restoreSystemUiOverlayStyle,
     this.onShareRequested,
+    this.headerImageFilter,
   });
 
   /// The system UI mode to enable when the reader enters the screen.
@@ -36,9 +39,20 @@ class QuranImageReader extends StatefulWidget {
   /// The orientations to restore when the reader leaves the screen.
   final List<DeviceOrientation>? restoreOrientations;
 
+  /// Overlay style to restore when the reader leaves the screen.
+  ///
+  /// When `null`, the reader does not touch the overlay style on dispose —
+  /// the host's [AnnotatedRegion] (or whatever overlay style is active on
+  /// the destination route) wins. Pass the host app's default style here to
+  /// guarantee a deterministic status/navigation bar appearance after pop.
+  final SystemUiOverlayStyle? restoreSystemUiOverlayStyle;
+
   /// Called when the user taps the share/reel button in the navigation overlay.
   /// The host app is responsible for opening its share composer.
   final void Function(int currentPage)? onShareRequested;
+
+  /// Optional filter for the Surah header images.
+  final ColorFilter? headerImageFilter;
 
   @override
   State<QuranImageReader> createState() => _QuranImageReaderState();
@@ -285,13 +299,15 @@ class _QuranImageReaderState extends State<QuranImageReader>
       );
     }
 
-    // Attempt to restore default overlay style.
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-      ),
-    );
+    // Restore overlay style only when the host provides a complete style.
+    // The previous stub (transparent colors only, no icon brightness, no
+    // contrastEnforced flags) caused Android to draw a translucent scrim on
+    // light-themed status bars after pop.
+    final SystemUiOverlayStyle? restoreStyle =
+        widget.restoreSystemUiOverlayStyle;
+    if (restoreStyle != null) {
+      SystemChrome.setSystemUIOverlayStyle(restoreStyle);
+    }
   }
 
   void _applySystemUiConfig() {
@@ -836,22 +852,24 @@ class _QuranImageReaderState extends State<QuranImageReader>
         widget.preferredSystemUiMode == SystemUiMode.immersive ||
         widget.preferredSystemUiMode == SystemUiMode.immersiveSticky;
     final padding = _stableQuranPaddingFor(
-      MediaQuery.viewPaddingOf(context),
+      context.systemSafeArea,
       isImmersive: isImmersive,
     );
 
     final scaffold = Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(
+        value: const SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
           systemNavigationBarColor: Colors.transparent,
           statusBarIconBrightness: Brightness.dark,
           statusBarBrightness: Brightness.light,
           systemNavigationBarIconBrightness: Brightness.dark,
-          // Hide bars if immersive
-          systemNavigationBarContrastEnforced: !isImmersive,
-          systemStatusBarContrastEnforced: !isImmersive,
+          // Disable contrast scrim — the page background already provides
+          // plenty of contrast, and enforcing it would draw a translucent
+          // scrim that lingers on the destination route during pop animation.
+          systemNavigationBarContrastEnforced: false,
+          systemStatusBarContrastEnforced: false,
         ),
         child: Stack(
           fit: StackFit.expand,
@@ -904,6 +922,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
                                           'warmup:$pageNumber',
                                         ),
                                         pageNumber: pageNumber,
+                                        headerImageFilter:
+                                            widget.headerImageFilter,
                                       ),
                                     ),
                                   ),
@@ -917,6 +937,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
                         onToggleNavigation: _toggleNavigation,
                         onShowNavigation: _showNavigation,
                         onPageChanged: _onReaderPageChanged,
+                        headerImageFilter: widget.headerImageFilter,
                       ),
                       ValueListenableBuilder<_JumpTransitionSnapshot?>(
                         valueListenable: _jumpTransitionSnapshotNotifier,

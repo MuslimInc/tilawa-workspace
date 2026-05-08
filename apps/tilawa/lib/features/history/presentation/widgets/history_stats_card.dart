@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class HistoryStatsCard extends StatelessWidget {
   const HistoryStatsCard({
@@ -14,11 +15,20 @@ class HistoryStatsCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return Card(
-      color: theme.colorScheme.primaryContainer,
+      color: colorScheme.primaryContainer,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        side: BorderSide(
+          color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+          width: tokens.borderWidthThin,
+        ),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(tokens.spaceLarge),
         child: Row(
           children: [
             // Total items
@@ -92,7 +102,7 @@ class _StatItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(icon, size: 18, color: theme.colorScheme.onPrimaryContainer),
-            const SizedBox(width: 8),
+            SizedBox(width: theme.tokens.spaceSmall),
             Text(
               value,
               style: theme.textTheme.headlineSmall?.copyWith(
@@ -102,7 +112,7 @@ class _StatItem extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: theme.tokens.spaceExtraSmall),
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(

@@ -307,4 +307,10 @@ class _FakeShareRepository implements ShareRepository {
   Future<void> shareContent(ShareContent content) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<String> exportContent(ShareContent content) {
+    // TODO: implement exportContent
+    throw UnimplementedError();
+  }
 }

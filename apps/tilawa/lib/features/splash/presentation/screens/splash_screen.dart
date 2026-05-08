@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -17,7 +18,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const Color _launchBackgroundColor = Color(0xFF1AADC5);
+  static const Color _launchBackgroundColor = AppColors.defaultPrimary;
   static const String _launchWordmarkAsset =
       'assets/images/launch_wordmark.png';
   static const double _androidSplashWordmarkBoxSize = 288;
