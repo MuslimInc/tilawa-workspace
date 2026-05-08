@@ -20,6 +20,7 @@ class QuranImageContent extends StatelessWidget {
     required this.devicePixelRatio,
     this.backgroundColor,
     this.isLandscape = false,
+    this.headerImageFilter,
   });
 
   final int pageNumber;
@@ -35,6 +36,7 @@ class QuranImageContent extends StatelessWidget {
   final double devicePixelRatio;
   final Color? backgroundColor;
   final bool isLandscape;
+  final ColorFilter? headerImageFilter;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +61,7 @@ class QuranImageContent extends StatelessWidget {
                 bannerLocalPath: imageCacheRepository
                     .surahHeaderBannerFilePath(),
                 devicePixelRatio: devicePixelRatio,
+                colorFilter: headerImageFilter,
               ),
             ),
           for (var index = 0; index < SurahHeaderConstants.lineCount; index++)
@@ -68,18 +71,31 @@ class QuranImageContent extends StatelessWidget {
               right: 0,
               top: yOffsets[index],
               height: lineHeight,
-              child: QuranLineImage(provider: lineProviders[index]),
+              child: QuranLineImage(
+                provider: lineProviders[index],
+                colorFilter: headerImageFilter,
+              ),
             ),
           if (markers.isNotEmpty)
             Positioned.fill(
               key: const ValueKey<String>('markers'),
               child: RepaintBoundary(
-                child: VerseMarkersOverlay(
-                  markers: markers,
-                  pageWidth: pageWidth,
-                  lineHeight: lineHeight,
-                  yOffsets: yOffsets,
-                ),
+                child: headerImageFilter != null
+                    ? ColorFiltered(
+                        colorFilter: headerImageFilter!,
+                        child: VerseMarkersOverlay(
+                          markers: markers,
+                          pageWidth: pageWidth,
+                          lineHeight: lineHeight,
+                          yOffsets: yOffsets,
+                        ),
+                      )
+                    : VerseMarkersOverlay(
+                        markers: markers,
+                        pageWidth: pageWidth,
+                        lineHeight: lineHeight,
+                        yOffsets: yOffsets,
+                      ),
               ),
             ),
         ],

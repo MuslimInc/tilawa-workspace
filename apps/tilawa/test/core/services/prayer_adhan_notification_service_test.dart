@@ -323,6 +323,51 @@ void main() {
           },
         );
 
+        test(
+          'navigates whitespace-formatted JSON payload to prayer status route',
+          () async {
+            await initialize();
+
+            const payload = '{ "type": "prayer", "prayer": "fajr" }';
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: payload,
+              ),
+            );
+
+            verify(
+              mockNav.navigateToNotification(
+                const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
+            ).called(1);
+          },
+        );
+
+        test('navigates native Adhan payload with prayer_key marker', () async {
+          await initialize();
+
+          final payload = jsonEncode({'prayer_key': 'fajr'});
+
+          await service.handleNotificationResponse(
+            NotificationResponse(
+              notificationResponseType:
+                  NotificationResponseType.selectedNotification,
+              payload: payload,
+            ),
+          );
+
+          verify(
+            mockNav.navigateToNotification(
+              const PrayerNotificationStatusRoute().location,
+              extra: payload,
+            ),
+          ).called(1);
+        });
+
         test('does not wait for analytics before navigating', () async {
           await initialize();
 

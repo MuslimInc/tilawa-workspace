@@ -9,6 +9,7 @@ import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -134,30 +135,9 @@ class _PlayerApp extends StatelessWidget {
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               PerfLogger.markBuild('ThemeBlocBuilder');
-              // Derive UI density from launch config (default: compact).
-              // Override with --dart-define=TILAWA_COMPACT_UI=false for comfortable.
               final density = appLaunchConfig.compactUiEnabled
                   ? TilawaDensity.compact
                   : TilawaDensity.comfortable;
-              final bool isDark = themeState.mode == ThemeMode.dark;
-              final Brightness iconBrightness = isDark
-                  ? Brightness.light
-                  : Brightness.dark;
-              final Brightness statusBarBrightness = isDark
-                  ? Brightness.dark
-                  : Brightness.light;
-              AppSystemChromeStyle.updateDefaultAppStyle(
-                SystemUiOverlayStyle(
-                  statusBarColor: const Color(0x00000000),
-                  statusBarIconBrightness: iconBrightness,
-                  statusBarBrightness: statusBarBrightness,
-                  systemNavigationBarColor: const Color(0x00000000),
-                  systemNavigationBarDividerColor: const Color(0x00000000),
-                  systemNavigationBarIconBrightness: iconBrightness,
-                  systemStatusBarContrastEnforced: false,
-                  systemNavigationBarContrastEnforced: false,
-                ),
-              );
               return MaterialApp.router(
                 title: AppStrings.appName,
                 showPerformanceOverlay: false,
@@ -165,14 +145,15 @@ class _PlayerApp extends StatelessWidget {
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
                 // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
                 builder: (context, child) {
-                  final Widget app = DevicePreview.appBuilder(context, child);
+                  final app = DevicePreview.appBuilder(context, child);
+                  final routedChild = _DefaultRouteSystemUiOverlay(child: app);
                   return MediaQuery(
                     data: MediaQuery.of(context).copyWith(
                       textScaler: MediaQuery.textScalerOf(
                         context,
                       ).clamp(minScaleFactor: 1.0, maxScaleFactor: 1.4),
                     ),
-                    child: app,
+                    child: routedChild,
                   );
                 },
                 theme: AppTheme.getLightTheme(
@@ -183,6 +164,7 @@ class _PlayerApp extends StatelessWidget {
                       themeState.primaryPresetId ==
                           PrimaryColorPreset.defaultPreset.id,
                   density: density,
+                  extensions: [QuranReaderTheme.light],
                 ),
                 darkTheme: AppTheme.getDarkTheme(
                   primaryColor: themeState.primaryColor,
@@ -194,6 +176,7 @@ class _PlayerApp extends StatelessWidget {
                   darkIsTrueBlack:
                       themeState.preset == AppThemePreset.trueBlack,
                   density: density,
+                  extensions: [QuranReaderTheme.dark],
                 ),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,
@@ -212,6 +195,25 @@ class _PlayerApp extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _DefaultRouteSystemUiOverlay extends StatelessWidget {
+  const _DefaultRouteSystemUiOverlay({required this.child});
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final overlayStyle = AppSystemChromeStyle.buildDefaultAppStyle(
+      Theme.of(context),
+    );
+    AppSystemChromeStyle.updateDefaultAppStyle(overlayStyle);
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: child ?? const SizedBox.shrink(),
     );
   }
 }

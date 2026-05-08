@@ -147,7 +147,14 @@ List<String> _drainFrameworkExceptions(WidgetTester tester) {
   return exceptions;
 }
 
-Widget _buildHarness() {
+Widget _buildHarness({int surahNumber = 1, int fromAyah = 1, int toAyah = 7}) {
+  final poster = SharePosterRenderer(
+    surahNumber: surahNumber,
+    fromAyah: fromAyah,
+    toAyah: toAyah,
+    reciterName: 'Test Reciter',
+  );
+
   return MaterialApp(
     theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
     home: Scaffold(
@@ -158,16 +165,7 @@ Widget _buildHarness() {
             const SizedBox(height: 84),
             Expanded(
               child: Center(
-                child: SizedBox(
-                  width: 360,
-                  height: 520,
-                  child: const SharePosterRenderer(
-                    surahNumber: 1,
-                    fromAyah: 1,
-                    toAyah: 7,
-                    reciterName: 'Test Reciter',
-                  ),
-                ),
+                child: SizedBox(width: 360, height: 520, child: poster),
               ),
             ),
             const SizedBox(height: 220),
@@ -226,5 +224,76 @@ void main() {
     );
     expect(find.byType(SharePosterRenderer), findsOneWidget);
     expect(find.byType(PageContent), findsOneWidget);
+    expect(find.byType(SurahHeaderBanner), findsOneWidget);
+    expect(find.byType(OverflowBox), findsNothing);
   });
+
+  testWidgets('SharePosterRenderer top-composes a mid-page selection', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(720, 1280);
+    tester.view.devicePixelRatio = 2.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final int pageNumber = getPageNumber(41, 34);
+    quranQcfLocator<QuranFontService>().debugMarkFontLoaded(pageNumber);
+
+    await tester.pumpWidget(
+      _buildHarness(surahNumber: 41, fromAyah: 34, toAyah: 35),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    final List<String> exceptions = _drainFrameworkExceptions(tester);
+    final List<String> overflowExceptions = exceptions
+        .where((message) => message.contains('A RenderFlex overflowed'))
+        .toList();
+
+    expect(
+      overflowExceptions,
+      isEmpty,
+      reason:
+          'Unexpected poster preview overflow: ${overflowExceptions.join('\n')}',
+    );
+    expect(find.byType(SurahHeaderBanner), findsOneWidget);
+    expect(find.byType(OverflowBox), findsNothing);
+  });
+
+  testWidgets(
+    'SharePosterRenderer fits long selected ranges without a scroll host',
+    (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(720, 1280);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final int pageNumber = getPageNumber(41, 31);
+      quranQcfLocator<QuranFontService>().debugMarkFontLoaded(pageNumber);
+
+      await tester.pumpWidget(
+        _buildHarness(surahNumber: 41, fromAyah: 31, toAyah: 39),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final List<String> exceptions = _drainFrameworkExceptions(tester);
+      final List<String> overflowExceptions = exceptions
+          .where((message) => message.contains('A RenderFlex overflowed'))
+          .toList();
+
+      expect(
+        overflowExceptions,
+        isEmpty,
+        reason:
+            'Unexpected poster preview overflow: ${overflowExceptions.join('\n')}',
+      );
+      expect(find.byType(SurahHeaderBanner), findsOneWidget);
+      expect(find.byType(OverflowBox), findsNothing);
+    },
+  );
 }

@@ -117,6 +117,45 @@ void main() {
           isTrue,
         );
         expect(matcher?.call(jsonEncode({'type': 'settings'})), isTrue);
+        expect(
+          matcher?.call(
+            jsonEncode({
+              'type': 'prayer',
+              'prayer': 'fajr',
+              'scheduled_time_ms': 1700000000000,
+              'notification_id': 20000000,
+              'adhan_enabled': true,
+            }),
+          ),
+          isFalse,
+        );
+        expect(
+          matcher?.call(
+            jsonEncode({
+              'actionType': 'prayer',
+              'actionData': 'fajr',
+              'prayer_key': 'fajr',
+              'scheduled_ms': 1700000000000,
+            }),
+          ),
+          isFalse,
+        );
+        expect(
+          matcher?.call(jsonEncode({'type': 'prayer', 'data': 'fajr'})),
+          isTrue,
+        );
+        expect(
+          matcher?.call(jsonEncode({'type': 'reciter', 'data': '7'})),
+          isTrue,
+        );
+        expect(
+          matcher?.call(jsonEncode({'type': 'athkar', 'data': 'morning'})),
+          isTrue,
+        );
+        expect(
+          matcher?.call(jsonEncode({'reciterName': 'Test Reciter'})),
+          isFalse,
+        );
         expect(matcher?.call(jsonEncode({'foo': 'bar'})), isFalse);
         verify(
           () => mockDispatcher.registerPayloadHandler(

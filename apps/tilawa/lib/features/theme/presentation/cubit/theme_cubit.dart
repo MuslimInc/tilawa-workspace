@@ -27,7 +27,22 @@ class ThemeState extends Equatable {
   /// Set when [primaryColorSource] is [PrimaryColorSource.preset]. Null for
   /// custom colors.
   final String? primaryPresetId;
+
+  /// Persisted for backward compatibility, but currently deferred.
+  ///
+  /// This flag is restored and saved, however app runtime theming still uses
+  /// [mode] directly (no [ThemeMode.system] wiring yet).
   final bool useSystemTheme;
+
+  /// Persisted theme-preset bucket for deferred/partial theme variants.
+  ///
+  /// - [AppThemePreset.trueBlack] has a partial runtime effect in dark theme
+  ///   generation.
+  /// - [AppThemePreset.highContrast] is currently reserved and has no runtime
+  ///   effect.
+  ///
+  /// These values are intentionally persisted for backward-compatible state
+  /// evolution.
   final AppThemePreset preset;
 
   ThemeState copyWith({
@@ -189,6 +204,8 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
   }
 
   Future<void> setUseSystemTheme(bool useSystemTheme) async {
+    // Deferred field: persisted for compatibility, but not yet wired to
+    // MaterialApp.themeMode / ThemeMode.system behavior.
     emit(state.copyWith(useSystemTheme: useSystemTheme));
   }
 
@@ -216,6 +233,8 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     return AppTheme.getDarkTheme(
       primaryColor: state.primaryColor,
       isDefaultPreset: _isDefaultPreset,
+      // Partial wiring only: trueBlack currently affects dark theme surfaces.
+      // highContrast remains reserved/deferred at runtime.
       darkIsTrueBlack: state.preset == AppThemePreset.trueBlack,
     );
   }

@@ -17,6 +17,9 @@ import '../widgets/share_poster_renderer.dart';
 import '../widgets/share_preview_widgets.dart';
 import '../widgets/video_reel_design.dart';
 
+const double _posterCaptureWidth = 720;
+const double _posterCaptureAspect = 9 / 16;
+
 class ScreenshotComposerScreen extends StatefulWidget {
   const ScreenshotComposerScreen({
     super.key,
@@ -145,7 +148,8 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
                       child: RepaintBoundary(
                         key: _posterBoundaryKey,
                         child: SizedBox(
-                          width: Theme.of(context).tokens.contentMaxWidthReader,
+                          width: _posterCaptureWidth,
+                          height: _posterCaptureWidth / _posterCaptureAspect,
                           child: ColoredBox(
                             color: QuranReaderTheme.of(context).pageBackground,
                             child: SharePosterRenderer(

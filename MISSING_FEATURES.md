@@ -12,11 +12,35 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 
 ---
 
-## 🧪 Implemented — Needs Production/Physical QA
-
-### 1. Prayer Times
+### Prayer Times
 **Description:** Display accurate prayer times based on user location with customizable calculation methods and Adhan notifications.
-*Status: Core UI and Native Android hardening is complete. Pending physical device QA for cold-start notifications.*
+*Status: Fully implemented and hardened. Version 1.0.0+24 resolved routing discrepancies and payload matching across all app states.*
+
+---
+
+## 🗂️ Post-Release Maintainability Backlog
+
+### Theme Token Harmonization (T4)
+**Release decision:** GO for current release, no pre-release implementation required.
+
+**Why deferred:**
+- No blocker found in T4 audit.
+- Current theme behavior is release-viable.
+- Broad harmonization now would introduce avoidable visual churn.
+
+**Backlog items:**
+- [ ] Quran Image Reader fallback/error/loading colors:
+	make mode-aware and `ColorScheme`-derived if visual issues appear.
+- [ ] Share/Reel palette:
+	consolidate duplicated branded constants into one feature token source.
+- [ ] Share/Reel branding strategy:
+	keep branded identity unless product decides to harmonize with app primary.
+- [ ] Settings semantic icon colors:
+	decide whether they remain fixed semantic colors or become theme-derived tokens.
+- [ ] Overlay/scrim constants:
+	optional tokenization for consistency.
+
+**Note:** Remaining work is maintainability-focused backlog and not a release blocker.
 
 ---
 
@@ -310,4 +334,4 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 
 ---
 
-*Last Updated: January 8, 2026*
+*Last Updated: May 8, 2026*

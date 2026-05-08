@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
+import 'package:meta/meta.dart';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
@@ -134,7 +135,7 @@ class PrayerAdhanNotificationService
       );
       _dispatcher.registerPayloadHandler(
         serviceId: 'prayer_notifications',
-        matcher: _isPrayerPayload,
+        matcher: isPrayerPayload,
         handler: handleNotificationResponse,
       );
 
@@ -801,7 +802,7 @@ class PrayerAdhanNotificationService
       logger.d(
         '${PrayerNotificationConfig.logTag} FLUTTER_TAP_PAYLOAD_RECEIVED id=${response.id} hasPayload=${payload != null}',
       );
-      if (payload == null || !_isPrayerPayload(payload)) {
+      if (payload == null || !isPrayerPayload(payload)) {
         return;
       }
 
@@ -882,13 +883,49 @@ class PrayerAdhanNotificationService
 
   // -- helpers ----------------------------------------------------------------
 
-  bool _isPrayerPayload(String? payload) {
+  @visibleForTesting
+  bool isPrayerPayload(String? payload) {
     if (payload == null || payload.isEmpty) return false;
-    // Cheap structural check; keeps the dispatcher matcher allocation-free.
-    return payload.contains(
-      '"${PrayerNotificationConfig.payloadTypeKey}":"'
-      '${PrayerNotificationConfig.payloadTypeValue}"',
-    );
+
+    // Try robust JSON parsing first.
+    try {
+      final dynamic decoded = jsonDecode(payload);
+      if (decoded is! Map) return false;
+      final Map<String, dynamic> data = Map<String, dynamic>.from(decoded);
+
+      // 1. Standard type check
+      final String? type = data[PrayerNotificationConfig.payloadTypeKey]
+          ?.toString();
+      if (type == PrayerNotificationConfig.payloadTypeValue) {
+        return true;
+      }
+
+      // 2. Local/Native markers fallback
+      const Set<String> localMarkers = {
+        'prayer',
+        'prayer_key',
+        'scheduled_time_ms',
+        'scheduled_ms',
+        'notification_id',
+        'adhan_enabled',
+        'is_adhan_playing',
+        'date',
+      };
+
+      for (final String key in localMarkers) {
+        if (data.containsKey(key)) {
+          return true;
+        }
+      }
+    } catch (_) {
+      // If JSON parsing fails, fall back to the cheap structural check.
+      return payload.contains(
+        '"${PrayerNotificationConfig.payloadTypeKey}":"'
+        '${PrayerNotificationConfig.payloadTypeValue}"',
+      );
+    }
+
+    return false;
   }
 
   PrayerNotificationSettings _settingsFor(

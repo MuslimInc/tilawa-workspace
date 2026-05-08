@@ -11,10 +11,54 @@
 ## Final Verified Status
 - **Implementation**: Completed
 - **Automated Tests**: Passed (`146/146` Flutter prayer notification coverage, `64/64` native Android JVM tests)
-- **Physical QA**: Pending
+- **Architecture Audit Verdict**: GO
+- **Production Code/Test Verdict**: GO
+- **Android Release QA Verdict**: CONDITIONAL GO
+- **Overall Android Release Readiness**: CONDITIONAL GO (pending physical QA evidence gaps)
+- **Physical QA**: Partially completed (see QA validation snapshot)
 - **Branch**: Re-frozen after blocker fix
-- **Limited Rollout**: BLOCKED until notification tap / Adhan stop smoke QA passes on device
-- **Full Production**: NO-GO until the full physical QA matrix passes
+- **Limited Rollout**: Allowed under CONDITIONAL GO with follow-up closure of remaining partial QA items
+- **Full Production**: Not GO yet
+
+## QA Validation Snapshot (2026-05-08)
+
+### Passed
+- Prayer tap routing (runtime evidence)
+- Athkar routing (runtime evidence)
+- Duplicate tap guard (runtime evidence)
+- FCM reciter routing (tests)
+- FCM prayer routing without local markers (tests)
+- FCM matcher excludes local prayer payloads (tests)
+- Download routing (tests)
+- Download payload not handled by FCM matcher (tests)
+- Permission denied scenario (manual toggle + runtime capture)
+
+### Permission Denied PASS Evidence
+- `android.permission.POST_NOTIFICATIONS: granted=false`
+- Notification manager app setting for `com.tilawa.app`: `importance=NONE userSet=true`
+- Valid prayer deep-link/tap intent still reaches app routing path and opens prayer status.
+- This behavior matches Android expectations: posting notifications is blocked when permission is denied, but explicit deep-link intent handling can still execute.
+
+### Remaining Partial Items
+1. Same-target explicit AppRouter skip log: PARTIAL / not proven.
+	- Duplicate tap guard is PASS.
+	- Not treated as functional failure unless a real notification tray tap reproduces duplicate navigation.
+	- Current adb native method-channel simulation can remain buffered with `awaiting_dart_ack`, so the flow may not reliably reach Dart-side AppRouter skip logging.
+2. Reboot re-arm observability: PARTIAL.
+	- Post-boot ingress evidence improved.
+	- Full re-arm/watchdog log evidence remains sparse.
+
+### Conditions to Upgrade Android Release QA from CONDITIONAL GO to GO
+1. Capture explicit same-target AppRouter skip evidence from a real system tray tap flow (`Notification navigation skipped` or `Duplicate notification navigation ignored`).
+2. Capture clear, end-to-end reboot re-arm/watchdog evidence after reboot.
+3. Confirm no duplicate navigation under real tray tap same-target scenarios.
+
+### Post-Release Technical Debt
+**IMPORTANT**: These items are NOT release blockers. Do not start any architecture refactor before release.
+1. Extract notification routing state from `AppRouter` into a dedicated service.
+2. Add `VibrationService` abstraction for `QiblaBloc` instead of direct plugin invocation.
+3. Replace hardcoded `PrayerNotificationStatusRoute` same-target logic with generalized route matching.
+4. Review `AppSystemChromeStyle` target enum if more special chrome routes appear.
 
 ## QA Blocker Fix - Notification Tap / Adhan Stop Redirect
 

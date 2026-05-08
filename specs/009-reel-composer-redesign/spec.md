@@ -33,6 +33,7 @@ The feature is delivered in six phases. Phase 1 (this spec's first deliverable) 
 4. **Surah Header Banner inclusion is implicit.** `_injectMissingSurahHeaders` only fires when a rendered text block contains `verse == 1`. Selections that exclude ayah 1 never get a banner — even when the banner would be useful (e.g. selection from a long surah).
 5. **Capture-time fractional scaling.** Video capture runs through `FittedBox(contain)` over a `RepaintBoundary` declared as 1080×1920, so the rasterized pixel size depends on the offstage layout, not the declared size. Risk of blurry text / wrong DPR.
 6. **Diacritic clipping risk.** The screenshot poster crops to `block.painter.height`, which excludes top-side diacritic ascent on QCF PUA glyphs.
+7. **Screenshot crop preserves original page offset.** `SharePosterRenderer` currently renders a full `PageContent` inside `OverflowBox` and shifts it with `Transform.translate`. This captures a slice of the original page rather than composing the selected range from the top, so mid-page selections can produce large empty areas and no leading Surah Header Banner.
 
 ### UX gaps
 
@@ -94,6 +95,7 @@ When the user selects ayahs and generates a screenshot or reel video, the final 
 | **R7 — Aspect ratios** | Reel: 9:16 hard. Screenshot: variable height, fixed `0.56` width-to-height ratio (current behaviour) — preserved to keep social-aspect compatibility. |
 | **R8 — Localization** | Surah names use `getSurahNameArabic` for Arabic locale, `getSurahNameEnglish` otherwise. Numeric values (juz, page, hizb if used) use Eastern-Arabic numerals in Arabic locale. |
 | **R9 — Selection limits** | Selections exceeding `ShareLimits.maxVersesPerClip` are blocked with an inline reason; no silent button disabling. |
+| **R10 — Screenshot selected composition** | Screenshot export must start with the Surah Header Banner, optional Bismillah per policy, then selected Quran content. It must not preserve the selected ayah's original page offset or show unrelated previous ayahs above the selected range. Preview and export must use the same selected-range composition widget. |
 
 ---
 
@@ -189,6 +191,21 @@ include = (selection contains ayah 1 of any surah on the rendered range)
 - The banner is rendered as a **fixed top section** of deterministic height, *above* the cropped Quran content. It does not flow inline with the page.
 
 This rule is enforced in Phase 2 (crop-and-compose). Phase 1 does not change banner behavior.
+
+### Screenshot Header Rule
+
+For generated Quran screenshots, the Surah Header Banner is always shown at the top of the selected-range composition for the selected surah. This is stricter than the reel policy because screenshot output is a compact standalone artifact and must identify the selected surah even when the selected range starts mid-surah. Bismillah follows the existing convention: include it under the banner for surahs other than Al-Fatihah (1) and At-Tawbah (9).
+
+Screenshot composition must not use a translated full-page crop as its primary rendering strategy. It should build a dedicated selected-range composition:
+
+```text
+Surah Header Banner
+Bismillah, when allowed by policy
+Selected QCF ayah content from the top
+Optional footer/branding
+```
+
+The first selected ayah content should appear immediately after the header/Bismillah spacing, subject only to typographic padding needed to avoid QCF clipping.
 
 ---
 

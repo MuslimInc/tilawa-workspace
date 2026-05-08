@@ -181,27 +181,28 @@ class _PremiumNavigationControls extends StatelessWidget {
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (onShareRequested != null) ...[
-                            Padding(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: tokens.spaceLarge,
-                              ),
-                              child: Center(
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth: tokens.contentMaxWidthForm,
-                                  ),
-                                  child: Align(
-                                    alignment: AlignmentDirectional.centerEnd,
-                                    child: _PremiumShareFab(
-                                      onTap: onShareRequested!,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: tokens.spaceSmall),
-                          ],
+                          /// TODO[feature]: Disable this feature for now because it is not stable yet, and we want to focus on getting the core navigation experience right first. We can re-enable it once it's more polished.
+                          // if (onShareRequested != null) ...[
+                          //   Padding(
+                          //     padding: EdgeInsets.symmetric(
+                          //       horizontal: tokens.spaceLarge,
+                          //     ),
+                          //     child: Center(
+                          //       child: ConstrainedBox(
+                          //         constraints: BoxConstraints(
+                          //           maxWidth: tokens.contentMaxWidthForm,
+                          //         ),
+                          //         child: Align(
+                          //           alignment: AlignmentDirectional.centerEnd,
+                          //           child: _PremiumShareFab(
+                          //             onTap: onShareRequested!,
+                          //           ),
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ),
+                          //   SizedBox(height: tokens.spaceSmall),
+                          // ],
                           RepaintBoundary(
                             child: NavigationSliderOverlay(
                               screenWidth: constraints.maxWidth,

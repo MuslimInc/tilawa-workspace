@@ -148,6 +148,41 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ---
 
+## Phase S1: Screenshot Selected-Range Composition
+
+Goal: Replace screenshot export's full-page crop/translate path with a selected-range composition. Preview and capture continue to share `SharePosterRenderer`; video generation and FFmpeg remain untouched.
+
+### S1-001: Document and isolate selected-range composition
+
+- [x] Add [selected_quran_range_page.dart](apps/tilawa/lib/features/share/presentation/utils/selected_quran_range_page.dart) with a pure helper that builds a synthetic `PreparedQuranPage` from selected QCF prepared blocks.
+- [x] The helper prepends `PreparedHeaderBlock` for the selected surah.
+- [x] The helper prepends `PreparedBismillahBlock` for surahs other than Al-Fatihah (1) and At-Tawbah (9).
+- [x] The helper appends only `PreparedTextBlock`s whose metadata intersects the selected ayah range.
+- [x] Add focused tests in [selected_quran_range_page_test.dart](apps/tilawa/test/features/share/presentation/utils/selected_quran_range_page_test.dart) for banner, Bismillah policy, selected block filtering, and empty selection fallback.
+
+### S1-002: Replace screenshot crop/translate renderer
+
+- [x] Update [share_poster_renderer.dart](apps/tilawa/lib/features/share/presentation/widgets/share_poster_renderer.dart) to render the synthetic selected-range `PreparedQuranPage` from the top.
+- [x] Remove the primary `OverflowBox + Transform.translate` crop path from `SharePosterRenderer`.
+- [x] Do not pass `verseTextColor` or `verseBackgroundColor` to screenshot `PageContent`; keep it on the prepared rendering path.
+- [x] Set `showSpecialBlocks: true` so the Surah Header Banner and optional Bismillah render.
+- [x] Preserve preview/export parity by keeping both `_ScreenshotLivePreview` and the capture `RepaintBoundary` on `SharePosterRenderer`.
+
+### S1-003: Phase S1 limitations and fallback
+
+- [x] Document in this file that S1 is QCF line/block-granular. If a selected range starts or ends mid-line, adjacent ayahs on the same QCF line may require Phase S2's package-level selected-range API to remove perfectly.
+- [x] Confirm no unrelated previous **lines** appear above the selected range.
+- [x] Defer app-side word-span reconstruction; do not duplicate private `quran_qcf` shaping logic in the app layer.
+
+### S1-004: Phase S1 validation
+
+- [x] Run `fvm flutter test test/features/share/presentation/utils/selected_quran_range_page_test.dart` in [apps/tilawa](apps/tilawa).
+- [x] Run `fvm flutter test test/features/share/presentation/widgets/share_poster_renderer_test.dart` in [apps/tilawa](apps/tilawa).
+- [x] Run `fvm flutter analyze` in [apps/tilawa](apps/tilawa).
+- [ ] Manual QA: Fussilat mid-page selected ayahs, Al-Fatihah 1-7, Al-Baqarah 255, Al-Kahf 1-3, short final surah, Arabic RTL, and preview/export comparison.
+
+---
+
 ## Phase 2: Crop-and-Compose
 
 Goal: Make the reel path focus on the selected ayah range while preserving the current Phase 1 UI shell. All production behavior lands behind `kReelComposerV2` until goldens and pixel-diff checks pass.

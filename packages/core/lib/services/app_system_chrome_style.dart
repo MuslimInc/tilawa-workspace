@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 /// Centralized System UI styles for the app.
@@ -37,6 +38,32 @@ final class AppSystemChromeStyle {
   /// Use this when the app theme changes.
   static void updateDefaultAppStyle(SystemUiOverlayStyle style) {
     _defaultAppStyle = style;
+  }
+
+  /// Builds the default system UI style for standard app routes.
+  ///
+  /// The status bar stays transparent so screens can paint behind it, while
+  /// the navigation bar uses the active theme surface to avoid inheriting a
+  /// stale bar color from the previous route.
+  static SystemUiOverlayStyle buildDefaultAppStyle(ThemeData theme) {
+    final Color navigationBarColor = theme.colorScheme.surface;
+    final Brightness barBrightness = ThemeData.estimateBrightnessForColor(
+      navigationBarColor,
+    );
+    final Brightness iconBrightness = barBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    return SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: iconBrightness,
+      statusBarBrightness: barBrightness,
+      systemNavigationBarColor: navigationBarColor,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: iconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
   }
 
   /// Updates the Quran Reader-specific System UI style.

@@ -23,6 +23,7 @@ import '../../../../features/share/presentation/screens/screenshot_composer_scre
 import '../../../../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
 import '../bloc/quran_font_loader_bloc.dart';
+import '../theme/quran_reader_theme.dart';
 
 /// Wraps `quran_image`'s reader flow inside the Tilawa app.
 ///
@@ -281,6 +282,9 @@ class _ReaderShell extends StatelessWidget {
             restoreOrientations: AppOrientationService.defaultOrientations,
             restoreSystemUiOverlayStyle: AppSystemChromeStyle.defaultAppStyle,
             onShareRequested: onShareRequested,
+            headerImageFilter: Theme.of(
+              context,
+            ).extension<QuranReaderTheme>()?.headerImageFilter,
           );
         }
 

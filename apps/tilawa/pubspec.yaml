@@ -3,7 +3,7 @@ resolution: workspace
 description: An Audio Quran Player project.
 
 publish_to: none
-version: 0.1.6+24
+version: 1.0.0+24
 
 environment:
   sdk: ^3.11.5
@@ -93,6 +93,7 @@ dependencies:
   chewie: ^1.13.0
   image_picker: ^1.2.1
   vibration: ^3.1.8
+  meta: ^1.17.0
 
 dev_dependencies:
   bloc_lint: ^0.3.6
