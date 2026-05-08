@@ -187,6 +187,8 @@ class TilawaMediaPlayerBarTokens {
     required this.shellBackgroundColor,
     required this.progressTrackBackgroundColor,
     required this.artworkPlaceholderColor,
+    required this.shellOutlineColor,
+    required this.playPauseButtonShadowColor,
   });
 
   final EdgeInsetsGeometry contentPadding;
@@ -217,6 +219,12 @@ class TilawaMediaPlayerBarTokens {
   /// Placeholder fill behind album art when no image is shown.
   final Color artworkPlaceholderColor;
 
+  /// Hairline border around the bar ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
+  final Color shellOutlineColor;
+
+  /// [BoxShadow.color] under the circular play/pause control.
+  final Color playPauseButtonShadowColor;
+
   factory TilawaMediaPlayerBarTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
@@ -228,6 +236,8 @@ class TilawaMediaPlayerBarTokens {
   factory TilawaMediaPlayerBarTokens.fromColorScheme(ColorScheme colorScheme) {
     // No-op: control buttons are already 32-36dp (below 48dp). Compacting
     // would worsen accessibility; needs a separate accessibility refactor.
+    const shellOutlineAlpha = 0.1;
+    const playPauseShadowOpacity = 0.3;
     return TilawaMediaPlayerBarTokens(
       contentPadding: const EdgeInsets.all(12),
       borderRadius: 16,
@@ -245,12 +255,18 @@ class TilawaMediaPlayerBarTokens {
       playPauseIconSize: 16,
       disabledControlOpacity: 0.3,
       shadowOpacity: 0.1,
-      playPauseShadowOpacity: 0.3,
+      playPauseShadowOpacity: playPauseShadowOpacity,
       playPauseShadowBlur: 8,
       shellBackgroundColor: colorScheme.surfaceContainerLow,
       progressTrackBackgroundColor: colorScheme.surfaceContainerHighest
-          .withValues(alpha: 0.1),
+          .withValues(alpha: shellOutlineAlpha),
       artworkPlaceholderColor: colorScheme.surfaceContainerHigh,
+      shellOutlineColor: colorScheme.outlineVariant.withValues(
+        alpha: shellOutlineAlpha,
+      ),
+      playPauseButtonShadowColor: colorScheme.primary.withValues(
+        alpha: playPauseShadowOpacity,
+      ),
     );
   }
 
@@ -276,6 +292,8 @@ class TilawaMediaPlayerBarTokens {
     Color? shellBackgroundColor,
     Color? progressTrackBackgroundColor,
     Color? artworkPlaceholderColor,
+    Color? shellOutlineColor,
+    Color? playPauseButtonShadowColor,
   }) {
     return TilawaMediaPlayerBarTokens(
       contentPadding: contentPadding ?? this.contentPadding,
@@ -303,6 +321,9 @@ class TilawaMediaPlayerBarTokens {
           this.progressTrackBackgroundColor,
       artworkPlaceholderColor:
           artworkPlaceholderColor ?? this.artworkPlaceholderColor,
+      shellOutlineColor: shellOutlineColor ?? this.shellOutlineColor,
+      playPauseButtonShadowColor:
+          playPauseButtonShadowColor ?? this.playPauseButtonShadowColor,
     );
   }
 
@@ -377,6 +398,16 @@ class TilawaMediaPlayerBarTokens {
         b.artworkPlaceholderColor,
         t,
       )!,
+      shellOutlineColor: Color.lerp(
+        a.shellOutlineColor,
+        b.shellOutlineColor,
+        t,
+      )!,
+      playPauseButtonShadowColor: Color.lerp(
+        a.playPauseButtonShadowColor,
+        b.playPauseButtonShadowColor,
+        t,
+      )!,
     );
   }
 }
@@ -395,8 +426,11 @@ class TilawaAdaptiveShellTokens {
     required this.bottomNavShadowOpacity,
     required this.bottomNavShadowBlur,
     required this.bottomNavShadowOffset,
+    required this.bottomNavOutlineColor,
     required this.sideRailRadius,
     required this.sideRailIndicatorColor,
+    required this.sideRailBackgroundColor,
+    required this.sideRailOutlineColor,
     required this.sideRailShadowOpacity,
     required this.sideRailShadowBlur,
     required this.sideRailShadowOffset,
@@ -442,10 +476,19 @@ class TilawaAdaptiveShellTokens {
   /// Offset for the floating bottom nav shadow.
   final Offset bottomNavShadowOffset;
 
+  /// [RoundedRectangleBorder.side] for the floating bottom nav ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
+  final Color bottomNavOutlineColor;
+
   final double sideRailRadius;
 
   /// [NavigationRail.indicatorColor]: primary tint over [ColorScheme.surfaceContainerHigh].
   final Color sideRailIndicatorColor;
+
+  /// Frosted rail panel fill ([ColorScheme.surface] at [TilawaDesignTokens.opacityGlass]).
+  final Color sideRailBackgroundColor;
+
+  /// Hairline border around the side rail panel.
+  final Color sideRailOutlineColor;
 
   final double sideRailShadowOpacity;
   final double sideRailShadowBlur;
@@ -489,6 +532,7 @@ class TilawaAdaptiveShellTokens {
     // screen. Color is derived here so every compact bottom nav follows the
     // active theme without per-screen overrides.
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
+    final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     return TilawaAdaptiveShellTokens(
       compactBottomNavBarBaseHeight: 55,
       bottomNavHorizontalMargin: 16,
@@ -501,8 +545,11 @@ class TilawaAdaptiveShellTokens {
       bottomNavShadowOpacity: 0.12,
       bottomNavShadowBlur: 18,
       bottomNavShadowOffset: Offset(0, 6),
+      bottomNavOutlineColor: shellChromeOutline,
       sideRailRadius: 16,
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
+      sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
+      sideRailOutlineColor: shellChromeOutline,
       sideRailShadowOpacity: 0.05,
       sideRailShadowBlur: 12,
       sideRailShadowOffset: Offset(2, 0),
@@ -532,6 +579,16 @@ class TilawaAdaptiveShellTokens {
 
   static Color _navButtonHighlightColor(ColorScheme colorScheme) {
     return colorScheme.onSurface.withValues(alpha: 0.04);
+  }
+
+  /// Matches [TilawaDesignTokens.opacitySubtle] (0.1) on [ColorScheme.outlineVariant].
+  static Color _shellChromeOutlineColor(ColorScheme colorScheme) {
+    return colorScheme.outlineVariant.withValues(alpha: 0.1);
+  }
+
+  /// Matches [TilawaDesignTokens.opacityGlass] (0.8) on [ColorScheme.surface].
+  static Color _sideRailBackgroundColor(ColorScheme colorScheme) {
+    return colorScheme.surface.withValues(alpha: 0.8);
   }
 
   static Color _sideRailIndicatorColor(ColorScheme colorScheme) {
@@ -570,8 +627,11 @@ class TilawaAdaptiveShellTokens {
     double? bottomNavShadowOpacity,
     double? bottomNavShadowBlur,
     Offset? bottomNavShadowOffset,
+    Color? bottomNavOutlineColor,
     double? sideRailRadius,
     Color? sideRailIndicatorColor,
+    Color? sideRailBackgroundColor,
+    Color? sideRailOutlineColor,
     double? sideRailShadowOpacity,
     double? sideRailShadowBlur,
     Offset? sideRailShadowOffset,
@@ -609,9 +669,14 @@ class TilawaAdaptiveShellTokens {
       bottomNavShadowBlur: bottomNavShadowBlur ?? this.bottomNavShadowBlur,
       bottomNavShadowOffset:
           bottomNavShadowOffset ?? this.bottomNavShadowOffset,
+      bottomNavOutlineColor:
+          bottomNavOutlineColor ?? this.bottomNavOutlineColor,
       sideRailRadius: sideRailRadius ?? this.sideRailRadius,
       sideRailIndicatorColor:
           sideRailIndicatorColor ?? this.sideRailIndicatorColor,
+      sideRailBackgroundColor:
+          sideRailBackgroundColor ?? this.sideRailBackgroundColor,
+      sideRailOutlineColor: sideRailOutlineColor ?? this.sideRailOutlineColor,
       sideRailShadowOpacity:
           sideRailShadowOpacity ?? this.sideRailShadowOpacity,
       sideRailShadowBlur: sideRailShadowBlur ?? this.sideRailShadowBlur,
@@ -706,10 +771,25 @@ class TilawaAdaptiveShellTokens {
         b.bottomNavShadowOffset,
         t,
       )!,
+      bottomNavOutlineColor: Color.lerp(
+        a.bottomNavOutlineColor,
+        b.bottomNavOutlineColor,
+        t,
+      )!,
       sideRailRadius: lerpTokenDouble(a.sideRailRadius, b.sideRailRadius, t),
       sideRailIndicatorColor: Color.lerp(
         a.sideRailIndicatorColor,
         b.sideRailIndicatorColor,
+        t,
+      )!,
+      sideRailBackgroundColor: Color.lerp(
+        a.sideRailBackgroundColor,
+        b.sideRailBackgroundColor,
+        t,
+      )!,
+      sideRailOutlineColor: Color.lerp(
+        a.sideRailOutlineColor,
+        b.sideRailOutlineColor,
         t,
       )!,
       sideRailShadowOpacity: lerpTokenDouble(

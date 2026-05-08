@@ -375,6 +375,24 @@ void main() {
     });
   });
 
+  group('TilawaMediaPlayerBarTokens', () {
+    test('fromColorScheme derives outline and play/pause shadow colors', () {
+      const scheme = ColorScheme.light(
+        primary: Color(0xFF006A60),
+        outlineVariant: Color(0xFF887766),
+      );
+      final tokens = TilawaMediaPlayerBarTokens.fromColorScheme(scheme);
+      expect(
+        tokens.shellOutlineColor,
+        scheme.outlineVariant.withValues(alpha: 0.1),
+      );
+      expect(
+        tokens.playPauseButtonShadowColor,
+        scheme.primary.withValues(alpha: 0.3),
+      );
+    });
+  });
+
   group('TilawaSettingsGroupTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSettingsGroupTokens.defaults();
@@ -561,6 +579,18 @@ void main() {
           tokens.navButtonHighlightColor,
           scheme.onSurface.withValues(alpha: 0.04),
         );
+        expect(
+          tokens.bottomNavOutlineColor,
+          scheme.outlineVariant.withValues(alpha: 0.1),
+        );
+        expect(
+          tokens.sideRailBackgroundColor,
+          scheme.surface.withValues(alpha: 0.8),
+        );
+        expect(
+          tokens.sideRailOutlineColor,
+          scheme.outlineVariant.withValues(alpha: 0.1),
+        );
       },
     );
 
@@ -642,8 +672,11 @@ void main() {
         bottomNavShadowOpacity: 0.12,
         bottomNavShadowBlur: 18.0,
         bottomNavShadowOffset: Offset(0, 6),
+        bottomNavOutlineColor: Color(0xFFAA9988),
         sideRailRadius: 16.0,
         sideRailIndicatorColor: Color(0xFFCC8866),
+        sideRailBackgroundColor: Color(0x88E0E0E0),
+        sideRailOutlineColor: Color(0xFF998877),
         sideRailShadowOpacity: 0.05,
         sideRailShadowBlur: 12.0,
         sideRailShadowOffset: Offset(2, 0),
@@ -674,8 +707,11 @@ void main() {
         bottomNavShadowOpacity: 0.18,
         bottomNavShadowBlur: 24.0,
         bottomNavShadowOffset: Offset(0, 8),
+        bottomNavOutlineColor: Color(0xFF776655),
         sideRailRadius: 20.0,
         sideRailIndicatorColor: Color(0xFF66AA88),
+        sideRailBackgroundColor: Color(0x88D0D0D0),
+        sideRailOutlineColor: Color(0xFF665544),
         sideRailShadowOpacity: 0.08,
         sideRailShadowBlur: 16.0,
         sideRailShadowOffset: Offset(4, 0),
@@ -720,6 +756,30 @@ void main() {
         Color.lerp(
           first.sideRailIndicatorColor,
           second.sideRailIndicatorColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.bottomNavOutlineColor,
+        Color.lerp(
+          first.bottomNavOutlineColor,
+          second.bottomNavOutlineColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.sideRailBackgroundColor,
+        Color.lerp(
+          first.sideRailBackgroundColor,
+          second.sideRailBackgroundColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.sideRailOutlineColor,
+        Color.lerp(
+          first.sideRailOutlineColor,
+          second.sideRailOutlineColor,
           0.5,
         ),
       );

@@ -186,7 +186,6 @@ class _BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
-    final designTokens = theme.tokens;
     final bottomPadding = context.floatingBottomPadding;
 
     final BorderRadius shellRadius = BorderRadius.circular(
@@ -223,9 +222,7 @@ class _BottomNavBar extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: shellRadius,
               side: BorderSide(
-                color: theme.colorScheme.outlineVariant.withValues(
-                  alpha: designTokens.opacitySubtle,
-                ),
+                color: tokens.bottomNavOutlineColor,
                 width: tokens.bottomNavBorderWidth,
               ),
             ),
@@ -282,14 +279,10 @@ class _SideNavRail extends StatelessWidget {
       borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
       child: Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface.withValues(
-            alpha: designTokens.opacityGlass,
-          ),
+          color: componentTokens.sideRailBackgroundColor,
           borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
           border: Border.all(
-            color: theme.colorScheme.outlineVariant.withValues(
-              alpha: designTokens.opacitySubtle,
-            ),
+            color: componentTokens.sideRailOutlineColor,
             width: designTokens.borderWidthThin,
           ),
           boxShadow: [

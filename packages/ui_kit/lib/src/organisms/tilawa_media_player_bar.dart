@@ -84,9 +84,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(
-            alpha: designTokens.opacitySubtle,
-          ),
+          color: componentTokens.shellOutlineColor,
           width: designTokens.borderWidthThin,
         ),
       ),
@@ -196,10 +194,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                               color: colorScheme.primary,
                               boxShadow: [
                                 BoxShadow(
-                                  color: colorScheme.primary.withValues(
-                                    alpha:
-                                        componentTokens.playPauseShadowOpacity,
-                                  ),
+                                  color:
+                                      componentTokens.playPauseButtonShadowColor,
                                   blurRadius:
                                       componentTokens.playPauseShadowBlur,
                                   offset: designTokens.shadowOffsetSmall,

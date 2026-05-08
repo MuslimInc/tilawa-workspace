@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 /// All app colors should be defined here to maintain consistency
 /// and make it easy to update colors across the app.
 abstract final class AppColors {
+  AppColors._();
+
   // Primary colors
   /// Default primary color (deep teal).
   static const Color primaryTeal = Color(0xFF0F766E);
