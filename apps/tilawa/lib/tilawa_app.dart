@@ -9,6 +9,7 @@ import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/l10n/app_localizations.dart' as quran_image_l10n;
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -163,6 +164,7 @@ class _PlayerApp extends StatelessWidget {
                       themeState.primaryPresetId ==
                           PrimaryColorPreset.defaultPreset.id,
                   density: density,
+                  extensions: [QuranReaderTheme.light],
                 ),
                 darkTheme: AppTheme.getDarkTheme(
                   primaryColor: themeState.primaryColor,
@@ -174,6 +176,7 @@ class _PlayerApp extends StatelessWidget {
                   darkIsTrueBlack:
                       themeState.preset == AppThemePreset.trueBlack,
                   density: density,
+                  extensions: [QuranReaderTheme.dark],
                 ),
                 themeMode: themeState.mode,
                 routerConfig: AppRouter.router,

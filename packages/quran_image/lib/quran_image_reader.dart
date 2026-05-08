@@ -24,6 +24,7 @@ class QuranImageReader extends StatefulWidget {
     this.restoreOrientations,
     this.restoreSystemUiOverlayStyle,
     this.onShareRequested,
+    this.headerImageFilter,
   });
 
   /// The system UI mode to enable when the reader enters the screen.
@@ -49,6 +50,9 @@ class QuranImageReader extends StatefulWidget {
   /// Called when the user taps the share/reel button in the navigation overlay.
   /// The host app is responsible for opening its share composer.
   final void Function(int currentPage)? onShareRequested;
+
+  /// Optional filter for the Surah header images.
+  final ColorFilter? headerImageFilter;
 
   @override
   State<QuranImageReader> createState() => _QuranImageReaderState();
@@ -918,6 +922,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
                                           'warmup:$pageNumber',
                                         ),
                                         pageNumber: pageNumber,
+                                        headerImageFilter:
+                                            widget.headerImageFilter,
                                       ),
                                     ),
                                   ),
@@ -931,6 +937,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
                         onToggleNavigation: _toggleNavigation,
                         onShowNavigation: _showNavigation,
                         onPageChanged: _onReaderPageChanged,
+                        headerImageFilter: widget.headerImageFilter,
                       ),
                       ValueListenableBuilder<_JumpTransitionSnapshot?>(
                         valueListenable: _jumpTransitionSnapshotNotifier,
