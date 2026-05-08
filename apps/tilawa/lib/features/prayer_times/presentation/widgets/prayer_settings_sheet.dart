@@ -359,15 +359,11 @@ class _SettingsSwitch extends StatelessWidget {
     required this.title,
     required this.value,
     required this.onChanged,
-    this.identifier,
   });
 
   final String title;
   final bool value;
   final ValueChanged<bool> onChanged;
-
-  /// Optional [Semantics.identifier] for E2E test targeting via Maestro.
-  final String? identifier;
 
   @override
   Widget build(BuildContext context) {
@@ -384,9 +380,7 @@ class _SettingsSwitch extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
     );
-    if (identifier case final String id) {
-      return Semantics(identifier: id, child: tile);
-    }
+
     return tile;
   }
 }

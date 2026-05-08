@@ -15,8 +15,6 @@ import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
 import '../bloc/downloads_status.dart';
 import '../widgets/reciter_downloads_section.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 
 class DownloadsScreen extends StatefulWidget {
   const DownloadsScreen({super.key});

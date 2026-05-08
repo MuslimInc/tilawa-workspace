@@ -13,8 +13,6 @@ import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 import '../widgets/reciter_card.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
