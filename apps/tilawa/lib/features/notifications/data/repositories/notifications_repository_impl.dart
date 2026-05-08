@@ -105,6 +105,7 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       'notification_id',
       'adhan_enabled',
       'is_adhan_playing',
+      'prayer',
       'prayer_key',
       'date',
     };

@@ -192,11 +192,12 @@ class AppRouter {
     }
 
     final String targetPath = Uri.parse(targetLocation).path;
-    final String currentPath = Uri.parse(currentLocation).path;
 
-    // For prayer status, path-level comparison is safest for phase-1 hotfix.
+    // For prayer status, we always want to allow re-navigation if it's not a
+    // duplicate tap (handled by the outer signature check), because the
+    // payload might be different (different prayer time).
     if (targetPath == const PrayerNotificationStatusRoute().location) {
-      return currentPath == targetPath;
+      return false;
     }
 
     return currentLocation == targetLocation;
