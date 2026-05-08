@@ -391,21 +391,23 @@ class _NavButton extends StatelessWidget {
       color: Colors.transparent,
       borderRadius: effectiveBorderRadius,
       clipBehavior: Clip.antiAlias,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? tokens.navButtonSelectedBackgroundColor
-              : Colors.transparent,
-          borderRadius: effectiveBorderRadius,
-        ),
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onTap();
-          },
-          borderRadius: effectiveBorderRadius,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: effectiveBorderRadius,
+        child: AnimatedContainer(
+          duration: isSelected
+              ? const Duration(milliseconds: 200)
+              : Duration.zero,
+          curve: Curves.easeOutCubic,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? tokens.navButtonSelectedBackgroundColor
+                : Colors.transparent,
+            borderRadius: effectiveBorderRadius,
+          ),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
             child: Padding(
