@@ -145,7 +145,6 @@ class _SearchFieldBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     final componentTokens = theme.componentTokens.searchField;
     final effectiveFillColor =
         backgroundColor ?? componentTokens.backgroundColor;
@@ -160,19 +159,13 @@ class _SearchFieldBody extends StatelessWidget {
         borderRadius: effectiveBorderRadius,
         border: Border.all(
           color: isFocused
-              ? colorScheme.primary.withValues(
-                  alpha: componentTokens.focusedBorderOpacity,
-                )
-              : colorScheme.outlineVariant.withValues(
-                  alpha: componentTokens.unfocusedBorderOpacity,
-                ),
+              ? componentTokens.focusedBorderColor
+              : componentTokens.unfocusedBorderColor,
         ),
         boxShadow: showShadow
             ? [
                 BoxShadow(
-                  color: colorScheme.primary.withValues(
-                    alpha: componentTokens.shadowOpacity,
-                  ),
+                  color: componentTokens.boxShadowColor,
                   blurRadius: componentTokens.shadowBlur,
                   offset: componentTokens.shadowOffset,
                 ),
@@ -200,19 +193,15 @@ class _SearchFieldBody extends StatelessWidget {
           hintStyle:
               hintStyle ??
               theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withValues(
-                  alpha: componentTokens.hintOpacity,
-                ),
+                color: componentTokens.hintTextColor,
               ),
           contentPadding: contentPadding ?? componentTokens.contentPadding,
           prefixIcon: Icon(
             prefixIcon,
             size: componentTokens.iconSize,
             color: isFocused
-                ? colorScheme.primary
-                : colorScheme.onSurfaceVariant.withValues(
-                    alpha: componentTokens.iconOpacity,
-                  ),
+                ? componentTokens.prefixIconFocusedColor
+                : componentTokens.prefixIconMutedColor,
           ),
           suffixIcon: hasText && onClear != null
               ? IconButton(

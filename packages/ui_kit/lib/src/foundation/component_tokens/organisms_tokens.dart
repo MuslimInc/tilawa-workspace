@@ -909,6 +909,8 @@ class TilawaSettingsGroupTokens {
     required this.groupSurfaceColor,
     required this.groupContainerBorderColor,
     required this.selectionTileDividerColor,
+    required this.switchActiveTrackColor,
+    required this.switchActiveThumbColor,
   });
 
   final EdgeInsetsGeometry groupHeaderPadding;
@@ -949,6 +951,12 @@ class TilawaSettingsGroupTokens {
   /// Divider under [TilawaSelectionTile] rows (`outlineVariant` × [tileDividerOpacity]).
   final Color selectionTileDividerColor;
 
+  /// [Switch.adaptive] active track ([ColorScheme.primary] × [switchActiveTrackOpacity]).
+  final Color switchActiveTrackColor;
+
+  /// [Switch.adaptive] thumb when on.
+  final Color switchActiveThumbColor;
+
   /// Default tokens for the settings group.
   ///
   /// [density] controls compact-mode token values. Comfortable (default)
@@ -985,6 +993,11 @@ class TilawaSettingsGroupTokens {
     final selectionTileDividerColor = colorScheme.outlineVariant.withValues(
       alpha: tileDividerOpacity,
     );
+    const switchActiveTrackOpacity = 0.5;
+    final switchActiveTrackColor = colorScheme.primary.withValues(
+      alpha: switchActiveTrackOpacity,
+    );
+    final switchActiveThumbColor = colorScheme.primary;
     if (density.isCompact) {
       return TilawaSettingsGroupTokens(
         // Compact: tuned for breathability while staying denser than comfortable.
@@ -1024,6 +1037,8 @@ class TilawaSettingsGroupTokens {
         groupSurfaceColor: groupSurfaceColor,
         groupContainerBorderColor: groupContainerBorderColor,
         selectionTileDividerColor: selectionTileDividerColor,
+        switchActiveTrackColor: switchActiveTrackColor,
+        switchActiveThumbColor: switchActiveThumbColor,
       );
     }
 
@@ -1064,6 +1079,8 @@ class TilawaSettingsGroupTokens {
       groupSurfaceColor: groupSurfaceColor,
       groupContainerBorderColor: groupContainerBorderColor,
       selectionTileDividerColor: selectionTileDividerColor,
+      switchActiveTrackColor: switchActiveTrackColor,
+      switchActiveThumbColor: switchActiveThumbColor,
     );
   }
 
@@ -1114,6 +1131,8 @@ class TilawaSettingsGroupTokens {
     Color? groupSurfaceColor,
     Color? groupContainerBorderColor,
     Color? selectionTileDividerColor,
+    Color? switchActiveTrackColor,
+    Color? switchActiveThumbColor,
   }) {
     return TilawaSettingsGroupTokens(
       groupHeaderPadding: groupHeaderPadding ?? this.groupHeaderPadding,
@@ -1153,6 +1172,10 @@ class TilawaSettingsGroupTokens {
           groupContainerBorderColor ?? this.groupContainerBorderColor,
       selectionTileDividerColor:
           selectionTileDividerColor ?? this.selectionTileDividerColor,
+      switchActiveTrackColor:
+          switchActiveTrackColor ?? this.switchActiveTrackColor,
+      switchActiveThumbColor:
+          switchActiveThumbColor ?? this.switchActiveThumbColor,
     );
   }
 
@@ -1293,6 +1316,16 @@ class TilawaSettingsGroupTokens {
       selectionTileDividerColor: Color.lerp(
         a.selectionTileDividerColor,
         b.selectionTileDividerColor,
+        t,
+      )!,
+      switchActiveTrackColor: Color.lerp(
+        a.switchActiveTrackColor,
+        b.switchActiveTrackColor,
+        t,
+      )!,
+      switchActiveThumbColor: Color.lerp(
+        a.switchActiveThumbColor,
+        b.switchActiveThumbColor,
         t,
       )!,
     );

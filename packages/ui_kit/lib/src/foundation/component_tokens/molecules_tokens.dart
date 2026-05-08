@@ -369,6 +369,7 @@ class TilawaChipTokens {
     required this.padding,
     required this.compactPadding,
     required this.backgroundColor,
+    required this.defaultBorderColor,
     required this.selectionSelectedBackgroundColor,
     required this.selectionUnselectedBackgroundColor,
     required this.contentGap,
@@ -387,6 +388,10 @@ class TilawaChipTokens {
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry compactPadding;
   final Color backgroundColor;
+
+  /// Default stroke for [TilawaChip] / [MetadataChip] ([TilawaDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
+  final Color defaultBorderColor;
+
   final Color selectionSelectedBackgroundColor;
   final Color selectionUnselectedBackgroundColor;
   final double contentGap;
@@ -420,11 +425,13 @@ class TilawaChipTokens {
     );
     final selectionUnselectedBackgroundColor =
         _selectionUnselectedBackgroundColor(colorScheme);
+    final defaultBorderColor = _defaultBorderColor(colorScheme);
     if (density.isCompact) {
       return TilawaChipTokens(
         padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         backgroundColor: backgroundColor,
+        defaultBorderColor: defaultBorderColor,
         selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
         selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
         contentGap: 6,
@@ -444,6 +451,7 @@ class TilawaChipTokens {
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       backgroundColor: backgroundColor,
+      defaultBorderColor: defaultBorderColor,
       selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
       selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
       contentGap: 8,
@@ -469,6 +477,10 @@ class TilawaChipTokens {
     )!;
   }
 
+  static Color _defaultBorderColor(ColorScheme colorScheme) {
+    return colorScheme.outlineVariant.withValues(alpha: 0.3);
+  }
+
   static Color _selectionSelectedBackgroundColor(ColorScheme colorScheme) {
     final blendAmount = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
     return Color.lerp(
@@ -491,6 +503,7 @@ class TilawaChipTokens {
     EdgeInsetsGeometry? padding,
     EdgeInsetsGeometry? compactPadding,
     Color? backgroundColor,
+    Color? defaultBorderColor,
     Color? selectionSelectedBackgroundColor,
     Color? selectionUnselectedBackgroundColor,
     double? contentGap,
@@ -509,6 +522,7 @@ class TilawaChipTokens {
       padding: padding ?? this.padding,
       compactPadding: compactPadding ?? this.compactPadding,
       backgroundColor: backgroundColor ?? this.backgroundColor,
+      defaultBorderColor: defaultBorderColor ?? this.defaultBorderColor,
       selectionSelectedBackgroundColor:
           selectionSelectedBackgroundColor ??
           this.selectionSelectedBackgroundColor,
@@ -543,6 +557,11 @@ class TilawaChipTokens {
         t,
       )!,
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
+      defaultBorderColor: Color.lerp(
+        a.defaultBorderColor,
+        b.defaultBorderColor,
+        t,
+      )!,
       selectionSelectedBackgroundColor: Color.lerp(
         a.selectionSelectedBackgroundColor,
         b.selectionSelectedBackgroundColor,
@@ -901,6 +920,12 @@ class TilawaSearchFieldTokens {
     required this.iconOpacity,
     required this.shadowBlur,
     required this.shadowOffset,
+    required this.focusedBorderColor,
+    required this.unfocusedBorderColor,
+    required this.boxShadowColor,
+    required this.hintTextColor,
+    required this.prefixIconMutedColor,
+    required this.prefixIconFocusedColor,
   });
 
   final double height;
@@ -915,6 +940,13 @@ class TilawaSearchFieldTokens {
   final double iconOpacity;
   final double shadowBlur;
   final Offset shadowOffset;
+
+  final Color focusedBorderColor;
+  final Color unfocusedBorderColor;
+  final Color boxShadowColor;
+  final Color hintTextColor;
+  final Color prefixIconMutedColor;
+  final Color prefixIconFocusedColor;
 
   factory TilawaSearchFieldTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
@@ -933,6 +965,25 @@ class TilawaSearchFieldTokens {
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
     final backgroundColor = _backgroundColor(colorScheme);
+    const focusedBorderOpacity = 0.28;
+    const unfocusedBorderOpacity = 0.26;
+    const shadowOpacity = 0.04;
+    const hintOpacity = 0.58;
+    const iconOpacity = 0.72;
+    final focusedBorderColor = colorScheme.primary.withValues(
+      alpha: focusedBorderOpacity,
+    );
+    final unfocusedBorderColor = colorScheme.outlineVariant.withValues(
+      alpha: unfocusedBorderOpacity,
+    );
+    final boxShadowColor = colorScheme.primary.withValues(alpha: shadowOpacity);
+    final hintTextColor = colorScheme.onSurfaceVariant.withValues(
+      alpha: hintOpacity,
+    );
+    final prefixIconMutedColor = colorScheme.onSurfaceVariant.withValues(
+      alpha: iconOpacity,
+    );
+    final prefixIconFocusedColor = colorScheme.primary;
     if (density.isCompact) {
       // Height stays at kMinInteractiveDimension (48dp) — non-negotiable.
       return TilawaSearchFieldTokens(
@@ -941,13 +992,19 @@ class TilawaSearchFieldTokens {
         borderRadius: 12,
         contentPadding: EdgeInsets.symmetric(vertical: 10),
         iconSize: 16,
-        focusedBorderOpacity: 0.28,
-        unfocusedBorderOpacity: 0.26,
-        shadowOpacity: 0.04,
-        hintOpacity: 0.58,
-        iconOpacity: 0.72,
+        focusedBorderOpacity: focusedBorderOpacity,
+        unfocusedBorderOpacity: unfocusedBorderOpacity,
+        shadowOpacity: shadowOpacity,
+        hintOpacity: hintOpacity,
+        iconOpacity: iconOpacity,
         shadowBlur: 8,
         shadowOffset: Offset(0, 2),
+        focusedBorderColor: focusedBorderColor,
+        unfocusedBorderColor: unfocusedBorderColor,
+        boxShadowColor: boxShadowColor,
+        hintTextColor: hintTextColor,
+        prefixIconMutedColor: prefixIconMutedColor,
+        prefixIconFocusedColor: prefixIconFocusedColor,
       );
     }
     return TilawaSearchFieldTokens(
@@ -956,13 +1013,19 @@ class TilawaSearchFieldTokens {
       borderRadius: 16,
       contentPadding: EdgeInsets.symmetric(vertical: 12),
       iconSize: 18,
-      focusedBorderOpacity: 0.28,
-      unfocusedBorderOpacity: 0.26,
-      shadowOpacity: 0.04,
-      hintOpacity: 0.58,
-      iconOpacity: 0.72,
+      focusedBorderOpacity: focusedBorderOpacity,
+      unfocusedBorderOpacity: unfocusedBorderOpacity,
+      shadowOpacity: shadowOpacity,
+      hintOpacity: hintOpacity,
+      iconOpacity: iconOpacity,
       shadowBlur: 12,
       shadowOffset: Offset(0, 4),
+      focusedBorderColor: focusedBorderColor,
+      unfocusedBorderColor: unfocusedBorderColor,
+      boxShadowColor: boxShadowColor,
+      hintTextColor: hintTextColor,
+      prefixIconMutedColor: prefixIconMutedColor,
+      prefixIconFocusedColor: prefixIconFocusedColor,
     );
   }
 
@@ -988,6 +1051,12 @@ class TilawaSearchFieldTokens {
     double? iconOpacity,
     double? shadowBlur,
     Offset? shadowOffset,
+    Color? focusedBorderColor,
+    Color? unfocusedBorderColor,
+    Color? boxShadowColor,
+    Color? hintTextColor,
+    Color? prefixIconMutedColor,
+    Color? prefixIconFocusedColor,
   }) {
     return TilawaSearchFieldTokens(
       height: height ?? this.height,
@@ -1003,6 +1072,13 @@ class TilawaSearchFieldTokens {
       iconOpacity: iconOpacity ?? this.iconOpacity,
       shadowBlur: shadowBlur ?? this.shadowBlur,
       shadowOffset: shadowOffset ?? this.shadowOffset,
+      focusedBorderColor: focusedBorderColor ?? this.focusedBorderColor,
+      unfocusedBorderColor: unfocusedBorderColor ?? this.unfocusedBorderColor,
+      boxShadowColor: boxShadowColor ?? this.boxShadowColor,
+      hintTextColor: hintTextColor ?? this.hintTextColor,
+      prefixIconMutedColor: prefixIconMutedColor ?? this.prefixIconMutedColor,
+      prefixIconFocusedColor:
+          prefixIconFocusedColor ?? this.prefixIconFocusedColor,
     );
   }
 
@@ -1036,6 +1112,28 @@ class TilawaSearchFieldTokens {
       iconOpacity: lerpTokenDouble(a.iconOpacity, b.iconOpacity, t),
       shadowBlur: lerpTokenDouble(a.shadowBlur, b.shadowBlur, t),
       shadowOffset: Offset.lerp(a.shadowOffset, b.shadowOffset, t)!,
+      focusedBorderColor: Color.lerp(
+        a.focusedBorderColor,
+        b.focusedBorderColor,
+        t,
+      )!,
+      unfocusedBorderColor: Color.lerp(
+        a.unfocusedBorderColor,
+        b.unfocusedBorderColor,
+        t,
+      )!,
+      boxShadowColor: Color.lerp(a.boxShadowColor, b.boxShadowColor, t)!,
+      hintTextColor: Color.lerp(a.hintTextColor, b.hintTextColor, t)!,
+      prefixIconMutedColor: Color.lerp(
+        a.prefixIconMutedColor,
+        b.prefixIconMutedColor,
+        t,
+      )!,
+      prefixIconFocusedColor: Color.lerp(
+        a.prefixIconFocusedColor,
+        b.prefixIconFocusedColor,
+        t,
+      )!,
     );
   }
 }

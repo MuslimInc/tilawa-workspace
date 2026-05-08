@@ -229,8 +229,11 @@ void main() {
 
     test('fromColorScheme derives theme-aware background color', () {
       const scheme = ColorScheme.light(
+        primary: Color(0xFF006A60),
         surface: Color(0xFFFCFAF5),
         surfaceContainer: Color(0xFFEBE6D7),
+        outlineVariant: Color(0xFF887766),
+        onSurfaceVariant: Color(0xFF554433),
       );
       final tokens = TilawaSearchFieldTokens.fromColorScheme(scheme);
 
@@ -238,6 +241,15 @@ void main() {
         tokens.backgroundColor,
         Color.lerp(scheme.surface, scheme.surfaceContainer, 0.42),
       );
+      expect(
+        tokens.focusedBorderColor,
+        scheme.primary.withValues(alpha: 0.28),
+      );
+      expect(
+        tokens.unfocusedBorderColor,
+        scheme.outlineVariant.withValues(alpha: 0.26),
+      );
+      expect(tokens.prefixIconFocusedColor, scheme.primary);
     });
 
     test('lerp interpolates all numeric values and EdgeInsets', () {
@@ -254,6 +266,12 @@ void main() {
         iconOpacity: 0.7,
         shadowBlur: 10.0,
         shadowOffset: Offset(0, 2),
+        focusedBorderColor: Color(0x55006600),
+        unfocusedBorderColor: Color(0x44332211),
+        boxShadowColor: Color(0x22001100),
+        hintTextColor: Color(0x80443322),
+        prefixIconMutedColor: Color(0xB0554433),
+        prefixIconFocusedColor: Color(0xFF006600),
       );
       const second = TilawaSearchFieldTokens(
         height: 56.0,
@@ -268,6 +286,12 @@ void main() {
         iconOpacity: 0.75,
         shadowBlur: 14.0,
         shadowOffset: Offset(0, 6),
+        focusedBorderColor: Color(0x77008800),
+        unfocusedBorderColor: Color(0x55443322),
+        boxShadowColor: Color(0x33002200),
+        hintTextColor: Color(0x90665544),
+        prefixIconMutedColor: Color(0xC0665544),
+        prefixIconFocusedColor: Color(0xFF008800),
       );
       final result = TilawaSearchFieldTokens.lerp(first, second, 0.5);
       expect(result.height, closeTo(52.0, 0.01));
@@ -277,6 +301,14 @@ void main() {
       );
       expect(result.shadowBlur, closeTo(12.0, 0.01));
       expect(result.focusedBorderOpacity, closeTo(0.285, 0.01));
+      expect(
+        result.focusedBorderColor,
+        Color.lerp(
+          first.focusedBorderColor,
+          second.focusedBorderColor,
+          0.5,
+        ),
+      );
     });
   });
 
@@ -426,6 +458,11 @@ void main() {
         tokens.selectionTileDividerColor,
         scheme.outlineVariant.withValues(alpha: 0.05),
       );
+      expect(
+        tokens.switchActiveTrackColor,
+        scheme.primary.withValues(alpha: 0.5),
+      );
+      expect(tokens.switchActiveThumbColor, scheme.primary);
     });
 
     test('copyWith updates nested EdgeInsets and numeric values', () {
@@ -475,6 +512,8 @@ void main() {
         groupSurfaceColor: Color(0xFFE0E0E0),
         groupContainerBorderColor: Color(0xFFCCCCCC),
         selectionTileDividerColor: Color(0xFFBBBBBB),
+        switchActiveTrackColor: Color(0x88006655),
+        switchActiveThumbColor: Color(0xFF006655),
       );
       const second = TilawaSettingsGroupTokens(
         groupHeaderPadding: EdgeInsets.fromLTRB(14, 18, 18, 10),
@@ -509,6 +548,8 @@ void main() {
         groupSurfaceColor: Color(0xFFD0D0D0),
         groupContainerBorderColor: Color(0xFFAAAAAA),
         selectionTileDividerColor: Color(0xFF999999),
+        switchActiveTrackColor: Color(0x88005544),
+        switchActiveThumbColor: Color(0xFF005544),
       );
 
       final result = TilawaSettingsGroupTokens.lerp(first, second, 0.5);
@@ -540,6 +581,22 @@ void main() {
         Color.lerp(
           first.selectionTileDividerColor,
           second.selectionTileDividerColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.switchActiveTrackColor,
+        Color.lerp(
+          first.switchActiveTrackColor,
+          second.switchActiveTrackColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.switchActiveThumbColor,
+        Color.lerp(
+          first.switchActiveThumbColor,
+          second.switchActiveThumbColor,
           0.5,
         ),
       );

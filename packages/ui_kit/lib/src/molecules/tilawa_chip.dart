@@ -44,10 +44,7 @@ class TilawaChip extends StatelessWidget {
     final effectiveForeground = foregroundColor ?? colorScheme.onSurfaceVariant;
     final effectiveRadius = borderRadius ?? componentTokens.roundedRadius;
     final effectiveBorderColor =
-        borderColor ??
-        colorScheme.outlineVariant.withValues(
-          alpha: designTokens.opacityMedium,
-        );
+        borderColor ?? componentTokens.defaultBorderColor;
 
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(effectiveRadius),
