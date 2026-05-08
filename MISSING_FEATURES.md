@@ -12,6 +12,32 @@ This document outlines features that are commonly found in Quran/Islamic apps bu
 
 ---
 
+## 🗂️ Post-Release Maintainability Backlog
+
+### Theme Token Harmonization (T4)
+**Release decision:** GO for current release, no pre-release implementation required.
+
+**Why deferred:**
+- No blocker found in T4 audit.
+- Current theme behavior is release-viable.
+- Broad harmonization now would introduce avoidable visual churn.
+
+**Backlog items:**
+- [ ] Quran Image Reader fallback/error/loading colors:
+	make mode-aware and `ColorScheme`-derived if visual issues appear.
+- [ ] Share/Reel palette:
+	consolidate duplicated branded constants into one feature token source.
+- [ ] Share/Reel branding strategy:
+	keep branded identity unless product decides to harmonize with app primary.
+- [ ] Settings semantic icon colors:
+	decide whether they remain fixed semantic colors or become theme-derived tokens.
+- [ ] Overlay/scrim constants:
+	optional tokenization for consistency.
+
+**Note:** Remaining work is maintainability-focused backlog and not a release blocker.
+
+---
+
 ## 🧪 Implemented — Needs Production/Physical QA
 
 ### 1. Prayer Times

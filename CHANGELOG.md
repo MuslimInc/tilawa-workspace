@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Not directly proven yet (coverage gaps, not observed regressions)**: `PrayerNotificationStatusScreen` from real Prayer/Adhan notification tap; `PrayerNotificationStatusScreen` light/dark/custom theme; Screenshot/Reel composer enter/exit; custom primary color; distinct non-image Quran Reader path (if still reachable separately).
 - **Decision**: No local screen-specific `AnnotatedRegion` override is justified yet.
 - **Next validation focus**: real notification tap path to `PrayerNotificationStatusScreen`, then composer enter/exit paths.
+- **Theme Token Harmonization (T4) Decision**: GO for release with no pre-release action.
+- **T4 Deferred Scope (post-release backlog)**: Quran Image Reader fallback harmonization if needed, Share/Reel branded palette consolidation into a single token source, Settings semantic icon-color strategy decision (fixed vs theme-derived), optional scrim/overlay tokenization.
 
 ## [0.1.6+24] - 2026-05-05
 
