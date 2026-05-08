@@ -20,6 +20,14 @@ class QiblaScreen extends StatefulWidget {
 }
 
 class _QiblaScreenState extends State<QiblaScreen> {
+  QiblaBloc? _qiblaBloc;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _qiblaBloc = context.read<QiblaBloc>();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -27,10 +35,13 @@ class _QiblaScreenState extends State<QiblaScreen> {
       debugPrint('[CompassSensor] QiblaScreen.initState');
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final QiblaBloc? qiblaBloc = _qiblaBloc;
+      if (qiblaBloc == null || qiblaBloc.isClosed) return;
       if (kDebugMode) {
         debugPrint('[CompassSensor] QiblaScreen -> CheckLocationService');
       }
-      context.read<QiblaBloc>().add(const CheckLocationService());
+      qiblaBloc.add(const CheckLocationService());
     });
   }
 
@@ -39,7 +50,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
     if (kDebugMode) {
       debugPrint('[CompassSensor] QiblaScreen.dispose -> StopQiblaStream');
     }
-    context.read<QiblaBloc>().add(const StopQiblaStream());
+    final QiblaBloc? qiblaBloc = _qiblaBloc;
+    if (qiblaBloc != null && !qiblaBloc.isClosed) {
+      qiblaBloc.add(const StopQiblaStream());
+    }
     super.dispose();
   }
 
