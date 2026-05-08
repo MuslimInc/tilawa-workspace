@@ -47,8 +47,11 @@ class TilawaSelectionTile extends StatelessWidget {
       children: [
         Material(
           color: isSelected
-              ? colorScheme.primaryContainer.withValues(
-                  alpha: tokens.tileIconContainerOpacity * 3,
+              ? Color.alphaBlend(
+                  colorScheme.primary.withValues(
+                    alpha: tokens.tileIconContainerOpacity * 3,
+                  ),
+                  colorScheme.surface,
                 )
               : Colors.transparent,
           child: InkWell(

@@ -225,7 +225,7 @@ class TilawaIconBoxTokens {
     final blendAmount = colorScheme.brightness == Brightness.dark ? 0.26 : 0.44;
     return Color.lerp(
       colorScheme.surface,
-      colorScheme.primaryContainer,
+      colorScheme.surfaceContainer,
       blendAmount,
     )!;
   }
@@ -371,7 +371,7 @@ class TilawaIconToggleTokens {
     final blendAmount = colorScheme.brightness == Brightness.dark ? 0.24 : 0.40;
     return Color.lerp(
       colorScheme.surface,
-      colorScheme.primaryContainer,
+      colorScheme.surfaceContainer,
       blendAmount,
     )!;
   }

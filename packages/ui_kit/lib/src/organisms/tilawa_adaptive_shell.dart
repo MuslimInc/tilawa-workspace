@@ -313,7 +313,10 @@ class _SideNavRail extends StatelessWidget {
                     selectedIndex: selectedIndex,
                     onDestinationSelected: onDestinationSelected,
                     backgroundColor: Colors.transparent,
-                    indicatorColor: theme.colorScheme.primaryContainer,
+                    indicatorColor: Color.alphaBlend(
+                      theme.colorScheme.primary.withValues(alpha: 0.14),
+                      theme.colorScheme.surfaceContainerHigh,
+                    ),
                     labelType: extended
                         ? NavigationRailLabelType.none
                         : NavigationRailLabelType.all,
@@ -397,6 +400,8 @@ class _NavButton extends StatelessWidget {
           onTap();
         },
         borderRadius: effectiveBorderRadius,
+        splashColor: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+        highlightColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
         child: AnimatedContainer(
           duration: isSelected
               ? const Duration(milliseconds: 200)

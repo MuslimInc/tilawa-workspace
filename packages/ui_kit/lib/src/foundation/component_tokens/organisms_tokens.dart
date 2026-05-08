@@ -377,7 +377,11 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
 
-  /// Primary-tinted elevated surface used by the compact bottom nav container.
+  /// Stable neutral elevated chrome for the compact bottom nav container.
+  ///
+  /// Intentionally not derived from [ColorScheme.surfaceContainerHigh] so the
+  /// bar does not shift when the user changes accent color ([AppTheme] may
+  /// nudge scheme container tiers toward [ColorScheme.primary]).
   final Color bottomNavBackgroundColor;
 
   /// Alpha for the soft shadow rendered under the floating bottom nav.
@@ -462,29 +466,19 @@ class TilawaAdaptiveShellTokens {
   }
 
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.42 : 0.72;
-    return Color.lerp(
-      colorScheme.surfaceContainerHigh,
-      colorScheme.primaryContainer,
-      blendAmount,
-    )!;
+    return colorScheme.brightness == Brightness.light
+        ? AppColors.lightSurfaceContainerHighBase
+        : AppColors.darkSurfaceContainerHighBase;
   }
 
   static Color _navButtonSelectedBackgroundColor(
     ColorScheme colorScheme,
     Color bottomNavBackgroundColor,
   ) {
-    final containerBlend = colorScheme.brightness == Brightness.dark
-        ? 0.56
-        : 0.70;
-    final tintOpacity = colorScheme.brightness == Brightness.dark ? 0.10 : 0.08;
+    final tintOpacity = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
     return Color.alphaBlend(
       colorScheme.primary.withValues(alpha: tintOpacity),
-      Color.lerp(
-        bottomNavBackgroundColor,
-        colorScheme.primaryContainer,
-        containerBlend,
-      )!,
+      bottomNavBackgroundColor,
     );
   }
 

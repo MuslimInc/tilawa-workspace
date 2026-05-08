@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../lib/src/foundation/app_colors.dart';
 import '../../lib/src/foundation/component_tokens/atoms_tokens.dart';
 import '../../lib/src/foundation/component_tokens/component_tokens_theme.dart';
 import '../../lib/src/foundation/component_tokens/molecules_tokens.dart';
@@ -229,13 +230,13 @@ void main() {
     test('fromColorScheme derives theme-aware background color', () {
       const scheme = ColorScheme.light(
         surface: Color(0xFFFCFAF5),
-        primaryContainer: Color(0xFFE3D4E9),
+        surfaceContainer: Color(0xFFEBE6D7),
       );
       final tokens = TilawaSearchFieldTokens.fromColorScheme(scheme);
 
       expect(
         tokens.backgroundColor,
-        Color.lerp(scheme.surface, scheme.primaryContainer, 0.42),
+        Color.lerp(scheme.surface, scheme.surfaceContainer, 0.42),
       );
     });
 
@@ -477,94 +478,76 @@ void main() {
     });
 
     test(
-      'fromColorScheme derives subtle primary-tinted bottom nav background',
+      'fromColorScheme uses stable neutral light bottom nav chrome',
       () {
         const scheme = ColorScheme.light(
           primary: Color(0xFF006A60),
           primaryContainer: Color(0xFFD8F0EC),
-          surfaceContainerHigh: Color(0xFFE2DBC7),
+          surfaceContainerHigh: Color(0xFFFF0000),
+          surfaceContainerHighest: Color(0xFF00FF00),
         );
         final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
         expect(
           tokens.bottomNavBackgroundColor,
-          Color.lerp(
-            scheme.surfaceContainerHigh,
-            scheme.primaryContainer,
-            0.72,
-          ),
+          AppColors.lightSurfaceContainerHighBase,
         );
         expect(
           tokens.navButtonSelectedBackgroundColor,
           Color.alphaBlend(
-            scheme.primary.withValues(alpha: 0.08),
-            Color.lerp(
-              tokens.bottomNavBackgroundColor,
-              scheme.primaryContainer,
-              0.70,
-            )!,
+            scheme.primary.withValues(alpha: 0.10),
+            tokens.bottomNavBackgroundColor,
           ),
         );
       },
     );
 
     test(
-      'fromColorScheme shifts purple away from the warm neutral surface',
+      'fromColorScheme light bottom nav ignores scheme container colors',
       () {
-        const scheme = ColorScheme.light(
+        final tealScheme = ColorScheme.light(
+          primary: Color(0xFF006A60),
+          primaryContainer: Color(0xFFD8F0EC),
+          surfaceContainerHigh: Color(0xFFFF0000),
+          surfaceContainerHighest: Color(0xFF00FF00),
+        );
+        final purpleScheme = ColorScheme.light(
           primary: Color(0xFF7A5C89),
           primaryContainer: Color(0xFFE3D4E9),
-          surfaceContainerHigh: Color(0xFFE2DBC7),
-        );
-        final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
-
-        expect(
-          tokens.bottomNavBackgroundColor,
-          Color.lerp(
-            scheme.surfaceContainerHigh,
-            scheme.primaryContainer,
-            0.72,
-          ),
+          surfaceContainerHigh: Color(0xFF0000FF),
+          surfaceContainerHighest: Color(0xFFFFFF00),
         );
         expect(
-          tokens.bottomNavBackgroundColor,
-          isNot(equals(scheme.surfaceContainerHigh)),
+          TilawaAdaptiveShellTokens.fromColorScheme(
+            tealScheme,
+          ).bottomNavBackgroundColor,
+          TilawaAdaptiveShellTokens.fromColorScheme(
+            purpleScheme,
+          ).bottomNavBackgroundColor,
         );
         expect(
-          tokens.navButtonSelectedBackgroundColor,
-          Color.alphaBlend(
-            scheme.primary.withValues(alpha: 0.08),
-            Color.lerp(
-              tokens.bottomNavBackgroundColor,
-              scheme.primaryContainer,
-              0.70,
-            )!,
-          ),
+          TilawaAdaptiveShellTokens.fromColorScheme(tealScheme)
+              .bottomNavBackgroundColor,
+          AppColors.lightSurfaceContainerHighBase,
         );
       },
     );
 
-    test('fromColorScheme uses a calmer dark-mode container blend', () {
+    test('fromColorScheme uses stable neutral dark bottom nav chrome', () {
       const scheme = ColorScheme.dark(
         primary: Color(0xFF70C8BD),
         primaryContainer: Color(0xFF143E39),
-        surfaceContainerHigh: Color(0xFF2A3A35),
+        surfaceContainerHigh: Color(0xFFFF0000),
+        surfaceContainerHighest: Color(0xFF00FF00),
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(
-        tokens.bottomNavBackgroundColor,
-        Color.lerp(scheme.surfaceContainerHigh, scheme.primaryContainer, 0.42),
-      );
+      expect(tokens.bottomNavBackgroundColor, AppColors.darkSurfaceContainerHighBase);
       expect(
         tokens.navButtonSelectedBackgroundColor,
         Color.alphaBlend(
-          scheme.primary.withValues(alpha: 0.10),
-          Color.lerp(
-            tokens.bottomNavBackgroundColor,
-            scheme.primaryContainer,
-            0.56,
-          )!,
+          scheme.primary.withValues(alpha: 0.12),
+          tokens.bottomNavBackgroundColor,
         ),
       );
     });
@@ -793,6 +776,53 @@ void main() {
               builder: (context) {
                 final accessedTokens = Theme.of(context).componentTokens;
                 expect(accessedTokens.searchField, isNotNull);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      },
+    );
+
+    testWidgets(
+      'TilawaComponentTokensX uses Theme colorScheme when extension is absent',
+      (WidgetTester tester) async {
+        final colorScheme = ColorScheme.fromSeed(
+          seedColor: const Color(0xFF7A5C89),
+          brightness: Brightness.light,
+        );
+        final theme = ThemeData(colorScheme: colorScheme);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: Builder(
+              builder: (context) {
+                final accessed = Theme.of(context).componentTokens;
+                final fromScheme = TilawaAdaptiveShellTokens.fromColorScheme(
+                  colorScheme,
+                );
+                expect(
+                  accessed.adaptiveShell.bottomNavBackgroundColor,
+                  AppColors.lightSurfaceContainerHighBase,
+                );
+                expect(
+                  accessed.adaptiveShell.bottomNavBackgroundColor,
+                  fromScheme.bottomNavBackgroundColor,
+                );
+                expect(
+                  accessed.adaptiveShell.navButtonSelectedBackgroundColor,
+                  fromScheme.navButtonSelectedBackgroundColor,
+                );
+                expect(
+                  accessed.adaptiveShell.navButtonSelectedBackgroundColor,
+                  isNot(
+                    equals(
+                      TilawaAdaptiveShellTokens.defaults()
+                          .navButtonSelectedBackgroundColor,
+                    ),
+                  ),
+                );
                 return const SizedBox.shrink();
               },
             ),

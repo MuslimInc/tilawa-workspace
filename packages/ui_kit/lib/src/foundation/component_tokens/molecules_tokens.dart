@@ -408,7 +408,7 @@ class TilawaChipTokens {
     final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
     return Color.lerp(
       colorScheme.surface,
-      colorScheme.primaryContainer,
+      colorScheme.surfaceContainer,
       blendAmount,
     )!;
   }
@@ -426,7 +426,7 @@ class TilawaChipTokens {
     final blendAmount = colorScheme.brightness == Brightness.dark ? 0.22 : 0.38;
     return Color.lerp(
       colorScheme.surface,
-      colorScheme.primaryContainer,
+      colorScheme.surfaceContainer,
       blendAmount,
     )!;
   }
@@ -608,18 +608,17 @@ class TilawaSegmentedControlTokens {
     final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
     return Color.lerp(
       colorScheme.surface,
-      colorScheme.primaryContainer,
+      colorScheme.surfaceContainer,
       blendAmount,
     )!;
   }
 
   static Color _selectedBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.34 : 0.62;
-    return Color.lerp(
-      colorScheme.surface,
-      colorScheme.primaryContainer,
-      blendAmount,
-    )!;
+    final a = colorScheme.brightness == Brightness.dark ? 0.16 : 0.12;
+    return Color.alphaBlend(
+      colorScheme.primary.withValues(alpha: a),
+      colorScheme.surfaceContainerHighest,
+    );
   }
 
   TilawaSegmentedControlTokens copyWith({
@@ -857,7 +856,7 @@ class TilawaSearchFieldTokens {
     final blendAmount = colorScheme.brightness == Brightness.dark ? 0.24 : 0.42;
     return Color.lerp(
       colorScheme.surface,
-      colorScheme.primaryContainer,
+      colorScheme.surfaceContainer,
       blendAmount,
     )!;
   }

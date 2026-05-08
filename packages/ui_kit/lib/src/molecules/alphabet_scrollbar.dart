@@ -220,7 +220,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
                   width: componentTokens.overlaySize,
                   height: componentTokens.overlaySize,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
+                    color: theme.colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(
                       componentTokens.overlayRadius,
                     ),
