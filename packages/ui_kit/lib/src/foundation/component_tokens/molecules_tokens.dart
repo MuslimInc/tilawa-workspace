@@ -16,6 +16,10 @@ class TilawaAlphabetScrollbarTokens {
     required this.overlayFontSize,
     required this.overlayRadius,
     required this.overlayOffset,
+    required this.overlayBackgroundColor,
+    required this.overlayShadowColor,
+    required this.overlayShadowBlur,
+    required this.overlayShadowOffset,
   });
 
   final double width;
@@ -28,21 +32,42 @@ class TilawaAlphabetScrollbarTokens {
   final double overlayRadius;
   final double overlayOffset;
 
+  /// Bubble fill while dragging (matches [ColorScheme.surfaceContainerHighest]).
+  final Color overlayBackgroundColor;
+
+  /// Soft shadow under the drag bubble ([Colors.black] with calibrated alpha).
+  final Color overlayShadowColor;
+
+  /// Blur radius for the overlay shadow (aligned with [TilawaDesignTokens.blurShadow]).
+  final double overlayShadowBlur;
+
+  final Offset overlayShadowOffset;
+
   factory TilawaAlphabetScrollbarTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    return TilawaAlphabetScrollbarTokens.fromColorScheme(
+      ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+    );
+  }
+
+  factory TilawaAlphabetScrollbarTokens.fromColorScheme(ColorScheme colorScheme) {
     // No-op: itemExtent (30) is already touch-marginal on the long surah
     // list. Tightening risks misclicks. Kept for visual review.
-    return const TilawaAlphabetScrollbarTokens(
+    return TilawaAlphabetScrollbarTokens(
       width: 36,
       itemExtent: 30,
       selectedIndicatorExtent: 25.5,
       letterFontSize: 13,
-      verticalPadding: EdgeInsets.symmetric(vertical: 12),
+      verticalPadding: const EdgeInsets.symmetric(vertical: 12),
       overlaySize: 64,
       overlayFontSize: 32,
       overlayRadius: 16,
       overlayOffset: 48,
+      overlayBackgroundColor: colorScheme.surfaceContainerHighest,
+      overlayShadowColor: const Color(0xFF000000).withValues(alpha: 0.15),
+      overlayShadowBlur: 16,
+      overlayShadowOffset: const Offset(0, 8),
     );
   }
 
@@ -56,6 +81,10 @@ class TilawaAlphabetScrollbarTokens {
     double? overlayFontSize,
     double? overlayRadius,
     double? overlayOffset,
+    Color? overlayBackgroundColor,
+    Color? overlayShadowColor,
+    double? overlayShadowBlur,
+    Offset? overlayShadowOffset,
   }) {
     return TilawaAlphabetScrollbarTokens(
       width: width ?? this.width,
@@ -68,6 +97,11 @@ class TilawaAlphabetScrollbarTokens {
       overlayFontSize: overlayFontSize ?? this.overlayFontSize,
       overlayRadius: overlayRadius ?? this.overlayRadius,
       overlayOffset: overlayOffset ?? this.overlayOffset,
+      overlayBackgroundColor:
+          overlayBackgroundColor ?? this.overlayBackgroundColor,
+      overlayShadowColor: overlayShadowColor ?? this.overlayShadowColor,
+      overlayShadowBlur: overlayShadowBlur ?? this.overlayShadowBlur,
+      overlayShadowOffset: overlayShadowOffset ?? this.overlayShadowOffset,
     );
   }
 
@@ -94,6 +128,26 @@ class TilawaAlphabetScrollbarTokens {
       overlayFontSize: lerpTokenDouble(a.overlayFontSize, b.overlayFontSize, t),
       overlayRadius: lerpTokenDouble(a.overlayRadius, b.overlayRadius, t),
       overlayOffset: lerpTokenDouble(a.overlayOffset, b.overlayOffset, t),
+      overlayBackgroundColor: Color.lerp(
+        a.overlayBackgroundColor,
+        b.overlayBackgroundColor,
+        t,
+      )!,
+      overlayShadowColor: Color.lerp(
+        a.overlayShadowColor,
+        b.overlayShadowColor,
+        t,
+      )!,
+      overlayShadowBlur: lerpTokenDouble(
+        a.overlayShadowBlur,
+        b.overlayShadowBlur,
+        t,
+      ),
+      overlayShadowOffset: Offset.lerp(
+        a.overlayShadowOffset,
+        b.overlayShadowOffset,
+        t,
+      )!,
     );
   }
 }
@@ -545,6 +599,9 @@ class TilawaSegmentedControlTokens {
     required this.minItemWidth,
     required this.selectedFontWeight,
     required this.unselectedFontWeight,
+    required this.selectedItemShadowColor,
+    required this.selectedItemShadowBlur,
+    required this.selectedItemShadowOffset,
   });
 
   final EdgeInsetsGeometry containerPadding;
@@ -557,6 +614,10 @@ class TilawaSegmentedControlTokens {
   final double minItemWidth;
   final FontWeight selectedFontWeight;
   final FontWeight unselectedFontWeight;
+
+  final Color selectedItemShadowColor;
+  final double selectedItemShadowBlur;
+  final Offset selectedItemShadowOffset;
 
   factory TilawaSegmentedControlTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
@@ -588,6 +649,10 @@ class TilawaSegmentedControlTokens {
         minItemWidth: 100,
         selectedFontWeight: FontWeight.bold,
         unselectedFontWeight: FontWeight.normal,
+        selectedItemShadowColor:
+            const Color(0xFF000000).withValues(alpha: 0.05),
+        selectedItemShadowBlur: 4,
+        selectedItemShadowOffset: const Offset(0, 2),
       );
     }
     return TilawaSegmentedControlTokens(
@@ -601,6 +666,10 @@ class TilawaSegmentedControlTokens {
       minItemWidth: 100,
       selectedFontWeight: FontWeight.bold,
       unselectedFontWeight: FontWeight.normal,
+      selectedItemShadowColor:
+          const Color(0xFF000000).withValues(alpha: 0.05),
+      selectedItemShadowBlur: 4,
+      selectedItemShadowOffset: const Offset(0, 2),
     );
   }
 
@@ -632,6 +701,9 @@ class TilawaSegmentedControlTokens {
     double? minItemWidth,
     FontWeight? selectedFontWeight,
     FontWeight? unselectedFontWeight,
+    Color? selectedItemShadowColor,
+    double? selectedItemShadowBlur,
+    Offset? selectedItemShadowOffset,
   }) {
     return TilawaSegmentedControlTokens(
       containerPadding: containerPadding ?? this.containerPadding,
@@ -646,6 +718,12 @@ class TilawaSegmentedControlTokens {
       minItemWidth: minItemWidth ?? this.minItemWidth,
       selectedFontWeight: selectedFontWeight ?? this.selectedFontWeight,
       unselectedFontWeight: unselectedFontWeight ?? this.unselectedFontWeight,
+      selectedItemShadowColor:
+          selectedItemShadowColor ?? this.selectedItemShadowColor,
+      selectedItemShadowBlur:
+          selectedItemShadowBlur ?? this.selectedItemShadowBlur,
+      selectedItemShadowOffset:
+          selectedItemShadowOffset ?? this.selectedItemShadowOffset,
     );
   }
 
@@ -687,6 +765,21 @@ class TilawaSegmentedControlTokens {
       unselectedFontWeight: FontWeight.lerp(
         a.unselectedFontWeight,
         b.unselectedFontWeight,
+        t,
+      )!,
+      selectedItemShadowColor: Color.lerp(
+        a.selectedItemShadowColor,
+        b.selectedItemShadowColor,
+        t,
+      )!,
+      selectedItemShadowBlur: lerpTokenDouble(
+        a.selectedItemShadowBlur,
+        b.selectedItemShadowBlur,
+        t,
+      ),
+      selectedItemShadowOffset: Offset.lerp(
+        a.selectedItemShadowOffset,
+        b.selectedItemShadowOffset,
         t,
       )!,
     );

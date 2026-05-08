@@ -184,6 +184,9 @@ class TilawaMediaPlayerBarTokens {
     required this.shadowOpacity,
     required this.playPauseShadowOpacity,
     required this.playPauseShadowBlur,
+    required this.shellBackgroundColor,
+    required this.progressTrackBackgroundColor,
+    required this.artworkPlaceholderColor,
   });
 
   final EdgeInsetsGeometry contentPadding;
@@ -205,13 +208,28 @@ class TilawaMediaPlayerBarTokens {
   final double playPauseShadowOpacity;
   final double playPauseShadowBlur;
 
+  /// Bar surface behind controls (persistent chrome).
+  final Color shellBackgroundColor;
+
+  /// [LinearProgressIndicator.backgroundColor] for the slim track.
+  final Color progressTrackBackgroundColor;
+
+  /// Placeholder fill behind album art when no image is shown.
+  final Color artworkPlaceholderColor;
+
   factory TilawaMediaPlayerBarTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    return TilawaMediaPlayerBarTokens.fromColorScheme(
+      ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+    );
+  }
+
+  factory TilawaMediaPlayerBarTokens.fromColorScheme(ColorScheme colorScheme) {
     // No-op: control buttons are already 32-36dp (below 48dp). Compacting
     // would worsen accessibility; needs a separate accessibility refactor.
-    return const TilawaMediaPlayerBarTokens(
-      contentPadding: EdgeInsets.all(12),
+    return TilawaMediaPlayerBarTokens(
+      contentPadding: const EdgeInsets.all(12),
       borderRadius: 16,
       artworkSize: 48,
       artworkRadius: 12,
@@ -229,6 +247,10 @@ class TilawaMediaPlayerBarTokens {
       shadowOpacity: 0.1,
       playPauseShadowOpacity: 0.3,
       playPauseShadowBlur: 8,
+      shellBackgroundColor: colorScheme.surfaceContainerLow,
+      progressTrackBackgroundColor: colorScheme.surfaceContainerHighest
+          .withValues(alpha: 0.1),
+      artworkPlaceholderColor: colorScheme.surfaceContainerHigh,
     );
   }
 
@@ -251,6 +273,9 @@ class TilawaMediaPlayerBarTokens {
     double? shadowOpacity,
     double? playPauseShadowOpacity,
     double? playPauseShadowBlur,
+    Color? shellBackgroundColor,
+    Color? progressTrackBackgroundColor,
+    Color? artworkPlaceholderColor,
   }) {
     return TilawaMediaPlayerBarTokens(
       contentPadding: contentPadding ?? this.contentPadding,
@@ -273,6 +298,11 @@ class TilawaMediaPlayerBarTokens {
       playPauseShadowOpacity:
           playPauseShadowOpacity ?? this.playPauseShadowOpacity,
       playPauseShadowBlur: playPauseShadowBlur ?? this.playPauseShadowBlur,
+      shellBackgroundColor: shellBackgroundColor ?? this.shellBackgroundColor,
+      progressTrackBackgroundColor: progressTrackBackgroundColor ??
+          this.progressTrackBackgroundColor,
+      artworkPlaceholderColor:
+          artworkPlaceholderColor ?? this.artworkPlaceholderColor,
     );
   }
 
@@ -332,6 +362,21 @@ class TilawaMediaPlayerBarTokens {
         b.playPauseShadowBlur,
         t,
       ),
+      shellBackgroundColor: Color.lerp(
+        a.shellBackgroundColor,
+        b.shellBackgroundColor,
+        t,
+      )!,
+      progressTrackBackgroundColor: Color.lerp(
+        a.progressTrackBackgroundColor,
+        b.progressTrackBackgroundColor,
+        t,
+      )!,
+      artworkPlaceholderColor: Color.lerp(
+        a.artworkPlaceholderColor,
+        b.artworkPlaceholderColor,
+        t,
+      )!,
     );
   }
 }
@@ -351,6 +396,7 @@ class TilawaAdaptiveShellTokens {
     required this.bottomNavShadowBlur,
     required this.bottomNavShadowOffset,
     required this.sideRailRadius,
+    required this.sideRailIndicatorColor,
     required this.sideRailShadowOpacity,
     required this.sideRailShadowBlur,
     required this.sideRailShadowOffset,
@@ -395,6 +441,10 @@ class TilawaAdaptiveShellTokens {
   final Offset bottomNavShadowOffset;
 
   final double sideRailRadius;
+
+  /// [NavigationRail.indicatorColor]: primary tint over [ColorScheme.surfaceContainerHigh].
+  final Color sideRailIndicatorColor;
+
   final double sideRailShadowOpacity;
   final double sideRailShadowBlur;
   final Offset sideRailShadowOffset;
@@ -444,6 +494,7 @@ class TilawaAdaptiveShellTokens {
       bottomNavShadowBlur: 18,
       bottomNavShadowOffset: Offset(0, 6),
       sideRailRadius: 16,
+      sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
       sideRailShadowOpacity: 0.05,
       sideRailShadowBlur: 12,
       sideRailShadowOffset: Offset(2, 0),
@@ -462,6 +513,13 @@ class TilawaAdaptiveShellTokens {
       navButtonLabelFontSize: 10,
       navButtonSelectedLabelWeight: FontWeight.w700,
       navButtonUnselectedLabelWeight: FontWeight.w500,
+    );
+  }
+
+  static Color _sideRailIndicatorColor(ColorScheme colorScheme) {
+    return Color.alphaBlend(
+      colorScheme.primary.withValues(alpha: 0.14),
+      colorScheme.surfaceContainerHigh,
     );
   }
 
@@ -495,6 +553,7 @@ class TilawaAdaptiveShellTokens {
     double? bottomNavShadowBlur,
     Offset? bottomNavShadowOffset,
     double? sideRailRadius,
+    Color? sideRailIndicatorColor,
     double? sideRailShadowOpacity,
     double? sideRailShadowBlur,
     Offset? sideRailShadowOffset,
@@ -531,6 +590,8 @@ class TilawaAdaptiveShellTokens {
       bottomNavShadowOffset:
           bottomNavShadowOffset ?? this.bottomNavShadowOffset,
       sideRailRadius: sideRailRadius ?? this.sideRailRadius,
+      sideRailIndicatorColor:
+          sideRailIndicatorColor ?? this.sideRailIndicatorColor,
       sideRailShadowOpacity:
           sideRailShadowOpacity ?? this.sideRailShadowOpacity,
       sideRailShadowBlur: sideRailShadowBlur ?? this.sideRailShadowBlur,
@@ -623,6 +684,11 @@ class TilawaAdaptiveShellTokens {
         t,
       )!,
       sideRailRadius: lerpTokenDouble(a.sideRailRadius, b.sideRailRadius, t),
+      sideRailIndicatorColor: Color.lerp(
+        a.sideRailIndicatorColor,
+        b.sideRailIndicatorColor,
+        t,
+      )!,
       sideRailShadowOpacity: lerpTokenDouble(
         a.sideRailShadowOpacity,
         b.sideRailShadowOpacity,
@@ -726,6 +792,7 @@ class TilawaSettingsGroupTokens {
     required this.tileDividerOpacity,
     required this.switchActiveTrackOpacity,
     required this.tileItemGap,
+    required this.selectionTileSelectedBackgroundColor,
   });
 
   final EdgeInsetsGeometry groupHeaderPadding;
@@ -754,6 +821,9 @@ class TilawaSettingsGroupTokens {
   final double switchActiveTrackOpacity;
   final double tileItemGap;
 
+  /// Selected row fill for [TilawaSelectionTile] (primary tint on surface).
+  final Color selectionTileSelectedBackgroundColor;
+
   /// Default tokens for the settings group.
   ///
   /// [density] controls compact-mode token values. Comfortable (default)
@@ -765,11 +835,27 @@ class TilawaSettingsGroupTokens {
   factory TilawaSettingsGroupTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    return TilawaSettingsGroupTokens.fromColorScheme(
+      ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+      density: density,
+    );
+  }
+
+  factory TilawaSettingsGroupTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    const tileIconContainerOpacity = 0.1;
+    final selectionTileSelectedBackgroundColor =
+        _selectionTileSelectedRowBackground(
+      colorScheme,
+      tileIconContainerOpacity,
+    );
     if (density.isCompact) {
-      return const TilawaSettingsGroupTokens(
+      return TilawaSettingsGroupTokens(
         // Compact: tuned for breathability while staying denser than comfortable.
-        groupHeaderPadding: EdgeInsets.fromLTRB(12, 12, 16, 6),
-        switchTileContentPadding: EdgeInsets.symmetric(
+        groupHeaderPadding: const EdgeInsets.fromLTRB(12, 12, 16, 6),
+        switchTileContentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 10,
         ),
@@ -777,11 +863,12 @@ class TilawaSettingsGroupTokens {
         groupBorderRadius: 20,
         groupShadowOpacity: 0.06,
         groupShadowBlur: 10,
-        groupShadowOffset: Offset(0, 4),
+        groupShadowOffset: const Offset(0, 4),
         groupTitleFontSize: 12.5,
         groupTitleLetterSpacing: 1.1,
-        tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        tileIconPadding: EdgeInsets.all(10),
+        tileContentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        tileIconPadding: const EdgeInsets.all(10),
         tileIconBorderRadius: 12,
         tileIconSize: 22,
         tileTitleFontSize: 15.5,
@@ -789,31 +876,33 @@ class TilawaSettingsGroupTokens {
         tileSubtitleOpacity: 0.65,
         tileTrailingSize: 18,
         tileTrailingOpacity: 0.55,
-        tileIconContainerOpacity: 0.1,
-        tileDividerPadding: EdgeInsets.only(left: 64, right: 16),
+        tileIconContainerOpacity: tileIconContainerOpacity,
+        tileDividerPadding: const EdgeInsets.only(left: 64, right: 16),
         tileDividerHeight: 1,
         tileDividerThickness: 0.5,
         tileDividerOpacity: 0.05,
         switchActiveTrackOpacity: 0.5,
         tileItemGap: 16,
+        selectionTileSelectedBackgroundColor:
+            selectionTileSelectedBackgroundColor,
       );
     }
 
-    // Comfortable: byte-for-byte unchanged from pre-density defaults.
-    return const TilawaSettingsGroupTokens(
-      groupHeaderPadding: EdgeInsets.fromLTRB(12, 16, 16, 8),
+    return TilawaSettingsGroupTokens(
+      groupHeaderPadding: const EdgeInsets.fromLTRB(12, 16, 16, 8),
       groupBorderRadius: 20,
       groupShadowOpacity: 0.06,
       groupShadowBlur: 10,
-      groupShadowOffset: Offset(0, 4),
+      groupShadowOffset: const Offset(0, 4),
       groupTitleFontSize: 12.5,
       groupTitleLetterSpacing: 1.1,
-      tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      switchTileContentPadding: EdgeInsets.symmetric(
+      tileContentPadding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      switchTileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 12,
       ),
-      tileIconPadding: EdgeInsets.all(10),
+      tileIconPadding: const EdgeInsets.all(10),
       tileIconBorderRadius: 12,
       tileIconSize: 22,
       tileTitleFontSize: 15.5,
@@ -822,13 +911,25 @@ class TilawaSettingsGroupTokens {
       tileSubtitleSpacing: 4,
       tileTrailingSize: 14,
       tileTrailingOpacity: 0.35,
-      tileIconContainerOpacity: 0.1,
-      tileDividerPadding: EdgeInsets.only(left: 64, right: 16),
+      tileIconContainerOpacity: tileIconContainerOpacity,
+      tileDividerPadding: const EdgeInsets.only(left: 64, right: 16),
       tileDividerHeight: 1,
       tileDividerThickness: 0.5,
       tileDividerOpacity: 0.05,
       switchActiveTrackOpacity: 0.5,
       tileItemGap: 16,
+      selectionTileSelectedBackgroundColor:
+          selectionTileSelectedBackgroundColor,
+    );
+  }
+
+  static Color _selectionTileSelectedRowBackground(
+    ColorScheme colorScheme,
+    double tileIconContainerOpacity,
+  ) {
+    return Color.alphaBlend(
+      colorScheme.primary.withValues(alpha: tileIconContainerOpacity * 3),
+      colorScheme.surface,
     );
   }
 
@@ -858,6 +959,7 @@ class TilawaSettingsGroupTokens {
     double? tileDividerOpacity,
     double? switchActiveTrackOpacity,
     double? tileItemGap,
+    Color? selectionTileSelectedBackgroundColor,
   }) {
     return TilawaSettingsGroupTokens(
       groupHeaderPadding: groupHeaderPadding ?? this.groupHeaderPadding,
@@ -889,6 +991,9 @@ class TilawaSettingsGroupTokens {
       switchActiveTrackOpacity:
           switchActiveTrackOpacity ?? this.switchActiveTrackOpacity,
       tileItemGap: tileItemGap ?? this.tileItemGap,
+      selectionTileSelectedBackgroundColor:
+          selectionTileSelectedBackgroundColor ??
+          this.selectionTileSelectedBackgroundColor,
     );
   }
 
@@ -1011,6 +1116,11 @@ class TilawaSettingsGroupTokens {
         t,
       ),
       tileItemGap: lerpTokenDouble(a.tileItemGap, b.tileItemGap, t),
+      selectionTileSelectedBackgroundColor: Color.lerp(
+        a.selectionTileSelectedBackgroundColor,
+        b.selectionTileSelectedBackgroundColor,
+        t,
+      )!,
     );
   }
 }

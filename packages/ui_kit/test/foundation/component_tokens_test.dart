@@ -383,6 +383,22 @@ void main() {
       expect(tokens.tileTitleFontSize, 15.5);
       expect(tokens.tileSubtitleOpacity, 0.5);
       expect(tokens.switchActiveTrackOpacity, 0.5);
+      expect(tokens.selectionTileSelectedBackgroundColor, isA<Color>());
+    });
+
+    test('fromColorScheme derives selection tile selected background', () {
+      const scheme = ColorScheme.light(
+        primary: Color(0xFF006A60),
+        surface: Color(0xFFFFEEDD),
+      );
+      final tokens = TilawaSettingsGroupTokens.fromColorScheme(scheme);
+      expect(
+        tokens.selectionTileSelectedBackgroundColor,
+        Color.alphaBlend(
+          scheme.primary.withValues(alpha: 0.1 * 3),
+          scheme.surface,
+        ),
+      );
     });
 
     test('copyWith updates nested EdgeInsets and numeric values', () {
@@ -428,6 +444,7 @@ void main() {
         tileDividerOpacity: 0.03,
         switchActiveTrackOpacity: 0.4,
         tileItemGap: 14.0,
+        selectionTileSelectedBackgroundColor: Color(0xFFE8D4C8),
       );
       const second = TilawaSettingsGroupTokens(
         groupHeaderPadding: EdgeInsets.fromLTRB(14, 18, 18, 10),
@@ -458,12 +475,21 @@ void main() {
         tileDividerOpacity: 0.07,
         switchActiveTrackOpacity: 0.6,
         tileItemGap: 18.0,
+        selectionTileSelectedBackgroundColor: Color(0xFFC8B8A8),
       );
 
       final result = TilawaSettingsGroupTokens.lerp(first, second, 0.5);
       expect(result.groupBorderRadius, closeTo(20.0, 0.01));
       expect(result.tileTitleFontSize, closeTo(15.5, 0.01));
       expect(result.switchActiveTrackOpacity, closeTo(0.5, 0.01));
+      expect(
+        result.selectionTileSelectedBackgroundColor,
+        Color.lerp(
+          first.selectionTileSelectedBackgroundColor,
+          second.selectionTileSelectedBackgroundColor,
+          0.5,
+        ),
+      );
     });
   });
 
@@ -497,6 +523,13 @@ void main() {
           Color.alphaBlend(
             scheme.primary.withValues(alpha: 0.10),
             tokens.bottomNavBackgroundColor,
+          ),
+        );
+        expect(
+          tokens.sideRailIndicatorColor,
+          Color.alphaBlend(
+            scheme.primary.withValues(alpha: 0.14),
+            scheme.surfaceContainerHigh,
           ),
         );
       },
@@ -581,6 +614,7 @@ void main() {
         bottomNavShadowBlur: 18.0,
         bottomNavShadowOffset: Offset(0, 6),
         sideRailRadius: 16.0,
+        sideRailIndicatorColor: Color(0xFFCC8866),
         sideRailShadowOpacity: 0.05,
         sideRailShadowBlur: 12.0,
         sideRailShadowOffset: Offset(2, 0),
@@ -610,6 +644,7 @@ void main() {
         bottomNavShadowBlur: 24.0,
         bottomNavShadowOffset: Offset(0, 8),
         sideRailRadius: 20.0,
+        sideRailIndicatorColor: Color(0xFF66AA88),
         sideRailShadowOpacity: 0.08,
         sideRailShadowBlur: 16.0,
         sideRailShadowOffset: Offset(4, 0),
@@ -644,6 +679,14 @@ void main() {
         Color.lerp(
           first.navButtonSelectedBackgroundColor,
           second.navButtonSelectedBackgroundColor,
+          0.5,
+        ),
+      );
+      expect(
+        result.sideRailIndicatorColor,
+        Color.lerp(
+          first.sideRailIndicatorColor,
+          second.sideRailIndicatorColor,
           0.5,
         ),
       );

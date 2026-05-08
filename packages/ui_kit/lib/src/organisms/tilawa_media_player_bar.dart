@@ -72,7 +72,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
+        color: componentTokens.shellBackgroundColor,
         borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
@@ -102,8 +102,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
               progressBarOverride ??
                   LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: colorScheme.surfaceContainerHighest
-                        .withValues(alpha: designTokens.opacitySubtle),
+                    backgroundColor: componentTokens.progressTrackBackgroundColor,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       colorScheme.primary,
                     ),
@@ -123,7 +122,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(
                             componentTokens.artworkRadius,
                           ),
-                          color: colorScheme.surfaceContainerHigh,
+                          color: componentTokens.artworkPlaceholderColor,
                         ),
                         child: artwork == null
                             ? _buildDefaultIcon(context)

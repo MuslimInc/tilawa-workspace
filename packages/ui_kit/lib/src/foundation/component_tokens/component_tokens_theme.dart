@@ -121,8 +121,8 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       divider: TilawaDividerTokens.defaults(density: density),
       emptyState: TilawaEmptyStateTokens.defaults(density: density),
       errorState: TilawaErrorStateTokens.defaults(density: density),
-      alphabetScrollbar: TilawaAlphabetScrollbarTokens.defaults(
-        density: density,
+      alphabetScrollbar: TilawaAlphabetScrollbarTokens.fromColorScheme(
+        effectiveColorScheme,
       ),
       feedbackStrip: TilawaFeedbackStripTokens.defaults(density: density),
       glassPanel: TilawaGlassPanelTokens.defaults(density: density),
@@ -145,12 +145,17 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       ),
       playerBackground: TilawaPlayerBackgroundTokens.defaults(density: density),
       footerBar: TilawaFooterBarTokens.defaults(density: density),
-      mediaPlayerBar: TilawaMediaPlayerBarTokens.defaults(density: density),
+      mediaPlayerBar: TilawaMediaPlayerBarTokens.fromColorScheme(
+        effectiveColorScheme,
+      ),
       adaptiveShell: TilawaAdaptiveShellTokens.fromColorScheme(
         effectiveColorScheme,
         density: density,
       ),
-      settingsGroup: TilawaSettingsGroupTokens.defaults(density: density),
+      settingsGroup: TilawaSettingsGroupTokens.fromColorScheme(
+        effectiveColorScheme,
+        density: density,
+      ),
       immersiveComposer: TilawaImmersiveComposerTokens.defaults(
         density: density,
       ),

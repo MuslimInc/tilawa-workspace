@@ -313,10 +313,7 @@ class _SideNavRail extends StatelessWidget {
                     selectedIndex: selectedIndex,
                     onDestinationSelected: onDestinationSelected,
                     backgroundColor: Colors.transparent,
-                    indicatorColor: Color.alphaBlend(
-                      theme.colorScheme.primary.withValues(alpha: 0.14),
-                      theme.colorScheme.surfaceContainerHigh,
-                    ),
+                    indicatorColor: componentTokens.sideRailIndicatorColor,
                     labelType: extended
                         ? NavigationRailLabelType.none
                         : NavigationRailLabelType.all,
