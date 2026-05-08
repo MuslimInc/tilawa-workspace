@@ -615,10 +615,7 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(
-        tokens.bottomNavBackgroundColor,
-        AppColors.lightSurfaceContainerHighBase,
-      );
+      expect(tokens.bottomNavBackgroundColor, Colors.white);
       expect(
         tokens.navButtonSelectedBackgroundColor,
         Color.alphaBlend(
@@ -682,7 +679,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          AppColors.lightSurfaceContainerHighBase,
+          Colors.white,
         );
       },
     );
@@ -698,7 +695,11 @@ void main() {
 
       expect(
         tokens.bottomNavBackgroundColor,
-        AppColors.darkSurfaceContainerHighBase,
+        Color.lerp(
+          AppColors.darkSurfaceContainerHighBase,
+          AppColors.darkBackground,
+          0.32,
+        ),
       );
       expect(
         tokens.navButtonSelectedBackgroundColor,
@@ -1062,7 +1063,7 @@ void main() {
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
-                  AppColors.lightSurfaceContainerHighBase,
+                  Colors.white,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,

@@ -461,9 +461,10 @@ class TilawaAdaptiveShellTokens {
 
   /// Stable neutral elevated chrome for the compact bottom nav container.
   ///
-  /// Intentionally not derived from [ColorScheme.surfaceContainerHigh] so the
-  /// bar does not shift when the user changes accent color ([AppTheme] may
-  /// nudge scheme container tiers toward [ColorScheme.primary]).
+  /// Light mode uses [Colors.white] so the floating bar reads as a clean chip on
+  /// the cream scaffold. Dark mode lerps [AppColors.darkSurfaceContainerHighBase]
+  /// toward [AppColors.darkBackground] so it stays separate from
+  /// primary-harmonized [ColorScheme] tiers.
   final Color bottomNavBackgroundColor;
 
   /// Alpha for the soft shadow rendered under the floating bottom nav.
@@ -599,9 +600,15 @@ class TilawaAdaptiveShellTokens {
   }
 
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
-    return colorScheme.brightness == Brightness.light
-        ? AppColors.lightSurfaceContainerHighBase
-        : AppColors.darkSurfaceContainerHighBase;
+    if (colorScheme.brightness == Brightness.light) {
+      return Colors.white;
+    }
+    return Color.lerp(
+          AppColors.darkSurfaceContainerHighBase,
+          AppColors.darkBackground,
+          0.32,
+        ) ??
+        AppColors.darkSurfaceContainerHighBase;
   }
 
   static Color _navButtonSelectedBackgroundColor(
