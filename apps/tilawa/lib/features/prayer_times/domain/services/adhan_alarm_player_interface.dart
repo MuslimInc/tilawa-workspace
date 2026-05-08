@@ -16,6 +16,11 @@ abstract interface class IAdhanAlarmPlayer {
   /// Fired when a native prayer notification is tapped.
   Stream<String> get onNotificationTapped;
 
+  /// Pull any buffered native notification tap that could not be delivered
+  /// live (for example while Flutter was temporarily detached) and emit it
+  /// into [onNotificationTapped].
+  Future<void> flushPendingNotificationTap();
+
   /// Schedule adhan audio playback for [scheduledTime]. The [id] is the same
   /// notification ID used for the corresponding visual notification so the
   /// audio and notification can be cancelled together.

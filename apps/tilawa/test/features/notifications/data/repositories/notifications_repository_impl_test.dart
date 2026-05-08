@@ -144,6 +144,23 @@ void main() {
           matcher?.call(jsonEncode({'type': 'prayer', 'data': 'fajr'})),
           isTrue,
         );
+        expect(matcher?.call(jsonEncode({'type': 'prayer'})), isTrue);
+        expect(
+          matcher?.call(
+            jsonEncode({
+              'type': 'prayer',
+              'prayer': 'fajr',
+              'prayer_name': 'fajr',
+              'prayer_key': 'fajr',
+              'scheduled_time_ms': 1700000000000,
+              'scheduled_ms': 1700000000000,
+              'notification_id': 20000000,
+              'adhan_enabled': true,
+              'is_adhan_playing': true,
+            }),
+          ),
+          isFalse,
+        );
         expect(
           matcher?.call(jsonEncode({'type': 'reciter', 'data': '7'})),
           isTrue,

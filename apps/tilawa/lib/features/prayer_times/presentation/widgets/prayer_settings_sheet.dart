@@ -368,7 +368,7 @@ class _SettingsSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SwitchListTile(
+    final Widget tile = SwitchListTile(
       title: Text(
         title,
         style: theme.textTheme.bodyMedium?.copyWith(
@@ -380,6 +380,8 @@ class _SettingsSwitch extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       visualDensity: VisualDensity.compact,
     );
+
+    return tile;
   }
 }
 

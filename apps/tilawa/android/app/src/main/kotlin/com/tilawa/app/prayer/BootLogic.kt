@@ -12,6 +12,16 @@ internal class BootLogic(
     private val watchdog: WatchdogProxy,
     private val analytics: PrayerAnalytics? = null
 ) {
+    private fun logDebug(message: String) {
+        try {
+            val ctx = scheduler.getContext()
+            val isDebuggable =
+                (ctx.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+            if (isDebuggable) Log.d("PrayerBootReceiver", message)
+        } catch (_: Throwable) {
+        }
+    }
+
     fun reArmAlarms(now: Long) {
         storage.setNeedsReschedule(true)
         watchdog.enqueuePeriodic()
@@ -55,6 +65,10 @@ internal class BootLogic(
         for (entry in pending) {
             if (entry.trigger <= now) continue
             try {
+                logDebug(
+                    "ADHAN_AUDIT source=boot_rearm event=attempt prayerKey=${entry.key} prayerName=${entry.name} " +
+                        "scheduledMs=${entry.trigger} notificationId=${entry.id} requestCode=${entry.id}"
+                )
                 val ok = scheduler.schedule(entry.id, entry.name, entry.key, entry.trigger, entry.sound)
                 if (ok) {
                     analytics?.logEvent(PrayerEvents.SCHEDULE_SUCCESS, mapOf(

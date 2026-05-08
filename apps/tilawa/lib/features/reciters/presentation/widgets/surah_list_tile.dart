@@ -77,7 +77,7 @@ class SurahListTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(tileRadius),
         child: InkWell(
           borderRadius: BorderRadius.circular(tileRadius),
-          onLongPress: () => _showSurahOptionsSheet(context, surah),
+          onLongPress: () => showSurahOptionsSheet(context, surah),
           onTap: () {
             if (isCurrentItem) {
               if (isPlaying) {
@@ -226,7 +226,7 @@ class SurahListTile extends StatelessWidget {
     );
   }
 
-  void _showSurahOptionsSheet(BuildContext context, SurahEntity surah) {
+  void showSurahOptionsSheet(BuildContext context, SurahEntity surah) {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;

@@ -18,6 +18,11 @@ internal object PrayerAdhanMethodChannel {
     private var logic: MethodChannelLogic? = null
     private var methodChannel: MethodChannel? = null
     private var pendingTap: Pair<String, String>? = null
+    private var isDebuggable: Boolean = false
+
+    private fun logDebug(message: String) {
+        if (isDebuggable) Log.d(TAG, message)
+    }
 
     @VisibleForTesting
     fun setLogic(logic: MethodChannelLogic?) {
@@ -32,6 +37,8 @@ internal object PrayerAdhanMethodChannel {
 
     fun register(messenger: BinaryMessenger, context: Context) {
         val appContext = context.applicationContext
+        isDebuggable =
+            (appContext.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
         val storage = DefaultPrayerStorage(appContext)
         val activeLogic = logic ?: MethodChannelLogic(
             scheduler = object : ExtendedAdhanSchedulerProxy {
@@ -75,7 +82,7 @@ internal object PrayerAdhanMethodChannel {
                     result.success(null)
                 } else {
                     pendingTap = null
-                    Log.d(TAG, "METHOD_CHANNEL_TAP_FLUSHED prayerKey=${tap.first}")
+                    logDebug("METHOD_CHANNEL_TAP_FLUSHED prayerKey=${tap.first}")
                     result.success(
                         mapOf(
                             "prayer_key" to tap.first,
@@ -91,8 +98,7 @@ internal object PrayerAdhanMethodChannel {
                 val args = call.arguments as? Map<String, Any?>
                 val payload = args?.get("payload") as? String
                 if (payload != null && pendingTap?.second == payload) {
-                    Log.d(
-                        TAG,
+                    logDebug(
                         "METHOD_CHANNEL_TAP_FLUSHED source=ack prayerKey=${pendingTap?.first}"
                     )
                     pendingTap = null
@@ -114,15 +120,14 @@ internal object PrayerAdhanMethodChannel {
     }
 
     fun notifyNotificationTapped(prayerKey: String, payload: String) {
-        Log.d(TAG, "METHOD_CHANNEL_TAP_RECEIVED prayerKey=$prayerKey")
+        logDebug("METHOD_CHANNEL_TAP_RECEIVED prayerKey=$prayerKey")
         pendingTap = Pair(prayerKey, payload)
         val mc = methodChannel
         if (mc == null) {
-            Log.d(TAG, "METHOD_CHANNEL_TAP_BUFFERED reason=no_channel prayerKey=$prayerKey")
+            logDebug("METHOD_CHANNEL_TAP_BUFFERED reason=no_channel prayerKey=$prayerKey")
             return
         }
-        Log.d(
-            TAG,
+        logDebug(
             "METHOD_CHANNEL_TAP_BUFFERED reason=awaiting_dart_ack prayerKey=$prayerKey"
         )
         mc.invokeMethod(

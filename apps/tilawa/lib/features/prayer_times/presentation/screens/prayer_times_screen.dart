@@ -78,7 +78,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           ),
         ),
       ),
-      // floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
+      floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
       body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
         buildWhen: (previous, current) {
           return previous.status != current.status ||
@@ -481,7 +481,6 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
     PrayerType.isha,
   ];
 
-  // ignore: unused_element
   Future<void> _fire() async {
     if (_firing) return;
     setState(() => _firing = true);
@@ -560,19 +559,19 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
             ),
           ),
         ),
-        // FloatingActionButton.extended(
-        //   onPressed: _firing ? null : _fire,
-        //   label: _firing
-        //       ? const SizedBox(
-        //           width: 18,
-        //           height: 18,
-        //           child: CircularProgressIndicator(strokeWidth: 2),
-        //         )
-        //       : const Text('Fire'),
-        //   icon: const Icon(Icons.notifications_active_outlined),
-        //   backgroundColor: theme.colorScheme.errorContainer,
-        //   foregroundColor: theme.colorScheme.onErrorContainer,
-        // ),
+        FloatingActionButton.extended(
+          onPressed: _firing ? null : _fire,
+          label: _firing
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Fire'),
+          icon: const Icon(Icons.notifications_active_outlined),
+          backgroundColor: theme.colorScheme.errorContainer,
+          foregroundColor: theme.colorScheme.onErrorContainer,
+        ),
       ],
     );
   }

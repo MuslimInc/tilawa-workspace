@@ -14,6 +14,12 @@ import androidx.core.content.ContextCompat
  * and is allowed past Android's background-start restrictions.
  */
 internal class AdhanReceiver : BroadcastReceiver() {
+    private fun logDebug(context: Context, message: String) {
+        if ((context.applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+            Log.d("AdhanReceiver", message)
+        }
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != "com.tilawa.app.prayer.ACTION_FIRE_ADHAN") {
             Log.w("AdhanReceiver", "Received intent with unknown action: ${intent.action}")
@@ -48,7 +54,12 @@ internal class AdhanReceiver : BroadcastReceiver() {
             deltaMs = if (scheduledMs > 0) deltaMs else null
         )
 
-        Log.d("AdhanReceiver", "Alarm fired: id=$notificationId, name=$prayerName, key=$prayerKey")
+        logDebug(context, "Alarm fired: id=$notificationId, name=$prayerName, key=$prayerKey")
+        logDebug(
+            context,
+            "ADHAN_AUDIT source=alarm_receiver event=alarm_fired prayerKey=$prayerKey prayerName=$prayerName " +
+                "scheduledMs=$scheduledMs notificationId=$notificationId requestCode=$notificationId triggerMs=$triggerMs"
+        )
         if (notificationId < 0) {
             return
         }

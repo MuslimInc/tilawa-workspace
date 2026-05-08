@@ -8,6 +8,7 @@ import 'package:flutter_local_notifications_platform_interface/flutter_local_not
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -90,9 +91,17 @@ class AppRouter {
       disableStateRestoration = false;
       pendingStartupNotificationLaunch = false;
       final String homeLocation = const HomeRoute().location;
-      router.go(homeLocation);
-      if (location != homeLocation) {
-        router.push(location, extra: extra);
+      if (isPrayerStatus) {
+        // Foreground native Adhan taps can arrive while the app is actively
+        // rendering another page. Navigate directly to the status route to
+        // avoid transitional home->push races and to refresh extra payload
+        // safely when already on status.
+        router.go(location, extra: extra);
+      } else {
+        router.go(homeLocation);
+        if (location != homeLocation) {
+          router.push(location, extra: extra);
+        }
       }
       if (isPrayerStatus) {
         logger.d('[AppRouter] NAVIGATION_TO_PRAYER_STATUS_SUCCESS');
@@ -134,7 +143,9 @@ class AppRouter {
       debugLogDiagnostics: kDebugMode,
       // Disable restoration when launched from notification to prevent
       // the restored state from overriding notification navigation
-      restorationScopeId: null,
+      restorationScopeId: disableStateRestoration
+          ? null
+          : AppStrings.routerRestorationScopeId,
       redirect: redirect,
       routes: $appRoutes,
       errorBuilder: errorBuilder,
@@ -158,7 +169,7 @@ class AppRouter {
     Object? extra,
   ) {
     final DateTime now = DateTime.now();
-    final String signature = '$location|${extra?.hashCode ?? 0}';
+    final String signature = '$location|${_notificationExtraSignature(extra)}';
 
     if (_lastNotificationNavigationSignature == signature &&
         _lastNotificationNavigationAt != null &&
@@ -170,6 +181,45 @@ class AppRouter {
     _lastNotificationNavigationSignature = signature;
     _lastNotificationNavigationAt = now;
     return false;
+  }
+
+  static String _notificationExtraSignature(Object? extra) {
+    final Object? encoded = JsonTypeRegistry().encode(extra);
+    final Object? canonical = _canonicalizeSignatureValue(encoded);
+    try {
+      return jsonEncode(canonical);
+    } catch (_) {
+      return canonical?.toString() ?? 'null';
+    }
+  }
+
+  static Object? _canonicalizeSignatureValue(Object? value) {
+    if (value == null || value is String || value is num || value is bool) {
+      return value;
+    }
+
+    if (value is Map) {
+      final List<MapEntry<String, Object?>> entries =
+          value.entries
+              .map(
+                (MapEntry<dynamic, dynamic> e) => MapEntry(
+                  e.key.toString(),
+                  _canonicalizeSignatureValue(e.value),
+                ),
+              )
+              .toList(growable: false)
+            ..sort((a, b) => a.key.compareTo(b.key));
+
+      return <String, Object?>{
+        for (final entry in entries) entry.key: entry.value,
+      };
+    }
+
+    if (value is Iterable) {
+      return value.map(_canonicalizeSignatureValue).toList(growable: false);
+    }
+
+    return value.toString();
   }
 
   static String? _currentLocation() {

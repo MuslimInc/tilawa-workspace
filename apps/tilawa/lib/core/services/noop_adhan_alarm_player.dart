@@ -13,6 +13,9 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   Stream<String> get onNotificationTapped => const Stream.empty();
 
   @override
+  Future<void> flushPendingNotificationTap() async {}
+
+  @override
   Future<bool> scheduleAdhan({
     required int id,
     required DateTime scheduledTime,

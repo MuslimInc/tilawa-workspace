@@ -59,7 +59,13 @@ class CheckPrayerAlarmCapabilityUseCase {
       hasNotificationPermission = false;
     }
 
-    const bool isIgnoringBatteryOptimizations = true;
+    bool isIgnoringBatteryOptimizations;
+    try {
+      isIgnoringBatteryOptimizations = await _permissions
+          .isIgnoringBatteryOptimizations();
+    } catch (_) {
+      isIgnoringBatteryOptimizations = true;
+    }
 
     bool oemRequiresAutostart = false;
     try {

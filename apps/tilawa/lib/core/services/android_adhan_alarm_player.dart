@@ -46,6 +46,9 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   Stream<String> get onNotificationTapped =>
       _onNotificationTappedController.stream;
 
+  @override
+  Future<void> flushPendingNotificationTap() => _drainPendingNotificationTap();
+
   static const MethodChannel _channel = MethodChannel(
     'com.tilawa.app/prayer_adhan',
   );

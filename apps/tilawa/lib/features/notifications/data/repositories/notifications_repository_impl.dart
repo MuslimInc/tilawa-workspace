@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
+import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 import '../../domain/repositories/notifications_repository.dart';
@@ -82,7 +83,8 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
     }
 
     // Keep local prayer/adhan payloads owned by PrayerAdhanNotificationService.
-    if (type == 'prayer' && _isLocalPrayerPayload(data)) {
+    final NotificationPayloadKind kind = classifyPrayerNotificationData(data);
+    if (isPrayerPayloadOwnedByPrayerService(kind)) {
       return false;
     }
 
@@ -96,25 +98,5 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       return null;
     }
     return type.toLowerCase();
-  }
-
-  bool _isLocalPrayerPayload(Map<String, dynamic> data) {
-    const Set<String> localPrayerKeys = <String>{
-      'scheduled_time_ms',
-      'scheduled_ms',
-      'notification_id',
-      'adhan_enabled',
-      'is_adhan_playing',
-      'prayer',
-      'prayer_key',
-      'date',
-    };
-
-    for (final String key in localPrayerKeys) {
-      if (data.containsKey(key)) {
-        return true;
-      }
-    }
-    return false;
   }
 }

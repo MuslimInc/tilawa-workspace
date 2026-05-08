@@ -77,6 +77,12 @@ internal class AdhanPlaybackService : Service() {
     private var completedSuccessfully = false
     private var startTimeMs: Long = 0
 
+    private fun logDebug(message: String) {
+        val isDebuggable =
+            (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        if (isDebuggable) Log.d(TAG, message)
+    }
+
     override fun onCreate() {
         super.onCreate()
         isRunning = true
@@ -92,13 +98,17 @@ internal class AdhanPlaybackService : Service() {
         
         when (val action = logic.handleIntent(intent)) {
             is PlaybackAction.STOP -> {
-                Log.d("AdhanPlaybackService", "ACTION_STOP received")
-                @Suppress("DEPRECATION")
-                stopForeground(true)
+                logDebug("ACTION_STOP received")
+                removeForegroundNotification()
                 stopSelf()
             }
             is PlaybackAction.PLAY -> {
-                Log.d("AdhanPlaybackService", "ACTION_PLAY received")
+                logDebug("ACTION_PLAY received")
+                logDebug(
+                    "ADHAN_AUDIT source=playback_service event=service_start prayerKey=${action.prayerKey} " +
+                        "prayerName=${action.prayerName} scheduledMs=${action.scheduledMs} " +
+                        "notificationId=$FOREGROUND_NOTIFICATION_ID channelId=$CHANNEL_ID"
+                )
                 
                 // Observability: Trigger Latency and Service Start Latency
                 if (action.scheduledMs > 0 && action.receiverTime > 0) {
@@ -148,7 +158,6 @@ internal class AdhanPlaybackService : Service() {
         } else {
             startForeground(FOREGROUND_NOTIFICATION_ID, notification)
         }
-
         acquireWakeLock()
         
         analytics.logEvent("adhan_playback_started", mapOf(
@@ -157,7 +166,7 @@ internal class AdhanPlaybackService : Service() {
             "sound_name" to sound
         ))
         
-        Log.d(TAG, "startPlayback: initializing MediaPlayer for sound: $sound")
+        logDebug("startPlayback: initializing MediaPlayer for sound: $sound")
         try {
             var adhanResId = resources.getIdentifier(sound, "raw", packageName)
             if (adhanResId == 0) {
@@ -183,7 +192,12 @@ internal class AdhanPlaybackService : Service() {
                 )
                 
                 setOnCompletionListener {
-                    Log.i(TAG, "Playback completed")
+                    logDebug("Playback completed")
+                    logDebug(
+                        "ADHAN_AUDIT source=playback_service event=playback_completed prayerKey=$prayerKey " +
+                            "prayerName=$prayerName scheduledMs=$scheduledMs notificationId=$FOREGROUND_NOTIFICATION_ID " +
+                            "channelId=$CHANNEL_ID"
+                    )
                     val durationMs = if (startTimeMs > 0) System.currentTimeMillis() - startTimeMs else null
                     analytics.logEvent("adhan_playback_completed", mapOf(
                         "prayer_name" to prayerName,
@@ -196,13 +210,7 @@ internal class AdhanPlaybackService : Service() {
                     )
                     completedSuccessfully = true
                     isPlayingInternally = false
-                    // Keep the notification but stop the foreground service status
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        stopForeground(STOP_FOREGROUND_DETACH)
-                    } else {
-                        @Suppress("DEPRECATION")
-                        stopForeground(false)
-                    }
+                    removeForegroundNotification()
                     stopSelf()
                 }
                 
@@ -257,7 +265,7 @@ internal class AdhanPlaybackService : Service() {
 
             mediaPlayer?.start()
             startTimeMs = System.currentTimeMillis()
-            Log.i(TAG, "MediaPlayer started successfully")
+            logDebug("MediaPlayer started successfully")
 
         } catch (e: Exception) {
             Log.e(TAG, "Failed to start playback", e)
@@ -292,7 +300,21 @@ internal class AdhanPlaybackService : Service() {
         releaseWakeLock()
     }
 
+    private fun removeForegroundNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
+        val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.cancel(FOREGROUND_NOTIFICATION_ID)
+    }
+
     override fun onDestroy() {
+        logDebug(
+            "ADHAN_AUDIT source=playback_service event=service_destroyed notificationId=$FOREGROUND_NOTIFICATION_ID channelId=$CHANNEL_ID"
+        )
         if (!completedSuccessfully && isPlayingInternally) {
             Log.w(TAG, "Abnormal termination: service destroyed before completion")
             analytics.logEvent(PrayerEvents.ABNORMAL_TERMINATION, mapOf(
@@ -353,8 +375,7 @@ internal class AdhanPlaybackService : Service() {
             },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        Log.d(
-            TAG,
+        logDebug(
             "NATIVE_NOTIFICATION_TAP_INTENT_CREATED prayerKey=$prayerKey notificationId=$notificationId target=${MainActivity::class.java.simpleName}",
         )
         val stopIntent = PendingIntent.getService(
