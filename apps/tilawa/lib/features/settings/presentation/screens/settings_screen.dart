@@ -19,33 +19,6 @@ import '../../../theme/domain/primary_color_preset.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
 
-// ── Layout constants (no matching design token) ──────────────────────────────
-const double _kAvatarSize = 60.0;
-const double _kPersonIconSize = 32.0;
-const double _kColorSwatchRadius = 12.0;
-const double _kCustomSwatchSize = 24.0;
-const int _kMaxConcurrentDownloads = 5;
-
-// Hue offsets (degrees) spread around the wheel so rows stay distinguishable
-// while following the user-selected primary — avoids fixed teal/mint fills
-// from `AppColors.settings*` that read like [AppColors.lightDefaultPrimaryContainer].
-const double _kHueSettingsTheme = 0;
-const double _kHueSettingsPrimaryColor = 10;
-const double _kHueSettingsLanguage = -24;
-const double _kHueSettingsPlayback = 20;
-const double _kHueSettingsDuration = 44;
-const double _kHueSettingsBookmarks = 28;
-const double _kHueSettingsHistory = -38;
-const double _kHueSettingsPrayer = 16;
-const double _kHueSettingsQuran = 52;
-const double _kHueSettingsStorage = -12;
-const double _kHueSettingsDownloads = 36;
-
-Color _settingsRowIconAccent(Color primary, double hueShiftDegrees) {
-  final hsl = HSLColor.fromColor(primary);
-  return hsl.withHue((hsl.hue + hueShiftDegrees) % 360.0).toColor();
-}
-
 // ── Top-level sheet / dialog helpers ─────────────────────────────────────────
 
 void _showColorPicker(
@@ -276,15 +249,11 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     BlocBuilder<ThemeCubit, ThemeState>(
                       builder: (context, state) {
-                        final primary = context.colorScheme.primary;
                         return Column(
                           children: [
                             TilawaSettingsSwitchTile(
                               icon: FluentIcons.dark_theme_24_regular,
-                              iconColor: _settingsRowIconAccent(
-                                primary,
-                                _kHueSettingsTheme,
-                              ),
+                              iconColor: AppColors.settingsTheme,
                               title: context.l10n.darkTheme,
                               value: state.mode == ThemeMode.dark,
                               onChanged: (value) =>
@@ -295,10 +264,7 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             TilawaSettingsTile(
                               icon: FluentIcons.color_24_regular,
-                              iconColor: _settingsRowIconAccent(
-                                primary,
-                                _kHueSettingsPrimaryColor,
-                              ),
+                              iconColor: AppColors.settingsColor,
                               title: context.l10n.primaryColor,
                               subtitle: _primaryColorTileSubtitle(
                                 context,
@@ -322,10 +288,7 @@ class SettingsScreen extends StatelessWidget {
                       builder: (context, state) {
                         return TilawaSettingsTile(
                           icon: FluentIcons.local_language_24_regular,
-                          iconColor: _settingsRowIconAccent(
-                            context.colorScheme.primary,
-                            _kHueSettingsLanguage,
-                          ),
+                          iconColor: AppColors.settingsLanguage,
                           title: context.l10n.language,
                           onTap: () =>
                               _showLanguagePicker(context, state.locale),
@@ -347,15 +310,11 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     BlocBuilder<SettingsCubit, SettingsState>(
                       builder: (context, state) {
-                        final primary = context.colorScheme.primary;
                         return Column(
                           children: [
                             TilawaSettingsSwitchTile(
                               icon: FluentIcons.history_24_regular,
-                              iconColor: _settingsRowIconAccent(
-                                primary,
-                                _kHueSettingsPlayback,
-                              ),
+                              iconColor: AppColors.settingsPlayback,
                               title: context.l10n.restorePlaybackState,
                               value: state.restorePlaybackState,
                               onChanged: (value) => context
@@ -367,10 +326,7 @@ class SettingsScreen extends StatelessWidget {
                             ),
                             TilawaSettingsSwitchTile(
                               icon: FluentIcons.timer_24_regular,
-                              iconColor: _settingsRowIconAccent(
-                                primary,
-                                _kHueSettingsDuration,
-                              ),
+                              iconColor: AppColors.settingsDuration,
                               title: context.l10n.enableRecitationDuration,
                               value: state.isSleepTimerEnabled,
                               onChanged: (value) => context
@@ -396,10 +352,7 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     TilawaSettingsTile(
                       icon: FluentIcons.bookmark_24_regular,
-                      iconColor: _settingsRowIconAccent(
-                        context.colorScheme.primary,
-                        _kHueSettingsBookmarks,
-                      ),
+                      iconColor: AppColors.settingsBookmarks,
                       title: context.l10n.bookmarks,
                       onTap: () => const BookmarksRoute().push(context),
                       borderRadius: BorderRadius.vertical(
@@ -408,28 +361,19 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.history_24_regular,
-                      iconColor: _settingsRowIconAccent(
-                        context.colorScheme.primary,
-                        _kHueSettingsHistory,
-                      ),
+                      iconColor: AppColors.settingsHistory,
                       title: context.l10n.listeningHistory,
                       onTap: () => const HistoryRoute().push(context),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.clock_24_regular,
-                      iconColor: _settingsRowIconAccent(
-                        context.colorScheme.primary,
-                        _kHueSettingsPrayer,
-                      ),
+                      iconColor: AppColors.settingsPrayer,
                       title: context.l10n.prayerTimes,
                       onTap: () => const PrayerTimesRoute().push(context),
                     ),
                     TilawaSettingsTile(
                       icon: FluentIcons.book_24_regular,
-                      iconColor: _settingsRowIconAccent(
-                        context.colorScheme.primary,
-                        _kHueSettingsQuran,
-                      ),
+                      iconColor: AppColors.settingsQuran,
                       title: context.l10n.quranReader,
                       onTap: () => const QuranLastReadRoute().push(context),
                       showDivider: false,
@@ -448,10 +392,7 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     TilawaSettingsTile(
                       icon: FluentIcons.folder_24_regular,
-                      iconColor: _settingsRowIconAccent(
-                        context.colorScheme.primary,
-                        _kHueSettingsStorage,
-                      ),
+                      iconColor: AppColors.settingsStorage,
                       title: context.l10n.manageStorage,
                       onTap: () => const DownloadsRoute().push(context),
                       borderRadius: BorderRadius.vertical(
@@ -462,10 +403,7 @@ class SettingsScreen extends StatelessWidget {
                       builder: (context, state) {
                         return TilawaSettingsTile(
                           icon: FluentIcons.arrow_download_24_regular,
-                          iconColor: _settingsRowIconAccent(
-                            context.colorScheme.primary,
-                            _kHueSettingsDownloads,
-                          ),
+                          iconColor: AppColors.settingsDownloads,
                           title: context.l10n.concurrentDownloads,
                           onTap: () => _showConcurrentDownloadsPicker(
                             context,
@@ -539,8 +477,8 @@ class _SettingsProfileCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: _kAvatarSize,
-                height: _kAvatarSize,
+                width: TilawaSettingsScreenTokens.profileAvatarSize,
+                height: TilawaSettingsScreenTokens.profileAvatarSize,
                 decoration: BoxDecoration(
                   color: foregroundColor.withValues(
                     alpha: tokens.opacitySubtle * 2,
@@ -556,7 +494,7 @@ class _SettingsProfileCard extends StatelessWidget {
                 child: Center(
                   child: Icon(
                     FluentIcons.person_32_filled,
-                    size: _kPersonIconSize,
+                    size: TilawaSettingsScreenTokens.profilePersonIconSize,
                     color: foregroundColor,
                   ),
                 ),
@@ -728,7 +666,8 @@ class _ColorPickerSheet extends StatelessWidget {
                 return TilawaSelectionTile(
                   leading: CircleAvatar(
                     backgroundColor: preset.value,
-                    radius: _kColorSwatchRadius,
+                    radius: TilawaSettingsScreenTokens
+                        .primaryPickerPresetSwatchRadius,
                   ),
                   title: _localizedPresetName(context, preset),
                   isSelected: isSelected,
@@ -740,7 +679,8 @@ class _ColorPickerSheet extends StatelessWidget {
               }),
               TilawaSelectionTile(
                 leading: SizedBox.square(
-                  dimension: _kCustomSwatchSize,
+                  dimension:
+                      TilawaSettingsScreenTokens.primaryPickerCustomSwatchSize,
                   child: const DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -840,7 +780,11 @@ class _ConcurrentDownloadsSheet extends StatelessWidget {
             ),
           ),
           SizedBox(height: tokens.spaceLarge),
-          for (int i = 1; i <= _kMaxConcurrentDownloads; i++)
+          for (
+            int i = 1;
+            i <= TilawaSettingsScreenTokens.maxConcurrentDownloadsPickerCount;
+            i++
+          )
             TilawaSelectionTile(
               title: '$i',
               isSelected: currentValue == i,
