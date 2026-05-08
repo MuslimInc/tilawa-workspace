@@ -95,10 +95,10 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
 
   /// Pre-built dark-mode instance.
   static const QuranReaderTheme dark = QuranReaderTheme(
-    pageBackground: Color(0xFF1A1A1A),
-    textColor: Color(0xFFF5F5F5),
-    primaryColor: Color(0xFFD4AF37), // Metallic Gold
-    headerBackground: Color(0xFF2C2C2C),
+    pageBackground: Color(0xFF0E0E0E),
+    textColor: Color(0xFFFFFFFF),
+    primaryColor: Color(0xFF9E9E9E),
+    headerBackground: Color(0xFF1A1A1A),
     headerTextColor: Color(0xE6FFFFFF), // white with ~90% opacity
     headerImageFilter: ColorFilter.matrix([
       -0.8,
@@ -122,7 +122,7 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
       1,
       0,
     ]),
-    systemBarColor: Color(0xFF1A1A1A),
+    systemBarColor: Color(0xFF0E0E0E),
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
     sliderRangeTextStyle: TextStyle(
@@ -137,12 +137,12 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
       letterSpacing: -0.2,
     ),
     pillPageTextStyle: TextStyle(
-      color: Color(0xFFD4AF37),
+      color: Color(0xFF9E9E9E),
       fontSize: 11,
       fontWeight: FontWeight.w700,
     ),
     cardPageBadgeTextStyle: TextStyle(
-      color: Color(0xFFD4AF37),
+      color: Color(0xFF9E9E9E),
       fontWeight: FontWeight.w900,
       fontSize: 12,
     ),
