@@ -150,6 +150,65 @@ String _localizedPresetName(BuildContext context, PrimaryColorPreset preset) {
   };
 }
 
+String _formatPrimaryColorHex(Color color) {
+  final int rgb = color.toARGB32() & 0x00FFFFFF;
+  final String hex = rgb.toRadixString(16).padLeft(6, '0').toUpperCase();
+  return '#$hex';
+}
+
+String _primaryColorTileSubtitle(BuildContext context, ThemeState state) {
+  if (state.primaryColorSource == PrimaryColorSource.custom) {
+    return '${context.l10n.custom} · ${_formatPrimaryColorHex(state.primaryColor)}';
+  }
+
+  final preset =
+      PrimaryColorPreset.findById(state.primaryPresetId) ??
+      PrimaryColorPreset.defaultPreset;
+  return _localizedPresetName(context, preset);
+}
+
+class _PrimaryColorTileTrailing extends StatelessWidget {
+  const _PrimaryColorTileTrailing({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final designTokens = theme.tokens;
+    final settingsTokens = theme.componentTokens.settingsGroup;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: settingsTokens.tileIconSize,
+          height: settingsTokens.tileIconSize,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(
+                alpha: designTokens.opacityMedium,
+              ),
+              width: designTokens.spaceTiny,
+            ),
+          ),
+        ),
+        SizedBox(width: designTokens.spaceSmall),
+        Icon(
+          FluentIcons.chevron_right_24_filled,
+          size: settingsTokens.tileTrailingSize,
+          color: colorScheme.onSurfaceVariant.withValues(
+            alpha: settingsTokens.tileTrailingOpacity,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 class SettingsScreen extends StatelessWidget {
@@ -214,6 +273,13 @@ class SettingsScreen extends StatelessWidget {
                               icon: FluentIcons.color_24_regular,
                               iconColor: AppColors.settingsColor,
                               title: context.l10n.primaryColor,
+                              subtitle: _primaryColorTileSubtitle(
+                                context,
+                                state,
+                              ),
+                              trailing: _PrimaryColorTileTrailing(
+                                color: state.primaryColor,
+                              ),
                               onTap: () => _showColorPicker(
                                 context,
                                 state.primaryColor,
