@@ -11,6 +11,8 @@ import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import 'package:tilawa_core/constants/app_strings.dart';
+
 import 'app_router_config.dart';
 import 'json_type_registry.dart';
 
@@ -134,7 +136,9 @@ class AppRouter {
       debugLogDiagnostics: kDebugMode,
       // Disable restoration when launched from notification to prevent
       // the restored state from overriding notification navigation
-      restorationScopeId: null,
+      restorationScopeId: disableStateRestoration
+          ? null
+          : AppStrings.routerRestorationScopeId,
       redirect: redirect,
       routes: $appRoutes,
       errorBuilder: errorBuilder,
