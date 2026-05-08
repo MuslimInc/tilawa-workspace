@@ -11,8 +11,10 @@
 ## Final Verified Status
 - **Implementation**: Completed
 - **Automated Tests**: Passed (`146/146` Flutter prayer notification coverage, `64/64` native Android JVM tests)
-- **Code-level Verdict**: GO
+- **Architecture Audit Verdict**: GO
+- **Production Code/Test Verdict**: GO
 - **Android Release QA Verdict**: CONDITIONAL GO
+- **Overall Android Release Readiness**: CONDITIONAL GO (pending physical QA evidence gaps)
 - **Physical QA**: Partially completed (see QA validation snapshot)
 - **Branch**: Re-frozen after blocker fix
 - **Limited Rollout**: Allowed under CONDITIONAL GO with follow-up closure of remaining partial QA items
@@ -50,6 +52,13 @@
 1. Capture explicit same-target AppRouter skip evidence from a real system tray tap flow (`Notification navigation skipped` or `Duplicate notification navigation ignored`).
 2. Capture clear, end-to-end reboot re-arm/watchdog evidence after reboot.
 3. Confirm no duplicate navigation under real tray tap same-target scenarios.
+
+### Post-Release Technical Debt
+**IMPORTANT**: These items are NOT release blockers. Do not start any architecture refactor before release.
+1. Extract notification routing state from `AppRouter` into a dedicated service.
+2. Add `VibrationService` abstraction for `QiblaBloc` instead of direct plugin invocation.
+3. Replace hardcoded `PrayerNotificationStatusRoute` same-target logic with generalized route matching.
+4. Review `AppSystemChromeStyle` target enum if more special chrome routes appear.
 
 ## QA Blocker Fix - Notification Tap / Adhan Stop Redirect
 

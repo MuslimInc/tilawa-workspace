@@ -18,9 +18,19 @@
 - [ ] PQA008 **Abnormal Termination**: Force kill service during playback; verify `adhan_service_abnormal_termination` event is logged.
 
 ## Current Release Status (2026-05-08)
-- Code-level verdict: GO
+- Architecture audit verdict: GO
+- Production code/test verdict: GO
 - Android release QA verdict: CONDITIONAL GO
+- Overall Android release readiness: CONDITIONAL GO
 - Do not claim full production GO until remaining PARTIAL items are closed.
+- Note: No architecture refactor should start before release.
+
+### Post-Release Technical Debt
+These items are not release blockers:
+1. Extract notification routing state from `AppRouter` into a dedicated service.
+2. Add `VibrationService` abstraction for `QiblaBloc` instead of direct plugin invocation.
+3. Replace hardcoded `PrayerNotificationStatusRoute` same-target logic with generalized route matching.
+4. Review `AppSystemChromeStyle` target enum if more special chrome routes appear.
 
 ## Conditions to Upgrade QA Verdict to GO
 1. Capture explicit same-target AppRouter skip evidence from real tray taps (`Notification navigation skipped` or `Duplicate notification navigation ignored`).

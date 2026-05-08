@@ -39,11 +39,18 @@ Implementation is **COMPLETED**. The branch was temporarily unfrozen on 2026-05-
 ## Verification Status
 - **Implementation**: Completed
 - **Automated Tests**: PASSED (`146/146` Flutter, `64/64` native Android JVM)
-- **Code-level Verdict**: GO
+- **Architecture Audit Verdict**: GO
+- **Production Code/Test Verdict**: GO
 - **Android Release QA Verdict**: CONDITIONAL GO
+- **Overall Android Release Readiness**: CONDITIONAL GO
 - **Physical QA**: PARTIAL (permission-denied scenario is now PASS)
 - **Limited Rollout**: Allowed under CONDITIONAL GO (do not mark full production GO yet)
 - **Remaining QA Gaps**:
 	- Same-target explicit AppRouter skip log is PARTIAL / not proven by current adb native method-channel simulation.
 	- Reboot re-arm observability is PARTIAL (post-boot ingress seen, full re-arm/watchdog logs sparse).
+- **Post-Release Technical Debt** (Not release blockers; do not refactor before release):
+	- Extract notification routing state from `AppRouter` into a dedicated service.
+	- Add `VibrationService` abstraction for `QiblaBloc` instead of direct plugin invocation.
+	- Replace hardcoded `PrayerNotificationStatusRoute` same-target logic with generalized route matching.
+	- Review `AppSystemChromeStyle` target enum if more special chrome routes appear.
 - **Frozen commit**: `<TO_BE_FILLED_AFTER_COMMIT>`
