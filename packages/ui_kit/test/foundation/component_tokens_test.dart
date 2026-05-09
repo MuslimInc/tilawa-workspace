@@ -599,9 +599,9 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.compactBottomNavBarBaseHeight, 55.0);
+      expect(tokens.compactBottomNavBarBaseHeight, 45.0);
       expect(tokens.bottomNavHorizontalMargin, 16.0);
-      expect(tokens.navButtonMinHeight, 64.0);
+      expect(tokens.navButtonMinHeight, 54.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());
     });
@@ -615,12 +615,12 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, Colors.white);
+      expect(tokens.bottomNavBackgroundColor, Colors.transparent);
       expect(
         tokens.navButtonSelectedBackgroundColor,
         Color.alphaBlend(
           scheme.primary.withValues(alpha: 0.10),
-          tokens.bottomNavBackgroundColor,
+          scheme.surfaceContainerLow,
         ),
       );
       expect(
@@ -679,7 +679,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          Colors.white,
+          Colors.transparent,
         );
       },
     );
@@ -1063,7 +1063,7 @@ void main() {
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
-                  Colors.white,
+                  Colors.transparent,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,

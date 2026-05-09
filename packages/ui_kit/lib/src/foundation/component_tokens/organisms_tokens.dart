@@ -239,7 +239,10 @@ class TilawaMediaPlayerBarTokens {
     const shellOutlineAlpha = 0.1;
     const playPauseShadowOpacity = 0.3;
     return TilawaMediaPlayerBarTokens(
-      contentPadding: const EdgeInsets.all(12),
+      // Slightly tighter vertical padding so the bar fits [playerCollapsedHeight]
+      // with progress strip + 48dp artwork row inside the mini-player SizedBox
+      // (outer shell also adds horizontal margins and tiny vertical padding).
+      contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       borderRadius: 16,
       artworkSize: 48,
       artworkRadius: 12,
@@ -535,7 +538,7 @@ class TilawaAdaptiveShellTokens {
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: 55,
+      compactBottomNavBarBaseHeight: 45,
       bottomNavHorizontalMargin: 16,
       bottomNavVerticalMargin: 4,
       bottomNavInternalPadding: 8,
@@ -543,9 +546,11 @@ class TilawaAdaptiveShellTokens {
       bottomNavBorderWidth: 1,
       bottomNavItemGap: 4,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      bottomNavShadowOpacity: 0.12,
-      bottomNavShadowBlur: 18,
-      bottomNavShadowOffset: Offset(0, 6),
+      // No drop shadow: blur extends above the pill and reads as a foggy layer
+      // over scroll content (outline still separates chrome from the scaffold).
+      bottomNavShadowOpacity: 0,
+      bottomNavShadowBlur: 0,
+      bottomNavShadowOffset: Offset.zero,
       bottomNavOutlineColor: shellChromeOutline,
       sideRailRadius: 16,
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
@@ -554,7 +559,7 @@ class TilawaAdaptiveShellTokens {
       sideRailShadowOpacity: 0.05,
       sideRailShadowBlur: 12,
       sideRailShadowOffset: Offset(2, 0),
-      navButtonMinHeight: 64,
+      navButtonMinHeight: 54,
       navButtonVerticalPadding: 4,
       navButtonGap: 4,
       navButtonIconSize: 22,
@@ -599,9 +604,12 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
+  /// Light compact nav uses a transparent bar so tab content (e.g. settings)
+  /// remains visible under the chrome; the hairline outline and per-destination
+  /// pills still read as controls. Dark keeps a filled bar for contrast.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
     if (colorScheme.brightness == Brightness.light) {
-      return Colors.white;
+      return Colors.transparent;
     }
     return Color.lerp(
           AppColors.darkSurfaceContainerHighBase,
@@ -616,9 +624,12 @@ class TilawaAdaptiveShellTokens {
     Color bottomNavBackgroundColor,
   ) {
     final tintOpacity = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
+    final base = bottomNavBackgroundColor.a == 0
+        ? colorScheme.surfaceContainerLow
+        : bottomNavBackgroundColor;
     return Color.alphaBlend(
       colorScheme.primary.withValues(alpha: tintOpacity),
-      bottomNavBackgroundColor,
+      base,
     );
   }
 
