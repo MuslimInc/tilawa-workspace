@@ -38,8 +38,8 @@ Future<void> _pumpShell(
         destinations: _destinations,
         selectedIndex: selectedIndex,
         onDestinationSelected: (_) {},
-        child: const ColoredBox(color: Color(0xFFEEEEEE)),
         bottomPlayer: const SizedBox.shrink(),
+        child: const ColoredBox(color: Color(0xFFEEEEEE)),
       ),
     ),
   );
@@ -78,13 +78,13 @@ void main() {
             destinations: _destinations,
             selectedIndex: 0,
             onDestinationSelected: (_) {},
+            bottomPlayer: const SizedBox.shrink(),
             child: Builder(
               builder: (context) {
                 capturedPadding = MediaQuery.paddingOf(context);
                 return const ColoredBox(color: Color(0xFFEEEEEE));
               },
             ),
-            bottomPlayer: const SizedBox.shrink(),
           ),
         ),
       );
@@ -112,8 +112,8 @@ void main() {
             destinations: _destinations,
             selectedIndex: 0,
             onDestinationSelected: (_) {},
-            child: const ColoredBox(color: Color(0xFFEEEEEE)),
             bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
           ),
         ),
       );
@@ -200,12 +200,12 @@ void main() {
             destinations: _destinations,
             selectedIndex: 0,
             onDestinationSelected: (_) {},
-            child: const ColoredBox(color: Color(0xFFEEEEEE)),
             bottomPlayer: const SizedBox(
               key: playerKey,
               height: 80,
               width: double.infinity,
             ),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
           ),
         ),
       );

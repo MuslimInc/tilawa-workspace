@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print — manual perf diagnostics
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_qcf/quran_qcf.dart';

@@ -176,8 +176,6 @@ class _PremiumNavigationControls extends StatelessWidget {
                 RepaintBoundary(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      final tokens = Theme.of(context).tokens;
-
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -238,35 +236,5 @@ class _PremiumNavigationControls extends StatelessWidget {
       message: 'build',
     );
     return controls;
-  }
-}
-
-class _PremiumShareFab extends StatelessWidget {
-  const _PremiumShareFab({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return SizedBox.square(
-      dimension: tokens.iconSizeExtraLarge,
-      child: FloatingActionButton.small(
-        heroTag: null,
-        elevation: tokens.spaceTiny,
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        ),
-        onPressed: onTap,
-        child: Icon(
-          Icons.video_camera_back_outlined,
-          size: tokens.iconSizeMedium,
-        ),
-      ),
-    );
   }
 }

@@ -94,9 +94,9 @@ class TilawaAdaptiveShell extends StatelessWidget {
           Scaffold(
             extendBody: true,
             body: MediaQuery.removePadding(
-              child: child,
               context: context,
               removeBottom: true,
+              child: child,
             ),
           ),
           if (!isKeyboardOpen)

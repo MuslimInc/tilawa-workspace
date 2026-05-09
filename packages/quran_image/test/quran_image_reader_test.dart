@@ -8,9 +8,9 @@ import 'package:quran_image/core/di/dependency_injection.dart';
 import 'package:quran_image/data/repositories/in_memory_navigation_visibility_repository.dart';
 import 'package:quran_image/data/repositories/in_memory_page_repository.dart';
 import 'package:quran_image/domain/domain.dart';
+import 'package:quran_image/l10n/app_localizations.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
-import 'package:quran_image/l10n/app_localizations.dart';
 import 'package:quran_image/presentation/widgets/organisms/navigation_slider_overlay.dart';
 import 'package:quran_image/quran_image_reader.dart';
 

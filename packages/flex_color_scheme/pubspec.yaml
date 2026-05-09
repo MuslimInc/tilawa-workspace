@@ -3,37 +3,6 @@ description: A Flutter package to use and make beautiful Material design based t
 version: 8.4.0
 resolution: workspace
 documentation: https://docs.flexcolorscheme.com
-screenshots:
-  - description: "Example of FlexColorScheme light theme colors in Themes Playground
-      theme simulator"
-    path: example/screenshots/fcs_colors_light.png
-  - description: "Example of FlexColorScheme dark theme colors in Themes Playground
-      theme simulator"
-    path: example/screenshots/fcs_colors_dark.png
-  - description: "FlexColorScheme light theme applied to a mock login screen in
-      Themes Playground"
-    path: example/screenshots/fcs_login_light.png
-  - description: "FlexColorScheme dark theme applied to a mock login screen in
-      Themes Playground"
-    path: example/screenshots/fcs_login_dark.png
-  - description: "FlexColorScheme light theme applied to a mock shop app in Themes
-      Playground"
-    path: example/screenshots/fcs_shop_light.png
-  - description: "FlexColorScheme dark theme applied to a mock shop app in Themes
-      Playground"
-    path: example/screenshots/fcs_shop_dark.png
-  - description: "A FlexColorScheme pink light theme applied on the Flutter M3 demo
-      app in Themes Playground"
-    path: example/screenshots/fcs_pad_light.png
-  - description: "A FlexColorScheme pink dark theme applied on the Flutter M3 demo
-      app in Themes Playground"
-    path: example/screenshots/fcs_pad_dark.png
-  - description: "A FlexColorScheme blue light theme applied on the Flutter M3 demo
-      app in Themes Playground"
-    path: example/screenshots/fcs_big_pad_light.png
-  - description: "A FlexColorScheme blue dark theme applied on the Flutter M3 demo
-      app in Themes Playground"
-    path: example/screenshots/fcs_big_pad_dark.png
 topics:
   - theme
   - colorscheme

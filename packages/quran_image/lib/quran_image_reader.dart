@@ -732,7 +732,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
     } finally {
       final current = _snapshotFutures[key];
       if (identical(current, future)) {
-        _snapshotFutures.remove(key);
+        final removed = _snapshotFutures.remove(key);
+        if (removed != null) unawaited(removed);
       }
     }
   }

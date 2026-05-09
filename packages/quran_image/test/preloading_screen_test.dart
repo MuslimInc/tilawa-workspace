@@ -334,7 +334,9 @@ class _TestAssetVerseMarkerRepository extends AssetVerseMarkerRepository {
   }) async {
     final error = initError;
     if (error != null) {
-      throw error;
+      if (error is Error) throw error;
+      if (error is Exception) throw error;
+      throw StateError('$error');
     }
     _initialized = true;
   }

@@ -1,2 +1,2 @@
-export 'skeletonizer.dart';
 export 'bone.dart';
+export 'skeletonizer.dart';

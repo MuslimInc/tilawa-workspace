@@ -50,10 +50,7 @@ class TilawaSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final listenables = <Listenable>[
-      if (controller != null) controller!,
-      if (focusNode != null) focusNode!,
-    ];
+    final listenables = <Listenable>[?controller, ?focusNode];
 
     Widget buildField() {
       return _SearchFieldBody(

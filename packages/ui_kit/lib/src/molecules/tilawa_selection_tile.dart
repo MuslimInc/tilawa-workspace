@@ -56,7 +56,7 @@ class TilawaSelectionTile extends StatelessWidget {
               child: Row(
                 spacing: tokens.tileItemGap,
                 children: [
-                  if (leading != null) leading!,
+                  ?leading,
                   Expanded(child: Text(title, style: textStyle)),
                   if (isSelected)
                     Icon(

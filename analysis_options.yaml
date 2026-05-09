@@ -1,0 +1,38 @@
+# Shared static analysis for the Tilawa workspace (Melos / Dart workspace).
+# Each member package uses: `include: ../../analysis_options.yaml`
+#
+# Deferred (documented for follow-up):
+# - do_not_use_environment — Tilawa uses fromEnvironment for launch and flags.
+# - always_use_package_imports / strict avoid_relative_lib_imports — large migration;
+#   `avoid_relative_lib_imports` is set to ignore below until imports are migrated.
+# - prefer_expression_function_bodies — often hurts Flutter `build` readability.
+#
+# Strict language modes (strict-casts / strict-inference / strict-raw-types) are
+# deferred: turning them on surfaced a large backlog of dynamic/json fixes across
+# apps/tilawa and packages. Re-enable in a dedicated migration PR.
+#
+# Extra style lints were omitted where they produced hundreds of infos and break
+# `melos run analyze` (`dart analyze --fatal-infos`). Add them in focused PRs.
+
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    missing_return: error
+    missing_required_param: error
+    must_be_immutable: error
+    dead_code: warning
+    unused_import: warning
+    unused_local_variable: warning
+    invalid_annotation_target: ignore
+    avoid_relative_lib_imports: ignore
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.gen.dart"
+    - "**/*.config.dart"
+    - "**/*.mocks.dart"
+    - "build/**"
+    - "lib/l10n/**"
+    - "**/parse_json.dart"
+    - "packages/quran_qcf/scratch/**"

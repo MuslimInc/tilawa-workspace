@@ -12,7 +12,7 @@ class LanguageSwitcher extends StatelessWidget {
   });
 
   final String currentLanguage;
-  final Function(String) onLanguageChanged;
+  final ValueChanged<String> onLanguageChanged;
   final List<String> languages;
   final String Function(String) getLanguageName;
 
