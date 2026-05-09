@@ -33,11 +33,7 @@ class MetadataChip extends StatelessWidget {
       icon: icon,
       backgroundColor: backgroundColor ?? colorScheme.surfaceContainerLow,
       foregroundColor: color,
-      borderColor:
-          borderColor ??
-          colorScheme.outlineVariant.withValues(
-            alpha: designTokens.opacityMedium,
-          ),
+      borderColor: borderColor ?? componentTokens.defaultBorderColor,
       padding: componentTokens.compactPadding,
       borderRadius: componentTokens.roundedRadius,
       iconSize: designTokens.iconSizeSmall,

@@ -19,13 +19,6 @@ import '../../../theme/domain/primary_color_preset.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
 
-// ── Layout constants (no matching design token) ──────────────────────────────
-const double _kAvatarSize = 60.0;
-const double _kPersonIconSize = 32.0;
-const double _kColorSwatchRadius = 12.0;
-const double _kCustomSwatchSize = 24.0;
-const int _kMaxConcurrentDownloads = 5;
-
 // ── Top-level sheet / dialog helpers ─────────────────────────────────────────
 
 void _showColorPicker(
@@ -484,8 +477,8 @@ class _SettingsProfileCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: _kAvatarSize,
-                height: _kAvatarSize,
+                width: TilawaSettingsScreenTokens.profileAvatarSize,
+                height: TilawaSettingsScreenTokens.profileAvatarSize,
                 decoration: BoxDecoration(
                   color: foregroundColor.withValues(
                     alpha: tokens.opacitySubtle * 2,
@@ -501,7 +494,7 @@ class _SettingsProfileCard extends StatelessWidget {
                 child: Center(
                   child: Icon(
                     FluentIcons.person_32_filled,
-                    size: _kPersonIconSize,
+                    size: TilawaSettingsScreenTokens.profilePersonIconSize,
                     color: foregroundColor,
                   ),
                 ),
@@ -673,7 +666,8 @@ class _ColorPickerSheet extends StatelessWidget {
                 return TilawaSelectionTile(
                   leading: CircleAvatar(
                     backgroundColor: preset.value,
-                    radius: _kColorSwatchRadius,
+                    radius: TilawaSettingsScreenTokens
+                        .primaryPickerPresetSwatchRadius,
                   ),
                   title: _localizedPresetName(context, preset),
                   isSelected: isSelected,
@@ -685,7 +679,8 @@ class _ColorPickerSheet extends StatelessWidget {
               }),
               TilawaSelectionTile(
                 leading: SizedBox.square(
-                  dimension: _kCustomSwatchSize,
+                  dimension:
+                      TilawaSettingsScreenTokens.primaryPickerCustomSwatchSize,
                   child: const DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -785,7 +780,11 @@ class _ConcurrentDownloadsSheet extends StatelessWidget {
             ),
           ),
           SizedBox(height: tokens.spaceLarge),
-          for (int i = 1; i <= _kMaxConcurrentDownloads; i++)
+          for (
+            int i = 1;
+            i <= TilawaSettingsScreenTokens.maxConcurrentDownloadsPickerCount;
+            i++
+          )
             TilawaSelectionTile(
               title: '$i',
               isSelected: currentValue == i,

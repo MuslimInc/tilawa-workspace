@@ -296,15 +296,19 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Backdrop scrim — darkens the screen behind the
-                    // expanded player sheet, focusing attention on it.
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: Container(
-                          color: Colors.black.withValues(alpha: progress * 0.5),
+                    // Backdrop scrim — only while expanding; omit at progress==0
+                    // so no full-screen layer sits above the scaffold behind the
+                    // bottom nav.
+                    if (progress > 0)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: Container(
+                            color: Colors.black.withValues(
+                              alpha: progress * 0.5,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
                     // Expanded player — slides up from below during expand,
                     // slides down below during collapse.
                     if (progress > 0.01)

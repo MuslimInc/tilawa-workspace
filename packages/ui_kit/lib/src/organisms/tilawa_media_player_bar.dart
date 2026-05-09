@@ -72,7 +72,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLow,
+        color: componentTokens.shellBackgroundColor,
         borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
@@ -84,9 +84,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
           ),
         ],
         border: Border.all(
-          color: colorScheme.outlineVariant.withValues(
-            alpha: designTokens.opacitySubtle,
-          ),
+          color: componentTokens.shellOutlineColor,
           width: designTokens.borderWidthThin,
         ),
       ),
@@ -102,9 +100,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
               progressBarOverride ??
                   LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: colorScheme.primaryContainer.withValues(
-                      alpha: designTokens.opacitySubtle,
-                    ),
+                    backgroundColor:
+                        componentTokens.progressTrackBackgroundColor,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       colorScheme.primary,
                     ),
@@ -124,7 +121,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(
                             componentTokens.artworkRadius,
                           ),
-                          color: colorScheme.primaryContainer,
+                          color: componentTokens.artworkPlaceholderColor,
                         ),
                         child: artwork == null
                             ? _buildDefaultIcon(context)
@@ -198,10 +195,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                               color: colorScheme.primary,
                               boxShadow: [
                                 BoxShadow(
-                                  color: colorScheme.primary.withValues(
-                                    alpha:
-                                        componentTokens.playPauseShadowOpacity,
-                                  ),
+                                  color: componentTokens
+                                      .playPauseButtonShadowColor,
                                   blurRadius:
                                       componentTokens.playPauseShadowBlur,
                                   offset: designTokens.shadowOffsetSmall,

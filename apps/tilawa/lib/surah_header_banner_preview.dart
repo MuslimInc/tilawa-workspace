@@ -5,10 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 PreviewThemeData themeData() {
   return PreviewThemeData(
-    materialLight: AppTheme.getLightTheme(
-      primaryColor: AppColors.primaryCyan,
-      isDefaultPreset: true,
-    ),
+    materialLight: AppTheme.getLightTheme(primaryColor: AppColors.primaryCyan),
     materialDark: AppTheme.getDarkTheme(
       primaryColor: AppColors.primaryCyan,
       isDefaultPreset: true,

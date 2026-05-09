@@ -39,22 +39,20 @@ class AppTheme {
     return GoogleFonts.alexandriaTextTheme();
   }
 
-  static FlexSchemeColor _lightScheme(
-    Color primaryColor, {
-    required bool isDefaultPreset,
-  }) {
+  static FlexSchemeColor _lightScheme(Color primaryColor) {
     final safePrimary = _safePrimaryForLight(primaryColor);
-    final primaryContainer = isDefaultPreset
-        ? const Color(0xFFD8F0EC)
-        : _containerForPrimary(safePrimary, brightness: Brightness.light);
+    final primaryContainer = _containerForPrimary(
+      safePrimary,
+      brightness: Brightness.light,
+    );
 
     return FlexSchemeColor.from(
       primary: safePrimary,
       primaryContainer: primaryContainer,
       secondary: AppColors.brandSecondary,
-      secondaryContainer: const Color(0xFFE4EBD5),
+      secondaryContainer: AppColors.lightSecondaryContainer,
       tertiary: AppColors.brandTertiary,
-      tertiaryContainer: const Color(0xFFF3E3BD),
+      tertiaryContainer: AppColors.lightTertiaryContainer,
       appBarColor: AppColors.lightSurface,
       error: AppColors.error,
       brightness: Brightness.light,
@@ -107,24 +105,25 @@ class AppTheme {
     required bool isDefaultPreset,
   }) {
     final darkPrimary = isDefaultPreset
-        ? const Color(0xFF70C8BD)
+        ? AppColors.darkDefaultPrimary
         : _liftForDarkTheme(primaryColor);
-    final primaryContainer = isDefaultPreset
-        ? const Color(0xFF143E39)
-        : _containerForPrimary(primaryColor, brightness: Brightness.dark);
+    final primaryContainer = _containerForPrimary(
+      primaryColor,
+      brightness: Brightness.dark,
+    );
 
     return FlexSchemeColor.from(
       primary: darkPrimary,
       primaryContainer: primaryContainer,
       primaryLightRef: primaryColor,
-      secondary: const Color(0xFFB8C69A),
-      secondaryContainer: const Color(0xFF2E3A28),
+      secondary: AppColors.darkSecondary,
+      secondaryContainer: AppColors.darkSecondaryContainer,
       secondaryLightRef: AppColors.brandSecondary,
-      tertiary: const Color(0xFFD8B76C),
-      tertiaryContainer: const Color(0xFF4B3B18),
+      tertiary: AppColors.darkTertiary,
+      tertiaryContainer: AppColors.darkTertiaryContainer,
       tertiaryLightRef: AppColors.brandTertiary,
       appBarColor: AppColors.darkSurface,
-      error: const Color(0xFFFFB4AB),
+      error: AppColors.darkSchemeError,
       brightness: Brightness.dark,
     );
   }
@@ -158,6 +157,7 @@ class AppTheme {
   }
 
   static ColorScheme _refineLightColorScheme(ColorScheme scheme) {
+    final Color primary = scheme.primary;
     return scheme.copyWith(
       surface: AppColors.lightSurface,
       surfaceContainerLowest: Colors.white,
@@ -165,14 +165,37 @@ class AppTheme {
       // Phase 1: deepen the upper container tiers so elevation reads clearly
       // on real-device DPIs. Lower tiers stay close to scaffold to preserve
       // existing flat backgrounds.
-      surfaceContainer: const Color(0xFFEBE6D7),
-      surfaceContainerHigh: const Color(0xFFE2DBC7),
-      surfaceContainerHighest: const Color(0xFFD7CFB9),
+      surfaceContainer: _blendSurfaceTowardPrimary(
+        AppColors.lightSurfaceContainerMid,
+        primary,
+        0.045,
+      ),
+      // Nudge upper tiers toward [primary] so chrome (bottom nav, switch OFF
+      // track via surfaceContainerHighest, etc.) reads as one family with the
+      // accent — subtle lerp keeps contrast on cream bases (AppColors *Base).
+      surfaceContainerHigh: _blendSurfaceTowardPrimary(
+        AppColors.lightSurfaceContainerHighBase,
+        primary,
+        0.14,
+      ),
+      surfaceContainerHighest: _blendSurfaceTowardPrimary(
+        AppColors.lightSurfaceContainerHighestBase,
+        primary,
+        0.20,
+      ),
       outline: AppColors.lightOutline,
-      outlineVariant: const Color(0xFFE6DED0),
-      shadow: const Color(0xFF1F2926),
-      scrim: const Color(0xFF1F2926),
+      outlineVariant: AppColors.lightOutlineVariant,
+      shadow: AppColors.lightShadow,
+      scrim: AppColors.lightShadow,
     );
+  }
+
+  static Color _blendSurfaceTowardPrimary(
+    Color base,
+    Color primary,
+    double blend,
+  ) {
+    return Color.lerp(base, primary, blend)!;
   }
 
   static ColorScheme _refineDarkColorScheme(
@@ -181,33 +204,76 @@ class AppTheme {
   }) {
     if (trueBlack) {
       return scheme.copyWith(
-        surface: const Color(0xFF050807),
+        surface: AppColors.darkTrueBlackSurface,
         surfaceContainerLowest: Colors.black,
         surfaceContainerLow: Colors.black,
-        surfaceContainer: const Color(0xFF080D0B),
-        surfaceContainerHigh: const Color(0xFF101714),
-        surfaceContainerHighest: const Color(0xFF19211D),
+        surfaceContainer: AppColors.darkTrueBlackSurfaceContainer,
+        surfaceContainerHigh: AppColors.darkTrueBlackSurfaceContainerHigh,
+        surfaceContainerHighest: AppColors.darkTrueBlackSurfaceContainerHighest,
         outline: AppColors.darkOutline,
-        outlineVariant: const Color(0xFF2B3934),
+        outlineVariant: AppColors.darkTrueBlackOutlineVariant,
         shadow: Colors.black,
         scrim: Colors.black,
       );
     }
 
+    final Color darkPrimary = scheme.primary;
     return scheme.copyWith(
       surface: AppColors.darkSurface,
-      surfaceContainerLowest: const Color(0xFF0B1210),
+      surfaceContainerLowest: AppColors.darkSurfaceContainerLowest,
       surfaceContainerLow: AppColors.darkBackground,
       surfaceContainer: AppColors.darkSurfaceContainer,
       // Phase 1: lift the upper container tiers so floating elements
       // (bottom nav, sheets, raised cards) separate from the page on
       // real-device DPIs.
-      surfaceContainerHigh: const Color(0xFF2A3A35),
-      surfaceContainerHighest: const Color(0xFF34463F),
+      surfaceContainerHigh: _blendSurfaceTowardPrimary(
+        AppColors.darkSurfaceContainerHighBase,
+        darkPrimary,
+        0.10,
+      ),
+      surfaceContainerHighest: _blendSurfaceTowardPrimary(
+        AppColors.darkSurfaceContainerHighestBase,
+        darkPrimary,
+        0.14,
+      ),
       outline: AppColors.darkOutline,
-      outlineVariant: const Color(0xFF2F3E39),
+      outlineVariant: AppColors.darkOutlineVariant,
       shadow: Colors.black,
       scrim: Colors.black,
+    );
+  }
+
+  /// M3 switch: OFF track uses a neutral outline tint on [ColorScheme.surfaceContainerLow]
+  /// instead of primary-colored `surfaceContainerHighest` (avoids a muddy lavender
+  /// track when the user picks a purple or teal primary). ON/disabled tracks stay
+  /// Flex defaults.
+  static SwitchThemeData _switchTheme(ColorScheme colorScheme) {
+    final SwitchThemeData base = FlexSubThemes.switchTheme(
+      colorScheme: colorScheme,
+      unselectedIsColored: false,
+      useMaterial3: true,
+    );
+    final WidgetStateProperty<Color?>? origTrack = base.trackColor;
+    if (origTrack == null) return base;
+
+    Color offTrack({required bool interaction}) => Color.alphaBlend(
+      colorScheme.outline.withValues(alpha: interaction ? 0.16 : 0.11),
+      colorScheme.surfaceContainerLow,
+    );
+
+    return base.copyWith(
+      trackColor: WidgetStateProperty.resolveWith((Set<WidgetState> states) {
+        if (states.contains(WidgetState.disabled) ||
+            states.contains(WidgetState.selected)) {
+          return origTrack.resolve(states);
+        }
+        if (states.contains(WidgetState.pressed) ||
+            states.contains(WidgetState.hovered) ||
+            states.contains(WidgetState.focused)) {
+          return offTrack(interaction: true);
+        }
+        return offTrack(interaction: false);
+      }),
     );
   }
 
@@ -224,6 +290,7 @@ class AppTheme {
       canvasColor: scaffoldBackgroundColor,
       dividerColor: colorScheme.outlineVariant,
       cardColor: colorScheme.surface,
+      switchTheme: _switchTheme(colorScheme),
       appBarTheme: theme.appBarTheme.copyWith(
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
@@ -255,13 +322,12 @@ class AppTheme {
   /// which matches all pre-density UI Kit values.
   static ThemeData getLightTheme({
     required Color primaryColor,
-    bool isDefaultPreset = false,
     bool? useGoogleFontsOverride,
     TilawaDensity density = TilawaDensity.comfortable,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
-    final scheme = _lightScheme(primaryColor, isDefaultPreset: isDefaultPreset);
+    final scheme = _lightScheme(primaryColor);
 
     final theme = FlexThemeData.light(
       colors: scheme,

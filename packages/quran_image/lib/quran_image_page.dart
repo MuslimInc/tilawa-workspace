@@ -7,7 +7,7 @@ import 'package:quran_image/page_mapping.dart';
 import 'package:quran_image/presentation/widgets/premium_bottom_bar.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_qcf/quran_qcf.dart'
-    hide SurahHeaderBannerLayoutPolicy, CalibratedSurahHeaderBannerLayoutPolicy;
+    hide CalibratedSurahHeaderBannerLayoutPolicy, SurahHeaderBannerLayoutPolicy;
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/constants/surah_header_constants.dart';

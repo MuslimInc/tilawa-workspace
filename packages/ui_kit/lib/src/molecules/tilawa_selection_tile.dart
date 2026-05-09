@@ -47,9 +47,7 @@ class TilawaSelectionTile extends StatelessWidget {
       children: [
         Material(
           color: isSelected
-              ? colorScheme.primaryContainer.withValues(
-                  alpha: tokens.tileIconContainerOpacity * 3,
-                )
+              ? tokens.selectionTileSelectedBackgroundColor
               : Colors.transparent,
           child: InkWell(
             onTap: onTap,
@@ -58,7 +56,7 @@ class TilawaSelectionTile extends StatelessWidget {
               child: Row(
                 spacing: tokens.tileItemGap,
                 children: [
-                  if (leading != null) leading!,
+                  ?leading,
                   Expanded(child: Text(title, style: textStyle)),
                   if (isSelected)
                     Icon(
@@ -77,9 +75,7 @@ class TilawaSelectionTile extends StatelessWidget {
             child: Divider(
               height: tokens.tileDividerHeight,
               thickness: tokens.tileDividerThickness,
-              color: colorScheme.outlineVariant.withValues(
-                alpha: tokens.tileDividerOpacity,
-              ),
+              color: tokens.selectionTileDividerColor,
             ),
           ),
       ],

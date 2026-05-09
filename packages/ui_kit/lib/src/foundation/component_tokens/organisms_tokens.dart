@@ -184,6 +184,11 @@ class TilawaMediaPlayerBarTokens {
     required this.shadowOpacity,
     required this.playPauseShadowOpacity,
     required this.playPauseShadowBlur,
+    required this.shellBackgroundColor,
+    required this.progressTrackBackgroundColor,
+    required this.artworkPlaceholderColor,
+    required this.shellOutlineColor,
+    required this.playPauseButtonShadowColor,
   });
 
   final EdgeInsetsGeometry contentPadding;
@@ -205,13 +210,39 @@ class TilawaMediaPlayerBarTokens {
   final double playPauseShadowOpacity;
   final double playPauseShadowBlur;
 
+  /// Bar surface behind controls (persistent chrome).
+  final Color shellBackgroundColor;
+
+  /// [LinearProgressIndicator.backgroundColor] for the slim track.
+  final Color progressTrackBackgroundColor;
+
+  /// Placeholder fill behind album art when no image is shown.
+  final Color artworkPlaceholderColor;
+
+  /// Hairline border around the bar ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
+  final Color shellOutlineColor;
+
+  /// [BoxShadow.color] under the circular play/pause control.
+  final Color playPauseButtonShadowColor;
+
   factory TilawaMediaPlayerBarTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    return TilawaMediaPlayerBarTokens.fromColorScheme(
+      ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+    );
+  }
+
+  factory TilawaMediaPlayerBarTokens.fromColorScheme(ColorScheme colorScheme) {
     // No-op: control buttons are already 32-36dp (below 48dp). Compacting
     // would worsen accessibility; needs a separate accessibility refactor.
-    return const TilawaMediaPlayerBarTokens(
-      contentPadding: EdgeInsets.all(12),
+    const shellOutlineAlpha = 0.1;
+    const playPauseShadowOpacity = 0.3;
+    return TilawaMediaPlayerBarTokens(
+      // Slightly tighter vertical padding so the bar fits [playerCollapsedHeight]
+      // with progress strip + 48dp artwork row inside the mini-player SizedBox
+      // (outer shell also adds horizontal margins and tiny vertical padding).
+      contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       borderRadius: 16,
       artworkSize: 48,
       artworkRadius: 12,
@@ -227,8 +258,18 @@ class TilawaMediaPlayerBarTokens {
       playPauseIconSize: 16,
       disabledControlOpacity: 0.3,
       shadowOpacity: 0.1,
-      playPauseShadowOpacity: 0.3,
+      playPauseShadowOpacity: playPauseShadowOpacity,
       playPauseShadowBlur: 8,
+      shellBackgroundColor: colorScheme.surfaceContainerLow,
+      progressTrackBackgroundColor: colorScheme.surfaceContainerHighest
+          .withValues(alpha: shellOutlineAlpha),
+      artworkPlaceholderColor: colorScheme.surfaceContainerHigh,
+      shellOutlineColor: colorScheme.outlineVariant.withValues(
+        alpha: shellOutlineAlpha,
+      ),
+      playPauseButtonShadowColor: colorScheme.primary.withValues(
+        alpha: playPauseShadowOpacity,
+      ),
     );
   }
 
@@ -251,6 +292,11 @@ class TilawaMediaPlayerBarTokens {
     double? shadowOpacity,
     double? playPauseShadowOpacity,
     double? playPauseShadowBlur,
+    Color? shellBackgroundColor,
+    Color? progressTrackBackgroundColor,
+    Color? artworkPlaceholderColor,
+    Color? shellOutlineColor,
+    Color? playPauseButtonShadowColor,
   }) {
     return TilawaMediaPlayerBarTokens(
       contentPadding: contentPadding ?? this.contentPadding,
@@ -273,6 +319,14 @@ class TilawaMediaPlayerBarTokens {
       playPauseShadowOpacity:
           playPauseShadowOpacity ?? this.playPauseShadowOpacity,
       playPauseShadowBlur: playPauseShadowBlur ?? this.playPauseShadowBlur,
+      shellBackgroundColor: shellBackgroundColor ?? this.shellBackgroundColor,
+      progressTrackBackgroundColor:
+          progressTrackBackgroundColor ?? this.progressTrackBackgroundColor,
+      artworkPlaceholderColor:
+          artworkPlaceholderColor ?? this.artworkPlaceholderColor,
+      shellOutlineColor: shellOutlineColor ?? this.shellOutlineColor,
+      playPauseButtonShadowColor:
+          playPauseButtonShadowColor ?? this.playPauseButtonShadowColor,
     );
   }
 
@@ -332,6 +386,31 @@ class TilawaMediaPlayerBarTokens {
         b.playPauseShadowBlur,
         t,
       ),
+      shellBackgroundColor: Color.lerp(
+        a.shellBackgroundColor,
+        b.shellBackgroundColor,
+        t,
+      )!,
+      progressTrackBackgroundColor: Color.lerp(
+        a.progressTrackBackgroundColor,
+        b.progressTrackBackgroundColor,
+        t,
+      )!,
+      artworkPlaceholderColor: Color.lerp(
+        a.artworkPlaceholderColor,
+        b.artworkPlaceholderColor,
+        t,
+      )!,
+      shellOutlineColor: Color.lerp(
+        a.shellOutlineColor,
+        b.shellOutlineColor,
+        t,
+      )!,
+      playPauseButtonShadowColor: Color.lerp(
+        a.playPauseButtonShadowColor,
+        b.playPauseButtonShadowColor,
+        t,
+      )!,
     );
   }
 }
@@ -350,7 +429,11 @@ class TilawaAdaptiveShellTokens {
     required this.bottomNavShadowOpacity,
     required this.bottomNavShadowBlur,
     required this.bottomNavShadowOffset,
+    required this.bottomNavOutlineColor,
     required this.sideRailRadius,
+    required this.sideRailIndicatorColor,
+    required this.sideRailBackgroundColor,
+    required this.sideRailOutlineColor,
     required this.sideRailShadowOpacity,
     required this.sideRailShadowBlur,
     required this.sideRailShadowOffset,
@@ -366,6 +449,8 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonLabelFontSize,
     required this.navButtonSelectedLabelWeight,
     required this.navButtonUnselectedLabelWeight,
+    required this.navButtonSplashColor,
+    required this.navButtonHighlightColor,
   });
 
   final double compactBottomNavBarBaseHeight;
@@ -377,7 +462,12 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
 
-  /// Primary-tinted elevated surface used by the compact bottom nav container.
+  /// Stable neutral elevated chrome for the compact bottom nav container.
+  ///
+  /// Light mode uses [Colors.white] so the floating bar reads as a clean chip on
+  /// the cream scaffold. Dark mode lerps [AppColors.darkSurfaceContainerHighBase]
+  /// toward [AppColors.darkBackground] so it stays separate from
+  /// primary-harmonized [ColorScheme] tiers.
   final Color bottomNavBackgroundColor;
 
   /// Alpha for the soft shadow rendered under the floating bottom nav.
@@ -390,7 +480,20 @@ class TilawaAdaptiveShellTokens {
   /// Offset for the floating bottom nav shadow.
   final Offset bottomNavShadowOffset;
 
+  /// [RoundedRectangleBorder.side] for the floating bottom nav ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
+  final Color bottomNavOutlineColor;
+
   final double sideRailRadius;
+
+  /// [NavigationRail.indicatorColor]: primary tint over [ColorScheme.surfaceContainerHigh].
+  final Color sideRailIndicatorColor;
+
+  /// Frosted rail panel fill ([ColorScheme.surface] at [TilawaDesignTokens.opacityGlass]).
+  final Color sideRailBackgroundColor;
+
+  /// Hairline border around the side rail panel.
+  final Color sideRailOutlineColor;
+
   final double sideRailShadowOpacity;
   final double sideRailShadowBlur;
   final Offset sideRailShadowOffset;
@@ -406,6 +509,12 @@ class TilawaAdaptiveShellTokens {
   final double navButtonLabelFontSize;
   final FontWeight navButtonSelectedLabelWeight;
   final FontWeight navButtonUnselectedLabelWeight;
+
+  /// [InkWell.splashColor] for shell nav destinations (bottom + rail).
+  final Color navButtonSplashColor;
+
+  /// [InkWell.highlightColor] for shell nav destinations.
+  final Color navButtonHighlightColor;
 
   factory TilawaAdaptiveShellTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
@@ -427,8 +536,9 @@ class TilawaAdaptiveShellTokens {
     // screen. Color is derived here so every compact bottom nav follows the
     // active theme without per-screen overrides.
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
+    final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: 55,
+      compactBottomNavBarBaseHeight: 45,
       bottomNavHorizontalMargin: 16,
       bottomNavVerticalMargin: 4,
       bottomNavInternalPadding: 8,
@@ -436,14 +546,20 @@ class TilawaAdaptiveShellTokens {
       bottomNavBorderWidth: 1,
       bottomNavItemGap: 4,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      bottomNavShadowOpacity: 0.12,
-      bottomNavShadowBlur: 18,
-      bottomNavShadowOffset: Offset(0, 6),
+      // No drop shadow: blur extends above the pill and reads as a foggy layer
+      // over scroll content (outline still separates chrome from the scaffold).
+      bottomNavShadowOpacity: 0,
+      bottomNavShadowBlur: 0,
+      bottomNavShadowOffset: Offset.zero,
+      bottomNavOutlineColor: shellChromeOutline,
       sideRailRadius: 16,
+      sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
+      sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
+      sideRailOutlineColor: shellChromeOutline,
       sideRailShadowOpacity: 0.05,
       sideRailShadowBlur: 12,
       sideRailShadowOffset: Offset(2, 0),
-      navButtonMinHeight: 64,
+      navButtonMinHeight: 54,
       navButtonVerticalPadding: 4,
       navButtonGap: 4,
       navButtonIconSize: 22,
@@ -458,33 +574,62 @@ class TilawaAdaptiveShellTokens {
       navButtonLabelFontSize: 10,
       navButtonSelectedLabelWeight: FontWeight.w700,
       navButtonUnselectedLabelWeight: FontWeight.w500,
+      navButtonSplashColor: _navButtonSplashColor(colorScheme),
+      navButtonHighlightColor: _navButtonHighlightColor(colorScheme),
     );
   }
 
-  static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.42 : 0.72;
-    return Color.lerp(
+  static Color _navButtonSplashColor(ColorScheme colorScheme) {
+    return colorScheme.onSurface.withValues(alpha: 0.06);
+  }
+
+  static Color _navButtonHighlightColor(ColorScheme colorScheme) {
+    return colorScheme.onSurface.withValues(alpha: 0.04);
+  }
+
+  /// Matches [TilawaDesignTokens.opacitySubtle] (0.1) on [ColorScheme.outlineVariant].
+  static Color _shellChromeOutlineColor(ColorScheme colorScheme) {
+    return colorScheme.outlineVariant.withValues(alpha: 0.1);
+  }
+
+  /// Matches [TilawaDesignTokens.opacityGlass] (0.8) on [ColorScheme.surface].
+  static Color _sideRailBackgroundColor(ColorScheme colorScheme) {
+    return colorScheme.surface.withValues(alpha: 0.8);
+  }
+
+  static Color _sideRailIndicatorColor(ColorScheme colorScheme) {
+    return Color.alphaBlend(
+      colorScheme.primary.withValues(alpha: 0.14),
       colorScheme.surfaceContainerHigh,
-      colorScheme.primaryContainer,
-      blendAmount,
-    )!;
+    );
+  }
+
+  /// Light compact nav uses a transparent bar so tab content (e.g. settings)
+  /// remains visible under the chrome; the hairline outline and per-destination
+  /// pills still read as controls. Dark keeps a filled bar for contrast.
+  static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
+    if (colorScheme.brightness == Brightness.light) {
+      return Colors.transparent;
+    }
+    return Color.lerp(
+          AppColors.darkSurfaceContainerHighBase,
+          AppColors.darkBackground,
+          0.32,
+        ) ??
+        AppColors.darkSurfaceContainerHighBase;
   }
 
   static Color _navButtonSelectedBackgroundColor(
     ColorScheme colorScheme,
     Color bottomNavBackgroundColor,
   ) {
-    final containerBlend = colorScheme.brightness == Brightness.dark
-        ? 0.56
-        : 0.70;
-    final tintOpacity = colorScheme.brightness == Brightness.dark ? 0.10 : 0.08;
+    final tintOpacity = colorScheme.brightness == Brightness.dark ? 0.12 : 0.10;
+    final base = bottomNavBackgroundColor.a == 0
+        ? colorScheme.surfaceContainerLow
+        : bottomNavBackgroundColor;
     return Color.alphaBlend(
       colorScheme.primary.withValues(alpha: tintOpacity),
-      Color.lerp(
-        bottomNavBackgroundColor,
-        colorScheme.primaryContainer,
-        containerBlend,
-      )!,
+      base,
     );
   }
 
@@ -500,7 +645,11 @@ class TilawaAdaptiveShellTokens {
     double? bottomNavShadowOpacity,
     double? bottomNavShadowBlur,
     Offset? bottomNavShadowOffset,
+    Color? bottomNavOutlineColor,
     double? sideRailRadius,
+    Color? sideRailIndicatorColor,
+    Color? sideRailBackgroundColor,
+    Color? sideRailOutlineColor,
     double? sideRailShadowOpacity,
     double? sideRailShadowBlur,
     Offset? sideRailShadowOffset,
@@ -516,6 +665,8 @@ class TilawaAdaptiveShellTokens {
     double? navButtonLabelFontSize,
     FontWeight? navButtonSelectedLabelWeight,
     FontWeight? navButtonUnselectedLabelWeight,
+    Color? navButtonSplashColor,
+    Color? navButtonHighlightColor,
   }) {
     return TilawaAdaptiveShellTokens(
       compactBottomNavBarBaseHeight:
@@ -536,7 +687,14 @@ class TilawaAdaptiveShellTokens {
       bottomNavShadowBlur: bottomNavShadowBlur ?? this.bottomNavShadowBlur,
       bottomNavShadowOffset:
           bottomNavShadowOffset ?? this.bottomNavShadowOffset,
+      bottomNavOutlineColor:
+          bottomNavOutlineColor ?? this.bottomNavOutlineColor,
       sideRailRadius: sideRailRadius ?? this.sideRailRadius,
+      sideRailIndicatorColor:
+          sideRailIndicatorColor ?? this.sideRailIndicatorColor,
+      sideRailBackgroundColor:
+          sideRailBackgroundColor ?? this.sideRailBackgroundColor,
+      sideRailOutlineColor: sideRailOutlineColor ?? this.sideRailOutlineColor,
       sideRailShadowOpacity:
           sideRailShadowOpacity ?? this.sideRailShadowOpacity,
       sideRailShadowBlur: sideRailShadowBlur ?? this.sideRailShadowBlur,
@@ -564,6 +722,9 @@ class TilawaAdaptiveShellTokens {
           navButtonSelectedLabelWeight ?? this.navButtonSelectedLabelWeight,
       navButtonUnselectedLabelWeight:
           navButtonUnselectedLabelWeight ?? this.navButtonUnselectedLabelWeight,
+      navButtonSplashColor: navButtonSplashColor ?? this.navButtonSplashColor,
+      navButtonHighlightColor:
+          navButtonHighlightColor ?? this.navButtonHighlightColor,
     );
   }
 
@@ -628,7 +789,27 @@ class TilawaAdaptiveShellTokens {
         b.bottomNavShadowOffset,
         t,
       )!,
+      bottomNavOutlineColor: Color.lerp(
+        a.bottomNavOutlineColor,
+        b.bottomNavOutlineColor,
+        t,
+      )!,
       sideRailRadius: lerpTokenDouble(a.sideRailRadius, b.sideRailRadius, t),
+      sideRailIndicatorColor: Color.lerp(
+        a.sideRailIndicatorColor,
+        b.sideRailIndicatorColor,
+        t,
+      )!,
+      sideRailBackgroundColor: Color.lerp(
+        a.sideRailBackgroundColor,
+        b.sideRailBackgroundColor,
+        t,
+      )!,
+      sideRailOutlineColor: Color.lerp(
+        a.sideRailOutlineColor,
+        b.sideRailOutlineColor,
+        t,
+      )!,
       sideRailShadowOpacity: lerpTokenDouble(
         a.sideRailShadowOpacity,
         b.sideRailShadowOpacity,
@@ -700,6 +881,16 @@ class TilawaAdaptiveShellTokens {
         b.navButtonUnselectedLabelWeight,
         t,
       )!,
+      navButtonSplashColor: Color.lerp(
+        a.navButtonSplashColor,
+        b.navButtonSplashColor,
+        t,
+      )!,
+      navButtonHighlightColor: Color.lerp(
+        a.navButtonHighlightColor,
+        b.navButtonHighlightColor,
+        t,
+      )!,
     );
   }
 }
@@ -732,6 +923,12 @@ class TilawaSettingsGroupTokens {
     required this.tileDividerOpacity,
     required this.switchActiveTrackOpacity,
     required this.tileItemGap,
+    required this.selectionTileSelectedBackgroundColor,
+    required this.groupSurfaceColor,
+    required this.groupContainerBorderColor,
+    required this.selectionTileDividerColor,
+    required this.switchActiveTrackColor,
+    required this.switchActiveThumbColor,
   });
 
   final EdgeInsetsGeometry groupHeaderPadding;
@@ -760,6 +957,24 @@ class TilawaSettingsGroupTokens {
   final double switchActiveTrackOpacity;
   final double tileItemGap;
 
+  /// Selected row fill for [TilawaSelectionTile] (primary tint on surface).
+  final Color selectionTileSelectedBackgroundColor;
+
+  /// Rounded panel fill behind settings rows ([TilawaSettingsGroup]).
+  final Color groupSurfaceColor;
+
+  /// Hairline border around the group panel (`outlineVariant` × `tileDividerOpacity` × 2).
+  final Color groupContainerBorderColor;
+
+  /// Divider under [TilawaSelectionTile] rows (`outlineVariant` × [tileDividerOpacity]).
+  final Color selectionTileDividerColor;
+
+  /// [Switch.adaptive] active track ([ColorScheme.primary] × [switchActiveTrackOpacity]).
+  final Color switchActiveTrackColor;
+
+  /// [Switch.adaptive] thumb when on.
+  final Color switchActiveThumbColor;
+
   /// Default tokens for the settings group.
   ///
   /// [density] controls compact-mode token values. Comfortable (default)
@@ -771,11 +986,41 @@ class TilawaSettingsGroupTokens {
   factory TilawaSettingsGroupTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
+    return TilawaSettingsGroupTokens.fromColorScheme(
+      ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+      density: density,
+    );
+  }
+
+  factory TilawaSettingsGroupTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
+    const tileIconContainerOpacity = 0.1;
+    final selectionTileSelectedBackgroundColor =
+        _selectionTileSelectedRowBackground(
+          colorScheme,
+          tileIconContainerOpacity,
+        );
+    const tileDividerOpacity = 0.05;
+    final groupSurfaceColor = colorScheme.surfaceContainerLow;
+    final groupContainerBorderColor = _groupContainerBorderColor(
+      colorScheme,
+      tileDividerOpacity,
+    );
+    final selectionTileDividerColor = colorScheme.outlineVariant.withValues(
+      alpha: tileDividerOpacity,
+    );
+    const switchActiveTrackOpacity = 0.5;
+    final switchActiveTrackColor = colorScheme.primary.withValues(
+      alpha: switchActiveTrackOpacity,
+    );
+    final switchActiveThumbColor = colorScheme.primary;
     if (density.isCompact) {
-      return const TilawaSettingsGroupTokens(
+      return TilawaSettingsGroupTokens(
         // Compact: tuned for breathability while staying denser than comfortable.
-        groupHeaderPadding: EdgeInsets.fromLTRB(12, 12, 16, 6),
-        switchTileContentPadding: EdgeInsets.symmetric(
+        groupHeaderPadding: const EdgeInsets.fromLTRB(12, 12, 16, 6),
+        switchTileContentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 10,
         ),
@@ -783,11 +1028,14 @@ class TilawaSettingsGroupTokens {
         groupBorderRadius: 20,
         groupShadowOpacity: 0.06,
         groupShadowBlur: 10,
-        groupShadowOffset: Offset(0, 4),
+        groupShadowOffset: const Offset(0, 4),
         groupTitleFontSize: 12.5,
         groupTitleLetterSpacing: 1.1,
-        tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        tileIconPadding: EdgeInsets.all(10),
+        tileContentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        tileIconPadding: const EdgeInsets.all(10),
         tileIconBorderRadius: 12,
         tileIconSize: 22,
         tileTitleFontSize: 15.5,
@@ -795,31 +1043,40 @@ class TilawaSettingsGroupTokens {
         tileSubtitleOpacity: 0.65,
         tileTrailingSize: 18,
         tileTrailingOpacity: 0.55,
-        tileIconContainerOpacity: 0.1,
-        tileDividerPadding: EdgeInsets.only(left: 64, right: 16),
+        tileIconContainerOpacity: tileIconContainerOpacity,
+        tileDividerPadding: const EdgeInsets.only(left: 64, right: 16),
         tileDividerHeight: 1,
         tileDividerThickness: 0.5,
-        tileDividerOpacity: 0.05,
+        tileDividerOpacity: tileDividerOpacity,
         switchActiveTrackOpacity: 0.5,
         tileItemGap: 16,
+        selectionTileSelectedBackgroundColor:
+            selectionTileSelectedBackgroundColor,
+        groupSurfaceColor: groupSurfaceColor,
+        groupContainerBorderColor: groupContainerBorderColor,
+        selectionTileDividerColor: selectionTileDividerColor,
+        switchActiveTrackColor: switchActiveTrackColor,
+        switchActiveThumbColor: switchActiveThumbColor,
       );
     }
 
-    // Comfortable: byte-for-byte unchanged from pre-density defaults.
-    return const TilawaSettingsGroupTokens(
-      groupHeaderPadding: EdgeInsets.fromLTRB(12, 16, 16, 8),
+    return TilawaSettingsGroupTokens(
+      groupHeaderPadding: const EdgeInsets.fromLTRB(12, 16, 16, 8),
       groupBorderRadius: 20,
       groupShadowOpacity: 0.06,
       groupShadowBlur: 10,
-      groupShadowOffset: Offset(0, 4),
+      groupShadowOffset: const Offset(0, 4),
       groupTitleFontSize: 12.5,
       groupTitleLetterSpacing: 1.1,
-      tileContentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      switchTileContentPadding: EdgeInsets.symmetric(
+      tileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 12,
       ),
-      tileIconPadding: EdgeInsets.all(10),
+      switchTileContentPadding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 12,
+      ),
+      tileIconPadding: const EdgeInsets.all(10),
       tileIconBorderRadius: 12,
       tileIconSize: 22,
       tileTitleFontSize: 15.5,
@@ -828,13 +1085,37 @@ class TilawaSettingsGroupTokens {
       tileSubtitleSpacing: 4,
       tileTrailingSize: 14,
       tileTrailingOpacity: 0.35,
-      tileIconContainerOpacity: 0.1,
-      tileDividerPadding: EdgeInsets.only(left: 64, right: 16),
+      tileIconContainerOpacity: tileIconContainerOpacity,
+      tileDividerPadding: const EdgeInsets.only(left: 64, right: 16),
       tileDividerHeight: 1,
       tileDividerThickness: 0.5,
-      tileDividerOpacity: 0.05,
+      tileDividerOpacity: tileDividerOpacity,
       switchActiveTrackOpacity: 0.5,
       tileItemGap: 16,
+      selectionTileSelectedBackgroundColor:
+          selectionTileSelectedBackgroundColor,
+      groupSurfaceColor: groupSurfaceColor,
+      groupContainerBorderColor: groupContainerBorderColor,
+      selectionTileDividerColor: selectionTileDividerColor,
+      switchActiveTrackColor: switchActiveTrackColor,
+      switchActiveThumbColor: switchActiveThumbColor,
+    );
+  }
+
+  static Color _groupContainerBorderColor(
+    ColorScheme colorScheme,
+    double tileDividerOpacity,
+  ) {
+    return colorScheme.outlineVariant.withValues(alpha: tileDividerOpacity * 2);
+  }
+
+  static Color _selectionTileSelectedRowBackground(
+    ColorScheme colorScheme,
+    double tileIconContainerOpacity,
+  ) {
+    return Color.alphaBlend(
+      colorScheme.primary.withValues(alpha: tileIconContainerOpacity * 3),
+      colorScheme.surface,
     );
   }
 
@@ -864,6 +1145,12 @@ class TilawaSettingsGroupTokens {
     double? tileDividerOpacity,
     double? switchActiveTrackOpacity,
     double? tileItemGap,
+    Color? selectionTileSelectedBackgroundColor,
+    Color? groupSurfaceColor,
+    Color? groupContainerBorderColor,
+    Color? selectionTileDividerColor,
+    Color? switchActiveTrackColor,
+    Color? switchActiveThumbColor,
   }) {
     return TilawaSettingsGroupTokens(
       groupHeaderPadding: groupHeaderPadding ?? this.groupHeaderPadding,
@@ -895,6 +1182,18 @@ class TilawaSettingsGroupTokens {
       switchActiveTrackOpacity:
           switchActiveTrackOpacity ?? this.switchActiveTrackOpacity,
       tileItemGap: tileItemGap ?? this.tileItemGap,
+      selectionTileSelectedBackgroundColor:
+          selectionTileSelectedBackgroundColor ??
+          this.selectionTileSelectedBackgroundColor,
+      groupSurfaceColor: groupSurfaceColor ?? this.groupSurfaceColor,
+      groupContainerBorderColor:
+          groupContainerBorderColor ?? this.groupContainerBorderColor,
+      selectionTileDividerColor:
+          selectionTileDividerColor ?? this.selectionTileDividerColor,
+      switchActiveTrackColor:
+          switchActiveTrackColor ?? this.switchActiveTrackColor,
+      switchActiveThumbColor:
+          switchActiveThumbColor ?? this.switchActiveThumbColor,
     );
   }
 
@@ -1017,6 +1316,36 @@ class TilawaSettingsGroupTokens {
         t,
       ),
       tileItemGap: lerpTokenDouble(a.tileItemGap, b.tileItemGap, t),
+      selectionTileSelectedBackgroundColor: Color.lerp(
+        a.selectionTileSelectedBackgroundColor,
+        b.selectionTileSelectedBackgroundColor,
+        t,
+      )!,
+      groupSurfaceColor: Color.lerp(
+        a.groupSurfaceColor,
+        b.groupSurfaceColor,
+        t,
+      )!,
+      groupContainerBorderColor: Color.lerp(
+        a.groupContainerBorderColor,
+        b.groupContainerBorderColor,
+        t,
+      )!,
+      selectionTileDividerColor: Color.lerp(
+        a.selectionTileDividerColor,
+        b.selectionTileDividerColor,
+        t,
+      )!,
+      switchActiveTrackColor: Color.lerp(
+        a.switchActiveTrackColor,
+        b.switchActiveTrackColor,
+        t,
+      )!,
+      switchActiveThumbColor: Color.lerp(
+        a.switchActiveThumbColor,
+        b.switchActiveThumbColor,
+        t,
+      )!,
     );
   }
 }
@@ -1038,6 +1367,11 @@ class TilawaImmersiveComposerTokens {
     required this.previewMaxHeight,
     required this.headerButtonSize,
     required this.headerIconSizeOffset,
+    required this.composerSurfaceColor,
+    required this.overlayPanelTranslucentFillColor,
+    required this.panelBorderColor,
+    required this.topBarSubtitleColor,
+    required this.headerIconButtonFillColor,
   });
 
   final Duration defaultAutoHideDuration;
@@ -1055,6 +1389,21 @@ class TilawaImmersiveComposerTokens {
   final double headerButtonSize;
   final double headerIconSizeOffset;
 
+  /// Full-bleed scaffold fill and opaque overlay panels ([ColorScheme.surface]).
+  final Color composerSurfaceColor;
+
+  /// Bottom/top overlay panel fill when blur is on ([composerSurfaceColor] at [backgroundOverlayOpacity]).
+  final Color overlayPanelTranslucentFillColor;
+
+  /// Border on overlay panels and top bar ([ColorScheme.outlineVariant] at [overlayBorderOpacity]).
+  final Color panelBorderColor;
+
+  /// Subtitle text on [_TopAppBar].
+  final Color topBarSubtitleColor;
+
+  /// Opaque circle behind header icon buttons (e.g. close).
+  final Color headerIconButtonFillColor;
+
   factory TilawaImmersiveComposerTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
@@ -1062,12 +1411,24 @@ class TilawaImmersiveComposerTokens {
     // `compactPanelHeightFactor` fields, but those are screen-size
     // responsiveness — unrelated to TilawaDensity. Kept no-op to avoid
     // semantic confusion.
-    return const TilawaImmersiveComposerTokens(
-      defaultAutoHideDuration: Duration(seconds: 3),
-      transitionDuration: Duration(milliseconds: 300),
-      backgroundBlurScale: 0.9,
-      backgroundOverlayOpacity: 0.42,
-      overlayBorderOpacity: 0.1,
+    return TilawaImmersiveComposerTokens.fromColorScheme(
+      ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+    );
+  }
+
+  factory TilawaImmersiveComposerTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
+    const backgroundBlurScale = 0.9;
+    const backgroundOverlayOpacity = 0.42;
+    const overlayBorderOpacity = 0.1;
+    final surface = colorScheme.surface;
+    return TilawaImmersiveComposerTokens(
+      defaultAutoHideDuration: const Duration(seconds: 3),
+      transitionDuration: const Duration(milliseconds: 300),
+      backgroundBlurScale: backgroundBlurScale,
+      backgroundOverlayOpacity: backgroundOverlayOpacity,
+      overlayBorderOpacity: overlayBorderOpacity,
       compactHeightBreakpoint: 760,
       compactPanelHeightFactor: 0.5,
       regularPanelHeightFactor: 0.44,
@@ -1077,6 +1438,15 @@ class TilawaImmersiveComposerTokens {
       previewMaxHeight: 460,
       headerButtonSize: 24,
       headerIconSizeOffset: 2,
+      composerSurfaceColor: surface,
+      overlayPanelTranslucentFillColor: surface.withValues(
+        alpha: backgroundOverlayOpacity,
+      ),
+      panelBorderColor: colorScheme.outlineVariant.withValues(
+        alpha: overlayBorderOpacity,
+      ),
+      topBarSubtitleColor: colorScheme.onSurfaceVariant,
+      headerIconButtonFillColor: colorScheme.surfaceContainerHighest,
     );
   }
 
@@ -1095,6 +1465,11 @@ class TilawaImmersiveComposerTokens {
     double? previewMaxHeight,
     double? headerButtonSize,
     double? headerIconSizeOffset,
+    Color? composerSurfaceColor,
+    Color? overlayPanelTranslucentFillColor,
+    Color? panelBorderColor,
+    Color? topBarSubtitleColor,
+    Color? headerIconButtonFillColor,
   }) {
     return TilawaImmersiveComposerTokens(
       defaultAutoHideDuration:
@@ -1118,6 +1493,14 @@ class TilawaImmersiveComposerTokens {
       previewMaxHeight: previewMaxHeight ?? this.previewMaxHeight,
       headerButtonSize: headerButtonSize ?? this.headerButtonSize,
       headerIconSizeOffset: headerIconSizeOffset ?? this.headerIconSizeOffset,
+      composerSurfaceColor: composerSurfaceColor ?? this.composerSurfaceColor,
+      overlayPanelTranslucentFillColor:
+          overlayPanelTranslucentFillColor ??
+          this.overlayPanelTranslucentFillColor,
+      panelBorderColor: panelBorderColor ?? this.panelBorderColor,
+      topBarSubtitleColor: topBarSubtitleColor ?? this.topBarSubtitleColor,
+      headerIconButtonFillColor:
+          headerIconButtonFillColor ?? this.headerIconButtonFillColor,
     );
   }
 
@@ -1187,6 +1570,27 @@ class TilawaImmersiveComposerTokens {
         b.headerIconSizeOffset,
         t,
       ),
+      composerSurfaceColor: Color.lerp(
+        a.composerSurfaceColor,
+        b.composerSurfaceColor,
+        t,
+      )!,
+      overlayPanelTranslucentFillColor: Color.lerp(
+        a.overlayPanelTranslucentFillColor,
+        b.overlayPanelTranslucentFillColor,
+        t,
+      )!,
+      panelBorderColor: Color.lerp(a.panelBorderColor, b.panelBorderColor, t)!,
+      topBarSubtitleColor: Color.lerp(
+        a.topBarSubtitleColor,
+        b.topBarSubtitleColor,
+        t,
+      )!,
+      headerIconButtonFillColor: Color.lerp(
+        a.headerIconButtonFillColor,
+        b.headerIconButtonFillColor,
+        t,
+      )!,
     );
   }
 }

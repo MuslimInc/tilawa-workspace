@@ -35,12 +35,10 @@ class TilawaSettingsGroup extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
+            color: tokens.groupSurfaceColor,
             borderRadius: BorderRadius.circular(tokens.groupBorderRadius),
             border: Border.all(
-              color: colorScheme.outlineVariant.withValues(
-                alpha: tokens.tileDividerOpacity * 2,
-              ),
+              color: tokens.groupContainerBorderColor,
               width: tokens.tileDividerThickness,
             ),
             boxShadow: [

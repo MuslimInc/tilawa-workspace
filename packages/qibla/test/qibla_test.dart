@@ -115,7 +115,7 @@ void main() {
       locationController.add(pos);
       compassController.add(event1); // North
 
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
 
       expect(results.length, 1);
       // Qibla for London is ~119. So offset from North(0) is ~119.
@@ -131,7 +131,7 @@ void main() {
       when(() => event2.accuracy).thenReturn(15.0);
 
       compassController.add(event2);
-      await Future.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
 
       expect(results.length, 2);
       // qibla = 90 + (360 - 119) = 90 + 241 = 331

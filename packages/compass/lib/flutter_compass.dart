@@ -19,8 +19,8 @@ class CompassEvent {
   final double? accuracy;
 
   CompassEvent.fromList(List<double>? data)
-    : heading = data?[0] ?? null,
-      headingForCameraMode = data?[1] ?? null,
+    : heading = data?[0],
+      headingForCameraMode = data?[1],
       accuracy = (data == null) || (data[2] == -1) ? null : data[2];
 
   @override
@@ -40,7 +40,7 @@ class FlutterCompass {
 
   FlutterCompass._();
 
-  static const EventChannel _compassChannel = const EventChannel(
+  static const EventChannel _compassChannel = EventChannel(
     'hemanthraj/compass',
   );
   static Stream<CompassEvent>? _stream;
@@ -50,9 +50,17 @@ class FlutterCompass {
     if (kIsWeb) {
       return Stream.empty();
     }
-    _stream ??= _compassChannel.receiveBroadcastStream().map(
-      (dynamic data) => CompassEvent.fromList(data?.cast<double>()),
-    );
+    _stream ??= _compassChannel.receiveBroadcastStream().map((Object? data) {
+      if (data == null) {
+        return CompassEvent.fromList(null);
+      }
+      if (data is! List) {
+        return CompassEvent.fromList(null);
+      }
+      return CompassEvent.fromList(
+        List<double>.from(data.map((e) => (e as num).toDouble())),
+      );
+    });
     return _stream;
   }
 }

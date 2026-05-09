@@ -186,7 +186,6 @@ class _BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
-    final designTokens = theme.tokens;
     final bottomPadding = context.floatingBottomPadding;
 
     final BorderRadius shellRadius = BorderRadius.circular(
@@ -208,46 +207,45 @@ class _BottomNavBar extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: shellRadius,
-            boxShadow: [
-              BoxShadow(
-                color: theme.colorScheme.shadow.withValues(
-                  alpha: tokens.bottomNavShadowOpacity,
-                ),
-                blurRadius: tokens.bottomNavShadowBlur,
-                offset: tokens.bottomNavShadowOffset,
-              ),
-            ],
+            boxShadow: tokens.bottomNavShadowOpacity > 0
+                ? [
+                    BoxShadow(
+                      color: theme.colorScheme.shadow.withValues(
+                        alpha: tokens.bottomNavShadowOpacity,
+                      ),
+                      blurRadius: tokens.bottomNavShadowBlur,
+                      offset: tokens.bottomNavShadowOffset,
+                    ),
+                  ]
+                : const [],
           ),
           child: Material(
             color: tokens.bottomNavBackgroundColor,
             shape: RoundedRectangleBorder(
               borderRadius: shellRadius,
               side: BorderSide(
-                color: theme.colorScheme.outlineVariant.withValues(
-                  alpha: designTokens.opacitySubtle,
-                ),
+                color: tokens.bottomNavOutlineColor,
                 width: tokens.bottomNavBorderWidth,
               ),
             ),
             clipBehavior: Clip.antiAlias,
             child: DecoratedBox(
               decoration: decoration ?? const BoxDecoration(),
-              child: Padding(
-                padding: EdgeInsets.all(tokens.bottomNavItemGap),
-                child: Row(
-                  spacing: tokens.bottomNavItemGap,
-                  children: [
-                    for (int i = 0; i < destinations.length; i++)
-                      Expanded(
-                        child: _NavButton(
-                          destination: destinations[i],
-                          isSelected: selectedIndex == i,
-                          onTap: () => onDestinationSelected(i),
-                          borderRadius: tokens.bottomNavInnerRadius,
-                        ),
+              child: Row(
+                spacing: tokens.bottomNavItemGap,
+                mainAxisAlignment: .spaceBetween,
+                crossAxisAlignment: .start,
+                children: [
+                  for (int i = 0; i < destinations.length; i++)
+                    Expanded(
+                      child: _NavButton(
+                        destination: destinations[i],
+                        isSelected: selectedIndex == i,
+                        onTap: () => onDestinationSelected(i),
+                        borderRadius: tokens.bottomNavInnerRadius,
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
             ),
           ),
@@ -282,14 +280,10 @@ class _SideNavRail extends StatelessWidget {
       borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
       child: Container(
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface.withValues(
-            alpha: designTokens.opacityGlass,
-          ),
+          color: componentTokens.sideRailBackgroundColor,
           borderRadius: BorderRadius.circular(componentTokens.sideRailRadius),
           border: Border.all(
-            color: theme.colorScheme.outlineVariant.withValues(
-              alpha: designTokens.opacitySubtle,
-            ),
+            color: componentTokens.sideRailOutlineColor,
             width: designTokens.borderWidthThin,
           ),
           boxShadow: [
@@ -313,7 +307,7 @@ class _SideNavRail extends StatelessWidget {
                     selectedIndex: selectedIndex,
                     onDestinationSelected: onDestinationSelected,
                     backgroundColor: Colors.transparent,
-                    indicatorColor: theme.colorScheme.primaryContainer,
+                    indicatorColor: componentTokens.sideRailIndicatorColor,
                     labelType: extended
                         ? NavigationRailLabelType.none
                         : NavigationRailLabelType.all,
@@ -368,9 +362,6 @@ class _NavButton extends StatelessWidget {
     final selectedFg = theme.colorScheme.primary;
     final unselectedFg = theme.colorScheme.onSurfaceVariant;
     final Color iconColor = isSelected ? selectedFg : unselectedFg;
-    final BorderRadius effectiveBorderRadius = BorderRadius.circular(
-      borderRadius,
-    );
 
     final Widget iconWidget = destination.iconBuilder != null
         ? destination.iconBuilder!(
@@ -387,77 +378,73 @@ class _NavButton extends StatelessWidget {
             color: iconColor,
           );
 
+    final BorderRadius effectiveBorderRadius = BorderRadius.circular(
+      borderRadius,
+    );
+
+    // Full-cell tap target; no splash/highlight; selection is icon/label only.
     final Widget button = Material(
-      color: Colors.transparent,
-      borderRadius: effectiveBorderRadius,
-      clipBehavior: Clip.antiAlias,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutCubic,
-        decoration: BoxDecoration(
-          color: isSelected
-              ? tokens.navButtonSelectedBackgroundColor
-              : Colors.transparent,
-          borderRadius: effectiveBorderRadius,
-        ),
-        child: InkWell(
-          onTap: () {
-            HapticFeedback.selectionClick();
-            onTap();
-          },
-          borderRadius: effectiveBorderRadius,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: tokens.navButtonVerticalPadding,
-              ),
-              child: Column(
-                mainAxisAlignment: .center,
-                spacing: tokens.navButtonGap,
-                mainAxisSize: .min,
-                children: [
-                  AnimatedScale(
-                    scale: isSelected
-                        ? tokens.navButtonSelectedCenterScale
-                        : tokens.navButtonUnselectedScale,
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onTap();
+        },
+        borderRadius: effectiveBorderRadius,
+        splashFactory: NoSplash.splashFactory,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: tokens.navButtonVerticalPadding,
+            ),
+            child: Column(
+              mainAxisAlignment: .start,
+              crossAxisAlignment: .center,
+              spacing: tokens.navButtonGap,
+              mainAxisSize: .min,
+              children: [
+                AnimatedScale(
+                  scale: isSelected
+                      ? tokens.navButtonSelectedCenterScale
+                      : tokens.navButtonUnselectedScale,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutBack,
+                  child: PageTransitionSwitcher(
                     duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeOutBack,
-                    child: PageTransitionSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      transitionBuilder:
-                          (child, animation, secondaryAnimation) =>
-                              FadeThroughTransition(
-                                animation: animation,
-                                secondaryAnimation: secondaryAnimation,
-                                fillColor: Colors.transparent,
-                                child: child,
-                              ),
-                      child: KeyedSubtree(
-                        key: ValueKey(isSelected),
-                        child: iconWidget,
-                      ),
-                    ),
-                  ),
-                  AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    style: (theme.textTheme.labelSmall ?? const TextStyle())
-                        .copyWith(
-                          fontSize: tokens.navButtonLabelFontSize,
-                          fontWeight: isSelected
-                              ? tokens.navButtonSelectedLabelWeight
-                              : tokens.navButtonUnselectedLabelWeight,
-                          color: isSelected ? selectedFg : unselectedFg,
+                    transitionBuilder: (child, animation, secondaryAnimation) =>
+                        FadeThroughTransition(
+                          animation: animation,
+                          secondaryAnimation: secondaryAnimation,
+                          fillColor: Colors.transparent,
+                          child: child,
                         ),
-                    child: Text(
-                      destination.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
+                    child: KeyedSubtree(
+                      key: ValueKey(isSelected),
+                      child: iconWidget,
                     ),
                   ),
-                ],
-              ),
+                ),
+                AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 200),
+                  style: (theme.textTheme.labelSmall ?? const TextStyle())
+                      .copyWith(
+                        fontSize: tokens.navButtonLabelFontSize,
+                        fontWeight: isSelected
+                            ? tokens.navButtonSelectedLabelWeight
+                            : tokens.navButtonUnselectedLabelWeight,
+                        color: isSelected ? selectedFg : unselectedFg,
+                      ),
+                  child: Text(
+                    destination.label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
             ),
           ),
         ),

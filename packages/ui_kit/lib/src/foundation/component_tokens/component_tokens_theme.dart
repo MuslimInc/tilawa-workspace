@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
 import '../density.dart';
+import '../design_tokens.dart';
 import 'atoms_tokens.dart';
 import 'molecules_tokens.dart';
 import 'organisms_tokens.dart';
@@ -120,8 +121,8 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       divider: TilawaDividerTokens.defaults(density: density),
       emptyState: TilawaEmptyStateTokens.defaults(density: density),
       errorState: TilawaErrorStateTokens.defaults(density: density),
-      alphabetScrollbar: TilawaAlphabetScrollbarTokens.defaults(
-        density: density,
+      alphabetScrollbar: TilawaAlphabetScrollbarTokens.fromColorScheme(
+        effectiveColorScheme,
       ),
       feedbackStrip: TilawaFeedbackStripTokens.defaults(density: density),
       glassPanel: TilawaGlassPanelTokens.defaults(density: density),
@@ -144,14 +145,19 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       ),
       playerBackground: TilawaPlayerBackgroundTokens.defaults(density: density),
       footerBar: TilawaFooterBarTokens.defaults(density: density),
-      mediaPlayerBar: TilawaMediaPlayerBarTokens.defaults(density: density),
+      mediaPlayerBar: TilawaMediaPlayerBarTokens.fromColorScheme(
+        effectiveColorScheme,
+      ),
       adaptiveShell: TilawaAdaptiveShellTokens.fromColorScheme(
         effectiveColorScheme,
         density: density,
       ),
-      settingsGroup: TilawaSettingsGroupTokens.defaults(density: density),
-      immersiveComposer: TilawaImmersiveComposerTokens.defaults(
+      settingsGroup: TilawaSettingsGroupTokens.fromColorScheme(
+        effectiveColorScheme,
         density: density,
+      ),
+      immersiveComposer: TilawaImmersiveComposerTokens.fromColorScheme(
+        effectiveColorScheme,
       ),
       iconToggle: TilawaIconToggleTokens.fromColorScheme(
         effectiveColorScheme,
@@ -344,6 +350,22 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
 }
 
 extension TilawaComponentTokensX on ThemeData {
-  TilawaComponentTokens get componentTokens =>
-      extension<TilawaComponentTokens>() ?? TilawaComponentTokens.light();
+  /// Resolves kit tokens from [ThemeExtension], or rebuilds them from
+  /// [colorScheme] when a subtree uses a partial [ThemeData] that omits the
+  /// extension (common with nested [Theme] wrappers). Avoids falling back to
+  /// [ColorScheme.fromSeed] with [AppColors.defaultPrimary], which ignores the
+  /// active user primary and refined surfaces.
+  TilawaComponentTokens get componentTokens {
+    final TilawaComponentTokens? ext = extension<TilawaComponentTokens>();
+    if (ext != null) return ext;
+
+    final TilawaDensity density =
+        extension<TilawaDesignTokens>()?.density ?? TilawaDensity.comfortable;
+    return colorScheme.brightness == Brightness.dark
+        ? TilawaComponentTokens.dark(density: density, colorScheme: colorScheme)
+        : TilawaComponentTokens.light(
+            density: density,
+            colorScheme: colorScheme,
+          );
+  }
 }

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 /// All app colors should be defined here to maintain consistency
 /// and make it easy to update colors across the app.
 abstract final class AppColors {
+  AppColors._();
+
   // Primary colors
   /// Default primary color (deep teal).
   static const Color primaryTeal = Color(0xFF0F766E);
@@ -46,6 +48,13 @@ abstract final class AppColors {
   /// Light elevated/contained surface.
   static const Color lightSurfaceContainer = Color(0xFFF1EEE6);
 
+  /// Upper elevation tier (e.g. bottom nav chrome) before light-theme primary
+  /// harmonization in [AppTheme].
+  static const Color lightSurfaceContainerHighBase = Color(0xFFE2DBC7);
+
+  /// Top elevation tier before light-theme primary harmonization in [AppTheme].
+  static const Color lightSurfaceContainerHighestBase = Color(0xFFD7CFB9);
+
   /// Light outline/divider color. Calibrated for visibility on real-device
   /// DPIs (~400 ppi); avoid going lighter than this.
   static const Color lightOutline = Color(0xFFC8BDA8);
@@ -59,9 +68,90 @@ abstract final class AppColors {
   /// Dark elevated/contained surface.
   static const Color darkSurfaceContainer = Color(0xFF1C2925);
 
+  /// Dark upper container tier **base** before optional primary harmonization in
+  /// [AppTheme]. Same value as stable dark bottom nav chrome in kit tokens.
+  static const Color darkSurfaceContainerHighBase = Color(0xFF2A3A35);
+
+  /// Dark top container tier **base** before optional primary harmonization in
+  /// [AppTheme].
+  static const Color darkSurfaceContainerHighestBase = Color(0xFF34463F);
+
+  /// Dark [ColorScheme] error tone used in [AppTheme] dark Flex scheme (Material
+  /// dark error), distinct from [error] used for light scheme / UI semantics.
+  static const Color darkSchemeError = Color(0xFFFFB4AB);
+
   /// Dark outline/divider color. Calibrated for visibility on real-device
   /// DPIs (~400 ppi); avoid going darker than this.
   static const Color darkOutline = Color(0xFF4B5B55);
+
+  // --- AppTheme: light FlexSchemeColor / refinement (single source of truth) ---
+
+  /// Historical reference: hand-tuned light primary container for the default
+  /// teal preset. [AppTheme] derives `ColorScheme.primaryContainer` from the
+  /// selected primary instead; unused at runtime.
+  static const Color lightDefaultPrimaryContainer = Color(0xFFD8F0EC);
+
+  /// Light [FlexSchemeColor.secondaryContainer].
+  static const Color lightSecondaryContainer = Color(0xFFE4EBD5);
+
+  /// Light [FlexSchemeColor.tertiaryContainer].
+  static const Color lightTertiaryContainer = Color(0xFFF3E3BD);
+
+  /// Light [ColorScheme.surfaceContainer] base before primary harmonization.
+  static const Color lightSurfaceContainerMid = Color(0xFFEBE6D7);
+
+  /// Light [ColorScheme.outlineVariant] after refinement.
+  static const Color lightOutlineVariant = Color(0xFFE6DED0);
+
+  /// Light [ColorScheme.shadow] and [ColorScheme.scrim].
+  static const Color lightShadow = Color(0xFF1F2926);
+
+  // --- AppTheme: dark FlexSchemeColor (single source of truth) ---
+
+  /// Dark preset primary on surface when [isDefaultPreset] (Flex dark scheme).
+  static const Color darkDefaultPrimary = Color(0xFF70C8BD);
+
+  /// Historical reference: dark primary container paired with [darkDefaultPrimary].
+  /// [AppTheme] derives `ColorScheme.primaryContainer` from the selected primary
+  /// instead; unused at runtime.
+  static const Color darkDefaultPrimaryContainer = Color(0xFF143E39);
+
+  /// Dark [FlexSchemeColor.secondary].
+  static const Color darkSecondary = Color(0xFFB8C69A);
+
+  /// Dark [FlexSchemeColor.secondaryContainer].
+  static const Color darkSecondaryContainer = Color(0xFF2E3A28);
+
+  /// Dark [FlexSchemeColor.tertiary].
+  static const Color darkTertiary = Color(0xFFD8B76C);
+
+  /// Dark [FlexSchemeColor.tertiaryContainer].
+  static const Color darkTertiaryContainer = Color(0xFF4B3B18);
+
+  // --- AppTheme: true-black dark refinement ---
+
+  /// True-black mode [ColorScheme.surface].
+  static const Color darkTrueBlackSurface = Color(0xFF050807);
+
+  /// True-black mode [ColorScheme.surfaceContainer].
+  static const Color darkTrueBlackSurfaceContainer = Color(0xFF080D0B);
+
+  /// True-black mode [ColorScheme.surfaceContainerHigh].
+  static const Color darkTrueBlackSurfaceContainerHigh = Color(0xFF101714);
+
+  /// True-black mode [ColorScheme.surfaceContainerHighest].
+  static const Color darkTrueBlackSurfaceContainerHighest = Color(0xFF19211D);
+
+  /// True-black mode [ColorScheme.outlineVariant].
+  static const Color darkTrueBlackOutlineVariant = Color(0xFF2B3934);
+
+  // --- AppTheme: dark refinement (non-true-black) ---
+
+  /// Dark [ColorScheme.surfaceContainerLowest] after refinement.
+  static const Color darkSurfaceContainerLowest = Color(0xFF0B1210);
+
+  /// Dark [ColorScheme.outlineVariant] after refinement.
+  static const Color darkOutlineVariant = Color(0xFF2F3E39);
 
   // Status colors
   /// Error/failure color

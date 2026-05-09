@@ -64,9 +64,7 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveBackground,
         borderRadius: BorderRadius.circular(tokens.containerRadius),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(alpha: 0.72),
-        ),
+        border: Border.all(color: tokens.containerBorderColor),
       ),
       child: Row(
         children: segments.map((segment) {
@@ -146,9 +144,9 @@ class _SegmentButton extends StatelessWidget {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+                      color: tokens.selectedItemShadowColor,
+                      blurRadius: tokens.selectedItemShadowBlur,
+                      offset: tokens.selectedItemShadowOffset,
                     ),
                   ],
                 )

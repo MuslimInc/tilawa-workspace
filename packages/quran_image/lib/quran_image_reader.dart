@@ -730,6 +730,11 @@ class _QuranImageReaderState extends State<QuranImageReader>
     try {
       return await future;
     } finally {
+      // Remove our own entry from the in-flight map only if it hasn't been
+      // replaced or cleared (e.g. by _clearSnapshotState during a viewport
+      // change). The future is already awaited above, so there is nothing
+      // else to do with the removed reference — it is the same `future`
+      // whose result/error has already been observed by the caller.
       final current = _snapshotFutures[key];
       if (identical(current, future)) {
         _snapshotFutures.remove(key);

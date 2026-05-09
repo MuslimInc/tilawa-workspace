@@ -158,11 +158,6 @@ class _PlayerApp extends StatelessWidget {
                 },
                 theme: AppTheme.getLightTheme(
                   primaryColor: themeState.primaryColor,
-                  isDefaultPreset:
-                      themeState.primaryColorSource ==
-                          PrimaryColorSource.preset &&
-                      themeState.primaryPresetId ==
-                          PrimaryColorPreset.defaultPreset.id,
                   density: density,
                   extensions: [QuranReaderTheme.light],
                 ),

@@ -98,9 +98,7 @@ class TilawaSettingsTile extends StatelessWidget {
             child: Divider(
               height: tokens.tileDividerHeight,
               thickness: tokens.tileDividerThickness,
-              color: colorScheme.outlineVariant.withValues(
-                alpha: tokens.tileDividerOpacity,
-              ),
+              color: tokens.selectionTileDividerColor,
             ),
           ),
       ],
@@ -186,10 +184,8 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                   Switch.adaptive(
                     value: value,
                     onChanged: onChanged,
-                    activeTrackColor: colorScheme.primary.withValues(
-                      alpha: tokens.switchActiveTrackOpacity,
-                    ),
-                    activeThumbColor: colorScheme.primary,
+                    activeTrackColor: tokens.switchActiveTrackColor,
+                    activeThumbColor: tokens.switchActiveThumbColor,
                   ),
                 ],
               ),
@@ -202,9 +198,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
             child: Divider(
               height: tokens.tileDividerHeight,
               thickness: tokens.tileDividerThickness,
-              color: colorScheme.outlineVariant.withValues(
-                alpha: tokens.tileDividerOpacity,
-              ),
+              color: tokens.selectionTileDividerColor,
             ),
           ),
       ],
