@@ -1753,6 +1753,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerNotifications => 'Prayer Notifications';
 
   @override
+  String get manageAlerts => 'Manage Alerts';
+
+  @override
   String get prayerNotificationsEnabledAll => 'All Prayer Notifications';
 
   @override

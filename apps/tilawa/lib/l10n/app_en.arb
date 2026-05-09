@@ -2354,6 +2354,10 @@
     "@prayerNotifications": {
         "description": "Section title for prayer time notification settings"
     },
+    "manageAlerts": "Manage Alerts",
+    "@manageAlerts": {
+        "description": "Action label to open prayer alert preferences"
+    },
     "prayerNotificationsEnabledAll": "All Prayer Notifications",
     "@prayerNotificationsEnabledAll": {
         "description": "Global toggle label for enabling/disabling all prayer notifications"

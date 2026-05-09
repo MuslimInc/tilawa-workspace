@@ -3236,6 +3236,12 @@ abstract class AppLocalizations {
   /// **'Prayer Notifications'**
   String get prayerNotifications;
 
+  /// Action label to open prayer alert preferences
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Alerts'**
+  String get manageAlerts;
+
   /// Global toggle label for enabling/disabling all prayer notifications
   ///
   /// In en, this message translates to:

@@ -426,77 +426,27 @@ class _PrayerAlertTile extends StatelessWidget {
               ),
             ),
           ),
-          _IconToggle(
-            icon: Icons.notifications_active_outlined,
-            activeIcon: Icons.notifications_active,
-            value: notificationEnabled,
-            onChanged: onNotificationChanged,
+          Semantics(
             identifier: notificationIdentifier,
-            tokens: tokens,
-            theme: theme,
+            child: TilawaIconToggle(
+              icon: Icons.notifications_active_outlined,
+              activeIcon: Icons.notifications_active,
+              value: notificationEnabled,
+              onChanged: onNotificationChanged,
+              semanticLabel: context.l10n.prayerNotifications,
+            ),
           ),
           SizedBox(width: tokens.spaceSmall),
-          _IconToggle(
+          TilawaIconToggle(
             icon: Icons.volume_mute_outlined,
             activeIcon: Icons.volume_up,
             value: adhanEnabled,
             onChanged: onAdhanChanged,
-            tokens: tokens,
-            theme: theme,
+            semanticLabel: context.l10n.playAdhan,
           ),
         ],
       ),
     );
-  }
-}
-
-class _IconToggle extends StatelessWidget {
-  const _IconToggle({
-    required this.icon,
-    required this.activeIcon,
-    required this.value,
-    required this.onChanged,
-    required this.tokens,
-    required this.theme,
-    this.identifier,
-  });
-
-  final IconData icon;
-  final IconData activeIcon;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final TilawaDesignTokens tokens;
-  final ThemeData theme;
-  final String? identifier;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = theme.colorScheme;
-    final Widget iconButton = Material(
-      color: value
-          ? colorScheme.primaryContainer
-          : colorScheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(tokens.radiusMedium),
-      child: InkWell(
-        onTap: () => onChanged(!value),
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        child: Padding(
-          padding: EdgeInsets.all(tokens.spaceSmall),
-          child: Icon(
-            value ? activeIcon : icon,
-            size: 20,
-            color: value
-                ? colorScheme.onPrimaryContainer
-                : colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-
-    if (identifier != null) {
-      return Semantics(identifier: identifier, child: iconButton);
-    }
-    return iconButton;
   }
 }
 

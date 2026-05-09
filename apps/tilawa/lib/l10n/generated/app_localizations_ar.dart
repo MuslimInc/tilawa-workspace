@@ -1744,6 +1744,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prayerNotifications => 'إشعارات الصلاة';
 
   @override
+  String get manageAlerts => 'إدارة التنبيهات';
+
+  @override
   String get prayerNotificationsEnabledAll => 'جميع إشعارات الصلاة';
 
   @override

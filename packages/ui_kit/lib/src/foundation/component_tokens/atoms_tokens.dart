@@ -350,7 +350,7 @@ class TilawaIconToggleTokens {
     // already below the 48dp guideline. Do not shrink further; flagged for
     // a separate accessibility refactor outside this work.
     return TilawaIconToggleTokens(
-      iconSize: 20.0,
+      iconSize: 18.0,
       activeBackgroundColor: _activeBackgroundColor(colorScheme),
       inactiveBackgroundColor: _inactiveBackgroundColor(colorScheme),
       padding: 8.0,
