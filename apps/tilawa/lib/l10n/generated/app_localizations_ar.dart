@@ -1163,6 +1163,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prayerTimesRefreshingLocation => 'جارٍ تحديث الموقع...';
 
   @override
+  String get prayerTimesLoading => 'جارٍ تحميل أوقات الصلاة...';
+
+  @override
   String get prayerTimesTapToRefreshLocation => 'اضغط لتحديث الموقع';
 
   @override

@@ -1173,6 +1173,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerTimesRefreshingLocation => 'Refreshing location...';
 
   @override
+  String get prayerTimesLoading => 'Loading prayer times...';
+
+  @override
   String get prayerTimesTapToRefreshLocation => 'Tap to refresh location';
 
   @override

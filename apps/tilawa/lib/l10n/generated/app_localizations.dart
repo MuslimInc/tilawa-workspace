@@ -2192,6 +2192,12 @@ abstract class AppLocalizations {
   /// **'Refreshing location...'**
   String get prayerTimesRefreshingLocation;
 
+  /// Accessibility label while the prayer times screen content is loading
+  ///
+  /// In en, this message translates to:
+  /// **'Loading prayer times...'**
+  String get prayerTimesLoading;
+
   /// Helper text inviting the user to refresh prayer times location
   ///
   /// In en, this message translates to:

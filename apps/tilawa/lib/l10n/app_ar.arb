@@ -1565,6 +1565,10 @@
     "@prayerTimesRefreshingLocation": {
         "description": "Helper text shown while refreshing prayer times location"
     },
+    "prayerTimesLoading": "جارٍ تحميل أوقات الصلاة...",
+    "@prayerTimesLoading": {
+        "description": "Accessibility label while the prayer times screen content is loading"
+    },
     "prayerTimesTapToRefreshLocation": "اضغط لتحديث الموقع",
     "@prayerTimesTapToRefreshLocation": {
         "description": "Helper text inviting the user to refresh prayer times location"
