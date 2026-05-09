@@ -7,4 +7,3 @@ export 'prayer_time_card.dart';
 export 'prayer_times_grid.dart';
 export 'prayer_times_list.dart';
 export 'prayer_times_location_header.dart';
-export 'prayer_times_screen_skeleton.dart';

@@ -70,18 +70,32 @@ class NextPrayerCountdownCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                TilawaStatusChip(
-                  label: nextPrayerLabel,
-                  backgroundColor: accentColor,
-                  foregroundColor: colorScheme.onPrimary,
-                  icon: Icons.notifications_active_rounded,
+                Expanded(
+                  child: Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerStart,
+                      child: TilawaStatusChip(
+                        label: nextPrayerLabel,
+                        backgroundColor: accentColor,
+                        foregroundColor: colorScheme.onPrimary,
+                        icon: Icons.notifications_active_rounded,
+                      ),
+                    ),
+                  ),
                 ),
-                const Spacer(),
-                Text(
-                  '$scheduledLabel • $prayerTime',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w600,
+                SizedBox(width: tokens.spaceSmall),
+                Expanded(
+                  child: Text(
+                    '$scheduledLabel • $prayerTime',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
                   ),
                 ),
               ],

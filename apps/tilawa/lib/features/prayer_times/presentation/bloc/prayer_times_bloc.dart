@@ -8,6 +8,7 @@ import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_re
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/entities.dart';
+import '../../domain/prayer_times_clock.dart';
 import '../../domain/usecases/usecases.dart';
 
 part 'prayer_times_bloc.freezed.dart';
@@ -196,7 +197,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         await _getPrayerTimesUseCase.call(
           latitude: latitude!,
           longitude: longitude!,
-          date: DateTime.now(),
+          date: PrayerTimesClock.now(),
           settings: effectiveSettings,
         );
 

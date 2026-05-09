@@ -11,9 +11,11 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/entities.dart';
+import '../../domain/prayer_times_clock.dart';
 import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
+import '../config/prayer_times_screen_loading_preview.dart';
 import '../formatters/prayer_location_label_formatter.dart';
 import '../mappers/prayer_row_view_data_mapper.dart';
 import '../prayer_notification_semantics_ids.dart';
@@ -97,10 +99,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               previous.isLoadingLocation != current.isLoadingLocation;
         },
         builder: (context, state) {
+          if (PrayerTimesScreenLoadingPreview.enabled) {
+            return _prayerTimesLoadingIndicator(context);
+          }
           switch (state.status) {
             case PrayerTimesStatus.initial:
             case PrayerTimesStatus.loading:
-              return const PrayerTimesScreenSkeleton();
+              return _prayerTimesLoadingIndicator(context);
 
             case PrayerTimesStatus.error:
               return TilawaErrorState(
@@ -127,6 +132,16 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
               );
           }
         },
+      ),
+    );
+  }
+
+  Widget _prayerTimesLoadingIndicator(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Semantics(
+      label: context.l10n.prayerTimesLoading,
+      child: Center(
+        child: CircularProgressIndicator(color: colorScheme.primary),
       ),
     );
   }
@@ -183,7 +198,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
   Widget _buildTodayView(BuildContext context, PrayerTimesState state) {
     if (state.todayPrayerTimes == null) {
-      return const PrayerTimesScreenSkeleton();
+      return _prayerTimesLoadingIndicator(context);
     }
 
     final tokens = Theme.of(context).tokens;
@@ -306,7 +321,7 @@ class _CountdownCardSection extends StatelessWidget {
   static String _buildDateMetaLabel(BuildContext context) {
     final isArabic = context.isArabic;
     final locale = isArabic ? 'ar' : 'en';
-    final now = DateTime.now();
+    final now = PrayerTimesClock.now();
     final dayName = DateFormat('EEEE', locale).format(now);
     var fullDate = DateFormat.yMMMMd(locale).format(now);
 
