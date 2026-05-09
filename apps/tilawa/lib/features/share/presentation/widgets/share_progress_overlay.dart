@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A translucent overlay shown during screenshot capture.
 class ShareProgressOverlay extends StatelessWidget {
@@ -17,7 +18,7 @@ class ShareProgressOverlay extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const CircularProgressIndicator(),
+                const TilawaLoadingIndicator(),
                 const SizedBox(height: 16),
                 Text(message),
               ],

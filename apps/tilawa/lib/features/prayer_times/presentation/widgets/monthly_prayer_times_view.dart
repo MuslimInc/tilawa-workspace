@@ -91,7 +91,7 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
                 previous.monthlyPrayerTimes != current.monthlyPrayerTimes,
             builder: (context, state) {
               if (state.monthlyPrayerTimes.isEmpty) {
-                return const Center(child: CircularProgressIndicator());
+                return const TilawaLoadingIndicator();
               }
 
               return ListView.builder(

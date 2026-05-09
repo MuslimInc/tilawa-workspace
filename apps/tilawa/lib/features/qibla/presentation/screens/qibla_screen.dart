@@ -162,10 +162,8 @@ class _PortraitContent extends StatelessWidget {
                   selector: (s) => s.direction,
                   builder: (context, direction) {
                     if (direction == null) {
-                      return Center(
-                        child: CircularProgressIndicator(
-                          color: colorScheme.onSurface,
-                        ),
+                      return TilawaLoadingIndicator(
+                        color: colorScheme.onSurface,
                       );
                     }
                     return QiblaCompassWidget(qiblaDirection: direction);
@@ -214,9 +212,7 @@ class _CompassArea extends StatelessWidget {
       builder: (context, state) {
         switch (state.status) {
           case QiblaStatus.loading:
-            return Center(
-              child: CircularProgressIndicator(color: colorScheme.onSurface),
-            );
+            return TilawaLoadingIndicator(color: colorScheme.onSurface);
           case QiblaStatus.serviceDisabled:
             return TilawaErrorState(
               icon: Icons.location_off_rounded,
@@ -250,11 +246,7 @@ class _CompassArea extends StatelessWidget {
               selector: (s) => s.direction,
               builder: (context, direction) {
                 if (direction == null) {
-                  return Center(
-                    child: CircularProgressIndicator(
-                      color: colorScheme.onSurface,
-                    ),
-                  );
+                  return TilawaLoadingIndicator(color: colorScheme.onSurface);
                 }
                 return QiblaCompassWidget(qiblaDirection: direction);
               },

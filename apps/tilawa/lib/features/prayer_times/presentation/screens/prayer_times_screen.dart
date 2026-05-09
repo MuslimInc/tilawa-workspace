@@ -137,11 +137,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   }
 
   Widget _prayerTimesLoadingIndicator(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return Semantics(
       label: context.l10n.prayerTimesLoading,
-      child: Center(
-        child: CircularProgressIndicator(color: colorScheme.primary),
+      child: TilawaLoadingIndicator(
+        semanticsLabel: context.l10n.prayerTimesLoading,
       ),
     );
   }
@@ -498,7 +497,8 @@ class _LocationUtilityCard extends StatelessWidget {
               ? SizedBox(
                   width: tokens.iconSizeSmall,
                   height: tokens.iconSizeSmall,
-                  child: CircularProgressIndicator(
+                  child: TilawaLoadingIndicator(
+                    centered: false,
                     strokeWidth: 2,
                     color: colorScheme.primary,
                   ),
@@ -1088,10 +1088,14 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
         FloatingActionButton.extended(
           onPressed: _firing ? null : _fire,
           label: _firing
-              ? const SizedBox(
+              ? SizedBox(
                   width: 18,
                   height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: TilawaLoadingIndicator(
+                    centered: false,
+                    strokeWidth: 2,
+                    color: theme.colorScheme.onErrorContainer,
+                  ),
                 )
               : const Text('Fire'),
           icon: const Icon(Icons.notifications_active_outlined),

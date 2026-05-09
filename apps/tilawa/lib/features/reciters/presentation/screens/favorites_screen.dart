@@ -44,7 +44,7 @@ class FavoritesScreen extends StatelessWidget {
               body: BlocBuilder<FavoritesCubit, FavoritesState>(
                 builder: (context, state) {
                   if (state is FavoritesLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const TilawaLoadingIndicator();
                   } else if (state is FavoritesError) {
                     return TilawaErrorState(
                       icon: Icons.error_outline_rounded,

@@ -64,7 +64,7 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
               child: BlocBuilder<QuranReaderBloc, QuranReaderState>(
                 builder: (context, state) {
                   if (state.isSearching) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const TilawaLoadingIndicator();
                   }
 
                   if (state.searchResults.isEmpty) {

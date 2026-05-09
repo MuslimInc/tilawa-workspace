@@ -112,7 +112,7 @@ class _GeneratedImagePreviewState extends State<GeneratedImagePreview> {
         if (snapshot.connectionState != ConnectionState.done) {
           return ColoredBox(
             color: theme.colorScheme.surfaceContainerHighest,
-            child: const Center(child: CircularProgressIndicator()),
+            child: const TilawaLoadingIndicator(),
           );
         }
 
@@ -302,7 +302,7 @@ class _GeneratedVideoPreviewState extends State<GeneratedVideoPreview> {
       if (_isInitializing && kDebugMode) {
         _log('build loading: waiting for controller initialization');
       }
-      return const Center(child: CircularProgressIndicator());
+      return const TilawaLoadingIndicator();
     }
 
     return SizedBox.expand(

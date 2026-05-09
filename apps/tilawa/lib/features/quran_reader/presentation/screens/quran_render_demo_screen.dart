@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa_core/logger.dart';
 
 class QuranRenderDemoScreen extends StatefulWidget {
@@ -135,7 +136,7 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
                 itemBuilder: (context, index) {
                   final pageNum = _startPage + index;
                   return _isLoading && index == _activePageIndex
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const TilawaLoadingIndicator()
                       : PageContent(
                           pageNumber: pageNum,
                           isWarming: _isWarming,

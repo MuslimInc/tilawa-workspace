@@ -128,7 +128,8 @@ class ComposerControls extends StatelessWidget {
                 ? SizedBox(
                     width: tokens.iconSizeMedium,
                     height: tokens.iconSizeMedium,
-                    child: CircularProgressIndicator(
+                    child: TilawaLoadingIndicator(
+                      centered: false,
                       strokeWidth: 2,
                       color: theme.colorScheme.onPrimary,
                     ),

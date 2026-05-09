@@ -66,8 +66,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
             },
             builder: (context, state) {
               return state.when(
-                initial: () => const Center(child: CircularProgressIndicator()),
-                loading: () => const Center(child: CircularProgressIndicator()),
+                initial: () => const TilawaLoadingIndicator(),
+                loading: () => const TilawaLoadingIndicator(),
                 loaded: (status, plans, canDownload) =>
                     _buildLoadedContent(context, status, plans, canDownload),
                 error: (message) => _buildErrorContent(context, message),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/di/injection.dart';
@@ -587,41 +586,9 @@ class _ReciterDetailsContent extends StatelessWidget {
         );
       case ReciterDetailsStatus.initial:
       case ReciterDetailsStatus.loading:
-        return SliverPadding(
-          padding: EdgeInsets.only(
-            top: tokens.spaceLarge,
-            left: tokens.spaceLarge,
-            right: tokens.spaceLarge,
-            bottom: bottomPadding,
-          ),
-          sliver: SliverSkeletonizer(
-            child: state.viewMode == ReciterViewMode.grid
-                ? SliverGrid(
-                    gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: tokens.cardCompactWidthThreshold,
-                      mainAxisSpacing: tokens.spaceMedium,
-                      crossAxisSpacing: tokens.spaceMedium,
-                      mainAxisExtent: tokens.cardCompactHeightThreshold,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            tokens.radiusLarge,
-                          ),
-                        ),
-                        child: const SizedBox.expand(),
-                      ),
-                      childCount: 8,
-                    ),
-                  )
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => const SkeletonSurahListTile(),
-                      childCount: 8,
-                    ),
-                  ),
-          ),
+        return const SliverFillRemaining(
+          hasScrollBody: false,
+          child: TilawaLoadingIndicator(),
         );
     }
   }

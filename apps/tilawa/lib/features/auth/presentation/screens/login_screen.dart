@@ -203,10 +203,13 @@ class _GoogleSignInButton extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (isLoading)
-              SizedBox(
+              const SizedBox(
                 width: 24,
                 height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2.5),
+                child: TilawaLoadingIndicator(
+                  centered: false,
+                  strokeWidth: 2.5,
+                ),
               )
             else ...[
               SvgPicture.asset(

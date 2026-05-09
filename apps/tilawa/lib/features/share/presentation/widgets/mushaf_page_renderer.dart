@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../utils/selection_crop_window.dart';
 import '../utils/share_feature_flags.dart';
@@ -121,7 +122,7 @@ class _QcfPageState extends State<_QcfPage> {
               // when done. Safe to call repeatedly — the service deduplicates
               // in-flight requests.
               fontService.ensureSingleFontLoaded(widget.pageSpec.pageNumber);
-              return const Center(child: CircularProgressIndicator.adaptive());
+              return const TilawaLoadingIndicator();
             }
 
             return Directionality(

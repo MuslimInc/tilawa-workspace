@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../atoms/tilawa_loading_indicator.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 
@@ -54,12 +55,13 @@ class TilawaCountProgressRing extends StatelessWidget {
                   duration: designTokens.durationMedium,
                   curve: Curves.easeOutBack,
                   builder: (context, value, _) {
-                    return CircularProgressIndicator(
+                    return TilawaLoadingIndicator(
+                      centered: false,
                       value: value,
                       strokeWidth: componentTokens.ringStrokeWidth,
                       backgroundColor: Colors.transparent,
                       valueColor: AlwaysStoppedAnimation<Color>(effectiveColor),
-                      strokeCap: .round,
+                      strokeCap: StrokeCap.round,
                     );
                   },
                 ),

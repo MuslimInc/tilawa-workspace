@@ -76,8 +76,7 @@ class AppTheme {
   ///                     0.40, saturation is also pulled down to 0.65 so the
   ///                     result is not a fully-saturated mid-tone (which
   ///                     defeats `onPrimary` contrast). No preset triggers
-  ///                     this — teal (the most saturated preset) sits at
-  ///                     S≈0.77.
+  ///                     this — the default teal preset sits at S≈0.75.
   ///
   /// Do not loosen these without re-running the contrast tests in
   /// `app_theme_color_roles_test.dart`.
