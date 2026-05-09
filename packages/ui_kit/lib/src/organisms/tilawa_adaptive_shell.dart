@@ -394,7 +394,6 @@ class _NavButton extends StatelessWidget {
         splashFactory: NoSplash.splashFactory,
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
-        mouseCursor: SystemMouseCursors.click,
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
           child: Padding(
