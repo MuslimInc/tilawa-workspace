@@ -12,6 +12,7 @@ class TilawaStatusChip extends StatelessWidget {
     this.foregroundColor,
     this.icon,
     this.padding,
+    this.showLabel = true,
   });
 
   final String label;
@@ -19,6 +20,7 @@ class TilawaStatusChip extends StatelessWidget {
   final Color? foregroundColor;
   final IconData? icon;
   final EdgeInsetsGeometry? padding;
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +37,7 @@ class TilawaStatusChip extends StatelessWidget {
       padding: padding ?? tokens.compactPadding,
       borderRadius: tokens.roundedRadius,
       iconSize: tokens.compactIconSize,
+      showLabel: showLabel,
       textStyle: theme.textTheme.labelSmall?.copyWith(
         fontWeight: tokens.statusFontWeight,
         color: effectiveForeground,

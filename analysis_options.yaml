@@ -36,3 +36,8 @@ analyzer:
     - "lib/l10n/**"
     - "**/parse_json.dart"
     - "packages/quran_qcf/scratch/**"
+
+# Formatter defaults (see dart-run-static-analysis skill; matches AGENTS 80 cols).
+formatter:
+  page_width: 80
+  trailing_commas: preserve

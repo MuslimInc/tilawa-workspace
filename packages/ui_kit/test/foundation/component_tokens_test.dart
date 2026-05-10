@@ -42,6 +42,7 @@ void main() {
       final tokens = TilawaSheetHandleTokens.defaults();
       expect(tokens.width, 46.0);
       expect(tokens.height, 5.0);
+      expect(tokens.marginTop, 12.0);
       expect(tokens.marginBottom, 16.0);
       expect(tokens.cornerRadius, 999.0);
       expect(tokens.colorOpacity, 0.22);
@@ -52,6 +53,7 @@ void main() {
       final updated = original.copyWith(width: 50.0, marginBottom: 20.0);
       expect(updated.width, 50.0);
       expect(updated.marginBottom, 20.0);
+      expect(updated.marginTop, original.marginTop);
       expect(updated.height, original.height);
     });
 
@@ -59,6 +61,7 @@ void main() {
       const first = TilawaSheetHandleTokens(
         width: 40.0,
         height: 4.0,
+        marginTop: 8.0,
         marginBottom: 12.0,
         cornerRadius: 900.0,
         colorOpacity: 0.2,
@@ -66,6 +69,7 @@ void main() {
       const second = TilawaSheetHandleTokens(
         width: 60.0,
         height: 6.0,
+        marginTop: 16.0,
         marginBottom: 20.0,
         cornerRadius: 999.0,
         colorOpacity: 0.3,
@@ -73,6 +77,7 @@ void main() {
       final result = TilawaSheetHandleTokens.lerp(first, second, 0.5);
       expect(result.width, closeTo(50.0, 0.01));
       expect(result.height, closeTo(5.0, 0.01));
+      expect(result.marginTop, closeTo(12.0, 0.01));
       expect(result.marginBottom, closeTo(16.0, 0.01));
       expect(result.colorOpacity, closeTo(0.25, 0.01));
     });
@@ -615,13 +620,13 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, Colors.transparent);
+      expect(tokens.bottomNavBackgroundColor, Colors.white);
+      expect(tokens.bottomNavShadowOpacity, closeTo(0.09, 0.001));
+      expect(tokens.bottomNavShadowBlur, 14);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, 4));
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        Color.alphaBlend(
-          scheme.primary.withValues(alpha: 0.10),
-          scheme.surfaceContainerLow,
-        ),
+        Color.alphaBlend(scheme.primary.withValues(alpha: 0.10), Colors.white),
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -640,7 +645,7 @@ void main() {
       );
       expect(
         tokens.bottomNavOutlineColor,
-        scheme.outlineVariant.withValues(alpha: 0.1),
+        scheme.outlineVariant.withValues(alpha: 0.17),
       );
       expect(
         tokens.sideRailBackgroundColor,
@@ -679,7 +684,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          Colors.transparent,
+          Colors.white,
         );
       },
     );
@@ -700,6 +705,13 @@ void main() {
           AppColors.darkBackground,
           0.32,
         ),
+      );
+      expect(tokens.bottomNavShadowOpacity, closeTo(0.055, 0.001));
+      expect(tokens.bottomNavShadowBlur, 10);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
+      expect(
+        tokens.bottomNavOutlineColor,
+        scheme.outlineVariant.withValues(alpha: 0.12),
       );
       expect(
         tokens.navButtonSelectedBackgroundColor,
@@ -1063,7 +1075,7 @@ void main() {
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
-                  Colors.transparent,
+                  Colors.white,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,

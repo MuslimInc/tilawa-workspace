@@ -14,6 +14,7 @@ class SettingsState extends Equatable {
     this.restorePlaybackState = true,
     this.isSleepTimerEnabled = true,
     this.prefetchQuranAssetsOnWifiOnly = true,
+    this.showPrayerTimesAlertChipLabels = true,
     this.appInfo,
   });
 
@@ -21,6 +22,7 @@ class SettingsState extends Equatable {
   final bool restorePlaybackState;
   final bool isSleepTimerEnabled;
   final bool prefetchQuranAssetsOnWifiOnly;
+  final bool showPrayerTimesAlertChipLabels;
   final AppInfo? appInfo;
 
   SettingsState copyWith({
@@ -28,6 +30,7 @@ class SettingsState extends Equatable {
     bool? restorePlaybackState,
     bool? isSleepTimerEnabled,
     bool? prefetchQuranAssetsOnWifiOnly,
+    bool? showPrayerTimesAlertChipLabels,
     AppInfo? appInfo,
   }) {
     return SettingsState(
@@ -37,6 +40,8 @@ class SettingsState extends Equatable {
       isSleepTimerEnabled: isSleepTimerEnabled ?? this.isSleepTimerEnabled,
       prefetchQuranAssetsOnWifiOnly:
           prefetchQuranAssetsOnWifiOnly ?? this.prefetchQuranAssetsOnWifiOnly,
+      showPrayerTimesAlertChipLabels:
+          showPrayerTimesAlertChipLabels ?? this.showPrayerTimesAlertChipLabels,
       appInfo: appInfo ?? this.appInfo,
     );
   }
@@ -47,6 +52,7 @@ class SettingsState extends Equatable {
     restorePlaybackState,
     isSleepTimerEnabled,
     prefetchQuranAssetsOnWifiOnly,
+    showPrayerTimesAlertChipLabels,
     appInfo,
   ];
 }
@@ -97,6 +103,8 @@ class SettingsCubit extends HydratedCubit<SettingsState>
         isSleepTimerEnabled: json['isSleepTimerEnabled'] as bool? ?? true,
         prefetchQuranAssetsOnWifiOnly:
             json['prefetchQuranAssetsOnWifiOnly'] as bool? ?? true,
+        showPrayerTimesAlertChipLabels:
+            json['showPrayerTimesAlertChipLabels'] as bool? ?? true,
       );
     } catch (_) {
       return const SettingsState();
@@ -110,6 +118,7 @@ class SettingsCubit extends HydratedCubit<SettingsState>
       'restorePlaybackState': state.restorePlaybackState,
       'isSleepTimerEnabled': state.isSleepTimerEnabled,
       'prefetchQuranAssetsOnWifiOnly': state.prefetchQuranAssetsOnWifiOnly,
+      'showPrayerTimesAlertChipLabels': state.showPrayerTimesAlertChipLabels,
     };
   }
 
@@ -129,6 +138,10 @@ class SettingsCubit extends HydratedCubit<SettingsState>
   Future<void> togglePrefetchQuranAssetsOnWifiOnly(bool enabled) async {
     emit(state.copyWith(prefetchQuranAssetsOnWifiOnly: enabled));
     await _prefetchPolicyService.setWifiOnlyEnabled(enabled);
+  }
+
+  void setShowPrayerTimesAlertChipLabels(bool show) {
+    emit(state.copyWith(showPrayerTimesAlertChipLabels: show));
   }
 
   void _updateQueueManager() {

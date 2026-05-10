@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:device_preview/device_preview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -145,7 +146,11 @@ class _PlayerApp extends StatelessWidget {
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
                 // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
                 builder: (context, child) {
-                  final app = DevicePreview.appBuilder(context, child);
+                  // Release: skip DevicePreview.appBuilder — no preview ancestor
+                  // work; profile/debug still use it when preview is enabled.
+                  final app = kReleaseMode
+                      ? (child ?? const SizedBox.shrink())
+                      : DevicePreview.appBuilder(context, child);
                   final routedChild = _DefaultRouteSystemUiOverlay(child: app);
                   return MediaQuery(
                     data: MediaQuery.of(context).copyWith(

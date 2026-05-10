@@ -48,7 +48,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
   double _devicePixelRatio = 1.0;
   double _pageWidth = 0;
   double _pageHeight = 0;
-  double _lineHeight = 0;
   bool _isLandscape = false;
 
   List<VerseMarkerData> _markers = const <VerseMarkerData>[];
@@ -79,12 +78,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
     if (pageChanged) {
       _refreshPageData();
       _rebuildLineProviders();
-    }
-
-    if (_pageWidth > 0) {
-      _lineHeight = widget.surahHeaderLayoutPolicy.lineHeightForPageWidth(
-        _pageWidth,
-      );
     }
 
     PerfLogger.log(
@@ -130,9 +123,6 @@ class _QuranImagePageState extends State<QuranImagePage> {
     _pageWidth = availableWidth;
     _pageHeight = availableHeight;
     _isLandscape = newIsLandscape;
-    _lineHeight = widget.surahHeaderLayoutPolicy.lineHeightForPageWidth(
-      _pageWidth,
-    );
 
     if (cacheWidthChanged) {
       _rebuildLineProviders();
@@ -154,17 +144,18 @@ class _QuranImagePageState extends State<QuranImagePage> {
     _headers = _headerRepository.getHeadersForPage(widget.pageNumber);
   }
 
-  ({double layoutHeight, List<double> yOffsets}) _calculateLayoutMetrics(
-    double availableHeight,
-  ) {
+  ({double layoutHeight, List<double> yOffsets}) _calculateLayoutMetrics({
+    required double availableHeight,
+    required double lineHeight,
+  }) {
     final layoutHeight = _isLandscape
-        ? _lineHeight * SurahHeaderConstants.lineCount
+        ? lineHeight * SurahHeaderConstants.lineCount
         : availableHeight;
 
     final lastLineIndex = SurahHeaderConstants.lastLineIndex.toDouble();
     final yOffsets = List<double>.generate(
       SurahHeaderConstants.lineCount,
-      (index) => (layoutHeight - _lineHeight) / lastLineIndex * index,
+      (index) => (layoutHeight - lineHeight) / lastLineIndex * index,
       growable: false,
     );
     return (layoutHeight: layoutHeight, yOffsets: yOffsets);
@@ -192,10 +183,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (_pageWidth <= 0) {
-      return const SizedBox.shrink();
-    }
-
+    PerfLogger.markBuild('QuranImagePage');
     final pageInfo = QuranPageMapping.getPageInfo(widget.pageNumber);
     final pageState = PageState.initial().copyWith(
       currentPage: widget.pageNumber,
@@ -209,24 +197,39 @@ class _QuranImagePageState extends State<QuranImagePage> {
         Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
+              if (constraints.maxWidth <= 0 || constraints.maxHeight <= 0) {
+                return const SizedBox.shrink();
+              }
+
+              final layoutPageWidth = constraints.maxWidth;
+              final layoutPageHeight = constraints.maxHeight;
+              final layoutLineHeight = widget.surahHeaderLayoutPolicy
+                  .lineHeightForPageWidth(layoutPageWidth);
               final (:layoutHeight, :yOffsets) = _calculateLayoutMetrics(
-                constraints.maxHeight,
+                availableHeight: constraints.maxHeight,
+                lineHeight: layoutLineHeight,
               );
 
-              return QuranImageContent(
-                pageNumber: widget.pageNumber,
-                pageWidth: _pageWidth,
-                pageHeight: _pageHeight,
-                lineHeight: _lineHeight,
-                yOffsets: yOffsets,
-                headers: _headers,
-                markers: _markers,
-                lineProviders: _lineProviders,
-                surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
-                imageCacheRepository: _imageCacheRepository,
-                devicePixelRatio: _devicePixelRatio,
-                isLandscape: _isLandscape,
-                headerImageFilter: widget.headerImageFilter,
+              // Isolates line stack + markers from app bar / footer repaint
+              // boundaries so compositor can cache this subtree when possible.
+              return RepaintBoundary(
+                child: QuranImageContent(
+                  pageNumber: widget.pageNumber,
+                  pageWidth: layoutPageWidth,
+                  // Header layout policy was tuned with full-viewport height; the
+                  // line stack width/height still come from this frame's layout.
+                  pageHeight: _pageHeight > 0 ? _pageHeight : layoutPageHeight,
+                  lineHeight: layoutLineHeight,
+                  yOffsets: yOffsets,
+                  headers: _headers,
+                  markers: _markers,
+                  lineProviders: _lineProviders,
+                  surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
+                  imageCacheRepository: _imageCacheRepository,
+                  devicePixelRatio: _devicePixelRatio,
+                  isLandscape: _isLandscape,
+                  headerImageFilter: widget.headerImageFilter,
+                ),
               );
             },
           ),

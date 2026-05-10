@@ -1,5 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../prayer_times_clock.dart';
+
 part 'prayer_time_entity.freezed.dart';
 part 'prayer_time_entity.g.dart';
 
@@ -62,7 +64,7 @@ abstract class PrayerTimeEntity with _$PrayerTimeEntity {
 
   /// Get the current or next MAIN prayer based on the current time
   PrayerTimeItem? getCurrentOrNextPrayer() {
-    final now = DateTime.now();
+    final now = PrayerTimesClock.now();
 
     for (final PrayerTimeItem prayer in mainPrayers) {
       if (prayer.time.isAfter(now)) {
@@ -79,7 +81,7 @@ abstract class PrayerTimeEntity with _$PrayerTimeEntity {
 
   /// Get the previous prayer that has passed
   PrayerTimeItem? getPreviousPrayer() {
-    final now = DateTime.now();
+    final now = PrayerTimesClock.now();
     PrayerTimeItem? previous;
 
     for (final PrayerTimeItem prayer in mainPrayers) {
@@ -100,13 +102,13 @@ abstract class PrayerTimeEntity with _$PrayerTimeEntity {
       return null;
     }
 
-    final now = DateTime.now();
+    final now = PrayerTimesClock.now();
     return next.time.difference(now);
   }
 
   /// Check if a specific prayer time has passed
   bool hasPrayerPassed(PrayerType type) {
-    final now = DateTime.now();
+    final now = PrayerTimesClock.now();
     final DateTime prayerTime = _getPrayerTime(type);
     return prayerTime.isBefore(now);
   }

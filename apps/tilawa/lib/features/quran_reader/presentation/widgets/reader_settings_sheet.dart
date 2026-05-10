@@ -61,9 +61,7 @@ class _ReaderSettingsSheetState extends State<ReaderSettingsSheet> {
           ),
           child: Column(
             children: [
-              TilawaSheetHandle(
-                margin: EdgeInsets.only(top: tokens.spaceMedium),
-              ),
+              const TilawaSheetHandle(),
               Padding(
                 padding: EdgeInsets.fromLTRB(
                   tokens.spaceLarge,

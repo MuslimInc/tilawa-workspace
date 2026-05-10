@@ -38,7 +38,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.permissionBanner,
     required this.prayerAlertRow,
     required this.bottomSheetScaffold,
-    required this.skeleton,
   });
 
   final TilawaSectionTitleTokens sectionTitle;
@@ -68,7 +67,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaPermissionBannerTokens permissionBanner;
   final TilawaPrayerAlertRowTokens prayerAlertRow;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
-  final TilawaSkeletonTokens skeleton;
 
   /// The density mode for this component token set.
   final TilawaDensity density;
@@ -168,10 +166,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(
         density: density,
       ),
-      skeleton: TilawaSkeletonTokens.defaults(
-        colorScheme: effectiveColorScheme,
-        density: density,
-      ),
     );
   }
 
@@ -205,7 +199,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaPermissionBannerTokens? permissionBanner,
     TilawaPrayerAlertRowTokens? prayerAlertRow,
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
-    TilawaSkeletonTokens? skeleton,
   }) {
     return TilawaComponentTokens(
       density: density ?? this.density,
@@ -236,7 +229,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       permissionBanner: permissionBanner ?? this.permissionBanner,
       prayerAlertRow: prayerAlertRow ?? this.prayerAlertRow,
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
-      skeleton: skeleton ?? this.skeleton,
     );
   }
 
@@ -344,7 +336,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
         other.bottomSheetScaffold,
         t,
       ),
-      skeleton: TilawaSkeletonTokens.lerp(skeleton, other.skeleton, t),
     );
   }
 }

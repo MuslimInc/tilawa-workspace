@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -18,6 +19,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../firebase_options.dart';
 import '../../router/app_router.dart';
 import '../../tilawa_app.dart';
+import '../di/injection.dart';
 import '../di/quran_image_dependencies_module.dart';
 import '../logging/app_logger.dart';
 

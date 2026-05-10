@@ -8,8 +8,11 @@ abstract final class AppColors {
   AppColors._();
 
   // Primary colors
-  /// Default primary color (deep teal).
-  static const Color primaryTeal = Color(0xFF0F766E);
+  /// Default primary / brand teal-cyan.
+  ///
+  /// Matches Android `launch_background` in `apps/tilawa/android/.../colors.xml`
+  /// (`#1AADC5`) so the native splash frame and `defaultPrimary` align.
+  static const Color primaryTeal = Color(0xFF1AADC5);
 
   /// Teal/cyan compatibility theme option.
   static const Color primaryCyan = primaryTeal;
@@ -109,7 +112,9 @@ abstract final class AppColors {
   // --- AppTheme: dark FlexSchemeColor (single source of truth) ---
 
   /// Dark preset primary on surface when [isDefaultPreset] (Flex dark scheme).
-  static const Color darkDefaultPrimary = Color(0xFF70C8BD);
+  ///
+  /// Lighter screen of [primaryTeal] for contrast on dark surfaces.
+  static const Color darkDefaultPrimary = Color(0xFF5DD3EB);
 
   /// Historical reference: dark primary container paired with [darkDefaultPrimary].
   /// [AppTheme] derives `ColorScheme.primaryContainer` from the selected primary
@@ -206,7 +211,7 @@ abstract final class AppColors {
   static const Color profileGradientStart = primaryTeal;
 
   /// Gradient end color for profile card
-  static const Color profileGradientEnd = Color(0xFF0D5F59);
+  static const Color profileGradientEnd = Color(0xFF117994);
 
   /// Background color for logout button card (light theme)
   static const Color logoutBackground = Color(0xFFFFF1F0);

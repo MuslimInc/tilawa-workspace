@@ -206,6 +206,18 @@ void main() {
       ],
     );
 
+    blocTest<SettingsCubit, SettingsState>(
+      'setShowPrayerTimesAlertChipLabels updates state',
+      build: () => cubit,
+      act: (cubit) => cubit.setShowPrayerTimesAlertChipLabels(false),
+      expect: () => [
+        const SettingsState(
+          showPrayerTimesAlertChipLabels: false,
+          appInfo: testAppInfo,
+        ),
+      ],
+    );
+
     group('Serialization', () {
       test('fromJson returns correct state', () {
         expect(
@@ -234,6 +246,7 @@ void main() {
           'restorePlaybackState': true,
           'isSleepTimerEnabled': true,
           'prefetchQuranAssetsOnWifiOnly': true,
+          'showPrayerTimesAlertChipLabels': true,
         });
       });
 

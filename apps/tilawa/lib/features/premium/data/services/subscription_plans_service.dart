@@ -6,12 +6,28 @@ import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/subscription_plan.dart';
 
 class SubscriptionPlansService {
-  SubscriptionPlansService({required FirebaseFirestore firestore})
-    : _firestore = firestore;
+  SubscriptionPlansService({
+    required FirebaseFirestore firestore,
+    this.firestoreCatalogEnabled = true,
+  }) : _firestore = firestore;
+
   final FirebaseFirestore _firestore;
 
-  /// Add default subscription plans to Firestore
+  /// When false, no subscription-related Firestore reads or writes run from
+  /// this service (catalog defaults, premium status, purchase records).
+  final bool firestoreCatalogEnabled;
+
+  /// Seeds Firestore with default plans.
+  ///
+  /// **Do not call from production app code.** Use admin tools or migrations.
+  @Deprecated('Catalog writes must not run from end-user clients')
   Future<void> addDefaultSubscriptionPlans() async {
+    if (!firestoreCatalogEnabled) {
+      logger.d(
+        'addDefaultSubscriptionPlans skipped (subscription Firestore off).',
+      );
+      return;
+    }
     try {
       final List<SubscriptionPlan> plans = _getDefaultSubscriptionPlans();
 
@@ -34,6 +50,12 @@ class SubscriptionPlansService {
 
   /// Get all subscription plans from Firestore
   Future<List<SubscriptionPlan>> getSubscriptionPlans() async {
+    if (!firestoreCatalogEnabled) {
+      logger.d(
+        'Subscription plans: using defaults (subscription Firestore off).',
+      );
+      return _getDefaultSubscriptionPlans();
+    }
     try {
       final QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
           .collection('subscription_plans')
@@ -51,6 +73,12 @@ class SubscriptionPlansService {
 
   /// Create a user's premium status document
   Future<void> createUserPremiumStatus(String userId) async {
+    if (!firestoreCatalogEnabled) {
+      logger.d(
+        'createUserPremiumStatus skipped for $userId (subscription Firestore off).',
+      );
+      return;
+    }
     try {
       final Map<String, Object?> premiumStatus = {
         'isPremium': false,
@@ -87,6 +115,12 @@ class SubscriptionPlansService {
     required String currency,
     required String transactionId,
   }) async {
+    if (!firestoreCatalogEnabled) {
+      logger.d(
+        'createPurchaseRecord skipped for $userId (subscription Firestore off).',
+      );
+      return;
+    }
     try {
       final Map<String, Object> purchaseRecord = {
         'planId': planId,

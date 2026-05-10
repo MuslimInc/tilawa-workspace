@@ -8,6 +8,7 @@ import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_re
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/entities.dart';
+import '../../domain/prayer_times_clock.dart';
 import '../../domain/usecases/usecases.dart';
 
 part 'prayer_times_bloc.freezed.dart';
@@ -26,6 +27,7 @@ class PrayerTimesEvent with _$PrayerTimesEvent {
   const factory PrayerTimesEvent.updateSettings(PrayerSettingsEntity settings) =
       _UpdateSettings;
   const factory PrayerTimesEvent.refreshCountdown() = _RefreshCountdown;
+  const factory PrayerTimesEvent.refreshIfStale() = _RefreshIfStale;
   const factory PrayerTimesEvent.setManualLocation({
     required double latitude,
     required double longitude,
@@ -63,12 +65,15 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._savePrayerSettingsUseCase,
     this._loadPrayerSettingsUseCase,
     this._schedulePrayerNotificationsUseCase,
-    this._cancelPrayerNotificationsUseCase,
-  ) : super(const PrayerTimesState()) {
+    this._cancelPrayerNotificationsUseCase, [
+    this._shouldRefreshPrayerTimesUseCase =
+        const ShouldRefreshPrayerTimesUseCase(),
+  ]) : super(const PrayerTimesState()) {
     on<_LoadPrayerTimes>(_onLoadPrayerTimes);
     on<_LoadMonthlyPrayerTimes>(_onLoadMonthlyPrayerTimes);
     on<_UpdateLocation>(_onUpdateLocation);
     on<_UpdateSettings>(_onUpdateSettings);
+    on<_RefreshIfStale>(_onRefreshIfStale);
     on<_SetManualLocation>(_onSetManualLocation);
   }
 
@@ -81,6 +86,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final SchedulePrayerNotificationsUseCase _schedulePrayerNotificationsUseCase;
   // ignore: unused_field
   final CancelPrayerNotificationsUseCase _cancelPrayerNotificationsUseCase;
+  final ShouldRefreshPrayerTimesUseCase _shouldRefreshPrayerTimesUseCase;
 
   Future<void> _onLoadPrayerTimes(
     _LoadPrayerTimes event,
@@ -157,6 +163,14 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           effectiveSettings = newSettings;
         }
       }
+
+      effectiveSettings = await _persistLastResolvedLocationIfNeeded(
+        settings: effectiveSettings,
+        latitude: latitude!,
+        longitude: longitude!,
+        locationName: locationName,
+      );
+      emit(state.copyWith(settings: effectiveSettings));
     } else if (effectiveSettings.calculationMethod ==
         CalculationMethod.ummAlQura) {
       // Location is saved, but we might need to auto-detect method
@@ -196,7 +210,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         await _getPrayerTimesUseCase.call(
           latitude: latitude!,
           longitude: longitude!,
-          date: DateTime.now(),
+          date: PrayerTimesClock.now(),
           settings: effectiveSettings,
         );
 
@@ -318,6 +332,27 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     }
   }
 
+  Future<void> _onRefreshIfStale(
+    _RefreshIfStale event,
+    Emitter<PrayerTimesState> emit,
+  ) async {
+    if (state.status == PrayerTimesStatus.loading) {
+      return;
+    }
+
+    final PrayerTimeEntity? prayerTimes = state.todayPrayerTimes;
+    final bool shouldRefresh = _shouldRefreshPrayerTimesUseCase(
+      loadedDate: prayerTimes?.date,
+      loadedUtcOffset: prayerTimes?.date.timeZoneOffset,
+    );
+
+    if (!shouldRefresh) {
+      return;
+    }
+
+    add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
+  }
+
   Future<void> _onSetManualLocation(
     _SetManualLocation event,
     Emitter<PrayerTimesState> emit,
@@ -335,6 +370,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       savedLatitude: event.latitude,
       savedLongitude: event.longitude,
       savedLocationName: event.locationName,
+      lastResolvedLatitude: event.latitude,
+      lastResolvedLongitude: event.longitude,
+      lastResolvedLocationName: event.locationName,
     );
 
     await _savePrayerSettingsUseCase.call(settings: updatedSettings);
@@ -342,5 +380,30 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
     // Reload prayer times; manual location overrides force a reschedule.
     add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
+  }
+
+  Future<PrayerSettingsEntity> _persistLastResolvedLocationIfNeeded({
+    required PrayerSettingsEntity settings,
+    required double latitude,
+    required double longitude,
+    required String? locationName,
+  }) async {
+    if (settings.savedLatitude != null && settings.savedLongitude != null) {
+      return settings;
+    }
+
+    if (settings.lastResolvedLatitude == latitude &&
+        settings.lastResolvedLongitude == longitude &&
+        settings.lastResolvedLocationName == locationName) {
+      return settings;
+    }
+
+    final updatedSettings = settings.copyWith(
+      lastResolvedLatitude: latitude,
+      lastResolvedLongitude: longitude,
+      lastResolvedLocationName: locationName,
+    );
+    await _savePrayerSettingsUseCase.call(settings: updatedSettings);
+    return updatedSettings;
   }
 }

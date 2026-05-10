@@ -16,6 +16,7 @@ class NavigationSliderOverlay extends StatelessWidget {
   const NavigationSliderOverlay({
     super.key,
     required this.screenWidth,
+    required this.committedPage,
     required this.state,
     required this.canGoToPreviousPage,
     required this.canGoToNextPage,
@@ -28,6 +29,7 @@ class NavigationSliderOverlay extends StatelessWidget {
   });
 
   final double screenWidth;
+  final int committedPage;
   final PageState state;
   final bool canGoToPreviousPage;
   final bool canGoToNextPage;
@@ -40,6 +42,7 @@ class NavigationSliderOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('NavigationSliderOverlay');
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
@@ -80,6 +83,7 @@ class NavigationSliderOverlay extends StatelessWidget {
                       children: [
                         PageSlider(
                           currentPage: state.displayPage,
+                          committedPage: committedPage,
                           totalPages: state.totalPages,
                           onChanged: (value) =>
                               onPreviewPageChanged(value.round()),

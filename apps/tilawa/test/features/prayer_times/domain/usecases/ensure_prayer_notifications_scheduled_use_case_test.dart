@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_notification_schedule_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
+import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_permission_status.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/ensure_prayer_notifications_scheduled_use_case.dart';
@@ -14,6 +15,7 @@ void main() {
   late _FakePrayerPermissionStatus permissionStatus;
   late _FakePrayerTimesRepository prayerTimesRepository;
   late _FakePrayerAdhanNotificationService notificationService;
+  late _FakeAdhanAlarmPlayer adhanPlayer;
   late EnsurePrayerNotificationsScheduledUseCase useCase;
 
   final DateTime now = DateTime(2026, 5, 1, 12);
@@ -27,6 +29,7 @@ void main() {
     permissionStatus = _FakePrayerPermissionStatus();
     prayerTimesRepository = _FakePrayerTimesRepository(settings: settings);
     notificationService = _FakePrayerAdhanNotificationService();
+    adhanPlayer = _FakeAdhanAlarmPlayer();
     useCase = EnsurePrayerNotificationsScheduledUseCase(
       scheduleRepository,
       permissionStatus,
@@ -35,6 +38,7 @@ void main() {
         notificationService,
         prayerTimesRepository,
       ),
+      adhanPlayer,
     );
   });
 
@@ -135,6 +139,41 @@ void main() {
       expect(notificationService.scheduleCalls, 0);
     });
 
+    test(
+      'uses last resolved location when manual saved location is absent',
+      () async {
+        prayerTimesRepository.settings = const PrayerSettingsEntity(
+          lastResolvedLatitude: 40,
+          lastResolvedLongitude: 41,
+          fajrNotification: PrayerNotificationSettings(
+            mode: PrayerAlertMode.notification,
+          ),
+        );
+
+        final result = await useCase(now: now, forceReschedule: true);
+        final ensureResult = _unwrap(result);
+
+        expect(ensureResult.action, PrayerNotificationEnsureAction.rescheduled);
+        expect(notificationService.scheduleCalls, 1);
+        expect(prayerTimesRepository.lastRangeLatitude, 40);
+        expect(prayerTimesRepository.lastRangeLongitude, 41);
+      },
+    );
+
+    test('re-marks dirty flag when forced recovery has no location', () async {
+      prayerTimesRepository.settings = const PrayerSettingsEntity();
+
+      final result = await useCase(now: now, forceReschedule: true);
+      final ensureResult = _unwrap(result);
+
+      expect(
+        ensureResult.action,
+        PrayerNotificationEnsureAction.skippedNoSavedLocation,
+      );
+      expect(adhanPlayer.markNeedsRescheduleCalls, 1);
+      expect(notificationService.scheduleCalls, 0);
+    });
+
     test('skips when every prayer notification is disabled', () async {
       prayerTimesRepository.settings = const PrayerSettingsEntity(
         savedLatitude: 30,
@@ -207,6 +246,8 @@ class _FakePrayerTimesRepository implements PrayerTimesRepository {
   _FakePrayerTimesRepository({required this.settings});
 
   PrayerSettingsEntity settings;
+  double? lastRangeLatitude;
+  double? lastRangeLongitude;
 
   @override
   Future<PrayerTimeEntity> getPrayerTimes({
@@ -226,6 +267,8 @@ class _FakePrayerTimesRepository implements PrayerTimesRepository {
     required DateTime endDate,
     required PrayerSettingsEntity settings,
   }) async {
+    lastRangeLatitude = latitude;
+    lastRangeLongitude = longitude;
     return <PrayerTimeEntity>[_prayerDay(startDate, latitude, longitude)];
   }
 
@@ -311,6 +354,62 @@ class _FakePrayerAdhanNotificationService
 
   @override
   Future<void> debugScheduleTestAdhan() async {}
+}
+
+class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
+  int markNeedsRescheduleCalls = 0;
+
+  @override
+  bool get isSupported => true;
+
+  @override
+  Stream<String> get onNotificationTapped => const Stream.empty();
+
+  @override
+  Future<void> flushPendingNotificationTap() async {}
+
+  @override
+  Future<bool> scheduleAdhan({
+    required int id,
+    required DateTime scheduledTime,
+    required String prayerName,
+    required String prayerKey,
+    String? sound,
+  }) async {
+    return true;
+  }
+
+  @override
+  Future<void> cancelAdhan(int id, {String? prayerName}) async {}
+
+  @override
+  Future<void> cancelAllAdhans() async {}
+
+  @override
+  Future<void> persistPendingAlarms(List<PendingAdhanAlarm> alarms) async {}
+
+  @override
+  Future<bool> consumeNeedsRescheduleAfterBoot() async => false;
+
+  @override
+  Future<void> markNeedsReschedule() async {
+    markNeedsRescheduleCalls++;
+  }
+
+  @override
+  Future<bool> isIgnoringBatteryOptimizations() async => true;
+
+  @override
+  Future<void> requestIgnoreBatteryOptimizations() async {}
+
+  @override
+  Future<String?> manufacturer() async => null;
+
+  @override
+  Future<void> stopCurrentAdhan() async {}
+
+  @override
+  Future<bool> isAdhanPlaying() async => false;
 }
 
 PrayerTimeEntity _prayerDay(DateTime date, double latitude, double longitude) {

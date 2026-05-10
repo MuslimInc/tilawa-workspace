@@ -15,8 +15,6 @@ dependencies:
   google_fonts: ^8.1.0
   flex_color_scheme:
     path: ../flex_color_scheme
-  skeletonizer:
-    path: ../skeletonizer
   gap: ^3.0.1
   fluentui_system_icons: ^1.1.273
   animations: ^2.2.0

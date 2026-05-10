@@ -23,6 +23,8 @@ class TilawaCard extends StatelessWidget {
     this.borderRadius,
     this.gradient,
     this.onTap,
+    this.splashColor,
+    this.highlightColor,
     this.flat = false,
   });
 
@@ -34,6 +36,8 @@ class TilawaCard extends StatelessWidget {
   final double? borderRadius;
   final Gradient? gradient;
   final VoidCallback? onTap;
+  final Color? splashColor;
+  final Color? highlightColor;
 
   /// When true, suppresses the default drop shadow. Use for cards nested
   /// inside another already-elevated container.
@@ -46,30 +50,34 @@ class TilawaCard extends StatelessWidget {
     final designTokens = theme.tokens;
 
     final double effectiveRadius = borderRadius ?? tokens.borderRadius;
+    final BorderRadius borderRadiusValue = BorderRadius.circular(
+      effectiveRadius,
+    );
+    final BoxDecoration decoration = BoxDecoration(
+      color: gradient == null
+          ? (backgroundColor ?? theme.colorScheme.surface)
+          : null,
+      gradient: gradient,
+      borderRadius: borderRadiusValue,
+      border: Border.all(
+        color: borderColor ?? theme.colorScheme.outlineVariant,
+        width: borderWidth ?? tokens.borderWidth,
+      ),
+      boxShadow: flat
+          ? null
+          : [
+              BoxShadow(
+                color: theme.colorScheme.shadow.withValues(
+                  alpha: designTokens.opacityShadow,
+                ),
+                blurRadius: designTokens.blurShadow,
+                offset: designTokens.shadowOffsetSmall,
+              ),
+            ],
+    );
 
     final Widget content = Container(
-      decoration: BoxDecoration(
-        color: gradient == null
-            ? (backgroundColor ?? theme.colorScheme.surface)
-            : null,
-        gradient: gradient,
-        borderRadius: BorderRadius.circular(effectiveRadius),
-        border: Border.all(
-          color: borderColor ?? theme.colorScheme.outlineVariant,
-          width: borderWidth ?? tokens.borderWidth,
-        ),
-        boxShadow: flat
-            ? null
-            : [
-                BoxShadow(
-                  color: theme.colorScheme.shadow.withValues(
-                    alpha: designTokens.opacityShadow,
-                  ),
-                  blurRadius: designTokens.blurShadow,
-                  offset: designTokens.shadowOffsetSmall,
-                ),
-              ],
-      ),
+      decoration: decoration,
       child: Padding(padding: padding ?? tokens.padding, child: child),
     );
 
@@ -77,13 +85,28 @@ class TilawaCard extends StatelessWidget {
       return content;
     }
 
+    final effectiveSplashColor =
+        splashColor ??
+        theme.colorScheme.primary.withValues(alpha: designTokens.opacitySubtle);
+    final effectiveHighlightColor =
+        highlightColor ??
+        theme.colorScheme.onSurface.withValues(
+          alpha: designTokens.opacitySubtle / 2,
+        );
+
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(effectiveRadius),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(effectiveRadius),
-        child: content,
+      clipBehavior: Clip.antiAlias,
+      borderRadius: borderRadiusValue,
+      child: Ink(
+        decoration: decoration,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: borderRadiusValue,
+          splashColor: effectiveSplashColor,
+          highlightColor: effectiveHighlightColor,
+          child: Padding(padding: padding ?? tokens.padding, child: child),
+        ),
       ),
     );
   }

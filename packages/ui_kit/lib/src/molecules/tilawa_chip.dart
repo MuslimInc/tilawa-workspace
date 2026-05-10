@@ -18,10 +18,16 @@ class TilawaChip extends StatelessWidget {
     this.textStyle,
     this.showShadow = false,
     this.shadowColor,
+    this.showLabel = true,
   });
 
   final String label;
   final IconData? icon;
+
+  /// When false and [icon] is non-null, only the icon is shown; [label] is
+  /// still used for accessibility. If [icon] is null, the label is always
+  /// shown.
+  final bool showLabel;
   final VoidCallback? onTap;
   final Color? backgroundColor;
   final Color? foregroundColor;
@@ -81,30 +87,35 @@ class TilawaChip extends StatelessWidget {
               size: iconSize ?? componentTokens.iconSize,
               color: effectiveForeground,
             ),
-          Flexible(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style:
-                  textStyle ??
-                  theme.textTheme.labelLarge?.copyWith(
-                    color: effectiveForeground,
-                  ),
+          if (showLabel || icon == null)
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style:
+                    textStyle ??
+                    theme.textTheme.labelLarge?.copyWith(
+                      color: effectiveForeground,
+                    ),
+              ),
             ),
-          ),
         ],
       ),
     );
 
+    final Widget effective = !showLabel && icon != null
+        ? Semantics(label: label, child: content)
+        : content;
+
     if (onTap == null) {
-      return content;
+      return effective;
     }
 
     return Material(
       color: Colors.transparent,
       shape: shape,
-      child: InkWell(onTap: onTap, customBorder: shape, child: content),
+      child: InkWell(onTap: onTap, customBorder: shape, child: effective),
     );
   }
 }

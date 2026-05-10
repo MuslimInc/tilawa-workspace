@@ -801,16 +801,18 @@ void main() {
       );
       expect(comfortable.width, equals(defaultTokens.width));
       expect(comfortable.height, equals(defaultTokens.height));
+      expect(comfortable.marginTop, equals(defaultTokens.marginTop));
       expect(comfortable.marginBottom, equals(defaultTokens.marginBottom));
       expect(comfortable.cornerRadius, equals(defaultTokens.cornerRadius));
       expect(comfortable.colorOpacity, equals(defaultTokens.colorOpacity));
     });
 
-    test('compact reduces marginBottom 16→12', () {
+    test('compact reduces marginBottom 16→12 and marginTop 12→10', () {
       final compact = TilawaSheetHandleTokens.defaults(
         density: TilawaDensity.compact,
       );
       expect(compact.marginBottom, 12.0);
+      expect(compact.marginTop, 10.0);
     });
 
     test('compact preserves width, height, cornerRadius, colorOpacity', () {
@@ -828,7 +830,9 @@ void main() {
       final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
       final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
       expect(light.sheetHandle.marginBottom, 12.0);
+      expect(light.sheetHandle.marginTop, 10.0);
       expect(dark.sheetHandle.marginBottom, 12.0);
+      expect(dark.sheetHandle.marginTop, 10.0);
     });
   });
 

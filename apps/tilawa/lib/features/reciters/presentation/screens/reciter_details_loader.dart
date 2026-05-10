@@ -22,7 +22,7 @@ class ReciterDetailsLoader extends StatelessWidget {
         body: BlocBuilder<ReciterDetailsLoaderCubit, ReciterDetailsLoaderState>(
           builder: (context, state) {
             if (state is ReciterDetailsLoaderLoading) {
-              return const Center(child: CircularProgressIndicator());
+              return const TilawaLoadingIndicator();
             }
 
             if (state is ReciterDetailsLoaderFailure) {

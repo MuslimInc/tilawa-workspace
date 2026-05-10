@@ -2144,6 +2144,12 @@ abstract class AppLocalizations {
   /// **'Show Sunrise'**
   String get showSunrise;
 
+  /// Toggle text next to notification status icons on prayer time rows
+  ///
+  /// In en, this message translates to:
+  /// **'Show alert chip labels'**
+  String get showPrayerTimesAlertChipLabels;
+
   /// Location required title
   ///
   /// In en, this message translates to:
@@ -2191,6 +2197,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Refreshing location...'**
   String get prayerTimesRefreshingLocation;
+
+  /// Accessibility label while the prayer times screen content is loading
+  ///
+  /// In en, this message translates to:
+  /// **'Loading prayer times...'**
+  String get prayerTimesLoading;
 
   /// Helper text inviting the user to refresh prayer times location
   ///
@@ -3236,6 +3248,12 @@ abstract class AppLocalizations {
   /// **'Prayer Notifications'**
   String get prayerNotifications;
 
+  /// Action label to open prayer alert preferences
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Alerts'**
+  String get manageAlerts;
+
   /// Global toggle label for enabling/disabling all prayer notifications
   ///
   /// In en, this message translates to:
@@ -3349,6 +3367,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'at {time}'**
   String prayerTimeAt(String time);
+
+  /// Prayer alert mode label when notification and Adhan are disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get prayerAlertModeOff;
+
+  /// Prayer alert mode label when notification is enabled without Adhan
+  ///
+  /// In en, this message translates to:
+  /// **'Notify only'**
+  String get prayerAlertModeNotifyOnly;
+
+  /// Prayer alert mode label when notification and Adhan are enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan'**
+  String get prayerAlertModeAdhan;
+
+  /// Description for disabled prayer alert mode
+  ///
+  /// In en, this message translates to:
+  /// **'No notification or Adhan for this prayer.'**
+  String get prayerAlertModeOffDescription;
+
+  /// Description for notification-only prayer alert mode
+  ///
+  /// In en, this message translates to:
+  /// **'Show a prayer-time notification without Adhan.'**
+  String get prayerAlertModeNotifyOnlyDescription;
+
+  /// Description for Adhan prayer alert mode
+  ///
+  /// In en, this message translates to:
+  /// **'Show a notification and play the Adhan.'**
+  String get prayerAlertModeAdhanDescription;
 
   /// Label for notification status
   ///

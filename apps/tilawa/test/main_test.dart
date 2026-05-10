@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
@@ -225,6 +226,10 @@ void main() {
 
     HydratedBloc.storage = mockStorage;
 
+    configureAppLaunch(
+      launchConfig: const AppLaunchConfig(subscriptionServiceEnabled: true),
+    );
+
     // Bootstrap memoizes one-shot init helpers to avoid duplicate runtime init;
     // clear the cache so each test's freshly stubbed mocks are actually called.
     resetMemoizedInitFutures();
@@ -327,6 +332,26 @@ void main() {
       await initializeFirebaseDataAsync();
       verify(() => mockFirebaseInit.initializeFirebaseData()).called(1);
     });
+
+    test(
+      'initializeFirebaseDataAsync skips when subscription service disabled',
+      () async {
+        configureAppLaunch(
+          launchConfig: const AppLaunchConfig(
+            subscriptionServiceEnabled: false,
+          ),
+        );
+        addTearDown(() {
+          configureAppLaunch(
+            launchConfig: const AppLaunchConfig(
+              subscriptionServiceEnabled: true,
+            ),
+          );
+        });
+        await initializeFirebaseDataAsync();
+        verifyNever(() => mockFirebaseInit.initializeFirebaseData());
+      },
+    );
 
     test('initializeDownloads success', () async {
       await initializeDownloads();

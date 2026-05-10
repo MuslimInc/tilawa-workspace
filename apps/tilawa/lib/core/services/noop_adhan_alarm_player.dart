@@ -37,6 +37,9 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   Future<bool> consumeNeedsRescheduleAfterBoot() async => false;
 
   @override
+  Future<void> markNeedsReschedule() async {}
+
+  @override
   Future<bool> isIgnoringBatteryOptimizations() async => true;
 
   @override

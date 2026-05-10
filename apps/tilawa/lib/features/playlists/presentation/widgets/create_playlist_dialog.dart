@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/playlists_bloc.dart';
 
@@ -106,10 +107,13 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
               return ElevatedButton(
                 onPressed: isLoading ? null : _createPlaylist,
                 child: isLoading
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: const TilawaLoadingIndicator(
+                          centered: false,
+                          strokeWidth: 2,
+                        ),
                       )
                     : Text(l10n.save),
               );

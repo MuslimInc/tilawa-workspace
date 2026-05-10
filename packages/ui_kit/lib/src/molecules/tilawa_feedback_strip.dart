@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../atoms/tilawa_loading_indicator.dart';
 import '../foundation/component_tokens.dart';
 
 class TilawaFeedbackStrip extends StatelessWidget {
@@ -45,9 +46,10 @@ class TilawaFeedbackStrip extends StatelessWidget {
             SizedBox(
               width: componentTokens.spinnerSize,
               height: componentTokens.spinnerSize,
-              child: CircularProgressIndicator(
+              child: TilawaLoadingIndicator(
+                centered: false,
                 strokeWidth: componentTokens.spinnerStrokeWidth,
-                valueColor: AlwaysStoppedAnimation<Color>(foregroundColor),
+                color: foregroundColor,
               ),
             )
           else

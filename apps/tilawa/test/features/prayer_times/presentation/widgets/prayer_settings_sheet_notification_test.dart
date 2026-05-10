@@ -11,6 +11,7 @@ import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_c
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import 'package:tilawa/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -18,6 +19,7 @@ import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'prayer_settings_sheet_notification_test.mocks.dart';
 
 @GenerateMocks([
+  SettingsCubit,
   PrayerPermissionsCubit,
   GetPrayerTimesUseCase,
   GetMonthlyPrayerTimesUseCase,
@@ -74,6 +76,7 @@ void main() {
   late MockSchedulePrayerNotificationsUseCase mockSchedule;
   late MockCancelPrayerNotificationsUseCase mockCancel;
   late MockPrayerPermissionsCubit mockPermissionsCubit;
+  late MockSettingsCubit mockSettingsCubit;
 
   setUpAll(() async {
     await initializeHydratedStorageForTest();
@@ -91,6 +94,10 @@ void main() {
     mockPermissionsCubit = MockPrayerPermissionsCubit();
     when(mockPermissionsCubit.state).thenReturn(const PrayerPermissionsState());
     when(mockPermissionsCubit.stream).thenAnswer((_) => const Stream.empty());
+
+    mockSettingsCubit = MockSettingsCubit();
+    when(mockSettingsCubit.state).thenReturn(const SettingsState());
+    when(mockSettingsCubit.stream).thenAnswer((_) => const Stream.empty());
 
     when(
       mockGetCountryCode.call(
@@ -131,6 +138,7 @@ void main() {
           BlocProvider<PrayerPermissionsCubit>.value(
             value: mockPermissionsCubit,
           ),
+          BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
         ],
         child: const Scaffold(body: PrayerSettingsSheet()),
       ),

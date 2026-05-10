@@ -96,11 +96,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
   DateTime _lastPreviewUpdateTime = DateTime(2000);
   static const _previewUpdateThrottle = Duration(milliseconds: 150);
 
-  // Cache recently previewed pages to avoid redundant updates during session.
-  // Prevents same page from appearing in logs multiple times.
-  final LinkedHashSet<int> _previewedPagesCache = LinkedHashSet<int>();
-  static const int _maxCachedPages = 50;
-
   // Last page number dispatched to prewarmCurrentTarget. Guards against
   // firing on every sub-pixel scroll tick when the rounded page hasn't changed.
   int _lastScrollPrewarmPage = -1;
@@ -470,11 +465,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final currentState = context.read<NavigationBloc>().state;
     if (currentState is! NavigationLoaded) return;
 
-    // Skip if already cached during this session — avoids logging redundant previews
-    if (_previewedPagesCache.contains(displayPage)) {
-      return;
-    }
-
     final currentPreviewState = _previewPageStateNotifier.value;
     if (displayPage == currentState.pageState.currentPage &&
         currentPreviewState == null) {
@@ -494,13 +484,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
       pageNumber: displayPage,
       cacheWidth: _cacheWidth,
     );
-
-    // Add to cache with LRU eviction to prevent unbounded growth
-    _previewedPagesCache.add(displayPage);
-    if (_previewedPagesCache.length > _maxCachedPages) {
-      // Remove oldest entry (LinkedHashSet preserves insertion order)
-      _previewedPagesCache.remove(_previewedPagesCache.first);
-    }
   }
 
   void _clearPreviewPage() {
@@ -531,13 +514,22 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final currentIndex = _pageController.page?.round() ?? 0;
     final delta = (targetIndex - currentIndex).abs();
     final isLongJump = delta > 3;
+    final useJumpSnapshot = quranReaderShouldUseJumpTransitionSnapshot(delta);
+    final snapshotRequested = isLongJump && useJumpSnapshot;
+
+    PerfLogger.logQuranPerf(
+      '[QuranPerf][Jump]',
+      'start fromPage=${currentIndex + 1} toPage=$safePageNumber delta=$delta '
+          'snapshotRequested=$snapshotRequested',
+    );
 
     if (isLongJump) {
       PerfLogger.log(
         widgetName: 'QuranImageReader',
         message:
             'slider jump delta=$delta '
-            'from=${currentIndex + 1} to=$safePageNumber',
+            'from=${currentIndex + 1} to=$safePageNumber '
+            'snapshot=$useJumpSnapshot',
       );
       // Do NOT clear preview here. The preview still shows the target page
       // (e.g. 379) while decode + snapshot runs. Clearing it early causes
@@ -551,10 +543,17 @@ class _QuranImageReaderState extends State<QuranImageReader>
       cacheWidth: _cacheWidth,
     );
     _JumpTransitionSnapshot? jumpSnapshot;
-    if (isLongJump) {
+    if (snapshotRequested) {
       jumpSnapshot = await _preparePageSnapshotForNavigation(safePageNumber);
     } else {
       await _preparePageForNavigation(safePageNumber);
+    }
+    final snapshotExecuted = jumpSnapshot != null;
+    if (snapshotRequested) {
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Jump]',
+        'prepareDone snapshotExecuted=$snapshotExecuted',
+      );
     }
     if (!mounted ||
         requestGeneration != _navigationRequestGeneration ||
@@ -567,6 +566,10 @@ class _QuranImageReaderState extends State<QuranImageReader>
         PerfLogger.log(
           widgetName: 'QuranImageReader',
           message: 'jump snapshot shown page=${jumpSnapshot.pageNumber}',
+        );
+        PerfLogger.logQuranPerf(
+          '[QuranPerf][Jump]',
+          'snapshotShown page=${jumpSnapshot.pageNumber}',
         );
       }
       _jumpTransitionSnapshotNotifier.value = jumpSnapshot;
@@ -585,6 +588,10 @@ class _QuranImageReaderState extends State<QuranImageReader>
         clearAttempts++;
         await WidgetsBinding.instance.endOfFrame;
         if (_lastSettledPageIndex == targetIndex) {
+          PerfLogger.logQuranPerf(
+            '[QuranPerf][Jump]',
+            'committedSettled page=$safePageNumber clearAttempts=$clearAttempts',
+          );
           // One more frame: let the raster thread paint the live page.
           if (mounted && requestGeneration == _navigationRequestGeneration) {
             await WidgetsBinding.instance.endOfFrame;
@@ -605,6 +612,11 @@ class _QuranImageReaderState extends State<QuranImageReader>
               'page=$safePageNumber '
               'attempts=$clearAttempts',
         );
+        PerfLogger.logQuranPerf(
+          '[QuranPerf][Jump]',
+          'snapshotCleared page=$safePageNumber clearAttempts=$clearAttempts '
+              'settledPage=$safePageNumber',
+        );
       }
       return;
     }
@@ -620,8 +632,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final pageIndex = pageNumber - 1;
     _lastSettledPageIndex = pageIndex;
     _clearPreviewPage();
-    // Clear preview cache on page change to allow re-previewing around new page
-    _previewedPagesCache.clear();
     PerfLogger.log(widgetName: 'PageView', message: 'swiped page=$pageNumber');
     context.read<NavigationBloc>().add(PageChanged(pageNumber));
     _imagePrewarmer.prewarmSettledWindow(
@@ -716,12 +726,20 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final cached = _snapshotCache.remove(key);
     if (cached != null) {
       _snapshotCache[key] = cached;
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Snapshot]',
+        'reuseImageCache page=$pageNumber key=$key',
+      );
       return cached;
     }
 
     final pending = _snapshotFutures.remove(key);
     if (pending != null) {
       _snapshotFutures[key] = pending;
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Snapshot]',
+        'awaitInFlightCapture page=$pageNumber',
+      );
       return pending;
     }
 
@@ -772,8 +790,10 @@ class _QuranImageReaderState extends State<QuranImageReader>
         }
 
         try {
+          final deviceDpr = View.of(context).devicePixelRatio;
+          final pixelRatio = quranReaderSnapshotPixelRatioForCapture(deviceDpr);
           final image = await renderObject.toImage(
-            pixelRatio: View.of(context).devicePixelRatio,
+            pixelRatio: pixelRatio,
           );
           _rememberSnapshot(cacheKey, image);
           PerfLogger.log(
@@ -782,8 +802,16 @@ class _QuranImageReaderState extends State<QuranImageReader>
                 'snapshot ready '
                 'page=$pageNumber '
                 'attempt=$attempt '
+                'deviceDpr=$deviceDpr '
+                'pixelRatio=$pixelRatio '
                 'size=${image.width}x${image.height} '
                 'elapsedMs=${sw.elapsedMilliseconds}',
+          );
+          PerfLogger.logQuranPerf(
+            '[QuranPerf][Snapshot]',
+            'toImage page=$pageNumber deviceDpr=$deviceDpr pixelRatio=$pixelRatio '
+                'size=${image.width}x${image.height} '
+                'elapsedMs=${sw.elapsedMilliseconds} attempt=$attempt',
           );
           return image;
         } catch (error) {
@@ -796,6 +824,10 @@ class _QuranImageReaderState extends State<QuranImageReader>
                   'attempts=$attempt '
                   'error=$error',
             );
+            PerfLogger.logQuranPerf(
+              '[QuranPerf][Snapshot]',
+              'toImageFailed page=$pageNumber attempts=$attempt error=$error',
+            );
           }
         }
       }
@@ -806,6 +838,11 @@ class _QuranImageReaderState extends State<QuranImageReader>
             'snapshot unavailable '
             'page=$pageNumber '
             'reason=paint-never-stabilized '
+            'elapsedMs=${sw.elapsedMilliseconds}',
+      );
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Snapshot]',
+        'toImageUnavailable page=$pageNumber reason=paint-never-stabilized '
             'elapsedMs=${sw.elapsedMilliseconds}',
       );
       return null;
@@ -849,6 +886,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('QuranImageReader');
     final sw = PerfLogger.startTimer();
     // If we are in an immersive mode, we want the content to be truly full-screen
     // and not be pushed down by the status bar or up by the navigation bar,

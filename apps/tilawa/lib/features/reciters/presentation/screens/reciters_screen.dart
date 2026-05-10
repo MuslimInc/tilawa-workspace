@@ -6,11 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
-import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -291,7 +289,8 @@ class _RecitersStartupLitePane extends StatelessWidget {
           children: [
             SizedBox.square(
               dimension: tokens.iconSizeExtraLarge - tokens.spaceMedium,
-              child: CircularProgressIndicator(
+              child: TilawaLoadingIndicator(
+                centered: false,
                 strokeWidth: tokens.progressHeight,
               ),
             ),
@@ -419,10 +418,7 @@ class _RecitersResultSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state is RecitersLoading) {
-      return _RecitersSkeletonSection(
-        reserveScrollbarSpace: reserveScrollbarSpace,
-        reserveScrollbarOnLeading: reserveScrollbarOnLeading,
-      );
+      return const _RecitersLoadingSection();
     }
 
     if (state is RecitersError) {
@@ -438,10 +434,7 @@ class _RecitersResultSection extends StatelessWidget {
       final RecitersLoaded loadedState = state as RecitersLoaded;
 
       if (!allowHeavyLoadedResults) {
-        return _RecitersSkeletonSection(
-          reserveScrollbarSpace: reserveScrollbarSpace,
-          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
-        );
+        return const _RecitersLoadingSection();
       }
 
       if (loadedState.filteredReciters.isEmpty) {
@@ -466,27 +459,14 @@ class _RecitersResultSection extends StatelessWidget {
   }
 }
 
-class _RecitersSkeletonSection extends StatelessWidget {
-  const _RecitersSkeletonSection({
-    required this.reserveScrollbarSpace,
-    required this.reserveScrollbarOnLeading,
-  });
-
-  final bool reserveScrollbarSpace;
-  final bool reserveScrollbarOnLeading;
+class _RecitersLoadingSection extends StatelessWidget {
+  const _RecitersLoadingSection();
 
   @override
   Widget build(BuildContext context) {
-    if (context.isCompact) {
-      return _ReciterSkeletonListSliver(
-        reserveScrollbarSpace: reserveScrollbarSpace,
-        reserveScrollbarOnLeading: reserveScrollbarOnLeading,
-      );
-    }
-    return ReciterSkeletonGridSliver(
-      reserveScrollbarSpace: reserveScrollbarSpace,
-      reserveScrollbarOnLeading: reserveScrollbarOnLeading,
-      itemCount: 10,
+    return const SliverFillRemaining(
+      hasScrollBody: false,
+      child: TilawaLoadingIndicator(),
     );
   }
 }
@@ -800,7 +780,8 @@ class StatePanel extends StatelessWidget {
                       padding: EdgeInsets.all(
                         tokens.spaceLarge + tokens.spaceExtraSmall,
                       ),
-                      child: CircularProgressIndicator(
+                      child: TilawaLoadingIndicator(
+                        centered: false,
                         strokeWidth: tokens.progressHeight,
                         color: accent,
                       ),
@@ -940,126 +921,6 @@ class _ReciterGridSliver extends StatelessWidget {
               final ReciterEntity reciter = state.filteredReciters[index];
               return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
             },
-          ),
-        );
-      },
-    );
-  }
-}
-
-ReciterEntity _fakeReciter(int index) {
-  return ReciterEntity(
-    id: index,
-    name: 'Reciter Name',
-    letter: 'ا',
-    date: '2024-01-01',
-    moshaf: const [
-      MoshafEntity(
-        id: 1,
-        name: 'Hafs An Asim',
-        server: 'server',
-        surahTotal: 114,
-        moshafType: 1,
-        surahList: '1-114',
-      ),
-    ],
-  );
-}
-
-class _ReciterSkeletonListSliver extends StatelessWidget {
-  const _ReciterSkeletonListSliver({
-    required this.reserveScrollbarSpace,
-    required this.reserveScrollbarOnLeading,
-  });
-
-  final bool reserveScrollbarSpace;
-  final bool reserveScrollbarOnLeading;
-  final int itemCount = 10;
-
-  @override
-  Widget build(BuildContext context) {
-    PerfLogger.markBuild('_ReciterSkeletonListSliver');
-    final tokens = Theme.of(context).tokens;
-
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        final padding = _recitersResultPadding(
-          context,
-          constraints,
-          top: tokens.spaceSmall,
-          bottom: tokens.spaceLarge,
-          reserveScrollbarSpace: reserveScrollbarSpace,
-          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
-        );
-
-        return SliverPadding(
-          padding: padding,
-          sliver: SliverSkeletonizer(
-            child: SliverList(
-              delegate: SliverChildBuilderDelegate((context, index) {
-                if (index.isOdd) {
-                  return SizedBox(height: tokens.spaceSmall);
-                }
-                final reciter = _fakeReciter(index ~/ 2);
-                return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
-              }, childCount: itemCount + itemCount - 1),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class ReciterSkeletonGridSliver extends StatelessWidget {
-  const ReciterSkeletonGridSliver({
-    super.key,
-    required this.reserveScrollbarSpace,
-    required this.reserveScrollbarOnLeading,
-    required this.itemCount,
-  });
-
-  final bool reserveScrollbarSpace;
-  final bool reserveScrollbarOnLeading;
-  final int itemCount;
-
-  @override
-  Widget build(BuildContext context) {
-    PerfLogger.markBuild('_ReciterSkeletonGridSliver');
-    final tokens = Theme.of(context).tokens;
-    final double targetItemExtent =
-        tokens.cardCompactWidthThreshold +
-        tokens.spaceExtraLarge +
-        tokens.spaceLarge;
-    final double targetItemHeight =
-        tokens.playerCollapsedHeight + tokens.spaceExtraLarge;
-
-    return SliverLayoutBuilder(
-      builder: (context, constraints) {
-        final padding = _recitersResultPadding(
-          context,
-          constraints,
-          top: tokens.spaceSmall,
-          bottom: tokens.spaceLarge,
-          reserveScrollbarSpace: reserveScrollbarSpace,
-          reserveScrollbarOnLeading: reserveScrollbarOnLeading,
-        );
-
-        return SliverPadding(
-          padding: padding,
-          sliver: SliverSkeletonizer(
-            child: SliverGrid(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: targetItemExtent,
-                mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
-                crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
-                childAspectRatio: targetItemExtent / targetItemHeight,
-              ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final reciter = _fakeReciter(index);
-                return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
-              }, childCount: itemCount),
-            ),
           ),
         );
       },

@@ -148,9 +148,6 @@ class _SurahIndexSheetState extends State<SurahIndexSheet> {
                   TilawaSheetHandle(
                     width: indexTheme.dragHandleWidth,
                     height: indexTheme.dragHandleHeight,
-                    margin: EdgeInsets.only(
-                      top: Theme.of(context).tokens.spaceMedium,
-                    ),
                     color: colorScheme.onSurfaceVariant.withValues(alpha: 0.28),
                   ),
                   _IndexHeader(

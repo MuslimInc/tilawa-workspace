@@ -249,7 +249,10 @@ class ReciterTile extends StatelessWidget {
             SizedBox(
               width: tokens.iconSizeSmall,
               height: tokens.iconSizeSmall,
-              child: const CircularProgressIndicator(strokeWidth: 2),
+              child: const TilawaLoadingIndicator(
+                centered: false,
+                strokeWidth: 2,
+              ),
             )
           else
             Icon(

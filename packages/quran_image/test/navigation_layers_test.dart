@@ -119,6 +119,7 @@ void main() {
           child: Scaffold(
             body: NavigationSliderOverlay(
               screenWidth: 400,
+              committedPage: 20,
               state: const PageState(
                 currentPage: 20,
                 totalPages: 604,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -139,8 +140,13 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
   void _setupAudioStreams() {
     void onStreamError(Object error, StackTrace stackTrace) {
-      // Swallow stream errors to prevent unhandled exceptions in release mode.
-      // The audio service can emit errors on codec failures, OS kills, etc.
+      developer.log(
+        'Audio player stream error',
+        name: 'AudioPlayerBloc',
+        error: error,
+        stackTrace: stackTrace,
+        level: 1000,
+      );
     }
 
     _subscriptions.add(

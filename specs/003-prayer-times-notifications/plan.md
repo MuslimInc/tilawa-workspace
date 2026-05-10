@@ -1,6 +1,6 @@
 # Implementation Plan: Prayer Times Notifications (Android-First)
 
-**Branch**: `003-prayer-times-notifications` | **Date**: 2026-04-28 (revised 2026-04-30) | **Spec**: [spec.md](spec.md)
+**Branch**: `003-prayer-times-notifications` | **Date**: 2026-04-28 (revised 2026-05-10) | **Spec**: [spec.md](spec.md)
 **Status**: Production-ready design
 **Input**: Feature specification from `specs/003-prayer-times-notifications/spec.md`
 **Research**: Phase 0 + package evaluation in [research.md](research.md)
@@ -25,6 +25,49 @@ Centralized constants live in `PrayerNotificationConfig`. Comprehensive use case
 cover scheduling, cancellation, capability check, and permission request — ensuring BLoC
 and UI never call platform APIs directly. Comprehensive error handling ensures no crash
 on any permission state, platform API failure, or scheduling edge case. iOS is future work.
+
+Current implementation note (2026-05-10): Sunrise is now schedulable as a
+notification-only prayer time entry. It uses the same `PrayerNotificationSettings`
+shape as the five prayers, but UI/domain update logic prevents Adhan mode.
+
+### Device clock freshness and scheduling recovery (2026-05-10)
+
+**Problem addressed**: Stale Prayer Times UI (countdown, today, monthly) and
+missed notify-only notifications after manual device date/time/timezone changes,
+including watchdog paths that skipped scheduling when only auto-location was
+available (`skippedNoSavedLocation`).
+
+**UI / domain (Clean Architecture)**:
+
+- `ShouldRefreshPrayerTimesUseCase` — pure domain predicate: reload if loaded
+  date ≠ `PrayerTimesClock.now()` local date, or UTC offset changed.
+- `PrayerTimesBloc` — `PrayerTimesEvent.refreshIfStale` delegates to the use
+  case; if stale, dispatches `loadPrayerTimes(forceReschedule: true)`.
+- `PrayerTimesScreen` — `WidgetsBindingObserver` on `resumed` + one-shot
+  `Timer` to next local midnight (using `PrayerTimesClock`); dispatches
+  `refreshIfStale` only (no business rules in the widget).
+- `MonthlyPrayerTimesView` — uses `PrayerTimesClock.now()` for current
+  month/year and “is today” comparisons.
+
+**Scheduling coordinates and native recovery**:
+
+- `PrayerSettingsEntity` — `lastResolvedLatitude`, `lastResolvedLongitude`,
+  `lastResolvedLocationName`; getters `effectiveSchedulingLatitude` /
+  `effectiveSchedulingLongitude` / `effectiveSchedulingLocationName` prefer
+  `saved*` over `lastResolved*`.
+- `PrayerTimesBloc` — after successful auto-location prayer load, persists
+  `lastResolved*` when `saved*` is absent; manual location sets both.
+- `EnsurePrayerNotificationsScheduledUseCase` and
+  `AppStartupTasks.initializePrayerNotifications` — schedule using effective
+  coordinates; on forced reschedule with missing coords or schedule `Left`,
+  call `IAdhanAlarmPlayer.markNeedsReschedule()` on Android.
+- Native — `MethodChannelLogic` handles `markNeedsReschedule`;
+  `PrayerBootReceiver` registers `ACTION_DATE_CHANGED` in the manifest in
+  addition to existing boot/time intents.
+
+**Tests**: Unit tests for `ShouldRefreshPrayerTimesUseCase`, effective-location
+getters, `EnsurePrayerNotificationsScheduledUseCase` (effective coords + dirty
+re-mark), and `PrayerTimesBloc` persistence behavior.
 
 ---
 
@@ -115,8 +158,16 @@ Visual Component     →  Option A: FLN + flutter_timezone
 
 ### Presentation
 
-- [prayer_settings_sheet.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/sheets/prayer_settings_sheet.dart) — UI toggle and minutesBefore selector
-- [prayer_times_bloc.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/bloc/prayer_times_bloc.dart) — Triggers rescheduling on settings change
+- [prayer_notification_settings_sheet.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/widgets/prayer_notification_settings_sheet.dart) — Global and per-prayer notification controls
+- [prayer_settings_sheet.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart) — Calculation/display settings
+- [prayer_times_bloc.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/bloc/prayer_times_bloc.dart) — Triggers rescheduling on settings change; persists `lastResolved*`; handles `refreshIfStale`
+- [prayer_times_screen.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/screens/prayer_times_screen.dart) — App lifecycle + midnight timer → `refreshIfStale`
+- [monthly_prayer_times_view.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/widgets/monthly_prayer_times_view.dart) — `PrayerTimesClock` for month/today
+
+### Domain (use cases)
+
+- [should_refresh_prayer_times_use_case.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/domain/usecases/should_refresh_prayer_times_use_case.dart) — Stale check vs clock
+- [ensure_prayer_notifications_scheduled_use_case.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/domain/usecases/ensure_prayer_notifications_scheduled_use_case.dart) — Effective coords + `markNeedsReschedule` on forced failure
 
 ---
 
@@ -126,7 +177,7 @@ Visual Component     →  Option A: FLN + flutter_timezone
 |---|---|---|---|
 | `prayer_adhan_silent` | Prayer Notifications (Silent) | None | Native Adhan audio is active |
 | `prayer_adhan` | Adhan Notifications | `adhan.mp3` | Native Adhan fails or is unsupported |
-| `prayer_times` | Prayer Notifications | Default | Standard prayer notification (no Adhan) |
+| `prayer_times` | Prayer Notifications | Default | Standard prayer notification (no Adhan), including Sunrise |
 
 ---
 
@@ -142,6 +193,16 @@ Visual Component     →  Option A: FLN + flutter_timezone
   - **Result**: Notification system plays `adhan.mp3`; visual notification is audible.
 
 > No duplicate sound path exists because `adhanHandledNatively` flag ensures channel selection is exclusive.
+
+### Sunrise Notification Behavior
+
+- Sunrise is included in the scheduling loop when `sunriseNotification.enabled`
+  is true.
+- Sunrise always resolves to `playAdhan = false`.
+- Sunrise uses the standard `prayer_times` notification channel.
+- Sunrise is included in watchdog "any enabled notification" checks.
+- The UI exposes Sunrise as Off/Notify only in row-level controls and Manage
+  Alerts.
 
 ---
 
@@ -174,6 +235,13 @@ Visual Component     →  Option A: FLN + flutter_timezone
   - `routing - Failure Path (Standard Adhan Channel)`
   - `deduplication logic`
   - `timezone change detection`
+
+### Device clock and scheduling recovery (2026-05-10)
+- `should_refresh_prayer_times_use_case_test.dart` — stale date / offset behavior.
+- `prayer_settings_entity_test.dart` — effective scheduling getters.
+- `ensure_prayer_notifications_scheduled_use_case_test.dart` — effective coords,
+  `markNeedsReschedule` when forced reschedule lacks location.
+- `prayer_times_bloc_test.dart` — `lastResolved*` persistence vs manual saved.
 
 ### Native Cleanup Verification
 - `cancelAll` in `AdhanScheduler.kt` verified to clear `AlarmManager` and `PrayerBootReceiver` persistent storage.

@@ -1147,6 +1147,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showSunrise => 'Show Sunrise';
 
   @override
+  String get showPrayerTimesAlertChipLabels => 'Show alert chip labels';
+
+  @override
   String get locationRequired => 'Location Required';
 
   @override
@@ -1171,6 +1174,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prayerTimesRefreshingLocation => 'Refreshing location...';
+
+  @override
+  String get prayerTimesLoading => 'Loading prayer times...';
 
   @override
   String get prayerTimesTapToRefreshLocation => 'Tap to refresh location';
@@ -1753,6 +1759,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerNotifications => 'Prayer Notifications';
 
   @override
+  String get manageAlerts => 'Manage Alerts';
+
+  @override
   String get prayerNotificationsEnabledAll => 'All Prayer Notifications';
 
   @override
@@ -1820,6 +1829,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String prayerTimeAt(String time) {
     return 'at $time';
   }
+
+  @override
+  String get prayerAlertModeOff => 'Off';
+
+  @override
+  String get prayerAlertModeNotifyOnly => 'Notify only';
+
+  @override
+  String get prayerAlertModeAdhan => 'Adhan';
+
+  @override
+  String get prayerAlertModeOffDescription =>
+      'No notification or Adhan for this prayer.';
+
+  @override
+  String get prayerAlertModeNotifyOnlyDescription =>
+      'Show a prayer-time notification without Adhan.';
+
+  @override
+  String get prayerAlertModeAdhanDescription =>
+      'Show a notification and play the Adhan.';
 
   @override
   String get notificationStatus => 'Notification';

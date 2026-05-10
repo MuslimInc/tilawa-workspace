@@ -470,8 +470,8 @@ class TilawaAdaptiveShellTokens {
   /// primary-harmonized [ColorScheme] tiers.
   final Color bottomNavBackgroundColor;
 
-  /// Alpha for the soft shadow rendered under the floating bottom nav.
-  /// Calibrated for visibility on real-device DPIs (~400 ppi).
+  /// Alpha for the soft shadow under the floating bottom nav (uses
+  /// [ColorScheme.shadow]). Kept low so elevation reads without a hazy band.
   final double bottomNavShadowOpacity;
 
   /// Blur radius for the floating bottom nav shadow.
@@ -537,6 +537,7 @@ class TilawaAdaptiveShellTokens {
     // active theme without per-screen overrides.
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
+    final bool lightChrome = colorScheme.brightness == Brightness.light;
     return TilawaAdaptiveShellTokens(
       compactBottomNavBarBaseHeight: 45,
       bottomNavHorizontalMargin: 16,
@@ -546,12 +547,12 @@ class TilawaAdaptiveShellTokens {
       bottomNavBorderWidth: 1,
       bottomNavItemGap: 4,
       bottomNavBackgroundColor: bottomNavBackgroundColor,
-      // No drop shadow: blur extends above the pill and reads as a foggy layer
-      // over scroll content (outline still separates chrome from the scaffold).
-      bottomNavShadowOpacity: 0,
-      bottomNavShadowBlur: 0,
-      bottomNavShadowOffset: Offset.zero,
-      bottomNavOutlineColor: shellChromeOutline,
+      // Soft elevation: tight blur + small downward offset so the bar lifts
+      // slightly without a hazy band over scroll content.
+      bottomNavShadowOpacity: lightChrome ? 0.09 : 0.055,
+      bottomNavShadowBlur: lightChrome ? 14 : 10,
+      bottomNavShadowOffset: Offset(0, lightChrome ? 4 : 2),
+      bottomNavOutlineColor: _bottomNavOutlineColor(colorScheme),
       sideRailRadius: 16,
       sideRailIndicatorColor: _sideRailIndicatorColor(colorScheme),
       sideRailBackgroundColor: _sideRailBackgroundColor(colorScheme),
@@ -592,6 +593,15 @@ class TilawaAdaptiveShellTokens {
     return colorScheme.outlineVariant.withValues(alpha: 0.1);
   }
 
+  /// Slightly stronger than [_shellChromeOutlineColor] so the white floating
+  /// bar edge stays legible on cream scaffolds without looking heavy.
+  static Color _bottomNavOutlineColor(ColorScheme colorScheme) {
+    final double alpha = colorScheme.brightness == Brightness.light
+        ? 0.17
+        : 0.12;
+    return colorScheme.outlineVariant.withValues(alpha: alpha);
+  }
+
   /// Matches [TilawaDesignTokens.opacityGlass] (0.8) on [ColorScheme.surface].
   static Color _sideRailBackgroundColor(ColorScheme colorScheme) {
     return colorScheme.surface.withValues(alpha: 0.8);
@@ -604,12 +614,12 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  /// Light compact nav uses a transparent bar so tab content (e.g. settings)
-  /// remains visible under the chrome; the hairline outline and per-destination
-  /// pills still read as controls. Dark keeps a filled bar for contrast.
+  /// Light compact nav uses an opaque white bar so the floating pill reads
+  /// clearly above cream or tinted scaffolds. Dark keeps a filled bar for
+  /// contrast.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
     if (colorScheme.brightness == Brightness.light) {
-      return Colors.transparent;
+      return Colors.white;
     }
     return Color.lerp(
           AppColors.darkSurfaceContainerHighBase,

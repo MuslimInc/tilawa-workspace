@@ -803,7 +803,8 @@ class _SharingCard extends StatelessWidget {
           const SizedBox(
             width: 20,
             height: 20,
-            child: CircularProgressIndicator(
+            child: TilawaLoadingIndicator(
+              centered: false,
               strokeWidth: 2.5,
               valueColor: AlwaysStoppedAnimation<Color>(
                 _ShareComposerColors.gold,
@@ -992,7 +993,7 @@ class _VideoReviewPreviewState extends State<_VideoReviewPreview> {
       autoPlay: true,
       looping: false,
       showControls: true,
-      placeholder: const Center(child: CircularProgressIndicator()),
+      placeholder: const TilawaLoadingIndicator(),
     );
     if (mounted) {
       setState(() {});
@@ -1035,7 +1036,7 @@ class _VideoReviewPreviewState extends State<_VideoReviewPreview> {
               child: _chewieController == null
                   ? const ColoredBox(
                       color: Colors.black12,
-                      child: Center(child: CircularProgressIndicator()),
+                      child: TilawaLoadingIndicator(),
                     )
                   : Chewie(controller: _chewieController!),
             ),

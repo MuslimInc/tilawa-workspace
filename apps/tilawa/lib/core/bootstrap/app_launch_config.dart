@@ -3,8 +3,13 @@ import 'package:flutter/foundation.dart';
 
 /// Launch-time feature toggles for startup orchestration.
 ///
-/// All toggles default to enabled and can be overridden via --dart-define.
-/// Example: --dart-define=TILAWA_LAUNCH_FIREBASE_INIT=false
+/// Most toggles default to enabled and can be overridden via `--dart-define`.
+/// [subscriptionServiceEnabled] defaults to **false** so subscription
+/// Firestore usage in `SubscriptionPlansService` (catalog, premium status,
+/// purchase records) stays off until explicitly enabled.
+///
+/// Example: `--dart-define=TILAWA_LAUNCH_FIREBASE_INIT=false`
+/// Example: `--dart-define=TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED=true`
 @immutable
 class AppLaunchConfig extends Equatable {
   const AppLaunchConfig({
@@ -31,6 +36,7 @@ class AppLaunchConfig extends Equatable {
     this.quranDataLoad = true,
     this.quranAssetsPrefetch = true,
     this.firebaseDataInit = true,
+    this.subscriptionServiceEnabled = false,
     this.notificationPermissionRequest = true,
     this.compactUiEnabled = true,
   });
@@ -129,6 +135,10 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_FIREBASE_DATA_INIT',
         defaultValue: true,
       ),
+      subscriptionServiceEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED',
+        defaultValue: false,
+      ),
       notificationPermissionRequest: bool.fromEnvironment(
         'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
         defaultValue: true,
@@ -163,6 +173,7 @@ class AppLaunchConfig extends Equatable {
   final bool quranDataLoad;
   final bool quranAssetsPrefetch;
   final bool firebaseDataInit;
+  final bool subscriptionServiceEnabled;
   final bool notificationPermissionRequest;
   final bool compactUiEnabled;
 
@@ -191,6 +202,7 @@ class AppLaunchConfig extends Equatable {
     quranDataLoad,
     quranAssetsPrefetch,
     firebaseDataInit,
+    subscriptionServiceEnabled,
     notificationPermissionRequest,
     compactUiEnabled,
   ];

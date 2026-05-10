@@ -96,6 +96,10 @@ internal class MethodChannelLogic(
                 }
                 result.success(needs)
             }
+            "markNeedsReschedule" -> {
+                storage.setNeedsReschedule(true)
+                result.success(null)
+            }
             "isIgnoringBatteryOptimizations" -> {
                 result.success(battery.isIgnoringBatteryOptimizations())
             }

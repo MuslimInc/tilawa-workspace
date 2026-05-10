@@ -44,6 +44,7 @@ class _ReciterPickerSheetState extends State<ReciterPickerSheet> {
         height: MediaQuery.sizeOf(context).height * 0.8,
         child: Column(
           children: [
+            const TilawaSheetHandle(),
             TilawaSearchField(
               controller: _searchController,
               hintText: context.l10n.searchReciters,

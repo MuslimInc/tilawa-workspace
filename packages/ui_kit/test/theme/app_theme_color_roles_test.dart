@@ -99,12 +99,8 @@ void main() {
 
       expect(tokens, isNotNull);
       expect(
-        tokens!.skeleton.baseColor,
+        tokens!.alphabetScrollbar.overlayBackgroundColor,
         theme.colorScheme.surfaceContainerHighest,
-      );
-      expect(
-        tokens.skeleton.highlightColor,
-        theme.colorScheme.surfaceContainerHigh,
       );
     });
 

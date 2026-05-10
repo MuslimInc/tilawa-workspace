@@ -36,7 +36,7 @@ class PageNavigationBar extends StatefulWidget {
 }
 
 class _PageNavigationBarState extends State<PageNavigationBar> {
-  static const int _totalPages = 604;
+  static int get _totalPages => QuranConstants.totalPagesCount;
 
   double? _sliderValueOverride;
   int? _lastPreviewPage;
@@ -415,7 +415,15 @@ class _PagePreviewInfo {
   final int juzNumber;
   final String hizbLabel;
 
+  static final Map<String, _PagePreviewInfo> _cache = {};
+
   static _PagePreviewInfo fromPage(BuildContext context, int pageNumber) {
+    final String cacheKey = '${context.l10n.localeName}|$pageNumber';
+    final _PagePreviewInfo? cached = _cache[cacheKey];
+    if (cached != null) {
+      return cached;
+    }
+
     final pageData = getPageData(pageNumber);
     final bool isArabic = context.l10n.localeName == 'ar';
     final Set<int> uniqueSurahNumbers = pageData
@@ -452,7 +460,7 @@ class _PagePreviewInfo {
       hizbLabelStr = '$prefix${context.l10n.hizb} $hizbIndex';
     }
 
-    return _PagePreviewInfo(
+    final _PagePreviewInfo result = _PagePreviewInfo(
       surahName: uniqueSurahNumbers
           .map(
             (surahNumber) => isArabic
@@ -463,5 +471,7 @@ class _PagePreviewInfo {
       juzNumber: juzNumber,
       hizbLabel: hizbLabelStr,
     );
+    _cache[cacheKey] = result;
+    return result;
   }
 }

@@ -304,9 +304,7 @@ class SleepTimerDialog extends StatelessWidget {
             child: Column(
               children: [
                 // Handle bar
-                TilawaSheetHandle(
-                  margin: EdgeInsets.only(top: tokens.spaceMedium),
-                ),
+                const TilawaSheetHandle(),
                 // Actions
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),

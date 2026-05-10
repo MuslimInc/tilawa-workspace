@@ -38,6 +38,7 @@ class TilawaSheetHandleTokens {
   const TilawaSheetHandleTokens({
     required this.width,
     required this.height,
+    required this.marginTop,
     required this.marginBottom,
     required this.cornerRadius,
     required this.colorOpacity,
@@ -45,6 +46,9 @@ class TilawaSheetHandleTokens {
 
   final double width;
   final double height;
+
+  /// Space above the drag pill; matches [TilawaDesignTokens.spaceMedium] per density.
+  final double marginTop;
   final double marginBottom;
   final double cornerRadius;
   final double colorOpacity;
@@ -56,6 +60,7 @@ class TilawaSheetHandleTokens {
       return const TilawaSheetHandleTokens(
         width: 46,
         height: 5,
+        marginTop: 10,
         marginBottom: 12,
         cornerRadius: 999,
         colorOpacity: 0.22,
@@ -64,6 +69,7 @@ class TilawaSheetHandleTokens {
     return const TilawaSheetHandleTokens(
       width: 46,
       height: 5,
+      marginTop: 12,
       marginBottom: 16,
       cornerRadius: 999,
       colorOpacity: 0.22,
@@ -73,6 +79,7 @@ class TilawaSheetHandleTokens {
   TilawaSheetHandleTokens copyWith({
     double? width,
     double? height,
+    double? marginTop,
     double? marginBottom,
     double? cornerRadius,
     double? colorOpacity,
@@ -80,6 +87,7 @@ class TilawaSheetHandleTokens {
     return TilawaSheetHandleTokens(
       width: width ?? this.width,
       height: height ?? this.height,
+      marginTop: marginTop ?? this.marginTop,
       marginBottom: marginBottom ?? this.marginBottom,
       cornerRadius: cornerRadius ?? this.cornerRadius,
       colorOpacity: colorOpacity ?? this.colorOpacity,
@@ -94,6 +102,7 @@ class TilawaSheetHandleTokens {
     return TilawaSheetHandleTokens(
       width: lerpTokenDouble(a.width, b.width, t),
       height: lerpTokenDouble(a.height, b.height, t),
+      marginTop: lerpTokenDouble(a.marginTop, b.marginTop, t),
       marginBottom: lerpTokenDouble(a.marginBottom, b.marginBottom, t),
       cornerRadius: lerpTokenDouble(a.cornerRadius, b.cornerRadius, t),
       colorOpacity: lerpTokenDouble(a.colorOpacity, b.colorOpacity, t),
@@ -350,7 +359,7 @@ class TilawaIconToggleTokens {
     // already below the 48dp guideline. Do not shrink further; flagged for
     // a separate accessibility refactor outside this work.
     return TilawaIconToggleTokens(
-      iconSize: 20.0,
+      iconSize: 18.0,
       activeBackgroundColor: _activeBackgroundColor(colorScheme),
       inactiveBackgroundColor: _inactiveBackgroundColor(colorScheme),
       padding: 8.0,
@@ -741,80 +750,6 @@ class TilawaErrorStateTokens {
         b.retryButtonForegroundColor,
         t,
       ),
-    );
-  }
-}
-
-/// Component tokens for [TilawaSkeletonBlock].
-@immutable
-class TilawaSkeletonTokens {
-  const TilawaSkeletonTokens({
-    required this.baseColor,
-    required this.highlightColor,
-    required this.borderRadius,
-    required this.animationDuration,
-    required this.pulseDuration,
-  });
-
-  /// Background color of the skeleton block.
-  /// Derived from [ColorScheme.surfaceContainerHighest].
-  final Color baseColor;
-
-  /// Highlight color for shimmer animation.
-  /// Derived from [ColorScheme.surfaceContainerHigh].
-  final Color highlightColor;
-
-  /// Border radius for rounded rectangle shapes.
-  final double borderRadius;
-
-  /// Duration of one complete shimmer animation cycle.
-  final Duration animationDuration;
-
-  /// Duration of pulse animation for reduced motion mode.
-  final Duration pulseDuration;
-
-  factory TilawaSkeletonTokens.defaults({
-    required ColorScheme colorScheme,
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    final isCompact = density.isCompact;
-
-    return TilawaSkeletonTokens(
-      baseColor: colorScheme.surfaceContainerHighest,
-      highlightColor: colorScheme.surfaceContainerHigh,
-      borderRadius: isCompact ? 8.0 : 12.0,
-      animationDuration: const Duration(milliseconds: 1500),
-      pulseDuration: const Duration(milliseconds: 1000),
-    );
-  }
-
-  TilawaSkeletonTokens copyWith({
-    Color? baseColor,
-    Color? highlightColor,
-    double? borderRadius,
-    Duration? animationDuration,
-    Duration? pulseDuration,
-  }) {
-    return TilawaSkeletonTokens(
-      baseColor: baseColor ?? this.baseColor,
-      highlightColor: highlightColor ?? this.highlightColor,
-      borderRadius: borderRadius ?? this.borderRadius,
-      animationDuration: animationDuration ?? this.animationDuration,
-      pulseDuration: pulseDuration ?? this.pulseDuration,
-    );
-  }
-
-  static TilawaSkeletonTokens lerp(
-    TilawaSkeletonTokens a,
-    TilawaSkeletonTokens b,
-    double t,
-  ) {
-    return TilawaSkeletonTokens(
-      baseColor: Color.lerp(a.baseColor, b.baseColor, t)!,
-      highlightColor: Color.lerp(a.highlightColor, b.highlightColor, t)!,
-      borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
-      animationDuration: t < 0.5 ? a.animationDuration : b.animationDuration,
-      pulseDuration: t < 0.5 ? a.pulseDuration : b.pulseDuration,
     );
   }
 }

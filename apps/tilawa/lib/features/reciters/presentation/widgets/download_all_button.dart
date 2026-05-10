@@ -126,7 +126,8 @@ class DownloadAllButton extends StatelessWidget {
                     SizedBox(
                       width: 14,
                       height: 14,
-                      child: CircularProgressIndicator(
+                      child: TilawaLoadingIndicator(
+                        centered: false,
                         strokeWidth: 2,
                         value: progress,
                         color: colorScheme.primary,

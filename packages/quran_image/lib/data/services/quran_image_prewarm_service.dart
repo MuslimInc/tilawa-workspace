@@ -146,12 +146,22 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     required int pageNumber,
     required int cacheWidth,
   }) async {
+    final profileSw = PerfLogger.isQuranPerfEnabled
+        ? (Stopwatch()..start())
+        : null;
     if (!_imageCacheRepository.status.isReady || cacheWidth <= 0) return;
     final requestGeneration = _generation;
     final safeTarget = pageNumber.clamp(1, PageState.quranPageCount).toInt();
     final pageKey = '$cacheWidth:$safeTarget';
     if (_readyPageKeys.remove(pageKey)) {
       _readyPageKeys.add(pageKey);
+      if (profileSw != null) {
+        PerfLogger.logQuranPerf(
+          '[QuranPerf][Prewarm]',
+          'ensurePageReady page=$safeTarget elapsedMs=${profileSw.elapsedMilliseconds} '
+              'outcome=readyKeyHit cacheKnown=true',
+        );
+      }
       return;
     }
 
@@ -159,6 +169,13 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     if (pending != null) {
       _pageWarmFutures[pageKey] = pending;
       await pending;
+      if (profileSw != null && requestGeneration == _generation) {
+        PerfLogger.logQuranPerf(
+          '[QuranPerf][Prewarm]',
+          'ensurePageReady page=$safeTarget elapsedMs=${profileSw.elapsedMilliseconds} '
+              'outcome=awaitedInFlight cacheKnown=false',
+        );
+      }
       return;
     }
 
@@ -172,6 +189,13 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
       await future;
       if (requestGeneration == _generation) {
         _rememberReadyPageKey(pageKey);
+        if (profileSw != null) {
+          PerfLogger.logQuranPerf(
+            '[QuranPerf][Prewarm]',
+            'ensurePageReady page=$safeTarget elapsedMs=${profileSw.elapsedMilliseconds} '
+                'outcome=warmed cacheKnown=true',
+          );
+        }
       }
     } catch (error) {
       PerfLogger.log(

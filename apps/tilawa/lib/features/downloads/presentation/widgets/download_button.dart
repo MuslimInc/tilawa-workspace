@@ -345,7 +345,8 @@ class _DownloadingProgressButton extends StatelessWidget {
             SizedBox(
               width: _kInnerRingSize,
               height: _kInnerRingSize,
-              child: CircularProgressIndicator(
+              child: TilawaLoadingIndicator(
+                centered: false,
                 value: progress > 0 ? progress : null,
                 strokeWidth: tokens.progressHeight,
                 backgroundColor: colorScheme.primary.withValues(

@@ -42,7 +42,10 @@ class VideoReviewPanel extends StatelessWidget {
         ? SizedBox(
             width: tokens.iconSizeSmall,
             height: tokens.iconSizeSmall,
-            child: const CircularProgressIndicator(strokeWidth: 2),
+            child: const TilawaLoadingIndicator(
+              centered: false,
+              strokeWidth: 2,
+            ),
           )
         : Icon(Icons.download_rounded, size: tokens.iconSizeSmall);
     final Text saveLabel = Text(context.l10n.save);

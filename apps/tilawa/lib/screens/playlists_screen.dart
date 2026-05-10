@@ -68,8 +68,8 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         },
         builder: (context, state) {
           return state.when(
-            initial: () => const Center(child: CircularProgressIndicator()),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            initial: () => const TilawaLoadingIndicator(),
+            loading: () => const TilawaLoadingIndicator(),
             loaded: (playlists, searchQuery, filteredPlaylists) => Column(
               children: [
                 PlaylistSearchBar(

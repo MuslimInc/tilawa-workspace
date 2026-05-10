@@ -11,6 +11,9 @@ class FirebaseInitializationService {
   ///
   /// This method must NOT write to Firestore from the client. Catalog
   /// seeding belongs in an admin backend or migration script.
+  ///
+  /// Startup skips this path when launch config
+  /// `subscriptionServiceEnabled` is false (default).
   Future<void> initializeFirebaseData() async {
     try {
       logger.d('Initializing Firebase data (read-only)...');

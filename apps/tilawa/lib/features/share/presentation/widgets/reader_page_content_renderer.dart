@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
 
@@ -71,9 +72,7 @@ class ReaderPageContentRenderer extends StatelessWidget {
                   .isFontLoaded(pageNumber);
 
               if (!isFontLoaded) {
-                return const Center(
-                  child: CircularProgressIndicator.adaptive(),
-                );
+                return const TilawaLoadingIndicator();
               }
 
               final preparedPage =

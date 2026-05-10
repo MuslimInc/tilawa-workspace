@@ -3,7 +3,7 @@ resolution: workspace
 description: An Audio Quran Player project.
 
 publish_to: none
-version: 1.0.0+25
+version: 1.0.1+26
 
 environment:
   sdk: ^3.11.5
@@ -80,8 +80,6 @@ dependencies:
   rxdart: ^0.28.0
   share_plus: ^12.0.1
   shared_preferences: ^2.5.4
-  skeletonizer:
-    path: ../../packages/skeletonizer
   stream_transform: ^2.1.1
   term_glyph: ^1.2.2
   timezone: ^0.11.0

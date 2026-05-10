@@ -1533,6 +1533,10 @@
     "@showSunrise": {
         "description": "Show sunrise toggle label"
     },
+    "showPrayerTimesAlertChipLabels": "Show alert chip labels",
+    "@showPrayerTimesAlertChipLabels": {
+        "description": "Toggle text next to notification status icons on prayer time rows"
+    },
     "locationRequired": "Location Required",
     "@locationRequired": {
         "description": "Location required title"
@@ -1564,6 +1568,10 @@
     "prayerTimesRefreshingLocation": "Refreshing location...",
     "@prayerTimesRefreshingLocation": {
         "description": "Helper text shown while refreshing prayer times location"
+    },
+    "prayerTimesLoading": "Loading prayer times...",
+    "@prayerTimesLoading": {
+        "description": "Accessibility label while the prayer times screen content is loading"
     },
     "prayerTimesTapToRefreshLocation": "Tap to refresh location",
     "@prayerTimesTapToRefreshLocation": {
@@ -2354,6 +2362,10 @@
     "@prayerNotifications": {
         "description": "Section title for prayer time notification settings"
     },
+    "manageAlerts": "Manage Alerts",
+    "@manageAlerts": {
+        "description": "Action label to open prayer alert preferences"
+    },
     "prayerNotificationsEnabledAll": "All Prayer Notifications",
     "@prayerNotificationsEnabledAll": {
         "description": "Global toggle label for enabling/disabling all prayer notifications"
@@ -2440,6 +2452,30 @@
                 "type": "String"
             }
         }
+    },
+    "prayerAlertModeOff": "Off",
+    "@prayerAlertModeOff": {
+        "description": "Prayer alert mode label when notification and Adhan are disabled"
+    },
+    "prayerAlertModeNotifyOnly": "Notify only",
+    "@prayerAlertModeNotifyOnly": {
+        "description": "Prayer alert mode label when notification is enabled without Adhan"
+    },
+    "prayerAlertModeAdhan": "Adhan",
+    "@prayerAlertModeAdhan": {
+        "description": "Prayer alert mode label when notification and Adhan are enabled"
+    },
+    "prayerAlertModeOffDescription": "No notification or Adhan for this prayer.",
+    "@prayerAlertModeOffDescription": {
+        "description": "Description for disabled prayer alert mode"
+    },
+    "prayerAlertModeNotifyOnlyDescription": "Show a prayer-time notification without Adhan.",
+    "@prayerAlertModeNotifyOnlyDescription": {
+        "description": "Description for notification-only prayer alert mode"
+    },
+    "prayerAlertModeAdhanDescription": "Show a notification and play the Adhan.",
+    "@prayerAlertModeAdhanDescription": {
+        "description": "Description for Adhan prayer alert mode"
     },
     "notificationStatus": "Notification",
     "@notificationStatus": {

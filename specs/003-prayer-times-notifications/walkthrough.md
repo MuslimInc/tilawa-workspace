@@ -34,6 +34,15 @@ Use the table once per device/OS combination:
 | Debug/Profile | Manual 10s test in profile | Button appears and schedules one test Adhan |  |  |  |
 | Release | Manual 10s test in release | Button is absent |  |  |  |
 
+### Clock-change and auto-location only (2026-05-10)
+
+On a profile where the user relies on **auto-detected location** and has **not**
+set a manual saved city, re-run the **Manual time change** and **Timezone
+change** rows. After Prayer Times has successfully loaded at least once, logs
+from the watchdog / reschedule path MUST **not** show
+`skippedNoSavedLocation`. Expect `PrayerWatchdog` / boot receiver activity and
+`[SCHEDULE OK]` (or equivalent) for enabled notify-only prayers (e.g. Fajr).
+
 ## Notification Tap Blocker Smoke
 
 Run this smoke set before any limited rollout:

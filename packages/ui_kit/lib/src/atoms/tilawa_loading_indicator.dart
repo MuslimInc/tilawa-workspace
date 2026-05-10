@@ -19,6 +19,10 @@ class TilawaLoadingIndicator extends StatelessWidget {
     this.strokeWidth,
     this.color,
     this.semanticsLabel,
+    this.value,
+    this.backgroundColor,
+    this.valueColor,
+    this.strokeCap,
   });
 
   /// Whether to wrap the indicator in a [Center] widget.
@@ -27,11 +31,25 @@ class TilawaLoadingIndicator extends StatelessWidget {
   /// Stroke width override. Defaults to the token value.
   final double? strokeWidth;
 
-  /// Color override. Defaults to `colorScheme.primary`.
+  /// Color override when [valueColor] is null.
+  ///
+  /// Defaults to theme primary when both this and [valueColor] are null.
   final Color? color;
 
   /// Optional semantic label for accessibility.
   final String? semanticsLabel;
+
+  /// Progress from 0–1 for determinate indicators; null for indeterminate.
+  final double? value;
+
+  /// Track color behind the active arc.
+  final Color? backgroundColor;
+
+  /// Animated color for the active arc (e.g. [AlwaysStoppedAnimation]).
+  final Animation<Color?>? valueColor;
+
+  /// Stroke cap style; null uses the Material default.
+  final StrokeCap? strokeCap;
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +57,13 @@ class TilawaLoadingIndicator extends StatelessWidget {
     final tokens = theme.componentTokens.loadingIndicator;
 
     final Widget indicator = CircularProgressIndicator(
+      value: value,
       strokeWidth: strokeWidth ?? tokens.defaultStrokeWidth,
-      color: color,
+      backgroundColor: backgroundColor,
+      color: valueColor != null ? null : color,
+      valueColor: valueColor,
       semanticsLabel: semanticsLabel,
+      strokeCap: strokeCap,
     );
 
     if (!centered) return indicator;

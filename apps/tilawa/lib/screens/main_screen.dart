@@ -107,7 +107,6 @@ class _MainScreenState extends State<MainScreen> {
           lazy: true,
           create: (_) => getIt<PrayerTimesBloc>(),
         ),
-        BlocProvider<QiblaBloc>(lazy: true, create: (_) => getIt<QiblaBloc>()),
         BlocProvider<InternetStatusBloc>(
           lazy: true,
           create: (_) => getIt<InternetStatusBloc>(),

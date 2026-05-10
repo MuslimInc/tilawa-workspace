@@ -82,9 +82,11 @@ void _showCustomColorPicker(BuildContext context, Color currentColor) {
 }
 
 void _showLanguagePicker(BuildContext context, Locale currentLocale) {
-  final tokens = Theme.of(context).tokens;
+  final theme = Theme.of(context);
+  final tokens = theme.tokens;
   showModalBottomSheet<void>(
     context: context,
+    backgroundColor: theme.colorScheme.surfaceContainerLow,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(tokens.radiusExtraLarge),
@@ -237,7 +239,7 @@ class SettingsScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               horizontal: tokens.spaceLarge,
               vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
-            ).copyWith(bottom: tokens.spaceExtraLarge),
+            ).copyWith(bottom: tokens.spaceExtraLarge + tokens.spaceLarge),
             child: Column(
               children: [
                 const _SettingsProfileCard(),
@@ -653,7 +655,7 @@ class _ColorPickerSheet extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: tokens.spaceLarge),
+              const TilawaSheetHandle(),
               Text(
                 context.l10n.choosePrimaryColor,
                 style: context.textTheme.titleMedium?.copyWith(
@@ -723,7 +725,7 @@ class _LanguagePickerSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: tokens.spaceLarge),
+            const TilawaSheetHandle(),
             Text(
               context.l10n.chooseLanguage,
               style: context.textTheme.titleMedium?.copyWith(
@@ -772,7 +774,7 @@ class _ConcurrentDownloadsSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: tokens.spaceLarge),
+          const TilawaSheetHandle(),
           Text(
             context.l10n.concurrentDownloads,
             style: context.textTheme.titleMedium?.copyWith(

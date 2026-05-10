@@ -229,36 +229,40 @@ CheckboxThemeData _checkboxTheme({
         return isLight ? Colors.grey.shade50 : Colors.grey.shade400;
       }
     }),
-    overlayColor:
-        WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-          if (useM3)
-            WidgetState.error & WidgetState.pressed: colorScheme.error
-                .withAlpha(kAlphaPressed),
-          if (useM3)
-            WidgetState.error & WidgetState.hovered: colorScheme.error
-                .withAlpha(kAlphaHovered),
-          if (useM3)
-            WidgetState.error & WidgetState.focused: colorScheme.error
-                .withAlpha(kAlphaFocused),
-          WidgetState.selected & WidgetState.pressed: tintInteract
-              ? FlexSubThemes.tintedPressed(overlay, tint, factor)
-              : colorScheme.onSurface.withAlpha(kAlphaPressed),
-          WidgetState.selected & WidgetState.hovered: tintInteract
-              ? FlexSubThemes.tintedHovered(overlay, tint, factor)
-              : baseColor.withAlpha(kAlphaHovered),
-          WidgetState.selected & WidgetState.focused: tintInteract
-              ? FlexSubThemes.tintedFocused(overlay, tint, factor)
-              : baseColor.withAlpha(kAlphaFocused),
-          WidgetState.pressed: tintInteract
-              ? FlexSubThemes.tintedPressed(overlay, tint, factor)
-              : baseColor.withAlpha(kAlphaPressed),
-          WidgetState.hovered: tintInteract
-              ? FlexSubThemes.tintedHovered(overlay, tint, factor)
-              : colorScheme.onSurface.withAlpha(kAlphaHovered),
-          WidgetState.focused: tintInteract
-              ? FlexSubThemes.tintedFocused(overlay, tint, factor)
-              : colorScheme.onSurface.withAlpha(kAlphaFocused),
-          WidgetState.any: Colors.transparent,
-        }),
+    overlayColor: WidgetStateProperty<Color>.fromMap(
+      <WidgetStatesConstraint, Color>{
+        if (useM3)
+          WidgetState.error & WidgetState.pressed: colorScheme.error.withAlpha(
+            kAlphaPressed,
+          ),
+        if (useM3)
+          WidgetState.error & WidgetState.hovered: colorScheme.error.withAlpha(
+            kAlphaHovered,
+          ),
+        if (useM3)
+          WidgetState.error & WidgetState.focused: colorScheme.error.withAlpha(
+            kAlphaFocused,
+          ),
+        WidgetState.selected & WidgetState.pressed: tintInteract
+            ? FlexSubThemes.tintedPressed(overlay, tint, factor)
+            : colorScheme.onSurface.withAlpha(kAlphaPressed),
+        WidgetState.selected & WidgetState.hovered: tintInteract
+            ? FlexSubThemes.tintedHovered(overlay, tint, factor)
+            : baseColor.withAlpha(kAlphaHovered),
+        WidgetState.selected & WidgetState.focused: tintInteract
+            ? FlexSubThemes.tintedFocused(overlay, tint, factor)
+            : baseColor.withAlpha(kAlphaFocused),
+        WidgetState.pressed: tintInteract
+            ? FlexSubThemes.tintedPressed(overlay, tint, factor)
+            : baseColor.withAlpha(kAlphaPressed),
+        WidgetState.hovered: tintInteract
+            ? FlexSubThemes.tintedHovered(overlay, tint, factor)
+            : colorScheme.onSurface.withAlpha(kAlphaHovered),
+        WidgetState.focused: tintInteract
+            ? FlexSubThemes.tintedFocused(overlay, tint, factor)
+            : colorScheme.onSurface.withAlpha(kAlphaFocused),
+        WidgetState.any: Colors.transparent,
+      },
+    ),
   );
 }

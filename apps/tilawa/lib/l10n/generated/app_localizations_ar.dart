@@ -1137,6 +1137,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get showSunrise => 'إظهار الشروق';
 
   @override
+  String get showPrayerTimesAlertChipLabels => 'إظهار نص شارات التنبيه';
+
+  @override
   String get locationRequired => 'الموقع مطلوب';
 
   @override
@@ -1161,6 +1164,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get prayerTimesRefreshingLocation => 'جارٍ تحديث الموقع...';
+
+  @override
+  String get prayerTimesLoading => 'جارٍ تحميل أوقات الصلاة...';
 
   @override
   String get prayerTimesTapToRefreshLocation => 'اضغط لتحديث الموقع';
@@ -1744,6 +1750,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prayerNotifications => 'إشعارات الصلاة';
 
   @override
+  String get manageAlerts => 'إدارة التنبيهات';
+
+  @override
   String get prayerNotificationsEnabledAll => 'جميع إشعارات الصلاة';
 
   @override
@@ -1811,6 +1820,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String prayerTimeAt(String time) {
     return 'الساعة $time';
   }
+
+  @override
+  String get prayerAlertModeOff => 'متوقف';
+
+  @override
+  String get prayerAlertModeNotifyOnly => 'تنبيه فقط';
+
+  @override
+  String get prayerAlertModeAdhan => 'الأذان';
+
+  @override
+  String get prayerAlertModeOffDescription =>
+      'لا يوجد تنبيه أو أذان لهذه الصلاة.';
+
+  @override
+  String get prayerAlertModeNotifyOnlyDescription =>
+      'إظهار تنبيه وقت الصلاة بدون أذان.';
+
+  @override
+  String get prayerAlertModeAdhanDescription => 'إظهار تنبيه وتشغيل الأذان.';
 
   @override
   String get notificationStatus => 'التنبيه';

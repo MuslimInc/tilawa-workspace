@@ -5,6 +5,7 @@ import 'package:tilawa_core/core.dart';
 import '../entities/entities.dart';
 import '../repositories/prayer_notification_schedule_repository.dart';
 import '../repositories/prayer_times_repository.dart';
+import '../services/adhan_alarm_player_interface.dart';
 import '../services/prayer_notification_permission_status.dart';
 import 'schedule_prayer_notifications_use_case.dart';
 
@@ -41,13 +42,15 @@ class EnsurePrayerNotificationsScheduledUseCase {
     this._scheduleRepository,
     this._permissionStatus,
     this._prayerTimesRepository,
-    this._schedulePrayerNotifications,
-  );
+    this._schedulePrayerNotifications, [
+    this._adhanPlayer,
+  ]);
 
   final PrayerNotificationScheduleRepository _scheduleRepository;
   final PrayerNotificationPermissionStatus _permissionStatus;
   final PrayerTimesRepository _prayerTimesRepository;
   final SchedulePrayerNotificationsUseCase _schedulePrayerNotifications;
+  final IAdhanAlarmPlayer? _adhanPlayer;
 
   Future<Either<Failure, PrayerNotificationEnsureResult>> call({
     bool forceReschedule = false,
@@ -72,9 +75,12 @@ class EnsurePrayerNotificationsScheduledUseCase {
 
       final PrayerSettingsEntity settings = await _prayerTimesRepository
           .loadSettings();
-      final double? latitude = settings.savedLatitude;
-      final double? longitude = settings.savedLongitude;
+      final double? latitude = settings.effectiveSchedulingLatitude;
+      final double? longitude = settings.effectiveSchedulingLongitude;
       if (latitude == null || longitude == null) {
+        if (forceReschedule) {
+          await _adhanPlayer?.markNeedsReschedule();
+        }
         return const Right(
           PrayerNotificationEnsureResult(
             action: PrayerNotificationEnsureAction.skippedNoSavedLocation,
@@ -116,12 +122,21 @@ class EnsurePrayerNotificationsScheduledUseCase {
             forceReschedule: true,
           );
 
-      return scheduleResult.fold(
-        (failure) => Left(failure),
-        (_) => const Right(
-          PrayerNotificationEnsureResult(
-            action: PrayerNotificationEnsureAction.rescheduled,
-          ),
+      Failure? scheduleFailure;
+      await scheduleResult.fold(
+        (failure) async => scheduleFailure = failure,
+        (_) => null,
+      );
+      if (scheduleFailure != null) {
+        if (forceReschedule) {
+          await _adhanPlayer?.markNeedsReschedule();
+        }
+        return Left(scheduleFailure!);
+      }
+
+      return const Right(
+        PrayerNotificationEnsureResult(
+          action: PrayerNotificationEnsureAction.rescheduled,
         ),
       );
     } catch (e) {
@@ -131,6 +146,7 @@ class EnsurePrayerNotificationsScheduledUseCase {
 
   bool _hasAnyEnabledPrayerNotification(PrayerSettingsEntity settings) {
     return settings.fajrNotification.enabled ||
+        settings.sunriseNotification.enabled ||
         settings.dhuhrNotification.enabled ||
         settings.asrNotification.enabled ||
         settings.maghribNotification.enabled ||

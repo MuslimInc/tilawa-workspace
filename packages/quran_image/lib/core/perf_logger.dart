@@ -1,5 +1,5 @@
 import 'dart:developer';
-import 'dart:ui' show FramePhase;
+import 'dart:ui' show FramePhase, FrameTiming;
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -54,9 +54,10 @@ class SlowFrameInfo extends Equatable {
   ];
 }
 
-/// Lightweight performance logger active only in profile mode.
+/// Lightweight performance logger for debug and profile builds.
 ///
-/// All methods are no-ops in debug and release builds.
+/// [isEnabled] is false in release, so [markBuild], [startFrameWatcher], and
+/// console logging are no-ops there. [logQuranPerf] runs only in profile mode.
 abstract final class PerfLogger {
   /// Runtime on/off switch for all instrumentation.
   ///
@@ -72,7 +73,7 @@ abstract final class PerfLogger {
   ///
   /// Has no effect in release mode because [isEnabled] already returns `false`
   /// at compile time.
-  static bool instrumentationEnabled = false;
+  static bool instrumentationEnabled = true;
 
   /// `true` when instrumentation should run.
   ///
@@ -103,10 +104,9 @@ abstract final class PerfLogger {
   /// timestamp ([SchedulerBinding.currentSystemFrameTimeStamp]).
   ///
   /// Each entry accumulates the widgets that called [markBuild] during a
-  /// single frame.  The timings callback removes entries by matching
-  /// [FrameTiming.vsyncStart], so every slow-frame report only lists the
-  /// widgets that built *during that exact frame* rather than sharing a single
-  /// batch-level list.
+  /// single frame.  [_takeBuildLogForTiming] pairs entries with [FrameTiming]
+  /// using [FramePhase.vsyncStart], [FramePhase.buildStart], or a small
+  /// nearest-key fallback so reports can list `widgets:` reliably.
   static final Map<Duration, List<String>> _buildLogByFrame = {};
 
   /// Notifies whenever any widget calls [markBuild].
@@ -132,10 +132,17 @@ abstract final class PerfLogger {
   /// No-op in release mode.
   static void markBuild(String widgetName) {
     if (!isEnabled) return;
-    // Group by the current frame's vsync timestamp so the timings callback
-    // can match builds to the exact FrameTiming that covers them.
-    final ts = SchedulerBinding.instance.currentSystemFrameTimeStamp;
-    (_buildLogByFrame[ts] ??= []).add(widgetName);
+    // [FrameTiming] phase timestamps sometimes align with [currentFrameTimeStamp]
+    // and sometimes with [currentSystemFrameTimeStamp].  Alias both keys to the
+    // same list so [_takeBuildLogForTiming] can drain contributors reliably.
+    final sys = SchedulerBinding.instance.currentSystemFrameTimeStamp;
+    final raw = SchedulerBinding.instance.currentFrameTimeStamp;
+    final list = _buildLogByFrame[sys] ?? _buildLogByFrame[raw] ?? <String>[];
+    list.add(widgetName);
+    _buildLogByFrame[sys] = list;
+    if (raw != sys) {
+      _buildLogByFrame[raw] = list;
+    }
 
     // Bump the build notifier so the PerfOverlay knows it can refresh.
     // Defer to the end of the frame to avoid "setState() called during build".
@@ -150,6 +157,68 @@ abstract final class PerfLogger {
     // Also emit a point marker on the DevTools Timeline so the widget appears
     // in the CPU/frame profiler alongside the frame's build phase.
     Timeline.instantSync(widgetName, arguments: const {'type': 'build'});
+  }
+
+  /// Exact key match only — used for every frame so fast frames never steal
+  /// orphans that belong to a later slow frame (nearest-match caused empty
+  /// `widgets:` on devices where scheduler vs [FrameTiming] clocks skew).
+  static List<String> _takeExactBuildLogForTiming(FrameTiming timing) {
+    for (final phase in <FramePhase>[
+      FramePhase.vsyncStart,
+      FramePhase.buildStart,
+    ]) {
+      final key = Duration(
+        microseconds: timing.timestampInMicroseconds(phase),
+      );
+      final taken = _removeBuildLogEntryForKey(key);
+      if (taken != null) return taken;
+    }
+    return const <String>[];
+  }
+
+  /// Last resort when a **slow build** frame has no exact map hit: attach the
+  /// pending [markBuild] bucket closest in time to this frame's vsync.
+  static List<String> _drainClosestOrphanBuildLog(
+    int vsyncUs, {
+    required int maxDeltaUs,
+  }) {
+    if (_buildLogByFrame.isEmpty) return const <String>[];
+    Duration? bestKey;
+    var bestDelta = 1 << 30;
+    for (final entry in _buildLogByFrame.entries) {
+      final d = (entry.key.inMicroseconds - vsyncUs).abs();
+      if (d < bestDelta && d <= maxDeltaUs && entry.value.isNotEmpty) {
+        bestDelta = d;
+        bestKey = entry.key;
+      }
+    }
+    if (bestKey == null) return const <String>[];
+    final log = _buildLogByFrame[bestKey];
+    if (log == null || log.isEmpty) return const <String>[];
+    _buildLogByFrame.removeWhere((_, v) => identical(v, log));
+    return log;
+  }
+
+  static void _pruneStaleBuildLogs({required int maxListsToRemove}) {
+    final sortedKeys = _buildLogByFrame.keys.toList()
+      ..sort((a, b) => a.inMicroseconds.compareTo(b.inMicroseconds));
+    var removed = 0;
+    for (final key in sortedKeys) {
+      if (removed >= maxListsToRemove) break;
+      if (!_buildLogByFrame.containsKey(key)) continue;
+      final log = _buildLogByFrame[key];
+      if (log == null) continue;
+      _buildLogByFrame.removeWhere((_, v) => identical(v, log));
+      removed++;
+    }
+  }
+
+  /// Removes one map entry for [key] and any alias keys sharing the same list.
+  static List<String>? _removeBuildLogEntryForKey(Duration key) {
+    final log = _buildLogByFrame[key];
+    if (log == null || log.isEmpty) return null;
+    _buildLogByFrame.removeWhere((_, v) => identical(v, log));
+    return log;
   }
 
   // ---------------------------------------------------------------------------
@@ -244,13 +313,7 @@ abstract final class PerfLogger {
 
     WidgetsBinding.instance.addTimingsCallback((timings) {
       for (final timing in timings) {
-        // Remove and consume the build log for exactly this frame, keyed by
-        // the frame's vsync start timestamp.  Non-slow frames are consumed
-        // here too, keeping the map from growing unbounded.
-        final vsyncTs = Duration(
-          microseconds: timing.timestampInMicroseconds(FramePhase.vsyncStart),
-        );
-        final frameBuildLog = _buildLogByFrame.remove(vsyncTs) ?? const [];
+        var frameBuildLog = _takeExactBuildLogForTiming(timing);
 
         final buildMs = timing.buildDuration.inMicroseconds / 1000;
         final rasterMs = timing.rasterDuration.inMicroseconds / 1000;
@@ -265,7 +328,31 @@ abstract final class PerfLogger {
         // build+raster individually look fine (GPU stall / texture upload).
         final totalSlow = totalMs > budgetMs * 2;
 
-        if (!buildSlow && !rasterSlow && !totalSlow) continue;
+        if (!buildSlow && !rasterSlow && !totalSlow) {
+          if (_buildLogByFrame.length > 48) {
+            _pruneStaleBuildLogs(maxListsToRemove: 24);
+          }
+          continue;
+        }
+
+        // [buildSlow] uses the same ~20 ms budget as raster; a frame can spend
+        // ~15–18 ms in build (many [markBuild] calls) and still be "not slow
+        // build" while raster is slow — recover orphans whenever build work was
+        // non-trivial (>2 ms) and this frame is actionable.
+        final shouldRecoverBuildAttribution =
+            frameBuildLog.isEmpty &&
+            (buildSlow || buildMs >= 2.0) &&
+            (buildSlow || rasterSlow || totalSlow);
+        if (shouldRecoverBuildAttribution) {
+          final vsyncUs = timing.timestampInMicroseconds(FramePhase.vsyncStart);
+          final recovered = _drainClosestOrphanBuildLog(
+            vsyncUs,
+            maxDeltaUs: 25000,
+          );
+          if (recovered.isNotEmpty) {
+            frameBuildLog = recovered;
+          }
+        }
 
         // Deduplicate widget names while preserving order of first appearance.
         final contributors = frameBuildLog.toSet().toList();
@@ -339,6 +426,18 @@ abstract final class PerfLogger {
   static void log({required String widgetName, required String message}) {
     if (!isEnabled) return;
     _logForWidget(widgetName, message);
+  }
+
+  /// Quran Image Reader markers for device profiling (`flutter run --profile`).
+  ///
+  /// No-op in debug, release, or when [instrumentationEnabled] is false
+  /// ([isQuranPerfEnabled] is profile-only).
+  /// Use consistent [tag] values such as `[QuranPerf][Jump]` for logcat grep.
+  static bool get isQuranPerfEnabled => kProfileMode && instrumentationEnabled;
+
+  static void logQuranPerf(String tag, String message) {
+    if (!isQuranPerfEnabled) return;
+    _log('$tag $message');
   }
 
   // ---------------------------------------------------------------------------

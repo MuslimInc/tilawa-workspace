@@ -955,14 +955,14 @@ void main() {
 
     group('cancelAllPrayerNotifications', () {
       test(
-        'cancels all 5 static IDs and all dynamic IDs in the 14-day range',
+        'cancels all static IDs and all dynamic IDs in the 14-day range',
         () async {
           await initialize();
 
           await service.cancelAllPrayerNotifications();
 
-          // 5 static + 14 days × 5 = 75 total cancel calls
-          verify(mockPlugin.cancel(id: anyNamed('id'))).called(75);
+          // 6 static + 14 days × 6 = 90 total cancel calls.
+          verify(mockPlugin.cancel(id: anyNamed('id'))).called(90);
           verify(mockAdhanPlayer.cancelAllAdhans()).called(1);
         },
       );
