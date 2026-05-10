@@ -8,11 +8,12 @@
 
 ## Overview
 
-This feature introduces no new persistence models. It operates entirely on
-existing domain entities (`PrayerSettingsEntity`, `PrayerTimeEntity`) and adds
-two new domain constructs: a value object (`PrayerAlarmCapability`) and
-centralized constants (`PrayerNotificationConfig`). All scheduling state is
-stored in `SharedPreferences` via two deduplication keys.
+The feature builds on existing domain entities (`PrayerSettingsEntity`,
+`PrayerTimeEntity`) and adds: a value object (`PrayerAlarmCapability`),
+centralized constants (`PrayerNotificationConfig`), and **extensions to**
+`PrayerSettingsEntity` for last-resolved scheduling coordinates. Notification
+deduplication state remains in `SharedPreferences` via fingerprint keys owned by
+`PrayerNotificationConfig`.
 
 ---
 
@@ -42,7 +43,19 @@ Generated with: Freezed + `@HydratedBloc`-compatible JSON
 | `asrNotification` | `PrayerNotificationSettings` | Asr alarm config |
 | `maghribNotification` | `PrayerNotificationSettings` | Maghrib alarm config |
 | `ishaNotification` | `PrayerNotificationSettings` | Isha alarm config |
+| `savedLatitude` / `savedLongitude` | `double?` | User-chosen manual location (priority for scheduling when set) |
+| `savedLocationName` | `String?` | Optional label for manual location |
+| `lastResolvedLatitude` / `lastResolvedLongitude` | `double?` | Last successful auto-detected coordinates (used when `saved*` is null) |
+| `lastResolvedLocationName` | `String?` | Optional label for last resolved location |
 | *(other fields)* | *(various)* | Calculation method, asr method, etc. |
+
+**Computed scheduling getters** (not stored):
+
+| Getter | Description |
+|---|---|
+| `effectiveSchedulingLatitude` | `savedLatitude ?? lastResolvedLatitude` |
+| `effectiveSchedulingLongitude` | `savedLongitude ?? lastResolvedLongitude` |
+| `effectiveSchedulingLocationName` | `savedLocationName ?? lastResolvedLocationName` |
 
 ### `PrayerTimeEntity`
 
@@ -116,6 +129,7 @@ adopted without modifying domain, BLoC, or UI.
 | `scheduleAdhan({id, scheduledTime, prayerName})` | `Future<void>` | Schedule adhan audio playback |
 | `cancelAdhan(id)` | `Future<void>` | Cancel a scheduled adhan by ID |
 | `cancelAllAdhans()` | `Future<void>` | Cancel all adhans in the prayer ID range |
+| `markNeedsReschedule()` | `Future<void>` | Android: set native `needs_reschedule_after_boot`; no-op elsewhere |
 
 ---
 
@@ -219,10 +233,11 @@ App start / reboot ───────────────► AppStartupTa
        │                                          ▼
        │                            SchedulePrayerNotificationsUseCase
        │
-Settings change / location change / Prayer Times load
+Settings change / location change / Prayer Times load / refreshIfStale → load (forceReschedule)
        │
        ▼
 PrayerTimesBloc._on* ──unawaited──► SchedulePrayerNotificationsUseCase
+                                            (coordinates: effective from settings)
                                             │
                                             ▼
                               PrayerAdhanNotificationService

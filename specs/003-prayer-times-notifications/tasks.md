@@ -54,6 +54,23 @@
 
 ---
 
+## Phase 5 — Device clock UI freshness [DONE] (2026-05-10)
+
+- [x] T060 [F] Add `ShouldRefreshPrayerTimesUseCase` (domain; `PrayerTimesClock`).
+- [x] T061 [F] Add `PrayerTimesEvent.refreshIfStale` / handler in `PrayerTimesBloc`.
+- [x] T062 [P] `PrayerTimesScreen`: `WidgetsBindingObserver` on resume + one-shot midnight timer.
+- [x] T063 [P] `MonthlyPrayerTimesView`: use `PrayerTimesClock.now()` for month/today.
+- [x] T064 [T] Unit/widget tests for use case, BLoC refresh path, and related coverage.
+
+## Phase 6 — Scheduling recovery (auto-location + dirty flag) [DONE] (2026-05-10)
+
+- [x] T070 [F] Extend `PrayerSettingsEntity` with `lastResolved*` + effective scheduling getters.
+- [x] T071 [F] `PrayerTimesBloc`: persist last resolved after successful auto load; align manual location with both saved and last resolved.
+- [x] T072 [F] `IAdhanAlarmPlayer.markNeedsReschedule()` + Android / no-op implementations.
+- [x] T073 [F] Native: method channel + `PrayerBootReceiver` `ACTION_DATE_CHANGED` (manifest).
+- [x] T074 [F] `EnsurePrayerNotificationsScheduledUseCase` + `app_startup_tasks`: effective coords; re-mark on forced reschedule failure.
+- [x] T075 [T] Tests for entity getters, ensure use case, BLoC persistence; update notification service test expectations if schedule surface changes.
+
 ## [RELEASE GATE]
 
 - [ ] **[RELEASE GATE]** Justify `USE_EXACT_ALARM` in Google Play Console: "Tilawa schedules prayer notifications at precise times for religious observance; accurate timing is required by the feature's core purpose."
