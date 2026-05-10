@@ -96,11 +96,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
   DateTime _lastPreviewUpdateTime = DateTime(2000);
   static const _previewUpdateThrottle = Duration(milliseconds: 150);
 
-  /// Offscreen [toImage] snapshot used to hide a one-frame GPU gap on **very**
-  /// long jumps. Medium jumps skip it: they are much faster; preview + decode
-  /// already ran while the user scrubbed.
-  static const int _jumpSnapshotMinPageDelta = 36;
-
   // Last page number dispatched to prewarmCurrentTarget. Guards against
   // firing on every sub-pixel scroll tick when the rounded page hasn't changed.
   int _lastScrollPrewarmPage = -1;
@@ -519,7 +514,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final currentIndex = _pageController.page?.round() ?? 0;
     final delta = (targetIndex - currentIndex).abs();
     final isLongJump = delta > 3;
-    final useJumpSnapshot = delta >= _jumpSnapshotMinPageDelta;
+    final useJumpSnapshot = quranReaderShouldUseJumpTransitionSnapshot(delta);
 
     if (isLongJump) {
       PerfLogger.log(

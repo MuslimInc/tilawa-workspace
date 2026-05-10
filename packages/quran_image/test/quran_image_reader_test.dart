@@ -14,6 +14,49 @@ import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/presentation/widgets/organisms/navigation_slider_overlay.dart';
 import 'package:quran_image/quran_image_reader.dart';
 
+Future<void> _pumpReaderHarness(
+  WidgetTester tester,
+  NavigationBloc navigationBloc,
+) async {
+  tester.view.physicalSize = const Size(1080, 2400);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
+
+  await tester.pumpWidget(
+    MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('en'),
+      home: BlocProvider<NavigationBloc>.value(
+        value: navigationBloc,
+        child: const QuranImageReader(),
+      ),
+    ),
+  );
+  await tester.pump();
+}
+
+Future<void> _showNavigationSlider(
+  WidgetTester tester,
+  _SeededNavigationBloc navigationBloc,
+) async {
+  navigationBloc.setVisibility(isVisible: true);
+  await tester.pump();
+  // [AnimatedBuilder] sets [IgnorePointer] while the slide animation is at 0.
+  await tester.pumpAndSettle(const Duration(seconds: 3));
+  expect(find.byType(NavigationSliderOverlay), findsOneWidget);
+}
+
+Future<void> _pumpUntilNavigationSettles(
+  WidgetTester tester, {
+  int maxPumps = 80,
+}) async {
+  for (var i = 0; i < maxPumps; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+  await tester.pumpAndSettle(const Duration(seconds: 2));
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -154,6 +197,34 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 800));
     expect(imagePrewarmer.disposeCount, 0);
+  });
+
+  /// Regression: [PageSlider] local drag value under RTL + nav overlay.
+  /// Full jump policy table: [reader_slider_jump_policy_test.dart].
+  group('QuranImageReader slider', () {
+    testWidgets('slider thumb moves during drag before page commits', (
+      tester,
+    ) async {
+      await _pumpReaderHarness(tester, navigationBloc);
+      await _showNavigationSlider(tester, navigationBloc);
+
+      final slider = find.byType(Slider);
+      final rect = tester.getRect(slider);
+      final gesture = await tester.startGesture(
+        Offset(rect.right - 12, rect.center.dy),
+      );
+      await gesture.moveBy(const Offset(-220, 0));
+      await tester.pump();
+
+      expect(tester.widget<Slider>(slider).value, greaterThan(5));
+      expect(
+        (navigationBloc.state as NavigationLoaded).pageState.currentPage,
+        1,
+      );
+
+      await gesture.up();
+      await _pumpUntilNavigationSettles(tester);
+    });
   });
 }
 
