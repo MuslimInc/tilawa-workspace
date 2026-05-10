@@ -58,6 +58,7 @@ Future<void> handlePrayerNotificationWatchdogEntrypoint() async {
           PrayerNotificationPermissionStatusImpl(permissionService),
           repository,
           SchedulePrayerNotificationsUseCase(notificationService, repository),
+          adhanPlayer,
         );
 
     bool forceReschedule = false;

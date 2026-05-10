@@ -74,6 +74,10 @@ void main() {
         forceReschedule: anyNamed('forceReschedule'),
       ),
     ).thenAnswer((_) async => const Right(null));
+
+    when(
+      mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+    ).thenAnswer((_) async => const Right(null));
   });
   provideDummy<Either<Failure, PrayerSettingsEntity>>(
     const Right(PrayerSettingsEntity()),
@@ -248,6 +252,17 @@ void main() {
           locationName: 'City',
           status: PrayerTimesStatus.loading,
         ),
+        const PrayerTimesState(
+          latitude: 10.0,
+          longitude: 10.0,
+          locationName: 'City',
+          status: PrayerTimesStatus.loading,
+          settings: PrayerSettingsEntity(
+            lastResolvedLatitude: 10.0,
+            lastResolvedLongitude: 10.0,
+            lastResolvedLocationName: 'City',
+          ),
+        ),
         isA<PrayerTimesState>()
             .having((s) => s.status, 'status', PrayerTimesStatus.loaded)
             .having((s) => s.todayPrayerTimes, 'todayPrayerTimes', tPrayerTimes)
@@ -266,6 +281,76 @@ void main() {
       },
       act: (bloc) => bloc.add(const PrayerTimesEvent.updateSettings(tSettings)),
       expect: () => [const PrayerTimesState()],
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'persists auto-detected location as last resolved scheduling location',
+      build: () {
+        when(
+          mockLoadPrayerSettingsUseCase.call(),
+        ).thenAnswer((_) async => const Right(tSettings));
+        when(
+          mockGetCurrentLocationUseCase.call(),
+        ).thenAnswer((_) async => Right(tLocationResult));
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      verify: (_) {
+        final capturedSettings =
+            verify(
+                  mockSavePrayerSettingsUseCase.call(
+                    settings: captureAnyNamed('settings'),
+                  ),
+                ).captured.last
+                as PrayerSettingsEntity;
+
+        expect(capturedSettings.savedLatitude, isNull);
+        expect(capturedSettings.savedLongitude, isNull);
+        expect(capturedSettings.lastResolvedLatitude, 10.0);
+        expect(capturedSettings.lastResolvedLongitude, 10.0);
+        expect(capturedSettings.lastResolvedLocationName, 'City');
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'does not overwrite manual saved location when loading from saved coordinates',
+      build: () {
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(
+              savedLatitude: 30.0,
+              savedLongitude: 31.0,
+              savedLocationName: 'Manual',
+              lastResolvedLatitude: 10.0,
+              lastResolvedLongitude: 11.0,
+              lastResolvedLocationName: 'Auto',
+            ),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      verify: (_) {
+        verifyNever(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        );
+      },
     );
     blocTest<PrayerTimesBloc, PrayerTimesState>(
       'should auto-detect calculation method for Egypt when using ummAlQura settings',

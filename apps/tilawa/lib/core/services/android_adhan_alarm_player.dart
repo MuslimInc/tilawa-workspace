@@ -205,6 +205,18 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   }
 
   @override
+  Future<void> markNeedsReschedule() async {
+    if (!isSupported) return;
+    try {
+      await _channel.invokeMethod<void>('markNeedsReschedule');
+    } on PlatformException catch (e) {
+      logger.e(
+        '[AndroidAdhanAlarmPlayer] markNeedsReschedule failed: ${e.message}',
+      );
+    }
+  }
+
+  @override
   Future<bool> isIgnoringBatteryOptimizations() async {
     if (!isSupported) return true;
     try {

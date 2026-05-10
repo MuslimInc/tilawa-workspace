@@ -761,20 +761,26 @@ class AppStartupTasks {
           );
         },
         (PrayerSettingsEntity settings) async {
-          final double? latitude = settings.savedLatitude;
-          final double? longitude = settings.savedLongitude;
+          final double? latitude = settings.effectiveSchedulingLatitude;
+          final double? longitude = settings.effectiveSchedulingLongitude;
           if (latitude == null || longitude == null) {
+            if (forceReschedule) {
+              await adhanPlayer.markNeedsReschedule();
+            }
             logger.d(
               '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: No saved location; startup schedule skipped',
             );
             return;
           }
-          await scheduleNotifications.call(
+          final scheduleResult = await scheduleNotifications.call(
             settings: settings,
             latitude: latitude,
             longitude: longitude,
             forceReschedule: forceReschedule,
           );
+          if (forceReschedule && scheduleResult.isLeft) {
+            await adhanPlayer.markNeedsReschedule();
+          }
         },
       );
       logger.d(

@@ -148,8 +148,27 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
     double? savedLatitude,
     double? savedLongitude,
     String? savedLocationName,
+    double? lastResolvedLatitude,
+    double? lastResolvedLongitude,
+    String? lastResolvedLocationName,
   }) = _PrayerSettingsEntity;
   const PrayerSettingsEntity._();
+
+  /// Latitude used by background scheduling recovery.
+  ///
+  /// Manual saved location wins. If the user has not chosen one, the last
+  /// location successfully used to calculate visible prayer times is used.
+  double? get effectiveSchedulingLatitude =>
+      savedLatitude ?? lastResolvedLatitude;
+
+  /// Longitude used by background scheduling recovery.
+  double? get effectiveSchedulingLongitude =>
+      savedLongitude ?? lastResolvedLongitude;
+
+  /// Location label paired with [effectiveSchedulingLatitude] and
+  /// [effectiveSchedulingLongitude].
+  String? get effectiveSchedulingLocationName =>
+      savedLocationName ?? lastResolvedLocationName;
 
   /// Returns true if the settings that affect prayer time calculations have changed
   /// compared to [other].

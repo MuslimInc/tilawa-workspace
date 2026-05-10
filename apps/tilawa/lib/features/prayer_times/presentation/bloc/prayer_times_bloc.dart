@@ -163,6 +163,14 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           effectiveSettings = newSettings;
         }
       }
+
+      effectiveSettings = await _persistLastResolvedLocationIfNeeded(
+        settings: effectiveSettings,
+        latitude: latitude!,
+        longitude: longitude!,
+        locationName: locationName,
+      );
+      emit(state.copyWith(settings: effectiveSettings));
     } else if (effectiveSettings.calculationMethod ==
         CalculationMethod.ummAlQura) {
       // Location is saved, but we might need to auto-detect method
@@ -362,6 +370,9 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       savedLatitude: event.latitude,
       savedLongitude: event.longitude,
       savedLocationName: event.locationName,
+      lastResolvedLatitude: event.latitude,
+      lastResolvedLongitude: event.longitude,
+      lastResolvedLocationName: event.locationName,
     );
 
     await _savePrayerSettingsUseCase.call(settings: updatedSettings);
@@ -369,5 +380,30 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
     // Reload prayer times; manual location overrides force a reschedule.
     add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
+  }
+
+  Future<PrayerSettingsEntity> _persistLastResolvedLocationIfNeeded({
+    required PrayerSettingsEntity settings,
+    required double latitude,
+    required double longitude,
+    required String? locationName,
+  }) async {
+    if (settings.savedLatitude != null && settings.savedLongitude != null) {
+      return settings;
+    }
+
+    if (settings.lastResolvedLatitude == latitude &&
+        settings.lastResolvedLongitude == longitude &&
+        settings.lastResolvedLocationName == locationName) {
+      return settings;
+    }
+
+    final updatedSettings = settings.copyWith(
+      lastResolvedLatitude: latitude,
+      lastResolvedLongitude: longitude,
+      lastResolvedLocationName: locationName,
+    );
+    await _savePrayerSettingsUseCase.call(settings: updatedSettings);
+    return updatedSettings;
   }
 }

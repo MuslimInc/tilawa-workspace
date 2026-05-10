@@ -51,6 +51,12 @@ abstract interface class IAdhanAlarmPlayer {
   /// even if the dedup fingerprint matches.
   Future<bool> consumeNeedsRescheduleAfterBoot();
 
+  /// Mark the schedule as needing a full Dart-side rebuild.
+  ///
+  /// Used when a platform event invalidated alarms, but the current recovery
+  /// attempt cannot safely rebuild the schedule yet.
+  Future<void> markNeedsReschedule();
+
   /// Returns `true` if the app is currently exempt from battery optimisations,
   /// meaning it can reliably fire exact alarms even in Doze mode.
   Future<bool> isIgnoringBatteryOptimizations();
