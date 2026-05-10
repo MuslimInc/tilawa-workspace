@@ -515,6 +515,13 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final delta = (targetIndex - currentIndex).abs();
     final isLongJump = delta > 3;
     final useJumpSnapshot = quranReaderShouldUseJumpTransitionSnapshot(delta);
+    final snapshotRequested = isLongJump && useJumpSnapshot;
+
+    PerfLogger.logQuranPerf(
+      '[QuranPerf][Jump]',
+      'start fromPage=${currentIndex + 1} toPage=$safePageNumber delta=$delta '
+          'snapshotRequested=$snapshotRequested',
+    );
 
     if (isLongJump) {
       PerfLogger.log(
@@ -536,10 +543,17 @@ class _QuranImageReaderState extends State<QuranImageReader>
       cacheWidth: _cacheWidth,
     );
     _JumpTransitionSnapshot? jumpSnapshot;
-    if (isLongJump && useJumpSnapshot) {
+    if (snapshotRequested) {
       jumpSnapshot = await _preparePageSnapshotForNavigation(safePageNumber);
     } else {
       await _preparePageForNavigation(safePageNumber);
+    }
+    final snapshotExecuted = jumpSnapshot != null;
+    if (snapshotRequested) {
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Jump]',
+        'prepareDone snapshotExecuted=$snapshotExecuted',
+      );
     }
     if (!mounted ||
         requestGeneration != _navigationRequestGeneration ||
@@ -552,6 +566,10 @@ class _QuranImageReaderState extends State<QuranImageReader>
         PerfLogger.log(
           widgetName: 'QuranImageReader',
           message: 'jump snapshot shown page=${jumpSnapshot.pageNumber}',
+        );
+        PerfLogger.logQuranPerf(
+          '[QuranPerf][Jump]',
+          'snapshotShown page=${jumpSnapshot.pageNumber}',
         );
       }
       _jumpTransitionSnapshotNotifier.value = jumpSnapshot;
@@ -570,6 +588,10 @@ class _QuranImageReaderState extends State<QuranImageReader>
         clearAttempts++;
         await WidgetsBinding.instance.endOfFrame;
         if (_lastSettledPageIndex == targetIndex) {
+          PerfLogger.logQuranPerf(
+            '[QuranPerf][Jump]',
+            'committedSettled page=$safePageNumber clearAttempts=$clearAttempts',
+          );
           // One more frame: let the raster thread paint the live page.
           if (mounted && requestGeneration == _navigationRequestGeneration) {
             await WidgetsBinding.instance.endOfFrame;
@@ -589,6 +611,11 @@ class _QuranImageReaderState extends State<QuranImageReader>
               'jump snapshot cleared '
               'page=$safePageNumber '
               'attempts=$clearAttempts',
+        );
+        PerfLogger.logQuranPerf(
+          '[QuranPerf][Jump]',
+          'snapshotCleared page=$safePageNumber clearAttempts=$clearAttempts '
+              'settledPage=$safePageNumber',
         );
       }
       return;
@@ -699,12 +726,20 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final cached = _snapshotCache.remove(key);
     if (cached != null) {
       _snapshotCache[key] = cached;
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Snapshot]',
+        'reuseImageCache page=$pageNumber key=$key',
+      );
       return cached;
     }
 
     final pending = _snapshotFutures.remove(key);
     if (pending != null) {
       _snapshotFutures[key] = pending;
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Snapshot]',
+        'awaitInFlightCapture page=$pageNumber',
+      );
       return pending;
     }
 
@@ -755,8 +790,9 @@ class _QuranImageReaderState extends State<QuranImageReader>
         }
 
         try {
+          final pixelRatio = View.of(context).devicePixelRatio;
           final image = await renderObject.toImage(
-            pixelRatio: View.of(context).devicePixelRatio,
+            pixelRatio: pixelRatio,
           );
           _rememberSnapshot(cacheKey, image);
           PerfLogger.log(
@@ -767,6 +803,12 @@ class _QuranImageReaderState extends State<QuranImageReader>
                 'attempt=$attempt '
                 'size=${image.width}x${image.height} '
                 'elapsedMs=${sw.elapsedMilliseconds}',
+          );
+          PerfLogger.logQuranPerf(
+            '[QuranPerf][Snapshot]',
+            'toImage page=$pageNumber pixelRatio=$pixelRatio '
+                'size=${image.width}x${image.height} '
+                'elapsedMs=${sw.elapsedMilliseconds} attempt=$attempt',
           );
           return image;
         } catch (error) {
@@ -779,6 +821,10 @@ class _QuranImageReaderState extends State<QuranImageReader>
                   'attempts=$attempt '
                   'error=$error',
             );
+            PerfLogger.logQuranPerf(
+              '[QuranPerf][Snapshot]',
+              'toImageFailed page=$pageNumber attempts=$attempt error=$error',
+            );
           }
         }
       }
@@ -789,6 +835,11 @@ class _QuranImageReaderState extends State<QuranImageReader>
             'snapshot unavailable '
             'page=$pageNumber '
             'reason=paint-never-stabilized '
+            'elapsedMs=${sw.elapsedMilliseconds}',
+      );
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Snapshot]',
+        'toImageUnavailable page=$pageNumber reason=paint-never-stabilized '
             'elapsedMs=${sw.elapsedMilliseconds}',
       );
       return null;

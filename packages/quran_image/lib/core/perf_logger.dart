@@ -72,7 +72,7 @@ abstract final class PerfLogger {
   ///
   /// Has no effect in release mode because [isEnabled] already returns `false`
   /// at compile time.
-  static bool instrumentationEnabled = false;
+  static bool instrumentationEnabled = true;
 
   /// `true` when instrumentation should run.
   ///
@@ -339,6 +339,18 @@ abstract final class PerfLogger {
   static void log({required String widgetName, required String message}) {
     if (!isEnabled) return;
     _logForWidget(widgetName, message);
+  }
+
+  /// Quran Image Reader markers for device profiling (`flutter run --profile`).
+  ///
+  /// No-op in debug, release, or when [instrumentationEnabled] is false.
+  /// Use consistent [tag] values such as `[QuranPerf][Jump]` for logcat grep.
+  static bool get isQuranPerfEnabled =>
+      kProfileMode && instrumentationEnabled;
+
+  static void logQuranPerf(String tag, String message) {
+    if (!isQuranPerfEnabled) return;
+    _log('$tag $message');
   }
 
   // ---------------------------------------------------------------------------

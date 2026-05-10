@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/di/dependency_injection.dart';
+import '../../../core/perf_logger.dart';
 import '../../../domain/domain.dart';
 import 'navigation_event.dart';
 import 'navigation_state.dart';
@@ -17,6 +18,8 @@ import 'navigation_state.dart';
 /// - User interaction tracking
 /// - Persisting last visited page
 class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
+  static bool _quranPerfOverlayFirstOpenLogged = false;
+
   final PageRepository _pageRepository;
   final NavigationVisibilityRepository _visibilityRepository;
   final SaveLastVisitedPageUseCase _saveLastVisitedPageUseCase;
@@ -81,7 +84,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   void _onShown(NavigationShown event, Emitter<NavigationState> emit) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
+      final wasVisible = currentState.visibility.isVisible;
       _visibilityRepository.show().then((visibility) {
+        _logQuranOverlayTransition(wasVisible: wasVisible, visibility: visibility);
         emit(currentState.copyWith(visibility: visibility));
       });
     }
@@ -90,7 +95,9 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   void _onHidden(NavigationHidden event, Emitter<NavigationState> emit) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
+      final wasVisible = currentState.visibility.isVisible;
       _visibilityRepository.hide().then((visibility) {
+        _logQuranOverlayTransition(wasVisible: wasVisible, visibility: visibility);
         emit(currentState.copyWith(visibility: visibility));
       });
     }
@@ -99,15 +106,35 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
   void _onToggled(NavigationToggled event, Emitter<NavigationState> emit) {
     final currentState = state;
     if (currentState is NavigationLoaded) {
+      final wasVisible = currentState.visibility.isVisible;
       if (currentState.visibility.isVisible) {
         _visibilityRepository.hide().then((visibility) {
+          _logQuranOverlayTransition(wasVisible: wasVisible, visibility: visibility);
           emit(currentState.copyWith(visibility: visibility));
         });
       } else {
         _visibilityRepository.show().then((visibility) {
+          _logQuranOverlayTransition(wasVisible: wasVisible, visibility: visibility);
           emit(currentState.copyWith(visibility: visibility));
         });
       }
+    }
+  }
+
+  void _logQuranOverlayTransition({
+    required bool wasVisible,
+    required NavigationVisibility visibility,
+  }) {
+    if (!PerfLogger.isQuranPerfEnabled) return;
+    final nowVisible = visibility.isVisible;
+    if (!wasVisible && nowVisible) {
+      if (!_quranPerfOverlayFirstOpenLogged) {
+        _quranPerfOverlayFirstOpenLogged = true;
+        PerfLogger.logQuranPerf('[QuranPerf][Overlay]', 'firstOpen');
+      }
+      PerfLogger.logQuranPerf('[QuranPerf][Overlay]', 'shown');
+    } else if (wasVisible && !nowVisible) {
+      PerfLogger.logQuranPerf('[QuranPerf][Overlay]', 'hidden');
     }
   }
 

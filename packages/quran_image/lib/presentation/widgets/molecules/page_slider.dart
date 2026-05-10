@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Molecular component for page navigation slider.
@@ -58,12 +59,22 @@ class _PageSliderState extends State<PageSlider> {
     if (_pendingReleasePage == null || _dragging) return;
 
     if (widget.committedPage == _pendingReleasePage) {
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Slider]',
+        'pendingRelease cleared committedPage=${widget.committedPage} '
+            'matchedPending=$_pendingReleasePage',
+      );
       _pendingReleasePage = null;
       return;
     }
 
     final committedMoved = oldWidget.committedPage != widget.committedPage;
     if (committedMoved && widget.committedPage != _pendingReleasePage) {
+      PerfLogger.logQuranPerf(
+        '[QuranPerf][Slider]',
+        'pendingRelease cleared reason=superseded '
+            'committedPage=${widget.committedPage} pendingWas=$_pendingReleasePage',
+      );
       _pendingReleasePage = null;
     }
   }
@@ -114,6 +125,12 @@ class _PageSliderState extends State<PageSlider> {
           // this density and cause expensive CustomPainter repaints on every
           // animation frame when the nav overlay slides in/out.
           onChangeStart: (_) {
+            if (_pendingReleasePage != null) {
+              PerfLogger.logQuranPerf(
+                '[QuranPerf][Slider]',
+                'pendingRelease cleared reason=dragStart',
+              );
+            }
             setState(() {
               _pendingReleasePage = null;
               _dragging = true;
@@ -126,6 +143,10 @@ class _PageSliderState extends State<PageSlider> {
           },
           onChangeEnd: (value) {
             final rounded = value.round().clamp(1, widget.totalPages).toInt();
+            PerfLogger.logQuranPerf(
+              '[QuranPerf][Slider]',
+              'pendingRelease set page=$rounded',
+            );
             setState(() {
               _dragging = false;
               _dragValue = null;
