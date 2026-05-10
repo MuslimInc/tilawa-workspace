@@ -86,7 +86,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       final wasVisible = currentState.visibility.isVisible;
       _visibilityRepository.show().then((visibility) {
-        _logQuranOverlayTransition(wasVisible: wasVisible, visibility: visibility);
+        _logQuranOverlayTransition(
+          wasVisible: wasVisible,
+          visibility: visibility,
+        );
         emit(currentState.copyWith(visibility: visibility));
       });
     }
@@ -97,7 +100,10 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       final wasVisible = currentState.visibility.isVisible;
       _visibilityRepository.hide().then((visibility) {
-        _logQuranOverlayTransition(wasVisible: wasVisible, visibility: visibility);
+        _logQuranOverlayTransition(
+          wasVisible: wasVisible,
+          visibility: visibility,
+        );
         emit(currentState.copyWith(visibility: visibility));
       });
     }
@@ -109,12 +115,18 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
       final wasVisible = currentState.visibility.isVisible;
       if (currentState.visibility.isVisible) {
         _visibilityRepository.hide().then((visibility) {
-          _logQuranOverlayTransition(wasVisible: wasVisible, visibility: visibility);
+          _logQuranOverlayTransition(
+            wasVisible: wasVisible,
+            visibility: visibility,
+          );
           emit(currentState.copyWith(visibility: visibility));
         });
       } else {
         _visibilityRepository.show().then((visibility) {
-          _logQuranOverlayTransition(wasVisible: wasVisible, visibility: visibility);
+          _logQuranOverlayTransition(
+            wasVisible: wasVisible,
+            visibility: visibility,
+          );
           emit(currentState.copyWith(visibility: visibility));
         });
       }

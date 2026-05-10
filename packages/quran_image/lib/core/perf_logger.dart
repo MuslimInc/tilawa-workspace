@@ -136,10 +136,7 @@ abstract final class PerfLogger {
     // same list so [_takeBuildLogForTiming] can drain contributors reliably.
     final sys = SchedulerBinding.instance.currentSystemFrameTimeStamp;
     final raw = SchedulerBinding.instance.currentFrameTimeStamp;
-    final list =
-        _buildLogByFrame[sys] ??
-        _buildLogByFrame[raw] ??
-        <String>[];
+    final list = _buildLogByFrame[sys] ?? _buildLogByFrame[raw] ?? <String>[];
     list.add(widgetName);
     _buildLogByFrame[sys] = list;
     if (raw != sys) {
@@ -434,8 +431,7 @@ abstract final class PerfLogger {
   ///
   /// No-op in debug, release, or when [instrumentationEnabled] is false.
   /// Use consistent [tag] values such as `[QuranPerf][Jump]` for logcat grep.
-  static bool get isQuranPerfEnabled =>
-      kProfileMode && instrumentationEnabled;
+  static bool get isQuranPerfEnabled => kProfileMode && instrumentationEnabled;
 
   static void logQuranPerf(String tag, String message) {
     if (!isQuranPerfEnabled) return;
