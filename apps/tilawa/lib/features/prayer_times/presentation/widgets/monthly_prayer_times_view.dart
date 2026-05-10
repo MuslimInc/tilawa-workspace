@@ -6,6 +6,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_times_bloc.dart';
+import '../formatters/prayer_time_label_formatter.dart';
 
 /// A view displaying prayer times for an entire month in a table format.
 class MonthlyPrayerTimesView extends StatefulWidget {
@@ -13,12 +14,10 @@ class MonthlyPrayerTimesView extends StatefulWidget {
     super.key,
     required this.latitude,
     required this.longitude,
-    required this.settings,
   });
 
   final double latitude;
   final double longitude;
-  final PrayerSettingsEntity settings;
 
   @override
   State<MonthlyPrayerTimesView> createState() => _MonthlyPrayerTimesViewState();
@@ -88,7 +87,9 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
         Expanded(
           child: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
             buildWhen: (previous, current) =>
-                previous.monthlyPrayerTimes != current.monthlyPrayerTimes,
+                previous.monthlyPrayerTimes != current.monthlyPrayerTimes ||
+                previous.settings.use24HourFormat !=
+                    current.settings.use24HourFormat,
             builder: (context, state) {
               if (state.monthlyPrayerTimes.isEmpty) {
                 return const TilawaLoadingIndicator();
@@ -108,7 +109,7 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
                     prayerTimes: prayerTimes,
                     isToday: isToday,
                     index: index,
-                    use24HourFormat: widget.settings.use24HourFormat,
+                    use24HourFormat: state.settings.use24HourFormat,
                   );
                 },
               );
@@ -277,41 +278,31 @@ class _TableRow extends StatelessWidget {
           ),
           _buildDataCell(
             context,
-            use24HourFormat
-                ? _formatTime(prayerTimes.fajr)
-                : _formatTime12Hour(prayerTimes.fajr, isArabic),
+            _formatTime(prayerTimes.fajr, isArabic),
             flex: 2,
             isToday: isToday,
           ),
           _buildDataCell(
             context,
-            use24HourFormat
-                ? _formatTime(prayerTimes.dhuhr)
-                : _formatTime12Hour(prayerTimes.dhuhr, isArabic),
+            _formatTime(prayerTimes.dhuhr, isArabic),
             flex: 2,
             isToday: isToday,
           ),
           _buildDataCell(
             context,
-            use24HourFormat
-                ? _formatTime(prayerTimes.asr)
-                : _formatTime12Hour(prayerTimes.asr, isArabic),
+            _formatTime(prayerTimes.asr, isArabic),
             flex: 2,
             isToday: isToday,
           ),
           _buildDataCell(
             context,
-            use24HourFormat
-                ? _formatTime(prayerTimes.maghrib)
-                : _formatTime12Hour(prayerTimes.maghrib, isArabic),
+            _formatTime(prayerTimes.maghrib, isArabic),
             flex: 2,
             isToday: isToday,
           ),
           _buildDataCell(
             context,
-            use24HourFormat
-                ? _formatTime(prayerTimes.isha)
-                : _formatTime12Hour(prayerTimes.isha, isArabic),
+            _formatTime(prayerTimes.isha, isArabic),
             flex: 2,
             isToday: isToday,
           ),
@@ -342,16 +333,11 @@ class _TableRow extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime time) {
-    return '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _formatTime12Hour(DateTime time, bool isArabic) {
-    final int hour = time.hour > 12 ? time.hour - 12 : time.hour;
-    final period = time.hour >= 12
-        ? (isArabic ? 'م' : 'PM')
-        : (isArabic ? 'ص' : 'AM');
-    final String formattedHour = hour == 0 ? '12' : hour.toString();
-    return '$formattedHour:${time.minute.toString().padLeft(2, '0')} $period';
+  String _formatTime(DateTime time, bool isArabic) {
+    return PrayerTimeLabelFormatter.formatDateTime(
+      time,
+      use24HourFormat: use24HourFormat,
+      isArabic: isArabic,
+    );
   }
 }

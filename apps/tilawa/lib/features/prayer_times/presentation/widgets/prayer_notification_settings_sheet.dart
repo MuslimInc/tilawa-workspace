@@ -195,6 +195,20 @@ class _PrayerNotificationSettingsSheetState
                   ),
 
                   _PrayerAlertTile(
+                    title: context.l10n.sunrise,
+                    notificationEnabled: settings.sunriseNotification.enabled,
+                    adhanEnabled: false,
+                    supportsAdhan: false,
+                    onNotificationChanged: (value) => _updateSettings(
+                      settings.updatePrayerAlert(
+                        'sunrise',
+                        notificationEnabled: value,
+                      ),
+                    ),
+                    onAdhanChanged: (_) {},
+                  ),
+
+                  _PrayerAlertTile(
                     title: context.l10n.dhuhr,
                     notificationEnabled: settings.dhuhrNotification.enabled,
                     adhanEnabled: settings.dhuhrNotification.playAdhan,
@@ -399,12 +413,14 @@ class _PrayerAlertTile extends StatelessWidget {
     required this.adhanEnabled,
     required this.onNotificationChanged,
     required this.onAdhanChanged,
+    this.supportsAdhan = true,
     this.notificationIdentifier,
   });
 
   final String title;
   final bool notificationEnabled;
   final bool adhanEnabled;
+  final bool supportsAdhan;
   final ValueChanged<bool> onNotificationChanged;
   final ValueChanged<bool> onAdhanChanged;
   final String? notificationIdentifier;
@@ -436,14 +452,16 @@ class _PrayerAlertTile extends StatelessWidget {
               semanticLabel: context.l10n.prayerNotifications,
             ),
           ),
-          SizedBox(width: tokens.spaceSmall),
-          TilawaIconToggle(
-            icon: Icons.volume_mute_outlined,
-            activeIcon: Icons.volume_up,
-            value: adhanEnabled,
-            onChanged: onAdhanChanged,
-            semanticLabel: context.l10n.playAdhan,
-          ),
+          if (supportsAdhan) ...[
+            SizedBox(width: tokens.spaceSmall),
+            TilawaIconToggle(
+              icon: Icons.volume_mute_outlined,
+              activeIcon: Icons.volume_up,
+              value: adhanEnabled,
+              onChanged: onAdhanChanged,
+              semanticLabel: context.l10n.playAdhan,
+            ),
+          ],
         ],
       ),
     );

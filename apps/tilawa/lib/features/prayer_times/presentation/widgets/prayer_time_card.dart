@@ -4,6 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../extensions/prayer_type_ui.dart';
+import '../formatters/prayer_time_label_formatter.dart';
 import 'prayer_time_localizations.dart';
 
 /// A card displaying a specific prayer time with status and supporting info.
@@ -251,9 +252,11 @@ class _PrayerTimeValue extends StatelessWidget {
     final isArabic = context.isArabic;
 
     return Text(
-      use24HourFormat
-          ? prayer.formattedTime
-          : prayer.getFormattedTime12Hour(isArabic: isArabic),
+      PrayerTimeLabelFormatter.formatItem(
+        prayer,
+        use24HourFormat: use24HourFormat,
+        isArabic: isArabic,
+      ),
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.headlineSmall?.copyWith(

@@ -1828,6 +1828,27 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get prayerAlertModeOff => 'Off';
+
+  @override
+  String get prayerAlertModeNotifyOnly => 'Notify only';
+
+  @override
+  String get prayerAlertModeAdhan => 'Adhan';
+
+  @override
+  String get prayerAlertModeOffDescription =>
+      'No notification or Adhan for this prayer.';
+
+  @override
+  String get prayerAlertModeNotifyOnlyDescription =>
+      'Show a prayer-time notification without Adhan.';
+
+  @override
+  String get prayerAlertModeAdhanDescription =>
+      'Show a notification and play the Adhan.';
+
+  @override
   String get notificationStatus => 'Notification';
 
   @override

@@ -133,6 +133,8 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
     @Default(0) int ishaAdjustment,
     @Default(PrayerNotificationSettings())
     PrayerNotificationSettings fajrNotification,
+    @Default(PrayerNotificationSettings(mode: PrayerAlertMode.none))
+    PrayerNotificationSettings sunriseNotification,
     @Default(PrayerNotificationSettings())
     PrayerNotificationSettings dhuhrNotification,
     @Default(PrayerNotificationSettings())
@@ -168,6 +170,7 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
   /// Check if all prayer notifications are enabled
   bool get allNotificationsEnabled =>
       fajrNotification.enabled &&
+      sunriseNotification.enabled &&
       dhuhrNotification.enabled &&
       asrNotification.enabled &&
       maghribNotification.enabled &&
@@ -201,6 +204,7 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
 
     return copyWith(
       fajrNotification: toggle(fajrNotification),
+      sunriseNotification: toggle(sunriseNotification),
       dhuhrNotification: toggle(dhuhrNotification),
       asrNotification: toggle(asrNotification),
       maghribNotification: toggle(maghribNotification),
@@ -229,6 +233,7 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
 
     return copyWith(
       fajrNotification: toggle(fajrNotification),
+      sunriseNotification: sunriseNotification,
       dhuhrNotification: toggle(dhuhrNotification),
       asrNotification: toggle(asrNotification),
       maghribNotification: toggle(maghribNotification),
@@ -240,6 +245,7 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
   PrayerSettingsEntity copyWithGlobalMinutesBefore(int minutes) {
     return copyWith(
       fajrNotification: fajrNotification.copyWith(minutesBefore: minutes),
+      sunriseNotification: sunriseNotification.copyWith(minutesBefore: minutes),
       dhuhrNotification: dhuhrNotification.copyWith(minutesBefore: minutes),
       asrNotification: asrNotification.copyWith(minutesBefore: minutes),
       maghribNotification: maghribNotification.copyWith(minutesBefore: minutes),
@@ -264,16 +270,18 @@ abstract class PrayerSettingsEntity with _$PrayerSettingsEntity {
       final newEnabled = notificationEnabled ?? current.enabled;
       final newAdhan = adhanEnabled ?? current.playAdhan;
 
+      final canPlayAdhan = prayerId != 'sunrise';
       return current.copyWith(
         mode: PrayerAlertMode.fromBools(
           enabled: newEnabled,
-          playAdhan: newAdhan,
+          playAdhan: canPlayAdhan && newAdhan,
         ),
       );
     }
 
     return switch (prayerId) {
       'fajr' => copyWith(fajrNotification: update(fajrNotification)),
+      'sunrise' => copyWith(sunriseNotification: update(sunriseNotification)),
       'dhuhr' => copyWith(dhuhrNotification: update(dhuhrNotification)),
       'asr' => copyWith(asrNotification: update(asrNotification)),
       'maghrib' => copyWith(maghribNotification: update(maghribNotification)),

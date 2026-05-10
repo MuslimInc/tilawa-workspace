@@ -1819,6 +1819,26 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String get prayerAlertModeOff => 'متوقف';
+
+  @override
+  String get prayerAlertModeNotifyOnly => 'تنبيه فقط';
+
+  @override
+  String get prayerAlertModeAdhan => 'الأذان';
+
+  @override
+  String get prayerAlertModeOffDescription =>
+      'لا يوجد تنبيه أو أذان لهذه الصلاة.';
+
+  @override
+  String get prayerAlertModeNotifyOnlyDescription =>
+      'إظهار تنبيه وقت الصلاة بدون أذان.';
+
+  @override
+  String get prayerAlertModeAdhanDescription => 'إظهار تنبيه وتشغيل الأذان.';
+
+  @override
   String get notificationStatus => 'التنبيه';
 
   @override

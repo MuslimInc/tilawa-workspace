@@ -3,6 +3,9 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
+import '../formatters/prayer_time_label_formatter.dart';
+import '../models/prayer_row_view_data.dart';
+import 'prayer_alert_status_chip.dart';
 import 'prayer_time_localizations.dart';
 
 class NextPrayerCountdownCard extends StatelessWidget {
@@ -12,12 +15,14 @@ class NextPrayerCountdownCard extends StatelessWidget {
     required this.timeUntil,
     this.use24HourFormat = true,
     this.dateMetaLabel,
+    this.alert,
   });
 
   final PrayerTimeItem nextPrayer;
   final Duration timeUntil;
   final bool use24HourFormat;
   final String? dateMetaLabel;
+  final PrayerAlertViewData? alert;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +31,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
     final bool isArabic = context.isArabic;
     final Duration remaining = timeUntil.isNegative ? Duration.zero : timeUntil;
     final Color accentColor = colorScheme.primary;
+    final alert = this.alert;
 
     final int hours = remaining.inHours;
     final int minutes = remaining.inMinutes.remainder(60);
@@ -37,9 +43,11 @@ class NextPrayerCountdownCard extends StatelessWidget {
     final String remainingLabel = context.l10n.prayerTimesTimeRemainingUntil(
       prayerName,
     );
-    final String prayerTime = use24HourFormat
-        ? nextPrayer.formattedTime
-        : nextPrayer.getFormattedTime12Hour(isArabic: isArabic);
+    final String prayerTime = PrayerTimeLabelFormatter.formatItem(
+      nextPrayer,
+      use24HourFormat: use24HourFormat,
+      isArabic: isArabic,
+    );
 
     final tokens = theme.tokens;
 
@@ -129,14 +137,35 @@ class NextPrayerCountdownCard extends StatelessWidget {
               ),
             ),
             SizedBox(height: tokens.spaceSmall),
-            Text(
-              '${hours.toString().padLeft(2, '0')}'
-              ':${minutes.toString().padLeft(2, '0')}'
-              ':${seconds.toString().padLeft(2, '0')}',
-              style: theme.textTheme.displaySmall?.copyWith(
-                color: accentColor,
-                fontWeight: FontWeight.w800,
-              ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: Text(
+                    '${hours.toString().padLeft(2, '0')}'
+                    ':${minutes.toString().padLeft(2, '0')}'
+                    ':${seconds.toString().padLeft(2, '0')}',
+                    style: theme.textTheme.displaySmall?.copyWith(
+                      color: accentColor,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
+                ),
+                if (alert != null && alert.supportsAlerts) ...[
+                  SizedBox(width: tokens.spaceSmall),
+                  Flexible(
+                    child: Align(
+                      alignment: AlignmentDirectional.bottomEnd,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: PrayerAlertStatusChip(alert: alert),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ],
         ),

@@ -2449,6 +2449,30 @@
             }
         }
     },
+    "prayerAlertModeOff": "Off",
+    "@prayerAlertModeOff": {
+        "description": "Prayer alert mode label when notification and Adhan are disabled"
+    },
+    "prayerAlertModeNotifyOnly": "Notify only",
+    "@prayerAlertModeNotifyOnly": {
+        "description": "Prayer alert mode label when notification is enabled without Adhan"
+    },
+    "prayerAlertModeAdhan": "Adhan",
+    "@prayerAlertModeAdhan": {
+        "description": "Prayer alert mode label when notification and Adhan are enabled"
+    },
+    "prayerAlertModeOffDescription": "No notification or Adhan for this prayer.",
+    "@prayerAlertModeOffDescription": {
+        "description": "Description for disabled prayer alert mode"
+    },
+    "prayerAlertModeNotifyOnlyDescription": "Show a prayer-time notification without Adhan.",
+    "@prayerAlertModeNotifyOnlyDescription": {
+        "description": "Description for notification-only prayer alert mode"
+    },
+    "prayerAlertModeAdhanDescription": "Show a notification and play the Adhan.",
+    "@prayerAlertModeAdhanDescription": {
+        "description": "Description for Adhan prayer alert mode"
+    },
     "notificationStatus": "Notification",
     "@notificationStatus": {
         "description": "Label for notification status"

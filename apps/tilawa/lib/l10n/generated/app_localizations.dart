@@ -3362,6 +3362,42 @@ abstract class AppLocalizations {
   /// **'at {time}'**
   String prayerTimeAt(String time);
 
+  /// Prayer alert mode label when notification and Adhan are disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get prayerAlertModeOff;
+
+  /// Prayer alert mode label when notification is enabled without Adhan
+  ///
+  /// In en, this message translates to:
+  /// **'Notify only'**
+  String get prayerAlertModeNotifyOnly;
+
+  /// Prayer alert mode label when notification and Adhan are enabled
+  ///
+  /// In en, this message translates to:
+  /// **'Adhan'**
+  String get prayerAlertModeAdhan;
+
+  /// Description for disabled prayer alert mode
+  ///
+  /// In en, this message translates to:
+  /// **'No notification or Adhan for this prayer.'**
+  String get prayerAlertModeOffDescription;
+
+  /// Description for notification-only prayer alert mode
+  ///
+  /// In en, this message translates to:
+  /// **'Show a prayer-time notification without Adhan.'**
+  String get prayerAlertModeNotifyOnlyDescription;
+
+  /// Description for Adhan prayer alert mode
+  ///
+  /// In en, this message translates to:
+  /// **'Show a notification and play the Adhan.'**
+  String get prayerAlertModeAdhanDescription;
+
   /// Label for notification status
   ///
   /// In en, this message translates to:

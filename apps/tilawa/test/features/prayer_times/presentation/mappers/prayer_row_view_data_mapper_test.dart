@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/presentation/mappers/prayer_row_view_data_mapper.dart';
+import 'package:tilawa/features/prayer_times/presentation/models/prayer_row_view_data.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 void main() {
@@ -75,7 +76,8 @@ void main() {
         (row) => row.type == PrayerType.sunrise,
       );
       expect(sunriseRow.isSecondary, isTrue);
-      expect(sunriseRow.showAlertIndicators, isFalse);
+      expect(sunriseRow.showAlertIndicators, isTrue);
+      expect(sunriseRow.alert.supportsAdhan, isFalse);
     });
 
     testWidgets('maps notification and adhan status per prayer', (
@@ -123,12 +125,18 @@ void main() {
 
       expect(fajr.notificationEnabled, isFalse);
       expect(fajr.adhanEnabled, isFalse);
+      expect(fajr.alert.state, PrayerAlertViewState.off);
+      expect(fajr.alert.label, l10n.prayerAlertModeOff);
       expect(fajr.statusText, l10n.prayerTimesPassed);
       expect(dhuhr.notificationEnabled, isTrue);
       expect(dhuhr.adhanEnabled, isFalse);
+      expect(dhuhr.alert.state, PrayerAlertViewState.notification);
+      expect(dhuhr.alert.label, l10n.prayerAlertModeNotifyOnly);
       expect(dhuhr.statusText, l10n.prayerTimesUpcoming);
       expect(asr.notificationEnabled, isTrue);
       expect(asr.adhanEnabled, isTrue);
+      expect(asr.alert.state, PrayerAlertViewState.adhan);
+      expect(asr.alert.label, l10n.prayerAlertModeAdhan);
       expect(asr.statusText, l10n.prayerTimesUpcoming);
     });
 
@@ -162,6 +170,43 @@ void main() {
       );
 
       expect(updated, isNull);
+    });
+
+    test('updates alert mode for supported prayer', () {
+      const settings = PrayerSettingsEntity(
+        fajrNotification: PrayerNotificationSettings(
+          mode: PrayerAlertMode.none,
+        ),
+      );
+
+      final updated = PrayerRowViewDataMapper.updatedAlertModeSettings(
+        settings,
+        PrayerType.fajr,
+        PrayerAlertMode.adhan,
+      );
+
+      expect(updated, isNotNull);
+      expect(updated!.fajrNotification.enabled, isTrue);
+      expect(updated.fajrNotification.playAdhan, isTrue);
+    });
+
+    test('coerces Sunrise Adhan mode to notification only', () {
+      const settings = PrayerSettingsEntity(
+        sunriseNotification: PrayerNotificationSettings(
+          mode: PrayerAlertMode.none,
+        ),
+      );
+
+      final updated = PrayerRowViewDataMapper.updatedAlertModeSettings(
+        settings,
+        PrayerType.sunrise,
+        PrayerAlertMode.adhan,
+      );
+
+      expect(updated, isNotNull);
+      expect(updated!.sunriseNotification.enabled, isTrue);
+      expect(updated.sunriseNotification.playAdhan, isFalse);
+      expect(updated.sunriseNotification.mode, PrayerAlertMode.notification);
     });
   });
 }

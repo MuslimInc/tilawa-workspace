@@ -18,6 +18,7 @@ import '../bloc/prayer_times_bloc.dart';
 import '../config/prayer_times_screen_loading_preview.dart';
 import '../formatters/prayer_location_label_formatter.dart';
 import '../mappers/prayer_row_view_data_mapper.dart';
+import '../models/prayer_row_view_data.dart';
 import '../prayer_notification_semantics_ids.dart';
 import '../widgets/prayer_notification_settings_sheet.dart';
 import '../widgets/widgets.dart';
@@ -252,7 +253,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
     return MonthlyPrayerTimesView(
       latitude: state.latitude!,
       longitude: state.longitude!,
-      settings: state.settings,
     );
   }
 
@@ -303,14 +303,14 @@ class _CountdownCardSection extends StatelessWidget {
     return BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
       buildWhen: (previous, current) =>
           previous.todayPrayerTimes != current.todayPrayerTimes ||
-          previous.settings.use24HourFormat != current.settings.use24HourFormat,
+          previous.settings != current.settings,
       builder: (context, state) {
         final todayTimes = state.todayPrayerTimes;
         if (todayTimes == null) return const SizedBox.shrink();
 
         return _CountdownTicker(
           prayerTimes: todayTimes,
-          use24HourFormat: state.settings.use24HourFormat,
+          settings: state.settings,
           dateMetaLabel: _buildDateMetaLabel(context),
         );
       },
@@ -350,12 +350,12 @@ class _CountdownCardSection extends StatelessWidget {
 class _CountdownTicker extends StatefulWidget {
   const _CountdownTicker({
     required this.prayerTimes,
-    required this.use24HourFormat,
+    required this.settings,
     required this.dateMetaLabel,
   });
 
   final PrayerTimeEntity prayerTimes;
-  final bool use24HourFormat;
+  final PrayerSettingsEntity settings;
   final String dateMetaLabel;
 
   @override
@@ -391,8 +391,13 @@ class _CountdownTickerState extends State<_CountdownTicker> {
     return NextPrayerCountdownCard(
       nextPrayer: nextPrayer,
       timeUntil: timeUntil,
-      use24HourFormat: widget.use24HourFormat,
+      use24HourFormat: widget.settings.use24HourFormat,
       dateMetaLabel: widget.dateMetaLabel,
+      alert: PrayerRowViewDataMapper.alertViewData(
+        settings: widget.settings,
+        type: nextPrayer.type,
+        l10n: context.l10n,
+      ),
     );
   }
 }
@@ -527,6 +532,7 @@ class _BottomUtilitiesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -535,29 +541,53 @@ class _BottomUtilitiesCard extends StatelessWidget {
         tokens.spaceLarge,
         0,
       ),
-      child: Column(
-        children: [
-          _UtilityActionCard(
-            icon: Icons.explore_outlined,
-            label: context.l10n.qiblaDirection,
-            onTap: onOpenQibla,
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          _UtilityActionCard(
-            semanticsId:
-                PrayerNotificationSemanticsIds.prayerNotificationsEntryPoint,
-            icon: Icons.tune_rounded,
-            label: context.l10n.manageAlerts,
-            onTap: onManageAlertsTap,
-          ),
-        ],
+      child: TilawaCard(
+        flat: true,
+        borderRadius: tokens.radiusLarge,
+        backgroundColor: colorScheme.surfaceContainerLowest,
+        borderColor: colorScheme.outlineVariant.withValues(
+          alpha: tokens.opacityMedium,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceSmall,
+          vertical: tokens.spaceExtraSmall,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: _UtilityInlineAction(
+                icon: Icons.explore_outlined,
+                label: context.l10n.qiblaDirection,
+                onTap: onOpenQibla,
+              ),
+            ),
+            SizedBox(
+              height: tokens.spaceExtraLarge,
+              child: VerticalDivider(
+                width: tokens.spaceMedium,
+                color: colorScheme.outlineVariant.withValues(
+                  alpha: tokens.opacityMedium,
+                ),
+              ),
+            ),
+            Expanded(
+              child: _UtilityInlineAction(
+                semanticsId: PrayerNotificationSemanticsIds
+                    .prayerNotificationsEntryPoint,
+                icon: Icons.tune_rounded,
+                label: context.l10n.manageAlerts,
+                onTap: onManageAlertsTap,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _UtilityActionCard extends StatelessWidget {
-  const _UtilityActionCard({
+class _UtilityInlineAction extends StatelessWidget {
+  const _UtilityInlineAction({
     required this.icon,
     required this.label,
     required this.onTap,
@@ -575,26 +605,25 @@ class _UtilityActionCard extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    return TilawaCard(
-      flat: true,
-      borderRadius: tokens.radiusLarge,
-      backgroundColor: colorScheme.surfaceContainerLowest,
-      borderColor: colorScheme.outlineVariant.withValues(
-        alpha: tokens.opacityMedium,
-      ),
-      onTap: onTap,
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceSmall,
-      ),
-      child: _UtilityActionRow(
-        semanticsId: semanticsId,
-        icon: icon,
-        label: label,
-        trailing: Icon(
-          Icons.chevron_right,
-          size: tokens.iconSizeMedium,
-          color: colorScheme.onSurfaceVariant,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minHeight: kMinInteractiveDimension,
+          ),
+          child: _UtilityActionRow(
+            semanticsId: semanticsId,
+            icon: icon,
+            label: label,
+            trailing: Icon(
+              Icons.chevron_right,
+              size: tokens.iconSizeMedium,
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
         ),
       ),
     );
@@ -697,8 +726,10 @@ class _TodayPrayerListSection extends StatelessWidget {
           vertical: tokens.spaceSmall,
         ),
         child: Column(
+          spacing: tokens.spaceExtraSmall,
           children: rows.map((row) {
             return _TodayPrayerListRow(
+              row: row,
               prayerName: row.prayerName,
               prayerTime: row.prayerTime,
               statusText: row.statusText,
@@ -706,14 +737,8 @@ class _TodayPrayerListSection extends StatelessWidget {
               hasPassed: row.hasPassed,
               isSecondary: row.isSecondary,
               showAlertIndicators: row.showAlertIndicators,
-              notificationEnabled: row.notificationEnabled,
-              adhanEnabled: row.adhanEnabled,
-              onTap: null,
-              onNotificationToggle: row.showAlertIndicators
-                  ? () => _onNotificationToggle(context, row.type)
-                  : null,
-              onAdhanToggle: row.showAlertIndicators && row.notificationEnabled
-                  ? () => _onAdhanToggle(context, row.type)
+              onTap: row.alert.supportsAlerts
+                  ? () => _showPrayerAlertSheet(context, row)
                   : null,
             );
           }).toList(),
@@ -722,31 +747,35 @@ class _TodayPrayerListSection extends StatelessWidget {
     );
   }
 
-  void _onNotificationToggle(BuildContext context, PrayerType type) {
-    final updated = PrayerRowViewDataMapper.toggledNotificationSettings(
-      settings,
-      type,
-    );
-    if (updated == null) return;
-    context.read<PrayerTimesBloc>().add(
-      PrayerTimesEvent.updateSettings(updated),
-    );
-  }
+  void _showPrayerAlertSheet(BuildContext context, PrayerRowViewData row) {
+    final bloc = context.read<PrayerTimesBloc>();
 
-  void _onAdhanToggle(BuildContext context, PrayerType type) {
-    final updated = PrayerRowViewDataMapper.toggledAdhanSettings(
-      settings,
-      type,
-    );
-    if (updated == null) return;
-    context.read<PrayerTimesBloc>().add(
-      PrayerTimesEvent.updateSettings(updated),
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (modalContext) => BlocProvider.value(
+        value: bloc,
+        child: _PrayerAlertQuickSheet(
+          row: row,
+          onModeSelected: (mode) {
+            final updated = PrayerRowViewDataMapper.updatedAlertModeSettings(
+              settings,
+              row.type,
+              mode,
+            );
+            if (updated == null) return;
+            bloc.add(PrayerTimesEvent.updateSettings(updated));
+            Navigator.of(modalContext).pop();
+          },
+        ),
+      ),
     );
   }
 }
 
 class _TodayPrayerListRow extends StatelessWidget {
   const _TodayPrayerListRow({
+    required this.row,
     required this.prayerName,
     required this.prayerTime,
     required this.statusText,
@@ -754,13 +783,10 @@ class _TodayPrayerListRow extends StatelessWidget {
     required this.hasPassed,
     required this.isSecondary,
     required this.showAlertIndicators,
-    required this.notificationEnabled,
-    required this.adhanEnabled,
     required this.onTap,
-    required this.onNotificationToggle,
-    required this.onAdhanToggle,
   });
 
+  final PrayerRowViewData row;
   final String prayerName;
   final String prayerTime;
   final String statusText;
@@ -768,11 +794,7 @@ class _TodayPrayerListRow extends StatelessWidget {
   final bool hasPassed;
   final bool isSecondary;
   final bool showAlertIndicators;
-  final bool notificationEnabled;
-  final bool adhanEnabled;
   final VoidCallback? onTap;
-  final VoidCallback? onNotificationToggle;
-  final VoidCallback? onAdhanToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -836,13 +858,7 @@ class _TodayPrayerListRow extends StatelessWidget {
               ),
               if (showAlertIndicators) ...[
                 SizedBox(width: tokens.spaceMedium),
-                _PrayerAlertIndicators(
-                  notificationEnabled: notificationEnabled,
-                  adhanEnabled: adhanEnabled,
-                  isSecondary: isSecondary,
-                  onNotificationTap: onNotificationToggle,
-                  onAdhanTap: onAdhanToggle,
-                ),
+                PrayerAlertStatusChip(alert: row.alert),
               ],
             ],
           ),
@@ -852,133 +868,195 @@ class _TodayPrayerListRow extends StatelessWidget {
   }
 }
 
-class _PrayerAlertIndicators extends StatelessWidget {
-  const _PrayerAlertIndicators({
-    required this.notificationEnabled,
-    required this.adhanEnabled,
-    required this.isSecondary,
-    required this.onNotificationTap,
-    required this.onAdhanTap,
+class _PrayerAlertQuickSheet extends StatelessWidget {
+  const _PrayerAlertQuickSheet({
+    required this.row,
+    required this.onModeSelected,
   });
 
-  final bool notificationEnabled;
-  final bool adhanEnabled;
-  final bool isSecondary;
-  final VoidCallback? onNotificationTap;
-  final VoidCallback? onAdhanTap;
+  final PrayerRowViewData row;
+  final ValueChanged<PrayerAlertMode> onModeSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final iconAlpha = isSecondary ? tokens.opacityEmphasis : 1.0;
-    final notificationColor =
-        (notificationEnabled
-                ? colorScheme.primary
-                : colorScheme.onSurfaceVariant)
-            .withValues(alpha: iconAlpha);
-    final adhanColor =
-        (!notificationEnabled
-                ? colorScheme.onSurfaceVariant
-                : adhanEnabled
-                ? colorScheme.primary
-                : colorScheme.onSurfaceVariant)
-            .withValues(
-              alpha: !notificationEnabled ? tokens.opacityEmphasis : iconAlpha,
-            );
+    final bottomPadding = context.floatingBottomPadding;
+    final currentMode = _modeForState(row.alert.state);
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _InlineAlertIcon(
-          icon: notificationEnabled
-              ? Icons.notifications_active_outlined
-              : Icons.notifications_off_outlined,
-          color: notificationColor,
-          emphasisColor: colorScheme.primaryContainer,
-          active: notificationEnabled,
-          onTap: onNotificationTap,
-          semanticLabel: context.l10n.prayerNotifications,
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(tokens.radiusExtraLarge),
         ),
-        SizedBox(width: tokens.spaceExtraSmall),
-        _InlineAlertIcon(
-          icon: !notificationEnabled
-              ? Icons.volume_off_outlined
-              : adhanEnabled
-              ? Icons.volume_up_outlined
-              : Icons.volume_mute_outlined,
-          color: adhanColor,
-          emphasisColor: colorScheme.primaryContainer,
-          active: notificationEnabled && adhanEnabled,
-          onTap: onAdhanTap,
-          semanticLabel: context.l10n.playAdhan,
-        ),
-      ],
-    );
-  }
-}
-
-class _InlineAlertIcon extends StatelessWidget {
-  const _InlineAlertIcon({
-    required this.icon,
-    required this.color,
-    required this.emphasisColor,
-    required this.active,
-    required this.onTap,
-    required this.semanticLabel,
-  });
-
-  final IconData icon;
-  final Color color;
-  final Color emphasisColor;
-  final bool active;
-  final VoidCallback? onTap;
-  final String semanticLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final isEnabled = onTap != null;
-    final backgroundColor = !isEnabled
-        ? colorScheme.surfaceContainerHighest.withValues(alpha: 0.16)
-        : (active ? emphasisColor : colorScheme.surfaceContainerHighest)
-              .withValues(alpha: active ? 0.35 : 0.28);
-
-    return Semantics(
-      button: isEnabled,
-      enabled: isEnabled,
-      label: semanticLabel,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(tokens.radiusSmall),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(tokens.radiusSmall),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: kMinInteractiveDimension,
-              minHeight: kMinInteractiveDimension,
-            ),
-            child: Center(
-              child: Container(
-                width: tokens.iconSizeLarge,
-                height: tokens.iconSizeLarge,
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Tooltip(
-                  message: semanticLabel,
-                  child: Center(
-                    child: Icon(icon, size: tokens.iconSizeSmall, color: color),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            tokens.spaceLarge,
+            tokens.spaceSmall,
+            tokens.spaceLarge,
+            bottomPadding + tokens.spaceLarge,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: tokens.spaceExtraLarge + tokens.spaceLarge,
+                  height: tokens.borderWidthThin * 4,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.outline.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+                    borderRadius: BorderRadius.circular(tokens.radiusSmall),
                   ),
                 ),
               ),
-            ),
+              SizedBox(height: tokens.spaceLarge),
+              Text(
+                row.prayerName,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              SizedBox(height: tokens.spaceExtraSmall),
+              Text(
+                '${row.prayerTime} · ${context.l10n.prayerNotifications}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: tokens.spaceMedium),
+              _AlertModeTile(
+                title: context.l10n.prayerAlertModeOff,
+                subtitle: context.l10n.prayerAlertModeOffDescription,
+                icon: Icons.notifications_off_outlined,
+                value: PrayerAlertMode.none,
+                groupValue: currentMode,
+                onChanged: onModeSelected,
+              ),
+              _AlertModeTile(
+                title: context.l10n.prayerAlertModeNotifyOnly,
+                subtitle: context.l10n.prayerAlertModeNotifyOnlyDescription,
+                icon: Icons.notifications_active_outlined,
+                value: PrayerAlertMode.notification,
+                groupValue: currentMode,
+                onChanged: onModeSelected,
+              ),
+              if (row.alert.supportsAdhan)
+                _AlertModeTile(
+                  title: context.l10n.prayerAlertModeAdhan,
+                  subtitle: context.l10n.prayerAlertModeAdhanDescription,
+                  icon: Icons.volume_up_outlined,
+                  value: PrayerAlertMode.adhan,
+                  groupValue: currentMode,
+                  onChanged: onModeSelected,
+                ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  PrayerAlertMode _modeForState(PrayerAlertViewState state) {
+    return switch (state) {
+      PrayerAlertViewState.off => PrayerAlertMode.none,
+      PrayerAlertViewState.notification => PrayerAlertMode.notification,
+      PrayerAlertViewState.adhan => PrayerAlertMode.adhan,
+    };
+  }
+}
+
+class _AlertModeTile extends StatelessWidget {
+  const _AlertModeTile({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+  });
+
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final PrayerAlertMode value;
+  final PrayerAlertMode groupValue;
+  final ValueChanged<PrayerAlertMode> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final selected = value == groupValue;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+      child: TilawaCard(
+        flat: true,
+        backgroundColor: selected
+            ? theme.colorScheme.primaryContainer.withValues(
+                alpha: tokens.opacitySubtle,
+              )
+            : theme.colorScheme.surfaceContainerLowest,
+        borderColor: selected
+            ? theme.colorScheme.primary.withValues(alpha: tokens.opacityMedium)
+            : theme.colorScheme.outlineVariant.withValues(
+                alpha: tokens.opacityMedium,
+              ),
+        borderRadius: tokens.radiusLarge,
+        onTap: selected ? null : () => onChanged(value),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceMedium,
+          vertical: tokens.spaceSmall,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: tokens.iconSizeMedium,
+              color: selected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+            SizedBox(width: tokens.spaceMedium),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: tokens.spaceExtraSmall / 2),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              selected
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              size: tokens.iconSizeMedium,
+              color: selected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
         ),
       ),
     );

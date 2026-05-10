@@ -28,11 +28,11 @@ import 'notification_permission_service.dart';
 import 'prayer_notification_config.dart';
 import 'prayer_notification_payload_classifier.dart';
 
-/// Five prayers that participate in scheduled notifications. Sunrise, midnight
-/// and lastThird have no [PrayerNotificationSettings] field on
-/// [PrayerSettingsEntity] and are not user-configurable, so they are excluded.
+/// Prayer time entries that participate in scheduled notifications. Sunrise is
+/// notification-only; midnight and lastThird are not user-configurable.
 const List<PrayerType> _schedulablePrayers = [
   PrayerType.fajr,
+  PrayerType.sunrise,
   PrayerType.dhuhr,
   PrayerType.asr,
   PrayerType.maghrib,
@@ -926,13 +926,11 @@ class PrayerAdhanNotificationService
   ) {
     return switch (prayer) {
       PrayerType.fajr => settings.fajrNotification,
+      PrayerType.sunrise => settings.sunriseNotification,
       PrayerType.dhuhr => settings.dhuhrNotification,
       PrayerType.asr => settings.asrNotification,
       PrayerType.maghrib => settings.maghribNotification,
       PrayerType.isha => settings.ishaNotification,
-      PrayerType.sunrise => const PrayerNotificationSettings(
-        mode: PrayerAlertMode.none,
-      ),
       PrayerType.midnight => const PrayerNotificationSettings(
         mode: PrayerAlertMode.none,
       ),

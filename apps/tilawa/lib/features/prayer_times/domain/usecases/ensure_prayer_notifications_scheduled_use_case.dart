@@ -131,6 +131,7 @@ class EnsurePrayerNotificationsScheduledUseCase {
 
   bool _hasAnyEnabledPrayerNotification(PrayerSettingsEntity settings) {
     return settings.fajrNotification.enabled ||
+        settings.sunriseNotification.enabled ||
         settings.dhuhrNotification.enabled ||
         settings.asrNotification.enabled ||
         settings.maghribNotification.enabled ||

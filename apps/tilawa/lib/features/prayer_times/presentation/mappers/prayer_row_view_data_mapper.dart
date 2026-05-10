@@ -1,6 +1,7 @@
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 
 import '../../domain/entities/entities.dart';
+import '../formatters/prayer_time_label_formatter.dart';
 import '../models/prayer_row_view_data.dart';
 
 /// Maps prayer/domain state into lightweight row data for presentation.
@@ -25,9 +26,11 @@ abstract final class PrayerRowViewDataMapper {
       return PrayerRowViewData(
         type: prayer.type,
         prayerName: _localizedPrayerName(prayer.type, l10n),
-        prayerTime: settings.use24HourFormat
-            ? prayer.formattedTime
-            : prayer.getFormattedTime12Hour(isArabic: isArabic),
+        prayerTime: PrayerTimeLabelFormatter.formatItem(
+          prayer,
+          use24HourFormat: settings.use24HourFormat,
+          isArabic: isArabic,
+        ),
         statusText: _localizedStatus(
           isCurrent: isCurrent,
           hasPassed: hasPassed,
@@ -39,8 +42,44 @@ abstract final class PrayerRowViewDataMapper {
         showAlertIndicators: showAlertIndicators,
         notificationEnabled: prayerAlert?.enabled ?? false,
         adhanEnabled: prayerAlert?.playAdhan ?? false,
+        alert: alertViewData(settings: settings, type: prayer.type, l10n: l10n),
       );
     }).toList();
+  }
+
+  static PrayerAlertViewData alertViewData({
+    required PrayerSettingsEntity settings,
+    required PrayerType type,
+    required AppLocalizations l10n,
+  }) {
+    final alert = alertForType(settings, type);
+    if (alert == null) {
+      return PrayerAlertViewData(
+        state: PrayerAlertViewState.off,
+        label: l10n.disabled,
+        supportsAlerts: false,
+        supportsAdhan: false,
+      );
+    }
+
+    final supportsAdhan = type != PrayerType.sunrise;
+    final state = switch (alert.mode) {
+      PrayerAlertMode.none => PrayerAlertViewState.off,
+      PrayerAlertMode.notification => PrayerAlertViewState.notification,
+      PrayerAlertMode.adhan when supportsAdhan => PrayerAlertViewState.adhan,
+      PrayerAlertMode.adhan => PrayerAlertViewState.notification,
+    };
+
+    return PrayerAlertViewData(
+      state: state,
+      label: switch (state) {
+        PrayerAlertViewState.off => l10n.prayerAlertModeOff,
+        PrayerAlertViewState.notification => l10n.prayerAlertModeNotifyOnly,
+        PrayerAlertViewState.adhan => l10n.prayerAlertModeAdhan,
+      },
+      supportsAlerts: true,
+      supportsAdhan: supportsAdhan,
+    );
   }
 
   static PrayerNotificationSettings? alertForType(
@@ -49,22 +88,24 @@ abstract final class PrayerRowViewDataMapper {
   ) {
     return switch (type) {
       PrayerType.fajr => settings.fajrNotification,
+      PrayerType.sunrise => settings.sunriseNotification,
       PrayerType.dhuhr => settings.dhuhrNotification,
       PrayerType.asr => settings.asrNotification,
       PrayerType.maghrib => settings.maghribNotification,
       PrayerType.isha => settings.ishaNotification,
-      PrayerType.sunrise || PrayerType.midnight || PrayerType.lastThird => null,
+      PrayerType.midnight || PrayerType.lastThird => null,
     };
   }
 
   static String? prayerIdForType(PrayerType type) {
     return switch (type) {
       PrayerType.fajr => 'fajr',
+      PrayerType.sunrise => 'sunrise',
       PrayerType.dhuhr => 'dhuhr',
       PrayerType.asr => 'asr',
       PrayerType.maghrib => 'maghrib',
       PrayerType.isha => 'isha',
-      PrayerType.sunrise || PrayerType.midnight || PrayerType.lastThird => null,
+      PrayerType.midnight || PrayerType.lastThird => null,
     };
   }
 
@@ -120,6 +161,21 @@ abstract final class PrayerRowViewDataMapper {
     return settings.updatePrayerAlert(
       prayerId,
       adhanEnabled: !currentAlert.playAdhan,
+    );
+  }
+
+  static PrayerSettingsEntity? updatedAlertModeSettings(
+    PrayerSettingsEntity settings,
+    PrayerType type,
+    PrayerAlertMode mode,
+  ) {
+    final prayerId = prayerIdForType(type);
+    if (prayerId == null) return null;
+
+    return settings.updatePrayerAlert(
+      prayerId,
+      notificationEnabled: mode.isNotificationEnabled,
+      adhanEnabled: type != PrayerType.sunrise && mode.isAdhanEnabled,
     );
   }
 }

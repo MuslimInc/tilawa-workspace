@@ -5,7 +5,6 @@ import 'package:tilawa/core/services/adhan_qa_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
-import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 
 /// A bottom sheet for managing prayer time settings.
@@ -17,28 +16,21 @@ class PrayerSettingsSheet extends StatefulWidget {
 }
 
 class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
-  late PrayerSettingsEntity _settings;
-
   @override
   void initState() {
     super.initState();
-    _settings = context.read<PrayerTimesBloc>().state.settings;
-    context.read<PrayerPermissionsCubit>().checkCapability();
     if (AdhanQAService.isEnabled) {
       AdhanQAService().init();
     }
   }
 
   void _updateSettings(PrayerSettingsEntity newSettings) {
-    setState(() {
-      _settings = newSettings;
-    });
+    context.read<PrayerTimesBloc>().add(
+      PrayerTimesEvent.updateSettings(newSettings),
+    );
   }
 
-  void _saveSettings() {
-    context.read<PrayerTimesBloc>().add(
-      PrayerTimesEvent.updateSettings(_settings),
-    );
+  void _close() {
     Navigator.of(context).pop();
   }
 
@@ -47,167 +39,106 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final settings = context.select(
+      (PrayerTimesBloc bloc) => bloc.state.settings,
+    );
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      expand: false,
-      builder: (context, scrollController) {
-        return BlocListener<PrayerTimesBloc, PrayerTimesState>(
-          listenWhen: (previous, current) =>
-              previous.settings != current.settings,
-          listener: (context, state) {
-            setState(() {
-              _settings = state.settings;
-            });
-          },
-          child: Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.vertical(
-                top: Radius.circular(tokens.radiusExtraLarge),
-              ),
-            ),
-            child: Column(
-              children: [
-                _SheetHandle(tokens: tokens, colorScheme: colorScheme),
-                _SheetHeader(
-                  onSave: _saveSettings,
-                  tokens: tokens,
-                  theme: theme,
-                ),
-                const TilawaDivider(height: 1),
-                Flexible(
-                  child: ListView(
-                    controller: scrollController,
-                    padding: EdgeInsets.all(tokens.spaceLarge),
-                    children: [
-                      _SectionTitle(
-                        title: context.l10n.calculationMethod,
-                        tokens: tokens,
-                        theme: theme,
-                      ),
-                      _SettingsDropdown<CalculationMethod>(
-                        value: _settings.calculationMethod,
-                        items: CalculationMethod.values,
-                        labelBuilder: (method) => method.localize(context.l10n),
-                        onChanged: (method) {
-                          if (method != null) {
-                            _updateSettings(
-                              _settings.copyWith(calculationMethod: method),
-                            );
-                          }
-                        },
-                      ),
-                      SizedBox(height: tokens.spaceLarge),
-                      _SectionTitle(
-                        title: context.l10n.asrCalculation,
-                        tokens: tokens,
-                        theme: theme,
-                      ),
-                      _SettingsDropdown<AsrJuristicMethod>(
-                        value: _settings.asrJuristicMethod,
-                        items: AsrJuristicMethod.values,
-                        labelBuilder: (method) => method.localize(context.l10n),
-                        onChanged: (method) {
-                          if (method != null) {
-                            _updateSettings(
-                              _settings.copyWith(asrJuristicMethod: method),
-                            );
-                          }
-                        },
-                      ),
-                      SizedBox(height: tokens.spaceLarge),
-                      _SectionTitle(
-                        title: context.l10n.displayOptions,
-                        tokens: tokens,
-                        theme: theme,
-                      ),
-                      _SettingsSwitch(
-                        title: context.l10n.use24HourFormat,
-                        value: _settings.use24HourFormat,
-                        onChanged: (value) {
-                          _updateSettings(
-                            _settings.copyWith(use24HourFormat: value),
-                          );
-                        },
-                      ),
-                      _SettingsSwitch(
-                        title: context.l10n.showSunrise,
-                        value: _settings.showSunrise,
-                        onChanged: (value) {
-                          _updateSettings(
-                            _settings.copyWith(showSunrise: value),
-                          );
-                        },
-                      ),
-                      SizedBox(height: tokens.spaceLarge),
-                      _SectionTitle(
-                        title: context.l10n.timeAdjustments,
-                        tokens: tokens,
-                        theme: theme,
-                      ),
-                      _AdjustmentSlider(
-                        label: context.l10n.fajr,
-                        value: _settings.fajrAdjustment,
-                        onChanged: (value) {
-                          _updateSettings(
-                            _settings.copyWith(fajrAdjustment: value.round()),
-                          );
-                        },
-                      ),
-                      _AdjustmentSlider(
-                        label: context.l10n.dhuhr,
-                        value: _settings.dhuhrAdjustment,
-                        onChanged: (value) {
-                          _updateSettings(
-                            _settings.copyWith(dhuhrAdjustment: value.round()),
-                          );
-                        },
-                      ),
-                      _AdjustmentSlider(
-                        label: context.l10n.asr,
-                        value: _settings.asrAdjustment,
-                        onChanged: (value) {
-                          _updateSettings(
-                            _settings.copyWith(asrAdjustment: value.round()),
-                          );
-                        },
-                      ),
-                      _AdjustmentSlider(
-                        label: context.l10n.maghrib,
-                        value: _settings.maghribAdjustment,
-                        onChanged: (value) {
-                          _updateSettings(
-                            _settings.copyWith(
-                              maghribAdjustment: value.round(),
-                            ),
-                          );
-                        },
-                      ),
-                      _AdjustmentSlider(
-                        label: context.l10n.isha,
-                        value: _settings.ishaAdjustment,
-                        onChanged: (value) {
-                          _updateSettings(
-                            _settings.copyWith(ishaAdjustment: value.round()),
-                          );
-                        },
-                      ),
-                      if (AdhanQAService.isEnabled) ...[
-                        SizedBox(height: tokens.spaceLarge),
-                        const _QASection(),
-                        SizedBox(height: tokens.spaceLarge),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
-            ),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * 0.86,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(tokens.radiusExtraLarge),
           ),
-        );
-      },
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _SheetHandle(tokens: tokens, colorScheme: colorScheme),
+              _SheetHeader(onClose: _close, tokens: tokens, theme: theme),
+              const TilawaDivider(height: 1),
+              Flexible(
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.all(tokens.spaceLarge),
+                  children: [
+                    _SectionTitle(
+                      title: context.l10n.calculationMethod,
+                      tokens: tokens,
+                      theme: theme,
+                    ),
+                    _SettingsDropdown<CalculationMethod>(
+                      value: settings.calculationMethod,
+                      items: CalculationMethod.values,
+                      labelBuilder: (method) => method.localize(context.l10n),
+                      onChanged: (method) {
+                        if (method != null) {
+                          _updateSettings(
+                            settings.copyWith(calculationMethod: method),
+                          );
+                        }
+                      },
+                    ),
+                    SizedBox(height: tokens.spaceLarge),
+                    _SectionTitle(
+                      title: context.l10n.asrCalculation,
+                      tokens: tokens,
+                      theme: theme,
+                    ),
+                    _SettingsDropdown<AsrJuristicMethod>(
+                      value: settings.asrJuristicMethod,
+                      items: AsrJuristicMethod.values,
+                      labelBuilder: (method) => method.localize(context.l10n),
+                      onChanged: (method) {
+                        if (method != null) {
+                          _updateSettings(
+                            settings.copyWith(asrJuristicMethod: method),
+                          );
+                        }
+                      },
+                    ),
+                    SizedBox(height: tokens.spaceLarge),
+                    _SectionTitle(
+                      title: context.l10n.displayOptions,
+                      tokens: tokens,
+                      theme: theme,
+                    ),
+                    _SettingsSwitch(
+                      title: context.l10n.use24HourFormat,
+                      value: settings.use24HourFormat,
+                      onChanged: (value) {
+                        _updateSettings(
+                          settings.copyWith(use24HourFormat: value),
+                        );
+                      },
+                    ),
+                    _SettingsSwitch(
+                      title: context.l10n.showSunrise,
+                      value: settings.showSunrise,
+                      onChanged: (value) {
+                        _updateSettings(settings.copyWith(showSunrise: value));
+                      },
+                    ),
+                    // TODO: Re-enable Time Adjustments after the Prayer Times
+                    // UX stabilizes. The feature is intentionally hidden for
+                    // now to keep settings simple and avoid advanced controls.
+                    if (AdhanQAService.isEnabled) ...[
+                      SizedBox(height: tokens.spaceLarge),
+                      const _QASection(),
+                      SizedBox(height: tokens.spaceLarge),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -234,12 +165,12 @@ class _SheetHandle extends StatelessWidget {
 
 class _SheetHeader extends StatelessWidget {
   const _SheetHeader({
-    required this.onSave,
+    required this.onClose,
     required this.tokens,
     required this.theme,
   });
 
-  final VoidCallback onSave;
+  final VoidCallback onClose;
   final TilawaDesignTokens tokens;
   final ThemeData theme;
 
@@ -257,12 +188,12 @@ class _SheetHeader extends StatelessWidget {
           ),
           const Spacer(),
           TextButton(
-            onPressed: onSave,
+            onPressed: onClose,
             style: TextButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
             ),
             child: Text(
-              context.l10n.save,
+              context.l10n.done,
               style: const TextStyle(fontWeight: FontWeight.w800),
             ),
           ),
@@ -318,6 +249,7 @@ class _SettingsDropdown<T> extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return DropdownButtonFormField<T>(
+      key: ValueKey<Object?>(value),
       initialValue: value,
       decoration: InputDecoration(
         filled: true,
@@ -382,62 +314,6 @@ class _SettingsSwitch extends StatelessWidget {
     );
 
     return tile;
-  }
-}
-
-class _AdjustmentSlider extends StatelessWidget {
-  const _AdjustmentSlider({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final int value;
-  final ValueChanged<double> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 70,
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Slider(
-              value: value.toDouble(),
-              min: -30,
-              max: 30,
-              divisions: 60,
-              label: '$value ${context.l10n.minutesShort}',
-              onChanged: onChanged,
-            ),
-          ),
-          SizedBox(
-            width: 44,
-            child: Text(
-              '${value > 0 ? '+' : ''}$value',
-              style: theme.textTheme.labelLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: theme.colorScheme.primary,
-              ),
-              textAlign: TextAlign.end,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 
