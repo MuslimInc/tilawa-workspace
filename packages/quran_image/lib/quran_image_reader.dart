@@ -96,10 +96,10 @@ class _QuranImageReaderState extends State<QuranImageReader>
   DateTime _lastPreviewUpdateTime = DateTime(2000);
   static const _previewUpdateThrottle = Duration(milliseconds: 150);
 
-  // Cache recently previewed pages to avoid redundant updates during session.
-  // Prevents same page from appearing in logs multiple times.
-  final LinkedHashSet<int> _previewedPagesCache = LinkedHashSet<int>();
-  static const int _maxCachedPages = 50;
+  /// Offscreen [toImage] snapshot used to hide a one-frame GPU gap on **very**
+  /// long jumps. Medium jumps skip it: they are much faster; preview + decode
+  /// already ran while the user scrubbed.
+  static const int _jumpSnapshotMinPageDelta = 36;
 
   // Last page number dispatched to prewarmCurrentTarget. Guards against
   // firing on every sub-pixel scroll tick when the rounded page hasn't changed.
@@ -470,11 +470,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final currentState = context.read<NavigationBloc>().state;
     if (currentState is! NavigationLoaded) return;
 
-    // Skip if already cached during this session — avoids logging redundant previews
-    if (_previewedPagesCache.contains(displayPage)) {
-      return;
-    }
-
     final currentPreviewState = _previewPageStateNotifier.value;
     if (displayPage == currentState.pageState.currentPage &&
         currentPreviewState == null) {
@@ -494,13 +489,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
       pageNumber: displayPage,
       cacheWidth: _cacheWidth,
     );
-
-    // Add to cache with LRU eviction to prevent unbounded growth
-    _previewedPagesCache.add(displayPage);
-    if (_previewedPagesCache.length > _maxCachedPages) {
-      // Remove oldest entry (LinkedHashSet preserves insertion order)
-      _previewedPagesCache.remove(_previewedPagesCache.first);
-    }
   }
 
   void _clearPreviewPage() {
@@ -531,13 +519,15 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final currentIndex = _pageController.page?.round() ?? 0;
     final delta = (targetIndex - currentIndex).abs();
     final isLongJump = delta > 3;
+    final useJumpSnapshot = delta >= _jumpSnapshotMinPageDelta;
 
     if (isLongJump) {
       PerfLogger.log(
         widgetName: 'QuranImageReader',
         message:
             'slider jump delta=$delta '
-            'from=${currentIndex + 1} to=$safePageNumber',
+            'from=${currentIndex + 1} to=$safePageNumber '
+            'snapshot=$useJumpSnapshot',
       );
       // Do NOT clear preview here. The preview still shows the target page
       // (e.g. 379) while decode + snapshot runs. Clearing it early causes
@@ -551,7 +541,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
       cacheWidth: _cacheWidth,
     );
     _JumpTransitionSnapshot? jumpSnapshot;
-    if (isLongJump) {
+    if (isLongJump && useJumpSnapshot) {
       jumpSnapshot = await _preparePageSnapshotForNavigation(safePageNumber);
     } else {
       await _preparePageForNavigation(safePageNumber);
@@ -620,8 +610,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final pageIndex = pageNumber - 1;
     _lastSettledPageIndex = pageIndex;
     _clearPreviewPage();
-    // Clear preview cache on page change to allow re-previewing around new page
-    _previewedPagesCache.clear();
     PerfLogger.log(widgetName: 'PageView', message: 'swiped page=$pageNumber');
     context.read<NavigationBloc>().add(PageChanged(pageNumber));
     _imagePrewarmer.prewarmSettledWindow(
