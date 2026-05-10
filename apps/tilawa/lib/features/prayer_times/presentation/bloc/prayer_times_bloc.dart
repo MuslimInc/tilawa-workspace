@@ -27,6 +27,7 @@ class PrayerTimesEvent with _$PrayerTimesEvent {
   const factory PrayerTimesEvent.updateSettings(PrayerSettingsEntity settings) =
       _UpdateSettings;
   const factory PrayerTimesEvent.refreshCountdown() = _RefreshCountdown;
+  const factory PrayerTimesEvent.refreshIfStale() = _RefreshIfStale;
   const factory PrayerTimesEvent.setManualLocation({
     required double latitude,
     required double longitude,
@@ -64,12 +65,15 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._savePrayerSettingsUseCase,
     this._loadPrayerSettingsUseCase,
     this._schedulePrayerNotificationsUseCase,
-    this._cancelPrayerNotificationsUseCase,
-  ) : super(const PrayerTimesState()) {
+    this._cancelPrayerNotificationsUseCase, [
+    this._shouldRefreshPrayerTimesUseCase =
+        const ShouldRefreshPrayerTimesUseCase(),
+  ]) : super(const PrayerTimesState()) {
     on<_LoadPrayerTimes>(_onLoadPrayerTimes);
     on<_LoadMonthlyPrayerTimes>(_onLoadMonthlyPrayerTimes);
     on<_UpdateLocation>(_onUpdateLocation);
     on<_UpdateSettings>(_onUpdateSettings);
+    on<_RefreshIfStale>(_onRefreshIfStale);
     on<_SetManualLocation>(_onSetManualLocation);
   }
 
@@ -82,6 +86,7 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   final SchedulePrayerNotificationsUseCase _schedulePrayerNotificationsUseCase;
   // ignore: unused_field
   final CancelPrayerNotificationsUseCase _cancelPrayerNotificationsUseCase;
+  final ShouldRefreshPrayerTimesUseCase _shouldRefreshPrayerTimesUseCase;
 
   Future<void> _onLoadPrayerTimes(
     _LoadPrayerTimes event,
@@ -317,6 +322,27 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         );
       }
     }
+  }
+
+  Future<void> _onRefreshIfStale(
+    _RefreshIfStale event,
+    Emitter<PrayerTimesState> emit,
+  ) async {
+    if (state.status == PrayerTimesStatus.loading) {
+      return;
+    }
+
+    final PrayerTimeEntity? prayerTimes = state.todayPrayerTimes;
+    final bool shouldRefresh = _shouldRefreshPrayerTimesUseCase(
+      loadedDate: prayerTimes?.date,
+      loadedUtcOffset: prayerTimes?.date.timeZoneOffset,
+    );
+
+    if (!shouldRefresh) {
+      return;
+    }
+
+    add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
   }
 
   Future<void> _onSetManualLocation(

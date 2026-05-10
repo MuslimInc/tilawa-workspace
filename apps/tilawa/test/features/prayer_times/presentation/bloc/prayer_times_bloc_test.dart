@@ -435,5 +435,142 @@ void main() {
         ).called(greaterThanOrEqualTo(1));
       },
     );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'refreshIfStale does nothing when loaded data is fresh',
+      build: () => PrayerTimesBloc(
+        mockGetPrayerTimesUseCase,
+        mockGetMonthlyPrayerTimesUseCase,
+        mockGetCurrentLocationUseCase,
+        mockGetCountryCodeUseCase,
+        mockSavePrayerSettingsUseCase,
+        mockLoadPrayerSettingsUseCase,
+        mockSchedulePrayerNotificationsUseCase,
+        mockCancelPrayerNotificationsUseCase,
+        _FakeShouldRefreshPrayerTimesUseCase(shouldRefresh: false),
+      ),
+      seed: () => PrayerTimesState(
+        status: PrayerTimesStatus.loaded,
+        todayPrayerTimes: tPrayerTimes,
+      ),
+      act: (bloc) => bloc.add(const PrayerTimesEvent.refreshIfStale()),
+      expect: () => <PrayerTimesState>[],
+      verify: (_) {
+        verifyNever(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        );
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'refreshIfStale reloads prayer times with forced reschedule when stale',
+      build: () {
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(savedLatitude: 10.0, savedLongitude: 10.0),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+
+        return PrayerTimesBloc(
+          mockGetPrayerTimesUseCase,
+          mockGetMonthlyPrayerTimesUseCase,
+          mockGetCurrentLocationUseCase,
+          mockGetCountryCodeUseCase,
+          mockSavePrayerSettingsUseCase,
+          mockLoadPrayerSettingsUseCase,
+          mockSchedulePrayerNotificationsUseCase,
+          mockCancelPrayerNotificationsUseCase,
+          _FakeShouldRefreshPrayerTimesUseCase(shouldRefresh: true),
+        );
+      },
+      seed: () => PrayerTimesState(
+        status: PrayerTimesStatus.loaded,
+        todayPrayerTimes: tPrayerTimes,
+      ),
+      act: (bloc) => bloc.add(const PrayerTimesEvent.refreshIfStale()),
+      expect: () => [
+        PrayerTimesState(
+          status: PrayerTimesStatus.loading,
+          todayPrayerTimes: tPrayerTimes,
+        ),
+        PrayerTimesState(
+          status: PrayerTimesStatus.loading,
+          todayPrayerTimes: tPrayerTimes,
+          settings: const PrayerSettingsEntity(
+            savedLatitude: 10.0,
+            savedLongitude: 10.0,
+          ),
+        ),
+        isA<PrayerTimesState>()
+            .having((s) => s.status, 'status', PrayerTimesStatus.loaded)
+            .having(
+              (s) => s.todayPrayerTimes,
+              'todayPrayerTimes',
+              tPrayerTimes,
+            ),
+      ],
+      verify: (_) {
+        verify(
+          mockSchedulePrayerNotificationsUseCase.call(
+            settings: anyNamed('settings'),
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            forceReschedule: true,
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'refreshIfStale is ignored while already loading',
+      build: () {
+        final fakeRefresh = _FakeShouldRefreshPrayerTimesUseCase(
+          shouldRefresh: true,
+        );
+        addTearDown(() => expect(fakeRefresh.calls, 0));
+
+        return PrayerTimesBloc(
+          mockGetPrayerTimesUseCase,
+          mockGetMonthlyPrayerTimesUseCase,
+          mockGetCurrentLocationUseCase,
+          mockGetCountryCodeUseCase,
+          mockSavePrayerSettingsUseCase,
+          mockLoadPrayerSettingsUseCase,
+          mockSchedulePrayerNotificationsUseCase,
+          mockCancelPrayerNotificationsUseCase,
+          fakeRefresh,
+        );
+      },
+      seed: () => const PrayerTimesState(status: PrayerTimesStatus.loading),
+      act: (bloc) => bloc.add(const PrayerTimesEvent.refreshIfStale()),
+      expect: () => <PrayerTimesState>[],
+    );
   });
+}
+
+class _FakeShouldRefreshPrayerTimesUseCase
+    implements ShouldRefreshPrayerTimesUseCase {
+  _FakeShouldRefreshPrayerTimesUseCase({required this.shouldRefresh});
+
+  final bool shouldRefresh;
+  int calls = 0;
+
+  @override
+  bool call({required DateTime? loadedDate, Duration? loadedUtcOffset}) {
+    calls++;
+    return shouldRefresh;
+  }
 }

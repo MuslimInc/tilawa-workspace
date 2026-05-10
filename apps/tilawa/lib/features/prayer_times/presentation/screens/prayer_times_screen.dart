@@ -34,13 +34,72 @@ class PrayerTimesScreen extends StatefulWidget {
   State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
 }
 
-class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
+class _PrayerTimesScreenState extends State<PrayerTimesScreen>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
+  Timer? _midnightRefreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleMidnightRefreshTimer();
+  }
+
+  @override
+  void dispose() {
+    _midnightRefreshTimer?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state != AppLifecycleState.resumed) {
+      return;
+    }
+
+    _dispatchRefreshIfStale();
+    _scheduleMidnightRefreshTimer();
+  }
 
   void _onSegmentChanged(String value) {
     setState(() {
       _selectedIndex = value == 'today' ? 0 : 1;
     });
+  }
+
+  void _scheduleMidnightRefreshTimer() {
+    _midnightRefreshTimer?.cancel();
+
+    final now = PrayerTimesClock.now();
+    final nextMidnight = DateTime(now.year, now.month, now.day + 1);
+    final delay = nextMidnight.difference(now);
+
+    _midnightRefreshTimer = Timer(
+      delay.isNegative || delay == Duration.zero
+          ? const Duration(seconds: 1)
+          : delay,
+      () {
+        if (!mounted) {
+          return;
+        }
+
+        _dispatchRefreshIfStale();
+        _scheduleMidnightRefreshTimer();
+      },
+    );
+  }
+
+  void _dispatchRefreshIfStale() {
+    if (!mounted) {
+      return;
+    }
+
+    context.read<PrayerTimesBloc>().add(
+      const PrayerTimesEvent.refreshIfStale(),
+    );
   }
 
   @override

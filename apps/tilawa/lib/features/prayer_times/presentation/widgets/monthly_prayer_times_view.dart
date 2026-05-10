@@ -5,6 +5,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
+import '../../domain/prayer_times_clock.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../formatters/prayer_time_label_formatter.dart';
 
@@ -30,7 +31,7 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
+    final now = PrayerTimesClock.now();
     _currentYear = now.year;
     _currentMonth = now.month;
     _loadMonthlyPrayerTimes();
@@ -121,7 +122,7 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
   }
 
   bool _isToday(DateTime date) {
-    final now = DateTime.now();
+    final now = PrayerTimesClock.now();
     return date.year == now.year &&
         date.month == now.month &&
         date.day == now.day;
@@ -147,7 +148,7 @@ class _MonthSelector extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    final String monthName = _getMonthName(context, month);
+    final String monthName = _getMonthName(context, year, month);
 
     return Container(
       margin: EdgeInsets.all(tokens.spaceLarge),
@@ -189,8 +190,8 @@ class _MonthSelector extends StatelessWidget {
     );
   }
 
-  String _getMonthName(BuildContext context, int month) {
-    final DateTime date = DateTime(DateTime.now().year, month, 1);
+  String _getMonthName(BuildContext context, int year, int month) {
+    final DateTime date = DateTime(year, month, 1);
     final String languageCode = Localizations.localeOf(context).languageCode;
     return DateFormat.MMMM(languageCode).format(date);
   }
