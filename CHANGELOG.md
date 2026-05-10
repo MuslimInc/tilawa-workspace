@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1+26] - 2026-05-10 [Google Play Release]
+
+### Added
+
+- **Prayer times (display)**: Optional setting to show or hide text labels on prayer alert status chips (icon-only mode with accessibility labels).
+
+### Changed
+
+- **Bottom navigation (compact)**: White floating bar with clearer outline and shadow; selected tab pill width constrained for spacing; light-theme chrome tokens tuned for cream backgrounds.
+- **Prayer times list**: Improved contrast for secondary status text on non-current rows.
+- **Settings sheets**: Language picker uses themed surface background; primary color and related sheets use consistent drag-handle spacing from design tokens.
+- **`TilawaSheetHandle` (ui_kit)**: Default top margin aligned with `spaceMedium` per density; `omitTopMargin` for overlays positioned manually; most call sites use `const TilawaSheetHandle()`.
+
+### Fixed
+
+- Bottom sheet drag handles sitting flush against the top edge of modals.
+
 ## [1.0.0+24] - 2026-05-08 [Google Play Release]
 
 ### Added
