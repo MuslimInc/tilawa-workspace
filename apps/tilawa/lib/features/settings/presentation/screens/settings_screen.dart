@@ -237,7 +237,7 @@ class SettingsScreen extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               horizontal: tokens.spaceLarge,
               vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
-            ).copyWith(bottom: tokens.spaceExtraLarge),
+            ).copyWith(bottom: tokens.spaceExtraLarge + tokens.spaceLarge),
             child: Column(
               children: [
                 const _SettingsProfileCard(),

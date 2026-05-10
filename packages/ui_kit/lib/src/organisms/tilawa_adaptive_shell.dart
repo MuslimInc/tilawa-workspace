@@ -381,8 +381,54 @@ class _NavButton extends StatelessWidget {
     final BorderRadius effectiveBorderRadius = BorderRadius.circular(
       borderRadius,
     );
+    final BorderRadius pillRadius = BorderRadius.circular(borderRadius * 0.72);
 
-    // Full-cell tap target; no splash/highlight; selection is icon/label only.
+    final Widget column = Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      spacing: tokens.navButtonGap,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        AnimatedScale(
+          scale: isSelected
+              ? tokens.navButtonSelectedCenterScale
+              : tokens.navButtonUnselectedScale,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOutBack,
+          child: PageTransitionSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation, secondaryAnimation) =>
+                FadeThroughTransition(
+                  animation: animation,
+                  secondaryAnimation: secondaryAnimation,
+                  fillColor: Colors.transparent,
+                  child: child,
+                ),
+            child: KeyedSubtree(key: ValueKey(isSelected), child: iconWidget),
+          ),
+        ),
+        AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 200),
+          style: (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
+            fontSize: tokens.navButtonLabelFontSize,
+            fontWeight: isSelected
+                ? tokens.navButtonSelectedLabelWeight
+                : tokens.navButtonUnselectedLabelWeight,
+            color: isSelected ? selectedFg : unselectedFg,
+            height: 1.15,
+          ),
+          child: Text(
+            destination.label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ],
+    );
+
+    // Full-cell tap target; selected tab gets a soft primary-tint pill
+    // ([navButtonSelectedBackgroundColor]) for clearer wayfinding.
     final Widget button = Material(
       type: MaterialType.transparency,
       child: InkWell(
@@ -400,60 +446,42 @@ class _NavButton extends StatelessWidget {
             padding: EdgeInsets.symmetric(
               vertical: tokens.navButtonVerticalPadding,
             ),
-            child: Column(
-              mainAxisAlignment: .start,
-              crossAxisAlignment: .center,
-              spacing: tokens.navButtonGap,
-              mainAxisSize: .min,
-              children: [
-                AnimatedScale(
-                  scale: isSelected
-                      ? tokens.navButtonSelectedCenterScale
-                      : tokens.navButtonUnselectedScale,
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutBack,
-                  child: PageTransitionSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    transitionBuilder: (child, animation, secondaryAnimation) =>
-                        FadeThroughTransition(
-                          animation: animation,
-                          secondaryAnimation: secondaryAnimation,
-                          fillColor: Colors.transparent,
-                          child: child,
-                        ),
-                    child: KeyedSubtree(
-                      key: ValueKey(isSelected),
-                      child: iconWidget,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxPillWidth = constraints.maxWidth * 0.86;
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxPillWidth),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOutCubic,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? tokens.navButtonSelectedBackgroundColor
+                            : Colors.transparent,
+                        borderRadius: pillRadius,
+                      ),
+                      child: column,
                     ),
                   ),
-                ),
-                AnimatedDefaultTextStyle(
-                  duration: const Duration(milliseconds: 200),
-                  style: (theme.textTheme.labelSmall ?? const TextStyle())
-                      .copyWith(
-                        fontSize: tokens.navButtonLabelFontSize,
-                        fontWeight: isSelected
-                            ? tokens.navButtonSelectedLabelWeight
-                            : tokens.navButtonUnselectedLabelWeight,
-                        color: isSelected ? selectedFg : unselectedFg,
-                      ),
-                  child: Text(
-                    destination.label,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),
       ),
     );
 
-    if (destination.identifier case final String id) {
-      return Semantics(identifier: id, child: button);
-    }
-    return button;
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: destination.label,
+      identifier: destination.identifier,
+      child: ExcludeSemantics(child: button),
+    );
   }
 }

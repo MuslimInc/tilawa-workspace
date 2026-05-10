@@ -913,7 +913,11 @@ class _TodayPrayerListRow extends StatelessWidget {
                       statusText,
                       style: theme.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: rowColor.withValues(alpha: rowAlpha),
+                        color: isCurrent
+                            ? rowColor.withValues(alpha: rowAlpha)
+                            : colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.92,
+                              ),
                       ),
                     ),
                   ],

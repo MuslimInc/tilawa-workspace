@@ -615,13 +615,13 @@ void main() {
       );
       final tokens = TilawaAdaptiveShellTokens.fromColorScheme(scheme);
 
-      expect(tokens.bottomNavBackgroundColor, Colors.transparent);
+      expect(tokens.bottomNavBackgroundColor, Colors.white);
+      expect(tokens.bottomNavShadowOpacity, closeTo(0.09, 0.001));
+      expect(tokens.bottomNavShadowBlur, 14);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, 4));
       expect(
         tokens.navButtonSelectedBackgroundColor,
-        Color.alphaBlend(
-          scheme.primary.withValues(alpha: 0.10),
-          scheme.surfaceContainerLow,
-        ),
+        Color.alphaBlend(scheme.primary.withValues(alpha: 0.10), Colors.white),
       );
       expect(
         tokens.sideRailIndicatorColor,
@@ -640,7 +640,7 @@ void main() {
       );
       expect(
         tokens.bottomNavOutlineColor,
-        scheme.outlineVariant.withValues(alpha: 0.1),
+        scheme.outlineVariant.withValues(alpha: 0.17),
       );
       expect(
         tokens.sideRailBackgroundColor,
@@ -679,7 +679,7 @@ void main() {
           TilawaAdaptiveShellTokens.fromColorScheme(
             tealScheme,
           ).bottomNavBackgroundColor,
-          Colors.transparent,
+          Colors.white,
         );
       },
     );
@@ -700,6 +700,13 @@ void main() {
           AppColors.darkBackground,
           0.32,
         ),
+      );
+      expect(tokens.bottomNavShadowOpacity, closeTo(0.055, 0.001));
+      expect(tokens.bottomNavShadowBlur, 10);
+      expect(tokens.bottomNavShadowOffset, const Offset(0, 2));
+      expect(
+        tokens.bottomNavOutlineColor,
+        scheme.outlineVariant.withValues(alpha: 0.12),
       );
       expect(
         tokens.navButtonSelectedBackgroundColor,
@@ -1063,7 +1070,7 @@ void main() {
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
-                  Colors.transparent,
+                  Colors.white,
                 );
                 expect(
                   accessed.adaptiveShell.bottomNavBackgroundColor,
