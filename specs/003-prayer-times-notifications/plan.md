@@ -1,6 +1,6 @@
 # Implementation Plan: Prayer Times Notifications (Android-First)
 
-**Branch**: `003-prayer-times-notifications` | **Date**: 2026-04-28 (revised 2026-04-30) | **Spec**: [spec.md](spec.md)
+**Branch**: `003-prayer-times-notifications` | **Date**: 2026-04-28 (revised 2026-05-10) | **Spec**: [spec.md](spec.md)
 **Status**: Production-ready design
 **Input**: Feature specification from `specs/003-prayer-times-notifications/spec.md`
 **Research**: Phase 0 + package evaluation in [research.md](research.md)
@@ -25,6 +25,10 @@ Centralized constants live in `PrayerNotificationConfig`. Comprehensive use case
 cover scheduling, cancellation, capability check, and permission request — ensuring BLoC
 and UI never call platform APIs directly. Comprehensive error handling ensures no crash
 on any permission state, platform API failure, or scheduling edge case. iOS is future work.
+
+Current implementation note (2026-05-10): Sunrise is now schedulable as a
+notification-only prayer time entry. It uses the same `PrayerNotificationSettings`
+shape as the five prayers, but UI/domain update logic prevents Adhan mode.
 
 ---
 
@@ -115,7 +119,8 @@ Visual Component     →  Option A: FLN + flutter_timezone
 
 ### Presentation
 
-- [prayer_settings_sheet.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/sheets/prayer_settings_sheet.dart) — UI toggle and minutesBefore selector
+- [prayer_notification_settings_sheet.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/widgets/prayer_notification_settings_sheet.dart) — Global and per-prayer notification controls
+- [prayer_settings_sheet.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/widgets/prayer_settings_sheet.dart) — Calculation/display settings
 - [prayer_times_bloc.dart](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/apps/tilawa/lib/features/prayer_times/presentation/bloc/prayer_times_bloc.dart) — Triggers rescheduling on settings change
 
 ---
@@ -126,7 +131,7 @@ Visual Component     →  Option A: FLN + flutter_timezone
 |---|---|---|---|
 | `prayer_adhan_silent` | Prayer Notifications (Silent) | None | Native Adhan audio is active |
 | `prayer_adhan` | Adhan Notifications | `adhan.mp3` | Native Adhan fails or is unsupported |
-| `prayer_times` | Prayer Notifications | Default | Standard prayer notification (no Adhan) |
+| `prayer_times` | Prayer Notifications | Default | Standard prayer notification (no Adhan), including Sunrise |
 
 ---
 
@@ -142,6 +147,16 @@ Visual Component     →  Option A: FLN + flutter_timezone
   - **Result**: Notification system plays `adhan.mp3`; visual notification is audible.
 
 > No duplicate sound path exists because `adhanHandledNatively` flag ensures channel selection is exclusive.
+
+### Sunrise Notification Behavior
+
+- Sunrise is included in the scheduling loop when `sunriseNotification.enabled`
+  is true.
+- Sunrise always resolves to `playAdhan = false`.
+- Sunrise uses the standard `prayer_times` notification channel.
+- Sunrise is included in watchdog "any enabled notification" checks.
+- The UI exposes Sunrise as Off/Notify only in row-level controls and Manage
+  Alerts.
 
 ---
 

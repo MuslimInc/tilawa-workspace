@@ -3,6 +3,7 @@
 **Feature Branch**: `003-prayer-times-notifications`
 **Created**: 2026-04-28
 **Status**: Implemented — code complete, release QA pending
+**Last Updated**: 2026-05-10
 **Type**: Feature Specification
 **Platform Scope**: Android (Google Play). iOS documented as future work.
 **GitHub Tracking**: [GitHub Projects — tilawa-workspace](https://github.com/muhammadkamel/tilawa-workspace/projects)
@@ -35,6 +36,10 @@ pipeline (`AdhanScheduler`, `AdhanReceiver`, `AdhanPlaybackService`). All consta
 (IDs, keys, log tags, schedule range) are centralized in `PrayerNotificationConfig`.
 All service methods are wrapped in try/catch — no scheduling failure can crash the
 app or propagate to UI.
+
+As of 2026-05-10, Sunrise participates in notification scheduling as a
+notification-only item. It is persisted as `sunriseNotification`, defaults to
+Off, and never supports Adhan playback.
 
 ---
 
@@ -91,6 +96,8 @@ notification fires.
 4. **Given** exact alarm permission is not granted (Android 12+), **When** user
    enables notifications, **Then** the app informs the user and, if possible,
    links to the system alarm permission settings.
+5. **Given** Sunrise is shown in the Prayer Times schedule, **When** user opens
+   Sunrise alert controls, **Then** only Off and Notify only are available.
 
 ---
 
@@ -145,6 +152,8 @@ toggle → alarm fires → adhan sound plays.
 - **Native Adhan scheduling fails**: The system remains fail-soft. If the native `AdhanAlarmPlayer` fails to schedule (e.g., due to background execution limits or permission revocation), the app falls back to standard `flutter_local_notifications` on the regular (with sound) channel to ensure the user is still notified.
 - **Notification permission denied** (Android 13+): Show in-app explanation; do not repeatedly prompt.
 - **All prayers disabled**: Cancel all existing alarms; schedule nothing.
+- **Sunrise notification**: Sunrise can be scheduled as a standard notification
+  only. It must never schedule Adhan audio or expose an Adhan control.
 - **minutesBefore pushes alarm into the past**: Skip that prayer for today; schedule for tomorrow.
 - **Device in Doze mode**: `setExactAndAllowWhileIdle()` defers to the next Doze maintenance window (≤15 min). This is documented as a known limitation.
 - **App killed / force stopped**: Android 10+ OS restriction; no workaround without foreground service; documented limitation.
@@ -176,6 +185,9 @@ toggle → alarm fires → adhan sound plays.
 - **FR-017**: System MUST use a native Android WorkManager watchdog to refresh the rolling 14-day schedule window.
 - **FR-018**: Foreground Adhan playback service MUST be silent (no notification sound) to avoid duplication with the Adhan audio.
 - **FR-019**: Permission revocation (Notifications or Exact Alarm) MUST trigger an immediate cancellation of all scheduled native and local alarms.
+- **FR-020**: System MUST support Sunrise notification as Off or Notify only.
+- **FR-021**: System MUST prevent Adhan mode for Sunrise in UI, settings
+  mapping, persisted settings updates, and scheduling.
 
 ---
 
@@ -192,6 +204,8 @@ toggle → alarm fires → adhan sound plays.
 - **SC-007**: No direct call to `AndroidFlutterLocalNotificationsPlugin`, `IAdhanAlarmPlayer`, or scheduling APIs exists anywhere in presentation layer or BLoC.
 - **SC-008**: `alarm` package import appears in zero files in Phase 1 (confirmed by static analysis / grep).
 - **SC-009**: Native Adhan scheduling MUST be confirmed as the source of truth for audio AND visual notification when it succeeds. The implementation uses XOR routing — if `IAdhanAlarmPlayer.scheduleAdhan` returns `true`, the service skips Flutter Local Notification scheduling for that prayer entirely, and `AdhanPlaybackService` posts the user-visible mediaPlayback foreground-service notification at fire time. This prevents duplicate notifications. Flutter Local Notification is the fallback path when native scheduling fails or is unsupported, and uses the standard adhan channel (with sound) in that case.
+- **SC-010**: Sunrise notifications, when enabled, fire as standard
+  notification-only alarms and never trigger Adhan audio.
 
 ---
 
@@ -202,7 +216,8 @@ toggle → alarm fires → adhan sound plays.
 - `flutter_local_notifications: ^21.0.0-dev.1` is already a dependency — confirmed.
 - `timezone` package is already used by `AthkarNotificationService` — confirmed.
 - User's saved location (`savedLatitude`, `savedLongitude`) is the source of truth for scheduling; live GPS is not used during scheduling.
-- `PrayerNotificationSettings` entity is not modified — it already has the required fields.
+- `PrayerNotificationSettings` is reused for Sunrise, but Sunrise is constrained
+  to notification-only behavior by settings update logic and presentation mapping.
 - No payment or premium gating on this feature.
 - Bundled adhan sound (`adhan.mp3`) is already in the project.
 - No payment or premium gating on this feature.
