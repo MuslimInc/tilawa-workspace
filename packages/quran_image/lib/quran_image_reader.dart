@@ -790,7 +790,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
         }
 
         try {
-          final pixelRatio = View.of(context).devicePixelRatio;
+          final deviceDpr = View.of(context).devicePixelRatio;
+          final pixelRatio = quranReaderSnapshotPixelRatioForCapture(deviceDpr);
           final image = await renderObject.toImage(
             pixelRatio: pixelRatio,
           );
@@ -801,12 +802,14 @@ class _QuranImageReaderState extends State<QuranImageReader>
                 'snapshot ready '
                 'page=$pageNumber '
                 'attempt=$attempt '
+                'deviceDpr=$deviceDpr '
+                'pixelRatio=$pixelRatio '
                 'size=${image.width}x${image.height} '
                 'elapsedMs=${sw.elapsedMilliseconds}',
           );
           PerfLogger.logQuranPerf(
             '[QuranPerf][Snapshot]',
-            'toImage page=$pageNumber pixelRatio=$pixelRatio '
+            'toImage page=$pageNumber deviceDpr=$deviceDpr pixelRatio=$pixelRatio '
                 'size=${image.width}x${image.height} '
                 'elapsedMs=${sw.elapsedMilliseconds} attempt=$attempt',
           );

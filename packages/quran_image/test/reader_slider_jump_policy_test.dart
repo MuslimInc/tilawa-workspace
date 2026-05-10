@@ -43,4 +43,28 @@ void main() {
       );
     });
   });
+
+  group('quranReaderSnapshotPixelRatioForCapture', () {
+    test('uses device ratio when at or below cap', () {
+      expect(quranReaderSnapshotPixelRatioForCapture(1.0), 1.0);
+      expect(quranReaderSnapshotPixelRatioForCapture(1.75), 1.75);
+      expect(
+        quranReaderSnapshotPixelRatioForCapture(
+          quranReaderSnapshotToImagePixelRatioCap,
+        ),
+        quranReaderSnapshotToImagePixelRatioCap,
+      );
+    });
+
+    test('caps when device DPR exceeds cap', () {
+      expect(
+        quranReaderSnapshotPixelRatioForCapture(2.75),
+        quranReaderSnapshotToImagePixelRatioCap,
+      );
+      expect(
+        quranReaderSnapshotPixelRatioForCapture(3.5),
+        quranReaderSnapshotToImagePixelRatioCap,
+      );
+    });
+  });
 }
