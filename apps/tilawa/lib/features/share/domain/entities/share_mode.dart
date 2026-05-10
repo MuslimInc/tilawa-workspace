@@ -7,7 +7,8 @@ enum ShareMode {
   audio,
 
   /// Generates a high-quality video (formerly "reel") with synchronized text.
-  video;
+  video
+  ;
 
   /// The list of share modes currently enabled in the application.
   /// To enable/disable a mode, modify this list.

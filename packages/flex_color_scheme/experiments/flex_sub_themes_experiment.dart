@@ -1721,37 +1721,38 @@ abstract final class FlexSubThemes {
                     : Colors.grey.shade400,
               },
       ),
-      overlayColor:
-          WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-            if (useM3)
-              WidgetState.error & WidgetState.pressed: colorScheme.error
-                  .withAlpha(kAlphaPressed),
-            if (useM3)
-              WidgetState.error & WidgetState.hovered: colorScheme.error
-                  .withAlpha(kAlphaHovered),
-            if (useM3)
-              WidgetState.error & WidgetState.focused: colorScheme.error
-                  .withAlpha(kAlphaFocused),
-            WidgetState.selected & WidgetState.pressed: tintInteract
-                ? tintedPressed(overlay, tint, factor)
-                : colorScheme.onSurface.withAlpha(kAlphaPressed),
-            WidgetState.selected & WidgetState.hovered: tintInteract
-                ? tintedHovered(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaHovered),
-            WidgetState.selected & WidgetState.focused: tintInteract
-                ? tintedFocused(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaFocused),
-            WidgetState.pressed: tintInteract
-                ? tintedPressed(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaPressed),
-            WidgetState.hovered: tintInteract
-                ? tintedHovered(overlay, tint, factor)
-                : colorScheme.onSurface.withAlpha(kAlphaHovered),
-            WidgetState.focused: tintInteract
-                ? tintedFocused(overlay, tint, factor)
-                : colorScheme.onSurface.withAlpha(kAlphaFocused),
-            WidgetState.any: Colors.transparent,
-          }),
+      overlayColor: WidgetStateProperty<Color>.fromMap(
+        <WidgetStatesConstraint, Color>{
+          if (useM3)
+            WidgetState.error & WidgetState.pressed: colorScheme.error
+                .withAlpha(kAlphaPressed),
+          if (useM3)
+            WidgetState.error & WidgetState.hovered: colorScheme.error
+                .withAlpha(kAlphaHovered),
+          if (useM3)
+            WidgetState.error & WidgetState.focused: colorScheme.error
+                .withAlpha(kAlphaFocused),
+          WidgetState.selected & WidgetState.pressed: tintInteract
+              ? tintedPressed(overlay, tint, factor)
+              : colorScheme.onSurface.withAlpha(kAlphaPressed),
+          WidgetState.selected & WidgetState.hovered: tintInteract
+              ? tintedHovered(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaHovered),
+          WidgetState.selected & WidgetState.focused: tintInteract
+              ? tintedFocused(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaFocused),
+          WidgetState.pressed: tintInteract
+              ? tintedPressed(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaPressed),
+          WidgetState.hovered: tintInteract
+              ? tintedHovered(overlay, tint, factor)
+              : colorScheme.onSurface.withAlpha(kAlphaHovered),
+          WidgetState.focused: tintInteract
+              ? tintedFocused(overlay, tint, factor)
+              : colorScheme.onSurface.withAlpha(kAlphaFocused),
+          WidgetState.any: Colors.transparent,
+        },
+      ),
     );
   }
 
@@ -3107,23 +3108,25 @@ abstract final class FlexSubThemes {
       // all states, if it was not defined, we can keeping them all null
       // and let M3 widget defaults handle the colors.
       if (baseSchemeColor != null || tintInteract || tintDisable) {
-        foregroundColor =
-            WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color>{
-              WidgetState.disabled: tintDisable
-                  ? tintedDisable(colorScheme.onSurface, tint)
-                  : colorScheme.onSurface.withAlpha(kAlphaDisabled),
-              WidgetState.any: foreground,
-            });
-        backgroundColor =
-            WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color>{
-              WidgetState.disabled: tintDisable
-                  ? tintedDisable(
-                      colorScheme.onSurface,
-                      tint,
-                    ).withAlpha(kAlphaVeryLowDisabled)
-                  : colorScheme.onSurface.withAlpha(kAlphaVeryLowDisabled),
-              WidgetState.any: background,
-            });
+        foregroundColor = WidgetStateProperty<Color?>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.disabled: tintDisable
+                ? tintedDisable(colorScheme.onSurface, tint)
+                : colorScheme.onSurface.withAlpha(kAlphaDisabled),
+            WidgetState.any: foreground,
+          },
+        );
+        backgroundColor = WidgetStateProperty<Color?>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.disabled: tintDisable
+                ? tintedDisable(
+                    colorScheme.onSurface,
+                    tint,
+                  ).withAlpha(kAlphaVeryLowDisabled)
+                : colorScheme.onSurface.withAlpha(kAlphaVeryLowDisabled),
+            WidgetState.any: background,
+          },
+        );
         overlayColor = WidgetStateProperty<Color?>.fromMap(
           <WidgetStatesConstraint, Color?>{
             WidgetState.hovered: tintInteract
@@ -3143,16 +3146,17 @@ abstract final class FlexSubThemes {
       // we need to define background color. Otherwise it will have value from
       // above or be left at defaults and let widget default define it.
       if (baseSchemeColor == null && onBaseSchemeColor != null) {
-        backgroundColor =
-            WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color>{
-              WidgetState.disabled: tintDisable
-                  ? tintedDisable(
-                      colorScheme.onSurface,
-                      tint,
-                    ).withAlpha(kAlphaVeryLowDisabled)
-                  : colorScheme.onSurface.withAlpha(kAlphaVeryLowDisabled),
-              WidgetState.any: background,
-            });
+        backgroundColor = WidgetStateProperty<Color?>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.disabled: tintDisable
+                ? tintedDisable(
+                    colorScheme.onSurface,
+                    tint,
+                  ).withAlpha(kAlphaVeryLowDisabled)
+                : colorScheme.onSurface.withAlpha(kAlphaVeryLowDisabled),
+            WidgetState.any: background,
+          },
+        );
       }
 
       // If elevation is null, we use widget defaults, otherwise we define a
@@ -3316,23 +3320,25 @@ abstract final class FlexSubThemes {
     // we only apply the tintInteract and tintDisable if we have a custom
     // color that anyway kills their separate designs.
     if (backgroundSchemeColor != null) {
-      backgroundColor =
-          WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color>{
-            WidgetState.disabled: tintDisable
-                ? tintedDisable(
-                    colorScheme.onSurface,
-                    background,
-                  ).withAlpha(kAlphaVeryLowDisabled)
-                : colorScheme.onSurface.withAlpha(kAlphaVeryLowDisabled),
-            WidgetState.any: background,
-          });
-      foregroundColor =
-          WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color>{
-            WidgetState.disabled: tintDisable
-                ? tintedDisable(colorScheme.onSurface, background)
-                : colorScheme.onSurface.withAlpha(kAlphaDisabled),
-            WidgetState.any: foreground,
-          });
+      backgroundColor = WidgetStateProperty<Color?>.fromMap(
+        <WidgetStatesConstraint, Color>{
+          WidgetState.disabled: tintDisable
+              ? tintedDisable(
+                  colorScheme.onSurface,
+                  background,
+                ).withAlpha(kAlphaVeryLowDisabled)
+              : colorScheme.onSurface.withAlpha(kAlphaVeryLowDisabled),
+          WidgetState.any: background,
+        },
+      );
+      foregroundColor = WidgetStateProperty<Color?>.fromMap(
+        <WidgetStatesConstraint, Color>{
+          WidgetState.disabled: tintDisable
+              ? tintedDisable(colorScheme.onSurface, background)
+              : colorScheme.onSurface.withAlpha(kAlphaDisabled),
+          WidgetState.any: foreground,
+        },
+      );
     } else {
       // We can in fact do tinted disabled TonalButtons, since they have the
       // same style.
@@ -3363,13 +3369,14 @@ abstract final class FlexSubThemes {
     // tonal and normal filled button. Added as workaround for issue:
     // https://github.com/flutter/flutter/issues/118063
     if (tintInteract) {
-      overlayColor =
-          WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color?>{
-            WidgetState.hovered: tintedHovered(overlay, tint, factor),
-            WidgetState.focused: tintedFocused(overlay, tint, factor),
-            WidgetState.pressed: tintedPressed(overlay, tint, factor),
-            WidgetState.any: null,
-          });
+      overlayColor = WidgetStateProperty<Color?>.fromMap(
+        <WidgetStatesConstraint, Color?>{
+          WidgetState.hovered: tintedHovered(overlay, tint, factor),
+          WidgetState.focused: tintedFocused(overlay, tint, factor),
+          WidgetState.pressed: tintedPressed(overlay, tint, factor),
+          WidgetState.any: null,
+        },
+      );
     }
 
     return FilledButtonThemeData(
@@ -4018,54 +4025,57 @@ abstract final class FlexSubThemes {
           ),
         },
       ),
-      floatingLabelStyle:
-          WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
-            WidgetState.error & WidgetState.focused: TextStyle(
-              color: colorScheme.error,
-            ),
-            WidgetState.error & WidgetState.hovered:
-                // TODO(rydmike): Info: M3 uses onErrorContainer.
-                // Excluding it, prefer error as float label color,
-                // FCS opinionated. Maybe include with option to choose style?
-                TextStyle(color: colorScheme.error),
-            WidgetState.error: TextStyle(
-              // TODO(rydmike): Info: M3 error, with this we get a hover diff.
-              // Prefer this as a diff to the hover state.
-              color: colorScheme.error.withValues(alpha: kEnabledBorderOpacity),
-            ),
-            WidgetState.focused: TextStyle(color: borderColor),
-            WidgetState.hovered: TextStyle(color: colorScheme.onSurfaceVariant),
-            WidgetState.disabled: tintDisable
-                ? TextStyle(color: tintDisabledColor)
-                : TextStyle(color: disabledDefault),
-            WidgetState.any: TextStyle(
-              color: useM3 ? colorScheme.onSurfaceVariant : hintColorM2,
-            ),
-          }),
-      helperStyle:
-          WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
-            WidgetState.disabled: tintDisable
-                ? TextStyle(color: tintDisabledColor)
-                : TextStyle(
-                    color: useM3
-                        ? colorScheme.onSurface.withValues(
-                            alpha: kAlphaDisabledFloat,
-                          )
-                        : Colors.transparent,
-                  ),
-            WidgetState.any: TextStyle(
-              color: useM3 ? colorScheme.onSurfaceVariant : hintColorM2,
-            ),
-          }),
-      hintStyle:
-          WidgetStateTextStyle.fromMap(<WidgetStatesConstraint, TextStyle>{
-            WidgetState.disabled: TextStyle(
-              color: tintDisable ? tintDisabledColor : disabledDefault,
-            ),
-            WidgetState.any: TextStyle(
-              color: useM3 ? colorScheme.onSurfaceVariant : hintColorM2,
-            ),
-          }),
+      floatingLabelStyle: WidgetStateTextStyle.fromMap(
+        <WidgetStatesConstraint, TextStyle>{
+          WidgetState.error & WidgetState.focused: TextStyle(
+            color: colorScheme.error,
+          ),
+          WidgetState.error & WidgetState.hovered:
+              // TODO(rydmike): Info: M3 uses onErrorContainer.
+              // Excluding it, prefer error as float label color,
+              // FCS opinionated. Maybe include with option to choose style?
+              TextStyle(color: colorScheme.error),
+          WidgetState.error: TextStyle(
+            // TODO(rydmike): Info: M3 error, with this we get a hover diff.
+            // Prefer this as a diff to the hover state.
+            color: colorScheme.error.withValues(alpha: kEnabledBorderOpacity),
+          ),
+          WidgetState.focused: TextStyle(color: borderColor),
+          WidgetState.hovered: TextStyle(color: colorScheme.onSurfaceVariant),
+          WidgetState.disabled: tintDisable
+              ? TextStyle(color: tintDisabledColor)
+              : TextStyle(color: disabledDefault),
+          WidgetState.any: TextStyle(
+            color: useM3 ? colorScheme.onSurfaceVariant : hintColorM2,
+          ),
+        },
+      ),
+      helperStyle: WidgetStateTextStyle.fromMap(
+        <WidgetStatesConstraint, TextStyle>{
+          WidgetState.disabled: tintDisable
+              ? TextStyle(color: tintDisabledColor)
+              : TextStyle(
+                  color: useM3
+                      ? colorScheme.onSurface.withValues(
+                          alpha: kAlphaDisabledFloat,
+                        )
+                      : Colors.transparent,
+                ),
+          WidgetState.any: TextStyle(
+            color: useM3 ? colorScheme.onSurfaceVariant : hintColorM2,
+          ),
+        },
+      ),
+      hintStyle: WidgetStateTextStyle.fromMap(
+        <WidgetStatesConstraint, TextStyle>{
+          WidgetState.disabled: TextStyle(
+            color: tintDisable ? tintDisabledColor : disabledDefault,
+          ),
+          WidgetState.any: TextStyle(
+            color: useM3 ? colorScheme.onSurfaceVariant : hintColorM2,
+          ),
+        },
+      ),
       iconColor: WidgetStateColor.fromMap(<WidgetStatesConstraint, Color>{
         WidgetState.disabled: tintDisable ? tintDisabledColor : disabledDefault,
         WidgetState.focused: useM3 ? colorScheme.onSurfaceVariant : baseColor,
@@ -4105,152 +4115,156 @@ abstract final class FlexSubThemes {
       border:
           (borderType ?? FlexInputBorderType.underline) ==
               FlexInputBorderType.underline
-          ? WidgetStateInputBorder.fromMap(<
-              WidgetStatesConstraint,
-              InputBorder
-            >{
-              WidgetState.disabled: UnderlineInputBorder(
-                borderRadius: effectiveUnderlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        color: tintDisable
-                            ? tintDisabledColor.withValues(
-                                alpha: kAlphaLowDisabledFloat,
-                              )
-                            : colorScheme.onSurface.withValues(
-                                alpha: kAlphaVeryLowDisabledFloat,
-                              ),
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-              WidgetState.error & WidgetState.focused: UnderlineInputBorder(
-                borderRadius: effectiveUnderlineBorder,
-                borderSide: focusedHasBorder
-                    ? BorderSide(color: colorScheme.error, width: focusedWidth)
-                    : BorderSide.none,
-              ),
-              WidgetState.error & WidgetState.hovered: UnderlineInputBorder(
-                borderRadius: effectiveUnderlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        // TODO(rydmike): Info: M3 uses onErrorContainer
-                        color: colorScheme.error,
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-              WidgetState.error: UnderlineInputBorder(
-                borderRadius: effectiveUnderlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        // TODO(rydmike): Info: M3 uses error
-                        color: colorScheme.error.withValues(
-                          alpha: kEnabledBorderOpacity,
-                        ),
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-              WidgetState.focused: UnderlineInputBorder(
-                borderRadius: effectiveUnderlineBorder,
-                borderSide: focusedHasBorder
-                    ? BorderSide(color: borderColor, width: focusedWidth)
-                    : BorderSide.none,
-              ),
-              WidgetState.hovered: UnderlineInputBorder(
-                borderRadius: effectiveUnderlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        color: enabledHoveredBorderColor,
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-              WidgetState.any: UnderlineInputBorder(
-                borderRadius: effectiveUnderlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        color: enabledBorderColor,
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-            })
+          ? WidgetStateInputBorder.fromMap(
+              <WidgetStatesConstraint, InputBorder>{
+                WidgetState.disabled: UnderlineInputBorder(
+                  borderRadius: effectiveUnderlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          color: tintDisable
+                              ? tintDisabledColor.withValues(
+                                  alpha: kAlphaLowDisabledFloat,
+                                )
+                              : colorScheme.onSurface.withValues(
+                                  alpha: kAlphaVeryLowDisabledFloat,
+                                ),
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.error & WidgetState.focused: UnderlineInputBorder(
+                  borderRadius: effectiveUnderlineBorder,
+                  borderSide: focusedHasBorder
+                      ? BorderSide(
+                          color: colorScheme.error,
+                          width: focusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.error & WidgetState.hovered: UnderlineInputBorder(
+                  borderRadius: effectiveUnderlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          // TODO(rydmike): Info: M3 uses onErrorContainer
+                          color: colorScheme.error,
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.error: UnderlineInputBorder(
+                  borderRadius: effectiveUnderlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          // TODO(rydmike): Info: M3 uses error
+                          color: colorScheme.error.withValues(
+                            alpha: kEnabledBorderOpacity,
+                          ),
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.focused: UnderlineInputBorder(
+                  borderRadius: effectiveUnderlineBorder,
+                  borderSide: focusedHasBorder
+                      ? BorderSide(color: borderColor, width: focusedWidth)
+                      : BorderSide.none,
+                ),
+                WidgetState.hovered: UnderlineInputBorder(
+                  borderRadius: effectiveUnderlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          color: enabledHoveredBorderColor,
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.any: UnderlineInputBorder(
+                  borderRadius: effectiveUnderlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          color: enabledBorderColor,
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+              },
+            )
           //
           // The outline version
-          : WidgetStateInputBorder.fromMap(<
-              WidgetStatesConstraint,
-              InputBorder
-            >{
-              WidgetState.disabled: OutlineInputBorder(
-                borderRadius: effectiveOutlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        color: tintDisable
-                            ? tintDisabledColor.withValues(
-                                alpha: kAlphaLowDisabledFloat,
-                              )
-                            : colorScheme.onSurface.withValues(
-                                alpha: kAlphaVeryLowDisabledFloat,
-                              ),
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-              WidgetState.error & WidgetState.focused: OutlineInputBorder(
-                borderRadius: effectiveOutlineBorder,
-                borderSide: focusedHasBorder
-                    ? BorderSide(color: colorScheme.error, width: focusedWidth)
-                    : BorderSide.none,
-              ),
-              WidgetState.error & WidgetState.hovered: OutlineInputBorder(
-                borderRadius: effectiveOutlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        // TODO(rydmike): Info: M3 uses onErrorContainer
-                        color: colorScheme.error,
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-              WidgetState.error: OutlineInputBorder(
-                borderRadius: effectiveOutlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        // TODO(rydmike): Info: M3 uses error
-                        color: colorScheme.error.withValues(
-                          alpha: kEnabledBorderOpacity,
-                        ),
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-              WidgetState.focused: OutlineInputBorder(
-                borderRadius: effectiveOutlineBorder,
-                borderSide: focusedHasBorder
-                    ? BorderSide(color: borderColor, width: focusedWidth)
-                    : BorderSide.none,
-              ),
-              WidgetState.hovered: OutlineInputBorder(
-                borderRadius: effectiveOutlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        color: enabledHoveredBorderColor,
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-              WidgetState.any: OutlineInputBorder(
-                borderRadius: effectiveOutlineBorder,
-                borderSide: unfocusedHasBorder
-                    ? BorderSide(
-                        color: enabledBorderColor,
-                        width: unfocusedWidth,
-                      )
-                    : BorderSide.none,
-              ),
-            }),
+          : WidgetStateInputBorder.fromMap(
+              <WidgetStatesConstraint, InputBorder>{
+                WidgetState.disabled: OutlineInputBorder(
+                  borderRadius: effectiveOutlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          color: tintDisable
+                              ? tintDisabledColor.withValues(
+                                  alpha: kAlphaLowDisabledFloat,
+                                )
+                              : colorScheme.onSurface.withValues(
+                                  alpha: kAlphaVeryLowDisabledFloat,
+                                ),
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.error & WidgetState.focused: OutlineInputBorder(
+                  borderRadius: effectiveOutlineBorder,
+                  borderSide: focusedHasBorder
+                      ? BorderSide(
+                          color: colorScheme.error,
+                          width: focusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.error & WidgetState.hovered: OutlineInputBorder(
+                  borderRadius: effectiveOutlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          // TODO(rydmike): Info: M3 uses onErrorContainer
+                          color: colorScheme.error,
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.error: OutlineInputBorder(
+                  borderRadius: effectiveOutlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          // TODO(rydmike): Info: M3 uses error
+                          color: colorScheme.error.withValues(
+                            alpha: kEnabledBorderOpacity,
+                          ),
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.focused: OutlineInputBorder(
+                  borderRadius: effectiveOutlineBorder,
+                  borderSide: focusedHasBorder
+                      ? BorderSide(color: borderColor, width: focusedWidth)
+                      : BorderSide.none,
+                ),
+                WidgetState.hovered: OutlineInputBorder(
+                  borderRadius: effectiveOutlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          color: enabledHoveredBorderColor,
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+                WidgetState.any: OutlineInputBorder(
+                  borderRadius: effectiveOutlineBorder,
+                  borderSide: unfocusedHasBorder
+                      ? BorderSide(
+                          color: enabledBorderColor,
+                          width: unfocusedWidth,
+                        )
+                      : BorderSide.none,
+                ),
+              },
+            ),
     );
   }
 
@@ -4645,59 +4659,63 @@ abstract final class FlexSubThemes {
         // We do not want that. This Duration fixes the issue.
         animationDuration: Duration.zero,
         // Foreground color, use same for icon.
-        foregroundColor:
-            WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-              WidgetState.disabled: tintDisable
-                  ? tintedDisable(foregroundColor, disabledTint)
-                  : foregroundColor.withAlpha(kAlphaDisabled),
-              WidgetState.pressed: indicatorFgColor,
-              WidgetState.hovered: indicatorFgColor,
-              WidgetState.focused: indicatorFgColor,
-              WidgetState.any: foregroundColor,
-            }),
+        foregroundColor: WidgetStateProperty<Color>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.disabled: tintDisable
+                ? tintedDisable(foregroundColor, disabledTint)
+                : foregroundColor.withAlpha(kAlphaDisabled),
+            WidgetState.pressed: indicatorFgColor,
+            WidgetState.hovered: indicatorFgColor,
+            WidgetState.focused: indicatorFgColor,
+            WidgetState.any: foregroundColor,
+          },
+        ),
         // icon foreground color.
-        iconColor:
-            WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-              WidgetState.disabled: tintDisable
-                  ? tintedDisable(foregroundColor, disabledTint)
-                  : foregroundColor.withAlpha(kAlphaDisabled),
-              WidgetState.pressed: indicatorFgColor,
-              WidgetState.hovered: indicatorFgColor,
-              WidgetState.focused: indicatorFgColor,
-              WidgetState.any: foregroundColor,
-            }),
-        backgroundColor:
-            WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-              if (indicatorBackgroundSchemeColor != null)
-                WidgetState.pressed: indicatorBgColor,
-              if (indicatorBackgroundSchemeColor != null)
-                WidgetState.hovered: indicatorBgColor,
-              if (indicatorBackgroundSchemeColor != null)
-                WidgetState.focused: indicatorBgColor,
-              WidgetState.any: transparentBackground
-                  ? Colors.transparent
-                  : backgroundColor,
-            }),
-        overlayColor:
-            WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-              WidgetState.pressed: tintInteract
-                  ? tintedPressed(overlay, tint, factor)
-                  : foregroundColor.withAlpha(kAlphaPressed),
-              WidgetState.selected: tintInteract
-                  ? tintedSplash(overlay, tint, factor)
-                  : foregroundColor.withAlpha(kAlphaSplash),
-              WidgetState.focused: indicatorBackgroundSchemeColor != null
-                  ? Colors.transparent
-                  : (tintInteract
-                        ? tintedFocused(overlay, tint, factor)
-                        : foregroundColor.withAlpha(kAlphaFocused)),
-              WidgetState.hovered: indicatorBackgroundSchemeColor != null
-                  ? Colors.transparent
-                  : (tintInteract
-                        ? tintedHovered(overlay, tint, factor)
-                        : foregroundColor.withAlpha(kAlphaFocused)),
-              WidgetState.any: Colors.transparent,
-            }),
+        iconColor: WidgetStateProperty<Color>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.disabled: tintDisable
+                ? tintedDisable(foregroundColor, disabledTint)
+                : foregroundColor.withAlpha(kAlphaDisabled),
+            WidgetState.pressed: indicatorFgColor,
+            WidgetState.hovered: indicatorFgColor,
+            WidgetState.focused: indicatorFgColor,
+            WidgetState.any: foregroundColor,
+          },
+        ),
+        backgroundColor: WidgetStateProperty<Color>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            if (indicatorBackgroundSchemeColor != null)
+              WidgetState.pressed: indicatorBgColor,
+            if (indicatorBackgroundSchemeColor != null)
+              WidgetState.hovered: indicatorBgColor,
+            if (indicatorBackgroundSchemeColor != null)
+              WidgetState.focused: indicatorBgColor,
+            WidgetState.any: transparentBackground
+                ? Colors.transparent
+                : backgroundColor,
+          },
+        ),
+        overlayColor: WidgetStateProperty<Color>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.pressed: tintInteract
+                ? tintedPressed(overlay, tint, factor)
+                : foregroundColor.withAlpha(kAlphaPressed),
+            WidgetState.selected: tintInteract
+                ? tintedSplash(overlay, tint, factor)
+                : foregroundColor.withAlpha(kAlphaSplash),
+            WidgetState.focused: indicatorBackgroundSchemeColor != null
+                ? Colors.transparent
+                : (tintInteract
+                      ? tintedFocused(overlay, tint, factor)
+                      : foregroundColor.withAlpha(kAlphaFocused)),
+            WidgetState.hovered: indicatorBackgroundSchemeColor != null
+                ? Colors.transparent
+                : (tintInteract
+                      ? tintedHovered(overlay, tint, factor)
+                      : foregroundColor.withAlpha(kAlphaFocused)),
+            WidgetState.any: Colors.transparent,
+          },
+        ),
         shape: radius == null
             ? null
             : ButtonStyleButton.allOrNull<OutlinedBorder>(
@@ -6037,27 +6055,29 @@ abstract final class FlexSubThemes {
     WidgetStateProperty<Color?>? foregroundColor;
     WidgetStateProperty<Color?>? overlayColor;
     if (baseSchemeColor != null || tintInteract || tintDisable) {
-      foregroundColor =
-          WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color>{
-            WidgetState.disabled: tintDisable
-                ? tintedDisable(colorScheme.onSurface, baseColor)
-                : colorScheme.onSurface.withValues(alpha: kAlphaDisabledFloat),
-            WidgetState.any: baseColor,
-          });
+      foregroundColor = WidgetStateProperty<Color?>.fromMap(
+        <WidgetStatesConstraint, Color>{
+          WidgetState.disabled: tintDisable
+              ? tintedDisable(colorScheme.onSurface, baseColor)
+              : colorScheme.onSurface.withValues(alpha: kAlphaDisabledFloat),
+          WidgetState.any: baseColor,
+        },
+      );
 
-      overlayColor =
-          WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color?>{
-            WidgetState.hovered: tintInteract
-                ? tintedHovered(overlay, tint, factor)
-                : baseColor.withValues(alpha: kAlphaHoveredFloat),
-            WidgetState.focused: tintInteract
-                ? tintedFocused(overlay, tint, factor)
-                : baseColor.withValues(alpha: kAlphaFocusedFloat),
-            WidgetState.pressed: tintInteract
-                ? tintedPressed(overlay, tint, factor)
-                : baseColor.withValues(alpha: kAlphaPressedFloat),
-            WidgetState.any: null,
-          });
+      overlayColor = WidgetStateProperty<Color?>.fromMap(
+        <WidgetStatesConstraint, Color?>{
+          WidgetState.hovered: tintInteract
+              ? tintedHovered(overlay, tint, factor)
+              : baseColor.withValues(alpha: kAlphaHoveredFloat),
+          WidgetState.focused: tintInteract
+              ? tintedFocused(overlay, tint, factor)
+              : baseColor.withValues(alpha: kAlphaFocusedFloat),
+          WidgetState.pressed: tintInteract
+              ? tintedPressed(overlay, tint, factor)
+              : baseColor.withValues(alpha: kAlphaPressedFloat),
+          WidgetState.any: null,
+        },
+      );
     }
 
     // Define side if its widths or color has any custom definition, if not
@@ -6234,15 +6254,16 @@ abstract final class FlexSubThemes {
       surfaceTintColor: surfaceTintColor,
       textStyle: effectiveTextStyle?.apply(color: foregroundColor),
       labelTextStyle: effectiveTextStyle != null
-          ? WidgetStateProperty<TextStyle>.fromMap(<
-              WidgetStatesConstraint,
-              TextStyle
-            >{
-              WidgetState.disabled: effectiveTextStyle.apply(
-                color: foregroundColor?.withAlpha(kAlphaDisabled),
-              ),
-              WidgetState.any: effectiveTextStyle.apply(color: foregroundColor),
-            })
+          ? WidgetStateProperty<TextStyle>.fromMap(
+              <WidgetStatesConstraint, TextStyle>{
+                WidgetState.disabled: effectiveTextStyle.apply(
+                  color: foregroundColor?.withAlpha(kAlphaDisabled),
+                ),
+                WidgetState.any: effectiveTextStyle.apply(
+                  color: foregroundColor,
+                ),
+              },
+            )
           : null,
       shape: radius != null
           ? RoundedRectangleBorder(
@@ -6549,29 +6570,30 @@ abstract final class FlexSubThemes {
                     : (isLight ? Colors.black54 : Colors.white70),
               },
       ),
-      overlayColor:
-          WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-            WidgetState.selected & WidgetState.pressed: tintInteract
-                ? tintedPressed(overlay, tint, factor)
-                : colorScheme.onSurface.withAlpha(kAlphaPressed),
-            WidgetState.selected & WidgetState.hovered: tintInteract
-                ? tintedHovered(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaHovered),
-            WidgetState.selected & WidgetState.focused: tintInteract
-                ? tintedFocused(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaFocused),
-            WidgetState.selected: Colors.transparent,
-            WidgetState.pressed: tintInteract
-                ? tintedPressed(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaPressed),
-            WidgetState.hovered: tintInteract
-                ? tintedHovered(overlay, tint, factor)
-                : colorScheme.onSurface.withAlpha(kAlphaHovered),
-            WidgetState.focused: tintInteract
-                ? tintedFocused(overlay, tint, factor)
-                : colorScheme.onSurface.withAlpha(kAlphaFocused),
-            WidgetState.any: Colors.transparent,
-          }),
+      overlayColor: WidgetStateProperty<Color>.fromMap(
+        <WidgetStatesConstraint, Color>{
+          WidgetState.selected & WidgetState.pressed: tintInteract
+              ? tintedPressed(overlay, tint, factor)
+              : colorScheme.onSurface.withAlpha(kAlphaPressed),
+          WidgetState.selected & WidgetState.hovered: tintInteract
+              ? tintedHovered(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaHovered),
+          WidgetState.selected & WidgetState.focused: tintInteract
+              ? tintedFocused(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaFocused),
+          WidgetState.selected: Colors.transparent,
+          WidgetState.pressed: tintInteract
+              ? tintedPressed(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaPressed),
+          WidgetState.hovered: tintInteract
+              ? tintedHovered(overlay, tint, factor)
+              : colorScheme.onSurface.withAlpha(kAlphaHovered),
+          WidgetState.focused: tintInteract
+              ? tintedFocused(overlay, tint, factor)
+              : colorScheme.onSurface.withAlpha(kAlphaFocused),
+          WidgetState.any: Colors.transparent,
+        },
+      ),
     );
   }
 
@@ -7105,27 +7127,28 @@ abstract final class FlexSubThemes {
             WidgetState.any: null,
           },
         ),
-        side: WidgetStateProperty<BorderSide>.fromMap(<
-          WidgetStatesConstraint,
-          BorderSide
-        >{
-          WidgetState.disabled: tintDisable
-              ? BorderSide(
-                  color: tintedDisable(
-                    colorScheme.onSurface,
-                    disableBorderTint,
-                  ).withAlpha(kAlphaLowDisabled),
-                  width: effectiveWidth,
-                )
-              : BorderSide(
-                  color: colorScheme.onSurface.withAlpha(kAlphaVeryLowDisabled),
-                  width: effectiveWidth,
-                ),
-          WidgetState.any: BorderSide(
-            color: borderColor,
-            width: effectiveWidth,
-          ),
-        }),
+        side: WidgetStateProperty<BorderSide>.fromMap(
+          <WidgetStatesConstraint, BorderSide>{
+            WidgetState.disabled: tintDisable
+                ? BorderSide(
+                    color: tintedDisable(
+                      colorScheme.onSurface,
+                      disableBorderTint,
+                    ).withAlpha(kAlphaLowDisabled),
+                    width: effectiveWidth,
+                  )
+                : BorderSide(
+                    color: colorScheme.onSurface.withAlpha(
+                      kAlphaVeryLowDisabled,
+                    ),
+                    width: effectiveWidth,
+                  ),
+            WidgetState.any: BorderSide(
+              color: borderColor,
+              width: effectiveWidth,
+            ),
+          },
+        ),
         shape: radius == null
             ? null
             : ButtonStyleButton.allOrNull<OutlinedBorder>(
@@ -7632,41 +7655,43 @@ abstract final class FlexSubThemes {
     if (!useM3) {
       return SwitchThemeData(
         splashRadius: splashRadius,
-        thumbColor:
-            WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-              WidgetState.disabled & WidgetState.selected: tintDisable
-                  ? tintedDisable(colorScheme.onSurface, baseColor)
-                  : (isLight ? Colors.grey.shade400 : Colors.grey.shade800),
-              WidgetState.disabled: tintDisable
-                  ? tintedDisable(
-                      colorScheme.onSurface,
-                      baseColor,
-                    ).withAlpha(kAlphaLowDisabled)
-                  : (isLight ? Colors.grey.shade400 : Colors.grey.shade800),
-              WidgetState.selected: thumbColor,
-              WidgetState.any: isLight
-                  ? Colors.grey.shade50
-                  : Colors.grey.shade400,
-            }),
-        trackColor:
-            WidgetStateProperty<Color>.fromMap(<WidgetStatesConstraint, Color>{
-              WidgetState.disabled: tintDisable
-                  ? tintedDisable(
-                      colorScheme.onSurface,
-                      baseColor,
-                    ).withAlpha(kAlphaVeryLowDisabled)
-                  : (isLight ? Colors.black12 : Colors.white10),
-              WidgetState.selected: baseColor.withAlpha(
-                isLight ? kAlphaM2SwitchTrackLight : kAlphaM2SwitchTrackDark,
-              ),
-              WidgetState.any: unselectedColored
-                  ? baseColor.withAlpha(
-                      isLight
-                          ? kAlphaM2SwitchUnselectTrackLight
-                          : kAlphaM2SwitchUnselectTrackDark,
-                    )
-                  : (isLight ? kSwitchM2LightTrackColor : Colors.white30),
-            }),
+        thumbColor: WidgetStateProperty<Color>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.disabled & WidgetState.selected: tintDisable
+                ? tintedDisable(colorScheme.onSurface, baseColor)
+                : (isLight ? Colors.grey.shade400 : Colors.grey.shade800),
+            WidgetState.disabled: tintDisable
+                ? tintedDisable(
+                    colorScheme.onSurface,
+                    baseColor,
+                  ).withAlpha(kAlphaLowDisabled)
+                : (isLight ? Colors.grey.shade400 : Colors.grey.shade800),
+            WidgetState.selected: thumbColor,
+            WidgetState.any: isLight
+                ? Colors.grey.shade50
+                : Colors.grey.shade400,
+          },
+        ),
+        trackColor: WidgetStateProperty<Color>.fromMap(
+          <WidgetStatesConstraint, Color>{
+            WidgetState.disabled: tintDisable
+                ? tintedDisable(
+                    colorScheme.onSurface,
+                    baseColor,
+                  ).withAlpha(kAlphaVeryLowDisabled)
+                : (isLight ? Colors.black12 : Colors.white10),
+            WidgetState.selected: baseColor.withAlpha(
+              isLight ? kAlphaM2SwitchTrackLight : kAlphaM2SwitchTrackDark,
+            ),
+            WidgetState.any: unselectedColored
+                ? baseColor.withAlpha(
+                    isLight
+                        ? kAlphaM2SwitchUnselectTrackLight
+                        : kAlphaM2SwitchUnselectTrackDark,
+                  )
+                : (isLight ? kSwitchM2LightTrackColor : Colors.white30),
+          },
+        ),
         overlayColor: WidgetStateProperty<Color?>.fromMap(
           <WidgetStatesConstraint, Color?>{
             WidgetState.selected & WidgetState.pressed: tintInteract
@@ -8128,27 +8153,29 @@ abstract final class FlexSubThemes {
     WidgetStateProperty<Color?>? foregroundColor;
     WidgetStateProperty<Color?>? overlayColor;
     if (baseSchemeColor != null || tintInteract || tintDisable) {
-      foregroundColor =
-          WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color?>{
-            WidgetState.disabled: tintDisable
-                ? tintedDisable(colorScheme.onSurface, tint)
-                : colorScheme.onSurface.withAlpha(kAlphaDisabled),
-            WidgetState.any: baseColor,
-          });
+      foregroundColor = WidgetStateProperty<Color?>.fromMap(
+        <WidgetStatesConstraint, Color?>{
+          WidgetState.disabled: tintDisable
+              ? tintedDisable(colorScheme.onSurface, tint)
+              : colorScheme.onSurface.withAlpha(kAlphaDisabled),
+          WidgetState.any: baseColor,
+        },
+      );
 
-      overlayColor =
-          WidgetStateProperty<Color?>.fromMap(<WidgetStatesConstraint, Color?>{
-            WidgetState.hovered: tintInteract
-                ? tintedHovered(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaHovered),
-            WidgetState.focused: tintInteract
-                ? tintedFocused(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaFocused),
-            WidgetState.pressed: tintInteract
-                ? tintedPressed(overlay, tint, factor)
-                : baseColor.withAlpha(kAlphaPressed),
-            WidgetState.any: null,
-          });
+      overlayColor = WidgetStateProperty<Color?>.fromMap(
+        <WidgetStatesConstraint, Color?>{
+          WidgetState.hovered: tintInteract
+              ? tintedHovered(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaHovered),
+          WidgetState.focused: tintInteract
+              ? tintedFocused(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaFocused),
+          WidgetState.pressed: tintInteract
+              ? tintedPressed(overlay, tint, factor)
+              : baseColor.withAlpha(kAlphaPressed),
+          WidgetState.any: null,
+        },
+      );
     }
 
     return TextButtonThemeData(

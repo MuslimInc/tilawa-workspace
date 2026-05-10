@@ -4,7 +4,8 @@ enum NotificationActionType {
   athkar,
   quran,
   settings,
-  unknown;
+  unknown
+  ;
 
   static NotificationActionType fromString(String? value) {
     return NotificationActionType.values.firstWhere(

@@ -85,7 +85,8 @@ enum PrayerAlertMode {
   notification,
 
   /// Visual notification and Adhan sound
-  adhan;
+  adhan
+  ;
 
   bool get isNotificationEnabled => this != PrayerAlertMode.none;
   bool get isAdhanEnabled => this == PrayerAlertMode.adhan;

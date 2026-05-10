@@ -328,7 +328,8 @@ enum FlexScaffoldBaseColor {
 
   /// The active theme's color scheme surfaceContainerHighest color will
   /// be used.
-  surfaceContainerHighest;
+  surfaceContainerHighest
+  ;
 
   /// Return the Color corresponding to the enum value.
   Color color(

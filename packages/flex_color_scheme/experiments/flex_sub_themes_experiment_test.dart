@@ -783,15 +783,15 @@ void main() {
                 ),
               },
             ),
-            fillColor: WidgetStateProperty<Color>.fromMap(<
-              WidgetStatesConstraint,
-              Color
-            >{
-              WidgetState.disabled & WidgetState.selected: Colors.grey.shade400,
-              WidgetState.disabled: Colors.transparent,
-              WidgetState.selected: colorScheme.primary,
-              WidgetState.any: Colors.transparent,
-            }),
+            fillColor: WidgetStateProperty<Color>.fromMap(
+              <WidgetStatesConstraint, Color>{
+                WidgetState.disabled & WidgetState.selected:
+                    Colors.grey.shade400,
+                WidgetState.disabled: Colors.transparent,
+                WidgetState.selected: colorScheme.primary,
+                WidgetState.any: Colors.transparent,
+              },
+            ),
             checkColor: WidgetStateProperty<Color>.fromMap(
               <WidgetStatesConstraint, Color>{
                 WidgetState.disabled: Colors.grey.shade200,
@@ -799,25 +799,27 @@ void main() {
                 WidgetState.any: Colors.grey.shade50,
               },
             ),
-            overlayColor: WidgetStateProperty<Color>.fromMap(<
-              WidgetStatesConstraint,
-              Color
-            >{
-              WidgetState.selected & WidgetState.pressed: colorScheme.onSurface
-                  .withAlpha(kAlphaPressed),
-              WidgetState.selected & WidgetState.hovered: colorScheme.primary
-                  .withAlpha(kAlphaHovered),
-              WidgetState.selected & WidgetState.focused: colorScheme.primary
-                  .withAlpha(kAlphaFocused),
-              WidgetState.pressed: colorScheme.primary.withAlpha(kAlphaPressed),
-              WidgetState.hovered: colorScheme.onSurface.withAlpha(
-                kAlphaHovered,
-              ),
-              WidgetState.focused: colorScheme.onSurface.withAlpha(
-                kAlphaFocused,
-              ),
-              WidgetState.any: Colors.transparent,
-            }),
+            overlayColor: WidgetStateProperty<Color>.fromMap(
+              <WidgetStatesConstraint, Color>{
+                WidgetState.selected & WidgetState.pressed: colorScheme
+                    .onSurface
+                    .withAlpha(kAlphaPressed),
+                WidgetState.selected & WidgetState.hovered: colorScheme.primary
+                    .withAlpha(kAlphaHovered),
+                WidgetState.selected & WidgetState.focused: colorScheme.primary
+                    .withAlpha(kAlphaFocused),
+                WidgetState.pressed: colorScheme.primary.withAlpha(
+                  kAlphaPressed,
+                ),
+                WidgetState.hovered: colorScheme.onSurface.withAlpha(
+                  kAlphaHovered,
+                ),
+                WidgetState.focused: colorScheme.onSurface.withAlpha(
+                  kAlphaFocused,
+                ),
+                WidgetState.any: Colors.transparent,
+              },
+            ),
           ).toString(),
         ),
       );
@@ -1348,15 +1350,15 @@ void main() {
                 ),
               },
             ),
-            fillColor: WidgetStateProperty<Color>.fromMap(<
-              WidgetStatesConstraint,
-              Color
-            >{
-              WidgetState.disabled & WidgetState.selected: Colors.grey.shade800,
-              WidgetState.disabled: Colors.transparent,
-              WidgetState.selected: colorScheme.primary,
-              WidgetState.any: Colors.transparent,
-            }),
+            fillColor: WidgetStateProperty<Color>.fromMap(
+              <WidgetStatesConstraint, Color>{
+                WidgetState.disabled & WidgetState.selected:
+                    Colors.grey.shade800,
+                WidgetState.disabled: Colors.transparent,
+                WidgetState.selected: colorScheme.primary,
+                WidgetState.any: Colors.transparent,
+              },
+            ),
             checkColor: WidgetStateProperty<Color>.fromMap(
               <WidgetStatesConstraint, Color>{
                 WidgetState.disabled: Colors.grey.shade900,
@@ -1364,25 +1366,27 @@ void main() {
                 WidgetState.any: Colors.grey.shade400,
               },
             ),
-            overlayColor: WidgetStateProperty<Color>.fromMap(<
-              WidgetStatesConstraint,
-              Color
-            >{
-              WidgetState.selected & WidgetState.pressed: colorScheme.onSurface
-                  .withAlpha(kAlphaPressed),
-              WidgetState.selected & WidgetState.hovered: colorScheme.primary
-                  .withAlpha(kAlphaHovered),
-              WidgetState.selected & WidgetState.focused: colorScheme.primary
-                  .withAlpha(kAlphaFocused),
-              WidgetState.pressed: colorScheme.primary.withAlpha(kAlphaPressed),
-              WidgetState.hovered: colorScheme.onSurface.withAlpha(
-                kAlphaHovered,
-              ),
-              WidgetState.focused: colorScheme.onSurface.withAlpha(
-                kAlphaFocused,
-              ),
-              WidgetState.any: Colors.transparent,
-            }),
+            overlayColor: WidgetStateProperty<Color>.fromMap(
+              <WidgetStatesConstraint, Color>{
+                WidgetState.selected & WidgetState.pressed: colorScheme
+                    .onSurface
+                    .withAlpha(kAlphaPressed),
+                WidgetState.selected & WidgetState.hovered: colorScheme.primary
+                    .withAlpha(kAlphaHovered),
+                WidgetState.selected & WidgetState.focused: colorScheme.primary
+                    .withAlpha(kAlphaFocused),
+                WidgetState.pressed: colorScheme.primary.withAlpha(
+                  kAlphaPressed,
+                ),
+                WidgetState.hovered: colorScheme.onSurface.withAlpha(
+                  kAlphaHovered,
+                ),
+                WidgetState.focused: colorScheme.onSurface.withAlpha(
+                  kAlphaFocused,
+                ),
+                WidgetState.any: Colors.transparent,
+              },
+            ),
           ).toString(),
         ),
       );
@@ -1582,15 +1586,15 @@ void main() {
                 ),
               },
             ),
-            fillColor: WidgetStateProperty<Color>.fromMap(<
-              WidgetStatesConstraint,
-              Color
-            >{
-              WidgetState.disabled & WidgetState.selected: Colors.grey.shade400,
-              WidgetState.disabled: Colors.transparent,
-              WidgetState.selected: colorScheme.tertiary,
-              WidgetState.any: Colors.transparent,
-            }),
+            fillColor: WidgetStateProperty<Color>.fromMap(
+              <WidgetStatesConstraint, Color>{
+                WidgetState.disabled & WidgetState.selected:
+                    Colors.grey.shade400,
+                WidgetState.disabled: Colors.transparent,
+                WidgetState.selected: colorScheme.tertiary,
+                WidgetState.any: Colors.transparent,
+              },
+            ),
             checkColor: WidgetStateProperty<Color>.fromMap(
               <WidgetStatesConstraint, Color>{
                 WidgetState.disabled: Colors.grey.shade200,

@@ -611,25 +611,27 @@ void main() {
               }
               return Colors.grey.shade50;
             }),
-            overlayColor: WidgetStateProperty<Color>.fromMap(<
-              WidgetStatesConstraint,
-              Color
-            >{
-              WidgetState.selected & WidgetState.pressed: colorScheme.onSurface
-                  .withAlpha(kAlphaPressed),
-              WidgetState.selected & WidgetState.hovered: colorScheme.primary
-                  .withAlpha(kAlphaHovered),
-              WidgetState.selected & WidgetState.focused: colorScheme.primary
-                  .withAlpha(kAlphaFocused),
-              WidgetState.pressed: colorScheme.primary.withAlpha(kAlphaPressed),
-              WidgetState.hovered: colorScheme.onSurface.withAlpha(
-                kAlphaHovered,
-              ),
-              WidgetState.focused: colorScheme.onSurface.withAlpha(
-                kAlphaFocused,
-              ),
-              WidgetState.any: Colors.transparent,
-            }),
+            overlayColor: WidgetStateProperty<Color>.fromMap(
+              <WidgetStatesConstraint, Color>{
+                WidgetState.selected & WidgetState.pressed: colorScheme
+                    .onSurface
+                    .withAlpha(kAlphaPressed),
+                WidgetState.selected & WidgetState.hovered: colorScheme.primary
+                    .withAlpha(kAlphaHovered),
+                WidgetState.selected & WidgetState.focused: colorScheme.primary
+                    .withAlpha(kAlphaFocused),
+                WidgetState.pressed: colorScheme.primary.withAlpha(
+                  kAlphaPressed,
+                ),
+                WidgetState.hovered: colorScheme.onSurface.withAlpha(
+                  kAlphaHovered,
+                ),
+                WidgetState.focused: colorScheme.onSurface.withAlpha(
+                  kAlphaFocused,
+                ),
+                WidgetState.any: Colors.transparent,
+              },
+            ),
           ).toString(),
         ),
       );
@@ -1181,25 +1183,27 @@ void main() {
               }
               return Colors.grey.shade400;
             }),
-            overlayColor: WidgetStateProperty<Color>.fromMap(<
-              WidgetStatesConstraint,
-              Color
-            >{
-              WidgetState.selected & WidgetState.pressed: colorScheme.onSurface
-                  .withAlpha(kAlphaPressed),
-              WidgetState.selected & WidgetState.hovered: colorScheme.primary
-                  .withAlpha(kAlphaHovered),
-              WidgetState.selected & WidgetState.focused: colorScheme.primary
-                  .withAlpha(kAlphaFocused),
-              WidgetState.pressed: colorScheme.primary.withAlpha(kAlphaPressed),
-              WidgetState.hovered: colorScheme.onSurface.withAlpha(
-                kAlphaHovered,
-              ),
-              WidgetState.focused: colorScheme.onSurface.withAlpha(
-                kAlphaFocused,
-              ),
-              WidgetState.any: Colors.transparent,
-            }),
+            overlayColor: WidgetStateProperty<Color>.fromMap(
+              <WidgetStatesConstraint, Color>{
+                WidgetState.selected & WidgetState.pressed: colorScheme
+                    .onSurface
+                    .withAlpha(kAlphaPressed),
+                WidgetState.selected & WidgetState.hovered: colorScheme.primary
+                    .withAlpha(kAlphaHovered),
+                WidgetState.selected & WidgetState.focused: colorScheme.primary
+                    .withAlpha(kAlphaFocused),
+                WidgetState.pressed: colorScheme.primary.withAlpha(
+                  kAlphaPressed,
+                ),
+                WidgetState.hovered: colorScheme.onSurface.withAlpha(
+                  kAlphaHovered,
+                ),
+                WidgetState.focused: colorScheme.onSurface.withAlpha(
+                  kAlphaFocused,
+                ),
+                WidgetState.any: Colors.transparent,
+              },
+            ),
           ).toString(),
         ),
       );

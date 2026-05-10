@@ -234,7 +234,8 @@ enum FlexScheme {
   /// is selected you should provide a [FlexColorScheme] based on a custom
   /// [FlexSchemeData] object. If not provided, it defaults to the
   /// [FlexScheme.material] theme.
-  custom;
+  custom
+  ;
 
   /// Returns the [FlexSchemeData] associated with this enum value.
   ///
