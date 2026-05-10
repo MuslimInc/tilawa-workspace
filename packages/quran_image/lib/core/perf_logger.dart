@@ -54,9 +54,10 @@ class SlowFrameInfo extends Equatable {
   ];
 }
 
-/// Lightweight performance logger active only in profile mode.
+/// Lightweight performance logger for debug and profile builds.
 ///
-/// All methods are no-ops in debug and release builds.
+/// [isEnabled] is false in release, so [markBuild], [startFrameWatcher], and
+/// console logging are no-ops there. [logQuranPerf] runs only in profile mode.
 abstract final class PerfLogger {
   /// Runtime on/off switch for all instrumentation.
   ///
@@ -429,7 +430,8 @@ abstract final class PerfLogger {
 
   /// Quran Image Reader markers for device profiling (`flutter run --profile`).
   ///
-  /// No-op in debug, release, or when [instrumentationEnabled] is false.
+  /// No-op in debug, release, or when [instrumentationEnabled] is false
+  /// ([isQuranPerfEnabled] is profile-only).
   /// Use consistent [tag] values such as `[QuranPerf][Jump]` for logcat grep.
   static bool get isQuranPerfEnabled => kProfileMode && instrumentationEnabled;
 
