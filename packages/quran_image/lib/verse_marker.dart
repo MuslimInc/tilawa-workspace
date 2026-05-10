@@ -263,16 +263,20 @@ class _VerseMarkersPainter extends CustomPainter {
       return;
     }
 
-    final markerWidth = pageWidth * 0.05138889;
-    final markerHeight = pageWidth * 0.06527778;
+    // Use the painted overlay width — it must match line images (full stack
+    // width). Relying on [pageWidth] alone can drift from [size.width] on
+    // narrow devices when layout and MediaQuery/View metrics disagree.
+    final layoutWidth = size.width;
+    final markerWidth = layoutWidth * 0.05138889;
+    final markerHeight = layoutWidth * 0.06527778;
     final markerPaths = _QcfMarkerPainter._pathsFor(
       Size(markerWidth, markerHeight),
     );
 
     for (final marker in markers) {
-      final xOffset = (marker.centerX * pageWidth - markerWidth / 2).clamp(
+      final xOffset = (marker.centerX * layoutWidth - markerWidth / 2).clamp(
         0.0,
-        pageWidth - markerWidth,
+        layoutWidth - markerWidth,
       );
       final lineIndex = marker.line.clamp(
         0,
