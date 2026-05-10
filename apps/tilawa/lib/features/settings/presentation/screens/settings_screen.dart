@@ -653,7 +653,7 @@ class _ColorPickerSheet extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox(height: tokens.spaceLarge),
+              const TilawaSheetHandle(),
               Text(
                 context.l10n.choosePrimaryColor,
                 style: context.textTheme.titleMedium?.copyWith(
@@ -723,7 +723,7 @@ class _LanguagePickerSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(height: tokens.spaceLarge),
+            const TilawaSheetHandle(),
             Text(
               context.l10n.chooseLanguage,
               style: context.textTheme.titleMedium?.copyWith(
@@ -772,7 +772,7 @@ class _ConcurrentDownloadsSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(height: tokens.spaceLarge),
+          const TilawaSheetHandle(),
           Text(
             context.l10n.concurrentDownloads,
             style: context.textTheme.titleMedium?.copyWith(

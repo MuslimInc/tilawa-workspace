@@ -38,7 +38,6 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final settings = context.select(
       (PrayerTimesBloc bloc) => bloc.state.settings,
     );
@@ -59,7 +58,9 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _SheetHandle(tokens: tokens, colorScheme: colorScheme),
+              TilawaSheetHandle(
+                margin: EdgeInsets.only(top: tokens.spaceSmall),
+              ),
               _SheetHeader(onClose: _close, tokens: tokens, theme: theme),
               const TilawaDivider(height: 1),
               Flexible(
@@ -138,26 +139,6 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle({required this.tokens, required this.colorScheme});
-
-  final TilawaDesignTokens tokens;
-  final ColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: tokens.spaceSmall),
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: colorScheme.outline.withValues(alpha: tokens.opacityMedium),
-        borderRadius: BorderRadius.circular(2),
       ),
     );
   }

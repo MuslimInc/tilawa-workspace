@@ -649,7 +649,11 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                 top: topPadding + 8,
                 left: 0,
                 right: 0,
-                child: const _PlayerSheetHandleAtom(),
+                child: TilawaSheetHandle(
+                  color: Colors.white.withValues(
+                    alpha: Theme.of(context).tokens.opacityMedium,
+                  ),
+                ),
               ),
           ],
         ),
@@ -1085,14 +1089,19 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
 Future<void> _showPlaybackActions(BuildContext context) async {
   final bool? shouldOpenStopConfirm = await showModalBottomSheet<bool>(
     context: context,
-    showDragHandle: true,
     builder: (sheetContext) {
       return Padding(
         padding: EdgeInsets.only(bottom: sheetContext.floatingBottomPadding),
-        child: ListTile(
-          leading: const Icon(FluentIcons.stop_24_regular),
-          title: Text(context.l10n.stopPlayback),
-          onTap: () => Navigator.of(sheetContext).pop(true),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const TilawaSheetHandle(),
+            ListTile(
+              leading: const Icon(FluentIcons.stop_24_regular),
+              title: Text(context.l10n.stopPlayback),
+              onTap: () => Navigator.of(sheetContext).pop(true),
+            ),
+          ],
         ),
       );
     },
@@ -1104,13 +1113,13 @@ Future<void> _showPlaybackActions(BuildContext context) async {
 
   final bool? shouldStop = await showModalBottomSheet<bool>(
     context: context,
-    showDragHandle: true,
     builder: (dialogContext) {
       return Padding(
         padding: EdgeInsets.only(bottom: dialogContext.floatingBottomPadding),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const TilawaSheetHandle(),
             ListTile(
               title: Text(context.l10n.stopPlayback),
               subtitle: Text(context.l10n.stopPlaybackConfirmMessage),
@@ -1215,27 +1224,6 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
           size: tokens.iconSizeLarge * 1.6, // approx 40
         ),
         onPressed: onTap,
-      ),
-    );
-  }
-}
-
-class _PlayerSheetHandleAtom extends StatelessWidget {
-  const _PlayerSheetHandleAtom();
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    return Center(
-      child: SizedBox(
-        width: tokens.iconSizeLarge * 1.6, // approx 40
-        height: tokens.spaceExtraSmall,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: tokens.opacityMedium),
-            borderRadius: BorderRadius.circular(tokens.spaceTiny),
-          ),
-        ),
       ),
     );
   }

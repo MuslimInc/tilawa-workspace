@@ -5,12 +5,14 @@ import '../foundation/component_tokens.dart';
 class TilawaSheetHandle extends StatelessWidget {
   const TilawaSheetHandle({
     super.key,
+    this.showHandle = true,
     this.width,
     this.height,
     this.margin,
     this.color,
   });
 
+  final bool showHandle;
   final double? width;
   final double? height;
   final EdgeInsetsGeometry? margin;
@@ -20,6 +22,9 @@ class TilawaSheetHandle extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final componentTokens = theme.componentTokens.sheetHandle;
+    if (!showHandle) {
+      return const SizedBox.shrink();
+    }
 
     return Center(
       child: Container(

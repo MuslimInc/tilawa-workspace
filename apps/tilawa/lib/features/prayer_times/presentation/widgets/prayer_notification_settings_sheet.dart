@@ -42,7 +42,6 @@ class _PrayerNotificationSettingsSheetState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final bottomPadding = context.floatingBottomPadding;
 
     // We use context.select to listen only to the settings change
@@ -60,7 +59,7 @@ class _PrayerNotificationSettingsSheetState
       child: Column(
         mainAxisSize: .min,
         children: [
-          _SheetHandle(tokens: tokens, colorScheme: colorScheme),
+          TilawaSheetHandle(margin: EdgeInsets.only(top: tokens.spaceSmall)),
           _SheetHeader(onDone: _close, tokens: tokens, theme: theme),
           const Divider(height: 1),
           Flexible(
@@ -318,24 +317,6 @@ class _PrayerNotificationSettingsSheetState
 }
 
 // Private helper widgets (reused from common patterns)
-
-class _SheetHandle extends StatelessWidget {
-  const _SheetHandle({required this.tokens, required this.colorScheme});
-  final TilawaDesignTokens tokens;
-  final ColorScheme colorScheme;
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: tokens.spaceSmall),
-      width: 40,
-      height: 4,
-      decoration: BoxDecoration(
-        color: colorScheme.outline.withValues(alpha: tokens.opacityMedium),
-        borderRadius: BorderRadius.circular(2),
-      ),
-    );
-  }
-}
 
 class _SheetHeader extends StatelessWidget {
   const _SheetHeader({
