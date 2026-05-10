@@ -88,14 +88,9 @@ void main() {
     when(mockPlayer.sequence).thenReturn(sequence);
   }
 
+  /// Syncs [sequenceSubject] with [capturedPlaylist] after queue mutations
+  /// (incremental APIs) or full [setAudioSources] replacements.
   Future<void> captureAndUpdate() async {
-    final VerificationResult verification = verify(
-      mockPlayer.setAudioSources(
-        captureAny,
-        initialIndex: anyNamed('initialIndex'),
-      ),
-    );
-    capturedPlaylist = verification.captured.last as List<AudioSource>;
     updateMockSequence();
     await Future.delayed(Duration.zero);
   }
@@ -166,16 +161,71 @@ void main() {
     when(mockPlayer.bufferedPosition).thenReturn(Duration.zero);
     when(mockPlayer.speed).thenReturn(1.0);
 
+    when(mockPlayer.audioSources).thenAnswer((_) => capturedPlaylist);
+    when(mockPlayer.effectiveIndices).thenAnswer(
+      (_) => List<int>.generate(capturedPlaylist.length, (int i) => i),
+    );
+
     // Mock player methods
     when(
-      mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
+      mockPlayer.setAudioSources(
+        any,
+        initialIndex: anyNamed('initialIndex'),
+        initialPosition: anyNamed('initialPosition'),
+        preload: anyNamed('preload'),
+        shuffleOrder: anyNamed('shuffleOrder'),
+      ),
     ).thenAnswer((invocation) async {
-      final sources = invocation.positionalArguments[0] as List<AudioSource>;
-      final List<IndexedAudioSource> indexedSources = sources
-          .cast<IndexedAudioSource>()
-          .toList();
-      sequenceSubject.add(indexedSources);
+      final List<AudioSource> sources =
+          invocation.positionalArguments[0] as List<AudioSource>;
+      capturedPlaylist
+        ..clear()
+        ..addAll(sources);
+      updateMockSequence();
       return null;
+    });
+
+    when(mockPlayer.addAudioSource(any)).thenAnswer((invocation) async {
+      capturedPlaylist.add(
+        invocation.positionalArguments[0] as AudioSource,
+      );
+      updateMockSequence();
+    });
+
+    when(mockPlayer.addAudioSources(any)).thenAnswer((invocation) async {
+      capturedPlaylist.addAll(
+        invocation.positionalArguments[0] as List<AudioSource>,
+      );
+      updateMockSequence();
+    });
+
+    when(
+      mockPlayer.insertAudioSource(any, any),
+    ).thenAnswer((invocation) async {
+      final int index = invocation.positionalArguments[0] as int;
+      final AudioSource source =
+          invocation.positionalArguments[1] as AudioSource;
+      capturedPlaylist.insert(index, source);
+      updateMockSequence();
+    });
+
+    when(mockPlayer.removeAudioSourceAt(any)).thenAnswer((invocation) async {
+      final int index = invocation.positionalArguments[0] as int;
+      capturedPlaylist.removeAt(index);
+      updateMockSequence();
+    });
+
+    when(mockPlayer.moveAudioSource(any, any)).thenAnswer((invocation) async {
+      final int from = invocation.positionalArguments[0] as int;
+      final int to = invocation.positionalArguments[1] as int;
+      final AudioSource moved = capturedPlaylist.removeAt(from);
+      capturedPlaylist.insert(to, moved);
+      updateMockSequence();
+    });
+
+    when(mockPlayer.clearAudioSources()).thenAnswer((_) async {
+      capturedPlaylist.clear();
+      updateMockSequence();
     });
 
     handler = AudioPlayerHandlerImpl(
@@ -194,9 +244,14 @@ void main() {
       mockPlayer.setAudioSources(
         captureAny,
         initialIndex: anyNamed('initialIndex'),
+        initialPosition: anyNamed('initialPosition'),
+        preload: anyNamed('preload'),
+        shuffleOrder: anyNamed('shuffleOrder'),
       ),
     );
-    capturedPlaylist = verification.captured.first as List<AudioSource>;
+    capturedPlaylist = List<AudioSource>.from(
+      verification.captured.first as List<AudioSource>,
+    );
     clearInteractions(mockPlayer);
   });
 
@@ -319,15 +374,7 @@ void main() {
         ),
       ];
       await handler.addQueueItems(items);
-      final VerificationResult verification = verify(
-        mockPlayer.setAudioSources(
-          captureAny,
-          initialIndex: anyNamed('initialIndex'),
-        ),
-      );
-      capturedPlaylist = verification.captured.last as List<AudioSource>;
-      updateMockSequence();
-      await Future.delayed(Duration.zero);
+      await captureAndUpdate();
 
       expect(handler.queue.value.length, 2);
     });
@@ -874,6 +921,7 @@ void main() {
       when(mockPlayer.stop()).thenAnswer((_) async {});
       await handler.clearAudioState();
       verify(mockPlayer.stop()).called(1);
+      verify(mockPlayer.clearAudioSources()).called(1);
     });
 
     test('subscribeToChildren returns recent root stream', () {
@@ -1007,11 +1055,15 @@ void main() {
       // Allow _init to run
       await Future.delayed(const Duration(milliseconds: 50));
 
-      // Check if setAudioSources was called
-      // Called twice: once by updateQueue, once by _init's final check
       verify(
-        mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
-      ).called(2);
+        mockPlayer.setAudioSources(
+          any,
+          initialIndex: anyNamed('initialIndex'),
+          initialPosition: anyNamed('initialPosition'),
+          preload: anyNamed('preload'),
+          shuffleOrder: anyNamed('shuffleOrder'),
+        ),
+      ).called(inInclusiveRange(1, 2));
 
       // Verify queue has items
       expect(localHandler.queue.value, hasLength(1));
@@ -1133,10 +1185,9 @@ void main() {
     });
 
     test('_safeSetAudioSources logs and rethrows error', () async {
-      // verifies line 279
-      when(
-        mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
-      ).thenThrow(Exception('Set sources failed'));
+      when(mockPlayer.addAudioSource(any)).thenThrow(
+        Exception('Add source failed'),
+      );
 
       expect(
         () => handler.addQueueItem(

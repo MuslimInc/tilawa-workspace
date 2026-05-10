@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
+import 'package:tilawa/router/app_router.dart';
 
 @singleton
 class UpdateService {
@@ -67,10 +69,9 @@ class UpdateService {
               await InAppUpdate.startFlexibleUpdate();
           if (result == AppUpdateResult.success) {
             _logger.i(
-              '[UpdateService] Flexible update downloaded. '
-              'Completing install.',
+              '[UpdateService] Flexible update downloaded; prompting user.',
             );
-            await InAppUpdate.completeFlexibleUpdate();
+            _offerFlexibleUpdateRestart();
           } else {
             _logger.w('[UpdateService] Flexible update result: $result');
           }
@@ -91,5 +92,29 @@ class UpdateService {
     } catch (e) {
       _logger.e('[UpdateService] Failed to check for update: $e');
     }
+  }
+
+  /// Lets the user finish a flexible update when convenient instead of
+  /// restarting the app immediately.
+  void _offerFlexibleUpdateRestart() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final BuildContext? ctx = AppRouter.navigatorKey.currentContext;
+      if (ctx == null) return;
+      final ScaffoldMessengerState? messenger = ScaffoldMessenger.maybeOf(ctx);
+      messenger?.showSnackBar(
+        SnackBar(
+          content: const Text(
+            'Update downloaded. Restart when you are ready to install it.',
+          ),
+          action: SnackBarAction(
+            label: 'Restart',
+            onPressed: () {
+              InAppUpdate.completeFlexibleUpdate();
+            },
+          ),
+          duration: const Duration(minutes: 5),
+        ),
+      );
+    });
   }
 }

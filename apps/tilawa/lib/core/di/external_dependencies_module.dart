@@ -15,6 +15,7 @@ import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/premium/data/services/subscription_plans_service.dart';
@@ -84,7 +85,11 @@ abstract class ExternalDependenciesModule {
   @singleton
   SubscriptionPlansService subscriptionPlansService(
     FirebaseFirestore firestore,
-  ) => SubscriptionPlansService(firestore: firestore);
+    AppLaunchConfig launchConfig,
+  ) => SubscriptionPlansService(
+    firestore: firestore,
+    firestoreCatalogEnabled: launchConfig.subscriptionServiceEnabled,
+  );
 
   @singleton
   FirebaseInitializationService firebaseInitializationService(

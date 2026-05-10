@@ -27,6 +27,7 @@ Future<void> main() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
     final subscriptionPlansService = SubscriptionPlansService(
       firestore: firestore,
+      firestoreCatalogEnabled: true,
     );
     final initializationService = FirebaseInitializationService(
       subscriptionPlansService: subscriptionPlansService,

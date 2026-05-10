@@ -557,6 +557,12 @@ class AppStartupTasks {
     if (!_isEnabled(launchConfig.firebaseDataInit, 'FIREBASE_DATA_INIT')) {
       return;
     }
+    if (!_isEnabled(
+      launchConfig.subscriptionServiceEnabled,
+      'SUBSCRIPTION_SERVICE',
+    )) {
+      return;
+    }
     logger.d(
       '[AppLaunch][AppStartupTasks.initializeFirebaseDataAsync]: Start in (${DateTime.now()})',
     );

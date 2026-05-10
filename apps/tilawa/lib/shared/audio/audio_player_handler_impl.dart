@@ -50,7 +50,6 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   final DownloadsRepository _downloadsRepository;
   final _items = <String, List<audio_service.MediaItem>>{};
   final AudioPlayer _player;
-  final List<AudioSource> _playlist = [];
   @override
   final BehaviorSubject<double> volume = BehaviorSubject.seeded(1.0);
   @override
@@ -286,12 +285,22 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     final List<AudioSource> initialSources = await Future.wait(
       queue.value.map(_itemToSource),
     );
-    _playlist.addAll(initialSources);
 
     // Only set sources if we actually have items to avoid a default "index 0" jump
-    if (_playlist.isNotEmpty) {
-      await _safeSetAudioSources(_playlist);
+    if (initialSources.isNotEmpty) {
+      await _safeSetAudioSources(initialSources);
     }
+  }
+
+  int _indexOfAudioSourceWithTag(String mediaId) {
+    final List<AudioSource> sources = _player.audioSources;
+    for (var i = 0; i < sources.length; i++) {
+      final AudioSource s = sources[i];
+      if (s is UriAudioSource && s.tag == mediaId) {
+        return i;
+      }
+    }
+    return -1;
   }
 
   Future<AudioSource> _itemToSource(audio_service.MediaItem mediaItem) async {
@@ -429,7 +438,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       _currentLoadingArtist = null;
       _pendingIndex = null;
       await _player.stop();
-      _playlist.clear();
+      await _player.clearAudioSources();
       log('Audio state cleared');
     } catch (e) {
       log('Error clearing audio state: $e');
@@ -456,14 +465,12 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
   @override
   Future<void> addQueueItem(audio_service.MediaItem mediaItem) async {
-    _playlist.add(await _itemToSource(mediaItem));
-    await _safeSetAudioSources(_playlist);
+    await _player.addAudioSource(await _itemToSource(mediaItem));
   }
 
   @override
   Future<void> addQueueItems(List<audio_service.MediaItem> mediaItems) async {
-    _playlist.addAll(await _itemsToSources(mediaItems));
-    await _safeSetAudioSources(_playlist);
+    await _player.addAudioSources(await _itemsToSources(mediaItems));
   }
 
   @override
@@ -471,15 +478,16 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     int index,
     audio_service.MediaItem mediaItem,
   ) async {
-    _playlist.insert(index, await _itemToSource(mediaItem));
-    await _safeSetAudioSources(_playlist);
+    await _player.insertAudioSource(
+      index,
+      await _itemToSource(mediaItem),
+    );
   }
 
   @override
   Future<void> updateQueue(List<audio_service.MediaItem> queue) async {
-    _playlist.clear();
-    _playlist.addAll(await _itemsToSources(queue));
-    await _safeSetAudioSources(_playlist);
+    final List<AudioSource> sources = await _itemsToSources(queue);
+    await _safeSetAudioSources(sources);
   }
 
   @override
@@ -494,35 +502,27 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
   @override
   Future<void> removeQueueItem(audio_service.MediaItem mediaItem) async {
-    final int index = _playlist.indexWhere((s) {
-      // Safe check for tag
-      if (s is UriAudioSource) {
-        return s.tag == mediaItem.id;
-      }
-      return false;
-    });
+    final int index = _indexOfAudioSourceWithTag(mediaItem.id);
 
     if (index != -1) {
-      _playlist.removeAt(index);
+      await _player.removeAudioSourceAt(index);
       _mediaItemMap.remove(mediaItem.id);
-      await _safeSetAudioSources(_playlist);
     }
   }
 
   @override
   Future<void> moveQueueItem(int currentIndex, int newIndex) async {
-    final AudioSource item = _playlist.removeAt(currentIndex);
-    _playlist.insert(newIndex, item);
-    await _safeSetAudioSources(_playlist);
+    await _player.moveAudioSource(currentIndex, newIndex);
   }
 
   @override
   Future<void> skipToNext() async {
     final int? currentIndex = _player.currentIndex;
     logger.d(
-      '[AudioPlayerHandler] skipToNext: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
+      '[AudioPlayerHandler] skipToNext: currentIndex=$currentIndex, playlistLength=${_player.audioSources.length}',
     );
-    if (currentIndex != null && currentIndex < _playlist.length - 1) {
+    if (currentIndex != null &&
+        currentIndex < _player.audioSources.length - 1) {
       logger.d(
         '[AudioPlayerHandler] skipToNext: moving to index ${currentIndex + 1}',
       );
@@ -538,7 +538,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   Future<void> skipToPrevious() async {
     final int? currentIndex = _player.currentIndex;
     logger.d(
-      '[AudioPlayerHandler] skipToPrevious: currentIndex=$currentIndex, playlistLength=${_playlist.length}',
+      '[AudioPlayerHandler] skipToPrevious: currentIndex=$currentIndex, playlistLength=${_player.audioSources.length}',
     );
     if (currentIndex != null && currentIndex > 0) {
       logger.d(
@@ -554,7 +554,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
   @override
   Future<void> skipToQueueItem(int index) async {
-    if (index < 0 || index >= _playlist.length) {
+    if (index < 0 || index >= _player.audioSources.length) {
       return;
     }
 
@@ -935,10 +935,8 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     int index, {
     Duration? initialPosition,
   }) async {
-    _playlist.clear();
-    _playlist.addAll(await _itemsToSources(queue));
     await _safeSetAudioSources(
-      _playlist,
+      await _itemsToSources(queue),
       initialIndex: index,
       initialPosition: initialPosition,
     );

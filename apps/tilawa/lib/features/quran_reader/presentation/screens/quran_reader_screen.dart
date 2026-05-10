@@ -94,7 +94,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   late final UiVisibilityCubit _uiVisibilityCubit;
   late final GlobalKey _screenshotBoundaryKey;
   bool _didInitDependencies = false;
-  bool _isProgrammaticJump = false;
+  late final ValueNotifier<bool> _programmaticJumpNotifier;
   bool _isInteracting = false;
   Timer? _resumeWarmingTimer;
   bool _allowSystemPop = false;
@@ -118,6 +118,12 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   bool _didReportInitialPreparedWindow = false;
   late final ValueNotifier<bool> _isScrollingNotifier;
 
+  /// Deep links may pass an invalid surah; keep navigation and metadata safe.
+  int get _effectiveSurahNumber {
+    if (widget.surahNumber <= 0) return widget.surahNumber;
+    return widget.surahNumber.clamp(1, 114);
+  }
+
   ThemeData? _cachedAppTheme;
   QuranReaderTheme? _cachedReaderTheme;
   SystemUiOverlayStyle? _cachedReaderSystemUiStyle;
@@ -133,6 +139,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _uiVisibilityCubit.show();
     _showOverlaysNotifier = ValueNotifier<bool>(!_uiVisibilityCubit.state);
     _isScrollingNotifier = ValueNotifier<bool>(false);
+    _programmaticJumpNotifier = ValueNotifier<bool>(false);
 
     initSideEffects();
     // precacheQuranAssets moved to didChangeDependencies to avoid MediaQuery warning
@@ -162,9 +169,12 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     quranQcfLocator<QuranFontService>().addListener(_handleFontRegistryChanged);
 
     if (widget.surahNumber > 0 &&
-        bloc.state.currentSurah?.number != widget.surahNumber) {
+        bloc.state.currentSurah?.number != _effectiveSurahNumber) {
       bloc.add(
-        QuranReaderEvent.loadSurah(widget.surahNumber, loadStartPage: false),
+        QuranReaderEvent.loadSurah(
+          _effectiveSurahNumber,
+          loadStartPage: false,
+        ),
       );
     }
   }
@@ -176,7 +186,9 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     if (inMemoryPage > 0) return inMemoryPage;
     final int hintedPage = bloc.state.initialPageHint ?? 0;
     if (hintedPage > 0) return hintedPage;
-    if (widget.surahNumber > 0) return getPageNumber(widget.surahNumber, 1);
+    if (widget.surahNumber > 0) {
+      return getPageNumber(_effectiveSurahNumber, 1);
+    }
     return 1;
   }
 
@@ -246,6 +258,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _preparedWindowNotifier.dispose();
     _showOverlaysNotifier.dispose();
     _warmingNotifier.dispose();
+    _programmaticJumpNotifier.dispose();
     unawaited(AppOrientationService.restoreDefaultOrientations());
     AppSystemChromeStyle.applyDefault();
     _uiVisibilityCubit.show();
@@ -350,7 +363,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: _cachedReaderSystemUiStyle!,
         child: _ReaderListener(
-          isProgrammaticJump: _isProgrammaticJump,
+          programmaticJump: _programmaticJumpNotifier,
           syncToPage: _syncToPage,
           updateSystemUiConfig: _updateSystemUiConfig,
           showOverlaysNotifier: _showOverlaysNotifier,
@@ -795,7 +808,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   void _resetWarmingCooldown() {
     _warmingCooldownTimer?.cancel();
     _warmingCooldownTimer = Timer(const Duration(seconds: 5), () {
-      if (mounted && _isWarming && !_isProgrammaticJump) {
+      if (mounted && _isWarming && !_programmaticJumpNotifier.value) {
         _warmingNotifier.value = _warmingNotifier.value.copyWith(
           isWarming: false,
         );
@@ -1059,7 +1072,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
   void _handleOnPageChanged(int pageNumber) {
     _currentPageNotifier.value = pageNumber;
-    if (_isProgrammaticJump) return;
+    if (_programmaticJumpNotifier.value) return;
 
     final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
 
@@ -1127,10 +1140,10 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   }
 
   Future<void> _jumpToPage(int pageNumber) async {
-    _isProgrammaticJump = true;
+    _programmaticJumpNotifier.value = true;
 
     if (!mounted) {
-      _isProgrammaticJump = false;
+      _programmaticJumpNotifier.value = false;
       return;
     }
 
@@ -1148,7 +1161,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _scheduleVisibleWindowPreparation(pageNumber);
 
     if (!mounted) {
-      _isProgrammaticJump = false;
+      _programmaticJumpNotifier.value = false;
       return;
     }
 
@@ -1181,7 +1194,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
     Timer(const Duration(milliseconds: 100), () {
       if (mounted) {
-        _isProgrammaticJump = false;
+        _programmaticJumpNotifier.value = false;
         // Resume background warming once the jump has settled.
         fontLoaderBloc.resumeBackgroundWarmUp();
       }
@@ -1194,14 +1207,14 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 class _ReaderListener extends StatelessWidget {
   const _ReaderListener({
     required this.child,
-    required this.isProgrammaticJump,
+    required this.programmaticJump,
     required this.syncToPage,
     required this.updateSystemUiConfig,
     required this.showOverlaysNotifier,
   });
 
   final Widget child;
-  final bool isProgrammaticJump;
+  final ValueListenable<bool> programmaticJump;
   final Future<void> Function(int) syncToPage;
   final void Function(bool) updateSystemUiConfig;
   final ValueNotifier<bool> showOverlaysNotifier;
@@ -1221,7 +1234,7 @@ class _ReaderListener extends StatelessWidget {
               previous.currentPage != current.currentPage &&
               current.currentPage != null,
           listener: (context, state) {
-            if (isProgrammaticJump) return;
+            if (programmaticJump.value) return;
             unawaited(syncToPage(state.currentPage!.pageNumber));
           },
         ),
