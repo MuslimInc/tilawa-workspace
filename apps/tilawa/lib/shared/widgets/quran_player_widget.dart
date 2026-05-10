@@ -649,10 +649,9 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                 top: topPadding + 8,
                 left: 0,
                 right: 0,
-                child: TilawaSheetHandle(
-                  color: Colors.white.withValues(
-                    alpha: Theme.of(context).tokens.opacityMedium,
-                  ),
+                child: const TilawaSheetHandle(
+                  omitTopMargin: true,
+                  color: Color(0x4DFFFFFF),
                 ),
               ),
           ],

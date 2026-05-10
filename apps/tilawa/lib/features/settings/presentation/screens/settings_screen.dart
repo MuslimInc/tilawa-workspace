@@ -82,9 +82,11 @@ void _showCustomColorPicker(BuildContext context, Color currentColor) {
 }
 
 void _showLanguagePicker(BuildContext context, Locale currentLocale) {
-  final tokens = Theme.of(context).tokens;
+  final theme = Theme.of(context);
+  final tokens = theme.tokens;
   showModalBottomSheet<void>(
     context: context,
+    backgroundColor: theme.colorScheme.surfaceContainerLow,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(tokens.radiusExtraLarge),

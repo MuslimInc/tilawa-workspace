@@ -59,7 +59,7 @@ class _PrayerNotificationSettingsSheetState
       child: Column(
         mainAxisSize: .min,
         children: [
-          TilawaSheetHandle(margin: EdgeInsets.only(top: tokens.spaceSmall)),
+          const TilawaSheetHandle(),
           _SheetHeader(onDone: _close, tokens: tokens, theme: theme),
           const Divider(height: 1),
           Flexible(

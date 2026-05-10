@@ -10,13 +10,23 @@ class TilawaSheetHandle extends StatelessWidget {
     this.height,
     this.margin,
     this.color,
+    this.omitTopMargin = false,
   });
 
   final bool showHandle;
   final double? width;
   final double? height;
+
+  /// When null, uses token [TilawaSheetHandleTokens.marginTop] and
+  /// [TilawaSheetHandleTokens.marginBottom]. When set, replaces that default
+  /// entirely.
   final EdgeInsetsGeometry? margin;
   final Color? color;
+
+  /// When true and [margin] is null, top inset is zero so a parent
+  /// ([Positioned], padding, etc.) can own vertical placement; bottom still
+  /// uses the token.
+  final bool omitTopMargin;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +40,12 @@ class TilawaSheetHandle extends StatelessWidget {
       child: Container(
         width: width ?? componentTokens.width,
         height: height ?? componentTokens.height,
-        margin: margin ?? EdgeInsets.only(bottom: componentTokens.marginBottom),
+        margin:
+            margin ??
+            EdgeInsets.only(
+              top: omitTopMargin ? 0 : componentTokens.marginTop,
+              bottom: componentTokens.marginBottom,
+            ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(componentTokens.cornerRadius),
           color:

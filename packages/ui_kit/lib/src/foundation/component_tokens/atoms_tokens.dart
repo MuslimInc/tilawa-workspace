@@ -38,6 +38,7 @@ class TilawaSheetHandleTokens {
   const TilawaSheetHandleTokens({
     required this.width,
     required this.height,
+    required this.marginTop,
     required this.marginBottom,
     required this.cornerRadius,
     required this.colorOpacity,
@@ -45,6 +46,9 @@ class TilawaSheetHandleTokens {
 
   final double width;
   final double height;
+
+  /// Space above the drag pill; matches [TilawaDesignTokens.spaceMedium] per density.
+  final double marginTop;
   final double marginBottom;
   final double cornerRadius;
   final double colorOpacity;
@@ -56,6 +60,7 @@ class TilawaSheetHandleTokens {
       return const TilawaSheetHandleTokens(
         width: 46,
         height: 5,
+        marginTop: 10,
         marginBottom: 12,
         cornerRadius: 999,
         colorOpacity: 0.22,
@@ -64,6 +69,7 @@ class TilawaSheetHandleTokens {
     return const TilawaSheetHandleTokens(
       width: 46,
       height: 5,
+      marginTop: 12,
       marginBottom: 16,
       cornerRadius: 999,
       colorOpacity: 0.22,
@@ -73,6 +79,7 @@ class TilawaSheetHandleTokens {
   TilawaSheetHandleTokens copyWith({
     double? width,
     double? height,
+    double? marginTop,
     double? marginBottom,
     double? cornerRadius,
     double? colorOpacity,
@@ -80,6 +87,7 @@ class TilawaSheetHandleTokens {
     return TilawaSheetHandleTokens(
       width: width ?? this.width,
       height: height ?? this.height,
+      marginTop: marginTop ?? this.marginTop,
       marginBottom: marginBottom ?? this.marginBottom,
       cornerRadius: cornerRadius ?? this.cornerRadius,
       colorOpacity: colorOpacity ?? this.colorOpacity,
@@ -94,6 +102,7 @@ class TilawaSheetHandleTokens {
     return TilawaSheetHandleTokens(
       width: lerpTokenDouble(a.width, b.width, t),
       height: lerpTokenDouble(a.height, b.height, t),
+      marginTop: lerpTokenDouble(a.marginTop, b.marginTop, t),
       marginBottom: lerpTokenDouble(a.marginBottom, b.marginBottom, t),
       cornerRadius: lerpTokenDouble(a.cornerRadius, b.cornerRadius, t),
       colorOpacity: lerpTokenDouble(a.colorOpacity, b.colorOpacity, t),

@@ -59,9 +59,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TilawaSheetHandle(
-                margin: EdgeInsets.only(top: tokens.spaceSmall),
-              ),
+              const TilawaSheetHandle(),
               _SheetHeader(onClose: _close, tokens: tokens, theme: theme),
               const TilawaDivider(height: 1),
               Flexible(
