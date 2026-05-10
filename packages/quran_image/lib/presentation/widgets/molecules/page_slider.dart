@@ -5,10 +5,19 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 ///
 /// A Slider widget styled according to design tokens for fast page navigation.
 ///
-/// Keeps a local value while the thumb is dragged so the thumb tracks the
-/// finger even when [currentPage] only updates on a throttled preview path.
+/// While dragging, the thumb follows a local value. After [onChangeEnd], the
+/// thumb holds the released page until [committedPage] catches up — otherwise
+/// [currentPage] can still reflect the old saved page for a frame (or longer
+/// while navigation runs), which would make the thumb jump backward.
 class PageSlider extends StatefulWidget {
+  /// Display page (preview while scrubbing, else committed) — same source as
+  /// the page indicator.
   final int currentPage;
+
+  /// Last page committed in navigation state (ignores preview). Used to know
+  /// when slider navigation has finished so the post-drag hold can end.
+  final int committedPage;
+
   final int totalPages;
   final ValueChanged<double> onChanged;
   final ValueChanged<double>? onChangeEnd;
@@ -17,6 +26,7 @@ class PageSlider extends StatefulWidget {
   const PageSlider({
     super.key,
     required this.currentPage,
+    required this.committedPage,
     required this.totalPages,
     required this.onChanged,
     this.onChangeEnd,
@@ -31,19 +41,42 @@ class _PageSliderState extends State<PageSlider> {
   bool _dragging = false;
   double? _dragValue;
 
+  /// Rounded page from the last [onChangeEnd]; cleared when [committedPage]
+  /// reaches it or navigation is superseded.
+  int? _pendingReleasePage;
+
   @override
   void didUpdateWidget(PageSlider oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _resolvePendingRelease(oldWidget);
     if (!_dragging && oldWidget.currentPage != widget.currentPage) {
       _dragValue = null;
     }
   }
 
+  void _resolvePendingRelease(PageSlider oldWidget) {
+    if (_pendingReleasePage == null || _dragging) return;
+
+    if (widget.committedPage == _pendingReleasePage) {
+      _pendingReleasePage = null;
+      return;
+    }
+
+    final committedMoved = oldWidget.committedPage != widget.committedPage;
+    if (committedMoved && widget.committedPage != _pendingReleasePage) {
+      _pendingReleasePage = null;
+    }
+  }
+
   double get _sliderValue {
-    final raw = _dragging && _dragValue != null
-        ? _dragValue!
-        : widget.currentPage.toDouble();
-    return raw.clamp(1.0, widget.totalPages.toDouble());
+    final max = widget.totalPages.toDouble();
+    if (_dragging && _dragValue != null) {
+      return _dragValue!.clamp(1.0, max);
+    }
+    if (_pendingReleasePage != null) {
+      return _pendingReleasePage!.clamp(1, widget.totalPages).toDouble();
+    }
+    return widget.currentPage.toDouble().clamp(1.0, max);
   }
 
   @override
@@ -82,8 +115,9 @@ class _PageSliderState extends State<PageSlider> {
           // animation frame when the nav overlay slides in/out.
           onChangeStart: (_) {
             setState(() {
+              _pendingReleasePage = null;
               _dragging = true;
-              _dragValue = widget.currentPage.toDouble();
+              _dragValue = _sliderValue;
             });
           },
           onChanged: (value) {
@@ -91,9 +125,11 @@ class _PageSliderState extends State<PageSlider> {
             widget.onChanged(value);
           },
           onChangeEnd: (value) {
+            final rounded = value.round().clamp(1, widget.totalPages).toInt();
             setState(() {
               _dragging = false;
               _dragValue = null;
+              _pendingReleasePage = rounded;
             });
             widget.onChangeEnd?.call(value);
           },

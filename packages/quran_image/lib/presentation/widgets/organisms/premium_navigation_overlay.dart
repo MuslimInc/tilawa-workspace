@@ -204,6 +204,7 @@ class _PremiumNavigationControls extends StatelessWidget {
                           RepaintBoundary(
                             child: NavigationSliderOverlay(
                               screenWidth: constraints.maxWidth,
+                              committedPage: committedPageState.currentPage,
                               state: effectivePageState,
                               canGoToPreviousPage:
                                   committedPageState.currentPage > 1,

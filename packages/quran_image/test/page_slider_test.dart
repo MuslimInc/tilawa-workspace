@@ -18,6 +18,7 @@ void main() {
           child: Scaffold(
             body: PageSlider(
               currentPage: 50,
+              committedPage: 50,
               totalPages: 604,
               onChanged: changes.add,
               onChangeEnd: (v) => endValue = v,
@@ -51,6 +52,7 @@ void main() {
             child: Scaffold(
               body: PageSlider(
                 currentPage: 50,
+                committedPage: 50,
                 totalPages: 604,
                 onChanged: (_) {},
                 onChangeEnd: (_) {},
@@ -76,10 +78,44 @@ void main() {
       );
 
       await gesture.up();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
-      final valueAfter = tester.widget<Slider>(slider).value;
-      expect(valueAfter, closeTo(50, 1.0));
+      final valueAfterRelease = tester.widget<Slider>(slider).value;
+      expect(
+        valueAfterRelease,
+        greaterThan(50),
+        reason: 'thumb must not snap back to stale currentPage before commit',
+      );
+    },
+  );
+
+  testWidgets(
+    'PageSlider holds released value until committedPage catches up',
+    (tester) async {
+      final key = GlobalKey<_HoldHarnessState>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: const MediaQueryData(size: Size(400, 900)),
+            child: _HoldHarness(key: key),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final slider = find.byType(Slider);
+      await tester.drag(slider, const Offset(160, 0));
+      await tester.pump();
+
+      final released = tester.widget<Slider>(slider).value.round();
+      expect(released, greaterThan(10));
+      expect(key.currentState!.committed, 10);
+
+      key.currentState!.applyCommitted(released);
+      await tester.pump();
+
+      expect(tester.widget<Slider>(slider).value.round(), released);
     },
   );
 
@@ -91,6 +127,7 @@ void main() {
           child: Scaffold(
             body: PageSlider(
               currentPage: 2,
+              committedPage: 2,
               totalPages: 20,
               onChanged: (_) {},
               onChangeEnd: (_) {},
@@ -124,6 +161,7 @@ void main() {
             child: Scaffold(
               body: PageSlider(
                 currentPage: 1,
+                committedPage: 1,
                 totalPages: 604,
                 onChanged: changes.add,
                 onChangeEnd: (_) {},
@@ -164,10 +202,41 @@ void main() {
     await tester.pump();
 
     expect(tester.widget<Slider>(find.byType(Slider)).value, 10);
-    key.currentState!.setCommittedPage(88);
+    key.currentState!.setBothPages(88);
     await tester.pump();
     expect(tester.widget<Slider>(find.byType(Slider)).value, 88);
   });
+}
+
+class _HoldHarness extends StatefulWidget {
+  const _HoldHarness({super.key});
+
+  @override
+  State<_HoldHarness> createState() => _HoldHarnessState();
+}
+
+class _HoldHarnessState extends State<_HoldHarness> {
+  int committed = 10;
+  int display = 10;
+
+  void applyCommitted(int page) => setState(() {
+    committed = page;
+    display = page;
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageSlider(
+        currentPage: display,
+        committedPage: committed,
+        totalPages: 100,
+        onChanged: (_) {},
+        onChangeEnd: (_) {},
+        screenWidth: 400,
+      ),
+    );
+  }
 }
 
 class _SliderHost extends StatefulWidget {
@@ -180,13 +249,14 @@ class _SliderHost extends StatefulWidget {
 class _SliderHostState extends State<_SliderHost> {
   int _page = 10;
 
-  void setCommittedPage(int page) => setState(() => _page = page);
+  void setBothPages(int page) => setState(() => _page = page);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageSlider(
         currentPage: _page,
+        committedPage: _page,
         totalPages: 100,
         onChanged: (_) {},
         onChangeEnd: (v) => setState(() => _page = v.round()),
