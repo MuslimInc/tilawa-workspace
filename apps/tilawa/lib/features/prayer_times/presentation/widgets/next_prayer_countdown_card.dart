@@ -4,6 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../formatters/prayer_time_label_formatter.dart';
+import '../layout/prayer_times_layout.dart';
 import '../models/prayer_row_view_data.dart';
 import 'prayer_alert_status_chip.dart';
 import 'prayer_time_localizations.dart';
@@ -75,13 +76,28 @@ class NextPrayerCountdownCard extends StatelessWidget {
           tokens.spaceLarge,
           tokens.spaceMedium,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final narrow = PrayerTimesLayout.isNarrowWidth(
+              constraints.maxWidth,
+            );
+            final bool heroChipLabels = showPrayerTimeChipLabels && !narrow;
+            final TextStyle scheduledStyle =
+                theme.textTheme.labelMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                ) ??
+                TextStyle(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                  fontSize: theme.textTheme.labelMedium?.fontSize ?? 12,
+                );
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Align(
+                if (narrow) ...[
+                  Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: FittedBox(
                       fit: BoxFit.scaleDown,
@@ -91,89 +107,120 @@ class NextPrayerCountdownCard extends StatelessWidget {
                         backgroundColor: accentColor,
                         foregroundColor: colorScheme.onPrimary,
                         icon: Icons.notifications_active_rounded,
-                        showLabel: showPrayerTimeChipLabels,
+                        showLabel: heroChipLabels,
                       ),
                     ),
                   ),
-                ),
-                SizedBox(width: tokens.spaceSmall),
-                Expanded(
-                  child: Text(
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Text(
                     '$scheduledLabel • $prayerTime',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                    maxLines: 1,
+                    style: scheduledStyle,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.end,
                   ),
-                ),
-              ],
-            ),
-            if (dateMetaLabel != null) ...[
-              SizedBox(height: tokens.spaceExtraSmall),
-              Text(
-                dateMetaLabel!,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-            SizedBox(height: tokens.spaceMedium),
-            Text(
-              prayerName,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            SizedBox(height: tokens.spaceSmall),
-            Text(
-              remainingLabel,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(height: tokens.spaceSmall),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: Text(
-                    '${hours.toString().padLeft(2, '0')}'
-                    ':${minutes.toString().padLeft(2, '0')}'
-                    ':${seconds.toString().padLeft(2, '0')}',
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      color: accentColor,
-                      fontWeight: FontWeight.w800,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                ] else ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerStart,
+                            child: TilawaStatusChip(
+                              label: nextPrayerLabel,
+                              backgroundColor: accentColor,
+                              foregroundColor: colorScheme.onPrimary,
+                              icon: Icons.notifications_active_rounded,
+                              showLabel: showPrayerTimeChipLabels,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: tokens.spaceSmall),
+                      Expanded(
+                        child: Text(
+                          '$scheduledLabel • $prayerTime',
+                          style: scheduledStyle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+                if (dateMetaLabel != null) ...[
+                  SizedBox(height: tokens.spaceExtraSmall),
+                  Text(
+                    dateMetaLabel!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
+                    maxLines: narrow ? 2 : 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+                SizedBox(height: tokens.spaceMedium),
+                Text(
+                  prayerName,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: colorScheme.onSurface,
                   ),
                 ),
-                if (alert != null && alert.supportsAlerts) ...[
-                  SizedBox(width: tokens.spaceSmall),
-                  Flexible(
-                    child: Align(
-                      alignment: AlignmentDirectional.bottomEnd,
+                SizedBox(height: tokens.spaceSmall),
+                Text(
+                  remainingLabel,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: PrayerAlertStatusChip(
-                          alert: alert,
-                          showLabel: showPrayerTimeChipLabels,
+                        alignment: AlignmentDirectional.centerStart,
+                        child: Text(
+                          '${hours.toString().padLeft(2, '0')}'
+                          ':${minutes.toString().padLeft(2, '0')}'
+                          ':${seconds.toString().padLeft(2, '0')}',
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            color: accentColor,
+                            fontWeight: FontWeight.w800,
+                            fontFeatures: const [
+                              FontFeature.tabularFigures(),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    if (alert != null && alert.supportsAlerts) ...[
+                      SizedBox(width: tokens.spaceSmall),
+                      Flexible(
+                        child: Align(
+                          alignment: AlignmentDirectional.bottomEnd,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: PrayerAlertStatusChip(
+                              alert: alert,
+                              showLabel: heroChipLabels,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );

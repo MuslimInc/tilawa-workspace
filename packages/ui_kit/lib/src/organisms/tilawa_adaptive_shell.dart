@@ -419,7 +419,8 @@ class _NavButton extends StatelessWidget {
           ),
           child: Text(
             destination.label,
-            maxLines: 2,
+            maxLines: 1,
+            softWrap: false,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
           ),

@@ -17,6 +17,7 @@ import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../config/prayer_times_screen_loading_preview.dart';
+import '../layout/prayer_times_layout.dart';
 import '../formatters/prayer_location_label_formatter.dart';
 import '../mappers/prayer_row_view_data_mapper.dart';
 import '../models/prayer_row_view_data.dart';
@@ -617,34 +618,73 @@ class _BottomUtilitiesCard extends StatelessWidget {
           horizontal: tokens.spaceSmall,
           vertical: tokens.spaceExtraSmall,
         ),
-        child: Row(
-          children: [
-            Expanded(
-              child: _UtilityInlineAction(
-                icon: Icons.explore_outlined,
-                label: context.l10n.qiblaDirection,
-                onTap: onOpenQibla,
-              ),
-            ),
-            SizedBox(
-              height: tokens.spaceExtraLarge,
-              child: VerticalDivider(
-                width: tokens.spaceMedium,
-                color: colorScheme.outlineVariant.withValues(
-                  alpha: tokens.opacityMedium,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final narrow = PrayerTimesLayout.isNarrowWidth(
+              constraints.maxWidth,
+            );
+            if (narrow) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _UtilityInlineAction(
+                    icon: Icons.explore_outlined,
+                    label: context.l10n.qiblaDirection,
+                    onTap: onOpenQibla,
+                    labelMaxLines: 2,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: tokens.spaceExtraSmall,
+                    ),
+                    child: Divider(
+                      height: 1,
+                      color: colorScheme.outlineVariant.withValues(
+                        alpha: tokens.opacityMedium,
+                      ),
+                    ),
+                  ),
+                  _UtilityInlineAction(
+                    semanticsId: PrayerNotificationSemanticsIds
+                        .prayerNotificationsEntryPoint,
+                    icon: Icons.tune_rounded,
+                    label: context.l10n.manageAlerts,
+                    onTap: onManageAlertsTap,
+                    labelMaxLines: 2,
+                  ),
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(
+                  child: _UtilityInlineAction(
+                    icon: Icons.explore_outlined,
+                    label: context.l10n.qiblaDirection,
+                    onTap: onOpenQibla,
+                  ),
                 ),
-              ),
-            ),
-            Expanded(
-              child: _UtilityInlineAction(
-                semanticsId: PrayerNotificationSemanticsIds
-                    .prayerNotificationsEntryPoint,
-                icon: Icons.tune_rounded,
-                label: context.l10n.manageAlerts,
-                onTap: onManageAlertsTap,
-              ),
-            ),
-          ],
+                SizedBox(
+                  height: tokens.spaceExtraLarge,
+                  child: VerticalDivider(
+                    width: tokens.spaceMedium,
+                    color: colorScheme.outlineVariant.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: _UtilityInlineAction(
+                    semanticsId: PrayerNotificationSemanticsIds
+                        .prayerNotificationsEntryPoint,
+                    icon: Icons.tune_rounded,
+                    label: context.l10n.manageAlerts,
+                    onTap: onManageAlertsTap,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -657,12 +697,14 @@ class _UtilityInlineAction extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.semanticsId,
+    this.labelMaxLines = 1,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback? onTap;
   final String? semanticsId;
+  final int labelMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -683,6 +725,7 @@ class _UtilityInlineAction extends StatelessWidget {
             semanticsId: semanticsId,
             icon: icon,
             label: label,
+            labelMaxLines: labelMaxLines,
             trailing: Icon(
               Icons.chevron_right,
               size: tokens.iconSizeMedium,
@@ -701,12 +744,14 @@ class _UtilityActionRow extends StatelessWidget {
     required this.label,
     required this.trailing,
     this.semanticsId,
+    this.labelMaxLines = 1,
   });
 
   final IconData icon;
   final String label;
   final Widget trailing;
   final String? semanticsId;
+  final int labelMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -729,6 +774,8 @@ class _UtilityActionRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
+              maxLines: labelMaxLines,
+              softWrap: labelMaxLines > 1,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
@@ -892,53 +939,114 @@ class _TodayPrayerListRow extends StatelessWidget {
             vertical: tokens.spaceExtraSmall,
             horizontal: tokens.spaceSmall,
           ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final narrow = PrayerTimesLayout.isNarrowWidth(
+                constraints.maxWidth,
+              );
+              final bool compactChipLabels = showAlertChipLabels && !narrow;
+              final TextStyle nameStyle =
+                  theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                    color: rowColor.withValues(alpha: rowAlpha),
+                  ) ??
+                  TextStyle(
+                    fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                    color: rowColor.withValues(alpha: rowAlpha),
+                    fontSize: 15,
+                  );
+              final TextStyle statusStyle =
+                  theme.textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isCurrent
+                        ? rowColor.withValues(alpha: rowAlpha)
+                        : colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.92,
+                          ),
+                  ) ??
+                  TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    color: isCurrent
+                        ? rowColor.withValues(alpha: rowAlpha)
+                        : colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.92,
+                          ),
+                  );
+              final TextStyle timeStyle =
+                  theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: rowColor.withValues(alpha: rowAlpha),
+                  ) ??
+                  TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: rowColor.withValues(alpha: rowAlpha),
+                    fontSize: 18,
+                  );
+
+              if (narrow) {
+                return Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      prayerName,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: isCurrent
-                            ? FontWeight.w800
-                            : FontWeight.w600,
-                        color: rowColor.withValues(alpha: rowAlpha),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(prayerName, style: nameStyle),
+                          SizedBox(height: tokens.spaceExtraSmall / 2),
+                          Text(statusText, style: statusStyle),
+                        ],
                       ),
                     ),
-                    SizedBox(height: tokens.spaceExtraSmall / 2),
-                    Text(
-                      statusText,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: isCurrent
-                            ? rowColor.withValues(alpha: rowAlpha)
-                            : colorScheme.onSurfaceVariant.withValues(
-                                alpha: 0.92,
-                              ),
-                      ),
+                    SizedBox(width: tokens.spaceSmall),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          prayerTime,
+                          style: timeStyle,
+                          textAlign: TextAlign.end,
+                        ),
+                        if (showAlertIndicators) ...[
+                          SizedBox(height: tokens.spaceExtraSmall),
+                          PrayerAlertStatusChip(
+                            alert: row.alert,
+                            showLabel: compactChipLabels,
+                          ),
+                        ],
+                      ],
                     ),
                   ],
-                ),
-              ),
-              SizedBox(width: tokens.spaceSmall),
-              Text(
-                prayerTime,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: rowColor.withValues(alpha: rowAlpha),
-                ),
-              ),
-              if (showAlertIndicators) ...[
-                SizedBox(width: tokens.spaceMedium),
-                PrayerAlertStatusChip(
-                  alert: row.alert,
-                  showLabel: showAlertChipLabels,
-                ),
-              ],
-            ],
+                );
+              }
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(prayerName, style: nameStyle),
+                        SizedBox(height: tokens.spaceExtraSmall / 2),
+                        Text(statusText, style: statusStyle),
+                      ],
+                    ),
+                  ),
+                  SizedBox(width: tokens.spaceSmall),
+                  Text(prayerTime, style: timeStyle),
+                  if (showAlertIndicators) ...[
+                    SizedBox(width: tokens.spaceMedium),
+                    PrayerAlertStatusChip(
+                      alert: row.alert,
+                      showLabel: showAlertChipLabels,
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
         ),
       ),

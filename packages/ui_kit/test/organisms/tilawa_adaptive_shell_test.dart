@@ -181,6 +181,43 @@ void main() {
     );
   });
 
+  group('TilawaAdaptiveShell — compact bottom nav density', () {
+    testWidgets('five destinations at 360dp width do not throw', (
+      tester,
+    ) async {
+      const destinations = <TilawaNavDestination>[
+        TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
+        TilawaNavDestination(label: 'Prayer Times', icon: Icons.schedule),
+        TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
+        TilawaNavDestination(label: 'Athkar', icon: Icons.self_improvement),
+        TilawaNavDestination(label: 'Settings', icon: Icons.settings_outlined),
+      ];
+
+      await tester.binding.setSurfaceSize(const Size(360, 800));
+      tester.view.physicalSize = const Size(360, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          direction: TextDirection.ltr,
+          child: TilawaAdaptiveShell(
+            destinations: destinations,
+            selectedIndex: 0,
+            onDestinationSelected: (_) {},
+            bottomPlayer: const SizedBox.shrink(),
+            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    });
+  });
+
   group('TilawaAdaptiveShell — bottomPlayer visibility', () {
     testWidgets('compact layout renders bottomPlayer with expected size', (
       tester,
