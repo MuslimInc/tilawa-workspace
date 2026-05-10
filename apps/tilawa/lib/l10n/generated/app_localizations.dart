@@ -2144,6 +2144,12 @@ abstract class AppLocalizations {
   /// **'Show Sunrise'**
   String get showSunrise;
 
+  /// Toggle text next to notification status icons on prayer time rows
+  ///
+  /// In en, this message translates to:
+  /// **'Show alert chip labels'**
+  String get showPrayerTimesAlertChipLabels;
+
   /// Location required title
   ///
   /// In en, this message translates to:

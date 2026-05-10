@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/services/adhan_qa_service.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
@@ -123,6 +124,19 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
                       value: settings.showSunrise,
                       onChanged: (value) {
                         _updateSettings(settings.copyWith(showSunrise: value));
+                      },
+                    ),
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, appSettings) {
+                        return _SettingsSwitch(
+                          title: context.l10n.showPrayerTimesAlertChipLabels,
+                          value: appSettings.showPrayerTimesAlertChipLabels,
+                          onChanged: (value) {
+                            context
+                                .read<SettingsCubit>()
+                                .setShowPrayerTimesAlertChipLabels(value);
+                          },
+                        );
                       },
                     ),
                     // TODO: Re-enable Time Adjustments after the Prayer Times

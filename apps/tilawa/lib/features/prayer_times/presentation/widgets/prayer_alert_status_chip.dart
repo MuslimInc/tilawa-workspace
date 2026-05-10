@@ -5,9 +5,14 @@ import '../models/prayer_row_view_data.dart';
 
 /// Compact Prayer Times alert state chip.
 class PrayerAlertStatusChip extends StatelessWidget {
-  const PrayerAlertStatusChip({super.key, required this.alert});
+  const PrayerAlertStatusChip({
+    super.key,
+    required this.alert,
+    this.showLabel = true,
+  });
 
   final PrayerAlertViewData alert;
+  final bool showLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +26,7 @@ class PrayerAlertStatusChip extends StatelessWidget {
         icon: _alertIcon(alert.state),
         backgroundColor: colors.$1,
         foregroundColor: colors.$2,
+        showLabel: showLabel,
       ),
     );
   }

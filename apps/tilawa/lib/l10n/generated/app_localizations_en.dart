@@ -1147,6 +1147,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showSunrise => 'Show Sunrise';
 
   @override
+  String get showPrayerTimesAlertChipLabels => 'Show alert chip labels';
+
+  @override
   String get locationRequired => 'Location Required';
 
   @override

@@ -10,6 +10,7 @@ import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../shared/widgets/tilawa_back_button.dart';
+import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/prayer_times_clock.dart';
 import '../../domain/services/prayer_adhan_notification_service_interface.dart';
@@ -447,6 +448,10 @@ class _CountdownTickerState extends State<_CountdownTicker> {
       return const SizedBox.shrink();
     }
 
+    final showAlertChipLabels = context.select<SettingsCubit, bool>(
+      (c) => c.state.showPrayerTimesAlertChipLabels,
+    );
+
     return NextPrayerCountdownCard(
       nextPrayer: nextPrayer,
       timeUntil: timeUntil,
@@ -457,6 +462,7 @@ class _CountdownTickerState extends State<_CountdownTicker> {
         type: nextPrayer.type,
         l10n: context.l10n,
       ),
+      showPrayerTimeChipLabels: showAlertChipLabels,
     );
   }
 }
@@ -757,6 +763,9 @@ class _TodayPrayerListSection extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
     final bool isArabic = context.isArabic;
+    final showAlertChipLabels = context.select<SettingsCubit, bool>(
+      (c) => c.state.showPrayerTimesAlertChipLabels,
+    );
 
     final rows = PrayerRowViewDataMapper.map(
       prayerTimes: prayerTimes,
@@ -796,6 +805,7 @@ class _TodayPrayerListSection extends StatelessWidget {
               hasPassed: row.hasPassed,
               isSecondary: row.isSecondary,
               showAlertIndicators: row.showAlertIndicators,
+              showAlertChipLabels: showAlertChipLabels,
               onTap: row.alert.supportsAlerts
                   ? () => _showPrayerAlertSheet(context, row)
                   : null,
@@ -842,6 +852,7 @@ class _TodayPrayerListRow extends StatelessWidget {
     required this.hasPassed,
     required this.isSecondary,
     required this.showAlertIndicators,
+    required this.showAlertChipLabels,
     required this.onTap,
   });
 
@@ -853,6 +864,7 @@ class _TodayPrayerListRow extends StatelessWidget {
   final bool hasPassed;
   final bool isSecondary;
   final bool showAlertIndicators;
+  final bool showAlertChipLabels;
   final VoidCallback? onTap;
 
   @override
@@ -917,7 +929,10 @@ class _TodayPrayerListRow extends StatelessWidget {
               ),
               if (showAlertIndicators) ...[
                 SizedBox(width: tokens.spaceMedium),
-                PrayerAlertStatusChip(alert: row.alert),
+                PrayerAlertStatusChip(
+                  alert: row.alert,
+                  showLabel: showAlertChipLabels,
+                ),
               ],
             ],
           ),

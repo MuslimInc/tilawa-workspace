@@ -16,6 +16,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
     this.use24HourFormat = true,
     this.dateMetaLabel,
     this.alert,
+    this.showPrayerTimeChipLabels = true,
   });
 
   final PrayerTimeItem nextPrayer;
@@ -23,6 +24,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
   final bool use24HourFormat;
   final String? dateMetaLabel;
   final PrayerAlertViewData? alert;
+  final bool showPrayerTimeChipLabels;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +91,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
                         backgroundColor: accentColor,
                         foregroundColor: colorScheme.onPrimary,
                         icon: Icons.notifications_active_rounded,
+                        showLabel: showPrayerTimeChipLabels,
                       ),
                     ),
                   ),
@@ -160,7 +163,10 @@ class NextPrayerCountdownCard extends StatelessWidget {
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
                         alignment: AlignmentDirectional.centerEnd,
-                        child: PrayerAlertStatusChip(alert: alert),
+                        child: PrayerAlertStatusChip(
+                          alert: alert,
+                          showLabel: showPrayerTimeChipLabels,
+                        ),
                       ),
                     ),
                   ),

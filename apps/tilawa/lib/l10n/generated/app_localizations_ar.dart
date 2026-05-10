@@ -1137,6 +1137,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get showSunrise => 'إظهار الشروق';
 
   @override
+  String get showPrayerTimesAlertChipLabels => 'إظهار نص شارات التنبيه';
+
+  @override
   String get locationRequired => 'الموقع مطلوب';
 
   @override

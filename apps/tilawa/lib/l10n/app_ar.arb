@@ -1533,6 +1533,10 @@
     "@showSunrise": {
         "description": "Show sunrise toggle label"
     },
+    "showPrayerTimesAlertChipLabels": "إظهار نص شارات التنبيه",
+    "@showPrayerTimesAlertChipLabels": {
+        "description": "Toggle text next to notification status icons on prayer time rows"
+    },
     "locationRequired": "الموقع مطلوب",
     "@locationRequired": {
         "description": "Location required title"
