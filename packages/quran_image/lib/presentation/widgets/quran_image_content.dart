@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_image/core/constants/surah_header_constants.dart';
+import 'package:quran_image/core/perf_logger.dart';
 import 'package:quran_image/domain/domain.dart';
 import 'package:quran_image/presentation/widgets/widgets.dart';
 import 'package:quran_image/verse_marker.dart';
@@ -40,6 +41,7 @@ class QuranImageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('QuranImageContent');
     final contentStack = Container(
       color: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
       child: Stack(

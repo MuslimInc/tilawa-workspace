@@ -42,6 +42,7 @@ class NavigationSliderOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('NavigationSliderOverlay');
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;

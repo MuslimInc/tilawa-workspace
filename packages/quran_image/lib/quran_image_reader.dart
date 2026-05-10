@@ -886,6 +886,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('QuranImageReader');
     final sw = PerfLogger.startTimer();
     // If we are in an immersive mode, we want the content to be truly full-screen
     // and not be pushed down by the status bar or up by the navigation bar,
