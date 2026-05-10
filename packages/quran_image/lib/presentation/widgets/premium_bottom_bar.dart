@@ -12,6 +12,7 @@ class PremiumBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('PremiumBottomBar');
     final sw = PerfLogger.startTimer();
     final theme = Theme.of(context);
     final tokens = theme.tokens;

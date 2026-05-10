@@ -21,6 +21,7 @@ class QuranReaderViewport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('QuranReaderViewport');
     return LayoutBuilder(
       builder: (context, constraints) {
         PerfLogger.log(

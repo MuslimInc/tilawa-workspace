@@ -790,7 +790,8 @@ class _QuranImageReaderState extends State<QuranImageReader>
         }
 
         try {
-          final pixelRatio = View.of(context).devicePixelRatio;
+          final deviceDpr = View.of(context).devicePixelRatio;
+          final pixelRatio = quranReaderSnapshotPixelRatioForCapture(deviceDpr);
           final image = await renderObject.toImage(
             pixelRatio: pixelRatio,
           );
@@ -801,12 +802,14 @@ class _QuranImageReaderState extends State<QuranImageReader>
                 'snapshot ready '
                 'page=$pageNumber '
                 'attempt=$attempt '
+                'deviceDpr=$deviceDpr '
+                'pixelRatio=$pixelRatio '
                 'size=${image.width}x${image.height} '
                 'elapsedMs=${sw.elapsedMilliseconds}',
           );
           PerfLogger.logQuranPerf(
             '[QuranPerf][Snapshot]',
-            'toImage page=$pageNumber pixelRatio=$pixelRatio '
+            'toImage page=$pageNumber deviceDpr=$deviceDpr pixelRatio=$pixelRatio '
                 'size=${image.width}x${image.height} '
                 'elapsedMs=${sw.elapsedMilliseconds} attempt=$attempt',
           );
@@ -883,6 +886,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('QuranImageReader');
     final sw = PerfLogger.startTimer();
     // If we are in an immersive mode, we want the content to be truly full-screen
     // and not be pushed down by the status bar or up by the navigation bar,

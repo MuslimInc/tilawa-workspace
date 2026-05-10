@@ -156,6 +156,7 @@ class _PremiumNavigationControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('PremiumNavigationControls');
     final sw = PerfLogger.startTimer();
     final controls = BlocSelector<NavigationBloc, NavigationState, PageState?>(
       selector: (state) {

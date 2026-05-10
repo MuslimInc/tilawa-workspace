@@ -183,6 +183,7 @@ class _QuranImagePageState extends State<QuranImagePage> {
 
   @override
   Widget build(BuildContext context) {
+    PerfLogger.markBuild('QuranImagePage');
     final pageInfo = QuranPageMapping.getPageInfo(widget.pageNumber);
     final pageState = PageState.initial().copyWith(
       currentPage: widget.pageNumber,
@@ -209,22 +210,26 @@ class _QuranImagePageState extends State<QuranImagePage> {
                 lineHeight: layoutLineHeight,
               );
 
-              return QuranImageContent(
-                pageNumber: widget.pageNumber,
-                pageWidth: layoutPageWidth,
-                // Header layout policy was tuned with full-viewport height; the
-                // line stack width/height still come from this frame's layout.
-                pageHeight: _pageHeight > 0 ? _pageHeight : layoutPageHeight,
-                lineHeight: layoutLineHeight,
-                yOffsets: yOffsets,
-                headers: _headers,
-                markers: _markers,
-                lineProviders: _lineProviders,
-                surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
-                imageCacheRepository: _imageCacheRepository,
-                devicePixelRatio: _devicePixelRatio,
-                isLandscape: _isLandscape,
-                headerImageFilter: widget.headerImageFilter,
+              // Isolates line stack + markers from app bar / footer repaint
+              // boundaries so compositor can cache this subtree when possible.
+              return RepaintBoundary(
+                child: QuranImageContent(
+                  pageNumber: widget.pageNumber,
+                  pageWidth: layoutPageWidth,
+                  // Header layout policy was tuned with full-viewport height; the
+                  // line stack width/height still come from this frame's layout.
+                  pageHeight: _pageHeight > 0 ? _pageHeight : layoutPageHeight,
+                  lineHeight: layoutLineHeight,
+                  yOffsets: yOffsets,
+                  headers: _headers,
+                  markers: _markers,
+                  lineProviders: _lineProviders,
+                  surahHeaderLayoutPolicy: widget.surahHeaderLayoutPolicy,
+                  imageCacheRepository: _imageCacheRepository,
+                  devicePixelRatio: _devicePixelRatio,
+                  isLandscape: _isLandscape,
+                  headerImageFilter: widget.headerImageFilter,
+                ),
               );
             },
           ),
