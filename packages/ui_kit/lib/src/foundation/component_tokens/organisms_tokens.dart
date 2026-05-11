@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
@@ -421,6 +423,7 @@ class TilawaAdaptiveShellTokens {
     required this.compactBottomNavBarBaseHeight,
     required this.bottomNavHorizontalMargin,
     required this.bottomNavVerticalMargin,
+    required this.bottomNavIconOnlyVerticalMargin,
     required this.bottomNavInternalPadding,
     required this.bottomNavInnerRadius,
     required this.bottomNavBorderWidth,
@@ -451,13 +454,30 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonUnselectedLabelWeight,
     required this.navButtonSplashColor,
     required this.navButtonHighlightColor,
+    required this.navButtonSelectionContainerVerticalPadding,
+    required this.navButtonIconOnlyMinHeight,
+    required this.navButtonIconOnlyVerticalPadding,
+    required this.navButtonIconOnlySelectionContainerVerticalPadding,
   });
 
+  /// Reserved height for the compact bottom nav **row** at unit text scale.
+  ///
+  /// Hosts should prefer [compactBottomNavLayoutHeight] with the current
+  /// [TextScaler] so scroll padding tracks a11y text scaling.
   final double compactBottomNavBarBaseHeight;
   final double bottomNavHorizontalMargin;
   final double bottomNavVerticalMargin;
+
+  /// Top inset above the compact bar when it is **icon-only** (tighter strip).
+  final double bottomNavIconOnlyVerticalMargin;
   final double bottomNavInternalPadding;
-  double get bottomNavRadius => bottomNavInnerRadius + bottomNavItemGap;
+
+  /// Corner radius of the compact floating bottom bar (shadow + [Material]).
+  ///
+  /// Uses the same value as [bottomNavInnerRadius] so the outer shell and
+  /// per-item tap targets share one corner radius.
+  double get bottomNavRadius => bottomNavInnerRadius;
+
   final double bottomNavInnerRadius;
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
@@ -516,6 +536,96 @@ class TilawaAdaptiveShellTokens {
   /// [InkWell.highlightColor] for shell nav destinations.
   final Color navButtonHighlightColor;
 
+  /// Vertical padding inside the compact nav item pill ([AnimatedContainer] in
+  /// the shell). Included in [compactBottomNavLayoutHeight] so reserved shell
+  /// padding matches painted chrome.
+  final double navButtonSelectionContainerVerticalPadding;
+
+  /// Min height for each compact nav slot in **icon-only** mode (no labels).
+  final double navButtonIconOnlyMinHeight;
+
+  /// Outer vertical padding around the icon column in icon-only compact nav.
+  final double navButtonIconOnlyVerticalPadding;
+
+  /// Pill vertical padding in icon-only compact nav (tighter than labeled).
+  final double navButtonIconOnlySelectionContainerVerticalPadding;
+
+  /// Height of the compact bottom nav row for [textScaler] (icon column + one
+  /// label line), floored at [navButtonMinHeight].
+  ///
+  /// Matches the compact bottom nav column (icon + gap + label line + pill
+  /// padding) so [TilawaShellPadding] can clear the painted bar.
+  double compactBottomNavLayoutHeight(TextScaler textScaler) =>
+      TilawaAdaptiveShellTokens._compactBottomNavLayoutHeight(
+        navButtonMinHeight: navButtonMinHeight,
+        navButtonVerticalPadding: navButtonVerticalPadding,
+        navButtonIconSize: navButtonIconSize,
+        navButtonSelectedCenterScale: navButtonSelectedCenterScale,
+        navButtonGap: navButtonGap,
+        navButtonLabelFontSize: navButtonLabelFontSize,
+        navButtonSelectionContainerVerticalPadding:
+            navButtonSelectionContainerVerticalPadding,
+        textScaler: textScaler,
+      );
+
+  /// Height of the compact bottom nav row in **icon-only** mode.
+  ///
+  /// Matches [_NavButton] when labels are hidden; use with
+  /// [compactBottomNavLayoutHeight] so scroll padding tracks the shorter bar.
+  double compactBottomNavIconOnlyLayoutHeight(TextScaler textScaler) =>
+      TilawaAdaptiveShellTokens._compactBottomNavIconOnlyLayoutHeight(
+        navButtonIconOnlyMinHeight: navButtonIconOnlyMinHeight,
+        navButtonIconOnlyVerticalPadding: navButtonIconOnlyVerticalPadding,
+        navButtonIconOnlySelectionContainerVerticalPadding:
+            navButtonIconOnlySelectionContainerVerticalPadding,
+        navButtonIconSize: navButtonIconSize,
+        navButtonSelectedCenterScale: navButtonSelectedCenterScale,
+        textScaler: textScaler,
+      );
+
+  static double _compactBottomNavIconOnlyLayoutHeight({
+    required double navButtonIconOnlyMinHeight,
+    required double navButtonIconOnlyVerticalPadding,
+    required double navButtonIconOnlySelectionContainerVerticalPadding,
+    required double navButtonIconSize,
+    required double navButtonSelectedCenterScale,
+    required TextScaler textScaler,
+  }) {
+    final double iconBlock =
+        navButtonIconOnlyVerticalPadding * 2 +
+        textScaler.scale(navButtonIconSize) * navButtonSelectedCenterScale;
+    final double pillVerticalInset =
+        2 * navButtonIconOnlySelectionContainerVerticalPadding;
+    return math.max(
+      textScaler.scale(navButtonIconOnlyMinHeight),
+      iconBlock + pillVerticalInset,
+    );
+  }
+
+  static double _compactBottomNavLayoutHeight({
+    required double navButtonMinHeight,
+    required double navButtonVerticalPadding,
+    required double navButtonIconSize,
+    required double navButtonSelectedCenterScale,
+    required double navButtonGap,
+    required double navButtonLabelFontSize,
+    required double navButtonSelectionContainerVerticalPadding,
+    required TextScaler textScaler,
+  }) {
+    const double labelLineHeight = 1.15;
+    final double labelBlock =
+        textScaler.scale(navButtonLabelFontSize) * labelLineHeight;
+    final double iconBlock =
+        navButtonVerticalPadding * 2 +
+        navButtonIconSize * navButtonSelectedCenterScale;
+    final double pillVerticalInset =
+        2 * navButtonSelectionContainerVerticalPadding;
+    return math.max(
+      navButtonMinHeight,
+      iconBlock + navButtonGap + labelBlock + pillVerticalInset,
+    );
+  }
+
   factory TilawaAdaptiveShellTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
@@ -538,10 +648,34 @@ class TilawaAdaptiveShellTokens {
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     final bool lightChrome = colorScheme.brightness == Brightness.light;
+    const double navButtonMinHeight = 54;
+    const double navButtonVerticalPadding = 4;
+    const double navButtonIconSize = 22;
+    const double navButtonSelectedCenterScale = 1.1;
+    const double navButtonGap = 4;
+    const double navButtonLabelFontSize = 10;
+    const double navButtonSelectionContainerVerticalPadding = 5;
+    const double navButtonIconOnlyMinHeight = 40;
+    const double navButtonIconOnlyVerticalPadding = 1;
+    const double navButtonIconOnlySelectionContainerVerticalPadding = 2;
+    const TextScaler unitTextScaler = TextScaler.linear(1);
+    final double compactBottomNavBarBaseHeight =
+        TilawaAdaptiveShellTokens._compactBottomNavLayoutHeight(
+          navButtonMinHeight: navButtonMinHeight,
+          navButtonVerticalPadding: navButtonVerticalPadding,
+          navButtonIconSize: navButtonIconSize,
+          navButtonSelectedCenterScale: navButtonSelectedCenterScale,
+          navButtonGap: navButtonGap,
+          navButtonLabelFontSize: navButtonLabelFontSize,
+          navButtonSelectionContainerVerticalPadding:
+              navButtonSelectionContainerVerticalPadding,
+          textScaler: unitTextScaler,
+        );
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: 45,
+      compactBottomNavBarBaseHeight: compactBottomNavBarBaseHeight,
       bottomNavHorizontalMargin: 16,
       bottomNavVerticalMargin: 4,
+      bottomNavIconOnlyVerticalMargin: 2,
       bottomNavInternalPadding: 8,
       bottomNavInnerRadius: 24,
       bottomNavBorderWidth: 1,
@@ -560,11 +694,11 @@ class TilawaAdaptiveShellTokens {
       sideRailShadowOpacity: 0.05,
       sideRailShadowBlur: 12,
       sideRailShadowOffset: Offset(2, 0),
-      navButtonMinHeight: 54,
-      navButtonVerticalPadding: 4,
-      navButtonGap: 4,
-      navButtonIconSize: 22,
-      navButtonSelectedCenterScale: 1.1,
+      navButtonMinHeight: navButtonMinHeight,
+      navButtonVerticalPadding: navButtonVerticalPadding,
+      navButtonGap: navButtonGap,
+      navButtonIconSize: navButtonIconSize,
+      navButtonSelectedCenterScale: navButtonSelectedCenterScale,
       navButtonUnselectedScale: 0.95,
       navButtonSelectedBackgroundColor: _navButtonSelectedBackgroundColor(
         colorScheme,
@@ -572,11 +706,17 @@ class TilawaAdaptiveShellTokens {
       ),
       navButtonSelectedBackgroundOpacity: 0.2,
       navButtonSelectedCenterOpacity: 0.25,
-      navButtonLabelFontSize: 10,
+      navButtonLabelFontSize: navButtonLabelFontSize,
       navButtonSelectedLabelWeight: FontWeight.w700,
       navButtonUnselectedLabelWeight: FontWeight.w500,
       navButtonSplashColor: _navButtonSplashColor(colorScheme),
       navButtonHighlightColor: _navButtonHighlightColor(colorScheme),
+      navButtonSelectionContainerVerticalPadding:
+          navButtonSelectionContainerVerticalPadding,
+      navButtonIconOnlyMinHeight: navButtonIconOnlyMinHeight,
+      navButtonIconOnlyVerticalPadding: navButtonIconOnlyVerticalPadding,
+      navButtonIconOnlySelectionContainerVerticalPadding:
+          navButtonIconOnlySelectionContainerVerticalPadding,
     );
   }
 
@@ -647,6 +787,7 @@ class TilawaAdaptiveShellTokens {
     double? compactBottomNavBarBaseHeight,
     double? bottomNavHorizontalMargin,
     double? bottomNavVerticalMargin,
+    double? bottomNavIconOnlyVerticalMargin,
     double? bottomNavInternalPadding,
     double? bottomNavInnerRadius,
     double? bottomNavBorderWidth,
@@ -677,6 +818,10 @@ class TilawaAdaptiveShellTokens {
     FontWeight? navButtonUnselectedLabelWeight,
     Color? navButtonSplashColor,
     Color? navButtonHighlightColor,
+    double? navButtonSelectionContainerVerticalPadding,
+    double? navButtonIconOnlyMinHeight,
+    double? navButtonIconOnlyVerticalPadding,
+    double? navButtonIconOnlySelectionContainerVerticalPadding,
   }) {
     return TilawaAdaptiveShellTokens(
       compactBottomNavBarBaseHeight:
@@ -685,6 +830,9 @@ class TilawaAdaptiveShellTokens {
           bottomNavHorizontalMargin ?? this.bottomNavHorizontalMargin,
       bottomNavVerticalMargin:
           bottomNavVerticalMargin ?? this.bottomNavVerticalMargin,
+      bottomNavIconOnlyVerticalMargin:
+          bottomNavIconOnlyVerticalMargin ??
+          this.bottomNavIconOnlyVerticalMargin,
       bottomNavInternalPadding:
           bottomNavInternalPadding ?? this.bottomNavInternalPadding,
       bottomNavInnerRadius: bottomNavInnerRadius ?? this.bottomNavInnerRadius,
@@ -735,6 +883,17 @@ class TilawaAdaptiveShellTokens {
       navButtonSplashColor: navButtonSplashColor ?? this.navButtonSplashColor,
       navButtonHighlightColor:
           navButtonHighlightColor ?? this.navButtonHighlightColor,
+      navButtonSelectionContainerVerticalPadding:
+          navButtonSelectionContainerVerticalPadding ??
+          this.navButtonSelectionContainerVerticalPadding,
+      navButtonIconOnlyMinHeight:
+          navButtonIconOnlyMinHeight ?? this.navButtonIconOnlyMinHeight,
+      navButtonIconOnlyVerticalPadding:
+          navButtonIconOnlyVerticalPadding ??
+          this.navButtonIconOnlyVerticalPadding,
+      navButtonIconOnlySelectionContainerVerticalPadding:
+          navButtonIconOnlySelectionContainerVerticalPadding ??
+          this.navButtonIconOnlySelectionContainerVerticalPadding,
     );
   }
 
@@ -757,6 +916,11 @@ class TilawaAdaptiveShellTokens {
       bottomNavVerticalMargin: lerpTokenDouble(
         a.bottomNavVerticalMargin,
         b.bottomNavVerticalMargin,
+        t,
+      ),
+      bottomNavIconOnlyVerticalMargin: lerpTokenDouble(
+        a.bottomNavIconOnlyVerticalMargin,
+        b.bottomNavIconOnlyVerticalMargin,
         t,
       ),
       bottomNavInternalPadding: lerpTokenDouble(
@@ -901,6 +1065,26 @@ class TilawaAdaptiveShellTokens {
         b.navButtonHighlightColor,
         t,
       )!,
+      navButtonSelectionContainerVerticalPadding: lerpTokenDouble(
+        a.navButtonSelectionContainerVerticalPadding,
+        b.navButtonSelectionContainerVerticalPadding,
+        t,
+      ),
+      navButtonIconOnlyMinHeight: lerpTokenDouble(
+        a.navButtonIconOnlyMinHeight,
+        b.navButtonIconOnlyMinHeight,
+        t,
+      ),
+      navButtonIconOnlyVerticalPadding: lerpTokenDouble(
+        a.navButtonIconOnlyVerticalPadding,
+        b.navButtonIconOnlyVerticalPadding,
+        t,
+      ),
+      navButtonIconOnlySelectionContainerVerticalPadding: lerpTokenDouble(
+        a.navButtonIconOnlySelectionContainerVerticalPadding,
+        b.navButtonIconOnlySelectionContainerVerticalPadding,
+        t,
+      ),
     );
   }
 }
@@ -967,7 +1151,7 @@ class TilawaSettingsGroupTokens {
   final double switchActiveTrackOpacity;
   final double tileItemGap;
 
-  /// Selected row fill for [TilawaSelectionTile] (primary tint on surface).
+  /// Selected row fill for [TilawaSelectionTile] (transparent by default).
   final Color selectionTileSelectedBackgroundColor;
 
   /// Rounded panel fill behind settings rows ([TilawaSettingsGroup]).
@@ -1007,11 +1191,7 @@ class TilawaSettingsGroupTokens {
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
     const tileIconContainerOpacity = 0.1;
-    final selectionTileSelectedBackgroundColor =
-        _selectionTileSelectedRowBackground(
-          colorScheme,
-          tileIconContainerOpacity,
-        );
+    const selectionTileSelectedBackgroundColor = Colors.transparent;
     const tileDividerOpacity = 0.05;
     final groupSurfaceColor = colorScheme.surfaceContainerLow;
     final groupContainerBorderColor = _groupContainerBorderColor(
@@ -1117,16 +1297,6 @@ class TilawaSettingsGroupTokens {
     double tileDividerOpacity,
   ) {
     return colorScheme.outlineVariant.withValues(alpha: tileDividerOpacity * 2);
-  }
-
-  static Color _selectionTileSelectedRowBackground(
-    ColorScheme colorScheme,
-    double tileIconContainerOpacity,
-  ) {
-    return Color.alphaBlend(
-      colorScheme.primary.withValues(alpha: tileIconContainerOpacity * 3),
-      colorScheme.surface,
-    );
   }
 
   TilawaSettingsGroupTokens copyWith({

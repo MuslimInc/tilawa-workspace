@@ -140,15 +140,36 @@ class _MainScreenState extends State<MainScreen> {
               final adaptiveShellTokens = Theme.of(
                 context,
               ).componentTokens.adaptiveShell;
+              final textScaler = MediaQuery.textScalerOf(context);
+              final double estimatedBottomNavInnerWidth =
+                  MediaQuery.sizeOf(context).width -
+                  2 * adaptiveShellTokens.bottomNavHorizontalMargin -
+                  2 * adaptiveShellTokens.bottomNavBorderWidth;
+              final bool compactIconOnlyBottomNav =
+                  context.isCompact &&
+                  estimatedBottomNavInnerWidth <
+                      TilawaBreakpoints.compactBottomNavAllLabelsMinInnerWidth;
+              final double compactNavRowHeight = compactIconOnlyBottomNav
+                  ? adaptiveShellTokens.compactBottomNavIconOnlyLayoutHeight(
+                      textScaler,
+                    )
+                  : adaptiveShellTokens.compactBottomNavLayoutHeight(
+                      textScaler,
+                    );
+              final double compactNavContentGap = compactIconOnlyBottomNav
+                  ? context.tokens.spaceLarge
+                  : context.tokens.spaceExtraLarge;
               // Total visual footprint of the floating bottom nav bar =
-              // base height + safe-area bottom + vertical margin + a visual
-              // gap so overlapping widgets (mini player, FABs) sit clearly
-              // above it rather than hugging its top edge.
+              // row height + safe-area bottom + vertical margin + a visual gap
+              // so overlapping widgets sit clearly above the bar.
+              final double compactNavTopMargin = compactIconOnlyBottomNav
+                  ? adaptiveShellTokens.bottomNavIconOnlyVerticalMargin
+                  : adaptiveShellTokens.bottomNavVerticalMargin;
               final double bottomNavBarHeight = context.isCompact
-                  ? (adaptiveShellTokens.compactBottomNavBarBaseHeight +
+                  ? (compactNavRowHeight +
                         bottomPadding +
-                        adaptiveShellTokens.bottomNavVerticalMargin +
-                        context.tokens.spaceExtraLarge)
+                        compactNavTopMargin +
+                        compactNavContentGap)
                   : bottomPadding;
 
               final List<_NavDestination> navDestinations = _buildDestinations(
@@ -236,9 +257,11 @@ class _MainShellContent extends StatelessWidget {
     final double playerHeight = playerShouldShow && !isKeyboardOpen
         ? context.tokens.playerCollapsedHeight
         : 0;
+    final double overlayBleedBuffer =
+        (playerShouldShow && !isKeyboardOpen) ? context.tokens.spaceSmall : 0;
     final double contentBottomPadding = isKeyboardOpen
         ? 0
-        : bottomNavBarHeight + playerHeight;
+        : bottomNavBarHeight + playerHeight + overlayBleedBuffer;
 
     return TilawaAdaptiveShell(
       destinations: adaptiveDestinations,

@@ -469,11 +469,7 @@ class _SettingsProfileCard extends StatelessWidget {
             vertical: tokens.spaceLarge,
           ),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [colorScheme.primary, colorScheme.secondary],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: colorScheme.primary,
             borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           ),
           child: Row(
@@ -644,6 +640,7 @@ class _ColorPickerSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final colorScheme = Theme.of(context).colorScheme;
     final isCustom = currentSource == PrimaryColorSource.custom;
 
     return SafeArea(
@@ -680,22 +677,22 @@ class _ColorPickerSheet extends StatelessWidget {
                 );
               }),
               TilawaSelectionTile(
-                leading: SizedBox.square(
-                  dimension:
-                      TilawaSettingsScreenTokens.primaryPickerCustomSwatchSize,
-                  child: const DecoratedBox(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: SweepGradient(
-                        colors: [
-                          Colors.red,
-                          Colors.blue,
-                          Colors.green,
-                          Colors.red,
-                        ],
-                      ),
-                    ),
-                  ),
+                leading: CircleAvatar(
+                  radius: TilawaSettingsScreenTokens
+                      .primaryPickerPresetSwatchRadius,
+                  backgroundColor: isCustom
+                      ? currentColor
+                      : colorScheme.surfaceContainerHigh,
+                  child: isCustom
+                      ? null
+                      : Icon(
+                          FluentIcons.color_24_regular,
+                          size:
+                              TilawaSettingsScreenTokens
+                                  .primaryPickerCustomSwatchSize *
+                              0.5,
+                          color: colorScheme.primary,
+                        ),
                 ),
                 title: context.l10n.custom,
                 isSelected: isCustom,

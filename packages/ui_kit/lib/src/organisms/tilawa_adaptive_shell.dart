@@ -9,6 +9,15 @@ import '../foundation/design_tokens.dart';
 import '../foundation/display_feature_insets.dart';
 import '../foundation/safe_area_ext.dart';
 
+/// Visible label policy for the compact bottom navigation row.
+enum _CompactNavLabelStrategy {
+  /// Every destination shows its label (may still ellipsis if l10n is long).
+  all,
+
+  /// Icons only; equal slot widths ([Expanded] flex 1 each).
+  iconOnly,
+}
+
 /// Builds the icon widget for a nav destination. Receives selection state and
 /// the resolved tint the shell would apply to a material [Icon]; callers may
 /// honor or ignore the color as they see fit (e.g. multi-color SVGs).
@@ -187,6 +196,16 @@ class _BottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
     final bottomPadding = context.floatingBottomPadding;
+    final double estimatedInnerWidth =
+        MediaQuery.sizeOf(context).width -
+        2 * tokens.bottomNavHorizontalMargin -
+        2 * tokens.bottomNavBorderWidth;
+    final bool iconOnlyBar =
+        estimatedInnerWidth <
+        TilawaBreakpoints.compactBottomNavAllLabelsMinInnerWidth;
+    final double topInset = iconOnlyBar
+        ? tokens.bottomNavIconOnlyVerticalMargin
+        : tokens.bottomNavVerticalMargin;
 
     final BorderRadius shellRadius = BorderRadius.circular(
       tokens.bottomNavRadius,
@@ -200,7 +219,7 @@ class _BottomNavBar extends StatelessWidget {
             padding ??
             EdgeInsets.fromLTRB(
               tokens.bottomNavHorizontalMargin,
-              tokens.bottomNavVerticalMargin,
+              topInset,
               tokens.bottomNavHorizontalMargin,
               bottomPadding,
             ),
@@ -231,21 +250,33 @@ class _BottomNavBar extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: DecoratedBox(
               decoration: decoration ?? const BoxDecoration(),
-              child: Row(
-                spacing: tokens.bottomNavItemGap,
-                mainAxisAlignment: .spaceBetween,
-                crossAxisAlignment: .start,
-                children: [
-                  for (int i = 0; i < destinations.length; i++)
-                    Expanded(
-                      child: _NavButton(
-                        destination: destinations[i],
-                        isSelected: selectedIndex == i,
-                        onTap: () => onDestinationSelected(i),
-                        borderRadius: tokens.bottomNavInnerRadius,
-                      ),
-                    ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, innerConstraints) {
+                  final strategy =
+                      innerConstraints.maxWidth >=
+                          TilawaBreakpoints
+                              .compactBottomNavAllLabelsMinInnerWidth
+                      ? _CompactNavLabelStrategy.all
+                      : _CompactNavLabelStrategy.iconOnly;
+
+                  return Row(
+                    spacing: tokens.bottomNavItemGap,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      for (int i = 0; i < destinations.length; i++)
+                        Expanded(
+                          child: _NavButton(
+                            destination: destinations[i],
+                            isSelected: selectedIndex == i,
+                            onTap: () => onDestinationSelected(i),
+                            borderRadius: tokens.bottomNavInnerRadius,
+                            compactLabelStrategy: strategy,
+                          ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -348,12 +379,14 @@ class _NavButton extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     required this.borderRadius,
+    required this.compactLabelStrategy,
   });
 
   final TilawaNavDestination destination;
   final bool isSelected;
   final VoidCallback onTap;
   final double borderRadius;
+  final _CompactNavLabelStrategy compactLabelStrategy;
 
   @override
   Widget build(BuildContext context) {
@@ -381,12 +414,15 @@ class _NavButton extends StatelessWidget {
     final BorderRadius effectiveBorderRadius = BorderRadius.circular(
       borderRadius,
     );
-    final BorderRadius pillRadius = BorderRadius.circular(borderRadius * 0.72);
+
+    final bool showVisibleLabel = switch (compactLabelStrategy) {
+      _CompactNavLabelStrategy.all => true,
+      _CompactNavLabelStrategy.iconOnly => false,
+    };
 
     final Widget column = Column(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
-      spacing: tokens.navButtonGap,
       mainAxisSize: MainAxisSize.min,
       children: [
         AnimatedScale(
@@ -407,26 +443,41 @@ class _NavButton extends StatelessWidget {
             child: KeyedSubtree(key: ValueKey(isSelected), child: iconWidget),
           ),
         ),
-        AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 200),
-          style: (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
-            fontSize: tokens.navButtonLabelFontSize,
-            fontWeight: isSelected
-                ? tokens.navButtonSelectedLabelWeight
-                : tokens.navButtonUnselectedLabelWeight,
-            color: isSelected ? selectedFg : unselectedFg,
-            height: 1.15,
+        if (showVisibleLabel) ...[
+          SizedBox(height: tokens.navButtonGap),
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 200),
+            style: (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
+              fontSize: tokens.navButtonLabelFontSize,
+              fontWeight: isSelected
+                  ? tokens.navButtonSelectedLabelWeight
+                  : tokens.navButtonUnselectedLabelWeight,
+              color: isSelected ? selectedFg : unselectedFg,
+              height: 1.15,
+            ),
+            child: Text(
+              destination.label,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+            ),
           ),
-          child: Text(
-            destination.label,
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
+        ],
       ],
     );
+
+    final bool iconOnly =
+        compactLabelStrategy == _CompactNavLabelStrategy.iconOnly;
+    final double slotMinHeight = iconOnly
+        ? tokens.navButtonIconOnlyMinHeight
+        : tokens.navButtonMinHeight;
+    final double outerVerticalPadding = iconOnly
+        ? tokens.navButtonIconOnlyVerticalPadding
+        : tokens.navButtonVerticalPadding;
+    final double pillVerticalPadding = iconOnly
+        ? tokens.navButtonIconOnlySelectionContainerVerticalPadding
+        : tokens.navButtonSelectionContainerVerticalPadding;
 
     // Full-cell tap target; selected tab gets a soft primary-tint pill
     // ([navButtonSelectedBackgroundColor]) for clearer wayfinding.
@@ -442,10 +493,10 @@ class _NavButton extends StatelessWidget {
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
+          constraints: BoxConstraints(minHeight: slotMinHeight),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              vertical: tokens.navButtonVerticalPadding,
+              vertical: outerVerticalPadding,
             ),
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -456,15 +507,15 @@ class _NavButton extends StatelessWidget {
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 220),
                       curve: Curves.easeOutCubic,
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                         horizontal: 8,
-                        vertical: 5,
+                        vertical: pillVerticalPadding,
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? tokens.navButtonSelectedBackgroundColor
                             : Colors.transparent,
-                        borderRadius: pillRadius,
+                        borderRadius: effectiveBorderRadius,
                       ),
                       child: column,
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../lib/src/foundation/breakpoints.dart';
 import '../../lib/src/foundation/design_tokens.dart';
 import '../../lib/src/organisms/tilawa_adaptive_shell.dart';
 import '../rtl_test_matrix.dart';
@@ -216,6 +217,152 @@ void main() {
 
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets(
+      'narrow inner width uses icons only with full semantics',
+      (tester) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
+          TilawaNavDestination(label: 'Prayer Times', icon: Icons.schedule),
+          TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
+          TilawaNavDestination(label: 'Athkar', icon: Icons.self_improvement),
+          TilawaNavDestination(
+            label: 'Settings',
+            icon: Icons.settings_outlined,
+          ),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('Reciters'), findsNothing);
+        expect(find.text('Prayer Times'), findsNothing);
+        expect(find.text('Quran'), findsNothing);
+        expect(find.text('Athkar'), findsNothing);
+        expect(find.text('Settings'), findsNothing);
+
+        expect(
+          tester.getSemantics(find.byIcon(Icons.person_outline)).label,
+          'Reciters',
+        );
+        expect(
+          tester.getSemantics(find.byIcon(Icons.schedule)).label,
+          'Prayer Times',
+        );
+      },
+    );
+
+    testWidgets(
+      'wide compact inner width keeps all destination labels visible',
+      (tester) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
+          TilawaNavDestination(label: 'Prayer Times', icon: Icons.schedule),
+          TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
+          TilawaNavDestination(label: 'Athkar', icon: Icons.self_improvement),
+          TilawaNavDestination(
+            label: 'Settings',
+            icon: Icons.settings_outlined,
+          ),
+        ];
+
+        final width =
+            TilawaBreakpoints.compactBottomNavAllLabelsMinInnerWidth.round() +
+            32 +
+            8;
+        await tester.binding.setSurfaceSize(Size(width.toDouble(), 800));
+        tester.view.physicalSize = Size(width.toDouble(), 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('Reciters'), findsOneWidget);
+        expect(find.text('Prayer Times'), findsOneWidget);
+        expect(find.text('Quran'), findsOneWidget);
+        expect(find.text('Athkar'), findsOneWidget);
+        expect(find.text('Settings'), findsOneWidget);
+      },
+    );
+
+    testInBothDirections(
+      'icons only keeps Arabic destination titles in semantics',
+      (tester, direction) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'القراء', icon: Icons.person_outline),
+          TilawaNavDestination(label: 'أوقات الصلاة', icon: Icons.schedule),
+          TilawaNavDestination(
+            label: 'القرآن',
+            icon: Icons.menu_book_outlined,
+          ),
+        ];
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: direction,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 1,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.text('أوقات الصلاة'), findsNothing);
+        expect(find.text('القراء'), findsNothing);
+        expect(find.text('القرآن'), findsNothing);
+        expect(
+          tester.getSemantics(find.byIcon(Icons.schedule)).label,
+          'أوقات الصلاة',
+        );
+        expect(
+          tester.getSemantics(find.byIcon(Icons.person_outline)).label,
+          'القراء',
+        );
+      },
+    );
   });
 
   group('TilawaAdaptiveShell — bottomPlayer visibility', () {
