@@ -257,8 +257,9 @@ class _MainShellContent extends StatelessWidget {
     final double playerHeight = playerShouldShow && !isKeyboardOpen
         ? context.tokens.playerCollapsedHeight
         : 0;
-    final double overlayBleedBuffer =
-        (playerShouldShow && !isKeyboardOpen) ? context.tokens.spaceSmall : 0;
+    final double overlayBleedBuffer = (playerShouldShow && !isKeyboardOpen)
+        ? context.tokens.spaceSmall
+        : 0;
     final double contentBottomPadding = isKeyboardOpen
         ? 0
         : bottomNavBarHeight + playerHeight + overlayBleedBuffer;
