@@ -47,4 +47,8 @@ sealed class DownloadsEvent with _$DownloadsEvent {
 
   const factory DownloadsEvent.refreshDownloadsProgress() =
       RefreshDownloadsProgress;
+
+  /// Clears [DownloadsState.uiNotification] after the UI has handled it.
+  const factory DownloadsEvent.clearUiNotification() =
+      ClearDownloadsUiNotification;
 }

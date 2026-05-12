@@ -23,6 +23,10 @@ abstract class DownloadsState with _$DownloadsState {
     @Default({}) Map<String, Map<String, List<DownloadItem>>> downloads,
     @Default(0) int totalDownloadsSize,
     String? errorMessage,
+
+    /// Increments whenever [uiNotification] is set for one-shot UI (toasts).
+    @Default(0) int uiNotificationSeq,
+    DownloadsStatus? uiNotification,
   }) = _DownloadsState;
 
   const DownloadsState._();

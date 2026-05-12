@@ -1,6 +1,6 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/di/dependency_injection.dart';
@@ -197,8 +197,13 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     // Persistence is now immediate as timers are removed.
     try {
       await _saveLastVisitedPageUseCase.execute(event.pageNumber);
-    } catch (e) {
-      debugPrint('[NavigationBloc] failed to save last visited page: $e');
+    } catch (e, stackTrace) {
+      developer.log(
+        'failed to save last visited page',
+        name: 'NavigationBloc',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 

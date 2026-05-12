@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -29,30 +27,11 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   bool get wantKeepAlive => true;
 
   final ScrollController _scrollController = ScrollController();
-  StreamSubscription<DownloadsStatus>? _statusSubscription;
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
-
-    // Listen to status events
-    _statusSubscription = context.read<DownloadsBloc>().statusStream.listen((
-      status,
-    ) {
-      status.mapOrNull(
-        error: (s) {
-          final String msg =
-              (s.message.contains('No internet') ||
-                  s.message.contains('internet'))
-              ? context.l10n.networkError
-              : s.message;
-          ToastUtils.showToast(msg: msg);
-        },
-        premiumRequired: (s) => ToastUtils.showToast(msg: s.message),
-        playbackInitiated: (s) => ToastUtils.showToast(msg: s.message),
-      );
-    });
 
     // Load downloads when the screen is first displayed
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -62,7 +41,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
   @override
   void dispose() {
-    _statusSubscription?.cancel();
     _scrollController.dispose();
     super.dispose();
   }
@@ -85,32 +63,53 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
-    return Scaffold(
-      appBar: AppBar(
-        leading: context.canPop() ? const TilawaBackButton() : null,
-        title: Text(context.l10n.downloads),
-        actions: [
-          TilawaIconActionButton(
-            icon: Icons.refresh_rounded,
-            onTap: _loadDownloads,
-          ),
-          SizedBox(width: 8),
-          TilawaIconActionButton(
-            icon: Icons.delete_sweep_rounded,
-            onTap: () => _showClearAllDialog(context),
-          ),
-          SizedBox(width: 8),
-        ],
-      ),
-      body: Stack(
-        children: [
-          BlocBuilder<DownloadsBloc, DownloadsState>(
-            builder: (context, state) {
-              return _DownloadsBody(state: state);
-            },
-          ),
-          const Positioned.fill(child: QuranPlayerWidget()),
-        ],
+    return BlocListener<DownloadsBloc, DownloadsState>(
+      listenWhen: (DownloadsState previous, DownloadsState current) =>
+          current.uiNotificationSeq != previous.uiNotificationSeq &&
+          current.uiNotification != null,
+      listener: (BuildContext context, DownloadsState state) {
+        final DownloadsStatus status = state.uiNotification!;
+        status.mapOrNull(
+          error: (s) {
+            final String msg =
+                (s.message.contains('No internet') ||
+                    s.message.contains('internet'))
+                ? context.l10n.networkError
+                : s.message;
+            ToastUtils.showToast(msg: msg);
+          },
+          premiumRequired: (s) => ToastUtils.showToast(msg: s.message),
+          playbackInitiated: (s) => ToastUtils.showToast(msg: s.message),
+        );
+        context.read<DownloadsBloc>().add(const ClearDownloadsUiNotification());
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          leading: context.canPop() ? const TilawaBackButton() : null,
+          title: Text(context.l10n.downloads),
+          actions: [
+            TilawaIconActionButton(
+              icon: Icons.refresh_rounded,
+              onTap: _loadDownloads,
+            ),
+            SizedBox(width: 8),
+            TilawaIconActionButton(
+              icon: Icons.delete_sweep_rounded,
+              onTap: () => _showClearAllDialog(context),
+            ),
+            SizedBox(width: 8),
+          ],
+        ),
+        body: Stack(
+          children: [
+            BlocBuilder<DownloadsBloc, DownloadsState>(
+              builder: (context, state) {
+                return _DownloadsBody(state: state);
+              },
+            ),
+            const Positioned.fill(child: QuranPlayerWidget()),
+          ],
+        ),
       ),
     );
   }

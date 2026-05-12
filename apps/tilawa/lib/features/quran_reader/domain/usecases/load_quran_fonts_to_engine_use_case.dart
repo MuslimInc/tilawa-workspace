@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/logger.dart';
 
@@ -47,6 +49,33 @@ class LoadQuranFontsToEngineUseCase {
       _repository.ensureSingleFontLoaded(pageNumber);
 
   bool isFontLoaded(int pageNumber) => _repository.isFontLoaded(pageNumber);
+
+  /// Waits until [isFontLoaded] becomes true for [pageNumber], starting a load
+  /// if needed, or throws [TimeoutException] if [timeout] elapses.
+  Future<void> ensureFontReady(
+    int pageNumber, {
+    Duration timeout = const Duration(seconds: 1),
+  }) async {
+    if (isFontLoaded(pageNumber)) return;
+
+    final Future<void> loadFuture = ensureSingleFontLoaded(pageNumber);
+    var loadCompleted = false;
+    unawaited(
+      loadFuture.whenComplete(() {
+        loadCompleted = true;
+      }),
+    );
+
+    final Stopwatch stopwatch = Stopwatch()..start();
+    while (!isFontLoaded(pageNumber) && !loadCompleted) {
+      if (stopwatch.elapsed >= timeout) {
+        throw TimeoutException(
+          'Font for page $pageNumber did not become ready within $timeout',
+        );
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 16));
+    }
+  }
 
   Future<void> warmInitialPage(int pageNumber) =>
       _repository.warmInitialPage(pageNumber);

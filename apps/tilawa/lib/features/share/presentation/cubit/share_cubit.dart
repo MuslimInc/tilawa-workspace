@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'dart:ui' show Color;
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran_qcf/quran_qcf.dart';
@@ -611,9 +611,13 @@ class ShareCubit extends Cubit<ShareState> {
   }
 
   /// Exports the currently reviewed media as a persistent copy.
-  Future<String?> savePreparedContent() async {
+  ///
+  /// On success, updates [ShareState.lastSaveExportPath]; clears it when a new
+  /// save starts or when content cannot be exported.
+  Future<void> savePreparedContent() async {
+    emit(state.copyWith(lastSaveExportPath: null));
     final content = state.content;
-    if (content == null || content is ShareText) return null;
+    if (content == null || content is ShareText) return;
 
     final int tSave = DateTime.now().millisecondsSinceEpoch;
     logger.d('[SHARE_FLOW] savePreparedContent start | t=${tSave}ms');
@@ -622,7 +626,7 @@ class ShareCubit extends Cubit<ShareState> {
       logger.d(
         '[SHARE_FLOW] savePreparedContent success | took=${DateTime.now().millisecondsSinceEpoch - tSave}ms | path=$exportedPath',
       );
-      return exportedPath;
+      emit(state.copyWith(lastSaveExportPath: exportedPath));
     } catch (e, st) {
       logger.e(
         '[SHARE_FLOW] savePreparedContent failure after ${DateTime.now().millisecondsSinceEpoch - tSave}ms',

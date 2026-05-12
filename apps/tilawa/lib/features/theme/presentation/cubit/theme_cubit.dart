@@ -1,27 +1,31 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/features/theme/domain/app_theme_mode.dart';
 import 'package:tilawa/features/theme/domain/entities/app_theme_preset.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Whether the current primary color came from a [PrimaryColorPreset] or a
 /// user-picked custom HEX value.
 enum PrimaryColorSource { preset, custom }
 
+/// ARGB for [PrimaryColorPreset.teal] / [PrimaryColorPreset.defaultPreset].
+const int _kDefaultPrimaryColorArgb = 0xFF1AADC5;
+
 class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
-    this.primaryColor = AppColors.primaryTeal,
+    this.primaryColorArgb = _kDefaultPrimaryColorArgb,
     this.primaryColorSource = PrimaryColorSource.preset,
     this.primaryPresetId = 'teal',
     this.useSystemTheme = false,
     this.preset = AppThemePreset.defaultMode,
   });
 
-  final ThemeMode mode;
-  final Color primaryColor;
+  final AppThemeMode mode;
+
+  /// Packed ARGB primary seed color for [AppTheme] generation.
+  final int primaryColorArgb;
   final PrimaryColorSource primaryColorSource;
 
   /// Set when [primaryColorSource] is [PrimaryColorSource.preset]. Null for
@@ -31,7 +35,7 @@ class ThemeState extends Equatable {
   /// Persisted for backward compatibility, but currently deferred.
   ///
   /// This flag is restored and saved, however app runtime theming still uses
-  /// [mode] directly (no [ThemeMode.system] wiring yet).
+  /// [mode] directly (no OS-driven system theme wiring yet).
   final bool useSystemTheme;
 
   /// Persisted theme-preset bucket for deferred/partial theme variants.
@@ -46,8 +50,8 @@ class ThemeState extends Equatable {
   final AppThemePreset preset;
 
   ThemeState copyWith({
-    ThemeMode? mode,
-    Color? primaryColor,
+    AppThemeMode? mode,
+    int? primaryColorArgb,
     PrimaryColorSource? primaryColorSource,
     String? primaryPresetId,
     bool clearPrimaryPresetId = false,
@@ -56,7 +60,7 @@ class ThemeState extends Equatable {
   }) {
     return ThemeState(
       mode: mode ?? this.mode,
-      primaryColor: primaryColor ?? this.primaryColor,
+      primaryColorArgb: primaryColorArgb ?? this.primaryColorArgb,
       primaryColorSource: primaryColorSource ?? this.primaryColorSource,
       primaryPresetId: clearPrimaryPresetId
           ? null
@@ -69,7 +73,7 @@ class ThemeState extends Equatable {
   @override
   List<Object?> get props => [
     mode,
-    primaryColor,
+    primaryColorArgb,
     primaryColorSource,
     primaryPresetId,
     useSystemTheme,
@@ -79,15 +83,15 @@ class ThemeState extends Equatable {
 
 @injectable
 class ThemeCubit extends HydratedCubit<ThemeState> {
-  ThemeCubit() : super(const ThemeState(mode: ThemeMode.light));
+  ThemeCubit() : super(const ThemeState(mode: AppThemeMode.light));
 
   @override
   ThemeState? fromJson(Map<String, dynamic> json) {
     try {
       final modeValue = json['mode'] as String?;
-      final ThemeMode mode = switch (modeValue) {
-        'dark' => ThemeMode.dark,
-        _ => ThemeMode.light,
+      final AppThemeMode mode = switch (modeValue) {
+        'dark' => AppThemeMode.dark,
+        _ => AppThemeMode.light,
       };
 
       final bool useSystemTheme = json['useSystemTheme'] as bool? ?? false;
@@ -102,7 +106,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
       final sourceValue = json['primaryColorSource'] as String?;
       final storedPresetId = json['primaryPresetId'] as String?;
 
-      Color primaryColor;
+      int primaryColorArgb;
       PrimaryColorSource primaryColorSource;
       String? primaryPresetId;
 
@@ -112,36 +116,36 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         final preset =
             PrimaryColorPreset.findById(storedPresetId) ??
             PrimaryColorPreset.defaultPreset;
-        primaryColor = preset.value;
+        primaryColorArgb = preset.valueArgb;
         primaryColorSource = PrimaryColorSource.preset;
         primaryPresetId = preset.id;
       } else if (sourceValue == 'custom' && colorValue != null) {
         // New shape, custom HEX preserved verbatim.
-        primaryColor = Color(colorValue);
+        primaryColorArgb = colorValue;
         primaryColorSource = PrimaryColorSource.custom;
         primaryPresetId = null;
       } else if (colorValue != null) {
         // Legacy payload (no source field). Migrate by ARGB lookup.
         final match = PrimaryColorPreset.findByArgb(colorValue);
         if (match != null) {
-          primaryColor = match.value;
+          primaryColorArgb = match.valueArgb;
           primaryColorSource = PrimaryColorSource.preset;
           primaryPresetId = match.id;
         } else {
-          primaryColor = Color(colorValue);
+          primaryColorArgb = colorValue;
           primaryColorSource = PrimaryColorSource.custom;
           primaryPresetId = null;
         }
       } else {
         // Missing/unparseable color → full default.
-        primaryColor = PrimaryColorPreset.defaultPreset.value;
+        primaryColorArgb = PrimaryColorPreset.defaultPreset.valueArgb;
         primaryColorSource = PrimaryColorSource.preset;
         primaryPresetId = PrimaryColorPreset.defaultPreset.id;
       }
 
       return ThemeState(
         mode: mode,
-        primaryColor: primaryColor,
+        primaryColorArgb: primaryColorArgb,
         primaryColorSource: primaryColorSource,
         primaryPresetId: primaryPresetId,
         useSystemTheme: useSystemTheme,
@@ -149,8 +153,8 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
       );
     } catch (_) {
       return ThemeState(
-        mode: ThemeMode.light,
-        primaryColor: PrimaryColorPreset.defaultPreset.value,
+        mode: AppThemeMode.light,
+        primaryColorArgb: PrimaryColorPreset.defaultPreset.valueArgb,
         primaryColorSource: PrimaryColorSource.preset,
         primaryPresetId: PrimaryColorPreset.defaultPreset.id,
       );
@@ -160,8 +164,8 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
   @override
   Map<String, dynamic>? toJson(ThemeState state) {
     return {
-      'mode': state.mode == ThemeMode.dark ? 'dark' : 'light',
-      'primaryColor': state.primaryColor.toARGB32(),
+      'mode': state.mode == AppThemeMode.dark ? 'dark' : 'light',
+      'primaryColor': state.primaryColorArgb,
       'primaryColorSource':
           state.primaryColorSource == PrimaryColorSource.custom
           ? 'custom'
@@ -176,7 +180,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     emit(state.copyWith(preset: preset));
   }
 
-  Future<void> setMode(ThemeMode mode) async {
+  Future<void> setMode(AppThemeMode mode) async {
     emit(state.copyWith(mode: mode));
   }
 
@@ -184,19 +188,19 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
   Future<void> setPrimaryPreset(PrimaryColorPreset preset) async {
     emit(
       state.copyWith(
-        primaryColor: preset.value,
+        primaryColorArgb: preset.valueArgb,
         primaryColorSource: PrimaryColorSource.preset,
         primaryPresetId: preset.id,
       ),
     );
   }
 
-  /// Apply a user-picked custom HEX color. Marks the source as
-  /// [PrimaryColorSource.custom] and clears the preset id.
-  Future<void> setPrimaryColor(Color color) async {
+  /// Apply a user-picked custom color as packed ARGB (same encoding as
+  /// [Color.toARGB32]).
+  Future<void> setPrimaryColorArgb(int argb) async {
     emit(
       state.copyWith(
-        primaryColor: color,
+        primaryColorArgb: argb,
         primaryColorSource: PrimaryColorSource.custom,
         clearPrimaryPresetId: true,
       ),
@@ -205,34 +209,11 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
 
   Future<void> setUseSystemTheme(bool useSystemTheme) async {
     // Deferred field: persisted for compatibility, but not yet wired to
-    // MaterialApp.themeMode / ThemeMode.system behavior.
+    // MaterialApp.themeMode / OS system wiring.
     emit(state.copyWith(useSystemTheme: useSystemTheme));
   }
 
   Future<void> toggleDark(bool enabled) async {
-    await setMode(enabled ? ThemeMode.dark : ThemeMode.light);
-  }
-
-  /// Whether the cubit's current primary color is the brand default preset.
-  /// Used to opt into the hand-tuned default **dark** primary on surface in
-  /// [AppTheme]. Light `primaryContainer` always follows `_containerForPrimary`.
-  bool get _isDefaultPreset =>
-      state.primaryColorSource == PrimaryColorSource.preset &&
-      state.primaryPresetId == PrimaryColorPreset.defaultPreset.id;
-
-  /// Get the current light theme
-  ThemeData getLightTheme() {
-    return AppTheme.getLightTheme(primaryColor: state.primaryColor);
-  }
-
-  /// Get the current dark theme
-  ThemeData getDarkTheme() {
-    return AppTheme.getDarkTheme(
-      primaryColor: state.primaryColor,
-      isDefaultPreset: _isDefaultPreset,
-      // Partial wiring only: trueBlack currently affects dark theme surfaces.
-      // highContrast remains reserved/deferred at runtime.
-      darkIsTrueBlack: state.preset == AppThemePreset.trueBlack,
-    );
+    await setMode(enabled ? AppThemeMode.dark : AppThemeMode.light);
   }
 }

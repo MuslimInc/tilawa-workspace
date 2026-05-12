@@ -1,6 +1,5 @@
 part of 'reciter_download_bloc.dart';
 
-@immutable
 abstract class ReciterDownloadEvent extends Equatable {
   const ReciterDownloadEvent();
 

@@ -22,6 +22,9 @@ enum PrimaryColorPreset {
   /// The concrete color rendered for this preset.
   final Color value;
 
+  /// ARGB value matching [value], for layers that avoid a [Color] type.
+  int get valueArgb => value.toARGB32();
+
   /// Default primary preset for fresh installs and corrupt-payload fallback.
   static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.teal;
 

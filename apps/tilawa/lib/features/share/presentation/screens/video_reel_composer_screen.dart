@@ -522,8 +522,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     final cubit = context.read<ShareCubit>();
     final l10n = context.l10n;
     try {
-      final exportedPath = await cubit.savePreparedContent();
-      if (!context.mounted || exportedPath == null) return;
+      await cubit.savePreparedContent();
+      if (!context.mounted) return;
+      final exportedPath = cubit.state.lastSaveExportPath;
+      if (exportedPath == null) return;
       _showInfoSnackBar(
         context,
         '${l10n.save} ${l10n.completed}: ${exportedPath.split('/').last}',

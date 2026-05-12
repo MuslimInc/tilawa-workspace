@@ -25,6 +25,7 @@ import 'features/localization/presentation/bloc/localization_bloc.dart';
 import 'features/theme/domain/entities/app_theme_preset.dart';
 import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
+import 'features/theme/presentation/theme_state_material.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'router/app_router.dart';
 
@@ -178,7 +179,7 @@ class _PlayerApp extends StatelessWidget {
                   density: density,
                   extensions: [QuranReaderTheme.dark],
                 ),
-                themeMode: themeState.mode,
+                themeMode: themeState.themeMode,
                 routerConfig: AppRouter.router,
                 // Disable restoration when launched from notification
                 restorationScopeId: AppRouter.disableStateRestoration

@@ -16,13 +16,14 @@ import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
 import '../../../../features/share/presentation/cubit/share_cubit.dart';
 import '../../../../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../../../../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
-import '../bloc/quran_font_loader_bloc.dart';
+import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 import '../theme/quran_reader_theme.dart';
 
 /// Wraps `quran_image`'s reader flow inside the Tilawa app.
@@ -178,12 +179,12 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
     final serverUrl = audioState.currentAudio?.url ?? '';
     final shareCubit = context.read<ShareCubit>();
-    final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
+    final fontEngine = getIt<LoadQuranFontsToEngineUseCase>();
     final navigator = Navigator.of(context);
     final theme = Theme.of(context);
     final readerOverlayStyle = _buildReaderSystemUiOverlayStyle(theme);
 
-    fontLoaderBloc.pauseBackgroundWarmUp();
+    fontEngine.pauseBackgroundWarmUp();
     SystemChrome.setSystemUIOverlayStyle(
       _buildShareSheetSystemUiOverlayStyle(theme),
     );
@@ -238,7 +239,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
       );
     } finally {
       SystemChrome.setSystemUIOverlayStyle(readerOverlayStyle);
-      fontLoaderBloc.resumeBackgroundWarmUp();
+      fontEngine.resumeBackgroundWarmUp();
     }
   }
 

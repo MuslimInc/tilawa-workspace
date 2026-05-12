@@ -16,8 +16,10 @@ import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../color_picker/color_picker.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
+import '../../../theme/domain/app_theme_mode.dart';
 import '../../../theme/domain/primary_color_preset.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
+import '../../../theme/presentation/theme_state_material.dart';
 import '../cubit/settings_cubit.dart';
 
 // ── Top-level sheet / dialog helpers ─────────────────────────────────────────
@@ -71,7 +73,9 @@ void _showCustomColorPicker(BuildContext context, Color currentColor) {
           ),
           TextButton(
             onPressed: () {
-              ctx.read<ThemeCubit>().setPrimaryColor(pickerColor);
+              ctx.read<ThemeCubit>().setPrimaryColorArgb(
+                pickerColor.toARGB32(),
+              );
               Navigator.of(ctx).pop();
             },
             child: Text(ctx.l10n.save),
@@ -258,7 +262,7 @@ class SettingsScreen extends StatelessWidget {
                               icon: FluentIcons.dark_theme_24_regular,
                               iconColor: AppColors.settingsTheme,
                               title: context.l10n.darkTheme,
-                              value: state.mode == ThemeMode.dark,
+                              value: state.mode == AppThemeMode.dark,
                               onChanged: (value) =>
                                   context.read<ThemeCubit>().toggleDark(value),
                               borderRadius: BorderRadius.vertical(

@@ -23,8 +23,10 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../../../../core/utils/performance_monitor.dart';
+import '../../../../core/di/injection.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
+import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 import '../bloc/quran_font_loader_bloc.dart';
 import '../bloc/quran_reader_bloc.dart';
 import '../utils/reader_side_effects_observer.dart';
@@ -91,6 +93,8 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   late final ValueNotifier<PreparedQuranPageWindow?> _preparedWindowNotifier;
   late final ValueNotifier<bool> _showOverlaysNotifier;
   late final ValueNotifier<_WarmingState> _warmingNotifier;
+  late final LoadQuranFontsToEngineUseCase _fontEngine =
+      getIt<LoadQuranFontsToEngineUseCase>();
   late final UiVisibilityCubit _uiVisibilityCubit;
   late final GlobalKey _screenshotBoundaryKey;
   bool _didInitDependencies = false;
@@ -560,11 +564,9 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     if (!kReleaseMode) {
       logger.i('[PERF][WINDOW] start p$centerPage');
     }
-    final QuranFontLoaderBloc fontLoaderBloc = context
-        .read<QuranFontLoaderBloc>();
     await Future.wait([
       quranQcfLocator<QuranFontService>().ensureQuranDataLoaded(),
-      fontLoaderBloc.ensureFontReady(centerPage),
+      _fontEngine.ensureFontReady(centerPage),
     ]);
     if (!mounted) return;
     if (!kReleaseMode) {
@@ -587,7 +589,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
         continue;
       }
 
-      await fontLoaderBloc.ensureFontReady(pageNumber);
+      await _fontEngine.ensureFontReady(pageNumber);
       if (!mounted || _pendingWindowCenterPage != centerPage) return;
       await _yieldForNeighborPreparation();
       if (!mounted || _pendingWindowCenterPage != centerPage) return;
@@ -680,7 +682,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
     // Phase 9: Pause global background warming to ensure the UI thread and Raster thread
     // are dedicated entirely to the user's current interaction.
-    context.read<QuranFontLoaderBloc>().pauseBackgroundWarmUp();
+    _fontEngine.pauseBackgroundWarmUp();
 
     // Reduce adjacent-page prebuild work while the user is actively dragging.
     // This frees raster budget for the current transition frame.
@@ -709,7 +711,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       _cacheExtentRestoreTimer?.cancel();
 
       // Resume global background warming only after the interaction has settled.
-      context.read<QuranFontLoaderBloc>().resumeBackgroundWarmUp();
+      _fontEngine.resumeBackgroundWarmUp();
 
       // Restore cache extent only after interaction settles to avoid
       // raster spikes from neighboring page builds during active swipe.
@@ -761,9 +763,8 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     if (uniquePages.isEmpty) return;
 
     // Priority 1: Ensure fonts are registered in the engine's font manager.
-    final fontLoader = context.read<QuranFontLoaderBloc>();
     for (final p in uniquePages) {
-      unawaited(fontLoader.ensureFontReady(p));
+      unawaited(_fontEngine.ensureFontReady(p));
     }
 
     // Priority 2: Force GPU rasterization by rotating through the pages in the ghost layer.
@@ -836,14 +837,13 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       return;
     }
 
-    final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     if (_currentPageNotifier.value != pageNumber) {
       _currentPageNotifier.value = pageNumber;
     }
 
     await Future.wait([
       quranQcfLocator<QuranFontService>().ensureQuranDataLoaded(),
-      fontLoaderBloc.ensureFontReady(pageNumber),
+      _fontEngine.ensureFontReady(pageNumber),
     ]);
     _preparePageWindowSync(pageNumber);
     _scheduleVisibleWindowPreparation(pageNumber);
@@ -887,7 +887,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
     final serverUrl = audioState.currentAudio?.url ?? '';
     final shareCubit = context.read<ShareCubit>();
-    final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     final navigator = Navigator.of(context);
     final theme = Theme.of(context);
     final readerOverlayStyle = AppSystemChromeStyle.quranReaderStyle;
@@ -917,7 +916,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       () =>
           '[SHARE_OPEN] pushing route | took=${DateTime.now().millisecondsSinceEpoch - t0}ms before push',
     );
-    fontLoaderBloc.pauseBackgroundWarmUp();
+    _fontEngine.pauseBackgroundWarmUp();
     SystemChrome.setSystemUIOverlayStyle(
       _buildShareSheetSystemUiOverlayStyle(theme),
     );
@@ -974,7 +973,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       );
     } finally {
       SystemChrome.setSystemUIOverlayStyle(readerOverlayStyle);
-      fontLoaderBloc.resumeBackgroundWarmUp();
+      _fontEngine.resumeBackgroundWarmUp();
     }
 
     _hotPathLog(
@@ -1032,7 +1031,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
   Future<void> _prewarmSurahIndexFonts() async {
     if (!mounted) return;
-    final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
     // Collect unique page numbers for all 114 surah start pages.
     final Set<int> pages = {};
     for (int s = 1; s <= 114; s++) {
@@ -1049,8 +1047,8 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     // Each call deduplicates if the font is already in the engine.
     for (final page in pages) {
       if (!mounted) return;
-      final bool wasLoaded = fontLoaderBloc.isFontLoaded(page);
-      await fontLoaderBloc.ensureFontReady(
+      final bool wasLoaded = _fontEngine.isFontLoaded(page);
+      await _fontEngine.ensureFontReady(
         page,
         timeout: const Duration(seconds: 2),
       );
@@ -1074,10 +1072,8 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     _currentPageNotifier.value = pageNumber;
     if (_programmaticJumpNotifier.value) return;
 
-    final fontLoaderBloc = context.read<QuranFontLoaderBloc>();
-
     // Pause background warming immediately to keep the frame budget clear for the animation
-    fontLoaderBloc.pauseBackgroundWarmUp();
+    _fontEngine.pauseBackgroundWarmUp();
 
     // Synchronously update the window notifier so the center page is
     // available to PageContent._handleWindowChanged before the next frame.
@@ -1119,7 +1115,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
 
     unawaited(
       (_pendingWindowPreparation ?? Future<void>.value()).whenComplete(() {
-        fontLoaderBloc.resumeBackgroundWarmUp();
+        _fontEngine.resumeBackgroundWarmUp();
 
         // Proactively warm neighbor pages in the ghost layer after current page is ready
         if (mounted && _enableGhostWarming) {
@@ -1151,11 +1147,11 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final int currentPage = _currentPageNotifier.value;
 
     // Pause global warming to ensure the jump transition is as smooth as possible.
-    fontLoaderBloc.pauseBackgroundWarmUp();
+    _fontEngine.pauseBackgroundWarmUp();
 
     await Future.wait([
       quranQcfLocator<QuranFontService>().ensureQuranDataLoaded(),
-      fontLoaderBloc.ensureFontReady(pageNumber),
+      _fontEngine.ensureFontReady(pageNumber),
     ]);
     _preparePageWindowSync(pageNumber);
     _scheduleVisibleWindowPreparation(pageNumber);
@@ -1196,7 +1192,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       if (mounted) {
         _programmaticJumpNotifier.value = false;
         // Resume background warming once the jump has settled.
-        fontLoaderBloc.resumeBackgroundWarmUp();
+        _fontEngine.resumeBackgroundWarmUp();
       }
     });
   }
@@ -1515,11 +1511,11 @@ void _hotPathLog(String Function() messageBuilder) {
 class _PerformanceBenchmarkOverlay extends StatefulWidget {
   const _PerformanceBenchmarkOverlay({
     required this.currentPageNotifier,
-    required this.fontLoaderBloc,
+    required this.fontEngine,
   });
 
   final ValueListenable<int> currentPageNotifier;
-  final QuranFontLoaderBloc fontLoaderBloc;
+  final LoadQuranFontsToEngineUseCase fontEngine;
 
   @override
   State<_PerformanceBenchmarkOverlay> createState() =>
@@ -1590,7 +1586,7 @@ class __PerformanceBenchmarkOverlayState
           ValueListenableBuilder<int>(
             valueListenable: widget.currentPageNotifier,
             builder: (context, page, _) {
-              final isLoaded = widget.fontLoaderBloc.isFontLoaded(page);
+              final isLoaded = widget.fontEngine.isFontLoaded(page);
               return _buildStat(
                 'Font Ready',
                 isLoaded ? 'YES' : 'NO',

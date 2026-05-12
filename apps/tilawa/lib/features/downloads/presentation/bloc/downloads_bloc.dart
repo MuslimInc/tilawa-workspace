@@ -1,4 +1,3 @@
-// ignore_for_file: avoid_public_methods_on_bloc_instances
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
@@ -98,6 +97,7 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       _onRefreshDownloadsProgress,
       transformer: debounce(const Duration(milliseconds: 1000)),
     );
+    on<ClearDownloadsUiNotification>(_onClearDownloadsUiNotification);
 
     _listenToGlobalProgress();
   }
@@ -122,13 +122,21 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
   StreamSubscription<DownloadProgress>? _progressSubscription;
 
-  // Broadcast stream controller for one-time status events
-  // This allows UI to react to events without changing the main state
-  final StreamController<DownloadsStatus> _statusController =
-      StreamController<DownloadsStatus>.broadcast();
+  void _notifyUi(Emitter<DownloadsState> emit, DownloadsStatus notification) {
+    emit(
+      state.copyWith(
+        uiNotification: notification,
+        uiNotificationSeq: state.uiNotificationSeq + 1,
+      ),
+    );
+  }
 
-  /// Exposes a broadcast stream of status events
-  Stream<DownloadsStatus> get statusStream => _statusController.stream;
+  void _onClearDownloadsUiNotification(
+    ClearDownloadsUiNotification event,
+    Emitter<DownloadsState> emit,
+  ) {
+    emit(state.copyWith(uiNotification: null));
+  }
 
   /// Listens to global download progress updates to refresh the list when necessary.
   ///
@@ -171,7 +179,6 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   @override
   Future<void> close() async {
     await _progressSubscription?.cancel();
-    await _statusController.close();
     return super.close();
   }
 
@@ -211,7 +218,8 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
   }
 
   /// Helper to check if a download can proceed (Premium check + Active check)
-  Future<bool> _canStartDownload({
+  Future<bool> _canStartDownload(
+    Emitter<DownloadsState> emit, {
     required String downloadId,
     required String title,
     required String reciterName,
@@ -223,14 +231,13 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
     final bool canDownload = accessResult.getOrElse(() => false);
     if (!canDownload) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          const DownloadsStatus.premiumRequired(
-            message:
-                'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
-          ),
-        );
-      }
+      _notifyUi(
+        emit,
+        const DownloadsStatus.premiumRequired(
+          message:
+              'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
+        ),
+      );
       return false;
     }
 
@@ -243,14 +250,13 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
           status == DownloadStatus.paused;
 
       if (isActive) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            DownloadsStatus.error(
-              message:
-                  'Surah "$title" by $reciterName is already being downloaded',
-            ),
-          );
-        }
+        _notifyUi(
+          emit,
+          DownloadsStatus.error(
+            message:
+                'Surah "$title" by $reciterName is already being downloaded',
+          ),
+        );
         return false;
       }
     } catch (e) {
@@ -270,20 +276,20 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       reciterName: event.reciterName,
     );
     if (downloadedResult.getOrElse(() => false)) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.error(
-            message:
-                'Surah "${event.surahTitle}" by ${event.reciterName} is already downloaded',
-          ),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.error(
+          message:
+              'Surah "${event.surahTitle}" by ${event.reciterName} is already downloaded',
+        ),
+      );
       return;
     }
 
     // Use consolidated validation check
     // SurahId is URL, which is used as TaskId
     final bool canProceed = await _canStartDownload(
+      emit,
       downloadId: event.surahId,
       title: event.surahTitle,
       reciterName: event.reciterName,
@@ -309,17 +315,16 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
     // Emit download started state
     // Emit download started status
-    if (!_statusController.isClosed) {
-      _statusController.add(
-        DownloadsStatus.downloadStarted(
-          surahId: downloadItem.id.split(
-            '_',
-          )[0], // Extract surah ID from download ID
-          surahTitle: downloadItem.title,
-          reciterName: downloadItem.reciterName,
-        ),
-      );
-    }
+    _notifyUi(
+      emit,
+      DownloadsStatus.downloadStarted(
+        surahId: downloadItem.id.split(
+          '_',
+        )[0], // Extract surah ID from download ID
+        surahTitle: downloadItem.title,
+        reciterName: downloadItem.reciterName,
+      ),
+    );
 
     final Either<Failure, void> result = await _downloadSurah(
       surahId: event.surahId,
@@ -330,13 +335,12 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
     result.fold(
       (failure) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            DownloadsStatus.error(
-              message: failure.message ?? 'Failed to download surah',
-            ),
-          );
-        }
+        _notifyUi(
+          emit,
+          DownloadsStatus.error(
+            message: failure.message ?? 'Failed to download surah',
+          ),
+        );
       },
       (_) {
         // Reload downloads after successful download
@@ -381,13 +385,12 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     );
     result.fold(
       (failure) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            DownloadsStatus.error(
-              message: failure.message ?? 'Failed to delete download',
-            ),
-          );
-        }
+        _notifyUi(
+          emit,
+          DownloadsStatus.error(
+            message: failure.message ?? 'Failed to delete download',
+          ),
+        );
       },
       (_) {
         // Reload downloads after successful deletion
@@ -407,13 +410,12 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     );
     result.fold(
       (failure) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            DownloadsStatus.error(
-              message: failure.message ?? 'Failed to delete reciter downloads',
-            ),
-          );
-        }
+        _notifyUi(
+          emit,
+          DownloadsStatus.error(
+            message: failure.message ?? 'Failed to delete reciter downloads',
+          ),
+        );
       },
       (_) {
         // Reload downloads after successful deletion
@@ -434,13 +436,12 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
     final Either<Failure, void> result = await _clearAllDownloads();
     result.fold(
       (failure) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            DownloadsStatus.error(
-              message: failure.message ?? 'Failed to clear all downloads',
-            ),
-          );
-        }
+        _notifyUi(
+          emit,
+          DownloadsStatus.error(
+            message: failure.message ?? 'Failed to clear all downloads',
+          ),
+        );
       },
       (_) {
         // Reload downloads after successful clearing
@@ -461,32 +462,29 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
       result.fold(
         (failure) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.error(
-                message: failure.message ?? 'Failed to check download status',
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.error(
+              message: failure.message ?? 'Failed to check download status',
+            ),
+          );
         },
         (isDownloaded) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.surahDownloadStatus(
-                surahId: event.surahId,
-                reciterName: event.reciterName,
-                isDownloaded: isDownloaded,
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.surahDownloadStatus(
+              surahId: event.surahId,
+              reciterName: event.reciterName,
+              isDownloaded: isDownloaded,
+            ),
+          );
         },
       );
     } catch (e) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.error(message: 'Failed to check download status: $e'),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.error(message: 'Failed to check download status: $e'),
+      );
     }
   }
 
@@ -514,31 +512,28 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
           await _validateDownloadedFile(download);
       validationResult.fold(
         (failure) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.error(
-                message: failure.message ?? 'Failed to validate file',
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.error(
+              message: failure.message ?? 'Failed to validate file',
+            ),
+          );
         },
         (isValid) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.fileValidationResult(
-                downloadId: event.downloadId,
-                isValid: isValid,
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.fileValidationResult(
+              downloadId: event.downloadId,
+              isValid: isValid,
+            ),
+          );
         },
       );
     } catch (e) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.error(message: 'Failed to validate file: $e'),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.error(message: 'Failed to validate file: $e'),
+      );
     }
   }
 
@@ -552,33 +547,29 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
       result.fold(
         (failure) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.error(
-                message:
-                    failure.message ??
-                    'Failed to get valid completed downloads',
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.error(
+              message:
+                  failure.message ?? 'Failed to get valid completed downloads',
+            ),
+          );
         },
         (validDownloads) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.validDownloadsLoaded(
-                reciterName: event.reciterName,
-                validDownloads: validDownloads,
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.validDownloadsLoaded(
+              reciterName: event.reciterName,
+              validDownloads: validDownloads,
+            ),
+          );
         },
       );
     } catch (e) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.error(message: 'Failed to get valid downloads: $e'),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.error(message: 'Failed to get valid downloads: $e'),
+      );
     }
   }
 
@@ -593,11 +584,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       final DownloadItem? download = result.getOrElse(() => null);
 
       if (download == null) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            const DownloadsStatus.error(message: 'Download not found'),
-          );
-        }
+        _notifyUi(
+          emit,
+          const DownloadsStatus.error(message: 'Download not found'),
+        );
         return;
       }
 
@@ -607,11 +597,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       final bool fileExists = validationResult.getOrElse(() => false);
 
       if (!fileExists) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            const DownloadsStatus.error(message: 'Downloaded file not found'),
-          );
-        }
+        _notifyUi(
+          emit,
+          const DownloadsStatus.error(message: 'Downloaded file not found'),
+        );
         return;
       }
 
@@ -620,30 +609,27 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
       playResult.fold(
         (failure) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.error(
-                message: failure.message ?? 'Error playing surah',
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.error(
+              message: failure.message ?? 'Error playing surah',
+            ),
+          );
         },
         (_) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.playbackInitiated(
-                message: 'Playing ${download.title}',
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.playbackInitiated(
+              message: 'Playing ${download.title}',
+            ),
+          );
         },
       );
     } catch (e) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.error(message: 'Error playing surah: $e'),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.error(message: 'Error playing surah: $e'),
+      );
     }
   }
 
@@ -657,13 +643,12 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       final List<DownloadItem> validDownloads = result.getOrElse(() => []);
 
       if (validDownloads.isEmpty) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            const DownloadsStatus.error(
-              message: 'No valid downloaded files found',
-            ),
-          );
-        }
+        _notifyUi(
+          emit,
+          const DownloadsStatus.error(
+            message: 'No valid downloaded files found',
+          ),
+        );
         return;
       }
 
@@ -674,31 +659,28 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
       playResult.fold(
         (failure) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.error(
-                message: failure.message ?? 'Error playing downloads',
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.error(
+              message: failure.message ?? 'Error playing downloads',
+            ),
+          );
         },
         (_) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.playbackInitiated(
-                message:
-                    'Playing ${validDownloads.length} surahs from ${event.reciterName}',
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.playbackInitiated(
+              message:
+                  'Playing ${validDownloads.length} surahs from ${event.reciterName}',
+            ),
+          );
         },
       );
     } catch (e) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.error(message: 'Error playing downloads: $e'),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.error(message: 'Error playing downloads: $e'),
+      );
     }
   }
 
@@ -712,33 +694,30 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       );
       result.fold(
         (failure) {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.error(
-                message: failure.message ?? 'Failed to check premium access',
+          _notifyUi(
+            emit,
+            DownloadsStatus.error(
+              message: failure.message ?? 'Failed to check premium access',
+            ),
+          );
+        },
+        (canDownload) {
+          if (!canDownload) {
+            _notifyUi(
+              emit,
+              const DownloadsStatus.premiumRequired(
+                message:
+                    'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
               ),
             );
           }
         },
-        (canDownload) {
-          if (!canDownload) {
-            if (!_statusController.isClosed) {
-              _statusController.add(
-                const DownloadsStatus.premiumRequired(
-                  message:
-                      'Download feature requires premium subscription. Upgrade to unlock unlimited downloads!',
-                ),
-              );
-            }
-          }
-        },
       );
     } catch (e) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.error(message: 'Failed to check premium access: $e'),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.error(message: 'Failed to check premium access: $e'),
+      );
     }
   }
 
@@ -753,11 +732,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       );
       final DownloadItem? downloadItem = result.getOrElse(() => null);
       if (downloadItem == null) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            const DownloadsStatus.error(message: 'Download not found'),
-          );
-        }
+        _notifyUi(
+          emit,
+          const DownloadsStatus.error(message: 'Download not found'),
+        );
         return;
       }
 
@@ -772,18 +750,18 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
 
       // Allow retry for failed downloads or stuck downloads
       if (downloadItem.status != DownloadStatus.failed && !isStuck) {
-        if (!_statusController.isClosed) {
-          _statusController.add(
-            const DownloadsStatus.error(
-              message: 'Only failed or stuck downloads can be retried',
-            ),
-          );
-        }
+        _notifyUi(
+          emit,
+          const DownloadsStatus.error(
+            message: 'Only failed or stuck downloads can be retried',
+          ),
+        );
         return;
       }
 
       // Use consolidated validation check
       final bool canProceed = await _canStartDownload(
+        emit,
         downloadId: event.downloadId,
         title: downloadItem.title,
         reciterName: downloadItem.reciterName,
@@ -793,15 +771,14 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       }
 
       // Emit download started state
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.downloadStarted(
-            surahId: downloadItem.id.split('_')[0],
-            surahTitle: downloadItem.title,
-            reciterName: downloadItem.reciterName,
-          ),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.downloadStarted(
+          surahId: downloadItem.id.split('_')[0],
+          surahTitle: downloadItem.title,
+          reciterName: downloadItem.reciterName,
+        ),
+      );
 
       // Retry the download using UseCase
       final Either<Failure, void> retryResult = await _retryDownload(
@@ -809,13 +786,12 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
       );
       await retryResult.fold(
         (failure) async {
-          if (!_statusController.isClosed) {
-            _statusController.add(
-              DownloadsStatus.error(
-                message: failure.message ?? 'Failed to retry download',
-              ),
-            );
-          }
+          _notifyUi(
+            emit,
+            DownloadsStatus.error(
+              message: failure.message ?? 'Failed to retry download',
+            ),
+          );
         },
         (_) async {
           // Reload downloads after successful retry
@@ -823,11 +799,10 @@ class DownloadsBloc extends HydratedBloc<DownloadsEvent, DownloadsState> {
         },
       );
     } catch (e) {
-      if (!_statusController.isClosed) {
-        _statusController.add(
-          DownloadsStatus.error(message: 'Failed to retry download: $e'),
-        );
-      }
+      _notifyUi(
+        emit,
+        DownloadsStatus.error(message: 'Failed to retry download: $e'),
+      );
     }
   }
 
