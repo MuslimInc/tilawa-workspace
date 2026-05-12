@@ -11,6 +11,7 @@ class MainBottomOverlay extends StatelessWidget {
     required this.isKeyboardOpen,
     required this.isAudioBindingDeferred,
     required this.isOfflineIndicatorReady,
+    this.compactBottomNavBarVisible,
     this.hostAbsorbsBottomSafeArea = false,
   });
 
@@ -18,6 +19,10 @@ class MainBottomOverlay extends StatelessWidget {
   final bool isKeyboardOpen;
   final bool isAudioBindingDeferred;
   final bool isOfflineIndicatorReady;
+
+  /// Hides the main shell compact bottom bar while the Quran player is
+  /// expanded past [TilawaDesignTokens.playerProgressThreshold].
+  final ValueNotifier<bool>? compactBottomNavBarVisible;
 
   /// Passed to [QuranPlayerWidget.hostAbsorbsBottomSafeArea] (compact shell).
   final bool hostAbsorbsBottomSafeArea;
@@ -29,6 +34,7 @@ class MainBottomOverlay extends StatelessWidget {
         : QuranPlayerWidget(
             bottomNavBarHeight: bottomNavBarHeight,
             isKeyboardOpen: isKeyboardOpen,
+            compactBottomNavBarVisible: compactBottomNavBarVisible,
             hostAbsorbsBottomSafeArea: hostAbsorbsBottomSafeArea,
           );
 

@@ -30,6 +30,7 @@ class QuranPlayerWidget extends StatefulWidget {
     super.key,
     this.bottomNavBarHeight = 0,
     this.isKeyboardOpen = false,
+    this.compactBottomNavBarVisible,
     this.hostAbsorbsBottomSafeArea = false,
   });
 
@@ -63,6 +64,13 @@ class QuranPlayerWidget extends StatefulWidget {
 
   /// Whether the keyboard is currently open.
   final bool isKeyboardOpen;
+
+  /// When non-null, set to `false` while expand progress is at or above
+  /// [TilawaDesignTokens.playerProgressThreshold] so a host
+  /// [TilawaAdaptiveShell] can hide its compact bottom bar for a true
+  /// full-screen expanded player. Stays `true` while collapsed so dismiss
+  /// gestures never hide the bar.
+  final ValueNotifier<bool>? compactBottomNavBarVisible;
 
   /// When true with [bottomNavBarHeight] == 0, the mini player anchors flush
   /// to the layout bottom (no [floatingBottomPadding]) because the host already
@@ -112,10 +120,24 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         '[QPlayer] expandController status=${status.name}, value=${_expandController.value.toStringAsFixed(3)}',
       );
     });
+    _expandController.addListener(_syncCompactBottomNavBarVisible);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncCompactBottomNavBarVisible();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant QuranPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.compactBottomNavBarVisible !=
+        widget.compactBottomNavBarVisible) {
+      _syncCompactBottomNavBarVisible();
+    }
   }
 
   @override
   void dispose() {
+    _expandController.removeListener(_syncCompactBottomNavBarVisible);
     _expandController.dispose();
     _dismissAnimController.dispose();
     super.dispose();
@@ -151,6 +173,22 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     );
+  }
+
+  void _syncCompactBottomNavBarVisible() {
+    final ValueNotifier<bool>? n = widget.compactBottomNavBarVisible;
+    if (n == null || !mounted) return;
+    final double threshold = context.tokens.playerProgressThreshold;
+    final bool showBar = _expandController.value < threshold;
+    if (n.value != showBar) {
+      n.value = showBar;
+    }
+  }
+
+  void _ensureCompactBottomNavBarShown() {
+    final ValueNotifier<bool>? n = widget.compactBottomNavBarVisible;
+    if (n == null || n.value) return;
+    n.value = true;
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
@@ -267,6 +305,9 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         if (!state.shouldShowBottomPlayer ||
             audio == null ||
             (widget.isKeyboardOpen && !isExpanding)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _ensureCompactBottomNavBarShown();
+          });
           return const SizedBox.shrink();
         }
 
@@ -338,7 +379,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                             audio: audio,
                             onCollapse: collapse,
                             onDismiss: _dismissWithUndo,
-                            expandProgress: progress,
+                            expandProgress: 0,
                           ),
                         ),
                       ),
@@ -554,9 +595,7 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
       child: Material(
         color: Colors.black,
         elevation: expandProgress * 16,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(expandProgress * 24),
-        ),
+        shape: const RoundedRectangleBorder(),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,

@@ -34,8 +34,18 @@ class _MainScreenState extends State<MainScreen> {
     milliseconds: 600,
   );
 
+  final ValueNotifier<bool> _compactBottomNavVisible = ValueNotifier<bool>(
+    true,
+  );
+
   bool _prayerTimesLoadScheduled = false;
   int _lastHandledIndex = 0;
+
+  @override
+  void dispose() {
+    _compactBottomNavVisible.dispose();
+    super.dispose();
+  }
 
   void _handleTabSideEffects(BuildContext context, int previous, int next) {
     final PrayerTimesBloc prayerTimesBloc = context.read<PrayerTimesBloc>();
@@ -216,6 +226,7 @@ class _MainScreenState extends State<MainScreen> {
                   navDestinations: navDestinations,
                   bottomNavBarHeight: bottomNavBarHeight,
                   isKeyboardOpen: isKeyboardOpen,
+                  compactBottomNavVisible: _compactBottomNavVisible,
                 ),
               );
             },
@@ -235,6 +246,7 @@ class _MainShellContent extends StatelessWidget {
     required this.navDestinations,
     required this.bottomNavBarHeight,
     required this.isKeyboardOpen,
+    required this.compactBottomNavVisible,
   });
 
   final MainScreenState state;
@@ -242,6 +254,7 @@ class _MainShellContent extends StatelessWidget {
   final List<_NavDestination> navDestinations;
   final double bottomNavBarHeight;
   final bool isKeyboardOpen;
+  final ValueNotifier<bool> compactBottomNavVisible;
 
   @override
   Widget build(BuildContext context) {
@@ -280,11 +293,13 @@ class _MainShellContent extends StatelessWidget {
           navDestinations[index].index!,
         );
       },
+      compactBottomNavigationBarVisible: compactBottomNavVisible,
       bottomPlayer: MainBottomOverlay(
         bottomNavBarHeight: context.isCompact ? 0 : bottomNavBarHeight,
         isKeyboardOpen: isKeyboardOpen,
         isAudioBindingDeferred: state.isAudioBindingDeferred,
         isOfflineIndicatorReady: state.isOfflineIndicatorReady,
+        compactBottomNavBarVisible: compactBottomNavVisible,
         hostAbsorbsBottomSafeArea: context.isCompact,
       ),
       child: state.isInitialTabMounted
