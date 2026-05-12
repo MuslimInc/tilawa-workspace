@@ -70,6 +70,14 @@ A versatile container with soft shadows and rounded corners.
 ### TilawaLoadingIndicator
 A smooth, indeterminate progress indicator that matches the app's theme.
 
+### TilawaIllustratedState
+A reusable state layout for premium empty, permission, and onboarding-adjacent
+moments. It provides a token-backed visual slot, title, subtitle, and optional
+actions without owning feature-specific copy or assets.
+
+See [Premium Visual System](docs/premium_visual_system.md) for illustration and
+asset rules.
+
 ## Visual Testing
 
 ### Golden Tests
