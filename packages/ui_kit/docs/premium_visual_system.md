@@ -57,6 +57,7 @@ Avoid visuals:
 Add to UI Kit when the visual contract is reusable:
 
 - Generic illustrated state layouts.
+- Generic non-figurative state visuals.
 - Decorative pattern layers.
 - Shared skeleton/state layouts.
 - Tokenized surface, spacing, motion, and sizing rules.
@@ -76,3 +77,19 @@ It provides a token-backed layout with a custom visual slot, optional icon
 fallback, title, subtitle, and up to two actions. Feature screens should compose
 their own assets into this component instead of creating one-off state layouts.
 
+`TilawaStateVisual` is the default icon fallback for `TilawaIllustratedState`.
+It uses a soft geometric field, centered symbolic icon, and theme-derived color
+roles. Use it when a state benefits from warmth but does not need a bespoke
+asset. Pass `TilawaStateVisual` directly only when a feature needs a specific
+tone, size, or semantic label.
+
+Prefer the default visual for:
+
+- Downloads empty and retry states.
+- Reciters search/favorites empty states.
+- Qibla service, permission, and sensor error states.
+- Prayer location-required states.
+- Athkar and tasbeeh empty states.
+
+Use bespoke visual assets later only when the state has enough product value to
+justify a reviewed, feature-owned asset.

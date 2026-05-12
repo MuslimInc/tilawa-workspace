@@ -48,6 +48,7 @@ void main() {
         ),
       );
 
+      expect(find.byType(TilawaStateVisual), findsOneWidget);
       expect(find.byIcon(Icons.download_done_rounded), findsOneWidget);
       expect(find.text('Ready offline'), findsOneWidget);
     });

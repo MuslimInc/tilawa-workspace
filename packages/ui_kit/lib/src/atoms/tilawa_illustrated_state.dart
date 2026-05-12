@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import 'tilawa_state_visual.dart';
 
 /// A reusable, feature-agnostic state layout with an illustration slot.
 ///
@@ -66,10 +67,10 @@ class TilawaIllustratedState extends StatelessWidget {
 
     final stateVisual =
         visual ??
-        Icon(
-          icon,
-          size: stateTokens.iconSize,
-          color: iconColor ?? colorScheme.primary,
+        TilawaStateVisual(
+          icon: icon!,
+          accentColor: iconColor ?? colorScheme.primary,
+          size: stateTokens.iconSize + designTokens.spaceExtraLarge * 2,
         );
 
     return Center(
