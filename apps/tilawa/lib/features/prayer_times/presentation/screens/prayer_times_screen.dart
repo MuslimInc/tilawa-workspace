@@ -17,8 +17,8 @@ import '../../domain/services/prayer_adhan_notification_service_interface.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../config/prayer_times_screen_loading_preview.dart';
-import '../layout/prayer_times_layout.dart';
 import '../formatters/prayer_location_label_formatter.dart';
+import '../layout/prayer_times_layout.dart';
 import '../mappers/prayer_row_view_data_mapper.dart';
 import '../models/prayer_row_view_data.dart';
 import '../prayer_notification_semantics_ids.dart';
@@ -139,9 +139,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                 TilawaSegment(value: 'monthly', label: context.l10n.monthly),
               ],
               selectedValue: _selectedIndex == 0 ? 'today' : 'monthly',
-              selectedColor: theme.colorScheme.primaryContainer.withValues(
-                alpha: 0.92,
-              ),
+              selectedColor: theme.colorScheme.surfaceContainerHigh,
+              selectedTextColor: theme.colorScheme.primary,
               onValueChanged: _onSegmentChanged,
             ),
           ),
@@ -549,7 +548,7 @@ class _LocationUtilityCard extends StatelessWidget {
       child: TilawaCard(
         flat: true,
         borderRadius: tokens.radiusLarge,
-        backgroundColor: colorScheme.surfaceContainerLowest,
+        backgroundColor: colorScheme.surfaceContainerLow,
         borderColor: colorScheme.outlineVariant.withValues(
           alpha: tokens.opacityMedium,
         ),
@@ -610,7 +609,7 @@ class _BottomUtilitiesCard extends StatelessWidget {
       child: TilawaCard(
         flat: true,
         borderRadius: tokens.radiusLarge,
-        backgroundColor: colorScheme.surfaceContainerLowest,
+        backgroundColor: colorScheme.surfaceContainerLow,
         borderColor: colorScheme.outlineVariant.withValues(
           alpha: tokens.opacityMedium,
         ),
@@ -832,7 +831,7 @@ class _TodayPrayerListSection extends StatelessWidget {
       child: TilawaCard(
         flat: true,
         borderRadius: tokens.radiusLarge,
-        backgroundColor: colorScheme.surface,
+        backgroundColor: colorScheme.surfaceContainerLow,
         borderColor: colorScheme.outlineVariant.withValues(
           alpha: tokens.opacityMedium,
         ),
@@ -927,66 +926,112 @@ class _TodayPrayerListRow extends StatelessWidget {
         : (hasPassed ? tokens.opacityEmphasis : 1);
 
     return Material(
-      color: isCurrent
-          ? colorScheme.primaryContainer.withValues(alpha: 0.18)
-          : Colors.transparent,
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(tokens.radiusMedium),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: tokens.spaceExtraSmall,
-            horizontal: tokens.spaceSmall,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(tokens.radiusMedium),
+            border: isCurrent
+                ? Border.all(
+                    color: colorScheme.primary.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+                    width: tokens.borderWidthThin * 2,
+                  )
+                : null,
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final narrow = PrayerTimesLayout.isNarrowWidth(
-                constraints.maxWidth,
-              );
-              final bool compactChipLabels = showAlertChipLabels && !narrow;
-              final TextStyle nameStyle =
-                  theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                    color: rowColor.withValues(alpha: rowAlpha),
-                  ) ??
-                  TextStyle(
-                    fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                    color: rowColor.withValues(alpha: rowAlpha),
-                    fontSize: 15,
-                  );
-              final TextStyle statusStyle =
-                  theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: isCurrent
-                        ? rowColor.withValues(alpha: rowAlpha)
-                        : colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.92,
-                          ),
-                  ) ??
-                  TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                    color: isCurrent
-                        ? rowColor.withValues(alpha: rowAlpha)
-                        : colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.92,
-                          ),
-                  );
-              final TextStyle timeStyle =
-                  theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: rowColor.withValues(alpha: rowAlpha),
-                  ) ??
-                  TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: rowColor.withValues(alpha: rowAlpha),
-                    fontSize: 18,
-                  );
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: tokens.spaceExtraSmall,
+              horizontal: tokens.spaceSmall,
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final narrow = PrayerTimesLayout.isNarrowWidth(
+                  constraints.maxWidth,
+                );
+                final bool compactChipLabels = showAlertChipLabels && !narrow;
+                final TextStyle nameStyle =
+                    theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                      color: rowColor.withValues(alpha: rowAlpha),
+                    ) ??
+                    TextStyle(
+                      fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
+                      color: rowColor.withValues(alpha: rowAlpha),
+                      fontSize: 15,
+                    );
+                final TextStyle statusStyle =
+                    theme.textTheme.labelSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isCurrent
+                          ? rowColor.withValues(alpha: rowAlpha)
+                          : colorScheme.onSurfaceVariant.withValues(
+                              alpha: 0.92,
+                            ),
+                    ) ??
+                    TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      color: isCurrent
+                          ? rowColor.withValues(alpha: rowAlpha)
+                          : colorScheme.onSurfaceVariant.withValues(
+                              alpha: 0.92,
+                            ),
+                    );
+                final TextStyle timeStyle =
+                    theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: rowColor.withValues(alpha: rowAlpha),
+                    ) ??
+                    TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: rowColor.withValues(alpha: rowAlpha),
+                      fontSize: 18,
+                    );
 
-              if (narrow) {
+                if (narrow) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(prayerName, style: nameStyle),
+                            SizedBox(height: tokens.spaceExtraSmall / 2),
+                            Text(statusText, style: statusStyle),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: tokens.spaceSmall),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            prayerTime,
+                            style: timeStyle,
+                            textAlign: TextAlign.end,
+                          ),
+                          if (showAlertIndicators) ...[
+                            SizedBox(height: tokens.spaceExtraSmall),
+                            PrayerAlertStatusChip(
+                              alert: row.alert,
+                              showLabel: compactChipLabels,
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  );
+                }
+
                 return Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Column(
@@ -1000,53 +1045,18 @@ class _TodayPrayerListRow extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: tokens.spaceSmall),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          prayerTime,
-                          style: timeStyle,
-                          textAlign: TextAlign.end,
-                        ),
-                        if (showAlertIndicators) ...[
-                          SizedBox(height: tokens.spaceExtraSmall),
-                          PrayerAlertStatusChip(
-                            alert: row.alert,
-                            showLabel: compactChipLabels,
-                          ),
-                        ],
-                      ],
-                    ),
+                    Text(prayerTime, style: timeStyle),
+                    if (showAlertIndicators) ...[
+                      SizedBox(width: tokens.spaceMedium),
+                      PrayerAlertStatusChip(
+                        alert: row.alert,
+                        showLabel: showAlertChipLabels,
+                      ),
+                    ],
                   ],
                 );
-              }
-
-              return Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(prayerName, style: nameStyle),
-                        SizedBox(height: tokens.spaceExtraSmall / 2),
-                        Text(statusText, style: statusStyle),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: tokens.spaceSmall),
-                  Text(prayerTime, style: timeStyle),
-                  if (showAlertIndicators) ...[
-                    SizedBox(width: tokens.spaceMedium),
-                    PrayerAlertStatusChip(
-                      alert: row.alert,
-                      showLabel: showAlertChipLabels,
-                    ),
-                  ],
-                ],
-              );
-            },
+              },
+            ),
           ),
         ),
       ),

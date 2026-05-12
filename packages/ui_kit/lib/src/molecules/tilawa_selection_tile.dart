@@ -5,7 +5,7 @@ import '../foundation/component_tokens.dart';
 /// A standardized tile for selection lists in bottom sheets and dialogs.
 ///
 /// Use for picker options where one item can be selected at a time.
-/// Shows a checkmark when selected and applies primary color styling.
+/// Shows a checkmark and bolder label when selected; row fill stays neutral.
 class TilawaSelectionTile extends StatelessWidget {
   /// Creates a selection tile.
   const TilawaSelectionTile({
@@ -40,7 +40,7 @@ class TilawaSelectionTile extends StatelessWidget {
 
     final textStyle = theme.textTheme.bodyLarge?.copyWith(
       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-      color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+      color: colorScheme.onSurface,
     );
 
     return Column(
@@ -61,7 +61,7 @@ class TilawaSelectionTile extends StatelessWidget {
                   if (isSelected)
                     Icon(
                       Icons.check_rounded,
-                      color: colorScheme.primary,
+                      color: colorScheme.onSurfaceVariant,
                       size: tokens.tileTrailingSize,
                     ),
                 ],

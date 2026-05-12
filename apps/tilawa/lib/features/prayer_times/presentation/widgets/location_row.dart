@@ -30,11 +30,7 @@ class LocationRow extends StatelessWidget {
 
         return TilawaCard(
           onTap: hasQiblaAction || isLoading ? null : onUpdateLocation,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [colorScheme.surface, colorScheme.surfaceContainerLowest],
-          ),
+          backgroundColor: colorScheme.surfaceContainerLow,
           borderRadius: tokens.radiusExtraLarge,
           borderColor: colorScheme.outlineVariant.withValues(
             alpha: tokens.opacityMedium,
@@ -93,8 +89,10 @@ class _LocationIcon extends StatelessWidget {
     return TilawaIconBox(
       icon: Icons.location_on_rounded,
       size: compact ? tokens.iconSizeMedium : tokens.iconSizeLarge,
-      backgroundColor: colorScheme.primaryContainer,
-      iconColor: colorScheme.onPrimaryContainer,
+      backgroundColor: colorScheme.surfaceContainerHighest.withValues(
+        alpha: tokens.opacityMedium,
+      ),
+      iconColor: colorScheme.primary,
       borderRadius: compact ? tokens.radiusMedium : tokens.radiusLarge,
       padding: compact ? tokens.spaceSmall : tokens.spaceMedium,
     );
@@ -109,6 +107,7 @@ class _LocationInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
     return Expanded(
@@ -123,7 +122,7 @@ class _LocationInfo extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 2),
+          SizedBox(height: tokens.spaceExtraSmall),
           Text(
             (locationName != null && locationName!.isNotEmpty)
                 ? locationName!
@@ -181,8 +180,11 @@ class _LocationActionButton extends StatelessWidget {
                 child: TilawaIconBox(
                   icon: Icons.gps_fixed_rounded,
                   size: tokens.iconSizeMedium,
-                  backgroundColor: colorScheme.primaryContainer,
-                  iconColor: colorScheme.onPrimaryContainer,
+                  backgroundColor: colorScheme.surfaceContainerHighest
+                      .withValues(alpha: tokens.opacityMedium),
+                  iconColor: isLoading
+                      ? colorScheme.onSurfaceVariant
+                      : colorScheme.primary,
                   borderRadius: compact
                       ? tokens.radiusMedium
                       : tokens.radiusLarge - 4,
@@ -194,7 +196,7 @@ class _LocationActionButton extends StatelessWidget {
                           child: TilawaLoadingIndicator(
                             centered: false,
                             strokeWidth: 2,
-                            color: colorScheme.onPrimaryContainer,
+                            color: colorScheme.primary,
                           ),
                         )
                       : null,

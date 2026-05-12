@@ -1420,6 +1420,22 @@ void main() {
       expect(k.navButtonMinHeight, equals(c.navButtonMinHeight));
       expect(k.navButtonIconSize, equals(c.navButtonIconSize));
       expect(k.navButtonLabelFontSize, equals(c.navButtonLabelFontSize));
+      expect(
+        k.navButtonIconOnlyMinHeight,
+        equals(c.navButtonIconOnlyMinHeight),
+      );
+      expect(
+        k.navButtonIconOnlyVerticalPadding,
+        equals(c.navButtonIconOnlyVerticalPadding),
+      );
+      expect(
+        k.navButtonIconOnlySelectionContainerVerticalPadding,
+        equals(c.navButtonIconOnlySelectionContainerVerticalPadding),
+      );
+      expect(
+        k.bottomNavIconOnlyVerticalMargin,
+        equals(c.bottomNavIconOnlyVerticalMargin),
+      );
     });
 
     test('ImmersiveComposer: compact equals comfortable for every field', () {

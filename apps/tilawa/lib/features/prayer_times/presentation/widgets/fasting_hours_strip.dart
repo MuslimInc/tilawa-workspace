@@ -35,6 +35,7 @@ class FastingHoursStrip extends StatelessWidget {
 
     // Active color from theme to ensure good contrast
     final Color activeColor = theme.colorScheme.primary;
+    final colorScheme = theme.colorScheme;
 
     return Padding(
       padding: EdgeInsets.symmetric(
@@ -42,6 +43,12 @@ class FastingHoursStrip extends StatelessWidget {
         vertical: tokens.spaceSmall,
       ),
       child: TilawaCard(
+        flat: true,
+        backgroundColor: colorScheme.surfaceContainerLow,
+        borderRadius: tokens.radiusLarge,
+        borderColor: colorScheme.outlineVariant.withValues(
+          alpha: tokens.opacityMedium,
+        ),
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceLarge,
           vertical: tokens.spaceMedium,

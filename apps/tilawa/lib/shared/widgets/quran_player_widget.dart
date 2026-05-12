@@ -30,6 +30,8 @@ class QuranPlayerWidget extends StatefulWidget {
     super.key,
     this.bottomNavBarHeight = 0,
     this.isKeyboardOpen = false,
+    this.compactBottomNavBarVisible,
+    this.hostAbsorbsBottomSafeArea = false,
   });
 
   static double collapsedHeight(BuildContext context) =>
@@ -39,7 +41,8 @@ class QuranPlayerWidget extends StatefulWidget {
   /// mini-player. Mirrors the player's own anchoring at
   /// `Positioned(bottom: bottomNavBarHeight + safeAreaPadding)`, so:
   ///
-  ///   footprint = collapsedHeight + bottomNavBarHeight + safeAreaPadding.
+  ///   footprint = collapsedHeight + bottomNavBarHeight + safeAreaPadding
+  ///   (omit safe area padding when [hostAbsorbsBottomSafeArea] is true).
   ///
   /// Use this to inset content (lists, FABs, scrollbars) so it isn't
   /// covered by the player.
@@ -50,16 +53,30 @@ class QuranPlayerWidget extends StatefulWidget {
   static double collapsedFootprint(
     BuildContext context, {
     double bottomNavBarHeight = 0,
+    bool hostAbsorbsBottomSafeArea = false,
   }) =>
       collapsedHeight(context) +
       bottomNavBarHeight +
-      context.floatingBottomPadding;
+      (hostAbsorbsBottomSafeArea ? 0 : context.floatingBottomPadding);
 
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
 
   /// Whether the keyboard is currently open.
   final bool isKeyboardOpen;
+
+  /// When non-null, set to `false` while expand progress is at or above
+  /// [TilawaDesignTokens.playerProgressThreshold] so a host
+  /// [TilawaAdaptiveShell] can hide its compact bottom bar for a true
+  /// full-screen expanded player. Stays `true` while collapsed so dismiss
+  /// gestures never hide the bar.
+  final ValueNotifier<bool>? compactBottomNavBarVisible;
+
+  /// When true with [bottomNavBarHeight] == 0, the mini player anchors flush
+  /// to the layout bottom (no [floatingBottomPadding]) because the host already
+  /// stacks bottom chrome (e.g. compact shell [BottomNavigationBar]) that
+  /// includes the system gesture inset.
+  final bool hostAbsorbsBottomSafeArea;
 
   @override
   State<QuranPlayerWidget> createState() => QuranPlayerWidgetState();
@@ -103,10 +120,24 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         '[QPlayer] expandController status=${status.name}, value=${_expandController.value.toStringAsFixed(3)}',
       );
     });
+    _expandController.addListener(_syncCompactBottomNavBarVisible);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _syncCompactBottomNavBarVisible();
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant QuranPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.compactBottomNavBarVisible !=
+        widget.compactBottomNavBarVisible) {
+      _syncCompactBottomNavBarVisible();
+    }
   }
 
   @override
   void dispose() {
+    _expandController.removeListener(_syncCompactBottomNavBarVisible);
     _expandController.dispose();
     _dismissAnimController.dispose();
     super.dispose();
@@ -142,6 +173,22 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeOutCubic,
     );
+  }
+
+  void _syncCompactBottomNavBarVisible() {
+    final ValueNotifier<bool>? n = widget.compactBottomNavBarVisible;
+    if (n == null || !mounted) return;
+    final double threshold = context.tokens.playerProgressThreshold;
+    final bool showBar = _expandController.value < threshold;
+    if (n.value != showBar) {
+      n.value = showBar;
+    }
+  }
+
+  void _ensureCompactBottomNavBarShown() {
+    final ValueNotifier<bool>? n = widget.compactBottomNavBarVisible;
+    if (n == null || n.value) return;
+    n.value = true;
   }
 
   void _onVerticalDragUpdate(DragUpdateDetails details) {
@@ -258,6 +305,9 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         if (!state.shouldShowBottomPlayer ||
             audio == null ||
             (widget.isKeyboardOpen && !isExpanding)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) _ensureCompactBottomNavBarShown();
+          });
           return const SizedBox.shrink();
         }
 
@@ -270,12 +320,18 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             builder: (context, _) {
               final progress = _expandController.value;
 
-              // Bottom inset above the screen edge / nav bar. Used in both
-              // expanded and collapsed layouts so the mini player position
-              // is consistent during the collapse-to-collapsed transition.
+              // Bottom inset above the layout bottom / overlaid nav. When the
+              // host stacks bottom chrome below this subtree
+              // ([hostAbsorbsBottomSafeArea]), skip [floatingBottomPadding] so we
+              // do not double-count the home indicator already inside the bar.
+              final double layoutBottomInset =
+                  widget.hostAbsorbsBottomSafeArea &&
+                      widget.bottomNavBarHeight <= 0
+                  ? 0.0
+                  : context.floatingBottomPadding;
               final bottomInset = widget.bottomNavBarHeight > 0
                   ? widget.bottomNavBarHeight
-                  : context.floatingBottomPadding;
+                  : layoutBottomInset;
 
               // Bottom sheet slide:
               // The expanded player translates from fully off-screen
@@ -323,7 +379,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                             audio: audio,
                             onCollapse: collapse,
                             onDismiss: _dismissWithUndo,
-                            expandProgress: progress,
+                            expandProgress: 0,
                           ),
                         ),
                       ),
@@ -539,9 +595,7 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
       child: Material(
         color: Colors.black,
         elevation: expandProgress * 16,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(expandProgress * 24),
-        ),
+        shape: const RoundedRectangleBorder(),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,

@@ -25,7 +25,7 @@ extension AppStartupWidgets on AppStartupTasks {
       return const TilawaApp();
     }
     return DevicePreview(
-      enabled: kDebugMode,
+      enabled: false,
       builder: (context) => const TilawaApp(),
     );
   }

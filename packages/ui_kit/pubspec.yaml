@@ -17,10 +17,10 @@ dependencies:
     path: ../flex_color_scheme
   gap: ^3.0.1
   fluentui_system_icons: ^1.1.273
-  animations: ^2.2.0
 
 dev_dependencies:
   alchemist: ^0.14.0
+  bloc_lint: ^0.4.1
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter

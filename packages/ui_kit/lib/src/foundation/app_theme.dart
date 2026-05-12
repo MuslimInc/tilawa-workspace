@@ -53,15 +53,15 @@ class AppTheme {
       secondaryContainer: AppColors.lightSecondaryContainer,
       tertiary: AppColors.brandTertiary,
       tertiaryContainer: AppColors.lightTertiaryContainer,
-      appBarColor: AppColors.lightSurface,
+      appBarColor: AppColors.lightBackground,
       error: AppColors.error,
       brightness: Brightness.light,
     );
   }
 
   /// Pulls pathological custom HEX values back into a renderable band so the
-  /// light theme's primary stays visible against cream surfaces and produces
-  /// readable on-primary contrast.
+  /// light theme's primary stays visible against light neutral surfaces and
+  /// produces readable on-primary contrast.
   ///
   /// This is **intentionally a no-op for the four [PrimaryColorPreset] values
   /// and for any reasonable custom color** — only colors that would render as
@@ -171,7 +171,7 @@ class AppTheme {
       ),
       // Nudge upper tiers toward [primary] so chrome (bottom nav, switch OFF
       // track via surfaceContainerHighest, etc.) reads as one family with the
-      // accent — subtle lerp keeps contrast on cream bases (AppColors *Base).
+      // accent — subtle lerp keeps contrast on neutral bases (AppColors *Base).
       surfaceContainerHigh: _blendSurfaceTowardPrimary(
         AppColors.lightSurfaceContainerHighBase,
         primary,
@@ -281,7 +281,7 @@ class AppTheme {
     required ColorScheme colorScheme,
     required Color scaffoldBackgroundColor,
   }) {
-    const surfaceTintColor = Colors.transparent;
+    const Color componentSurfaceTint = Colors.transparent;
 
     return theme.copyWith(
       colorScheme: colorScheme,
@@ -291,22 +291,24 @@ class AppTheme {
       cardColor: colorScheme.surface,
       switchTheme: _switchTheme(colorScheme),
       appBarTheme: theme.appBarTheme.copyWith(
-        backgroundColor: colorScheme.surface,
+        backgroundColor: scaffoldBackgroundColor,
         foregroundColor: colorScheme.onSurface,
-        surfaceTintColor: surfaceTintColor,
+        // Match scaffold so M3 elevation tint does not re-introduce cream/primary
+        // wash on the app bar (see [AppColors.lightBackground] / surface low).
+        surfaceTintColor: scaffoldBackgroundColor,
       ),
       cardTheme: theme.cardTheme.copyWith(
         color: colorScheme.surface,
-        surfaceTintColor: surfaceTintColor,
+        surfaceTintColor: componentSurfaceTint,
       ),
       dialogTheme: theme.dialogTheme.copyWith(
         backgroundColor: colorScheme.surface,
-        surfaceTintColor: surfaceTintColor,
+        surfaceTintColor: componentSurfaceTint,
       ),
       bottomSheetTheme: theme.bottomSheetTheme.copyWith(
         backgroundColor: colorScheme.surface,
         modalBackgroundColor: colorScheme.surface,
-        surfaceTintColor: surfaceTintColor,
+        surfaceTintColor: componentSurfaceTint,
       ),
     );
   }

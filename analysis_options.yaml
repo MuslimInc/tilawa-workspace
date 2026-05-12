@@ -14,7 +14,9 @@
 # Extra style lints were omitted where they produced hundreds of infos and break
 # `melos run analyze` (`dart analyze --fatal-infos`). Add them in focused PRs.
 
-include: package:flutter_lints/flutter.yaml
+include:
+  - package:flutter_lints/flutter.yaml
+  - package:bloc_lint/recommended.yaml
 
 analyzer:
   errors:

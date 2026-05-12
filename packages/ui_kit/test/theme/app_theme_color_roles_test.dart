@@ -119,7 +119,11 @@ void main() {
       expect(colorScheme.surfaceContainerLow, Colors.black);
       expect(colorScheme.surface, const Color(0xFF050807));
       expect(theme.cardColor, colorScheme.surface);
-      expect(theme.appBarTheme.backgroundColor, colorScheme.surface);
+      expect(theme.appBarTheme.backgroundColor, theme.scaffoldBackgroundColor);
+      expect(
+        theme.appBarTheme.surfaceTintColor,
+        theme.scaffoldBackgroundColor,
+      );
       expect(theme.dialogTheme.backgroundColor, colorScheme.surface);
       expect(theme.bottomSheetTheme.backgroundColor, colorScheme.surface);
     });

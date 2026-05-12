@@ -43,24 +43,24 @@ abstract final class AppColors {
   static const Color brandTertiary = primaryGold;
 
   /// Light app background.
-  static const Color lightBackground = Color(0xFFF8F7F2);
+  static const Color lightBackground = Color(0xFFFFFFFF);
 
   /// Light default surface.
-  static const Color lightSurface = Color(0xFFFFFCF7);
+  static const Color lightSurface = Color(0xFFFFFFFF);
 
-  /// Light elevated/contained surface.
-  static const Color lightSurfaceContainer = Color(0xFFF1EEE6);
+  /// Light elevated/contained surface (near-white neutral).
+  static const Color lightSurfaceContainer = Color(0xFFF4F4F4);
 
   /// Upper elevation tier (e.g. bottom nav chrome) before light-theme primary
   /// harmonization in [AppTheme].
-  static const Color lightSurfaceContainerHighBase = Color(0xFFE2DBC7);
+  static const Color lightSurfaceContainerHighBase = Color(0xFFEFEFEF);
 
   /// Top elevation tier before light-theme primary harmonization in [AppTheme].
-  static const Color lightSurfaceContainerHighestBase = Color(0xFFD7CFB9);
+  static const Color lightSurfaceContainerHighestBase = Color(0xFFE8E8E8);
 
   /// Light outline/divider color. Calibrated for visibility on real-device
   /// DPIs (~400 ppi); avoid going lighter than this.
-  static const Color lightOutline = Color(0xFFC8BDA8);
+  static const Color lightOutline = Color(0xFFC0C0C0);
 
   /// Dark app background.
   static const Color darkBackground = Color(0xFF101816);
@@ -97,14 +97,14 @@ abstract final class AppColors {
   /// Light [FlexSchemeColor.secondaryContainer].
   static const Color lightSecondaryContainer = Color(0xFFE4EBD5);
 
-  /// Light [FlexSchemeColor.tertiaryContainer].
-  static const Color lightTertiaryContainer = Color(0xFFF3E3BD);
+  /// Light [FlexSchemeColor.tertiaryContainer] (subtle neutral, near white).
+  static const Color lightTertiaryContainer = Color(0xFFF0F4F3);
 
   /// Light [ColorScheme.surfaceContainer] base before primary harmonization.
-  static const Color lightSurfaceContainerMid = Color(0xFFEBE6D7);
+  static const Color lightSurfaceContainerMid = Color(0xFFF6F6F6);
 
   /// Light [ColorScheme.outlineVariant] after refinement.
-  static const Color lightOutlineVariant = Color(0xFFE6DED0);
+  static const Color lightOutlineVariant = Color(0xFFE8E8E8);
 
   /// Light [ColorScheme.shadow] and [ColorScheme.scrim].
   static const Color lightShadow = Color(0xFF1F2926);

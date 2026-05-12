@@ -1,4 +1,4 @@
-import 'package:animations/animations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +8,25 @@ import '../foundation/content_bounds.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/display_feature_insets.dart';
 import '../foundation/safe_area_ext.dart';
+
+/// [ValueListenable] that is always `true` and never notifies.
+///
+/// Used as the default for [TilawaAdaptiveShell.compactBottomNavigationBarVisible]
+/// so the shell does not need a long-lived [ValueNotifier].
+class _AlwaysShowCompactBottomNavListenable implements ValueListenable<bool> {
+  const _AlwaysShowCompactBottomNavListenable();
+
+  @override
+  bool get value => true;
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
+}
+
+const _kAlwaysShowCompactBottomNav = _AlwaysShowCompactBottomNavListenable();
 
 /// Builds the icon widget for a nav destination. Receives selection state and
 /// the resolved tint the shell would apply to a material [Icon]; callers may
@@ -45,7 +64,11 @@ class TilawaNavDestination {
 
 /// A shell that adapts its navigation based on the window size.
 ///
-/// - Compact: Shows a bottom navigation bar.
+/// - Compact: [BottomNavigationBar] is laid out in a [Column] under an
+///   [Expanded] body region (not [Scaffold.bottomNavigationBar]) so nested
+///   tab [Scaffold]s receive bounded constraints. Optional
+///   [compactBottomNavigationBarVisible] can hide the bar (e.g. full-screen
+///   player). [Scaffold.extendBody] is false.
 /// - Medium/Expanded: Shows a side navigation rail.
 ///
 /// This shell also respects [DisplayFeature]s (hinges/folds) on foldable
@@ -58,6 +81,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
     required this.onDestinationSelected,
     required this.child,
     required this.bottomPlayer,
+    this.compactBottomNavigationBarVisible,
     this.bottomBarPadding,
     this.bottomBarDecoration,
     this.avoidDisplayFeatures = true,
@@ -71,6 +95,10 @@ class TilawaAdaptiveShell extends StatelessWidget {
   /// The bottom player (or similar floating control) that should respect
   /// the navigation bar/rail boundaries.
   final Widget bottomPlayer;
+
+  /// When non-null, compact mode shows the bottom bar only while this value is
+  /// true (e.g. hide while a full-screen sheet covers the tab bar).
+  final ValueListenable<bool>? compactBottomNavigationBarVisible;
 
   /// Optional padding for the bottom bar in compact mode.
   final EdgeInsetsGeometry? bottomBarPadding;
@@ -89,31 +117,46 @@ class TilawaAdaptiveShell extends StatelessWidget {
     final bool isKeyboardOpen = context.isKeyboardVisible;
 
     if (windowSize == TilawaWindowSize.compact) {
-      return Stack(
-        children: [
-          Scaffold(
-            extendBody: true,
-            body: MediaQuery.removePadding(
-              context: context,
-              removeBottom: true,
-              child: child,
+      final ValueListenable<bool> compactNavListenable =
+          compactBottomNavigationBarVisible ?? _kAlwaysShowCompactBottomNav;
+
+      return ValueListenableBuilder<bool>(
+        valueListenable: compactNavListenable,
+        builder: (context, bottomNavVisible, _) {
+          return Scaffold(
+            extendBody: false,
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Positioned.fill(
+                        child: MediaQuery.removePadding(
+                          context: context,
+                          removeBottom: true,
+                          child: child,
+                        ),
+                      ),
+                      Positioned.fill(child: bottomPlayer),
+                    ],
+                  ),
+                ),
+                if (isKeyboardOpen || !bottomNavVisible)
+                  const SizedBox.shrink()
+                else
+                  _BottomNavBar(
+                    destinations: destinations,
+                    selectedIndex: displayIndex,
+                    onDestinationSelected: onDestinationSelected,
+                    padding: bottomBarPadding,
+                    decoration: bottomBarDecoration,
+                  ),
+              ],
             ),
-          ),
-          if (!isKeyboardOpen)
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _BottomNavBar(
-                destinations: destinations,
-                selectedIndex: displayIndex,
-                onDestinationSelected: onDestinationSelected,
-                padding: bottomBarPadding,
-                decoration: bottomBarDecoration,
-              ),
-            ),
-          Positioned.fill(child: bottomPlayer),
-        ],
+          );
+        },
       );
     }
 
@@ -182,15 +225,105 @@ class _BottomNavBar extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final Decoration? decoration;
 
+  static BottomNavigationBarItem _barItem(
+    BuildContext context,
+    TilawaNavDestination destination,
+    TilawaAdaptiveShellTokens tokens,
+    ThemeData theme, {
+    required bool tabIsSelected,
+  }) {
+    final Color inactiveColor = theme.colorScheme.onSurfaceVariant;
+    final Color activeColor = theme.colorScheme.primary;
+
+    Widget inactiveGlyph = destination.iconBuilder != null
+        ? destination.iconBuilder!(
+            context,
+            isSelected: false,
+            color: inactiveColor,
+          )
+        : Icon(
+            destination.icon,
+            size: tokens.navButtonIconSize,
+            color: inactiveColor,
+          );
+
+    Widget activeGlyph = destination.iconBuilder != null
+        ? destination.iconBuilder!(
+            context,
+            isSelected: true,
+            color: activeColor,
+          )
+        : Icon(
+            destination.activeIcon ?? destination.icon,
+            size: tokens.navButtonIconSize,
+            color: activeColor,
+          );
+
+    if (destination.identifier != null) {
+      inactiveGlyph = Semantics(
+        identifier: destination.identifier,
+        child: inactiveGlyph,
+      );
+      activeGlyph = Semantics(
+        identifier: destination.identifier,
+        child: activeGlyph,
+      );
+    }
+
+    return BottomNavigationBarItem(
+      icon: inactiveGlyph,
+      activeIcon: tabIsSelected ? activeGlyph : inactiveGlyph,
+      label: destination.label,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
-    final bottomPadding = context.floatingBottomPadding;
+    // Horizontal placement uses [bottomNavHorizontalMargin] (0 =
+    // edge-to-edge). Bottom inset is hardware safe area only (no
+    // [floatingBottomPadding] buffer).
+    final double bottomOuterPadding = context.systemBottomSafeArea;
+    final double estimatedInnerWidth =
+        MediaQuery.sizeOf(context).width -
+        2 * tokens.bottomNavHorizontalMargin -
+        2 * tokens.bottomNavBorderWidth;
+    final bool iconOnlyBar =
+        estimatedInnerWidth <
+        TilawaBreakpoints.compactBottomNavAllLabelsMinInnerWidth;
+    final double topInset = iconOnlyBar
+        ? tokens.bottomNavIconOnlyVerticalMargin
+        : tokens.bottomNavVerticalMargin;
 
-    final BorderRadius shellRadius = BorderRadius.circular(
-      tokens.bottomNavRadius,
+    final BorderRadius shellRadius = BorderRadius.vertical(
+      top: Radius.circular(tokens.bottomNavRadius),
     );
+
+    final int count = destinations.length;
+    final bool hasSelection = selectedIndex != null;
+    final int barIndex = hasSelection ? selectedIndex!.clamp(0, count - 1) : 0;
+
+    final TextStyle baseLabel = theme.textTheme.labelSmall ?? const TextStyle();
+    final TextStyle selectedLabelStyle = baseLabel.copyWith(
+      fontSize: tokens.navButtonLabelFontSize,
+      fontWeight: tokens.navButtonSelectedLabelWeight,
+      height: 1.15,
+    );
+    final TextStyle unselectedLabelStyle = baseLabel.copyWith(
+      fontSize: tokens.navButtonLabelFontSize,
+      fontWeight: tokens.navButtonUnselectedLabelWeight,
+      height: 1.15,
+    );
+
+    // [BottomNavigationBar] applies [MediaQuery.withClampedTextScaling] with
+    // max 1.0 on labels. Nesting that on an already clamped [TextScaler] whose
+    // minimum exceeds 1.0 can compose invalid bounds (assert in
+    // [_ClampedTextScaler]). Use a linear scaler capped to 1.0 so Material's
+    // internal clamp stays on the [_LinearTextScaler] path.
+    final double bottomBarTextScale = MediaQuery.textScalerOf(
+      context,
+    ).scale(1.0).clamp(0.01, 1.0);
 
     return TilawaContentBounds(
       kind: TilawaContentKind.media,
@@ -200,9 +333,9 @@ class _BottomNavBar extends StatelessWidget {
             padding ??
             EdgeInsets.fromLTRB(
               tokens.bottomNavHorizontalMargin,
-              tokens.bottomNavVerticalMargin,
+              topInset,
               tokens.bottomNavHorizontalMargin,
-              bottomPadding,
+              bottomOuterPadding,
             ),
         child: DecoratedBox(
           decoration: BoxDecoration(
@@ -231,21 +364,55 @@ class _BottomNavBar extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: DecoratedBox(
               decoration: decoration ?? const BoxDecoration(),
-              child: Row(
-                spacing: tokens.bottomNavItemGap,
-                mainAxisAlignment: .spaceBetween,
-                crossAxisAlignment: .start,
-                children: [
-                  for (int i = 0; i < destinations.length; i++)
-                    Expanded(
-                      child: _NavButton(
-                        destination: destinations[i],
-                        isSelected: selectedIndex == i,
-                        onTap: () => onDestinationSelected(i),
-                        borderRadius: tokens.bottomNavInnerRadius,
-                      ),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(bottomBarTextScale),
+                ),
+                child: Theme(
+                  data: theme.copyWith(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                    hoverColor: Colors.transparent,
+                  ),
+                  child: BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    currentIndex: barIndex,
+                    onTap: (int index) {
+                      HapticFeedback.selectionClick();
+                      onDestinationSelected(index);
+                    },
+                    backgroundColor: Colors.transparent,
+                    elevation: 0,
+                    showSelectedLabels: !iconOnlyBar,
+                    showUnselectedLabels: !iconOnlyBar,
+                    selectedItemColor: hasSelection
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurfaceVariant,
+                    unselectedItemColor: theme.colorScheme.onSurfaceVariant,
+                    selectedLabelStyle: selectedLabelStyle,
+                    unselectedLabelStyle: unselectedLabelStyle,
+                    selectedIconTheme: IconThemeData(
+                      size: tokens.navButtonIconSize,
+                      color: hasSelection
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurfaceVariant,
                     ),
-                ],
+                    unselectedIconTheme: IconThemeData(
+                      size: tokens.navButtonIconSize,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    items: [
+                      for (int i = 0; i < count; i++)
+                        _barItem(
+                          context,
+                          destinations[i],
+                          tokens,
+                          theme,
+                          tabIsSelected: hasSelection && selectedIndex == i,
+                        ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -338,151 +505,6 @@ class _SideNavRail extends StatelessWidget {
           },
         ),
       ),
-    );
-  }
-}
-
-class _NavButton extends StatelessWidget {
-  const _NavButton({
-    required this.destination,
-    required this.isSelected,
-    required this.onTap,
-    required this.borderRadius,
-  });
-
-  final TilawaNavDestination destination;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final double borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.componentTokens.adaptiveShell;
-    final selectedFg = theme.colorScheme.primary;
-    final unselectedFg = theme.colorScheme.onSurfaceVariant;
-    final Color iconColor = isSelected ? selectedFg : unselectedFg;
-
-    final Widget iconWidget = destination.iconBuilder != null
-        ? destination.iconBuilder!(
-            context,
-            isSelected: isSelected,
-            color: iconColor,
-          )
-        : Icon(
-            isSelected
-                ? (destination.activeIcon ?? destination.icon)
-                : destination.icon,
-            key: ValueKey('${destination.icon.hashCode}_$isSelected'),
-            size: tokens.navButtonIconSize,
-            color: iconColor,
-          );
-
-    final BorderRadius effectiveBorderRadius = BorderRadius.circular(
-      borderRadius,
-    );
-    final BorderRadius pillRadius = BorderRadius.circular(borderRadius * 0.72);
-
-    final Widget column = Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      spacing: tokens.navButtonGap,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        AnimatedScale(
-          scale: isSelected
-              ? tokens.navButtonSelectedCenterScale
-              : tokens.navButtonUnselectedScale,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutBack,
-          child: PageTransitionSwitcher(
-            duration: const Duration(milliseconds: 200),
-            transitionBuilder: (child, animation, secondaryAnimation) =>
-                FadeThroughTransition(
-                  animation: animation,
-                  secondaryAnimation: secondaryAnimation,
-                  fillColor: Colors.transparent,
-                  child: child,
-                ),
-            child: KeyedSubtree(key: ValueKey(isSelected), child: iconWidget),
-          ),
-        ),
-        AnimatedDefaultTextStyle(
-          duration: const Duration(milliseconds: 200),
-          style: (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
-            fontSize: tokens.navButtonLabelFontSize,
-            fontWeight: isSelected
-                ? tokens.navButtonSelectedLabelWeight
-                : tokens.navButtonUnselectedLabelWeight,
-            color: isSelected ? selectedFg : unselectedFg,
-            height: 1.15,
-          ),
-          child: Text(
-            destination.label,
-            maxLines: 1,
-            softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ],
-    );
-
-    // Full-cell tap target; selected tab gets a soft primary-tint pill
-    // ([navButtonSelectedBackgroundColor]) for clearer wayfinding.
-    final Widget button = Material(
-      type: MaterialType.transparency,
-      child: InkWell(
-        onTap: () {
-          HapticFeedback.selectionClick();
-          onTap();
-        },
-        borderRadius: effectiveBorderRadius,
-        splashFactory: NoSplash.splashFactory,
-        splashColor: Colors.transparent,
-        highlightColor: Colors.transparent,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(minHeight: tokens.navButtonMinHeight),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: tokens.navButtonVerticalPadding,
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final maxPillWidth = constraints.maxWidth * 0.86;
-                return Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: maxPillWidth),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOutCubic,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 5,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? tokens.navButtonSelectedBackgroundColor
-                            : Colors.transparent,
-                        borderRadius: pillRadius,
-                      ),
-                      child: column,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ),
-    );
-
-    return Semantics(
-      button: true,
-      selected: isSelected,
-      label: destination.label,
-      identifier: destination.identifier,
-      child: ExcludeSemantics(child: button),
     );
   }
 }

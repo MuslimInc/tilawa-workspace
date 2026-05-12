@@ -44,9 +44,7 @@ class PrayerTimeCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: isNext
-                ? colorScheme.surfaceContainerLow
-                : colorScheme.surface,
+            color: colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
             border: Border.all(
               color: isNext
@@ -154,7 +152,9 @@ class _HeaderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,14 +162,14 @@ class _HeaderRow extends StatelessWidget {
         TilawaIconBox(
           icon: prayer.type.icon,
           size: compact ? 16 : 24,
-          padding: tightHeight ? 4 : 8,
-          backgroundColor: isNext
-              ? colorScheme.primary.withValues(alpha: 0.12)
-              : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          padding: tightHeight ? tokens.spaceExtraSmall : tokens.spaceSmall,
+          backgroundColor: colorScheme.surfaceContainerHighest.withValues(
+            alpha: tokens.opacityMedium,
+          ),
           iconColor: isNext
               ? colorScheme.primary
               : colorScheme.onSurfaceVariant,
-          borderRadius: 8,
+          borderRadius: tokens.radiusSmall,
         ),
         const Spacer(),
         TilawaStatusChip(
@@ -180,14 +180,10 @@ class _HeaderRow extends StatelessWidget {
               : context.l10n.prayerTimesUpcoming,
           backgroundColor: isNext
               ? colorScheme.primary
-              : hasPassed
-              ? colorScheme.surfaceContainerHighest
-              : colorScheme.primaryContainer,
+              : colorScheme.surfaceContainerHighest,
           foregroundColor: isNext
               ? colorScheme.onPrimary
-              : hasPassed
-              ? colorScheme.onSurfaceVariant
-              : colorScheme.onPrimaryContainer,
+              : colorScheme.onSurfaceVariant,
         ),
       ],
     );

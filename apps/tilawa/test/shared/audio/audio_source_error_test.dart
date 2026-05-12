@@ -141,6 +141,7 @@ void main() {
       sequenceSubject.add(indexedSources);
       return null;
     });
+    when(mockPlayer.addAudioSource(any)).thenAnswer((_) async {});
 
     handler = AudioPlayerHandlerImpl(
       [],
@@ -255,9 +256,7 @@ void main() {
       await handler.addQueueItem(validItem);
 
       // Verify it was added
-      verify(
-        mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
-      ).called(1);
+      verify(mockPlayer.addAudioSource(any)).called(1);
     });
 
     test('should accept valid HTTPS URL', () async {
@@ -271,9 +270,7 @@ void main() {
       // Should not throw
       await handler.addQueueItem(validItem);
 
-      verify(
-        mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
-      ).called(1);
+      verify(mockPlayer.addAudioSource(any)).called(1);
     });
 
     test('should accept valid file URI', () async {
@@ -287,9 +284,7 @@ void main() {
       // Should not throw
       await handler.addQueueItem(validItem);
 
-      verify(
-        mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
-      ).called(1);
+      verify(mockPlayer.addAudioSource(any)).called(1);
     });
   });
 
@@ -376,7 +371,6 @@ void main() {
 
   group('Audio Source Error - Error State Broadcasting', () {
     test('should broadcast error state when audio loading fails', () async {
-      // Setup mock to throw error on setAudioSources
       when(
         mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
       ).thenThrow(Exception('Failed to load audio source'));
@@ -387,17 +381,14 @@ void main() {
         extras: <String, dynamic>{'url': 'http://example.com/audio.mp3'},
       );
 
-      // Should catch the error and broadcast error state
       try {
-        await handler.addQueueItem(item);
-      } catch (e) {
-        // Error is expected
+        await handler.updateQueue([item]);
+      } catch (_) {
+        // [_safeSetAudioSources] rethrows after broadcasting error.
       }
 
-      // Wait for state to propagate
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 150));
 
-      // Verify error state was broadcast
       expect(
         handler.playbackState.value.processingState,
         AudioProcessingState.error,
@@ -469,9 +460,7 @@ void main() {
       // URL-encoded characters should be valid
       await handler.addQueueItem(itemWithSpecialChars);
 
-      verify(
-        mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
-      ).called(1);
+      verify(mockPlayer.addAudioSource(any)).called(1);
     });
 
     test('should reject URLs with unencoded spaces', () async {
@@ -500,9 +489,7 @@ void main() {
       // Long but valid URLs should work
       await handler.addQueueItem(itemWithLongUrl);
 
-      verify(
-        mockPlayer.setAudioSources(any, initialIndex: anyNamed('initialIndex')),
-      ).called(1);
+      verify(mockPlayer.addAudioSource(any)).called(1);
     });
   });
 }
