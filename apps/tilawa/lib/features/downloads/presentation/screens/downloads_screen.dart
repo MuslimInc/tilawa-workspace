@@ -172,12 +172,12 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return SizedBox.expand(
       child: TilawaIllustratedState(
-        icon: Icons.error_outline_rounded,
-        iconColor: colorScheme.error,
+        visual: const TilawaStateVisual(
+          icon: Icons.cloud_off_rounded,
+          tone: TilawaStateVisualTone.error,
+        ),
         title: message,
         semanticLabel: message,
         primaryAction: TilawaButton(
@@ -243,10 +243,18 @@ class _EmptyDownloadsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TilawaIllustratedState(
-      icon: Icons.download_done_rounded,
+      visual: const TilawaStateVisual(
+        icon: Icons.offline_pin_rounded,
+        tone: TilawaStateVisualTone.tertiary,
+      ),
       title: context.l10n.noDownloadsYet,
       subtitle: context.l10n.downloadSurahsOffline,
-      iconColor: Theme.of(context).colorScheme.primary,
+      semanticLabel: context.l10n.noDownloadsYet,
+      primaryAction: TilawaButton(
+        text: context.l10n.reciters,
+        leadingIcon: const Icon(Icons.record_voice_over_rounded),
+        onPressed: () => context.go('/'),
+      ),
     );
   }
 }

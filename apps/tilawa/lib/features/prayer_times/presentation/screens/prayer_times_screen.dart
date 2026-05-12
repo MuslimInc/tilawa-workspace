@@ -170,8 +170,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
             case PrayerTimesStatus.error:
               return TilawaIllustratedState(
-                icon: Icons.error_outline_rounded,
-                iconColor: theme.colorScheme.error,
+                visual: const TilawaStateVisual(
+                  icon: Icons.event_busy_rounded,
+                  tone: TilawaStateVisualTone.error,
+                ),
                 title: state.errorMessage,
                 semanticLabel: state.errorMessage,
                 primaryAction: TilawaButton(
@@ -220,8 +222,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final tokens = theme.tokens;
 
     return TilawaIllustratedState(
-      icon: Icons.location_off_rounded,
-      iconColor: theme.colorScheme.outline,
+      visual: const TilawaStateVisual(
+        icon: Icons.my_location_rounded,
+        tone: TilawaStateVisualTone.tertiary,
+      ),
       title: context.l10n.locationRequired,
       subtitle: context.l10n.locationRequiredDescription,
       semanticLabel: context.l10n.locationRequired,
@@ -303,7 +307,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
   Widget _buildMonthlyView(BuildContext context, PrayerTimesState state) {
     if (state.latitude == null || state.longitude == null) {
       return TilawaIllustratedState(
-        icon: Icons.location_off_rounded,
+        visual: const TilawaStateVisual(
+          icon: Icons.my_location_rounded,
+          tone: TilawaStateVisualTone.tertiary,
+        ),
         title: context.l10n.locationRequired,
         subtitle: context.l10n.locationRequiredDescription,
         semanticLabel: context.l10n.locationRequired,

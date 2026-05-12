@@ -126,7 +126,7 @@ class _PortraitContent extends StatelessWidget {
               case QiblaStatus.serviceDisabled:
                 return _QiblaUnavailableState(
                   icon: Icons.location_off_rounded,
-                  iconColor: colorScheme.outline,
+                  tone: TilawaStateVisualTone.neutral,
                   title: context.l10n.locationServiceDisabled,
                   subtitle: context.l10n.enableLocationServiceMessage,
                   retryLabel: context.l10n.tryAgain,
@@ -136,7 +136,8 @@ class _PortraitContent extends StatelessWidget {
                 );
               case QiblaStatus.permissionDenied:
                 return _QiblaUnavailableState(
-                  icon: Icons.security_rounded,
+                  icon: Icons.explore_off_rounded,
+                  tone: TilawaStateVisualTone.tertiary,
                   title: context.l10n.permissionDenied,
                   subtitle: context.l10n.locationPermissionRequiredMessage,
                   retryLabel: context.l10n.tryAgain,
@@ -147,7 +148,7 @@ class _PortraitContent extends StatelessWidget {
               case QiblaStatus.error:
                 return _QiblaUnavailableState(
                   icon: Icons.error_outline_rounded,
-                  iconColor: colorScheme.error,
+                  tone: TilawaStateVisualTone.error,
                   title: context.l10n.error,
                   subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
                   retryLabel: context.l10n.tryAgain,
@@ -218,7 +219,7 @@ class _CompassArea extends StatelessWidget {
           case QiblaStatus.serviceDisabled:
             return _QiblaUnavailableState(
               icon: Icons.location_off_rounded,
-              iconColor: colorScheme.outline,
+              tone: TilawaStateVisualTone.neutral,
               title: context.l10n.locationServiceDisabled,
               subtitle: context.l10n.enableLocationServiceMessage,
               retryLabel: context.l10n.tryAgain,
@@ -227,7 +228,8 @@ class _CompassArea extends StatelessWidget {
             );
           case QiblaStatus.permissionDenied:
             return _QiblaUnavailableState(
-              icon: Icons.security_rounded,
+              icon: Icons.explore_off_rounded,
+              tone: TilawaStateVisualTone.tertiary,
               title: context.l10n.permissionDenied,
               subtitle: context.l10n.locationPermissionRequiredMessage,
               retryLabel: context.l10n.tryAgain,
@@ -238,7 +240,7 @@ class _CompassArea extends StatelessWidget {
           case QiblaStatus.error:
             return _QiblaUnavailableState(
               icon: Icons.error_outline_rounded,
-              iconColor: colorScheme.error,
+              tone: TilawaStateVisualTone.error,
               title: context.l10n.error,
               subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
               retryLabel: context.l10n.tryAgain,
@@ -269,8 +271,8 @@ class _QiblaUnavailableState extends StatelessWidget {
     required this.title,
     required this.retryLabel,
     required this.onRetry,
+    this.tone = TilawaStateVisualTone.primary,
     this.subtitle,
-    this.iconColor,
   });
 
   final IconData icon;
@@ -278,13 +280,12 @@ class _QiblaUnavailableState extends StatelessWidget {
   final String? subtitle;
   final String retryLabel;
   final VoidCallback onRetry;
-  final Color? iconColor;
+  final TilawaStateVisualTone tone;
 
   @override
   Widget build(BuildContext context) {
     return TilawaIllustratedState(
-      icon: icon,
-      iconColor: iconColor ?? Theme.of(context).colorScheme.primary,
+      visual: TilawaStateVisual(icon: icon, tone: tone),
       title: title,
       subtitle: subtitle,
       semanticLabel: title,
