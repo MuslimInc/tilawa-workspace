@@ -169,15 +169,21 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               return _prayerTimesLoadingIndicator(context);
 
             case PrayerTimesStatus.error:
-              return TilawaErrorState(
+              return TilawaIllustratedState(
                 icon: Icons.error_outline_rounded,
+                iconColor: theme.colorScheme.error,
                 title: state.errorMessage,
-                retryLabel: context.l10n.retry,
-                onRetry: () {
-                  context.read<PrayerTimesBloc>().add(
-                    const PrayerTimesEvent.loadPrayerTimes(),
-                  );
-                },
+                semanticLabel: state.errorMessage,
+                primaryAction: TilawaButton(
+                  text: context.l10n.retry,
+                  variant: TilawaButtonVariant.secondary,
+                  leadingIcon: const Icon(Icons.refresh_rounded),
+                  onPressed: () {
+                    context.read<PrayerTimesBloc>().add(
+                      const PrayerTimesEvent.loadPrayerTimes(),
+                    );
+                  },
+                ),
               );
 
             case PrayerTimesStatus.locationRequired:
@@ -213,12 +219,13 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return TilawaEmptyState(
+    return TilawaIllustratedState(
       icon: Icons.location_off_rounded,
       iconColor: theme.colorScheme.outline,
       title: context.l10n.locationRequired,
       subtitle: context.l10n.locationRequiredDescription,
-      action: Column(
+      semanticLabel: context.l10n.locationRequired,
+      primaryAction: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (state.errorMessage.isNotEmpty) ...[
@@ -231,7 +238,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             ),
             SizedBox(height: tokens.spaceMedium),
           ],
-          FilledButton.icon(
+          TilawaButton(
+            text: context.l10n.enableLocation,
+            leadingIcon: const Icon(Icons.my_location_rounded),
+            isLoading: state.isLoadingLocation,
             onPressed: state.isLoadingLocation
                 ? null
                 : () {
@@ -239,17 +249,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                       const PrayerTimesEvent.updateLocation(),
                     );
                   },
-            icon: state.isLoadingLocation
-                ? SizedBox.square(
-                    dimension: tokens.iconSizeSmall,
-                    child: TilawaLoadingIndicator(
-                      centered: false,
-                      strokeWidth: tokens.borderWidthThin * 4,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  )
-                : const Icon(Icons.my_location_rounded),
-            label: Text(context.l10n.enableLocation),
           ),
         ],
       ),
@@ -303,10 +302,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   Widget _buildMonthlyView(BuildContext context, PrayerTimesState state) {
     if (state.latitude == null || state.longitude == null) {
-      return TilawaEmptyState(
+      return TilawaIllustratedState(
         icon: Icons.location_off_rounded,
         title: context.l10n.locationRequired,
         subtitle: context.l10n.locationRequiredDescription,
+        semanticLabel: context.l10n.locationRequired,
       );
     }
 

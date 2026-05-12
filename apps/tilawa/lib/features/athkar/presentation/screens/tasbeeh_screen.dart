@@ -263,11 +263,10 @@ class _TasbeehHistoryView extends StatelessWidget {
           ],
           Expanded(
             child: state.savedDhikr.isEmpty
-                ? Center(
-                    child: Text(
-                      context.l10n.tasbeehHistoryEmpty,
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                ? TilawaIllustratedState(
+                    icon: Icons.history_toggle_off_rounded,
+                    title: context.l10n.tasbeehHistoryEmpty,
+                    semanticLabel: context.l10n.tasbeehHistoryEmpty,
                   )
                 : ListView.separated(
                     itemCount: state.savedDhikr.length,

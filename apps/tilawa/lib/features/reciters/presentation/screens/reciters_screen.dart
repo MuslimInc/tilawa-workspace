@@ -484,7 +484,7 @@ class _RecitersErrorSliver extends StatelessWidget {
   Widget build(BuildContext context) {
     return SliverFillRemaining(
       hasScrollBody: false,
-      child: StatePanel(
+      child: _StatePanel(
         key: const ValueKey('error_state'),
         icon: Icons.error_outline_rounded,
         title: failureMessage,
@@ -510,7 +510,7 @@ class _RecitersEmptySliver extends StatelessWidget {
 
     return SliverFillRemaining(
       hasScrollBody: false,
-      child: StatePanel(
+      child: _StatePanel(
         key: const ValueKey('empty_state'),
         icon: isFavoritesState
             ? Icons.favorite_border_rounded
@@ -734,15 +734,14 @@ class _DownloadsButton extends StatelessWidget {
   }
 }
 
-class StatePanel extends StatelessWidget {
-  const StatePanel({
+class _StatePanel extends StatelessWidget {
+  const _StatePanel({
     super.key,
     required this.icon,
     required this.title,
     this.subtitle,
     this.actionLabel,
     this.onAction,
-    this.isLoading = false,
     this.isError = false,
   });
 
@@ -751,77 +750,31 @@ class StatePanel extends StatelessWidget {
   final String? subtitle;
   final String? actionLabel;
   final VoidCallback? onAction;
-  final bool isLoading;
   final bool isError;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
     final Color accent = isError
         ? theme.colorScheme.error
         : theme.colorScheme.primary;
 
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraLarge),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: tokens.iconSizeExtraLarge + tokens.spaceExtraLarge,
-              height: tokens.iconSizeExtraLarge + tokens.spaceExtraLarge,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: accent.withValues(alpha: 0.1),
-              ),
-              child: isLoading
-                  ? Padding(
-                      padding: EdgeInsets.all(
-                        tokens.spaceLarge + tokens.spaceExtraSmall,
-                      ),
-                      child: TilawaLoadingIndicator(
-                        centered: false,
-                        strokeWidth: tokens.progressHeight,
-                        color: accent,
-                      ),
-                    )
-                  : Icon(
-                      icon,
-                      size: tokens.iconSizeExtraLarge - tokens.spaceLarge,
-                      color: accent,
-                    ),
-            ),
-            SizedBox(height: tokens.spaceMedium + tokens.spaceTiny),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: isError ? accent : theme.colorScheme.onSurface,
-              ),
-            ),
-            if (subtitle != null) ...[
-              SizedBox(height: tokens.spaceSmall),
-              Text(
-                subtitle!,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-            if (actionLabel != null && onAction != null) ...[
-              SizedBox(height: tokens.spaceLarge),
-              FilledButton.tonalIcon(
-                onPressed: onAction,
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(actionLabel!),
-              ),
-            ],
-          ],
-        ),
-      ),
+    return TilawaIllustratedState(
+      icon: icon,
+      iconColor: accent,
+      title: title,
+      subtitle: subtitle,
+      semanticLabel: title,
+      primaryAction: actionLabel != null && onAction != null
+          ? TilawaButton(
+              text: actionLabel!,
+              variant: isError
+                  ? TilawaButtonVariant.secondary
+                  : TilawaButtonVariant.primary,
+              leadingIcon: const Icon(Icons.refresh_rounded),
+              onPressed: onAction,
+            )
+          : null,
     );
   }
 }

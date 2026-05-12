@@ -124,8 +124,9 @@ class _PortraitContent extends StatelessWidget {
               case QiblaStatus.loading:
                 return TilawaLoadingIndicator(color: colorScheme.onSurface);
               case QiblaStatus.serviceDisabled:
-                return TilawaErrorState(
+                return _QiblaUnavailableState(
                   icon: Icons.location_off_rounded,
+                  iconColor: colorScheme.outline,
                   title: context.l10n.locationServiceDisabled,
                   subtitle: context.l10n.enableLocationServiceMessage,
                   retryLabel: context.l10n.tryAgain,
@@ -134,7 +135,7 @@ class _PortraitContent extends StatelessWidget {
                   ),
                 );
               case QiblaStatus.permissionDenied:
-                return TilawaErrorState(
+                return _QiblaUnavailableState(
                   icon: Icons.security_rounded,
                   title: context.l10n.permissionDenied,
                   subtitle: context.l10n.locationPermissionRequiredMessage,
@@ -144,8 +145,9 @@ class _PortraitContent extends StatelessWidget {
                   ),
                 );
               case QiblaStatus.error:
-                return TilawaErrorState(
+                return _QiblaUnavailableState(
                   icon: Icons.error_outline_rounded,
+                  iconColor: colorScheme.error,
                   title: context.l10n.error,
                   subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
                   retryLabel: context.l10n.tryAgain,
@@ -214,8 +216,9 @@ class _CompassArea extends StatelessWidget {
           case QiblaStatus.loading:
             return TilawaLoadingIndicator(color: colorScheme.onSurface);
           case QiblaStatus.serviceDisabled:
-            return TilawaErrorState(
+            return _QiblaUnavailableState(
               icon: Icons.location_off_rounded,
+              iconColor: colorScheme.outline,
               title: context.l10n.locationServiceDisabled,
               subtitle: context.l10n.enableLocationServiceMessage,
               retryLabel: context.l10n.tryAgain,
@@ -223,7 +226,7 @@ class _CompassArea extends StatelessWidget {
                   context.read<QiblaBloc>().add(const CheckLocationService()),
             );
           case QiblaStatus.permissionDenied:
-            return TilawaErrorState(
+            return _QiblaUnavailableState(
               icon: Icons.security_rounded,
               title: context.l10n.permissionDenied,
               subtitle: context.l10n.locationPermissionRequiredMessage,
@@ -233,8 +236,9 @@ class _CompassArea extends StatelessWidget {
               ),
             );
           case QiblaStatus.error:
-            return TilawaErrorState(
+            return _QiblaUnavailableState(
               icon: Icons.error_outline_rounded,
+              iconColor: colorScheme.error,
               title: context.l10n.error,
               subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
               retryLabel: context.l10n.tryAgain,
@@ -255,6 +259,41 @@ class _CompassArea extends StatelessWidget {
             return const SizedBox.shrink();
         }
       },
+    );
+  }
+}
+
+class _QiblaUnavailableState extends StatelessWidget {
+  const _QiblaUnavailableState({
+    required this.icon,
+    required this.title,
+    required this.retryLabel,
+    required this.onRetry,
+    this.subtitle,
+    this.iconColor,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final String retryLabel;
+  final VoidCallback onRetry;
+  final Color? iconColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaIllustratedState(
+      icon: icon,
+      iconColor: iconColor ?? Theme.of(context).colorScheme.primary,
+      title: title,
+      subtitle: subtitle,
+      semanticLabel: title,
+      primaryAction: TilawaButton(
+        text: retryLabel,
+        variant: TilawaButtonVariant.secondary,
+        leadingIcon: const Icon(Icons.refresh_rounded),
+        onPressed: onRetry,
+      ),
     );
   }
 }

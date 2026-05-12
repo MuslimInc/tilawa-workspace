@@ -172,15 +172,22 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return SizedBox.expand(
-      child: TilawaErrorState(
+      child: TilawaIllustratedState(
         icon: Icons.error_outline_rounded,
+        iconColor: colorScheme.error,
         title: message,
-        retryLabel: context.l10n.retry,
-        onRetry: () {
-          context.read<DownloadsBloc>().add(const LoadDownloads());
-        },
-        iconColor: Theme.of(context).colorScheme.error,
+        semanticLabel: message,
+        primaryAction: TilawaButton(
+          text: context.l10n.retry,
+          variant: TilawaButtonVariant.secondary,
+          leadingIcon: const Icon(Icons.refresh_rounded),
+          onPressed: () {
+            context.read<DownloadsBloc>().add(const LoadDownloads());
+          },
+        ),
       ),
     );
   }
@@ -235,7 +242,7 @@ class _EmptyDownloadsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaEmptyState(
+    return TilawaIllustratedState(
       icon: Icons.download_done_rounded,
       title: context.l10n.noDownloadsYet,
       subtitle: context.l10n.downloadSurahsOffline,
