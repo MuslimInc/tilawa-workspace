@@ -614,7 +614,7 @@ void main() {
         tokens.compactBottomNavIconOnlyLayoutHeight(TextScaler.linear(1)),
         closeTo(40.0, 0.05),
       );
-      expect(tokens.bottomNavHorizontalMargin, 16.0);
+      expect(tokens.bottomNavHorizontalMargin, 0.0);
       expect(tokens.navButtonMinHeight, 54.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());

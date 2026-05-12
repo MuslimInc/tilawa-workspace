@@ -465,6 +465,9 @@ class TilawaAdaptiveShellTokens {
   /// Hosts should prefer [compactBottomNavLayoutHeight] with the current
   /// [TextScaler] so scroll padding tracks a11y text scaling.
   final double compactBottomNavBarBaseHeight;
+
+  /// Horizontal inset of the compact bar from the screen edges (0 = full
+  /// width).
   final double bottomNavHorizontalMargin;
   final double bottomNavVerticalMargin;
 
@@ -472,7 +475,7 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavIconOnlyVerticalMargin;
   final double bottomNavInternalPadding;
 
-  /// Corner radius of the compact floating bottom bar (shadow + [Material]).
+  /// Top corner radius of the compact bottom bar (bottom corners are square).
   ///
   /// Uses the same value as [bottomNavInnerRadius] so the outer shell and
   /// per-item tap targets share one corner radius.
@@ -673,7 +676,7 @@ class TilawaAdaptiveShellTokens {
         );
     return TilawaAdaptiveShellTokens(
       compactBottomNavBarBaseHeight: compactBottomNavBarBaseHeight,
-      bottomNavHorizontalMargin: 16,
+      bottomNavHorizontalMargin: 0,
       bottomNavVerticalMargin: 4,
       bottomNavIconOnlyVerticalMargin: 2,
       bottomNavInternalPadding: 8,

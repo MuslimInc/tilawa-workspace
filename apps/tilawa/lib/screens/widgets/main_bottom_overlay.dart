@@ -11,12 +11,16 @@ class MainBottomOverlay extends StatelessWidget {
     required this.isKeyboardOpen,
     required this.isAudioBindingDeferred,
     required this.isOfflineIndicatorReady,
+    this.hostAbsorbsBottomSafeArea = false,
   });
 
   final double bottomNavBarHeight;
   final bool isKeyboardOpen;
   final bool isAudioBindingDeferred;
   final bool isOfflineIndicatorReady;
+
+  /// Passed to [QuranPlayerWidget.hostAbsorbsBottomSafeArea] (compact shell).
+  final bool hostAbsorbsBottomSafeArea;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +29,7 @@ class MainBottomOverlay extends StatelessWidget {
         : QuranPlayerWidget(
             bottomNavBarHeight: bottomNavBarHeight,
             isKeyboardOpen: isKeyboardOpen,
+            hostAbsorbsBottomSafeArea: hostAbsorbsBottomSafeArea,
           );
 
     return Stack(

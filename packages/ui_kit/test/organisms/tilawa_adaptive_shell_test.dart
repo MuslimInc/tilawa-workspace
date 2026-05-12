@@ -55,9 +55,78 @@ void main() {
         size: const Size(400, 800),
         direction: direction,
       );
-      // Compact layout: no NavigationRail anywhere.
+      // Compact layout: Material bottom bar, no rail.
       expect(find.byType(NavigationRail), findsNothing);
+      expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
+
+    testWidgets(
+      'compact bottom nav survives parent text scale clamped above 1.0',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(400, 800));
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+            home: MediaQuery.withClampedTextScaling(
+              minScaleFactor: 1.2,
+              maxScaleFactor: 2.0,
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: TilawaAdaptiveShell(
+                  destinations: _destinations,
+                  selectedIndex: 0,
+                  onDestinationSelected: (_) {},
+                  bottomPlayer: const SizedBox.shrink(),
+                  child: const ColoredBox(color: Color(0xFFEEEEEE)),
+                ),
+              ),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byType(BottomNavigationBar), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'compact hides bottom nav when compactBottomNavigationBarVisible is false',
+      (tester) async {
+        final visible = ValueNotifier<bool>(false);
+        addTearDown(visible.dispose);
+
+        await tester.binding.setSurfaceSize(const Size(400, 800));
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: _destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              compactBottomNavigationBarVisible: visible,
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byType(BottomNavigationBar), findsNothing);
+      },
+    );
 
     testWidgets('compact body has zero bottom MediaQuery padding', (
       tester,
@@ -253,19 +322,19 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.text('Reciters'), findsNothing);
-        expect(find.text('Prayer Times'), findsNothing);
-        expect(find.text('Quran'), findsNothing);
-        expect(find.text('Athkar'), findsNothing);
-        expect(find.text('Settings'), findsNothing);
+        final BottomNavigationBar bar = tester.widget(
+          find.byType(BottomNavigationBar),
+        );
+        expect(bar.showSelectedLabels, isFalse);
+        expect(bar.showUnselectedLabels, isFalse);
 
         expect(
           tester.getSemantics(find.byIcon(Icons.person_outline)).label,
-          'Reciters',
+          startsWith('Reciters'),
         );
         expect(
           tester.getSemantics(find.byIcon(Icons.schedule)).label,
-          'Prayer Times',
+          startsWith('Prayer Times'),
         );
       },
     );
@@ -309,6 +378,12 @@ void main() {
         );
         await tester.pump();
 
+        final BottomNavigationBar bar = tester.widget(
+          find.byType(BottomNavigationBar),
+        );
+        expect(bar.showSelectedLabels, isTrue);
+        expect(bar.showUnselectedLabels, isTrue);
+
         expect(find.text('Reciters'), findsOneWidget);
         expect(find.text('Prayer Times'), findsOneWidget);
         expect(find.text('Quran'), findsOneWidget);
@@ -350,16 +425,19 @@ void main() {
         );
         await tester.pump();
 
-        expect(find.text('أوقات الصلاة'), findsNothing);
-        expect(find.text('القراء'), findsNothing);
-        expect(find.text('القرآن'), findsNothing);
+        final BottomNavigationBar bar = tester.widget(
+          find.byType(BottomNavigationBar),
+        );
+        expect(bar.showSelectedLabels, isFalse);
+        expect(bar.showUnselectedLabels, isFalse);
+
         expect(
           tester.getSemantics(find.byIcon(Icons.schedule)).label,
-          'أوقات الصلاة',
+          startsWith('أوقات الصلاة'),
         );
         expect(
           tester.getSemantics(find.byIcon(Icons.person_outline)).label,
-          'القراء',
+          startsWith('القراء'),
         );
       },
     );
@@ -384,10 +462,9 @@ void main() {
             destinations: _destinations,
             selectedIndex: 0,
             onDestinationSelected: (_) {},
-            bottomPlayer: const SizedBox(
+            bottomPlayer: const ColoredBox(
               key: playerKey,
-              height: 80,
-              width: double.infinity,
+              color: Color(0xFFFF0000),
             ),
             child: const ColoredBox(color: Color(0xFFEEEEEE)),
           ),
@@ -395,8 +472,8 @@ void main() {
       );
       await tester.pump();
 
-      // bottomPlayer is placed inside Positioned.fill, so it expands to the
-      // full shell surface. Verify it is present and has non-zero dimensions.
+      // [Positioned.fill] expands the bottom slot to the body; verify it
+      // receives non-zero layout after the scaffold lays out.
       expect(find.byKey(playerKey), findsOneWidget);
       final size = tester.getSize(find.byKey(playerKey));
       expect(size.height, greaterThan(0));

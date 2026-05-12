@@ -135,7 +135,6 @@ class _MainScreenState extends State<MainScreen> {
                 return const _MainShellPlaceholderScaffold();
               }
 
-              final double bottomPadding = context.floatingBottomPadding;
               final bool isKeyboardOpen = context.isKeyboardVisible;
               final adaptiveShellTokens = Theme.of(
                 context,
@@ -167,10 +166,10 @@ class _MainScreenState extends State<MainScreen> {
                   : adaptiveShellTokens.bottomNavVerticalMargin;
               final double bottomNavBarHeight = context.isCompact
                   ? (compactNavRowHeight +
-                        bottomPadding +
+                        context.systemBottomSafeArea +
                         compactNavTopMargin +
                         compactNavContentGap)
-                  : bottomPadding;
+                  : context.floatingBottomPadding;
 
               final List<_NavDestination> navDestinations = _buildDestinations(
                 context,
@@ -257,11 +256,14 @@ class _MainShellContent extends StatelessWidget {
     final double playerHeight = playerShouldShow && !isKeyboardOpen
         ? context.tokens.playerCollapsedHeight
         : 0;
-    final double overlayBleedBuffer = (playerShouldShow && !isKeyboardOpen)
+    final double overlayBleedBuffer =
+        (playerShouldShow && !isKeyboardOpen && !context.isCompact)
         ? context.tokens.spaceSmall
         : 0;
     final double contentBottomPadding = isKeyboardOpen
         ? 0
+        : context.isCompact
+        ? (playerShouldShow ? playerHeight + overlayBleedBuffer : 0)
         : bottomNavBarHeight + playerHeight + overlayBleedBuffer;
 
     return TilawaAdaptiveShell(
@@ -279,10 +281,11 @@ class _MainShellContent extends StatelessWidget {
         );
       },
       bottomPlayer: MainBottomOverlay(
-        bottomNavBarHeight: bottomNavBarHeight,
+        bottomNavBarHeight: context.isCompact ? 0 : bottomNavBarHeight,
         isKeyboardOpen: isKeyboardOpen,
         isAudioBindingDeferred: state.isAudioBindingDeferred,
         isOfflineIndicatorReady: state.isOfflineIndicatorReady,
+        hostAbsorbsBottomSafeArea: context.isCompact,
       ),
       child: state.isInitialTabMounted
           ? MainTabViewport(

@@ -30,6 +30,7 @@ class QuranPlayerWidget extends StatefulWidget {
     super.key,
     this.bottomNavBarHeight = 0,
     this.isKeyboardOpen = false,
+    this.hostAbsorbsBottomSafeArea = false,
   });
 
   static double collapsedHeight(BuildContext context) =>
@@ -39,7 +40,8 @@ class QuranPlayerWidget extends StatefulWidget {
   /// mini-player. Mirrors the player's own anchoring at
   /// `Positioned(bottom: bottomNavBarHeight + safeAreaPadding)`, so:
   ///
-  ///   footprint = collapsedHeight + bottomNavBarHeight + safeAreaPadding.
+  ///   footprint = collapsedHeight + bottomNavBarHeight + safeAreaPadding
+  ///   (omit safe area padding when [hostAbsorbsBottomSafeArea] is true).
   ///
   /// Use this to inset content (lists, FABs, scrollbars) so it isn't
   /// covered by the player.
@@ -50,16 +52,23 @@ class QuranPlayerWidget extends StatefulWidget {
   static double collapsedFootprint(
     BuildContext context, {
     double bottomNavBarHeight = 0,
+    bool hostAbsorbsBottomSafeArea = false,
   }) =>
       collapsedHeight(context) +
       bottomNavBarHeight +
-      context.floatingBottomPadding;
+      (hostAbsorbsBottomSafeArea ? 0 : context.floatingBottomPadding);
 
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
 
   /// Whether the keyboard is currently open.
   final bool isKeyboardOpen;
+
+  /// When true with [bottomNavBarHeight] == 0, the mini player anchors flush
+  /// to the layout bottom (no [floatingBottomPadding]) because the host already
+  /// stacks bottom chrome (e.g. compact shell [BottomNavigationBar]) that
+  /// includes the system gesture inset.
+  final bool hostAbsorbsBottomSafeArea;
 
   @override
   State<QuranPlayerWidget> createState() => QuranPlayerWidgetState();
@@ -270,12 +279,18 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             builder: (context, _) {
               final progress = _expandController.value;
 
-              // Bottom inset above the screen edge / nav bar. Used in both
-              // expanded and collapsed layouts so the mini player position
-              // is consistent during the collapse-to-collapsed transition.
+              // Bottom inset above the layout bottom / overlaid nav. When the
+              // host stacks bottom chrome below this subtree
+              // ([hostAbsorbsBottomSafeArea]), skip [floatingBottomPadding] so we
+              // do not double-count the home indicator already inside the bar.
+              final double layoutBottomInset =
+                  widget.hostAbsorbsBottomSafeArea &&
+                      widget.bottomNavBarHeight <= 0
+                  ? 0.0
+                  : context.floatingBottomPadding;
               final bottomInset = widget.bottomNavBarHeight > 0
                   ? widget.bottomNavBarHeight
-                  : context.floatingBottomPadding;
+                  : layoutBottomInset;
 
               // Bottom sheet slide:
               // The expanded player translates from fully off-screen
