@@ -40,9 +40,9 @@ Future<void> _pumpReaderHarness(
 
 Future<void> _showNavigationSlider(
   WidgetTester tester,
-  SeededNavigationBloc navigationBloc,
+  NavigationBloc navigationBloc,
 ) async {
-  navigationBloc.setVisibility(isVisible: true);
+  emitTestNavigationVisibility(navigationBloc, isVisible: true);
   await tester.pump();
   // [AnimatedBuilder] sets [IgnorePointer] while the slide animation is at 0.
   await tester.pumpAndSettle(const Duration(seconds: 3));
@@ -141,7 +141,7 @@ void main() {
       expect(imagePrewarmer.startInitialRequests, hasLength(1));
       expect(imagePrewarmer.startInitialRequests.single.pageNumber, 1);
 
-      navigationBloc.setVisibility(isVisible: true);
+      emitTestNavigationVisibility(navigationBloc, isVisible: true);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
       expect(find.byType(NavigationSliderOverlay), findsOneWidget);
