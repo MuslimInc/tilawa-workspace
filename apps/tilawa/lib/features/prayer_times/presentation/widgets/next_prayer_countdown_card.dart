@@ -60,11 +60,8 @@ class NextPrayerCountdownCard extends StatelessWidget {
         vertical: tokens.spaceSmall,
       ),
       child: TilawaCard(
-        backgroundColor: colorScheme.surfaceContainerLow,
+        flat: true,
         borderRadius: tokens.radiusExtraLarge,
-        borderColor: colorScheme.outlineVariant.withValues(
-          alpha: tokens.opacityMedium,
-        ),
         padding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,
           tokens.spaceMedium,

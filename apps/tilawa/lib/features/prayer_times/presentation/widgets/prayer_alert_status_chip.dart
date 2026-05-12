@@ -18,6 +18,7 @@ class PrayerAlertStatusChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final colors = _alertColors(colorScheme, alert.state);
+    final tokens = Theme.of(context).tokens;
 
     return Semantics(
       label: alert.label,
@@ -27,6 +28,10 @@ class PrayerAlertStatusChip extends StatelessWidget {
         backgroundColor: colors.$1,
         foregroundColor: colors.$2,
         showLabel: showLabel,
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceSmall,
+          vertical: tokens.spaceSmall,
+        ),
       ),
     );
   }

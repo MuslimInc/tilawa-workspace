@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -238,7 +239,7 @@ class SettingsScreen extends StatelessWidget {
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(
               horizontal: tokens.spaceLarge,
-              vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
+              vertical: tokens.spaceLarge,
             ).copyWith(bottom: tokens.spaceExtraLarge + tokens.spaceLarge),
             child: Column(
               children: [
@@ -456,6 +457,7 @@ class _SettingsProfileCard extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
     final colorScheme = context.colorScheme;
     final foregroundColor = colorScheme.onPrimary;
+    final borderRadius = BorderRadius.circular(tokens.radiusExtraLarge);
 
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
@@ -463,79 +465,263 @@ class _SettingsProfileCard extends StatelessWidget {
           authenticated: (user) => user,
           orElse: () => null,
         );
-        return Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceExtraLarge,
-            vertical: tokens.spaceLarge,
-          ),
+        final bool isGuest = user == null;
+        final String displayName =
+            user != null && user.displayName.trim().isNotEmpty
+            ? user.displayName.trim()
+            : context.l10n.guestUser;
+        final String subtitle = user != null && user.email.trim().isNotEmpty
+            ? user.email.trim()
+            : context.l10n.signInToSync;
+
+        final Color primary = colorScheme.primary;
+        final Color gradientHi = Color.lerp(
+          primary,
+          Colors.white,
+          context.isDarkMode ? 0.1 : 0.16,
+        )!;
+        final Color gradientLo = Color.lerp(
+          primary,
+          Colors.black,
+          context.isDarkMode ? 0.14 : 0.05,
+        )!;
+
+        void onGuestTap() => const LoginRoute().push(context);
+
+        final Widget card = Container(
           decoration: BoxDecoration(
-            color: colorScheme.primary,
-            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+            borderRadius: borderRadius,
+            boxShadow: [
+              BoxShadow(
+                color: primary.withValues(
+                  alpha: context.isDarkMode ? 0.45 : 0.28,
+                ),
+                blurRadius: 28,
+                offset: const Offset(0, 14),
+                spreadRadius: -10,
+              ),
+            ],
           ),
-          child: Row(
-            children: [
-              Container(
-                width: TilawaSettingsScreenTokens.profileAvatarSize,
-                height: TilawaSettingsScreenTokens.profileAvatarSize,
-                decoration: BoxDecoration(
-                  color: foregroundColor.withValues(
-                    alpha: tokens.opacitySubtle * 2,
-                  ),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: foregroundColor.withValues(
-                      alpha: tokens.opacityMedium,
+          child: ClipRRect(
+            borderRadius: borderRadius,
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: isGuest ? onGuestTap : null,
+                mouseCursor: isGuest
+                    ? SystemMouseCursors.click
+                    : MouseCursor.defer,
+                splashColor: foregroundColor.withValues(
+                  alpha: tokens.opacityMedium,
+                ),
+                highlightColor: foregroundColor.withValues(
+                  alpha: tokens.opacitySubtle * 2,
+                ),
+                child: Ink(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [gradientHi, gradientLo],
                     ),
-                    width: tokens.spaceTiny,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceExtraLarge,
+                      vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _SettingsProfileAvatar(
+                          tokens: tokens,
+                          foregroundColor: foregroundColor,
+                          photoUrl: user?.photoUrl,
+                        ),
+                        SizedBox(
+                          width: tokens.spaceLarge + tokens.spaceSmall,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                displayName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.2,
+                                  height: 1.2,
+                                  color: foregroundColor,
+                                ),
+                              ),
+                              SizedBox(height: tokens.spaceExtraSmall),
+                              Text(
+                                subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.textTheme.bodyMedium?.copyWith(
+                                  color: foregroundColor.withValues(
+                                    alpha: tokens.opacityGlass,
+                                  ),
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.25,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (isGuest) ...[
+                          SizedBox(width: tokens.spaceSmall),
+                          _GuestSignInPill(
+                            foregroundColor: foregroundColor,
+                            tokens: tokens,
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
                 ),
-                child: Center(
+              ),
+            ),
+          ),
+        );
+
+        if (isGuest) {
+          return Semantics(
+            button: true,
+            excludeSemantics: true,
+            label: '${context.l10n.guestUser}. ${context.l10n.signInToSync}',
+            hint: context.l10n.signIn,
+            child: card,
+          );
+        }
+        return card;
+      },
+    );
+  }
+}
+
+/// Circular avatar with light elevation and Google / placeholder content.
+class _SettingsProfileAvatar extends StatelessWidget {
+  const _SettingsProfileAvatar({
+    required this.tokens,
+    required this.foregroundColor,
+    required this.photoUrl,
+  });
+
+  final TilawaDesignTokens tokens;
+  final Color foregroundColor;
+  final String? photoUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final double size = TilawaSettingsScreenTokens.profileAvatarSize;
+    final String trimmed = photoUrl?.trim() ?? '';
+    final bool hasPhoto = trimmed.isNotEmpty;
+
+    return Material(
+      elevation: context.isDarkMode ? 5 : 3,
+      shadowColor: Colors.black.withValues(alpha: 0.22),
+      shape: const CircleBorder(),
+      color: foregroundColor.withValues(
+        alpha: tokens.opacitySubtle * 2,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: hasPhoto
+            ? CachedNetworkImage(
+                imageUrl: trimmed,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(
+                  child: SizedBox(
+                    width: tokens.spaceLarge,
+                    height: tokens.spaceLarge,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: foregroundColor.withValues(
+                        alpha: tokens.opacityGlass,
+                      ),
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Center(
                   child: Icon(
                     FluentIcons.person_32_filled,
                     size: TilawaSettingsScreenTokens.profilePersonIconSize,
                     color: foregroundColor,
                   ),
                 ),
-              ),
-              SizedBox(width: tokens.spaceLarge),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user?.displayName ?? context.l10n.guestUser,
-                      style: context.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: foregroundColor,
-                      ),
-                    ),
-                    SizedBox(height: tokens.spaceExtraSmall),
-                    Text(
-                      user?.email ?? context.l10n.signInToSync,
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        color: foregroundColor.withValues(
-                          alpha: tokens.opacityGlass,
-                        ),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+              )
+            : Center(
+                child: Icon(
+                  FluentIcons.person_32_filled,
+                  size: TilawaSettingsScreenTokens.profilePersonIconSize,
+                  color: foregroundColor,
                 ),
               ),
-              if (user == null)
-                IconButton(
-                  onPressed: () => const LoginRoute().push(context),
-                  icon: Icon(
-                    Directionality.of(context) == TextDirection.rtl
-                        ? FluentIcons.arrow_left_24_filled
-                        : FluentIcons.arrow_right_24_filled,
+      ),
+    );
+  }
+}
+
+class _GuestSignInPill extends StatelessWidget {
+  const _GuestSignInPill({
+    required this.foregroundColor,
+    required this.tokens,
+  });
+
+  final Color foregroundColor;
+  final TilawaDesignTokens tokens;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool rtl = Directionality.of(context) == TextDirection.rtl;
+    final IconData arrow = rtl
+        ? FluentIcons.arrow_left_16_filled
+        : FluentIcons.arrow_right_16_filled;
+
+    return IgnorePointer(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 40),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
+            color: foregroundColor.withValues(
+              alpha: tokens.opacityMedium + tokens.opacitySubtle,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceMedium,
+              vertical: tokens.spaceSmall,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  context.l10n.signIn,
+                  style: context.textTheme.labelLarge?.copyWith(
                     color: foregroundColor,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
                   ),
                 ),
-            ],
+                SizedBox(width: tokens.spaceExtraSmall),
+                Icon(
+                  arrow,
+                  size: tokens.iconSizeSmall,
+                  color: foregroundColor,
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
