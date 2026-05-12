@@ -133,3 +133,8 @@ When expanding the screenshot builder:
   captures from the app.
 - Review generated output visually before committing final PNGs.
 
+Current builder:
+
+```shell
+python3 screenshots/tools/build_play_screenshots.py
+```
