@@ -30,6 +30,7 @@ dependencies:
   meta: ^1.9.1
 
 dev_dependencies:
+  bloc_lint: ^0.4.1
   flutter_lints: ^6.0.0
   # Dart test coverage
   coverage: ^1.15.0
