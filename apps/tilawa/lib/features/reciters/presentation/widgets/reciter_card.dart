@@ -65,11 +65,9 @@ class ReciterCard extends StatelessWidget {
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: tokens.spaceSmall,
                   children: [
-                    const _ReciterMark(),
-                    SizedBox(width: tokens.spaceMedium),
                     Expanded(child: _ReciterInfo(reciter: reciter)),
-                    SizedBox(width: tokens.spaceSmall),
                     _FavoriteButton(reciter: reciter),
                   ],
                 ),
@@ -77,37 +75,6 @@ class ReciterCard extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ReciterMark extends StatelessWidget {
-  const _ReciterMark();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      width: tokens.iconSizeExtraLarge,
-      height: tokens.iconSizeExtraLarge,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: colorScheme.primaryContainer.withValues(
-          alpha: tokens.opacityMedium,
-        ),
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      child: Icon(
-        FluentIcons.person_sound_spatial_24_regular,
-        size: tokens.iconSizeMedium,
-        color: colorScheme.primary,
       ),
     );
   }
