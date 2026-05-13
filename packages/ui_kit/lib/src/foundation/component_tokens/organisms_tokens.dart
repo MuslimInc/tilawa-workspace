@@ -1322,10 +1322,10 @@ class TilawaSettingsGroupTokens {
       tileIconSize: 22,
       tileTitleFontSize: 15.5,
       tileSubtitleFontSize: 12.5,
-      tileSubtitleOpacity: 0.5,
+      tileSubtitleOpacity: 0.6,
       tileSubtitleSpacing: 4,
       tileTrailingSize: 14,
-      tileTrailingOpacity: 0.35,
+      tileTrailingOpacity: 0.45,
       tileIconContainerOpacity: tileIconContainerOpacity,
       tileDividerPadding: const EdgeInsetsDirectional.only(
         start: 64,

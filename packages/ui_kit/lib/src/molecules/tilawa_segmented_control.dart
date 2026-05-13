@@ -21,6 +21,7 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
     this.selectedColor,
     this.selectedTextColor,
     this.unselectedTextColor,
+    this.enabled = true,
   });
 
   /// The segments to display. Each segment has a value and label.
@@ -43,6 +44,9 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
 
   /// Text color for unselected segments. Defaults to onSurfaceVariant.
   final Color? unselectedTextColor;
+
+  /// Whether the control is interactive.
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +82,7 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
               selectedTextColor: effectiveSelectedTextColor,
               unselectedTextColor: effectiveUnselectedTextColor,
               tokens: tokens,
+              enabled: enabled,
             ),
           );
         }).toList(),
@@ -108,6 +113,7 @@ class _SegmentButton extends StatelessWidget {
     required this.selectedTextColor,
     required this.unselectedTextColor,
     required this.tokens,
+    required this.enabled,
   });
 
   final String label;
@@ -117,6 +123,7 @@ class _SegmentButton extends StatelessWidget {
   final Color selectedTextColor;
   final Color unselectedTextColor;
   final TilawaSegmentedControlTokens tokens;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -133,12 +140,13 @@ class _SegmentButton extends StatelessWidget {
       color: isSelected ? selectedBackgroundColor : Colors.transparent,
       borderRadius: BorderRadius.circular(tokens.containerRadius - 2),
       child: InkWell(
-        onTap: onTap,
+        onTap: enabled ? onTap : null,
         borderRadius: BorderRadius.circular(tokens.containerRadius - 2),
         child: Semantics(
           // fix: Accessibility — segment state (inside InkWell avoids merge bugs)
           selected: isSelected,
           button: true,
+          enabled: enabled,
           label: label,
           child: Container(
             padding: tokens.itemPadding,

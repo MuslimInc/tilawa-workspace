@@ -15,6 +15,7 @@ class TilawaSelectionTile extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     this.showDivider = true,
+    this.enabled = true,
   });
 
   /// The text label to display.
@@ -31,6 +32,9 @@ class TilawaSelectionTile extends StatelessWidget {
 
   /// Whether to show a divider below the tile.
   final bool showDivider;
+
+  /// Whether the tile is interactive.
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +54,12 @@ class TilawaSelectionTile extends StatelessWidget {
               ? tokens.selectionTileSelectedBackgroundColor
               : Colors.transparent,
           child: InkWell(
-            onTap: onTap,
+            onTap: enabled ? onTap : null,
             child: Semantics(
               // fix: Accessibility — single-select list item state (child of InkWell avoids merge bugs)
               selected: isSelected,
               button: true,
+              enabled: enabled,
               label: title,
               child: Padding(
                 padding: tokens.tileContentPadding,

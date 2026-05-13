@@ -138,9 +138,6 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
     if (letterIndex >= 0 && letterIndex < widget.letters.length) {
       final newLetter = widget.letters[letterIndex];
       if (newLetter != _draggedLetter) {
-        debugPrint(
-          '[SelectedLetter] [${DateTime.now()}] Hovered: $newLetter at index $letterIndex (Current selected: ${widget.selectedLetter})',
-        );
         HapticFeedback.selectionClick();
         setState(() {
           _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
@@ -326,9 +323,6 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
             final letter = _updateDraggedLetter(details.globalPosition);
             if (letter != null) {
               _lastNotifiedLetter = letter;
-              debugPrint(
-                '[SelectedLetter] [${DateTime.now()}] LongPress Select: $letter (Current selected: ${widget.selectedLetter})',
-              );
               widget.onLetterSelected(letter);
             }
             // Show overlay after state is updated (ensures _draggedLetter is set)
@@ -341,9 +335,6 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
             final letter = _updateDraggedLetter(details.globalPosition);
             if (letter != null && letter != _lastNotifiedLetter) {
               _lastNotifiedLetter = letter;
-              debugPrint(
-                '[SelectedLetter] [${DateTime.now()}] LongPress Move: $letter (Current selected: ${widget.selectedLetter})',
-              );
               widget.onLetterSelected(letter);
             }
             widget.onLongPressMoveUpdate?.call(details);
@@ -434,51 +425,52 @@ class _LetterItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          debugPrint(
-            '[SelectedLetter] [${DateTime.now()}] ✓ TAP Toggle: $letter '
-            '(Actual selected: $actualSelectedLetter)',
-          );
-          if (letter == actualSelectedLetter) {
-            onLetterSelected(null);
-          } else {
-            onLetterSelected(letter);
-          }
-        },
-        child: SizedBox(
-          height: size,
-          width: size,
-          child: isSelected
-              ? Container(
-                  width: selectedIndicatorSize,
-                  height: selectedIndicatorSize,
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: letter,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (letter == actualSelectedLetter) {
+              onLetterSelected(null);
+            } else {
+              onLetterSelected(letter);
+            }
+          },
+          child: SizedBox(
+            height: size,
+            width: size,
+            child: isSelected
+                ? Container(
+                    width: selectedIndicatorSize,
+                    height: selectedIndicatorSize,
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        letter,
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                  )
+                : Center(
                     child: Text(
                       letter,
                       style: TextStyle(
                         fontSize: fontSize,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w500,
+                        color: unselectedColor,
                       ),
                     ),
                   ),
-                )
-              : Center(
-                  child: Text(
-                    letter,
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.w500,
-                      color: unselectedColor,
-                    ),
-                  ),
-                ),
+          ),
         ),
       ),
     );

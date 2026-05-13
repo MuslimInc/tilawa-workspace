@@ -33,6 +33,9 @@ class TilawaTextField extends StatefulWidget {
     this.initialValue,
     this.maxLength,
     this.showCounter = false,
+    this.showPasswordTooltip,
+    this.hidePasswordTooltip,
+    this.clearTextTooltip,
   }) : assert(
          controller == null || initialValue == null,
          'controller and initialValue cannot both be provided.',
@@ -132,6 +135,15 @@ class TilawaTextField extends StatefulWidget {
   /// default Flutter counter (e.g., "5/100").
   final bool showCounter;
 
+  /// Tooltip text shown on the password reveal icon.
+  final String? showPasswordTooltip;
+
+  /// Tooltip text shown on the password hide icon.
+  final String? hidePasswordTooltip;
+
+  /// Tooltip text shown on the clear icon.
+  final String? clearTextTooltip;
+
   @override
   State<TilawaTextField> createState() => _TilawaTextFieldState();
 }
@@ -220,13 +232,15 @@ class _TilawaTextFieldState extends State<TilawaTextField> {
                   : Icons.visibility_off_outlined,
             ),
             onPressed: widget.enabled ? _togglePasswordVisibility : null,
-            tooltip: _isObscured ? 'Show password' : 'Hide password',
+            tooltip: _isObscured
+                ? (widget.showPasswordTooltip ?? 'Show password')
+                : (widget.hidePasswordTooltip ?? 'Hide password'),
           )
         : (_showClearButton
               ? IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: widget.enabled ? _handleClear : null,
-                  tooltip: 'Clear text',
+                  tooltip: widget.clearTextTooltip ?? 'Clear text',
                 )
               : widget.suffixIcon);
 
