@@ -41,7 +41,15 @@ class DownloadItemCard extends StatelessWidget {
         vertical: tokens.spaceSmall,
       ),
       leading: _buildStatusIcon(context),
-      title: Text(surahName, maxLines: 2, overflow: TextOverflow.ellipsis),
+      title: Text(
+        surahName,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -81,7 +89,9 @@ class DownloadItemCard extends StatelessWidget {
                   _getStatusText(context),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
               if (download.fileSize > 0) ...[
@@ -93,7 +103,9 @@ class DownloadItemCard extends StatelessWidget {
                     '${_formatFileSize(context, download.downloadedSize)} / ${_formatFileSize(context, download.fileSize)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               ],
@@ -212,6 +224,17 @@ class DownloadItemCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: tokens.opacitySubtle),
         shape: BoxShape.circle,
+        border: Border.all(
+          color: color.withValues(alpha: tokens.opacitySubtle),
+          width: tokens.borderWidthThin,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: color.withValues(alpha: tokens.opacityShadow * 0.22),
+            blurRadius: tokens.blurShadow * 0.5,
+            offset: tokens.shadowOffsetSmall,
+          ),
+        ],
       ),
       child: Icon(icon, color: color, size: tokens.iconSizeMedium),
     );

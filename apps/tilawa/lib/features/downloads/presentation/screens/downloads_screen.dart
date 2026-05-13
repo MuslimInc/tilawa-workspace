@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -148,20 +150,27 @@ class _DownloadsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return switch (state.status) {
-      DownloadsStateStatus.initial ||
-      DownloadsStateStatus.loading => const TilawaLoadingIndicator(),
-      DownloadsStateStatus.loaded => _DownloadsList(
-        downloadsByReciter: state.downloads,
-        formattedSize: FileSizeFormatter.formatBytes(
-          context,
-          state.totalDownloadsSize,
+    return Stack(
+      children: [
+        const Positioned.fill(child: _DownloadsAmbientBackground()),
+        Positioned.fill(
+          child: switch (state.status) {
+            DownloadsStateStatus.initial ||
+            DownloadsStateStatus.loading => const TilawaLoadingIndicator(),
+            DownloadsStateStatus.loaded => _DownloadsList(
+              downloadsByReciter: state.downloads,
+              formattedSize: FileSizeFormatter.formatBytes(
+                context,
+                state.totalDownloadsSize,
+              ),
+            ),
+            DownloadsStateStatus.error => _ErrorView(
+              message: state.errorMessage ?? context.l10n.error,
+            ),
+          },
         ),
-      ),
-      DownloadsStateStatus.error => _ErrorView(
-        message: state.errorMessage ?? context.l10n.error,
-      ),
-    };
+      ],
+    );
   }
 }
 
@@ -208,31 +217,51 @@ class _DownloadsList extends StatelessWidget {
       return const _EmptyDownloadsView();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _DownloadsSizeWidget(formattedSize: formattedSize),
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.only(bottom: 120),
-            children: [
-              for (int i = 0; i < downloadsByReciter.length; i++)
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  child: ReciterDownloadsSection(
-                    reciterName: downloadsByReciter.keys.elementAt(i),
-                    downloadsByNarrative: downloadsByReciter.values.elementAt(
-                      i,
+    final List<DownloadItem> downloads = downloadsByReciter.values
+        .expand((narratives) => narratives.values)
+        .expand((items) => items)
+        .toList(growable: false);
+    final int completedCount = downloads
+        .where((download) => download.status == DownloadStatus.completed)
+        .length;
+    final int downloadingCount = downloads
+        .where(
+          (download) => download.status == DownloadStatus.downloading,
+        )
+        .length;
+
+    return _DownloadsContentBounds(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _DownloadsSummaryCard(
+            formattedSize: formattedSize,
+            totalCount: downloads.length,
+            completedCount: completedCount,
+            downloadingCount: downloadingCount,
+          ),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.only(bottom: 120),
+              children: [
+                for (int i = 0; i < downloadsByReciter.length; i++)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: ReciterDownloadsSection(
+                      reciterName: downloadsByReciter.keys.elementAt(i),
+                      downloadsByNarrative: downloadsByReciter.values.elementAt(
+                        i,
+                      ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -259,10 +288,45 @@ class _EmptyDownloadsView extends StatelessWidget {
   }
 }
 
-class _DownloadsSizeWidget extends StatelessWidget {
-  const _DownloadsSizeWidget({required this.formattedSize});
+class _DownloadsContentBounds extends StatelessWidget {
+  const _DownloadsContentBounds({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: math.min(
+              constraints.maxWidth,
+              tokens.contentMaxWidthSettings,
+            ),
+            height: constraints.maxHeight,
+            child: child,
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _DownloadsSummaryCard extends StatelessWidget {
+  const _DownloadsSummaryCard({
+    required this.formattedSize,
+    required this.totalCount,
+    required this.completedCount,
+    required this.downloadingCount,
+  });
 
   final String formattedSize;
+  final int totalCount;
+  final int completedCount;
+  final int downloadingCount;
 
   @override
   Widget build(BuildContext context) {
@@ -274,40 +338,216 @@ class _DownloadsSizeWidget extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceLarge,
-        vertical: tokens.spaceSmall,
+        vertical: tokens.spaceMedium,
       ),
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceLarge,
-          vertical: tokens.spaceMedium,
-        ),
+        padding: EdgeInsets.all(tokens.spaceLarge),
         decoration: BoxDecoration(
-          color: colorScheme.primaryContainer.withValues(alpha: 0.46),
-          borderRadius: BorderRadius.circular(tokens.radiusMedium),
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: [
+              colorScheme.primaryContainer.withValues(
+                alpha: tokens.opacityGlass,
+              ),
+              colorScheme.surfaceContainerLow.withValues(
+                alpha: tokens.opacityGlass,
+              ),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
           border: Border.all(
             color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
             width: tokens.borderWidthThin,
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.sd_storage_rounded,
-              size: tokens.iconSizeMedium,
-              color: colorScheme.primary,
-            ),
-            SizedBox(width: tokens.spaceSmall),
-            Text(
-              context.l10n.storageUsed(formattedSize),
-              style: textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w600,
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withValues(
+                alpha: tokens.opacityShadow * 0.36,
               ),
+              blurRadius: tokens.blurShadow,
+              offset: tokens.shadowOffsetSmall,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                TilawaIconBox(
+                  icon: Icons.offline_pin_rounded,
+                  iconColor: colorScheme.primary,
+                  backgroundColor: colorScheme.surface.withValues(
+                    alpha: tokens.opacityGlass,
+                  ),
+                ),
+                SizedBox(width: tokens.spaceMedium),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.downloads,
+                        style: textTheme.titleMedium?.copyWith(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(height: tokens.spaceExtraSmall),
+                      Text(
+                        context.l10n.storageUsed(formattedSize),
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: tokens.spaceLarge),
+            Wrap(
+              spacing: tokens.spaceSmall,
+              runSpacing: tokens.spaceSmall,
+              children: [
+                _DownloadsMetricChip(
+                  icon: Icons.library_music_rounded,
+                  label: '$totalCount ${context.l10n.surahs}',
+                ),
+                _DownloadsMetricChip(
+                  icon: Icons.check_circle_rounded,
+                  label: '${context.l10n.completed}: $completedCount',
+                ),
+                if (downloadingCount > 0)
+                  _DownloadsMetricChip(
+                    icon: Icons.downloading_rounded,
+                    label: '${context.l10n.downloading}: $downloadingCount',
+                  ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _DownloadsMetricChip extends StatelessWidget {
+  const _DownloadsMetricChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceSmall,
+      ),
+      decoration: BoxDecoration(
+        color: colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacitySubtle,
+          ),
+          width: tokens.borderWidthThin,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: tokens.iconSizeSmall, color: colorScheme.primary),
+          SizedBox(width: tokens.spaceExtraSmall),
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DownloadsAmbientBackground extends StatelessWidget {
+  const _DownloadsAmbientBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ExcludeSemantics(
+      child: CustomPaint(
+        painter: _DownloadsAmbientPainter(
+          colorScheme: theme.colorScheme,
+          tokens: theme.tokens,
+        ),
+      ),
+    );
+  }
+}
+
+class _DownloadsAmbientPainter extends CustomPainter {
+  const _DownloadsAmbientPainter({
+    required this.colorScheme,
+    required this.tokens,
+  });
+
+  final ColorScheme colorScheme;
+  final TilawaDesignTokens tokens;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shortest = size.shortestSide;
+    final topCenter = Offset(size.width * 0.18, size.height * 0.12);
+    final lowerCenter = Offset(size.width * 0.82, size.height * 0.72);
+
+    final primaryStroke = Paint()
+      ..color = colorScheme.primary.withValues(
+        alpha: tokens.opacitySubtle * 0.34,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+    final tertiaryStroke = Paint()
+      ..color = colorScheme.tertiary.withValues(
+        alpha: tokens.opacitySubtle * 0.28,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+
+    for (final factor in <double>[0.46, 0.7]) {
+      canvas.drawArc(
+        Rect.fromCircle(center: topCenter, radius: shortest * factor),
+        -math.pi * 0.1,
+        math.pi * 0.5,
+        false,
+        primaryStroke,
+      );
+    }
+
+    for (final factor in <double>[0.48, 0.74]) {
+      canvas.drawArc(
+        Rect.fromCircle(center: lowerCenter, radius: shortest * factor),
+        math.pi * 0.92,
+        math.pi * 0.46,
+        false,
+        tertiaryStroke,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DownloadsAmbientPainter oldDelegate) {
+    return oldDelegate.colorScheme != colorScheme ||
+        oldDelegate.tokens != tokens;
   }
 }
