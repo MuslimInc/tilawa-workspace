@@ -218,9 +218,7 @@ class _TasbeehOptionCard extends StatelessWidget {
           ),
           SizedBox(width: tokens.spaceSmall),
           Icon(
-            context.isArabic
-                ? Icons.chevron_left_rounded
-                : Icons.chevron_right_rounded,
+            Icons.chevron_right_rounded,
             color: colorScheme.onSurfaceVariant,
           ),
         ],
