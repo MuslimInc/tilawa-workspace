@@ -182,12 +182,18 @@ class _RecitersScreenState extends State<RecitersScreen> {
     if (_isStartupLiteUi) {
       return Scaffold(
         resizeToAvoidBottomInset: false,
-        body: CustomScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: [
-            const SliverFillRemaining(
-              hasScrollBody: false,
-              child: _RecitersStartupLitePane(),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            const _RecitersAmbientBackground(),
+            CustomScrollView(
+              physics: const NeverScrollableScrollPhysics(),
+              slivers: [
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _RecitersStartupLitePane(),
+                ),
+              ],
             ),
           ],
         ),
@@ -346,7 +352,9 @@ class _RecitersSliverScreen extends StatelessWidget {
         (state as RecitersLoaded).searchQuery.isEmpty;
 
     return Stack(
+      fit: StackFit.expand,
       children: [
+        const Positioned.fill(child: _RecitersAmbientBackground()),
         Column(
           children: [
             _RecitersSearchHeaderBar(
@@ -549,35 +557,75 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final double searchFieldHeight = theme.componentTokens.searchField.height;
 
     return SizedBox(
       height: _recitersSearchHeaderExtent(context),
-      child: Material(
-        color: theme.colorScheme.primary,
-        child: Padding(
-          padding: EdgeInsets.only(top: context.contentTopSafePadding),
-          child: Center(
-            child: SizedBox(
-              height: searchFieldHeight,
-              child: _ConstrainedHeaderContent(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: _SearchField(
-                          controller: searchController,
-                          focusNode: focusNode,
-                          onChanged: onSearchChanged,
-                          onClear: onClearSearch,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: [
+              Color.alphaBlend(
+                colorScheme.primary.withValues(
+                  alpha: tokens.opacitySubtle * 0.7,
+                ),
+                colorScheme.surface,
+              ),
+              colorScheme.surface,
+            ],
+          ),
+          border: Border(
+            bottom: BorderSide(
+              color: colorScheme.outlineVariant.withValues(
+                alpha: tokens.opacitySubtle,
+              ),
+              width: tokens.borderWidthThin,
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withValues(
+                alpha: tokens.opacityShadow * 0.45,
+              ),
+              blurRadius: tokens.blurShadow,
+              offset: tokens.shadowOffsetSmall,
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: EdgeInsets.only(top: context.contentTopSafePadding),
+            child: Center(
+              child: SizedBox(
+                height: searchFieldHeight,
+                child: _ConstrainedHeaderContent(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceMedium,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: _SearchField(
+                            controller: searchController,
+                            focusNode: focusNode,
+                            onChanged: onSearchChanged,
+                            onClear: onClearSearch,
+                          ),
                         ),
-                      ),
-                      SizedBox(width: tokens.spaceSmall),
-                      _FavoritesToggle(state: state, onTap: onToggleFavorites),
-                      SizedBox(width: tokens.spaceSmall),
-                      const _DownloadsButton(),
-                    ],
+                        SizedBox(width: tokens.spaceSmall),
+                        _FavoritesToggle(
+                          state: state,
+                          onTap: onToggleFavorites,
+                        ),
+                        SizedBox(width: tokens.spaceSmall),
+                        const _DownloadsButton(),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -586,6 +634,80 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _RecitersAmbientBackground extends StatelessWidget {
+  const _RecitersAmbientBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ExcludeSemantics(
+      child: CustomPaint(
+        painter: _RecitersAmbientPainter(
+          colorScheme: theme.colorScheme,
+          tokens: theme.tokens,
+        ),
+      ),
+    );
+  }
+}
+
+class _RecitersAmbientPainter extends CustomPainter {
+  const _RecitersAmbientPainter({
+    required this.colorScheme,
+    required this.tokens,
+  });
+
+  final ColorScheme colorScheme;
+  final TilawaDesignTokens tokens;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shortest = size.shortestSide;
+    final topCenter = Offset(size.width * 0.08, size.height * 0.08);
+    final lowerCenter = Offset(size.width * 0.88, size.height * 0.58);
+
+    final primaryStroke = Paint()
+      ..color = colorScheme.primary.withValues(
+        alpha: tokens.opacitySubtle * 0.38,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+    final tertiaryStroke = Paint()
+      ..color = colorScheme.tertiary.withValues(
+        alpha: tokens.opacitySubtle * 0.28,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+
+    for (final factor in <double>[0.48, 0.72]) {
+      canvas.drawArc(
+        Rect.fromCircle(center: topCenter, radius: shortest * factor),
+        -math.pi * 0.05,
+        math.pi * 0.52,
+        false,
+        primaryStroke,
+      );
+    }
+
+    for (final factor in <double>[0.5, 0.78]) {
+      canvas.drawArc(
+        Rect.fromCircle(center: lowerCenter, radius: shortest * factor),
+        math.pi * 0.9,
+        math.pi * 0.5,
+        false,
+        tertiaryStroke,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RecitersAmbientPainter oldDelegate) {
+    return oldDelegate.colorScheme != colorScheme ||
+        oldDelegate.tokens != tokens;
   }
 }
 
