@@ -181,11 +181,11 @@ class TilawaFeedbackStripTokens {
       );
     }
     return const TilawaFeedbackStripTokens(
-      padding: EdgeInsets.all(14),
+      padding: EdgeInsets.all(16),
       borderRadius: 18,
       spinnerSize: 18,
       spinnerStrokeWidth: 2.2,
-      contentGap: 10,
+      contentGap: 8,
     );
   }
 
@@ -432,7 +432,7 @@ class TilawaChipTokens {
         defaultBorderColor: defaultBorderColor,
         selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
         selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
-        contentGap: 6,
+        contentGap: 8,
         iconSize: 16,
         compactIconSize: 14,
         borderWidth: 0.5,

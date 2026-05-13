@@ -86,11 +86,11 @@ void main() {
   group('TilawaFeedbackStripTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaFeedbackStripTokens.defaults();
-      expect(tokens.padding, const EdgeInsets.all(14));
+      expect(tokens.padding, const EdgeInsets.all(16));
       expect(tokens.borderRadius, 18.0);
       expect(tokens.spinnerSize, 18.0);
       expect(tokens.spinnerStrokeWidth, 2.2);
-      expect(tokens.contentGap, 10.0);
+      expect(tokens.contentGap, 8.0);
     });
 
     test('copyWith updates padding and numeric values', () {
@@ -439,7 +439,7 @@ void main() {
       expect(tokens.groupBorderRadius, 20.0);
       expect(tokens.groupShadowOpacity, 0.06);
       expect(tokens.tileTitleFontSize, 15.5);
-      expect(tokens.tileSubtitleOpacity, 0.5);
+      expect(tokens.tileSubtitleOpacity, 0.6);
       expect(tokens.switchActiveTrackOpacity, 0.5);
       expect(tokens.selectionTileSelectedBackgroundColor, isA<Color>());
     });
@@ -961,7 +961,7 @@ void main() {
       expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.compactHeightBreakpoint, 760.0);
       expect(tokens.compactPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, 24.0);
+      expect(tokens.headerButtonSize, 48.0);
       expect(tokens.composerSurfaceColor, isA<Color>());
       expect(tokens.panelBorderColor, isA<Color>());
     });

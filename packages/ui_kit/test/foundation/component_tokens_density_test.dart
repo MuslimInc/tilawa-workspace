@@ -509,9 +509,9 @@ void main() {
       );
     });
 
-    test('compact changes contentGap to 6', () {
+    test('compact changes contentGap to 8', () {
       final compact = TilawaChipTokens.defaults(density: TilawaDensity.compact);
-      expect(compact.contentGap, 6.0);
+      expect(compact.contentGap, 8.0);
     });
 
     test('compact does NOT change compactPadding', () {
@@ -600,7 +600,7 @@ void main() {
         tokens.chip.padding,
         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       );
-      expect(tokens.chip.contentGap, 6.0);
+      expect(tokens.chip.contentGap, 8.0);
     });
 
     test('dark component tokens propagate compact density to chip', () {
@@ -609,7 +609,7 @@ void main() {
         tokens.chip.padding,
         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       );
-      expect(tokens.chip.contentGap, 6.0);
+      expect(tokens.chip.contentGap, 8.0);
     });
   });
 
