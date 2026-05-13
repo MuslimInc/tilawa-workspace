@@ -19,11 +19,14 @@ class TilawaSectionTitle extends StatelessWidget {
     final theme = Theme.of(context);
     final componentTokens = theme.componentTokens.sectionTitle;
 
-    return Text(
-      title,
-      style: theme.textTheme.titleSmall?.copyWith(
-        color: color,
-        fontWeight: fontWeight ?? componentTokens.fontWeight,
+    return Semantics(
+      header: true,
+      child: Text(
+        title,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: color,
+          fontWeight: fontWeight ?? componentTokens.fontWeight,
+        ),
       ),
     );
   }
