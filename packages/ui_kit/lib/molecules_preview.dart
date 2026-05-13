@@ -46,7 +46,7 @@ Widget previewLanguageSwitcher() {
     body: Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: LanguageSwitcher(
+        child: TilawaLanguageSwitcher(
           currentLanguage: 'en',
           languages: const ['en', 'ar'],
           getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
@@ -67,7 +67,7 @@ Widget previewLanguageSwitcherArabicSelected() {
     body: Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: LanguageSwitcher(
+        child: TilawaLanguageSwitcher(
           currentLanguage: 'ar',
           languages: const ['en', 'ar'],
           getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',

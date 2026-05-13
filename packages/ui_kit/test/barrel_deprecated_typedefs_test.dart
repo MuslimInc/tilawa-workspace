@@ -10,7 +10,7 @@ void main() {
     WidgetTester tester,
   ) async {
     // ignore: deprecated_member_use_from_same_package
-    final LanguageSwitcher languageSwitcher = LanguageSwitcher(
+    final TilawaLanguageSwitcher languageSwitcher = TilawaLanguageSwitcher(
       currentLanguage: 'en',
       onLanguageChanged: (_) {},
       languages: const ['en', 'ar'],

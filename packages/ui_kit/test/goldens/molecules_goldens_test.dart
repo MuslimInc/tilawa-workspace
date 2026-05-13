@@ -898,7 +898,7 @@ void main() {
           GoldenTestScenario(
             name: 'English selected',
             child: TilawaPreviewWrapper(
-              child: LanguageSwitcher(
+              child: TilawaLanguageSwitcher(
                 currentLanguage: 'en',
                 languages: const ['en', 'ar'],
                 getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
@@ -909,7 +909,7 @@ void main() {
           GoldenTestScenario(
             name: 'Arabic selected',
             child: TilawaPreviewWrapper(
-              child: LanguageSwitcher(
+              child: TilawaLanguageSwitcher(
                 currentLanguage: 'ar',
                 languages: const ['en', 'ar'],
                 getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',

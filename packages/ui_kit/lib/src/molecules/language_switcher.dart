@@ -75,7 +75,3 @@ class TilawaLanguageSwitcher extends StatelessWidget {
     );
   }
 }
-
-/// Deprecated. Use [TilawaLanguageSwitcher] instead.
-@Deprecated('Use TilawaLanguageSwitcher instead')
-typedef LanguageSwitcher = TilawaLanguageSwitcher;
