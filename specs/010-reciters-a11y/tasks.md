@@ -11,8 +11,4 @@
 - [x] **T010-005**: Refactor `ReciterCard` — single `InkWell` on info; favorite ≥48dp; semantics label + `toggled`; preserve `ReciterSemanticsIds`.
 - [x] **T010-006**: Update `RecitersScreen` — header icon semantics, `Semantics(header: true)`, loading `semanticsLabel`, favorites `enabled`, search clear tooltip, scrollbar semantics.
 - [x] **T010-007**: Run `dart analyze` / `flutter analyze` on `apps/tilawa` and `packages/ui_kit`.
-
-## Follow-up (optional)
-
-- [ ] Widget test: `ReciterCard` semantics (open + favorite labels, no nested buttons).
-- [ ] Add explicit keyboard-accessible “Refresh” for pull-to-refresh on Reciters.
+- [x] **T010-008**: Widget tests for `ReciterCard` semantics, 48dp favorite target, toggle tap, favorited label (`reciter_card_test.dart`).
