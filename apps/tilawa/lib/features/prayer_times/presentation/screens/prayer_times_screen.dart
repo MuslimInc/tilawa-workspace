@@ -1201,18 +1201,7 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: tokens.spaceExtraLarge + tokens.spaceLarge,
-                  height: tokens.borderWidthThin * 4,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(
-                      alpha: tokens.opacityMedium,
-                    ),
-                    borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                  ),
-                ),
-              ),
+              TilawaSheetHandle(),
               SizedBox(height: tokens.spaceLarge),
               Text(
                 row.prayerName,
