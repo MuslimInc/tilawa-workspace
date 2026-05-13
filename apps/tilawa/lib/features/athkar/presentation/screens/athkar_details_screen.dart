@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -8,6 +9,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
+import '../widgets/athkar_ambient_background.dart';
 import '../widgets/athkar_details_body.dart';
 
 class AthkarDetailsScreen extends StatefulWidget {
@@ -58,8 +60,16 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
                       vertical: tokens.spaceExtraSmall,
                     ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer,
+                      color: theme.colorScheme.primaryContainer.withValues(
+                        alpha: tokens.opacityGlass,
+                      ),
                       borderRadius: BorderRadius.circular(tokens.radiusMedium),
+                      border: Border.all(
+                        color: theme.colorScheme.primary.withValues(
+                          alpha: tokens.opacitySubtle,
+                        ),
+                        width: tokens.borderWidthThin,
+                      ),
                     ),
                     child: Text(
                       '${_currentIndex + 1} / ${state.items.length}',
@@ -76,26 +86,50 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
             ),
             body: Builder(
               builder: (context) {
-                if (state is AthkarLoading) {
-                  return const TilawaLoadingIndicator();
-                } else if (state is AthkarError) {
-                  return Center(
-                    child: Text(
-                      state.failure.message ?? 'An unexpected error occurred',
+                return Stack(
+                  children: [
+                    const Positioned.fill(child: AthkarAmbientBackground()),
+                    Positioned.fill(
+                      child: switch (state) {
+                        AthkarLoading() => const TilawaLoadingIndicator(),
+                        AthkarError(:final failure) => TilawaIllustratedState(
+                          visual: const TilawaStateVisual(
+                            icon: Icons.menu_book_rounded,
+                            tone: TilawaStateVisualTone.error,
+                          ),
+                          title:
+                              failure.message ?? context.l10n.unexpectedError,
+                          semanticLabel:
+                              failure.message ?? context.l10n.unexpectedError,
+                          primaryAction: TilawaButton(
+                            text: context.l10n.retry,
+                            variant: TilawaButtonVariant.secondary,
+                            leadingIcon: const Icon(Icons.refresh_rounded),
+                            onPressed: () {
+                              context.read<AthkarCubit>().loadAthkar(
+                                widget.categoryId,
+                              );
+                            },
+                          ),
+                        ),
+                        AthkarItemsLoaded(
+                          :final items,
+                          :final currentCounts,
+                        ) =>
+                          AthkarDetailsBody(
+                            items: items,
+                            currentCounts: currentCounts,
+                            onPageChanged: (index) {
+                              setState(() {
+                                _currentIndex = index;
+                              });
+                            },
+                          ),
+                        _ => const SizedBox.shrink(),
+                      },
                     ),
-                  );
-                } else if (state is AthkarItemsLoaded) {
-                  return AthkarDetailsBody(
-                    items: state.items,
-                    currentCounts: state.currentCounts,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                    },
-                  );
-                }
-                return const SizedBox.shrink();
+                  ],
+                );
               },
             ),
           );

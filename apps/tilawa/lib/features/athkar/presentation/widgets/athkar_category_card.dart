@@ -18,44 +18,83 @@ class AthkarCategoryCard extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    // Map icon string to IconData (simplified for now)
-    IconData getIcon(String iconName) {
-      switch (iconName) {
-        case 'wb_sunny_rounded':
-          return Icons.wb_sunny_rounded;
-        case 'nights_stay_rounded':
-          return Icons.nights_stay_rounded;
-        case 'prayer_times_rounded':
-          return Icons.auto_awesome_rounded;
-        default:
-          return Icons.bookmark_added_rounded;
-      }
-    }
+    final IconData iconData = _iconForName(icon);
 
     return TilawaCard(
       onTap: onTap,
       borderRadius: tokens.radiusExtraLarge,
-      padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Column(
-        mainAxisAlignment: .center,
-        spacing: tokens.spaceMedium,
-        children: [
-          TilawaIconBox(
-            icon: getIcon(icon),
-            size: tokens.iconSizeLarge,
-            backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
-            iconColor: colorScheme.primary,
-            borderRadius: tokens.radiusMedium,
+      padding: EdgeInsets.zero,
+      gradient: LinearGradient(
+        begin: AlignmentDirectional.topStart,
+        end: AlignmentDirectional.bottomEnd,
+        colors: [
+          colorScheme.surfaceContainerLow.withValues(
+            alpha: tokens.opacityGlass,
           ),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+          colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+        ],
+      ),
+      borderColor: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+      child: Stack(
+        children: [
+          PositionedDirectional(
+            top: -tokens.spaceExtraLarge,
+            end: -tokens.spaceExtraLarge,
+            child: IgnorePointer(
+              child: Icon(
+                iconData,
+                size: tokens.iconSizeExtraLarge * 2,
+                color: colorScheme.primary.withValues(
+                  alpha: tokens.opacitySubtle * 0.55,
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(tokens.spaceLarge),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: tokens.spaceMedium,
+              children: [
+                TilawaIconBox(
+                  icon: iconData,
+                  size: tokens.iconSizeLarge,
+                  backgroundColor: colorScheme.primary.withValues(
+                    alpha: tokens.opacitySubtle,
+                  ),
+                  iconColor: colorScheme.primary,
+                  borderRadius: tokens.radiusLarge,
+                ),
+                Text(
+                  name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  IconData _iconForName(String iconName) {
+    switch (iconName) {
+      case 'wb_sunny_rounded':
+        return Icons.wb_sunny_rounded;
+      case 'nights_stay_rounded':
+        return Icons.nights_stay_rounded;
+      case 'prayer_times_rounded':
+        return Icons.auto_awesome_rounded;
+      case 'tasbeeh':
+        return Icons.radio_button_checked_rounded;
+      default:
+        return Icons.bookmark_added_rounded;
+    }
   }
 }
