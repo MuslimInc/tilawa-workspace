@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -272,32 +273,38 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           const PrayerTimesEvent.loadPrayerTimes(),
         );
       },
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        padding: EdgeInsets.only(
-          top: tokens.spaceMedium,
-          bottom: tokens.spaceExtraLarge,
-        ),
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          _LocationUtilityCard(
-            locationName: state.locationName,
-            onUpdateLocation: () {
-              context.read<PrayerTimesBloc>().add(
-                const PrayerTimesEvent.updateLocation(),
-              );
-            },
-            isLoading: state.isLoadingLocation,
-          ),
-          _CountdownCardSection(),
-          _TodayPrayerList(
-            prayerTimes: state.todayPrayerTimes!,
-            settings: state.settings,
-          ),
-          _BottomUtilitiesCard(
-            onOpenQibla: () => context.push('/qibla'),
-            onManageAlertsTap: () => _showNotificationDialog(context),
+          const Positioned.fill(child: _PrayerTimesAmbientBackground()),
+          ListView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.only(
+              top: tokens.spaceMedium,
+              bottom: tokens.spaceExtraLarge,
+            ),
+            children: [
+              _LocationUtilityCard(
+                locationName: state.locationName,
+                onUpdateLocation: () {
+                  context.read<PrayerTimesBloc>().add(
+                    const PrayerTimesEvent.updateLocation(),
+                  );
+                },
+                isLoading: state.isLoadingLocation,
+              ),
+              _CountdownCardSection(),
+              _TodayPrayerList(
+                prayerTimes: state.todayPrayerTimes!,
+                settings: state.settings,
+              ),
+              _BottomUtilitiesCard(
+                onOpenQibla: () => context.push('/qibla'),
+                onManageAlertsTap: () => _showNotificationDialog(context),
+              ),
+            ],
           ),
         ],
       ),
@@ -406,6 +413,88 @@ class _CountdownCardSection extends StatelessWidget {
       normalized = normalized.replaceAll(arabicNumbers[i], englishNumbers[i]);
     }
     return normalized;
+  }
+}
+
+class _PrayerTimesAmbientBackground extends StatelessWidget {
+  const _PrayerTimesAmbientBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ExcludeSemantics(
+      child: CustomPaint(
+        painter: _PrayerTimesAmbientPainter(
+          colorScheme: theme.colorScheme,
+          tokens: theme.tokens,
+        ),
+      ),
+    );
+  }
+}
+
+class _PrayerTimesAmbientPainter extends CustomPainter {
+  const _PrayerTimesAmbientPainter({
+    required this.colorScheme,
+    required this.tokens,
+  });
+
+  final ColorScheme colorScheme;
+  final TilawaDesignTokens tokens;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shortest = size.shortestSide;
+    final firstCenter = Offset(size.width * 0.08, size.height * 0.18);
+    final secondCenter = Offset(size.width * 0.92, size.height * 0.64);
+
+    final primaryStroke = Paint()
+      ..color = colorScheme.primary.withValues(
+        alpha: tokens.opacitySubtle * 0.42,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+    final tertiaryStroke = Paint()
+      ..color = colorScheme.tertiary.withValues(
+        alpha: tokens.opacitySubtle * 0.32,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+
+    for (final radiusFactor in <double>[0.44, 0.68]) {
+      final rect = Rect.fromCircle(
+        center: firstCenter,
+        radius: shortest * radiusFactor,
+      );
+      canvas.drawArc(
+        rect,
+        -math.pi * 0.08,
+        math.pi * 0.54,
+        false,
+        primaryStroke,
+      );
+    }
+
+    for (final radiusFactor in <double>[0.5, 0.76]) {
+      final rect = Rect.fromCircle(
+        center: secondCenter,
+        radius: shortest * radiusFactor,
+      );
+      canvas.drawArc(
+        rect,
+        math.pi * 0.9,
+        math.pi * 0.48,
+        false,
+        tertiaryStroke,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PrayerTimesAmbientPainter oldDelegate) {
+    return oldDelegate.colorScheme != colorScheme ||
+        oldDelegate.tokens != tokens;
   }
 }
 
@@ -940,6 +1029,11 @@ class _TodayPrayerListRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
         child: DecoratedBox(
           decoration: BoxDecoration(
+            color: isCurrent
+                ? colorScheme.primaryContainer.withValues(
+                    alpha: tokens.opacitySubtle,
+                  )
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(tokens.radiusMedium),
             border: isCurrent
                 ? Border.all(

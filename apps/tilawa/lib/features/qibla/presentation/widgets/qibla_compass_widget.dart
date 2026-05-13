@@ -41,65 +41,76 @@ class QiblaCompassWidget extends StatelessWidget {
     // Result: Qibla arrow points to Qibla.
 
     final tokens = theme.tokens;
-    final size = MediaQuery.sizeOf(context);
-    final compassSize = size.shortestSide * kCompassSizeRatio;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          width: compassSize,
-          height: compassSize,
-          child: Semantics(
-            label: 'Qibla Compass',
-            hint: 'Rotate your device to align the arrow with the Qibla',
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // The Dial (Rotates with device heading)
-                Transform.rotate(
-                  angle: qiblaDirection.direction * (math.pi / 180) * -1,
-                  child: _CompassDial(qiblaDirection: qiblaDirection),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenSize = MediaQuery.sizeOf(context);
+        final boundedWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : screenSize.shortestSide;
+        final baseSize = math.min(boundedWidth, screenSize.shortestSide);
+        final compassSize = baseSize * kCompassSizeRatio;
+        final dialSize = baseSize * kDialSizeRatio;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox.square(
+              dimension: compassSize,
+              child: Semantics(
+                label: 'Qibla Compass',
+                hint: 'Rotate your device to align the arrow with the Qibla',
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // The Dial (Rotates with device heading)
+                    Transform.rotate(
+                      angle: qiblaDirection.direction * (math.pi / 180) * -1,
+                      child: _CompassDial(
+                        qiblaDirection: qiblaDirection,
+                        dialSize: dialSize,
+                      ),
+                    ),
+
+                    // Center Indicator (Fixed on Screen) - Acts as the cap
+                    _CenterIndicator(isAligned: isAligned),
+
+                    // 3. Qibla Pointer (Central Arrow)
+                    Transform.rotate(
+                      angle:
+                          (qiblaDirection.offset - qiblaDirection.direction) *
+                          (math.pi / 180),
+                      child: _QiblaPointer(isAligned: isAligned),
+                    ),
+                  ],
                 ),
-
-                // Center Indicator (Fixed on Screen) - Acts as the cap
-                _CenterIndicator(isAligned: isAligned),
-
-                // 3. Qibla Pointer (Central Arrow)
-                Transform.rotate(
-                  angle:
-                      (qiblaDirection.offset - qiblaDirection.direction) *
-                      (math.pi / 180),
-                  child: _QiblaPointer(isAligned: isAligned),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-        SizedBox(height: tokens.spaceExtraLarge),
-        _AngleDisplay(
-          angle: qiblaDirection.direction,
-          isAligned: isAligned,
-          alignedColor: alignedColor,
-          unalignedColor: unalignedColor,
-        ),
-      ],
+            SizedBox(height: tokens.spaceLarge),
+            _AngleDisplay(
+              angle: qiblaDirection.direction,
+              isAligned: isAligned,
+              alignedColor: alignedColor,
+              unalignedColor: unalignedColor,
+            ),
+          ],
+        );
+      },
     );
   }
 }
 
 class _CompassDial extends StatelessWidget {
-  const _CompassDial({required this.qiblaDirection});
+  const _CompassDial({required this.qiblaDirection, required this.dialSize});
 
   final QiblaDirectionEntity qiblaDirection;
+  final double dialSize;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
-    final size = MediaQuery.sizeOf(context);
-    final dialSize = size.shortestSide * kDialSizeRatio;
 
     return Stack(
       alignment: Alignment.center,
@@ -342,14 +353,41 @@ class _CompassDialPainter extends CustomPainter {
 
     // Background Circle
     final bgPaint = Paint()
-      ..color = colorScheme.surfaceContainerHighest
+      ..shader = RadialGradient(
+        colors: [
+          Color.alphaBlend(
+            colorScheme.primary.withValues(alpha: tokens.opacitySubtle * 0.35),
+            colorScheme.surface,
+          ),
+          Color.alphaBlend(
+            colorScheme.tertiary.withValues(
+              alpha: tokens.opacitySubtle * 0.45,
+            ),
+            colorScheme.surfaceContainerHighest,
+          ),
+          colorScheme.surfaceContainerHighest,
+        ],
+        stops: const [0, 0.72, 1],
+      ).createShader(Rect.fromCircle(center: center, radius: radius))
       ..style = PaintingStyle.fill;
 
     canvas.drawCircle(center, radius, bgPaint);
 
+    final innerGuidePaint = Paint()
+      ..color = colorScheme.primary.withValues(
+        alpha: tokens.opacitySubtle * 0.55,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+
+    canvas.drawCircle(center, radius * 0.72, innerGuidePaint);
+    canvas.drawCircle(center, radius * 0.46, innerGuidePaint);
+
     // Border
     final borderPaint = Paint()
-      ..color = colorScheme.onSurface.withValues(alpha: tokens.opacitySubtle)
+      ..color = colorScheme.onSurface.withValues(
+        alpha: tokens.opacitySubtle * 0.7,
+      )
       ..style = PaintingStyle.stroke
       ..strokeWidth = borderWidth;
 
@@ -357,12 +395,12 @@ class _CompassDialPainter extends CustomPainter {
 
     // Ticks
     final tickPaint = Paint()
-      ..color = colorScheme.outline.withValues(alpha: tokens.opacityEmphasis)
+      ..color = colorScheme.outline.withValues(alpha: tokens.opacityMedium)
       ..strokeWidth = kThinTickStrokeWidth
       ..strokeCap = StrokeCap.round;
 
     final majorTickPaint = Paint()
-      ..color = colorScheme.onSurface
+      ..color = colorScheme.onSurface.withValues(alpha: tokens.opacityEmphasis)
       ..strokeWidth = kThickTickStrokeWidth
       ..strokeCap = StrokeCap.round;
 
