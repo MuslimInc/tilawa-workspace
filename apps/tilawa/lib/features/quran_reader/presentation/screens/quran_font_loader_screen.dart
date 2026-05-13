@@ -298,26 +298,32 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
 
           if (error != null) {
             return Scaffold(
-              body: _ErrorView(
-                message: error.failure.localizedMessage(context),
-                onRetry: () {
-                  final page = initialPageNumber;
-                  if (page != null) {
-                    context.read<QuranFontLoaderBloc>().add(
-                      QuranFontLoaderEvent.initialize(initialPageNumber: page),
-                    );
-                  }
-                },
+              body: _FontLoaderSurface(
+                child: _ErrorView(
+                  message: error.failure.localizedMessage(context),
+                  onRetry: () {
+                    final page = initialPageNumber;
+                    if (page != null) {
+                      context.read<QuranFontLoaderBloc>().add(
+                        QuranFontLoaderEvent.initialize(
+                          initialPageNumber: page,
+                        ),
+                      );
+                    }
+                  },
+                ),
               ),
             );
           }
 
           if (downloading != null) {
             return Scaffold(
-              body: _DownloadView(
-                progress: downloading.progress,
-                speedKbps: downloading.speedKbps,
-                etaSeconds: downloading.etaSeconds,
+              body: _FontLoaderSurface(
+                child: _DownloadView(
+                  progress: downloading.progress,
+                  speedKbps: downloading.speedKbps,
+                  etaSeconds: downloading.etaSeconds,
+                ),
               ),
             );
           }
@@ -358,6 +364,72 @@ class _ReaderView extends StatelessWidget {
 }
 
 // ─── Atom: brand icon ────────────────────────────────────────────────────────
+
+class _FontLoaderSurface extends StatelessWidget {
+  const _FontLoaderSurface({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        ColoredBox(color: colorScheme.surface),
+        ExcludeSemantics(
+          child: CustomPaint(
+            painter: _FontLoaderAmbientPainter(
+              colorScheme: colorScheme,
+              tokens: tokens,
+            ),
+          ),
+        ),
+        SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+            child: child,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FontLoaderAmbientPainter extends CustomPainter {
+  const _FontLoaderAmbientPainter({
+    required this.colorScheme,
+    required this.tokens,
+  });
+
+  final ColorScheme colorScheme;
+  final TilawaDesignTokens tokens;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shortest = size.shortestSide;
+    final center = Offset(size.width * 0.5, size.height * 0.35);
+    final stroke = Paint()
+      ..color = colorScheme.primary.withValues(
+        alpha: tokens.opacitySubtle * 0.45,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+
+    for (final factor in <double>[0.36, 0.58, 0.8]) {
+      canvas.drawCircle(center, shortest * factor, stroke);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_FontLoaderAmbientPainter oldDelegate) {
+    return oldDelegate.colorScheme != colorScheme ||
+        oldDelegate.tokens != tokens;
+  }
+}
 
 class _BrandIcon extends StatelessWidget {
   const _BrandIcon();
