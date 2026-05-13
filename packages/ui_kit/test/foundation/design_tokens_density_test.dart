@@ -60,23 +60,21 @@ void main() {
         equals(comfortableTokens.iconSizeMedium),
       );
 
-      // Medium/large spacing and large radii tighten on compact.
+      // Medium spacing tightens on compact (8 vs 12). Larger space/radius
+      // steps stay on the same 8dp multiples for both densities today.
       expect(
         compactTokens.spaceMedium,
         lessThan(comfortableTokens.spaceMedium),
       );
-      expect(compactTokens.spaceLarge, lessThan(comfortableTokens.spaceLarge));
+      expect(compactTokens.spaceLarge, comfortableTokens.spaceLarge);
       expect(
         compactTokens.spaceExtraLarge,
-        lessThan(comfortableTokens.spaceExtraLarge),
+        comfortableTokens.spaceExtraLarge,
       );
-      expect(
-        compactTokens.radiusLarge,
-        lessThan(comfortableTokens.radiusLarge),
-      );
+      expect(compactTokens.radiusLarge, comfortableTokens.radiusLarge);
       expect(
         compactTokens.radiusExtraLarge,
-        lessThan(comfortableTokens.radiusExtraLarge),
+        comfortableTokens.radiusExtraLarge,
       );
     });
 
@@ -114,7 +112,8 @@ void main() {
       );
 
       expect(compactTokens.density, TilawaDensity.compact);
-      // Phase 0: Other values unchanged
+      // copyWith does not recompute spacing from density; explicit fields carry
+      // over from the base instance.
       expect(compactTokens.spaceMedium, comfortableTokens.spaceMedium);
     });
   });

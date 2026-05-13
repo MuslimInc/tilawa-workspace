@@ -630,9 +630,9 @@ void main() {
       expect(compact.padding, const EdgeInsets.all(8.0));
     });
 
-    test('compact changes borderRadius to 14', () {
+    test('compact keeps borderRadius 16 (8dp grid)', () {
       final compact = TilawaCardTokens.defaults(density: TilawaDensity.compact);
-      expect(compact.borderRadius, 14.0);
+      expect(compact.borderRadius, 16.0);
     });
 
     test('compact does NOT change borderWidth', () {
@@ -646,13 +646,13 @@ void main() {
         density: TilawaDensity.compact,
       );
       expect(tokens.card.padding, const EdgeInsets.all(8.0));
-      expect(tokens.card.borderRadius, 14.0);
+      expect(tokens.card.borderRadius, 16.0);
     });
 
     test('dark component tokens propagate compact density to card', () {
       final tokens = TilawaComponentTokens.dark(density: TilawaDensity.compact);
       expect(tokens.card.padding, const EdgeInsets.all(8.0));
-      expect(tokens.card.borderRadius, 14.0);
+      expect(tokens.card.borderRadius, 16.0);
     });
   });
 
@@ -730,11 +730,11 @@ void main() {
       );
     });
 
-    test('compact changes padding to all(10)', () {
+    test('compact changes padding to all(8)', () {
       final compact = TilawaFeedbackStripTokens.defaults(
         density: TilawaDensity.compact,
       );
-      expect(compact.padding, const EdgeInsets.all(10));
+      expect(compact.padding, const EdgeInsets.all(8));
     });
 
     test('compact changes contentGap to 8', () {
@@ -775,7 +775,7 @@ void main() {
       final tokens = TilawaComponentTokens.light(
         density: TilawaDensity.compact,
       );
-      expect(tokens.feedbackStrip.padding, const EdgeInsets.all(10));
+      expect(tokens.feedbackStrip.padding, const EdgeInsets.all(8));
       expect(tokens.feedbackStrip.contentGap, 8.0);
     });
 
@@ -785,7 +785,7 @@ void main() {
         final tokens = TilawaComponentTokens.dark(
           density: TilawaDensity.compact,
         );
-        expect(tokens.feedbackStrip.padding, const EdgeInsets.all(10));
+        expect(tokens.feedbackStrip.padding, const EdgeInsets.all(8));
         expect(tokens.feedbackStrip.contentGap, 8.0);
       },
     );
@@ -937,29 +937,30 @@ void main() {
       expect(comfortable.itemRadius, equals(defaultTokens.itemRadius));
     });
 
-    test('compact tightens containerPadding all(4)→all(2)', () {
+    test('compact keeps containerPadding all(4) like comfortable', () {
       final compact = TilawaSegmentedControlTokens.defaults(
         density: TilawaDensity.compact,
       );
-      expect(compact.containerPadding, const EdgeInsets.all(2));
+      final comfortable = TilawaSegmentedControlTokens.defaults();
+      expect(compact.containerPadding, comfortable.containerPadding);
     });
 
-    test('compact tightens itemPadding (h:16,v:8)→(h:12,v:6)', () {
+    test('compact tightens itemPadding (h:16,v:8)→(h:12,v:8)', () {
       final compact = TilawaSegmentedControlTokens.defaults(
         density: TilawaDensity.compact,
       );
       expect(
         compact.itemPadding,
-        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       );
     });
 
-    test('compact tightens containerRadius 12→10 and itemRadius 8→6', () {
+    test('compact tightens containerRadius 12→10; itemRadius stays 8', () {
       final compact = TilawaSegmentedControlTokens.defaults(
         density: TilawaDensity.compact,
       );
       expect(compact.containerRadius, 10.0);
-      expect(compact.itemRadius, 6.0);
+      expect(compact.itemRadius, 8.0);
     });
 
     test('compact preserves opacities, minItemWidth, font weights', () {
@@ -982,8 +983,10 @@ void main() {
     test('component tokens propagate compact density (light + dark)', () {
       final light = TilawaComponentTokens.light(density: TilawaDensity.compact);
       final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
-      expect(light.segmentedControl.itemRadius, 6.0);
-      expect(dark.segmentedControl.itemRadius, 6.0);
+      expect(light.segmentedControl.containerRadius, 10.0);
+      expect(dark.segmentedControl.containerRadius, 10.0);
+      expect(light.segmentedControl.itemRadius, 8.0);
+      expect(dark.segmentedControl.itemRadius, 8.0);
     });
   });
 
@@ -1102,11 +1105,11 @@ void main() {
       expect(compact.borderRadius, 12.0);
     });
 
-    test('compact tightens contentPadding vertical 12→10', () {
+    test('compact tightens contentPadding vertical 12→8', () {
       final compact = TilawaSearchFieldTokens.defaults(
         density: TilawaDensity.compact,
       );
-      expect(compact.contentPadding, const EdgeInsets.symmetric(vertical: 10));
+      expect(compact.contentPadding, const EdgeInsets.symmetric(vertical: 8));
     });
 
     test('compact tightens iconSize 18→16', () {
