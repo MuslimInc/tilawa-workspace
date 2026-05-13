@@ -251,7 +251,7 @@ void main() {
         density: TilawaDensity.compact,
       );
       expect(
-        compact.groupHeaderPadding,
+        compact.groupHeaderPadding.resolve(TextDirection.ltr),
         const EdgeInsets.fromLTRB(12, 12, 16, 6),
       );
     });
@@ -387,7 +387,7 @@ void main() {
         density: TilawaDensity.compact,
       );
       expect(
-        tokens.settingsGroup.groupHeaderPadding,
+        tokens.settingsGroup.groupHeaderPadding.resolve(TextDirection.ltr),
         const EdgeInsets.fromLTRB(12, 12, 16, 6),
       );
       expect(
@@ -400,7 +400,7 @@ void main() {
     test('component tokens dark theme propagates compact density', () {
       final tokens = TilawaComponentTokens.dark(density: TilawaDensity.compact);
       expect(
-        tokens.settingsGroup.groupHeaderPadding,
+        tokens.settingsGroup.groupHeaderPadding.resolve(TextDirection.ltr),
         const EdgeInsets.fromLTRB(12, 12, 16, 6),
       );
       expect(
@@ -1391,16 +1391,23 @@ void main() {
       expect(k.overlayColor, equals(c.overlayColor));
     });
 
-    test('MediaPlayerBar: compact equals comfortable for every field', () {
+    test('MediaPlayerBar: compact tightens chrome vs comfortable', () {
       final c = TilawaMediaPlayerBarTokens.defaults(
         density: TilawaDensity.comfortable,
       );
       final k = TilawaMediaPlayerBarTokens.defaults(
         density: TilawaDensity.compact,
       );
-      expect(k.contentPadding, equals(c.contentPadding));
-      expect(k.borderRadius, equals(c.borderRadius));
-      expect(k.artworkSize, equals(c.artworkSize));
+      expect(
+        k.contentPadding.resolve(TextDirection.ltr),
+        const EdgeInsets.fromLTRB(10, 6, 10, 6),
+      );
+      expect(
+        c.contentPadding.resolve(TextDirection.ltr),
+        const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      );
+      expect(k.borderRadius, lessThan(c.borderRadius));
+      expect(k.artworkSize, lessThan(c.artworkSize));
       expect(k.controlButtonSize, equals(c.controlButtonSize));
       expect(k.playPauseButtonSize, equals(c.playPauseButtonSize));
     });

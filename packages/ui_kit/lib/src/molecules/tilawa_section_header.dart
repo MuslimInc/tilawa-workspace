@@ -91,12 +91,20 @@ class TilawaSectionHeader extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(title, style: titleTextStyle),
+                    Text(
+                      title,
+                      style: titleTextStyle,
+                      textAlign: TextAlign.start,
+                    ),
                     if (subtitle != null && subtitleTextStyle != null) ...[
                       SizedBox(
                         height: Theme.of(context).tokens.spaceExtraSmall,
                       ),
-                      Text(subtitle!, style: subtitleTextStyle!),
+                      Text(
+                        subtitle!,
+                        style: subtitleTextStyle!,
+                        textAlign: TextAlign.start,
+                      ),
                     ],
                   ],
                 ),

@@ -145,6 +145,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       footerBar: TilawaFooterBarTokens.defaults(density: density),
       mediaPlayerBar: TilawaMediaPlayerBarTokens.fromColorScheme(
         effectiveColorScheme,
+        density: density,
       ),
       adaptiveShell: TilawaAdaptiveShellTokens.fromColorScheme(
         effectiveColorScheme,

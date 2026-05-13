@@ -25,6 +25,8 @@ class TilawaSearchField extends StatelessWidget {
     this.textStyle,
     this.enabled = true,
     this.onTapOutside,
+    this.errorText,
+    this.errorStyle,
   });
 
   final String hintText;
@@ -47,6 +49,16 @@ class TilawaSearchField extends StatelessWidget {
   final TextStyle? textStyle;
   final bool enabled;
   final TapRegionCallback? onTapOutside;
+
+  /// Validation or lookup failure message shown under the field.
+  ///
+  /// When non-null and non-empty, the shell uses [ColorScheme.error] and the
+  /// field grows vertically to fit the message.
+  final String? errorText;
+
+  /// Style for [errorText]. Defaults to [TextTheme.bodySmall] in
+  /// [ColorScheme.error].
+  final TextStyle? errorStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +86,8 @@ class TilawaSearchField extends StatelessWidget {
         textStyle: textStyle,
         enabled: enabled,
         onTapOutside: onTapOutside,
+        errorText: errorText,
+        errorStyle: errorStyle,
         hasText: controller?.text.isNotEmpty ?? false,
         isFocused: focusNode?.hasFocus ?? false,
       );
@@ -114,6 +128,8 @@ class _SearchFieldBody extends StatelessWidget {
     required this.onTapOutside,
     required this.hasText,
     required this.isFocused,
+    this.errorText,
+    this.errorStyle,
   });
 
   final String hintText;
@@ -138,26 +154,39 @@ class _SearchFieldBody extends StatelessWidget {
   final TapRegionCallback? onTapOutside;
   final bool hasText;
   final bool isFocused;
+  final String? errorText;
+  final TextStyle? errorStyle;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final componentTokens = theme.componentTokens.searchField;
+    final colorScheme = theme.colorScheme;
     final effectiveFillColor =
         backgroundColor ?? componentTokens.backgroundColor;
     final effectiveBorderRadius =
         borderRadius ?? BorderRadius.circular(componentTokens.borderRadius);
+    final bool hasError = errorText != null && errorText!.trim().isNotEmpty;
+    final double? shellHeight = hasError
+        ? null
+        : (height ?? componentTokens.height);
 
     return Container(
-      height: height ?? componentTokens.height,
+      height: shellHeight,
+      constraints: hasError
+          ? BoxConstraints(minHeight: componentTokens.height)
+          : null,
       margin: margin,
       decoration: BoxDecoration(
         color: effectiveFillColor,
         borderRadius: effectiveBorderRadius,
         border: Border.all(
-          color: isFocused
-              ? componentTokens.focusedBorderColor
-              : componentTokens.unfocusedBorderColor,
+          color: hasError
+              ? colorScheme.error
+              : (isFocused
+                    ? componentTokens.focusedBorderColor
+                    : componentTokens.unfocusedBorderColor),
+          width: hasError ? 2 : 1,
         ),
         boxShadow: showShadow
             ? [
@@ -188,6 +217,14 @@ class _SearchFieldBody extends StatelessWidget {
           filled: false,
           border: .none,
           hintText: hintText,
+          errorText: hasError ? errorText : null,
+          errorStyle:
+              errorStyle ??
+              theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.error,
+                fontWeight: FontWeight.w500,
+              ),
+          errorMaxLines: 3,
           hintStyle:
               hintStyle ??
               theme.textTheme.bodyMedium?.copyWith(

@@ -972,7 +972,8 @@ class TilawaSearchFieldTokens {
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
     const shadowOpacity = 0.04;
-    const hintOpacity = 0.58;
+    // Slightly higher floor for hint vs surface (readability / WCAG-ish headroom).
+    const hintOpacity = 0.62;
     const iconOpacity = 0.72;
     final focusedBorderColor = colorScheme.primary.withValues(
       alpha: focusedBorderOpacity,

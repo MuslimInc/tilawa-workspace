@@ -20,28 +20,31 @@ class TilawaSettingsGroup extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         TilawaSectionHeader.settings(context, title: title),
-        Container(
-          decoration: BoxDecoration(
-            color: tokens.groupSurfaceColor,
-            borderRadius: BorderRadius.circular(tokens.groupBorderRadius),
-            border: Border.all(
-              color: tokens.groupContainerBorderColor,
-              width: tokens.tileDividerThickness,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.shadow.withValues(
-                  alpha: tokens.groupShadowOpacity,
-                ),
-                blurRadius: tokens.groupShadowBlur,
-                offset: tokens.groupShadowOffset,
+        SizedBox(
+          width: double.infinity,
+          child: Container(
+            decoration: BoxDecoration(
+              color: tokens.groupSurfaceColor,
+              borderRadius: BorderRadius.circular(tokens.groupBorderRadius),
+              border: Border.all(
+                color: tokens.groupContainerBorderColor,
+                width: tokens.tileDividerThickness,
               ),
-            ],
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withValues(
+                    alpha: tokens.groupShadowOpacity,
+                  ),
+                  blurRadius: tokens.groupShadowBlur,
+                  offset: tokens.groupShadowOffset,
+                ),
+              ],
+            ),
+            child: Column(children: children),
           ),
-          child: Column(children: children),
         ),
       ],
     );

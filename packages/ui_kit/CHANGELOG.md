@@ -15,6 +15,8 @@
 ### Changed
 
 - `TilawaButton` — non–full-width labels now ellipsize in constrained parents via `Flexible(fit: FlexFit.loose)`; `isFullWidth` behavior unchanged.
+- `TilawaSearchFieldTokens` — hint text uses a slightly higher alpha on `onSurfaceVariant` for readability.
+- `TilawaMediaPlayerBarTokens` — compact density tightens padding, radii, and artwork while keeping transport controls at ≥48dp.
 
 ### Fixed
 
@@ -42,4 +44,11 @@
 - `TilawaPermissionBannerTokens` — spacing values aligned to the 8dp grid.
 - Settings tiles tokens — tile gaps/padding expressed on the 8dp grid.
 - `TilawaCardTokens` — compact card corner radius aligned to an 8dp grid multiple.
-- `TilawaButton` — label row no longer uses `LayoutBuilder` so Alchemist intrinsics stay valid.
+- `TilawaSettingsGroupTokens` — `groupHeaderPadding` and `tileDividerPadding` use directional insets so RTL mirrors LTR layout; settings rows enforce a 48dp minimum height where the list row allows it.
+- `TilawaSettingsTile` — trailing chevron remains right-pointing; `ListTile` trailing alignment handles RTL.
+- `TilawaSettingsGroup` — group panel spans full cross-axis width in narrow parents.
+- `TilawaSectionHeader` — section title and subtitle use `TextAlign.start` for correct RTL alignment.
+- `TilawaChip` / `TilawaSelectionPill` — optional `Semantics.selected` for pills via `semanticsSelected`.
+- `TilawaErrorState` — retry progress indicator size follows design token `iconSizeLarge`.
+- `TilawaSearchField` — optional `errorText` / `errorStyle` with error border and vertical growth for validation copy.
+- `TilawaMediaPlayerBar` — `contentPadding` resolved with ambient `Directionality`; transport `IconButton`s expose tooltips for a11y.

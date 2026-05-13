@@ -48,3 +48,7 @@ The label row does **not** use `LayoutBuilder` (intrinsic-safe for golden and ta
 If you temporarily wrapped **`TilawaButton`** in **`SingleChildScrollView`** only to avoid the pre-fix overflow, you can **remove** that workaround; the component now handles narrow constraints on its own.
 
 See **`CHANGELOG.md` (`### Changed`)** and **`test/atoms/tilawa_button_test.dart`**.
+
+## Settings rows and RTL
+
+`TilawaSettingsGroupTokens` uses **`EdgeInsetsDirectional`** for **`groupHeaderPadding`** and **`tileDividerPadding`** so inset alignment mirrors under RTL. **`ListTile`** rows sit in a **`ConstrainedBox`** with **`minHeight: kMinInteractiveDimension`** so single-line tiles meet the 48dp row floor without changing tokenized padding values. **`TilawaSettingsTile`** keeps a **right-pointing** trailing chevron; **`ListTile`** positions the trailing slot on the correct edge in RTL.

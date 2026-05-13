@@ -232,18 +232,54 @@ class TilawaMediaPlayerBarTokens {
   }) {
     return TilawaMediaPlayerBarTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
+      density: density,
     );
   }
 
-  factory TilawaMediaPlayerBarTokens.fromColorScheme(ColorScheme colorScheme) {
+  factory TilawaMediaPlayerBarTokens.fromColorScheme(
+    ColorScheme colorScheme, {
+    TilawaDensity density = TilawaDensity.comfortable,
+  }) {
     // fix: Accessibility — ≥48dp transport control hit targets
     const shellOutlineAlpha = 0.1;
     const playPauseShadowOpacity = 0.3;
+    if (density.isCompact) {
+      return TilawaMediaPlayerBarTokens(
+        contentPadding: const EdgeInsetsDirectional.fromSTEB(10, 6, 10, 6),
+        borderRadius: 14,
+        artworkSize: 44,
+        artworkRadius: 10,
+        titleFontWeight: FontWeight.w600,
+        subtitleOpacity: 0.72,
+        infoGap: 2,
+        artworkInfoGap: 10,
+        infoControlsGap: 6,
+        controlsGap: 2,
+        controlButtonSize: kMinInteractiveDimension,
+        playPauseButtonSize: kMinInteractiveDimension,
+        defaultIconSize: 22,
+        playPauseIconSize: 15,
+        disabledControlOpacity: 0.3,
+        shadowOpacity: 0.1,
+        playPauseShadowOpacity: playPauseShadowOpacity,
+        playPauseShadowBlur: 8,
+        shellBackgroundColor: colorScheme.surfaceContainerLow,
+        progressTrackBackgroundColor: colorScheme.surfaceContainerHighest
+            .withValues(alpha: shellOutlineAlpha),
+        artworkPlaceholderColor: colorScheme.surfaceContainerHigh,
+        shellOutlineColor: colorScheme.outlineVariant.withValues(
+          alpha: shellOutlineAlpha,
+        ),
+        playPauseButtonShadowColor: colorScheme.primary.withValues(
+          alpha: playPauseShadowOpacity,
+        ),
+      );
+    }
     return TilawaMediaPlayerBarTokens(
       // Slightly tighter vertical padding so the bar fits [playerCollapsedHeight]
       // with progress strip + 48dp artwork row inside the mini-player SizedBox
       // (outer shell also adds horizontal margins and tiny vertical padding).
-      contentPadding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       borderRadius: 16,
       artworkSize: 48,
       artworkRadius: 12,
@@ -1211,7 +1247,12 @@ class TilawaSettingsGroupTokens {
     if (density.isCompact) {
       return TilawaSettingsGroupTokens(
         // Compact: tuned for breathability while staying denser than comfortable.
-        groupHeaderPadding: const EdgeInsets.fromLTRB(12, 12, 16, 6),
+        groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
+          12,
+          12,
+          16,
+          6,
+        ),
         switchTileContentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 10,
@@ -1236,7 +1277,10 @@ class TilawaSettingsGroupTokens {
         tileTrailingSize: 18,
         tileTrailingOpacity: 0.55,
         tileIconContainerOpacity: tileIconContainerOpacity,
-        tileDividerPadding: const EdgeInsets.only(left: 64, right: 16),
+        tileDividerPadding: const EdgeInsetsDirectional.only(
+          start: 64,
+          end: 16,
+        ),
         tileDividerHeight: 1,
         tileDividerThickness: 0.5,
         tileDividerOpacity: tileDividerOpacity,
@@ -1253,7 +1297,12 @@ class TilawaSettingsGroupTokens {
     }
 
     return TilawaSettingsGroupTokens(
-      groupHeaderPadding: const EdgeInsets.fromLTRB(12, 16, 16, 8),
+      groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
+        12,
+        16,
+        16,
+        8,
+      ),
       groupBorderRadius: 20,
       groupShadowOpacity: 0.06,
       groupShadowBlur: 10,
@@ -1278,7 +1327,10 @@ class TilawaSettingsGroupTokens {
       tileTrailingSize: 14,
       tileTrailingOpacity: 0.35,
       tileIconContainerOpacity: tileIconContainerOpacity,
-      tileDividerPadding: const EdgeInsets.only(left: 64, right: 16),
+      tileDividerPadding: const EdgeInsetsDirectional.only(
+        start: 64,
+        end: 16,
+      ),
       tileDividerHeight: 1,
       tileDividerThickness: 0.5,
       tileDividerOpacity: tileDividerOpacity,

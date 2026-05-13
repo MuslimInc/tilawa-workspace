@@ -9,6 +9,7 @@ class TilawaChip extends StatelessWidget {
     required this.label,
     this.icon,
     this.onTap,
+    this.semanticsSelected,
     this.backgroundColor,
     this.foregroundColor,
     this.borderColor,
@@ -29,6 +30,10 @@ class TilawaChip extends StatelessWidget {
   /// shown.
   final bool showLabel;
   final VoidCallback? onTap;
+
+  /// When non-null, merged into tap [Semantics] for selection state
+  /// (e.g. [TilawaSelectionPill]).
+  final bool? semanticsSelected;
   final Color? backgroundColor;
   final Color? foregroundColor;
   final Color? borderColor;
@@ -114,6 +119,7 @@ class TilawaChip extends StatelessWidget {
     return Semantics(
       button: true,
       label: label,
+      selected: semanticsSelected,
       child: Material(
         color: Colors.transparent,
         shape: shape,

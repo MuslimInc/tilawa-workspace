@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 /// A generic, feature-agnostic error-state widget with retry capability.
 ///
@@ -46,6 +47,7 @@ class TilawaErrorState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.errorState;
+    final designTokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
     return Center(
@@ -104,8 +106,8 @@ class TilawaErrorState extends StatelessWidget {
                 ),
                 child: isRetrying
                     ? SizedBox(
-                        width: 22,
-                        height: 22,
+                        width: designTokens.iconSizeLarge,
+                        height: designTokens.iconSizeLarge,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color:

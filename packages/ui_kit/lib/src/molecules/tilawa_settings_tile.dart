@@ -30,7 +30,6 @@ class TilawaSettingsTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
     final effectiveIconColor = iconColor ?? colorScheme.primary;
-    final trailingIcon = FluentIcons.chevron_right_24_filled;
     final BorderRadius? resolvedRadius = borderRadius is BorderRadius
         ? borderRadius as BorderRadius
         : null;
@@ -86,33 +85,41 @@ class TilawaSettingsTile extends StatelessWidget {
               titleTextStyle: titleStyle,
               subtitleTextStyle: subtitleStyle,
             ),
-            child: ListTile(
-              shape: resolvedRadius != null
-                  ? RoundedRectangleBorder(borderRadius: resolvedRadius)
-                  : null,
-              leading: _SettingsLeadingIcon(
-                icon: icon,
-                color: effectiveIconColor,
-                tokens: tokens,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: kMinInteractiveDimension,
               ),
-              title: Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing:
-                  trailing ??
-                  Icon(
-                    trailingIcon,
-                    size: tokens.tileTrailingSize,
-                    color: colorScheme.onSurfaceVariant.withValues(
-                      alpha: (tokens.tileTrailingOpacity * 1.35).clamp(
-                        0.45,
-                        0.72,
+              child: ListTile(
+                shape: resolvedRadius != null
+                    ? RoundedRectangleBorder(borderRadius: resolvedRadius)
+                    : null,
+                leading: _SettingsLeadingIcon(
+                  icon: icon,
+                  color: effectiveIconColor,
+                  tokens: tokens,
+                ),
+                title: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.start,
+                ),
+                trailing:
+                    trailing ??
+                    // Right chevron; ListTile still places trailing on the
+                    // correct edge in RTL.
+                    Icon(
+                      FluentIcons.chevron_right_24_filled,
+                      size: tokens.tileTrailingSize,
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: (tokens.tileTrailingOpacity * 1.35).clamp(
+                          0.45,
+                          0.72,
+                        ),
                       ),
                     ),
-                  ),
-              onTap: onTap,
+                onTap: onTap,
+              ),
             ),
           ),
         ),
@@ -210,28 +217,34 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
               titleTextStyle: titleStyle,
               subtitleTextStyle: subtitleStyle,
             ),
-            child: ListTile(
-              shape: resolvedRadius != null
-                  ? RoundedRectangleBorder(borderRadius: resolvedRadius)
-                  : null,
-              leading: _SettingsLeadingIcon(
-                icon: icon,
-                color: effectiveIconColor,
-                tokens: tokens,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: kMinInteractiveDimension,
               ),
-              title: Text(
-                title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              child: ListTile(
+                shape: resolvedRadius != null
+                    ? RoundedRectangleBorder(borderRadius: resolvedRadius)
+                    : null,
+                leading: _SettingsLeadingIcon(
+                  icon: icon,
+                  color: effectiveIconColor,
+                  tokens: tokens,
+                ),
+                title: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.start,
+                ),
+                trailing: Switch.adaptive(
+                  value: value,
+                  onChanged: onChanged,
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  activeTrackColor: tokens.switchActiveTrackColor,
+                  activeThumbColor: tokens.switchActiveThumbColor,
+                ),
+                onTap: () => onChanged(!value),
               ),
-              trailing: Switch.adaptive(
-                value: value,
-                onChanged: onChanged,
-                materialTapTargetSize: MaterialTapTargetSize.padded,
-                activeTrackColor: tokens.switchActiveTrackColor,
-                activeThumbColor: tokens.switchActiveThumbColor,
-              ),
-              onTap: () => onChanged(!value),
             ),
           ),
         ),

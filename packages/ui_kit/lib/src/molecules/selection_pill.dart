@@ -44,6 +44,7 @@ class TilawaSelectionPill extends StatelessWidget {
       label: label,
       icon: icon,
       onTap: onTap,
+      semanticsSelected: selected,
       backgroundColor: background,
       foregroundColor: foreground,
       borderColor: selected
