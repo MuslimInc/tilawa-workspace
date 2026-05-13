@@ -50,34 +50,34 @@ class ReciterCard extends StatelessWidget {
               width: tokens.borderWidthThin,
             ),
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceLarge,
-              vertical: tokens.spaceLarge,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              spacing: tokens.spaceSmall,
-              children: [
-                Expanded(
-                  child: Semantics(
-                    button: true,
-                    identifier: ReciterSemanticsIds.reciterCard(reciter.id),
-                    label: context.l10n.a11yOpenReciterDetails(reciter.name),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                      onTap: () {
-                        ReciterDetailsRoute(
-                          reciterId: reciter.id.toString(),
-                          $extra: reciter,
-                        ).push(context);
-                      },
+          child: InkWell(
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
+            onTap: () {
+              ReciterDetailsRoute(
+                reciterId: reciter.id.toString(),
+                $extra: reciter,
+              ).push(context);
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceLarge,
+                vertical: tokens.spaceLarge,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                spacing: tokens.spaceSmall,
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      identifier: ReciterSemanticsIds.reciterCard(reciter.id),
+                      label: context.l10n.a11yOpenReciterDetails(reciter.name),
                       child: _ReciterInfo(reciter: reciter),
                     ),
                   ),
-                ),
-                _FavoriteButton(reciter: reciter),
-              ],
+                  _FavoriteButton(reciter: reciter),
+                ],
+              ),
             ),
           ),
         ),
