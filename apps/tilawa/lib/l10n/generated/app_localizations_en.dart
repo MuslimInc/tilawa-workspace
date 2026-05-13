@@ -48,6 +48,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecitersMatchSearch => 'No reciters match your search';
 
   @override
+  String a11yOpenReciterDetails(String reciterName) {
+    return 'Open $reciterName';
+  }
+
+  @override
+  String get a11yFavoriteRecitersOnlyFilter => 'Show favorite reciters only';
+
+  @override
+  String get a11yRecitersLetterIndex => 'Letter index';
+
+  @override
+  String get a11yRecitersAlphabetScrollbarHint =>
+      'Drag up or down to jump to a letter';
+
+  @override
+  String get a11yClearRecitersSearch => 'Clear search text';
+
+  @override
   String get filteredByLetter => 'Filtered by letter:';
 
   @override
@@ -448,6 +466,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addToFavorites => 'Add to Favorites';
+
+  @override
+  String get removeFromFavorites => 'Remove from favorites';
 
   @override
   String get createFirstPlaylistMessage =>

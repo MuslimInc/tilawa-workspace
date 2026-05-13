@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,57 +23,60 @@ class ReciterCard extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    return Semantics(
-      identifier: ReciterSemanticsIds.reciterCard(reciter.id),
-      child: RepaintBoundary(
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(tokens.radiusLarge),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(tokens.radiusLarge),
-            onTap: () {
-              ReciterDetailsRoute(
-                reciterId: reciter.id.toString(),
-                $extra: reciter,
-              ).push(context);
-            },
-            child: Ink(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: AlignmentDirectional.topStart,
-                  end: AlignmentDirectional.bottomEnd,
-                  colors: [
-                    Color.alphaBlend(
-                      colorScheme.primary.withValues(
-                        alpha: tokens.opacitySubtle * 0.38,
-                      ),
-                      colorScheme.surfaceContainerLow,
-                    ),
-                    colorScheme.surfaceContainerLow,
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(
-                    alpha: tokens.opacityMedium,
+    return RepaintBoundary(
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
+              colors: [
+                Color.alphaBlend(
+                  colorScheme.primary.withValues(
+                    alpha: tokens.opacitySubtle * 0.38,
                   ),
-                  width: tokens.borderWidthThin,
+                  colorScheme.surfaceContainerLow,
                 ),
+                colorScheme.surfaceContainerLow,
+              ],
+            ),
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
+            border: Border.all(
+              color: colorScheme.outlineVariant.withValues(
+                alpha: tokens.opacityMedium,
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceLarge,
-                  vertical: tokens.spaceLarge,
+              width: tokens.borderWidthThin,
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceLarge,
+              vertical: tokens.spaceLarge,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: tokens.spaceSmall,
+              children: [
+                Expanded(
+                  child: Semantics(
+                    identifier: ReciterSemanticsIds.reciterCard(reciter.id),
+                    label: context.l10n.a11yOpenReciterDetails(reciter.name),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+                      onTap: () {
+                        ReciterDetailsRoute(
+                          reciterId: reciter.id.toString(),
+                          $extra: reciter,
+                        ).push(context);
+                      },
+                      child: _ReciterInfo(reciter: reciter),
+                    ),
+                  ),
                 ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  spacing: tokens.spaceSmall,
-                  children: [
-                    Expanded(child: _ReciterInfo(reciter: reciter)),
-                    _FavoriteButton(reciter: reciter),
-                  ],
-                ),
-              ),
+                _FavoriteButton(reciter: reciter),
+              ],
             ),
           ),
         ),
@@ -165,8 +170,17 @@ class _FavoriteButton extends StatelessWidget {
       return state is FavoritesLoaded && state.favoriteIds.contains(reciter.id);
     });
 
+    final double hitExtent = math.max(
+      kMinInteractiveDimension,
+      tokens.iconSizeLargePlus,
+    );
+
     return Semantics(
       identifier: ReciterSemanticsIds.reciterFavoriteButton(reciter.id),
+      toggled: isFavorite,
+      label: isFavorite
+          ? context.l10n.removeFromFavorites
+          : context.l10n.addToFavorites,
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
@@ -175,8 +189,8 @@ class _FavoriteButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
           onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
           child: SizedBox(
-            width: tokens.iconSizeLargePlus,
-            height: tokens.iconSizeLargePlus,
+            width: hitExtent,
+            height: hitExtent,
             child: Center(
               child: Icon(
                 isFavorite

@@ -18,6 +18,8 @@ class ArabicAlphabetScrollbar extends StatefulWidget {
     this.onLongPressStart,
     this.onLongPressMoveUpdate,
     this.onLongPressEnd,
+    this.scrollbarSemanticsLabel,
+    this.scrollbarSemanticsHint,
   });
 
   final List<String> letters;
@@ -29,6 +31,12 @@ class ArabicAlphabetScrollbar extends StatefulWidget {
   final GestureLongPressStartCallback? onLongPressStart;
   final GestureLongPressMoveUpdateCallback? onLongPressMoveUpdate;
   final GestureLongPressEndCallback? onLongPressEnd;
+
+  /// Optional group label for the scrollbar (e.g. "Letter index").
+  final String? scrollbarSemanticsLabel;
+
+  /// Optional hint for drag-to-select behavior.
+  final String? scrollbarSemanticsHint;
 
   @override
   State<ArabicAlphabetScrollbar> createState() =>
@@ -165,235 +173,265 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
     );
 
     return RepaintBoundary(
-      child: OverlayPortal(
-        controller: _overlayController,
-        overlayChildBuilder: (context) {
-          if (_draggedLetter == null || _draggedOffset == null) {
-            return const SizedBox.shrink();
-          }
+      child: _MaybeScrollbarSemantics(
+        label: widget.scrollbarSemanticsLabel,
+        hint: widget.scrollbarSemanticsHint,
+        child: OverlayPortal(
+          controller: _overlayController,
+          overlayChildBuilder: (context) {
+            if (_draggedLetter == null || _draggedOffset == null) {
+              return const SizedBox.shrink();
+            }
 
-          final RenderBox box = this.context.findRenderObject()! as RenderBox;
-          final Offset globalOffset = box.localToGlobal(Offset.zero);
-          final Size screenSize = MediaQuery.sizeOf(context);
+            final RenderBox box = this.context.findRenderObject()! as RenderBox;
+            final Offset globalOffset = box.localToGlobal(Offset.zero);
+            final Size screenSize = MediaQuery.sizeOf(context);
 
-          // Determine if the scrollbar is on the left or right side of the screen
-          final bool isOnRightSide = globalOffset.dx > screenSize.width / 2;
+            // Determine if the scrollbar is on the left or right side of the screen
+            final bool isOnRightSide = globalOffset.dx > screenSize.width / 2;
 
-          return Positioned(
-            left: isOnRightSide
-                ? null
-                : globalOffset.dx +
-                      componentTokens.width +
-                      componentTokens.overlayOffset,
-            right: isOnRightSide
-                ? (screenSize.width - globalOffset.dx) +
-                      componentTokens.overlayOffset
-                : null,
-            top:
-                globalOffset.dy +
-                _draggedOffset!.dy -
-                (componentTokens.overlaySize / 2),
-            child: DefaultTextStyle(
-              style: theme.textTheme.displaySmall!.copyWith(
-                color: theme.colorScheme.onPrimaryContainer,
-                fontWeight: FontWeight.bold,
-                fontSize: componentTokens.overlayFontSize,
-              ),
-              child: TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutBack,
-                tween: Tween(begin: 0.0, end: 1.0),
-                builder: (context, value, child) {
-                  return Transform.scale(
-                    scale: value,
-                    child: Opacity(
-                      opacity: value.clamp(0.0, 1.0),
-                      child: child,
-                    ),
-                  );
-                },
-                child: Container(
-                  key: const Key('alphabet_scrollbar_overlay'),
-                  width: componentTokens.overlaySize,
-                  height: componentTokens.overlaySize,
-                  decoration: BoxDecoration(
-                    color: componentTokens.overlayBackgroundColor,
-                    borderRadius: BorderRadius.circular(
-                      componentTokens.overlayRadius,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: componentTokens.overlayShadowColor,
-                        blurRadius: componentTokens.overlayShadowBlur,
-                        offset: componentTokens.overlayShadowOffset,
+            return Positioned(
+              left: isOnRightSide
+                  ? null
+                  : globalOffset.dx +
+                        componentTokens.width +
+                        componentTokens.overlayOffset,
+              right: isOnRightSide
+                  ? (screenSize.width - globalOffset.dx) +
+                        componentTokens.overlayOffset
+                  : null,
+              top:
+                  globalOffset.dy +
+                  _draggedOffset!.dy -
+                  (componentTokens.overlaySize / 2),
+              child: DefaultTextStyle(
+                style: theme.textTheme.displaySmall!.copyWith(
+                  color: theme.colorScheme.onPrimaryContainer,
+                  fontWeight: FontWeight.bold,
+                  fontSize: componentTokens.overlayFontSize,
+                ),
+                child: TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOutBack,
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Opacity(
+                        opacity: value.clamp(0.0, 1.0),
+                        child: child,
                       ),
-                    ],
+                    );
+                  },
+                  child: Container(
+                    key: const Key('alphabet_scrollbar_overlay'),
+                    width: componentTokens.overlaySize,
+                    height: componentTokens.overlaySize,
+                    decoration: BoxDecoration(
+                      color: componentTokens.overlayBackgroundColor,
+                      borderRadius: BorderRadius.circular(
+                        componentTokens.overlayRadius,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: componentTokens.overlayShadowColor,
+                          blurRadius: componentTokens.overlayShadowBlur,
+                          offset: componentTokens.overlayShadowOffset,
+                        ),
+                      ],
+                    ),
+                    child: Center(child: Text(_draggedLetter!)),
                   ),
-                  child: Center(child: Text(_draggedLetter!)),
                 ),
               ),
-            ),
-          );
-        },
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTapDown: (details) {
-            // Cancel any pending hide so a quick second tap keeps the overlay visible
-            _hideOverlayTimer?.cancel();
-            _hideOverlayTimer = null;
-            // Show overlay immediately on press, except when tapping the already-selected
-            // letter — that tap toggles selection off, so the overlay would just flash.
-            final letter = _updateDraggedLetter(details.globalPosition);
-            if (letter != null && letter != widget.selectedLetter) {
+            );
+          },
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapDown: (details) {
+              // Cancel any pending hide so a quick second tap keeps the overlay visible
+              _hideOverlayTimer?.cancel();
+              _hideOverlayTimer = null;
+              // Show overlay immediately on press, except when tapping the already-selected
+              // letter — that tap toggles selection off, so the overlay would just flash.
+              final letter = _updateDraggedLetter(details.globalPosition);
+              if (letter != null && letter != widget.selectedLetter) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _overlayController.show();
+                });
+              }
+            },
+            onTapUp: (details) {
+              // Delay long enough that a follow-up tap (double press) cancels the hide
+              // before it fires, so the overlay stays visible across rapid presses.
+              _hideOverlayTimer?.cancel();
+              _hideOverlayTimer = Timer(const Duration(milliseconds: 600), () {
+                _hideOverlayTimer = null;
+                if (mounted) {
+                  setState(() {
+                    _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
+                    _draggedLetter = null;
+                    _draggedOffset = null;
+                  });
+                  _overlayController.hide();
+                }
+              });
+            },
+            onTapCancel: () {
+              // The outer tap can be cancelled because either (a) the inner letter
+              // InkWell won the gesture arena and consumed the tap, or (b) a long-press/pan
+              // is starting. In case (a) no further callback fires, so we must schedule
+              // the auto-hide here. In case (b) the upcoming onLongPressStart / onPanStart
+              // re-shows the overlay, and onLongPressEnd / onPanEnd hide it — but those
+              // handlers also cancel this timer, so it's safe to schedule it unconditionally.
+              _hideOverlayTimer?.cancel();
+              _hideOverlayTimer = Timer(const Duration(milliseconds: 600), () {
+                _hideOverlayTimer = null;
+                if (mounted) {
+                  setState(() {
+                    _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
+                    _draggedLetter = null;
+                    _draggedOffset = null;
+                  });
+                  _overlayController.hide();
+                }
+              });
+            },
+            onPanStart: (details) {
+              // Cancel any auto-hide scheduled by the preceding onTapCancel
+              _hideOverlayTimer?.cancel();
+              _hideOverlayTimer = null;
+              final letter = _updateDraggedLetter(details.globalPosition);
+              if (letter != null) {
+                _lastNotifiedLetter = letter;
+                widget.onLetterSelected(letter);
+              }
+              _overlayController.show();
+              widget.onPanStart(details);
+            },
+            onPanUpdate: (details) {
+              final letter = _updateDraggedLetter(details.globalPosition);
+              if (letter != null && letter != _lastNotifiedLetter) {
+                _lastNotifiedLetter = letter;
+                widget.onLetterSelected(letter);
+              }
+              widget.onPanUpdate(details);
+            },
+            onPanEnd: (details) {
+              setState(() {
+                _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
+                _draggedLetter = null;
+                _draggedOffset = null;
+                _lastNotifiedLetter = null;
+              });
+              _overlayController.hide();
+              widget.onPanEnd(details);
+            },
+            onLongPressStart: (details) {
+              // Cancel any auto-hide scheduled by the preceding onTapCancel
+              _hideOverlayTimer?.cancel();
+              _hideOverlayTimer = null;
+              final letter = _updateDraggedLetter(details.globalPosition);
+              if (letter != null) {
+                _lastNotifiedLetter = letter;
+                widget.onLetterSelected(letter);
+              }
+              // Show overlay after state is updated (ensures _draggedLetter is set)
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 _overlayController.show();
               });
-            }
-          },
-          onTapUp: (details) {
-            // Delay long enough that a follow-up tap (double press) cancels the hide
-            // before it fires, so the overlay stays visible across rapid presses.
-            _hideOverlayTimer?.cancel();
-            _hideOverlayTimer = Timer(const Duration(milliseconds: 600), () {
-              _hideOverlayTimer = null;
-              if (mounted) {
-                setState(() {
-                  _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
-                  _draggedLetter = null;
-                  _draggedOffset = null;
-                });
-                _overlayController.hide();
+              widget.onLongPressStart?.call(details);
+            },
+            onLongPressMoveUpdate: (details) {
+              final letter = _updateDraggedLetter(details.globalPosition);
+              if (letter != null && letter != _lastNotifiedLetter) {
+                _lastNotifiedLetter = letter;
+                widget.onLetterSelected(letter);
               }
-            });
-          },
-          onTapCancel: () {
-            // The outer tap can be cancelled because either (a) the inner letter
-            // InkWell won the gesture arena and consumed the tap, or (b) a long-press/pan
-            // is starting. In case (a) no further callback fires, so we must schedule
-            // the auto-hide here. In case (b) the upcoming onLongPressStart / onPanStart
-            // re-shows the overlay, and onLongPressEnd / onPanEnd hide it — but those
-            // handlers also cancel this timer, so it's safe to schedule it unconditionally.
-            _hideOverlayTimer?.cancel();
-            _hideOverlayTimer = Timer(const Duration(milliseconds: 600), () {
-              _hideOverlayTimer = null;
-              if (mounted) {
-                setState(() {
-                  _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
-                  _draggedLetter = null;
-                  _draggedOffset = null;
-                });
-                _overlayController.hide();
-              }
-            });
-          },
-          onPanStart: (details) {
-            // Cancel any auto-hide scheduled by the preceding onTapCancel
-            _hideOverlayTimer?.cancel();
-            _hideOverlayTimer = null;
-            final letter = _updateDraggedLetter(details.globalPosition);
-            if (letter != null) {
-              _lastNotifiedLetter = letter;
-              widget.onLetterSelected(letter);
-            }
-            _overlayController.show();
-            widget.onPanStart(details);
-          },
-          onPanUpdate: (details) {
-            final letter = _updateDraggedLetter(details.globalPosition);
-            if (letter != null && letter != _lastNotifiedLetter) {
-              _lastNotifiedLetter = letter;
-              widget.onLetterSelected(letter);
-            }
-            widget.onPanUpdate(details);
-          },
-          onPanEnd: (details) {
-            setState(() {
-              _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
-              _draggedLetter = null;
-              _draggedOffset = null;
-              _lastNotifiedLetter = null;
-            });
-            _overlayController.hide();
-            widget.onPanEnd(details);
-          },
-          onLongPressStart: (details) {
-            // Cancel any auto-hide scheduled by the preceding onTapCancel
-            _hideOverlayTimer?.cancel();
-            _hideOverlayTimer = null;
-            final letter = _updateDraggedLetter(details.globalPosition);
-            if (letter != null) {
-              _lastNotifiedLetter = letter;
-              widget.onLetterSelected(letter);
-            }
-            // Show overlay after state is updated (ensures _draggedLetter is set)
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _overlayController.show();
-            });
-            widget.onLongPressStart?.call(details);
-          },
-          onLongPressMoveUpdate: (details) {
-            final letter = _updateDraggedLetter(details.globalPosition);
-            if (letter != null && letter != _lastNotifiedLetter) {
-              _lastNotifiedLetter = letter;
-              widget.onLetterSelected(letter);
-            }
-            widget.onLongPressMoveUpdate?.call(details);
-          },
-          onLongPressEnd: (details) {
-            setState(() {
-              _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
-              _draggedLetter = null;
-              _draggedOffset = null;
-              _lastNotifiedLetter = null;
-            });
-            _overlayController.hide();
-            widget.onLongPressEnd?.call(details);
-          },
-          child: Container(
-            width: componentTokens.width,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface.withValues(
-                alpha: tokens.opacityGlass,
+              widget.onLongPressMoveUpdate?.call(details);
+            },
+            onLongPressEnd: (details) {
+              setState(() {
+                _lastActiveLetter = _draggedLetter ?? widget.selectedLetter;
+                _draggedLetter = null;
+                _draggedOffset = null;
+                _lastNotifiedLetter = null;
+              });
+              _overlayController.hide();
+              widget.onLongPressEnd?.call(details);
+            },
+            child: Container(
+              width: componentTokens.width,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface.withValues(
+                  alpha: tokens.opacityGlass,
+                ),
+                borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
               ),
-              borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-            ),
-            child: ListView.builder(
-              controller: _scrollController,
-              padding: componentTokens.verticalPadding,
-              physics: const ClampingScrollPhysics(),
-              itemCount: widget.letters.length,
-              itemExtent: componentTokens.itemExtent,
-              itemBuilder: (context, index) {
-                final letter = widget.letters[index];
-                final activeLetter = _draggedLetter ?? widget.selectedLetter;
-                final isSelected = letter == activeLetter;
-                final wasActive = letter == _lastActiveLetter;
+              child: ListView.builder(
+                controller: _scrollController,
+                padding: componentTokens.verticalPadding,
+                physics: const ClampingScrollPhysics(),
+                itemCount: widget.letters.length,
+                itemExtent: componentTokens.itemExtent,
+                itemBuilder: (context, index) {
+                  final letter = widget.letters[index];
+                  final activeLetter = _draggedLetter ?? widget.selectedLetter;
+                  final isSelected = letter == activeLetter;
+                  final wasActive = letter == _lastActiveLetter;
 
-                // Only create new widget if selection state changed for this item
-                // Otherwise reuse cached widget
-                if (isSelected != wasActive ||
-                    !_itemCache.containsKey(letter)) {
-                  _itemCache[letter] = _LetterItem(
-                    key: ValueKey(letter),
-                    letter: letter,
-                    isSelected: isSelected,
-                    actualSelectedLetter: widget.selectedLetter,
-                    onLetterSelected: widget.onLetterSelected,
-                    size: componentTokens.itemExtent,
-                    selectedIndicatorSize:
-                        componentTokens.selectedIndicatorExtent,
-                    fontSize: componentTokens.letterFontSize,
-                    primaryColor: primaryColor,
-                    unselectedColor: unselectedColor,
-                  );
-                }
+                  // Only create new widget if selection state changed for this item
+                  // Otherwise reuse cached widget
+                  if (isSelected != wasActive ||
+                      !_itemCache.containsKey(letter)) {
+                    _itemCache[letter] = _LetterItem(
+                      key: ValueKey(letter),
+                      letter: letter,
+                      isSelected: isSelected,
+                      actualSelectedLetter: widget.selectedLetter,
+                      onLetterSelected: widget.onLetterSelected,
+                      size: componentTokens.itemExtent,
+                      selectedIndicatorSize:
+                          componentTokens.selectedIndicatorExtent,
+                      fontSize: componentTokens.letterFontSize,
+                      primaryColor: primaryColor,
+                      unselectedColor: unselectedColor,
+                    );
+                  }
 
-                return _itemCache[letter]!;
-              },
+                  return _itemCache[letter]!;
+                },
+              ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _MaybeScrollbarSemantics extends StatelessWidget {
+  const _MaybeScrollbarSemantics({
+    required this.label,
+    required this.hint,
+    required this.child,
+  });
+
+  final String? label;
+  final String? hint;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (label == null && hint == null) {
+      return child;
+    }
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      label: label,
+      hint: hint,
+      child: child,
     );
   }
 }

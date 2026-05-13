@@ -398,6 +398,9 @@ class _RecitersSliverScreen extends StatelessWidget {
               allReciters: (state as RecitersLoaded).reciters,
               scrollController: scrollController,
               onLetterSelected: onLetterSelected,
+              scrollbarSemanticsLabel: context.l10n.a11yRecitersLetterIndex,
+              scrollbarSemanticsHint:
+                  context.l10n.a11yRecitersAlphabetScrollbarHint,
             ),
           ),
       ],
@@ -425,7 +428,7 @@ class _RecitersResultSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state is RecitersLoading) {
-      return const _RecitersLoadingSection();
+      return _RecitersLoadingSection();
     }
 
     if (state is RecitersError) {
@@ -441,7 +444,7 @@ class _RecitersResultSection extends StatelessWidget {
       final RecitersLoaded loadedState = state as RecitersLoaded;
 
       if (!allowHeavyLoadedResults) {
-        return const _RecitersLoadingSection();
+        return _RecitersLoadingSection();
       }
 
       if (loadedState.filteredReciters.isEmpty) {
@@ -467,12 +470,12 @@ class _RecitersResultSection extends StatelessWidget {
 }
 
 class _RecitersLoadingSection extends StatelessWidget {
-  const _RecitersLoadingSection();
-
   @override
   Widget build(BuildContext context) {
-    return const _DryLayoutSafeFillSliver(
-      child: TilawaLoadingIndicator(),
+    return _DryLayoutSafeFillSliver(
+      child: TilawaLoadingIndicator(
+        semanticsLabel: context.l10n.loadingReciters,
+      ),
     );
   }
 }
@@ -558,69 +561,74 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
 
     return SizedBox(
       height: _recitersSearchHeaderExtent(context),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: [
-              Color.alphaBlend(
-                colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle * 0.7,
+      child: Semantics(
+        header: true,
+        label: context.l10n.reciters,
+        explicitChildNodes: true,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: AlignmentDirectional.topStart,
+              end: AlignmentDirectional.bottomEnd,
+              colors: [
+                Color.alphaBlend(
+                  colorScheme.primary.withValues(
+                    alpha: tokens.opacitySubtle * 0.7,
+                  ),
+                  colorScheme.surface,
                 ),
                 colorScheme.surface,
+              ],
+            ),
+            border: Border(
+              bottom: BorderSide(
+                color: colorScheme.outlineVariant.withValues(
+                  alpha: tokens.opacitySubtle,
+                ),
+                width: tokens.borderWidthThin,
               ),
-              colorScheme.surface,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: colorScheme.shadow.withValues(
+                  alpha: tokens.opacityShadow * 0.45,
+                ),
+                blurRadius: tokens.blurShadow,
+                offset: tokens.shadowOffsetSmall,
+              ),
             ],
           ),
-          border: Border(
-            bottom: BorderSide(
-              color: colorScheme.outlineVariant.withValues(
-                alpha: tokens.opacitySubtle,
-              ),
-              width: tokens.borderWidthThin,
-            ),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.shadow.withValues(
-                alpha: tokens.opacityShadow * 0.45,
-              ),
-              blurRadius: tokens.blurShadow,
-              offset: tokens.shadowOffsetSmall,
-            ),
-          ],
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: Padding(
-            padding: EdgeInsets.only(top: context.contentTopSafePadding),
-            child: Center(
-              child: SizedBox(
-                height: searchFieldHeight,
-                child: _ConstrainedHeaderContent(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceMedium,
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _SearchField(
-                            controller: searchController,
-                            focusNode: focusNode,
-                            onChanged: onSearchChanged,
-                            onClear: onClearSearch,
+          child: Material(
+            color: Colors.transparent,
+            child: Padding(
+              padding: EdgeInsets.only(top: context.contentTopSafePadding),
+              child: Center(
+                child: SizedBox(
+                  height: searchFieldHeight,
+                  child: _ConstrainedHeaderContent(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: tokens.spaceMedium,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _SearchField(
+                              controller: searchController,
+                              focusNode: focusNode,
+                              onChanged: onSearchChanged,
+                              onClear: onClearSearch,
+                            ),
                           ),
-                        ),
-                        SizedBox(width: tokens.spaceSmall),
-                        _FavoritesToggle(
-                          state: state,
-                          onTap: onToggleFavorites,
-                        ),
-                        SizedBox(width: tokens.spaceSmall),
-                        const _DownloadsButton(),
-                      ],
+                          SizedBox(width: tokens.spaceSmall),
+                          _FavoritesToggle(
+                            state: state,
+                            onTap: onToggleFavorites,
+                          ),
+                          SizedBox(width: tokens.spaceSmall),
+                          const _DownloadsButton(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -750,6 +758,7 @@ class _SearchField extends StatelessWidget {
         clearIcon: FluentIcons.dismiss_24_regular,
         onChanged: onChanged,
         onClear: onClear,
+        clearButtonTooltip: context.l10n.a11yClearRecitersSearch,
         borderRadius: BorderRadius.circular(
           Theme.of(context).tokens.radiusLarge,
         ),
@@ -772,6 +781,10 @@ class _FavoritesToggle extends StatelessWidget {
     final tokens = theme.tokens;
     final bool isActive =
         state is RecitersLoaded && (state as RecitersLoaded).showFavoritesOnly;
+    final bool favoritesReady = context.select<FavoritesCubit, bool>(
+      (c) => c.state is FavoritesLoaded,
+    );
+    final String filterLabel = context.l10n.a11yFavoriteRecitersOnlyFilter;
 
     return Semantics(
       identifier: ReciterSemanticsIds.recitersFavoritesToggle,
@@ -783,6 +796,10 @@ class _FavoritesToggle extends StatelessWidget {
                 ? Icons.favorite_rounded
                 : Icons.favorite_border_rounded,
             isActive: isActive,
+            enabled: favoritesReady,
+            toggled: isActive,
+            tooltip: filterLabel,
+            semanticLabel: filterLabel,
             onTap: onTap,
           ),
           PositionedDirectional(
@@ -845,8 +862,11 @@ class _DownloadsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String label = context.l10n.viewDownloads;
     return TilawaIconActionButton(
       icon: FluentIcons.arrow_download_24_regular,
+      tooltip: label,
+      semanticLabel: label,
       onTap: () => const DownloadsRoute().push(context),
     );
   }
@@ -1033,10 +1053,18 @@ class ReciterAlphabetScrollbar extends StatefulWidget {
     required this.allReciters,
     required this.scrollController,
     required this.onLetterSelected,
+    this.scrollbarSemanticsLabel,
+    this.scrollbarSemanticsHint,
   });
   final List<ReciterEntity> allReciters;
   final ScrollController scrollController;
   final Function(String? letter) onLetterSelected;
+
+  /// Group label for the scrollbar (e.g. letter index).
+  final String? scrollbarSemanticsLabel;
+
+  /// Hint describing drag-to-jump behavior.
+  final String? scrollbarSemanticsHint;
 
   @override
   State<ReciterAlphabetScrollbar> createState() =>
@@ -1111,6 +1139,8 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
       onLongPressMoveUpdate: (details) {},
       onLongPressEnd: (_) =>
           context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
+      scrollbarSemanticsLabel: widget.scrollbarSemanticsLabel,
+      scrollbarSemanticsHint: widget.scrollbarSemanticsHint,
     );
   }
 }

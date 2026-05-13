@@ -52,6 +52,32 @@
     "@noRecitersMatchSearch": {
         "description": "No reciters match search message"
     },
+    "a11yOpenReciterDetails": "Open {reciterName}",
+    "@a11yOpenReciterDetails": {
+        "description": "Screen reader label for opening a reciter from the list",
+        "placeholders": {
+            "reciterName": {
+                "type": "String",
+                "description": "Reciter display name"
+            }
+        }
+    },
+    "a11yFavoriteRecitersOnlyFilter": "Show favorite reciters only",
+    "@a11yFavoriteRecitersOnlyFilter": {
+        "description": "Accessibility name for the favorites-only filter toggle"
+    },
+    "a11yRecitersLetterIndex": "Letter index",
+    "@a11yRecitersLetterIndex": {
+        "description": "Accessibility label for the Arabic letter scrollbar"
+    },
+    "a11yRecitersAlphabetScrollbarHint": "Drag up or down to jump to a letter",
+    "@a11yRecitersAlphabetScrollbarHint": {
+        "description": "Accessibility hint for the Arabic letter scrollbar"
+    },
+    "a11yClearRecitersSearch": "Clear search text",
+    "@a11yClearRecitersSearch": {
+        "description": "Tooltip for clearing the reciters search field"
+    },
     "filteredByLetter": "Filtered by letter:",
     "@filteredByLetter": {
         "description": "Filtered by letter indicator"
@@ -597,6 +623,10 @@
     "addToFavorites": "Add to Favorites",
     "@addToFavorites": {
         "description": "Add to favorites button text"
+    },
+    "removeFromFavorites": "Remove from favorites",
+    "@removeFromFavorites": {
+        "description": "Accessibility label for removing a reciter from favorites"
     },
     "createFirstPlaylistMessage": "Create your first playlist to organize your favorite surahs",
     "@createFirstPlaylistMessage": {

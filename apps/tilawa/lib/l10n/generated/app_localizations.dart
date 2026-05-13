@@ -176,6 +176,36 @@ abstract class AppLocalizations {
   /// **'No reciters match your search'**
   String get noRecitersMatchSearch;
 
+  /// Screen reader label for opening a reciter from the list
+  ///
+  /// In en, this message translates to:
+  /// **'Open {reciterName}'**
+  String a11yOpenReciterDetails(String reciterName);
+
+  /// Accessibility name for the favorites-only filter toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show favorite reciters only'**
+  String get a11yFavoriteRecitersOnlyFilter;
+
+  /// Accessibility label for the Arabic letter scrollbar
+  ///
+  /// In en, this message translates to:
+  /// **'Letter index'**
+  String get a11yRecitersLetterIndex;
+
+  /// Accessibility hint for the Arabic letter scrollbar
+  ///
+  /// In en, this message translates to:
+  /// **'Drag up or down to jump to a letter'**
+  String get a11yRecitersAlphabetScrollbarHint;
+
+  /// Tooltip for clearing the reciters search field
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search text'**
+  String get a11yClearRecitersSearch;
+
   /// Filtered by letter indicator
   ///
   /// In en, this message translates to:
@@ -943,6 +973,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add to Favorites'**
   String get addToFavorites;
+
+  /// Accessibility label for removing a reciter from favorites
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get removeFromFavorites;
 
   /// Message shown when no playlists exist
   ///
