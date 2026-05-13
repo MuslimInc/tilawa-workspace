@@ -9,6 +9,14 @@ import 'package:tilawa_ui_kit/src/molecules/molecules.dart';
 import '../../lib/src/previews/preview_wrapper.dart';
 import 'golden_constraints.dart';
 
+/// Stable line box for glass-panel golden body text (reduces ±1px vertical
+/// drift between Flutter / font versions).
+const StrutStyle _kGoldenGlassPanelBodyStrut = StrutStyle(
+  fontSize: 16,
+  height: 1.25,
+  forceStrutHeight: true,
+);
+
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
   AppTheme.useGoogleFonts = false;
@@ -26,7 +34,10 @@ void main() {
               child: TilawaGlassPanel(
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('Glass Panel'),
+                  child: Text(
+                    'Glass Panel',
+                    strutStyle: _kGoldenGlassPanelBodyStrut,
+                  ),
                 ),
               ),
             ),
@@ -38,7 +49,10 @@ void main() {
               child: TilawaGlassPanel(
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('Dark Glass Panel'),
+                  child: Text(
+                    'Dark Glass Panel',
+                    strutStyle: _kGoldenGlassPanelBodyStrut,
+                  ),
                 ),
               ),
             ),
@@ -60,7 +74,10 @@ void main() {
               child: TilawaGlassPanel(
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('Glass Panel'),
+                  child: Text(
+                    'Glass Panel',
+                    strutStyle: _kGoldenGlassPanelBodyStrut,
+                  ),
                 ),
               ),
             ),
@@ -73,7 +90,10 @@ void main() {
               child: TilawaGlassPanel(
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('Dark Glass Panel'),
+                  child: Text(
+                    'Dark Glass Panel',
+                    strutStyle: _kGoldenGlassPanelBodyStrut,
+                  ),
                 ),
               ),
             ),

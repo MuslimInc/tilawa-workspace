@@ -218,6 +218,18 @@ void main() {
       ],
     );
 
+    blocTest<SettingsCubit, SettingsState>(
+      'setUseCompactDesign updates state',
+      build: () => cubit,
+      act: (cubit) => cubit.setUseCompactDesign(false),
+      expect: () => [
+        const SettingsState(
+          useCompactDesign: false,
+          appInfo: testAppInfo,
+        ),
+      ],
+    );
+
     group('Serialization', () {
       test('fromJson returns correct state', () {
         expect(
@@ -247,6 +259,7 @@ void main() {
           'isSleepTimerEnabled': true,
           'prefetchQuranAssetsOnWifiOnly': true,
           'showPrayerTimesAlertChipLabels': true,
+          'useCompactDesign': true,
         });
       });
 

@@ -8,6 +8,13 @@ import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 import '../../lib/src/previews/preview_wrapper.dart';
 import 'golden_constraints.dart';
 
+/// Stable line box for card golden captions (avoids height drift vs masters).
+const StrutStyle _kGoldenCardCaptionStrut = StrutStyle(
+  fontSize: 16,
+  height: 1.25,
+  forceStrutHeight: true,
+);
+
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
   AppTheme.useGoogleFonts = false;
@@ -22,21 +29,36 @@ void main() {
           GoldenTestScenario(
             name: 'Light Theme',
             child: const TilawaPreviewWrapper(
-              child: TilawaCard(child: Text('Card Content')),
+              child: TilawaCard(
+                child: Text(
+                  'Card Content',
+                  strutStyle: _kGoldenCardCaptionStrut,
+                ),
+              ),
             ),
           ),
           GoldenTestScenario(
             name: 'Dark Theme',
             child: const TilawaPreviewWrapper(
               isDark: true,
-              child: TilawaCard(child: Text('Dark Card')),
+              child: TilawaCard(
+                child: Text(
+                  'Dark Card',
+                  strutStyle: _kGoldenCardCaptionStrut,
+                ),
+              ),
             ),
           ),
           GoldenTestScenario(
             name: 'RTL / Arabic',
             child: const TilawaPreviewWrapper(
               isRTL: true,
-              child: TilawaCard(child: Text('بطاقة بنمط عربي')),
+              child: TilawaCard(
+                child: Text(
+                  'بطاقة بنمط عربي',
+                  strutStyle: _kGoldenCardCaptionStrut,
+                ),
+              ),
             ),
           ),
         ],
@@ -53,7 +75,12 @@ void main() {
             name: 'Light (compact)',
             child: const TilawaPreviewWrapper(
               density: TilawaDensity.compact,
-              child: TilawaCard(child: Text('Card Content')),
+              child: TilawaCard(
+                child: Text(
+                  'Card Content',
+                  strutStyle: _kGoldenCardCaptionStrut,
+                ),
+              ),
             ),
           ),
           GoldenTestScenario(
@@ -61,7 +88,12 @@ void main() {
             child: const TilawaPreviewWrapper(
               density: TilawaDensity.compact,
               isDark: true,
-              child: TilawaCard(child: Text('Dark Card')),
+              child: TilawaCard(
+                child: Text(
+                  'Dark Card',
+                  strutStyle: _kGoldenCardCaptionStrut,
+                ),
+              ),
             ),
           ),
           GoldenTestScenario(
@@ -69,7 +101,12 @@ void main() {
             child: const TilawaPreviewWrapper(
               density: TilawaDensity.compact,
               isRTL: true,
-              child: TilawaCard(child: Text('بطاقة مدمجة')),
+              child: TilawaCard(
+                child: Text(
+                  'بطاقة مدمجة',
+                  strutStyle: _kGoldenCardCaptionStrut,
+                ),
+              ),
             ),
           ),
         ],

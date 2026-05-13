@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:alchemist/alchemist.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
 
@@ -11,10 +12,25 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   // Strictly disable Google Fonts in the AppTheme for the test environment
   AppTheme.useGoogleFonts = false;
 
+  // Stable metrics for [GoldenTestScenario] titles (Alchemist) — avoids ±1–2px
+  // total golden height drift across Flutter / font versions vs committed PNGs.
+  final GoldenTestTheme standard = GoldenTestTheme.standard();
+  final GoldenTestTheme goldenTestTheme = GoldenTestTheme(
+    backgroundColor: standard.backgroundColor,
+    borderColor: standard.borderColor,
+    nameTextStyle: const TextStyle(
+      fontSize: 18,
+      height: 1.0,
+      fontFamily: 'Roboto',
+    ),
+    padding: standard.padding,
+  );
+
   return AlchemistConfig.runWithConfig(
-    config: const AlchemistConfig(
-      platformGoldensConfig: PlatformGoldensConfig(enabled: true),
-      ciGoldensConfig: CiGoldensConfig(enabled: false),
+    config: AlchemistConfig(
+      platformGoldensConfig: const PlatformGoldensConfig(enabled: true),
+      ciGoldensConfig: const CiGoldensConfig(enabled: false),
+      goldenTestTheme: goldenTestTheme,
     ),
     run: testMain,
   );
