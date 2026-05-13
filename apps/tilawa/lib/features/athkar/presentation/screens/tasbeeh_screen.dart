@@ -22,6 +22,7 @@ import '../../domain/usecases/set_tasbeeh_target_count_use_case.dart';
 import '../cubit/tasbeeh_cubit.dart';
 import '../cubit/tasbeeh_state.dart';
 import '../services/haptic_tasbeeh_target_feedback_service.dart';
+import '../widgets/athkar_ambient_background.dart';
 
 class TasbeehScreen extends StatelessWidget {
   const TasbeehScreen({super.key, this.cubit});
@@ -87,20 +88,26 @@ class _TasbeehView extends StatelessWidget {
                 : null,
             title: Text(context.l10n.tasbeehCategory),
           ),
-          body: SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-                    child: content,
-                  ),
+          body: Stack(
+            children: [
+              const Positioned.fill(child: AthkarAmbientBackground()),
+              SafeArea(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
+                        child: content,
+                      ),
+                    ),
+                    if (bottomActions != null)
+                      _TasbeehBottomActionArea(child: bottomActions),
+                  ],
                 ),
-                if (bottomActions != null)
-                  _TasbeehBottomActionArea(child: bottomActions),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -118,25 +125,27 @@ class _TasbeehOptionsView extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return Padding(
-      padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _TasbeehOptionCard(
-            icon: Icons.add_circle_outline_rounded,
-            title: context.l10n.tasbeehAddNewOptionTitle,
-            subtitle: context.l10n.tasbeehAddNewOptionSubtitle,
-            onTap: cubit.showCreateView,
-          ),
-          SizedBox(height: tokens.spaceMedium),
-          _TasbeehOptionCard(
-            icon: Icons.history_rounded,
-            title: context.l10n.tasbeehViewHistoryOptionTitle,
-            subtitle: context.l10n.tasbeehViewHistoryOptionSubtitle,
-            onTap: cubit.showHistoryView,
-          ),
-        ],
+    return _TasbeehContentBounds(
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _TasbeehOptionCard(
+              icon: Icons.add_circle_outline_rounded,
+              title: context.l10n.tasbeehAddNewOptionTitle,
+              subtitle: context.l10n.tasbeehAddNewOptionSubtitle,
+              onTap: cubit.showCreateView,
+            ),
+            SizedBox(height: tokens.spaceMedium),
+            _TasbeehOptionCard(
+              icon: Icons.history_rounded,
+              title: context.l10n.tasbeehViewHistoryOptionTitle,
+              subtitle: context.l10n.tasbeehViewHistoryOptionSubtitle,
+              onTap: cubit.showHistoryView,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -159,30 +168,60 @@ class _TasbeehOptionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
 
     return TilawaCard(
       onTap: onTap,
-      borderRadius: tokens.radiusLarge,
-      borderColor: theme.colorScheme.outlineVariant,
-      backgroundColor: theme.colorScheme.surfaceContainerLow,
+      borderRadius: tokens.radiusExtraLarge,
+      borderColor: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+      gradient: LinearGradient(
+        begin: AlignmentDirectional.topStart,
+        end: AlignmentDirectional.bottomEnd,
+        colors: [
+          colorScheme.surfaceContainerLow.withValues(
+            alpha: tokens.opacityGlass,
+          ),
+          colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+        ],
+      ),
       child: Row(
         children: [
-          Icon(icon, color: theme.colorScheme.primary),
+          TilawaIconBox(
+            icon: icon,
+            iconColor: colorScheme.primary,
+            backgroundColor: colorScheme.primary.withValues(
+              alpha: tokens.opacitySubtle,
+            ),
+            borderRadius: tokens.radiusLarge,
+          ),
           SizedBox(width: tokens.spaceMedium),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: theme.textTheme.titleMedium),
+                Text(
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
                 SizedBox(height: tokens.spaceExtraSmall),
-                Text(subtitle, style: theme.textTheme.bodySmall),
+                Text(
+                  subtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
           ),
           SizedBox(width: tokens.spaceSmall),
           Icon(
-            Icons.chevron_right_rounded,
-            color: theme.colorScheme.onSurfaceVariant,
+            context.isArabic
+                ? Icons.chevron_left_rounded
+                : Icons.chevron_right_rounded,
+            color: colorScheme.onSurfaceVariant,
           ),
         ],
       ),
@@ -201,39 +240,62 @@ class _TasbeehCreateView extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(tokens.spaceLarge),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  context.l10n.tasbeehAddNewOptionTitle,
-                  style: theme.textTheme.titleLarge,
+    return _TasbeehContentBounds(
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(tokens.spaceLarge),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: TilawaCard(
+                borderRadius: tokens.radiusExtraLarge,
+                borderColor: theme.colorScheme.primary.withValues(
+                  alpha: tokens.opacitySubtle,
                 ),
-                SizedBox(height: tokens.spaceMedium),
-                TilawaTextField(
-                  hintText: context.l10n.tasbeehInputHint,
-                  prefixIcon: Icon(Icons.edit_note_rounded),
-                  onChanged: cubit.updateDraftText,
-                  maxLength: TasbeehConstants.maxTextLength,
+                gradient: LinearGradient(
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
+                  colors: [
+                    theme.colorScheme.surfaceContainerLow.withValues(
+                      alpha: tokens.opacityGlass,
+                    ),
+                    theme.colorScheme.surface.withValues(
+                      alpha: tokens.opacityGlass,
+                    ),
+                  ],
                 ),
-                SizedBox(height: tokens.spaceSmall),
-                TilawaTextField(
-                  hintText: '${TasbeehConstants.defaultTargetCount}',
-                  prefixIcon: Icon(Icons.flag_rounded),
-                  onChanged: cubit.updateDraftTargetText,
-                  keyboardType: TextInputType.number,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.tasbeehAddNewOptionTitle,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    SizedBox(height: tokens.spaceMedium),
+                    TilawaTextField(
+                      hintText: context.l10n.tasbeehInputHint,
+                      prefixIcon: const Icon(Icons.edit_note_rounded),
+                      onChanged: cubit.updateDraftText,
+                      maxLength: TasbeehConstants.maxTextLength,
+                    ),
+                    SizedBox(height: tokens.spaceSmall),
+                    TilawaTextField(
+                      hintText: '${TasbeehConstants.defaultTargetCount}',
+                      prefixIcon: const Icon(Icons.flag_rounded),
+                      onChanged: cubit.updateDraftTargetText,
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
@@ -249,79 +311,109 @@ class _TasbeehHistoryView extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return Padding(
-      padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (state.savedDhikr.isNotEmpty) ...[
-            Text(
-              context.l10n.tasbeehChooseSavedDhikr,
-              style: theme.textTheme.titleLarge,
-            ),
-            SizedBox(height: tokens.spaceSmall),
-          ],
-          Expanded(
-            child: state.savedDhikr.isEmpty
-                ? TilawaIllustratedState(
-                    icon: Icons.history_toggle_off_rounded,
-                    title: context.l10n.tasbeehHistoryEmpty,
-                    semanticLabel: context.l10n.tasbeehHistoryEmpty,
-                  )
-                : ListView.separated(
-                    itemCount: state.savedDhikr.length,
-                    separatorBuilder: (_, _) =>
-                        SizedBox(height: tokens.spaceSmall),
-                    itemBuilder: (context, index) {
-                      final item = state.savedDhikr[index];
-                      return TilawaCard(
-                        onTap: () => cubit.selectDhikrAndStartCounting(item.id),
-                        borderRadius: tokens.radiusLarge,
-                        borderColor: theme.colorScheme.outlineVariant,
-                        backgroundColor: theme.colorScheme.surface,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.text,
-                                    style: theme.textTheme.titleMedium,
-                                  ),
-                                  SizedBox(height: tokens.spaceExtraSmall),
-                                  Text(
-                                    context.l10n.tasbeehCurrentTarget(
-                                      item.targetCount,
-                                    ),
-                                    style: theme.textTheme.bodySmall,
-                                  ),
-                                ],
+    return _TasbeehContentBounds(
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (state.savedDhikr.isNotEmpty) ...[
+              Text(
+                context.l10n.tasbeehChooseSavedDhikr,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              SizedBox(height: tokens.spaceSmall),
+            ],
+            Expanded(
+              child: state.savedDhikr.isEmpty
+                  ? TilawaIllustratedState(
+                      visual: const TilawaStateVisual(
+                        icon: Icons.history_toggle_off_rounded,
+                        tone: TilawaStateVisualTone.tertiary,
+                      ),
+                      title: context.l10n.tasbeehHistoryEmpty,
+                      semanticLabel: context.l10n.tasbeehHistoryEmpty,
+                    )
+                  : ListView.separated(
+                      itemCount: state.savedDhikr.length,
+                      separatorBuilder: (_, _) =>
+                          SizedBox(height: tokens.spaceSmall),
+                      itemBuilder: (context, index) {
+                        final item = state.savedDhikr[index];
+                        return TilawaCard(
+                          onTap: () =>
+                              cubit.selectDhikrAndStartCounting(item.id),
+                          borderRadius: tokens.radiusLarge,
+                          borderColor: theme.colorScheme.primary.withValues(
+                            alpha: tokens.opacitySubtle,
+                          ),
+                          backgroundColor: theme.colorScheme.surface.withValues(
+                            alpha: tokens.opacityGlass,
+                          ),
+                          child: Row(
+                            children: [
+                              TilawaIconBox(
+                                icon: Icons.radio_button_checked_rounded,
+                                iconColor: theme.colorScheme.primary,
+                                backgroundColor: theme.colorScheme.primary
+                                    .withValues(alpha: tokens.opacitySubtle),
+                                borderRadius: tokens.radiusLarge,
                               ),
-                            ),
-                            SizedBox(width: tokens.spaceSmall),
-                            TilawaIconActionButton(
-                              icon: Icons.delete_outline_rounded,
-                              onTap: () async {
-                                final shouldDelete = await showDialog<bool>(
-                                  context: context,
-                                  builder: (dialogContext) =>
-                                      _TasbeehDeleteConfirmationDialog(
-                                        tasbeehText: item.text,
+                              SizedBox(width: tokens.spaceMedium),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item.text,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w800,
+                                          ),
+                                    ),
+                                    SizedBox(height: tokens.spaceExtraSmall),
+                                    Text(
+                                      context.l10n.tasbeehCurrentTarget(
+                                        item.targetCount,
                                       ),
-                                );
-                                if (shouldDelete == true) {
-                                  await cubit.removeDhikr(item.id);
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: tokens.spaceSmall),
+                              TilawaIconActionButton(
+                                icon: Icons.delete_outline_rounded,
+                                onTap: () async {
+                                  final shouldDelete = await showDialog<bool>(
+                                    context: context,
+                                    builder: (dialogContext) =>
+                                        _TasbeehDeleteConfirmationDialog(
+                                          tasbeehText: item.text,
+                                        ),
+                                  );
+                                  if (shouldDelete == true) {
+                                    await cubit.removeDhikr(item.id);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -337,69 +429,152 @@ class _TasbeehCountingView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
     final selected = state.selectedDhikr;
+    final progress = selected == null || selected.targetCount <= 0
+        ? 0.0
+        : (state.selectedCount / selected.targetCount).clamp(0.0, 1.0);
 
-    return Padding(
-      padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          selected == null
-              ? const SizedBox.shrink()
-              : TilawaStatusChip(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tokens.spaceMedium,
-                    vertical: tokens.spaceSmall,
+    return _TasbeehContentBounds(
+      child: Padding(
+        padding: EdgeInsets.all(tokens.spaceLarge),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            selected == null
+                ? const SizedBox.shrink()
+                : TilawaStatusChip(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceMedium,
+                      vertical: tokens.spaceSmall,
+                    ),
+                    icon: Icons.flag_rounded,
+                    label: context.l10n.tasbeehCurrentTarget(
+                      selected.targetCount,
+                    ),
                   ),
-                  icon: Icons.flag_rounded,
-                  label: context.l10n.tasbeehCurrentTarget(
-                    selected.targetCount,
-                  ),
-                ),
-          SizedBox(height: tokens.spaceLarge),
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: cubit.incrementSelected,
-              child: _ShakeOnTrigger(
-                trigger: state.vibrationEventCount,
-                child: TilawaCard(
-                  borderRadius: tokens.radiusExtraLarge,
-                  backgroundColor: theme.colorScheme.surfaceContainerLow,
-                  borderColor: theme.colorScheme.outlineVariant,
-                  child: Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          selected?.text ??
-                              context.l10n.tasbeehSelectOrCreatePrompt,
-                          textAlign: TextAlign.center,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleLarge,
+            SizedBox(height: tokens.spaceLarge),
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: cubit.incrementSelected,
+                child: _ShakeOnTrigger(
+                  trigger: state.vibrationEventCount,
+                  child: TilawaCard(
+                    borderRadius: tokens.radiusExtraLarge,
+                    borderColor: colorScheme.primary.withValues(
+                      alpha: tokens.opacitySubtle,
+                    ),
+                    gradient: LinearGradient(
+                      begin: AlignmentDirectional.topStart,
+                      end: AlignmentDirectional.bottomEnd,
+                      colors: [
+                        colorScheme.surfaceContainerLow.withValues(
+                          alpha: tokens.opacityGlass,
                         ),
-                        SizedBox(height: tokens.spaceMedium),
-                        Text(
-                          '${state.selectedCount}',
-                          style: theme.textTheme.displayMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: tokens.spaceSmall),
-                        Text(
-                          context.l10n.tasbeehTapToCount,
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodyMedium,
+                        colorScheme.surface.withValues(
+                          alpha: tokens.opacityGlass,
                         ),
                       ],
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            selected?.text ??
+                                context.l10n.tasbeehSelectOrCreatePrompt,
+                            textAlign: TextAlign.center,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: colorScheme.onSurface,
+                              fontWeight: FontWeight.w800,
+                              height: 1.35,
+                            ),
+                          ),
+                          SizedBox(height: tokens.spaceExtraLarge),
+                          Container(
+                            padding: EdgeInsets.all(tokens.spaceExtraLarge),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colorScheme.primary.withValues(
+                                alpha: tokens.opacitySubtle,
+                              ),
+                              border: Border.all(
+                                color: colorScheme.primary.withValues(
+                                  alpha: tokens.opacityMedium,
+                                ),
+                                width: tokens.borderWidthThin,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.primary.withValues(
+                                    alpha: tokens.opacityShadow * 0.35,
+                                  ),
+                                  blurRadius: tokens.blurShadow,
+                                  offset: tokens.shadowOffsetSmall,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              '${state.selectedCount}',
+                              style: theme.textTheme.displayMedium?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: tokens.spaceLarge),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              tokens.radiusExtraLarge,
+                            ),
+                            child: LinearProgressIndicator(
+                              value: progress,
+                              minHeight: tokens.progressHeight,
+                              backgroundColor: colorScheme.outlineVariant
+                                  .withValues(alpha: tokens.opacitySubtle),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: tokens.spaceMedium),
+                          Text(
+                            context.l10n.tasbeehTapToCount,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TasbeehContentBounds extends StatelessWidget {
+  const _TasbeehContentBounds({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: tokens.contentMaxWidthSettings),
+        child: child,
       ),
     );
   }
