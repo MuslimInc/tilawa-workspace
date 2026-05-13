@@ -12,6 +12,10 @@
 - `SelectionPill` typedef (use `TilawaSelectionPill`).
 - `MetadataChip` typedef (use `TilawaMetadataChip`).
 
+### Changed
+
+- `TilawaButton` — non–full-width labels now ellipsize in constrained parents via `Flexible(fit: FlexFit.loose)`; `isFullWidth` behavior unchanged.
+
 ### Fixed
 
 - `TilawaPermissionBanner` — Material 3 minimum touch target for the action control.

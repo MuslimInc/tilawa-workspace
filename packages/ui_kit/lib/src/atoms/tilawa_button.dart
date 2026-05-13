@@ -233,8 +233,10 @@ class _ButtonContent extends StatelessWidget {
       );
     }
 
-    // Avoid [LayoutBuilder]: intrinsic sizing (e.g. Alchemist golden [Table]
-    // column probes) cannot evaluate layout callbacks on [LayoutBuilder].
+    // Non–full-width: [Flexible] gives the label a finite max width on the row
+    // main axis when the parent is bounded, so ellipsis works without
+    // [LayoutBuilder] (intrinsic-safe for e.g. Alchemist golden [Table] probes).
+    // Full-width: [Expanded] unchanged.
     final label = Text(
       text,
       overflow: TextOverflow.ellipsis,
@@ -258,7 +260,10 @@ class _ButtonContent extends StatelessWidget {
           ),
           const SizedBox(width: 8),
         ],
-        if (isFullWidth) Expanded(child: label) else label,
+        if (isFullWidth)
+          Expanded(child: label)
+        else
+          Flexible(fit: FlexFit.loose, child: label),
         if (trailingIcon != null) ...[
           const SizedBox(width: 8),
           IconTheme(
