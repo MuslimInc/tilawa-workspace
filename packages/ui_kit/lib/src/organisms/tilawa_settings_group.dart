@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../molecules/tilawa_section_header.dart';
 
 class TilawaSettingsGroup extends StatelessWidget {
   const TilawaSettingsGroup({
@@ -18,33 +19,10 @@ class TilawaSettingsGroup extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
 
-    final TextStyle? sectionStyle = theme.textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0.2,
-      height: 1.25,
-      color: colorScheme.onSurface,
-    );
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: tokens.groupHeaderPadding,
-          child: Text(
-            title,
-            style:
-                sectionStyle?.copyWith(
-                  fontSize: tokens.groupTitleFontSize,
-                  letterSpacing: tokens.groupTitleLetterSpacing,
-                ) ??
-                TextStyle(
-                  fontSize: tokens.groupTitleFontSize,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: tokens.groupTitleLetterSpacing,
-                  color: colorScheme.onSurface,
-                ),
-          ),
-        ),
+        TilawaSectionHeader.settings(context, title: title),
         Container(
           decoration: BoxDecoration(
             color: tokens.groupSurfaceColor,

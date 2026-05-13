@@ -13,7 +13,6 @@ import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
 import '../widgets/athkar_ambient_background.dart';
 import '../widgets/athkar_category_card.dart';
-import 'tasbeeh_screen.dart';
 
 class AthkarCategoriesScreen extends StatelessWidget {
   const AthkarCategoriesScreen({super.key});
@@ -32,7 +31,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
             const Positioned.fill(child: AthkarAmbientBackground()),
             BlocBuilder<AthkarCubit, AthkarState>(
               builder: (context, state) {
-                if (state is AthkarLoading) {
+                if (state is AthkarLoading || state is AthkarInitial) {
                   return const TilawaLoadingIndicator();
                 } else if (state is AthkarError) {
                   final message =
@@ -84,11 +83,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
                         icon: category.icon,
                         onTap: () {
                           if (category.id == TasbeehConstants.categoryId) {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const TasbeehScreen(),
-                              ),
-                            );
+                            const TasbeehRoute().push(context);
                             return;
                           }
 
@@ -101,7 +96,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
                     },
                   );
                 }
-                return const SizedBox.shrink();
+                return const TilawaLoadingIndicator();
               },
             ),
           ],

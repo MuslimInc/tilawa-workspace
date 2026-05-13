@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -301,7 +302,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                 settings: state.settings,
               ),
               _BottomUtilitiesCard(
-                onOpenQibla: () => context.push('/qibla'),
+                onOpenQibla: () => const QiblaRoute().push(context),
                 onManageAlertsTap: () => _showNotificationDialog(context),
               ),
             ],

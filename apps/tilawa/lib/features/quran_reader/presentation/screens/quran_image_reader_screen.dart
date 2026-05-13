@@ -12,6 +12,9 @@ import 'package:quran_image/presentation/bloc/navigation/navigation_event.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/quran_image_reader.dart';
 import 'package:quran_qcf/quran_qcf.dart';
+import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/router/share_composer_extra.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
@@ -19,9 +22,6 @@ import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
-import '../../../../features/share/presentation/cubit/share_cubit.dart';
-import '../../../../features/share/presentation/screens/screenshot_composer_screen.dart';
-import '../../../../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
 import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 import '../theme/quran_reader_theme.dart';
@@ -178,9 +178,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
     final serverUrl = audioState.currentAudio?.url ?? '';
-    final shareCubit = context.read<ShareCubit>();
     final fontEngine = getIt<LoadQuranFontsToEngineUseCase>();
-    final navigator = Navigator.of(context);
     final theme = Theme.of(context);
     final readerOverlayStyle = _buildReaderSystemUiOverlayStyle(theme);
 
@@ -189,9 +187,8 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
       _buildShareSheetSystemUiOverlayStyle(theme),
     );
     try {
-      await showModalBottomSheet<void>(
+      await showTilawaModalBottomSheet<void>(
         context: context,
-        isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) => ShareOptionsSheet(
           surahNumber: primarySurahNumber,
@@ -203,16 +200,17 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
             final firstAyah = surahEntries.first.start;
             final lastAyah = surahEntries.last.end;
 
-            navigator.push(
-              ScreenshotComposerScreen.route(
-                cubit: shareCubit,
-                surahNumber: selectedSurah,
-                currentPage: currentPage,
-                initialFromAyah: firstAyah,
-                initialToAyah: lastAyah,
-                reciterName: reciterName,
-                readerBoundaryKey: _dummyBoundaryKey,
-              ),
+            unawaited(
+              ScreenshotComposerRoute(
+                $extra: ScreenshotComposerNavExtra(
+                  surahNumber: selectedSurah,
+                  currentPage: currentPage,
+                  initialFromAyah: firstAyah,
+                  initialToAyah: lastAyah,
+                  reciterName: reciterName,
+                  readerBoundaryKey: _dummyBoundaryKey,
+                ),
+              ).push(this.context),
             );
           },
           onShareVideoReel: (selectedSurah) {
@@ -222,17 +220,16 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
             final firstAyah = surahEntries.first.start;
             final lastAyah = surahEntries.last.end;
 
-            navigator.push(
-              VideoReelComposerScreen.route(
-                cubit: shareCubit,
-                surahNumber: selectedSurah,
-                currentPage: currentPage,
-                initialFromAyah: firstAyah,
-                initialToAyah: lastAyah,
-                reciterName: reciterName,
-                reciterServerUrl: serverUrl,
-                readerBoundaryKey: _dummyBoundaryKey,
-              ),
+            unawaited(
+              VideoReelComposerRoute(
+                $extra: VideoReelComposerNavExtra(
+                  surahNumber: selectedSurah,
+                  initialFromAyah: firstAyah,
+                  initialToAyah: lastAyah,
+                  reciterName: reciterName,
+                  reciterServerUrl: serverUrl,
+                ),
+              ).push(this.context),
             );
           },
         ),

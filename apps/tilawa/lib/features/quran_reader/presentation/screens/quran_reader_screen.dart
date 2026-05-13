@@ -13,9 +13,8 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/page_navigation_bar.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
-import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
-import 'package:tilawa/features/share/presentation/screens/screenshot_composer_screen.dart';
-import 'package:tilawa/features/share/presentation/screens/video_reel_composer_screen.dart';
+import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/router/share_composer_extra.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
@@ -887,8 +886,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
     final serverUrl = audioState.currentAudio?.url ?? '';
-    final shareCubit = context.read<ShareCubit>();
-    final navigator = Navigator.of(context);
     final theme = Theme.of(context);
     final readerOverlayStyle = AppSystemChromeStyle.quranReaderStyle;
 
@@ -922,9 +919,8 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       _buildShareSheetSystemUiOverlayStyle(theme),
     );
     try {
-      await showModalBottomSheet<void>(
+      await showTilawaModalBottomSheet<void>(
         context: context,
-        isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) => ShareOptionsSheet(
           surahNumber: initialSurahNumber,
@@ -936,17 +932,18 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
             final firstAyah = surahEntries.first.start;
             final lastAyah = surahEntries.last.end;
 
-            navigator.push(
-              ScreenshotComposerScreen.route(
-                cubit: shareCubit,
-                surahNumber: selectedSurah,
-                currentPage: currentPage,
-                initialFromAyah: firstAyah,
-                initialToAyah: lastAyah,
-                reciterName: reciterName,
-                readerBoundaryKey: _screenshotBoundaryKey,
-                readerPreviewBytesNotifier: previewNotifier,
-              ),
+            unawaited(
+              ScreenshotComposerRoute(
+                $extra: ScreenshotComposerNavExtra(
+                  surahNumber: selectedSurah,
+                  currentPage: currentPage,
+                  initialFromAyah: firstAyah,
+                  initialToAyah: lastAyah,
+                  reciterName: reciterName,
+                  readerBoundaryKey: _screenshotBoundaryKey,
+                  readerPreviewBytesNotifier: previewNotifier,
+                ),
+              ).push(this.context),
             );
           },
           onShareVideoReel: (selectedSurah) {
@@ -956,18 +953,16 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
             final firstAyah = surahEntries.first.start;
             final lastAyah = surahEntries.last.end;
 
-            navigator.push(
-              VideoReelComposerScreen.route(
-                cubit: shareCubit,
-                surahNumber: selectedSurah,
-                currentPage: currentPage,
-                initialFromAyah: firstAyah,
-                initialToAyah: lastAyah,
-                reciterName: reciterName,
-                reciterServerUrl: serverUrl,
-                readerBoundaryKey: _screenshotBoundaryKey,
-                readerPreviewBytesNotifier: previewNotifier,
-              ),
+            unawaited(
+              VideoReelComposerRoute(
+                $extra: VideoReelComposerNavExtra(
+                  surahNumber: selectedSurah,
+                  initialFromAyah: firstAyah,
+                  initialToAyah: lastAyah,
+                  reciterName: reciterName,
+                  reciterServerUrl: serverUrl,
+                ),
+              ).push(this.context),
             );
           },
         ),
@@ -1009,12 +1004,10 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   void _showSurahIndex() {
     // Pre-load fonts for all surah start pages so that any index jump is instant.
     unawaited(_prewarmSurahIndexFonts());
-    showModalBottomSheet<int>(
+    showTilawaModalBottomSheet<int>(
       context: context,
-      isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.4),
       builder: (context) => SurahIndexSheet(
         onSurahSelected: (surahNumber) =>
             Navigator.of(context).pop(surahNumber),

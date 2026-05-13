@@ -33,9 +33,8 @@ void _showColorPicker(
   String? currentPresetId,
 ) {
   final tokens = Theme.of(context).tokens;
-  showModalBottomSheet<void>(
+  showTilawaModalBottomSheet<void>(
     context: context,
-    isScrollControlled: true,
     backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
@@ -92,7 +91,7 @@ void _showCustomColorPicker(BuildContext context, Color currentColor) {
 void _showLanguagePicker(BuildContext context, Locale currentLocale) {
   final theme = Theme.of(context);
   final tokens = theme.tokens;
-  showModalBottomSheet<void>(
+  showTilawaModalBottomSheet<void>(
     context: context,
     backgroundColor: theme.colorScheme.surfaceContainerLow,
     shape: RoundedRectangleBorder(
@@ -107,7 +106,7 @@ void _showLanguagePicker(BuildContext context, Locale currentLocale) {
 void _showConcurrentDownloadsPicker(BuildContext context, int currentValue) {
   final theme = Theme.of(context);
   final tokens = theme.tokens;
-  showModalBottomSheet<void>(
+  showTilawaModalBottomSheet<void>(
     context: context,
     backgroundColor: theme.colorScheme.surfaceContainerLow,
     shape: RoundedRectangleBorder(
@@ -1052,63 +1051,58 @@ class _ColorPickerSheet extends StatelessWidget {
     final isCustom = currentSource == PrimaryColorSource.custom;
 
     return SafeArea(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.sizeOf(context).height * 0.85,
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const TilawaSheetHandle(),
-              Text(
-                context.l10n.choosePrimaryColor,
-                style: context.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const TilawaSheetHandle(),
+            Text(
+              context.l10n.choosePrimaryColor,
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-              SizedBox(height: tokens.spaceLarge),
-              ...PrimaryColorPreset.values.map((preset) {
-                final isSelected = !isCustom && currentPresetId == preset.id;
-                return TilawaSelectionTile(
-                  leading: CircleAvatar(
-                    backgroundColor: preset.value,
-                    radius: TilawaSettingsScreenTokens
-                        .primaryPickerPresetSwatchRadius,
-                  ),
-                  title: _localizedPresetName(context, preset),
-                  isSelected: isSelected,
-                  onTap: () {
-                    context.read<ThemeCubit>().setPrimaryPreset(preset);
-                    Navigator.pop(context);
-                  },
-                );
-              }),
-              TilawaSelectionTile(
+            ),
+            SizedBox(height: tokens.spaceLarge),
+            ...PrimaryColorPreset.values.map((preset) {
+              final isSelected = !isCustom && currentPresetId == preset.id;
+              return TilawaSelectionTile(
                 leading: CircleAvatar(
+                  backgroundColor: preset.value,
                   radius: TilawaSettingsScreenTokens
                       .primaryPickerPresetSwatchRadius,
-                  backgroundColor: isCustom
-                      ? currentColor
-                      : colorScheme.surfaceContainerHigh,
-                  child: isCustom
-                      ? null
-                      : Icon(
-                          FluentIcons.color_24_regular,
-                          size:
-                              TilawaSettingsScreenTokens
-                                  .primaryPickerCustomSwatchSize *
-                              0.5,
-                          color: colorScheme.primary,
-                        ),
                 ),
-                title: context.l10n.custom,
-                isSelected: isCustom,
-                onTap: onCustomColorTap,
+                title: _localizedPresetName(context, preset),
+                isSelected: isSelected,
+                onTap: () {
+                  context.read<ThemeCubit>().setPrimaryPreset(preset);
+                  Navigator.pop(context);
+                },
+              );
+            }),
+            TilawaSelectionTile(
+              leading: CircleAvatar(
+                radius:
+                    TilawaSettingsScreenTokens.primaryPickerPresetSwatchRadius,
+                backgroundColor: isCustom
+                    ? currentColor
+                    : colorScheme.surfaceContainerHigh,
+                child: isCustom
+                    ? null
+                    : Icon(
+                        FluentIcons.color_24_regular,
+                        size:
+                            TilawaSettingsScreenTokens
+                                .primaryPickerCustomSwatchSize *
+                            0.5,
+                        color: colorScheme.primary,
+                      ),
               ),
-              SizedBox(height: tokens.spaceLarge),
-            ],
-          ),
+              title: context.l10n.custom,
+              isSelected: isCustom,
+              onTap: onCustomColorTap,
+            ),
+            SizedBox(height: tokens.spaceLarge),
+          ],
         ),
       ),
     );
