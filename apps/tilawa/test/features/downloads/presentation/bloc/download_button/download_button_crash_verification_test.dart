@@ -38,12 +38,14 @@ class TestDownloading extends TestDownloadState {
 
 /// Bloc WITHOUT the isClosed check - this WILL crash
 class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
-  BlocWithoutFix({required this.progressStream}) : super(TestInitial()) {
+  BlocWithoutFix({required Stream<double> progressStream})
+    : _progressStream = progressStream,
+      super(TestInitial()) {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - NO isClosed check
       emit(TestDownloading(0.0));
       // Simulate real implementation: listen and add events
-      _subscription = progressStream.listen((progress) {
+      _subscription = _progressStream.listen((progress) {
         // This is where it crashes if closed
         add(TestProgressUpdated(progress));
       });
@@ -54,7 +56,7 @@ class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
     });
   }
 
-  final Stream<double> progressStream;
+  final Stream<double> _progressStream;
   // ignore: unused_field
   StreamSubscription<double>? _subscription;
 
@@ -69,11 +71,13 @@ class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
 
 /// Bloc WITH the isClosed check - this will NOT crash
 class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
-  BlocWithFix({required this.progressStream}) : super(TestInitial()) {
+  BlocWithFix({required Stream<double> progressStream})
+    : _progressStream = progressStream,
+      super(TestInitial()) {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - WITH isClosed check
       emit(TestDownloading(0.0));
-      _subscription = progressStream.listen((progress) {
+      _subscription = _progressStream.listen((progress) {
         if (isClosed) return;
         add(TestProgressUpdated(progress));
       });
@@ -84,7 +88,7 @@ class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
     });
   }
 
-  final Stream<double> progressStream;
+  final Stream<double> _progressStream;
   // ignore: unused_field
   StreamSubscription<double>? _subscription;
 

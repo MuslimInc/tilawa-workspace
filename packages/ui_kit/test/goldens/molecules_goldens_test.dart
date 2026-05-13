@@ -7,6 +7,15 @@ import 'package:tilawa_ui_kit/src/foundation/density.dart';
 import 'package:tilawa_ui_kit/src/molecules/molecules.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
+import 'golden_constraints.dart';
+
+/// Stable line box for glass-panel golden body text (reduces ±1px vertical
+/// drift between Flutter / font versions).
+const StrutStyle _kGoldenGlassPanelBodyStrut = StrutStyle(
+  fontSize: 16,
+  height: 1.25,
+  forceStrutHeight: true,
+);
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -17,6 +26,7 @@ void main() {
       'TilawaGlassPanel',
       fileName: 'molecules/tilawa_glass_panel',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Light',
@@ -24,7 +34,10 @@ void main() {
               child: TilawaGlassPanel(
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('Glass Panel'),
+                  child: Text(
+                    'Glass Panel',
+                    strutStyle: _kGoldenGlassPanelBodyStrut,
+                  ),
                 ),
               ),
             ),
@@ -36,7 +49,10 @@ void main() {
               child: TilawaGlassPanel(
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('Dark Glass Panel'),
+                  child: Text(
+                    'Dark Glass Panel',
+                    strutStyle: _kGoldenGlassPanelBodyStrut,
+                  ),
                 ),
               ),
             ),
@@ -49,6 +65,7 @@ void main() {
       'TilawaGlassPanel compact',
       fileName: 'molecules/tilawa_glass_panel_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Light (compact)',
@@ -57,7 +74,10 @@ void main() {
               child: TilawaGlassPanel(
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('Glass Panel'),
+                  child: Text(
+                    'Glass Panel',
+                    strutStyle: _kGoldenGlassPanelBodyStrut,
+                  ),
                 ),
               ),
             ),
@@ -70,7 +90,10 @@ void main() {
               child: TilawaGlassPanel(
                 child: Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text('Dark Glass Panel'),
+                  child: Text(
+                    'Dark Glass Panel',
+                    strutStyle: _kGoldenGlassPanelBodyStrut,
+                  ),
                 ),
               ),
             ),
@@ -83,6 +106,7 @@ void main() {
       'TilawaStatusChip',
       fileName: 'molecules/tilawa_status_chip',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Success',
@@ -124,6 +148,7 @@ void main() {
       'TilawaChip',
       fileName: 'molecules/tilawa_chip',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -162,6 +187,7 @@ void main() {
       'TilawaChip compact',
       fileName: 'molecules/tilawa_chip_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',
@@ -193,6 +219,7 @@ void main() {
       'MetadataChip',
       fileName: 'molecules/tilawa_metadata_chip',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default icon + label',
@@ -227,6 +254,7 @@ void main() {
       'SelectionPill',
       fileName: 'molecules/tilawa_selection_pill',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Selected',
@@ -260,6 +288,7 @@ void main() {
       'SelectionPill compact',
       fileName: 'molecules/tilawa_selection_pill_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Selected (compact)',
@@ -288,6 +317,7 @@ void main() {
       'TilawaCountProgressRing',
       fileName: 'molecules/tilawa_count_progress_ring',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Progress default',
@@ -363,6 +393,7 @@ void main() {
       'TilawaIconActionButton',
       fileName: 'molecules/tilawa_icon_action_button',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Inactive',
@@ -401,6 +432,7 @@ void main() {
       'TilawaSearchField',
       fileName: 'molecules/tilawa_search_field',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -471,6 +503,7 @@ void main() {
       'TilawaSearchField compact',
       fileName: 'molecules/tilawa_search_field_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',
@@ -518,6 +551,7 @@ void main() {
       'TilawaSettingsTiles',
       fileName: 'molecules/tilawa_settings_tile',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Tile with subtitle',
@@ -527,7 +561,6 @@ void main() {
                 child: TilawaSettingsTile(
                   icon: Icons.notifications_outlined,
                   title: 'Notifications',
-                  subtitle: 'Daily prayer alerts',
                   onTap: () {},
                 ),
               ),
@@ -586,7 +619,6 @@ void main() {
                 child: TilawaSettingsSwitchTile(
                   icon: Icons.notifications_outlined,
                   title: 'إشعارات الصلاة',
-                  subtitle: 'تشغيل التنبيهات',
                   value: true,
                   onChanged: (_) {},
                   showDivider: false,
@@ -602,6 +634,7 @@ void main() {
       'TilawaSettingsTiles compact',
       fileName: 'molecules/tilawa_settings_tile_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Tile with subtitle (compact)',
@@ -612,7 +645,6 @@ void main() {
                 child: TilawaSettingsTile(
                   icon: Icons.notifications_outlined,
                   title: 'Notifications',
-                  subtitle: 'Daily prayer alerts',
                   onTap: () {},
                 ),
               ),
@@ -675,7 +707,6 @@ void main() {
                 child: TilawaSettingsSwitchTile(
                   icon: Icons.notifications_outlined,
                   title: 'إشعارات الصلاة',
-                  subtitle: 'تشغيل التنبيهات',
                   value: true,
                   onChanged: (_) {},
                   showDivider: false,
@@ -691,6 +722,7 @@ void main() {
       'TilawaFeedbackStrip',
       fileName: 'molecules/tilawa_feedback_strip',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -754,6 +786,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       },
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',
@@ -816,6 +849,7 @@ void main() {
       'TilawaPermissionBanner',
       fileName: 'molecules/tilawa_permission_banner',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -846,6 +880,7 @@ void main() {
       'TilawaPermissionBanner compact',
       fileName: 'molecules/tilawa_permission_banner_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',
@@ -878,11 +913,12 @@ void main() {
       'LanguageSwitcher',
       fileName: 'molecules/tilawa_language_switcher',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'English selected',
             child: TilawaPreviewWrapper(
-              child: LanguageSwitcher(
+              child: TilawaLanguageSwitcher(
                 currentLanguage: 'en',
                 languages: const ['en', 'ar'],
                 getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
@@ -893,7 +929,7 @@ void main() {
           GoldenTestScenario(
             name: 'Arabic selected',
             child: TilawaPreviewWrapper(
-              child: LanguageSwitcher(
+              child: TilawaLanguageSwitcher(
                 currentLanguage: 'ar',
                 languages: const ['en', 'ar'],
                 getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
@@ -909,6 +945,7 @@ void main() {
       'TilawaSegmentedControl',
       fileName: 'molecules/tilawa_segmented_control',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'First selected',
@@ -967,6 +1004,7 @@ void main() {
       'TilawaSegmentedControl compact',
       fileName: 'molecules/tilawa_segmented_control_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'First selected (compact)',
@@ -1011,6 +1049,7 @@ void main() {
       'TilawaSelectionTile',
       fileName: 'molecules/tilawa_selection_tile',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Unselected',
@@ -1062,6 +1101,7 @@ void main() {
       'TilawaSelectionTile compact',
       fileName: 'molecules/tilawa_selection_tile_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Selected (compact)',

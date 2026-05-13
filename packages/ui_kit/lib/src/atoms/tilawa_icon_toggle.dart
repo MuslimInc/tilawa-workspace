@@ -56,18 +56,27 @@ class TilawaIconToggle extends StatelessWidget {
       button: true,
       toggled: value,
       label: semanticLabel,
-      child: Material(
-        color: background,
-        borderRadius: BorderRadius.circular(effectiveRadius),
-        child: InkWell(
-          onTap: () => onChanged(!value),
+      child: ConstrainedBox(
+        // fix: Accessibility — enforce ≥48×48dp hit target
+        constraints: const BoxConstraints(
+          minWidth: kMinInteractiveDimension,
+          minHeight: kMinInteractiveDimension,
+        ),
+        child: Material(
+          color: background,
           borderRadius: BorderRadius.circular(effectiveRadius),
-          child: Padding(
-            padding: EdgeInsets.all(padding ?? tokens.padding),
-            child: Icon(
-              value ? activeIcon : icon,
-              size: iconSize ?? tokens.iconSize,
-              color: iconColor,
+          child: InkWell(
+            onTap: () => onChanged(!value),
+            borderRadius: BorderRadius.circular(effectiveRadius),
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.all(padding ?? tokens.padding),
+                child: Icon(
+                  value ? activeIcon : icon,
+                  size: iconSize ?? tokens.iconSize,
+                  color: iconColor,
+                ),
+              ),
             ),
           ),
         ),

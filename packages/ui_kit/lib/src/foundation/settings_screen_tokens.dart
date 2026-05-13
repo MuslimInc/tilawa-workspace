@@ -3,10 +3,10 @@ abstract final class TilawaSettingsScreenTokens {
   TilawaSettingsScreenTokens._();
 
   /// Profile card avatar diameter.
-  static const double profileAvatarSize = 60;
+  static const double profileAvatarSize = 68;
 
   /// Person icon inside the profile avatar.
-  static const double profilePersonIconSize = 32;
+  static const double profilePersonIconSize = 34;
 
   /// [CircleAvatar] radius for preset color swatches in the primary picker.
   static const double primaryPickerPresetSwatchRadius = 12;

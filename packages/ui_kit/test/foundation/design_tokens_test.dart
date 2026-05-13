@@ -117,19 +117,17 @@ void main() {
         expect(compact.spaceExtraSmall, comfortable.spaceExtraSmall);
         expect(compact.spaceSmall, comfortable.spaceSmall);
 
-        // Medium and larger spacing tighten on compact.
+        // Medium spacing tightens on compact; larger steps match
+        // comfortable on the current 8dp grid.
         expect(compact.spaceMedium, lessThan(comfortable.spaceMedium));
-        expect(compact.spaceLarge, lessThan(comfortable.spaceLarge));
-        expect(compact.spaceExtraLarge, lessThan(comfortable.spaceExtraLarge));
+        expect(compact.spaceLarge, comfortable.spaceLarge);
+        expect(compact.spaceExtraLarge, comfortable.spaceExtraLarge);
 
-        // Radii tighten only at the larger sizes.
+        // Radii: compact matches comfortable at large tiers today.
         expect(compact.radiusSmall, comfortable.radiusSmall);
         expect(compact.radiusMedium, comfortable.radiusMedium);
-        expect(compact.radiusLarge, lessThan(comfortable.radiusLarge));
-        expect(
-          compact.radiusExtraLarge,
-          lessThan(comfortable.radiusExtraLarge),
-        );
+        expect(compact.radiusLarge, comfortable.radiusLarge);
+        expect(compact.radiusExtraLarge, comfortable.radiusExtraLarge);
       });
     });
 

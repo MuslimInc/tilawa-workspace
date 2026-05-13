@@ -21,6 +21,20 @@ import 'package:tilawa/features/downloads/presentation/bloc/downloads_status.dar
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import '../../helpers/mock_helper.mocks.dart';
 
+/// One-shot UI notifications from [DownloadsBloc] (state-driven; replaces
+/// `statusStream`).
+Stream<DownloadsStatus> downloadsBlocUiNotifications(
+  DownloadsBloc bloc,
+) async* {
+  var lastSeq = 0;
+  await for (final DownloadsState s in bloc.stream) {
+    if (s.uiNotification != null && s.uiNotificationSeq != lastSeq) {
+      lastSeq = s.uiNotificationSeq;
+      yield s.uiNotification!;
+    }
+  }
+}
+
 // Provide dummy values for Either types that Mockito can't generate automatically
 @visibleForTesting
 Either<Failure, void> provideDummyEitherFailureVoid() => const Right(null);
@@ -350,7 +364,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emitsInOrder([
                 isA<DownloadStarted>()
                     .having((s) => s.surahId, 'surahId', testSurahId)
@@ -383,7 +397,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(isA<PremiumRequired>()),
             ),
           );
@@ -414,7 +428,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<Error>().having(
                   (e) => e.message,
@@ -452,7 +466,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -496,7 +510,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emitsInOrder([
                 isA<DownloadStarted>(),
                 isA<Error>().having(
@@ -549,7 +563,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -644,7 +658,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -688,7 +702,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -719,7 +733,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<SurahDownloadStatus>()
                     .having((s) => s.surahId, 'surahId', testSurahId)
@@ -752,7 +766,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -799,7 +813,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<FileValidationResult>()
                     .having((s) => s.downloadId, 'downloadId', testDownloadId)
@@ -845,7 +859,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<Error>().having(
                   (e) => e.message,
@@ -889,7 +903,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<ValidDownloadsLoaded>()
                     .having(
@@ -919,7 +933,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -966,7 +980,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<PlaybackInitiated>().having(
                   (s) => s.message,
@@ -992,7 +1006,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<Error>().having(
                   (e) => e.message,
@@ -1019,7 +1033,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -1048,7 +1062,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -1094,7 +1108,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<PlaybackInitiated>().having(
                   (s) => s.message,
@@ -1120,7 +1134,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<Error>().having(
                   (e) => e.message,
@@ -1147,7 +1161,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -1174,7 +1188,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(isA<PremiumRequired>()),
             ),
           );
@@ -1202,7 +1216,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -1248,7 +1262,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(isA<DownloadStarted>()),
           ),
         );
@@ -1263,7 +1277,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -1289,7 +1303,7 @@ void main() {
 
           unawaited(
             expectLater(
-              downloadsBloc.statusStream,
+              downloadsBlocUiNotifications(downloadsBloc),
               emits(
                 isA<Error>().having(
                   (e) => e.message,
@@ -1316,7 +1330,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(isA<PremiumRequired>()),
           ),
         );
@@ -1337,7 +1351,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emitsThrough(
               isA<Error>().having(
                 (e) => e.message,
@@ -1378,7 +1392,7 @@ void main() {
         // Expect stream emissions for DownloadSurah
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(isA<DownloadStarted>()),
           ),
         );
@@ -1787,7 +1801,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -1822,7 +1836,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -1853,7 +1867,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -1909,7 +1923,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emitsThrough(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -1965,7 +1979,7 @@ void main() {
 
           // Assert - Should allow retry for stuck download
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emitsThrough(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -2046,7 +2060,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -2076,7 +2090,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -2120,7 +2134,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -2167,7 +2181,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -2199,7 +2213,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -2245,7 +2259,7 @@ void main() {
 
           // Assert
           await expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<DownloadsStatus>().having(
                 (s) => s.maybeMap(
@@ -2273,7 +2287,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -2316,7 +2330,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -2337,7 +2351,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -2377,7 +2391,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -2398,7 +2412,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -2421,7 +2435,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,
@@ -2459,7 +2473,7 @@ void main() {
 
         unawaited(
           expectLater(
-            downloadsBloc.statusStream,
+            downloadsBlocUiNotifications(downloadsBloc),
             emits(
               isA<Error>().having(
                 (e) => e.message,

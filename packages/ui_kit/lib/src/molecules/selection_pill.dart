@@ -4,8 +4,9 @@ import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_chip.dart';
 
-class SelectionPill extends StatelessWidget {
-  const SelectionPill({
+/// Pill-shaped filter control built on [TilawaChip].
+class TilawaSelectionPill extends StatelessWidget {
+  const TilawaSelectionPill({
     super.key,
     required this.label,
     required this.selected,
@@ -43,6 +44,7 @@ class SelectionPill extends StatelessWidget {
       label: label,
       icon: icon,
       onTap: onTap,
+      semanticsSelected: selected,
       backgroundColor: background,
       foregroundColor: foreground,
       borderColor: selected
@@ -61,3 +63,7 @@ class SelectionPill extends StatelessWidget {
     );
   }
 }
+
+/// Deprecated. Use [TilawaSelectionPill] instead.
+@Deprecated('Use TilawaSelectionPill instead')
+typedef SelectionPill = TilawaSelectionPill;

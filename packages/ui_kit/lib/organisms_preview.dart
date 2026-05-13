@@ -129,7 +129,6 @@ Widget previewTilawaSettingsGroup() {
           TilawaSettingsTile(
             icon: Icons.language,
             title: 'Language',
-            subtitle: 'English',
             onTap: () {},
           ),
           TilawaSettingsSwitchTile(
@@ -166,7 +165,6 @@ Widget previewTilawaSettingsGroupDark() {
           TilawaSettingsTile(
             icon: Icons.language,
             title: 'Language',
-            subtitle: 'English',
             onTap: () {},
           ),
           TilawaSettingsSwitchTile(

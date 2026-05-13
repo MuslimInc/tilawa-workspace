@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../molecules/tilawa_section_header.dart';
 
 class TilawaSettingsGroup extends StatelessWidget {
   const TilawaSettingsGroup({
@@ -19,39 +20,31 @@ class TilawaSettingsGroup extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
 
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: tokens.groupHeaderPadding,
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: tokens.groupTitleFontSize,
-              fontWeight: .w800,
-              color: colorScheme.primary,
-              letterSpacing: tokens.groupTitleLetterSpacing,
-            ),
-          ),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            color: tokens.groupSurfaceColor,
-            borderRadius: BorderRadius.circular(tokens.groupBorderRadius),
-            border: Border.all(
-              color: tokens.groupContainerBorderColor,
-              width: tokens.tileDividerThickness,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.shadow.withValues(
-                  alpha: tokens.groupShadowOpacity,
-                ),
-                blurRadius: tokens.groupShadowBlur,
-                offset: tokens.groupShadowOffset,
+        TilawaSectionHeader.settings(context, title: title),
+        SizedBox(
+          width: double.infinity,
+          child: Container(
+            decoration: BoxDecoration(
+              color: tokens.groupSurfaceColor,
+              borderRadius: BorderRadius.circular(tokens.groupBorderRadius),
+              border: Border.all(
+                color: tokens.groupContainerBorderColor,
+                width: tokens.tileDividerThickness,
               ),
-            ],
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withValues(
+                    alpha: tokens.groupShadowOpacity,
+                  ),
+                  blurRadius: tokens.groupShadowBlur,
+                  offset: tokens.groupShadowOffset,
+                ),
+              ],
+            ),
+            child: Column(children: children),
           ),
-          child: Column(children: children),
         ),
       ],
     );

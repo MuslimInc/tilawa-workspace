@@ -459,10 +459,7 @@ class _RoundHeaderButton extends StatelessWidget {
       child: IconButton(
         onPressed: onPressed,
         style: IconButton.styleFrom(padding: .zero),
-        iconSize:
-            componentTokens.headerButtonSize -
-            componentTokens.headerIconSizeOffset -
-            componentTokens.headerIconSizeOffset,
+        iconSize: theme.tokens.iconSizeMedium,
         icon: Icon(icon),
       ),
     );

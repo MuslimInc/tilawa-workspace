@@ -175,6 +175,10 @@ class AppLaunchConfig extends Equatable {
   final bool firebaseDataInit;
   final bool subscriptionServiceEnabled;
   final bool notificationPermissionRequest;
+
+  /// Default for UI density when no persisted [SettingsState.useCompactDesign]
+  /// exists (see `SettingsCubit.fromJson`). Overridable via
+  /// `--dart-define=TILAWA_COMPACT_UI=false`.
   final bool compactUiEnabled;
 
   @override

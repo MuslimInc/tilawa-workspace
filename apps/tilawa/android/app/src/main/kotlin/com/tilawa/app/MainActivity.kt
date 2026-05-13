@@ -85,17 +85,18 @@ class MainActivity : AudioServiceActivity() {
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
-        // Register custom channels before super to ensure they are registered in tests
-        // even if super.configureFlutterEngine throws (e.g. in Robolectric)
+        super.configureFlutterEngine(flutterEngine)
+        
+        // Register custom channels after super to ensure they are registered
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WATCHDOG_CHANNEL)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "ensurePeriodicWatchdogScheduled" -> {
-                        PrayerNotificationsWatchdogScheduler.enqueuePeriodic(applicationContext)
+                        PrayerNotificationsWatchdogScheduler.enqueuePeriodic(this@MainActivity)
                         result.success(null)
                     }
                     "runPrayerNotificationWatchdogNow" -> {
-                        PrayerNotificationsWatchdogScheduler.enqueueOneTime(applicationContext)
+                        PrayerNotificationsWatchdogScheduler.enqueueOneTime(this@MainActivity)
                         result.success(null)
                     }
                     else -> result.notImplemented()
@@ -106,8 +107,6 @@ class MainActivity : AudioServiceActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             this,
         )
-        
-        super.configureFlutterEngine(flutterEngine)
     }
 
     override fun getRenderMode(): RenderMode {

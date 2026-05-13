@@ -269,7 +269,7 @@ void main() {
       },
     );
 
-    test('returns false and emits nothing if already pending', () async {
+    test('does not clear favorites while a toggle is pending', () async {
       when(mockToggleFavorite(any)).thenAnswer((_) async {
         await Future.delayed(const Duration(milliseconds: 100));
         return const Right(null);
@@ -287,9 +287,8 @@ void main() {
       // Start a toggle to set pending
       final Future<void> toggleFuture = cubit.toggleFavorite(tReciter);
 
-      final result = await cubit.clearAllFavorites();
+      await cubit.clearAllFavorites();
 
-      expect(result, isFalse);
       verifyNever(mockClearFavorites());
 
       await toggleFuture;

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/features/settings/domain/usecases/get_app_info.dart';
 import 'package:tilawa_core/entities/app_info.dart';
@@ -15,6 +16,7 @@ class SettingsState extends Equatable {
     this.isSleepTimerEnabled = true,
     this.prefetchQuranAssetsOnWifiOnly = true,
     this.showPrayerTimesAlertChipLabels = true,
+    this.useCompactDesign = true,
     this.appInfo,
   });
 
@@ -23,6 +25,9 @@ class SettingsState extends Equatable {
   final bool isSleepTimerEnabled;
   final bool prefetchQuranAssetsOnWifiOnly;
   final bool showPrayerTimesAlertChipLabels;
+
+  /// When true, [TilawaDensity.compact] is applied app-wide (tighter spacing).
+  final bool useCompactDesign;
   final AppInfo? appInfo;
 
   SettingsState copyWith({
@@ -31,6 +36,7 @@ class SettingsState extends Equatable {
     bool? isSleepTimerEnabled,
     bool? prefetchQuranAssetsOnWifiOnly,
     bool? showPrayerTimesAlertChipLabels,
+    bool? useCompactDesign,
     AppInfo? appInfo,
   }) {
     return SettingsState(
@@ -42,6 +48,7 @@ class SettingsState extends Equatable {
           prefetchQuranAssetsOnWifiOnly ?? this.prefetchQuranAssetsOnWifiOnly,
       showPrayerTimesAlertChipLabels:
           showPrayerTimesAlertChipLabels ?? this.showPrayerTimesAlertChipLabels,
+      useCompactDesign: useCompactDesign ?? this.useCompactDesign,
       appInfo: appInfo ?? this.appInfo,
     );
   }
@@ -53,6 +60,7 @@ class SettingsState extends Equatable {
     isSleepTimerEnabled,
     prefetchQuranAssetsOnWifiOnly,
     showPrayerTimesAlertChipLabels,
+    useCompactDesign,
     appInfo,
   ];
 }
@@ -105,6 +113,9 @@ class SettingsCubit extends HydratedCubit<SettingsState>
             json['prefetchQuranAssetsOnWifiOnly'] as bool? ?? true,
         showPrayerTimesAlertChipLabels:
             json['showPrayerTimesAlertChipLabels'] as bool? ?? true,
+        useCompactDesign:
+            json['useCompactDesign'] as bool? ??
+            appLaunchConfig.compactUiEnabled,
       );
     } catch (_) {
       return const SettingsState();
@@ -119,6 +130,7 @@ class SettingsCubit extends HydratedCubit<SettingsState>
       'isSleepTimerEnabled': state.isSleepTimerEnabled,
       'prefetchQuranAssetsOnWifiOnly': state.prefetchQuranAssetsOnWifiOnly,
       'showPrayerTimesAlertChipLabels': state.showPrayerTimesAlertChipLabels,
+      'useCompactDesign': state.useCompactDesign,
     };
   }
 
@@ -142,6 +154,10 @@ class SettingsCubit extends HydratedCubit<SettingsState>
 
   void setShowPrayerTimesAlertChipLabels(bool show) {
     emit(state.copyWith(showPrayerTimesAlertChipLabels: show));
+  }
+
+  void setUseCompactDesign(bool enabled) {
+    emit(state.copyWith(useCompactDesign: enabled));
   }
 
   void _updateQueueManager() {

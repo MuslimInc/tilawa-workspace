@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';

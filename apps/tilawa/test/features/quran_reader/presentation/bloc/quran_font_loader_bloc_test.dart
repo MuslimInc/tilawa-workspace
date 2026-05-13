@@ -55,7 +55,7 @@ void main() {
           () => mockCheckFontsDownloadedUseCase(),
         ).thenAnswer((_) async => false);
         when(
-          () => mockLoadQuranFontsToEngineUseCase.ensureSingleFontLoaded(any()),
+          () => mockLoadQuranFontsToEngineUseCase.ensureFontReady(any()),
         ).thenAnswer((_) async {});
         when(
           () => mockLoadQuranFontsToEngineUseCase.ensureQuranDataLoaded(),

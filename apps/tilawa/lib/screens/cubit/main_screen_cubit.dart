@@ -1,10 +1,14 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'main_screen_state.dart';
+
+const bool _kReleaseMode = bool.fromEnvironment(
+  'dart.vm.product',
+  defaultValue: false,
+);
 
 /// Owns all startup-orchestration timers and tab navigation state for the
 /// app shell.
@@ -43,78 +47,73 @@ class MainScreenCubit extends Cubit<MainScreenState> {
     // to avoid contention with the route-entrance transition.
     _shellActivationTimer = Timer(_shellActivationDelay, () {
       if (isClosed) return;
-      SchedulerBinding.instance.scheduleTask<void>(
-        () {
-          if (isClosed) return;
-          emit(state.copyWith(isShellActivated: true));
-          if (!kReleaseMode) {
-            debugPrint(
-              '[PerfLogger][MainScreen] shell-activated '
-              'delayMs=${_shellActivationDelay.inMilliseconds}',
-            );
-          }
-        },
-        Priority.idle,
-        debugLabel: 'main-screen-shell-activation',
-      );
+      scheduleMicrotask(() {
+        if (isClosed) return;
+        emit(state.copyWith(isShellActivated: true));
+        if (!_kReleaseMode) {
+          developer.log(
+            '[PerfLogger][MainScreen] shell-activated '
+            'delayMs=${_shellActivationDelay.inMilliseconds}',
+            name: 'tilawa.main_screen',
+          );
+        }
+      });
     });
 
     // Phase B: mount the initial tab after the route has settled to prevent
     // a single heavy composition frame at the start of the transition.
     _initialTabMountTimer = Timer(_initialTabRouteSettleDelay, () {
       if (isClosed) return;
-      SchedulerBinding.instance.scheduleTask<void>(
-        () {
-          if (isClosed) return;
-          emit(
-            state.copyWith(
-              isInitialTabMounted: true,
-              builtTabIndexes: {...state.builtTabIndexes, state.currentIndex},
-            ),
+      scheduleMicrotask(() {
+        if (isClosed) return;
+        emit(
+          state.copyWith(
+            isInitialTabMounted: true,
+            builtTabIndexes: {...state.builtTabIndexes, state.currentIndex},
+          ),
+        );
+        if (!_kReleaseMode) {
+          developer.log(
+            '[PerfLogger][MainScreen] initial-tab-mounted '
+            'delayMs=${_initialTabRouteSettleDelay.inMilliseconds}',
+            name: 'tilawa.main_screen',
           );
-          if (!kReleaseMode) {
-            debugPrint(
-              '[PerfLogger][MainScreen] initial-tab-mounted '
-              'delayMs=${_initialTabRouteSettleDelay.inMilliseconds}',
-            );
-          }
-        },
-        Priority.idle,
-        debugLabel: 'main-screen-initial-tab-mount',
-      );
+        }
+      });
     });
 
     // Phase C: enable deferred UI elements (e.g. SVG icons) after the
     // critical startup window is clear.
     _startupUiWarmupTimer = Timer(_startupUiWarmupDelay, () {
       if (isClosed) return;
-      SchedulerBinding.instance.scheduleTask<void>(
-        () {
-          if (isClosed) return;
-          emit(state.copyWith(isStartupUiWarm: true));
-          if (!kReleaseMode) {
-            debugPrint(
-              '[PerfLogger][MainScreen] startup-ui-warm '
-              'delayMs=${_startupUiWarmupDelay.inMilliseconds}',
-            );
-          }
-        },
-        Priority.idle,
-        debugLabel: 'main-screen-startup-warmup',
-      );
+      scheduleMicrotask(() {
+        if (isClosed) return;
+        emit(state.copyWith(isStartupUiWarm: true));
+        if (!_kReleaseMode) {
+          developer.log(
+            '[PerfLogger][MainScreen] startup-ui-warm '
+            'delayMs=${_startupUiWarmupDelay.inMilliseconds}',
+            name: 'tilawa.main_screen',
+          );
+        }
+      });
     });
 
     // Phase D: bind audio player after the critical startup window is clear.
-    if (!kReleaseMode) {
-      debugPrint(
+    if (!_kReleaseMode) {
+      developer.log(
         '[PerfLogger][MainScreen] audio-binding scheduled '
         'delayMs=${_deferredAudioBindingDelay.inMilliseconds}',
+        name: 'tilawa.main_screen',
       );
     }
     _audioBindingTimer = Timer(_deferredAudioBindingDelay, () {
       if (isClosed) return;
-      if (!kReleaseMode) {
-        debugPrint('[PerfLogger][MainScreen] audio-binding started');
+      if (!_kReleaseMode) {
+        developer.log(
+          '[PerfLogger][MainScreen] audio-binding started',
+          name: 'tilawa.main_screen',
+        );
       }
       emit(state.copyWith(isAudioBindingDeferred: false));
     });
@@ -122,14 +121,10 @@ class MainScreenCubit extends Cubit<MainScreenState> {
     // Phase E: show offline indicator after the startup window.
     _offlineIndicatorTimer = Timer(_offlineIndicatorDelay, () {
       if (isClosed) return;
-      SchedulerBinding.instance.scheduleTask<void>(
-        () {
-          if (isClosed) return;
-          emit(state.copyWith(isOfflineIndicatorReady: true));
-        },
-        Priority.idle,
-        debugLabel: 'main-screen-offline-indicator',
-      );
+      scheduleMicrotask(() {
+        if (isClosed) return;
+        emit(state.copyWith(isOfflineIndicatorReady: true));
+      });
     });
   }
 

@@ -54,13 +54,11 @@ class TilawaAlphabetScrollbarTokens {
   factory TilawaAlphabetScrollbarTokens.fromColorScheme(
     ColorScheme colorScheme,
   ) {
-    // No-op: itemExtent (30) is already touch-marginal on the long surah
-    // list. Tightening risks misclicks. Kept for visual review.
     return TilawaAlphabetScrollbarTokens(
-      width: 36,
-      itemExtent: 30,
-      selectedIndicatorExtent: 25.5,
-      letterFontSize: 13,
+      width: kMinInteractiveDimension,
+      itemExtent: 48, // fix: Accessibility — ≥48dp row hit target
+      selectedIndicatorExtent: 40,
+      letterFontSize: 14,
       verticalPadding: const EdgeInsets.symmetric(vertical: 12),
       overlaySize: 64,
       overlayFontSize: 32,
@@ -175,7 +173,7 @@ class TilawaFeedbackStripTokens {
   }) {
     if (density.isCompact) {
       return const TilawaFeedbackStripTokens(
-        padding: EdgeInsets.all(10),
+        padding: EdgeInsets.all(8), // fix: Spacing & alignment — 8dp grid
         borderRadius: 18,
         spinnerSize: 18,
         spinnerStrokeWidth: 2.2,
@@ -389,7 +387,7 @@ class TilawaChipTokens {
   final EdgeInsetsGeometry compactPadding;
   final Color backgroundColor;
 
-  /// Default stroke for [TilawaChip] / [MetadataChip] ([TilawaDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
+  /// Default stroke for [TilawaChip] / [TilawaMetadataChip] ([TilawaDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
   final Color defaultBorderColor;
 
   final Color selectionSelectedBackgroundColor;
@@ -666,13 +664,15 @@ class TilawaSegmentedControlTokens {
     final containerBorderColor = _containerBorderColor(colorScheme);
     if (density.isCompact) {
       return TilawaSegmentedControlTokens(
-        containerPadding: EdgeInsets.all(2),
-        itemPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        containerPadding: const EdgeInsets.all(
+          4,
+        ), // fix: Spacing & alignment — 8dp grid
+        itemPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         containerBackgroundColor: containerBackgroundColor,
         selectedBackgroundColor: selectedBackgroundColor,
         containerBorderColor: containerBorderColor,
         containerRadius: 10,
-        itemRadius: 6,
+        itemRadius: 8,
         containerOpacity: 0.3,
         minItemWidth: 100,
         selectedFontWeight: FontWeight.bold,
@@ -847,10 +847,9 @@ class TilawaSeekBarTokens {
   factory TilawaSeekBarTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    // No-op: touchExtent (30) is already below 48dp; track is the main drag
-    // affordance. Keep no-op until proper UX review.
+    // fix: Accessibility — ≥48dp touch strip for seek interaction
     return const TilawaSeekBarTokens(
-      touchExtent: 30,
+      touchExtent: kMinInteractiveDimension,
       horizontalMargin: 16,
       trackHeight: 8,
       thumbRadius: 12,
@@ -912,6 +911,7 @@ class TilawaSearchFieldTokens {
     required this.backgroundColor,
     required this.borderRadius,
     required this.contentPadding,
+    required this.scrollPadding, // fix: Spacing & alignment — tokenized scroll inset
     required this.iconSize,
     required this.focusedBorderOpacity,
     required this.unfocusedBorderOpacity,
@@ -932,6 +932,10 @@ class TilawaSearchFieldTokens {
   final Color backgroundColor;
   final double borderRadius;
   final EdgeInsetsGeometry contentPadding;
+
+  /// Padding passed to [TextField.scrollPadding] when the field is focused.
+  final EdgeInsets scrollPadding;
+
   final double iconSize;
   final double focusedBorderOpacity;
   final double unfocusedBorderOpacity;
@@ -968,7 +972,8 @@ class TilawaSearchFieldTokens {
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
     const shadowOpacity = 0.04;
-    const hintOpacity = 0.58;
+    // Slightly higher floor for hint vs surface (readability / WCAG-ish headroom).
+    const hintOpacity = 0.62;
     const iconOpacity = 0.72;
     final focusedBorderColor = colorScheme.primary.withValues(
       alpha: focusedBorderOpacity,
@@ -990,7 +995,12 @@ class TilawaSearchFieldTokens {
         height: kMinInteractiveDimension,
         backgroundColor: backgroundColor,
         borderRadius: 12,
-        contentPadding: EdgeInsets.symmetric(vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 8,
+        ), // fix: Spacing & alignment — 8dp grid
+        scrollPadding: const EdgeInsets.all(
+          16,
+        ), // fix: Spacing & alignment — tokenized (2×8dp)
         iconSize: 16,
         focusedBorderOpacity: focusedBorderOpacity,
         unfocusedBorderOpacity: unfocusedBorderOpacity,
@@ -1011,7 +1021,10 @@ class TilawaSearchFieldTokens {
       height: kMinInteractiveDimension,
       backgroundColor: backgroundColor,
       borderRadius: 16,
-      contentPadding: EdgeInsets.symmetric(vertical: 12),
+      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+      scrollPadding: const EdgeInsets.all(
+        16,
+      ), // fix: Spacing & alignment — tokenized (2×8dp)
       iconSize: 18,
       focusedBorderOpacity: focusedBorderOpacity,
       unfocusedBorderOpacity: unfocusedBorderOpacity,
@@ -1043,6 +1056,7 @@ class TilawaSearchFieldTokens {
     Color? backgroundColor,
     double? borderRadius,
     EdgeInsetsGeometry? contentPadding,
+    EdgeInsets? scrollPadding,
     double? iconSize,
     double? focusedBorderOpacity,
     double? unfocusedBorderOpacity,
@@ -1063,6 +1077,7 @@ class TilawaSearchFieldTokens {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       borderRadius: borderRadius ?? this.borderRadius,
       contentPadding: contentPadding ?? this.contentPadding,
+      scrollPadding: scrollPadding ?? this.scrollPadding,
       iconSize: iconSize ?? this.iconSize,
       focusedBorderOpacity: focusedBorderOpacity ?? this.focusedBorderOpacity,
       unfocusedBorderOpacity:
@@ -1096,6 +1111,7 @@ class TilawaSearchFieldTokens {
         b.contentPadding,
         t,
       )!,
+      scrollPadding: EdgeInsets.lerp(a.scrollPadding, b.scrollPadding, t)!,
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
       focusedBorderOpacity: lerpTokenDouble(
         a.focusedBorderOpacity,

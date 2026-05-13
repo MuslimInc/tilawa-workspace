@@ -549,6 +549,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get darkTheme => 'الوضع الداكن';
 
   @override
+  String get compactDesign => 'تصميم مضغوط';
+
+  @override
   String get chooseTheme => 'اختر السمة';
 
   @override

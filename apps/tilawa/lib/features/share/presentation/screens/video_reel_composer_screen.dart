@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_qcf/quran_qcf.dart';
@@ -27,40 +26,6 @@ import 'package:tilawa/features/share/presentation/widgets/video_step_indicator.
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class VideoReelComposerScreen extends StatefulWidget {
-  static Route<void> route({
-    required ShareCubit cubit,
-    required int surahNumber,
-    required int currentPage,
-    required int initialFromAyah,
-    required int initialToAyah,
-    required String reciterName,
-    required String reciterServerUrl,
-    GlobalKey? readerBoundaryKey,
-    ValueNotifier<Uint8List?>? readerPreviewBytesNotifier,
-  }) {
-    // Initialize cubit with audio configuration and verse range
-    cubit.configureAudioClip(
-      surahNumber: surahNumber,
-      fromAyah: initialFromAyah,
-      toAyah: initialToAyah,
-      reciterName: reciterName,
-      serverUrl: reciterServerUrl,
-    );
-
-    return MaterialPageRoute(
-      builder: (context) => BlocProvider.value(
-        value: cubit,
-        child: VideoReelComposerScreen(
-          surahNumber: surahNumber,
-          initialFromAyah: initialFromAyah,
-          initialToAyah: initialToAyah,
-          reciterName: reciterName,
-          reciterServerUrl: reciterServerUrl,
-        ),
-      ),
-    );
-  }
-
   const VideoReelComposerScreen({
     super.key,
     required this.surahNumber,
@@ -100,6 +65,13 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<ShareCubit>().configureAudioClip(
+      surahNumber: widget.surahNumber,
+      fromAyah: widget.initialFromAyah,
+      toAyah: widget.initialToAyah,
+      reciterName: widget.reciterName,
+      serverUrl: widget.reciterServerUrl,
+    );
     final state = context.read<ShareCubit>().state;
     _syncVideoBoundaryKeys(state.videoPageSpecs);
   }
@@ -522,8 +494,10 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     final cubit = context.read<ShareCubit>();
     final l10n = context.l10n;
     try {
-      final exportedPath = await cubit.savePreparedContent();
-      if (!context.mounted || exportedPath == null) return;
+      await cubit.savePreparedContent();
+      if (!context.mounted) return;
+      final exportedPath = cubit.state.lastSaveExportPath;
+      if (exportedPath == null) return;
       _showInfoSnackBar(
         context,
         '${l10n.save} ${l10n.completed}: ${exportedPath.split('/').last}',

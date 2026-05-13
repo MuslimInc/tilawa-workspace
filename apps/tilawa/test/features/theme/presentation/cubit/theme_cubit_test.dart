@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/theme/domain/app_theme_mode.dart';
 import 'package:tilawa/features/theme/domain/entities/app_theme_preset.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/features/theme/presentation/cubit/theme_cubit.dart';
@@ -27,8 +28,11 @@ void main() {
 
   group('fresh/default state', () {
     test('starts with expected defaults', () {
-      expect(cubit.state.mode, ThemeMode.light);
-      expect(cubit.state.primaryColor, PrimaryColorPreset.defaultPreset.value);
+      expect(cubit.state.mode, AppThemeMode.light);
+      expect(
+        cubit.state.primaryColorArgb,
+        PrimaryColorPreset.defaultPreset.valueArgb,
+      );
       expect(cubit.state.primaryColorSource, PrimaryColorSource.preset);
       expect(cubit.state.primaryPresetId, PrimaryColorPreset.defaultPreset.id);
     });
@@ -41,13 +45,13 @@ void main() {
         () async {
           await cubit.setPrimaryPreset(preset);
 
-          expect(cubit.state.primaryColor, preset.value);
+          expect(cubit.state.primaryColorArgb, preset.valueArgb);
           expect(cubit.state.primaryColorSource, PrimaryColorSource.preset);
           expect(cubit.state.primaryPresetId, preset.id);
 
           final json = cubit.toJson(cubit.state);
           expect(json, isNotNull);
-          expect(json!['primaryColor'], preset.value.toARGB32());
+          expect(json!['primaryColor'], preset.valueArgb);
           expect(json['primaryColorSource'], 'preset');
           expect(json['primaryPresetId'], preset.id);
         },
@@ -57,19 +61,19 @@ void main() {
 
   group('custom color selection', () {
     test(
-      'setPrimaryColor marks state as custom and preserves ARGB in json',
+      'setPrimaryColorArgb marks state as custom and preserves ARGB in json',
       () async {
-        const customColor = Color(0xFF12A4F6);
+        const customArgb = 0xFF12A4F6;
 
-        await cubit.setPrimaryColor(customColor);
+        await cubit.setPrimaryColorArgb(customArgb);
 
-        expect(cubit.state.primaryColor, customColor);
+        expect(cubit.state.primaryColorArgb, customArgb);
         expect(cubit.state.primaryColorSource, PrimaryColorSource.custom);
         expect(cubit.state.primaryPresetId, isNull);
 
         final json = cubit.toJson(cubit.state);
         expect(json, isNotNull);
-        expect(json!['primaryColor'], customColor.toARGB32());
+        expect(json!['primaryColor'], customArgb);
         expect(json['primaryColorSource'], 'custom');
         expect(json['primaryPresetId'], isNull);
       },
@@ -92,7 +96,7 @@ void main() {
         expect(restored, isNotNull);
         expect(restored!.primaryColorSource, PrimaryColorSource.preset);
         expect(restored.primaryPresetId, PrimaryColorPreset.brown.id);
-        expect(restored.primaryColor, PrimaryColorPreset.brown.value);
+        expect(restored.primaryColorArgb, PrimaryColorPreset.brown.valueArgb);
       },
     );
 
@@ -111,7 +115,10 @@ void main() {
         expect(restored, isNotNull);
         expect(restored!.primaryColorSource, PrimaryColorSource.preset);
         expect(restored.primaryPresetId, PrimaryColorPreset.defaultPreset.id);
-        expect(restored.primaryColor, PrimaryColorPreset.defaultPreset.value);
+        expect(
+          restored.primaryColorArgb,
+          PrimaryColorPreset.defaultPreset.valueArgb,
+        );
       },
     );
 
@@ -128,7 +135,7 @@ void main() {
       });
 
       expect(restored, isNotNull);
-      expect(restored!.primaryColor, customColor);
+      expect(restored!.primaryColorArgb, customColor.toARGB32());
       expect(restored.primaryColorSource, PrimaryColorSource.custom);
       expect(restored.primaryPresetId, isNull);
     });
@@ -141,13 +148,13 @@ void main() {
         () {
           final restored = cubit.fromJson({
             'mode': 'light',
-            'primaryColor': preset.value.toARGB32(),
+            'primaryColor': preset.valueArgb,
             'useSystemTheme': false,
             'preset': AppThemePreset.defaultMode.name,
           });
 
           expect(restored, isNotNull);
-          expect(restored!.primaryColor, preset.value);
+          expect(restored!.primaryColorArgb, preset.valueArgb);
           expect(restored.primaryColorSource, PrimaryColorSource.preset);
           expect(restored.primaryPresetId, preset.id);
         },
@@ -165,7 +172,7 @@ void main() {
       });
 
       expect(restored, isNotNull);
-      expect(restored!.primaryColor, customColor);
+      expect(restored!.primaryColorArgb, customColor.toARGB32());
       expect(restored.primaryColorSource, PrimaryColorSource.custom);
       expect(restored.primaryPresetId, isNull);
     });
@@ -179,7 +186,10 @@ void main() {
         });
 
         expect(restored, isNotNull);
-        expect(restored!.primaryColor, PrimaryColorPreset.defaultPreset.value);
+        expect(
+          restored!.primaryColorArgb,
+          PrimaryColorPreset.defaultPreset.valueArgb,
+        );
         expect(restored.primaryColorSource, PrimaryColorSource.preset);
         expect(restored.primaryPresetId, PrimaryColorPreset.defaultPreset.id);
       },
@@ -195,8 +205,11 @@ void main() {
       });
 
       expect(restored, isNotNull);
-      expect(restored!.mode, ThemeMode.light);
-      expect(restored.primaryColor, PrimaryColorPreset.defaultPreset.value);
+      expect(restored!.mode, AppThemeMode.light);
+      expect(
+        restored.primaryColorArgb,
+        PrimaryColorPreset.defaultPreset.valueArgb,
+      );
       expect(restored.primaryColorSource, PrimaryColorSource.preset);
       expect(restored.primaryPresetId, PrimaryColorPreset.defaultPreset.id);
     });
@@ -208,7 +221,10 @@ void main() {
       });
 
       expect(restored, isNotNull);
-      expect(restored!.primaryColor, PrimaryColorPreset.defaultPreset.value);
+      expect(
+        restored!.primaryColorArgb,
+        PrimaryColorPreset.defaultPreset.valueArgb,
+      );
       expect(restored.primaryColorSource, PrimaryColorSource.preset);
       expect(restored.primaryPresetId, PrimaryColorPreset.defaultPreset.id);
     });
@@ -216,13 +232,13 @@ void main() {
 
   group('mode and deferred theme fields', () {
     test('mode serialization/restoration works', () {
-      final darkState = cubit.state.copyWith(mode: ThemeMode.dark);
+      final darkState = cubit.state.copyWith(mode: AppThemeMode.dark);
       final json = cubit.toJson(darkState);
       final restored = cubit.fromJson(json!);
 
       expect(json['mode'], 'dark');
       expect(restored, isNotNull);
-      expect(restored!.mode, ThemeMode.dark);
+      expect(restored!.mode, AppThemeMode.dark);
     });
 
     test(

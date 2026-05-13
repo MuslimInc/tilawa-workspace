@@ -101,17 +101,17 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
   }
 
-  Future<bool> clearAllFavorites() async {
-    if (isClosed) return false;
+  Future<void> clearAllFavorites() async {
+    if (isClosed) return;
     if (_pendingReciterIds.isNotEmpty) {
-      return false;
+      return;
     }
 
     final FavoritesLoaded? currentState = state is FavoritesLoaded
         ? state as FavoritesLoaded
         : null;
     if (currentState == null || currentState.favoriteIds.isEmpty) {
-      return true;
+      return;
     }
 
     final List<ReciterEntity> previousFavorites = List<ReciterEntity>.from(
@@ -127,18 +127,20 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     );
 
     final Either<Failure, void> result = await _clearFavoriteReciters();
-    if (isClosed) return false;
+    if (isClosed) return;
 
-    return result.fold((_) {
-      _currentFavoriteIds = previousFavoriteIds;
-      emit(
-        FavoritesLoaded(
-          favorites: previousFavorites,
-          favoriteIds: previousFavoriteIds,
-        ),
-      );
-      return false;
-    }, (_) => true);
+    result.fold(
+      (_) {
+        _currentFavoriteIds = previousFavoriteIds;
+        emit(
+          FavoritesLoaded(
+            favorites: previousFavorites,
+            favoriteIds: previousFavoriteIds,
+          ),
+        );
+      },
+      (_) {},
+    );
   }
 
   bool _isFavorite(int id) {

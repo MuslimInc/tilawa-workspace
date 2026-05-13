@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -87,15 +89,26 @@ class _QiblaScreenState extends State<QiblaScreen> {
               title: Text(context.l10n.qiblaDirection),
             ),
             body: SafeArea(
-              child: CustomScrollView(
-                slivers: [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: isLandscape
-                        ? const _LandscapeContent()
-                        : const _PortraitContent(),
-                  ),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
+                    children: [
+                      const Positioned.fill(child: _QiblaAmbientBackground()),
+                      CustomScrollView(
+                        slivers: [
+                          SliverToBoxAdapter(
+                            child: SizedBox(
+                              height: constraints.maxHeight,
+                              child: isLandscape
+                                  ? const _LandscapeContent()
+                                  : const _PortraitContent(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -124,8 +137,9 @@ class _PortraitContent extends StatelessWidget {
               case QiblaStatus.loading:
                 return TilawaLoadingIndicator(color: colorScheme.onSurface);
               case QiblaStatus.serviceDisabled:
-                return TilawaErrorState(
+                return _QiblaUnavailableState(
                   icon: Icons.location_off_rounded,
+                  tone: TilawaStateVisualTone.neutral,
                   title: context.l10n.locationServiceDisabled,
                   subtitle: context.l10n.enableLocationServiceMessage,
                   retryLabel: context.l10n.tryAgain,
@@ -134,8 +148,9 @@ class _PortraitContent extends StatelessWidget {
                   ),
                 );
               case QiblaStatus.permissionDenied:
-                return TilawaErrorState(
-                  icon: Icons.security_rounded,
+                return _QiblaUnavailableState(
+                  icon: Icons.explore_off_rounded,
+                  tone: TilawaStateVisualTone.tertiary,
                   title: context.l10n.permissionDenied,
                   subtitle: context.l10n.locationPermissionRequiredMessage,
                   retryLabel: context.l10n.tryAgain,
@@ -144,8 +159,9 @@ class _PortraitContent extends StatelessWidget {
                   ),
                 );
               case QiblaStatus.error:
-                return TilawaErrorState(
+                return _QiblaUnavailableState(
                   icon: Icons.error_outline_rounded,
+                  tone: TilawaStateVisualTone.error,
                   title: context.l10n.error,
                   subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
                   retryLabel: context.l10n.tryAgain,
@@ -166,11 +182,11 @@ class _PortraitContent extends StatelessWidget {
                         color: colorScheme.onSurface,
                       );
                     }
-                    return QiblaCompassWidget(qiblaDirection: direction);
+                    return _QiblaCompassPanel(direction: direction);
                   },
                 );
               case QiblaStatus.initial:
-                return const SizedBox.shrink();
+                return TilawaLoadingIndicator(color: colorScheme.onSurface);
             }
           },
         ),
@@ -214,8 +230,9 @@ class _CompassArea extends StatelessWidget {
           case QiblaStatus.loading:
             return TilawaLoadingIndicator(color: colorScheme.onSurface);
           case QiblaStatus.serviceDisabled:
-            return TilawaErrorState(
+            return _QiblaUnavailableState(
               icon: Icons.location_off_rounded,
+              tone: TilawaStateVisualTone.neutral,
               title: context.l10n.locationServiceDisabled,
               subtitle: context.l10n.enableLocationServiceMessage,
               retryLabel: context.l10n.tryAgain,
@@ -223,8 +240,9 @@ class _CompassArea extends StatelessWidget {
                   context.read<QiblaBloc>().add(const CheckLocationService()),
             );
           case QiblaStatus.permissionDenied:
-            return TilawaErrorState(
-              icon: Icons.security_rounded,
+            return _QiblaUnavailableState(
+              icon: Icons.explore_off_rounded,
+              tone: TilawaStateVisualTone.tertiary,
               title: context.l10n.permissionDenied,
               subtitle: context.l10n.locationPermissionRequiredMessage,
               retryLabel: context.l10n.tryAgain,
@@ -233,8 +251,9 @@ class _CompassArea extends StatelessWidget {
               ),
             );
           case QiblaStatus.error:
-            return TilawaErrorState(
+            return _QiblaUnavailableState(
               icon: Icons.error_outline_rounded,
+              tone: TilawaStateVisualTone.error,
               title: context.l10n.error,
               subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
               retryLabel: context.l10n.tryAgain,
@@ -248,13 +267,174 @@ class _CompassArea extends StatelessWidget {
                 if (direction == null) {
                   return TilawaLoadingIndicator(color: colorScheme.onSurface);
                 }
-                return QiblaCompassWidget(qiblaDirection: direction);
+                return _QiblaCompassPanel(direction: direction);
               },
             );
           case QiblaStatus.initial:
-            return const SizedBox.shrink();
+            return TilawaLoadingIndicator(color: colorScheme.onSurface);
         }
       },
+    );
+  }
+}
+
+class _QiblaUnavailableState extends StatelessWidget {
+  const _QiblaUnavailableState({
+    required this.icon,
+    required this.title,
+    required this.retryLabel,
+    required this.onRetry,
+    this.tone = TilawaStateVisualTone.primary,
+    this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final String retryLabel;
+  final VoidCallback onRetry;
+  final TilawaStateVisualTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaIllustratedState(
+      visual: TilawaStateVisual(icon: icon, tone: tone),
+      title: title,
+      subtitle: subtitle,
+      semanticLabel: title,
+      primaryAction: TilawaButton(
+        text: retryLabel,
+        variant: TilawaButtonVariant.secondary,
+        leadingIcon: const Icon(Icons.refresh_rounded),
+        onPressed: onRetry,
+      ),
+    );
+  }
+}
+
+class _QiblaAmbientBackground extends StatelessWidget {
+  const _QiblaAmbientBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ExcludeSemantics(
+      child: CustomPaint(
+        painter: _QiblaAmbientPainter(
+          colorScheme: theme.colorScheme,
+          tokens: theme.tokens,
+        ),
+      ),
+    );
+  }
+}
+
+class _QiblaAmbientPainter extends CustomPainter {
+  const _QiblaAmbientPainter({
+    required this.colorScheme,
+    required this.tokens,
+  });
+
+  final ColorScheme colorScheme;
+  final TilawaDesignTokens tokens;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height * 0.34);
+    final shortest = size.shortestSide;
+
+    final primaryStroke = Paint()
+      ..color = colorScheme.primary.withValues(
+        alpha: tokens.opacitySubtle * 0.5,
+      )
+      ..strokeWidth = tokens.borderWidthThin
+      ..style = PaintingStyle.stroke;
+    final tertiaryStroke = Paint()
+      ..color = colorScheme.tertiary.withValues(
+        alpha: tokens.opacitySubtle * 0.4,
+      )
+      ..strokeWidth = tokens.borderWidthThin
+      ..style = PaintingStyle.stroke;
+    final guideStroke = Paint()
+      ..color = colorScheme.outlineVariant.withValues(
+        alpha: tokens.opacitySubtle * 0.5,
+      )
+      ..strokeWidth = tokens.borderWidthThin
+      ..style = PaintingStyle.stroke;
+
+    for (final factor in <double>[0.58, 0.88]) {
+      final radius = shortest * factor;
+      final rect = Rect.fromCircle(center: center, radius: radius);
+      canvas.drawArc(
+        rect,
+        math.pi * 1.08,
+        math.pi * 0.84,
+        false,
+        primaryStroke,
+      );
+    }
+
+    final lowerCenter = Offset(size.width / 2, size.height * 0.72);
+    for (final factor in <double>[0.56]) {
+      final radius = shortest * factor;
+      final rect = Rect.fromCircle(center: lowerCenter, radius: radius);
+      canvas.drawArc(
+        rect,
+        math.pi * 1.18,
+        math.pi * 0.64,
+        false,
+        tertiaryStroke,
+      );
+    }
+
+    canvas.drawLine(
+      Offset(center.dx, tokens.spaceExtraLarge),
+      Offset(center.dx, size.height - tokens.spaceExtraLarge),
+      guideStroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_QiblaAmbientPainter oldDelegate) {
+    return oldDelegate.colorScheme != colorScheme ||
+        oldDelegate.tokens != tokens;
+  }
+}
+
+class _QiblaCompassPanel extends StatelessWidget {
+  const _QiblaCompassPanel({required this.direction});
+
+  final QiblaDirectionEntity direction;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: tokens.contentMaxWidthForm * kQiblaPanelMaxWidthFactor,
+          ),
+          child: TilawaGlassPanel(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceMedium,
+              vertical: tokens.spaceLarge,
+            ),
+            backgroundColor: colorScheme.surface.withValues(
+              alpha: tokens.opacityGlass,
+            ),
+            borderColor: colorScheme.primary.withValues(
+              alpha: tokens.opacitySubtle,
+            ),
+            child: QiblaCompassWidget(qiblaDirection: direction),
+          ),
+        ),
+      ),
     );
   }
 }

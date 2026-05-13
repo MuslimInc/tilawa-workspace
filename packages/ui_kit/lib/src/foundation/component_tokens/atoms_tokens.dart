@@ -137,7 +137,7 @@ class TilawaCardTokens {
   }) {
     if (density.isCompact) {
       return const TilawaCardTokens(
-        borderRadius: 14.0,
+        borderRadius: 16.0, // fix: Spacing & alignment — 8dp grid multiple
         borderWidth: 0.5,
         padding: EdgeInsets.all(8.0),
       );
@@ -355,9 +355,6 @@ class TilawaIconToggleTokens {
     ColorScheme colorScheme, {
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    // No-op: total tap area today is 36dp (iconSize 20 + padding 8*2),
-    // already below the 48dp guideline. Do not shrink further; flagged for
-    // a separate accessibility refactor outside this work.
     return TilawaIconToggleTokens(
       iconSize: 18.0,
       activeBackgroundColor: _activeBackgroundColor(colorScheme),

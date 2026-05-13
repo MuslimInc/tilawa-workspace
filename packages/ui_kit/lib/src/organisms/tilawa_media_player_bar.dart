@@ -108,7 +108,9 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                     minHeight: designTokens.progressHeight,
                   ),
               Padding(
-                padding: componentTokens.contentPadding,
+                padding: componentTokens.contentPadding.resolve(
+                  Directionality.of(context),
+                ),
                 child: Row(
                   children: [
                     // Album Art
@@ -175,6 +177,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                             height: componentTokens.controlButtonSize,
                             child: IconButton(
                               padding: EdgeInsets.zero,
+                              tooltip: 'Previous track',
                               icon: Icon(
                                 FluentIcons.previous_20_filled,
                                 size: designTokens.iconSizeMedium,
@@ -205,6 +208,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                             ),
                             child: IconButton(
                               padding: EdgeInsets.zero,
+                              tooltip: isPlaying ? 'Pause' : 'Play',
                               icon: Icon(
                                 isPlaying
                                     ? FluentIcons.pause_16_filled
@@ -222,6 +226,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                             height: componentTokens.controlButtonSize,
                             child: IconButton(
                               padding: EdgeInsets.zero,
+                              tooltip: 'Next track',
                               icon: Icon(
                                 FluentIcons.next_20_filled,
                                 size: designTokens.iconSizeMedium,
@@ -240,6 +245,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                               height: componentTokens.controlButtonSize,
                               child: IconButton(
                                 padding: EdgeInsets.zero,
+                                tooltip: 'Sleep timer',
                                 icon: Icon(
                                   isSleepTimerActive
                                       ? FluentIcons.timer_20_filled

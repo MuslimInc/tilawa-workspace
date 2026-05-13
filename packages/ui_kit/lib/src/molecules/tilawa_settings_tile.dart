@@ -2,6 +2,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 class TilawaSettingsTile extends StatelessWidget {
   const TilawaSettingsTile({
@@ -10,7 +11,6 @@ class TilawaSettingsTile extends StatelessWidget {
     required this.title,
     required this.onTap,
     this.iconColor,
-    this.subtitle,
     this.showDivider = true,
     this.borderRadius = BorderRadius.zero,
     this.trailing,
@@ -19,7 +19,6 @@ class TilawaSettingsTile extends StatelessWidget {
   final IconData icon;
   final Color? iconColor;
   final String title;
-  final String? subtitle;
   final VoidCallback onTap;
   final bool showDivider;
   final BorderRadiusGeometry borderRadius;
@@ -31,63 +30,95 @@ class TilawaSettingsTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
     final effectiveIconColor = iconColor ?? colorScheme.primary;
-    final trailingIcon = FluentIcons.chevron_right_24_filled;
+    final BorderRadius? resolvedRadius = borderRadius is BorderRadius
+        ? borderRadius as BorderRadius
+        : null;
+    final TextDirection direction = Directionality.of(context);
+    final EdgeInsets resolvedContentPadding = tokens.tileContentPadding.resolve(
+      direction,
+    );
+    final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
+      direction,
+    );
+    final double minLeadingWidth =
+        resolvedIconPadding.horizontal + tokens.tileIconSize;
+    final TextStyle titleStyle =
+        theme.textTheme.bodyLarge?.copyWith(
+          fontSize: tokens.tileTitleFontSize,
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+          height: 1.25,
+        ) ??
+        TextStyle(
+          fontSize: tokens.tileTitleFontSize,
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        );
+    final TextStyle subtitleStyle =
+        theme.textTheme.bodySmall?.copyWith(
+          fontSize: tokens.tileSubtitleFontSize,
+          color: colorScheme.onSurfaceVariant.withValues(
+            alpha: tokens.tileSubtitleOpacity.clamp(0.55, 0.85),
+          ),
+          height: 1.35,
+        ) ??
+        TextStyle(
+          fontSize: tokens.tileSubtitleFontSize,
+          color: colorScheme.onSurfaceVariant.withValues(
+            alpha: tokens.tileSubtitleOpacity.clamp(0.55, 0.85),
+          ),
+        );
 
     return Column(
       children: [
         Material(
           color: Colors.transparent,
           borderRadius: borderRadius,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: borderRadius is BorderRadius
-                ? borderRadius as BorderRadius
-                : null,
-            child: Padding(
-              padding: tokens.tileContentPadding,
-              child: Row(
-                spacing: tokens.tileItemGap,
-                children: [
-                  _SettingsLeadingIcon(
-                    icon: icon,
-                    color: effectiveIconColor,
-                    tokens: tokens,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: .start,
-                      spacing: tokens.tileSubtitleSpacing,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: tokens.tileTitleFontSize,
-                            fontWeight: .w600,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        if (subtitle != null)
-                          Text(
-                            subtitle!,
-                            style: TextStyle(
-                              fontSize: tokens.tileSubtitleFontSize,
-                              color: colorScheme.onSurfaceVariant.withValues(
-                                alpha: tokens.tileSubtitleOpacity,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  trailing ??
-                      Icon(
-                        trailingIcon,
-                        size: tokens.tileTrailingSize,
-                        color: colorScheme.onSurfaceVariant.withValues(
-                          alpha: tokens.tileTrailingOpacity,
+          clipBehavior: Clip.antiAlias,
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              contentPadding: resolvedContentPadding,
+              horizontalTitleGap: tokens.tileItemGap,
+              minLeadingWidth: minLeadingWidth,
+              // fix: Spacing & alignment — 8dp grid via design tokens
+              minVerticalPadding: theme.tokens.spaceSmall,
+              titleTextStyle: titleStyle,
+              subtitleTextStyle: subtitleStyle,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: kMinInteractiveDimension,
+              ),
+              child: ListTile(
+                shape: resolvedRadius != null
+                    ? RoundedRectangleBorder(borderRadius: resolvedRadius)
+                    : null,
+                leading: _SettingsLeadingIcon(
+                  icon: icon,
+                  color: effectiveIconColor,
+                  tokens: tokens,
+                ),
+                title: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.start,
+                ),
+                trailing:
+                    trailing ??
+                    // Right chevron; ListTile still places trailing on the
+                    // correct edge in RTL.
+                    Icon(
+                      FluentIcons.chevron_right_24_filled,
+                      size: tokens.tileTrailingSize,
+                      color: colorScheme.onSurfaceVariant.withValues(
+                        alpha: (tokens.tileTrailingOpacity * 1.35).clamp(
+                          0.45,
+                          0.72,
                         ),
                       ),
-                ],
+                    ),
+                onTap: onTap,
               ),
             ),
           ),
@@ -114,7 +145,6 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.iconColor,
-    this.subtitle,
     this.showDivider = true,
     this.borderRadius = BorderRadius.zero,
   });
@@ -122,7 +152,6 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
   final IconData icon;
   final Color? iconColor;
   final String title;
-  final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
   final bool showDivider;
@@ -134,60 +163,87 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
     final effectiveIconColor = iconColor ?? colorScheme.primary;
+    final BorderRadius? resolvedRadius = borderRadius is BorderRadius
+        ? borderRadius as BorderRadius
+        : null;
+    final TextDirection direction = Directionality.of(context);
+    final EdgeInsets resolvedContentPadding = tokens.switchTileContentPadding
+        .resolve(direction);
+    final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
+      direction,
+    );
+    final double minLeadingWidth =
+        resolvedIconPadding.horizontal + tokens.tileIconSize;
+    final TextStyle titleStyle =
+        theme.textTheme.bodyLarge?.copyWith(
+          fontSize: tokens.tileTitleFontSize,
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+          height: 1.25,
+        ) ??
+        TextStyle(
+          fontSize: tokens.tileTitleFontSize,
+          fontWeight: FontWeight.w600,
+          color: colorScheme.onSurface,
+        );
+    final TextStyle subtitleStyle =
+        theme.textTheme.bodySmall?.copyWith(
+          fontSize: tokens.tileSubtitleFontSize,
+          color: colorScheme.onSurfaceVariant.withValues(
+            alpha: tokens.tileSubtitleOpacity.clamp(0.55, 0.85),
+          ),
+          height: 1.35,
+        ) ??
+        TextStyle(
+          fontSize: tokens.tileSubtitleFontSize,
+          color: colorScheme.onSurfaceVariant.withValues(
+            alpha: tokens.tileSubtitleOpacity.clamp(0.55, 0.85),
+          ),
+        );
 
     return Column(
       children: [
         Material(
           color: Colors.transparent,
           borderRadius: borderRadius,
-          child: InkWell(
-            onTap: () => onChanged(!value),
-            borderRadius: borderRadius is BorderRadius
-                ? borderRadius as BorderRadius
-                : null,
-            child: Padding(
-              padding: tokens.switchTileContentPadding,
-              child: Row(
-                spacing: tokens.tileItemGap,
-                children: [
-                  _SettingsLeadingIcon(
-                    icon: icon,
-                    color: effectiveIconColor,
-                    tokens: tokens,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: .start,
-                      spacing: tokens.tileSubtitleSpacing,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: tokens.tileTitleFontSize,
-                            fontWeight: .w600,
-                            color: colorScheme.onSurface,
-                          ),
-                        ),
-                        if (subtitle != null)
-                          Text(
-                            subtitle!,
-                            style: TextStyle(
-                              fontSize: tokens.tileSubtitleFontSize,
-                              color: colorScheme.onSurfaceVariant.withValues(
-                                alpha: tokens.tileSubtitleOpacity,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  Switch.adaptive(
-                    value: value,
-                    onChanged: onChanged,
-                    activeTrackColor: tokens.switchActiveTrackColor,
-                    activeThumbColor: tokens.switchActiveThumbColor,
-                  ),
-                ],
+          clipBehavior: Clip.antiAlias,
+          child: ListTileTheme(
+            data: ListTileThemeData(
+              contentPadding: resolvedContentPadding,
+              horizontalTitleGap: tokens.tileItemGap,
+              minLeadingWidth: minLeadingWidth,
+              // fix: Spacing & alignment — 8dp grid via design tokens
+              minVerticalPadding: theme.tokens.spaceSmall,
+              titleTextStyle: titleStyle,
+              subtitleTextStyle: subtitleStyle,
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: kMinInteractiveDimension,
+              ),
+              child: ListTile(
+                shape: resolvedRadius != null
+                    ? RoundedRectangleBorder(borderRadius: resolvedRadius)
+                    : null,
+                leading: _SettingsLeadingIcon(
+                  icon: icon,
+                  color: effectiveIconColor,
+                  tokens: tokens,
+                ),
+                title: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.start,
+                ),
+                trailing: Switch.adaptive(
+                  value: value,
+                  onChanged: onChanged,
+                  materialTapTargetSize: MaterialTapTargetSize.padded,
+                  activeTrackColor: tokens.switchActiveTrackColor,
+                  activeThumbColor: tokens.switchActiveThumbColor,
+                ),
+                onTap: () => onChanged(!value),
               ),
             ),
           ),
@@ -219,7 +275,9 @@ class _SettingsLeadingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
       padding: tokens.tileIconPadding,
       decoration: BoxDecoration(
         color: color.withValues(alpha: tokens.tileIconContainerOpacity),

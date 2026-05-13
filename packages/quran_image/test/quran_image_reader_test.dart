@@ -14,6 +14,8 @@ import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
 import 'package:quran_image/presentation/widgets/organisms/navigation_slider_overlay.dart';
 import 'package:quran_image/quran_image_reader.dart';
 
+import 'seeded_navigation_bloc.dart';
+
 Future<void> _pumpReaderHarness(
   WidgetTester tester,
   NavigationBloc navigationBloc,
@@ -38,9 +40,9 @@ Future<void> _pumpReaderHarness(
 
 Future<void> _showNavigationSlider(
   WidgetTester tester,
-  _SeededNavigationBloc navigationBloc,
+  NavigationBloc navigationBloc,
 ) async {
-  navigationBloc.setVisibility(isVisible: true);
+  emitTestNavigationVisibility(navigationBloc, isVisible: true);
   await tester.pump();
   // [AnimatedBuilder] sets [IgnorePointer] while the slide animation is at 0.
   await tester.pumpAndSettle(const Duration(seconds: 3));
@@ -63,7 +65,7 @@ void main() {
   late Directory tempDirectory;
   late _TestQuranImageCacheRepository imageRepository;
   late _TestQuranImagePrewarmer imagePrewarmer;
-  late _SeededNavigationBloc navigationBloc;
+  late SeededNavigationBloc navigationBloc;
 
   setUp(() async {
     await sl.reset();
@@ -83,7 +85,7 @@ void main() {
 
     imageRepository = _TestQuranImageCacheRepository(linePaths);
     imagePrewarmer = _TestQuranImagePrewarmer();
-    navigationBloc = _SeededNavigationBloc(
+    navigationBloc = SeededNavigationBloc(
       initialState: NavigationLoaded(
         pageState: PageState.initial(),
         visibility: NavigationVisibility.initial(),
@@ -139,7 +141,7 @@ void main() {
       expect(imagePrewarmer.startInitialRequests, hasLength(1));
       expect(imagePrewarmer.startInitialRequests.single.pageNumber, 1);
 
-      navigationBloc.setVisibility(isVisible: true);
+      emitTestNavigationVisibility(navigationBloc, isVisible: true);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 250));
       expect(find.byType(NavigationSliderOverlay), findsOneWidget);
@@ -396,36 +398,5 @@ class _InMemoryLastVisitedPageRepository implements LastVisitedPageRepository {
   @override
   Future<void> saveLastVisitedPage(int pageNumber) async {
     _page = pageNumber;
-  }
-}
-
-class _SeededNavigationBloc extends NavigationBloc {
-  _SeededNavigationBloc({
-    required NavigationLoaded initialState,
-    required PageRepository pageRepository,
-    required NavigationVisibilityRepository visibilityRepository,
-    required SaveLastVisitedPageUseCase saveLastVisitedPageUseCase,
-    required GetLastVisitedPageUseCase getLastVisitedPageUseCase,
-  }) : super(
-         pageRepository: pageRepository,
-         visibilityRepository: visibilityRepository,
-         saveLastVisitedPageUseCase: saveLastVisitedPageUseCase,
-         getLastVisitedPageUseCase: getLastVisitedPageUseCase,
-       ) {
-    emit(initialState);
-  }
-
-  void setVisibility({required bool isVisible}) {
-    final current = state;
-    if (current is! NavigationLoaded) return;
-    emit(
-      current.copyWith(
-        visibility: current.visibility.copyWith(
-          isVisible: isVisible,
-          lastShownAt: isVisible ? DateTime.now() : null,
-          clearLastShownAt: !isVisible,
-        ),
-      ),
-    );
   }
 }

@@ -30,7 +30,9 @@ abstract class ShareState with _$ShareState {
     @Default('') String progressMessage,
     // Generated content
     ShareContent? content,
-    // Error
+
+    /// Path from the latest persistent export; cleared when a new save starts.
+    String? lastSaveExportPath,
     String? errorMessage,
     List<PageAyahInfo>? ayahs,
     int? capturingIndex,

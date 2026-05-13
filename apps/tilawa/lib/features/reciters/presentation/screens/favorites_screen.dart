@@ -46,9 +46,11 @@ class FavoritesScreen extends StatelessWidget {
                   if (state is FavoritesLoading) {
                     return const TilawaLoadingIndicator();
                   } else if (state is FavoritesError) {
-                    return TilawaErrorState(
+                    return TilawaIllustratedState(
                       icon: Icons.error_outline_rounded,
+                      iconColor: colorScheme.error,
                       title: state.failure.localizedMessage(context),
+                      semanticLabel: state.failure.localizedMessage(context),
                     );
                   } else if (state is FavoritesLoaded) {
                     if (state.favorites.isEmpty) {
@@ -104,9 +106,10 @@ class FavoritesScreen extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
-    return TilawaEmptyState(
+    return TilawaIllustratedState(
       icon: Icons.favorite_border_rounded,
       title: l10n.noFavorites,
+      semanticLabel: l10n.noFavorites,
     );
   }
 }

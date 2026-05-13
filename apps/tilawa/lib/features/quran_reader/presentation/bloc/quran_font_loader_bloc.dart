@@ -1,6 +1,6 @@
 import 'dart:async';
+
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -13,6 +13,11 @@ import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 import '../../domain/usecases/update_current_page_use_case.dart';
 
 part 'quran_font_loader_bloc.freezed.dart';
+
+/// True in debug and profile (same as former `!kReleaseMode`).
+const bool _kFontLoaderDiagnosticLogs = !bool.fromEnvironment(
+  'dart.vm.product',
+);
 
 @freezed
 abstract class QuranFontLoaderEvent with _$QuranFontLoaderEvent {
@@ -58,51 +63,6 @@ class QuranFontLoaderBloc
   final DownloadQuranFontsUseCase _downloadQuranFontsUseCase;
   final LoadQuranFontsToEngineUseCase _loadQuranFontsToEngineUseCase;
   final UpdateCurrentPageUseCase _updateCurrentPageUseCase;
-
-  Future<void> ensurePageWindowLoaded(int pageNumber) {
-    return _loadQuranFontsToEngineUseCase.ensurePageWindowLoaded(
-      pageNumber: pageNumber,
-    );
-  }
-
-  Future<void> ensureSingleFontLoaded(int pageNumber) {
-    return _loadQuranFontsToEngineUseCase.ensureSingleFontLoaded(pageNumber);
-  }
-
-  Future<void> ensureFontReady(
-    int pageNumber, {
-    Duration timeout = const Duration(seconds: 1),
-  }) async {
-    if (isFontLoaded(pageNumber)) return;
-
-    final Future<void> loadFuture = _loadQuranFontsToEngineUseCase
-        .ensureSingleFontLoaded(pageNumber);
-    var loadCompleted = false;
-    unawaited(
-      loadFuture.whenComplete(() {
-        loadCompleted = true;
-      }),
-    );
-
-    final Stopwatch stopwatch = Stopwatch()..start();
-    while (!isFontLoaded(pageNumber) && !loadCompleted) {
-      if (stopwatch.elapsed >= timeout) {
-        throw TimeoutException(
-          'Font for page $pageNumber did not become ready within $timeout',
-        );
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 16));
-    }
-  }
-
-  bool isFontLoaded(int pageNumber) =>
-      _loadQuranFontsToEngineUseCase.isFontLoaded(pageNumber);
-
-  void pauseBackgroundWarmUp() =>
-      _loadQuranFontsToEngineUseCase.pauseBackgroundWarmUp();
-
-  void resumeBackgroundWarmUp() =>
-      _loadQuranFontsToEngineUseCase.resumeBackgroundWarmUp();
 
   Future<void> _onInitialize(
     _Initialize event,
@@ -210,9 +170,10 @@ class QuranFontLoaderBloc
             '[FONT] await ensureSingleFontLoaded starting... | page=${event.initialPageNumber}',
       );
 
-      final Future<void> ensureInitialFontFuture = ensureFontReady(
-        event.initialPageNumber,
-      );
+      final Future<void> ensureInitialFontFuture =
+          _loadQuranFontsToEngineUseCase.ensureFontReady(
+            event.initialPageNumber,
+          );
 
       _debugLog(() => '[FONT] await ensureQuranDataLoaded starting...');
       final Future<void> ensureDataFuture = _loadQuranFontsToEngineUseCase
@@ -261,7 +222,8 @@ class QuranFontLoaderBloc
 }
 
 void _debugLog(String Function() messageBuilder) {
-  if (!kReleaseMode) {
-    logger.i(messageBuilder());
+  if (!_kFontLoaderDiagnosticLogs) {
+    return;
   }
+  logger.i(messageBuilder());
 }

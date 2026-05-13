@@ -150,6 +150,7 @@ class TilawaButton extends StatelessWidget {
       leadingIcon: leadingIcon,
       trailingIcon: trailingIcon,
       isLoading: isLoading,
+      isFullWidth: isFullWidth,
       foregroundColor: _isDisabled
           ? colorScheme.onSurface.withValues(alpha: 0.38)
           : foregroundColor,
@@ -210,12 +211,14 @@ class _ButtonContent extends StatelessWidget {
     this.leadingIcon,
     this.trailingIcon,
     this.isLoading = false,
+    this.isFullWidth = false,
   });
 
   final String text;
   final Widget? leadingIcon;
   final Widget? trailingIcon;
   final bool isLoading;
+  final bool isFullWidth;
   final Color foregroundColor;
   final double fontSize;
   final double iconSize;
@@ -230,8 +233,24 @@ class _ButtonContent extends StatelessWidget {
       );
     }
 
+    // Non–full-width: [Flexible] gives the label a finite max width on the row
+    // main axis when the parent is bounded, so ellipsis works without
+    // [LayoutBuilder] (intrinsic-safe for e.g. Alchemist golden [Table] probes).
+    // Full-width: [Expanded] unchanged.
+    final label = Text(
+      text,
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+      softWrap: false,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w600,
+        color: foregroundColor,
+      ),
+    );
+
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         if (leadingIcon != null) ...[
@@ -241,14 +260,10 @@ class _ButtonContent extends StatelessWidget {
           ),
           const SizedBox(width: 8),
         ],
-        Text(
-          text,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w600,
-            color: foregroundColor,
-          ),
-        ),
+        if (isFullWidth)
+          Expanded(child: label)
+        else
+          Flexible(fit: FlexFit.loose, child: label),
         if (trailingIcon != null) ...[
           const SizedBox(width: 8),
           IconTheme(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 /// A generic, feature-agnostic error-state widget with retry capability.
 ///
@@ -17,6 +18,7 @@ class TilawaErrorState extends StatelessWidget {
     this.retryLabel,
     this.onRetry,
     this.iconColor,
+    this.isRetrying = false,
   });
 
   /// The icon shown above the title.
@@ -38,10 +40,14 @@ class TilawaErrorState extends StatelessWidget {
   /// `colorScheme.onSurface` with token-driven opacity.
   final Color? iconColor;
 
+  /// When true, the retry button shows a loading indicator and ignores taps.
+  final bool isRetrying;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.errorState;
+    final designTokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
     return Center(
@@ -83,7 +89,8 @@ class TilawaErrorState extends StatelessWidget {
             if (retryLabel != null && onRetry != null) ...[
               SizedBox(height: tokens.actionSpacing),
               ElevatedButton(
-                onPressed: onRetry,
+                // fix: Feedback & states — optional in-flight retry affordance
+                onPressed: isRetrying ? null : onRetry,
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       tokens.retryButtonBackgroundColor ??
@@ -97,7 +104,18 @@ class TilawaErrorState extends StatelessWidget {
                     ),
                   ),
                 ),
-                child: Text(retryLabel!),
+                child: isRetrying
+                    ? SizedBox(
+                        width: designTokens.iconSizeLarge,
+                        height: designTokens.iconSizeLarge,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color:
+                              tokens.retryButtonForegroundColor ??
+                              colorScheme.surface,
+                        ),
+                      )
+                    : Text(retryLabel!),
               ),
             ],
           ],

@@ -40,34 +40,6 @@ class ScreenshotComposerScreen extends StatefulWidget {
   final GlobalKey readerBoundaryKey;
   final ValueListenable<Uint8List?>? readerPreviewBytesNotifier;
 
-  static Route<void> route({
-    required ShareCubit cubit,
-    required int surahNumber,
-    required int currentPage,
-    required int initialFromAyah,
-    required int initialToAyah,
-    required String reciterName,
-    required GlobalKey readerBoundaryKey,
-    ValueListenable<Uint8List?>? readerPreviewBytesNotifier,
-  }) {
-    return PageRouteBuilder<void>(
-      transitionDuration: const Duration(milliseconds: 320),
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          BlocProvider.value(
-            value: cubit,
-            child: ScreenshotComposerScreen(
-              surahNumber: surahNumber,
-              currentPage: currentPage,
-              initialFromAyah: initialFromAyah,
-              initialToAyah: initialToAyah,
-              reciterName: reciterName,
-              readerBoundaryKey: readerBoundaryKey,
-              readerPreviewBytesNotifier: readerPreviewBytesNotifier,
-            ),
-          ),
-    );
-  }
-
   @override
   State<ScreenshotComposerScreen> createState() =>
       _ScreenshotComposerScreenState();
@@ -262,8 +234,10 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
     final cubit = context.read<ShareCubit>();
     final l10n = context.l10n;
     try {
-      final exportedPath = await cubit.savePreparedContent();
-      if (!context.mounted || exportedPath == null) return;
+      await cubit.savePreparedContent();
+      if (!context.mounted) return;
+      final exportedPath = cubit.state.lastSaveExportPath;
+      if (exportedPath == null) return;
       _showInfoSnackBar(
         context,
         '${l10n.save} ${l10n.completed}: ${exportedPath.split('/').last}',

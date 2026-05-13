@@ -4,6 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import '../formatters/prayer_time_label_formatter.dart';
+import '../extensions/prayer_type_ui.dart';
 import '../layout/prayer_times_layout.dart';
 import '../models/prayer_row_view_data.dart';
 import 'prayer_alert_status_chip.dart';
@@ -60,10 +61,23 @@ class NextPrayerCountdownCard extends StatelessWidget {
         vertical: tokens.spaceSmall,
       ),
       child: TilawaCard(
-        backgroundColor: colorScheme.surfaceContainerLow,
+        flat: true,
         borderRadius: tokens.radiusExtraLarge,
-        borderColor: colorScheme.outlineVariant.withValues(
-          alpha: tokens.opacityMedium,
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [
+            Color.alphaBlend(
+              colorScheme.primary.withValues(
+                alpha: tokens.opacitySubtle * 0.85,
+              ),
+              colorScheme.surface,
+            ),
+            colorScheme.surfaceContainerLow,
+          ],
+        ),
+        borderColor: colorScheme.primary.withValues(
+          alpha: tokens.opacitySubtle * 1.4,
         ),
         padding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,
@@ -158,19 +172,47 @@ class NextPrayerCountdownCard extends StatelessWidget {
                   ),
                 ],
                 SizedBox(height: tokens.spaceMedium),
-                Text(
-                  prayerName,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: colorScheme.onSurface,
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        prayerName,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: colorScheme.onSurface,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: tokens.spaceMedium),
+                    _NextPrayerVisual(icon: nextPrayer.type.icon),
+                  ],
                 ),
                 SizedBox(height: tokens.spaceSmall),
-                Text(
-                  remainingLabel,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceMedium,
+                    vertical: tokens.spaceSmall,
+                  ),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+                    borderRadius: BorderRadius.circular(tokens.radiusLarge),
+                    border: Border.all(
+                      color: colorScheme.primary.withValues(
+                        alpha: tokens.opacitySubtle,
+                      ),
+                      width: tokens.borderWidthThin,
+                    ),
+                  ),
+                  child: Text(
+                    remainingLabel,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 SizedBox(height: tokens.spaceSmall),
@@ -217,6 +259,46 @@ class NextPrayerCountdownCard extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _NextPrayerVisual extends StatelessWidget {
+  const _NextPrayerVisual({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      width: tokens.iconSizeExtraLarge + tokens.spaceLarge,
+      height: tokens.iconSizeExtraLarge + tokens.spaceLarge,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colorScheme.primaryContainer.withValues(
+          alpha: tokens.opacityMedium,
+        ),
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+          width: tokens.borderWidthThin,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            blurRadius: tokens.blurShadow,
+            offset: tokens.shadowOffsetSmall,
+          ),
+        ],
+      ),
+      child: Icon(
+        icon,
+        size: tokens.iconSizeLarge,
+        color: colorScheme.primary,
       ),
     );
   }

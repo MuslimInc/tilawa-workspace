@@ -123,12 +123,15 @@ class _ShareHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            const MetadataChip(
+            const TilawaMetadataChip(
               icon: Icons.auto_stories_rounded,
               label: 'Tilawa',
             ),
             const Spacer(),
-            MetadataChip(icon: Icons.menu_book_rounded, label: '$pageNumber'),
+            TilawaMetadataChip(
+              icon: Icons.menu_book_rounded,
+              label: '$pageNumber',
+            ),
           ],
         ),
         SizedBox(height: tokens.spaceMedium),

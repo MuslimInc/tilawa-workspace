@@ -150,7 +150,7 @@ void main() {
   testWidgets('save action enters loading state while export is pending', (
     tester,
   ) async {
-    final completer = Completer<String?>();
+    final completer = Completer<void>();
     when(() => cubit.savePreparedContent()).thenAnswer((_) => completer.future);
 
     await tester.pumpWidget(buildSubject());
@@ -172,7 +172,7 @@ void main() {
     );
     expect(savingButton.onPressed, isNull);
 
-    completer.complete('/tmp/exported.mp4');
+    completer.complete();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
 
