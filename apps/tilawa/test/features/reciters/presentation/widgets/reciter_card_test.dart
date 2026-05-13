@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
+import 'package:tilawa/features/reciters/presentation/reciter_semantics_ids.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -151,4 +152,44 @@ void main() {
 
     await cubit.close();
   });
+
+  testWidgets(
+    'open-reciter and favorite InkWells are siblings, not nested',
+    (WidgetTester tester) async {
+      final cubit = await _loadedCubit();
+      await _pumpCard(tester, cubit);
+
+      expect(
+        find.descendant(
+          of: find.byType(ReciterCard),
+          matching: find.byType(InkWell),
+        ),
+        findsNWidgets(2),
+      );
+
+      final Finder openInkWell = find.descendant(
+        of: find.bySemanticsIdentifier(ReciterSemanticsIds.reciterCard(tReciter.id)),
+        matching: find.byType(InkWell),
+      );
+      final Finder favoriteInkWell = find.descendant(
+        of: find.bySemanticsIdentifier(
+          ReciterSemanticsIds.reciterFavoriteButton(tReciter.id),
+        ),
+        matching: find.byType(InkWell),
+      );
+
+      expect(openInkWell, findsOneWidget);
+      expect(favoriteInkWell, findsOneWidget);
+      expect(
+        find.descendant(of: openInkWell, matching: favoriteInkWell),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: favoriteInkWell, matching: openInkWell),
+        findsNothing,
+      );
+
+      await cubit.close();
+    },
+  );
 }

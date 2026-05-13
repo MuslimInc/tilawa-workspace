@@ -61,6 +61,7 @@ class ReciterCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Semantics(
+                    button: true,
                     identifier: ReciterSemanticsIds.reciterCard(reciter.id),
                     label: context.l10n.a11yOpenReciterDetails(reciter.name),
                     child: InkWell(
@@ -176,6 +177,7 @@ class _FavoriteButton extends StatelessWidget {
     );
 
     return Semantics(
+      button: true,
       identifier: ReciterSemanticsIds.reciterFavoriteButton(reciter.id),
       toggled: isFavorite,
       label: isFavorite
