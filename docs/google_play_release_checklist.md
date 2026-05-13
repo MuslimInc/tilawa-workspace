@@ -30,6 +30,12 @@
 
 ## 5. Play Console Readiness
 
+- [ ] Review `docs/google_play_screenshot_readiness.md`.
+- [ ] Regenerate the English and Arabic Play screenshot sets.
+- [ ] Verify all final screenshots are 1080x1920 and follow the documented
+      seven-slot storyboard.
+- [ ] Confirm screenshots contain no debug UI, clipped text, raw emulator
+      chrome, or misleading empty/error states.
 - [ ] Upload AAB to internal testing first.
 - [ ] Complete Data Safety and privacy policy declarations.
 - [ ] Validate required permissions rationale (notifications, location, camera).

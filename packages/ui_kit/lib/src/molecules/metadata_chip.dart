@@ -4,8 +4,9 @@ import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_chip.dart';
 
-class MetadataChip extends StatelessWidget {
-  const MetadataChip({
+/// Compact metadata chip built on [TilawaChip].
+class TilawaMetadataChip extends StatelessWidget {
+  const TilawaMetadataChip({
     super.key,
     required this.label,
     this.icon,
@@ -44,3 +45,7 @@ class MetadataChip extends StatelessWidget {
     );
   }
 }
+
+/// Deprecated. Use [TilawaMetadataChip] instead.
+@Deprecated('Use TilawaMetadataChip instead')
+typedef MetadataChip = TilawaMetadataChip;

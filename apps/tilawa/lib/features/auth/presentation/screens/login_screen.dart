@@ -234,7 +234,7 @@ class _AppLanguageSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<LocalizationBloc, LocalizationState>(
       builder: (context, state) {
-        return LanguageSwitcher(
+        return TilawaLanguageSwitcher(
           currentLanguage: state.locale.languageCode,
           languages: const ['ar', 'en'],
           getLanguageName: (code) => code == 'ar' ? 'العربية' : 'English',

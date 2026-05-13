@@ -236,8 +236,7 @@ class TilawaMediaPlayerBarTokens {
   }
 
   factory TilawaMediaPlayerBarTokens.fromColorScheme(ColorScheme colorScheme) {
-    // No-op: control buttons are already 32-36dp (below 48dp). Compacting
-    // would worsen accessibility; needs a separate accessibility refactor.
+    // fix: Accessibility — ≥48dp transport control hit targets
     const shellOutlineAlpha = 0.1;
     const playPauseShadowOpacity = 0.3;
     return TilawaMediaPlayerBarTokens(
@@ -254,8 +253,8 @@ class TilawaMediaPlayerBarTokens {
       artworkInfoGap: 12,
       infoControlsGap: 8,
       controlsGap: 4,
-      controlButtonSize: 32,
-      playPauseButtonSize: 36,
+      controlButtonSize: kMinInteractiveDimension,
+      playPauseButtonSize: kMinInteractiveDimension,
       defaultIconSize: 24,
       playPauseIconSize: 16,
       disabledControlOpacity: 0.3,

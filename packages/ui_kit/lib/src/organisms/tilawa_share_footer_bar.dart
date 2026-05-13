@@ -29,9 +29,10 @@ class TilawaShareFooterBar extends StatelessWidget {
                 Brightness.dark
             ? theme.colorScheme.onSecondaryContainer
             : theme.colorScheme.onSurface);
+    // fix: Consistency & standards — respect ambient directionality (no RTL hardcode)
+    // fix: Visual hierarchy — derive styles from text theme roles
     final TextStyle primaryStyle = (textTheme.titleSmall ?? const TextStyle())
         .copyWith(
-          fontSize: tokens.labelFontSize,
           fontWeight: tokens.labelFontWeight,
           color: resolvedForegroundColor,
           decoration: TextDecoration.none,
@@ -39,7 +40,6 @@ class TilawaShareFooterBar extends StatelessWidget {
         );
     final TextStyle secondaryStyle = (textTheme.bodySmall ?? const TextStyle())
         .copyWith(
-          fontSize: tokens.secondaryLabelFontSize,
           color: resolvedForegroundColor.withValues(
             alpha: tokens.secondaryLabelOpacity,
           ),
@@ -60,7 +60,6 @@ class TilawaShareFooterBar extends StatelessWidget {
                   primaryLabel,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  textDirection: TextDirection.rtl,
                   textAlign: TextAlign.start,
                   style: primaryStyle,
                 ),
@@ -71,7 +70,7 @@ class TilawaShareFooterBar extends StatelessWidget {
                   secondaryLabel,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.right,
+                  textAlign: TextAlign.end,
                   style: secondaryStyle,
                 ),
               ),

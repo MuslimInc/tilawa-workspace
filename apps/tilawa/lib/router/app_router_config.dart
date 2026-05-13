@@ -10,6 +10,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
+import '../features/athkar/presentation/screens/tasbeeh_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/bookmarks/presentation/bloc/bookmarks_bloc.dart';
 import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
@@ -29,9 +30,12 @@ import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/reciters/presentation/screens/reciter_details_loader.dart';
 import '../features/reciters/presentation/screens/reciter_details_screen.dart';
 import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/share/presentation/screens/screenshot_composer_screen.dart';
+import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
+import 'share_composer_extra.dart';
 
 part 'app_router_config.g.dart';
 
@@ -153,6 +157,16 @@ class AthkarCategoriesRoute extends GoRouteData with $AthkarCategoriesRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const AthkarCategoriesScreen();
+  }
+}
+
+@TypedGoRoute<TasbeehRoute>(path: '/athkar/tasbeeh')
+class TasbeehRoute extends GoRouteData with $TasbeehRoute {
+  const TasbeehRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const TasbeehScreen();
   }
 }
 
@@ -295,6 +309,47 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
     return QuranImageReaderScreen(
       surahNumber: surahNumber,
       initialAyah: ayahNumber,
+    );
+  }
+}
+
+@TypedGoRoute<ScreenshotComposerRoute>(path: '/share/screenshot')
+class ScreenshotComposerRoute extends GoRouteData
+    with $ScreenshotComposerRoute {
+  const ScreenshotComposerRoute({this.$extra});
+
+  final ScreenshotComposerNavExtra? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    final ScreenshotComposerNavExtra extra = $extra!;
+    return ScreenshotComposerScreen(
+      surahNumber: extra.surahNumber,
+      currentPage: extra.currentPage,
+      initialFromAyah: extra.initialFromAyah,
+      initialToAyah: extra.initialToAyah,
+      reciterName: extra.reciterName,
+      readerBoundaryKey: extra.readerBoundaryKey,
+      readerPreviewBytesNotifier: extra.readerPreviewBytesNotifier,
+    );
+  }
+}
+
+@TypedGoRoute<VideoReelComposerRoute>(path: '/share/video-reel')
+class VideoReelComposerRoute extends GoRouteData with $VideoReelComposerRoute {
+  const VideoReelComposerRoute({this.$extra});
+
+  final VideoReelComposerNavExtra? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    final VideoReelComposerNavExtra extra = $extra!;
+    return VideoReelComposerScreen(
+      surahNumber: extra.surahNumber,
+      initialFromAyah: extra.initialFromAyah,
+      initialToAyah: extra.initialToAyah,
+      reciterName: extra.reciterName,
+      reciterServerUrl: extra.reciterServerUrl,
     );
   }
 }

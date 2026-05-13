@@ -184,5 +184,30 @@ void main() {
       expect(find.byType(Slider), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets('touch strip height is at least 48dp with gesture handling', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          const SeekBar(
+            duration: Duration(minutes: 5),
+            position: Duration(minutes: 1),
+            bufferedPosition: Duration(minutes: 2),
+          ),
+        ),
+      );
+
+      final seekFinder = find.byType(SeekBar);
+      final stackFinder = find.descendant(
+        of: seekFinder,
+        matching: find.byType(Stack),
+      );
+      expect(tester.getSize(stackFinder).height, greaterThanOrEqualTo(48));
+
+      await tester.drag(find.byType(Slider).last, const Offset(24, 0));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
   });
 }

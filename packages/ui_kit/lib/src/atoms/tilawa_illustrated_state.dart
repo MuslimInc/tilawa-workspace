@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import 'tilawa_state_visual.dart';
 
 /// A reusable, feature-agnostic state layout with an illustration slot.
 ///
@@ -21,10 +22,7 @@ class TilawaIllustratedState extends StatelessWidget {
     this.secondaryAction,
     this.maxWidth,
     this.semanticLabel,
-  }) : assert(
-         visual != null || icon != null,
-         'Provide either a visual widget or an icon.',
-       );
+  });
 
   /// Primary message shown below the visual.
   final String title;
@@ -64,13 +62,25 @@ class TilawaIllustratedState extends StatelessWidget {
     final designTokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    final stateVisual =
-        visual ??
-        Icon(
-          icon,
-          size: stateTokens.iconSize,
-          color: iconColor ?? colorScheme.primary,
-        );
+    final Widget stateVisual;
+    if (visual != null) {
+      stateVisual = visual!;
+    } else if (icon != null) {
+      stateVisual = TilawaStateVisual(
+        icon: icon!,
+        accentColor: iconColor ?? colorScheme.primary,
+        size: stateTokens.iconSize + designTokens.spaceExtraLarge * 2,
+      );
+    } else {
+      stateVisual = const SizedBox.shrink();
+    }
+    final actionMaxWidth = maxWidth ?? designTokens.contentMaxWidthForm;
+    Widget constrainAction(Widget action) {
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: actionMaxWidth),
+        child: action,
+      );
+    }
 
     return Center(
       child: Semantics(
@@ -113,8 +123,10 @@ class TilawaIllustratedState extends StatelessWidget {
                     spacing: designTokens.spaceSmall,
                     runSpacing: designTokens.spaceSmall,
                     children: [
-                      ?secondaryAction,
-                      ?primaryAction,
+                      if (secondaryAction != null)
+                        constrainAction(secondaryAction!),
+                      if (primaryAction != null)
+                        constrainAction(primaryAction!),
                     ],
                   ),
                 ],

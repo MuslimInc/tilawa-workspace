@@ -46,7 +46,7 @@ Widget previewLanguageSwitcher() {
     body: Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: LanguageSwitcher(
+        child: TilawaLanguageSwitcher(
           currentLanguage: 'en',
           languages: const ['en', 'ar'],
           getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
@@ -67,7 +67,7 @@ Widget previewLanguageSwitcherArabicSelected() {
     body: Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: LanguageSwitcher(
+        child: TilawaLanguageSwitcher(
           currentLanguage: 'ar',
           languages: const ['en', 'ar'],
           getLanguageName: (code) => code == 'en' ? 'English' : 'العربية',
@@ -504,7 +504,6 @@ Widget previewTilawaSettingsTile() {
         child: TilawaSettingsTile(
           icon: Icons.notifications_outlined,
           title: 'Notifications',
-          subtitle: 'Daily prayer alerts',
           onTap: () {},
         ),
       ),
@@ -548,7 +547,6 @@ Widget previewTilawaSettingsTileRtl() {
           child: TilawaSettingsTile(
             icon: Icons.notifications_outlined,
             title: 'الإشعارات',
-            subtitle: 'تنبيهات الصلوات اليومية',
             onTap: _noop,
           ),
         ),
@@ -615,7 +613,6 @@ Widget previewTilawaSettingsSwitchTileRtl() {
           child: TilawaSettingsSwitchTile(
             icon: Icons.notifications_outlined,
             title: 'إشعارات الصلاة',
-            subtitle: 'تشغيل التنبيهات',
             value: true,
             onChanged: _noopBool,
             showDivider: false,

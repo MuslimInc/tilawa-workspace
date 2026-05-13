@@ -177,7 +177,8 @@ class _SearchFieldBody extends StatelessWidget {
         onSubmitted: onSubmitted,
         onTapOutside: onTapOutside,
         textInputAction: textInputAction,
-        scrollPadding: scrollPadding ?? const EdgeInsets.all(20),
+        // fix: Spacing & alignment — tokenized scroll inset from component tokens
+        scrollPadding: scrollPadding ?? componentTokens.scrollPadding,
         textAlignVertical: .center,
         style:
             textStyle ??

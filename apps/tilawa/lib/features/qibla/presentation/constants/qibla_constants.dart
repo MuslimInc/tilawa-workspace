@@ -11,14 +11,14 @@ import 'package:flutter/material.dart';
 // Compass Sizing Ratios
 // ===============================
 
-/// Compass widget size as a ratio of the screen's shortest side.
-const double kCompassSizeRatio = 0.85;
+/// Compass widget size as a ratio of the available panel width.
+const double kCompassSizeRatio = 0.78;
 
-/// Dial size as a ratio of the screen's shortest side.
-const double kDialSizeRatio = 0.65;
+/// Dial size as a ratio of the available panel width.
+const double kDialSizeRatio = 0.58;
 
 /// Qibla pointer icon size in logical pixels.
-const double kQiblaPointerIconSize = 100.0;
+const double kQiblaPointerIconSize = 72.0;
 
 /// Center indicator size offset added to design token spacing.
 const double kCenterIndicatorSizeOffset = 2.0;
@@ -62,13 +62,13 @@ const double kThickTickStrokeWidth = 2.0;
 // ===============================
 
 /// Font size for the angle display value.
-const double kAngleDisplayFontSize = 48.0;
+const double kAngleDisplayFontSize = 42.0;
 
 /// Font weight for angle display.
 const FontWeight kAngleDisplayFontWeight = FontWeight.w900;
 
 /// Letter spacing for compass text labels.
-const double kCompassTextLetterSpacing = 1.2;
+const double kCompassTextLetterSpacing = 0.0;
 
 // ===============================
 // Layout & Spacing
@@ -97,6 +97,9 @@ const double kTipFontSize = 16.0;
 
 /// Font weight for tip text.
 const FontWeight kTipFontWeight = FontWeight.w500;
+
+/// Max Qibla panel width as a ratio of the form content max width token.
+const double kQiblaPanelMaxWidthFactor = 0.72;
 
 // ===============================
 // Animation & Effects

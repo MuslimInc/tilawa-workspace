@@ -44,8 +44,8 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
 
     return Card(
       elevation: 0,
-      shadowColor: Colors.transparent,
-      color: colorScheme.surfaceContainerLow,
+      shadowColor: colorScheme.shadow.withValues(alpha: tokens.opacityShadow),
+      color: Colors.transparent,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
         side: BorderSide(
@@ -56,30 +56,53 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
         ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildReciterHeader(context, downloads),
-          AnimatedCrossFade(
-            firstChild: const SizedBox(height: 0, width: double.infinity),
-            secondChild: Column(
-              children: [
-                Divider(
-                  height: 1,
-                  color: colorScheme.outlineVariant.withValues(
-                    alpha: tokens.opacityMedium,
-                  ),
-                ),
-                _buildDownloadsList(context),
-              ],
-            ),
-            crossFadeState: _isExpanded
-                ? CrossFadeState.showSecond
-                : CrossFadeState.showFirst,
-            duration: const Duration(milliseconds: 300),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: [
+              colorScheme.surfaceContainerLow.withValues(
+                alpha: tokens.opacityGlass,
+              ),
+              colorScheme.surface.withValues(alpha: tokens.opacityGlass),
+            ],
           ),
-        ],
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withValues(
+                alpha: tokens.opacityShadow * 0.3,
+              ),
+              blurRadius: tokens.blurShadow,
+              offset: tokens.shadowOffsetSmall,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildReciterHeader(context, downloads),
+            AnimatedCrossFade(
+              firstChild: const SizedBox(height: 0, width: double.infinity),
+              secondChild: Column(
+                children: [
+                  Divider(
+                    height: 1,
+                    color: colorScheme.outlineVariant.withValues(
+                      alpha: tokens.opacityMedium,
+                    ),
+                  ),
+                  _buildDownloadsList(context),
+                ],
+              ),
+              crossFadeState: _isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              duration: tokens.durationMedium,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -107,6 +130,9 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               padding: EdgeInsets.all(tokens.spaceTiny),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                color: colorScheme.primary.withValues(
+                  alpha: tokens.opacitySubtle,
+                ),
                 border: Border.all(
                   color: colorScheme.primary.withValues(
                     alpha: tokens.opacitySubtle,
@@ -148,6 +174,8 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
                       color: colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  SizedBox(height: tokens.spaceSmall),
+                  _DownloadHealthPill(downloads: downloads),
                 ],
               ),
             ),
@@ -407,6 +435,57 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
   void _playAllDownloads(BuildContext context) {
     context.read<DownloadsBloc>().add(
       DownloadsEvent.playAllDownloads(reciterName: widget.reciterName),
+    );
+  }
+}
+
+class _DownloadHealthPill extends StatelessWidget {
+  const _DownloadHealthPill({required this.downloads});
+
+  final List<DownloadItem> downloads;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final int completedCount = downloads
+        .where((download) => download.status == DownloadStatus.completed)
+        .length;
+    final bool hasIssues = downloads.any(
+      (download) =>
+          download.status == DownloadStatus.failed ||
+          download.status == DownloadStatus.cancelled,
+    );
+
+    final Color accent = hasIssues ? colorScheme.error : colorScheme.primary;
+    final IconData icon = hasIssues
+        ? Icons.error_outline_rounded
+        : Icons.check_rounded;
+
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceSmall,
+        vertical: tokens.spaceExtraSmall,
+      ),
+      decoration: BoxDecoration(
+        color: accent.withValues(alpha: tokens.opacitySubtle),
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: tokens.iconSizeSmall, color: accent),
+          SizedBox(width: tokens.spaceExtraSmall),
+          Text(
+            '$completedCount/${downloads.length}',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: accent,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

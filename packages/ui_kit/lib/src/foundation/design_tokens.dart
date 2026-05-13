@@ -185,10 +185,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 145 — height threshold for tight card layout.
   final double cardTightHeightThreshold;
 
-  /// 80.0
+  /// 72.0 — collapsed mini-player chrome height (matches [_create]).
   final double playerCollapsedHeight;
 
-  /// 80.0
+  /// 72.0 — dismiss gesture threshold aligned with [playerCollapsedHeight].
   final double playerDismissThreshold;
 
   /// 200.0
@@ -239,13 +239,23 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
-      spaceMedium: isCompact ? 10.0 : 12.0,
-      spaceLarge: isCompact ? 14.0 : 16.0,
-      spaceExtraLarge: isCompact ? 20.0 : 24.0,
+      spaceMedium: isCompact
+          ? 8.0
+          : 12.0, // fix: Spacing & alignment — compact on 8dp grid
+      spaceLarge: isCompact
+          ? 16.0
+          : 16.0, // fix: Spacing & alignment — compact on 8dp grid
+      spaceExtraLarge: isCompact
+          ? 24.0
+          : 24.0, // fix: Spacing & alignment — compact on 8dp grid
       radiusSmall: 8.0,
       radiusMedium: 12.0,
-      radiusLarge: isCompact ? 14.0 : 16.0,
-      radiusExtraLarge: isCompact ? 20.0 : 24.0,
+      radiusLarge: isCompact
+          ? 16.0
+          : 16.0, // fix: Spacing & alignment — compact on 8dp grid
+      radiusExtraLarge: isCompact
+          ? 24.0
+          : 24.0, // fix: Spacing & alignment — compact on 8dp grid
       opacitySubtle: 0.1,
       opacityShadow: 0.18,
       opacityShadowStrong: 0.28,

@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 
-class LanguageSwitcher extends StatelessWidget {
-  const LanguageSwitcher({
+/// Switches [languages] with the same chrome as [TilawaSegmentedControl].
+class TilawaLanguageSwitcher extends StatelessWidget {
+  const TilawaLanguageSwitcher({
     super.key,
     required this.currentLanguage,
     required this.onLanguageChanged,
@@ -30,31 +31,40 @@ class LanguageSwitcher extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.containerRadius),
       ),
       child: Row(
-        mainAxisSize: .min,
-        textDirection: .ltr,
+        mainAxisSize: MainAxisSize.min,
+        textDirection: TextDirection.ltr,
         children: languages.map((lang) {
           final isSelected = currentLanguage == lang;
-          return GestureDetector(
-            onTap: () => onLanguageChanged(lang),
-            child: Container(
-              padding: tokens.itemPadding,
-              constraints: BoxConstraints(minWidth: tokens.minItemWidth),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? theme.colorScheme.primary
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(tokens.itemRadius),
-              ),
-              child: Center(
-                child: Text(
-                  getLanguageName(lang),
-                  style: TextStyle(
-                    color: isSelected
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.onSurface,
-                    fontWeight: isSelected
-                        ? tokens.selectedFontWeight
-                        : tokens.unselectedFontWeight,
+          final String label = getLanguageName(lang);
+          return Material(
+            color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(tokens.itemRadius),
+            child: InkWell(
+              onTap: () => onLanguageChanged(lang),
+              borderRadius: BorderRadius.circular(tokens.itemRadius),
+              child: Semantics(
+                // fix: Accessibility — segment role (inside InkWell avoids merge bugs)
+                selected: isSelected,
+                button: true,
+                label: label,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: tokens.minItemWidth),
+                  child: Padding(
+                    padding: tokens.itemPadding,
+                    child: Center(
+                      child: Text(
+                        label,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          // fix: Visual hierarchy — use theme role, not raw TextStyle
+                          color: isSelected
+                              ? theme.colorScheme.onPrimary
+                              : theme.colorScheme.onSurface,
+                          fontWeight: isSelected
+                              ? tokens.selectedFontWeight
+                              : tokens.unselectedFontWeight,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

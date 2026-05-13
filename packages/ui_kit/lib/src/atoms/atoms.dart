@@ -10,4 +10,5 @@ export 'tilawa_illustrated_state.dart';
 export 'tilawa_loading_indicator.dart';
 export 'tilawa_section_title.dart';
 export 'tilawa_sheet_handle.dart';
+export 'tilawa_state_visual.dart';
 export 'tilawa_text_field.dart';

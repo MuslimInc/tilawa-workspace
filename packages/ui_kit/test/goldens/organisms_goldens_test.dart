@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
+import 'golden_constraints.dart';
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -15,6 +16,7 @@ void main() {
       'TilawaMediaPlayerBar',
       fileName: 'organisms/tilawa_media_player_bar',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Playing default',
@@ -75,6 +77,7 @@ void main() {
       'TilawaSettingsGroup',
       fileName: 'organisms/tilawa_settings_group',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -87,7 +90,6 @@ void main() {
                     TilawaSettingsTile(
                       icon: Icons.language,
                       title: 'Language',
-                      subtitle: 'English',
                       onTap: () {},
                     ),
                     TilawaSettingsSwitchTile(
@@ -119,7 +121,6 @@ void main() {
                     TilawaSettingsTile(
                       icon: Icons.language,
                       title: 'Language',
-                      subtitle: 'English',
                       onTap: () {},
                     ),
                     TilawaSettingsSwitchTile(
@@ -147,6 +148,7 @@ void main() {
       'TilawaSettingsGroup compact',
       fileName: 'organisms/tilawa_settings_group_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',
@@ -160,7 +162,6 @@ void main() {
                     TilawaSettingsTile(
                       icon: Icons.language,
                       title: 'Language',
-                      subtitle: 'English',
                       onTap: () {},
                     ),
                     TilawaSettingsSwitchTile(
@@ -193,7 +194,6 @@ void main() {
                     TilawaSettingsTile(
                       icon: Icons.language,
                       title: 'Language',
-                      subtitle: 'English',
                       onTap: () {},
                     ),
                     TilawaSettingsSwitchTile(
@@ -221,6 +221,7 @@ void main() {
       'TilawaShareFooterBar',
       fileName: 'organisms/tilawa_share_footer_bar',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -255,6 +256,7 @@ void main() {
       'TilawaShareFooterBar compact',
       fileName: 'organisms/tilawa_share_footer_bar_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',

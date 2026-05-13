@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -12,9 +13,8 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/theme/quran_reader_theme.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/page_navigation_bar.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/surah_index_sheet.dart';
-import 'package:tilawa/features/share/presentation/cubit/share_cubit.dart';
-import 'package:tilawa/features/share/presentation/screens/screenshot_composer_screen.dart';
-import 'package:tilawa/features/share/presentation/screens/video_reel_composer_screen.dart';
+import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/router/share_composer_extra.dart';
 import 'package:tilawa/features/share/presentation/widgets/share_options_sheet.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
@@ -886,8 +886,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     final audioState = context.read<AudioPlayerBloc>().state;
     final reciterName = audioState.currentAudio?.artist ?? 'Al-Afasy';
     final serverUrl = audioState.currentAudio?.url ?? '';
-    final shareCubit = context.read<ShareCubit>();
-    final navigator = Navigator.of(context);
     final theme = Theme.of(context);
     final readerOverlayStyle = AppSystemChromeStyle.quranReaderStyle;
 
@@ -921,9 +919,8 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       _buildShareSheetSystemUiOverlayStyle(theme),
     );
     try {
-      await showModalBottomSheet<void>(
+      await showTilawaModalBottomSheet<void>(
         context: context,
-        isScrollControlled: true,
         backgroundColor: Colors.transparent,
         builder: (context) => ShareOptionsSheet(
           surahNumber: initialSurahNumber,
@@ -935,17 +932,18 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
             final firstAyah = surahEntries.first.start;
             final lastAyah = surahEntries.last.end;
 
-            navigator.push(
-              ScreenshotComposerScreen.route(
-                cubit: shareCubit,
-                surahNumber: selectedSurah,
-                currentPage: currentPage,
-                initialFromAyah: firstAyah,
-                initialToAyah: lastAyah,
-                reciterName: reciterName,
-                readerBoundaryKey: _screenshotBoundaryKey,
-                readerPreviewBytesNotifier: previewNotifier,
-              ),
+            unawaited(
+              ScreenshotComposerRoute(
+                $extra: ScreenshotComposerNavExtra(
+                  surahNumber: selectedSurah,
+                  currentPage: currentPage,
+                  initialFromAyah: firstAyah,
+                  initialToAyah: lastAyah,
+                  reciterName: reciterName,
+                  readerBoundaryKey: _screenshotBoundaryKey,
+                  readerPreviewBytesNotifier: previewNotifier,
+                ),
+              ).push(this.context),
             );
           },
           onShareVideoReel: (selectedSurah) {
@@ -955,18 +953,16 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
             final firstAyah = surahEntries.first.start;
             final lastAyah = surahEntries.last.end;
 
-            navigator.push(
-              VideoReelComposerScreen.route(
-                cubit: shareCubit,
-                surahNumber: selectedSurah,
-                currentPage: currentPage,
-                initialFromAyah: firstAyah,
-                initialToAyah: lastAyah,
-                reciterName: reciterName,
-                reciterServerUrl: serverUrl,
-                readerBoundaryKey: _screenshotBoundaryKey,
-                readerPreviewBytesNotifier: previewNotifier,
-              ),
+            unawaited(
+              VideoReelComposerRoute(
+                $extra: VideoReelComposerNavExtra(
+                  surahNumber: selectedSurah,
+                  initialFromAyah: firstAyah,
+                  initialToAyah: lastAyah,
+                  reciterName: reciterName,
+                  reciterServerUrl: serverUrl,
+                ),
+              ).push(this.context),
             );
           },
         ),
@@ -1008,12 +1004,10 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   void _showSurahIndex() {
     // Pre-load fonts for all surah start pages so that any index jump is instant.
     unawaited(_prewarmSurahIndexFonts());
-    showModalBottomSheet<int>(
+    showTilawaModalBottomSheet<int>(
       context: context,
-      isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.4),
       builder: (context) => SurahIndexSheet(
         onSurahSelected: (surahNumber) =>
             Navigator.of(context).pop(surahNumber),
@@ -1291,6 +1285,9 @@ class _ReaderStack extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        Positioned.fill(
+          child: _ReaderAmbientBackground(readerTheme: readerTheme),
+        ),
         // RepaintBoundary isolates the warming ghost layer. Placed BEFORE the Scaffold
         // so it is rendered underneath the opaque page background, completely hidden from the user.
         RepaintBoundary(
@@ -1302,6 +1299,7 @@ class _ReaderStack extends StatelessWidget {
         ),
         Scaffold(
           key: const ValueKey('QuranReaderScaffold'),
+          backgroundColor: Colors.transparent,
           resizeToAvoidBottomInset: false,
           extendBody: true,
           extendBodyBehindAppBar: true,
@@ -1319,31 +1317,34 @@ class _ReaderStack extends StatelessWidget {
                 // becomes ready. There is no gate here — gating on null caused
                 // QuranPageView to unmount/remount, destroying PageContent state
                 // and missing the first notifier fire after mount.
-                child: QuranPageView(
-                  mushafService: quranQcfLocator<MushafService>(),
-                  pageSnapshotService: quranQcfLocator<PageSnapshotService>(),
-                  controller: pageController,
-                  currentPageListenable: currentPageNotifier,
-                  cacheExtentListenable: cacheExtentNotifier,
-                  preparedWindowListenable: preparedWindowNotifier,
-                  pageBackgroundColor: readerTheme.pageBackground,
-                  textColor: readerTheme.textColor,
-                  headerImageFilter: readerTheme.headerImageFilter,
-                  headerTextColor: readerTheme.headerTextColor,
-                  headerFontSizeMultiplier: headerFontSizeMultiplier,
-                  uiTextDirection: Directionality.of(context),
-                  onPageChanged: onPageChanged,
-                  onScrollStarted: onPointerDown,
-                  onScrollEnded: onPointerUp,
-                  juzLabel: context.l10n.juzPart,
-                  hizbLabel: context.l10n.hizb,
-                  surahNameBuilder: getSurahName,
-                  onSurahSelected: (surahNumber) =>
-                      unawaited(jumpToSurah(surahNumber)),
-                  onShowIndex: handleShowIndex,
-                  showOverlaysListenable: showOverlaysNotifier,
-                  isScrollingListenable: isScrollingNotifier,
-                  showShadows: false,
+                child: _ReaderPageStage(
+                  readerTheme: readerTheme,
+                  child: QuranPageView(
+                    mushafService: quranQcfLocator<MushafService>(),
+                    pageSnapshotService: quranQcfLocator<PageSnapshotService>(),
+                    controller: pageController,
+                    currentPageListenable: currentPageNotifier,
+                    cacheExtentListenable: cacheExtentNotifier,
+                    preparedWindowListenable: preparedWindowNotifier,
+                    pageBackgroundColor: readerTheme.pageBackground,
+                    textColor: readerTheme.textColor,
+                    headerImageFilter: readerTheme.headerImageFilter,
+                    headerTextColor: readerTheme.headerTextColor,
+                    headerFontSizeMultiplier: headerFontSizeMultiplier,
+                    uiTextDirection: Directionality.of(context),
+                    onPageChanged: onPageChanged,
+                    onScrollStarted: onPointerDown,
+                    onScrollEnded: onPointerUp,
+                    juzLabel: context.l10n.juzPart,
+                    hizbLabel: context.l10n.hizb,
+                    surahNameBuilder: getSurahName,
+                    onSurahSelected: (surahNumber) =>
+                        unawaited(jumpToSurah(surahNumber)),
+                    onShowIndex: handleShowIndex,
+                    showOverlaysListenable: showOverlaysNotifier,
+                    isScrollingListenable: isScrollingNotifier,
+                    showShadows: false,
+                  ),
                 ),
               ),
             ),
@@ -1360,6 +1361,122 @@ class _ReaderStack extends StatelessWidget {
           onPointerUp: onPointerUp,
         ),
       ],
+    );
+  }
+}
+
+class _ReaderAmbientBackground extends StatelessWidget {
+  const _ReaderAmbientBackground({required this.readerTheme});
+
+  final QuranReaderTheme readerTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ColoredBox(
+      color: readerTheme.pageBackground,
+      child: ExcludeSemantics(
+        child: CustomPaint(
+          painter: _ReaderAmbientPainter(
+            colorScheme: theme.colorScheme,
+            readerTheme: readerTheme,
+            tokens: theme.tokens,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ReaderAmbientPainter extends CustomPainter {
+  const _ReaderAmbientPainter({
+    required this.colorScheme,
+    required this.readerTheme,
+    required this.tokens,
+  });
+
+  final ColorScheme colorScheme;
+  final QuranReaderTheme readerTheme;
+  final TilawaDesignTokens tokens;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shortest = size.shortestSide;
+    final topCenter = Offset(size.width * 0.12, size.height * 0.16);
+    final lowerCenter = Offset(size.width * 0.9, size.height * 0.72);
+
+    final primaryStroke = Paint()
+      ..color = readerTheme.primaryColor.withValues(
+        alpha: tokens.opacitySubtle * 0.34,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+    final tertiaryStroke = Paint()
+      ..color = colorScheme.tertiary.withValues(
+        alpha: tokens.opacitySubtle * 0.22,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+
+    for (final factor in <double>[0.56, 0.84]) {
+      canvas.drawArc(
+        Rect.fromCircle(center: topCenter, radius: shortest * factor),
+        -math.pi * 0.12,
+        math.pi * 0.48,
+        false,
+        primaryStroke,
+      );
+    }
+
+    for (final factor in <double>[0.52, 0.76]) {
+      canvas.drawArc(
+        Rect.fromCircle(center: lowerCenter, radius: shortest * factor),
+        math.pi * 0.86,
+        math.pi * 0.42,
+        false,
+        tertiaryStroke,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ReaderAmbientPainter oldDelegate) {
+    return oldDelegate.colorScheme != colorScheme ||
+        oldDelegate.readerTheme != readerTheme ||
+        oldDelegate.tokens != tokens;
+  }
+}
+
+class _ReaderPageStage extends StatelessWidget {
+  const _ReaderPageStage({
+    required this.readerTheme,
+    required this.child,
+  });
+
+  final QuranReaderTheme readerTheme;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: readerTheme.pageBackground,
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.shadow.withValues(
+              alpha: tokens.opacityShadow * 0.35,
+            ),
+            blurRadius: tokens.blurShadow * 1.5,
+            spreadRadius: -tokens.spaceSmall,
+            offset: tokens.shadowOffsetSmall,
+          ),
+        ],
+      ),
+      child: child,
     );
   }
 }

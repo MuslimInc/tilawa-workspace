@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -169,15 +171,23 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               return _prayerTimesLoadingIndicator(context);
 
             case PrayerTimesStatus.error:
-              return TilawaErrorState(
-                icon: Icons.error_outline_rounded,
+              return TilawaIllustratedState(
+                visual: const TilawaStateVisual(
+                  icon: Icons.event_busy_rounded,
+                  tone: TilawaStateVisualTone.error,
+                ),
                 title: state.errorMessage,
-                retryLabel: context.l10n.retry,
-                onRetry: () {
-                  context.read<PrayerTimesBloc>().add(
-                    const PrayerTimesEvent.loadPrayerTimes(),
-                  );
-                },
+                semanticLabel: state.errorMessage,
+                primaryAction: TilawaButton(
+                  text: context.l10n.retry,
+                  variant: TilawaButtonVariant.secondary,
+                  leadingIcon: const Icon(Icons.refresh_rounded),
+                  onPressed: () {
+                    context.read<PrayerTimesBloc>().add(
+                      const PrayerTimesEvent.loadPrayerTimes(),
+                    );
+                  },
+                ),
               );
 
             case PrayerTimesStatus.locationRequired:
@@ -213,12 +223,15 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return TilawaEmptyState(
-      icon: Icons.location_off_rounded,
-      iconColor: theme.colorScheme.outline,
+    return TilawaIllustratedState(
+      visual: const TilawaStateVisual(
+        icon: Icons.my_location_rounded,
+        tone: TilawaStateVisualTone.tertiary,
+      ),
       title: context.l10n.locationRequired,
       subtitle: context.l10n.locationRequiredDescription,
-      action: Column(
+      semanticLabel: context.l10n.locationRequired,
+      primaryAction: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (state.errorMessage.isNotEmpty) ...[
@@ -231,7 +244,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
             ),
             SizedBox(height: tokens.spaceMedium),
           ],
-          FilledButton.icon(
+          TilawaButton(
+            text: context.l10n.enableLocation,
+            leadingIcon: const Icon(Icons.my_location_rounded),
+            isLoading: state.isLoadingLocation,
             onPressed: state.isLoadingLocation
                 ? null
                 : () {
@@ -239,17 +255,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                       const PrayerTimesEvent.updateLocation(),
                     );
                   },
-            icon: state.isLoadingLocation
-                ? SizedBox.square(
-                    dimension: tokens.iconSizeSmall,
-                    child: TilawaLoadingIndicator(
-                      centered: false,
-                      strokeWidth: tokens.borderWidthThin * 4,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  )
-                : const Icon(Icons.my_location_rounded),
-            label: Text(context.l10n.enableLocation),
           ),
         ],
       ),
@@ -269,32 +274,38 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           const PrayerTimesEvent.loadPrayerTimes(),
         );
       },
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        padding: EdgeInsets.only(
-          top: tokens.spaceMedium,
-          bottom: tokens.spaceExtraLarge,
-        ),
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          _LocationUtilityCard(
-            locationName: state.locationName,
-            onUpdateLocation: () {
-              context.read<PrayerTimesBloc>().add(
-                const PrayerTimesEvent.updateLocation(),
-              );
-            },
-            isLoading: state.isLoadingLocation,
-          ),
-          _CountdownCardSection(),
-          _TodayPrayerList(
-            prayerTimes: state.todayPrayerTimes!,
-            settings: state.settings,
-          ),
-          _BottomUtilitiesCard(
-            onOpenQibla: () => context.push('/qibla'),
-            onManageAlertsTap: () => _showNotificationDialog(context),
+          const Positioned.fill(child: _PrayerTimesAmbientBackground()),
+          ListView(
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
+            padding: EdgeInsets.only(
+              top: tokens.spaceMedium,
+              bottom: tokens.spaceExtraLarge,
+            ),
+            children: [
+              _LocationUtilityCard(
+                locationName: state.locationName,
+                onUpdateLocation: () {
+                  context.read<PrayerTimesBloc>().add(
+                    const PrayerTimesEvent.updateLocation(),
+                  );
+                },
+                isLoading: state.isLoadingLocation,
+              ),
+              _CountdownCardSection(),
+              _TodayPrayerList(
+                prayerTimes: state.todayPrayerTimes!,
+                settings: state.settings,
+              ),
+              _BottomUtilitiesCard(
+                onOpenQibla: () => const QiblaRoute().push(context),
+                onManageAlertsTap: () => _showNotificationDialog(context),
+              ),
+            ],
           ),
         ],
       ),
@@ -303,10 +314,14 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   Widget _buildMonthlyView(BuildContext context, PrayerTimesState state) {
     if (state.latitude == null || state.longitude == null) {
-      return TilawaEmptyState(
-        icon: Icons.location_off_rounded,
+      return TilawaIllustratedState(
+        visual: const TilawaStateVisual(
+          icon: Icons.my_location_rounded,
+          tone: TilawaStateVisualTone.tertiary,
+        ),
         title: context.l10n.locationRequired,
         subtitle: context.l10n.locationRequiredDescription,
+        semanticLabel: context.l10n.locationRequired,
       );
     }
 
@@ -399,6 +414,88 @@ class _CountdownCardSection extends StatelessWidget {
       normalized = normalized.replaceAll(arabicNumbers[i], englishNumbers[i]);
     }
     return normalized;
+  }
+}
+
+class _PrayerTimesAmbientBackground extends StatelessWidget {
+  const _PrayerTimesAmbientBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return ExcludeSemantics(
+      child: CustomPaint(
+        painter: _PrayerTimesAmbientPainter(
+          colorScheme: theme.colorScheme,
+          tokens: theme.tokens,
+        ),
+      ),
+    );
+  }
+}
+
+class _PrayerTimesAmbientPainter extends CustomPainter {
+  const _PrayerTimesAmbientPainter({
+    required this.colorScheme,
+    required this.tokens,
+  });
+
+  final ColorScheme colorScheme;
+  final TilawaDesignTokens tokens;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shortest = size.shortestSide;
+    final firstCenter = Offset(size.width * 0.08, size.height * 0.18);
+    final secondCenter = Offset(size.width * 0.92, size.height * 0.64);
+
+    final primaryStroke = Paint()
+      ..color = colorScheme.primary.withValues(
+        alpha: tokens.opacitySubtle * 0.42,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+    final tertiaryStroke = Paint()
+      ..color = colorScheme.tertiary.withValues(
+        alpha: tokens.opacitySubtle * 0.32,
+      )
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = tokens.borderWidthThin;
+
+    for (final radiusFactor in <double>[0.44, 0.68]) {
+      final rect = Rect.fromCircle(
+        center: firstCenter,
+        radius: shortest * radiusFactor,
+      );
+      canvas.drawArc(
+        rect,
+        -math.pi * 0.08,
+        math.pi * 0.54,
+        false,
+        primaryStroke,
+      );
+    }
+
+    for (final radiusFactor in <double>[0.5, 0.76]) {
+      final rect = Rect.fromCircle(
+        center: secondCenter,
+        radius: shortest * radiusFactor,
+      );
+      canvas.drawArc(
+        rect,
+        math.pi * 0.9,
+        math.pi * 0.48,
+        false,
+        tertiaryStroke,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PrayerTimesAmbientPainter oldDelegate) {
+    return oldDelegate.colorScheme != colorScheme ||
+        oldDelegate.tokens != tokens;
   }
 }
 
@@ -933,6 +1030,11 @@ class _TodayPrayerListRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
         child: DecoratedBox(
           decoration: BoxDecoration(
+            color: isCurrent
+                ? colorScheme.primaryContainer.withValues(
+                    alpha: tokens.opacitySubtle,
+                  )
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(tokens.radiusMedium),
             border: isCurrent
                 ? Border.all(
@@ -1100,18 +1202,7 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: tokens.spaceExtraLarge + tokens.spaceLarge,
-                  height: tokens.borderWidthThin * 4,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.outline.withValues(
-                      alpha: tokens.opacityMedium,
-                    ),
-                    borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                  ),
-                ),
-              ),
+              TilawaSheetHandle(),
               SizedBox(height: tokens.spaceLarge),
               Text(
                 row.prayerName,

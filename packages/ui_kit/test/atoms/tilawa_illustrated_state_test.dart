@@ -2,12 +2,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-Widget _wrap(Widget child) {
+Widget _wrap(
+  Widget child, {
+  Brightness brightness = Brightness.light,
+  TextDirection textDirection = TextDirection.ltr,
+  TextScaler textScaler = TextScaler.noScaling,
+}) {
+  final colorScheme = ColorScheme.fromSeed(
+    seedColor: Colors.green,
+    brightness: brightness,
+  );
+  final designTokens = brightness == Brightness.dark
+      ? TilawaDesignTokens.dark()
+      : TilawaDesignTokens.light();
+  final componentTokens = brightness == Brightness.dark
+      ? TilawaComponentTokens.dark(colorScheme: colorScheme)
+      : TilawaComponentTokens.light(colorScheme: colorScheme);
+
   return MaterialApp(
     theme: ThemeData(
-      extensions: [TilawaDesignTokens.light(), TilawaComponentTokens.light()],
+      colorScheme: colorScheme,
+      extensions: [designTokens, componentTokens],
     ),
-    home: Scaffold(body: child),
+    home: Directionality(
+      textDirection: textDirection,
+      child: MediaQuery(
+        data: MediaQueryData(textScaler: textScaler),
+        child: Scaffold(body: child),
+      ),
+    ),
   );
 }
 
@@ -48,8 +71,24 @@ void main() {
         ),
       );
 
+      expect(find.byType(TilawaStateVisual), findsOneWidget);
       expect(find.byIcon(Icons.download_done_rounded), findsOneWidget);
       expect(find.text('Ready offline'), findsOneWidget);
+    });
+
+    testWidgets('renders gracefully when no visual or icon is provided', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          TilawaIllustratedState(
+            title: 'Fallback state',
+          ),
+        ),
+      );
+
+      expect(find.byType(TilawaStateVisual), findsNothing);
+      expect(find.text('Fallback state'), findsOneWidget);
     });
 
     testWidgets('renders and triggers primary and secondary actions', (
@@ -125,6 +164,55 @@ void main() {
       );
 
       expect(constrainedBox.constraints.maxWidth, 280);
+    });
+
+    testWidgets('supports dark theme with the default visual fallback', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrap(
+          const TilawaIllustratedState(
+            icon: Icons.cloud_off_rounded,
+            title: 'Try again',
+            subtitle: 'Downloads are not available right now.',
+          ),
+          brightness: Brightness.dark,
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TilawaStateVisual), findsOneWidget);
+      expect(find.text('Try again'), findsOneWidget);
+    });
+
+    testWidgets('supports RTL and larger text on compact phones', (
+      tester,
+    ) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(320, 640);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      await tester.pumpWidget(
+        _wrap(
+          TilawaIllustratedState(
+            icon: Icons.my_location_rounded,
+            title: 'الموقع مطلوب',
+            subtitle: 'تتطلب مواقيت الصلاة موقعك للحساب بدقة',
+            primaryAction: TilawaButton(
+              text: 'تفعيل الموقع',
+              leadingIcon: const Icon(Icons.my_location_rounded),
+              onPressed: () {},
+            ),
+          ),
+          textDirection: TextDirection.rtl,
+          textScaler: const TextScaler.linear(1.6),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(find.text('الموقع مطلوب'), findsOneWidget);
+      expect(find.text('تفعيل الموقع'), findsOneWidget);
     });
   });
 }

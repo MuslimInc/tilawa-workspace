@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../molecules/tilawa_section_header.dart';
 
 class TilawaSettingsGroup extends StatelessWidget {
   const TilawaSettingsGroup({
@@ -19,20 +20,9 @@ class TilawaSettingsGroup extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
 
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: tokens.groupHeaderPadding,
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: tokens.groupTitleFontSize,
-              fontWeight: .w800,
-              color: colorScheme.primary,
-              letterSpacing: tokens.groupTitleLetterSpacing,
-            ),
-          ),
-        ),
+        TilawaSectionHeader.settings(context, title: title),
         Container(
           decoration: BoxDecoration(
             color: tokens.groupSurfaceColor,
