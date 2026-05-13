@@ -17,6 +17,7 @@ class TilawaErrorState extends StatelessWidget {
     this.retryLabel,
     this.onRetry,
     this.iconColor,
+    this.isRetrying = false,
   });
 
   /// The icon shown above the title.
@@ -37,6 +38,9 @@ class TilawaErrorState extends StatelessWidget {
   /// Override color for the icon. Defaults to
   /// `colorScheme.onSurface` with token-driven opacity.
   final Color? iconColor;
+
+  /// When true, the retry button shows a loading indicator and ignores taps.
+  final bool isRetrying;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +87,8 @@ class TilawaErrorState extends StatelessWidget {
             if (retryLabel != null && onRetry != null) ...[
               SizedBox(height: tokens.actionSpacing),
               ElevatedButton(
-                onPressed: onRetry,
+                // fix: Feedback & states — optional in-flight retry affordance
+                onPressed: isRetrying ? null : onRetry,
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       tokens.retryButtonBackgroundColor ??
@@ -97,7 +102,18 @@ class TilawaErrorState extends StatelessWidget {
                     ),
                   ),
                 ),
-                child: Text(retryLabel!),
+                child: isRetrying
+                    ? SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color:
+                              tokens.retryButtonForegroundColor ??
+                              colorScheme.surface,
+                        ),
+                      )
+                    : Text(retryLabel!),
               ),
             ],
           ],

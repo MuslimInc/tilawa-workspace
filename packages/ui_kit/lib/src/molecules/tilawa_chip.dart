@@ -60,7 +60,7 @@ class TilawaChip extends StatelessWidget {
       ),
     );
 
-    final content = Container(
+    final Widget content = Container(
       padding: padding ?? componentTokens.padding,
       decoration: ShapeDecoration(
         color: effectiveBackground,
@@ -104,18 +104,25 @@ class TilawaChip extends StatelessWidget {
       ),
     );
 
-    final Widget effective = !showLabel && icon != null
-        ? Semantics(label: label, child: content)
-        : content;
-
     if (onTap == null) {
-      return effective;
+      return !showLabel && icon != null
+          ? Semantics(label: label, child: content)
+          : content;
     }
 
-    return Material(
-      color: Colors.transparent,
-      shape: shape,
-      child: InkWell(onTap: onTap, customBorder: shape, child: effective),
+    // fix: Accessibility — explicit button role and label (no MergeSemantics: avoids engine merge bugs)
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        shape: shape,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: shape,
+          child: content,
+        ),
+      ),
     );
   }
 }

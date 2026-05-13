@@ -11,6 +11,9 @@ Future<T?> showTilawaModalBottomSheet<T>({
   Color? backgroundColor,
   ShapeBorder? shape,
   bool useSafeArea = false,
+  Color? barrierColor,
+  bool isDismissible = true,
+  String? sheetSemanticsLabel,
 }) {
   final double maxHeight = MediaQuery.sizeOf(context).height * 0.9;
   return showModalBottomSheet<T>(
@@ -19,7 +22,18 @@ Future<T?> showTilawaModalBottomSheet<T>({
     useSafeArea: useSafeArea,
     backgroundColor: backgroundColor,
     shape: shape,
+    // fix: Feedback & states — expose barrier + dismiss for parity with Material
+    barrierColor: barrierColor,
+    isDismissible: isDismissible,
     constraints: BoxConstraints(maxHeight: maxHeight),
-    builder: builder,
+    builder: (BuildContext sheetContext) {
+      final Widget content = builder(sheetContext);
+      if (sheetSemanticsLabel == null) return content;
+      // fix: Accessibility — optional sheet title for screen readers
+      return Semantics(
+        label: sheetSemanticsLabel,
+        child: content,
+      );
+    },
   );
 }

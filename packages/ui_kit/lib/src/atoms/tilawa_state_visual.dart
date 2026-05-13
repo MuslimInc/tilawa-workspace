@@ -69,40 +69,31 @@ class TilawaStateVisual extends StatelessWidget {
 
     final visual = SizedBox.square(
       dimension: dimension,
-      child: CustomPaint(
-        painter: _TilawaStateVisualPainter(
-          accent: accent,
-          surface: colorScheme.surface,
-          surfaceContainer: colorScheme.surfaceContainerHighest,
-          outline: colorScheme.outlineVariant,
-          tokens: tokens,
-        ),
-        child: Center(
-          child: Container(
-            padding: EdgeInsets.all(tokens.spaceMedium),
-            decoration: BoxDecoration(
-              color: Color.alphaBlend(
-                accent.withValues(alpha: tokens.opacitySubtle),
-                colorScheme.surface,
-              ),
-              borderRadius: BorderRadius.circular(tokens.radiusLarge),
-              border: Border.all(
-                color: accent.withValues(alpha: tokens.opacityMedium),
-                width: tokens.borderWidthThin,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: accent.withValues(alpha: tokens.opacitySubtle),
-                  blurRadius: tokens.blurShadow,
-                  offset: tokens.shadowOffsetSmall,
-                ),
-              ],
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(tokens.spaceMedium),
+          decoration: BoxDecoration(
+            color: Color.alphaBlend(
+              accent.withValues(alpha: tokens.opacitySubtle),
+              colorScheme.surface,
             ),
-            child: Icon(
-              icon,
-              size: iconSize,
-              color: iconColor ?? accent,
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
+            border: Border.all(
+              color: accent.withValues(alpha: tokens.opacityMedium),
+              width: tokens.borderWidthThin,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: tokens.opacitySubtle),
+                blurRadius: tokens.blurShadow,
+                offset: tokens.shadowOffsetSmall,
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            size: iconSize,
+            color: iconColor ?? accent,
           ),
         ),
       ),
@@ -123,93 +114,5 @@ class TilawaStateVisual extends StatelessWidget {
       TilawaStateVisualTone.neutral => colorScheme.outline,
       TilawaStateVisualTone.error => colorScheme.error,
     };
-  }
-}
-
-class _TilawaStateVisualPainter extends CustomPainter {
-  const _TilawaStateVisualPainter({
-    required this.accent,
-    required this.surface,
-    required this.surfaceContainer,
-    required this.outline,
-    required this.tokens,
-  });
-
-  final Color accent;
-  final Color surface;
-  final Color surfaceContainer;
-  final Color outline;
-  final TilawaDesignTokens tokens;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.shortestSide / 2;
-
-    final basePaint = Paint()
-      ..color = Color.alphaBlend(
-        accent.withValues(alpha: tokens.opacitySubtle),
-        surfaceContainer,
-      )
-      ..style = PaintingStyle.fill;
-    canvas.drawCircle(center, radius, basePaint);
-
-    final outerStroke = Paint()
-      ..color = outline.withValues(alpha: tokens.opacityMedium)
-      ..strokeWidth = tokens.borderWidthThin
-      ..style = PaintingStyle.stroke;
-    canvas.drawCircle(center, radius - tokens.borderWidthThin, outerStroke);
-
-    final glowPaint = Paint()
-      ..color = accent.withValues(alpha: tokens.opacitySubtle)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = tokens.borderWidthThin + tokens.borderWidthThin;
-    canvas.drawCircle(center, radius - tokens.spaceSmall, glowPaint);
-
-    final motifPaint = Paint()
-      ..color = accent.withValues(alpha: tokens.opacitySubtle)
-      ..style = PaintingStyle.fill;
-
-    final motifRadius = tokens.radiusLarge;
-    final motifSize = Size(tokens.iconSizeLargePlus, tokens.iconSizeLargePlus);
-    final topLeft = Offset(tokens.spaceLarge, tokens.spaceSmall);
-    final bottomRight = Offset(
-      size.width - tokens.spaceLarge - motifSize.width,
-      size.height - tokens.spaceSmall - motifSize.height,
-    );
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        topLeft & motifSize,
-        Radius.circular(motifRadius),
-      ),
-      motifPaint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        bottomRight & motifSize,
-        Radius.circular(motifRadius),
-      ),
-      motifPaint,
-    );
-
-    final quietStroke = Paint()
-      ..color = surface.withValues(alpha: tokens.opacityGlass)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = tokens.borderWidthThin;
-    canvas.drawLine(
-      Offset(center.dx, tokens.spaceMedium),
-      Offset(center.dx, size.height - tokens.spaceMedium),
-      quietStroke,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_TilawaStateVisualPainter oldDelegate) {
-    return oldDelegate.accent != accent ||
-        oldDelegate.surface != surface ||
-        oldDelegate.surfaceContainer != surfaceContainer ||
-        oldDelegate.outline != outline ||
-        oldDelegate.tokens != tokens;
   }
 }

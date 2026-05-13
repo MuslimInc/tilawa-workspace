@@ -135,23 +135,29 @@ class _SegmentButton extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(tokens.containerRadius - 2),
-        child: Container(
-          padding: tokens.itemPadding,
-          decoration: isSelected
-              ? BoxDecoration(
-                  borderRadius: BorderRadius.circular(
-                    tokens.containerRadius - 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: tokens.selectedItemShadowColor,
-                      blurRadius: tokens.selectedItemShadowBlur,
-                      offset: tokens.selectedItemShadowOffset,
+        child: Semantics(
+          // fix: Accessibility — segment state (inside InkWell avoids merge bugs)
+          selected: isSelected,
+          button: true,
+          label: label,
+          child: Container(
+            padding: tokens.itemPadding,
+            decoration: isSelected
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(
+                      tokens.containerRadius - 2,
                     ),
-                  ],
-                )
-              : null,
-          child: Center(child: Text(label, style: textStyle)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: tokens.selectedItemShadowColor,
+                        blurRadius: tokens.selectedItemShadowBlur,
+                        offset: tokens.selectedItemShadowOffset,
+                      ),
+                    ],
+                  )
+                : null,
+            child: Center(child: Text(label, style: textStyle)),
+          ),
         ),
       ),
     );

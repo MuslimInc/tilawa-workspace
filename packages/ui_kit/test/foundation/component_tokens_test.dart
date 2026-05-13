@@ -260,6 +260,7 @@ void main() {
         backgroundColor: Color(0xFFF1EFE8),
         borderRadius: 14.0,
         contentPadding: EdgeInsets.symmetric(vertical: 10),
+        scrollPadding: EdgeInsets.all(16),
         iconSize: 16.0,
         focusedBorderOpacity: 0.25,
         unfocusedBorderOpacity: 0.2,
@@ -280,6 +281,7 @@ void main() {
         backgroundColor: Color(0xFFE3D4E9),
         borderRadius: 18.0,
         contentPadding: EdgeInsets.symmetric(vertical: 14),
+        scrollPadding: EdgeInsets.all(24),
         iconSize: 20.0,
         focusedBorderOpacity: 0.32,
         unfocusedBorderOpacity: 0.28,
@@ -296,6 +298,14 @@ void main() {
         prefixIconFocusedColor: Color(0xFF008800),
       );
       final result = TilawaSearchFieldTokens.lerp(first, second, 0.5);
+      expect(
+        result.scrollPadding,
+        EdgeInsets.lerp(
+          const EdgeInsets.all(16),
+          const EdgeInsets.all(24),
+          0.5,
+        ),
+      );
       expect(result.height, closeTo(52.0, 0.01));
       expect(
         result.backgroundColor,

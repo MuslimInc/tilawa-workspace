@@ -6,6 +6,7 @@ import 'package:tilawa_ui_kit/src/atoms/atoms.dart';
 import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
+import 'golden_constraints.dart';
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
@@ -16,6 +17,7 @@ void main() {
       'TilawaCard',
       fileName: 'atoms/tilawa_card',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Light Theme',
@@ -45,6 +47,7 @@ void main() {
       'TilawaCard compact',
       fileName: 'atoms/tilawa_card_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Light (compact)',
@@ -77,6 +80,7 @@ void main() {
       'TilawaIconBox',
       fileName: 'atoms/tilawa_icon_box',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -92,6 +96,7 @@ void main() {
       'TilawaIconBox compact',
       fileName: 'atoms/tilawa_icon_box_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',
@@ -116,6 +121,7 @@ void main() {
       'TilawaIconToggle',
       fileName: 'atoms/tilawa_icon_toggle',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Off',
@@ -159,6 +165,7 @@ void main() {
       'TilawaEmptyState',
       fileName: 'atoms/tilawa_empty_state',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -188,6 +195,7 @@ void main() {
       'TilawaEmptyState compact',
       fileName: 'atoms/tilawa_empty_state_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',
@@ -235,6 +243,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 16));
       },
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -248,6 +257,7 @@ void main() {
       'TilawaDivider',
       fileName: 'atoms/tilawa_divider',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -270,6 +280,7 @@ void main() {
       'TilawaSectionTitle',
       fileName: 'atoms/tilawa_section_title',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Light',
@@ -308,6 +319,7 @@ void main() {
       'TilawaSheetHandle',
       fileName: 'atoms/tilawa_sheet_handle',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Light',
@@ -330,6 +342,7 @@ void main() {
       'TilawaSheetHandle compact',
       fileName: 'atoms/tilawa_sheet_handle_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Light (compact)',
@@ -354,6 +367,7 @@ void main() {
       'TilawaErrorState',
       fileName: 'atoms/tilawa_error_state',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -411,6 +425,7 @@ void main() {
       'TilawaErrorState compact',
       fileName: 'atoms/tilawa_error_state_compact',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default (compact)',
@@ -463,6 +478,7 @@ void main() {
       'TilawaButton - Variants',
       fileName: 'atoms/tilawa_button_variants',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Primary',
@@ -517,6 +533,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 100));
       },
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Disabled',
@@ -562,6 +579,7 @@ void main() {
       'TilawaButton - Environment',
       fileName: 'atoms/tilawa_button_env',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Dark Mode - Primary',
@@ -600,6 +618,7 @@ void main() {
       'tilawa_text_field_variants',
       fileName: 'atoms/tilawa_text_field_variants',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Default',
@@ -674,6 +693,7 @@ void main() {
       'tilawa_text_field_env',
       fileName: 'atoms/tilawa_text_field_env',
       builder: () => GoldenTestGroup(
+        scenarioConstraints: kUiKitGoldenScenarioConstraints,
         children: [
           GoldenTestScenario(
             name: 'Dark Mode',

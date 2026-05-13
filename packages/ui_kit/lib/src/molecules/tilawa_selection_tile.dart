@@ -51,20 +51,26 @@ class TilawaSelectionTile extends StatelessWidget {
               : Colors.transparent,
           child: InkWell(
             onTap: onTap,
-            child: Padding(
-              padding: tokens.tileContentPadding,
-              child: Row(
-                spacing: tokens.tileItemGap,
-                children: [
-                  ?leading,
-                  Expanded(child: Text(title, style: textStyle)),
-                  if (isSelected)
-                    Icon(
-                      Icons.check_rounded,
-                      color: colorScheme.onSurfaceVariant,
-                      size: tokens.tileTrailingSize,
-                    ),
-                ],
+            child: Semantics(
+              // fix: Accessibility — single-select list item state (child of InkWell avoids merge bugs)
+              selected: isSelected,
+              button: true,
+              label: title,
+              child: Padding(
+                padding: tokens.tileContentPadding,
+                child: Row(
+                  spacing: tokens.tileItemGap,
+                  children: [
+                    ?leading,
+                    Expanded(child: Text(title, style: textStyle)),
+                    if (isSelected)
+                      Icon(
+                        Icons.check_rounded,
+                        color: colorScheme.onSurfaceVariant,
+                        size: tokens.tileTrailingSize,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

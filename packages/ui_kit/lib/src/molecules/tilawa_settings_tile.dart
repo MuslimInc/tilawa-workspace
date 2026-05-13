@@ -2,6 +2,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 class TilawaSettingsTile extends StatelessWidget {
   const TilawaSettingsTile({
@@ -80,7 +81,8 @@ class TilawaSettingsTile extends StatelessWidget {
               contentPadding: resolvedContentPadding,
               horizontalTitleGap: tokens.tileItemGap,
               minLeadingWidth: minLeadingWidth,
-              minVerticalPadding: 10,
+              // fix: Spacing & alignment — 8dp grid via design tokens
+              minVerticalPadding: theme.tokens.spaceSmall,
               titleTextStyle: titleStyle,
               subtitleTextStyle: subtitleStyle,
             ),
@@ -203,7 +205,8 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
               contentPadding: resolvedContentPadding,
               horizontalTitleGap: tokens.tileItemGap,
               minLeadingWidth: minLeadingWidth,
-              minVerticalPadding: 10,
+              // fix: Spacing & alignment — 8dp grid via design tokens
+              minVerticalPadding: theme.tokens.spaceSmall,
               titleTextStyle: titleStyle,
               subtitleTextStyle: subtitleStyle,
             ),

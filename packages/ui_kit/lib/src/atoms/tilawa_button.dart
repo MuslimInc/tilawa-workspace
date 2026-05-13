@@ -233,42 +233,40 @@ class _ButtonContent extends StatelessWidget {
       );
     }
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final hasFiniteWidth = constraints.maxWidth.isFinite;
-        final label = Text(
-          text,
-          overflow: hasFiniteWidth ? TextOverflow.ellipsis : null,
-          softWrap: false,
-          style: TextStyle(
-            fontSize: fontSize,
-            fontWeight: FontWeight.w600,
-            color: foregroundColor,
-          ),
-        );
+    // Avoid [LayoutBuilder]: intrinsic sizing (e.g. Alchemist golden [Table]
+    // column probes) cannot evaluate layout callbacks on [LayoutBuilder].
+    final label = Text(
+      text,
+      overflow: TextOverflow.ellipsis,
+      maxLines: 1,
+      softWrap: false,
+      style: TextStyle(
+        fontSize: fontSize,
+        fontWeight: FontWeight.w600,
+        color: foregroundColor,
+      ),
+    );
 
-        return Row(
-          mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (leadingIcon != null) ...[
-              IconTheme(
-                data: IconThemeData(size: iconSize, color: foregroundColor),
-                child: leadingIcon!,
-              ),
-              const SizedBox(width: 8),
-            ],
-            if (hasFiniteWidth) Flexible(child: label) else label,
-            if (trailingIcon != null) ...[
-              const SizedBox(width: 8),
-              IconTheme(
-                data: IconThemeData(size: iconSize, color: foregroundColor),
-                child: trailingIcon!,
-              ),
-            ],
-          ],
-        );
-      },
+    return Row(
+      mainAxisSize: isFullWidth ? MainAxisSize.max : MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (leadingIcon != null) ...[
+          IconTheme(
+            data: IconThemeData(size: iconSize, color: foregroundColor),
+            child: leadingIcon!,
+          ),
+          const SizedBox(width: 8),
+        ],
+        if (isFullWidth) Expanded(child: label) else label,
+        if (trailingIcon != null) ...[
+          const SizedBox(width: 8),
+          IconTheme(
+            data: IconThemeData(size: iconSize, color: foregroundColor),
+            child: trailingIcon!,
+          ),
+        ],
+      ],
     );
   }
 }

@@ -56,6 +56,7 @@ class SeekBarState extends State<SeekBar> {
 
   @override
   Widget build(BuildContext context) {
+    // fix: Accessibility — touch strip height from tokens (≥48dp)
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.seekBar;
     final baseColor = theme.colorScheme.onPrimary;

@@ -314,7 +314,8 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
 }
 
 @TypedGoRoute<ScreenshotComposerRoute>(path: '/share/screenshot')
-class ScreenshotComposerRoute extends GoRouteData with $ScreenshotComposerRoute {
+class ScreenshotComposerRoute extends GoRouteData
+    with $ScreenshotComposerRoute {
   const ScreenshotComposerRoute({this.$extra});
 
   final ScreenshotComposerNavExtra? $extra;

@@ -11,6 +11,8 @@ class TilawaIconActionButton extends StatefulWidget {
     this.isActive = false,
     this.size,
     this.iconSize,
+    this.tooltip,
+    this.semanticLabel,
   });
 
   final IconData icon;
@@ -18,6 +20,13 @@ class TilawaIconActionButton extends StatefulWidget {
   final bool isActive;
   final double? size;
   final double? iconSize;
+
+  /// Shown on long-press / desktop hover; also used as a11y fallback when
+  /// [semanticLabel] is null.
+  final String? tooltip;
+
+  /// Screen reader label for the control.
+  final String? semanticLabel;
 
   @override
   State<TilawaIconActionButton> createState() => _TilawaIconActionButtonState();
@@ -60,7 +69,7 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
       componentTokens.borderRadius,
     );
 
-    return SizedBox(
+    Widget result = SizedBox(
       width: effectiveSize,
       height: effectiveSize,
       child: Material(
@@ -88,6 +97,18 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
           ),
         ),
       ),
+    );
+
+    final String? tip = widget.tooltip ?? widget.semanticLabel;
+    if (tip != null) {
+      result = Tooltip(message: tip, child: result);
+    }
+
+    // fix: Accessibility — explicit name for icon-only control
+    return Semantics(
+      button: true,
+      label: widget.semanticLabel ?? widget.tooltip,
+      child: result,
     );
   }
 }

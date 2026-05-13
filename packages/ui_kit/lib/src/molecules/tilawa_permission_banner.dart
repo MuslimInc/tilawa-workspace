@@ -64,8 +64,7 @@ class TilawaPermissionBanner extends StatelessWidget {
             onPressed: onAction,
             style: TextButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: tokens.actionSpacing),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              // fix: Accessibility — preserve Material ≥48dp minimum touch target
             ),
             child: Text(
               actionLabel,

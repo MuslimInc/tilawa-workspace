@@ -189,8 +189,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
             CustomScrollView(
               physics: const NeverScrollableScrollPhysics(),
               slivers: [
-                const SliverFillRemaining(
-                  hasScrollBody: false,
+                const _DryLayoutSafeFillSliver(
                   child: _RecitersStartupLitePane(),
                 ),
               ],
@@ -472,8 +471,7 @@ class _RecitersLoadingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const SliverFillRemaining(
-      hasScrollBody: false,
+    return const _DryLayoutSafeFillSliver(
       child: TilawaLoadingIndicator(),
     );
   }
@@ -490,8 +488,7 @@ class _RecitersErrorSliver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SliverFillRemaining(
-      hasScrollBody: false,
+    return _DryLayoutSafeFillSliver(
       child: _StatePanel(
         key: const ValueKey('error_state'),
         icon: Icons.error_outline_rounded,
@@ -516,8 +513,7 @@ class _RecitersEmptySliver extends StatelessWidget {
     final bool isFavoritesState = state.showFavoritesOnly;
     final bool hasActiveFilters = _hasActiveFilters(state);
 
-    return SliverFillRemaining(
-      hasScrollBody: false,
+    return _DryLayoutSafeFillSliver(
       child: _StatePanel(
         key: const ValueKey('empty_state'),
         icon: isFavoritesState
@@ -897,6 +893,34 @@ class _StatePanel extends StatelessWidget {
               onPressed: onAction,
             )
           : null,
+    );
+  }
+}
+
+class _DryLayoutSafeFillSliver extends StatelessWidget {
+  const _DryLayoutSafeFillSliver({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final double height = math.max(
+          constraints.remainingPaintExtent,
+          0,
+        );
+
+        return SliverToBoxAdapter(
+          child: ConstrainedBox(
+            constraints: BoxConstraints.tightFor(
+              width: constraints.crossAxisExtent,
+              height: height,
+            ),
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
