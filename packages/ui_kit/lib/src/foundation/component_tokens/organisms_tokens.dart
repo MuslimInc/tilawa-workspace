@@ -1670,7 +1670,7 @@ class TilawaImmersiveComposerTokens {
       regularPreviewHeightFactor: 0.5,
       panelMinHeight: 220,
       previewMaxHeight: 460,
-      headerButtonSize: 24,
+      headerButtonSize: kMinInteractiveDimension,
       headerIconSizeOffset: 2,
       composerSurfaceColor: surface,
       overlayPanelTranslucentFillColor: surface.withValues(

@@ -55,7 +55,7 @@ class TilawaAlphabetScrollbarTokens {
     ColorScheme colorScheme,
   ) {
     return TilawaAlphabetScrollbarTokens(
-      width: 36,
+      width: kMinInteractiveDimension,
       itemExtent: 48, // fix: Accessibility — ≥48dp row hit target
       selectedIndicatorExtent: 40,
       letterFontSize: 14,
