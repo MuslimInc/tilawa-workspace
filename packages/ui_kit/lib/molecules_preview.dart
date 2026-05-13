@@ -504,7 +504,6 @@ Widget previewTilawaSettingsTile() {
         child: TilawaSettingsTile(
           icon: Icons.notifications_outlined,
           title: 'Notifications',
-          subtitle: 'Daily prayer alerts',
           onTap: () {},
         ),
       ),
@@ -548,7 +547,6 @@ Widget previewTilawaSettingsTileRtl() {
           child: TilawaSettingsTile(
             icon: Icons.notifications_outlined,
             title: 'الإشعارات',
-            subtitle: 'تنبيهات الصلوات اليومية',
             onTap: _noop,
           ),
         ),
@@ -615,7 +613,6 @@ Widget previewTilawaSettingsSwitchTileRtl() {
           child: TilawaSettingsSwitchTile(
             icon: Icons.notifications_outlined,
             title: 'إشعارات الصلاة',
-            subtitle: 'تشغيل التنبيهات',
             value: true,
             onChanged: _noopBool,
             showDivider: false,

@@ -527,7 +527,6 @@ void main() {
                 child: TilawaSettingsTile(
                   icon: Icons.notifications_outlined,
                   title: 'Notifications',
-                  subtitle: 'Daily prayer alerts',
                   onTap: () {},
                 ),
               ),
@@ -586,7 +585,6 @@ void main() {
                 child: TilawaSettingsSwitchTile(
                   icon: Icons.notifications_outlined,
                   title: 'إشعارات الصلاة',
-                  subtitle: 'تشغيل التنبيهات',
                   value: true,
                   onChanged: (_) {},
                   showDivider: false,
@@ -612,7 +610,6 @@ void main() {
                 child: TilawaSettingsTile(
                   icon: Icons.notifications_outlined,
                   title: 'Notifications',
-                  subtitle: 'Daily prayer alerts',
                   onTap: () {},
                 ),
               ),
@@ -675,7 +672,6 @@ void main() {
                 child: TilawaSettingsSwitchTile(
                   icon: Icons.notifications_outlined,
                   title: 'إشعارات الصلاة',
-                  subtitle: 'تشغيل التنبيهات',
                   value: true,
                   onChanged: (_) {},
                   showDivider: false,

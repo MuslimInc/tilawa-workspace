@@ -87,7 +87,6 @@ void main() {
                     TilawaSettingsTile(
                       icon: Icons.language,
                       title: 'Language',
-                      subtitle: 'English',
                       onTap: () {},
                     ),
                     TilawaSettingsSwitchTile(
@@ -119,7 +118,6 @@ void main() {
                     TilawaSettingsTile(
                       icon: Icons.language,
                       title: 'Language',
-                      subtitle: 'English',
                       onTap: () {},
                     ),
                     TilawaSettingsSwitchTile(
@@ -160,7 +158,6 @@ void main() {
                     TilawaSettingsTile(
                       icon: Icons.language,
                       title: 'Language',
-                      subtitle: 'English',
                       onTap: () {},
                     ),
                     TilawaSettingsSwitchTile(
@@ -193,7 +190,6 @@ void main() {
                     TilawaSettingsTile(
                       icon: Icons.language,
                       title: 'Language',
-                      subtitle: 'English',
                       onTap: () {},
                     ),
                     TilawaSettingsSwitchTile(
