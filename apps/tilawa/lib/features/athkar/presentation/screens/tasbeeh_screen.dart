@@ -369,6 +369,8 @@ class _TasbeehHistoryView extends StatelessWidget {
                               SizedBox(width: tokens.spaceSmall),
                               TilawaIconActionButton(
                                 icon: Icons.delete_outline_rounded,
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainerHigh,
                                 onTap: () async {
                                   final shouldDelete = await showDialog<bool>(
                                     context: context,

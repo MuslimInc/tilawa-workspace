@@ -78,7 +78,7 @@ class AppStartupTasks {
 
   void resetLaunchState() {
     logger.d(
-      '[AppLaunch][AppStartupTasks.resetLaunchState]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.resetLaunchState: Start in (${DateTime.now()})',
     );
     AppRouter.disableStateRestoration = false;
     AppRouter.pendingStartupNotificationLaunch = false;
@@ -92,7 +92,7 @@ class AppStartupTasks {
   /// runtime use.
   void resetMemoizedInitFutures() {
     logger.d(
-      '[AppLaunch][AppStartupTasks.resetMemoizedInitFutures]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.resetMemoizedInitFutures: Start in (${DateTime.now()})',
     );
     _notificationServiceInitFuture = null;
     _notificationHandlersInitFuture = null;
@@ -104,7 +104,7 @@ class AppStartupTasks {
   Future<void> initializeFirebase() async {
     if (!_isEnabled(launchConfig.firebaseInit, 'FIREBASE_INIT')) return;
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeFirebase]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeFirebase: Start in (${DateTime.now()})',
     );
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -117,7 +117,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.configureForegroundMessaging]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.configureForegroundMessaging: Start in (${DateTime.now()})',
     );
     AppRouter.init();
     await FirebaseMessaging.instance
@@ -132,7 +132,7 @@ class AppStartupTasks {
   void initializeBlocObserver() {
     if (!_isEnabled(launchConfig.blocObserver, 'BLOC_OBSERVER')) return;
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeBlocObserver]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeBlocObserver: Start in (${DateTime.now()})',
     );
     Bloc.observer = CompositeBlocObserver(
       observers: [
@@ -147,7 +147,7 @@ class AppStartupTasks {
       return Future<void>.value();
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.configureSystemChrome]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.configureSystemChrome: Start in (${DateTime.now()})',
     );
     return Future.wait([
       AppOrientationService.applyDefaultOrientations(),
@@ -163,7 +163,7 @@ class AppStartupTasks {
     required LaunchTimeline timeline,
   }) async {
     logger.d(
-      '[AppLaunch][AppStartupTasks.runCriticalInit]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.runCriticalInit: Start in (${DateTime.now()})',
     );
     final bool firebaseOk = await initializeFirebaseAndHydratedStorage(
       timeline,
@@ -185,7 +185,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeNonCriticalServices]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeNonCriticalServices: Start in (${DateTime.now()})',
     );
     if (AppStartupTasks.skipNonCriticalServicesForTesting) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -204,7 +204,7 @@ class AppStartupTasks {
 
   Future<void> _initializeNonCriticalServicesInBackground() async {
     logger.d(
-      '[AppLaunch][AppStartupTasks._initializeNonCriticalServicesInBackground]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks._initializeNonCriticalServicesInBackground: Start in (${DateTime.now()})',
     );
     final LaunchTimeline timeline = LaunchTimeline()..startPhase();
 
@@ -216,7 +216,7 @@ class AppStartupTasks {
     await _runPhase4QuranAndFirebase(timeline);
 
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeNonCriticalServices]: '
+      '[AppLaunch] source=AppStartupTasks.initializeNonCriticalServices: '
       'All non-critical services completed at (${DateTime.now()})',
     );
   }
@@ -224,7 +224,7 @@ class AppStartupTasks {
   /// Schedules deferred tasks that don't need to block the main flow.
   void _scheduleDeferredBackgroundTasks() {
     logger.d(
-      '[AppLaunch][AppStartupTasks._scheduleDeferredBackgroundTasks]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks._scheduleDeferredBackgroundTasks: Start in (${DateTime.now()})',
     );
     // Defer Android notification channel creation well past first interactive
     // frames to avoid startup frame contention.
@@ -250,18 +250,18 @@ class AppStartupTasks {
 
   Future<void> _ensurePrayerNotificationWatchdogScheduled() async {
     logger.d(
-      '[AppLaunch][AppStartupTasks._ensurePrayerNotificationWatchdogScheduled]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks._ensurePrayerNotificationWatchdogScheduled: Start in (${DateTime.now()})',
     );
     try {
       final PrayerNotificationWatchdogScheduler scheduler =
           getIt<PrayerNotificationWatchdogScheduler>();
       await scheduler.ensurePeriodicWatchdogScheduled();
       logger.d(
-        '[AppLaunch][AppStartupTasks._ensurePrayerNotificationWatchdogScheduled]: Scheduled at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks._ensurePrayerNotificationWatchdogScheduled: Scheduled at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks._ensurePrayerNotificationWatchdogScheduled]: Warning: Could not schedule watchdog at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks._ensurePrayerNotificationWatchdogScheduled: Warning: Could not schedule watchdog at (${DateTime.now()}): $e',
       );
     }
   }
@@ -269,7 +269,7 @@ class AppStartupTasks {
   /// Phase 4: Load Quran data, schedule prefetch, init Firebase data, request permissions.
   Future<void> _runPhase4QuranAndFirebase(LaunchTimeline timeline) async {
     logger.d(
-      '[AppLaunch][AppStartupTasks._runPhase4QuranAndFirebase]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks._runPhase4QuranAndFirebase: Start in (${DateTime.now()})',
     );
     try {
       if (launchConfig.quranDataLoad) {
@@ -313,21 +313,21 @@ class AppStartupTasks {
       }
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks._runPhase4QuranAndFirebase]: Phase4 error at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks._runPhase4QuranAndFirebase: Phase4 error at (${DateTime.now()}): $e',
       );
     }
   }
 
   Future<void> _prefetchQuranAssetsDeferred() async {
     logger.d(
-      '[AppLaunch][AppStartupTasks._prefetchQuranAssetsDeferred]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks._prefetchQuranAssetsDeferred: Start in (${DateTime.now()})',
     );
     try {
       await Future<void>.delayed(quranAssetsPrefetchDelay);
       await _assetPrefetchService.prefetchInBackground();
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks._runPhase4QuranAndFirebase]: Quran asset prefetch skipped/failed at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks._runPhase4QuranAndFirebase: Quran asset prefetch skipped/failed at (${DateTime.now()}): $e',
       );
     }
   }
@@ -350,7 +350,7 @@ class AppStartupTasks {
 
   Future<void> _createNotificationChannelDeferred() async {
     logger.d(
-      '[AppLaunch][AppStartupTasks._createNotificationChannelDeferred]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks._createNotificationChannelDeferred: Start in (${DateTime.now()})',
     );
     try {
       await Future<void>.delayed(
@@ -362,18 +362,18 @@ class AppStartupTasks {
           getIt<INotificationDispatcher>();
       await dispatcher.initialize();
       logger.d(
-        '[AppLaunch][AppStartupTasks._createNotificationChannelDeferred]: Deferred notification channel ensured at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks._createNotificationChannelDeferred: Deferred notification channel ensured at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks._createNotificationChannelDeferred]: Warning: Could not create deferred notification channel at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks._createNotificationChannelDeferred: Warning: Could not create deferred notification channel at (${DateTime.now()}): $e',
       );
     }
   }
 
   Future<void> initializeNotificationService() async {
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeNotificationService]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeNotificationService: Start in (${DateTime.now()})',
     );
     if (!_isEnabled(
       launchConfig.notificationServiceInit,
@@ -393,11 +393,11 @@ class AppStartupTasks {
         fcmService.initialize();
 
         logger.d(
-          '[AppLaunch][AppStartupTasks.initializeNotificationService]: Notification services initialized successfully at (${DateTime.now()})',
+          '[AppLaunch] source=AppStartupTasks.initializeNotificationService: Notification services initialized successfully at (${DateTime.now()})',
         );
       } catch (e) {
         logger.d(
-          '[AppLaunch][AppStartupTasks.initializeNotificationService]: Warning: Could not initialize Notification services at (${DateTime.now()}): $e',
+          '[AppLaunch] source=AppStartupTasks.initializeNotificationService: Warning: Could not initialize Notification services at (${DateTime.now()}): $e',
         );
       }
     }();
@@ -412,7 +412,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeHydratedStorage]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeHydratedStorage: Start in (${DateTime.now()})',
     );
     try {
       HydratedBloc.storage = await HydratedStorage.build(
@@ -424,11 +424,11 @@ class AppStartupTasks {
       );
 
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeHydratedStorage]: HydratedStorage initialized successfully at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks.initializeHydratedStorage: HydratedStorage initialized successfully at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeHydratedStorage]: Warning: Could not initialize HydratedStorage, using in-memory fallback at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.initializeHydratedStorage: Warning: Could not initialize HydratedStorage, using in-memory fallback at (${DateTime.now()}): $e',
       );
       HydratedBloc.storage = _InMemoryStorage();
     }
@@ -437,7 +437,7 @@ class AppStartupTasks {
   Future<void> initializeHive() async {
     if (!_isEnabled(launchConfig.hiveInit, 'HIVE_INIT')) return;
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeHive]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeHive: Start in (${DateTime.now()})',
     );
     try {
       final directory = kIsWeb
@@ -447,11 +447,11 @@ class AppStartupTasks {
         Hive.init(directory.path);
       }
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeHive]: Hive initialized successfully at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks.initializeHive: Hive initialized successfully at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeHive]: Warning: Could not initialize Hive at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.initializeHive: Warning: Could not initialize Hive at (${DateTime.now()}): $e',
       );
     }
   }
@@ -464,7 +464,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeCredentialManager]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeCredentialManager: Start in (${DateTime.now()})',
     );
     try {
       final CredentialManager credentialManager = getIt<CredentialManager>();
@@ -473,11 +473,11 @@ class AppStartupTasks {
         googleClientId: AppStrings.googleClientId,
       );
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeCredentialManager]: Credential Manager initialized successfully at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks.initializeCredentialManager: Credential Manager initialized successfully at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeCredentialManager]: Warning: Could not initialize Credential Manager at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.initializeCredentialManager: Warning: Could not initialize Credential Manager at (${DateTime.now()}): $e',
       );
     }
   }
@@ -485,7 +485,7 @@ class AppStartupTasks {
   Future<void> initializeCrashlytics() async {
     if (!_isEnabled(launchConfig.crashlyticsInit, 'CRASHLYTICS_INIT')) return;
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeCrashlytics]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeCrashlytics: Start in (${DateTime.now()})',
     );
     return _crashlyticsInitFuture ??= () async {
       try {
@@ -494,7 +494,7 @@ class AppStartupTasks {
         await crashlyticsService.initialize();
       } catch (e) {
         logger.d(
-          '[AppLaunch][AppStartupTasks.initializeCrashlytics]: Crashlytics initialization error at (${DateTime.now()}): $e',
+          '[AppLaunch] source=AppStartupTasks.initializeCrashlytics: Crashlytics initialization error at (${DateTime.now()}): $e',
         );
       }
     }();
@@ -503,7 +503,7 @@ class AppStartupTasks {
   Future<void> initializeAnalytics() async {
     if (!_isEnabled(launchConfig.analyticsInit, 'ANALYTICS_INIT')) return;
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeAnalytics]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeAnalytics: Start in (${DateTime.now()})',
     );
     return _analyticsInitFuture ??= () async {
       try {
@@ -512,7 +512,7 @@ class AppStartupTasks {
         await analyticsInitService.initialize();
       } catch (e) {
         logger.d(
-          '[AppLaunch][AppStartupTasks.initializeAnalytics]: Analytics initialization error at (${DateTime.now()}): $e',
+          '[AppLaunch] source=AppStartupTasks.initializeAnalytics: Analytics initialization error at (${DateTime.now()}): $e',
         );
       }
     }();
@@ -526,7 +526,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.requestNotificationPermission]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.requestNotificationPermission: Start in (${DateTime.now()})',
     );
     return _notificationPermissionFuture ??= () async {
       try {
@@ -543,11 +543,11 @@ class AppStartupTasks {
               },
             );
         logger.d(
-          '[AppLaunch][AppStartupTasks.requestNotificationPermission]: Notification permission request completed at (${DateTime.now()})',
+          '[AppLaunch] source=AppStartupTasks.requestNotificationPermission: Notification permission request completed at (${DateTime.now()})',
         );
       } catch (e) {
         logger.d(
-          '[AppLaunch][AppStartupTasks.requestNotificationPermission]: Warning: Could not request notification permission at (${DateTime.now()}): $e',
+          '[AppLaunch] source=AppStartupTasks.requestNotificationPermission: Warning: Could not request notification permission at (${DateTime.now()}): $e',
         );
       }
     }();
@@ -564,7 +564,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeFirebaseDataAsync]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeFirebaseDataAsync: Start in (${DateTime.now()})',
     );
     try {
       final FirebaseInitializationService firebaseInitService =
@@ -572,7 +572,7 @@ class AppStartupTasks {
       await firebaseInitService.initializeFirebaseData();
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeFirebaseDataAsync]: Warning: Could not initialize Firebase data at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.initializeFirebaseDataAsync: Warning: Could not initialize Firebase data at (${DateTime.now()}): $e',
       );
     }
   }
@@ -580,7 +580,7 @@ class AppStartupTasks {
   Future<void> initializeDownloads() async {
     if (!_isEnabled(launchConfig.downloadsInit, 'DOWNLOADS_INIT')) return;
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeDownloads]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeDownloads: Start in (${DateTime.now()})',
     );
     try {
       final DownloadsInitializationService downloadsInitService =
@@ -588,7 +588,7 @@ class AppStartupTasks {
       await downloadsInitService.initialize();
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeDownloads]: Warning: Could not initialize downloads at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.initializeDownloads: Warning: Could not initialize downloads at (${DateTime.now()}): $e',
       );
     }
   }
@@ -601,7 +601,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.prepareNotificationLaunchState]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: Start in (${DateTime.now()})',
     );
     try {
       // Keep pre-runApp on a fast path: only probe FCM cold-start payload.
@@ -617,11 +617,11 @@ class AppStartupTasks {
       }
 
       logger.d(
-        '[AppLaunch][AppStartupTasks.prepareNotificationLaunchState]: Notification launch state prepared (fcm-only) at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: Notification launch state prepared (fcm-only) at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.prepareNotificationLaunchState]: Warning: Could not prepare notification launch state at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: Warning: Could not prepare notification launch state at (${DateTime.now()}): $e',
       );
     }
   }
@@ -634,7 +634,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeNotificationHandlers]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeNotificationHandlers: Start in (${DateTime.now()})',
     );
     return _notificationHandlersInitFuture ??= () async {
       try {
@@ -657,11 +657,11 @@ class AppStartupTasks {
         await downloadNotificationService.initialize();
 
         logger.d(
-          '[AppLaunch][AppStartupTasks.initializeNotificationHandlers]: Notification handlers initialized at (${DateTime.now()})',
+          '[AppLaunch] source=AppStartupTasks.initializeNotificationHandlers: Notification handlers initialized at (${DateTime.now()})',
         );
       } catch (e) {
         logger.d(
-          '[AppLaunch][AppStartupTasks.initializeNotificationHandlers]: Warning: Could not initialize notification handlers at (${DateTime.now()}): $e',
+          '[AppLaunch] source=AppStartupTasks.initializeNotificationHandlers: Warning: Could not initialize notification handlers at (${DateTime.now()}): $e',
         );
       }
     }();
@@ -672,7 +672,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeAudioService]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeAudioService: Start in (${DateTime.now()})',
     );
     try {
       final handler = getIt<AudioPlayerHandler>();
@@ -685,11 +685,11 @@ class AppStartupTasks {
         ),
       );
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeAudioService]: Audio service initialized successfully at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks.initializeAudioService: Audio service initialized successfully at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeAudioService]: Warning: Could not initialize audio service at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.initializeAudioService: Warning: Could not initialize audio service at (${DateTime.now()}): $e',
       );
     }
   }
@@ -702,18 +702,18 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializeAthkarNotifications]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializeAthkarNotifications: Start in (${DateTime.now()})',
     );
     try {
       final IAthkarNotificationService athkarService =
           getIt<IAthkarNotificationService>();
       await athkarService.scheduleAthkarNotifications();
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeAthkarNotifications]: Athkar notifications scheduled successfully at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks.initializeAthkarNotifications: Athkar notifications scheduled successfully at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializeAthkarNotifications]: Warning: Could not initialize athkar notifications at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.initializeAthkarNotifications: Warning: Could not initialize athkar notifications at (${DateTime.now()}): $e',
       );
     }
   }
@@ -732,7 +732,7 @@ class AppStartupTasks {
       return;
     }
     logger.d(
-      '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Start in (${DateTime.now()})',
     );
     try {
       final IPrayerAdhanNotificationService service =
@@ -753,7 +753,7 @@ class AppStartupTasks {
         forceReschedule = await adhanPlayer.consumeNeedsRescheduleAfterBoot();
         if (forceReschedule) {
           logger.d(
-            '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: '
+            '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: '
             'Boot/timezone change detected — forcing reschedule',
           );
         }
@@ -763,7 +763,7 @@ class AppStartupTasks {
       await result.fold(
         (failure) async {
           logger.d(
-            '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Warning: Could not load prayer settings for startup schedule: ${failure.message}',
+            '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Warning: Could not load prayer settings for startup schedule: ${failure.message}',
           );
         },
         (PrayerSettingsEntity settings) async {
@@ -774,7 +774,7 @@ class AppStartupTasks {
               await adhanPlayer.markNeedsReschedule();
             }
             logger.d(
-              '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: No saved location; startup schedule skipped',
+              '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: No saved location; startup schedule skipped',
             );
             return;
           }
@@ -790,11 +790,11 @@ class AppStartupTasks {
         },
       );
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Prayer notifications initialized at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Prayer notifications initialized at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupTasks.initializePrayerNotifications]: Warning: Could not initialize prayer notifications at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Warning: Could not initialize prayer notifications at (${DateTime.now()}): $e',
       );
     }
   }
@@ -808,7 +808,7 @@ class AppStartupTasks {
 
   void _logDisabled(String toggleName) {
     logger.d(
-      '[AppLaunch][Config]: Disabled by config: $toggleName at (${DateTime.now()})',
+      '[AppLaunch] source=Config: Disabled by config: $toggleName at (${DateTime.now()})',
     );
   }
 }

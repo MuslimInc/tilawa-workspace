@@ -36,7 +36,7 @@ class ShareCubit extends Cubit<ShareState> {
     this._getReciters,
   ) : super(const ShareState()) {
     logger.d(
-      '[AppLaunch][ShareCubit.constructor]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareCubit.constructor: Start in (${DateTime.now()})',
     );
   }
 
@@ -61,7 +61,7 @@ class ShareCubit extends Cubit<ShareState> {
     String? reciterFolder,
   }) {
     logger.d(
-      '[AppLaunch][ShareCubit.configureAudioClip]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareCubit.configureAudioClip: Start in (${DateTime.now()})',
     );
     final effectiveMin = minAyah ?? 1;
     final effectiveMax = maxAyah ?? getVerseCount(surahNumber);
@@ -134,7 +134,7 @@ class ShareCubit extends Cubit<ShareState> {
 
   Future<void> _fetchAyahs(int surahNumber, int fromAyah, int toAyah) async {
     logger.d(
-      '[AppLaunch][ShareCubit._fetchAyahs]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareCubit._fetchAyahs: Start in (${DateTime.now()})',
     );
     try {
       final rangeAyahs = await _getShareAyahs(
@@ -152,7 +152,7 @@ class ShareCubit extends Cubit<ShareState> {
 
   Future<void> loadReciterOptions() async {
     logger.d(
-      '[AppLaunch][ShareCubit.loadReciterOptions]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareCubit.loadReciterOptions: Start in (${DateTime.now()})',
     );
     if (state.surahNumber == null) return;
     if (state.isLoadingReciters) return;
@@ -296,7 +296,7 @@ class ShareCubit extends Cubit<ShareState> {
     Color? footerForegroundColor,
   }) async {
     logger.d(
-      '[AppLaunch][ShareCubit.prepareScreenshot]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareCubit.prepareScreenshot: Start in (${DateTime.now()})',
     );
     emit(
       state.copyWith(
@@ -352,7 +352,7 @@ class ShareCubit extends Cubit<ShareState> {
     Color? footerForegroundColor,
   }) async {
     logger.d(
-      '[AppLaunch][ShareCubit.captureAndShareScreenshot]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareCubit.captureAndShareScreenshot: Start in (${DateTime.now()})',
     );
     emit(state.copyWith(status: ShareStatus.sharing));
     try {
@@ -393,7 +393,7 @@ class ShareCubit extends Cubit<ShareState> {
     int? maxDurationSeconds,
   }) async {
     logger.d(
-      '[AppLaunch][ShareCubit.prepareAudioClip]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareCubit.prepareAudioClip: Start in (${DateTime.now()})',
     );
     final config = _buildAudioConfig();
     if (config == null) return;
@@ -483,7 +483,7 @@ class ShareCubit extends Cubit<ShareState> {
     int? maxDurationSeconds,
   }) async {
     logger.d(
-      '[AppLaunch][ShareCubit.generateVideo]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareCubit.generateVideo: Start in (${DateTime.now()})',
     );
     final audioConfig = _buildAudioConfig();
 

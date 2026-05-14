@@ -50,7 +50,7 @@ class ShareRepositoryImpl implements ShareRepository {
     Color? footerForegroundColor,
   }) async {
     logger.d(
-      '[AppLaunch][ShareRepositoryImpl.captureScreenshot]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareRepositoryImpl.captureScreenshot: Start in (${DateTime.now()})',
     );
     final boundaryKey = handle.value as GlobalKey;
     await WidgetsBinding.instance.endOfFrame;
@@ -85,7 +85,7 @@ class ShareRepositoryImpl implements ShareRepository {
     CancelToken? cancelToken,
   }) async {
     logger.d(
-      '[AppLaunch][ShareRepositoryImpl.generateAudioClip]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareRepositoryImpl.generateAudioClip: Start in (${DateTime.now()})',
     );
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
@@ -129,7 +129,7 @@ class ShareRepositoryImpl implements ShareRepository {
     CancelToken? cancelToken,
   }) async {
     logger.d(
-      '[AppLaunch][ShareRepositoryImpl.generateVideo]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareRepositoryImpl.generateVideo: Start in (${DateTime.now()})',
     );
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
@@ -273,7 +273,7 @@ class ShareRepositoryImpl implements ShareRepository {
   @override
   Future<void> shareContent(ShareContent content) async {
     logger.d(
-      '[AppLaunch][ShareRepositoryImpl.shareContent]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareRepositoryImpl.shareContent: Start in (${DateTime.now()})',
     );
     if (content case ShareText(:final text)) {
       await SharePlus.instance.share(ShareParams(text: text));
@@ -338,7 +338,7 @@ class ShareRepositoryImpl implements ShareRepository {
   @override
   Future<void> cleanup() {
     logger.d(
-      '[AppLaunch][ShareRepositoryImpl.cleanup]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ShareRepositoryImpl.cleanup: Start in (${DateTime.now()})',
     );
     return _fileManager.cleanup();
   }

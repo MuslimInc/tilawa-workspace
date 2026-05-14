@@ -168,7 +168,13 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
       _log('cache root resolved path=${cacheRoot.path}');
 
       // Fast path — already fully cached.
+      final readyCacheTimer = PerfLogger.startTimer();
       if (await _loadReadyCache(cacheRoot)) {
+        PerfLogger.logElapsed(
+          readyCacheTimer,
+          widgetName: _logSource,
+          message: 'ready cache validation completed result=hit',
+        );
         _log(
           'ready cache hit extractedRootRelativePath='
           '$_extractedRootRelativePath',
@@ -181,6 +187,11 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
         );
         return _status;
       }
+      PerfLogger.logElapsed(
+        readyCacheTimer,
+        widgetName: _logSource,
+        message: 'ready cache validation completed result=miss',
+      );
 
       _log('ready cache miss; starting download pipeline');
       await cacheRoot.create(recursive: true);
@@ -194,10 +205,16 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
       _extractedRootRelativePath = extractedRootRelativePath;
 
       // Spot-check boundary files to catch silent extraction failures.
+      final validationTimer = PerfLogger.startTimer();
       if (!await _validateExtractedFiles(
         cacheRoot,
         extractedRootRelativePath,
       )) {
+        PerfLogger.logElapsed(
+          validationTimer,
+          widgetName: _logSource,
+          message: 'post-download validation completed result=failed',
+        );
         _log(
           'post-download validation failed '
           'extractedRootRelativePath=$extractedRootRelativePath',
@@ -206,6 +223,11 @@ class CloudflareQuranImageCacheRepository implements QuranImageCacheRepository {
           'Quran image cache was created but failed validation.',
         );
       }
+      PerfLogger.logElapsed(
+        validationTimer,
+        widgetName: _logSource,
+        message: 'post-download validation completed result=passed',
+      );
 
       _log(
         'post-download validation passed '

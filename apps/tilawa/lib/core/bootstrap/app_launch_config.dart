@@ -15,6 +15,7 @@ class AppLaunchConfig extends Equatable {
   const AppLaunchConfig({
     this.resetLaunchState = true,
     this.frameWatcher = true,
+    this.perfInstrumentation = kProfileMode,
     this.firebaseInit = true,
     this.hydratedStorageInit = true,
     this.foregroundMessaging = true,
@@ -50,6 +51,10 @@ class AppLaunchConfig extends Equatable {
       frameWatcher: bool.fromEnvironment(
         'TILAWA_LAUNCH_FRAME_WATCHER',
         defaultValue: true,
+      ),
+      perfInstrumentation: bool.fromEnvironment(
+        'TILAWA_LAUNCH_PERF_INSTRUMENTATION',
+        defaultValue: kProfileMode,
       ),
       firebaseInit: bool.fromEnvironment(
         'TILAWA_LAUNCH_FIREBASE_INIT',
@@ -152,6 +157,7 @@ class AppLaunchConfig extends Equatable {
 
   final bool resetLaunchState;
   final bool frameWatcher;
+  final bool perfInstrumentation;
   final bool firebaseInit;
   final bool hydratedStorageInit;
   final bool foregroundMessaging;
@@ -185,6 +191,7 @@ class AppLaunchConfig extends Equatable {
   List<Object?> get props => [
     resetLaunchState,
     frameWatcher,
+    perfInstrumentation,
     firebaseInit,
     hydratedStorageInit,
     foregroundMessaging,

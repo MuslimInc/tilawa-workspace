@@ -51,12 +51,16 @@ class QuranAssetsPrefetchService {
         .checkConnectivity();
 
     if (!_hasAnyNetworkConnection(connectivityResults)) {
-      logger.d('[QuranAssetsPrefetch] skipped reason=offline');
+      logger.d(
+        '[QuranImagesPerformance] source=QuranAssetsPrefetch skipped reason=offline',
+      );
       return;
     }
 
     if (!await _allowsCurrentConnection(connectivityResults)) {
-      logger.d('[QuranAssetsPrefetch] skipped reason=wifi-only-policy');
+      logger.d(
+        '[QuranImagesPerformance] source=QuranAssetsPrefetch skipped reason=wifi-only-policy',
+      );
       return;
     }
 
@@ -84,11 +88,15 @@ class QuranAssetsPrefetchService {
 
     if (_imageCacheRepository.status.isReady) {
       _completedAssets.add(_QuranAssetKind.images);
-      logger.d('[QuranAssetsPrefetch] images already ready');
+      logger.d(
+        '[QuranImagesPerformance] source=QuranAssetsPrefetch images already ready',
+      );
       return;
     }
 
-    logger.d('[QuranAssetsPrefetch] images prepare started');
+    logger.d(
+      '[QuranImagesPerformance] source=QuranAssetsPrefetch images prepare started',
+    );
 
     // Performance trace for Quran image cache preparation (TEST TRACE)
     final performance = getIt<PerformanceMonitoringService>();
@@ -99,10 +107,12 @@ class QuranAssetsPrefetchService {
 
     if (status.isReady) {
       _completedAssets.add(_QuranAssetKind.images);
-      logger.d('[QuranAssetsPrefetch] images prepare completed');
+      logger.d(
+        '[QuranImagesPerformance] source=QuranAssetsPrefetch images prepare completed',
+      );
     } else {
       logger.d(
-        '[QuranAssetsPrefetch] images prepare incomplete '
+        '[QuranImagesPerformance] source=QuranAssetsPrefetch images prepare incomplete '
         'phase=${status.phase.name} error=${status.errorMessage}',
       );
     }
@@ -113,18 +123,26 @@ class QuranAssetsPrefetchService {
 
     if (await _quranFontService.areFontsDownloaded()) {
       _completedAssets.add(_QuranAssetKind.fonts);
-      logger.d('[QuranAssetsPrefetch] fonts already ready');
+      logger.d(
+        '[QuranImagesPerformance] source=QuranAssetsPrefetch fonts already ready',
+      );
       return;
     }
 
-    logger.d('[QuranAssetsPrefetch] fonts download started');
+    logger.d(
+      '[QuranImagesPerformance] source=QuranAssetsPrefetch fonts download started',
+    );
     await _quranFontService.downloadFonts();
 
     if (await _quranFontService.areFontsDownloaded()) {
       _completedAssets.add(_QuranAssetKind.fonts);
-      logger.d('[QuranAssetsPrefetch] fonts download completed');
+      logger.d(
+        '[QuranImagesPerformance] source=QuranAssetsPrefetch fonts download completed',
+      );
     } else {
-      logger.d('[QuranAssetsPrefetch] fonts download incomplete');
+      logger.d(
+        '[QuranImagesPerformance] source=QuranAssetsPrefetch fonts download incomplete',
+      );
     }
   }
 }

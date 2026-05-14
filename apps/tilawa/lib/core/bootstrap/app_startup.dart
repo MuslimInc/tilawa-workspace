@@ -50,7 +50,7 @@ Future<void> bootstrap({
   DiConfigurator? diConfigurator,
   AppLaunchConfig? launchConfig,
 }) async {
-  logger.d('[AppLaunch][bootstrap]: Start in (${DateTime.now()})');
+  logger.d('[AppLaunch] source=bootstrap: Start in (${DateTime.now()})');
   if (launchConfig != null) {
     configureAppLaunch(launchConfig: launchConfig);
   }
@@ -60,7 +60,7 @@ Future<void> bootstrap({
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   logger.d(
-    '[AppLaunch][firebaseMessagingBackgroundHandler]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=firebaseMessagingBackgroundHandler: Start in (${DateTime.now()})',
   );
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
@@ -68,7 +68,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 @visibleForTesting
 Future<void> initializeNotificationService() {
   logger.d(
-    '[AppLaunch][initializeNotificationService]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=initializeNotificationService: Start in (${DateTime.now()})',
   );
   return _startupTasks.initializeNotificationService();
 }
@@ -76,7 +76,7 @@ Future<void> initializeNotificationService() {
 @visibleForTesting
 void resetMemoizedInitFutures() {
   logger.d(
-    '[AppLaunch][resetMemoizedInitFutures]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=resetMemoizedInitFutures: Start in (${DateTime.now()})',
   );
   _startupTasks.resetMemoizedInitFutures();
 }
@@ -84,41 +84,45 @@ void resetMemoizedInitFutures() {
 @visibleForTesting
 Future<void> initializeHydratedStorage() {
   logger.d(
-    '[AppLaunch][initializeHydratedStorage]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=initializeHydratedStorage: Start in (${DateTime.now()})',
   );
   return _startupTasks.initializeHydratedStorage();
 }
 
 @visibleForTesting
 Future<void> initializeHive() {
-  logger.d('[AppLaunch][initializeHive]: Start in (${DateTime.now()})');
+  logger.d('[AppLaunch] source=initializeHive: Start in (${DateTime.now()})');
   return _startupTasks.initializeHive();
 }
 
 @visibleForTesting
 Future<void> initializeCredentialManager() {
   logger.d(
-    '[AppLaunch][initializeCredentialManager]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=initializeCredentialManager: Start in (${DateTime.now()})',
   );
   return _startupTasks.initializeCredentialManager();
 }
 
 @visibleForTesting
 Future<void> initializeCrashlytics() {
-  logger.d('[AppLaunch][initializeCrashlytics]: Start in (${DateTime.now()})');
+  logger.d(
+    '[AppLaunch] source=initializeCrashlytics: Start in (${DateTime.now()})',
+  );
   return _startupTasks.initializeCrashlytics();
 }
 
 @visibleForTesting
 Future<void> initializeAnalytics() {
-  logger.d('[AppLaunch][initializeAnalytics]: Start in (${DateTime.now()})');
+  logger.d(
+    '[AppLaunch] source=initializeAnalytics: Start in (${DateTime.now()})',
+  );
   return _startupTasks.initializeAnalytics();
 }
 
 @visibleForTesting
 Future<void> requestNotificationPermission() {
   logger.d(
-    '[AppLaunch][requestNotificationPermission]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=requestNotificationPermission: Start in (${DateTime.now()})',
   );
   return _startupTasks.requestNotificationPermission();
 }
@@ -126,42 +130,46 @@ Future<void> requestNotificationPermission() {
 @visibleForTesting
 Future<void> initializeFirebaseDataAsync() {
   logger.d(
-    '[AppLaunch][initializeFirebaseDataAsync]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=initializeFirebaseDataAsync: Start in (${DateTime.now()})',
   );
   return _startupTasks.initializeFirebaseDataAsync();
 }
 
 @visibleForTesting
 Future<void> initializeDownloads() {
-  logger.d('[AppLaunch][initializeDownloads]: Start in (${DateTime.now()})');
+  logger.d(
+    '[AppLaunch] source=initializeDownloads: Start in (${DateTime.now()})',
+  );
   return _startupTasks.initializeDownloads();
 }
 
 @visibleForTesting
 Future<void> prepareNotificationLaunchState() {
   logger.d(
-    '[AppLaunch][prepareNotificationLaunchState]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=prepareNotificationLaunchState: Start in (${DateTime.now()})',
   );
   return _startupTasks.prepareNotificationLaunchState();
 }
 
 Future<void> initializeNotificationHandlers() {
   logger.d(
-    '[AppLaunch][initializeNotificationHandlers]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=initializeNotificationHandlers: Start in (${DateTime.now()})',
   );
   return _startupTasks.initializeNotificationHandlers();
 }
 
 @visibleForTesting
 Future<void> initializeAudioService() {
-  logger.d('[AppLaunch][initializeAudioService]: Start in (${DateTime.now()})');
+  logger.d(
+    '[AppLaunch] source=initializeAudioService: Start in (${DateTime.now()})',
+  );
   return _startupTasks.initializeAudioService();
 }
 
 @visibleForTesting
 Future<void> initializeAthkarNotifications() {
   logger.d(
-    '[AppLaunch][initializeAthkarNotifications]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=initializeAthkarNotifications: Start in (${DateTime.now()})',
   );
   return _startupTasks.initializeAthkarNotifications();
 }
@@ -169,7 +177,7 @@ Future<void> initializeAthkarNotifications() {
 @visibleForTesting
 void initializeNonCriticalServices() {
   logger.d(
-    '[AppLaunch][initializeNonCriticalServices]: Start in (${DateTime.now()})',
+    '[AppLaunch] source=initializeNonCriticalServices: Start in (${DateTime.now()})',
   );
   _startupTasks.initializeNonCriticalServices();
 }

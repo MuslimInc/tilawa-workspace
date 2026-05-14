@@ -182,6 +182,12 @@ class NavigationBloc extends Bloc<NavigationEvent, NavigationState> {
     if (currentState is NavigationLoaded) {
       // Only update if page actually changed
       if (currentState.pageState.currentPage != event.pageNumber) {
+        PerfLogger.log(
+          widgetName: 'NavigationBloc',
+          message:
+              'page changed from=${currentState.pageState.currentPage} '
+              'to=${event.pageNumber}',
+        );
         final pageState = _pageRepository.navigateToPage(event.pageNumber);
         emit(currentState.copyWith(pageState: pageState));
         // Persist the newly visited page

@@ -12,10 +12,12 @@ extension AppBootstrapperPhases on AppBootstrapper {
     required LaunchTimeline timeline,
   }) async {
     logger.d(
-      '[AppLaunch][AppBootstrapperPhases.runBootstrapPhases]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppBootstrapperPhases.runBootstrapPhases: Start in (${DateTime.now()})',
     );
     timeline.startPhase();
     WidgetsFlutterBinding.ensureInitialized();
+    PerfLogger.instrumentationEnabled =
+        _startupTasks.launchConfig.perfInstrumentation;
     if (_startupTasks.launchConfig.frameWatcher) {
       PerfLogger.startFrameWatcher();
     }
@@ -49,7 +51,7 @@ extension AppBootstrapperPhases on AppBootstrapper {
     required LaunchTimeline timeline,
   }) {
     logger.d(
-      '[AppLaunch][AppBootstrapperPhases.createCriticalInitCoordinator]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppBootstrapperPhases.createCriticalInitCoordinator: Start in (${DateTime.now()})',
     );
     final Completer<Future<void>> completer = Completer<Future<void>>();
 
@@ -78,7 +80,7 @@ extension AppBootstrapperPhases on AppBootstrapper {
   /// Schedules critical init to start after the first frame paints.
   void scheduleCriticalInit(CriticalInitCoordinator coordinator) {
     logger.d(
-      '[AppLaunch][AppBootstrapperPhases.scheduleCriticalInit]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppBootstrapperPhases.scheduleCriticalInit: Start in (${DateTime.now()})',
     );
     SchedulerBinding.instance.addPostFrameCallback((_) {
       coordinator.kickOff();
@@ -90,7 +92,7 @@ extension AppBootstrapperPhases on AppBootstrapper {
     CriticalInitCoordinator coordinator,
   ) async {
     logger.d(
-      '[AppLaunch][AppBootstrapperPhases.ensureCriticalInitCompletes]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppBootstrapperPhases.ensureCriticalInitCompletes: Start in (${DateTime.now()})',
     );
     if (!coordinator.completer.isCompleted) {
       await Future<void>.delayed(const Duration(milliseconds: 16));

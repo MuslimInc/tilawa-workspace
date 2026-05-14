@@ -92,11 +92,13 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
   void _scheduleUpdateCheck({required Duration delay, required String reason}) {
     _updateCheckTimer?.cancel();
     logger.d(
-      '[PerfLogger][Startup] update-check scheduled '
+      '[AppLaunch] source=Startup update-check scheduled '
       'reason=$reason delayMs=${delay.inMilliseconds}',
     );
     _updateCheckTimer = Timer(delay, () {
-      logger.d('[PerfLogger][Startup] update-check started reason=$reason');
+      logger.d(
+        '[AppLaunch] source=Startup update-check started reason=$reason',
+      );
       _checkForUpdate();
     });
   }

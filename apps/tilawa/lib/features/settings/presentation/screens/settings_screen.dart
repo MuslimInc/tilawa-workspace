@@ -650,82 +650,82 @@ class _SettingsProfileCard extends StatelessWidget {
           child: Material(
             color: primary,
             child: InkWell(
-                onTap: isGuest ? onGuestTap : null,
-                mouseCursor: isGuest
-                    ? SystemMouseCursors.click
-                    : MouseCursor.defer,
-                splashColor: foregroundColor.withValues(
-                  alpha: tokens.opacityMedium,
+              onTap: isGuest ? onGuestTap : null,
+              mouseCursor: isGuest
+                  ? SystemMouseCursors.click
+                  : MouseCursor.defer,
+              splashColor: foregroundColor.withValues(
+                alpha: tokens.opacityMedium,
+              ),
+              highlightColor: foregroundColor.withValues(
+                alpha: tokens.opacitySubtle * 2,
+              ),
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: primary,
                 ),
-                highlightColor: foregroundColor.withValues(
-                  alpha: tokens.opacitySubtle * 2,
-                ),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    color: primary,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceExtraLarge,
+                    vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceExtraLarge,
-                      vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        _SettingsProfileAvatar(
-                          tokens: tokens,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _SettingsProfileAvatar(
+                        tokens: tokens,
+                        foregroundColor: foregroundColor,
+                        photoUrl: user?.photoUrl,
+                      ),
+                      SizedBox(
+                        width: tokens.spaceLarge + tokens.spaceSmall,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              displayName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0,
+                                height: 1.2,
+                                color: foregroundColor,
+                              ),
+                            ),
+                            SizedBox(height: tokens.spaceExtraSmall),
+                            Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                color: foregroundColor.withValues(
+                                  alpha: tokens.opacityGlass,
+                                ),
+                                fontWeight: FontWeight.w500,
+                                height: 1.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isGuest) ...[
+                        SizedBox(width: tokens.spaceSmall),
+                        _GuestSignInPill(
                           foregroundColor: foregroundColor,
-                          photoUrl: user?.photoUrl,
+                          tokens: tokens,
                         ),
-                        SizedBox(
-                          width: tokens.spaceLarge + tokens.spaceSmall,
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                displayName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0,
-                                  height: 1.2,
-                                  color: foregroundColor,
-                                ),
-                              ),
-                              SizedBox(height: tokens.spaceExtraSmall),
-                              Text(
-                                subtitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.bodyMedium?.copyWith(
-                                  color: foregroundColor.withValues(
-                                    alpha: tokens.opacityGlass,
-                                  ),
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.25,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (isGuest) ...[
-                          SizedBox(width: tokens.spaceSmall),
-                          _GuestSignInPill(
-                            foregroundColor: foregroundColor,
-                            tokens: tokens,
-                          ),
-                        ],
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),
             ),
-          );
+          ),
+        );
 
         final Widget content = isGuest
             ? Semantics(

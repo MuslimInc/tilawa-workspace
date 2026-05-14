@@ -304,6 +304,7 @@ class _TestQuranImagePrewarmer implements QuranImagePrewarmer {
   void prewarmSettledWindow({
     required int pageNumber,
     required int cacheWidth,
+    int radius = 1,
   }) {
     settledWindowRequests.add(
       _WarmRequest(pageNumber: pageNumber, cacheWidth: cacheWidth),

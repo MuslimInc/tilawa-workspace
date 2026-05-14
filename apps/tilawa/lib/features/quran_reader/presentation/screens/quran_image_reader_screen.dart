@@ -104,7 +104,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     _navigationBloc = NavigationBloc()
       ..add(NavigationInitialized(initialPage: initialPage));
     logger.d(
-      '[QuranImageReaderScreen] NavigationBloc initialized with page: $initialPage',
+      '[QuranImagesPerformance] source=QuranImageReaderScreen NavigationBloc initialized with page: $initialPage',
     );
   }
 
@@ -113,7 +113,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     _initNavigationBloc();
     setState(() => _isPreloaded = true);
     logger.d(
-      '[QuranImageReaderScreen] preload complete — '
+      '[QuranImagesPerformance] source=QuranImageReaderScreen preload complete — '
       'transitioning to reader',
     );
   }

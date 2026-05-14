@@ -62,12 +62,12 @@ class _RecitersScreenState extends State<RecitersScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       debugPrint(
-        '[PerfLogger][RecitersScreen] initial-load scheduled '
+        '[AppLaunch] source=RecitersScreen initial-load scheduled '
         'delayMs=${_initialRecitersLoadDelay.inMilliseconds}',
       );
       _initialLoadTimer = Timer(_initialRecitersLoadDelay, () {
         if (!mounted) return;
-        debugPrint('[PerfLogger][RecitersScreen] initial-load started');
+        debugPrint('[AppLaunch] source=RecitersScreen initial-load started');
         context.read<RecitersBloc>().add(const LoadReciters());
       });
     });
@@ -603,7 +603,14 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
                             onTap: onToggleFavorites,
                           ),
                           SizedBox(width: tokens.spaceSmall),
-                          const _DownloadsButton(),
+                          TilawaIconActionButton(
+                            icon: FluentIcons.arrow_download_24_regular,
+                            tooltip: context.l10n.viewDownloads,
+                            semanticLabel: context.l10n.viewDownloads,
+                            backgroundColor: colorScheme.surfaceContainerHigh,
+                            onTap: () =>
+                                const DownloadsRoute().push(context),
+                          ),
                         ],
                       ),
                     ),
@@ -777,6 +784,7 @@ class _FavoritesToggle extends StatelessWidget {
             toggled: isActive,
             tooltip: filterLabel,
             semanticLabel: filterLabel,
+            backgroundColor: theme.colorScheme.surfaceContainerHigh,
             onTap: onTap,
           ),
           PositionedDirectional(
@@ -830,21 +838,6 @@ class _FavoritesToggle extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DownloadsButton extends StatelessWidget {
-  const _DownloadsButton();
-
-  @override
-  Widget build(BuildContext context) {
-    final String label = context.l10n.viewDownloads;
-    return TilawaIconActionButton(
-      icon: FluentIcons.arrow_download_24_regular,
-      tooltip: label,
-      semanticLabel: label,
-      onTap: () => const DownloadsRoute().push(context),
     );
   }
 }

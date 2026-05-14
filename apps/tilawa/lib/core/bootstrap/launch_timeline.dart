@@ -22,14 +22,14 @@ class LaunchTimeline {
 
   void log(String label) {
     logger.d(
-      '[AppLaunch][LaunchTimeline.$label]: '
+      '[AppLaunch] source=LaunchTimeline.$label: '
       'Duration ${phase.elapsedMilliseconds}ms at (${DateTime.now()})',
     );
   }
 
   void logTotal(String label) {
     logger.d(
-      '[AppLaunch][LaunchTimeline.TOTAL]: '
+      '[AppLaunch] source=LaunchTimeline.TOTAL: '
       '$label: ${total.elapsedMilliseconds}ms at (${DateTime.now()})',
     );
   }

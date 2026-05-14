@@ -15,6 +15,7 @@ class TilawaIconActionButton extends StatefulWidget {
     this.iconSize,
     this.tooltip,
     this.semanticLabel,
+    this.backgroundColor,
   });
 
   final IconData icon;
@@ -37,6 +38,12 @@ class TilawaIconActionButton extends StatefulWidget {
 
   /// Screen reader label for the control.
   final String? semanticLabel;
+
+  /// Optional fill colour. When `null` (default) the button uses
+  /// `ColorScheme.surface` — visually transparent on a `surface` background.
+  /// Pass `ColorScheme.surfaceContainerHigh` (or similar) to render a quiet
+  /// pill when the button sits on a `surface`-coloured header.
+  final Color? backgroundColor;
 
   @override
   State<TilawaIconActionButton> createState() => _TilawaIconActionButtonState();
@@ -92,7 +99,7 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
       width: effectiveSize,
       height: effectiveSize,
       child: Material(
-        color: theme.colorScheme.surface,
+        color: widget.backgroundColor ?? theme.colorScheme.surface,
         borderRadius: effectiveBorderRadius,
         child: ScaleTransition(
           scale: Tween<double>(begin: 1.0, end: 0.92).animate(
