@@ -113,7 +113,7 @@ void main() {
     await cubit.close();
   });
 
-  testWidgets('favorite control semantic bounds meet 48dp minimum', (
+  testWidgets('favorite control semantic bounds meet Tilawa hit-target floor', (
     WidgetTester tester,
   ) async {
     final cubit = await loadedCubit();
@@ -122,8 +122,8 @@ void main() {
     final Rect rect = tester.getRect(
       find.bySemanticsLabel('Add to Favorites'),
     );
-    expect(rect.width, greaterThanOrEqualTo(kMinInteractiveDimension));
-    expect(rect.height, greaterThanOrEqualTo(kMinInteractiveDimension));
+    expect(rect.width, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
+    expect(rect.height, greaterThanOrEqualTo(kTilawaMinInteractiveDimension));
 
     await cubit.close();
   });

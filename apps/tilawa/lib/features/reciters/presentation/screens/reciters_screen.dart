@@ -608,8 +608,7 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
                             tooltip: context.l10n.viewDownloads,
                             semanticLabel: context.l10n.viewDownloads,
                             backgroundColor: colorScheme.surfaceContainerHigh,
-                            onTap: () =>
-                                const DownloadsRoute().push(context),
+                            onTap: () => const DownloadsRoute().push(context),
                           ),
                         ],
                       ),

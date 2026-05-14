@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
 import '../density.dart';
+import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
 import 'token_lerp.dart';
 
 @immutable
@@ -255,8 +256,8 @@ class TilawaMediaPlayerBarTokens {
         artworkInfoGap: 10,
         infoControlsGap: 6,
         controlsGap: 2,
-        controlButtonSize: 44.0,
-        playPauseButtonSize: 44.0,
+        controlButtonSize: kTilawaMinInteractiveDimension,
+        playPauseButtonSize: kTilawaMinInteractiveDimension,
         defaultIconSize: 22,
         playPauseIconSize: 15,
         disabledControlOpacity: 0.3,
@@ -289,8 +290,8 @@ class TilawaMediaPlayerBarTokens {
       artworkInfoGap: 12,
       infoControlsGap: 8,
       controlsGap: 4,
-      controlButtonSize: 44.0,
-      playPauseButtonSize: 44.0,
+      controlButtonSize: kTilawaMinInteractiveDimension,
+      playPauseButtonSize: kTilawaMinInteractiveDimension,
       defaultIconSize: 24,
       playPauseIconSize: 16,
       disabledControlOpacity: 0.3,
@@ -1670,7 +1671,7 @@ class TilawaImmersiveComposerTokens {
       regularPreviewHeightFactor: 0.5,
       panelMinHeight: 220,
       previewMaxHeight: 460,
-      headerButtonSize: 44.0,
+      headerButtonSize: kTilawaMinInteractiveDimension,
       headerIconSizeOffset: 2,
       composerSurfaceColor: surface,
       overlayPanelTranslucentFillColor: surface.withValues(

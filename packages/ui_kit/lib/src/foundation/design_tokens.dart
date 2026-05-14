@@ -2,6 +2,20 @@ import 'package:flutter/material.dart';
 
 import 'density.dart';
 
+/// Tilawa minimum interactive (hit-target) dimension, in logical pixels.
+///
+/// **44 dp** — matches Apple HIG; denser than Material's 48 dp default
+/// (`kMinInteractiveDimension`) without dropping below the iOS
+/// accessibility floor. Single source of truth for hit targets across the
+/// design system; consumed by [TilawaDesignTokens.minInteractiveDimension]
+/// and by every component-token factory (icon action button, search field,
+/// seek bar, alphabet scrollbar, media player controls, immersive composer).
+///
+/// Use this (or `context.minInteractiveDimension` /
+/// `tokens.minInteractiveDimension`) instead of Flutter's
+/// `kMinInteractiveDimension` for all in-product hit targets.
+const double kTilawaMinInteractiveDimension = 44.0;
+
 /// Design tokens for the Tilawa UI Kit to avoid magic numbers
 /// and ensure consistency across components.
 @immutable
@@ -153,14 +167,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 48.0
   final double iconSizeExtraLarge;
 
-  /// 44.0 — Tilawa minimum interactive (hit-target) dimension.
-  ///
-  /// Below Flutter's `kMinInteractiveDimension` (48.0, Material default) and
-  /// matches Apple's HIG 44 pt floor. The denser target keeps the calm,
-  /// premium feel of the visual system without dropping below the iOS
-  /// accessibility floor. Use this instead of `kMinInteractiveDimension`
-  /// for *all* in-product hit targets (cards, list rows, icon buttons,
-  /// chips, settings tiles, search-field height, player controls).
+  /// Tilawa minimum interactive (hit-target) dimension. Defaults to
+  /// [kTilawaMinInteractiveDimension] (44 dp). Use this for *all* in-product
+  /// hit targets (cards, list rows, icon buttons, chips, settings tiles,
+  /// search-field height, player controls) instead of Flutter's
+  /// `kMinInteractiveDimension`.
   final double minInteractiveDimension;
 
   /// 1.8 — relaxed line height for dense Arabic text.
@@ -285,7 +296,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeLarge: 24.0,
       iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 48.0,
-      minInteractiveDimension: 44.0,
+      minInteractiveDimension: kTilawaMinInteractiveDimension,
       textHeightLoose: 2.0,
       durationFast: const Duration(milliseconds: 200),
       durationMedium: const Duration(milliseconds: 400),

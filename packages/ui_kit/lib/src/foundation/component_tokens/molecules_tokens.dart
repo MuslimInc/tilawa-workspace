@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
 import '../density.dart';
+import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
 import 'token_lerp.dart';
 
 @immutable
@@ -55,8 +56,9 @@ class TilawaAlphabetScrollbarTokens {
     ColorScheme colorScheme,
   ) {
     return TilawaAlphabetScrollbarTokens(
-      width: 44.0,
-      itemExtent: 44.0, // fix: Accessibility — Tilawa 44 dp row hit target.
+      width: kTilawaMinInteractiveDimension,
+      itemExtent:
+          kTilawaMinInteractiveDimension, // fix: Accessibility — Tilawa 44 dp row hit target.
       selectedIndicatorExtent: 40,
       letterFontSize: 14,
       verticalPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -308,7 +310,7 @@ class TilawaIconActionButtonTokens {
     // Size = Tilawa hit-target floor (44 dp). At the floor; do not shrink
     // further.
     return const TilawaIconActionButtonTokens(
-      size: 44.0,
+      size: kTilawaMinInteractiveDimension,
       borderRadius: 16,
       activeBackgroundOpacity: 0.12,
       activeBorderOpacity: 0.35,
@@ -849,7 +851,7 @@ class TilawaSeekBarTokens {
   }) {
     // fix: Accessibility — Tilawa 44 dp touch strip for seek interaction.
     return const TilawaSeekBarTokens(
-      touchExtent: 44.0,
+      touchExtent: kTilawaMinInteractiveDimension,
       horizontalMargin: 16,
       trackHeight: 8,
       thumbRadius: 12,
@@ -992,7 +994,7 @@ class TilawaSearchFieldTokens {
     if (density.isCompact) {
       // Height stays at the Tilawa hit-target floor (44 dp) — non-negotiable.
       return TilawaSearchFieldTokens(
-        height: 44.0,
+        height: kTilawaMinInteractiveDimension,
         backgroundColor: backgroundColor,
         borderRadius: 12,
         contentPadding: const EdgeInsets.symmetric(
@@ -1018,7 +1020,7 @@ class TilawaSearchFieldTokens {
       );
     }
     return TilawaSearchFieldTokens(
-      height: 44.0,
+      height: kTilawaMinInteractiveDimension,
       backgroundColor: backgroundColor,
       borderRadius: 16,
       contentPadding: const EdgeInsets.symmetric(vertical: 12),
