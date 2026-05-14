@@ -36,6 +36,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.iconSizeLarge,
     required this.iconSizeLargePlus,
     required this.iconSizeExtraLarge,
+    required this.minInteractiveDimension,
     required this.textHeightLoose,
     required this.durationFast,
     required this.durationMedium,
@@ -151,6 +152,16 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
   /// 48.0
   final double iconSizeExtraLarge;
+
+  /// 44.0 — Tilawa minimum interactive (hit-target) dimension.
+  ///
+  /// Below Flutter's `kMinInteractiveDimension` (48.0, Material default) and
+  /// matches Apple's HIG 44 pt floor. The denser target keeps the calm,
+  /// premium feel of the visual system without dropping below the iOS
+  /// accessibility floor. Use this instead of `kMinInteractiveDimension`
+  /// for *all* in-product hit targets (cards, list rows, icon buttons,
+  /// chips, settings tiles, search-field height, player controls).
+  final double minInteractiveDimension;
 
   /// 1.8 — relaxed line height for dense Arabic text.
   final double textHeightLoose;
@@ -274,6 +285,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeLarge: 24.0,
       iconSizeLargePlus: 42.0,
       iconSizeExtraLarge: 48.0,
+      minInteractiveDimension: 44.0,
       textHeightLoose: 2.0,
       durationFast: const Duration(milliseconds: 200),
       durationMedium: const Duration(milliseconds: 400),
@@ -328,6 +340,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? iconSizeLarge,
     double? iconSizeLargePlus,
     double? iconSizeExtraLarge,
+    double? minInteractiveDimension,
     double? textHeightLoose,
     Duration? durationFast,
     Duration? durationMedium,
@@ -379,6 +392,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeLarge: iconSizeLarge ?? this.iconSizeLarge,
       iconSizeLargePlus: iconSizeLargePlus ?? this.iconSizeLargePlus,
       iconSizeExtraLarge: iconSizeExtraLarge ?? this.iconSizeExtraLarge,
+      minInteractiveDimension:
+          minInteractiveDimension ?? this.minInteractiveDimension,
       textHeightLoose: textHeightLoose ?? this.textHeightLoose,
       durationFast: durationFast ?? this.durationFast,
       durationMedium: durationMedium ?? this.durationMedium,
@@ -477,6 +492,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeExtraLarge: lerpDouble(
         iconSizeExtraLarge,
         other.iconSizeExtraLarge,
+        t,
+      )!,
+      minInteractiveDimension: lerpDouble(
+        minInteractiveDimension,
+        other.minInteractiveDimension,
         t,
       )!,
       textHeightLoose: lerpDouble(textHeightLoose, other.textHeightLoose, t)!,
@@ -586,4 +606,8 @@ extension TilawaIconSizeX on BuildContext {
   double get iconSizeMedium => tokens.iconSizeMedium;
   double get iconSizeLarge => tokens.iconSizeLarge;
   double get iconSizeExtraLarge => tokens.iconSizeExtraLarge;
+
+  /// Tilawa minimum interactive (hit-target) dimension. Use this instead of
+  /// Flutter's `kMinInteractiveDimension`.
+  double get minInteractiveDimension => tokens.minInteractiveDimension;
 }

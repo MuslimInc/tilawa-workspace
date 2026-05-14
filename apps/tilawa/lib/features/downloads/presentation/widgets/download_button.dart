@@ -242,8 +242,8 @@ class _CompletedDownloadButton extends StatelessWidget {
     final tokens = theme.tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: Center(
         child: Container(
           width: _kCircleSize,
@@ -274,8 +274,8 @@ class _PendingDownloadButton extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: Center(
         child: InkWell(
           onTap: onCancel,
@@ -296,8 +296,8 @@ class _LoadingDownloadButton extends StatelessWidget {
     final componentTokens = Theme.of(context).componentTokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: TilawaLoadingIndicator(
         strokeWidth: componentTokens.loadingIndicator.compactStrokeWidth,
       ),
@@ -324,8 +324,8 @@ class _DownloadingProgressButton extends StatelessWidget {
     final tokens = theme.tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: Center(
         child: Stack(
           alignment: Alignment.center,
@@ -404,8 +404,8 @@ class _PausedDownloadButton extends StatelessWidget {
     final tokens = theme.tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: Center(
         child: Stack(
           alignment: Alignment.center,
@@ -456,8 +456,8 @@ class _DefaultDownloadButton extends StatelessWidget {
     final tokens = theme.tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: IconButton(
         icon: Icon(
           Icons.download_rounded,

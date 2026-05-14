@@ -158,7 +158,7 @@ class _FavoriteButton extends StatelessWidget {
     });
 
     final double hitExtent = math.max(
-      kMinInteractiveDimension,
+      context.minInteractiveDimension,
       tokens.iconSizeLargePlus,
     );
 

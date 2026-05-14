@@ -29,6 +29,7 @@ class TilawaSettingsTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
+    final designTokens = theme.tokens;
     final effectiveIconColor = iconColor ?? colorScheme.primary;
     final BorderRadius? resolvedRadius = borderRadius is BorderRadius
         ? borderRadius as BorderRadius
@@ -86,8 +87,8 @@ class TilawaSettingsTile extends StatelessWidget {
               subtitleTextStyle: subtitleStyle,
             ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: kMinInteractiveDimension,
+              constraints: BoxConstraints(
+                minHeight: designTokens.minInteractiveDimension,
               ),
               child: ListTile(
                 shape: resolvedRadius != null
@@ -162,6 +163,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.settingsGroup;
+    final designTokens = theme.tokens;
     final effectiveIconColor = iconColor ?? colorScheme.primary;
     final BorderRadius? resolvedRadius = borderRadius is BorderRadius
         ? borderRadius as BorderRadius
@@ -218,8 +220,8 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
               subtitleTextStyle: subtitleStyle,
             ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: kMinInteractiveDimension,
+              constraints: BoxConstraints(
+                minHeight: designTokens.minInteractiveDimension,
               ),
               child: ListTile(
                 shape: resolvedRadius != null

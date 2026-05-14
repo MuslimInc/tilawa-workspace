@@ -156,8 +156,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       .completeOnboarding();
                                 },
                                 style: FilledButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(
-                                    kMinInteractiveDimension,
+                                  minimumSize: Size.fromHeight(
+                                    context.minInteractiveDimension,
                                   ),
                                 ),
                                 child: Text(context.l10n.startJourney),
@@ -175,7 +175,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             style: FilledButton.styleFrom(
                               minimumSize: Size(
                                 tokens.spaceExtraLarge * 4,
-                                kMinInteractiveDimension,
+                                context.minInteractiveDimension,
                               ),
                             ),
                             child: Text(context.l10n.next),

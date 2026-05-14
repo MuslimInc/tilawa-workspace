@@ -50,6 +50,16 @@
 - [x] **T-071**: `flutter test` in `packages/ui_kit` is green (494 / 494 tests).
 - [x] **T-072**: `flutter test` in `apps/tilawa`: pre-existing failures (`reciter_card_test`, `main_screen_cubit_test` timer gates, `main_screen_startup_test`) noted as out of scope — they fail on `HEAD` without this change. No new failures introduced.
 
+## Hit-target floor (2026-05-15, same branch)
+
+- [x] **T-080**: Add `minInteractiveDimension` field to `TilawaDesignTokens` (44 dp).
+- [x] **T-081**: Expose via `BuildContext` extension as `context.minInteractiveDimension` alongside the icon-size aliases.
+- [x] **T-082**: Migrate every UI Kit call site from `kMinInteractiveDimension` to the new token (atoms: `tilawa_icon_toggle`; molecules: `tilawa_permission_banner`, `tilawa_settings_tile`; component-token factories: `molecules_tokens.dart` for `iconActionButton`, `searchField`, `seekBar`, `alphabetScrollbar`; `organisms_tokens.dart` for `mediaPlayerBar` and `immersiveComposer`).
+- [x] **T-083**: Update prior "48 dp — non-negotiable" comments to reflect the 44 dp floor.
+- [x] **T-084**: Migrate app feature widgets: `download_button.dart` (8 sites), `reciter_card.dart`, `prayer_times_screen.dart`, `location_row.dart` (3 sites), `onboarding_screen.dart` (2 sites).
+- [x] **T-085**: Update token-defaults / density / a11y-audit / golden tests for the new floor (regenerate the four affected molecule/organism goldens).
+- [x] **T-086**: Document the hit-target rule in `packages/ui_kit/docs/premium_visual_system.md`.
+
 ## Follow-ups (not in this branch)
 
 - [ ] **F-001**: Update reciter card widget tests to match either the simplified single-InkWell layout *or* split the card into two sibling InkWell + Semantics regions as the tests expect. (Tests pre-date this pass.)

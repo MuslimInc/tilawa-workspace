@@ -814,8 +814,8 @@ class _UtilityInlineAction extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: kMinInteractiveDimension,
+          constraints: BoxConstraints(
+            minHeight: context.minInteractiveDimension,
           ),
           child: _UtilityActionRow(
             semanticsId: semanticsId,

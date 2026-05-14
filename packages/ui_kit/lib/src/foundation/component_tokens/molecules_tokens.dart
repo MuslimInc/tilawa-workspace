@@ -55,8 +55,8 @@ class TilawaAlphabetScrollbarTokens {
     ColorScheme colorScheme,
   ) {
     return TilawaAlphabetScrollbarTokens(
-      width: kMinInteractiveDimension,
-      itemExtent: 48, // fix: Accessibility — ≥48dp row hit target
+      width: 44.0,
+      itemExtent: 44.0, // fix: Accessibility — Tilawa 44 dp row hit target.
       selectedIndicatorExtent: 40,
       letterFontSize: 14,
       verticalPadding: const EdgeInsets.symmetric(vertical: 12),
@@ -305,10 +305,10 @@ class TilawaIconActionButtonTokens {
   factory TilawaIconActionButtonTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    // No-op: size = kMinInteractiveDimension (48dp). At the floor; do not
-    // shrink further.
+    // Size = Tilawa hit-target floor (44 dp). At the floor; do not shrink
+    // further.
     return const TilawaIconActionButtonTokens(
-      size: kMinInteractiveDimension,
+      size: 44.0,
       borderRadius: 16,
       activeBackgroundOpacity: 0.12,
       activeBorderOpacity: 0.35,
@@ -847,9 +847,9 @@ class TilawaSeekBarTokens {
   factory TilawaSeekBarTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
-    // fix: Accessibility — ≥48dp touch strip for seek interaction
+    // fix: Accessibility — Tilawa 44 dp touch strip for seek interaction.
     return const TilawaSeekBarTokens(
-      touchExtent: kMinInteractiveDimension,
+      touchExtent: 44.0,
       horizontalMargin: 16,
       trackHeight: 8,
       thumbRadius: 12,
@@ -990,9 +990,9 @@ class TilawaSearchFieldTokens {
     );
     final prefixIconFocusedColor = colorScheme.primary;
     if (density.isCompact) {
-      // Height stays at kMinInteractiveDimension (48dp) — non-negotiable.
+      // Height stays at the Tilawa hit-target floor (44 dp) — non-negotiable.
       return TilawaSearchFieldTokens(
-        height: kMinInteractiveDimension,
+        height: 44.0,
         backgroundColor: backgroundColor,
         borderRadius: 12,
         contentPadding: const EdgeInsets.symmetric(
@@ -1018,7 +1018,7 @@ class TilawaSearchFieldTokens {
       );
     }
     return TilawaSearchFieldTokens(
-      height: kMinInteractiveDimension,
+      height: 44.0,
       backgroundColor: backgroundColor,
       borderRadius: 16,
       contentPadding: const EdgeInsets.symmetric(vertical: 12),

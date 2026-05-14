@@ -172,9 +172,9 @@ class _LocationActionButton extends StatelessWidget {
               compact ? tokens.radiusMedium : tokens.radiusLarge - 4,
             ),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minWidth: kMinInteractiveDimension,
-                minHeight: kMinInteractiveDimension,
+              constraints: BoxConstraints(
+                minWidth: context.minInteractiveDimension,
+                minHeight: context.minInteractiveDimension,
               ),
               child: Center(
                 child: TilawaIconBox(
@@ -231,8 +231,8 @@ class _QiblaActionRow extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(tokens.radiusMedium),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: kMinInteractiveDimension,
+            constraints: BoxConstraints(
+              minHeight: context.minInteractiveDimension,
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),

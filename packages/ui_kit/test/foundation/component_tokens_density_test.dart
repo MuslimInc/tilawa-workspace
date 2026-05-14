@@ -1089,13 +1089,13 @@ void main() {
       expect(comfortable.shadowOffset, equals(defaultTokens.shadowOffset));
     });
 
-    test('compact preserves height at kMinInteractiveDimension (48dp)', () {
+    test('compact preserves height at Tilawa hit-target floor (44dp)', () {
       final compact = TilawaSearchFieldTokens.defaults(
         density: TilawaDensity.compact,
       );
       final comfortable = TilawaSearchFieldTokens.defaults();
       expect(compact.height, equals(comfortable.height));
-      expect(compact.height, kMinInteractiveDimension);
+      expect(compact.height, 44.0);
     });
 
     test('compact tightens borderRadius 16→12', () {
@@ -1150,8 +1150,8 @@ void main() {
       final dark = TilawaComponentTokens.dark(density: TilawaDensity.compact);
       expect(light.searchField.borderRadius, 12.0);
       expect(dark.searchField.borderRadius, 12.0);
-      expect(light.searchField.height, kMinInteractiveDimension);
-      expect(dark.searchField.height, kMinInteractiveDimension);
+      expect(light.searchField.height, 44.0);
+      expect(dark.searchField.height, 44.0);
     });
   });
 

@@ -26,6 +26,21 @@ their place.
    `TilawaDesignTokens`, component fills from `TilawaComponentTokens`. No
    hard-coded hex, radii, or shadows in reusable UI Kit widgets.
 
+## Hit targets
+
+The Tilawa hit-target floor is **44 dp**, exposed as
+`TilawaDesignTokens.minInteractiveDimension` (and `context.minInteractiveDimension`).
+
+Use this instead of Flutter's `kMinInteractiveDimension` (which is the Material
+48 dp default) for *all* in-product hit targets: cards, list rows, icon
+buttons, chips, settings tiles, search-field heights, player controls,
+location pickers, etc.
+
+| Floor | Source | Where used |
+| ----- | ------ | ---------- |
+| **44 dp** | `TilawaDesignTokens.minInteractiveDimension` | Tilawa default. Matches iOS HIG; denser, more premium than Material's 48 dp without dropping below iOS accessibility. |
+| 48 dp | `kMinInteractiveDimension` (Flutter) | Do **not** use in product code. Material default; only acceptable in third-party widgets we can't override. |
+
 ## Cards and surfaces
 
 `TilawaCard` exposes a `surface:` enum that captures the three legitimate
