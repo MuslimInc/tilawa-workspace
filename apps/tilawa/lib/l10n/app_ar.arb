@@ -2542,5 +2542,9 @@
     "errorInvalidNotificationPayload": "بيانات التنبيه غير صالحة.",
     "@errorInvalidNotificationPayload": {
         "description": "Error message when notification data is corrupted or invalid"
+    },
+    "moreOptions": "المزيد",
+    "@moreOptions": {
+        "description": "Label for the more-options overflow menu button"
     }
 }

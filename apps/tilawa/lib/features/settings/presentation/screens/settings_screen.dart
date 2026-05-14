@@ -303,7 +303,6 @@ class SettingsScreen extends StatelessWidget {
                                 children: [
                                   TilawaSettingsSwitchTile(
                                     icon: FluentIcons.dark_theme_24_regular,
-                                    iconColor: AppColors.settingsTheme,
                                     title: context.l10n.darkTheme,
                                     value: state.mode == AppThemeMode.dark,
                                     onChanged: (value) => context
@@ -318,7 +317,6 @@ class SettingsScreen extends StatelessWidget {
                                       return TilawaSettingsSwitchTile(
                                         icon: FluentIcons
                                             .arrow_minimize_24_regular,
-                                        iconColor: AppColors.settingsTheme,
                                         title: context.l10n.compactDesign,
                                         value: settingsState.useCompactDesign,
                                         onChanged: (value) => context
@@ -329,7 +327,6 @@ class SettingsScreen extends StatelessWidget {
                                   ),
                                   TilawaSettingsTile(
                                     icon: FluentIcons.color_24_regular,
-                                    iconColor: AppColors.settingsColor,
                                     title: context.l10n.primaryColor,
                                     trailing: _PrimaryColorTileTrailing(
                                       color: state.primaryColor,
@@ -349,7 +346,6 @@ class SettingsScreen extends StatelessWidget {
                             builder: (context, state) {
                               return TilawaSettingsTile(
                                 icon: FluentIcons.local_language_24_regular,
-                                iconColor: AppColors.settingsLanguage,
                                 title: context.l10n.language,
                                 onTap: () =>
                                     _showLanguagePicker(context, state.locale),
@@ -375,7 +371,6 @@ class SettingsScreen extends StatelessWidget {
                                 children: [
                                   TilawaSettingsSwitchTile(
                                     icon: FluentIcons.history_24_regular,
-                                    iconColor: AppColors.settingsPlayback,
                                     title: context.l10n.restorePlaybackState,
                                     value: state.restorePlaybackState,
                                     onChanged: (value) => context
@@ -387,7 +382,6 @@ class SettingsScreen extends StatelessWidget {
                                   ),
                                   TilawaSettingsSwitchTile(
                                     icon: FluentIcons.timer_24_regular,
-                                    iconColor: AppColors.settingsDuration,
                                     title:
                                         context.l10n.enableRecitationDuration,
                                     value: state.isSleepTimerEnabled,
@@ -416,7 +410,6 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           TilawaSettingsTile(
                             icon: FluentIcons.bookmark_24_regular,
-                            iconColor: AppColors.settingsBookmarks,
                             title: context.l10n.bookmarks,
                             onTap: () => const BookmarksRoute().push(context),
                             borderRadius: BorderRadius.vertical(
@@ -425,19 +418,16 @@ class SettingsScreen extends StatelessWidget {
                           ),
                           TilawaSettingsTile(
                             icon: FluentIcons.history_24_regular,
-                            iconColor: AppColors.settingsHistory,
                             title: context.l10n.listeningHistory,
                             onTap: () => const HistoryRoute().push(context),
                           ),
                           TilawaSettingsTile(
                             icon: FluentIcons.clock_24_regular,
-                            iconColor: AppColors.settingsPrayer,
                             title: context.l10n.prayerTimes,
                             onTap: () => const PrayerTimesRoute().push(context),
                           ),
                           TilawaSettingsTile(
                             icon: FluentIcons.book_24_regular,
-                            iconColor: AppColors.settingsQuran,
                             title: context.l10n.quranReader,
                             onTap: () =>
                                 const QuranLastReadRoute().push(context),
@@ -457,7 +447,6 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           TilawaSettingsTile(
                             icon: FluentIcons.folder_24_regular,
-                            iconColor: AppColors.settingsStorage,
                             title: context.l10n.manageStorage,
                             onTap: () => const DownloadsRoute().push(context),
                             borderRadius: BorderRadius.vertical(
@@ -468,7 +457,6 @@ class SettingsScreen extends StatelessWidget {
                             builder: (context, state) {
                               return TilawaSettingsTile(
                                 icon: FluentIcons.arrow_download_24_regular,
-                                iconColor: AppColors.settingsDownloads,
                                 title: context.l10n.concurrentDownloads,
                                 onTap: () => _showConcurrentDownloadsPicker(
                                   context,
@@ -494,7 +482,6 @@ class SettingsScreen extends StatelessWidget {
                           children: [
                             TilawaSettingsTile(
                               icon: FluentIcons.apps_list_24_regular,
-                              iconColor: AppColors.settingsBookmarks,
                               title: 'Route list',
                               onTap: () => const RouteListRoute().push(context),
                               borderRadius: BorderRadius.vertical(
@@ -655,40 +642,14 @@ class _SettingsProfileCard extends StatelessWidget {
             : context.l10n.signInToSync;
 
         final Color primary = colorScheme.primary;
-        final Color gradientHi = Color.lerp(
-          primary,
-          colorScheme.surface,
-          context.isDarkMode ? 0.1 : 0.16,
-        )!;
-        final Color gradientLo = Color.lerp(
-          primary,
-          colorScheme.onSurface,
-          context.isDarkMode ? 0.14 : 0.05,
-        )!;
 
         void onGuestTap() => const LoginRoute().push(context);
 
-        final Widget card = Container(
-          decoration: BoxDecoration(
-            borderRadius: borderRadius,
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(
-                  alpha: context.isDarkMode
-                      ? tokens.opacityShadowStrong
-                      : tokens.opacityShadow,
-                ),
-                blurRadius: tokens.blurShadow * 1.5,
-                offset: tokens.shadowOffsetMedium,
-                spreadRadius: -tokens.spaceSmall,
-              ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: borderRadius,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
+        final Widget card = ClipRRect(
+          borderRadius: borderRadius,
+          child: Material(
+            color: primary,
+            child: InkWell(
                 onTap: isGuest ? onGuestTap : null,
                 mouseCursor: isGuest
                     ? SystemMouseCursors.click
@@ -701,11 +662,7 @@ class _SettingsProfileCard extends StatelessWidget {
                 ),
                 child: Ink(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [gradientHi, gradientLo],
-                    ),
+                    color: primary,
                   ),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
@@ -768,8 +725,7 @@ class _SettingsProfileCard extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        );
+          );
 
         final Widget content = isGuest
             ? Semantics(

@@ -23,59 +23,30 @@ class AthkarCategoryCard extends StatelessWidget {
     return TilawaCard(
       onTap: onTap,
       borderRadius: tokens.radiusExtraLarge,
-      padding: EdgeInsets.zero,
-      gradient: LinearGradient(
-        begin: AlignmentDirectional.topStart,
-        end: AlignmentDirectional.bottomEnd,
-        colors: [
-          colorScheme.surfaceContainerLow.withValues(
-            alpha: tokens.opacityGlass,
-          ),
-          colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-        ],
-      ),
-      borderColor: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-      child: Stack(
+      surface: TilawaCardSurface.raised,
+      backgroundColor: colorScheme.surface,
+      padding: EdgeInsets.all(tokens.spaceLarge),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: tokens.spaceMedium,
         children: [
-          PositionedDirectional(
-            top: -tokens.spaceExtraLarge,
-            end: -tokens.spaceExtraLarge,
-            child: IgnorePointer(
-              child: Icon(
-                iconData,
-                size: tokens.iconSizeExtraLarge * 2,
-                color: colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle * 0.55,
-                ),
-              ),
+          TilawaIconBox(
+            icon: iconData,
+            size: tokens.iconSizeLarge,
+            backgroundColor: colorScheme.primary.withValues(
+              alpha: tokens.opacitySubtle,
             ),
+            iconColor: colorScheme.primary,
+            borderRadius: tokens.radiusLarge,
           ),
-          Padding(
-            padding: EdgeInsets.all(tokens.spaceLarge),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: tokens.spaceMedium,
-              children: [
-                TilawaIconBox(
-                  icon: iconData,
-                  size: tokens.iconSizeLarge,
-                  backgroundColor: colorScheme.primary.withValues(
-                    alpha: tokens.opacitySubtle,
-                  ),
-                  iconColor: colorScheme.primary,
-                  borderRadius: tokens.radiusLarge,
-                ),
-                Text(
-                  name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
+          Text(
+            name,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

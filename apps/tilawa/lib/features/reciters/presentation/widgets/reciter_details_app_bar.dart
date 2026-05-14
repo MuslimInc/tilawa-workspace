@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
-/// Compact app bar showing the reciter name with a gradient
-/// background and subtle decorative elements.
+/// Compact app bar showing the reciter name on a single solid primary
+/// surface. Decorative circles and gradient fills were intentionally
+/// removed in the visual-simplification pass — the goal is to let the
+/// reciter name be the focal element, not the chrome.
 class ReciterDetailsAppBar extends StatelessWidget {
   const ReciterDetailsAppBar({super.key, required this.reciter});
 
@@ -21,49 +23,24 @@ class ReciterDetailsAppBar extends StatelessWidget {
       pinned: true,
       backgroundColor: colorScheme.primary,
       foregroundColor: appBarForegroundColor,
+      elevation: 0,
+      scrolledUnderElevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: appBarForegroundColor),
         onPressed: () => context.pop(),
       ),
       centerTitle: true,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [colorScheme.primary, colorScheme.secondary],
-            ),
-          ),
-          child: Stack(
-            children: [
-              // Subtle decorative circles
-              Positioned(
-                left: -30,
-                top: -20,
-                child: _DecorativeCircle(size: 80, opacity: 0.06),
-              ),
-              Positioned(
-                right: -15,
-                bottom: -10,
-                child: _DecorativeCircle(size: 60, opacity: 0.04),
-              ),
-            ],
-          ),
-        ),
-      ),
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Small inline avatar
           CircleAvatar(
             radius: 16,
-            backgroundColor: appBarForegroundColor.withValues(alpha: 0.2),
+            backgroundColor: appBarForegroundColor.withValues(alpha: 0.18),
             child: Text(
               reciter.name[0],
               style: theme.textTheme.labelLarge?.copyWith(
                 color: appBarForegroundColor,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -75,33 +52,12 @@ class ReciterDetailsAppBar extends StatelessWidget {
                   .responsiveStyle((t) => t.titleLarge)
                   ?.copyWith(
                     color: appBarForegroundColor,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _DecorativeCircle extends StatelessWidget {
-  const _DecorativeCircle({required this.size, required this.opacity});
-
-  final double size;
-  final double opacity;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Theme.of(
-          context,
-        ).colorScheme.onPrimary.withValues(alpha: opacity),
       ),
     );
   }

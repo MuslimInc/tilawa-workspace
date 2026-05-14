@@ -1888,4 +1888,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorInvalidNotificationPayload => 'بيانات التنبيه غير صالحة.';
+
+  @override
+  String get moreOptions => 'المزيد';
 }

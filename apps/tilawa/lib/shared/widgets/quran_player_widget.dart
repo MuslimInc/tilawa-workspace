@@ -1106,30 +1106,35 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
             ),
           ),
         ),
-        GestureDetector(
-          onTap: () => showSliderDialog(
-            context: context,
-            title: context.l10n.playbackSpeed,
-            divisions: 8,
-            min: 0.5,
-            max: 2.5,
-            value: state.speed,
-            onChanged: (s) => context.read<AudioPlayerBloc>().add(
-              AudioPlayerEvent.setSpeed(s),
+        Semantics(
+          button: true,
+          label: context.l10n.playbackSpeed,
+          value: '${state.speed.toStringAsFixed(1)}x',
+          child: GestureDetector(
+            onTap: () => showSliderDialog(
+              context: context,
+              title: context.l10n.playbackSpeed,
+              divisions: 8,
+              min: 0.5,
+              max: 2.5,
+              value: state.speed,
+              onChanged: (s) => context.read<AudioPlayerBloc>().add(
+                AudioPlayerEvent.setSpeed(s),
+              ),
             ),
-          ),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              '${state.speed.toStringAsFixed(1)}x',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: tokens.spaceMedium,
-                fontWeight: FontWeight.bold,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                '${state.speed.toStringAsFixed(1)}x',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: tokens.spaceMedium,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

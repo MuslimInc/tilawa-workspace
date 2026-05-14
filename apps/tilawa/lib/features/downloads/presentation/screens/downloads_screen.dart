@@ -343,32 +343,12 @@ class _DownloadsSummaryCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(tokens.spaceLarge),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: [
-              colorScheme.primaryContainer.withValues(
-                alpha: tokens.opacityGlass,
-              ),
-              colorScheme.surfaceContainerLow.withValues(
-                alpha: tokens.opacityGlass,
-              ),
-            ],
-          ),
+          color: colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(tokens.radiusLarge),
           border: Border.all(
-            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            color: colorScheme.outlineVariant,
             width: tokens.borderWidthThin,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.shadow.withValues(
-                alpha: tokens.opacityShadow * 0.36,
-              ),
-              blurRadius: tokens.blurShadow,
-              offset: tokens.shadowOffsetSmall,
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

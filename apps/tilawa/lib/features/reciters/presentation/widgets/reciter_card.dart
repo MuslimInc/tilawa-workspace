@@ -29,24 +29,10 @@ class ReciterCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: Ink(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              end: AlignmentDirectional.bottomEnd,
-              colors: [
-                Color.alphaBlend(
-                  colorScheme.primary.withValues(
-                    alpha: tokens.opacitySubtle * 0.38,
-                  ),
-                  colorScheme.surfaceContainerLow,
-                ),
-                colorScheme.surfaceContainerLow,
-              ],
-            ),
+            color: colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(tokens.radiusLarge),
             border: Border.all(
-              color: colorScheme.outlineVariant.withValues(
-                alpha: tokens.opacityMedium,
-              ),
+              color: colorScheme.outlineVariant,
               width: tokens.borderWidthThin,
             ),
           ),

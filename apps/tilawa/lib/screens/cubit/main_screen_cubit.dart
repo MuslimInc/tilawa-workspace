@@ -22,19 +22,17 @@ class MainScreenCubit extends Cubit<MainScreenState> {
 
   // ── Timing constants (must mirror main_screen.dart display logic) ──────────
 
-  static const Duration _shellActivationDelay = Duration(milliseconds: 260);
   static const Duration _initialTabRouteSettleDelay = Duration(
-    milliseconds: 1200,
+    milliseconds: 300,
   );
-  static const Duration _startupUiWarmupDelay = Duration(milliseconds: 5200);
+  static const Duration _startupUiWarmupDelay = Duration(milliseconds: 1000);
   static const Duration _deferredAudioBindingDelay = Duration(
-    milliseconds: 3800,
+    milliseconds: 800,
   );
-  static const Duration _offlineIndicatorDelay = Duration(milliseconds: 3000);
+  static const Duration _offlineIndicatorDelay = Duration(milliseconds: 600);
 
   // ── Timers ─────────────────────────────────────────────────────────────────
 
-  Timer? _shellActivationTimer;
   Timer? _initialTabMountTimer;
   Timer? _startupUiWarmupTimer;
   Timer? _audioBindingTimer;
@@ -43,21 +41,17 @@ class MainScreenCubit extends Cubit<MainScreenState> {
   // ── Startup orchestration ──────────────────────────────────────────────────
 
   void _scheduleStartupTasks() {
-    // Phase A: activate the outer shell after a short post-first-frame delay
+    // Phase A: activate the outer shell on the next event-loop tick
     // to avoid contention with the route-entrance transition.
-    _shellActivationTimer = Timer(_shellActivationDelay, () {
+    Timer(Duration.zero, () {
       if (isClosed) return;
-      scheduleMicrotask(() {
-        if (isClosed) return;
-        emit(state.copyWith(isShellActivated: true));
-        if (!_kReleaseMode) {
-          developer.log(
-            '[PerfLogger][MainScreen] shell-activated '
-            'delayMs=${_shellActivationDelay.inMilliseconds}',
-            name: 'tilawa.main_screen',
-          );
-        }
-      });
+      emit(state.copyWith(isShellActivated: true));
+      if (!_kReleaseMode) {
+        developer.log(
+          '[PerfLogger][MainScreen] shell-activated (next-tick)',
+          name: 'tilawa.main_screen',
+        );
+      }
     });
 
     // Phase B: mount the initial tab after the route has settled to prevent
@@ -146,7 +140,6 @@ class MainScreenCubit extends Cubit<MainScreenState> {
 
   @override
   Future<void> close() {
-    _shellActivationTimer?.cancel();
     _initialTabMountTimer?.cancel();
     _startupUiWarmupTimer?.cancel();
     _audioBindingTimer?.cancel();

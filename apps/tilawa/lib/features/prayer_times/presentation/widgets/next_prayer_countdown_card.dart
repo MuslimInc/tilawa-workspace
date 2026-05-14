@@ -61,24 +61,9 @@ class NextPrayerCountdownCard extends StatelessWidget {
         vertical: tokens.spaceSmall,
       ),
       child: TilawaCard(
-        flat: true,
+        surface: TilawaCardSurface.raised,
         borderRadius: tokens.radiusExtraLarge,
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [
-            Color.alphaBlend(
-              colorScheme.primary.withValues(
-                alpha: tokens.opacitySubtle * 0.85,
-              ),
-              colorScheme.surface,
-            ),
-            colorScheme.surfaceContainerLow,
-          ],
-        ),
-        borderColor: colorScheme.primary.withValues(
-          alpha: tokens.opacitySubtle * 1.4,
-        ),
+        backgroundColor: colorScheme.surface,
         padding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,
           tokens.spaceMedium,
@@ -280,20 +265,7 @@ class _NextPrayerVisual extends StatelessWidget {
       height: tokens.iconSizeExtraLarge + tokens.spaceLarge,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colorScheme.primaryContainer.withValues(
-          alpha: tokens.opacityMedium,
-        ),
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-          width: tokens.borderWidthThin,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-            blurRadius: tokens.blurShadow,
-            offset: tokens.shadowOffsetSmall,
-          ),
-        ],
+        color: colorScheme.primaryContainer,
       ),
       child: Icon(
         icon,

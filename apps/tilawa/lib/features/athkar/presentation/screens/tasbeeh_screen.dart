@@ -173,17 +173,8 @@ class _TasbeehOptionCard extends StatelessWidget {
     return TilawaCard(
       onTap: onTap,
       borderRadius: tokens.radiusExtraLarge,
-      borderColor: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-      gradient: LinearGradient(
-        begin: AlignmentDirectional.topStart,
-        end: AlignmentDirectional.bottomEnd,
-        colors: [
-          colorScheme.surfaceContainerLow.withValues(
-            alpha: tokens.opacityGlass,
-          ),
-          colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-        ],
-      ),
+      surface: TilawaCardSurface.raised,
+      backgroundColor: colorScheme.surface,
       child: Row(
         children: [
           TilawaIconBox(
@@ -248,21 +239,8 @@ class _TasbeehCreateView extends StatelessWidget {
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: TilawaCard(
                 borderRadius: tokens.radiusExtraLarge,
-                borderColor: theme.colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
-                gradient: LinearGradient(
-                  begin: AlignmentDirectional.topStart,
-                  end: AlignmentDirectional.bottomEnd,
-                  colors: [
-                    theme.colorScheme.surfaceContainerLow.withValues(
-                      alpha: tokens.opacityGlass,
-                    ),
-                    theme.colorScheme.surface.withValues(
-                      alpha: tokens.opacityGlass,
-                    ),
-                  ],
-                ),
+                surface: TilawaCardSurface.raised,
+                backgroundColor: theme.colorScheme.surface,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
@@ -460,21 +438,8 @@ class _TasbeehCountingView extends StatelessWidget {
                   trigger: state.vibrationEventCount,
                   child: TilawaCard(
                     borderRadius: tokens.radiusExtraLarge,
-                    borderColor: colorScheme.primary.withValues(
-                      alpha: tokens.opacitySubtle,
-                    ),
-                    gradient: LinearGradient(
-                      begin: AlignmentDirectional.topStart,
-                      end: AlignmentDirectional.bottomEnd,
-                      colors: [
-                        colorScheme.surfaceContainerLow.withValues(
-                          alpha: tokens.opacityGlass,
-                        ),
-                        colorScheme.surface.withValues(
-                          alpha: tokens.opacityGlass,
-                        ),
-                      ],
-                    ),
+                    surface: TilawaCardSurface.raised,
+                    backgroundColor: colorScheme.surface,
                     child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,

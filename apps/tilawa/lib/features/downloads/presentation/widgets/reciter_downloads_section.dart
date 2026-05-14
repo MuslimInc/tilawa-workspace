@@ -58,25 +58,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
       clipBehavior: Clip.antiAlias,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: [
-              colorScheme.surfaceContainerLow.withValues(
-                alpha: tokens.opacityGlass,
-              ),
-              colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.shadow.withValues(
-                alpha: tokens.opacityShadow * 0.3,
-              ),
-              blurRadius: tokens.blurShadow,
-              offset: tokens.shadowOffsetSmall,
-            ),
-          ],
+          color: colorScheme.surface,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,

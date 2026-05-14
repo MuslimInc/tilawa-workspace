@@ -87,24 +87,11 @@ class _AthkarItemWidgetState extends State<AthkarItemWidget> {
                     Expanded(
                       child: TilawaCard(
                         borderRadius: tokens.radiusExtraLarge,
+                        surface: TilawaCardSurface.raised,
+                        backgroundColor: colorScheme.surface,
                         padding: EdgeInsets.symmetric(
                           horizontal: tokens.spaceExtraLarge,
                           vertical: tokens.spaceExtraLarge,
-                        ),
-                        gradient: LinearGradient(
-                          begin: AlignmentDirectional.topStart,
-                          end: AlignmentDirectional.bottomEnd,
-                          colors: [
-                            colorScheme.surfaceContainerLow.withValues(
-                              alpha: tokens.opacityGlass,
-                            ),
-                            colorScheme.surface.withValues(
-                              alpha: tokens.opacityGlass,
-                            ),
-                          ],
-                        ),
-                        borderColor: colorScheme.primary.withValues(
-                          alpha: tokens.opacitySubtle,
                         ),
                         child: Scrollbar(
                           controller: _scrollController,

@@ -100,9 +100,9 @@ class ReciterSearchHeader extends StatelessWidget {
                       identifier: ReciterSemanticsIds.reciterDetailsViewToggle,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceContainerLow.withValues(
-                            alpha: tokens.opacityEmphasis,
-                          ),
+                          // color: colorScheme.surfaceContainerLow.withValues(
+                          //   alpha: tokens.opacityEmphasis,
+                          // ),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: colorScheme.primary.withValues(
@@ -111,6 +111,12 @@ class ReciterSearchHeader extends StatelessWidget {
                           ),
                         ),
                         child: IconButton(
+                          padding: EdgeInsets.zero,
+                          style: IconButton.styleFrom(
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: const CircleBorder(),
+                            padding: EdgeInsets.zero,
+                          ),
                           icon:
                               BlocBuilder<
                                 ReciterDetailsBloc,

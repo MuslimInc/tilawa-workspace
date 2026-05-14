@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -90,9 +92,20 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         bloc.state.selectedMoshaf ??
         (widget.reciter.moshaf.isNotEmpty ? widget.reciter.moshaf.first : null);
     if (moshaf == null) return;
+
+    final completer = Completer<void>();
+    late final StreamSubscription<ReciterDetailsState> subscription;
+    subscription = bloc.stream.listen((state) {
+      if (state.status == ReciterDetailsStatus.loaded ||
+          state.status == ReciterDetailsStatus.error) {
+        subscription.cancel();
+        completer.complete();
+      }
+    });
+
     bloc.add(LoadSurahList(reciter: widget.reciter, moshaf: moshaf));
     bloc.add(LoadReciterHistory(widget.reciter.id.toString()));
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    await completer.future;
   }
 
   void _scrollToPlayingSurah(List<SurahEntity> surahs) {

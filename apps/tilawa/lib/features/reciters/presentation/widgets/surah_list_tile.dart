@@ -216,6 +216,26 @@ class SurahListTile extends StatelessWidget {
                         size: tokens.iconSizeLarge,
                       ),
                     ),
+                    SizedBox(width: tokens.spaceSmall),
+                    Semantics(
+                      button: true,
+                      label: context.l10n.moreOptions,
+                      child: InkWell(
+                        onTap: () => showSurahOptionsSheet(context, surah),
+                        borderRadius: BorderRadius.circular(
+                          tokens.radiusMedium,
+                        ),
+                        child: SizedBox(
+                          width: badgeSize,
+                          height: badgeSize,
+                          child: Icon(
+                            Icons.more_vert_rounded,
+                            color: colorScheme.onSurfaceVariant,
+                            size: tokens.iconSizeMedium,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],

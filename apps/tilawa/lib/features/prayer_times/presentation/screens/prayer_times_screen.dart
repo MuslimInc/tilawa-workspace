@@ -643,7 +643,7 @@ class _LocationUtilityCard extends StatelessWidget {
         0,
       ),
       child: TilawaCard(
-        flat: true,
+        surface: TilawaCardSurface.flat,
         borderRadius: tokens.radiusLarge,
         backgroundColor: colorScheme.surfaceContainerLow,
         borderColor: colorScheme.outlineVariant.withValues(
@@ -704,7 +704,7 @@ class _BottomUtilitiesCard extends StatelessWidget {
         0,
       ),
       child: TilawaCard(
-        flat: true,
+        surface: TilawaCardSurface.flat,
         borderRadius: tokens.radiusLarge,
         backgroundColor: colorScheme.surfaceContainerLow,
         borderColor: colorScheme.outlineVariant.withValues(
@@ -926,7 +926,7 @@ class _TodayPrayerListSection extends StatelessWidget {
         0,
       ),
       child: TilawaCard(
-        flat: true,
+        surface: TilawaCardSurface.flat,
         borderRadius: tokens.radiusLarge,
         backgroundColor: colorScheme.surfaceContainerLow,
         borderColor: colorScheme.outlineVariant.withValues(
@@ -1286,7 +1286,7 @@ class _AlertModeTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: tokens.spaceSmall),
       child: TilawaCard(
-        flat: true,
+        surface: TilawaCardSurface.flat,
         backgroundColor: selected
             ? theme.colorScheme.primaryContainer.withValues(
                 alpha: tokens.opacitySubtle,

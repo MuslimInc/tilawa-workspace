@@ -567,36 +567,13 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
         explicitChildNodes: true,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: AlignmentDirectional.topStart,
-              end: AlignmentDirectional.bottomEnd,
-              colors: [
-                Color.alphaBlend(
-                  colorScheme.primary.withValues(
-                    alpha: tokens.opacitySubtle * 0.7,
-                  ),
-                  colorScheme.surface,
-                ),
-                colorScheme.surface,
-              ],
-            ),
+            color: colorScheme.surface,
             border: Border(
               bottom: BorderSide(
-                color: colorScheme.outlineVariant.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
+                color: colorScheme.outlineVariant,
                 width: tokens.borderWidthThin,
               ),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: colorScheme.shadow.withValues(
-                  alpha: tokens.opacityShadow * 0.45,
-                ),
-                blurRadius: tokens.blurShadow,
-                offset: tokens.shadowOffsetSmall,
-              ),
-            ],
           ),
           child: Material(
             color: Colors.transparent,

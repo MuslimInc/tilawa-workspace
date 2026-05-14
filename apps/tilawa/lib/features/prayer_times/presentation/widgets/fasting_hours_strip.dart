@@ -43,7 +43,7 @@ class FastingHoursStrip extends StatelessWidget {
         vertical: tokens.spaceSmall,
       ),
       child: TilawaCard(
-        flat: true,
+        surface: TilawaCardSurface.flat,
         backgroundColor: colorScheme.surfaceContainerLow,
         borderRadius: tokens.radiusLarge,
         borderColor: colorScheme.outlineVariant.withValues(

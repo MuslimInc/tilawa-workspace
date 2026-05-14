@@ -25,26 +25,10 @@ class QuranReaderAppBar extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colorScheme.surface.withValues(alpha: 0.96),
-            colorScheme.surfaceContainerLow.withValues(alpha: 0.92),
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: tokens.opacitySubtle),
-            blurRadius: tokens.blurGlass / 2,
-            offset: tokens.shadowOffsetSmall,
-          ),
-        ],
+        color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outlineVariant.withValues(
-              alpha: tokens.opacitySubtle,
-            ),
+            color: colorScheme.outlineVariant,
             width: tokens.borderWidthThin,
           ),
         ),

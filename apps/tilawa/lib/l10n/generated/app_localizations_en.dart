@@ -1898,4 +1898,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorInvalidNotificationPayload => 'Invalid notification payload.';
+
+  @override
+  String get moreOptions => 'More options';
 }

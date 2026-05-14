@@ -45,7 +45,7 @@ void main() {
     reset(mockClearFavorites);
   });
 
-  Future<FavoritesCubit> _loadedCubit({
+  Future<FavoritesCubit> loadedCubit({
     bool withFavoriteReciter = false,
   }) async {
     when(
@@ -67,7 +67,7 @@ void main() {
     return cubit;
   }
 
-  Future<void> _pumpCard(WidgetTester tester, FavoritesCubit cubit) async {
+  Future<void> pumpCard(WidgetTester tester, FavoritesCubit cubit) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.getLightTheme(
@@ -94,8 +94,8 @@ void main() {
   testWidgets('exposes open-reciter and favorite semantics in English', (
     WidgetTester tester,
   ) async {
-    final cubit = await _loadedCubit();
-    await _pumpCard(tester, cubit);
+    final cubit = await loadedCubit();
+    await pumpCard(tester, cubit);
 
     final Finder openInk = find
         .descendant(
@@ -116,8 +116,8 @@ void main() {
   testWidgets('favorite control semantic bounds meet 48dp minimum', (
     WidgetTester tester,
   ) async {
-    final cubit = await _loadedCubit();
-    await _pumpCard(tester, cubit);
+    final cubit = await loadedCubit();
+    await pumpCard(tester, cubit);
 
     final Rect rect = tester.getRect(
       find.bySemanticsLabel('Add to Favorites'),
@@ -131,8 +131,8 @@ void main() {
   testWidgets('tapping favorite invokes toggle use case', (
     WidgetTester tester,
   ) async {
-    final cubit = await _loadedCubit();
-    await _pumpCard(tester, cubit);
+    final cubit = await loadedCubit();
+    await pumpCard(tester, cubit);
 
     await tester.tap(find.bySemanticsLabel('Add to Favorites'));
     await tester.pumpAndSettle();
@@ -145,8 +145,8 @@ void main() {
   testWidgets('when reciter is favorited, shows remove semantics', (
     WidgetTester tester,
   ) async {
-    final cubit = await _loadedCubit(withFavoriteReciter: true);
-    await _pumpCard(tester, cubit);
+    final cubit = await loadedCubit(withFavoriteReciter: true);
+    await pumpCard(tester, cubit);
 
     expect(find.bySemanticsLabel('Remove from favorites'), findsOneWidget);
 
@@ -156,8 +156,8 @@ void main() {
   testWidgets(
     'open-reciter and favorite InkWells are siblings, not nested',
     (WidgetTester tester) async {
-      final cubit = await _loadedCubit();
-      await _pumpCard(tester, cubit);
+      final cubit = await loadedCubit();
+      await pumpCard(tester, cubit);
 
       expect(
         find.descendant(
@@ -168,7 +168,9 @@ void main() {
       );
 
       final Finder openInkWell = find.descendant(
-        of: find.bySemanticsIdentifier(ReciterSemanticsIds.reciterCard(tReciter.id)),
+        of: find.bySemanticsIdentifier(
+          ReciterSemanticsIds.reciterCard(tReciter.id),
+        ),
         matching: find.byType(InkWell),
       );
       final Finder favoriteInkWell = find.descendant(

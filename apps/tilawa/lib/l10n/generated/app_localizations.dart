@@ -3493,6 +3493,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid notification payload.'**
   String get errorInvalidNotificationPayload;
+
+  /// Label for the more-options overflow menu button
+  ///
+  /// In en, this message translates to:
+  /// **'More options'**
+  String get moreOptions;
 }
 
 class _AppLocalizationsDelegate
