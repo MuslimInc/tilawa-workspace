@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -157,43 +155,24 @@ class _FavoriteButton extends StatelessWidget {
       return state is FavoritesLoaded && state.favoriteIds.contains(reciter.id);
     });
 
-    final double hitExtent = math.max(
-      context.minInteractiveDimension,
-      tokens.iconSizeLargePlus,
-    );
-
     return Semantics(
-      button: true,
       identifier: ReciterSemanticsIds.reciterFavoriteButton(reciter.id),
-      toggled: isFavorite,
-      label: isFavorite
-          ? context.l10n.removeFromFavorites
-          : context.l10n.addToFavorites,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-        child: InkWell(
-          radius: tokens.radiusExtraLarge,
-          borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-          onTap: () => context.read<FavoritesCubit>().toggleFavorite(reciter),
-          child: SizedBox(
-            width: hitExtent,
-            height: hitExtent,
-            child: Center(
-              child: Icon(
-                isFavorite
-                    ? Icons.favorite_rounded
-                    : Icons.favorite_outline_rounded,
-                size: tokens.iconSizeMedium,
-                color: isFavorite
-                    ? colorScheme.error
-                    : colorScheme.onSurfaceVariant.withValues(
-                        alpha: tokens.opacityMedium,
-                      ),
-              ),
-            ),
-          ),
+      child: TilawaIconToggle(
+        icon: Icons.favorite_outline_rounded,
+        activeIcon: Icons.favorite_rounded,
+        value: isFavorite,
+        onChanged: (_) =>
+            context.read<FavoritesCubit>().toggleFavorite(reciter),
+        iconSize: tokens.iconSizeMedium,
+        activeIconColor: colorScheme.error,
+        inactiveIconColor: colorScheme.onSurfaceVariant.withValues(
+          alpha: tokens.opacityMedium,
         ),
+        activeBackgroundColor: Colors.transparent,
+        inactiveBackgroundColor: Colors.transparent,
+        semanticLabel: isFavorite
+            ? context.l10n.removeFromFavorites
+            : context.l10n.addToFavorites,
       ),
     );
   }

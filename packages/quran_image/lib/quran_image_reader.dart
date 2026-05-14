@@ -582,7 +582,6 @@ class _QuranImageReaderState extends State<QuranImageReader>
       pageNumber: safePageNumber,
       cacheWidth: _cacheWidth,
     );
-    final prepTimer = Stopwatch()..start();
     _JumpTransitionSnapshot? jumpSnapshot;
     if (snapshotRequested) {
       jumpSnapshot = await _preparePageSnapshotForNavigation(safePageNumber);

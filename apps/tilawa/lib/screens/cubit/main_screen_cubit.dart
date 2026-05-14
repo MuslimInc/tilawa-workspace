@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'main_screen_state.dart';
@@ -48,68 +47,47 @@ class MainScreenCubit extends Cubit<MainScreenState> {
     // to avoid contention with the route-entrance transition.
     _shellActivationTimer = Timer(_shellActivationDelay, () {
       if (isClosed) return;
-      SchedulerBinding.instance.scheduleTask<void>(
-        () {
-          if (isClosed) return;
-          emit(state.copyWith(isShellActivated: true));
-          if (!_kReleaseMode) {
-            developer.log(
-              '[PerfLogger][MainScreen] shell-activated '
-              'delayMs=${_shellActivationDelay.inMilliseconds}',
-              name: 'tilawa.main_screen',
-            );
-          }
-        },
-        Priority.idle,
-        debugLabel: 'main-screen-shell-activation',
-      );
+      emit(state.copyWith(isShellActivated: true));
+      if (!_kReleaseMode) {
+        developer.log(
+          '[PerfLogger][MainScreen] shell-activated '
+          'delayMs=${_shellActivationDelay.inMilliseconds}',
+          name: 'tilawa.main_screen',
+        );
+      }
     });
 
     // Phase B: mount the initial tab after the route has settled to prevent
     // a single heavy composition frame at the start of the transition.
     _initialTabMountTimer = Timer(_initialTabRouteSettleDelay, () {
       if (isClosed) return;
-      SchedulerBinding.instance.scheduleTask<void>(
-        () {
-          if (isClosed) return;
-          emit(
-            state.copyWith(
-              isInitialTabMounted: true,
-              builtTabIndexes: {...state.builtTabIndexes, state.currentIndex},
-            ),
-          );
-          if (!_kReleaseMode) {
-            developer.log(
-              '[PerfLogger][MainScreen] initial-tab-mounted '
-              'delayMs=${_initialTabRouteSettleDelay.inMilliseconds}',
-              name: 'tilawa.main_screen',
-            );
-          }
-        },
-        Priority.idle,
-        debugLabel: 'main-screen-initial-tab-mount',
+      emit(
+        state.copyWith(
+          isInitialTabMounted: true,
+          builtTabIndexes: {...state.builtTabIndexes, state.currentIndex},
+        ),
       );
+      if (!_kReleaseMode) {
+        developer.log(
+          '[PerfLogger][MainScreen] initial-tab-mounted '
+          'delayMs=${_initialTabRouteSettleDelay.inMilliseconds}',
+          name: 'tilawa.main_screen',
+        );
+      }
     });
 
     // Phase C: enable deferred UI elements (e.g. SVG icons) after the
     // critical startup window is clear.
     _startupUiWarmupTimer = Timer(_startupUiWarmupDelay, () {
       if (isClosed) return;
-      SchedulerBinding.instance.scheduleTask<void>(
-        () {
-          if (isClosed) return;
-          emit(state.copyWith(isStartupUiWarm: true));
-          if (!_kReleaseMode) {
-            developer.log(
-              '[PerfLogger][MainScreen] startup-ui-warm '
-              'delayMs=${_startupUiWarmupDelay.inMilliseconds}',
-              name: 'tilawa.main_screen',
-            );
-          }
-        },
-        Priority.idle,
-        debugLabel: 'main-screen-startup-warmup',
-      );
+      emit(state.copyWith(isStartupUiWarm: true));
+      if (!_kReleaseMode) {
+        developer.log(
+          '[PerfLogger][MainScreen] startup-ui-warm '
+          'delayMs=${_startupUiWarmupDelay.inMilliseconds}',
+          name: 'tilawa.main_screen',
+        );
+      }
     });
 
     // Phase D: bind audio player after the critical startup window is clear.
