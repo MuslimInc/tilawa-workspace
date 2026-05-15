@@ -3,8 +3,8 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
-import '../formatters/prayer_time_label_formatter.dart';
 import '../extensions/prayer_type_ui.dart';
+import '../formatters/prayer_time_label_formatter.dart';
 import '../layout/prayer_times_layout.dart';
 import '../models/prayer_row_view_data.dart';
 import 'prayer_alert_status_chip.dart';
@@ -159,6 +159,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
                 SizedBox(height: tokens.spaceMedium),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: tokens.spaceMedium,
                   children: [
                     Expanded(
                       child: Text(
@@ -169,7 +170,6 @@ class NextPrayerCountdownCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(width: tokens.spaceMedium),
                     _NextPrayerVisual(icon: nextPrayer.type.icon),
                   ],
                 ),
@@ -261,8 +261,8 @@ class _NextPrayerVisual extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      width: tokens.iconSizeExtraLarge + tokens.spaceLarge,
-      height: tokens.iconSizeExtraLarge + tokens.spaceLarge,
+      width: tokens.iconSizeExtraLarge,
+      height: tokens.iconSizeExtraLarge,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: colorScheme.primaryContainer,

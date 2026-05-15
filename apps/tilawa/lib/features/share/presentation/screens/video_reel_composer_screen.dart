@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/share/domain/entities/share_content.dart';
 import 'package:tilawa/features/share/domain/entities/share_limits.dart';
 import 'package:tilawa/features/share/domain/entities/widget_capture_handle.dart';
@@ -514,23 +515,11 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
   }
 
   void _showInfoSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(behavior: SnackBarBehavior.floating, content: Text(message)),
-    );
+    ToastUtils.showToast(msg: message);
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
-    final colorScheme = Theme.of(context).colorScheme;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: colorScheme.errorContainer,
-        content: Text(
-          message,
-          style: TextStyle(color: colorScheme.onErrorContainer),
-        ),
-      ),
-    );
+    ToastUtils.showErrorToast(message);
   }
 }
 

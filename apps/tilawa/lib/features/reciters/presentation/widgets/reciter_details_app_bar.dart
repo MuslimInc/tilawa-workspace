@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Compact app bar showing the reciter name on a single solid primary
 /// surface. Decorative circles and gradient fills were intentionally
@@ -25,10 +25,7 @@ class ReciterDetailsAppBar extends StatelessWidget {
       foregroundColor: appBarForegroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
-      leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: appBarForegroundColor),
-        onPressed: () => context.pop(),
-      ),
+      leading: TilawaBackButton(color: appBarForegroundColor),
       centerTitle: true,
       title: Row(
         mainAxisSize: MainAxisSize.min,

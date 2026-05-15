@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/share/presentation/widgets/video_review_panel.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -254,23 +255,11 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
   }
 
   void _showInfoSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(behavior: SnackBarBehavior.floating, content: Text(message)),
-    );
+    ToastUtils.showToast(msg: message);
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
-    final colorScheme = Theme.of(context).colorScheme;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: colorScheme.errorContainer,
-        content: Text(
-          message,
-          style: TextStyle(color: colorScheme.onErrorContainer),
-        ),
-      ),
-    );
+    ToastUtils.showErrorToast(message);
   }
 
   Future<void> _handleCapture(

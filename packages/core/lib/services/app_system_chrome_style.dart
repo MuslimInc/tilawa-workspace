@@ -42,23 +42,31 @@ final class AppSystemChromeStyle {
 
   /// Builds the default system UI style for standard app routes.
   ///
-  /// The status bar stays transparent so screens can paint behind it, while
-  /// the navigation bar uses the active theme surface to avoid inheriting a
-  /// stale bar color from the previous route.
-  static SystemUiOverlayStyle buildDefaultAppStyle(ThemeData theme) {
-    final Color navigationBarColor = theme.colorScheme.surface;
+  /// The status bar stays transparent so screens can paint behind it. The
+  /// navigation bar takes [navigationBarColor] — pass the Tilawa bottom-nav
+  /// fill (e.g. `theme.componentTokens.adaptiveShell.bottomNavBackgroundColor`)
+  /// so the OS gesture strip blends seamlessly with the app's floating nav.
+  /// Falls back to `theme.colorScheme.surface` when the override is null.
+  static SystemUiOverlayStyle buildDefaultAppStyle(
+    ThemeData theme, {
+    Color? navigationBarColor,
+  }) {
+    final Color resolvedNavColor =
+        navigationBarColor ?? theme.colorScheme.surface;
     final Brightness barBrightness = ThemeData.estimateBrightnessForColor(
-      navigationBarColor,
+      resolvedNavColor,
     );
     final Brightness iconBrightness = barBrightness == Brightness.dark
         ? Brightness.light
         : Brightness.dark;
 
+    final Color opaqueNavColor = resolvedNavColor.withValues(alpha: 1);
+
     return SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: iconBrightness,
       statusBarBrightness: barBrightness,
-      systemNavigationBarColor: navigationBarColor,
+      systemNavigationBarColor: opaqueNavColor,
       systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: iconBrightness,
       systemStatusBarContrastEnforced: false,

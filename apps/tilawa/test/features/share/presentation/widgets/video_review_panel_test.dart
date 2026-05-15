@@ -6,6 +6,12 @@ import 'package:tilawa/features/share/presentation/widgets/video_review_panel.da
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+Finder _tilawaButton(String text, TilawaButtonVariant variant) {
+  return find.byWidgetPredicate(
+    (Widget w) => w is TilawaButton && w.text == text && w.variant == variant,
+  );
+}
+
 Widget _buildHarness({
   required ShareContent content,
   required VoidCallback onEdit,
@@ -48,7 +54,7 @@ const _screenshotContent = ShareContent.screenshot(
 
 void main() {
   testWidgets(
-    'video mode: save button is OutlinedButton and triggers callback',
+    'video mode: save uses outline TilawaButton and triggers callback',
     (WidgetTester tester) async {
       int saveTaps = 0;
 
@@ -61,7 +67,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.widgetWithText(OutlinedButton, 'Save'));
+      await tester.tap(_tilawaButton('Save', TilawaButtonVariant.outline));
       await tester.pump();
 
       expect(saveTaps, 1);
@@ -70,13 +76,13 @@ void main() {
   );
 
   testWidgets(
-    'video mode: save button is disabled and shows spinner while saving',
+    'video mode: save is disabled and shows spinner while saving',
     (WidgetTester tester) async {
       int saveTaps = 0;
 
       await tester.pumpWidget(
         _buildHarness(
-          content: _screenshotContent,
+          content: _videoContent,
           onEdit: () {},
           onSave: () => saveTaps++,
           onShare: () {},
@@ -84,11 +90,10 @@ void main() {
         ),
       );
 
-      final Finder saveButtonFinder = find.widgetWithText(
-        OutlinedButton,
-        'Save',
+      final Finder saveButtonFinder = find.byKey(
+        const ValueKey('video_review_save_button'),
       );
-      final OutlinedButton saveButton = tester.widget<OutlinedButton>(
+      final TilawaButton saveButton = tester.widget<TilawaButton>(
         saveButtonFinder,
       );
 
@@ -102,7 +107,7 @@ void main() {
     },
   );
 
-  testWidgets('video mode: share is the FilledButton primary', (
+  testWidgets('video mode: share is the primary TilawaButton', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -114,21 +119,13 @@ void main() {
       ),
     );
 
-    // Filled (non-tonal) Share Reel exists
-    expect(find.widgetWithText(FilledButton, 'Share Reel'), findsOneWidget);
-    // No tonal share button in video mode
     expect(
-      find.byWidgetPredicate(
-        (w) =>
-            w is FilledButton &&
-            (w.style?.backgroundColor != null) == false &&
-            false,
-      ),
-      findsNothing,
+      _tilawaButton('Share Reel', TilawaButtonVariant.primary),
+      findsOneWidget,
     );
   });
 
-  testWidgets('screenshot mode: save is the FilledButton primary', (
+  testWidgets('screenshot mode: save is the primary TilawaButton', (
     WidgetTester tester,
   ) async {
     int saveTaps = 0;
@@ -143,10 +140,13 @@ void main() {
       ),
     );
 
-    final Finder saveButtonFinder = find.widgetWithText(FilledButton, 'Save');
+    final Finder saveButtonFinder = _tilawaButton(
+      'Save',
+      TilawaButtonVariant.primary,
+    );
     expect(saveButtonFinder, findsOneWidget);
-    // Save must NOT be an OutlinedButton in screenshot mode
     expect(find.widgetWithText(OutlinedButton, 'Save'), findsNothing);
+    expect(find.widgetWithText(FilledButton, 'Save'), findsNothing);
 
     await tester.tap(saveButtonFinder);
     await tester.pump();
@@ -155,8 +155,7 @@ void main() {
   });
 
   testWidgets(
-    'screenshot mode: share is rendered via FilledButton.tonalIcon, not the '
-    'filled primary',
+    'screenshot mode: share uses secondary TilawaButton, save stays primary',
     (WidgetTester tester) async {
       await tester.pumpWidget(
         _buildHarness(
@@ -168,13 +167,12 @@ void main() {
         ),
       );
 
-      // The Save button is the only filled (non-tonal) FilledButton.
-      // FilledButton.tonalIcon also returns a FilledButton subtype, so we
-      // assert the count by label rather than runtime type — Save is filled
-      // primary; Share is tonal but still type FilledButton.
-      expect(find.widgetWithText(FilledButton, 'Save'), findsOneWidget);
       expect(
-        find.widgetWithText(FilledButton, 'Share Screenshot'),
+        _tilawaButton('Save', TilawaButtonVariant.primary),
+        findsOneWidget,
+      );
+      expect(
+        _tilawaButton('Share Screenshot', TilawaButtonVariant.secondary),
         findsOneWidget,
       );
     },
@@ -196,8 +194,10 @@ void main() {
         ),
       );
 
-      final Finder saveButtonFinder = find.widgetWithText(FilledButton, 'Save');
-      final FilledButton saveButton = tester.widget<FilledButton>(
+      final Finder saveButtonFinder = find.byKey(
+        const ValueKey('video_review_save_button'),
+      );
+      final TilawaButton saveButton = tester.widget<TilawaButton>(
         saveButtonFinder,
       );
 

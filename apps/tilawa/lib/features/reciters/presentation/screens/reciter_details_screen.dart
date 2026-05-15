@@ -81,7 +81,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     HapticFeedback.lightImpact();
     _scrollController.animateTo(
       0,
-      duration: const Duration(milliseconds: 400),
+      duration: context.tokens.durationMedium,
       curve: Curves.easeOut,
     );
   }
@@ -161,7 +161,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   void _ensureVisibleForKey(GlobalKey key) {
     Scrollable.ensureVisible(
       key.currentContext!,
-      duration: const Duration(milliseconds: 300),
+      duration: context.tokens.durationFast,
       curve: Curves.easeOut,
       alignment: 0.0,
     );
@@ -183,12 +183,12 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           // Scroll-to-top FAB
           floatingActionButton: AnimatedSlide(
             offset: _showScrollToTop ? Offset.zero : const Offset(0, 2),
-            duration: const Duration(milliseconds: 250),
+            duration: tokens.durationFast,
             child: IgnorePointer(
               ignoring: !_showScrollToTop,
               child: AnimatedOpacity(
                 opacity: _showScrollToTop ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 250),
+                duration: tokens.durationFast,
                 child: FloatingActionButton.small(
                   onPressed: _scrollToTop,
                   backgroundColor: theme.colorScheme.primary,

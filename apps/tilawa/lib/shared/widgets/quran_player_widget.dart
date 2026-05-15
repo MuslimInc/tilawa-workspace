@@ -105,11 +105,15 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   @override
   void initState() {
     super.initState();
+    // Token-aligned: durationMedium (400ms). Cannot read tokens in initState
+    // (no theme/build context yet); keep literals in sync with
+    // TilawaDesignTokens by hand.
     _expandController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 400),
     );
 
+    // Token-aligned: durationFast (200ms). See note above.
     _dismissAnimController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
@@ -730,7 +734,8 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Positioned.fill(
@@ -759,21 +764,19 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                     children: [
                       Text(
                         audio.title,
-                        style: const TextStyle(
+                        style: theme.textTheme.titleMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       Text(
                         audio.artist ?? context.l10n.unknownReciter,
-                        style: TextStyle(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: Colors.white.withValues(
                             alpha: tokens.opacityEmphasis,
                           ),
-                          fontSize: 13,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -915,7 +918,8 @@ class _PlayerHeaderMolecule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
@@ -929,7 +933,7 @@ class _PlayerHeaderMolecule extends StatelessWidget {
       ),
       title: Text(
         context.l10n.currentPlaying,
-        style: TextStyle(color: Colors.white, fontSize: tokens.spaceLarge),
+        style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
       ),
       actions: [
         if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
@@ -1088,7 +1092,7 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: .spaceAround,
       children: [
@@ -1110,30 +1114,33 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
           button: true,
           label: context.l10n.playbackSpeed,
           value: '${state.speed.toStringAsFixed(1)}x',
-          child: GestureDetector(
-            onTap: () => showSliderDialog(
-              context: context,
-              title: context.l10n.playbackSpeed,
-              divisions: 8,
-              min: 0.5,
-              max: 2.5,
-              value: state.speed,
-              onChanged: (s) => context.read<AudioPlayerBloc>().add(
-                AudioPlayerEvent.setSpeed(s),
+          child: Material(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(20),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => showSliderDialog(
+                context: context,
+                title: context.l10n.playbackSpeed,
+                divisions: 8,
+                min: 0.5,
+                max: 2.5,
+                value: state.speed,
+                onChanged: (s) => context.read<AudioPlayerBloc>().add(
+                  AudioPlayerEvent.setSpeed(s),
+                ),
               ),
-            ),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                '${state.speed.toStringAsFixed(1)}x',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: tokens.spaceMedium,
-                  fontWeight: FontWeight.bold,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                child: Text(
+                  '${state.speed.toStringAsFixed(1)}x',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -1338,7 +1345,8 @@ class _ExpandedProgressBar extends StatelessWidget {
             duration: Duration.zero,
           ),
       builder: (context, positionData) {
-        final tokens = Theme.of(context).tokens;
+        final theme = Theme.of(context);
+        final tokens = theme.tokens;
         final seekActiveColor = Colors.white;
         final seekThumbColor = Colors.white;
         final seekBufferedColor = Colors.white.withValues(
@@ -1371,20 +1379,18 @@ class _ExpandedProgressBar extends StatelessWidget {
                 children: [
                   Text(
                     _formatDuration(positionData.position),
-                    style: TextStyle(
+                    style: theme.textTheme.labelMedium?.copyWith(
                       color: Colors.white.withValues(
                         alpha: tokens.opacityEmphasis - 0.1,
                       ),
-                      fontSize: tokens.spaceMedium,
                     ),
                   ),
                   Text(
                     _formatDuration(positionData.duration),
-                    style: TextStyle(
+                    style: theme.textTheme.labelMedium?.copyWith(
                       color: Colors.white.withValues(
                         alpha: tokens.opacityEmphasis - 0.1,
                       ),
-                      fontSize: tokens.spaceMedium,
                     ),
                   ),
                 ],

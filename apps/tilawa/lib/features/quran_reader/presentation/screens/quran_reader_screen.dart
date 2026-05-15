@@ -287,6 +287,11 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
   SystemUiOverlayStyle _buildReaderSystemUiOverlayStyle(
     QuranReaderTheme readerTheme,
   ) {
+    // Fully transparent system bars are intentional: the Mushaf page renders
+    // edge-to-edge behind the status / nav bars. Paired with
+    // [system*ContrastEnforced: false] so the OS doesn't draw a scrim.
+    // Do NOT replace with `colorScheme.surface` — that paints an opaque band
+    // over the page.
     return SystemUiOverlayStyle(
       statusBarColor: const Color(0x00000000),
       statusBarIconBrightness: readerTheme.statusBarIconBrightness,
@@ -1553,8 +1558,9 @@ class _ReaderOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     return AnimatedPositioned(
-      duration: const Duration(milliseconds: 300),
+      duration: tokens.durationFast,
       curve: Curves.easeOutCubic,
       left: 0,
       right: 0,
@@ -1563,7 +1569,7 @@ class _ReaderOverlay extends StatelessWidget {
         valueListenable: showOverlaysNotifier,
         builder: (context, showOverlays, child) {
           return AnimatedSlide(
-            duration: const Duration(milliseconds: 300),
+            duration: tokens.durationFast,
             curve: Curves.easeOutCubic,
             offset: showOverlays ? Offset.zero : const Offset(0, 1),
             child: child!,

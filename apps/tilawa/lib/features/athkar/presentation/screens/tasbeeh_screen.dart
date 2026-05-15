@@ -678,6 +678,8 @@ class _ShakeOnTrigger extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       key: ValueKey<int>(trigger),
       tween: Tween<double>(begin: 0, end: trigger == 0 ? 0 : 1),
+      // Bespoke shake-feedback timing: chrome tokens would dampen the visible
+      // tasbeeh-count snap. Hand-tuned with the haptic pulse.
       duration: const Duration(milliseconds: 420),
       builder: (context, value, animatedChild) {
         final offsetX = math.sin(value * math.pi * 6) * 10 * (1 - value);

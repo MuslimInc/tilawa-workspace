@@ -103,7 +103,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
 
     _scrollController.animateTo(
       0,
-      duration: const Duration(milliseconds: 220),
+      duration: context.tokens.durationFast,
       curve: Curves.easeOutCubic,
     );
   }

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -1056,43 +1057,24 @@ class _TodayPrayerListRow extends StatelessWidget {
                   constraints.maxWidth,
                 );
                 final bool compactChipLabels = showAlertChipLabels && !narrow;
-                final TextStyle nameStyle =
-                    theme.textTheme.titleSmall?.copyWith(
+                final TextStyle nameStyle = theme.textTheme.titleSmall!
+                    .copyWith(
                       fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
                       color: rowColor.withValues(alpha: rowAlpha),
-                    ) ??
-                    TextStyle(
-                      fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                      color: rowColor.withValues(alpha: rowAlpha),
-                      fontSize: 15,
                     );
-                final TextStyle statusStyle =
-                    theme.textTheme.labelSmall?.copyWith(
+                final TextStyle statusStyle = theme.textTheme.labelSmall!
+                    .copyWith(
                       fontWeight: FontWeight.w600,
                       color: isCurrent
                           ? rowColor.withValues(alpha: rowAlpha)
                           : colorScheme.onSurfaceVariant.withValues(
                               alpha: 0.92,
                             ),
-                    ) ??
-                    TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                      color: isCurrent
-                          ? rowColor.withValues(alpha: rowAlpha)
-                          : colorScheme.onSurfaceVariant.withValues(
-                              alpha: 0.92,
-                            ),
                     );
-                final TextStyle timeStyle =
-                    theme.textTheme.titleMedium?.copyWith(
+                final TextStyle timeStyle = theme.textTheme.titleMedium!
+                    .copyWith(
                       fontWeight: FontWeight.w800,
                       color: rowColor.withValues(alpha: rowAlpha),
-                    ) ??
-                    TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: rowColor.withValues(alpha: rowAlpha),
-                      fontSize: 18,
                     );
 
                 if (narrow) {
@@ -1381,13 +1363,8 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
         playAdhan: _playAdhan,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '🔔 Test fired: ${_selectedPrayer.name} (adhan=$_playAdhan)',
-            ),
-            duration: const Duration(seconds: 2),
-          ),
+        ToastUtils.showToast(
+          msg: '🔔 Test fired: ${_selectedPrayer.name} (adhan=$_playAdhan)',
         );
       }
     } finally {

@@ -5,7 +5,19 @@ import 'package:tilawa/features/share/presentation/widgets/composer_controls.dar
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+Finder _primaryTilawaButton() {
+  return find.byWidgetPredicate(
+    (Widget w) => w is TilawaButton && w.variant == TilawaButtonVariant.primary,
+  );
+}
+
 void main() {
+  late AppLocalizations en;
+
+  setUpAll(() {
+    en = lookupAppLocalizations(const Locale('en'));
+  });
+
   Widget buildSubject({required bool isError, VoidCallback? onPrimaryAction}) {
     return MaterialApp(
       locale: const Locale('en'),
@@ -44,15 +56,12 @@ void main() {
     await tester.pumpWidget(buildSubject(isError: true));
     await tester.pump();
 
-    expect(find.widgetWithText(FilledButton, 'Retry'), findsOneWidget);
-    expect(
-      find.widgetWithIcon(FilledButton, Icons.refresh_rounded),
-      findsOneWidget,
+    final TilawaButton primary = tester.widget<TilawaButton>(
+      _primaryTilawaButton(),
     );
-    expect(
-      find.widgetWithIcon(FilledButton, Icons.movie_creation_rounded),
-      findsNothing,
-    );
+    expect(primary.text, en.retry);
+    expect(primary.leadingIcon, isA<Icon>());
+    expect((primary.leadingIcon! as Icon).icon, Icons.refresh_rounded);
   });
 
   testWidgets(
@@ -61,11 +70,13 @@ void main() {
       await tester.pumpWidget(buildSubject(isError: false));
       await tester.pump();
 
-      expect(
-        find.widgetWithIcon(FilledButton, Icons.movie_creation_rounded),
-        findsOneWidget,
+      final TilawaButton primary = tester.widget<TilawaButton>(
+        _primaryTilawaButton(),
       );
-      expect(find.widgetWithText(FilledButton, 'Retry'), findsNothing);
+      expect(primary.text, en.generateReel);
+      expect(primary.leadingIcon, isA<Icon>());
+      expect((primary.leadingIcon! as Icon).icon, Icons.movie_creation_rounded);
+      expect(find.text(en.retry), findsNothing);
     },
   );
 
@@ -78,7 +89,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.widgetWithText(FilledButton, 'Retry'));
+    await tester.tap(_primaryTilawaButton());
     await tester.pump();
 
     expect(taps, 1);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/history_entity.dart';
@@ -184,6 +185,9 @@ class HistoryCard extends StatelessWidget {
                 style: IconButton.styleFrom(
                   backgroundColor: colorScheme.primaryContainer,
                 ),
+                tooltip: history.completed
+                    ? context.l10n.play
+                    : context.l10n.resume,
               ),
             ],
           ),

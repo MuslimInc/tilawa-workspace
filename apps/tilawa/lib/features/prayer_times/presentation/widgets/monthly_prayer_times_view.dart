@@ -172,6 +172,7 @@ class _MonthSelector extends StatelessWidget {
             onPressed: onPrevious,
             icon: const Icon(Icons.chevron_left_rounded),
             color: colorScheme.primary,
+            tooltip: context.l10n.previous,
           ),
           Text(
             '$monthName $year',
@@ -184,6 +185,7 @@ class _MonthSelector extends StatelessWidget {
             onPressed: onNext,
             icon: const Icon(Icons.chevron_right_rounded),
             color: colorScheme.primary,
+            tooltip: context.l10n.next,
           ),
         ],
       ),

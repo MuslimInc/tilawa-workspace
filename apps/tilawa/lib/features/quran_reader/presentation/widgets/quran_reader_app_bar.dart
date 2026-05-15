@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class QuranReaderAppBar extends StatelessWidget {
@@ -45,6 +46,7 @@ class QuranReaderAppBar extends StatelessWidget {
                 onPressed: onBack,
                 color: colorScheme.onSurfaceVariant,
                 icon: const Icon(Icons.arrow_back),
+                tooltip: context.l10n.back,
               ),
               Expanded(
                 child: Column(
@@ -72,11 +74,13 @@ class QuranReaderAppBar extends StatelessWidget {
                 onPressed: onSearch,
                 color: colorScheme.onSurfaceVariant,
                 icon: const Icon(Icons.search),
+                tooltip: context.l10n.searchSurah,
               ),
               IconButton(
                 onPressed: onSettings,
                 color: colorScheme.onSurfaceVariant,
                 icon: const Icon(Icons.settings),
+                tooltip: context.l10n.settings,
               ),
             ],
           ),

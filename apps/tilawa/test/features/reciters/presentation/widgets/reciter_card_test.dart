@@ -97,15 +97,12 @@ void main() {
     final cubit = await loadedCubit();
     await pumpCard(tester, cubit);
 
-    final Finder openInk = find
-        .descendant(
-          of: find.byType(ReciterCard),
-          matching: find.byType(InkWell),
-        )
-        .first;
+    final Finder openRegion = find.bySemanticsIdentifier(
+      ReciterSemanticsIds.reciterCard(tReciter.id),
+    );
 
     expect(
-      tester.getSemantics(openInk).label,
+      tester.getSemantics(openRegion).label,
       startsWith('Open Test Reciter'),
     );
     expect(find.bySemanticsLabel('Add to Favorites'), findsOneWidget);

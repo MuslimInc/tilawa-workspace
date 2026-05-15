@@ -14,17 +14,19 @@ class TilawaBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: const BackButtonIcon(),
-      color: color,
-      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
-      onPressed: () {
-        if (onPressed != null) {
-          onPressed!();
-        } else if (context.canPop()) {
-          context.pop();
-        }
-      },
+    return Center(
+      child: IconButton(
+        icon: const BackButtonIcon(),
+        color: color,
+        tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+        onPressed: () {
+          if (onPressed != null) {
+            onPressed!();
+          } else if (context.canPop()) {
+            context.pop();
+          }
+        },
+      ),
     );
   }
 }

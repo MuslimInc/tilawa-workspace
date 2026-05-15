@@ -156,7 +156,9 @@ void main() {
     await tester.pumpWidget(buildSubject());
     await tester.pump();
 
-    final Finder saveButtonFinder = find.widgetWithText(OutlinedButton, 'Save');
+    final Finder saveButtonFinder = find.byKey(
+      const ValueKey('video_review_save_button'),
+    );
     expect(saveButtonFinder, findsOneWidget);
 
     await tester.tap(saveButtonFinder);
@@ -167,8 +169,8 @@ void main() {
       matching: find.byType(CircularProgressIndicator),
     );
     expect(saveSpinnerFinder, findsOneWidget);
-    final OutlinedButton savingButton = tester.widget<OutlinedButton>(
-      saveButtonFinder,
+    final TextButton savingButton = tester.widget<TextButton>(
+      find.descendant(of: saveButtonFinder, matching: find.byType(TextButton)),
     );
     expect(savingButton.onPressed, isNull);
 

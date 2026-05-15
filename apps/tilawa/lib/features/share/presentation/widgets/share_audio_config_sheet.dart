@@ -216,7 +216,9 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                               ),
                               const SizedBox(height: 18),
                               AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 240),
+                                duration: Theme.of(
+                                  context,
+                                ).tokens.durationFast,
                                 child: isReviewing
                                     ? _VideoReviewPreview(
                                         key: const ValueKey('generated_video'),

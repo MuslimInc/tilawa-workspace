@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/bookmark_entity.dart';
@@ -133,6 +134,7 @@ class BookmarkCard extends StatelessWidget {
                 color: colorScheme.onSurface.withValues(alpha: 0.5),
               ),
               onPressed: onEdit,
+              tooltip: context.l10n.editBookmarkLabel,
             ),
         ],
       ),

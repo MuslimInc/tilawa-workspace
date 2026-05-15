@@ -37,23 +37,17 @@ class VideoReviewPanel extends StatelessWidget {
     };
     final isScreenshotMode = mode == ShareMode.screenshot;
 
-    final Widget saveButton = isScreenshotMode
-        ? TilawaButton(
-            text: context.l10n.save,
-            variant: TilawaButtonVariant.primary,
-            isLoading: isSaving,
-            leadingIcon: const Icon(Icons.download_rounded),
-            onPressed: isSaving ? null : onSave,
-            isFullWidth: true,
-          )
-        : TilawaButton(
-            text: context.l10n.save,
-            variant: TilawaButtonVariant.outline,
-            isLoading: isSaving,
-            leadingIcon: const Icon(Icons.download_rounded),
-            onPressed: isSaving ? null : onSave,
-            isFullWidth: true,
-          );
+    final Widget saveButton = TilawaButton(
+      key: const ValueKey('video_review_save_button'),
+      text: context.l10n.save,
+      variant: isScreenshotMode
+          ? TilawaButtonVariant.primary
+          : TilawaButtonVariant.outline,
+      isLoading: isSaving,
+      leadingIcon: const Icon(Icons.download_rounded),
+      onPressed: isSaving ? null : onSave,
+      isFullWidth: true,
+    );
 
     final Widget shareButton = isScreenshotMode
         ? TilawaButton(

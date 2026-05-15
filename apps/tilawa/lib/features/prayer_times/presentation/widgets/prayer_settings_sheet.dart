@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/services/adhan_qa_service.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -322,18 +323,11 @@ class _QASectionState extends State<_QASection> {
     try {
       await _qaService.scheduleTestAdhan(delayMinutes: minutes);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Scheduled Adhan in $minutes minutes')),
-        );
+        ToastUtils.showSuccessToast('Scheduled Adhan in $minutes minutes');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        ToastUtils.showErrorToast('Failed: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -345,18 +339,11 @@ class _QASectionState extends State<_QASection> {
     try {
       await _qaService.cancelTestAdhan();
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Cancelled test Adhan')));
+        ToastUtils.showToast(msg: 'Cancelled test Adhan');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        ToastUtils.showErrorToast('Failed: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

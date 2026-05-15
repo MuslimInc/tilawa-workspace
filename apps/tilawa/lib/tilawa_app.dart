@@ -209,21 +209,50 @@ class _PlayerApp extends StatelessWidget {
   }
 }
 
-class _DefaultRouteSystemUiOverlay extends StatelessWidget {
+class _DefaultRouteSystemUiOverlay extends StatefulWidget {
   const _DefaultRouteSystemUiOverlay({required this.child});
 
   final Widget? child;
 
   @override
-  Widget build(BuildContext context) {
-    final overlayStyle = AppSystemChromeStyle.buildDefaultAppStyle(
-      Theme.of(context),
-    );
-    AppSystemChromeStyle.updateDefaultAppStyle(overlayStyle);
+  State<_DefaultRouteSystemUiOverlay> createState() =>
+      _DefaultRouteSystemUiOverlayState();
+}
 
+class _DefaultRouteSystemUiOverlayState
+    extends State<_DefaultRouteSystemUiOverlay> {
+  SystemUiOverlayStyle? _lastAppliedStyle;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncSystemUiOverlay();
+  }
+
+  void _syncSystemUiOverlay() {
+    final theme = Theme.of(context);
+    // Match the OS gesture strip to the Tilawa floating bottom-nav so the
+    // two read as one continuous surface — otherwise the strip leaks the
+    // primary-harmonised `colorScheme.surface` underneath the white nav.
+    final overlayStyle = AppSystemChromeStyle.buildDefaultAppStyle(
+      theme,
+      navigationBarColor:
+          theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
+    );
+    if (_lastAppliedStyle == overlayStyle) {
+      return;
+    }
+    _lastAppliedStyle = overlayStyle;
+    AppSystemChromeStyle.updateDefaultAppStyle(overlayStyle);
+    SystemChrome.setSystemUIOverlayStyle(overlayStyle);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _syncSystemUiOverlay();
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
-      child: child ?? const SizedBox.shrink(),
+      value: _lastAppliedStyle!,
+      child: widget.child ?? const SizedBox.shrink(),
     );
   }
 }

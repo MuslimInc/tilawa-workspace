@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_ce/hive.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
@@ -150,6 +151,7 @@ class AppStartupTasks {
       '[AppLaunch] source=AppStartupTasks.configureSystemChrome: Start in (${DateTime.now()})',
     );
     return Future.wait([
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge),
       AppOrientationService.applyDefaultOrientations(),
     ]).timeout(const Duration(milliseconds: 1000));
   }

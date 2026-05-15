@@ -140,6 +140,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               backgroundColor:
                                   theme.colorScheme.surfaceContainerHighest,
                             ),
+                            tooltip: context.l10n.previous,
                           )
                         else
                           const SizedBox.shrink(),

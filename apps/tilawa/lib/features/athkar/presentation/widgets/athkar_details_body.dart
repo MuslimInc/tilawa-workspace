@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/athkar_item.dart';
 import '../cubit/athkar_cubit.dart';
@@ -82,7 +83,7 @@ class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
         _pageController
             .animateToPage(
               index + 1,
-              duration: const Duration(milliseconds: 300),
+              duration: context.tokens.durationFast,
               curve: Curves.easeInOut,
             )
             .whenComplete(() {
@@ -123,7 +124,7 @@ class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
           _pageController
               .animateToPage(
                 currentPage + 1,
-                duration: const Duration(milliseconds: 300),
+                duration: context.tokens.durationFast,
                 curve: Curves.easeInOut,
               )
               .whenComplete(() {
