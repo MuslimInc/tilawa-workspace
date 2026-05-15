@@ -4,6 +4,11 @@ import 'package:flutter/material.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 
+/// Visual slot for [Switch.adaptive] in settings rows. M3 switches request
+/// about 52x40 dp plus theme padding; fitting to this box keeps [ListTile] at
+/// [TilawaDesignTokens.minInteractiveDimension] without inflating the row.
+const Size _kSettingsSwitchSlotSize = Size(48, 30);
+
 class TilawaSettingsTile extends StatelessWidget {
   const TilawaSettingsTile({
     super.key,
@@ -38,6 +43,11 @@ class TilawaSettingsTile extends StatelessWidget {
     final EdgeInsets resolvedContentPadding = tokens.tileContentPadding.resolve(
       direction,
     );
+    final EdgeInsetsGeometry listTileContentPadding =
+        EdgeInsetsDirectional.only(
+          start: designTokens.spaceSmall,
+          end: designTokens.spaceSmall,
+        );
     final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
       direction,
     );
@@ -48,12 +58,13 @@ class TilawaSettingsTile extends StatelessWidget {
           fontSize: tokens.tileTitleFontSize,
           fontWeight: FontWeight.w600,
           color: colorScheme.onSurface,
-          height: 1.25,
+          height: 1.2,
         ) ??
         TextStyle(
           fontSize: tokens.tileTitleFontSize,
           fontWeight: FontWeight.w600,
           color: colorScheme.onSurface,
+          height: 1.2,
         );
     final TextStyle subtitleStyle =
         theme.textTheme.bodySmall?.copyWith(
@@ -81,46 +92,43 @@ class TilawaSettingsTile extends StatelessWidget {
               contentPadding: resolvedContentPadding,
               horizontalTitleGap: tokens.tileItemGap,
               minLeadingWidth: minLeadingWidth,
-              // fix: Spacing & alignment — 8dp grid via design tokens
-              minVerticalPadding: theme.tokens.spaceSmall,
+              minTileHeight: designTokens.minInteractiveDimension,
+              minVerticalPadding: 0,
               titleTextStyle: titleStyle,
               subtitleTextStyle: subtitleStyle,
             ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: designTokens.minInteractiveDimension,
+            child: ListTile(
+              minTileHeight: designTokens.minInteractiveDimension,
+              contentPadding: listTileContentPadding,
+              shape: resolvedRadius != null
+                  ? RoundedRectangleBorder(borderRadius: resolvedRadius)
+                  : null,
+              leading: _SettingsLeadingIcon(
+                icon: icon,
+                color: effectiveIconColor,
+                tokens: tokens,
               ),
-              child: ListTile(
-                shape: resolvedRadius != null
-                    ? RoundedRectangleBorder(borderRadius: resolvedRadius)
-                    : null,
-                leading: _SettingsLeadingIcon(
-                  icon: icon,
-                  color: effectiveIconColor,
-                  tokens: tokens,
-                ),
-                title: Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.start,
-                ),
-                trailing:
-                    trailing ??
-                    // Right chevron; ListTile still places trailing on the
-                    // correct edge in RTL.
-                    Icon(
-                      FluentIcons.chevron_right_24_filled,
-                      size: tokens.tileTrailingSize,
-                      color: colorScheme.onSurfaceVariant.withValues(
-                        alpha: (tokens.tileTrailingOpacity * 1.35).clamp(
-                          0.45,
-                          0.72,
-                        ),
+              title: Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.start,
+              ),
+              trailing:
+                  trailing ??
+                  // Right chevron; ListTile still places trailing on the
+                  // correct edge in RTL.
+                  Icon(
+                    FluentIcons.chevron_right_24_filled,
+                    size: tokens.tileTrailingSize,
+                    color: colorScheme.onSurfaceVariant.withValues(
+                      alpha: (tokens.tileTrailingOpacity * 1.35).clamp(
+                        0.45,
+                        0.72,
                       ),
                     ),
-                onTap: onTap,
-              ),
+                  ),
+              onTap: onTap,
             ),
           ),
         ),
@@ -171,6 +179,11 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     final TextDirection direction = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = tokens.switchTileContentPadding
         .resolve(direction);
+    final EdgeInsetsGeometry listTileContentPadding =
+        EdgeInsetsDirectional.only(
+          start: designTokens.spaceSmall,
+          end: designTokens.spaceSmall,
+        );
     final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
       direction,
     );
@@ -181,12 +194,13 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
           fontSize: tokens.tileTitleFontSize,
           fontWeight: FontWeight.w600,
           color: colorScheme.onSurface,
-          height: 1.25,
+          height: 1.2,
         ) ??
         TextStyle(
           fontSize: tokens.tileTitleFontSize,
           fontWeight: FontWeight.w600,
           color: colorScheme.onSurface,
+          height: 1.2,
         );
     final TextStyle subtitleStyle =
         theme.textTheme.bodySmall?.copyWith(
@@ -214,39 +228,55 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
               contentPadding: resolvedContentPadding,
               horizontalTitleGap: tokens.tileItemGap,
               minLeadingWidth: minLeadingWidth,
-              // fix: Spacing & alignment — 8dp grid via design tokens
-              minVerticalPadding: theme.tokens.spaceSmall,
+              minTileHeight: designTokens.minInteractiveDimension,
+              minVerticalPadding: 0,
               titleTextStyle: titleStyle,
               subtitleTextStyle: subtitleStyle,
             ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: designTokens.minInteractiveDimension,
+            child: ListTile(
+              minTileHeight: designTokens.minInteractiveDimension,
+              contentPadding: listTileContentPadding,
+              visualDensity: VisualDensity.compact,
+              titleAlignment: ListTileTitleAlignment.center,
+              shape: resolvedRadius != null
+                  ? RoundedRectangleBorder(borderRadius: resolvedRadius)
+                  : null,
+              leading: _SettingsLeadingIcon(
+                icon: icon,
+                color: effectiveIconColor,
+                tokens: tokens,
               ),
-              child: ListTile(
-                shape: resolvedRadius != null
-                    ? RoundedRectangleBorder(borderRadius: resolvedRadius)
-                    : null,
-                leading: _SettingsLeadingIcon(
-                  icon: icon,
-                  color: effectiveIconColor,
-                  tokens: tokens,
-                ),
-                title: Text(
-                  title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.start,
-                ),
-                trailing: Switch.adaptive(
-                  value: value,
-                  onChanged: onChanged,
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                  activeTrackColor: tokens.switchActiveTrackColor,
-                  activeThumbColor: tokens.switchActiveThumbColor,
-                ),
-                onTap: () => onChanged(!value),
+              title: Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.start,
+                style: titleStyle,
               ),
+              trailing: Theme(
+                data: theme.copyWith(
+                  switchTheme: theme.switchTheme.copyWith(
+                    padding: EdgeInsets.zero,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+                child: SizedBox(
+                  width: _kSettingsSwitchSlotSize.width,
+                  height: _kSettingsSwitchSlotSize.height,
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    alignment: Alignment.center,
+                    child: Switch.adaptive(
+                      value: value,
+                      onChanged: onChanged,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      activeTrackColor: tokens.switchActiveTrackColor,
+                      activeThumbColor: tokens.switchActiveThumbColor,
+                    ),
+                  ),
+                ),
+              ),
+              onTap: () => onChanged(!value),
             ),
           ),
         ),

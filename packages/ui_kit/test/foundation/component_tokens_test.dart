@@ -438,7 +438,7 @@ void main() {
       final tokens = TilawaSettingsGroupTokens.defaults();
       expect(tokens.groupBorderRadius, 20.0);
       expect(tokens.groupShadowOpacity, 0.06);
-      expect(tokens.tileTitleFontSize, 15.5);
+      expect(tokens.tileTitleFontSize, 14.5);
       expect(tokens.tileSubtitleOpacity, 0.6);
       expect(tokens.switchActiveTrackOpacity, 0.5);
       expect(tokens.selectionTileSelectedBackgroundColor, isA<Color>());

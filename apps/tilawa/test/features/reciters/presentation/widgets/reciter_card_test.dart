@@ -151,7 +151,7 @@ void main() {
   });
 
   testWidgets(
-    'open-reciter and favorite InkWells are siblings, not nested',
+    'full-card InkWell wraps content; favorite retains inner InkWell',
     (WidgetTester tester) async {
       final cubit = await loadedCubit();
       await pumpCard(tester, cubit);
@@ -164,28 +164,23 @@ void main() {
         findsNWidgets(2),
       );
 
-      final Finder openInkWell = find.descendant(
-        of: find.bySemanticsIdentifier(
-          ReciterSemanticsIds.reciterCard(tReciter.id),
-        ),
+      final Finder row = find.byType(Row);
+      final Finder openInkWell = find.ancestor(
+        of: row,
         matching: find.byType(InkWell),
       );
+      expect(openInkWell, findsOneWidget);
+
       final Finder favoriteInkWell = find.descendant(
         of: find.bySemanticsIdentifier(
           ReciterSemanticsIds.reciterFavoriteButton(tReciter.id),
         ),
         matching: find.byType(InkWell),
       );
-
-      expect(openInkWell, findsOneWidget);
       expect(favoriteInkWell, findsOneWidget);
       expect(
         find.descendant(of: openInkWell, matching: favoriteInkWell),
-        findsNothing,
-      );
-      expect(
-        find.descendant(of: favoriteInkWell, matching: openInkWell),
-        findsNothing,
+        findsOneWidget,
       );
 
       await cubit.close();

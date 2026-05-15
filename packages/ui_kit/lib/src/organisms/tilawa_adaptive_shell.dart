@@ -298,16 +298,6 @@ class _BottomNavBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
     final Color navColor = tokens.bottomNavBackgroundColor;
-    final double estimatedInnerWidth =
-        MediaQuery.sizeOf(context).width -
-        2 * tokens.bottomNavHorizontalMargin -
-        2 * tokens.bottomNavBorderWidth;
-    final bool iconOnlyBar =
-        estimatedInnerWidth <
-        TilawaBreakpoints.compactBottomNavAllLabelsMinInnerWidth;
-    final double topInset = iconOnlyBar
-        ? tokens.bottomNavIconOnlyVerticalMargin
-        : tokens.bottomNavVerticalMargin;
 
     final BorderRadius shellRadius = BorderRadius.vertical(
       top: Radius.circular(tokens.bottomNavRadius),
@@ -365,7 +355,7 @@ class _BottomNavBar extends StatelessWidget {
                     padding ??
                     EdgeInsets.fromLTRB(
                       tokens.bottomNavHorizontalMargin,
-                      topInset,
+                      0,
                       tokens.bottomNavHorizontalMargin,
                       0,
                     ),
@@ -415,8 +405,6 @@ class _BottomNavBar extends StatelessWidget {
                             },
                             backgroundColor: Colors.transparent,
                             elevation: 0,
-                            showSelectedLabels: !iconOnlyBar,
-                            showUnselectedLabels: !iconOnlyBar,
                             selectedItemColor: hasSelection
                                 ? theme.colorScheme.primary
                                 : theme.colorScheme.onSurfaceVariant,

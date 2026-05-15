@@ -1211,11 +1211,11 @@ class TilawaSettingsGroupTokens {
   /// Default tokens for the settings group.
   ///
   /// [density] controls compact-mode token values. Comfortable (default)
-  /// matches all pre-density values exactly. Compact (Phase 1A) changes only
-  /// three values: [groupHeaderPadding], [switchTileContentPadding], and
-  /// [tileSubtitleSpacing]. All other tokens remain identical to comfortable
-  /// to preserve typography, icon sizing, divider integrity, and minimum
-  /// touch targets.
+  /// matches historical typography and chrome. Compact tightens group headers,
+  /// subtitle spacing, and some type metrics. Horizontal list insets stay on
+  /// [tileContentPadding] / [switchTileContentPadding]; vertical is zero so
+  /// row height is driven by [ListTile.minTileHeight] (44 dp,
+  /// [kTilawaMinInteractiveDimension]) in the settings tile widgets.
   factory TilawaSettingsGroupTokens.defaults({
     TilawaDensity density = TilawaDensity.comfortable,
   }) {
@@ -1256,7 +1256,7 @@ class TilawaSettingsGroupTokens {
         ),
         switchTileContentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 10,
+          vertical: 0,
         ),
         tileSubtitleSpacing: 2,
         groupBorderRadius: 20,
@@ -1267,19 +1267,19 @@ class TilawaSettingsGroupTokens {
         groupTitleLetterSpacing: 1.1,
         tileContentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
-          vertical: 8,
+          vertical: 0,
         ),
-        tileIconPadding: const EdgeInsets.all(10),
-        tileIconBorderRadius: 12,
-        tileIconSize: 22,
-        tileTitleFontSize: 15.5,
+        tileIconPadding: const EdgeInsets.all(6),
+        tileIconBorderRadius: 10,
+        tileIconSize: 20,
+        tileTitleFontSize: 14.5,
         tileSubtitleFontSize: 13,
         tileSubtitleOpacity: 0.65,
         tileTrailingSize: 18,
         tileTrailingOpacity: 0.55,
         tileIconContainerOpacity: tileIconContainerOpacity,
         tileDividerPadding: const EdgeInsetsDirectional.only(
-          start: 64,
+          start: 48,
           end: 16,
         ),
         tileDividerHeight: 1,
@@ -1312,16 +1312,16 @@ class TilawaSettingsGroupTokens {
       groupTitleLetterSpacing: 1.1,
       tileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
-        vertical: 12,
+        vertical: 0,
       ),
       switchTileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
-        vertical: 12,
+        vertical: 0,
       ),
-      tileIconPadding: const EdgeInsets.all(10),
-      tileIconBorderRadius: 12,
-      tileIconSize: 22,
-      tileTitleFontSize: 15.5,
+      tileIconPadding: const EdgeInsets.all(6),
+      tileIconBorderRadius: 10,
+      tileIconSize: 20,
+      tileTitleFontSize: 14.5,
       tileSubtitleFontSize: 12.5,
       tileSubtitleOpacity: 0.6,
       tileSubtitleSpacing: 4,
@@ -1329,7 +1329,7 @@ class TilawaSettingsGroupTokens {
       tileTrailingOpacity: 0.45,
       tileIconContainerOpacity: tileIconContainerOpacity,
       tileDividerPadding: const EdgeInsetsDirectional.only(
-        start: 64,
+        start: 48,
         end: 16,
       ),
       tileDividerHeight: 1,

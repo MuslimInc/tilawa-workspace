@@ -256,31 +256,38 @@ void main() {
       );
     });
 
-    test('compact changes switchTileContentPadding vertical to 10', () {
-      final compact = TilawaSettingsGroupTokens.defaults(
-        density: TilawaDensity.compact,
-      );
-      expect(
-        compact.switchTileContentPadding,
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      );
-    });
+    test(
+      'settings list tiles use zero vertical content padding (all densities)',
+      () {
+        const expected = EdgeInsets.symmetric(horizontal: 16, vertical: 0);
+        expect(
+          TilawaSettingsGroupTokens.defaults().tileContentPadding,
+          expected,
+        );
+        expect(
+          TilawaSettingsGroupTokens.defaults(
+            density: TilawaDensity.compact,
+          ).tileContentPadding,
+          expected,
+        );
+        expect(
+          TilawaSettingsGroupTokens.defaults().switchTileContentPadding,
+          expected,
+        );
+        expect(
+          TilawaSettingsGroupTokens.defaults(
+            density: TilawaDensity.compact,
+          ).switchTileContentPadding,
+          expected,
+        );
+      },
+    );
 
     test('compact changes tileSubtitleSpacing to 2', () {
       final compact = TilawaSettingsGroupTokens.defaults(
         density: TilawaDensity.compact,
       );
       expect(compact.tileSubtitleSpacing, 2);
-    });
-
-    test('compact changes tileContentPadding vertical to 8', () {
-      final compact = TilawaSettingsGroupTokens.defaults(
-        density: TilawaDensity.compact,
-      );
-      expect(
-        compact.tileContentPadding,
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      );
     });
 
     test('compact does NOT change font sizes', () {
@@ -392,7 +399,7 @@ void main() {
       );
       expect(
         tokens.settingsGroup.switchTileContentPadding,
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       );
       expect(tokens.settingsGroup.tileSubtitleSpacing, 2);
     });
@@ -405,7 +412,7 @@ void main() {
       );
       expect(
         tokens.settingsGroup.switchTileContentPadding,
-        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       );
       expect(tokens.settingsGroup.tileSubtitleSpacing, 2);
     });
