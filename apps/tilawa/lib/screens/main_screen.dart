@@ -16,6 +16,7 @@ import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/qibla/presentation/bloc/qibla_bloc.dart';
+import '../router/app_router_config.dart';
 import 'cubit/main_screen_cubit.dart';
 import 'cubit/main_screen_state.dart';
 import 'widgets/main_bottom_overlay.dart';
@@ -85,6 +86,11 @@ class _MainScreenState extends State<MainScreen> {
         activeIcon: FluentIcons.clock_24_filled,
         label: context.l10n.prayerTimes,
         identifier: 'prayer_times_tab',
+      ),
+      _NavDestination(
+        label: context.l10n.quran,
+        icon: Icons.menu_book_rounded,
+        identifier: 'quran_last_read_nav',
       ),
       _NavDestination(
         index: 2,
@@ -283,6 +289,10 @@ class _MainShellContent extends StatelessWidget {
         (d) => d.index == state.currentIndex,
       ),
       onDestinationSelected: (index) {
+        if (navDestinations[index].index == null) {
+          const QuranLastReadRoute().push(context);
+          return;
+        }
         context.read<MainScreenCubit>().selectTab(
           navDestinations[index].index!,
         );

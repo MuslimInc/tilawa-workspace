@@ -7,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa/features/localization/domain/usecases/get_current_language_use_case.dart';
@@ -24,6 +25,8 @@ import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/main_screen.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
+import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_state.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -43,6 +46,12 @@ class _MockGetCurrentLanguageUseCase extends Mock
 
 class _MockPlayerBackgroundCubit extends MockCubit<PlayerBackgroundState>
     implements PlayerBackgroundCubit {}
+
+class _MockAudioPlayerBloc extends MockCubit<AudioPlayerState>
+    implements AudioPlayerBloc {}
+
+class _MockInternetStatusBloc extends MockCubit<InternetStatusState>
+    implements InternetStatusBloc {}
 
 class _MockSetLanguageUseCase extends Mock implements SetLanguageUseCase {}
 
@@ -68,6 +77,7 @@ void main() {
   late _MockToggleFavoriteReciterUseCase mockToggleFavorite;
   late _MockClearFavoriteRecitersUseCase mockClearFavorites;
   late FavoritesCubit favoritesCubit;
+  late _MockInternetStatusBloc mockInternetStatusBloc;
 
   setUpAll(() {
     registerFallbackValue(const NoParams());
@@ -101,6 +111,12 @@ void main() {
     );
 
     getIt.registerSingleton<FavoritesCubit>(favoritesCubit);
+
+    mockInternetStatusBloc = _MockInternetStatusBloc();
+    when(() => mockInternetStatusBloc.state).thenReturn(
+      const InternetStatusState.connected(),
+    );
+    getIt.registerSingleton<InternetStatusBloc>(mockInternetStatusBloc);
   });
 
   tearDown(() async {
@@ -115,8 +131,17 @@ void main() {
     when(() => mockPlayerBackgroundCubit.state).thenReturn(
       const PlayerBackgroundInitial(PlayerBackgroundConfiguration()),
     );
-    return BlocProvider<PlayerBackgroundCubit>.value(
-      value: mockPlayerBackgroundCubit,
+    final mockAudioPlayerBloc = _MockAudioPlayerBloc();
+    when(() => mockAudioPlayerBloc.state).thenReturn(
+      const AudioPlayerState(status: AudioPlayerStatus.initial),
+    );
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<PlayerBackgroundCubit>.value(
+          value: mockPlayerBackgroundCubit,
+        ),
+        BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
+      ],
       child: MaterialApp(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
