@@ -2258,6 +2258,18 @@ abstract class AppLocalizations {
   /// **'Time remaining until {prayerName}'**
   String prayerTimesTimeRemainingUntil(String prayerName);
 
+  /// Short countdown caption when the hero already shows the prayer name
+  ///
+  /// In en, this message translates to:
+  /// **'Time remaining'**
+  String get prayerTimesTimeRemainingCaption;
+
+  /// Heading for the list of today's prayers below the next-prayer summary
+  ///
+  /// In en, this message translates to:
+  /// **'Rest of today'**
+  String get prayerTimesRestOfToday;
+
   /// Label for the scheduled time of the next prayer
   ///
   /// In en, this message translates to:

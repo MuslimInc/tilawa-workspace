@@ -44,9 +44,8 @@ class NextPrayerCountdownCard extends StatelessWidget {
     final String prayerName = nextPrayer.type.localizedName(context);
     final String nextPrayerLabel = context.l10n.nextPrayer;
     final String scheduledLabel = context.l10n.prayerTimesScheduled;
-    final String remainingLabel = context.l10n.prayerTimesTimeRemainingUntil(
-      prayerName,
-    );
+    final String remainingCaption =
+        context.l10n.prayerTimesTimeRemainingCaption;
     final String prayerTime = PrayerTimeLabelFormatter.formatItem(
       nextPrayer,
       use24HourFormat: use24HourFormat,
@@ -68,7 +67,7 @@ class NextPrayerCountdownCard extends StatelessWidget {
           tokens.spaceLarge,
           tokens.spaceMedium,
           tokens.spaceLarge,
-          tokens.spaceMedium,
+          tokens.spaceSmall,
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -90,62 +89,29 @@ class NextPrayerCountdownCard extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (narrow) ...[
-                  Align(
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
                     alignment: AlignmentDirectional.centerStart,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: AlignmentDirectional.centerStart,
-                      child: TilawaStatusChip(
-                        label: nextPrayerLabel,
-                        backgroundColor: accentColor,
-                        foregroundColor: colorScheme.onPrimary,
-                        icon: Icons.notifications_active_rounded,
-                        showLabel: heroChipLabels,
-                      ),
+                    child: TilawaStatusChip(
+                      label: nextPrayerLabel,
+                      backgroundColor: accentColor,
+                      foregroundColor: colorScheme.onPrimary,
+                      icon: Icons.notifications_active_rounded,
+                      showLabel: heroChipLabels,
                     ),
                   ),
-                  SizedBox(height: tokens.spaceExtraSmall),
-                  Text(
-                    '$scheduledLabel • $prayerTime',
-                    style: scheduledStyle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ] else ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: AlignmentDirectional.centerStart,
-                            child: TilawaStatusChip(
-                              label: nextPrayerLabel,
-                              backgroundColor: accentColor,
-                              foregroundColor: colorScheme.onPrimary,
-                              icon: Icons.notifications_active_rounded,
-                              showLabel: showPrayerTimeChipLabels,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: tokens.spaceSmall),
-                      Expanded(
-                        child: Text(
-                          '$scheduledLabel • $prayerTime',
-                          style: scheduledStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.end,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
+                SizedBox(height: tokens.spaceExtraSmall),
+                Text(
+                  '$scheduledLabel · $prayerTime',
+                  style: scheduledStyle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 if (dateMetaLabel != null) ...[
-                  SizedBox(height: tokens.spaceExtraSmall),
+                  SizedBox(height: tokens.spaceTiny),
                   Text(
                     dateMetaLabel!,
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -156,16 +122,17 @@ class NextPrayerCountdownCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                SizedBox(height: tokens.spaceMedium),
+                SizedBox(height: tokens.spaceSmall),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   spacing: tokens.spaceMedium,
                   children: [
                     Expanded(
                       child: Text(
                         prayerName,
-                        style: theme.textTheme.headlineSmall?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
+                          height: 1.15,
                           color: colorScheme.onSurface,
                         ),
                       ),
@@ -173,34 +140,15 @@ class NextPrayerCountdownCard extends StatelessWidget {
                     _NextPrayerVisual(icon: nextPrayer.type.icon),
                   ],
                 ),
-                SizedBox(height: tokens.spaceSmall),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tokens.spaceMedium,
-                    vertical: tokens.spaceSmall,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface.withValues(
-                      alpha: tokens.opacityMedium,
-                    ),
-                    borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(
-                        alpha: tokens.opacitySubtle,
-                      ),
-                      width: tokens.borderWidthThin,
-                    ),
-                  ),
-                  child: Text(
-                    remainingLabel,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
+                SizedBox(height: tokens.spaceExtraSmall),
+                Text(
+                  remainingCaption,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: tokens.spaceSmall),
+                SizedBox(height: tokens.spaceTiny),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -212,9 +160,10 @@ class NextPrayerCountdownCard extends StatelessWidget {
                           '${hours.toString().padLeft(2, '0')}'
                           ':${minutes.toString().padLeft(2, '0')}'
                           ':${seconds.toString().padLeft(2, '0')}',
-                          style: theme.textTheme.displaySmall?.copyWith(
+                          style: theme.textTheme.headlineLarge?.copyWith(
                             color: accentColor,
                             fontWeight: FontWeight.w800,
+                            height: 1.05,
                             fontFeatures: const [
                               FontFeature.tabularFigures(),
                             ],

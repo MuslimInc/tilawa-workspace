@@ -12,13 +12,26 @@ abstract final class PrayerRowViewDataMapper {
     required PrayerTimeItem? currentPrayer,
     required AppLocalizations l10n,
     required bool isArabic,
+    PrayerTimeItem? omitFromListWhenSameInstantAs,
   }) {
     final prayers = prayerTimes.mainPrayers.where((prayer) {
-      return settings.showSunrise || prayer.type != PrayerType.sunrise;
+      if (!settings.showSunrise && prayer.type == PrayerType.sunrise) {
+        return false;
+      }
+      final omit = omitFromListWhenSameInstantAs;
+      if (omit != null &&
+          prayer.type == omit.type &&
+          prayer.time == omit.time) {
+        return false;
+      }
+      return true;
     });
 
     return prayers.map((prayer) {
-      final isCurrent = currentPrayer?.type == prayer.type;
+      final isCurrent =
+          currentPrayer != null &&
+          prayer.type == currentPrayer.type &&
+          prayer.time == currentPrayer.time;
       final hasPassed = prayerTimes.hasPrayerPassed(prayer.type) && !isCurrent;
       final prayerAlert = alertForType(settings, prayer.type);
       final showAlertIndicators = prayerAlert != null;

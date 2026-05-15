@@ -9,10 +9,14 @@ class PrayerAlertStatusChip extends StatelessWidget {
     super.key,
     required this.alert,
     this.showLabel = true,
+    this.dense = false,
   });
 
   final PrayerAlertViewData alert;
   final bool showLabel;
+
+  /// Tighter padding for dense list rows (e.g. Prayer Times today list).
+  final bool dense;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +34,7 @@ class PrayerAlertStatusChip extends StatelessWidget {
         showLabel: showLabel,
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceSmall,
-          vertical: tokens.spaceSmall,
+          vertical: dense ? tokens.spaceExtraSmall : tokens.spaceSmall,
         ),
       ),
     );

@@ -1620,6 +1620,14 @@
             }
         }
     },
+    "prayerTimesTimeRemainingCaption": "Time remaining",
+    "@prayerTimesTimeRemainingCaption": {
+        "description": "Short countdown caption when the hero already shows the prayer name"
+    },
+    "prayerTimesRestOfToday": "Rest of today",
+    "@prayerTimesRestOfToday": {
+        "description": "Heading for the list of today's prayers below the next-prayer summary"
+    },
     "prayerTimesScheduled": "Scheduled",
     "@prayerTimesScheduled": {
         "description": "Label for the scheduled time of the next prayer"
