@@ -283,24 +283,24 @@ class DownloadItemCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        final colorScheme = Theme.of(context).colorScheme;
         return AlertDialog(
           title: Text(context.l10n.deleteDownload),
           content: Text(
             context.l10n.deleteDownloadConfirmation(download.title),
           ),
           actions: [
-            TextButton(
+            TilawaButton(
+              text: context.l10n.cancel,
+              variant: TilawaButtonVariant.ghost,
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.cancel),
             ),
-            TextButton(
+            TilawaButton(
+              text: context.l10n.delete,
+              variant: TilawaButtonVariant.danger,
               onPressed: () {
                 Navigator.of(context).pop();
                 onDelete();
               },
-              style: TextButton.styleFrom(foregroundColor: colorScheme.error),
-              child: Text(context.l10n.delete),
             ),
           ],
         );

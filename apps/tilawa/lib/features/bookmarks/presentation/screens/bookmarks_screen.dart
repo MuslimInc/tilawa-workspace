@@ -286,11 +286,14 @@ class BookmarksScreen extends StatelessWidget {
           autofocus: true,
         ),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: context.l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
             onPressed: () => Navigator.pop(dialogContext),
-            child: Text(context.l10n.cancel),
           ),
-          ElevatedButton(
+          TilawaButton(
+            text: context.l10n.save,
+            variant: TilawaButtonVariant.primary,
             onPressed: () {
               context.read<BookmarksBloc>().add(
                 UpdateBookmarkLabelEvent(
@@ -300,7 +303,6 @@ class BookmarksScreen extends StatelessWidget {
               );
               Navigator.pop(dialogContext);
             },
-            child: Text(context.l10n.save),
           ),
         ],
       ),

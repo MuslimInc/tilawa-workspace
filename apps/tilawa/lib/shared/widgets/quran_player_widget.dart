@@ -1145,7 +1145,7 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
 }
 
 Future<void> _showPlaybackActions(BuildContext context) async {
-  final bool? shouldOpenStopConfirm = await showModalBottomSheet<bool>(
+  final bool? shouldOpenStopConfirm = await showTilawaModalBottomSheet<bool>(
     context: context,
     builder: (sheetContext) {
       return Padding(
@@ -1169,7 +1169,7 @@ Future<void> _showPlaybackActions(BuildContext context) async {
     return;
   }
 
-  final bool? shouldStop = await showModalBottomSheet<bool>(
+  final bool? shouldStop = await showTilawaModalBottomSheet<bool>(
     context: context,
     builder: (dialogContext) {
       return Padding(
@@ -1185,13 +1185,15 @@ Future<void> _showPlaybackActions(BuildContext context) async {
             OverflowBar(
               spacing: 12,
               children: [
-                TextButton(
+                TilawaButton(
+                  text: context.l10n.cancel,
+                  variant: TilawaButtonVariant.ghost,
                   onPressed: () => Navigator.of(dialogContext).pop(false),
-                  child: Text(context.l10n.cancel),
                 ),
-                FilledButton(
+                TilawaButton(
+                  text: context.l10n.stopPlayback,
+                  variant: TilawaButtonVariant.danger,
                   onPressed: () => Navigator.of(dialogContext).pop(true),
-                  child: Text(context.l10n.stopPlayback),
                 ),
               ],
             ),

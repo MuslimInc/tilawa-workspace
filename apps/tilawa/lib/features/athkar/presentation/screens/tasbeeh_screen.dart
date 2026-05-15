@@ -630,9 +630,11 @@ class _TasbeehCountingActions extends StatelessWidget {
           ),
           SizedBox(height: tokens.spaceSmall),
         ],
-        OutlinedButton(
+        TilawaButton(
+          text: context.l10n.reset,
+          variant: TilawaButtonVariant.outline,
+          isFullWidth: true,
           onPressed: state.selectedDhikr == null ? null : cubit.resetSelected,
-          child: Text(context.l10n.reset),
         ),
       ],
     );
@@ -650,13 +652,15 @@ class _TasbeehDeleteConfirmationDialog extends StatelessWidget {
       title: Text(context.l10n.delete),
       content: Text(context.l10n.tasbeehDeleteConfirmationMessage(tasbeehText)),
       actions: [
-        TextButton(
+        TilawaButton(
+          text: context.l10n.cancel,
+          variant: TilawaButtonVariant.ghost,
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(context.l10n.cancel),
         ),
-        FilledButton(
+        TilawaButton(
+          text: context.l10n.delete,
+          variant: TilawaButtonVariant.danger,
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(context.l10n.delete),
         ),
       ],
     );

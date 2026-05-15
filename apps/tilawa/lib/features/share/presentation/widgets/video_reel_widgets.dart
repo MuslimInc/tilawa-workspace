@@ -72,19 +72,28 @@ class VideoReviewPanel extends StatelessWidget {
           Expanded(
             child: SizedBox(
               height: headerButtonSize,
-              child: OutlinedButton(
+              child: TilawaButton(
+                text: context.l10n.edit,
+                variant: TilawaButtonVariant.outline,
+                size: TilawaButtonSize.small,
                 onPressed: onEdit,
-                child: Text(context.l10n.edit),
+                isFullWidth: true,
               ),
             ),
           ),
           Expanded(
             child: SizedBox(
               height: headerButtonSize,
-              child: FilledButton.icon(
+              child: TilawaButton(
+                text: shareLabel,
+                variant: TilawaButtonVariant.primary,
+                size: TilawaButtonSize.small,
+                leadingIcon: Icon(
+                  Icons.share_rounded,
+                  size: tokens.iconSizeSmall,
+                ),
                 onPressed: onShare,
-                icon: Icon(Icons.share_rounded, size: tokens.iconSizeSmall),
-                label: Text(shareLabel),
+                isFullWidth: true,
               ),
             ),
           ),
@@ -184,10 +193,12 @@ class ComposerControls extends StatelessWidget {
             ),
           ],
           SizedBox(height: tokens.spaceMedium),
-          FilledButton.icon(
+          TilawaButton(
+            text: context.l10n.generateReel,
+            variant: TilawaButtonVariant.primary,
+            leadingIcon: const Icon(Icons.movie_creation_rounded),
             onPressed: rangeIsValid ? onPrimaryAction : null,
-            icon: const Icon(Icons.movie_creation_rounded),
-            label: Text(context.l10n.generateReel),
+            isFullWidth: true,
           ),
         ],
       ),

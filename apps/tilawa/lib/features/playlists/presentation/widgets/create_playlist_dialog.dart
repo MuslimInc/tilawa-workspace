@@ -97,25 +97,19 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
           ),
         ),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
           ),
           BlocBuilder<PlaylistsBloc, PlaylistsState>(
             builder: (context, state) {
               final isLoading = state is PlaylistsLoading;
-              return ElevatedButton(
+              return TilawaButton(
+                text: l10n.save,
+                variant: TilawaButtonVariant.primary,
+                isLoading: isLoading,
                 onPressed: isLoading ? null : _createPlaylist,
-                child: isLoading
-                    ? SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: const TilawaLoadingIndicator(
-                          centered: false,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : Text(l10n.save),
               );
             },
           ),

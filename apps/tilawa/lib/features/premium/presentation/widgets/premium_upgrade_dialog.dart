@@ -80,24 +80,19 @@ class PremiumUpgradeDialog extends StatelessWidget {
             ],
           ),
           actions: [
-            TextButton(
+            TilawaButton(
+              text: context.l10n.maybeLater,
+              variant: TilawaButtonVariant.ghost,
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.maybeLater),
             ),
-            FilledButton.icon(
+            TilawaButton(
+              text: context.l10n.upgradeNow,
+              variant: TilawaButtonVariant.primary,
+              leadingIcon: const Icon(Icons.star_rounded),
               onPressed: () {
                 Navigator.of(context).pop();
                 onUpgrade?.call();
               },
-              icon: const Icon(Icons.star_rounded),
-              label: Text(context.l10n.upgradeNow),
-              style: FilledButton.styleFrom(
-                backgroundColor: colorScheme.tertiary,
-                foregroundColor: colorScheme.onTertiary,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                ),
-              ),
             ),
           ],
         );

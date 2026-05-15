@@ -84,32 +84,24 @@ class SleepTimerDialog extends StatelessWidget {
 
                 // Cancel Button
                 if (state.isSleepTimerActive)
-                  OutlinedButton.icon(
+                  TilawaButton(
+                    text: context.l10n.cancelTimer,
+                    variant: TilawaButtonVariant.danger,
+                    isFullWidth: true,
+                    leadingIcon: const Icon(Icons.timer_off_outlined),
                     onPressed: () {
                       context.read<AudioPlayerBloc>().add(
                         const AudioPlayerEvent.cancelSleepTimer(),
                       );
                       context.pop();
                     },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: colorScheme.error,
-                      side: BorderSide(color: colorScheme.error),
-                      padding: EdgeInsets.symmetric(
-                        vertical: tokens.spaceMedium,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          tokens.radiusMedium,
-                        ),
-                      ),
-                    ),
-                    icon: const Icon(Icons.timer_off_outlined),
-                    label: Text(context.l10n.cancelTimer),
                   )
                 else
-                  TextButton(
+                  TilawaButton(
+                    text: context.l10n.cancel,
+                    variant: TilawaButtonVariant.ghost,
+                    isFullWidth: true,
                     onPressed: () => context.pop(),
-                    child: Text(context.l10n.cancel),
                   ),
               ],
             );
@@ -287,7 +279,7 @@ class SleepTimerDialog extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    final Duration? picked = await showModalBottomSheet<Duration>(
+    final Duration? picked = await showTilawaModalBottomSheet<Duration>(
       context: context,
       backgroundColor: Colors.transparent, // For custom container shape
       builder: (context) => StatefulBuilder(
@@ -311,9 +303,11 @@ class SleepTimerDialog extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextButton(
+                      TilawaButton(
+                        text: context.l10n.cancel,
+                        variant: TilawaButtonVariant.ghost,
+                        size: TilawaButtonSize.small,
                         onPressed: () => context.pop(),
-                        child: Text(context.l10n.cancel),
                       ),
                       Text(
                         context.l10n.setTimer,
@@ -322,11 +316,13 @@ class SleepTimerDialog extends StatelessWidget {
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                      TextButton(
+                      TilawaButton(
+                        text: context.l10n.save,
+                        variant: TilawaButtonVariant.ghost,
+                        size: TilawaButtonSize.small,
                         onPressed: () {
                           Navigator.of(context).pop(tempDuration);
                         },
-                        child: Text(context.l10n.save),
                       ),
                     ],
                   ),

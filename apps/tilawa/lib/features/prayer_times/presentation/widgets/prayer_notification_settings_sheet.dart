@@ -489,19 +489,17 @@ class _PermissionBanner extends StatelessWidget {
               ),
             ),
           ),
-          TextButton(
+          TilawaButton(
+            text: context.l10n.openSettings,
+            variant: TilawaButtonVariant.ghost,
+            size: TilawaButtonSize.small,
+            compact: true,
             onPressed: onTap,
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              context.l10n.openSettings,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: colorScheme.onTertiaryContainer,
-                fontWeight: FontWeight.w700,
-              ),
+            foregroundColor: colorScheme.onTertiaryContainer,
+            padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+            textStyle: theme.textTheme.labelSmall?.copyWith(
+              color: colorScheme.onTertiaryContainer,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],

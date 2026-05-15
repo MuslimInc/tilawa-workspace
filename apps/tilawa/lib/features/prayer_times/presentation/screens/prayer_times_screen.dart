@@ -338,7 +338,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final PrayerPermissionsCubit permissionsCubit = context
         .read<PrayerPermissionsCubit>();
 
-    showModalBottomSheet(
+    showTilawaModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (modalContext) => MultiBlocProvider(
@@ -356,7 +356,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final PrayerPermissionsCubit permissionsCubit = context
         .read<PrayerPermissionsCubit>();
 
-    showModalBottomSheet(
+    showTilawaModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (modalContext) => MultiBlocProvider(
@@ -962,7 +962,7 @@ class _TodayPrayerListSection extends StatelessWidget {
   void _showPrayerAlertSheet(BuildContext context, PrayerRowViewData row) {
     final bloc = context.read<PrayerTimesBloc>();
 
-    showModalBottomSheet(
+    showTilawaModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       builder: (modalContext) => BlocProvider.value(

@@ -25,6 +25,7 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Dialog(
       child: Container(
@@ -43,7 +44,7 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
               controller: _searchController,
               hintText: context.l10n.searchAyahsHint,
               textInputAction: TextInputAction.search,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(tokens.radiusMedium),
               onClear: () {
                 _searchController.clear();
                 context.read<QuranReaderBloc>().add(
@@ -119,9 +120,10 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
             const SizedBox(height: 16),
 
             // Close button
-            TextButton(
+            TilawaButton(
+              text: context.l10n.close,
+              variant: TilawaButtonVariant.ghost,
               onPressed: () => Navigator.pop(context),
-              child: Text(context.l10n.close),
             ),
           ],
         ),

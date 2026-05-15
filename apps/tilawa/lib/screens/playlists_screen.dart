@@ -149,10 +149,11 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
       icon: Icons.playlist_add_rounded,
       title: l10n.noPlaylistsYet,
       subtitle: l10n.createFirstPlaylistMessage,
-      action: ElevatedButton.icon(
+      action: TilawaButton(
+        text: l10n.createPlaylist,
+        variant: TilawaButtonVariant.primary,
+        leadingIcon: const Icon(Icons.add_rounded),
         onPressed: () => _showCreatePlaylistDialog(context),
-        icon: const Icon(Icons.add_rounded),
-        label: Text(l10n.createPlaylist),
       ),
     );
   }
@@ -222,22 +223,20 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
         title: Text(l10n.deletePlaylist),
         content: Text(l10n.deletePlaylistMessage),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
           ),
-          ElevatedButton(
+          TilawaButton(
+            text: l10n.delete,
+            variant: TilawaButtonVariant.danger,
             onPressed: () {
               Navigator.of(context).pop();
               context.read<PlaylistsBloc>().add(
                 DeletePlaylistEvent((playlist as Playlist).id),
               );
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            child: Text(l10n.delete),
           ),
         ],
       ),

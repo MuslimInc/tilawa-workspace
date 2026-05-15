@@ -456,7 +456,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
     }
 
     final state = cubit.state;
-    showModalBottomSheet<ShareReciterOption>(
+    showTilawaModalBottomSheet<ShareReciterOption>(
       context: context,
       isScrollControlled: true,
       builder: (context) => ReciterPickerSheet(

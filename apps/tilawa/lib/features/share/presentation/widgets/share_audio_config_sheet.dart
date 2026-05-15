@@ -295,7 +295,13 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                 _SharingCard(label: context.l10n.sharing),
                                 const SizedBox(height: 14),
                               ],
-                              FilledButton.icon(
+                              TilawaButton(
+                                text: context.l10n.generateReel,
+                                variant: TilawaButtonVariant.primary,
+                                isFullWidth: true,
+                                leadingIcon: const Icon(
+                                  Icons.movie_creation_outlined,
+                                ),
                                 onPressed: _isValid && !isBusy
                                     ? () {
                                         context
@@ -316,26 +322,26 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                             );
                                       }
                                     : null,
-                                icon: const Icon(Icons.movie_creation_outlined),
-                                label: Text(context.l10n.generateReel),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: _ShareComposerColors.gold,
-                                  foregroundColor:
-                                      _ShareComposerColors.deepGreen,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  textStyle: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(fontWeight: FontWeight.w800),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
+                                backgroundColor: _ShareComposerColors.gold,
+                                foregroundColor: _ShareComposerColors.deepGreen,
+                                borderRadius: 18,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
                                 ),
+                                textStyle: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w800),
                               ),
                               const SizedBox(height: 10),
-                              OutlinedButton.icon(
+                              TilawaButton(
+                                text: context.l10n.shareAudio,
+                                variant: TilawaButtonVariant.outline,
+                                isFullWidth: true,
+                                leadingIcon: const Icon(
+                                  Icons.graphic_eq_rounded,
+                                ),
                                 onPressed: _isValid && !isBusy
                                     ? () {
                                         context
@@ -347,24 +353,19 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                             );
                                       }
                                     : null,
-                                icon: const Icon(Icons.graphic_eq_rounded),
-                                label: Text(context.l10n.shareAudio),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  side: BorderSide(
-                                    color: Colors.white.withValues(alpha: 0.18),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  textStyle: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(fontWeight: FontWeight.w700),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
+                                foregroundColor: Colors.white,
+                                borderColor: Colors.white.withValues(
+                                  alpha: 0.18,
                                 ),
+                                borderRadius: 18,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
+                                ),
+                                textStyle: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w700),
                               ),
                             ],
                           ),
@@ -767,13 +768,14 @@ class _ProgressCard extends StatelessWidget {
           const SizedBox(height: 14),
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton.icon(
+            child: TilawaButton(
+              text: context.l10n.cancel,
+              variant: TilawaButtonVariant.ghost,
+              size: TilawaButtonSize.small,
+              compact: true,
+              leadingIcon: const Icon(Icons.close_rounded),
               onPressed: onCancel,
-              icon: const Icon(Icons.close_rounded),
-              label: Text(context.l10n.cancel),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white.withValues(alpha: 0.84),
-              ),
+              foregroundColor: Colors.white.withValues(alpha: 0.84),
             ),
           ),
         ],
@@ -1044,18 +1046,16 @@ class _VideoReviewPreviewState extends State<_VideoReviewPreview> {
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
+            child: TilawaButton(
+              text: context.l10n.shareReel,
+              variant: TilawaButtonVariant.primary,
+              isFullWidth: true,
+              leadingIcon: const Icon(Icons.share_rounded),
               onPressed: widget.onShare,
-              icon: const Icon(Icons.share_rounded),
-              label: Text(context.l10n.shareReel),
-              style: FilledButton.styleFrom(
-                backgroundColor: _ShareComposerColors.mint,
-                foregroundColor: _ShareComposerColors.deepGreen,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-              ),
+              backgroundColor: _ShareComposerColors.mint,
+              foregroundColor: _ShareComposerColors.deepGreen,
+              borderRadius: 18,
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 24),
             ),
           ),
         ],

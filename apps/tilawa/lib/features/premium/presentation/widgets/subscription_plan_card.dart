@@ -140,28 +140,24 @@ class SubscriptionPlanCard extends StatelessWidget {
             SizedBox(height: tokens.spaceLarge),
             SizedBox(
               width: double.infinity,
-              child: FilledButton(
+              child: TilawaButton(
+                text: plan.type == SubscriptionType.lifetime
+                    ? 'Buy Now'
+                    : 'Subscribe',
+                variant: TilawaButtonVariant.primary,
+                isFullWidth: true,
                 onPressed: onSelect,
-                style: FilledButton.styleFrom(
-                  backgroundColor: accent,
-                  foregroundColor: plan.isPopular
+                backgroundColor: accent,
+                foregroundColor: plan.isPopular
+                    ? colorScheme.onTertiary
+                    : colorScheme.onPrimary,
+                borderRadius: tokens.radiusMedium,
+                padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
+                textStyle: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: plan.isPopular
                       ? colorScheme.onTertiary
                       : colorScheme.onPrimary,
-                  padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                  ),
-                ),
-                child: Text(
-                  plan.type == SubscriptionType.lifetime
-                      ? 'Buy Now'
-                      : 'Subscribe',
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: plan.isPopular
-                        ? colorScheme.onTertiary
-                        : colorScheme.onPrimary,
-                  ),
                 ),
               ),
             ),

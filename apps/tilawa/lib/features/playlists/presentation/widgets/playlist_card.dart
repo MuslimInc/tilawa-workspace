@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
 import '../../../../l10n/generated/app_localizations.dart';
 import '../../domain/entities/playlist.dart';
 
@@ -26,168 +27,179 @@ class PlaylistCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: InkWell(
+    return Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceSmall,
+      ),
+      child: TilawaCard(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          playlist.name,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+        surface: TilawaCardSurface.flat,
+        backgroundColor: colorScheme.surfaceContainerLow,
+        borderColor: colorScheme.outlineVariant.withValues(
+          alpha: tokens.opacityMedium,
+        ),
+        borderWidth: tokens.borderWidthThin,
+        borderRadius: tokens.radiusLarge,
+        padding: EdgeInsets.all(tokens.spaceMedium),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        playlist.name,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          playlist.description,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuButton<String>(
-                    onSelected: (value) {
-                      switch (value) {
-                        case 'edit':
-                          onEdit();
-                        case 'delete':
-                          onDelete();
-                        case 'favorite':
-                          onToggleFavorite();
-                        case 'play':
-                          onPlay();
-                      }
-                    },
-                    itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'play',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.play_arrow),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(l10n.playPlaylist)),
-                          ],
-                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      PopupMenuItem(
-                        value: 'edit',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.edit),
-                            const SizedBox(width: 8),
-                            Expanded(child: Text(l10n.editPlaylist)),
-                          ],
+                      SizedBox(height: tokens.spaceTiny),
+                      Text(
+                        playlist.description,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                      PopupMenuItem(
-                        value: 'favorite',
-                        child: Row(
-                          children: [
-                            Icon(
-                              playlist.isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: playlist.isFavorite ? Colors.red : null,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                playlist.isFavorite
-                                    ? l10n.favorites
-                                    : l10n.addToFavorites,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const PopupMenuDivider(),
-                      PopupMenuItem(
-                        value: 'delete',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.delete, color: Colors.red),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                l10n.deletePlaylist,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
-                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.music_note,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${playlist.itemCount} ${l10n.playlistItemCount}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(
-                    Icons.access_time,
-                    size: 16,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _formatDuration(playlist.totalDuration),
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const Spacer(),
-                  if (playlist.isPublic)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        l10n.public,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
+                ),
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    switch (value) {
+                      case 'edit':
+                        onEdit();
+                      case 'delete':
+                        onDelete();
+                      case 'favorite':
+                        onToggleFavorite();
+                      case 'play':
+                        onPlay();
+                    }
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'play',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.play_arrow),
+                          SizedBox(width: tokens.spaceSmall),
+                          Expanded(child: Text(l10n.playPlaylist)),
+                        ],
                       ),
                     ),
-                ],
-              ),
-            ],
-          ),
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.edit),
+                          SizedBox(width: tokens.spaceSmall),
+                          Expanded(child: Text(l10n.editPlaylist)),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'favorite',
+                      child: Row(
+                        children: [
+                          Icon(
+                            playlist.isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: playlist.isFavorite
+                                ? colorScheme.error
+                                : null,
+                          ),
+                          SizedBox(width: tokens.spaceSmall),
+                          Expanded(
+                            child: Text(
+                              playlist.isFavorite
+                                  ? l10n.favorites
+                                  : l10n.addToFavorites,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: colorScheme.error),
+                          SizedBox(width: tokens.spaceSmall),
+                          Expanded(
+                            child: Text(
+                              l10n.deletePlaylist,
+                              style: TextStyle(color: colorScheme.error),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            SizedBox(height: tokens.spaceSmall),
+            Row(
+              children: [
+                Icon(
+                  Icons.music_note,
+                  size: tokens.iconSizeSmall,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                SizedBox(width: tokens.spaceTiny),
+                Text(
+                  '${playlist.itemCount} ${l10n.playlistItemCount}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(width: tokens.spaceMedium),
+                Icon(
+                  Icons.access_time,
+                  size: tokens.iconSizeSmall,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+                SizedBox(width: tokens.spaceTiny),
+                Text(
+                  _formatDuration(playlist.totalDuration),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const Spacer(),
+                if (playlist.isPublic)
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceSmall,
+                      vertical: tokens.spaceTiny,
+                    ),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(tokens.radiusMedium),
+                    ),
+                    child: Text(
+                      l10n.public,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.onPrimaryContainer,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
         ),
       ),
     );

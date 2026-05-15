@@ -180,15 +180,11 @@ class _SheetHeader extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          TextButton(
+          TilawaButton(
+            text: context.l10n.done,
+            variant: TilawaButtonVariant.ghost,
+            size: TilawaButtonSize.small,
             onPressed: onClose,
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
-            ),
-            child: Text(
-              context.l10n.done,
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
           ),
         ],
       ),
@@ -385,16 +381,20 @@ class _QASectionState extends State<_QASection> {
           ),
         ),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: 'Clear',
+            variant: TilawaButtonVariant.danger,
+            size: TilawaButtonSize.small,
             onPressed: () async {
               await _qaService.clearLogs();
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('Clear'),
           ),
-          TextButton(
+          TilawaButton(
+            text: 'Close',
+            variant: TilawaButtonVariant.ghost,
+            size: TilawaButtonSize.small,
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
           ),
         ],
       ),
@@ -429,22 +429,30 @@ class _QASectionState extends State<_QASection> {
                 spacing: tokens.spaceSmall,
                 runSpacing: tokens.spaceSmall,
                 children: [
-                  FilledButton.tonal(
+                  TilawaButton(
+                    text: 'Schedule 2m',
+                    variant: TilawaButtonVariant.secondary,
+                    size: TilawaButtonSize.small,
                     onPressed: _isLoading ? null : () => _schedule(2),
-                    child: const Text('Schedule 2m'),
                   ),
-                  FilledButton.tonal(
+                  TilawaButton(
+                    text: 'Schedule 5m',
+                    variant: TilawaButtonVariant.secondary,
+                    size: TilawaButtonSize.small,
                     onPressed: _isLoading ? null : () => _schedule(5),
-                    child: const Text('Schedule 5m'),
                   ),
-                  OutlinedButton(
+                  TilawaButton(
+                    text: 'Cancel Test',
+                    variant: TilawaButtonVariant.outline,
+                    size: TilawaButtonSize.small,
                     onPressed: _isLoading ? null : _cancel,
-                    child: const Text('Cancel Test'),
                   ),
-                  TextButton.icon(
+                  TilawaButton(
+                    text: 'Logs',
+                    variant: TilawaButtonVariant.ghost,
+                    size: TilawaButtonSize.small,
+                    leadingIcon: const Icon(Icons.list_alt),
                     onPressed: _viewLogs,
-                    icon: const Icon(Icons.list_alt),
-                    label: const Text('Logs'),
                   ),
                 ],
               ),

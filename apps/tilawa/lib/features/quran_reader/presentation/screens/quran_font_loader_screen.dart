@@ -665,10 +665,12 @@ class _ErrorView extends StatelessWidget {
             foregroundColor: AppColors.error,
           ),
           SizedBox(height: tokens.spaceExtraLarge),
-          FilledButton.icon(
+          TilawaButton(
+            text: context.l10n.retry,
+            variant: TilawaButtonVariant.primary,
+            leadingIcon: const Icon(Icons.refresh_rounded),
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
-            label: Text(context.l10n.retry),
+            isFullWidth: true,
           ),
         ],
       ),

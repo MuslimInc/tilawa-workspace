@@ -314,18 +314,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: Text(context.l10n.clearHistory),
         content: Text(context.l10n.clearHistoryConfirmation),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: context.l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.l10n.cancel),
           ),
-          TextButton(
+          TilawaButton(
+            text: context.l10n.clearAll,
+            variant: TilawaButtonVariant.danger,
             onPressed: () {
               Navigator.pop(dialogContext, true);
             },
-            child: Text(
-              context.l10n.clearAll,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
           ),
         ],
       ),

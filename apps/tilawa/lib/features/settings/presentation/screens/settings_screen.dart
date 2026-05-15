@@ -69,18 +69,20 @@ void _showCustomColorPicker(BuildContext context, Color currentColor) {
           ),
         ),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: ctx.l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(ctx.l10n.cancel),
           ),
-          TextButton(
+          TilawaButton(
+            text: ctx.l10n.save,
+            variant: TilawaButtonVariant.primary,
             onPressed: () {
               ctx.read<ThemeCubit>().setPrimaryColorArgb(
                 pickerColor.toARGB32(),
               );
               Navigator.of(ctx).pop();
             },
-            child: Text(ctx.l10n.save),
           ),
         ],
       );
@@ -125,19 +127,18 @@ void _showLogoutDialog(BuildContext context) {
       title: Text(ctx.l10n.logout),
       content: Text(ctx.l10n.logoutConfirmation),
       actions: [
-        TextButton(
+        TilawaButton(
+          text: ctx.l10n.cancel,
+          variant: TilawaButtonVariant.ghost,
           onPressed: () => Navigator.pop(ctx),
-          child: Text(ctx.l10n.cancel),
         ),
-        TextButton(
+        TilawaButton(
+          text: ctx.l10n.logout,
+          variant: TilawaButtonVariant.danger,
           onPressed: () {
             Navigator.pop(ctx);
             ctx.read<AuthBloc>().add(const SignOutEvent());
           },
-          child: Text(
-            ctx.l10n.logout,
-            style: const TextStyle(color: AppColors.error),
-          ),
         ),
       ],
     ),
@@ -789,7 +790,8 @@ class _SettingsProfileAvatar extends StatelessWidget {
                   child: SizedBox(
                     width: tokens.spaceLarge,
                     height: tokens.spaceLarge,
-                    child: CircularProgressIndicator(
+                    child: TilawaLoadingIndicator(
+                      centered: false,
                       strokeWidth: 2,
                       color: foregroundColor.withValues(
                         alpha: tokens.opacityGlass,
@@ -953,7 +955,8 @@ class _AppVersionInfo extends StatelessWidget {
                       SizedBox(
                         width: tokens.iconSizeSmall,
                         height: tokens.iconSizeSmall,
-                        child: CircularProgressIndicator(
+                        child: TilawaLoadingIndicator(
+                          centered: false,
                           strokeWidth: 2,
                           color: colorScheme.primary.withValues(
                             alpha: tokens.opacityEmphasis,

@@ -22,26 +22,22 @@ class HistoryCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final double progressPercent = history.progressPercentage;
 
-    return Card(
-      margin: EdgeInsets.symmetric(
+    return Padding(
+      padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceLarge,
         vertical: tokens.spaceExtraSmall,
       ),
-      color: colorScheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        side: BorderSide(
-          color: colorScheme.outlineVariant.withValues(
+      child: GestureDetector(
+        onLongPress: onLongPress,
+        child: TilawaCard(
+          onTap: onTap,
+          surface: TilawaCardSurface.flat,
+          backgroundColor: colorScheme.surfaceContainerLow,
+          borderColor: colorScheme.outlineVariant.withValues(
             alpha: tokens.opacityMedium,
           ),
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        child: Padding(
+          borderWidth: tokens.borderWidthThin,
+          borderRadius: tokens.radiusLarge,
           padding: EdgeInsets.all(tokens.spaceMedium),
           child: Row(
             children: [
@@ -50,12 +46,14 @@ class HistoryCard extends StatelessWidget {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(tokens.radiusSmall),
                   color: colorScheme.primaryContainer,
                 ),
                 child: history.artworkUrl != null
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(
+                          tokens.radiusSmall,
+                        ),
                         child: Image.network(
                           history.artworkUrl!,
                           fit: BoxFit.cover,

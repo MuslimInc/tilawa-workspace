@@ -305,10 +305,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
             SizedBox(height: tokens.spaceMedium),
             SizedBox(
               width: double.infinity,
-              child: FilledButton.icon(
+              child: TilawaButton(
+                text: context.l10n.startFreeTrial,
+                variant: TilawaButtonVariant.primary,
+                leadingIcon: const Icon(Icons.play_arrow_rounded),
                 onPressed: () => _startTrial(context),
-                icon: const Icon(Icons.play_arrow_rounded),
-                label: Text(context.l10n.startFreeTrial),
+                isFullWidth: true,
               ),
             ),
           ],
@@ -333,11 +335,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
       icon: Icons.check_circle_outline_rounded,
       iconColor: Theme.of(context).colorScheme.primary,
       title: message,
-      action: ElevatedButton(
+      action: TilawaButton(
+        text: context.l10n.continueButton,
+        variant: TilawaButtonVariant.primary,
         onPressed: () {
           context.read<PremiumBloc>().add(const LoadPremiumStatus());
         },
-        child: Text(context.l10n.continueButton),
       ),
     );
   }

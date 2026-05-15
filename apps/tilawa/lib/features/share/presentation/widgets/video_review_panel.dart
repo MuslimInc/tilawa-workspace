@@ -27,10 +27,9 @@ class VideoReviewPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
+    final tokens = Theme.of(context).tokens;
     final bottomPadding = context.floatingBottomPadding;
-    final shareLabel = switch (content) {
+    final String shareLabelText = switch (content) {
       ShareScreenshot() => context.l10n.shareScreenshot,
       ShareVideo() => context.l10n.shareReel,
       ShareAudioClip() => context.l10n.shareAudio,
@@ -38,51 +37,38 @@ class VideoReviewPanel extends StatelessWidget {
     };
     final isScreenshotMode = mode == ShareMode.screenshot;
 
-    final Widget saveIcon = isSaving
-        ? SizedBox(
-            width: tokens.iconSizeSmall,
-            height: tokens.iconSizeSmall,
-            child: const TilawaLoadingIndicator(
-              centered: false,
-              strokeWidth: 2,
-            ),
-          )
-        : Icon(Icons.download_rounded, size: tokens.iconSizeSmall);
-    final Text saveLabel = Text(context.l10n.save);
-    final VoidCallback? savePressed = isSaving ? null : onSave;
-
     final Widget saveButton = isScreenshotMode
-        ? FilledButton.icon(
-            onPressed: savePressed,
-            icon: saveIcon,
-            label: saveLabel,
+        ? TilawaButton(
+            text: context.l10n.save,
+            variant: TilawaButtonVariant.primary,
+            isLoading: isSaving,
+            leadingIcon: const Icon(Icons.download_rounded),
+            onPressed: isSaving ? null : onSave,
+            isFullWidth: true,
           )
-        : OutlinedButton.icon(
-            onPressed: savePressed,
-            icon: saveIcon,
-            label: saveLabel,
+        : TilawaButton(
+            text: context.l10n.save,
+            variant: TilawaButtonVariant.outline,
+            isLoading: isSaving,
+            leadingIcon: const Icon(Icons.download_rounded),
+            onPressed: isSaving ? null : onSave,
+            isFullWidth: true,
           );
 
-    final Icon shareIcon = Icon(
-      Icons.share_rounded,
-      size: tokens.iconSizeSmall,
-    );
-    final Text shareText = Text(
-      shareLabel,
-      maxLines: 1,
-      overflow: TextOverflow.fade,
-    );
-
     final Widget shareButton = isScreenshotMode
-        ? FilledButton.tonalIcon(
+        ? TilawaButton(
+            text: shareLabelText,
+            variant: TilawaButtonVariant.secondary,
+            leadingIcon: const Icon(Icons.share_rounded),
             onPressed: onShare,
-            icon: shareIcon,
-            label: shareText,
+            isFullWidth: true,
           )
-        : FilledButton.icon(
+        : TilawaButton(
+            text: shareLabelText,
+            variant: TilawaButtonVariant.primary,
+            leadingIcon: const Icon(Icons.share_rounded),
             onPressed: onShare,
-            icon: shareIcon,
-            label: shareText,
+            isFullWidth: true,
           );
 
     return Padding(
@@ -97,9 +83,11 @@ class VideoReviewPanel extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: OutlinedButton(
+                child: TilawaButton(
+                  text: context.l10n.edit,
+                  variant: TilawaButtonVariant.outline,
                   onPressed: onEdit,
-                  child: Text(context.l10n.edit),
+                  isFullWidth: true,
                 ),
               ),
               SizedBox(width: tokens.spaceSmall),

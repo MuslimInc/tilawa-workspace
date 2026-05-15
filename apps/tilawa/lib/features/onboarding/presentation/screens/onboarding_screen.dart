@@ -149,36 +149,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               padding: EdgeInsetsDirectional.only(
                                 start: tokens.spaceLarge,
                               ),
-                              child: FilledButton(
+                              child: TilawaButton(
+                                text: context.l10n.startJourney,
+                                variant: TilawaButtonVariant.primary,
+                                size: TilawaButtonSize.large,
+                                isFullWidth: true,
                                 onPressed: () {
                                   context
                                       .read<OnboardingCubit>()
                                       .completeOnboarding();
                                 },
-                                style: FilledButton.styleFrom(
-                                  minimumSize: Size.fromHeight(
-                                    context.minInteractiveDimension,
-                                  ),
-                                ),
-                                child: Text(context.l10n.startJourney),
                               ),
                             ),
                           )
                         else
-                          FilledButton(
-                            onPressed: () {
-                              _pageController.nextPage(
-                                duration: tokens.durationMedium,
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                            style: FilledButton.styleFrom(
-                              minimumSize: Size(
-                                tokens.spaceExtraLarge * 4,
-                                context.minInteractiveDimension,
-                              ),
+                          SizedBox(
+                            width: tokens.spaceExtraLarge * 4,
+                            child: TilawaButton(
+                              text: context.l10n.next,
+                              variant: TilawaButtonVariant.primary,
+                              size: TilawaButtonSize.large,
+                              onPressed: () {
+                                _pageController.nextPage(
+                                  duration: tokens.durationMedium,
+                                  curve: Curves.easeInOut,
+                                );
+                              },
                             ),
-                            child: Text(context.l10n.next),
                           ),
                       ],
                     ),

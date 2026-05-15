@@ -457,7 +457,10 @@ class _ReciterDetailsContent extends StatelessWidget {
                   style: theme.textTheme.bodyLarge,
                 ),
                 SizedBox(height: tokens.spaceLarge),
-                ElevatedButton.icon(
+                TilawaButton(
+                  text: context.l10n.retry,
+                  variant: TilawaButtonVariant.primary,
+                  leadingIcon: const Icon(Icons.refresh_rounded),
                   onPressed: () {
                     if (reciter.moshaf.isNotEmpty) {
                       context.read<ReciterDetailsBloc>().add(
@@ -468,17 +471,6 @@ class _ReciterDetailsContent extends StatelessWidget {
                       );
                     }
                   },
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: Text(context.l10n.retry),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceExtraLarge,
-                      vertical: tokens.spaceMedium,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                    ),
-                  ),
                 ),
               ],
             ),

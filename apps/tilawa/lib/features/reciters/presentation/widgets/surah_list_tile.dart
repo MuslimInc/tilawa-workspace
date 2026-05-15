@@ -252,7 +252,7 @@ class SurahListTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final int surahNumber = int.tryParse(surah.formattedId) ?? (index + 1);
 
-    showModalBottomSheet<void>(
+    showTilawaModalBottomSheet<void>(
       context: context,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
