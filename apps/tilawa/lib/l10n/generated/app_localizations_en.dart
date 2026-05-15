@@ -1214,9 +1214,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prayerTimesTimeRemainingCaption => 'Time remaining';
 
   @override
-  String get prayerTimesRestOfToday => 'Rest of today';
-
-  @override
   String get prayerTimesScheduled => 'Scheduled';
 
   @override

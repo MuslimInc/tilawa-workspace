@@ -1204,9 +1204,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get prayerTimesTimeRemainingCaption => 'الوقت المتبقي';
 
   @override
-  String get prayerTimesRestOfToday => 'باقي اليوم';
-
-  @override
   String get prayerTimesScheduled => 'الموعد';
 
   @override

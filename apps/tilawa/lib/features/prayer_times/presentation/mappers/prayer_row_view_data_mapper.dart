@@ -28,36 +28,55 @@ abstract final class PrayerRowViewDataMapper {
     });
 
     return prayers.map((prayer) {
-      final isCurrent =
-          currentPrayer != null &&
-          prayer.type == currentPrayer.type &&
-          prayer.time == currentPrayer.time;
-      final hasPassed = prayerTimes.hasPrayerPassed(prayer.type) && !isCurrent;
-      final prayerAlert = alertForType(settings, prayer.type);
-      final showAlertIndicators = prayerAlert != null;
-
-      return PrayerRowViewData(
-        type: prayer.type,
-        prayerName: _localizedPrayerName(prayer.type, l10n),
-        prayerTime: PrayerTimeLabelFormatter.formatItem(
-          prayer,
-          use24HourFormat: settings.use24HourFormat,
-          isArabic: isArabic,
-        ),
-        statusText: _localizedStatus(
-          isCurrent: isCurrent,
-          hasPassed: hasPassed,
-          l10n: l10n,
-        ),
-        isCurrent: isCurrent,
-        hasPassed: hasPassed,
-        isSecondary: prayer.type == PrayerType.sunrise,
-        showAlertIndicators: showAlertIndicators,
-        notificationEnabled: prayerAlert?.enabled ?? false,
-        adhanEnabled: prayerAlert?.playAdhan ?? false,
-        alert: alertViewData(settings: settings, type: prayer.type, l10n: l10n),
+      return rowForPrayerItem(
+        prayerTimes: prayerTimes,
+        settings: settings,
+        item: prayer,
+        currentPrayer: currentPrayer,
+        l10n: l10n,
+        isArabic: isArabic,
       );
     }).toList();
+  }
+
+  /// Build row view data for a single prayer instance (e.g. next-prayer hero).
+  static PrayerRowViewData rowForPrayerItem({
+    required PrayerTimeEntity prayerTimes,
+    required PrayerSettingsEntity settings,
+    required PrayerTimeItem item,
+    required PrayerTimeItem? currentPrayer,
+    required AppLocalizations l10n,
+    required bool isArabic,
+  }) {
+    final isCurrent =
+        currentPrayer != null &&
+        item.type == currentPrayer.type &&
+        item.time == currentPrayer.time;
+    final hasPassed = prayerTimes.hasPrayerPassed(item.type) && !isCurrent;
+    final prayerAlert = alertForType(settings, item.type);
+    final showAlertIndicators = prayerAlert != null;
+
+    return PrayerRowViewData(
+      type: item.type,
+      prayerName: _localizedPrayerName(item.type, l10n),
+      prayerTime: PrayerTimeLabelFormatter.formatItem(
+        item,
+        use24HourFormat: settings.use24HourFormat,
+        isArabic: isArabic,
+      ),
+      statusText: _localizedStatus(
+        isCurrent: isCurrent,
+        hasPassed: hasPassed,
+        l10n: l10n,
+      ),
+      isCurrent: isCurrent,
+      hasPassed: hasPassed,
+      isSecondary: item.type == PrayerType.sunrise,
+      showAlertIndicators: showAlertIndicators,
+      notificationEnabled: prayerAlert?.enabled ?? false,
+      adhanEnabled: prayerAlert?.playAdhan ?? false,
+      alert: alertViewData(settings: settings, type: item.type, l10n: l10n),
+    );
   }
 
   static PrayerAlertViewData alertViewData({
@@ -142,7 +161,7 @@ abstract final class PrayerRowViewDataMapper {
   }) {
     if (isCurrent) return l10n.next;
     if (hasPassed) return l10n.prayerTimesPassed;
-    return l10n.prayerTimesUpcoming;
+    return '';
   }
 
   static PrayerSettingsEntity? toggledNotificationSettings(

@@ -2264,12 +2264,6 @@ abstract class AppLocalizations {
   /// **'Time remaining'**
   String get prayerTimesTimeRemainingCaption;
 
-  /// Heading for the list of today's prayers below the next-prayer summary
-  ///
-  /// In en, this message translates to:
-  /// **'Rest of today'**
-  String get prayerTimesRestOfToday;
-
   /// Label for the scheduled time of the next prayer
   ///
   /// In en, this message translates to:

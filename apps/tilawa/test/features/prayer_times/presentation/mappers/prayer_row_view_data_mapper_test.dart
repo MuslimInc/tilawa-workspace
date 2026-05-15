@@ -129,16 +129,16 @@ void main() {
       expect(fajr.alert.state, PrayerAlertViewState.off);
       expect(fajr.alert.label, l10n.prayerAlertModeOff);
       expect(fajr.statusText, l10n.prayerTimesPassed);
+      expect(dhuhr.statusText, '');
       expect(dhuhr.notificationEnabled, isTrue);
       expect(dhuhr.adhanEnabled, isFalse);
       expect(dhuhr.alert.state, PrayerAlertViewState.notification);
       expect(dhuhr.alert.label, l10n.prayerAlertModeNotifyOnly);
-      expect(dhuhr.statusText, l10n.prayerTimesUpcoming);
       expect(asr.notificationEnabled, isTrue);
       expect(asr.adhanEnabled, isTrue);
       expect(asr.alert.state, PrayerAlertViewState.adhan);
       expect(asr.alert.label, l10n.prayerAlertModeAdhan);
-      expect(asr.statusText, l10n.prayerTimesUpcoming);
+      expect(asr.statusText, '');
     });
 
     testWidgets(

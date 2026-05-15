@@ -75,49 +75,61 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
 
-    return Column(
-      children: [
-        _MonthSelector(
-          year: _currentYear,
-          month: _currentMonth,
-          onPrevious: _goToPreviousMonth,
-          onNext: _goToNextMonth,
-        ),
-        SizedBox(height: tokens.spaceSmall),
-        const _TableHeader(),
-        Expanded(
-          child: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
-            buildWhen: (previous, current) =>
-                previous.monthlyPrayerTimes != current.monthlyPrayerTimes ||
-                previous.settings.use24HourFormat !=
-                    current.settings.use24HourFormat,
-            builder: (context, state) {
-              if (state.monthlyPrayerTimes.isEmpty) {
-                return const TilawaLoadingIndicator();
-              }
-
-              return ListView.builder(
-                itemCount: state.monthlyPrayerTimes.length,
-                padding: EdgeInsets.only(
-                  top: tokens.spaceExtraSmall,
-                  bottom: tokens.spaceLarge,
-                ),
-                itemBuilder: (context, index) {
-                  final prayerTimes = state.monthlyPrayerTimes[index];
-                  final bool isToday = _isToday(prayerTimes.date);
-
-                  return _TableRow(
-                    prayerTimes: prayerTimes,
-                    isToday: isToday,
-                    index: index,
-                    use24HourFormat: state.settings.use24HourFormat,
+    return Builder(
+      builder: (context) {
+        return CustomScrollView(
+          slivers: [
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverToBoxAdapter(
+              child: _MonthSelector(
+                year: _currentYear,
+                month: _currentMonth,
+                onPrevious: _goToPreviousMonth,
+                onNext: _goToNextMonth,
+              ),
+            ),
+            SliverToBoxAdapter(child: SizedBox(height: tokens.spaceSmall)),
+            const SliverToBoxAdapter(child: _TableHeader()),
+            BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
+              buildWhen: (previous, current) =>
+                  previous.monthlyPrayerTimes != current.monthlyPrayerTimes ||
+                  previous.settings.use24HourFormat !=
+                      current.settings.use24HourFormat,
+              builder: (context, state) {
+                if (state.monthlyPrayerTimes.isEmpty) {
+                  return const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: TilawaLoadingIndicator(),
                   );
-                },
-              );
-            },
-          ),
-        ),
-      ],
+                }
+
+                return SliverPadding(
+                  padding: EdgeInsets.only(
+                    top: tokens.spaceExtraSmall,
+                    bottom: tokens.spaceLarge,
+                  ),
+                  sliver: SliverList.builder(
+                    itemCount: state.monthlyPrayerTimes.length,
+                    itemBuilder: (context, index) {
+                      final prayerTimes = state.monthlyPrayerTimes[index];
+                      final bool isToday = _isToday(prayerTimes.date);
+
+                      return _TableRow(
+                        prayerTimes: prayerTimes,
+                        isToday: isToday,
+                        index: index,
+                        use24HourFormat: state.settings.use24HourFormat,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -10,6 +10,7 @@ class PrayerAlertStatusChip extends StatelessWidget {
     required this.alert,
     this.showLabel = true,
     this.dense = false,
+    this.quiet = false,
   });
 
   final PrayerAlertViewData alert;
@@ -18,11 +19,28 @@ class PrayerAlertStatusChip extends StatelessWidget {
   /// Tighter padding for dense list rows (e.g. Prayer Times today list).
   final bool dense;
 
+  /// Icon-only hint (no pill). Use on dense lists to reduce visual noise.
+  final bool quiet;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final colors = _alertColors(colorScheme, alert.state);
     final tokens = Theme.of(context).tokens;
+
+    if (quiet) {
+      final double iconSize = dense
+          ? tokens.iconSizeSmall
+          : tokens.iconSizeMedium;
+      return Semantics(
+        label: alert.label,
+        child: Icon(
+          _alertIcon(alert.state),
+          size: iconSize,
+          color: colors.$2,
+        ),
+      );
+    }
 
     return Semantics(
       label: alert.label,
