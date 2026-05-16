@@ -48,109 +48,99 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * 0.86,
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(tokens.radiusExtraLarge),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const TilawaSheetHandle(),
-              _SheetHeader(onClose: _close, tokens: tokens, theme: theme),
-              const TilawaDivider(height: 1),
-              Flexible(
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.all(tokens.spaceLarge),
-                  children: [
-                    _SectionTitle(
-                      title: context.l10n.calculationMethod,
-                      tokens: tokens,
-                      theme: theme,
-                    ),
-                    _SettingsDropdown<CalculationMethod>(
-                      value: settings.calculationMethod,
-                      items: CalculationMethod.values,
-                      labelBuilder: (method) => method.localize(context.l10n),
-                      onChanged: (method) {
-                        if (method != null) {
-                          _updateSettings(
-                            settings.copyWith(calculationMethod: method),
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: tokens.spaceLarge),
-                    _SectionTitle(
-                      title: context.l10n.asrCalculation,
-                      tokens: tokens,
-                      theme: theme,
-                    ),
-                    _SettingsDropdown<AsrJuristicMethod>(
-                      value: settings.asrJuristicMethod,
-                      items: AsrJuristicMethod.values,
-                      labelBuilder: (method) => method.localize(context.l10n),
-                      onChanged: (method) {
-                        if (method != null) {
-                          _updateSettings(
-                            settings.copyWith(asrJuristicMethod: method),
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: tokens.spaceLarge),
-                    _SectionTitle(
-                      title: context.l10n.displayOptions,
-                      tokens: tokens,
-                      theme: theme,
-                    ),
-                    _SettingsSwitch(
-                      title: context.l10n.use24HourFormat,
-                      value: settings.use24HourFormat,
-                      onChanged: (value) {
+      child: SafeArea(
+        top: false,
+        child: TilawaBottomSheetScaffold(
+          topBar: _SheetHeader(onClose: _close, tokens: tokens, theme: theme),
+          betweenTopBarAndBody: const [TilawaDivider(height: 1)],
+          children: [
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: TilawaBottomSheetScaffold.resolvedBodyPadding(context),
+                children: [
+                  _SectionTitle(
+                    title: context.l10n.calculationMethod,
+                    tokens: tokens,
+                    theme: theme,
+                  ),
+                  _SettingsDropdown<CalculationMethod>(
+                    value: settings.calculationMethod,
+                    items: CalculationMethod.values,
+                    labelBuilder: (method) => method.localize(context.l10n),
+                    onChanged: (method) {
+                      if (method != null) {
                         _updateSettings(
-                          settings.copyWith(use24HourFormat: value),
+                          settings.copyWith(calculationMethod: method),
                         );
-                      },
-                    ),
-                    _SettingsSwitch(
-                      title: context.l10n.showSunrise,
-                      value: settings.showSunrise,
-                      onChanged: (value) {
-                        _updateSettings(settings.copyWith(showSunrise: value));
-                      },
-                    ),
-                    BlocBuilder<SettingsCubit, SettingsState>(
-                      builder: (context, appSettings) {
-                        return _SettingsSwitch(
-                          title: context.l10n.showPrayerTimesAlertChipLabels,
-                          value: appSettings.showPrayerTimesAlertChipLabels,
-                          onChanged: (value) {
-                            context
-                                .read<SettingsCubit>()
-                                .setShowPrayerTimesAlertChipLabels(value);
-                          },
+                      }
+                    },
+                  ),
+                  SizedBox(height: tokens.spaceLarge),
+                  _SectionTitle(
+                    title: context.l10n.asrCalculation,
+                    tokens: tokens,
+                    theme: theme,
+                  ),
+                  _SettingsDropdown<AsrJuristicMethod>(
+                    value: settings.asrJuristicMethod,
+                    items: AsrJuristicMethod.values,
+                    labelBuilder: (method) => method.localize(context.l10n),
+                    onChanged: (method) {
+                      if (method != null) {
+                        _updateSettings(
+                          settings.copyWith(asrJuristicMethod: method),
                         );
-                      },
-                    ),
-                    // TODO: Re-enable Time Adjustments after the Prayer Times
-                    // UX stabilizes. The feature is intentionally hidden for
-                    // now to keep settings simple and avoid advanced controls.
-                    if (AdhanQAService.isEnabled) ...[
-                      SizedBox(height: tokens.spaceLarge),
-                      const _QASection(),
-                      SizedBox(height: tokens.spaceLarge),
-                    ],
+                      }
+                    },
+                  ),
+                  SizedBox(height: tokens.spaceLarge),
+                  _SectionTitle(
+                    title: context.l10n.displayOptions,
+                    tokens: tokens,
+                    theme: theme,
+                  ),
+                  _SettingsSwitch(
+                    title: context.l10n.use24HourFormat,
+                    value: settings.use24HourFormat,
+                    onChanged: (value) {
+                      _updateSettings(
+                        settings.copyWith(use24HourFormat: value),
+                      );
+                    },
+                  ),
+                  _SettingsSwitch(
+                    title: context.l10n.showSunrise,
+                    value: settings.showSunrise,
+                    onChanged: (value) {
+                      _updateSettings(settings.copyWith(showSunrise: value));
+                    },
+                  ),
+                  BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (context, appSettings) {
+                      return _SettingsSwitch(
+                        title: context.l10n.showPrayerTimesAlertChipLabels,
+                        value: appSettings.showPrayerTimesAlertChipLabels,
+                        onChanged: (value) {
+                          context
+                              .read<SettingsCubit>()
+                              .setShowPrayerTimesAlertChipLabels(value);
+                        },
+                      );
+                    },
+                  ),
+                  // TODO: Re-enable Time Adjustments after the Prayer Times
+                  // UX stabilizes. The feature is intentionally hidden for
+                  // now to keep settings simple and avoid advanced controls.
+                  if (AdhanQAService.isEnabled) ...[
+                    SizedBox(height: tokens.spaceLarge),
+                    const _QASection(),
+                    SizedBox(height: tokens.spaceLarge),
                   ],
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -170,25 +160,22 @@ class _SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Row(
-        children: [
-          Text(
-            context.l10n.prayerSettings,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+    return Row(
+      children: [
+        Text(
+          context.l10n.prayerSettings,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
           ),
-          const Spacer(),
-          TilawaButton(
-            text: context.l10n.done,
-            variant: TilawaButtonVariant.ghost,
-            size: TilawaButtonSize.small,
-            onPressed: onClose,
-          ),
-        ],
-      ),
+        ),
+        const Spacer(),
+        TilawaButton(
+          text: context.l10n.done,
+          variant: TilawaButtonVariant.ghost,
+          size: TilawaButtonSize.small,
+          onPressed: onClose,
+        ),
+      ],
     );
   }
 }

@@ -32,15 +32,10 @@ void _showColorPicker(
   PrimaryColorSource currentSource,
   String? currentPresetId,
 ) {
-  final tokens = Theme.of(context).tokens;
   showTilawaModalBottomSheet<void>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens.radiusExtraLarge),
-      ),
-    ),
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     builder: (sheetContext) => _ColorPickerSheet(
       currentColor: currentColor,
       currentSource: currentSource,
@@ -92,30 +87,20 @@ void _showCustomColorPicker(BuildContext context, Color currentColor) {
 
 void _showLanguagePicker(BuildContext context, Locale currentLocale) {
   final theme = Theme.of(context);
-  final tokens = theme.tokens;
   showTilawaModalBottomSheet<void>(
     context: context,
     backgroundColor: theme.colorScheme.surfaceContainerLow,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens.radiusExtraLarge),
-      ),
-    ),
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     builder: (_) => _LanguagePickerSheet(currentLocale: currentLocale),
   );
 }
 
 void _showConcurrentDownloadsPicker(BuildContext context, int currentValue) {
   final theme = Theme.of(context);
-  final tokens = theme.tokens;
   showTilawaModalBottomSheet<void>(
     context: context,
     backgroundColor: theme.colorScheme.surfaceContainerLow,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens.radiusExtraLarge),
-      ),
-    ),
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     builder: (_) => _ConcurrentDownloadsSheet(currentValue: currentValue),
   );
 }

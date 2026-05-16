@@ -188,6 +188,7 @@ Short prompts that align outputs with this repo:
 | Breakpoints | `packages/ui_kit/lib/src/foundation/breakpoints.dart` |
 | Component tokens | `packages/ui_kit/lib/src/foundation/component_tokens/` |
 | App theme wiring | `apps/tilawa/lib/tilawa_app.dart` |
+| Bottom sheet shell | `packages/ui_kit/lib/src/foundation/tilawa_bottom_sheet_scaffold.dart` |
 | Primary presets | `apps/tilawa/lib/features/theme/domain/primary_color_preset.dart` |
 | Deeper color docs | `docs/design/colors.md` |
 | External DESIGN.md catalog (index) | `docs/design/awesome-design-md-readme.md` |
@@ -219,13 +220,15 @@ reference hex into feature code unless it becomes a deliberate token in
 
 ## 14. Active design initiative (rolling)
 
-**Status:** In progress — sheet / reading-surface rhythm.
+**Status:** `TilawaBottomSheetScaffold` implemented and wired for prayer-time
+sheets, settings pickers, and surah options; see `TilawaBottomSheetScaffold`
+in `packages/ui_kit`.
 
 | Field | Detail |
 |-------|--------|
 | **Reference moodboard** | [`design-md/mintlify/DESIGN.md`](design-md/mintlify/DESIGN.md) — dense, reading-optimized prose surfaces and clear section padding (not Mintlify colors or fonts). |
-| **Tilawa implementation** | `TilawaBottomSheetScaffoldTokens.defaults()` in `organisms_tokens.dart`: horizontal insets **16 dp** (`spaceLarge`), header unchanged on trailing edge, body uses **12 dp** top and **24 dp** bottom (`spaceMedium` / `spaceExtraLarge`) for scroll/end breathing room. |
-| **Next candidates** | Wire a public `TilawaBottomSheetScaffold` that consumes these tokens; revisit `TilawaSettingsGroup` vertical rhythm only with golden updates. |
+| **Tilawa implementation** | `TilawaBottomSheetScaffold` + `TilawaBottomSheetScaffoldTokens` (`organisms_tokens.dart`). Modal sheets use `TilawaBottomSheetScaffold.modalShape(context)` and surface `backgroundColor` on `showTilawaModalBottomSheet` where the shell provides the chrome. |
+| **Next candidates** | Refactor remaining ad-hoc sheets (share composer, sleep timer, player confirm) to the scaffold where it reduces duplication. |
 
 Replace or extend this section when the initiative completes or a new one starts.
 

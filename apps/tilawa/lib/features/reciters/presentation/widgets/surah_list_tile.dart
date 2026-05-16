@@ -234,11 +234,8 @@ class SurahListTile extends StatelessWidget {
 
     showTilawaModalBottomSheet<void>(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(tokens.radiusExtraLarge),
-        ),
-      ),
+      backgroundColor: colorScheme.surface,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
       builder: (sheetContext) {
         final bottomPadding = sheetContext.floatingBottomPadding;
         return Padding(

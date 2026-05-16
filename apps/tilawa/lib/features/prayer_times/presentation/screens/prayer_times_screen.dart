@@ -426,6 +426,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     showTilawaModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
       builder: (modalContext) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: bloc),
@@ -444,6 +446,8 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     showTilawaModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
       builder: (modalContext) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: bloc),
@@ -999,6 +1003,8 @@ void _openPrayerAlertQuickSheet(
   showTilawaModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     builder: (modalContext) => BlocProvider.value(
       value: bloc,
       child: _PrayerAlertQuickSheet(
@@ -1277,72 +1283,64 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
     final tokens = theme.tokens;
     final bottomPadding = context.floatingBottomPadding;
     final currentMode = _modeForState(row.alert.state);
+    final bp = TilawaBottomSheetScaffold.resolvedBodyPadding(context);
+    final paddedBody = bp.copyWith(bottom: bp.bottom + bottomPadding);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(tokens.radiusExtraLarge),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            tokens.spaceLarge,
-            tokens.spaceSmall,
-            tokens.spaceLarge,
-            bottomPadding + tokens.spaceLarge,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TilawaSheetHandle(),
-              SizedBox(height: tokens.spaceLarge),
-              Text(
-                row.prayerName,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
+    return SafeArea(
+      top: false,
+      child: TilawaBottomSheetScaffold(
+        showHandle: true,
+        children: [
+          Padding(
+            padding: paddedBody,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  row.prayerName,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              SizedBox(height: tokens.spaceExtraSmall),
-              Text(
-                '${row.prayerTime} · ${context.l10n.prayerNotifications}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+                SizedBox(height: tokens.spaceExtraSmall),
+                Text(
+                  '${row.prayerTime} · ${context.l10n.prayerNotifications}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              SizedBox(height: tokens.spaceMedium),
-              _AlertModeTile(
-                title: context.l10n.prayerAlertModeOff,
-                subtitle: context.l10n.prayerAlertModeOffDescription,
-                icon: Icons.notifications_off_outlined,
-                value: PrayerAlertMode.none,
-                groupValue: currentMode,
-                onChanged: onModeSelected,
-              ),
-              _AlertModeTile(
-                title: context.l10n.prayerAlertModeNotifyOnly,
-                subtitle: context.l10n.prayerAlertModeNotifyOnlyDescription,
-                icon: Icons.notifications_active_outlined,
-                value: PrayerAlertMode.notification,
-                groupValue: currentMode,
-                onChanged: onModeSelected,
-              ),
-              if (row.alert.supportsAdhan)
+                SizedBox(height: tokens.spaceMedium),
                 _AlertModeTile(
-                  title: context.l10n.prayerAlertModeAdhan,
-                  subtitle: context.l10n.prayerAlertModeAdhanDescription,
-                  icon: Icons.volume_up_outlined,
-                  value: PrayerAlertMode.adhan,
+                  title: context.l10n.prayerAlertModeOff,
+                  subtitle: context.l10n.prayerAlertModeOffDescription,
+                  icon: Icons.notifications_off_outlined,
+                  value: PrayerAlertMode.none,
                   groupValue: currentMode,
                   onChanged: onModeSelected,
                 ),
-            ],
+                _AlertModeTile(
+                  title: context.l10n.prayerAlertModeNotifyOnly,
+                  subtitle: context.l10n.prayerAlertModeNotifyOnlyDescription,
+                  icon: Icons.notifications_active_outlined,
+                  value: PrayerAlertMode.notification,
+                  groupValue: currentMode,
+                  onChanged: onModeSelected,
+                ),
+                if (row.alert.supportsAdhan)
+                  _AlertModeTile(
+                    title: context.l10n.prayerAlertModeAdhan,
+                    subtitle: context.l10n.prayerAlertModeAdhanDescription,
+                    icon: Icons.volume_up_outlined,
+                    value: PrayerAlertMode.adhan,
+                    groupValue: currentMode,
+                    onChanged: onModeSelected,
+                  ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

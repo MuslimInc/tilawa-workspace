@@ -3,7 +3,12 @@ import 'package:flutter/material.dart';
 /// Opens a modal bottom sheet with a consistent maximum height.
 ///
 /// Call sites should still include [TilawaSheetHandle] at the top of their
-/// content when the sheet is draggable.
+/// content when the sheet is draggable, unless using [TilawaBottomSheetScaffold]
+/// which inserts the handle for you.
+///
+/// Prefer [TilawaBottomSheetScaffold.modalShape] with a matching surface
+/// [backgroundColor] when the sheet uses [TilawaBottomSheetScaffold] for
+/// layout so the system clip aligns with tokenized corners.
 Future<T?> showTilawaModalBottomSheet<T>({
   required BuildContext context,
   required Widget Function(BuildContext context) builder,
