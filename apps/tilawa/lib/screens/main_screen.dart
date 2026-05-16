@@ -154,30 +154,11 @@ class _MainScreenState extends State<MainScreen> {
                 context,
               ).componentTokens.adaptiveShell;
               final textScaler = MediaQuery.textScalerOf(context);
-              final double estimatedBottomNavInnerWidth =
-                  MediaQuery.sizeOf(context).width -
-                  2 * adaptiveShellTokens.bottomNavHorizontalMargin -
-                  2 * adaptiveShellTokens.bottomNavBorderWidth;
-              final bool phoneIconOnlyBottomNav =
-                  context.isNarrow &&
-                  estimatedBottomNavInnerWidth <
-                      TilawaBreakpoints.phoneBottomNavAllLabelsMinInnerWidth;
-              final double phoneNavRowHeight = phoneIconOnlyBottomNav
-                  ? adaptiveShellTokens.phoneBottomNavIconOnlyLayoutHeight(
-                      textScaler,
-                    )
-                  : adaptiveShellTokens.phoneBottomNavLayoutHeight(
-                      textScaler,
-                    );
-              final double phoneNavContentGap = phoneIconOnlyBottomNav
-                  ? context.tokens.spaceLarge
-                  : context.tokens.spaceExtraLarge;
-              // Total visual footprint of the floating bottom nav bar =
-              // row height + safe-area bottom + vertical margin + a visual gap
-              // so overlapping widgets sit clearly above the bar.
-              final double phoneNavTopMargin = phoneIconOnlyBottomNav
-                  ? adaptiveShellTokens.bottomNavIconOnlyVerticalMargin
-                  : adaptiveShellTokens.bottomNavVerticalMargin;
+              final double phoneNavRowHeight = adaptiveShellTokens
+                  .phoneBottomNavLayoutHeight(textScaler);
+              final double phoneNavContentGap = context.tokens.spaceExtraLarge;
+              final double phoneNavTopMargin =
+                  adaptiveShellTokens.bottomNavVerticalMargin;
               final double bottomNavBarHeight = context.isNarrow
                   ? (phoneNavRowHeight +
                         context.systemBottomSafeArea +

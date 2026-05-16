@@ -19,17 +19,6 @@ class TilawaBreakpoints {
 
   /// Upper bound for expanded (tablets, foldables in landscape).
   static const double expanded = 1200;
-
-  /// Minimum **inner** width of the phone bottom nav row (constraints on
-  /// the destination [Row]) for which every item keeps a visible text label.
-  ///
-  /// Below this, [TilawaAdaptiveShell] shows **icons only** with equal-width
-  /// slots; full titles stay on [Semantics] for screen readers.
-  ///
-  /// Tuned near where five equal columns fall under ~72 logical px each
-  /// after default horizontal margins, which commonly produces clipped labels
-  /// on ~360–400dp phones.
-  static const double phoneBottomNavAllLabelsMinInnerWidth = 400;
 }
 
 /// Discrete window-size class, aligned with Material 3 window size classes.

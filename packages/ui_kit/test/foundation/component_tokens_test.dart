@@ -611,7 +611,7 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(57.7, 0.05));
+      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(61.7, 0.05));
       expect(tokens.navButtonSelectionContainerVerticalPadding, 5.0);
       expect(tokens.navButtonIconOnlyMinHeight, 40.0);
       expect(tokens.navButtonIconOnlyVerticalPadding, 1.0);
@@ -636,7 +636,7 @@ void main() {
       final scaled = tokens.phoneBottomNavLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(57.7, 0.05));
+      expect(unit, closeTo(61.7, 0.05));
       expect(scaled, greaterThan(unit));
     });
 

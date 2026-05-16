@@ -503,6 +503,10 @@ class TilawaAdaptiveShellTokens {
   final Offset sideRailShadowOffset;
   final double navButtonMinHeight;
   final double navButtonVerticalPadding;
+
+  /// Vertical gap between each destination **icon** and **label** on the
+  /// phone bottom navigation bar. Applied as padding under the icon; included
+  /// in [phoneBottomNavLayoutHeight] so hosts reserve matching chrome height.
   final double navButtonGap;
   final double navButtonIconSize;
   final double navButtonSelectedCenterScale;
@@ -627,7 +631,7 @@ class TilawaAdaptiveShellTokens {
     const double navButtonVerticalPadding = 4;
     const double navButtonIconSize = 22;
     const double navButtonSelectedCenterScale = 1.1;
-    const double navButtonGap = 4;
+    const double navButtonGap = 8;
     const double navButtonLabelFontSize = 10;
     const double navButtonSelectionContainerVerticalPadding = 5;
     const double navButtonIconOnlyMinHeight = 40;

@@ -66,9 +66,9 @@ class TilawaNavDestination {
 ///
 /// - Phone (narrow): [BottomNavigationBar] is laid out in a [Column] under an
 ///   [Expanded] body region (not [Scaffold.bottomNavigationBar]) so nested
-///   tab [Scaffold]s receive bounded constraints. Optional
-///   [phoneBottomNavigationBarVisible] can hide the bar (e.g. full-screen
-///   player). [Scaffold.extendBody] is false.
+///   tab [Scaffold]s receive bounded constraints. Destination **labels are always
+///   shown** (icons + text). Optional [phoneBottomNavigationBarVisible] can hide
+///   the bar (e.g. full-screen player). [Scaffold.extendBody] is false.
 /// - Medium/Expanded: Shows a side navigation rail.
 ///
 /// This shell also respects [DisplayFeature]s (hinges/folds) on foldable
@@ -287,6 +287,15 @@ class _BottomNavBar extends StatelessWidget {
       );
     }
 
+    inactiveGlyph = Padding(
+      padding: EdgeInsets.only(bottom: tokens.navButtonGap),
+      child: inactiveGlyph,
+    );
+    activeGlyph = Padding(
+      padding: EdgeInsets.only(bottom: tokens.navButtonGap),
+      child: activeGlyph,
+    );
+
     return BottomNavigationBarItem(
       icon: inactiveGlyph,
       activeIcon: tabIsSelected ? activeGlyph : inactiveGlyph,
@@ -328,21 +337,6 @@ class _BottomNavBar extends StatelessWidget {
     final double bottomBarTextScale = MediaQuery.textScalerOf(
       context,
     ).scale(1.0).clamp(0.01, 1.0);
-
-    final EdgeInsets resolvedBarPadding =
-        (padding ??
-                EdgeInsets.fromLTRB(
-                  tokens.bottomNavHorizontalMargin,
-                  0,
-                  tokens.bottomNavHorizontalMargin,
-                  0,
-                ))
-            .resolve(Directionality.of(context));
-    final double bottomNavInnerWidth =
-        MediaQuery.sizeOf(context).width - resolvedBarPadding.horizontal;
-    final bool showAllBottomNavLabels =
-        bottomNavInnerWidth >=
-        TilawaBreakpoints.phoneBottomNavAllLabelsMinInnerWidth;
 
     final SystemUiOverlayStyle bottomNavOverlayStyle = SystemUiOverlayStyle(
       systemNavigationBarColor: navColor.withValues(alpha: 1),
@@ -419,8 +413,8 @@ class _BottomNavBar extends StatelessWidget {
                               HapticFeedback.selectionClick();
                               onDestinationSelected(index);
                             },
-                            showSelectedLabels: showAllBottomNavLabels,
-                            showUnselectedLabels: showAllBottomNavLabels,
+                            showSelectedLabels: true,
+                            showUnselectedLabels: true,
                             backgroundColor: Colors.transparent,
                             elevation: 0,
                             selectedItemColor: hasSelection
