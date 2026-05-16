@@ -185,6 +185,23 @@ abstract final class AppShareComposerColors {
   static const Color feedbackErrorOutline = Color(0xFFFFB4AB);
 }
 
+/// Poster gradient shell for multi-surah **page passage** share cards.
+///
+/// Greens are tuned for this variant (slightly different from
+/// [AppShareComposerColors]); [gold], [mint], and [parchment] match the share
+/// composer palette for consistency across share surfaces.
+abstract final class AppPagePassagePosterColors {
+  static const Color deepGreen = Color(0xFF0B342E);
+  static const Color forestGreen = Color(0xFF145247);
+
+  static const Color gold = AppShareComposerColors.gold;
+  static const Color mint = AppShareComposerColors.mint;
+  static const Color parchment = AppShareComposerColors.cream;
+
+  /// Warmer secondary stop in the parchment gradient.
+  static const Color warmParchment = Color(0xFFEFE1C2);
+}
+
 /// Default colors for **static export** screenshots (e.g. branded Quran page PNG
 /// footer). Not for in-scaffold UI.
 abstract final class AppExportScreenshotColors {
@@ -204,4 +221,40 @@ abstract final class AppVideoReelDesignDefaults {
   static const Color frameStrongTextColor = Color(0xFF5D4037);
   static const Color frameAccentColor = Color(0xFFC5A358);
   static const Color frameSurfaceColor = Color(0xFFFFF9F2);
+}
+
+/// Legacy static palette for [QuranReaderTheme] light/dark defaults in the app.
+///
+/// The reader resolves most chrome from [ColorScheme] at runtime via
+/// `QuranReaderTheme.fromTheme`; these values preserve the historical presets
+/// for the static `QuranReaderTheme.light` / `.dark` extensions.
+abstract final class AppQuranReaderLegacyColors {
+  // --- Light ---
+
+  static const Color lightPageBackground = Color(0xFFFFF9F1);
+  static const Color lightOnSurface = Color(0xFF000000);
+  static const Color lightPrimary = Color(0xFF8B6B23);
+  static const Color lightHeaderBackground = Color(0xFFF4EAD2);
+  static const Color lightSystemBar = Color(0xFFFFF9F1);
+
+  /// ~60% black — slider range labels and secondary reader text.
+  static const Color lightMutedOnSurface = Color(0x99000000);
+
+  // --- Dark ---
+
+  static const Color darkPageBackground = Color(0xFF0E0E0E);
+  static const Color darkOnSurface = Color(0xFFFFFFFF);
+  static const Color darkPrimary = Color(0xFF9E9E9E);
+  static const Color darkHeaderBackground = Color(0xFF1A1A1A);
+  static const Color darkHeaderOnSurface = Color(0xE6FFFFFF);
+  static const Color darkSystemBar = Color(0xFF0E0E0E);
+
+  /// Muted caption gray for slider range in dark mode.
+  static const Color darkMutedCaption = Color(0xA6E0E0E0);
+
+  static const Color darkPillSurah = Color(0xFFE0E0E0);
+  static const Color darkSurahTileName = Color(0xFFE0E0E0);
+
+  /// Accent for Arabic surah names on tiles in dark reader preset.
+  static const Color darkArabicAccent = Color(0xFFD4AF37);
 }

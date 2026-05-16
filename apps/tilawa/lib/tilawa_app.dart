@@ -123,6 +123,10 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
 class _PlayerApp extends StatelessWidget {
   const _PlayerApp();
 
+  /// Matches [DESIGN.md] §3 — predictable layouts with moderate a11y scaling.
+  static const double _kTextScaleClampMin = 1.0;
+  static const double _kTextScaleClampMax = 1.4;
+
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('PlayerAppMaterialRoot');
@@ -155,9 +159,13 @@ class _PlayerApp extends StatelessWidget {
                   );
                   return MediaQuery(
                     data: MediaQuery.of(context).copyWith(
-                      textScaler: MediaQuery.textScalerOf(
-                        context,
-                      ).clamp(minScaleFactor: 1.0, maxScaleFactor: 1.4),
+                      textScaler:
+                          MediaQuery.textScalerOf(
+                            context,
+                          ).clamp(
+                            minScaleFactor: _kTextScaleClampMin,
+                            maxScaleFactor: _kTextScaleClampMax,
+                          ),
                     ),
                     child: routedChild,
                   );

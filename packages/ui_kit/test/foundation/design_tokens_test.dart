@@ -32,7 +32,7 @@ void main() {
       iconSizeMedium: 20.0,
       iconSizeLarge: 24.0,
       iconSizeLargePlus: 42.0,
-      iconSizeExtraLarge: 48.0,
+      iconSizeExtraLarge: 44.0,
       minInteractiveDimension: 44.0,
       textHeightLoose: 1.8,
       durationFast: Duration(milliseconds: 200),
@@ -83,7 +83,7 @@ void main() {
         expect(light.iconSizeMedium, 20.0);
         expect(light.iconSizeLarge, 24.0);
         expect(light.iconSizeLargePlus, 42.0);
-        expect(light.iconSizeExtraLarge, 48.0);
+        expect(light.iconSizeExtraLarge, 44.0);
         expect(light.textHeightLoose, 2.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
         expect(light.durationMedium, const Duration(milliseconds: 400));
@@ -225,7 +225,7 @@ void main() {
           narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
           minInteractiveDimension: 44.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
@@ -276,7 +276,7 @@ void main() {
           narrowCardHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
           minInteractiveDimension: 44.0,
           textHeightLoose: 2.0,
           playerCollapsedHeight: 120.0,
@@ -336,7 +336,7 @@ void main() {
           narrowCardHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
           minInteractiveDimension: 44.0,
           textHeightLoose: 2.0,
           playerCollapsedHeight: 120.0,
@@ -394,7 +394,7 @@ void main() {
           narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
           minInteractiveDimension: 44.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
@@ -465,7 +465,7 @@ void main() {
         expect(lerped.opacitySubtle, closeTo(0.15, 0.01));
         expect(lerped.contentMaxWidthReader, closeTo(810, 1.0));
         expect(lerped.iconSizeExtraSmall, closeTo(15.0, 0.01));
-        expect(lerped.iconSizeExtraLarge, closeTo(60.0, 0.01));
+        expect(lerped.iconSizeExtraLarge, closeTo(58.0, 0.01));
         expect(lerped.textHeightLoose, closeTo(1.9, 0.01));
       });
 
@@ -509,7 +509,7 @@ void main() {
           narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
           minInteractiveDimension: 44.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
@@ -558,7 +558,7 @@ void main() {
             iconSizeMedium: 20.0,
             iconSizeLarge: 24.0,
             iconSizeLargePlus: 42.0,
-            iconSizeExtraLarge: 48.0,
+            iconSizeExtraLarge: 44.0,
             minInteractiveDimension: 44.0,
             textHeightLoose: 1.8,
             durationFast: Duration(milliseconds: 200),
@@ -660,6 +660,28 @@ void main() {
                 final accessedTokens = Theme.of(context).tokens;
                 expect(accessedTokens.spaceSmall, 8.0);
                 expect(accessedTokens.radiusSmall, 8.0);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      });
+    });
+
+    group('TilawaIconSizeX extension', () {
+      testWidgets('exposes icon size steps including largePlus', (
+        WidgetTester tester,
+      ) async {
+        final tokens = TilawaDesignTokens.light();
+        final theme = ThemeData(extensions: [tokens]);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: Builder(
+              builder: (context) {
+                expect(context.iconSizeExtraLarge, 44.0);
+                expect(context.iconSizeLargePlus, 42.0);
                 return const SizedBox.shrink();
               },
             ),

@@ -158,8 +158,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 42.0
   final double iconSizeLargePlus;
 
-  /// 48.0 — largest *glyph* size in the default ramp; not a guaranteed touch
-  /// target. Use [minInteractiveDimension] for hit targets.
+  /// 44.0 — largest *glyph* size in the default ramp; matches
+  /// [kTilawaMinInteractiveDimension] so the top-of-ramp icon aligns with the
+  /// kit’s minimum hit target. Use [minInteractiveDimension] for layout limits
+  /// on tappable chrome, not necessarily every decorative icon.
   final double iconSizeExtraLarge;
 
   /// Tilawa minimum interactive (hit-target) dimension. Defaults to
@@ -263,7 +265,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeMedium: 20.0,
       iconSizeLarge: 24.0,
       iconSizeLargePlus: 42.0,
-      iconSizeExtraLarge: 48.0,
+      iconSizeExtraLarge: kTilawaMinInteractiveDimension,
       minInteractiveDimension: kTilawaMinInteractiveDimension,
       textHeightLoose: 2.0,
       durationFast: const Duration(milliseconds: 200),
@@ -579,6 +581,7 @@ extension TilawaIconSizeX on BuildContext {
   double get iconSizeSmall => tokens.iconSizeSmall;
   double get iconSizeMedium => tokens.iconSizeMedium;
   double get iconSizeLarge => tokens.iconSizeLarge;
+  double get iconSizeLargePlus => tokens.iconSizeLargePlus;
   double get iconSizeExtraLarge => tokens.iconSizeExtraLarge;
 
   /// Tilawa minimum interactive (hit-target) dimension. Use this instead of

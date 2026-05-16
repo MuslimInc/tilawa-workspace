@@ -86,7 +86,7 @@ Registered as a `ThemeExtension` on `ThemeData` (access: `Theme.of(context).exte
 |----------|------------------|
 | Space scale | 2, 4, 8, 12, 16, 24 |
 | Corner radii | 8, 12, 16, 24 |
-| Icon sizes | 12, 16, 20, 24, 42, 48 |
+| Icon sizes | 12, 16, 20, 24, 42, 44 |
 | Min touch target | **44 dp** (`kTilawaMinInteractiveDimension`) — intentional vs Material 48dp |
 | Durations | 200 ms / 400 ms / 600 ms (fast / medium / slow) |
 | Line height (loose) | 2.0 for dense Arabic-friendly layouts |

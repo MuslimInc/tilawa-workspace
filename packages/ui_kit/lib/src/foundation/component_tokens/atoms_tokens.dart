@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
+import '../design_tokens.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -440,7 +441,7 @@ class TilawaEmptyStateTokens {
 
   factory TilawaEmptyStateTokens.defaults() {
     return const TilawaEmptyStateTokens(
-      iconSize: 48.0,
+      iconSize: kTilawaMinInteractiveDimension,
       iconOpacity: 0.4,
       titleSpacing: 16.0,
       subtitleSpacing: 8.0,

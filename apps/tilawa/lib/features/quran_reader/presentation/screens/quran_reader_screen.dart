@@ -293,11 +293,11 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     // Do NOT replace with `colorScheme.surface` — that paints an opaque band
     // over the page.
     return SystemUiOverlayStyle(
-      statusBarColor: const Color(0x00000000),
+      statusBarColor: Colors.transparent,
       statusBarIconBrightness: readerTheme.statusBarIconBrightness,
       statusBarBrightness: readerTheme.statusBarBrightness,
-      systemNavigationBarColor: const Color(0x00000000),
-      systemNavigationBarDividerColor: const Color(0x00000000),
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
       systemStatusBarContrastEnforced: false,
       systemNavigationBarContrastEnforced: false,
     );

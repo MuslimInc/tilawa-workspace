@@ -352,7 +352,7 @@ void main() {
   group('TilawaEmptyStateTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaEmptyStateTokens.defaults();
-      expect(tokens.iconSize, 48.0);
+      expect(tokens.iconSize, 44.0);
       expect(tokens.iconOpacity, 0.4);
       expect(tokens.titleSpacing, 16.0);
       expect(tokens.subtitleSpacing, 8.0);
