@@ -168,7 +168,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// `kMinInteractiveDimension`.
   final double minInteractiveDimension;
 
-  /// 1.8 — relaxed line height for dense Arabic text.
+  /// 2.0 — relaxed line height for dense Arabic text.
   final double textHeightLoose;
 
   /// 200ms
