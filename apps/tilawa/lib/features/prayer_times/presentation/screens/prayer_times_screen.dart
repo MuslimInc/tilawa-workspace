@@ -204,10 +204,12 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                                     theme.colorScheme.surfaceContainer,
                                 selectedColor: theme.colorScheme.surface,
                                 selectedTextColor: theme.colorScheme.primary,
-                                // Match the body cards' radiusExtraLarge so the
-                                // header chrome and the cards share the same
-                                // rounding rhythm.
-                                containerRadius: tokens.radiusExtraLarge,
+                                // Match the body cards' rounding so the header
+                                // chrome and the cards share the same rhythm.
+                                // TILAWA_BRAND.md §5 — `card` family.
+                                containerRadius: tokens.resolveRadius(
+                                  family: TilawaRadiusFamily.card,
+                                ),
                                 onValueChanged: _onSegmentChanged,
                               ),
                             ),
@@ -754,7 +756,8 @@ class _LocationUtilityCard extends StatelessWidget {
       ),
       child: TilawaCard(
         surface: TilawaCardSurface.raised,
-        borderRadius: tokens.radiusExtraLarge,
+        // TILAWA_BRAND.md §5 — `card` family.
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
         backgroundColor: colorScheme.surface,
         onTap: isLoading ? null : onUpdateLocation,
         padding: EdgeInsets.symmetric(
@@ -812,7 +815,8 @@ class _BottomUtilitiesCard extends StatelessWidget {
       ),
       child: TilawaCard(
         surface: TilawaCardSurface.raised,
-        borderRadius: tokens.radiusExtraLarge,
+        // TILAWA_BRAND.md §5 — `card` family.
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
         backgroundColor: colorScheme.surface,
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceSmall,
@@ -915,7 +919,7 @@ class _UtilityInlineAction extends StatelessWidget {
     // Concentric corner rule: row radius = card radius - card horizontal padding.
     // _BottomUtilitiesCard: cardRadius=radiusExtraLarge, hPad=spaceSmall.
     final double inkRadius = tokens.concentricInner(
-      outerRadius: tokens.radiusExtraLarge,
+      outerRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
       padding: tokens.spaceSmall,
     );
 
@@ -1069,7 +1073,8 @@ class _TodayPrayerListSection extends StatelessWidget {
       ),
       child: TilawaCard(
         surface: TilawaCardSurface.raised,
-        borderRadius: tokens.radiusExtraLarge,
+        // TILAWA_BRAND.md §5 — `card` family.
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
         backgroundColor: colorScheme.surface,
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceMedium,
@@ -1161,7 +1166,7 @@ class _TodayPrayerListRow extends StatelessWidget {
     // Concentric corner rule: row radius = card radius - card horizontal padding.
     // _TodayPrayerListSection: cardRadius=radiusExtraLarge, hPad=spaceMedium.
     final double rowRadius = tokens.concentricInner(
-      outerRadius: tokens.radiusExtraLarge,
+      outerRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
       padding: tokens.spaceMedium,
     );
 
@@ -1397,7 +1402,8 @@ class _AlertModeTile extends StatelessWidget {
             : theme.colorScheme.outlineVariant.withValues(
                 alpha: tokens.opacityMedium,
               ),
-        borderRadius: tokens.radiusLarge,
+        // TILAWA_BRAND.md §5 — `chrome` family: tile nested inside the sheet.
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
         onTap: selected ? null : () => onChanged(value),
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceMedium,

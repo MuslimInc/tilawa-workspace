@@ -615,3 +615,73 @@ extension TilawaConcentricRadiusX on TilawaDesignTokens {
     return inner < 0 ? 0 : inner;
   }
 }
+
+/// Brand-doc roles for rounded components. Each family carries a distinct
+/// rounding intent; the same numeric token reads differently at different
+/// component sizes, so [TilawaRadiusResolverX.resolveRadius] takes both the
+/// family and the component height into account.
+///
+/// See `TILAWA_BRAND.md` §5 (Rhythm and elevation).
+enum TilawaRadiusFamily {
+  /// Containers that hold content (`TilawaCard`, sheets, body cards). Stays
+  /// at [TilawaDesignTokens.radiusExtraLarge] regardless of height, never
+  /// accidentally pills.
+  card,
+
+  /// Tappable affordances at or near [kTilawaMinInteractiveDimension]
+  /// (chips, segmented control items, icon buttons). Becomes a true pill
+  /// (`height / 2`) when small, caps at [TilawaDesignTokens.radiusExtraLarge]
+  /// when tall.
+  pill,
+
+  /// Chrome strips that sit inside cards — header bars, sub-nav surrounds,
+  /// segmented control containers. Uses [TilawaDesignTokens.radiusLarge] so
+  /// the chrome reads as nested inside a `card`-radius parent.
+  chrome,
+
+  /// Decorative or hairline elements (dividers, status dots, ambient
+  /// ornament). Uses [TilawaDesignTokens.radiusMedium] for subtle softness
+  /// without claiming container weight.
+  decorative,
+}
+
+/// Resolves a component's corner radius from its brand role and physical
+/// height.
+///
+/// Why this exists: a 24 dp radius reads as "rounded card" on a 200 dp tall
+/// container, as "almost circle" on a 44 dp tall pill, and as "fully round
+/// capsule" on a 24 dp tall hairline. Same token, three meanings. This
+/// extension keeps the brand-doc intent constant while letting the math
+/// follow the geometry.
+extension TilawaRadiusResolverX on TilawaDesignTokens {
+  /// Returns the radius a component should paint at, given its [family] and
+  /// physical [height] in logical pixels.
+  ///
+  /// - [TilawaRadiusFamily.card] → always [radiusExtraLarge].
+  /// - [TilawaRadiusFamily.pill] → `min(height / 2, radiusExtraLarge)`. Icon-
+  ///   only chips at 44 dp become 22 dp circles; wider tappable pills cap
+  ///   at the card-radius family so they never out-round the cards they sit
+  ///   beside.
+  /// - [TilawaRadiusFamily.chrome] → [radiusLarge]. Concentric inside cards.
+  /// - [TilawaRadiusFamily.decorative] → [radiusMedium].
+  ///
+  /// [height] is required for `pill` and ignored for the others, but kept in
+  /// the signature so call sites read uniformly. Pass `0` (or omit) for
+  /// non-pill families.
+  double resolveRadius({
+    required TilawaRadiusFamily family,
+    double height = 0,
+  }) {
+    switch (family) {
+      case TilawaRadiusFamily.card:
+        return radiusExtraLarge;
+      case TilawaRadiusFamily.pill:
+        final double half = height / 2;
+        return half < radiusExtraLarge ? half : radiusExtraLarge;
+      case TilawaRadiusFamily.chrome:
+        return radiusLarge;
+      case TilawaRadiusFamily.decorative:
+        return radiusMedium;
+    }
+  }
+}

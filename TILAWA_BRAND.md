@@ -85,6 +85,23 @@ Apple's lesson: **the color change is the divider; the artifact gets the single 
 
 **Touch targets:** 44 dp minimum (`kTilawaMinInteractiveDimension`) — same as DESIGN §4. Brand-level: prefer **wide, generous** hit zones over packed grids. Density is the enemy of reverence.
 
+### Rounding (height-aware)
+
+A single radius token reads differently depending on the component's height: 24 dp on a 200 dp card is "rounded card," on a 44 dp pill is "almost circle," on a 24 dp hairline is "fully round capsule." The brand-doc intent is constant — *rounded enough to feel soft, not square; pill when small, card when large* — but the math depends on the geometry.
+
+Use **`tokens.resolveRadius(family: ..., height: ...)`** (see `TilawaRadiusResolverX` in `design_tokens.dart`) instead of reaching for a raw `radiusXxx` token. Roles:
+
+| Family | Rule | Examples |
+|---|---|---|
+| `card` | always `radiusExtraLarge` | Body cards, sheets, hero countdown card |
+| `pill` | `min(height / 2, radiusExtraLarge)` | Tappable chips, segmented control items, icon buttons — auto-pills when small, caps at the card family when tall |
+| `chrome` | `radiusLarge` | Sub-nav surrounds, search-field bars, segmented control container — visually nested inside a `card`-radius parent |
+| `decorative` | `radiusMedium` | Status dots, ambient ornament, hairline pills |
+
+For inner elements nested inside a known outer container with known padding, prefer **`tokens.concentricInner(outerRadius, padding)`** — it preserves the parallel-curves rule (`innerRadius = outerRadius - padding`).
+
+**Anti-pattern:** hard-coding `borderRadius: tokens.radiusExtraLarge` in feature code. The intent is the family, not the token. Reach for `resolveRadius` so the math follows the geometry — and so a future token change ripples cleanly.
+
 ---
 
 ## 6. Motion intent

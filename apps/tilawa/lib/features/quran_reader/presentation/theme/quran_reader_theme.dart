@@ -973,6 +973,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
     required this.tileBorderWidth,
     required this.tileNumberSize,
     required this.tileNumberRadius,
+    required this.tileNumberFontSize,
     required this.tileArabicNameSize,
     required this.tileMetaFontSize,
   });
@@ -994,6 +995,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
   final double tileBorderWidth;
   final double tileNumberSize;
   final double tileNumberRadius;
+  final double tileNumberFontSize;
   final double tileArabicNameSize;
   final double tileMetaFontSize;
 
@@ -1015,6 +1017,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
     tileBorderWidth: 0.6,
     tileNumberSize: 40.0,
     tileNumberRadius: 10.0,
+    tileNumberFontSize: 13.0,
     tileArabicNameSize: 18.0,
     tileMetaFontSize: 11.0,
   );
@@ -1042,6 +1045,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
     double? tileBorderWidth,
     double? tileNumberSize,
     double? tileNumberRadius,
+    double? tileNumberFontSize,
     double? tileArabicNameSize,
     double? tileMetaFontSize,
   }) {
@@ -1064,6 +1068,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
       tileBorderWidth: tileBorderWidth ?? this.tileBorderWidth,
       tileNumberSize: tileNumberSize ?? this.tileNumberSize,
       tileNumberRadius: tileNumberRadius ?? this.tileNumberRadius,
+      tileNumberFontSize: tileNumberFontSize ?? this.tileNumberFontSize,
       tileArabicNameSize: tileArabicNameSize ?? this.tileArabicNameSize,
       tileMetaFontSize: tileMetaFontSize ?? this.tileMetaFontSize,
     );
@@ -1123,6 +1128,11 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
       tileNumberRadius: lerpDouble(
         tileNumberRadius,
         other.tileNumberRadius,
+        t,
+      )!,
+      tileNumberFontSize: lerpDouble(
+        tileNumberFontSize,
+        other.tileNumberFontSize,
         t,
       )!,
       tileArabicNameSize: lerpDouble(

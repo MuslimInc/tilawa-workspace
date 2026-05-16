@@ -423,7 +423,7 @@ class _SurahTile extends StatelessWidget {
                     '$surahNumber',
                     style: readerTheme.pillPageTextStyle.copyWith(
                       color: colorScheme.onPrimaryContainer,
-                      fontSize: 13,
+                      fontSize: indexTheme.tileNumberFontSize,
                     ),
                   ),
                 ),
