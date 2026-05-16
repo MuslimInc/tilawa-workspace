@@ -185,7 +185,7 @@ void main() {
       expect(find.text('Try again'), findsOneWidget);
     });
 
-    testWidgets('supports RTL and larger text on compact phones', (
+    testWidgets('supports RTL and larger text on narrow phones', (
       tester,
     ) async {
       tester.view.devicePixelRatio = 1;

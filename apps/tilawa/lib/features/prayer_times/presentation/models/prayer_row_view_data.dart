@@ -1,6 +1,6 @@
 import '../../domain/entities/prayer_time_entity.dart';
 
-/// Compact alert state used by Prayer Times presentation widgets.
+/// Dense alert state used by Prayer Times presentation widgets.
 enum PrayerAlertViewState {
   /// No notification or Adhan is scheduled.
   off,

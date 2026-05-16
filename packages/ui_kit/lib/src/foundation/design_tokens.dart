@@ -56,8 +56,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.contentMaxWidthForm,
     required this.contentMaxWidthMedia,
     required this.contentMaxWidthSettings,
-    required this.cardCompactWidthThreshold,
-    required this.cardCompactHeightThreshold,
+    required this.narrowCardWidthThreshold,
+    required this.narrowCardHeightThreshold,
     required this.cardTightHeightThreshold,
     required this.playerCollapsedHeight,
     required this.playerDismissThreshold,
@@ -192,11 +192,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 760 — max width for settings detail pages.
   final double contentMaxWidthSettings;
 
-  /// 180 — width threshold for compact card layout.
-  final double cardCompactWidthThreshold;
+  /// 180 — width threshold for narrow (space-constrained) card layout.
+  final double narrowCardWidthThreshold;
 
-  /// 155 — height threshold for compact card layout.
-  final double cardCompactHeightThreshold;
+  /// 155 — height threshold for narrow (space-constrained) card layout.
+  final double narrowCardHeightThreshold;
 
   /// 145 — height threshold for tight card layout.
   final double cardTightHeightThreshold;
@@ -272,8 +272,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       contentMaxWidthForm: 560,
       contentMaxWidthMedia: 1200,
       contentMaxWidthSettings: 760,
-      cardCompactWidthThreshold: 180.0,
-      cardCompactHeightThreshold: 155.0,
+      narrowCardWidthThreshold: 180.0,
+      narrowCardHeightThreshold: 155.0,
       cardTightHeightThreshold: 145.0,
       playerCollapsedHeight: 72.0,
       playerDismissThreshold: 72.0,
@@ -326,8 +326,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? contentMaxWidthForm,
     double? contentMaxWidthMedia,
     double? contentMaxWidthSettings,
-    double? cardCompactWidthThreshold,
-    double? cardCompactHeightThreshold,
+    double? narrowCardWidthThreshold,
+    double? narrowCardHeightThreshold,
     double? cardTightHeightThreshold,
     double? playerCollapsedHeight,
     double? playerDismissThreshold,
@@ -380,10 +380,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       contentMaxWidthMedia: contentMaxWidthMedia ?? this.contentMaxWidthMedia,
       contentMaxWidthSettings:
           contentMaxWidthSettings ?? this.contentMaxWidthSettings,
-      cardCompactWidthThreshold:
-          cardCompactWidthThreshold ?? this.cardCompactWidthThreshold,
-      cardCompactHeightThreshold:
-          cardCompactHeightThreshold ?? this.cardCompactHeightThreshold,
+      narrowCardWidthThreshold:
+          narrowCardWidthThreshold ?? this.narrowCardWidthThreshold,
+      narrowCardHeightThreshold:
+          narrowCardHeightThreshold ?? this.narrowCardHeightThreshold,
       cardTightHeightThreshold:
           cardTightHeightThreshold ?? this.cardTightHeightThreshold,
       playerCollapsedHeight:
@@ -496,14 +496,14 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         other.contentMaxWidthSettings,
         t,
       )!,
-      cardCompactWidthThreshold: lerpDouble(
-        cardCompactWidthThreshold,
-        other.cardCompactWidthThreshold,
+      narrowCardWidthThreshold: lerpDouble(
+        narrowCardWidthThreshold,
+        other.narrowCardWidthThreshold,
         t,
       )!,
-      cardCompactHeightThreshold: lerpDouble(
-        cardCompactHeightThreshold,
-        other.cardCompactHeightThreshold,
+      narrowCardHeightThreshold: lerpDouble(
+        narrowCardHeightThreshold,
+        other.narrowCardHeightThreshold,
         t,
       )!,
       cardTightHeightThreshold: lerpDouble(

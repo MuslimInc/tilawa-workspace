@@ -3,7 +3,7 @@
 **Feature Branch**: `009-reel-composer-redesign`
 **Created**: 2026-05-07
 **Status**: Planning
-**Depends On**: Tilawa UI Kit foundation (tokens, density, theming), `quran_qcf` page preparation services, existing share/export pipeline (FFmpeg, screenshot capture)
+**Depends On**: Tilawa UI Kit foundation (tokens, theming), `quran_qcf` page preparation services, existing share/export pipeline (FFmpeg, screenshot capture)
 
 ---
 
@@ -260,7 +260,7 @@ Adopt **8% top / 14% bottom** as the unified default. Verse text MUST NOT enter 
 |---|---|
 | No literal hex in `video_reel_design.dart` | Token compliance |
 | `flutter analyze` passes with no `avoid_hard_coded_color` warnings | Token compliance |
-| Goldens pass in light, dark, and compact density | Theming |
+| Goldens pass in light and dark theme | Theming |
 
 ### Phase 5 (UX upgrades)
 
@@ -354,7 +354,7 @@ Adopt **8% top / 14% bottom** as the unified default. Verse text MUST NOT enter 
 ### Phase 4 — Token migration
 
 - [ ] `VideoReelDesign` deleted; all values pulled from `TilawaShareCanvasTokens` and existing `tokens`/`colorScheme`.
-- [ ] Goldens pass in light, dark, and compact density.
+- [ ] Goldens pass in light and dark theme.
 
 ### Phase 5 — UX upgrades
 

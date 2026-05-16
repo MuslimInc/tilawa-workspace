@@ -139,57 +139,57 @@ class _PlayerApp extends StatelessWidget {
             builder: (context, themeState) {
               PerfLogger.markBuild('ThemeBlocBuilder');
               return MaterialApp.router(
-                    title: AppStrings.appName,
-                    showPerformanceOverlay: false,
-                    debugShowCheckedModeBanner: false,
-                    // showPerformanceOverlay: kDebugMode || kProfileMode,
-                    // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
-                    builder: (context, child) {
-                      // Release: skip DevicePreview.appBuilder — no preview ancestor
-                      // work; profile/debug still use it when preview is enabled.
-                      final app = kReleaseMode
-                          ? (child ?? const SizedBox.shrink())
-                          : DevicePreview.appBuilder(context, child);
-                      final routedChild = _DefaultRouteSystemUiOverlay(
-                        child: app,
-                      );
-                      return MediaQuery(
-                        data: MediaQuery.of(context).copyWith(
-                          textScaler: MediaQuery.textScalerOf(
-                            context,
-                          ).clamp(minScaleFactor: 1.0, maxScaleFactor: 1.4),
-                        ),
-                        child: routedChild,
-                      );
-                    },
-                    theme: AppTheme.getLightTheme(
-                      primaryColor: themeState.primaryColor,
-                      extensions: [QuranReaderTheme.light],
-                    ),
-                    darkTheme: AppTheme.getDarkTheme(
-                      primaryColor: themeState.primaryColor,
-                      isDefaultPreset:
-                          themeState.primaryColorSource ==
-                              PrimaryColorSource.preset &&
-                          themeState.primaryPresetId ==
-                              PrimaryColorPreset.defaultPreset.id,
-                      darkIsTrueBlack:
-                          themeState.preset == AppThemePreset.trueBlack,
-                      extensions: [QuranReaderTheme.dark],
-                    ),
-                    themeMode: themeState.themeMode,
-                    routerConfig: AppRouter.router,
-                    // Disable restoration when launched from notification
-                    restorationScopeId: AppRouter.disableStateRestoration
-                        ? null
-                        : AppStrings.restorationScopeId,
-                    locale: locState.locale,
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    localizationsDelegates: const [
-                      ...AppLocalizations.localizationsDelegates,
-                      quran_image_l10n.AppLocalizations.delegate,
-                    ],
+                title: AppStrings.appName,
+                showPerformanceOverlay: false,
+                debugShowCheckedModeBanner: false,
+                // showPerformanceOverlay: kDebugMode || kProfileMode,
+                // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
+                builder: (context, child) {
+                  // Release: skip DevicePreview.appBuilder — no preview ancestor
+                  // work; profile/debug still use it when preview is enabled.
+                  final app = kReleaseMode
+                      ? (child ?? const SizedBox.shrink())
+                      : DevicePreview.appBuilder(context, child);
+                  final routedChild = _DefaultRouteSystemUiOverlay(
+                    child: app,
                   );
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: MediaQuery.textScalerOf(
+                        context,
+                      ).clamp(minScaleFactor: 1.0, maxScaleFactor: 1.4),
+                    ),
+                    child: routedChild,
+                  );
+                },
+                theme: AppTheme.getLightTheme(
+                  primaryColor: themeState.primaryColor,
+                  extensions: [QuranReaderTheme.light],
+                ),
+                darkTheme: AppTheme.getDarkTheme(
+                  primaryColor: themeState.primaryColor,
+                  isDefaultPreset:
+                      themeState.primaryColorSource ==
+                          PrimaryColorSource.preset &&
+                      themeState.primaryPresetId ==
+                          PrimaryColorPreset.defaultPreset.id,
+                  darkIsTrueBlack:
+                      themeState.preset == AppThemePreset.trueBlack,
+                  extensions: [QuranReaderTheme.dark],
+                ),
+                themeMode: themeState.themeMode,
+                routerConfig: AppRouter.router,
+                // Disable restoration when launched from notification
+                restorationScopeId: AppRouter.disableStateRestoration
+                    ? null
+                    : AppStrings.restorationScopeId,
+                locale: locState.locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const [
+                  ...AppLocalizations.localizationsDelegates,
+                  quran_image_l10n.AppLocalizations.delegate,
+                ],
+              );
             },
           );
         },

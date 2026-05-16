@@ -342,14 +342,14 @@ class TilawaIconActionButtonTokens {
 class TilawaChipTokens {
   const TilawaChipTokens({
     required this.padding,
-    required this.compactPadding,
+    required this.inlinePadding,
     required this.backgroundColor,
     required this.defaultBorderColor,
     required this.selectionSelectedBackgroundColor,
     required this.selectionUnselectedBackgroundColor,
     required this.contentGap,
     required this.iconSize,
-    required this.compactIconSize,
+    required this.inlineIconSize,
     required this.borderWidth,
     required this.pillRadius,
     required this.roundedRadius,
@@ -361,7 +361,7 @@ class TilawaChipTokens {
   });
 
   final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry compactPadding;
+  final EdgeInsetsGeometry inlinePadding;
   final Color backgroundColor;
 
   /// Default stroke for [TilawaChip] / [TilawaMetadataChip] ([TilawaDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
@@ -371,7 +371,7 @@ class TilawaChipTokens {
   final Color selectionUnselectedBackgroundColor;
   final double contentGap;
   final double iconSize;
-  final double compactIconSize;
+  final double inlineIconSize;
   final double borderWidth;
   final double pillRadius;
   final double roundedRadius;
@@ -398,14 +398,14 @@ class TilawaChipTokens {
     final defaultBorderColor = _defaultBorderColor(colorScheme);
     return TilawaChipTokens(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      inlinePadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       backgroundColor: backgroundColor,
       defaultBorderColor: defaultBorderColor,
       selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
       selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
       contentGap: 8,
       iconSize: 16,
-      compactIconSize: 14,
+      inlineIconSize: 14,
       borderWidth: 0.5,
       pillRadius: 999,
       roundedRadius: 8,
@@ -450,14 +450,14 @@ class TilawaChipTokens {
 
   TilawaChipTokens copyWith({
     EdgeInsetsGeometry? padding,
-    EdgeInsetsGeometry? compactPadding,
+    EdgeInsetsGeometry? inlinePadding,
     Color? backgroundColor,
     Color? defaultBorderColor,
     Color? selectionSelectedBackgroundColor,
     Color? selectionUnselectedBackgroundColor,
     double? contentGap,
     double? iconSize,
-    double? compactIconSize,
+    double? inlineIconSize,
     double? borderWidth,
     double? pillRadius,
     double? roundedRadius,
@@ -469,7 +469,7 @@ class TilawaChipTokens {
   }) {
     return TilawaChipTokens(
       padding: padding ?? this.padding,
-      compactPadding: compactPadding ?? this.compactPadding,
+      inlinePadding: inlinePadding ?? this.inlinePadding,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       defaultBorderColor: defaultBorderColor ?? this.defaultBorderColor,
       selectionSelectedBackgroundColor:
@@ -480,7 +480,7 @@ class TilawaChipTokens {
           this.selectionUnselectedBackgroundColor,
       contentGap: contentGap ?? this.contentGap,
       iconSize: iconSize ?? this.iconSize,
-      compactIconSize: compactIconSize ?? this.compactIconSize,
+      inlineIconSize: inlineIconSize ?? this.inlineIconSize,
       borderWidth: borderWidth ?? this.borderWidth,
       pillRadius: pillRadius ?? this.pillRadius,
       roundedRadius: roundedRadius ?? this.roundedRadius,
@@ -500,9 +500,9 @@ class TilawaChipTokens {
   ) {
     return TilawaChipTokens(
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t)!,
-      compactPadding: EdgeInsetsGeometry.lerp(
-        a.compactPadding,
-        b.compactPadding,
+      inlinePadding: EdgeInsetsGeometry.lerp(
+        a.inlinePadding,
+        b.inlinePadding,
         t,
       )!,
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
@@ -523,7 +523,7 @@ class TilawaChipTokens {
       )!,
       contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
-      compactIconSize: lerpTokenDouble(a.compactIconSize, b.compactIconSize, t),
+      inlineIconSize: lerpTokenDouble(a.inlineIconSize, b.inlineIconSize, t),
       borderWidth: lerpTokenDouble(a.borderWidth, b.borderWidth, t),
       pillRadius: lerpTokenDouble(a.pillRadius, b.pillRadius, t),
       roundedRadius: lerpTokenDouble(a.roundedRadius, b.roundedRadius, t),
@@ -601,7 +601,9 @@ class TilawaSegmentedControlTokens {
     return TilawaSegmentedControlTokens.fromColorScheme(colorScheme);
   }
 
-  factory TilawaSegmentedControlTokens.fromColorScheme(ColorScheme colorScheme) {
+  factory TilawaSegmentedControlTokens.fromColorScheme(
+    ColorScheme colorScheme,
+  ) {
     final containerBackgroundColor = _containerBackgroundColor(colorScheme);
     final selectedBackgroundColor = _selectedBackgroundColor(colorScheme);
     final containerBorderColor = _containerBorderColor(colorScheme);

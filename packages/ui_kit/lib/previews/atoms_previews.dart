@@ -44,8 +44,8 @@ Widget previewTilawaLoadingIndicator() {
   return const TilawaPreviewWrapper(child: TilawaLoadingIndicator());
 }
 
-@Preview(name: 'TilawaLoadingIndicator / Compact', group: 'Atoms')
-Widget previewTilawaLoadingIndicatorCompact() {
+@Preview(name: 'TilawaLoadingIndicator / Thin stroke', group: 'Atoms')
+Widget previewTilawaLoadingIndicatorThinStroke() {
   return const TilawaPreviewWrapper(
     child: TilawaLoadingIndicator(strokeWidth: 2.0),
   );

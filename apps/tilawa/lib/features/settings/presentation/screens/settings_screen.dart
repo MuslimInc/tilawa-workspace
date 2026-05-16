@@ -313,19 +313,6 @@ class SettingsScreen extends StatelessWidget {
                                       top: Radius.circular(tokens.radiusLarge),
                                     ),
                                   ),
-                                  BlocBuilder<SettingsCubit, SettingsState>(
-                                    builder: (context, settingsState) {
-                                      return TilawaSettingsSwitchTile(
-                                        icon: FluentIcons
-                                            .arrow_minimize_24_regular,
-                                        title: context.l10n.compactDesign,
-                                        value: settingsState.useCompactDesign,
-                                        onChanged: (value) => context
-                                            .read<SettingsCubit>()
-                                            .setUseCompactDesign(value),
-                                      );
-                                    },
-                                  ),
                                   TilawaSettingsTile(
                                     icon: FluentIcons.color_24_regular,
                                     title: context.l10n.primaryColor,

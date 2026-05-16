@@ -493,7 +493,7 @@ class _PermissionBanner extends StatelessWidget {
             text: context.l10n.openSettings,
             variant: TilawaButtonVariant.ghost,
             size: TilawaButtonSize.small,
-            compact: true,
+            shrinkWrapTapTarget: true,
             onPressed: onTap,
             foregroundColor: colorScheme.onTertiaryContainer,
             padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),

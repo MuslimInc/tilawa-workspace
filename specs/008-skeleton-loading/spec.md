@@ -3,7 +3,7 @@
 **Feature Branch**: `008-skeleton-loading`  
 **Created**: 2026-05-04  
 **Status**: Planning  
-**Depends On**: UI Kit foundation (tokens, density, theming)
+**Depends On**: UI Kit foundation (tokens, theming)
 
 ---
 
@@ -28,7 +28,7 @@ This feature adds a complete skeleton loading system to the Tilawa UI Kit, start
 
 1. Provide a foundation skeleton component (`TilawaSkeletonBlock`) that matches the app's visual design system
 2. Support shimmer animation with reduced motion fallback
-3. Enable theme-aware colors (light/dark) and density (comfortable/compact)
+3. Enable theme-aware colors (light/dark) and surface hierarchy
 4. Create reusable patterns for lists, cards, and common UI structures (Phase S1-C)
 5. Gradually replace appropriate spinner loading states in app screens (Phase S1-D)
 
@@ -69,7 +69,7 @@ This feature adds a complete skeleton loading system to the Tilawa UI Kit, start
 2. **Subtle animation**: Shimmer should be gentle, not distracting
 3. **Respect motion preferences**: Reduced motion must disable animations
 4. **Theme aware**: Colors adapt to light/dark and surface hierarchy
-5. **Density aware**: Compact mode should have proportionally reduced skeleton sizes
+5. **Responsive layouts**: Skeleton patterns may follow narrow vs wide breakpoints where product needs it; there is **no** global comfortable/compact token axis (see [007 supersession](../007-compact-ui-coverage/spec.md))
 
 ---
 
@@ -152,15 +152,17 @@ All visual values must be token-driven:
 
 ---
 
-## Compact Density Requirements
+## Density note (superseded)
 
-| Property | Comfortable | Compact | Notes |
-|----------|-------------|---------|-------|
-| Border radius | 12dp | 8dp | Proportional reduction |
-| Default height | 16dp | 14dp | Slight reduction |
-| Line height (text) | 12dp | 10dp | Maintain legibility |
+An earlier draft required `TilawaDensity` and comfortable/compact token columns for skeleton blocks. **Dual-density mode was removed** from the UI Kit (see [007 spec supersession](../007-compact-ui-coverage/spec.md)). Skeleton components must use **theme-backed single defaults** (light/dark only for goldens unless a feature needs explicit width breakpoints).
 
-Tokens must support `TilawaDensity` parameter in factory constructor.
+Historical sizing table (do not implement dual factories):
+
+| Property | Single default (illustrative) | Notes |
+|----------|------------------------------|-------|
+| Border radius | from design tokens | No separate compact column |
+| Default height | from design tokens | |
+| Line height (text) | legibility first | |
 
 ---
 
@@ -180,7 +182,7 @@ Tokens must support `TilawaDensity` parameter in factory constructor.
 
 | Scenario | Variants |
 |----------|----------|
-| Rectangle block | Light, Dark, Compact |
+| Rectangle block | Light, Dark |
 | Circle/avatar block | Light, Dark |
 | Text line block | Light, Dark, Compact |
 | Reduced motion (static) | Light |
@@ -221,7 +223,7 @@ Tokens must support `TilawaDensity` parameter in factory constructor.
 ## Dependencies
 
 - **UI Kit Foundation**: Requires existing token architecture
-- **Density Support**: Leverages `TilawaDensity` from compact UI work
+- **Theming**: Light/dark `ColorScheme` and `TilawaComponentTokens` (no `TilawaDensity` axis)
 - **Color Scheme**: Uses `surfaceContainer` colors from Material 3
 
 ---

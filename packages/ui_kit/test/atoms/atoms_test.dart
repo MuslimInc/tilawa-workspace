@@ -300,28 +300,19 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaLoadingIndicatorTokens.defaults();
       expect(tokens.defaultStrokeWidth, 4.0);
-      expect(tokens.compactStrokeWidth, 2.0);
     });
 
     test('copyWith preserves unchanged values', () {
       final original = TilawaLoadingIndicatorTokens.defaults();
       final updated = original.copyWith(defaultStrokeWidth: 3.0);
       expect(updated.defaultStrokeWidth, 3.0);
-      expect(updated.compactStrokeWidth, original.compactStrokeWidth);
     });
 
     test('lerp interpolates values', () {
-      const a = TilawaLoadingIndicatorTokens(
-        defaultStrokeWidth: 2.0,
-        compactStrokeWidth: 1.0,
-      );
-      const b = TilawaLoadingIndicatorTokens(
-        defaultStrokeWidth: 6.0,
-        compactStrokeWidth: 3.0,
-      );
+      const a = TilawaLoadingIndicatorTokens(defaultStrokeWidth: 2.0);
+      const b = TilawaLoadingIndicatorTokens(defaultStrokeWidth: 6.0);
       final result = TilawaLoadingIndicatorTokens.lerp(a, b, 0.5);
       expect(result.defaultStrokeWidth, closeTo(4.0, 0.01));
-      expect(result.compactStrokeWidth, closeTo(2.0, 0.01));
     });
   });
 

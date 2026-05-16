@@ -786,10 +786,6 @@
     "@darkTheme": {
         "description": "Dark theme option"
     },
-    "compactDesign": "Compact design",
-    "@compactDesign": {
-        "description": "Toggles tighter spacing and sizing across the app"
-    },
     "chooseTheme": "Choose Theme",
     "@chooseTheme": {
         "description": "Choose theme dialog title"

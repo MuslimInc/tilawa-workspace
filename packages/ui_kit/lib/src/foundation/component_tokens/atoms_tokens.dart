@@ -231,31 +231,21 @@ class TilawaIconBoxTokens {
 /// Component tokens for [TilawaLoadingIndicator].
 @immutable
 class TilawaLoadingIndicatorTokens {
-  const TilawaLoadingIndicatorTokens({
-    required this.defaultStrokeWidth,
-    required this.compactStrokeWidth,
-  });
+  const TilawaLoadingIndicatorTokens({required this.defaultStrokeWidth});
 
   /// Default stroke width for the circular progress indicator.
+  ///
+  /// Callers that need a thinner arc (e.g. inside a small tap target) should
+  /// pass [TilawaLoadingIndicator.strokeWidth] instead of extending tokens.
   final double defaultStrokeWidth;
 
-  /// Compact stroke width used in smaller contexts.
-  final double compactStrokeWidth;
-
   factory TilawaLoadingIndicatorTokens.defaults() {
-    return const TilawaLoadingIndicatorTokens(
-      defaultStrokeWidth: 4.0,
-      compactStrokeWidth: 2.0,
-    );
+    return const TilawaLoadingIndicatorTokens(defaultStrokeWidth: 4.0);
   }
 
-  TilawaLoadingIndicatorTokens copyWith({
-    double? defaultStrokeWidth,
-    double? compactStrokeWidth,
-  }) {
+  TilawaLoadingIndicatorTokens copyWith({double? defaultStrokeWidth}) {
     return TilawaLoadingIndicatorTokens(
       defaultStrokeWidth: defaultStrokeWidth ?? this.defaultStrokeWidth,
-      compactStrokeWidth: compactStrokeWidth ?? this.compactStrokeWidth,
     );
   }
 
@@ -268,11 +258,6 @@ class TilawaLoadingIndicatorTokens {
       defaultStrokeWidth: lerpTokenDouble(
         a.defaultStrokeWidth,
         b.defaultStrokeWidth,
-        t,
-      ),
-      compactStrokeWidth: lerpTokenDouble(
-        a.compactStrokeWidth,
-        b.compactStrokeWidth,
         t,
       ),
     );

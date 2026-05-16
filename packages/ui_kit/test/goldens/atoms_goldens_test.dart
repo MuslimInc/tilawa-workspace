@@ -66,54 +66,6 @@ void main() {
     );
 
     goldenTest(
-      'TilawaCard compact',
-      fileName: 'atoms/tilawa_card_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Light (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaCard(
-                child: Text(
-                  'Card Content',
-                  strutStyle: _kGoldenCardCaptionStrut,
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isDark: true,
-              child: TilawaCard(
-                child: Text(
-                  'Dark Card',
-                  strutStyle: _kGoldenCardCaptionStrut,
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'RTL Arabic (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isRTL: true,
-              child: TilawaCard(
-                child: Text(
-                  'بطاقة مدمجة',
-                  strutStyle: _kGoldenCardCaptionStrut,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
       'TilawaIconBox',
       fileName: 'atoms/tilawa_icon_box',
       builder: () => GoldenTestGroup(
@@ -122,31 +74,6 @@ void main() {
           GoldenTestScenario(
             name: 'Default',
             child: const TilawaPreviewWrapper(
-              child: TilawaIconBox(icon: Icons.bookmark_rounded),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
-      'TilawaIconBox compact',
-      fileName: 'atoms/tilawa_icon_box_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaIconBox(icon: Icons.bookmark_rounded),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isDark: true,
               child: TilawaIconBox(icon: Icons.bookmark_rounded),
             ),
           ),
@@ -219,50 +146,6 @@ void main() {
             child: TilawaPreviewWrapper(
               textScale: 1.5,
               child: TilawaEmptyState(
-                icon: Icons.inbox_outlined,
-                title: 'Scaled Text',
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
-      'TilawaEmptyState compact',
-      fileName: 'atoms/tilawa_empty_state_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: const TilawaEmptyState(
-                icon: Icons.inbox_outlined,
-                title: 'No Data',
-                subtitle: 'Add something to get started.',
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'With action (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaEmptyState(
-                icon: Icons.inbox_outlined,
-                title: 'No Data',
-                subtitle: 'Add something to get started.',
-                action: const TilawaButton(text: 'Add Item'),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Scale 1.5 (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              textScale: 1.5,
-              child: const TilawaEmptyState(
                 icon: Icons.inbox_outlined,
                 title: 'Scaled Text',
               ),
@@ -376,31 +259,6 @@ void main() {
     );
 
     goldenTest(
-      'TilawaSheetHandle compact',
-      fileName: 'atoms/tilawa_sheet_handle_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Light (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SizedBox(width: 220, child: TilawaSheetHandle()),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isDark: true,
-              child: SizedBox(width: 220, child: TilawaSheetHandle()),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
       'TilawaErrorState',
       fileName: 'atoms/tilawa_error_state',
       builder: () => GoldenTestGroup(
@@ -451,57 +309,6 @@ void main() {
                 icon: Icons.signal_wifi_off_rounded,
                 title: 'No connection',
                 subtitle: 'Check your internet and try again.',
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
-      'TilawaErrorState compact',
-      fileName: 'atoms/tilawa_error_state_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaErrorState(
-                icon: Icons.error_outline_rounded,
-                title: 'Something went wrong',
-                subtitle: 'Please try again later.',
-                retryLabel: 'Retry',
-                onRetry: () {},
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isDark: true,
-              child: TilawaErrorState(
-                icon: Icons.error_outline_rounded,
-                title: 'Something went wrong',
-                subtitle: 'Please try again later.',
-                retryLabel: 'Retry',
-                onRetry: () {},
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'RTL Arabic (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isRTL: true,
-              child: TilawaErrorState(
-                icon: Icons.error_outline_rounded,
-                title: 'حدث خطأ ما',
-                subtitle: 'يرجى المحاولة مرة أخرى.',
-                retryLabel: 'إعادة المحاولة',
-                onRetry: () {},
               ),
             ),
           ),

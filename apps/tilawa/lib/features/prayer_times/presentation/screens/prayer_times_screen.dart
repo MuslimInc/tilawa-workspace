@@ -753,7 +753,7 @@ class _LocationUtilityCard extends StatelessWidget {
         ),
         child: _UtilityActionRow(
           icon: Icons.location_on_outlined,
-          label: PrayerLocationLabelFormatter.compactLabel(
+          label: PrayerLocationLabelFormatter.abbreviatedLocationLabel(
             locationName: locationName,
             l10n: context.l10n,
           ),
@@ -1182,7 +1182,8 @@ class _TodayPrayerListRow extends StatelessWidget {
                   final narrow = PrayerTimesLayout.isNarrowWidth(
                     constraints.maxWidth,
                   );
-                  final bool compactChipLabels = showAlertChipLabels && !narrow;
+                  final bool abbreviatedChipLabels =
+                      showAlertChipLabels && !narrow;
                   final TextStyle nameStyle = theme.textTheme.titleSmall!
                       .copyWith(
                         fontWeight: isCurrent
@@ -1234,7 +1235,7 @@ class _TodayPrayerListRow extends StatelessWidget {
                         PrayerAlertStatusChip(
                           alert: row.alert,
                           showLabel: narrow
-                              ? compactChipLabels
+                              ? abbreviatedChipLabels
                               : showAlertChipLabels,
                           dense: true,
                           quiet: true,

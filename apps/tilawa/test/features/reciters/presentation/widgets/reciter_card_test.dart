@@ -72,7 +72,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: PrimaryColorPreset.defaultPreset.value,
-          density: TilawaDensity.comfortable,
           useGoogleFontsOverride: false,
         ),
         supportedLocales: AppLocalizations.supportedLocales,

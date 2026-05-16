@@ -401,7 +401,7 @@ class TilawaMediaPlayerBarTokens {
 @immutable
 class TilawaAdaptiveShellTokens {
   const TilawaAdaptiveShellTokens({
-    required this.compactBottomNavBarBaseHeight,
+    required this.phoneBottomNavBarBaseHeight,
     required this.bottomNavHorizontalMargin,
     required this.bottomNavVerticalMargin,
     required this.bottomNavIconOnlyVerticalMargin,
@@ -441,22 +441,22 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonIconOnlySelectionContainerVerticalPadding,
   });
 
-  /// Reserved height for the compact bottom nav **row** at unit text scale.
+  /// Reserved height for the phone bottom nav **row** at unit text scale.
   ///
-  /// Hosts should prefer [compactBottomNavLayoutHeight] with the current
+  /// Hosts should prefer [phoneBottomNavLayoutHeight] with the current
   /// [TextScaler] so scroll padding tracks a11y text scaling.
-  final double compactBottomNavBarBaseHeight;
+  final double phoneBottomNavBarBaseHeight;
 
-  /// Horizontal inset of the compact bar from the screen edges (0 = full
+  /// Horizontal inset of the phone bar from the screen edges (0 = full
   /// width).
   final double bottomNavHorizontalMargin;
   final double bottomNavVerticalMargin;
 
-  /// Top inset above the compact bar when it is **icon-only** (tighter strip).
+  /// Top inset above the phone bar when it is **icon-only** (tighter strip).
   final double bottomNavIconOnlyVerticalMargin;
   final double bottomNavInternalPadding;
 
-  /// Top corner radius of the compact bottom bar (bottom corners are square).
+  /// Top corner radius of the phone bottom bar (bottom corners are square).
   ///
   /// Uses the same value as [bottomNavInnerRadius] so the outer shell and
   /// per-item tap targets share one corner radius.
@@ -466,7 +466,7 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
 
-  /// Stable neutral elevated chrome for the compact bottom nav container.
+  /// Stable neutral elevated chrome for the phone bottom nav container.
   ///
   /// Light mode uses [Colors.white] so the floating bar reads as a clean chip on
   /// the cream scaffold. Dark mode lerps [AppColors.darkSurfaceContainerHighBase]
@@ -520,27 +520,27 @@ class TilawaAdaptiveShellTokens {
   /// [InkWell.highlightColor] for shell nav destinations.
   final Color navButtonHighlightColor;
 
-  /// Vertical padding inside the compact nav item pill ([AnimatedContainer] in
-  /// the shell). Included in [compactBottomNavLayoutHeight] so reserved shell
+  /// Vertical padding inside the phone nav item pill ([AnimatedContainer] in
+  /// the shell). Included in [phoneBottomNavLayoutHeight] so reserved shell
   /// padding matches painted chrome.
   final double navButtonSelectionContainerVerticalPadding;
 
-  /// Min height for each compact nav slot in **icon-only** mode (no labels).
+  /// Min height for each phone nav slot in **icon-only** mode (no labels).
   final double navButtonIconOnlyMinHeight;
 
-  /// Outer vertical padding around the icon column in icon-only compact nav.
+  /// Outer vertical padding around the icon column in icon-only phone nav.
   final double navButtonIconOnlyVerticalPadding;
 
-  /// Pill vertical padding in icon-only compact nav (tighter than labeled).
+  /// Pill vertical padding in icon-only phone nav (tighter than labeled).
   final double navButtonIconOnlySelectionContainerVerticalPadding;
 
-  /// Height of the compact bottom nav row for [textScaler] (icon column + one
+  /// Height of the phone bottom nav row for [textScaler] (icon column + one
   /// label line), floored at [navButtonMinHeight].
   ///
-  /// Matches the compact bottom nav column (icon + gap + label line + pill
+  /// Matches the phone bottom nav column (icon + gap + label line + pill
   /// padding) so [TilawaShellPadding] can clear the painted bar.
-  double compactBottomNavLayoutHeight(TextScaler textScaler) =>
-      TilawaAdaptiveShellTokens._compactBottomNavLayoutHeight(
+  double phoneBottomNavLayoutHeight(TextScaler textScaler) =>
+      TilawaAdaptiveShellTokens._phoneBottomNavLayoutHeight(
         navButtonMinHeight: navButtonMinHeight,
         navButtonVerticalPadding: navButtonVerticalPadding,
         navButtonIconSize: navButtonIconSize,
@@ -552,12 +552,12 @@ class TilawaAdaptiveShellTokens {
         textScaler: textScaler,
       );
 
-  /// Height of the compact bottom nav row in **icon-only** mode.
+  /// Height of the phone bottom nav row in **icon-only** mode.
   ///
   /// Matches [_NavButton] when labels are hidden; use with
-  /// [compactBottomNavLayoutHeight] so scroll padding tracks the shorter bar.
-  double compactBottomNavIconOnlyLayoutHeight(TextScaler textScaler) =>
-      TilawaAdaptiveShellTokens._compactBottomNavIconOnlyLayoutHeight(
+  /// [phoneBottomNavLayoutHeight] so scroll padding tracks the shorter bar.
+  double phoneBottomNavIconOnlyLayoutHeight(TextScaler textScaler) =>
+      TilawaAdaptiveShellTokens._phoneBottomNavIconOnlyLayoutHeight(
         navButtonIconOnlyMinHeight: navButtonIconOnlyMinHeight,
         navButtonIconOnlyVerticalPadding: navButtonIconOnlyVerticalPadding,
         navButtonIconOnlySelectionContainerVerticalPadding:
@@ -567,7 +567,7 @@ class TilawaAdaptiveShellTokens {
         textScaler: textScaler,
       );
 
-  static double _compactBottomNavIconOnlyLayoutHeight({
+  static double _phoneBottomNavIconOnlyLayoutHeight({
     required double navButtonIconOnlyMinHeight,
     required double navButtonIconOnlyVerticalPadding,
     required double navButtonIconOnlySelectionContainerVerticalPadding,
@@ -586,7 +586,7 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  static double _compactBottomNavLayoutHeight({
+  static double _phoneBottomNavLayoutHeight({
     required double navButtonMinHeight,
     required double navButtonVerticalPadding,
     required double navButtonIconSize,
@@ -618,7 +618,7 @@ class TilawaAdaptiveShellTokens {
   }
 
   factory TilawaAdaptiveShellTokens.fromColorScheme(ColorScheme colorScheme) {
-    // Color is derived here so every compact bottom nav follows the
+    // Color is derived here so every phone bottom nav follows the
     // active theme without per-screen overrides.
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
@@ -634,8 +634,8 @@ class TilawaAdaptiveShellTokens {
     const double navButtonIconOnlyVerticalPadding = 1;
     const double navButtonIconOnlySelectionContainerVerticalPadding = 2;
     const TextScaler unitTextScaler = TextScaler.linear(1);
-    final double compactBottomNavBarBaseHeight =
-        TilawaAdaptiveShellTokens._compactBottomNavLayoutHeight(
+    final double phoneBottomNavBarBaseHeight =
+        TilawaAdaptiveShellTokens._phoneBottomNavLayoutHeight(
           navButtonMinHeight: navButtonMinHeight,
           navButtonVerticalPadding: navButtonVerticalPadding,
           navButtonIconSize: navButtonIconSize,
@@ -647,7 +647,7 @@ class TilawaAdaptiveShellTokens {
           textScaler: unitTextScaler,
         );
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: compactBottomNavBarBaseHeight,
+      phoneBottomNavBarBaseHeight: phoneBottomNavBarBaseHeight,
       bottomNavHorizontalMargin: 0,
       bottomNavVerticalMargin: 4,
       bottomNavIconOnlyVerticalMargin: 2,
@@ -729,7 +729,7 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  /// Light compact nav uses an opaque white bar so the floating pill reads
+  /// Light phone nav uses an opaque white bar so the floating pill reads
   /// clearly above cream or tinted scaffolds. Dark keeps a filled bar for
   /// contrast.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
@@ -759,7 +759,7 @@ class TilawaAdaptiveShellTokens {
   }
 
   TilawaAdaptiveShellTokens copyWith({
-    double? compactBottomNavBarBaseHeight,
+    double? phoneBottomNavBarBaseHeight,
     double? bottomNavHorizontalMargin,
     double? bottomNavVerticalMargin,
     double? bottomNavIconOnlyVerticalMargin,
@@ -799,8 +799,8 @@ class TilawaAdaptiveShellTokens {
     double? navButtonIconOnlySelectionContainerVerticalPadding,
   }) {
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight:
-          compactBottomNavBarBaseHeight ?? this.compactBottomNavBarBaseHeight,
+      phoneBottomNavBarBaseHeight:
+          phoneBottomNavBarBaseHeight ?? this.phoneBottomNavBarBaseHeight,
       bottomNavHorizontalMargin:
           bottomNavHorizontalMargin ?? this.bottomNavHorizontalMargin,
       bottomNavVerticalMargin:
@@ -878,9 +878,9 @@ class TilawaAdaptiveShellTokens {
     double t,
   ) {
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: lerpTokenDouble(
-        a.compactBottomNavBarBaseHeight,
-        b.compactBottomNavBarBaseHeight,
+      phoneBottomNavBarBaseHeight: lerpTokenDouble(
+        a.phoneBottomNavBarBaseHeight,
+        b.phoneBottomNavBarBaseHeight,
         t,
       ),
       bottomNavHorizontalMargin: lerpTokenDouble(
@@ -1470,10 +1470,10 @@ class TilawaImmersiveComposerTokens {
     required this.backgroundBlurScale,
     required this.backgroundOverlayOpacity,
     required this.overlayBorderOpacity,
-    required this.compactHeightBreakpoint,
-    required this.compactPanelHeightFactor,
+    required this.shortWindowHeightBreakpoint,
+    required this.shortWindowPanelHeightFactor,
     required this.regularPanelHeightFactor,
-    required this.compactPreviewHeightFactor,
+    required this.shortWindowPreviewHeightFactor,
     required this.regularPreviewHeightFactor,
     required this.panelMinHeight,
     required this.previewMaxHeight,
@@ -1491,10 +1491,10 @@ class TilawaImmersiveComposerTokens {
   final double backgroundBlurScale;
   final double backgroundOverlayOpacity;
   final double overlayBorderOpacity;
-  final double compactHeightBreakpoint;
-  final double compactPanelHeightFactor;
+  final double shortWindowHeightBreakpoint;
+  final double shortWindowPanelHeightFactor;
   final double regularPanelHeightFactor;
-  final double compactPreviewHeightFactor;
+  final double shortWindowPreviewHeightFactor;
   final double regularPreviewHeightFactor;
   final double panelMinHeight;
   final double previewMaxHeight;
@@ -1535,10 +1535,10 @@ class TilawaImmersiveComposerTokens {
       backgroundBlurScale: backgroundBlurScale,
       backgroundOverlayOpacity: backgroundOverlayOpacity,
       overlayBorderOpacity: overlayBorderOpacity,
-      compactHeightBreakpoint: 760,
-      compactPanelHeightFactor: 0.5,
+      shortWindowHeightBreakpoint: 760,
+      shortWindowPanelHeightFactor: 0.5,
       regularPanelHeightFactor: 0.44,
-      compactPreviewHeightFactor: 0.42,
+      shortWindowPreviewHeightFactor: 0.42,
       regularPreviewHeightFactor: 0.5,
       panelMinHeight: 220,
       previewMaxHeight: 460,
@@ -1562,10 +1562,10 @@ class TilawaImmersiveComposerTokens {
     double? backgroundBlurScale,
     double? backgroundOverlayOpacity,
     double? overlayBorderOpacity,
-    double? compactHeightBreakpoint,
-    double? compactPanelHeightFactor,
+    double? shortWindowHeightBreakpoint,
+    double? shortWindowPanelHeightFactor,
     double? regularPanelHeightFactor,
-    double? compactPreviewHeightFactor,
+    double? shortWindowPreviewHeightFactor,
     double? regularPreviewHeightFactor,
     double? panelMinHeight,
     double? previewMaxHeight,
@@ -1585,14 +1585,14 @@ class TilawaImmersiveComposerTokens {
       backgroundOverlayOpacity:
           backgroundOverlayOpacity ?? this.backgroundOverlayOpacity,
       overlayBorderOpacity: overlayBorderOpacity ?? this.overlayBorderOpacity,
-      compactHeightBreakpoint:
-          compactHeightBreakpoint ?? this.compactHeightBreakpoint,
-      compactPanelHeightFactor:
-          compactPanelHeightFactor ?? this.compactPanelHeightFactor,
+      shortWindowHeightBreakpoint:
+          shortWindowHeightBreakpoint ?? this.shortWindowHeightBreakpoint,
+      shortWindowPanelHeightFactor:
+          shortWindowPanelHeightFactor ?? this.shortWindowPanelHeightFactor,
       regularPanelHeightFactor:
           regularPanelHeightFactor ?? this.regularPanelHeightFactor,
-      compactPreviewHeightFactor:
-          compactPreviewHeightFactor ?? this.compactPreviewHeightFactor,
+      shortWindowPreviewHeightFactor:
+          shortWindowPreviewHeightFactor ?? this.shortWindowPreviewHeightFactor,
       regularPreviewHeightFactor:
           regularPreviewHeightFactor ?? this.regularPreviewHeightFactor,
       panelMinHeight: panelMinHeight ?? this.panelMinHeight,
@@ -1635,14 +1635,14 @@ class TilawaImmersiveComposerTokens {
         b.overlayBorderOpacity,
         t,
       ),
-      compactHeightBreakpoint: lerpTokenDouble(
-        a.compactHeightBreakpoint,
-        b.compactHeightBreakpoint,
+      shortWindowHeightBreakpoint: lerpTokenDouble(
+        a.shortWindowHeightBreakpoint,
+        b.shortWindowHeightBreakpoint,
         t,
       ),
-      compactPanelHeightFactor: lerpTokenDouble(
-        a.compactPanelHeightFactor,
-        b.compactPanelHeightFactor,
+      shortWindowPanelHeightFactor: lerpTokenDouble(
+        a.shortWindowPanelHeightFactor,
+        b.shortWindowPanelHeightFactor,
         t,
       ),
       regularPanelHeightFactor: lerpTokenDouble(
@@ -1650,9 +1650,9 @@ class TilawaImmersiveComposerTokens {
         b.regularPanelHeightFactor,
         t,
       ),
-      compactPreviewHeightFactor: lerpTokenDouble(
-        a.compactPreviewHeightFactor,
-        b.compactPreviewHeightFactor,
+      shortWindowPreviewHeightFactor: lerpTokenDouble(
+        a.shortWindowPreviewHeightFactor,
+        b.shortWindowPreviewHeightFactor,
         t,
       ),
       regularPreviewHeightFactor: lerpTokenDouble(

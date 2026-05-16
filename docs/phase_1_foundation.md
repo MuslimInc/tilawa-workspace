@@ -12,11 +12,11 @@ Lay the substrate for the rest of the rollout. No user-visible UX change in this
 
 `packages/ui_kit/lib/src/foundation/breakpoints.dart`
 
-- `TilawaBreakpoints` — Material 3 aligned thresholds (`compact = 600`, `medium = 840`, `expanded = 1200`).
-- `TilawaWindowSize` enum — `compact`, `medium`, `expanded`, `large`. The `large` class is reserved; it is not actively targeted today.
+- `TilawaBreakpoints` — Material 3 aligned thresholds (`narrowUpperBound = 600`, `medium = 840`, `expanded = 1200`).
+- `TilawaWindowSize` enum — `narrow`, `medium`, `expanded`, `large`. The `large` class is reserved; it is not actively targeted today.
 - `TilawaWindowSizeX` extension on `BuildContext`:
   - `windowSize` — resolves the current class from `MediaQuery.sizeOf(context)`. Uses the narrow `sizeOf` dependency so consumers do not rebuild on unrelated `MediaQuery` changes (keyboard, text scaler).
-  - `isCompact`, `isAtLeastMedium`, `isAtLeastExpanded`, `isAtLeastLarge` — predicates for common branches.
+  - `isNarrow`, `isAtLeastMedium`, `isAtLeastExpanded`, `isAtLeastLarge` — predicates for common branches.
 
 ### 2. Content max-width tokens
 

@@ -5,7 +5,6 @@ import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 void main() {
   group('TilawaDesignTokens', () {
     const defaultTokens = TilawaDesignTokens(
-      density: TilawaDensity.comfortable,
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
@@ -43,8 +42,8 @@ void main() {
       contentMaxWidthForm: 560,
       contentMaxWidthMedia: 1200,
       contentMaxWidthSettings: 760,
-      cardCompactWidthThreshold: 180.0,
-      cardCompactHeightThreshold: 155.0,
+      narrowCardWidthThreshold: 180.0,
+      narrowCardHeightThreshold: 155.0,
       cardTightHeightThreshold: 145.0,
       playerCollapsedHeight: 100.0,
       playerDismissThreshold: 80.0,
@@ -93,8 +92,8 @@ void main() {
         expect(light.contentMaxWidthForm, 560);
         expect(light.contentMaxWidthMedia, 1200);
         expect(light.contentMaxWidthSettings, 760);
-        expect(light.cardCompactWidthThreshold, 180.0);
-        expect(light.cardCompactHeightThreshold, 155.0);
+        expect(light.narrowCardWidthThreshold, 180.0);
+        expect(light.narrowCardHeightThreshold, 155.0);
         expect(light.cardTightHeightThreshold, 145.0);
       });
 
@@ -104,31 +103,6 @@ void main() {
         expect(dark.spaceExtraSmall, light.spaceExtraSmall);
         expect(dark.spaceSmall, light.spaceSmall);
         expect(dark.radiusSmall, light.radiusSmall);
-      });
-
-      test('compact density tightens medium/large spacing and radii', () {
-        final comfortable = TilawaDesignTokens.light();
-        final compact = TilawaDesignTokens.light(
-          density: TilawaDensity.compact,
-        );
-
-        // Tiny/small spacing is shared: shrinking further would erode hit
-        // margins around touch targets.
-        expect(compact.spaceTiny, comfortable.spaceTiny);
-        expect(compact.spaceExtraSmall, comfortable.spaceExtraSmall);
-        expect(compact.spaceSmall, comfortable.spaceSmall);
-
-        // Medium spacing tightens on compact; larger steps match
-        // comfortable on the current 8dp grid.
-        expect(compact.spaceMedium, lessThan(comfortable.spaceMedium));
-        expect(compact.spaceLarge, comfortable.spaceLarge);
-        expect(compact.spaceExtraLarge, comfortable.spaceExtraLarge);
-
-        // Radii: compact matches comfortable at large tiers today.
-        expect(compact.radiusSmall, comfortable.radiusSmall);
-        expect(compact.radiusMedium, comfortable.radiusMedium);
-        expect(compact.radiusLarge, comfortable.radiusLarge);
-        expect(compact.radiusExtraLarge, comfortable.radiusExtraLarge);
       });
     });
 
@@ -214,7 +188,6 @@ void main() {
     group('lerp()', () {
       test('returns first value at t=0', () {
         const first = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -248,8 +221,8 @@ void main() {
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
           contentMaxWidthSettings: 760,
-          cardCompactWidthThreshold: 180.0,
-          cardCompactHeightThreshold: 194.0,
+          narrowCardWidthThreshold: 180.0,
+          narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 48,
@@ -266,7 +239,6 @@ void main() {
           playerAlphaScalingFactor: 2.5,
         );
         const second = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -300,8 +272,8 @@ void main() {
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
           contentMaxWidthSettings: 900,
-          cardCompactWidthThreshold: 200.0,
-          cardCompactHeightThreshold: 220.0,
+          narrowCardWidthThreshold: 200.0,
+          narrowCardHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 48,
@@ -327,7 +299,6 @@ void main() {
       test('returns second value at t=1', () {
         final first = TilawaDesignTokens.light();
         const second = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -361,8 +332,8 @@ void main() {
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
           contentMaxWidthSettings: 900,
-          cardCompactWidthThreshold: 200.0,
-          cardCompactHeightThreshold: 220.0,
+          narrowCardWidthThreshold: 200.0,
+          narrowCardHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 48,
@@ -386,7 +357,6 @@ void main() {
 
       test('returns middle value at t=0.5', () {
         const first = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -420,8 +390,8 @@ void main() {
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
           contentMaxWidthSettings: 760,
-          cardCompactWidthThreshold: 180.0,
-          cardCompactHeightThreshold: 194.0,
+          narrowCardWidthThreshold: 180.0,
+          narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 48,
@@ -438,7 +408,6 @@ void main() {
           playerAlphaScalingFactor: 2.5,
         );
         const second = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -472,8 +441,8 @@ void main() {
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
           contentMaxWidthSettings: 900,
-          cardCompactWidthThreshold: 200.0,
-          cardCompactHeightThreshold: 220.0,
+          narrowCardWidthThreshold: 200.0,
+          narrowCardHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 18,
           iconSizeExtraLarge: 72,
@@ -503,7 +472,6 @@ void main() {
       test('interpolates Offset values', () {
         final first = TilawaDesignTokens.light();
         const second = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -537,8 +505,8 @@ void main() {
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
           contentMaxWidthSettings: 760,
-          cardCompactWidthThreshold: 180.0,
-          cardCompactHeightThreshold: 194.0,
+          narrowCardWidthThreshold: 180.0,
+          narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
           iconSizeExtraLarge: 48,
@@ -563,7 +531,6 @@ void main() {
         'handles Duration differently (discrete at t<0.5 returns first)',
         () {
           const first = TilawaDesignTokens(
-            density: TilawaDensity.comfortable,
             spaceTiny: 4.0,
             spaceExtraSmall: 4.0,
             spaceSmall: 8.0,
@@ -601,8 +568,8 @@ void main() {
             contentMaxWidthForm: 560,
             contentMaxWidthMedia: 1200,
             contentMaxWidthSettings: 760,
-            cardCompactWidthThreshold: 180.0,
-            cardCompactHeightThreshold: 194.0,
+            narrowCardWidthThreshold: 180.0,
+            narrowCardHeightThreshold: 194.0,
             cardTightHeightThreshold: 145.0,
             playerCollapsedHeight: 100.0,
             playerDismissThreshold: 80.0,
@@ -615,7 +582,6 @@ void main() {
             playerAlphaScalingFactor: 2.5,
           );
           const second = TilawaDesignTokens(
-            density: TilawaDensity.comfortable,
             spaceTiny: 4.0,
             spaceExtraSmall: 8.0,
             spaceSmall: 16.0,
@@ -653,8 +619,8 @@ void main() {
             contentMaxWidthForm: 700,
             contentMaxWidthMedia: 1400,
             contentMaxWidthSettings: 900,
-            cardCompactWidthThreshold: 200.0,
-            cardCompactHeightThreshold: 220.0,
+            narrowCardWidthThreshold: 200.0,
+            narrowCardHeightThreshold: 220.0,
             cardTightHeightThreshold: 160.0,
             playerCollapsedHeight: 120.0,
             playerDismissThreshold: 100.0,

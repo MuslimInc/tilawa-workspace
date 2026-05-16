@@ -45,10 +45,10 @@ Future<BuildContext> _pump(
 
 void main() {
   group('TilawaWindowSize resolution', () {
-    testInBothDirections('compact below 600', (tester, direction) async {
+    testInBothDirections('narrow below 600', (tester, direction) async {
       final ctx = await _pump(tester, const Size(480, 800), direction);
-      expect(ctx.windowSize, TilawaWindowSize.compact);
-      expect(ctx.isCompact, isTrue);
+      expect(ctx.windowSize, TilawaWindowSize.narrow);
+      expect(ctx.isNarrow, isTrue);
       expect(ctx.isAtLeastMedium, isFalse);
       expect(ctx.isAtLeastExpanded, isFalse);
       expect(ctx.isAtLeastLarge, isFalse);
@@ -57,7 +57,7 @@ void main() {
     testInBothDirections('medium at 600', (tester, direction) async {
       final ctx = await _pump(tester, const Size(600, 800), direction);
       expect(ctx.windowSize, TilawaWindowSize.medium);
-      expect(ctx.isCompact, isFalse);
+      expect(ctx.isNarrow, isFalse);
       expect(ctx.isAtLeastMedium, isTrue);
       expect(ctx.isAtLeastExpanded, isFalse);
     });
@@ -84,7 +84,7 @@ void main() {
   // duplicating theme setup.
 
   test('TilawaBreakpoints constants are MD3 aligned', () {
-    expect(TilawaBreakpoints.compact, 600);
+    expect(TilawaBreakpoints.narrowUpperBound, 600);
     expect(TilawaBreakpoints.medium, 840);
     expect(TilawaBreakpoints.expanded, 1200);
   });

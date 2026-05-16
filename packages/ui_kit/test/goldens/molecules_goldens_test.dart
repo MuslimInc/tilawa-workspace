@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
-import 'package:tilawa_ui_kit/src/foundation/density.dart';
 import 'package:tilawa_ui_kit/src/molecules/molecules.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
@@ -45,47 +44,6 @@ void main() {
           GoldenTestScenario(
             name: 'Dark',
             child: const TilawaPreviewWrapper(
-              isDark: true,
-              child: TilawaGlassPanel(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Dark Glass Panel',
-                    strutStyle: _kGoldenGlassPanelBodyStrut,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
-      'TilawaGlassPanel compact',
-      fileName: 'molecules/tilawa_glass_panel_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Light (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaGlassPanel(
-                child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Glass Panel',
-                    strutStyle: _kGoldenGlassPanelBodyStrut,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
               isDark: true,
               child: TilawaGlassPanel(
                 child: Padding(
@@ -184,38 +142,6 @@ void main() {
     );
 
     goldenTest(
-      'TilawaChip compact',
-      fileName: 'molecules/tilawa_chip_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaChip(label: 'Bookmarked', icon: Icons.bookmark),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Label only (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaChip(label: 'Favorite'),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'RTL Arabic (compact)',
-            child: const TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isRTL: true,
-              child: TilawaChip(label: 'محفوظ', icon: Icons.bookmark),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
       'MetadataChip',
       fileName: 'molecules/tilawa_metadata_chip',
       builder: () => GoldenTestGroup(
@@ -278,35 +204,6 @@ void main() {
             child: TilawaPreviewWrapper(
               isDark: true,
               child: SelectionPill(label: 'All', selected: true, onTap: () {}),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
-      'SelectionPill compact',
-      fileName: 'molecules/tilawa_selection_pill_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Selected (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SelectionPill(label: 'All', selected: true, onTap: () {}),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Unselected with icon (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SelectionPill(
-                label: 'Recent',
-                selected: false,
-                icon: Icons.history,
-                onTap: () {},
-              ),
             ),
           ),
         ],
@@ -500,54 +397,6 @@ void main() {
     );
 
     goldenTest(
-      'TilawaSearchField compact',
-      fileName: 'molecules/tilawa_search_field_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaSearchField(
-                hintText: 'Search surahs',
-                onChanged: (_) {},
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'With text (compact)',
-            child: Builder(
-              builder: (context) {
-                final controller = TextEditingController(text: 'Al-Baqarah');
-                return TilawaPreviewWrapper(
-                  density: TilawaDensity.compact,
-                  child: TilawaSearchField(
-                    hintText: 'Search surahs',
-                    controller: controller,
-                    onChanged: (_) {},
-                    onClear: controller.clear,
-                  ),
-                );
-              },
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isDark: true,
-              child: TilawaSearchField(
-                hintText: 'Search surahs',
-                onChanged: (_) {},
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
       'TilawaSettingsTiles',
       fileName: 'molecules/tilawa_settings_tile',
       builder: () => GoldenTestGroup(
@@ -631,94 +480,6 @@ void main() {
     );
 
     goldenTest(
-      'TilawaSettingsTiles compact',
-      fileName: 'molecules/tilawa_settings_tile_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Tile with subtitle (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 340,
-                child: TilawaSettingsTile(
-                  icon: Icons.notifications_outlined,
-                  title: 'Notifications',
-                  onTap: () {},
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Tile no subtitle (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 340,
-                child: TilawaSettingsTile(
-                  icon: Icons.language,
-                  title: 'Language',
-                  onTap: () {},
-                  showDivider: false,
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Switch off (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 340,
-                child: TilawaSettingsSwitchTile(
-                  icon: Icons.dark_mode_outlined,
-                  title: 'Dark mode',
-                  value: false,
-                  onChanged: (_) {},
-                  showDivider: false,
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Switch on (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 340,
-                child: TilawaSettingsSwitchTile(
-                  icon: Icons.dark_mode_outlined,
-                  title: 'Dark mode',
-                  value: true,
-                  onChanged: (_) {},
-                  showDivider: false,
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'RTL Arabic (compact)',
-            child: TilawaPreviewWrapper(
-              isRTL: true,
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 340,
-                child: TilawaSettingsSwitchTile(
-                  icon: Icons.notifications_outlined,
-                  title: 'إشعارات الصلاة',
-                  value: true,
-                  onChanged: (_) {},
-                  showDivider: false,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
       'TilawaFeedbackStrip',
       fileName: 'molecules/tilawa_feedback_strip',
       builder: () => GoldenTestGroup(
@@ -779,73 +540,6 @@ void main() {
     );
 
     goldenTest(
-      'TilawaFeedbackStrip compact',
-      fileName: 'molecules/tilawa_feedback_strip_compact',
-      pumpBeforeTest: (tester) async {
-        // Deterministic pump to settle spinner animation for stable capture.
-        await tester.pump(const Duration(milliseconds: 16));
-      },
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: Builder(
-                builder: (context) {
-                  final scheme = Theme.of(context).colorScheme;
-                  return TilawaFeedbackStrip(
-                    icon: Icons.check_circle_rounded,
-                    message: 'Saved successfully',
-                    backgroundColor: scheme.primaryContainer,
-                    foregroundColor: scheme.onPrimaryContainer,
-                  );
-                },
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'With spinner (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: Builder(
-                builder: (context) {
-                  final scheme = Theme.of(context).colorScheme;
-                  return TilawaFeedbackStrip(
-                    icon: Icons.sync_rounded,
-                    message: 'Syncing...',
-                    backgroundColor: scheme.primaryContainer,
-                    foregroundColor: scheme.onPrimaryContainer,
-                    showSpinner: true,
-                  );
-                },
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'RTL Arabic (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isRTL: true,
-              child: Builder(
-                builder: (context) {
-                  final scheme = Theme.of(context).colorScheme;
-                  return TilawaFeedbackStrip(
-                    icon: Icons.check_circle_rounded,
-                    message: 'تم الحفظ بنجاح',
-                    backgroundColor: scheme.primaryContainer,
-                    foregroundColor: scheme.onPrimaryContainer,
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
       'TilawaPermissionBanner',
       fileName: 'molecules/tilawa_permission_banner',
       builder: () => GoldenTestGroup(
@@ -864,39 +558,6 @@ void main() {
           GoldenTestScenario(
             name: 'Dark',
             child: TilawaPreviewWrapper(
-              isDark: true,
-              child: TilawaPermissionBanner(
-                message: 'Enable notifications to receive prayer alerts',
-                actionLabel: 'Enable',
-                onAction: () {},
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
-      'TilawaPermissionBanner compact',
-      fileName: 'molecules/tilawa_permission_banner_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaPermissionBanner(
-                message: 'Enable notifications to receive prayer alerts',
-                actionLabel: 'Enable',
-                onAction: () {},
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
               isDark: true,
               child: TilawaPermissionBanner(
                 message: 'Enable notifications to receive prayer alerts',
@@ -1001,51 +662,6 @@ void main() {
     );
 
     goldenTest(
-      'TilawaSegmentedControl compact',
-      fileName: 'molecules/tilawa_segmented_control_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'First selected (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 300,
-                child: TilawaSegmentedControl<String>(
-                  segments: const [
-                    TilawaSegment(value: 'today', label: 'Today'),
-                    TilawaSegment(value: 'monthly', label: 'Monthly'),
-                  ],
-                  selectedValue: 'today',
-                  onValueChanged: (_) {},
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              isDark: true,
-              child: SizedBox(
-                width: 300,
-                child: TilawaSegmentedControl<String>(
-                  segments: const [
-                    TilawaSegment(value: 'today', label: 'Today'),
-                    TilawaSegment(value: 'monthly', label: 'Monthly'),
-                  ],
-                  selectedValue: 'monthly',
-                  onValueChanged: (_) {},
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
       'TilawaSelectionTile',
       fileName: 'molecules/tilawa_selection_tile',
       builder: () => GoldenTestGroup(
@@ -1088,38 +704,6 @@ void main() {
               isDark: true,
               child: TilawaSelectionTile(
                 title: 'System Default',
-                isSelected: false,
-                onTap: () {},
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
-      'TilawaSelectionTile compact',
-      fileName: 'molecules/tilawa_selection_tile_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Selected (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaSelectionTile(
-                title: 'Arabic',
-                isSelected: true,
-                onTap: () {},
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Unselected (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: TilawaSelectionTile(
-                title: 'English',
                 isSelected: false,
                 onTap: () {},
               ),

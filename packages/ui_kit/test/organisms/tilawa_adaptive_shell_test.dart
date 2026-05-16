@@ -49,19 +49,22 @@ Future<void> _pumpShell(
 
 void main() {
   group('TilawaAdaptiveShell — navigation pattern by window size', () {
-    testInBothDirections('compact uses bottom nav', (tester, direction) async {
+    testInBothDirections('narrow window uses bottom nav', (
+      tester,
+      direction,
+    ) async {
       await _pumpShell(
         tester,
         size: const Size(400, 800),
         direction: direction,
       );
-      // Compact layout: Material bottom bar, no rail.
+      // Narrow phone layout: Material bottom bar, no rail.
       expect(find.byType(NavigationRail), findsNothing);
       expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
     testWidgets(
-      'compact bottom nav survives parent text scale clamped above 1.0',
+      'narrow bottom nav survives parent text scale clamped above 1.0',
       (tester) async {
         await tester.binding.setSurfaceSize(const Size(400, 800));
         tester.view.physicalSize = const Size(400, 800);
@@ -97,7 +100,7 @@ void main() {
     );
 
     testWidgets(
-      'compact hides bottom nav when compactBottomNavigationBarVisible is false',
+      'narrow hides bottom nav when phoneBottomNavigationBarVisible is false',
       (tester) async {
         final visible = ValueNotifier<bool>(false);
         addTearDown(visible.dispose);
@@ -116,7 +119,7 @@ void main() {
               destinations: _destinations,
               selectedIndex: 0,
               onDestinationSelected: (_) {},
-              compactBottomNavigationBarVisible: visible,
+              phoneBottomNavigationBarVisible: visible,
               bottomPlayer: const SizedBox.shrink(),
               child: const ColoredBox(color: Color(0xFFEEEEEE)),
             ),
@@ -128,7 +131,7 @@ void main() {
       },
     );
 
-    testWidgets('compact body has zero bottom MediaQuery padding', (
+    testWidgets('narrow body has zero bottom MediaQuery padding', (
       tester,
     ) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));
@@ -163,7 +166,7 @@ void main() {
       expect(capturedPadding.bottom, 0.0);
     });
 
-    testWidgets('compact hides bottom nav while keyboard is open', (
+    testWidgets('narrow hides bottom nav while keyboard is open', (
       tester,
     ) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));
@@ -251,7 +254,7 @@ void main() {
     );
   });
 
-  group('TilawaAdaptiveShell — compact bottom nav density', () {
+  group('TilawaAdaptiveShell — phone bottom nav sizing', () {
     testWidgets('five destinations at 360dp width do not throw', (
       tester,
     ) async {
@@ -340,7 +343,7 @@ void main() {
     );
 
     testWidgets(
-      'wide compact inner width keeps all destination labels visible',
+      'wide inner width keeps all destination labels visible',
       (tester) async {
         const destinations = <TilawaNavDestination>[
           TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
@@ -354,7 +357,7 @@ void main() {
         ];
 
         final width =
-            TilawaBreakpoints.compactBottomNavAllLabelsMinInnerWidth.round() +
+            TilawaBreakpoints.phoneBottomNavAllLabelsMinInnerWidth.round() +
             32 +
             8;
         await tester.binding.setSurfaceSize(Size(width.toDouble(), 800));
@@ -444,7 +447,7 @@ void main() {
   });
 
   group('TilawaAdaptiveShell — bottomPlayer visibility', () {
-    testWidgets('compact layout renders bottomPlayer with expected size', (
+    testWidgets('narrow layout renders bottomPlayer with expected size', (
       tester,
     ) async {
       const playerKey = Key('bottom_player');

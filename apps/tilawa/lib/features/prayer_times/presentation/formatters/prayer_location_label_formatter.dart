@@ -1,8 +1,8 @@
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 
-/// Formats potentially verbose geocoded addresses for compact Prayer Times UI.
+/// Formats potentially verbose geocoded addresses for space-constrained UI.
 abstract final class PrayerLocationLabelFormatter {
-  static String compactLabel({
+  static String abbreviatedLocationLabel({
     required String? locationName,
     required AppLocalizations l10n,
   }) {

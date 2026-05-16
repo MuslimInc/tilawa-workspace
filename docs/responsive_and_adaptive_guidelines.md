@@ -6,7 +6,7 @@ Recommendations for the Tilawa UI Kit and the Tilawa app. Goal: predictable beha
 
 - `TilawaDesignTokens` — spacing, radius, border, opacity, icon sizes.
 - Component primitives in `packages/ui_kit` — `MetadataChip`, `SelectionPill`, `TilawaGlassPanel`, `TilawaSheetHandle`, `TilawaSettingsGroup/Tile`, `ImmersiveComposerScaffold`, `TilawaIconActionButton`.
-- Compact/regular variants on `ImmersiveComposerScaffold` already address two device classes.
+- Short-window vs regular height behavior on `ImmersiveComposerScaffold` addresses two vertical device classes (token-backed `shortWindow*` thresholds).
 
 This foundation is correct. The additions below formalize it.
 
@@ -27,19 +27,22 @@ Add `TilawaBreakpoints` next to `TilawaDesignTokens`:
 
 ```dart
 class TilawaBreakpoints {
-  static const double compact = 600;
+  static const double narrowUpperBound = 600;
   static const double medium = 840;
   static const double expanded = 1200;
 }
 
-enum TilawaWindowSize { compact, medium, expanded }
+enum TilawaWindowSize { narrow, medium, expanded, large }
 
 extension TilawaWindowSizeX on BuildContext {
   TilawaWindowSize get windowSize {
     final width = MediaQuery.sizeOf(this).width;
-    if (width >= TilawaBreakpoints.expanded) return TilawaWindowSize.expanded;
-    if (width >= TilawaBreakpoints.medium) return TilawaWindowSize.medium;
-    return TilawaWindowSize.compact;
+    if (width >= TilawaBreakpoints.expanded) return TilawaWindowSize.large;
+    if (width >= TilawaBreakpoints.medium) return TilawaWindowSize.expanded;
+    if (width >= TilawaBreakpoints.narrowUpperBound) {
+      return TilawaWindowSize.medium;
+    }
+    return TilawaWindowSize.narrow;
   }
 }
 ```
@@ -62,7 +65,7 @@ Wrap screens in `ConstrainedBox(maxWidth: tokens.contentMaxWidthX)` and center. 
 
 Promote a `TilawaAdaptiveShell` organism:
 
-- **Compact** → bottom `NavigationBar`.
+- **Narrow (phone)** → bottom `NavigationBar`.
 - **Medium** → `NavigationRail` (icons + labels).
 - **Expanded** → extended `NavigationRail` or persistent `Drawer`.
 
