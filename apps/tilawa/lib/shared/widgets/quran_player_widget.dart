@@ -211,7 +211,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       return;
     }
 
-    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenHeight = context.viewportHeight;
     // Negative primaryDelta = dragging up = expanding
     final delta = -primaryDelta / screenHeight;
     _expandController.value =
@@ -314,7 +314,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           return const SizedBox.shrink();
         }
 
-        final screenHeight = MediaQuery.sizeOf(context).height;
+        final screenHeight = context.viewportHeight;
 
         return Align(
           alignment: Alignment.bottomCenter,

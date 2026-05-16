@@ -158,7 +158,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 42.0
   final double iconSizeLargePlus;
 
-  /// 48.0
+  /// 48.0 — largest *glyph* size in the default ramp; not a guaranteed touch
+  /// target. Use [minInteractiveDimension] for hit targets.
   final double iconSizeExtraLarge;
 
   /// Tilawa minimum interactive (hit-target) dimension. Defaults to

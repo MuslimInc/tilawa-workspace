@@ -38,12 +38,24 @@ enum TilawaWindowSize {
 
 /// Ergonomic access to the current window-size class and common predicates.
 extension TilawaWindowSizeX on BuildContext {
-  /// Resolves the current [TilawaWindowSize] from `MediaQuery.sizeOf(this)`.
+  /// Full logical viewport size from [MediaQuery.sizeOf].
+  ///
+  /// Use for **proportional** layout (e.g. sheet `maxHeight` as a fraction of
+  /// the viewport). For **width-class** branching, prefer [windowSize].
+  Size get viewportSize => MediaQuery.sizeOf(this);
+
+  /// Shorthand for [viewportSize.height].
+  double get viewportHeight => viewportSize.height;
+
+  /// Shorthand for [viewportSize.width].
+  double get viewportWidth => viewportSize.width;
+
+  /// Resolves the current [TilawaWindowSize] from [viewportSize].
   ///
   /// Uses [MediaQuery.sizeOf] (narrow dependency) so callers do not rebuild on
   /// unrelated MediaQuery changes (e.g. keyboard open, textScaler change).
   TilawaWindowSize get windowSize {
-    final width = MediaQuery.sizeOf(this).width;
+    final width = viewportWidth;
     if (width >= TilawaBreakpoints.expanded) return TilawaWindowSize.large;
     if (width >= TilawaBreakpoints.medium) return TilawaWindowSize.expanded;
     if (width >= TilawaBreakpoints.narrowUpperBound) {
@@ -68,7 +80,7 @@ extension TilawaWindowSizeX on BuildContext {
   /// Use this for layout math (like scroll-to-index offsets) that must
   /// remain accurate on wide screens.
   double resolveContentWidth(TilawaContentKind kind) {
-    final screenWidth = MediaQuery.sizeOf(this).width;
+    final screenWidth = viewportWidth;
     final maxWidth = TilawaContentBounds.resolveMaxWidth(this, kind);
     return screenWidth < maxWidth ? screenWidth : maxWidth;
   }

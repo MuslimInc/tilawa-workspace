@@ -180,14 +180,14 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: _ShareComposerColors.gold.withValues(alpha: 0.22),
+                      color: AppShareComposerColors.gold.withValues(alpha: 0.22),
                     ),
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        _ShareComposerColors.deepGreen,
-                        _ShareComposerColors.forestGreen,
+                        AppShareComposerColors.deepGreen,
+                        AppShareComposerColors.forestGreen,
                       ],
                     ),
                     boxShadow: [
@@ -324,8 +324,8 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                             );
                                       }
                                     : null,
-                                backgroundColor: _ShareComposerColors.gold,
-                                foregroundColor: _ShareComposerColors.deepGreen,
+                                backgroundColor: AppShareComposerColors.gold,
+                                foregroundColor: AppShareComposerColors.deepGreen,
                                 borderRadius: 18,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -421,9 +421,9 @@ class _ConfigHeader extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  color: _ShareComposerColors.gold.withValues(alpha: 0.14),
+                  color: AppShareComposerColors.gold.withValues(alpha: 0.14),
                   border: Border.all(
-                    color: _ShareComposerColors.gold.withValues(alpha: 0.28),
+                    color: AppShareComposerColors.gold.withValues(alpha: 0.28),
                   ),
                 ),
                 child: Row(
@@ -432,13 +432,13 @@ class _ConfigHeader extends StatelessWidget {
                     const Icon(
                       Icons.auto_stories_rounded,
                       size: 16,
-                      color: _ShareComposerColors.gold,
+                      color: AppShareComposerColors.gold,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'Tilawa',
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: _ShareComposerColors.cream,
+                        color: AppShareComposerColors.cream,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -620,14 +620,14 @@ class _VerseDropdown extends StatelessWidget {
     return DropdownButtonFormField<int>(
       initialValue: clampedValue,
       onChanged: enabled ? (value) => onChanged(value!) : null,
-      iconEnabledColor: _ShareComposerColors.deepGreen,
-      dropdownColor: _ShareComposerColors.cream,
+      iconEnabledColor: AppShareComposerColors.deepGreen,
+      dropdownColor: AppShareComposerColors.cream,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: _ShareComposerColors.cream,
+        fillColor: AppShareComposerColors.cream,
         labelStyle: const TextStyle(
-          color: _ShareComposerColors.deepGreen,
+          color: AppShareComposerColors.deepGreen,
           fontWeight: FontWeight.w600,
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -637,22 +637,22 @@ class _VerseDropdown extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: _ShareComposerColors.deepGreen.withValues(alpha: 0.08),
+            color: AppShareComposerColors.deepGreen.withValues(alpha: 0.08),
           ),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: _ShareComposerColors.deepGreen.withValues(alpha: 0.04),
+            color: AppShareComposerColors.deepGreen.withValues(alpha: 0.04),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: _ShareComposerColors.gold),
+          borderSide: const BorderSide(color: AppShareComposerColors.gold),
         ),
       ),
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-        color: _ShareComposerColors.deepGreen,
+        color: AppShareComposerColors.deepGreen,
         fontWeight: FontWeight.w700,
       ),
       items: List.generate(max - min + 1, (index) {
@@ -694,7 +694,7 @@ class _LiveVideoPreview extends StatelessWidget {
               const Spacer(),
               const Icon(
                 Icons.play_circle_outline_rounded,
-                color: _ShareComposerColors.gold,
+                color: AppShareComposerColors.gold,
               ),
             ],
           ),
@@ -763,7 +763,7 @@ class _ProgressCard extends StatelessWidget {
               minHeight: 8,
               backgroundColor: Colors.white.withValues(alpha: 0.08),
               valueColor: const AlwaysStoppedAnimation<Color>(
-                _ShareComposerColors.gold,
+                AppShareComposerColors.gold,
               ),
             ),
           ),
@@ -811,7 +811,7 @@ class _SharingCard extends StatelessWidget {
               centered: false,
               strokeWidth: 2.5,
               valueColor: AlwaysStoppedAnimation<Color>(
-                _ShareComposerColors.gold,
+                AppShareComposerColors.gold,
               ),
             ),
           ),
@@ -833,8 +833,8 @@ class _SharingCard extends StatelessWidget {
 
 class _FeedbackCard extends StatelessWidget {
   const _FeedbackCard.error({required this.message})
-    : backgroundColor = const Color(0xFF5B1F1F),
-      outlineColor = const Color(0xFFFFB4AB),
+    : backgroundColor = AppShareComposerColors.feedbackErrorBackground,
+      outlineColor = AppShareComposerColors.feedbackErrorOutline,
       icon = Icons.error_outline_rounded;
 
   final String message;
@@ -892,7 +892,7 @@ class _MetadataPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: _ShareComposerColors.gold),
+          Icon(icon, size: 16, color: AppShareComposerColors.gold),
           const SizedBox(width: 6),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 220),
@@ -927,11 +927,11 @@ class _SelectionBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final backgroundColor = isError
-        ? const Color(0xFF5B1F1F)
+        ? AppShareComposerColors.feedbackErrorBackground
         : Colors.black.withValues(alpha: 0.16);
     final accent = isError
-        ? const Color(0xFFFFB4AB)
-        : _ShareComposerColors.mint;
+        ? AppShareComposerColors.feedbackErrorOutline
+        : AppShareComposerColors.mint;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1054,8 +1054,8 @@ class _VideoReviewPreviewState extends State<_VideoReviewPreview> {
               isFullWidth: true,
               leadingIcon: const Icon(Icons.share_rounded),
               onPressed: widget.onShare,
-              backgroundColor: _ShareComposerColors.mint,
-              foregroundColor: _ShareComposerColors.deepGreen,
+              backgroundColor: AppShareComposerColors.mint,
+              foregroundColor: AppShareComposerColors.deepGreen,
               borderRadius: 18,
               padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 24),
             ),
@@ -1064,12 +1064,4 @@ class _VideoReviewPreviewState extends State<_VideoReviewPreview> {
       ),
     );
   }
-}
-
-abstract final class _ShareComposerColors {
-  static const Color deepGreen = Color(0xFF0D3933);
-  static const Color forestGreen = Color(0xFF165147);
-  static const Color gold = Color(0xFFE1C17B);
-  static const Color mint = Color(0xFF8FDFC0);
-  static const Color cream = Color(0xFFF7F1E1);
 }

@@ -167,3 +167,41 @@ abstract final class AppColors {
   /// Brand tertiary used by FlexColorScheme assembly only.
   static const Color brandTertiary = primaryGold;
 }
+
+/// Fixed “studio” palette for the **share audio / reel composer** (dark
+/// gradient shell). Intentionally **not** derived from [ColorScheme] — a
+/// documented exception to DESIGN.md §9 for cohesive marketing-style UI.
+abstract final class AppShareComposerColors {
+  static const Color deepGreen = Color(0xFF0D3933);
+  static const Color forestGreen = Color(0xFF165147);
+  static const Color gold = Color(0xFFE1C17B);
+  static const Color mint = Color(0xFF8FDFC0);
+  static const Color cream = Color(0xFFF7F1E1);
+
+  /// Error callout background (composer-only).
+  static const Color feedbackErrorBackground = Color(0xFF5B1F1F);
+
+  /// Error callout border / icon tint (composer-only).
+  static const Color feedbackErrorOutline = Color(0xFFFFB4AB);
+}
+
+/// Default colors for **static export** screenshots (e.g. branded Quran page PNG
+/// footer). Not for in-scaffold UI.
+abstract final class AppExportScreenshotColors {
+  static const Color footerBackground = Color(0xFF1B4060);
+  static const Color footerForeground = Color(0xFFFFFFFF);
+}
+
+/// Fallback reel frame colors when the app does not build a
+/// theme-derived palette. Prefer runtime [ColorScheme] / reader theme in
+/// product paths; these preserve legacy mushaf-inspired defaults for tests.
+abstract final class AppVideoReelDesignDefaults {
+  static const Color mushafBackgroundColor = Color(0xFFFFF8ED);
+  static const Color mushafTextColor = Color(0xF52E2116);
+  static const Color verseHighlightColor = Color(0x3DF57C00);
+  static const Color frameTextColor = Color(0xFF6B5B4F);
+  static const Color frameSecondaryTextColor = Color(0xFF8B7355);
+  static const Color frameStrongTextColor = Color(0xFF5D4037);
+  static const Color frameAccentColor = Color(0xFFC5A358);
+  static const Color frameSurfaceColor = Color(0xFFFFF9F2);
+}

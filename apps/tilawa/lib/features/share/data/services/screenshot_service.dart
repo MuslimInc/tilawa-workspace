@@ -164,10 +164,10 @@ class ScreenshotService {
     logger.d(
       '[AppLaunch] source=ScreenshotService.captureAndBrand: Start in (${DateTime.now()})',
     );
-    const Color defaultFooterBg = Color(0xFF1B4060);
+    const Color defaultFooterBg = AppExportScreenshotColors.footerBackground;
     final Color brandColor = footerBackgroundColor ?? defaultFooterBg;
     final Color foregroundColor =
-        footerForegroundColor ?? const Color(0xFFFFFFFF);
+        footerForegroundColor ?? AppExportScreenshotColors.footerForeground;
     final pageImage = await _captureBoundaryImage(
       boundaryKey: boundaryKey,
       pixelRatio: pixelRatio,

@@ -188,6 +188,7 @@ Short prompts that align outputs with this repo:
 | Content width helper | `packages/ui_kit/lib/src/foundation/content_bounds.dart` |
 | Breakpoints | `packages/ui_kit/lib/src/foundation/breakpoints.dart` |
 | Component tokens | `packages/ui_kit/lib/src/foundation/component_tokens/` |
+| Export / composer fixed palettes (DESIGN §9 exceptions) | `packages/ui_kit/lib/src/foundation/app_colors.dart` — `AppShareComposerColors`, `AppExportScreenshotColors`, `AppVideoReelDesignDefaults` |
 | App theme wiring | `apps/tilawa/lib/tilawa_app.dart` |
 | Bottom sheet shell | `packages/ui_kit/lib/src/foundation/tilawa_bottom_sheet_scaffold.dart` |
 | Primary presets | `apps/tilawa/lib/features/theme/domain/primary_color_preset.dart` |

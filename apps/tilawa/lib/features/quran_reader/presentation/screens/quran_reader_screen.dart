@@ -459,7 +459,7 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
       return null;
     }
 
-    final Size viewportSize = MediaQuery.sizeOf(context);
+    final Size viewportSize = context.viewportSize;
     final QuranLayoutMetrics metrics = _pagePreparationLayoutStrategy
         .calculateMetrics(
           context,

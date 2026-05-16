@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../quran_reader/presentation/theme/quran_reader_theme.dart';
 
 abstract final class VideoReelDesign {
-  static const Color mushafBackgroundColor = Color(0xFFFFF8ED);
-  static const Color mushafTextColor = Color(0xF52E2116);
-  static const Color verseHighlightColor = Color(0x3DF57C00);
+  static const Color mushafBackgroundColor =
+      AppVideoReelDesignDefaults.mushafBackgroundColor;
+  static const Color mushafTextColor =
+      AppVideoReelDesignDefaults.mushafTextColor;
+  static const Color verseHighlightColor =
+      AppVideoReelDesignDefaults.verseHighlightColor;
 
-  static const Color frameTextColor = Color(0xFF6B5B4F);
-  static const Color frameSecondaryTextColor = Color(0xFF8B7355);
-  static const Color frameStrongTextColor = Color(0xFF5D4037);
-  static const Color frameAccentColor = Color(0xFFC5A358);
-  static const Color frameSurfaceColor = Color(0xFFFFF9F2);
+  static const Color frameTextColor =
+      AppVideoReelDesignDefaults.frameTextColor;
+  static const Color frameSecondaryTextColor =
+      AppVideoReelDesignDefaults.frameSecondaryTextColor;
+  static const Color frameStrongTextColor =
+      AppVideoReelDesignDefaults.frameStrongTextColor;
+  static const Color frameAccentColor =
+      AppVideoReelDesignDefaults.frameAccentColor;
+  static const Color frameSurfaceColor =
+      AppVideoReelDesignDefaults.frameSurfaceColor;
 
   static const double topBarHeightFactor = 0.042;
   static const double topBarMinHeight = 28;

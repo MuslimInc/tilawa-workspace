@@ -1,7 +1,11 @@
 import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+import 'app_colors.dart';
+import 'component_tokens.dart';
+import 'design_tokens.dart';
 
 /// Centralized app theme configuration
 class AppTheme {
@@ -32,11 +36,18 @@ class AppTheme {
   static const bool _tooltipsMatchBackground = true;
   static const bool _useMaterial3ErrorColors = true;
 
-  // Shared text theme with slightly reduced sizes for a minimized look
-  static TextTheme _getTextTheme(bool useFonts) {
-    // Use Alexandria if enabled, otherwise default to a standard text theme base
-    if (!useFonts) return const TextTheme();
-    return GoogleFonts.alexandriaTextTheme();
+  // Shared text theme: M3 typography base, optionally Alexandria.
+  static TextTheme _material3TypographyBase(Brightness brightness) {
+    final typography = Typography.material2021(
+      platform: defaultTargetPlatform,
+    );
+    return brightness == Brightness.dark ? typography.white : typography.black;
+  }
+
+  static TextTheme _getTextTheme(bool useFonts, Brightness brightness) {
+    final base = _material3TypographyBase(brightness);
+    if (!useFonts) return base;
+    return GoogleFonts.alexandriaTextTheme(base);
   }
 
   static FlexSchemeColor _lightScheme(Color primaryColor) {
@@ -63,11 +74,10 @@ class AppTheme {
   /// light theme's primary stays visible against light neutral surfaces and
   /// produces readable on-primary contrast.
   ///
-  /// This is **intentionally a no-op for the four [PrimaryColorPreset] values
-  /// and for any reasonable custom color** — only colors that would render as
-  /// near-white, near-black, or pure gray are pulled into the band. The user's
-  /// stored color is never mutated; only the value handed to FlexColorScheme
-  /// for the light theme is adjusted.
+  /// This is **intentionally a no-op** for every curated primary preset swatch
+  /// in the app and for any reasonable custom color — only colors that would
+  /// render as near-white, near-black, or pure gray are pulled into the band. The user's stored color is never mutated; only the value handed
+  /// to FlexColorScheme for the light theme is adjusted.
   ///
   /// Thresholds (chosen so every current preset passes through unchanged):
   /// - saturation floor: 0.16
@@ -276,6 +286,23 @@ class AppTheme {
     );
   }
 
+  static final WidgetStateProperty<Size?> _buttonMinimumTouchSize =
+      WidgetStateProperty.all(
+        const Size(
+          kTilawaMinInteractiveDimension,
+          kTilawaMinInteractiveDimension,
+        ),
+      );
+
+  static ButtonStyle? _buttonStyleWithMinTouchTarget(ButtonStyle? base) {
+    if (base == null) {
+      return const ButtonStyle().copyWith(
+        minimumSize: _buttonMinimumTouchSize,
+      );
+    }
+    return base.copyWith(minimumSize: _buttonMinimumTouchSize);
+  }
+
   static ThemeData _applySurfaceScale({
     required ThemeData theme,
     required ColorScheme colorScheme,
@@ -310,6 +337,25 @@ class AppTheme {
         modalBackgroundColor: colorScheme.surface,
         surfaceTintColor: componentSurfaceTint,
       ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: _buttonStyleWithMinTouchTarget(
+          theme.elevatedButtonTheme.style,
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: _buttonStyleWithMinTouchTarget(theme.filledButtonTheme.style),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: _buttonStyleWithMinTouchTarget(
+          theme.outlinedButtonTheme.style,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: _buttonStyleWithMinTouchTarget(theme.textButtonTheme.style),
+      ),
+      iconButtonTheme: IconButtonThemeData(
+        style: _buttonStyleWithMinTouchTarget(theme.iconButtonTheme.style),
+      ),
     );
   }
 
@@ -338,7 +384,7 @@ class AppTheme {
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
-      textTheme: _getTextTheme(useFonts),
+      textTheme: _getTextTheme(useFonts, Brightness.light),
     );
     final colorScheme = _refineLightColorScheme(theme.colorScheme);
     final themedSurfaces = _applySurfaceScale(
@@ -383,7 +429,7 @@ class AppTheme {
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
       fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
-      textTheme: _getTextTheme(useFonts),
+      textTheme: _getTextTheme(useFonts, Brightness.dark),
     );
     final colorScheme = _refineDarkColorScheme(
       theme.colorScheme,

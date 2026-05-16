@@ -46,7 +46,7 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
 
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.86,
+        maxHeight: context.viewportHeight * 0.86,
       ),
       child: SafeArea(
         top: false,
