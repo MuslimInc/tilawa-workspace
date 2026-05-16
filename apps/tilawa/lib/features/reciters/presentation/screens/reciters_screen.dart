@@ -451,7 +451,7 @@ class _RecitersResultSection extends StatelessWidget {
         return _RecitersEmptySliver(state: loadedState, onClearAll: onClearAll);
       }
 
-      if (context.isCompact) {
+      if (context.isNarrow) {
         return _ReciterListSliver(
           state: loadedState,
           reserveScrollbarSpace: reserveScrollbarSpace,
@@ -978,7 +978,7 @@ class _ReciterGridSliver extends StatelessWidget {
     PerfLogger.markBuild('_ReciterGridSliver');
     final tokens = Theme.of(context).tokens;
     final double targetItemExtent =
-        tokens.cardCompactWidthThreshold +
+        tokens.narrowCardWidthThreshold +
         tokens.spaceExtraLarge +
         tokens.spaceLarge;
     final double targetItemHeight =

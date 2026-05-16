@@ -57,7 +57,7 @@
 - [x] **T-082**: Migrate every UI Kit call site from `kMinInteractiveDimension` to the new token (atoms: `tilawa_icon_toggle`; molecules: `tilawa_permission_banner`, `tilawa_settings_tile`; component-token factories: `molecules_tokens.dart` for `iconActionButton`, `searchField`, `seekBar`, `alphabetScrollbar`; `organisms_tokens.dart` for `mediaPlayerBar` and `immersiveComposer`).
 - [x] **T-083**: Update prior "48 dp — non-negotiable" comments to reflect the 44 dp floor.
 - [x] **T-084**: Migrate app feature widgets: `download_button.dart` (8 sites), `reciter_card.dart`, `prayer_times_screen.dart`, `location_row.dart` (3 sites), `onboarding_screen.dart` (2 sites).
-- [x] **T-085**: Update token-defaults / density / a11y-audit / golden tests for the new floor (regenerate the four affected molecule/organism goldens).
+- [x] **T-085**: Update token-defaults / golden / a11y-audit tests for the new floor (regenerate the four affected molecule/organism goldens).
 - [x] **T-086**: Document the hit-target rule in `packages/ui_kit/docs/premium_visual_system.md`.
 
 ## Follow-ups (not in this branch)

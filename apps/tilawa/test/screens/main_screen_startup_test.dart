@@ -251,7 +251,7 @@ void main() {
   );
 
   for (final (:name, :size) in [
-    (name: 'compact', size: const Size(360, 640)),
+    (name: 'narrowPhone', size: const Size(360, 640)),
     (name: 'expanded', size: const Size(1024, 768)),
   ]) {
     testWidgets('renders reciters sliver surface without overflow on $name', (

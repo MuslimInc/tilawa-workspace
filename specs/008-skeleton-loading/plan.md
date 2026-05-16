@@ -128,7 +128,7 @@ packages/ui_kit/test/
 
 **S1-A-002: Add `TilawaSkeletonTokens` to atoms_tokens.dart**
 - Fields: `baseColor`, `highlightColor`, `borderRadius`, `animationDuration`, `pulseDuration`
-- Factory `defaults()` with density support
+- Factory `defaults()` without a separate density axis (single comfortable-equivalent defaults; see [007 supersession](../007-compact-ui-coverage/spec.md))
 - Standard `copyWith()` and `lerp()` methods
 
 **S1-A-003: Wire tokens into `TilawaComponentTokens`**
@@ -172,20 +172,19 @@ packages/ui_kit/test/
 
 **S1-B-002: Add token tests**
 - Defaults factory creates valid tokens
-- Density changes borderRadius
+- `copyWith` overrides and `lerp` behave predictably
 - Colors derive from ColorScheme
-- copyWith preserves values
-- lerp interpolates correctly
 
 **S1-B-003: Add golden tests**
 - Rectangle (light)
 - Rectangle (dark)
-- Rectangle (compact)
 - Circle/avatar (light)
 - Circle/avatar (dark)
-- Text line (light, dark, compact)
+- Text line (light, dark)
 - Reduced motion static (light)
 - Multiple blocks composition (light)
+
+_(Historical third golden axis “compact density” was removed with `TilawaDensity`; see [007 spec](../007-compact-ui-coverage/spec.md).)_
 
 **S1-B-004: Generate goldens**
 - Run with `--update-goldens`
@@ -218,7 +217,7 @@ Only proceed after S1-A and S1-B are reviewed and approved.
 
 - Each pattern composes multiple `TilawaSkeletonBlock` widgets
 - Patterns accept `itemCount` for repeating structures
-- Patterns support all theme/density modes
+- Patterns support light/dark themes and responsive layout where needed
 - Separate golden tests for each pattern
 
 ---

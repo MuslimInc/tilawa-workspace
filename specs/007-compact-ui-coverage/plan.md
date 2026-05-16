@@ -2,7 +2,15 @@
 
 **Branch**: `007-compact-ui-coverage` | **Date**: 2026-05-04 | **Spec**: [spec.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/007-compact-ui-coverage/spec.md)
 
-## Summary
+## Status: superseded (2026)
+
+The dual-density implementation described in this plan (`TilawaDensity`, per-family `density` factories, `component_tokens_density_test.dart`, compact/comfortable goldens) has been **removed** from the UI Kit and app. See [spec.md](spec.md) for the authoritative replacement model (`narrow` / `phone` naming, single token defaults, what is not “100%” string-free).
+
+Everything below this banner is **historical** — useful for archaeology, not execution.
+
+---
+
+## Summary (historical)
 
 Implement complete density awareness across all 28 component token families in the Tilawa UI Kit. 15 families gain real compact divergence while 13 remain no-op for safety. All comfortable values are preserved exactly. Touch targets never drop below 48dp.
 
@@ -48,7 +56,7 @@ packages/ui_kit/lib/src/foundation/component_tokens/
 └── component_tokens_theme.dart # Aggregates all, passes density
 
 packages/ui_kit/test/foundation/
-└── component_tokens_density_test.dart  # 63 tests covering all families
+└── (removed) component_tokens_density_test.dart  # deleted with density API
 ```
 
 ## Complexity Tracking
@@ -110,6 +118,6 @@ Full validation:
 cd packages/ui_kit && flutter test test/foundation/component_tokens_density_test.dart
 ```
 
-## Implementation Complete
+## Implementation complete (historical)
 
-All phases implemented. 63 tests passing. Zero analyzer issues.
+All phases were implemented, then the density system was retired. `component_tokens_density_test.dart` and related density-only tests are **deleted**.

@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../density.dart';
 import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
 import 'token_lerp.dart';
 
@@ -21,10 +20,7 @@ class TilawaPlayerBackgroundTokens {
   final double defaultOverlayOpacity;
   final Color overlayColor;
 
-  factory TilawaPlayerBackgroundTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // No-op: pure backdrop layer (cache scale, blur, overlay). No layout.
+  factory TilawaPlayerBackgroundTokens.defaults() {
     return const TilawaPlayerBackgroundTokens(
       cacheWidthScale: 2,
       defaultBlurAmount: 0,
@@ -90,20 +86,7 @@ class TilawaFooterBarTokens {
   final double secondaryLabelFontSize;
   final double secondaryLabelOpacity;
 
-  factory TilawaFooterBarTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaFooterBarTokens(
-        height: 52,
-        horizontalPadding: 12,
-        contentGap: 8,
-        labelFontSize: 16,
-        labelFontWeight: FontWeight.bold,
-        secondaryLabelFontSize: 12,
-        secondaryLabelOpacity: 0.7,
-      );
-    }
+  factory TilawaFooterBarTokens.defaults() {
     return const TilawaFooterBarTokens(
       height: 56,
       horizontalPadding: 16,
@@ -228,54 +211,16 @@ class TilawaMediaPlayerBarTokens {
   /// [BoxShadow.color] under the circular play/pause control.
   final Color playPauseButtonShadowColor;
 
-  factory TilawaMediaPlayerBarTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaMediaPlayerBarTokens.defaults() {
     return TilawaMediaPlayerBarTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
-      density: density,
     );
   }
 
-  factory TilawaMediaPlayerBarTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaMediaPlayerBarTokens.fromColorScheme(ColorScheme colorScheme) {
     // fix: Accessibility — ≥48dp transport control hit targets
     const shellOutlineAlpha = 0.1;
     const playPauseShadowOpacity = 0.3;
-    if (density.isCompact) {
-      return TilawaMediaPlayerBarTokens(
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(10, 6, 10, 6),
-        borderRadius: 14,
-        artworkSize: 44,
-        artworkRadius: 10,
-        titleFontWeight: FontWeight.w600,
-        subtitleOpacity: 0.72,
-        infoGap: 2,
-        artworkInfoGap: 10,
-        infoControlsGap: 6,
-        controlsGap: 2,
-        controlButtonSize: kTilawaMinInteractiveDimension,
-        playPauseButtonSize: kTilawaMinInteractiveDimension,
-        defaultIconSize: 22,
-        playPauseIconSize: 15,
-        disabledControlOpacity: 0.3,
-        shadowOpacity: 0.1,
-        playPauseShadowOpacity: playPauseShadowOpacity,
-        playPauseShadowBlur: 8,
-        shellBackgroundColor: colorScheme.surfaceContainerLow,
-        progressTrackBackgroundColor: colorScheme.surfaceContainerHighest
-            .withValues(alpha: shellOutlineAlpha),
-        artworkPlaceholderColor: colorScheme.surfaceContainerHigh,
-        shellOutlineColor: colorScheme.outlineVariant.withValues(
-          alpha: shellOutlineAlpha,
-        ),
-        playPauseButtonShadowColor: colorScheme.primary.withValues(
-          alpha: playPauseShadowOpacity,
-        ),
-      );
-    }
     return TilawaMediaPlayerBarTokens(
       // Slightly tighter vertical padding so the bar fits [playerCollapsedHeight]
       // with progress strip + 48dp artwork row inside the mini-player SizedBox
@@ -456,7 +401,7 @@ class TilawaMediaPlayerBarTokens {
 @immutable
 class TilawaAdaptiveShellTokens {
   const TilawaAdaptiveShellTokens({
-    required this.compactBottomNavBarBaseHeight,
+    required this.phoneBottomNavBarBaseHeight,
     required this.bottomNavHorizontalMargin,
     required this.bottomNavVerticalMargin,
     required this.bottomNavIconOnlyVerticalMargin,
@@ -496,22 +441,22 @@ class TilawaAdaptiveShellTokens {
     required this.navButtonIconOnlySelectionContainerVerticalPadding,
   });
 
-  /// Reserved height for the compact bottom nav **row** at unit text scale.
+  /// Reserved height for the phone bottom nav **row** at unit text scale.
   ///
-  /// Hosts should prefer [compactBottomNavLayoutHeight] with the current
+  /// Hosts should prefer [phoneBottomNavLayoutHeight] with the current
   /// [TextScaler] so scroll padding tracks a11y text scaling.
-  final double compactBottomNavBarBaseHeight;
+  final double phoneBottomNavBarBaseHeight;
 
-  /// Horizontal inset of the compact bar from the screen edges (0 = full
+  /// Horizontal inset of the phone bar from the screen edges (0 = full
   /// width).
   final double bottomNavHorizontalMargin;
   final double bottomNavVerticalMargin;
 
-  /// Top inset above the compact bar when it is **icon-only** (tighter strip).
+  /// Top inset above the phone bar when it is **icon-only** (tighter strip).
   final double bottomNavIconOnlyVerticalMargin;
   final double bottomNavInternalPadding;
 
-  /// Top corner radius of the compact bottom bar (bottom corners are square).
+  /// Top corner radius of the phone bottom bar (bottom corners are square).
   ///
   /// Uses the same value as [bottomNavInnerRadius] so the outer shell and
   /// per-item tap targets share one corner radius.
@@ -521,7 +466,7 @@ class TilawaAdaptiveShellTokens {
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
 
-  /// Stable neutral elevated chrome for the compact bottom nav container.
+  /// Stable neutral elevated chrome for the phone bottom nav container.
   ///
   /// Light mode uses [Colors.white] so the floating bar reads as a clean chip on
   /// the cream scaffold. Dark mode lerps [AppColors.darkSurfaceContainerHighBase]
@@ -575,27 +520,27 @@ class TilawaAdaptiveShellTokens {
   /// [InkWell.highlightColor] for shell nav destinations.
   final Color navButtonHighlightColor;
 
-  /// Vertical padding inside the compact nav item pill ([AnimatedContainer] in
-  /// the shell). Included in [compactBottomNavLayoutHeight] so reserved shell
+  /// Vertical padding inside the phone nav item pill ([AnimatedContainer] in
+  /// the shell). Included in [phoneBottomNavLayoutHeight] so reserved shell
   /// padding matches painted chrome.
   final double navButtonSelectionContainerVerticalPadding;
 
-  /// Min height for each compact nav slot in **icon-only** mode (no labels).
+  /// Min height for each phone nav slot in **icon-only** mode (no labels).
   final double navButtonIconOnlyMinHeight;
 
-  /// Outer vertical padding around the icon column in icon-only compact nav.
+  /// Outer vertical padding around the icon column in icon-only phone nav.
   final double navButtonIconOnlyVerticalPadding;
 
-  /// Pill vertical padding in icon-only compact nav (tighter than labeled).
+  /// Pill vertical padding in icon-only phone nav (tighter than labeled).
   final double navButtonIconOnlySelectionContainerVerticalPadding;
 
-  /// Height of the compact bottom nav row for [textScaler] (icon column + one
+  /// Height of the phone bottom nav row for [textScaler] (icon column + one
   /// label line), floored at [navButtonMinHeight].
   ///
-  /// Matches the compact bottom nav column (icon + gap + label line + pill
+  /// Matches the phone bottom nav column (icon + gap + label line + pill
   /// padding) so [TilawaShellPadding] can clear the painted bar.
-  double compactBottomNavLayoutHeight(TextScaler textScaler) =>
-      TilawaAdaptiveShellTokens._compactBottomNavLayoutHeight(
+  double phoneBottomNavLayoutHeight(TextScaler textScaler) =>
+      TilawaAdaptiveShellTokens._phoneBottomNavLayoutHeight(
         navButtonMinHeight: navButtonMinHeight,
         navButtonVerticalPadding: navButtonVerticalPadding,
         navButtonIconSize: navButtonIconSize,
@@ -607,12 +552,12 @@ class TilawaAdaptiveShellTokens {
         textScaler: textScaler,
       );
 
-  /// Height of the compact bottom nav row in **icon-only** mode.
+  /// Height of the phone bottom nav row in **icon-only** mode.
   ///
   /// Matches [_NavButton] when labels are hidden; use with
-  /// [compactBottomNavLayoutHeight] so scroll padding tracks the shorter bar.
-  double compactBottomNavIconOnlyLayoutHeight(TextScaler textScaler) =>
-      TilawaAdaptiveShellTokens._compactBottomNavIconOnlyLayoutHeight(
+  /// [phoneBottomNavLayoutHeight] so scroll padding tracks the shorter bar.
+  double phoneBottomNavIconOnlyLayoutHeight(TextScaler textScaler) =>
+      TilawaAdaptiveShellTokens._phoneBottomNavIconOnlyLayoutHeight(
         navButtonIconOnlyMinHeight: navButtonIconOnlyMinHeight,
         navButtonIconOnlyVerticalPadding: navButtonIconOnlyVerticalPadding,
         navButtonIconOnlySelectionContainerVerticalPadding:
@@ -622,7 +567,7 @@ class TilawaAdaptiveShellTokens {
         textScaler: textScaler,
       );
 
-  static double _compactBottomNavIconOnlyLayoutHeight({
+  static double _phoneBottomNavIconOnlyLayoutHeight({
     required double navButtonIconOnlyMinHeight,
     required double navButtonIconOnlyVerticalPadding,
     required double navButtonIconOnlySelectionContainerVerticalPadding,
@@ -641,7 +586,7 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  static double _compactBottomNavLayoutHeight({
+  static double _phoneBottomNavLayoutHeight({
     required double navButtonMinHeight,
     required double navButtonVerticalPadding,
     required double navButtonIconSize,
@@ -665,24 +610,15 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  factory TilawaAdaptiveShellTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaAdaptiveShellTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
     );
-    return TilawaAdaptiveShellTokens.fromColorScheme(
-      colorScheme,
-      density: density,
-    );
+    return TilawaAdaptiveShellTokens.fromColorScheme(colorScheme);
   }
 
-  factory TilawaAdaptiveShellTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // Sizing remains density-stable because this app-wide shell affects every
-    // screen. Color is derived here so every compact bottom nav follows the
+  factory TilawaAdaptiveShellTokens.fromColorScheme(ColorScheme colorScheme) {
+    // Color is derived here so every phone bottom nav follows the
     // active theme without per-screen overrides.
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
@@ -698,8 +634,8 @@ class TilawaAdaptiveShellTokens {
     const double navButtonIconOnlyVerticalPadding = 1;
     const double navButtonIconOnlySelectionContainerVerticalPadding = 2;
     const TextScaler unitTextScaler = TextScaler.linear(1);
-    final double compactBottomNavBarBaseHeight =
-        TilawaAdaptiveShellTokens._compactBottomNavLayoutHeight(
+    final double phoneBottomNavBarBaseHeight =
+        TilawaAdaptiveShellTokens._phoneBottomNavLayoutHeight(
           navButtonMinHeight: navButtonMinHeight,
           navButtonVerticalPadding: navButtonVerticalPadding,
           navButtonIconSize: navButtonIconSize,
@@ -711,7 +647,7 @@ class TilawaAdaptiveShellTokens {
           textScaler: unitTextScaler,
         );
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: compactBottomNavBarBaseHeight,
+      phoneBottomNavBarBaseHeight: phoneBottomNavBarBaseHeight,
       bottomNavHorizontalMargin: 0,
       bottomNavVerticalMargin: 4,
       bottomNavIconOnlyVerticalMargin: 2,
@@ -793,7 +729,7 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  /// Light compact nav uses an opaque white bar so the floating pill reads
+  /// Light phone nav uses an opaque white bar so the floating pill reads
   /// clearly above cream or tinted scaffolds. Dark keeps a filled bar for
   /// contrast.
   static Color _bottomNavBackgroundColor(ColorScheme colorScheme) {
@@ -823,7 +759,7 @@ class TilawaAdaptiveShellTokens {
   }
 
   TilawaAdaptiveShellTokens copyWith({
-    double? compactBottomNavBarBaseHeight,
+    double? phoneBottomNavBarBaseHeight,
     double? bottomNavHorizontalMargin,
     double? bottomNavVerticalMargin,
     double? bottomNavIconOnlyVerticalMargin,
@@ -863,8 +799,8 @@ class TilawaAdaptiveShellTokens {
     double? navButtonIconOnlySelectionContainerVerticalPadding,
   }) {
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight:
-          compactBottomNavBarBaseHeight ?? this.compactBottomNavBarBaseHeight,
+      phoneBottomNavBarBaseHeight:
+          phoneBottomNavBarBaseHeight ?? this.phoneBottomNavBarBaseHeight,
       bottomNavHorizontalMargin:
           bottomNavHorizontalMargin ?? this.bottomNavHorizontalMargin,
       bottomNavVerticalMargin:
@@ -942,9 +878,9 @@ class TilawaAdaptiveShellTokens {
     double t,
   ) {
     return TilawaAdaptiveShellTokens(
-      compactBottomNavBarBaseHeight: lerpTokenDouble(
-        a.compactBottomNavBarBaseHeight,
-        b.compactBottomNavBarBaseHeight,
+      phoneBottomNavBarBaseHeight: lerpTokenDouble(
+        a.phoneBottomNavBarBaseHeight,
+        b.phoneBottomNavBarBaseHeight,
         t,
       ),
       bottomNavHorizontalMargin: lerpTokenDouble(
@@ -1210,25 +1146,17 @@ class TilawaSettingsGroupTokens {
 
   /// Default tokens for the settings group.
   ///
-  /// [density] controls compact-mode token values. Comfortable (default)
-  /// matches historical typography and chrome. Compact tightens group headers,
-  /// subtitle spacing, and some type metrics. Horizontal list insets stay on
-  /// [tileContentPadding] / [switchTileContentPadding]; vertical is zero so
-  /// row height is driven by [ListTile.minTileHeight] (44 dp,
-  /// [kTilawaMinInteractiveDimension]) in the settings tile widgets.
-  factory TilawaSettingsGroupTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  /// Horizontal list insets stay on [tileContentPadding] /
+  /// [switchTileContentPadding]; vertical is zero so row height is driven by
+  /// [ListTile.minTileHeight] (44 dp, [kTilawaMinInteractiveDimension]) in the
+  /// settings tile widgets.
+  factory TilawaSettingsGroupTokens.defaults() {
     return TilawaSettingsGroupTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
-      density: density,
     );
   }
 
-  factory TilawaSettingsGroupTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaSettingsGroupTokens.fromColorScheme(ColorScheme colorScheme) {
     const tileIconContainerOpacity = 0.1;
     const selectionTileSelectedBackgroundColor = Colors.transparent;
     const tileDividerOpacity = 0.05;
@@ -1245,57 +1173,6 @@ class TilawaSettingsGroupTokens {
       alpha: switchActiveTrackOpacity,
     );
     final switchActiveThumbColor = colorScheme.primary;
-    if (density.isCompact) {
-      return TilawaSettingsGroupTokens(
-        // Compact: tuned for breathability while staying denser than comfortable.
-        groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
-          12,
-          12,
-          16,
-          6,
-        ),
-        switchTileContentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 0,
-        ),
-        tileSubtitleSpacing: 2,
-        groupBorderRadius: 20,
-        groupShadowOpacity: 0.06,
-        groupShadowBlur: 10,
-        groupShadowOffset: const Offset(0, 4),
-        groupTitleFontSize: 12.5,
-        groupTitleLetterSpacing: 1.1,
-        tileContentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 0,
-        ),
-        tileIconPadding: const EdgeInsets.all(6),
-        tileIconBorderRadius: 10,
-        tileIconSize: 20,
-        tileTitleFontSize: 14.5,
-        tileSubtitleFontSize: 13,
-        tileSubtitleOpacity: 0.65,
-        tileTrailingSize: 18,
-        tileTrailingOpacity: 0.55,
-        tileIconContainerOpacity: tileIconContainerOpacity,
-        tileDividerPadding: const EdgeInsetsDirectional.only(
-          start: 48,
-          end: 16,
-        ),
-        tileDividerHeight: 1,
-        tileDividerThickness: 0.5,
-        tileDividerOpacity: tileDividerOpacity,
-        switchActiveTrackOpacity: 0.5,
-        tileItemGap: 16,
-        selectionTileSelectedBackgroundColor:
-            selectionTileSelectedBackgroundColor,
-        groupSurfaceColor: groupSurfaceColor,
-        groupContainerBorderColor: groupContainerBorderColor,
-        selectionTileDividerColor: selectionTileDividerColor,
-        switchActiveTrackColor: switchActiveTrackColor,
-        switchActiveThumbColor: switchActiveThumbColor,
-      );
-    }
 
     return TilawaSettingsGroupTokens(
       groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
@@ -1593,10 +1470,10 @@ class TilawaImmersiveComposerTokens {
     required this.backgroundBlurScale,
     required this.backgroundOverlayOpacity,
     required this.overlayBorderOpacity,
-    required this.compactHeightBreakpoint,
-    required this.compactPanelHeightFactor,
+    required this.shortWindowHeightBreakpoint,
+    required this.shortWindowPanelHeightFactor,
     required this.regularPanelHeightFactor,
-    required this.compactPreviewHeightFactor,
+    required this.shortWindowPreviewHeightFactor,
     required this.regularPreviewHeightFactor,
     required this.panelMinHeight,
     required this.previewMaxHeight,
@@ -1614,10 +1491,10 @@ class TilawaImmersiveComposerTokens {
   final double backgroundBlurScale;
   final double backgroundOverlayOpacity;
   final double overlayBorderOpacity;
-  final double compactHeightBreakpoint;
-  final double compactPanelHeightFactor;
+  final double shortWindowHeightBreakpoint;
+  final double shortWindowPanelHeightFactor;
   final double regularPanelHeightFactor;
-  final double compactPreviewHeightFactor;
+  final double shortWindowPreviewHeightFactor;
   final double regularPreviewHeightFactor;
   final double panelMinHeight;
   final double previewMaxHeight;
@@ -1639,13 +1516,7 @@ class TilawaImmersiveComposerTokens {
   /// Opaque circle behind header icon buttons (e.g. close).
   final Color headerIconButtonFillColor;
 
-  factory TilawaImmersiveComposerTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // No-op: this organism has its own `compactHeightBreakpoint` /
-    // `compactPanelHeightFactor` fields, but those are screen-size
-    // responsiveness — unrelated to TilawaDensity. Kept no-op to avoid
-    // semantic confusion.
+  factory TilawaImmersiveComposerTokens.defaults() {
     return TilawaImmersiveComposerTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
     );
@@ -1664,10 +1535,10 @@ class TilawaImmersiveComposerTokens {
       backgroundBlurScale: backgroundBlurScale,
       backgroundOverlayOpacity: backgroundOverlayOpacity,
       overlayBorderOpacity: overlayBorderOpacity,
-      compactHeightBreakpoint: 760,
-      compactPanelHeightFactor: 0.5,
+      shortWindowHeightBreakpoint: 760,
+      shortWindowPanelHeightFactor: 0.5,
       regularPanelHeightFactor: 0.44,
-      compactPreviewHeightFactor: 0.42,
+      shortWindowPreviewHeightFactor: 0.42,
       regularPreviewHeightFactor: 0.5,
       panelMinHeight: 220,
       previewMaxHeight: 460,
@@ -1691,10 +1562,10 @@ class TilawaImmersiveComposerTokens {
     double? backgroundBlurScale,
     double? backgroundOverlayOpacity,
     double? overlayBorderOpacity,
-    double? compactHeightBreakpoint,
-    double? compactPanelHeightFactor,
+    double? shortWindowHeightBreakpoint,
+    double? shortWindowPanelHeightFactor,
     double? regularPanelHeightFactor,
-    double? compactPreviewHeightFactor,
+    double? shortWindowPreviewHeightFactor,
     double? regularPreviewHeightFactor,
     double? panelMinHeight,
     double? previewMaxHeight,
@@ -1714,14 +1585,14 @@ class TilawaImmersiveComposerTokens {
       backgroundOverlayOpacity:
           backgroundOverlayOpacity ?? this.backgroundOverlayOpacity,
       overlayBorderOpacity: overlayBorderOpacity ?? this.overlayBorderOpacity,
-      compactHeightBreakpoint:
-          compactHeightBreakpoint ?? this.compactHeightBreakpoint,
-      compactPanelHeightFactor:
-          compactPanelHeightFactor ?? this.compactPanelHeightFactor,
+      shortWindowHeightBreakpoint:
+          shortWindowHeightBreakpoint ?? this.shortWindowHeightBreakpoint,
+      shortWindowPanelHeightFactor:
+          shortWindowPanelHeightFactor ?? this.shortWindowPanelHeightFactor,
       regularPanelHeightFactor:
           regularPanelHeightFactor ?? this.regularPanelHeightFactor,
-      compactPreviewHeightFactor:
-          compactPreviewHeightFactor ?? this.compactPreviewHeightFactor,
+      shortWindowPreviewHeightFactor:
+          shortWindowPreviewHeightFactor ?? this.shortWindowPreviewHeightFactor,
       regularPreviewHeightFactor:
           regularPreviewHeightFactor ?? this.regularPreviewHeightFactor,
       panelMinHeight: panelMinHeight ?? this.panelMinHeight,
@@ -1764,14 +1635,14 @@ class TilawaImmersiveComposerTokens {
         b.overlayBorderOpacity,
         t,
       ),
-      compactHeightBreakpoint: lerpTokenDouble(
-        a.compactHeightBreakpoint,
-        b.compactHeightBreakpoint,
+      shortWindowHeightBreakpoint: lerpTokenDouble(
+        a.shortWindowHeightBreakpoint,
+        b.shortWindowHeightBreakpoint,
         t,
       ),
-      compactPanelHeightFactor: lerpTokenDouble(
-        a.compactPanelHeightFactor,
-        b.compactPanelHeightFactor,
+      shortWindowPanelHeightFactor: lerpTokenDouble(
+        a.shortWindowPanelHeightFactor,
+        b.shortWindowPanelHeightFactor,
         t,
       ),
       regularPanelHeightFactor: lerpTokenDouble(
@@ -1779,9 +1650,9 @@ class TilawaImmersiveComposerTokens {
         b.regularPanelHeightFactor,
         t,
       ),
-      compactPreviewHeightFactor: lerpTokenDouble(
-        a.compactPreviewHeightFactor,
-        b.compactPreviewHeightFactor,
+      shortWindowPreviewHeightFactor: lerpTokenDouble(
+        a.shortWindowPreviewHeightFactor,
+        b.shortWindowPreviewHeightFactor,
         t,
       ),
       regularPreviewHeightFactor: lerpTokenDouble(
@@ -1845,18 +1716,7 @@ class TilawaBottomSheetScaffoldTokens {
   final EdgeInsetsGeometry bodyPadding;
   final double closeButtonSize;
 
-  factory TilawaBottomSheetScaffoldTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      // closeButtonSize 40 stays — already below 48dp; not making it worse.
-      return const TilawaBottomSheetScaffoldTokens(
-        topRadius: 24,
-        headerPadding: EdgeInsets.fromLTRB(16, 6, 8, 8),
-        bodyPadding: EdgeInsets.all(16),
-        closeButtonSize: 40,
-      );
-    }
+  factory TilawaBottomSheetScaffoldTokens.defaults() {
     return const TilawaBottomSheetScaffoldTokens(
       topRadius: 28,
       headerPadding: EdgeInsets.fromLTRB(20, 8, 12, 12),

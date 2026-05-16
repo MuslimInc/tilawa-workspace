@@ -44,7 +44,7 @@ Low-risk visual and UX fixes. **No render-pipeline changes.** Render the live pr
 
 ### P1-004: `MediaPreviewFrame` radius → token
 
-- [x] Inspected [share_preview_widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/share_preview_widgets.dart): outer `TilawaCard.borderRadius: 34` is paired with inner `DecoratedBox` already at `tokens.radiusExtraLarge` (24 dp comfortable / 20 dp compact). The nested two-radius design is **intentional** — a 10 dp rounding gradient between outer card and inner media surface.
+- [x] Inspected [share_preview_widgets.dart](apps/tilawa/lib/features/share/presentation/widgets/share_preview_widgets.dart): outer `TilawaCard.borderRadius: 34` is paired with inner `DecoratedBox` already at `tokens.radiusExtraLarge` (e.g. 24 dp outer / inner from design tokens). The nested two-radius design is **intentional** — a 10 dp rounding gradient between outer card and inner media surface.
 - [x] Token swap evaluated: `tokens.radiusExtraLarge` would close that gradient (outer radius 24, inner radius 24 — visually flat). Delta to current value is 10 dp, well outside the spec's ±2 dp tolerance.
 - [x] **Decision: defer to Phase 4.** Leave the literal `34` in place; add a `mediaPreviewFrameRadius` field to `TilawaShareCanvasTokens` during the token-migration phase, where design owns the visual decision (keep the gradient, flatten it, or pick a third value).
 - [x] No source change in Phase 1. No new tests required.
@@ -312,15 +312,14 @@ Goal: Move reel/screenshot composition styling out of feature-local constants an
 - [ ] Add `TilawaShareCanvasTokens` to [organisms_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/organisms_tokens.dart) with top bar, bottom bar, safe-zone, banner-gap, highlight-opacity, canvas-radius, and media-preview-frame-radius fields.
 - [ ] Add lerp/copy/equality support for `TilawaShareCanvasTokens` in [organisms_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens/organisms_tokens.dart) and [token_lerp.dart](packages/ui_kit/lib/src/foundation/component_tokens/token_lerp.dart) if needed.
 - [ ] Expose the tokens through [component_tokens.dart](packages/ui_kit/lib/src/foundation/component_tokens.dart) and [component_tokens_theme.dart](packages/ui_kit/lib/src/foundation/component_tokens/component_tokens_theme.dart).
-- [ ] Add tests in [component_tokens_test.dart](packages/ui_kit/test/foundation/component_tokens_test.dart) for defaults, copyWith, equality, and density overrides.
-- [ ] Add tests in [component_tokens_density_test.dart](packages/ui_kit/test/foundation/component_tokens_density_test.dart) for comfortable and compact share-canvas token values.
+- [ ] Add tests in [component_tokens_test.dart](packages/ui_kit/test/foundation/component_tokens_test.dart) for defaults, copyWith, equality, and theme propagation.
 
 ### P4-002: Migrate reel composition dimensions
 
 - [ ] Replace `VideoReelDesign.topBar*`, gap, safe-zone, and layout factor reads in [mushaf_page_renderer.dart](apps/tilawa/lib/features/share/presentation/widgets/mushaf_page_renderer.dart) with `TilawaShareCanvasTokens`.
 - [ ] Replace Phase 2 canvas metric literals in [reel_canvas_metrics.dart](apps/tilawa/lib/features/share/presentation/utils/reel_canvas_metrics.dart) with token-backed defaults where appropriate.
 - [ ] Keep explicit fallbacks for any token read that can be null in tests.
-- [ ] Add widget tests in [mushaf_page_renderer_responsive_test.dart](apps/tilawa/test/features/share/presentation/widgets/mushaf_page_renderer_responsive_test.dart) for comfortable and compact density dimensions.
+- [ ] Add widget tests in [mushaf_page_renderer_responsive_test.dart](apps/tilawa/test/features/share/presentation/widgets/mushaf_page_renderer_responsive_test.dart) for narrow vs wide layout dimensions where applicable.
 
 ### P4-003: Migrate reel composition colors
 
@@ -347,8 +346,8 @@ Goal: Move reel/screenshot composition styling out of feature-local constants an
 ### P4-006: Token migration goldens and validation
 
 - [ ] Add or update UI Kit goldens in [organisms_goldens_test.dart](packages/ui_kit/test/goldens/organisms_goldens_test.dart) if `TilawaShareCanvasTokens` affects exported organisms.
-- [ ] Add reel composition goldens for light, dark, and compact density in [video_reel_composer_goldens_test.dart](apps/tilawa/test/features/share/presentation/goldens/video_reel_composer_goldens_test.dart).
-- [ ] Run `fvm flutter test test/foundation/component_tokens_test.dart test/foundation/component_tokens_density_test.dart` in [packages/ui_kit](packages/ui_kit).
+- [ ] Add reel composition goldens for light and dark theme in [video_reel_composer_goldens_test.dart](apps/tilawa/test/features/share/presentation/goldens/video_reel_composer_goldens_test.dart).
+- [ ] Run `fvm flutter test test/foundation/component_tokens_test.dart` in [packages/ui_kit](packages/ui_kit).
 - [ ] Run `fvm flutter test test/goldens` in [packages/ui_kit](packages/ui_kit).
 - [ ] Run the app reel golden suite in [apps/tilawa](apps/tilawa).
 - [ ] Run `fvm flutter analyze packages/ui_kit apps/tilawa/lib/features/share/presentation apps/tilawa/test/features/share/presentation` from the workspace root.

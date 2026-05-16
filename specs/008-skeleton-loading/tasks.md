@@ -3,6 +3,8 @@
 **Feature**: [Tilawa Skeleton Loading](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/008-skeleton-loading/spec.md)  
 **Plan**: [Implementation Plan](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/008-skeleton-loading/plan.md)
 
+**Note (2026):** Checklist rows that mention **compact density** or `TilawaDensity` describe work that was **completed then retired**. The UI Kit no longer has a dual-density axis ([007 supersession](../007-compact-ui-coverage/spec.md)). Prefer **light/dark** goldens and single token defaults going forward.
+
 ---
 
 ## Phase S1-A: UI Kit Foundation
@@ -15,7 +17,7 @@
 ### S1-A-002: Add `TilawaSkeletonTokens`
 - [ ] Add class to `atoms_tokens.dart`
 - [ ] Fields: `baseColor`, `highlightColor`, `borderRadius`, `animationDuration`, `pulseDuration`
-- [ ] Factory `defaults()` with `TilawaDensity` parameter
+- [ ] Factory `defaults()` aligned with theme tokens (no dual-density parameter)
 - [ ] Implement `copyWith()`
 - [ ] Implement `lerp()`
 
@@ -103,14 +105,14 @@
 ### S1-C-002: Implement `TilawaSkeletonListTile`
 - [x] Avatar circle + 2-3 text lines
 - [x] Token-driven spacing
-- [x] Density support
+- [x] Token-driven spacing (single theme defaults)
 - [x] Widget tests
 - [x] Golden tests
 
 ### S1-C-003: Implement `TilawaSkeletonCard`
 - [x] Image block + title + subtitle
 - [x] Token-driven spacing
-- [x] Density support
+- [x] Token-driven spacing (single theme defaults)
 - [x] Widget tests
 - [x] Golden tests
 

@@ -17,6 +17,7 @@ const double _kPulseBorderWidth = 2.0;
 const double _kPulseExpansion = 8.0;
 const double _kPercentageFontSize = 9.0;
 const double _kFullCircleRadius = 1000.0;
+const double _kLoadingIndicatorStrokeWidth = 2.0;
 const Duration _kPulseAnimationDuration = Duration(milliseconds: 1500);
 
 /// Download button with independent state management
@@ -293,13 +294,11 @@ class _LoadingDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final componentTokens = Theme.of(context).componentTokens;
-
     return SizedBox(
       width: context.minInteractiveDimension,
       height: context.minInteractiveDimension,
-      child: TilawaLoadingIndicator(
-        strokeWidth: componentTokens.loadingIndicator.compactStrokeWidth,
+      child: const TilawaLoadingIndicator(
+        strokeWidth: _kLoadingIndicatorStrokeWidth,
       ),
     );
   }

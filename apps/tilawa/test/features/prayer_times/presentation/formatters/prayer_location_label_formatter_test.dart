@@ -20,7 +20,7 @@ void main() {
         ),
       );
 
-      final label = PrayerLocationLabelFormatter.compactLabel(
+      final label = PrayerLocationLabelFormatter.abbreviatedLocationLabel(
         locationName: 'Mohye El-Isawy, Al Isaweyah',
         l10n: l10n,
       );
@@ -45,7 +45,7 @@ void main() {
         ),
       );
 
-      final label = PrayerLocationLabelFormatter.compactLabel(
+      final label = PrayerLocationLabelFormatter.abbreviatedLocationLabel(
         locationName: '123 Main Street',
         l10n: l10n,
       );

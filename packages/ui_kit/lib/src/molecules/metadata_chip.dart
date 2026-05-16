@@ -4,7 +4,7 @@ import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_chip.dart';
 
-/// Compact metadata chip built on [TilawaChip].
+/// Inline metadata chip built on [TilawaChip].
 class TilawaMetadataChip extends StatelessWidget {
   const TilawaMetadataChip({
     super.key,
@@ -35,7 +35,7 @@ class TilawaMetadataChip extends StatelessWidget {
       backgroundColor: backgroundColor ?? colorScheme.surfaceContainerLow,
       foregroundColor: color,
       borderColor: borderColor ?? componentTokens.defaultBorderColor,
-      padding: componentTokens.compactPadding,
+      padding: componentTokens.inlinePadding,
       borderRadius: componentTokens.roundedRadius,
       iconSize: designTokens.iconSizeSmall,
       textStyle: theme.textTheme.labelMedium?.copyWith(

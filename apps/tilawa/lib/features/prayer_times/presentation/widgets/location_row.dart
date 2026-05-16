@@ -26,7 +26,7 @@ class LocationRow extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final bool compact = constraints.maxWidth < 420;
+        final bool narrowWidth = constraints.maxWidth < 420;
 
         return TilawaCard(
           onTap: hasQiblaAction || isLoading ? null : onUpdateLocation,
@@ -36,22 +36,22 @@ class LocationRow extends StatelessWidget {
             alpha: tokens.opacityMedium,
           ),
           padding: EdgeInsets.all(
-            compact ? tokens.spaceMedium : tokens.spaceLarge,
+            narrowWidth ? tokens.spaceMedium : tokens.spaceLarge,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
-                  _LocationIcon(compact: compact),
+                  _LocationIcon(narrowWidth: narrowWidth),
                   SizedBox(
-                    width: compact ? tokens.spaceMedium : tokens.spaceLarge,
+                    width: narrowWidth ? tokens.spaceMedium : tokens.spaceLarge,
                   ),
                   _LocationInfo(locationName: locationName),
                   SizedBox(width: tokens.spaceSmall),
                   _LocationActionButton(
                     isLoading: isLoading,
-                    compact: compact,
+                    narrowWidth: narrowWidth,
                     onPressed: onUpdateLocation,
                   ),
                 ],
@@ -76,9 +76,9 @@ class LocationRow extends StatelessWidget {
 }
 
 class _LocationIcon extends StatelessWidget {
-  const _LocationIcon({required this.compact});
+  const _LocationIcon({required this.narrowWidth});
 
-  final bool compact;
+  final bool narrowWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -88,13 +88,13 @@ class _LocationIcon extends StatelessWidget {
 
     return TilawaIconBox(
       icon: Icons.location_on_rounded,
-      size: compact ? tokens.iconSizeMedium : tokens.iconSizeLarge,
+      size: narrowWidth ? tokens.iconSizeMedium : tokens.iconSizeLarge,
       backgroundColor: colorScheme.surfaceContainerHighest.withValues(
         alpha: tokens.opacityMedium,
       ),
       iconColor: colorScheme.primary,
-      borderRadius: compact ? tokens.radiusMedium : tokens.radiusLarge,
-      padding: compact ? tokens.spaceSmall : tokens.spaceMedium,
+      borderRadius: narrowWidth ? tokens.radiusMedium : tokens.radiusLarge,
+      padding: narrowWidth ? tokens.spaceSmall : tokens.spaceMedium,
     );
   }
 }
@@ -142,12 +142,12 @@ class _LocationInfo extends StatelessWidget {
 class _LocationActionButton extends StatelessWidget {
   const _LocationActionButton({
     required this.isLoading,
-    required this.compact,
+    required this.narrowWidth,
     required this.onPressed,
   });
 
   final bool isLoading;
-  final bool compact;
+  final bool narrowWidth;
   final VoidCallback onPressed;
 
   @override
@@ -164,12 +164,12 @@ class _LocationActionButton extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           borderRadius: BorderRadius.circular(
-            compact ? tokens.radiusMedium : tokens.radiusLarge - 4,
+            narrowWidth ? tokens.radiusMedium : tokens.radiusLarge - 4,
           ),
           child: InkWell(
             onTap: isLoading ? null : onPressed,
             borderRadius: BorderRadius.circular(
-              compact ? tokens.radiusMedium : tokens.radiusLarge - 4,
+              narrowWidth ? tokens.radiusMedium : tokens.radiusLarge - 4,
             ),
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -185,7 +185,7 @@ class _LocationActionButton extends StatelessWidget {
                   iconColor: isLoading
                       ? colorScheme.onSurfaceVariant
                       : colorScheme.primary,
-                  borderRadius: compact
+                  borderRadius: narrowWidth
                       ? tokens.radiusMedium
                       : tokens.radiusLarge - 4,
                   padding: tokens.spaceSmall,

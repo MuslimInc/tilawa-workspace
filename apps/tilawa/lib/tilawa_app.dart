@@ -21,7 +21,6 @@ import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
-import 'features/settings/presentation/cubit/settings_cubit.dart';
 import 'features/theme/domain/entities/app_theme_preset.dart';
 import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
@@ -139,67 +138,57 @@ class _PlayerApp extends StatelessWidget {
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               PerfLogger.markBuild('ThemeBlocBuilder');
-              return BlocBuilder<SettingsCubit, SettingsState>(
-                builder: (context, settingsState) {
-                  PerfLogger.markBuild('SettingsBlocBuilder');
-                  final TilawaDensity density = settingsState.useCompactDesign
-                      ? TilawaDensity.compact
-                      : TilawaDensity.comfortable;
-                  return MaterialApp.router(
-                    title: AppStrings.appName,
-                    showPerformanceOverlay: false,
-                    debugShowCheckedModeBanner: false,
-                    // showPerformanceOverlay: kDebugMode || kProfileMode,
-                    // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
-                    builder: (context, child) {
-                      // Release: skip DevicePreview.appBuilder — no preview ancestor
-                      // work; profile/debug still use it when preview is enabled.
-                      final app = kReleaseMode
-                          ? (child ?? const SizedBox.shrink())
-                          : DevicePreview.appBuilder(context, child);
-                      final routedChild = _DefaultRouteSystemUiOverlay(
-                        child: app,
-                      );
-                      return MediaQuery(
-                        data: MediaQuery.of(context).copyWith(
-                          textScaler: MediaQuery.textScalerOf(
-                            context,
-                          ).clamp(minScaleFactor: 1.0, maxScaleFactor: 1.4),
-                        ),
-                        child: routedChild,
-                      );
-                    },
-                    theme: AppTheme.getLightTheme(
-                      primaryColor: themeState.primaryColor,
-                      density: density,
-                      extensions: [QuranReaderTheme.light],
+              return MaterialApp.router(
+                title: AppStrings.appName,
+                showPerformanceOverlay: false,
+                debugShowCheckedModeBanner: false,
+                // showPerformanceOverlay: kDebugMode || kProfileMode,
+                // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
+                builder: (context, child) {
+                  // Release: skip DevicePreview.appBuilder — no preview ancestor
+                  // work; profile/debug still use it when preview is enabled.
+                  final app = kReleaseMode
+                      ? (child ?? const SizedBox.shrink())
+                      : DevicePreview.appBuilder(context, child);
+                  final routedChild = _DefaultRouteSystemUiOverlay(
+                    child: app,
+                  );
+                  return MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: MediaQuery.textScalerOf(
+                        context,
+                      ).clamp(minScaleFactor: 1.0, maxScaleFactor: 1.4),
                     ),
-                    darkTheme: AppTheme.getDarkTheme(
-                      primaryColor: themeState.primaryColor,
-                      isDefaultPreset:
-                          themeState.primaryColorSource ==
-                              PrimaryColorSource.preset &&
-                          themeState.primaryPresetId ==
-                              PrimaryColorPreset.defaultPreset.id,
-                      darkIsTrueBlack:
-                          themeState.preset == AppThemePreset.trueBlack,
-                      density: density,
-                      extensions: [QuranReaderTheme.dark],
-                    ),
-                    themeMode: themeState.themeMode,
-                    routerConfig: AppRouter.router,
-                    // Disable restoration when launched from notification
-                    restorationScopeId: AppRouter.disableStateRestoration
-                        ? null
-                        : AppStrings.restorationScopeId,
-                    locale: locState.locale,
-                    supportedLocales: AppLocalizations.supportedLocales,
-                    localizationsDelegates: const [
-                      ...AppLocalizations.localizationsDelegates,
-                      quran_image_l10n.AppLocalizations.delegate,
-                    ],
+                    child: routedChild,
                   );
                 },
+                theme: AppTheme.getLightTheme(
+                  primaryColor: themeState.primaryColor,
+                  extensions: [QuranReaderTheme.light],
+                ),
+                darkTheme: AppTheme.getDarkTheme(
+                  primaryColor: themeState.primaryColor,
+                  isDefaultPreset:
+                      themeState.primaryColorSource ==
+                          PrimaryColorSource.preset &&
+                      themeState.primaryPresetId ==
+                          PrimaryColorPreset.defaultPreset.id,
+                  darkIsTrueBlack:
+                      themeState.preset == AppThemePreset.trueBlack,
+                  extensions: [QuranReaderTheme.dark],
+                ),
+                themeMode: themeState.themeMode,
+                routerConfig: AppRouter.router,
+                // Disable restoration when launched from notification
+                restorationScopeId: AppRouter.disableStateRestoration
+                    ? null
+                    : AppStrings.restorationScopeId,
+                locale: locState.locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const [
+                  ...AppLocalizations.localizationsDelegates,
+                  quran_image_l10n.AppLocalizations.delegate,
+                ],
               );
             },
           );

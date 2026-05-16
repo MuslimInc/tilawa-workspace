@@ -4,7 +4,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Compact horizontal carousel of recently listened surahs for
+/// Inline horizontal carousel of recently listened surahs for
 /// quick resume playback. Uses chip-style cards to minimize
 /// vertical space.
 class ReciterHistorySection extends StatelessWidget {
@@ -74,7 +74,7 @@ class ReciterHistorySection extends StatelessWidget {
   }
 }
 
-/// Compact chip-style card showing surah name with a play/check
+/// Inline chip-style card showing surah name with a play/check
 /// icon and progress percentage.
 class _HistoryChip extends StatelessWidget {
   const _HistoryChip({required this.history, required this.onTap});

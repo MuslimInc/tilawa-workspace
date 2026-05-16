@@ -3,7 +3,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../models/prayer_row_view_data.dart';
 
-/// Compact Prayer Times alert state chip.
+/// Dense Prayer Times alert state chip.
 class PrayerAlertStatusChip extends StatelessWidget {
   const PrayerAlertStatusChip({
     super.key,

@@ -367,7 +367,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 }
 
 /// Row containing "Surahs (count)" on the left and the Download All
-/// button on the right. Keeps everything compact in one line.
+/// button on the right. Keeps the row to a single line.
 class _SurahHeaderRow extends StatelessWidget {
   const _SurahHeaderRow({
     required this.count,
@@ -536,10 +536,10 @@ class _ReciterDetailsContent extends StatelessWidget {
             ),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: tokens.cardCompactWidthThreshold,
+                maxCrossAxisExtent: tokens.narrowCardWidthThreshold,
                 mainAxisSpacing: tokens.spaceMedium,
                 crossAxisSpacing: tokens.spaceMedium,
-                mainAxisExtent: tokens.cardCompactHeightThreshold,
+                mainAxisExtent: tokens.narrowCardHeightThreshold,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final SurahEntity surah = filteredSurahs[index];

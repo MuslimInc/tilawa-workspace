@@ -2,133 +2,71 @@
 
 **Feature Branch**: `007-compact-ui-coverage`  
 **Created**: 2026-05-04  
-**Status**: Completed  
-**Input**: [docs/update-direction-i-want-clever-moonbeam.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/docs/update-direction-i-want-clever-moonbeam.md)
-
-## Context
-
-Compact UI is the app default (`TILAWA_COMPACT_UI=true`). Prior to this work, only 7 of 28 component token families diverged in compact mode, creating uneven visual density across screens. This feature implements complete density awareness across all reasonable component families while preserving comfortable behavior and maintaining touch targets above 48dp.
+**Status**: **Superseded / retired (2026)**  
+**Input (historical)**: [docs/update-direction-i-want-clever-moonbeam.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/docs/update-direction-i-want-clever-moonbeam.md)
 
 ---
 
-## User Scenarios & Testing
+## Current status (authoritative)
 
-### User Story 1 - Consistent Compact Visual Density (Priority: P1)
+This specification described a **dual-density** product (`TilawaDensity` comfortable vs compact), a **user-visible “compact design”** setting, and **per-family `density` parameters** on component tokens.
 
-As a user with the compact UI preference enabled, I want all UI components to have consistent spacing and sizing so that the interface feels cohesive and professional rather than a mix of compact and full-size elements.
+That approach was **fully removed** from the Tilawa codebase in favor of:
 
-**Why this priority**: Visual inconsistency between compact and non-compact families on the same screen creates a jarring, unfinished appearance.
+- **Single token defaults** — no `density` argument on token factories; no parallel comfortable/compact value sets in `TilawaComponentTokens`.
+- **Removed app setting** — no runtime toggle for a global “compact UI” mode tied to token density.
+- **Renamed layout vocabulary** — window class `compact` → **`narrow`**; breakpoint `TilawaBreakpoints.compact` → **`narrowUpperBound`**; `isCompact` → **`isNarrow`**; phone bottom navigation tokens use **`phone*`**; short-height composer tokens use **`shortWindow*`**; chip tight padding uses **`inline*`**; `TilawaButton.compact` → **`shrinkWrapTapTarget`** (same Material behavior, different name).
+- **Removed token fields** — e.g. `TilawaLoadingIndicatorTokens.compactStrokeWidth` removed; one-off dimensions live next to their widget when needed.
 
-**Independent Test**: Enable compact mode and navigate through prayer times, audio player, and settings screens. All components should have proportionally reduced padding and spacing.
-
-**Acceptance Scenarios**:
-
-1. **Given** compact mode is enabled, **When** viewing any screen with cards, empty states, and buttons, **Then** all components have consistent reduced spacing (no full-size elements mixed with compact ones).
-2. **Given** compact mode is enabled, **When** interacting with segmented controls and search fields, **Then** the reduced padding is visually apparent but touch targets remain usable.
+The sections below are **retained for history** (what was built and later backed out). Do not treat functional requirements as active contract.
 
 ---
 
-### User Story 2 - Preserved Touch Accessibility (Priority: P1)
+## Is the word “compact” gone 100% from the project?
 
-As a user with accessibility needs or on a small device, I want interactive elements to remain tappable even in compact mode so that I don't struggle to hit small targets.
+**No — not as a substring everywhere**, and that is intentional:
 
-**Why this priority**: Compact should not mean inaccessible. Touch targets must remain at or above 48dp.
+| Remains | Reason |
+|--------|--------|
+| `VisualDensity.compact` | Flutter **framework** API (Material). Tilawa code may still pass this constant where a denser Material control is desired. |
+| `androidCompactActionIndices` | **Android platform** media-session API name. |
+| Vendored **`packages/flex_color_scheme`** | Third-party docs mentioning “compactness” / `VisualDensity`. |
+| English prose in older specs/docs | Words like “compact location” meaning *short copy*, not the removed API. |
 
-**Independent Test**: Verify via accessibility inspector that all interactive elements maintain minimum touch targets.
-
-**Acceptance Scenarios**:
-
-1. **Given** compact mode is enabled, **When** viewing icon action buttons and seek bars, **Then** their sizes remain unchanged (already at minimum safe size).
-2. **Given** compact mode is enabled, **When** using the search field, **Then** the height remains at `kMinInteractiveDimension` (48dp) despite other reductions.
-
----
-
-### User Story 3 - Seamless Comfortable Mode (Priority: P2)
-
-As a user who prefers the original comfortable UI, I want the option to disable compact mode and see the original spacing so that I can choose my preferred density.
-
-**Why this priority**: User preference and accessibility options should always be preserved.
-
-**Independent Test**: Run app with `TILAWA_COMPACT_UI=false` and verify all components use original comfortable spacing.
-
-**Acceptance Scenarios**:
-
-1. **Given** comfortable mode is enabled, **When** viewing any screen, **Then** all component spacing matches pre-compact-UI values exactly.
-2. **Given** comfortable mode is enabled, **When** comparing to compact mode screenshots, **Then** the difference is visually apparent with comfortable having more breathing room.
+**Yes — for Tilawa-owned *compact density / compact UI* APIs**: there is no `TilawaDensity`, no `density:` on component token `defaults()`, no `TILAWA_COMPACT_UI` product path, and no `compactStrokeWidth` / `compactBottomNav*` / `TilawaWindowSize.compact` / `isCompact` in first-party libraries.
 
 ---
 
-## Requirements
+## Historical context (frozen)
 
-### Functional Requirements
+Compact UI was previously described as the app default (`TILAWA_COMPACT_UI=true`). The work expanded density awareness across component token families while preserving comfortable behavior and maintaining touch targets above 48dp.
 
-- **FR-001**: All 28 component token families must accept a `density` parameter in their `defaults()` factory.
-- **FR-002**: 15 families must have real compact divergence (smaller padding, spacing, or sizes).
-- **FR-003**: 11 families must remain no-op in compact (API uniform but values unchanged for safety).
-- **FR-004**: Comfortable mode values must be byte-for-byte identical to pre-implementation defaults.
-- **FR-005**: No interactive touch target may drop below 48dp in compact mode.
-- **FR-006**: All families must have unit test coverage asserting compact/comfortable behavior.
-
-### Component Inventory
-
-**Already density-aware (7 families) - no changes:**
-- TilawaCardTokens, TilawaIconBoxTokens, TilawaEmptyStateTokens, TilawaChipTokens
-- TilawaGlassPanelTokens, TilawaFeedbackStripTokens, TilawaSettingsGroupTokens
-
-**Phase F-A - Atoms (2 divergent, 4 no-op):**
-| Family | Decision | Compact Changes |
-|--------|----------|-----------------|
-| SheetHandleTokens | Divergent | `marginBottom 16→12` |
-| ErrorStateTokens | Divergent | `iconSize 80→64`, spacing reductions |
-| SectionTitleTokens | No-op | Only fontWeight field |
-| LoadingIndicatorTokens | No-op | Display-only, already small |
-| IconToggleTokens | No-op | Already 36dp (below 48dp, don't worsen) |
-| DividerTokens | No-op | 1px line, nothing to compact |
-
-**Phase F-B - Molecules (3 divergent, 5 no-op):**
-| Family | Decision | Compact Changes |
-|--------|----------|-----------------|
-| SegmentedControlTokens | Divergent | padding, radius reductions |
-| PermissionBannerTokens | Divergent | padding, spacing reductions |
-| PrayerAlertRowTokens | Divergent | verticalPadding, spacing |
-| AlphabetScrollbarTokens | No-op | 30dp already touch-marginal |
-| IconActionButtonTokens | No-op | 48dp at floor |
-| SeekBarTokens | No-op | 30dp touchExtent, track is main affordance |
-| CountProgressRingTokens | No-op | Display-only, calibrated for legibility |
-| SearchFieldTokens | Divergent (F-C) | borderRadius, shadow, iconSize (height stays 48dp) |
-
-**Phase F-D - Organisms (2 divergent, 4 no-op):**
-| Family | Decision | Compact Changes |
-|--------|----------|-----------------|
-| FooterBarTokens | Divergent | `height 56→52`, padding/gap |
-| BottomSheetScaffoldTokens | Divergent | radius, padding (closeButton 40dp stays) |
-| PlayerBackgroundTokens | No-op | Pure backdrop, no layout |
-| MediaPlayerBarTokens | No-op | Buttons 32-36dp, don't worsen |
-| AdaptiveShellTokens | No-op | App-wide nav, high-risk |
-| ImmersiveComposerTokens | No-op | Fields are screen-size responsive, not density |
+That entire dual-mode token layer was later removed to simplify the system (DRY/KISS/YAGNI).
 
 ---
 
-## Success Criteria
+## Historical user scenarios & requirements
 
-### Measurable Outcomes
+The following applied **only while the dual-density system existed**. They are not current acceptance criteria.
 
-- **SC-001**: All 28 component families have `density` parameter in `defaults()` factory.
-- **SC-002**: All comfortable values match pre-implementation defaults exactly.
-- **SC-003**: 63 unit tests pass covering all divergent and no-op families.
-- **SC-004**: `flutter analyze` reports zero issues in `packages/ui_kit`.
-- **SC-005**: No widget files modified (pure token-layer change).
+### User Story 1 - Consistent compact visual density (historical)
 
-### Quality Gates
+As a user with compact UI preference enabled, all components should have proportionally reduced spacing where safe.
 
-- No touch target below 48dp in compact mode.
-- Visual consistency across all screens in compact mode.
-- Comfortable mode unchanged and fully functional.
+### User Story 2 - Preserved touch accessibility (still true as engineering rule)
+
+Interactive elements should respect `kTilawaMinInteractiveDimension` / Material guidance; shrinking unsafe controls was always avoided.
+
+### User Story 3 - Comfortable mode (historical)
+
+User toggle between comfortable and compact token modes — **removed** with the setting and density API.
+
+### Functional requirements (historical)
+
+FR-001–FR-006 required `density` on factories, divergent families, tests, etc. **Obsolete.**
 
 ---
 
-## Assumptions
+## Historical component inventory
 
-- Density awareness is implemented at the token layer; widgets already read `componentTokens.<family>`.
-- No-op families are documented with rationale for future maintainers.
-- Test coverage prevents accidental divergence in no-op families.
+Tables in the original spec listed which token families diverged in compact mode. Those divergences are **no longer in code**; token files carry a single set of values.

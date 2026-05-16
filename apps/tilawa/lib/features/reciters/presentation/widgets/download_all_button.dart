@@ -10,7 +10,7 @@ import '../../../../features/surah/domain/entities/surah_entity.dart';
 import '../bloc/reciter_download_bloc.dart';
 import '../reciter_semantics_ids.dart';
 
-/// Compact download button designed to sit inline inside a header
+/// Inline download button designed to sit inside a header
 /// row next to the surah count label.
 class DownloadAllButton extends StatelessWidget {
   const DownloadAllButton({
@@ -46,7 +46,7 @@ class DownloadAllButton extends StatelessWidget {
           return Semantics(
             identifier: ReciterSemanticsIds.reciterDetailsDownloadAllCompleted,
             child: Container(
-              padding: chipTokens.compactPadding.add(
+              padding: chipTokens.inlinePadding.add(
                 EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
               ),
               decoration: BoxDecoration(
@@ -65,7 +65,7 @@ class DownloadAllButton extends StatelessWidget {
                   Icon(
                     Icons.check_circle_rounded,
                     color: colorScheme.onPrimaryContainer,
-                    size: chipTokens.compactIconSize,
+                    size: chipTokens.inlineIconSize,
                   ),
                   SizedBox(width: tokens.spaceExtraSmall),
                   Text(
@@ -81,7 +81,7 @@ class DownloadAllButton extends StatelessWidget {
           );
         }
 
-        // Download / Downloading — compact pill
+        // Download / Downloading — inline pill
         return Semantics(
           identifier: isDownloading
               ? ReciterSemanticsIds.reciterDetailsDownloadAllDownloading
@@ -108,7 +108,7 @@ class DownloadAllButton extends StatelessWidget {
               },
               borderRadius: borderRadius,
               child: Container(
-                padding: chipTokens.compactPadding.add(
+                padding: chipTokens.inlinePadding.add(
                   EdgeInsets.symmetric(
                     horizontal: tokens.spaceSmall,
                     vertical: tokens.spaceExtraSmall,
@@ -152,13 +152,13 @@ class DownloadAllButton extends StatelessWidget {
                       Icon(
                         Icons.pause_rounded,
                         color: colorScheme.primary,
-                        size: chipTokens.compactIconSize,
+                        size: chipTokens.inlineIconSize,
                       ),
                     ] else ...[
                       Icon(
                         Icons.download_rounded,
                         color: colorScheme.onSurfaceVariant,
-                        size: chipTokens.compactIconSize,
+                        size: chipTokens.inlineIconSize,
                       ),
                       SizedBox(width: tokens.spaceExtraSmall),
                       Text(
@@ -185,7 +185,7 @@ class DownloadAllButton extends StatelessWidget {
     bool isDownloading,
     double progress,
   ) {
-    // Always use compact fraction format for inline display
+    // Always use short fraction format for inline display
     return '${state.downloadedCount}/${state.totalCount}';
   }
 }

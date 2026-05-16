@@ -1,11 +1,17 @@
 # Tasks: Compact UI — Complete Coverage Across UI Kit
 
-**Feature**: [Compact UI Coverage](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/007-compact-ui-coverage/spec.md)  
-**Plan**: [Implementation Plan](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/007-compact-ui-coverage/plan.md)
+**Status**: **Superseded (2026).** The checklist below records work that was **done and later removed** (`TilawaDensity`, per-token `density`, density-only tests, compact/comfortable goldens, app “compact design” setting). Do not open new tasks against this model.
 
-## Implementation Strategy
+**Current truth**: [spec.md](spec.md) — single token defaults, `narrow` / `phone` / `inline` / `shortWindow` naming, no dual-density API.
 
-This feature implements density awareness across all component token families. Already-completed families (Card, IconBox, EmptyState, Chip, GlassPanel, FeedbackStrip, SettingsGroup) are not modified. New work focuses on 21 additional families across atoms, molecules, and organisms.
+---
+
+**Feature (historical)**: [Compact UI Coverage](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/007-compact-ui-coverage/spec.md)  
+**Plan (historical)**: [Implementation Plan](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/007-compact-ui-coverage/plan.md)
+
+## Implementation Strategy (historical)
+
+This feature implemented density awareness across all component token families. Already-completed families (Card, IconBox, EmptyState, Chip, GlassPanel, FeedbackStrip, SettingsGroup) were not modified at the time. New work focused on 21 additional families across atoms, molecules, and organisms. **All of this was subsequently retired.**
 
 ---
 

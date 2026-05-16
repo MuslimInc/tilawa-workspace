@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../density.dart';
 import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
 import 'token_lerp.dart';
 
@@ -44,9 +43,7 @@ class TilawaAlphabetScrollbarTokens {
 
   final Offset overlayShadowOffset;
 
-  factory TilawaAlphabetScrollbarTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaAlphabetScrollbarTokens.defaults() {
     return TilawaAlphabetScrollbarTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
     );
@@ -170,18 +167,7 @@ class TilawaFeedbackStripTokens {
   final double spinnerStrokeWidth;
   final double contentGap;
 
-  factory TilawaFeedbackStripTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaFeedbackStripTokens(
-        padding: EdgeInsets.all(8), // fix: Spacing & alignment — 8dp grid
-        borderRadius: 18,
-        spinnerSize: 18,
-        spinnerStrokeWidth: 2.2,
-        contentGap: 8,
-      );
-    }
+  factory TilawaFeedbackStripTokens.defaults() {
     return const TilawaFeedbackStripTokens(
       padding: EdgeInsets.all(16),
       borderRadius: 18,
@@ -238,16 +224,7 @@ class TilawaGlassPanelTokens {
   final double borderRadiusOffset;
   final double backgroundOpacity;
 
-  factory TilawaGlassPanelTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaGlassPanelTokens(
-        padding: EdgeInsets.all(12),
-        borderRadiusOffset: 8,
-        backgroundOpacity: 0.8,
-      );
-    }
+  factory TilawaGlassPanelTokens.defaults() {
     return const TilawaGlassPanelTokens(
       padding: EdgeInsets.all(16),
       borderRadiusOffset: 8,
@@ -304,9 +281,7 @@ class TilawaIconActionButtonTokens {
   final double activeBorderOpacity;
   final double inactiveBorderOpacity;
 
-  factory TilawaIconActionButtonTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaIconActionButtonTokens.defaults() {
     // Size = Tilawa hit-target floor (44 dp). At the floor; do not shrink
     // further.
     return const TilawaIconActionButtonTokens(
@@ -367,14 +342,14 @@ class TilawaIconActionButtonTokens {
 class TilawaChipTokens {
   const TilawaChipTokens({
     required this.padding,
-    required this.compactPadding,
+    required this.inlinePadding,
     required this.backgroundColor,
     required this.defaultBorderColor,
     required this.selectionSelectedBackgroundColor,
     required this.selectionUnselectedBackgroundColor,
     required this.contentGap,
     required this.iconSize,
-    required this.compactIconSize,
+    required this.inlineIconSize,
     required this.borderWidth,
     required this.pillRadius,
     required this.roundedRadius,
@@ -386,7 +361,7 @@ class TilawaChipTokens {
   });
 
   final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry compactPadding;
+  final EdgeInsetsGeometry inlinePadding;
   final Color backgroundColor;
 
   /// Default stroke for [TilawaChip] / [TilawaMetadataChip] ([TilawaDesignTokens.opacityMedium] on [ColorScheme.outlineVariant]).
@@ -396,7 +371,7 @@ class TilawaChipTokens {
   final Color selectionUnselectedBackgroundColor;
   final double contentGap;
   final double iconSize;
-  final double compactIconSize;
+  final double inlineIconSize;
   final double borderWidth;
   final double pillRadius;
   final double roundedRadius;
@@ -406,19 +381,14 @@ class TilawaChipTokens {
   final FontWeight statusFontWeight;
   final double statusLetterSpacing;
 
-  factory TilawaChipTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaChipTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
     );
-    return TilawaChipTokens.fromColorScheme(colorScheme, density: density);
+    return TilawaChipTokens.fromColorScheme(colorScheme);
   }
 
-  factory TilawaChipTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaChipTokens.fromColorScheme(ColorScheme colorScheme) {
     final backgroundColor = _backgroundColor(colorScheme);
     final selectionSelectedBackgroundColor = _selectionSelectedBackgroundColor(
       colorScheme,
@@ -426,37 +396,16 @@ class TilawaChipTokens {
     final selectionUnselectedBackgroundColor =
         _selectionUnselectedBackgroundColor(colorScheme);
     final defaultBorderColor = _defaultBorderColor(colorScheme);
-    if (density.isCompact) {
-      return TilawaChipTokens(
-        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        backgroundColor: backgroundColor,
-        defaultBorderColor: defaultBorderColor,
-        selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
-        selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
-        contentGap: 8,
-        iconSize: 16,
-        compactIconSize: 14,
-        borderWidth: 0.5,
-        pillRadius: 999,
-        roundedRadius: 8,
-        selectedShadowOpacity: 0.18,
-        selectedShadowBlur: 12,
-        selectionFontWeight: FontWeight.w700,
-        statusFontWeight: FontWeight.w900,
-        statusLetterSpacing: 0.5,
-      );
-    }
     return TilawaChipTokens(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      compactPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      inlinePadding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       backgroundColor: backgroundColor,
       defaultBorderColor: defaultBorderColor,
       selectionSelectedBackgroundColor: selectionSelectedBackgroundColor,
       selectionUnselectedBackgroundColor: selectionUnselectedBackgroundColor,
       contentGap: 8,
       iconSize: 16,
-      compactIconSize: 14,
+      inlineIconSize: 14,
       borderWidth: 0.5,
       pillRadius: 999,
       roundedRadius: 8,
@@ -501,14 +450,14 @@ class TilawaChipTokens {
 
   TilawaChipTokens copyWith({
     EdgeInsetsGeometry? padding,
-    EdgeInsetsGeometry? compactPadding,
+    EdgeInsetsGeometry? inlinePadding,
     Color? backgroundColor,
     Color? defaultBorderColor,
     Color? selectionSelectedBackgroundColor,
     Color? selectionUnselectedBackgroundColor,
     double? contentGap,
     double? iconSize,
-    double? compactIconSize,
+    double? inlineIconSize,
     double? borderWidth,
     double? pillRadius,
     double? roundedRadius,
@@ -520,7 +469,7 @@ class TilawaChipTokens {
   }) {
     return TilawaChipTokens(
       padding: padding ?? this.padding,
-      compactPadding: compactPadding ?? this.compactPadding,
+      inlinePadding: inlinePadding ?? this.inlinePadding,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       defaultBorderColor: defaultBorderColor ?? this.defaultBorderColor,
       selectionSelectedBackgroundColor:
@@ -531,7 +480,7 @@ class TilawaChipTokens {
           this.selectionUnselectedBackgroundColor,
       contentGap: contentGap ?? this.contentGap,
       iconSize: iconSize ?? this.iconSize,
-      compactIconSize: compactIconSize ?? this.compactIconSize,
+      inlineIconSize: inlineIconSize ?? this.inlineIconSize,
       borderWidth: borderWidth ?? this.borderWidth,
       pillRadius: pillRadius ?? this.pillRadius,
       roundedRadius: roundedRadius ?? this.roundedRadius,
@@ -551,9 +500,9 @@ class TilawaChipTokens {
   ) {
     return TilawaChipTokens(
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t)!,
-      compactPadding: EdgeInsetsGeometry.lerp(
-        a.compactPadding,
-        b.compactPadding,
+      inlinePadding: EdgeInsetsGeometry.lerp(
+        a.inlinePadding,
+        b.inlinePadding,
         t,
       )!,
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
@@ -574,7 +523,7 @@ class TilawaChipTokens {
       )!,
       contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
-      compactIconSize: lerpTokenDouble(a.compactIconSize, b.compactIconSize, t),
+      inlineIconSize: lerpTokenDouble(a.inlineIconSize, b.inlineIconSize, t),
       borderWidth: lerpTokenDouble(a.borderWidth, b.borderWidth, t),
       pillRadius: lerpTokenDouble(a.pillRadius, b.pillRadius, t),
       roundedRadius: lerpTokenDouble(a.roundedRadius, b.roundedRadius, t),
@@ -645,47 +594,19 @@ class TilawaSegmentedControlTokens {
   final double selectedItemShadowBlur;
   final Offset selectedItemShadowOffset;
 
-  factory TilawaSegmentedControlTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaSegmentedControlTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
     );
-    return TilawaSegmentedControlTokens.fromColorScheme(
-      colorScheme,
-      density: density,
-    );
+    return TilawaSegmentedControlTokens.fromColorScheme(colorScheme);
   }
 
   factory TilawaSegmentedControlTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+    ColorScheme colorScheme,
+  ) {
     final containerBackgroundColor = _containerBackgroundColor(colorScheme);
     final selectedBackgroundColor = _selectedBackgroundColor(colorScheme);
     final containerBorderColor = _containerBorderColor(colorScheme);
-    if (density.isCompact) {
-      return TilawaSegmentedControlTokens(
-        containerPadding: const EdgeInsets.all(
-          4,
-        ), // fix: Spacing & alignment — 8dp grid
-        itemPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        containerBackgroundColor: containerBackgroundColor,
-        selectedBackgroundColor: selectedBackgroundColor,
-        containerBorderColor: containerBorderColor,
-        containerRadius: 10,
-        itemRadius: 8,
-        containerOpacity: 0.3,
-        minItemWidth: 100,
-        selectedFontWeight: FontWeight.bold,
-        unselectedFontWeight: FontWeight.normal,
-        selectedItemShadowColor: const Color(
-          0xFF000000,
-        ).withValues(alpha: 0.05),
-        selectedItemShadowBlur: 4,
-        selectedItemShadowOffset: const Offset(0, 2),
-      );
-    }
     return TilawaSegmentedControlTokens(
       containerPadding: EdgeInsets.all(4),
       itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -846,9 +767,7 @@ class TilawaSeekBarTokens {
   final double bufferedTrackOpacity;
   final double inactiveTrackOpacity;
 
-  factory TilawaSeekBarTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaSeekBarTokens.defaults() {
     // fix: Accessibility — Tilawa 44 dp touch strip for seek interaction.
     return const TilawaSeekBarTokens(
       touchExtent: kTilawaMinInteractiveDimension,
@@ -954,22 +873,14 @@ class TilawaSearchFieldTokens {
   final Color prefixIconMutedColor;
   final Color prefixIconFocusedColor;
 
-  factory TilawaSearchFieldTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaSearchFieldTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
     );
-    return TilawaSearchFieldTokens.fromColorScheme(
-      colorScheme,
-      density: density,
-    );
+    return TilawaSearchFieldTokens.fromColorScheme(colorScheme);
   }
 
-  factory TilawaSearchFieldTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaSearchFieldTokens.fromColorScheme(ColorScheme colorScheme) {
     final backgroundColor = _backgroundColor(colorScheme);
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
@@ -991,34 +902,6 @@ class TilawaSearchFieldTokens {
       alpha: iconOpacity,
     );
     final prefixIconFocusedColor = colorScheme.primary;
-    if (density.isCompact) {
-      // Height stays at the Tilawa hit-target floor (44 dp) — non-negotiable.
-      return TilawaSearchFieldTokens(
-        height: kTilawaMinInteractiveDimension,
-        backgroundColor: backgroundColor,
-        borderRadius: 12,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 8,
-        ), // fix: Spacing & alignment — 8dp grid
-        scrollPadding: const EdgeInsets.all(
-          16,
-        ), // fix: Spacing & alignment — tokenized (2×8dp)
-        iconSize: 16,
-        focusedBorderOpacity: focusedBorderOpacity,
-        unfocusedBorderOpacity: unfocusedBorderOpacity,
-        shadowOpacity: shadowOpacity,
-        hintOpacity: hintOpacity,
-        iconOpacity: iconOpacity,
-        shadowBlur: 8,
-        shadowOffset: Offset(0, 2),
-        focusedBorderColor: focusedBorderColor,
-        unfocusedBorderColor: unfocusedBorderColor,
-        boxShadowColor: boxShadowColor,
-        hintTextColor: hintTextColor,
-        prefixIconMutedColor: prefixIconMutedColor,
-        prefixIconFocusedColor: prefixIconFocusedColor,
-      );
-    }
     return TilawaSearchFieldTokens(
       height: kTilawaMinInteractiveDimension,
       backgroundColor: backgroundColor,
@@ -1190,11 +1073,7 @@ class TilawaCountProgressRingTokens {
   final double progressLabelBorderRadius;
   final double progressLabelBackgroundOpacity;
 
-  factory TilawaCountProgressRingTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // No-op: display-only counter ring; sizes are calibrated for legibility
-    // of the count number (fontSize 36). Keep no-op.
+  factory TilawaCountProgressRingTokens.defaults() {
     return const TilawaCountProgressRingTokens(
       outerSize: 72,
       innerSize: 62,
@@ -1320,18 +1199,7 @@ class TilawaPermissionBannerTokens {
   final double iconSpacing;
   final double actionSpacing;
 
-  factory TilawaPermissionBannerTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaPermissionBannerTokens(
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        borderRadius: 10,
-        iconSize: 16,
-        iconSpacing: 6,
-        actionSpacing: 6,
-      );
-    }
+  factory TilawaPermissionBannerTokens.defaults() {
     return const TilawaPermissionBannerTokens(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       borderRadius: 12,
@@ -1383,15 +1251,7 @@ class TilawaPrayerAlertRowTokens {
   final double verticalPadding;
   final double toggleSpacing;
 
-  factory TilawaPrayerAlertRowTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaPrayerAlertRowTokens(
-        verticalPadding: 2,
-        toggleSpacing: 6,
-      );
-    }
+  factory TilawaPrayerAlertRowTokens.defaults() {
     return const TilawaPrayerAlertRowTokens(
       verticalPadding: 4,
       toggleSpacing: 8,

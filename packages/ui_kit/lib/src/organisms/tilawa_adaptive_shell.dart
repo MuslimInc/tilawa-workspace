@@ -11,10 +11,10 @@ import '../foundation/safe_area_ext.dart';
 
 /// [ValueListenable] that is always `true` and never notifies.
 ///
-/// Used as the default for [TilawaAdaptiveShell.compactBottomNavigationBarVisible]
+/// Used as the default for [TilawaAdaptiveShell.phoneBottomNavigationBarVisible]
 /// so the shell does not need a long-lived [ValueNotifier].
-class _AlwaysShowCompactBottomNavListenable implements ValueListenable<bool> {
-  const _AlwaysShowCompactBottomNavListenable();
+class _AlwaysShowPhoneBottomNavListenable implements ValueListenable<bool> {
+  const _AlwaysShowPhoneBottomNavListenable();
 
   @override
   bool get value => true;
@@ -26,7 +26,7 @@ class _AlwaysShowCompactBottomNavListenable implements ValueListenable<bool> {
   void removeListener(VoidCallback listener) {}
 }
 
-const _kAlwaysShowCompactBottomNav = _AlwaysShowCompactBottomNavListenable();
+const _kAlwaysShowPhoneBottomNav = _AlwaysShowPhoneBottomNavListenable();
 
 /// Builds the icon widget for a nav destination. Receives selection state and
 /// the resolved tint the shell would apply to a material [Icon]; callers may
@@ -64,10 +64,10 @@ class TilawaNavDestination {
 
 /// A shell that adapts its navigation based on the window size.
 ///
-/// - Compact: [BottomNavigationBar] is laid out in a [Column] under an
+/// - Phone (narrow): [BottomNavigationBar] is laid out in a [Column] under an
 ///   [Expanded] body region (not [Scaffold.bottomNavigationBar]) so nested
 ///   tab [Scaffold]s receive bounded constraints. Optional
-///   [compactBottomNavigationBarVisible] can hide the bar (e.g. full-screen
+///   [phoneBottomNavigationBarVisible] can hide the bar (e.g. full-screen
 ///   player). [Scaffold.extendBody] is false.
 /// - Medium/Expanded: Shows a side navigation rail.
 ///
@@ -81,7 +81,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
     required this.onDestinationSelected,
     required this.child,
     required this.bottomPlayer,
-    this.compactBottomNavigationBarVisible,
+    this.phoneBottomNavigationBarVisible,
     this.bottomBarPadding,
     this.bottomBarDecoration,
     this.avoidDisplayFeatures = true,
@@ -96,14 +96,15 @@ class TilawaAdaptiveShell extends StatelessWidget {
   /// the navigation bar/rail boundaries.
   final Widget bottomPlayer;
 
-  /// When non-null, compact mode shows the bottom bar only while this value is
+  /// When non-null, narrow (phone) window class shows the bottom bar only
+  /// while this value is
   /// true (e.g. hide while a full-screen sheet covers the tab bar).
-  final ValueListenable<bool>? compactBottomNavigationBarVisible;
+  final ValueListenable<bool>? phoneBottomNavigationBarVisible;
 
-  /// Optional padding for the bottom bar in compact mode.
+  /// Optional padding for the bottom bar on phone layouts.
   final EdgeInsetsGeometry? bottomBarPadding;
 
-  /// Optional decoration for the bottom bar in compact mode.
+  /// Optional decoration for the bottom bar on phone layouts.
   final Decoration? bottomBarDecoration;
 
   /// Whether to avoid placing content under display features (hinges/folds).
@@ -116,16 +117,16 @@ class TilawaAdaptiveShell extends StatelessWidget {
     final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
     final bool isKeyboardOpen = context.isKeyboardVisible;
 
-    if (windowSize == TilawaWindowSize.compact) {
-      final ValueListenable<bool> compactNavListenable =
-          compactBottomNavigationBarVisible ?? _kAlwaysShowCompactBottomNav;
+    if (windowSize == TilawaWindowSize.narrow) {
+      final ValueListenable<bool> phoneNavListenable =
+          phoneBottomNavigationBarVisible ?? _kAlwaysShowPhoneBottomNav;
 
       final Color shellChromeColor = Theme.of(
         context,
       ).componentTokens.adaptiveShell.bottomNavBackgroundColor;
 
       return ValueListenableBuilder<bool>(
-        valueListenable: compactNavListenable,
+        valueListenable: phoneNavListenable,
         builder: (context, bottomNavVisible, _) {
           // Do NOT wrap the whole [Scaffold] in [MediaQuery.removeViewPadding]
           // (removeBottom: true): [BottomNavigationBar] reads
@@ -328,6 +329,21 @@ class _BottomNavBar extends StatelessWidget {
       context,
     ).scale(1.0).clamp(0.01, 1.0);
 
+    final EdgeInsets resolvedBarPadding =
+        (padding ??
+                EdgeInsets.fromLTRB(
+                  tokens.bottomNavHorizontalMargin,
+                  0,
+                  tokens.bottomNavHorizontalMargin,
+                  0,
+                ))
+            .resolve(Directionality.of(context));
+    final double bottomNavInnerWidth =
+        MediaQuery.sizeOf(context).width - resolvedBarPadding.horizontal;
+    final bool showAllBottomNavLabels =
+        bottomNavInnerWidth >=
+        TilawaBreakpoints.phoneBottomNavAllLabelsMinInnerWidth;
+
     final SystemUiOverlayStyle bottomNavOverlayStyle = SystemUiOverlayStyle(
       systemNavigationBarColor: navColor.withValues(alpha: 1),
       systemNavigationBarDividerColor: Colors.transparent,
@@ -403,6 +419,8 @@ class _BottomNavBar extends StatelessWidget {
                               HapticFeedback.selectionClick();
                               onDestinationSelected(index);
                             },
+                            showSelectedLabels: showAllBottomNavLabels,
+                            showUnselectedLabels: showAllBottomNavLabels,
                             backgroundColor: Colors.transparent,
                             elevation: 0,
                             selectedItemColor: hasSelection

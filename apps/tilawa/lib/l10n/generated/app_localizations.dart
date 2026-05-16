@@ -1154,12 +1154,6 @@ abstract class AppLocalizations {
   /// **'Dark Mode'**
   String get darkTheme;
 
-  /// Toggles tighter spacing and sizing across the app
-  ///
-  /// In en, this message translates to:
-  /// **'Compact design'**
-  String get compactDesign;
-
   /// Choose theme dialog title
   ///
   /// In en, this message translates to:

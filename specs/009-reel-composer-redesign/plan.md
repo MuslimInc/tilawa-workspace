@@ -142,7 +142,7 @@ Phase S1 is line/block-granular. If a selected range starts or ends in the middl
 
 ### B. Stepper hit-area without visual change
 
-Stepper buttons stay visually 36×36 (matches the rest of the app's compact density), but the tappable area expands to 48×48 via a transparent `SizedBox`/`Padding` wrapper. This avoids visual regression and a token churn.
+Stepper buttons stay visually 36×36 (matches the rest of the app’s dense inline controls), but the tappable area expands to 48×48 via a transparent `SizedBox`/`Padding` wrapper. This avoids visual regression and a token churn.
 
 ### C. Mode-aware Save/Share emphasis
 
@@ -191,7 +191,7 @@ Replace literal `fontSize: 16/14/12` with `theme.textTheme.titleSmall?.fontSize`
 | S2 | Precise screenshot mid-line filtering via quran_qcf selected-range preparation API if S1 line granularity leaks adjacent ayahs | Medium-high | No | Yes |
 | 2 | Crop-and-compose — `SelectionCropWindow` shared, reel top-anchored, banner rule explicit | Medium | `kReelComposerV2` | Yes (5 scenarios) |
 | 3 | Single composition widget — preview and capture share one widget tree | Medium | `kReelComposerSingleTree` | Yes (preview-vs-capture pixel diff) |
-| 4 | Token migration — delete `VideoReelDesign`, introduce `TilawaShareCanvasTokens` | Low | No | Yes (light/dark/compact) |
+| 4 | Token migration — delete `VideoReelDesign`, introduce `TilawaShareCanvasTokens` | Low | No | Yes (light/dark) |
 | 5 | UX upgrades — range slider, reciter audition, staged progress, mode-aware emphasis confirmed | Medium | No | Optional |
 | 6 | PictureRecorder capture (optional) | High | `kCaptureViaPictureRecorder` | Yes (raster equivalence) |
 

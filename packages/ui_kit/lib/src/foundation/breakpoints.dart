@@ -10,8 +10,8 @@ import 'content_bounds.dart';
 class TilawaBreakpoints {
   const TilawaBreakpoints._();
 
-  /// Upper bound for compact (phones in portrait).
-  static const double compact = 600;
+  /// Upper bound for the narrow window class (typical phones in portrait).
+  static const double narrowUpperBound = 600;
 
   /// Upper bound for medium (small tablets, foldable inner displays in
   /// portrait, phones in landscape).
@@ -20,7 +20,7 @@ class TilawaBreakpoints {
   /// Upper bound for expanded (tablets, foldables in landscape).
   static const double expanded = 1200;
 
-  /// Minimum **inner** width of the compact bottom nav row (constraints on
+  /// Minimum **inner** width of the phone bottom nav row (constraints on
   /// the destination [Row]) for which every item keeps a visible text label.
   ///
   /// Below this, [TilawaAdaptiveShell] shows **icons only** with equal-width
@@ -29,13 +29,13 @@ class TilawaBreakpoints {
   /// Tuned near where five equal columns fall under ~72 logical px each
   /// after default horizontal margins, which commonly produces clipped labels
   /// on ~360–400dp phones.
-  static const double compactBottomNavAllLabelsMinInnerWidth = 400;
+  static const double phoneBottomNavAllLabelsMinInnerWidth = 400;
 }
 
 /// Discrete window-size class, aligned with Material 3 window size classes.
 enum TilawaWindowSize {
   /// width < 600
-  compact,
+  narrow,
 
   /// 600 ≤ width < 840
   medium,
@@ -57,11 +57,13 @@ extension TilawaWindowSizeX on BuildContext {
     final width = MediaQuery.sizeOf(this).width;
     if (width >= TilawaBreakpoints.expanded) return TilawaWindowSize.large;
     if (width >= TilawaBreakpoints.medium) return TilawaWindowSize.expanded;
-    if (width >= TilawaBreakpoints.compact) return TilawaWindowSize.medium;
-    return TilawaWindowSize.compact;
+    if (width >= TilawaBreakpoints.narrowUpperBound) {
+      return TilawaWindowSize.medium;
+    }
+    return TilawaWindowSize.narrow;
   }
 
-  bool get isCompact => windowSize == TilawaWindowSize.compact;
+  bool get isNarrow => windowSize == TilawaWindowSize.narrow;
 
   bool get isAtLeastMedium => windowSize.index >= TilawaWindowSize.medium.index;
 

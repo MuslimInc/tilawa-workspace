@@ -22,7 +22,7 @@ enum TilawaButtonVariant {
 
 /// Sizes for [TilawaButton] determining its height and padding.
 enum TilawaButtonSize {
-  /// Smallest height, useful for dense UI or small cards.
+  /// Smallest height, useful for tight vertical spacing or small cards.
   small,
 
   /// Standard height for most mobile interactions.
@@ -37,8 +37,8 @@ enum TilawaButtonSize {
 /// Supports multiple variants, sizes, and states (including loading and disabled).
 ///
 /// [TilawaButton] handles its own internal layout, including icons and
-/// loading indicators, while ensuring a minimum touch target of 48x48
-/// unless [compact] is true (dense inline actions, e.g. banner links).
+/// loading indicators, while ensuring a minimum touch target of 48×48
+/// unless [shrinkWrapTapTarget] is true (e.g. inline text-link actions).
 ///
 /// Optional [backgroundColor], [foregroundColor], and [borderColor] override
 /// the colours implied by [variant] for branded or marketing surfaces.
@@ -61,7 +61,7 @@ class TilawaButton extends StatelessWidget {
     this.borderRadius,
     this.padding,
     this.textStyle,
-    this.compact = false,
+    this.shrinkWrapTapTarget = false,
   });
 
   /// The text label to display.
@@ -111,8 +111,9 @@ class TilawaButton extends StatelessWidget {
   /// Merged on top of the built-in label [TextStyle] (font size from [size]).
   final TextStyle? textStyle;
 
-  /// When true, skips the 48×48 minimum and uses a shrink-wrapped tap target.
-  final bool compact;
+  /// When true, skips the 48×48 minimum and uses a shrink-wrapped tap
+  /// target ([MaterialTapTargetSize.shrinkWrap]).
+  final bool shrinkWrapTapTarget;
 
   /// Whether the button is effectively disabled.
   bool get _isDisabled => onPressed == null || isLoading;
@@ -145,11 +146,11 @@ class TilawaButton extends StatelessWidget {
       minimumSize: WidgetStateProperty.all(
         Size(
           isFullWidth ? double.infinity : 0,
-          compact ? 0 : height,
+          shrinkWrapTapTarget ? 0 : height,
         ),
       ),
       padding: WidgetStateProperty.all(resolvedPadding),
-      tapTargetSize: compact
+      tapTargetSize: shrinkWrapTapTarget
           ? MaterialTapTargetSize.shrinkWrap
           : MaterialTapTargetSize.padded,
       backgroundColor: WidgetStateProperty.resolveWith((states) {
@@ -218,7 +219,7 @@ class TilawaButton extends StatelessWidget {
           : (semanticLabel ?? text),
       button: true,
       enabled: !_isDisabled,
-      child: compact
+      child: shrinkWrapTapTarget
           ? textButton
           : ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48, minWidth: 48),

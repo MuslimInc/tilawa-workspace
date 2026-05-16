@@ -774,7 +774,7 @@ class _ProgressCard extends StatelessWidget {
               text: context.l10n.cancel,
               variant: TilawaButtonVariant.ghost,
               size: TilawaButtonSize.small,
-              compact: true,
+              shrinkWrapTapTarget: true,
               leadingIcon: const Icon(Icons.close_rounded),
               onPressed: onCancel,
               foregroundColor: Colors.white.withValues(alpha: 0.84),

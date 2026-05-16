@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tilawa_ui_kit/src/foundation/density.dart';
 
 import '../foundation/app_colors.dart';
 import '../foundation/app_theme.dart';
@@ -18,7 +17,6 @@ class TilawaPreviewWrapper extends StatelessWidget {
     this.textScale = 1.0,
     this.padding = const EdgeInsets.all(16.0),
     this.useGoogleFonts = false, // Default to false for test/preview stability
-    this.density = TilawaDensity.comfortable,
   });
 
   final Widget child;
@@ -28,10 +26,6 @@ class TilawaPreviewWrapper extends StatelessWidget {
   final EdgeInsets padding;
   final bool useGoogleFonts;
 
-  /// UI density for the wrapped subtree. Defaults to [TilawaDensity.comfortable]
-  /// so existing previews and goldens remain visually unchanged.
-  final TilawaDensity density;
-
   @override
   Widget build(BuildContext context) {
     final theme = isDark
@@ -39,12 +33,10 @@ class TilawaPreviewWrapper extends StatelessWidget {
             primaryColor: AppColors.primaryCyan,
             isDefaultPreset: true,
             useGoogleFontsOverride: useGoogleFonts,
-            density: density,
           )
         : AppTheme.getLightTheme(
             primaryColor: AppColors.primaryCyan,
             useGoogleFontsOverride: useGoogleFonts,
-            density: density,
           );
 
     final mediaQuery = MediaQuery.maybeOf(context);

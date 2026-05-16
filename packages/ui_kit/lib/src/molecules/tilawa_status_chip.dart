@@ -34,9 +34,9 @@ class TilawaStatusChip extends StatelessWidget {
       icon: icon,
       backgroundColor: backgroundColor ?? tokens.backgroundColor,
       foregroundColor: effectiveForeground,
-      padding: padding ?? tokens.compactPadding,
+      padding: padding ?? tokens.inlinePadding,
       borderRadius: tokens.roundedRadius,
-      iconSize: tokens.compactIconSize,
+      iconSize: tokens.inlineIconSize,
       showLabel: showLabel,
       textStyle: theme.textTheme.labelSmall?.copyWith(
         fontWeight: tokens.statusFontWeight,

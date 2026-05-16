@@ -3,7 +3,7 @@ import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Compact app bar showing the reciter name on a single solid primary
+/// Dense app bar showing the reciter name on a single solid primary
 /// surface. Decorative circles and gradient fills were intentionally
 /// removed in the visual-simplification pass — the goal is to let the
 /// reciter name be the focal element, not the chrome.

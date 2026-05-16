@@ -185,7 +185,7 @@ void main() {
       },
     );
 
-    testWidgets('compact skips 48×48 outer minimum constraints', (
+    testWidgets('shrinkWrapTapTarget skips 48×48 outer minimum constraints', (
       WidgetTester tester,
     ) async {
       await tester.pumpWidget(
@@ -193,7 +193,7 @@ void main() {
           TilawaButton(
             text: 'Link',
             variant: TilawaButtonVariant.ghost,
-            compact: true,
+            shrinkWrapTapTarget: true,
             onPressed: () {},
           ),
         ),
