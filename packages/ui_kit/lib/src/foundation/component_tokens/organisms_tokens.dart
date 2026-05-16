@@ -1706,6 +1706,11 @@ class TilawaImmersiveComposerTokens {
 }
 
 /// Component tokens for [TilawaBottomSheetScaffold].
+///
+/// Default insets follow the kit spacing scale: **16 dp** horizontal,
+/// **12 dp** body top, **24 dp** body bottom (Medium / Extra Large on
+/// [TilawaDesignTokens]) for reading-oriented sheets—see **§14** in root
+/// `DESIGN.md`.
 @immutable
 class TilawaBottomSheetScaffoldTokens {
   const TilawaBottomSheetScaffoldTokens({
@@ -1723,8 +1728,8 @@ class TilawaBottomSheetScaffoldTokens {
   factory TilawaBottomSheetScaffoldTokens.defaults() {
     return const TilawaBottomSheetScaffoldTokens(
       topRadius: 28,
-      headerPadding: EdgeInsets.fromLTRB(20, 8, 12, 12),
-      bodyPadding: EdgeInsets.all(20),
+      headerPadding: EdgeInsets.fromLTRB(16, 8, 12, 12),
+      bodyPadding: EdgeInsets.fromLTRB(16, 12, 16, 24),
       closeButtonSize: 40,
     );
   }

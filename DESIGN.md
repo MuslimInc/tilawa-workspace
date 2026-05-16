@@ -190,6 +190,44 @@ Short prompts that align outputs with this repo:
 | App theme wiring | `apps/tilawa/lib/tilawa_app.dart` |
 | Primary presets | `apps/tilawa/lib/features/theme/domain/primary_color_preset.dart` |
 | Deeper color docs | `docs/design/colors.md` |
+| External DESIGN.md catalog (index) | `docs/design/awesome-design-md-readme.md` |
+| Third-party reference designs (per brand) | `design-md/<brand>/DESIGN.md` |
+
+---
+
+## 13. External design references
+
+**Canonical for Tilawa:** this file (`DESIGN.md` at repo root) plus code in `packages/ui_kit`.
+
+**Local library:** the `design-md/` directory is a snapshot of
+[VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md)
+(see the catalog and usage notes in
+[`docs/design/awesome-design-md-readme.md`](docs/design/awesome-design-md-readme.md)).
+Use **one** `design-md/<brand>/DESIGN.md` per initiative as a **moodboard**
+(layout rhythm, elevation, patterns)—not as a replacement palette.
+
+**Agent workflow:** subordinate any external file to this spec: implement with
+`TilawaDesignTokens`, `TilawaComponentTokens`, and `ColorScheme`; do not paste
+reference hex into feature code unless it becomes a deliberate token in
+`AppColors` / theme refinement.
+
+**Updating the library:** refresh `design-md/` from upstream (copy, re-clone, or
+`git submodule`) when you want new references; keep the snapshot license
+(MIT) in mind.
+
+---
+
+## 14. Active design initiative (rolling)
+
+**Status:** In progress — sheet / reading-surface rhythm.
+
+| Field | Detail |
+|-------|--------|
+| **Reference moodboard** | [`design-md/mintlify/DESIGN.md`](design-md/mintlify/DESIGN.md) — dense, reading-optimized prose surfaces and clear section padding (not Mintlify colors or fonts). |
+| **Tilawa implementation** | `TilawaBottomSheetScaffoldTokens.defaults()` in `organisms_tokens.dart`: horizontal insets **16 dp** (`spaceLarge`), header unchanged on trailing edge, body uses **12 dp** top and **24 dp** bottom (`spaceMedium` / `spaceExtraLarge`) for scroll/end breathing room. |
+| **Next candidates** | Wire a public `TilawaBottomSheetScaffold` that consumes these tokens; revisit `TilawaSettingsGroup` vertical rhythm only with golden updates. |
+
+Replace or extend this section when the initiative completes or a new one starts.
 
 ---
 

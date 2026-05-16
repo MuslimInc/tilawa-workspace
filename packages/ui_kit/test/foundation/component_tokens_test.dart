@@ -608,6 +608,35 @@ void main() {
     });
   });
 
+  group('TilawaBottomSheetScaffoldTokens', () {
+    test('defaults creates expected values', () {
+      final tokens = TilawaBottomSheetScaffoldTokens.defaults();
+      expect(tokens.topRadius, 28.0);
+      expect(
+        tokens.headerPadding,
+        const EdgeInsets.fromLTRB(16, 8, 12, 12),
+      );
+      expect(
+        tokens.bodyPadding,
+        const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      );
+      expect(tokens.closeButtonSize, 40.0);
+    });
+
+    test('copyWith updates padding and sizes', () {
+      final original = TilawaBottomSheetScaffoldTokens.defaults();
+      final updated = original.copyWith(
+        topRadius: 24,
+        closeButtonSize: 44,
+        bodyPadding: const EdgeInsets.all(16),
+      );
+      expect(updated.topRadius, 24.0);
+      expect(updated.closeButtonSize, 44.0);
+      expect(updated.bodyPadding, const EdgeInsets.all(16));
+      expect(updated.headerPadding, original.headerPadding);
+    });
+  });
+
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();

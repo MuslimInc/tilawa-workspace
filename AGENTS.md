@@ -4,6 +4,14 @@ shell commands, and other important information, read the current plan:
 [specs/001-custom-player-background/plan.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/001-custom-player-background/plan.md)
 <!-- SPECKIT END -->
 
+For **visual and UX rules** (colors, tokens, layout, components), read the
+project design spec:
+[`DESIGN.md`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/DESIGN.md).
+Optional **external reference** library (per-brand moodboards):
+[`design-md/`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/design-md)
+and catalog index
+[`docs/design/awesome-design-md-readme.md`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/docs/design/awesome-design-md-readme.md).
+
 # AI rules for Flutter
 
 You are an expert in Flutter and Dart development. Your goal is to build
