@@ -188,17 +188,14 @@ class TilawaCard extends StatelessWidget {
         highlightColor ??
         colorScheme.onSurface.withValues(alpha: designTokens.opacitySubtle / 2);
 
-    // Render the decoration via Container (same as the non-tappable branch) and
-
-    // overlay an InkWell with a transparent Material on top. Using `Ink` here
-
-    // would force the decoration onto a Material ancestor, which can pick up
-
-    // theme surface-tinting and shift the rendered color.
+    // A non-positioned child defines stack size (finite height in e.g. vertical
+    // [ListView]s where max height is infinite). [SizedBox] width forces the
+    // painted card and ink to span the cross axis; [Positioned.fill] ink
+    // matches that footprint.
 
     return Stack(
       children: [
-        content,
+        SizedBox(width: double.infinity, child: content),
 
         Positioned.fill(
           child: Material(

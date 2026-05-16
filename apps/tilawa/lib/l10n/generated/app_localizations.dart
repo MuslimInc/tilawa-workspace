@@ -1130,6 +1130,12 @@ abstract class AppLocalizations {
   /// **'Purple'**
   String get colorPurple;
 
+  /// Gold accent preset name for primary color
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get colorGold;
+
   /// Theme setting title
   ///
   /// In en, this message translates to:

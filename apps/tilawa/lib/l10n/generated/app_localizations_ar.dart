@@ -558,6 +558,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get colorPurple => 'أرجواني';
 
   @override
+  String get colorGold => 'ذهبي';
+
+  @override
   String get theme => 'السمة';
 
   @override

@@ -23,6 +23,7 @@ void main() {
     const presetNoOpCases = <String, Color>{
       'teal': AppColors.primaryTeal,
       'sage': AppColors.primarySage,
+      'gold': AppColors.primaryGold,
       'brown': AppColors.primaryBrown,
       'purple': AppColors.primaryPurple,
     };

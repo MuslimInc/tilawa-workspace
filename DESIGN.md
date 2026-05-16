@@ -9,7 +9,7 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 ## 1. Visual theme and atmosphere
 
 - **Material 3** via **FlexColorScheme**: surfaces, containers, and component themes are assembled in `AppTheme` and refined with Tilawa-specific ramps (`AppColors`).
-- **Calm, content-first:** small palette, quiet neutrals, one **user-selectable primary** accent. Surfaces are near-monochrome in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
+- **Calm, content-first:** small palette, quiet neutrals, one **user-selectable primary** accent from **curated presets** (default **Tilawa teal**); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces are near-monochrome in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
 - **Readable for Arabic:** line-height token `textHeightLoose` supports dense script in readers and lists (see `TilawaDesignTokens`).
 - **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` (not compact VisualDensity).
 - **Premium depth:** layered shadows (`opacityShadow` / `opacityShadowStrong`), optional **glass** tokens (`blurGlass`, `opacityGlass`) for overlays and chrome — use consistently, not everywhere.
@@ -20,12 +20,13 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 
 ### User-selectable primary (accent)
 
-Offered in app settings (`PrimaryColorPreset`). Default aligns with native splash **teal** `#1AADC5`.
+Offered in app settings (`PrimaryColorPreset`). Default aligns with native splash **teal** `#1AADC5`. **Custom** hex is the last row in the primary-color sheet; extreme values may be adjusted in light theme for readability.
 
 | Preset | Hex (reference) | Notes |
 |--------|-----------------|--------|
 | Teal (default) | `#1AADC5` | Brand default |
 | Sage | `#6F7F58` | Scholarly green |
+| Gold | `#8C681F` | Warm, Mushaf-inspired accent |
 | Brown | `#7B5E3B` | Warm neutral accent |
 | Purple | `#7A5C89` | Muted purple |
 

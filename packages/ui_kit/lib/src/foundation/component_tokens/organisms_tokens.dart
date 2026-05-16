@@ -1193,7 +1193,7 @@ class TilawaSettingsGroupTokens {
       groupTitleLetterSpacing: 1.1,
       tileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
-        vertical: 0,
+        vertical: 12,
       ),
       switchTileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,

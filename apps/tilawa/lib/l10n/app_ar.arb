@@ -770,6 +770,10 @@
     "@colorPurple": {
         "description": "Purple color name"
     },
+    "colorGold": "ذهبي",
+    "@colorGold": {
+        "description": "Gold accent preset name for primary color"
+    },
     "theme": "السمة",
     "@theme": {
         "description": "Theme setting title"

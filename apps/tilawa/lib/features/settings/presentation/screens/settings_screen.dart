@@ -135,6 +135,7 @@ String _localizedPresetName(BuildContext context, PrimaryColorPreset preset) {
   return switch (preset) {
     PrimaryColorPreset.teal => l10n.colorCyan,
     PrimaryColorPreset.sage => l10n.colorGreen,
+    PrimaryColorPreset.gold => l10n.colorGold,
     PrimaryColorPreset.brown => l10n.colorBrown,
     PrimaryColorPreset.purple => l10n.colorPurple,
   };
@@ -991,8 +992,8 @@ class _ColorPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final isCustom = currentSource == PrimaryColorSource.custom;
 
     return SafeArea(
@@ -1009,7 +1010,8 @@ class _ColorPickerSheet extends StatelessWidget {
             ),
             SizedBox(height: tokens.spaceLarge),
             ...PrimaryColorPreset.values.map((preset) {
-              final isSelected = !isCustom && currentPresetId == preset.id;
+              final isSelected =
+                  !isCustom && currentPresetId == preset.id;
               return TilawaSelectionTile(
                 leading: CircleAvatar(
                   backgroundColor: preset.value,
@@ -1026,20 +1028,19 @@ class _ColorPickerSheet extends StatelessWidget {
             }),
             TilawaSelectionTile(
               leading: CircleAvatar(
-                radius:
-                    TilawaSettingsScreenTokens.primaryPickerPresetSwatchRadius,
+                radius: TilawaSettingsScreenTokens
+                    .primaryPickerPresetSwatchRadius,
                 backgroundColor: isCustom
                     ? currentColor
-                    : colorScheme.surfaceContainerHigh,
+                    : theme.colorScheme.surfaceContainerHigh,
                 child: isCustom
                     ? null
                     : Icon(
                         FluentIcons.color_24_regular,
-                        size:
-                            TilawaSettingsScreenTokens
+                        size: TilawaSettingsScreenTokens
                                 .primaryPickerCustomSwatchSize *
                             0.5,
-                        color: colorScheme.primary,
+                        color: theme.colorScheme.primary,
                       ),
               ),
               title: context.l10n.custom,
