@@ -219,6 +219,8 @@ class DownloadItemCard extends StatelessWidget {
       DownloadStatus.pending => Icons.schedule_rounded,
     };
 
+    // TILAWA_BRAND.md §5: in-card decorative icon. Tinted fill + hairline,
+    // no shadow — the status color carries the meaning.
     return Container(
       padding: EdgeInsets.all(tokens.spaceSmall),
       decoration: BoxDecoration(
@@ -228,13 +230,6 @@ class DownloadItemCard extends StatelessWidget {
           color: color.withValues(alpha: tokens.opacitySubtle),
           width: tokens.borderWidthThin,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: tokens.opacityShadow * 0.22),
-            blurRadius: tokens.blurShadow * 0.5,
-            offset: tokens.shadowOffsetSmall,
-          ),
-        ],
       ),
       child: Icon(icon, color: color, size: tokens.iconSizeMedium),
     );

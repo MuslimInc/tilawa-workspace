@@ -57,9 +57,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   ToastUtils.showSuccessToast(message);
                 },
                 trialNotEligible: (message) {
+                  // §3: not a CTA, not an error — informational. Vellum tier
+                  // is the quiet raised neutral, no second accent needed.
                   ToastUtils.showToast(
                     msg: message,
-                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceContainerHigh,
                   );
                 },
               );
@@ -122,13 +125,16 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final accent = canDownload ? colorScheme.primary : colorScheme.tertiary;
+    // TILAWA_BRAND.md §3: one accent per screen — Ink. The "not yet premium"
+    // state earns differentiation via a quieter surface tier, not a second
+    // (Gilding) accent.
+    final accent = colorScheme.primary;
     final container = canDownload
         ? colorScheme.primaryContainer
-        : colorScheme.tertiaryContainer;
+        : colorScheme.surfaceContainerLow;
     final onContainer = canDownload
         ? colorScheme.onPrimaryContainer
-        : colorScheme.onTertiaryContainer;
+        : colorScheme.onSurface;
 
     return Card(
       elevation: 0,

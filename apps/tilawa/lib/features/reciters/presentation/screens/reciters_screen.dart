@@ -566,8 +566,10 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
         label: context.l10n.reciters,
         explicitChildNodes: true,
         child: DecoratedBox(
+          // TILAWA_BRAND.md §3: header chrome is "Vellum" — sits slightly above
+          // the page (Parchment) without elevating to a card. One hairline below.
           decoration: BoxDecoration(
-            color: colorScheme.surface,
+            color: colorScheme.surfaceContainerHigh,
             border: Border(
               bottom: BorderSide(
                 color: colorScheme.outlineVariant,
@@ -607,7 +609,9 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
                             icon: FluentIcons.arrow_download_24_regular,
                             tooltip: context.l10n.viewDownloads,
                             semanticLabel: context.l10n.viewDownloads,
-                            backgroundColor: colorScheme.surfaceContainerHigh,
+                            // Quiet inset on Vellum header — tier change vs.
+                            // colorScheme.surface is the only divider needed.
+                            backgroundColor: colorScheme.surface,
                             onTap: () => const DownloadsRoute().push(context),
                           ),
                         ],
@@ -783,7 +787,7 @@ class _FavoritesToggle extends StatelessWidget {
             toggled: isActive,
             tooltip: filterLabel,
             semanticLabel: filterLabel,
-            backgroundColor: theme.colorScheme.surfaceContainerHigh,
+            backgroundColor: theme.colorScheme.surface,
             onTap: onTap,
           ),
           PositionedDirectional(
@@ -807,8 +811,10 @@ class _FavoritesToggle extends StatelessWidget {
                     horizontal: tokens.spaceExtraSmall + tokens.spaceTiny,
                   ),
                   decoration: BoxDecoration(
+                    // Ring blends into the Vellum header (surfaceContainerHigh)
+                    // when inactive — TILAWA_BRAND.md §3 Vellum role.
                     color: isActive
-                        ? theme.colorScheme.surface
+                        ? theme.colorScheme.surfaceContainerHigh
                         : theme.colorScheme.primary,
                     borderRadius: BorderRadius.circular(
                       tokens.radiusExtraLarge,
@@ -816,7 +822,7 @@ class _FavoritesToggle extends StatelessWidget {
                     border: Border.all(
                       color: isActive
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.surface,
+                          : theme.colorScheme.surfaceContainerHigh,
                       width: tokens.borderWidthThin + tokens.borderWidthThin,
                     ),
                   ),

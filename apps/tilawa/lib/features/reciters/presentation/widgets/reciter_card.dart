@@ -164,7 +164,9 @@ class _FavoriteButton extends StatelessWidget {
         onChanged: (_) =>
             context.read<FavoritesCubit>().toggleFavorite(reciter),
         iconSize: tokens.iconSizeMedium,
-        activeIconColor: colorScheme.error,
+        // TILAWA_BRAND.md §3: favorite is not destructive — active state uses
+        // Ink (primary), the app's single accent for "I chose this" signals.
+        activeIconColor: colorScheme.primary,
         inactiveIconColor: colorScheme.onSurfaceVariant.withValues(
           alpha: tokens.opacityMedium,
         ),

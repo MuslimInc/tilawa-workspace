@@ -105,21 +105,12 @@ class SurahListTile extends StatelessWidget {
                   height: badgeSize,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
+                    // §5: no shadow on in-card badges. Active state speaks via
+                    // the saturated activeColor fill + icon swap.
                     color: isCurrentItem
                         ? activeColor
                         : colorScheme.primaryContainer,
                     borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                    boxShadow: isCurrentItem
-                        ? [
-                            BoxShadow(
-                              color: activeColor.withValues(
-                                alpha: tokens.opacitySubtle * 2,
-                              ),
-                              blurRadius: tokens.blurGlass / 2,
-                              offset: tokens.shadowOffsetSmall,
-                            ),
-                          ]
-                        : null,
                   ),
                   child: isCurrentItem
                       ? Icon(
@@ -189,22 +180,12 @@ class SurahListTile extends StatelessWidget {
                       duration: tokens.durationFast,
                       width: badgeSize,
                       height: badgeSize,
+                      // §5: play badge stays flat — color alone signals active.
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isCurrentItem
                             ? activeColor
                             : colorScheme.primaryContainer,
-                        boxShadow: isCurrentItem
-                            ? [
-                                BoxShadow(
-                                  color: activeColor.withValues(
-                                    alpha: tokens.opacitySubtle * 2,
-                                  ),
-                                  blurRadius: tokens.blurGlass / 2,
-                                  offset: tokens.shadowOffsetSmall,
-                                ),
-                              ]
-                            : null,
                       ),
                       child: Icon(
                         isCurrentItem && isPlaying

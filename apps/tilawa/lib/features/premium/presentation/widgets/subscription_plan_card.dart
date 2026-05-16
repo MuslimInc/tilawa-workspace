@@ -18,11 +18,12 @@ class SubscriptionPlanCard extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final Color accent = plan.isPopular
-        ? colorScheme.tertiary
-        : colorScheme.primary;
+    // TILAWA_BRAND.md §3: Gilding (tertiary) is decorative, never a CTA color.
+    // The "Popular" plan earns loudness from the badge + outlined border, not
+    // from a gold subscribe button. Both plans share the Ink (primary) accent.
+    final Color accent = colorScheme.primary;
     final Color surface = plan.isPopular
-        ? colorScheme.tertiaryContainer.withValues(alpha: 0.55)
+        ? colorScheme.primaryContainer.withValues(alpha: 0.18)
         : colorScheme.surfaceContainerLow;
 
     return Card(
@@ -62,14 +63,16 @@ class SubscriptionPlanCard extends StatelessWidget {
                       vertical: tokens.spaceTiny,
                     ),
                     decoration: BoxDecoration(
-                      color: colorScheme.tertiary,
+                      // One-accent rule: badge keeps the same Ink family as the
+                      // Subscribe CTA below it (TILAWA_BRAND.md §10).
+                      color: colorScheme.primary,
                       borderRadius: BorderRadius.circular(tokens.radiusMedium),
                     ),
                     child: Text(
                       'POPULAR',
                       style: theme.textTheme.labelSmall?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: colorScheme.onTertiary,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
                   ),
@@ -148,16 +151,12 @@ class SubscriptionPlanCard extends StatelessWidget {
                 isFullWidth: true,
                 onPressed: onSelect,
                 backgroundColor: accent,
-                foregroundColor: plan.isPopular
-                    ? colorScheme.onTertiary
-                    : colorScheme.onPrimary,
+                foregroundColor: colorScheme.onPrimary,
                 borderRadius: tokens.radiusMedium,
                 padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
                 textStyle: theme.textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w800,
-                  color: plan.isPopular
-                      ? colorScheme.onTertiary
-                      : colorScheme.onPrimary,
+                  color: colorScheme.onPrimary,
                 ),
               ),
             ),
