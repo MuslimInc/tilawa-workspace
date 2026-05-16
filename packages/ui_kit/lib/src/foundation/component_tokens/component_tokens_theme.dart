@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../density.dart';
-import '../design_tokens.dart';
 import 'atoms_tokens.dart';
 import 'molecules_tokens.dart';
 import 'organisms_tokens.dart';
@@ -10,7 +8,6 @@ import 'organisms_tokens.dart';
 @immutable
 class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   const TilawaComponentTokens({
-    required this.density,
     required this.sectionTitle,
     required this.sheetHandle,
     required this.card,
@@ -68,35 +65,21 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaPrayerAlertRowTokens prayerAlertRow;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
 
-  /// The density mode for this component token set.
-  final TilawaDensity density;
-
   /// Creates light theme component tokens.
-  ///
-  /// [density] controls component sizing. In Phase 0, both modes produce
-  /// identical values. Future phases will implement compact-specific values
-  /// per component family.
-  factory TilawaComponentTokens.light({
-    TilawaDensity density = TilawaDensity.comfortable,
-    ColorScheme? colorScheme,
-  }) => TilawaComponentTokens._create(
-    density: density,
-    brightness: Brightness.light,
-    colorScheme: colorScheme,
-  );
+  factory TilawaComponentTokens.light({ColorScheme? colorScheme}) =>
+      TilawaComponentTokens._create(
+        brightness: Brightness.light,
+        colorScheme: colorScheme,
+      );
 
-  factory TilawaComponentTokens.dark({
-    TilawaDensity density = TilawaDensity.comfortable,
-    ColorScheme? colorScheme,
-  }) => TilawaComponentTokens._create(
-    density: density,
-    brightness: Brightness.dark,
-    colorScheme: colorScheme,
-  );
+  factory TilawaComponentTokens.dark({ColorScheme? colorScheme}) =>
+      TilawaComponentTokens._create(
+        brightness: Brightness.dark,
+        colorScheme: colorScheme,
+      );
 
-  /// Internal factory for creating tokens with the given density and brightness.
+  /// Internal factory for creating tokens with the given brightness.
   factory TilawaComponentTokens._create({
-    required TilawaDensity density,
     required Brightness brightness,
     ColorScheme? colorScheme,
   }) {
@@ -107,72 +90,52 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
           brightness: brightness,
         );
     return TilawaComponentTokens(
-      density: density,
-      sectionTitle: TilawaSectionTitleTokens.defaults(density: density),
-      sheetHandle: TilawaSheetHandleTokens.defaults(density: density),
-      card: TilawaCardTokens.defaults(density: density),
-      iconBox: TilawaIconBoxTokens.fromColorScheme(
-        effectiveColorScheme,
-        density: density,
-      ),
-      loadingIndicator: TilawaLoadingIndicatorTokens.defaults(density: density),
-      divider: TilawaDividerTokens.defaults(density: density),
-      emptyState: TilawaEmptyStateTokens.defaults(density: density),
-      errorState: TilawaErrorStateTokens.defaults(density: density),
+      sectionTitle: TilawaSectionTitleTokens.defaults(),
+      sheetHandle: TilawaSheetHandleTokens.defaults(),
+      card: TilawaCardTokens.defaults(),
+      iconBox: TilawaIconBoxTokens.fromColorScheme(effectiveColorScheme),
+      loadingIndicator: TilawaLoadingIndicatorTokens.defaults(),
+      divider: TilawaDividerTokens.defaults(),
+      emptyState: TilawaEmptyStateTokens.defaults(),
+      errorState: TilawaErrorStateTokens.defaults(),
       alphabetScrollbar: TilawaAlphabetScrollbarTokens.fromColorScheme(
         effectiveColorScheme,
       ),
-      feedbackStrip: TilawaFeedbackStripTokens.defaults(density: density),
-      glassPanel: TilawaGlassPanelTokens.defaults(density: density),
-      iconActionButton: TilawaIconActionButtonTokens.defaults(density: density),
-      chip: TilawaChipTokens.fromColorScheme(
-        effectiveColorScheme,
-        density: density,
-      ),
+      feedbackStrip: TilawaFeedbackStripTokens.defaults(),
+      glassPanel: TilawaGlassPanelTokens.defaults(),
+      iconActionButton: TilawaIconActionButtonTokens.defaults(),
+      chip: TilawaChipTokens.fromColorScheme(effectiveColorScheme),
       segmentedControl: TilawaSegmentedControlTokens.fromColorScheme(
         effectiveColorScheme,
-        density: density,
       ),
-      seekBar: TilawaSeekBarTokens.defaults(density: density),
+      seekBar: TilawaSeekBarTokens.defaults(),
       searchField: TilawaSearchFieldTokens.fromColorScheme(
         effectiveColorScheme,
-        density: density,
       ),
-      countProgressRing: TilawaCountProgressRingTokens.defaults(
-        density: density,
-      ),
-      playerBackground: TilawaPlayerBackgroundTokens.defaults(density: density),
-      footerBar: TilawaFooterBarTokens.defaults(density: density),
+      countProgressRing: TilawaCountProgressRingTokens.defaults(),
+      playerBackground: TilawaPlayerBackgroundTokens.defaults(),
+      footerBar: TilawaFooterBarTokens.defaults(),
       mediaPlayerBar: TilawaMediaPlayerBarTokens.fromColorScheme(
         effectiveColorScheme,
-        density: density,
       ),
       adaptiveShell: TilawaAdaptiveShellTokens.fromColorScheme(
         effectiveColorScheme,
-        density: density,
       ),
       settingsGroup: TilawaSettingsGroupTokens.fromColorScheme(
         effectiveColorScheme,
-        density: density,
       ),
       immersiveComposer: TilawaImmersiveComposerTokens.fromColorScheme(
         effectiveColorScheme,
       ),
-      iconToggle: TilawaIconToggleTokens.fromColorScheme(
-        effectiveColorScheme,
-        density: density,
-      ),
-      permissionBanner: TilawaPermissionBannerTokens.defaults(density: density),
-      prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(density: density),
-      bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(
-        density: density,
-      ),
+      iconToggle: TilawaIconToggleTokens.fromColorScheme(effectiveColorScheme),
+      permissionBanner: TilawaPermissionBannerTokens.defaults(),
+      prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(),
+      bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
     );
   }
 
   @override
   TilawaComponentTokens copyWith({
-    TilawaDensity? density,
     TilawaSectionTitleTokens? sectionTitle,
     TilawaSheetHandleTokens? sheetHandle,
     TilawaCardTokens? card,
@@ -202,7 +165,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
   }) {
     return TilawaComponentTokens(
-      density: density ?? this.density,
       sectionTitle: sectionTitle ?? this.sectionTitle,
       sheetHandle: sheetHandle ?? this.sheetHandle,
       card: card ?? this.card,
@@ -239,9 +201,7 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     double t,
   ) {
     if (other is! TilawaComponentTokens) return this;
-    // Preserve density of 'this' token during lerp.
     return TilawaComponentTokens(
-      density: density,
       sectionTitle: TilawaSectionTitleTokens.lerp(
         sectionTitle,
         other.sectionTitle,
@@ -351,13 +311,8 @@ extension TilawaComponentTokensX on ThemeData {
     final TilawaComponentTokens? ext = extension<TilawaComponentTokens>();
     if (ext != null) return ext;
 
-    final TilawaDensity density =
-        extension<TilawaDesignTokens>()?.density ?? TilawaDensity.comfortable;
     return colorScheme.brightness == Brightness.dark
-        ? TilawaComponentTokens.dark(density: density, colorScheme: colorScheme)
-        : TilawaComponentTokens.light(
-            density: density,
-            colorScheme: colorScheme,
-          );
+        ? TilawaComponentTokens.dark(colorScheme: colorScheme)
+        : TilawaComponentTokens.light(colorScheme: colorScheme);
   }
 }

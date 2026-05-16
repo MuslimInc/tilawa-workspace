@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../density.dart';
 import '../design_tokens.dart' show kTilawaMinInteractiveDimension;
 import 'token_lerp.dart';
 
@@ -21,10 +20,7 @@ class TilawaPlayerBackgroundTokens {
   final double defaultOverlayOpacity;
   final Color overlayColor;
 
-  factory TilawaPlayerBackgroundTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // No-op: pure backdrop layer (cache scale, blur, overlay). No layout.
+  factory TilawaPlayerBackgroundTokens.defaults() {
     return const TilawaPlayerBackgroundTokens(
       cacheWidthScale: 2,
       defaultBlurAmount: 0,
@@ -90,20 +86,7 @@ class TilawaFooterBarTokens {
   final double secondaryLabelFontSize;
   final double secondaryLabelOpacity;
 
-  factory TilawaFooterBarTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaFooterBarTokens(
-        height: 52,
-        horizontalPadding: 12,
-        contentGap: 8,
-        labelFontSize: 16,
-        labelFontWeight: FontWeight.bold,
-        secondaryLabelFontSize: 12,
-        secondaryLabelOpacity: 0.7,
-      );
-    }
+  factory TilawaFooterBarTokens.defaults() {
     return const TilawaFooterBarTokens(
       height: 56,
       horizontalPadding: 16,
@@ -228,54 +211,16 @@ class TilawaMediaPlayerBarTokens {
   /// [BoxShadow.color] under the circular play/pause control.
   final Color playPauseButtonShadowColor;
 
-  factory TilawaMediaPlayerBarTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaMediaPlayerBarTokens.defaults() {
     return TilawaMediaPlayerBarTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
-      density: density,
     );
   }
 
-  factory TilawaMediaPlayerBarTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaMediaPlayerBarTokens.fromColorScheme(ColorScheme colorScheme) {
     // fix: Accessibility — ≥48dp transport control hit targets
     const shellOutlineAlpha = 0.1;
     const playPauseShadowOpacity = 0.3;
-    if (density.isCompact) {
-      return TilawaMediaPlayerBarTokens(
-        contentPadding: const EdgeInsetsDirectional.fromSTEB(10, 6, 10, 6),
-        borderRadius: 14,
-        artworkSize: 44,
-        artworkRadius: 10,
-        titleFontWeight: FontWeight.w600,
-        subtitleOpacity: 0.72,
-        infoGap: 2,
-        artworkInfoGap: 10,
-        infoControlsGap: 6,
-        controlsGap: 2,
-        controlButtonSize: kTilawaMinInteractiveDimension,
-        playPauseButtonSize: kTilawaMinInteractiveDimension,
-        defaultIconSize: 22,
-        playPauseIconSize: 15,
-        disabledControlOpacity: 0.3,
-        shadowOpacity: 0.1,
-        playPauseShadowOpacity: playPauseShadowOpacity,
-        playPauseShadowBlur: 8,
-        shellBackgroundColor: colorScheme.surfaceContainerLow,
-        progressTrackBackgroundColor: colorScheme.surfaceContainerHighest
-            .withValues(alpha: shellOutlineAlpha),
-        artworkPlaceholderColor: colorScheme.surfaceContainerHigh,
-        shellOutlineColor: colorScheme.outlineVariant.withValues(
-          alpha: shellOutlineAlpha,
-        ),
-        playPauseButtonShadowColor: colorScheme.primary.withValues(
-          alpha: playPauseShadowOpacity,
-        ),
-      );
-    }
     return TilawaMediaPlayerBarTokens(
       // Slightly tighter vertical padding so the bar fits [playerCollapsedHeight]
       // with progress strip + 48dp artwork row inside the mini-player SizedBox
@@ -665,24 +610,15 @@ class TilawaAdaptiveShellTokens {
     );
   }
 
-  factory TilawaAdaptiveShellTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaAdaptiveShellTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
     );
-    return TilawaAdaptiveShellTokens.fromColorScheme(
-      colorScheme,
-      density: density,
-    );
+    return TilawaAdaptiveShellTokens.fromColorScheme(colorScheme);
   }
 
-  factory TilawaAdaptiveShellTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // Sizing remains density-stable because this app-wide shell affects every
-    // screen. Color is derived here so every compact bottom nav follows the
+  factory TilawaAdaptiveShellTokens.fromColorScheme(ColorScheme colorScheme) {
+    // Color is derived here so every compact bottom nav follows the
     // active theme without per-screen overrides.
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
@@ -1210,25 +1146,17 @@ class TilawaSettingsGroupTokens {
 
   /// Default tokens for the settings group.
   ///
-  /// [density] controls compact-mode token values. Comfortable (default)
-  /// matches historical typography and chrome. Compact tightens group headers,
-  /// subtitle spacing, and some type metrics. Horizontal list insets stay on
-  /// [tileContentPadding] / [switchTileContentPadding]; vertical is zero so
-  /// row height is driven by [ListTile.minTileHeight] (44 dp,
-  /// [kTilawaMinInteractiveDimension]) in the settings tile widgets.
-  factory TilawaSettingsGroupTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  /// Horizontal list insets stay on [tileContentPadding] /
+  /// [switchTileContentPadding]; vertical is zero so row height is driven by
+  /// [ListTile.minTileHeight] (44 dp, [kTilawaMinInteractiveDimension]) in the
+  /// settings tile widgets.
+  factory TilawaSettingsGroupTokens.defaults() {
     return TilawaSettingsGroupTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
-      density: density,
     );
   }
 
-  factory TilawaSettingsGroupTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaSettingsGroupTokens.fromColorScheme(ColorScheme colorScheme) {
     const tileIconContainerOpacity = 0.1;
     const selectionTileSelectedBackgroundColor = Colors.transparent;
     const tileDividerOpacity = 0.05;
@@ -1245,57 +1173,6 @@ class TilawaSettingsGroupTokens {
       alpha: switchActiveTrackOpacity,
     );
     final switchActiveThumbColor = colorScheme.primary;
-    if (density.isCompact) {
-      return TilawaSettingsGroupTokens(
-        // Compact: tuned for breathability while staying denser than comfortable.
-        groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
-          12,
-          12,
-          16,
-          6,
-        ),
-        switchTileContentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 0,
-        ),
-        tileSubtitleSpacing: 2,
-        groupBorderRadius: 20,
-        groupShadowOpacity: 0.06,
-        groupShadowBlur: 10,
-        groupShadowOffset: const Offset(0, 4),
-        groupTitleFontSize: 12.5,
-        groupTitleLetterSpacing: 1.1,
-        tileContentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 0,
-        ),
-        tileIconPadding: const EdgeInsets.all(6),
-        tileIconBorderRadius: 10,
-        tileIconSize: 20,
-        tileTitleFontSize: 14.5,
-        tileSubtitleFontSize: 13,
-        tileSubtitleOpacity: 0.65,
-        tileTrailingSize: 18,
-        tileTrailingOpacity: 0.55,
-        tileIconContainerOpacity: tileIconContainerOpacity,
-        tileDividerPadding: const EdgeInsetsDirectional.only(
-          start: 48,
-          end: 16,
-        ),
-        tileDividerHeight: 1,
-        tileDividerThickness: 0.5,
-        tileDividerOpacity: tileDividerOpacity,
-        switchActiveTrackOpacity: 0.5,
-        tileItemGap: 16,
-        selectionTileSelectedBackgroundColor:
-            selectionTileSelectedBackgroundColor,
-        groupSurfaceColor: groupSurfaceColor,
-        groupContainerBorderColor: groupContainerBorderColor,
-        selectionTileDividerColor: selectionTileDividerColor,
-        switchActiveTrackColor: switchActiveTrackColor,
-        switchActiveThumbColor: switchActiveThumbColor,
-      );
-    }
 
     return TilawaSettingsGroupTokens(
       groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
@@ -1639,13 +1516,7 @@ class TilawaImmersiveComposerTokens {
   /// Opaque circle behind header icon buttons (e.g. close).
   final Color headerIconButtonFillColor;
 
-  factory TilawaImmersiveComposerTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // No-op: this organism has its own `compactHeightBreakpoint` /
-    // `compactPanelHeightFactor` fields, but those are screen-size
-    // responsiveness — unrelated to TilawaDensity. Kept no-op to avoid
-    // semantic confusion.
+  factory TilawaImmersiveComposerTokens.defaults() {
     return TilawaImmersiveComposerTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
     );
@@ -1845,18 +1716,7 @@ class TilawaBottomSheetScaffoldTokens {
   final EdgeInsetsGeometry bodyPadding;
   final double closeButtonSize;
 
-  factory TilawaBottomSheetScaffoldTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      // closeButtonSize 40 stays — already below 48dp; not making it worse.
-      return const TilawaBottomSheetScaffoldTokens(
-        topRadius: 24,
-        headerPadding: EdgeInsets.fromLTRB(16, 6, 8, 8),
-        bodyPadding: EdgeInsets.all(16),
-        closeButtonSize: 40,
-      );
-    }
+  factory TilawaBottomSheetScaffoldTokens.defaults() {
     return const TilawaBottomSheetScaffoldTokens(
       topRadius: 28,
       headerPadding: EdgeInsets.fromLTRB(20, 8, 12, 12),

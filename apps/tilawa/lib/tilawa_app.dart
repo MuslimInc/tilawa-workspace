@@ -21,7 +21,6 @@ import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
-import 'features/settings/presentation/cubit/settings_cubit.dart';
 import 'features/theme/domain/entities/app_theme_preset.dart';
 import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
@@ -139,13 +138,7 @@ class _PlayerApp extends StatelessWidget {
           return BlocBuilder<ThemeCubit, ThemeState>(
             builder: (context, themeState) {
               PerfLogger.markBuild('ThemeBlocBuilder');
-              return BlocBuilder<SettingsCubit, SettingsState>(
-                builder: (context, settingsState) {
-                  PerfLogger.markBuild('SettingsBlocBuilder');
-                  final TilawaDensity density = settingsState.useCompactDesign
-                      ? TilawaDensity.compact
-                      : TilawaDensity.comfortable;
-                  return MaterialApp.router(
+              return MaterialApp.router(
                     title: AppStrings.appName,
                     showPerformanceOverlay: false,
                     debugShowCheckedModeBanner: false,
@@ -171,7 +164,6 @@ class _PlayerApp extends StatelessWidget {
                     },
                     theme: AppTheme.getLightTheme(
                       primaryColor: themeState.primaryColor,
-                      density: density,
                       extensions: [QuranReaderTheme.light],
                     ),
                     darkTheme: AppTheme.getDarkTheme(
@@ -183,7 +175,6 @@ class _PlayerApp extends StatelessWidget {
                               PrimaryColorPreset.defaultPreset.id,
                       darkIsTrueBlack:
                           themeState.preset == AppThemePreset.trueBlack,
-                      density: density,
                       extensions: [QuranReaderTheme.dark],
                     ),
                     themeMode: themeState.themeMode,
@@ -199,8 +190,6 @@ class _PlayerApp extends StatelessWidget {
                       quran_image_l10n.AppLocalizations.delegate,
                     ],
                   );
-                },
-              );
             },
           );
         },

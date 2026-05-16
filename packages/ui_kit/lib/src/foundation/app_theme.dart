@@ -318,13 +318,9 @@ class AppTheme {
   /// [useGoogleFontsOverride] is a foundation API extension for
   /// preview/golden stability. It allows disabling font loading in headless
   /// test environments without modifying the production [useGoogleFonts] default.
-  ///
-  /// [density] controls the overall UI density. Defaults to [TilawaDensity.comfortable]
-  /// which matches all pre-density UI Kit values.
   static ThemeData getLightTheme({
     required Color primaryColor,
     bool? useGoogleFontsOverride,
-    TilawaDensity density = TilawaDensity.comfortable,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
@@ -353,8 +349,8 @@ class AppTheme {
 
     return themedSurfaces.copyWith(
       extensions: [
-        TilawaDesignTokens.light(density: density),
-        TilawaComponentTokens.light(density: density, colorScheme: colorScheme),
+        TilawaDesignTokens.light(),
+        TilawaComponentTokens.light(colorScheme: colorScheme),
         ...extensions,
       ],
     );
@@ -365,15 +361,11 @@ class AppTheme {
   /// [useGoogleFontsOverride] is a foundation API extension for
   /// preview/golden stability. It allows disabling font loading in headless
   /// test environments without modifying the production [useGoogleFonts] default.
-  ///
-  /// [density] controls the overall UI density. Defaults to [TilawaDensity.comfortable]
-  /// which matches all pre-density UI Kit values.
   static ThemeData getDarkTheme({
     required Color primaryColor,
     bool isDefaultPreset = false,
     bool? useGoogleFontsOverride,
     bool darkIsTrueBlack = false,
-    TilawaDensity density = TilawaDensity.comfortable,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
     final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
@@ -408,8 +400,8 @@ class AppTheme {
 
     return themedSurfaces.copyWith(
       extensions: [
-        TilawaDesignTokens.dark(density: density),
-        TilawaComponentTokens.dark(density: density, colorScheme: colorScheme),
+        TilawaDesignTokens.dark(),
+        TilawaComponentTokens.dark(colorScheme: colorScheme),
         ...extensions,
       ],
     );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../app_colors.dart';
-import '../density.dart';
 import 'token_lerp.dart';
 
 @immutable
@@ -10,11 +9,7 @@ class TilawaSectionTitleTokens {
 
   final FontWeight fontWeight;
 
-  factory TilawaSectionTitleTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // No-op: TilawaSectionTitle has only a fontWeight; nothing dimensional
-    // to compact. Density param kept for API uniformity.
+  factory TilawaSectionTitleTokens.defaults() {
     return const TilawaSectionTitleTokens(fontWeight: .w800);
   }
 
@@ -47,25 +42,13 @@ class TilawaSheetHandleTokens {
   final double width;
   final double height;
 
-  /// Space above the drag pill; matches [TilawaDesignTokens.spaceMedium] per density.
+  /// Space above the drag pill; matches [TilawaDesignTokens.spaceMedium].
   final double marginTop;
   final double marginBottom;
   final double cornerRadius;
   final double colorOpacity;
 
-  factory TilawaSheetHandleTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaSheetHandleTokens(
-        width: 46,
-        height: 5,
-        marginTop: 10,
-        marginBottom: 12,
-        cornerRadius: 999,
-        colorOpacity: 0.22,
-      );
-    }
+  factory TilawaSheetHandleTokens.defaults() {
     return const TilawaSheetHandleTokens(
       width: 46,
       height: 5,
@@ -132,16 +115,7 @@ class TilawaCardTokens {
   /// Default inner padding.
   final EdgeInsets padding;
 
-  factory TilawaCardTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaCardTokens(
-        borderRadius: 16.0, // fix: Spacing & alignment — 8dp grid multiple
-        borderWidth: 0.5,
-        padding: EdgeInsets.all(8.0),
-      );
-    }
+  factory TilawaCardTokens.defaults() {
     return const TilawaCardTokens(
       borderRadius: 16.0,
       borderWidth: 0.5,
@@ -200,28 +174,15 @@ class TilawaIconBoxTokens {
   /// Corner radius of the container.
   final double borderRadius;
 
-  factory TilawaIconBoxTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaIconBoxTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
     );
-    return TilawaIconBoxTokens.fromColorScheme(colorScheme, density: density);
+    return TilawaIconBoxTokens.fromColorScheme(colorScheme);
   }
 
-  factory TilawaIconBoxTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaIconBoxTokens.fromColorScheme(ColorScheme colorScheme) {
     final backgroundColor = _backgroundColor(colorScheme);
-    if (density.isCompact) {
-      return TilawaIconBoxTokens(
-        iconSize: 20.0,
-        backgroundColor: backgroundColor,
-        padding: 6.0,
-        borderRadius: 10.0,
-      );
-    }
     return TilawaIconBoxTokens(
       iconSize: 24.0,
       backgroundColor: backgroundColor,
@@ -281,11 +242,7 @@ class TilawaLoadingIndicatorTokens {
   /// Compact stroke width used in smaller contexts.
   final double compactStrokeWidth;
 
-  factory TilawaLoadingIndicatorTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // No-op: stroke widths are already small/display-only. Density param kept
-    // for API uniformity.
+  factory TilawaLoadingIndicatorTokens.defaults() {
     return const TilawaLoadingIndicatorTokens(
       defaultStrokeWidth: 4.0,
       compactStrokeWidth: 2.0,
@@ -339,22 +296,14 @@ class TilawaIconToggleTokens {
   final double padding;
   final double borderRadius;
 
-  factory TilawaIconToggleTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaIconToggleTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: AppColors.defaultPrimary,
     );
-    return TilawaIconToggleTokens.fromColorScheme(
-      colorScheme,
-      density: density,
-    );
+    return TilawaIconToggleTokens.fromColorScheme(colorScheme);
   }
 
-  factory TilawaIconToggleTokens.fromColorScheme(
-    ColorScheme colorScheme, {
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
+  factory TilawaIconToggleTokens.fromColorScheme(ColorScheme colorScheme) {
     return TilawaIconToggleTokens(
       iconSize: 18.0,
       activeBackgroundColor: _activeBackgroundColor(colorScheme),
@@ -441,11 +390,7 @@ class TilawaDividerTokens {
   /// Opacity applied to the default divider color.
   final double colorOpacity;
 
-  factory TilawaDividerTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    // No-op: divider is a 1px line; nothing to compact. Density param kept
-    // for API uniformity.
+  factory TilawaDividerTokens.defaults() {
     return const TilawaDividerTokens(
       height: 1.0,
       thickness: 0.5,
@@ -508,19 +453,7 @@ class TilawaEmptyStateTokens {
   /// Outer padding around the whole empty-state layout.
   final EdgeInsets padding;
 
-  factory TilawaEmptyStateTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaEmptyStateTokens(
-        iconSize: 40.0,
-        iconOpacity: 0.4,
-        titleSpacing: 12.0,
-        subtitleSpacing: 4.0,
-        actionSpacing: 16.0,
-        padding: EdgeInsets.all(16.0),
-      );
-    }
+  factory TilawaEmptyStateTokens.defaults() {
     return const TilawaEmptyStateTokens(
       iconSize: 48.0,
       iconOpacity: 0.4,
@@ -627,28 +560,7 @@ class TilawaErrorStateTokens {
   /// Foreground color of the retry button. If null, uses colorScheme.surface.
   final Color? retryButtonForegroundColor;
 
-  factory TilawaErrorStateTokens.defaults({
-    TilawaDensity density = TilawaDensity.comfortable,
-  }) {
-    if (density.isCompact) {
-      return const TilawaErrorStateTokens(
-        iconSize: 64.0,
-        iconOpacity: 0.8,
-        titleSpacing: 16.0,
-        titleFontSize: 24.0,
-        titleFontWeight: FontWeight.bold,
-        subtitleSpacing: 8.0,
-        subtitleFontSize: 16.0,
-        subtitleOpacity: 0.7,
-        actionSpacing: 20.0,
-        padding: EdgeInsets.symmetric(horizontal: 40.0),
-        retryButtonPadding: EdgeInsets.symmetric(
-          horizontal: 32.0,
-          vertical: 12.0,
-        ),
-        retryButtonBorderRadius: 30.0,
-      );
-    }
+  factory TilawaErrorStateTokens.defaults() {
     return const TilawaErrorStateTokens(
       iconSize: 80.0,
       iconOpacity: 0.8,

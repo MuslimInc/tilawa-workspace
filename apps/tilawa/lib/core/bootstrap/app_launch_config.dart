@@ -39,7 +39,6 @@ class AppLaunchConfig extends Equatable {
     this.firebaseDataInit = true,
     this.subscriptionServiceEnabled = false,
     this.notificationPermissionRequest = true,
-    this.compactUiEnabled = true,
   });
 
   factory AppLaunchConfig.fromEnvironment() {
@@ -148,10 +147,6 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
         defaultValue: true,
       ),
-      compactUiEnabled: bool.fromEnvironment(
-        'TILAWA_COMPACT_UI',
-        defaultValue: true,
-      ),
     );
   }
 
@@ -182,11 +177,6 @@ class AppLaunchConfig extends Equatable {
   final bool subscriptionServiceEnabled;
   final bool notificationPermissionRequest;
 
-  /// Default for UI density when no persisted [SettingsState.useCompactDesign]
-  /// exists (see `SettingsCubit.fromJson`). Overridable via
-  /// `--dart-define=TILAWA_COMPACT_UI=false`.
-  final bool compactUiEnabled;
-
   @override
   List<Object?> get props => [
     resetLaunchState,
@@ -215,6 +205,5 @@ class AppLaunchConfig extends Equatable {
     firebaseDataInit,
     subscriptionServiceEnabled,
     notificationPermissionRequest,
-    compactUiEnabled,
   ];
 }

@@ -5,7 +5,6 @@ export 'color_scheme_ext.dart';
 export 'component_tokens.dart';
 export 'content_bounds.dart';
 export 'content_grid.dart';
-export 'density.dart';
 export 'design_tokens.dart';
 export 'display_feature_insets.dart';
 export 'tilawa_modal_bottom_sheet.dart';
