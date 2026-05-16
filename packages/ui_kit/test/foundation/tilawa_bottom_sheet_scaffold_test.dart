@@ -32,7 +32,9 @@ void main() {
     expect(find.text('Content'), findsOneWidget);
   });
 
-  testWidgets('modalShape uses scaffold top radius from tokens', (tester) async {
+  testWidgets('modalShape uses scaffold top radius from tokens', (
+    tester,
+  ) async {
     late BuildContext ctx;
     await tester.pumpWidget(
       MaterialApp(

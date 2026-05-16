@@ -1010,8 +1010,7 @@ class _ColorPickerSheet extends StatelessWidget {
             ),
             SizedBox(height: tokens.spaceLarge),
             ...PrimaryColorPreset.values.map((preset) {
-              final isSelected =
-                  !isCustom && currentPresetId == preset.id;
+              final isSelected = !isCustom && currentPresetId == preset.id;
               return TilawaSelectionTile(
                 leading: CircleAvatar(
                   backgroundColor: preset.value,
@@ -1028,8 +1027,8 @@ class _ColorPickerSheet extends StatelessWidget {
             }),
             TilawaSelectionTile(
               leading: CircleAvatar(
-                radius: TilawaSettingsScreenTokens
-                    .primaryPickerPresetSwatchRadius,
+                radius:
+                    TilawaSettingsScreenTokens.primaryPickerPresetSwatchRadius,
                 backgroundColor: isCustom
                     ? currentColor
                     : theme.colorScheme.surfaceContainerHigh,
@@ -1037,7 +1036,8 @@ class _ColorPickerSheet extends StatelessWidget {
                     ? null
                     : Icon(
                         FluentIcons.color_24_regular,
-                        size: TilawaSettingsScreenTokens
+                        size:
+                            TilawaSettingsScreenTokens
                                 .primaryPickerCustomSwatchSize *
                             0.5,
                         color: theme.colorScheme.primary,
