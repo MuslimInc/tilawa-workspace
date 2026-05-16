@@ -622,3 +622,31 @@ extension TilawaIconSizeX on BuildContext {
   /// Flutter's `kMinInteractiveDimension`.
   double get minInteractiveDimension => tokens.minInteractiveDimension;
 }
+
+/// Helpers for keeping nested rounded containers visually concentric.
+///
+/// **The rule:** an inner rounded element nested inside an outer rounded
+/// container looks correct only when their curves stay parallel. That requires
+/// `innerRadius = outerRadius - padding` (the padding between them).
+///
+/// Hardcoding inner radii drifts on different densities (compact vs regular)
+/// because `spaceMedium`/`spaceLarge` change while radius tokens don't. Always
+/// compute via [concentricInner] so the math stays correct.
+extension TilawaConcentricRadiusX on TilawaDesignTokens {
+  /// Returns the radius an inner element should use so its corners stay
+  /// parallel to an outer container's corners.
+  ///
+  /// - [outerRadius] — the outer container's corner radius.
+  /// - [padding] — the gap between outer and inner edges (the outer's inner
+  ///   padding on the side that touches the inner element).
+  ///
+  /// Clamped to `0` if padding ≥ outer radius (degenerate case: inner element
+  /// is too close to the edge for any rounding).
+  double concentricInner({
+    required double outerRadius,
+    required double padding,
+  }) {
+    final double inner = outerRadius - padding;
+    return inner < 0 ? 0 : inner;
+  }
+}

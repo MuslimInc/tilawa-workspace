@@ -735,14 +735,6 @@ class _LocationUtilityCard extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    debugPrint(
-      '[RADIUS_AUDIT] _LocationUtilityCard '
-      'cardRadius=${tokens.radiusExtraLarge} '
-      'hPad=${tokens.spaceSmall} vPad=${tokens.spaceSmall} '
-      'innerTapTarget=none(full-card onTap) '
-      'expectedConcentricInnerRadius=N/A',
-    );
-
     return Padding(
       padding: EdgeInsets.fromLTRB(
         tokens.spaceLarge,
@@ -800,17 +792,6 @@ class _BottomUtilitiesCard extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-
-    final double expectedInner =
-        tokens.radiusExtraLarge - tokens.spaceSmall;
-    debugPrint(
-      '[RADIUS_AUDIT] _BottomUtilitiesCard '
-      'cardRadius=${tokens.radiusExtraLarge} '
-      'hPad=${tokens.spaceSmall} vPad=${tokens.spaceExtraSmall} '
-      'innerInkRadius(set)=${tokens.radiusLarge} '
-      'expectedConcentricInnerRadius=$expectedInner '
-      'match=${tokens.radiusLarge == expectedInner}',
-    );
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -923,13 +904,9 @@ class _UtilityInlineAction extends StatelessWidget {
 
     // Concentric corner rule: row radius = card radius - card horizontal padding.
     // _BottomUtilitiesCard: cardRadius=radiusExtraLarge, hPad=spaceSmall.
-    final double inkRadius = tokens.radiusExtraLarge - tokens.spaceSmall;
-    debugPrint(
-      '[RADIUS_AUDIT] _UtilityInlineAction(label="$label") '
-      'inkRadius=$inkRadius '
-      '(tokens: radiusMedium=${tokens.radiusMedium} '
-      'radiusLarge=${tokens.radiusLarge} '
-      'radiusExtraLarge=${tokens.radiusExtraLarge})',
+    final double inkRadius = tokens.concentricInner(
+      outerRadius: tokens.radiusExtraLarge,
+      padding: tokens.spaceSmall,
     );
 
     return Material(
@@ -1071,17 +1048,6 @@ class _TodayPrayerListSection extends StatelessWidget {
       omitFromListWhenSameInstantAs: currentPrayer,
     );
 
-    final double expectedInner =
-        tokens.radiusExtraLarge - tokens.spaceMedium;
-    debugPrint(
-      '[RADIUS_AUDIT] _TodayPrayerListSection '
-      'cardRadius=${tokens.radiusExtraLarge} '
-      'hPad=${tokens.spaceMedium} vPad=${tokens.spaceSmall} '
-      'rowInkRadius(computed)=$expectedInner '
-      'expectedConcentricInnerRadius=$expectedInner '
-      'match=true',
-    );
-
     return Padding(
       padding: EdgeInsets.fromLTRB(
         tokens.spaceLarge,
@@ -1182,7 +1148,10 @@ class _TodayPrayerListRow extends StatelessWidget {
 
     // Concentric corner rule: row radius = card radius - card horizontal padding.
     // _TodayPrayerListSection: cardRadius=radiusExtraLarge, hPad=spaceMedium.
-    final double rowRadius = tokens.radiusExtraLarge - tokens.spaceMedium;
+    final double rowRadius = tokens.concentricInner(
+      outerRadius: tokens.radiusExtraLarge,
+      padding: tokens.spaceMedium,
+    );
 
     return Material(
       color: Colors.transparent,
