@@ -204,6 +204,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                                     theme.colorScheme.surfaceContainer,
                                 selectedColor: theme.colorScheme.surface,
                                 selectedTextColor: theme.colorScheme.primary,
+                                // Match the body cards' radiusExtraLarge so the
+                                // header chrome and the cards share the same
+                                // rounding rhythm.
+                                containerRadius: tokens.radiusExtraLarge,
                                 onValueChanged: _onSegmentChanged,
                               ),
                             ),

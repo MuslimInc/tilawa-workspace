@@ -197,49 +197,42 @@ class _HeroAlertControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The chip itself owns the InkWell (via TilawaChip.onTap) so the ink
-    // splash conforms to the painted pill exactly — no outer InkWell needed.
-    final chip = PrayerAlertStatusChip(
-      alert: alert,
-      showLabel: showLabel,
-      dense: true,
-      onTap: onTap,
-    );
-
-    if (onTap == null) {
-      return chip;
-    }
-
-    // Extend the 44 dp hit target around the chip without painting any
-    // additional ink. Taps in the surrounding empty space fall through to
-    // [onTap] but the visual splash stays confined to the chip.
-    final Widget tappable = Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: tokens.minInteractiveDimension,
-          minHeight: tokens.minInteractiveDimension,
-        ),
-        child: Center(child: chip),
-      ),
-    );
-
-    final message = tooltip;
-    if (message != null && message.isNotEmpty) {
-      return Tooltip(
-        message: message,
-        child: Semantics(
-          button: true,
-          label: '${alert.label}. $message',
-          child: tappable,
-        ),
+    // TILAWA_BRAND.md §3 + §9: card chrome recedes; the state is signalled by
+    // the icon shape (bell / bell-off / speaker), not by a competing colored
+    // background. Same icon-action grammar as the screen's gear button.
+    final onTapCallback = onTap;
+    if (onTapCallback == null) {
+      return PrayerAlertStatusChip(
+        alert: alert,
+        showLabel: showLabel,
+        dense: true,
       );
     }
 
-    return Semantics(
-      button: true,
-      label: alert.label,
-      child: tappable,
+    final colorScheme = Theme.of(context).colorScheme;
+    final bool isActive = alert.state != PrayerAlertViewState.off;
+    final String? tooltipMessage = tooltip;
+    final String semantics = tooltipMessage != null && tooltipMessage.isNotEmpty
+        ? '${alert.label}. $tooltipMessage'
+        : alert.label;
+
+    return TilawaIconActionButton(
+      icon: _alertIcon(alert.state),
+      onTap: onTapCallback,
+      isActive: isActive,
+      toggled: isActive,
+      tooltip: tooltipMessage,
+      semanticLabel: semantics,
+      backgroundColor: colorScheme.surface,
     );
+  }
+
+  IconData _alertIcon(PrayerAlertViewState state) {
+    return switch (state) {
+      PrayerAlertViewState.off => Icons.notifications_off_outlined,
+      PrayerAlertViewState.notification => Icons.notifications_active_outlined,
+      PrayerAlertViewState.adhan => Icons.volume_up_outlined,
+    };
   }
 }
 

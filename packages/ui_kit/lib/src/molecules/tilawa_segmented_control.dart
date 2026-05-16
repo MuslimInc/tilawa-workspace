@@ -21,6 +21,8 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
     this.selectedColor,
     this.selectedTextColor,
     this.unselectedTextColor,
+    this.containerRadius,
+    this.itemRadius,
     this.enabled = true,
   });
 
@@ -45,6 +47,14 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
   /// Text color for unselected segments. Defaults to onSurfaceVariant.
   final Color? unselectedTextColor;
 
+  /// Outer container corner radius. Defaults to the segmented-control kit
+  /// token. Pass a larger value when the control sits inside a card-radius
+  /// chrome strip and needs to match the surrounding rounding.
+  final double? containerRadius;
+
+  /// Selected/unselected segment corner radius. Defaults to the kit token.
+  final double? itemRadius;
+
   /// Whether the control is interactive.
   final bool enabled;
 
@@ -62,12 +72,19 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
         selectedTextColor ?? colorScheme.onPrimaryContainer;
     final effectiveUnselectedTextColor =
         unselectedTextColor ?? colorScheme.onSurfaceVariant;
+    final double effectiveContainerRadius =
+        containerRadius ?? tokens.containerRadius;
+    // Concentric inner rounding: kit subtracts 2 to keep the selected pill
+    // visually nested inside the container. Honor the same rule for overrides
+    // unless [itemRadius] is supplied explicitly.
+    final double effectiveItemRadius =
+        itemRadius ?? (effectiveContainerRadius - 2);
 
     return Container(
       padding: tokens.containerPadding,
       decoration: BoxDecoration(
         color: effectiveBackground,
-        borderRadius: BorderRadius.circular(tokens.containerRadius),
+        borderRadius: BorderRadius.circular(effectiveContainerRadius),
       ),
       child: Row(
         spacing: tokens.itemSpacing,
@@ -82,6 +99,7 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
               selectedTextColor: effectiveSelectedTextColor,
               unselectedTextColor: effectiveUnselectedTextColor,
               tokens: tokens,
+              itemRadius: effectiveItemRadius,
               enabled: enabled,
             ),
           );
@@ -113,6 +131,7 @@ class _SegmentButton extends StatelessWidget {
     required this.selectedTextColor,
     required this.unselectedTextColor,
     required this.tokens,
+    required this.itemRadius,
     required this.enabled,
   });
 
@@ -123,6 +142,7 @@ class _SegmentButton extends StatelessWidget {
   final Color selectedTextColor;
   final Color unselectedTextColor;
   final TilawaSegmentedControlTokens tokens;
+  final double itemRadius;
   final bool enabled;
 
   @override
@@ -136,12 +156,14 @@ class _SegmentButton extends StatelessWidget {
       color: isSelected ? selectedTextColor : unselectedTextColor,
     );
 
+    final itemBorderRadius = BorderRadius.circular(itemRadius);
+
     return Material(
       color: isSelected ? selectedBackgroundColor : Colors.transparent,
-      borderRadius: BorderRadius.circular(tokens.containerRadius - 2),
+      borderRadius: itemBorderRadius,
       child: InkWell(
         onTap: enabled ? onTap : null,
-        borderRadius: BorderRadius.circular(tokens.containerRadius - 2),
+        borderRadius: itemBorderRadius,
         child: Semantics(
           // fix: Accessibility — segment state (inside InkWell avoids merge bugs)
           selected: isSelected,
@@ -151,11 +173,7 @@ class _SegmentButton extends StatelessWidget {
           child: Container(
             padding: tokens.itemPadding,
             decoration: isSelected
-                ? BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      tokens.containerRadius,
-                    ),
-                  )
+                ? BoxDecoration(borderRadius: itemBorderRadius)
                 : null,
             child: Center(child: Text(label, style: textStyle)),
           ),
