@@ -180,7 +180,9 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: AppShareComposerColors.gold.withValues(alpha: 0.22),
+                      color: AppShareComposerColors.gold.withValues(
+                        alpha: 0.22,
+                      ),
                     ),
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
@@ -325,7 +327,8 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                       }
                                     : null,
                                 backgroundColor: AppShareComposerColors.gold,
-                                foregroundColor: AppShareComposerColors.deepGreen,
+                                foregroundColor:
+                                    AppShareComposerColors.deepGreen,
                                 borderRadius: 18,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,

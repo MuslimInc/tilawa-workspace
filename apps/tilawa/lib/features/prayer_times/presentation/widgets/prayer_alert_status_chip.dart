@@ -11,6 +11,7 @@ class PrayerAlertStatusChip extends StatelessWidget {
     this.showLabel = true,
     this.dense = false,
     this.quiet = false,
+    this.onTap,
   });
 
   final PrayerAlertViewData alert;
@@ -21,6 +22,10 @@ class PrayerAlertStatusChip extends StatelessWidget {
 
   /// Icon-only hint (no pill). Use on dense lists to reduce visual noise.
   final bool quiet;
+
+  /// Optional tap handler. Forwarded to the underlying TilawaStatusChip so the
+  /// ink splash conforms to the painted pill exactly.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +55,7 @@ class PrayerAlertStatusChip extends StatelessWidget {
         backgroundColor: colors.$1,
         foregroundColor: colors.$2,
         showLabel: showLabel,
+        onTap: onTap,
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceSmall,
           vertical: dense ? tokens.spaceExtraSmall : tokens.spaceSmall,

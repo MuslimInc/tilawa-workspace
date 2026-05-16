@@ -57,8 +57,17 @@ class TilawaChip extends StatelessWidget {
     final effectiveBorderColor =
         borderColor ?? componentTokens.defaultBorderColor;
 
+    // Tappable chips honor the Tilawa 44 dp interactive minimum. At that size
+    // the dense 8 dp corner radius reads as a square button, so the corner
+    // rule shifts: pill rounding (radius = height / 2). Icon-only tappable
+    // chips become 44 dp circles for free since width == height. Static
+    // (label) chips keep their dense rounding.
+    final double resolvedRadius = onTap != null
+        ? kTilawaMinInteractiveDimension / 2
+        : effectiveRadius;
+
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(effectiveRadius),
+      borderRadius: BorderRadius.circular(resolvedRadius),
       side: BorderSide(
         color: effectiveBorderColor,
         width: componentTokens.borderWidth,
@@ -68,7 +77,6 @@ class TilawaChip extends StatelessWidget {
     final Widget content = Container(
       padding: padding ?? componentTokens.padding,
       decoration: ShapeDecoration(
-        color: effectiveBackground,
         shape: shape,
         shadows: showShadow
             ? [
@@ -82,30 +90,32 @@ class TilawaChip extends StatelessWidget {
               ]
             : null,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: componentTokens.contentGap,
-        children: [
-          if (icon != null)
-            Icon(
-              icon,
-              size: iconSize ?? componentTokens.iconSize,
-              color: effectiveForeground,
-            ),
-          if (showLabel || icon == null)
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:
-                    textStyle ??
-                    theme.textTheme.labelLarge?.copyWith(
-                      color: effectiveForeground,
-                    ),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: componentTokens.contentGap,
+          children: [
+            if (icon != null)
+              Icon(
+                icon,
+                size: iconSize ?? componentTokens.iconSize,
+                color: effectiveForeground,
               ),
-            ),
-        ],
+            if (showLabel || icon == null)
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style:
+                      textStyle ??
+                      theme.textTheme.labelLarge?.copyWith(
+                        color: effectiveForeground,
+                      ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
 
@@ -115,18 +125,27 @@ class TilawaChip extends StatelessWidget {
           : content;
     }
 
-    // fix: Accessibility — explicit button role and label (no MergeSemantics: avoids engine merge bugs)
+    // fix: Accessibility — tappable chips enforce the Tilawa 44 dp minimum so
+    // the painted body and the ink splash share the same bounds; static
+    // (label) chips stay dense. Explicit button role / label avoids
+    // MergeSemantics (engine merge bugs).
     return Semantics(
       button: true,
       label: label,
       selected: semanticsSelected,
-      child: Material(
-        color: Colors.transparent,
-        shape: shape,
-        child: InkWell(
-          onTap: onTap,
-          customBorder: shape,
-          child: content,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minWidth: kTilawaMinInteractiveDimension,
+          minHeight: kTilawaMinInteractiveDimension,
+        ),
+        child: Material(
+          color: effectiveBackground,
+          shape: shape,
+          child: InkWell(
+            onTap: onTap,
+            customBorder: shape,
+            child: content,
+          ),
         ),
       ),
     );

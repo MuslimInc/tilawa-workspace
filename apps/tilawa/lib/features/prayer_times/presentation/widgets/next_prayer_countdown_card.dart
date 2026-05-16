@@ -197,39 +197,29 @@ class _HeroAlertControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The chip itself owns the InkWell (via TilawaChip.onTap) so the ink
+    // splash conforms to the painted pill exactly — no outer InkWell needed.
     final chip = PrayerAlertStatusChip(
       alert: alert,
       showLabel: showLabel,
       dense: true,
+      onTap: onTap,
     );
 
     if (onTap == null) {
       return chip;
     }
 
-    final borderRadius = BorderRadius.circular(tokens.radiusLarge);
-    final Widget tappable = Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: borderRadius,
-        child: Padding(
-          padding: EdgeInsets.all(tokens.spaceExtraSmall),
-          child: chip,
+    // Extend the 44 dp hit target around the chip without painting any
+    // additional ink. Taps in the surrounding empty space fall through to
+    // [onTap] but the visual splash stays confined to the chip.
+    final Widget tappable = Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: tokens.minInteractiveDimension,
+          minHeight: tokens.minInteractiveDimension,
         ),
-      ),
-    );
-
-    final padded = ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: tokens.minInteractiveDimension,
-        minHeight: tokens.minInteractiveDimension,
-      ),
-      child: Center(
-        child: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: tappable,
-        ),
+        child: Center(child: chip),
       ),
     );
 
@@ -240,7 +230,7 @@ class _HeroAlertControl extends StatelessWidget {
         child: Semantics(
           button: true,
           label: '${alert.label}. $message',
-          child: padded,
+          child: tappable,
         ),
       );
     }
@@ -248,7 +238,7 @@ class _HeroAlertControl extends StatelessWidget {
     return Semantics(
       button: true,
       label: alert.label,
-      child: padded,
+      child: tappable,
     );
   }
 }

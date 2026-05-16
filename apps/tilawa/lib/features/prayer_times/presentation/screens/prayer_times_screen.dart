@@ -197,10 +197,12 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                                 selectedValue: _selectedIndex == 0
                                     ? 'today'
                                     : 'monthly',
+                                // Selected pill matches the Parchment card tier
+                                // used by the body cards (TilawaCard / surface)
+                                // so the picked tab reads as "the page below."
                                 backgroundColor:
                                     theme.colorScheme.surfaceContainer,
-                                selectedColor:
-                                    theme.colorScheme.surfaceContainerHigh,
+                                selectedColor: theme.colorScheme.surface,
                                 selectedTextColor: theme.colorScheme.primary,
                                 onValueChanged: _onSegmentChanged,
                               ),

@@ -561,6 +561,7 @@ class TilawaSegmentedControlTokens {
   const TilawaSegmentedControlTokens({
     required this.containerPadding,
     required this.itemPadding,
+    required this.itemSpacing,
     required this.containerBackgroundColor,
     required this.selectedBackgroundColor,
     required this.containerBorderColor,
@@ -577,6 +578,10 @@ class TilawaSegmentedControlTokens {
 
   final EdgeInsetsGeometry containerPadding;
   final EdgeInsetsGeometry itemPadding;
+
+  /// Logical gap between adjacent segment buttons. Lets the selected pill read
+  /// as its own surface instead of butting up against the next segment.
+  final double itemSpacing;
   final Color containerBackgroundColor;
   final Color selectedBackgroundColor;
 
@@ -610,6 +615,7 @@ class TilawaSegmentedControlTokens {
     return TilawaSegmentedControlTokens(
       containerPadding: EdgeInsets.all(4),
       itemPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemSpacing: 4,
       containerBackgroundColor: containerBackgroundColor,
       selectedBackgroundColor: selectedBackgroundColor,
       containerBorderColor: containerBorderColor,
@@ -649,6 +655,7 @@ class TilawaSegmentedControlTokens {
   TilawaSegmentedControlTokens copyWith({
     EdgeInsetsGeometry? containerPadding,
     EdgeInsetsGeometry? itemPadding,
+    double? itemSpacing,
     Color? containerBackgroundColor,
     Color? selectedBackgroundColor,
     Color? containerBorderColor,
@@ -665,6 +672,7 @@ class TilawaSegmentedControlTokens {
     return TilawaSegmentedControlTokens(
       containerPadding: containerPadding ?? this.containerPadding,
       itemPadding: itemPadding ?? this.itemPadding,
+      itemSpacing: itemSpacing ?? this.itemSpacing,
       containerBackgroundColor:
           containerBackgroundColor ?? this.containerBackgroundColor,
       selectedBackgroundColor:
@@ -697,6 +705,7 @@ class TilawaSegmentedControlTokens {
         t,
       )!,
       itemPadding: EdgeInsetsGeometry.lerp(a.itemPadding, b.itemPadding, t)!,
+      itemSpacing: lerpTokenDouble(a.itemSpacing, b.itemSpacing, t),
       containerBackgroundColor: Color.lerp(
         a.containerBackgroundColor,
         b.containerBackgroundColor,

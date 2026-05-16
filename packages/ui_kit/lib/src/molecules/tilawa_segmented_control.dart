@@ -68,9 +68,9 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
       decoration: BoxDecoration(
         color: effectiveBackground,
         borderRadius: BorderRadius.circular(tokens.containerRadius),
-        border: Border.all(color: tokens.containerBorderColor),
       ),
       child: Row(
+        spacing: tokens.itemSpacing,
         children: segments.map((segment) {
           final isSelected = segment.value == selectedValue;
           return Expanded(
@@ -153,15 +153,8 @@ class _SegmentButton extends StatelessWidget {
             decoration: isSelected
                 ? BoxDecoration(
                     borderRadius: BorderRadius.circular(
-                      tokens.containerRadius - 2,
+                      tokens.containerRadius,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: tokens.selectedItemShadowColor,
-                        blurRadius: tokens.selectedItemShadowBlur,
-                        offset: tokens.selectedItemShadowOffset,
-                      ),
-                    ],
                   )
                 : null,
             child: Center(child: Text(label, style: textStyle)),

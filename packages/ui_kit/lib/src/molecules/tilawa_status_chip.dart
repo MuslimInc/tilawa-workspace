@@ -13,6 +13,7 @@ class TilawaStatusChip extends StatelessWidget {
     this.icon,
     this.padding,
     this.showLabel = true,
+    this.onTap,
   });
 
   final String label;
@@ -21,6 +22,10 @@ class TilawaStatusChip extends StatelessWidget {
   final IconData? icon;
   final EdgeInsetsGeometry? padding;
   final bool showLabel;
+
+  /// Optional tap handler. When supplied, the chip itself owns the ink so the
+  /// splash conforms to the painted pill exactly (no external InkWell needed).
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +37,7 @@ class TilawaStatusChip extends StatelessWidget {
     return TilawaChip(
       label: label,
       icon: icon,
+      onTap: onTap,
       backgroundColor: backgroundColor ?? tokens.backgroundColor,
       foregroundColor: effectiveForeground,
       padding: padding ?? tokens.inlinePadding,

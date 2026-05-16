@@ -11,8 +11,7 @@ abstract final class VideoReelDesign {
   static const Color verseHighlightColor =
       AppVideoReelDesignDefaults.verseHighlightColor;
 
-  static const Color frameTextColor =
-      AppVideoReelDesignDefaults.frameTextColor;
+  static const Color frameTextColor = AppVideoReelDesignDefaults.frameTextColor;
   static const Color frameSecondaryTextColor =
       AppVideoReelDesignDefaults.frameSecondaryTextColor;
   static const Color frameStrongTextColor =

@@ -61,8 +61,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   // is the quiet raised neutral, no second accent needed.
                   ToastUtils.showToast(
                     msg: message,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.surfaceContainerHigh,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHigh,
                   );
                 },
               );
