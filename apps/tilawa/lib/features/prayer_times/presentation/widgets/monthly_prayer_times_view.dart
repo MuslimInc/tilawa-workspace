@@ -8,6 +8,7 @@ import '../../domain/entities/entities.dart';
 import '../../domain/prayer_times_clock.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../formatters/prayer_time_label_formatter.dart';
+import '../layout/prayer_times_layout.dart';
 
 /// A view displaying prayer times for an entire month in a table format.
 class MonthlyPrayerTimesView extends StatefulWidget {
@@ -108,7 +109,7 @@ class _MonthlyPrayerTimesViewState extends State<MonthlyPrayerTimesView> {
                 return SliverPadding(
                   padding: EdgeInsets.only(
                     top: tokens.spaceExtraSmall,
-                    bottom: tokens.spaceLarge,
+                    bottom: prayerTimesScrollBottomPadding(context),
                   ),
                   sliver: SliverList.builder(
                     itemCount: state.monthlyPrayerTimes.length,

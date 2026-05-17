@@ -7,10 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/prayer_times_clock.dart';
@@ -111,7 +113,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final tokens = theme.tokens;
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      // Parchment surface when opened as a standalone route (debug route list,
+      // deep links). In the main tab the shell still paints behind us, but an
+      // opaque surface avoids the black void from a transparent scaffold.
+      backgroundColor: theme.colorScheme.surface,
       // floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
       body: Stack(
         fit: StackFit.expand,
@@ -139,6 +144,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                       ),
                       sliver: SliverAppBar(
                         pinned: true,
+                        automaticallyImplyLeading: false,
+                        leading: context.canPop()
+                            ? const TilawaBackButton()
+                            : null,
                         backgroundColor: theme.colorScheme.surfaceContainer,
                         surfaceTintColor: Colors.transparent,
                         elevation: 0,
@@ -373,7 +382,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
               SliverPadding(
                 padding: EdgeInsets.only(
                   top: tokens.spaceSmall,
-                  bottom: tokens.spaceExtraLarge,
+                  bottom: prayerTimesScrollBottomPadding(context),
                 ),
                 sliver: SliverList.list(
                   children: [

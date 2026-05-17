@@ -901,25 +901,26 @@ class _RecitersHeaderOverflowMenu extends StatelessWidget {
         ),
       ),
       alignmentOffset: Offset(0, tokens.spaceSmall),
-      builder: (BuildContext context, MenuController controller, Widget? child) {
-        return Semantics(
-          identifier: ReciterSemanticsIds.recitersMoreActionsButton,
-          child: TilawaIconActionButton(
-            icon: FluentIcons.more_horizontal_24_regular,
-            isActive: showLetterIndex,
-            tooltip: context.l10n.recitersMoreActions,
-            semanticLabel: context.l10n.recitersMoreActions,
-            backgroundColor: colorScheme.surface,
-            onTap: () {
-              if (controller.isOpen) {
-                controller.close();
-              } else {
-                controller.open();
-              }
-            },
-          ),
-        );
-      },
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+            return Semantics(
+              identifier: ReciterSemanticsIds.recitersMoreActionsButton,
+              child: TilawaIconActionButton(
+                icon: FluentIcons.more_horizontal_24_regular,
+                isActive: showLetterIndex,
+                tooltip: context.l10n.recitersMoreActions,
+                semanticLabel: context.l10n.recitersMoreActions,
+                backgroundColor: colorScheme.surface,
+                onTap: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+              ),
+            );
+          },
       menuChildren: <Widget>[
         MenuItemButton(
           onPressed: () => const DownloadsRoute().push(context),
