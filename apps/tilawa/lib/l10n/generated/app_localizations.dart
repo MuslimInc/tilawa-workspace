@@ -200,6 +200,18 @@ abstract class AppLocalizations {
   /// **'Drag up or down to jump to a letter'**
   String get a11yRecitersAlphabetScrollbarHint;
 
+  /// Tooltip for enabling the reciters A–Z letter index
+  ///
+  /// In en, this message translates to:
+  /// **'Show letter index'**
+  String get showRecitersLetterIndex;
+
+  /// Tooltip for hiding the reciters A–Z letter index
+  ///
+  /// In en, this message translates to:
+  /// **'Hide letter index'**
+  String get hideRecitersLetterIndex;
+
   /// Tooltip for clearing the reciters search field
   ///
   /// In en, this message translates to:
@@ -961,6 +973,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} recitation(s) available'**
   String recitationsAvailable(int count);
+
+  /// Suffix on reciter list rows when more than one moshaf exists
+  ///
+  /// In en, this message translates to:
+  /// **' · {count} more'**
+  String reciterAdditionalMoshafCount(int count);
 
   /// Loading surahs for a specific reciter message
   ///

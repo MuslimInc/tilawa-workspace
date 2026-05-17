@@ -63,6 +63,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'Drag up or down to jump to a letter';
 
   @override
+  String get showRecitersLetterIndex => 'Show letter index';
+
+  @override
+  String get hideRecitersLetterIndex => 'Hide letter index';
+
+  @override
   String get a11yClearRecitersSearch => 'Clear search text';
 
   @override
@@ -457,6 +463,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String recitationsAvailable(int count) {
     return '$count recitation(s) available';
+  }
+
+  @override
+  String reciterAdditionalMoshafCount(int count) {
+    return ' · $count more';
   }
 
   @override

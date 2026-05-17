@@ -63,6 +63,12 @@ class AppLocalizationsAr extends AppLocalizations {
       'اسحب لأعلى أو لأسفل للانتقال إلى حرف';
 
   @override
+  String get showRecitersLetterIndex => 'إظهار فهرس الحروف';
+
+  @override
+  String get hideRecitersLetterIndex => 'إخفاء فهرس الحروف';
+
+  @override
   String get a11yClearRecitersSearch => 'مسح نص البحث';
 
   @override
@@ -455,6 +461,11 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String recitationsAvailable(int count) {
     return '$count رواية متاحة';
+  }
+
+  @override
+  String reciterAdditionalMoshafCount(int count) {
+    return ' · $count أخرى';
   }
 
   @override

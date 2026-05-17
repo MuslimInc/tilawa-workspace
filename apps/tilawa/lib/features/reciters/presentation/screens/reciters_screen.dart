@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/reciters/presentation/utils/reciter_list_moshaf_label.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -46,6 +47,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
   Timer? _startupLiteUiTimer;
   bool _isStartupLiteUi = true;
   bool _allowHeavyLoadedResults = false;
+  bool _showLetterIndex = false;
+  bool _letterIndexDefaultResolved = false;
   late final FavoritesCubit _favoritesCubit;
 
   @override
@@ -124,6 +127,27 @@ class _RecitersScreenState extends State<RecitersScreen> {
   void _clearLetterFilter() {
     context.read<RecitersBloc>().add(const ClearLetterFilter());
     context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_letterIndexDefaultResolved) {
+      return;
+    }
+    _letterIndexDefaultResolved = true;
+    _showLetterIndex =
+        MediaQuery.sizeOf(context).width >=
+        kRecitersAlphabetDefaultVisibleBreakpoint;
+  }
+
+  void _toggleLetterIndex() {
+    setState(() {
+      _showLetterIndex = !_showLetterIndex;
+    });
+    if (!_showLetterIndex) {
+      _clearLetterFilter();
+    }
   }
 
   void _onSearchChanged(String value) {
@@ -261,12 +285,14 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 body: _RecitersSliverScreen(
                   state: state,
                   allowHeavyLoadedResults: _allowHeavyLoadedResults,
+                  showLetterIndex: _showLetterIndex,
                   searchController: _searchController,
                   focusNode: _focusNode,
                   scrollController: _scrollController,
                   onSearchChanged: _onSearchChanged,
                   onClearSearch: _clearSearch,
                   onToggleFavorites: () => _toggleFavoritesFilter(innerContext),
+                  onToggleLetterIndex: _toggleLetterIndex,
                   onClearAll: _clearAllFilters,
                   onLetterSelected: _onLetterSelected,
                   onRetry: _refreshReciters,
@@ -312,12 +338,14 @@ class _RecitersSliverScreen extends StatelessWidget {
   const _RecitersSliverScreen({
     required this.state,
     required this.allowHeavyLoadedResults,
+    required this.showLetterIndex,
     required this.searchController,
     required this.focusNode,
     required this.scrollController,
     required this.onSearchChanged,
     required this.onClearSearch,
     required this.onToggleFavorites,
+    required this.onToggleLetterIndex,
     required this.onClearAll,
     required this.onLetterSelected,
     required this.onRetry,
@@ -325,12 +353,14 @@ class _RecitersSliverScreen extends StatelessWidget {
 
   final RecitersState state;
   final bool allowHeavyLoadedResults;
+  final bool showLetterIndex;
   final TextEditingController searchController;
   final FocusNode focusNode;
   final ScrollController scrollController;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
   final VoidCallback onToggleFavorites;
+  final VoidCallback onToggleLetterIndex;
   final VoidCallback onClearAll;
   final ValueChanged<String?> onLetterSelected;
   final Future<void> Function() onRetry;
@@ -344,11 +374,12 @@ class _RecitersSliverScreen extends StatelessWidget {
     final double headerExtent = _recitersSearchHeaderExtent(context);
     const double scrollbarVerticalMargin = 10;
     final double scrollbarTopOffset = headerExtent + scrollbarVerticalMargin;
-    final bool showScrollbar =
+    final bool letterIndexAvailable =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
         (state as RecitersLoaded).filteredReciters.isNotEmpty &&
         (state as RecitersLoaded).searchQuery.isEmpty;
+    final bool showLetterIndexRail = letterIndexAvailable && showLetterIndex;
 
     return Stack(
       fit: StackFit.expand,
@@ -358,11 +389,14 @@ class _RecitersSliverScreen extends StatelessWidget {
           children: [
             _RecitersSearchHeaderBar(
               state: state,
+              letterIndexAvailable: letterIndexAvailable,
+              showLetterIndex: showLetterIndex,
               searchController: searchController,
               focusNode: focusNode,
               onSearchChanged: onSearchChanged,
               onClearSearch: onClearSearch,
               onToggleFavorites: onToggleFavorites,
+              onToggleLetterIndex: onToggleLetterIndex,
             ),
             Expanded(
               child: RefreshIndicator.adaptive(
@@ -376,7 +410,7 @@ class _RecitersSliverScreen extends StatelessWidget {
                     _RecitersResultSection(
                       state: state,
                       allowHeavyLoadedResults: allowHeavyLoadedResults,
-                      reserveScrollbarSpace: showScrollbar,
+                      reserveScrollbarSpace: showLetterIndexRail,
                       reserveScrollbarOnLeading: isRtl,
                       onClearAll: onClearAll,
                       onRetry: onRetry,
@@ -387,7 +421,7 @@ class _RecitersSliverScreen extends StatelessWidget {
             ),
           ],
         ),
-        if (showScrollbar)
+        if (showLetterIndexRail)
           PositionedDirectional(
             top: scrollbarTopOffset,
             bottom: scrollbarVerticalMargin,
@@ -538,19 +572,25 @@ class _RecitersEmptySliver extends StatelessWidget {
 class _RecitersSearchHeaderBar extends StatelessWidget {
   const _RecitersSearchHeaderBar({
     required this.state,
+    required this.letterIndexAvailable,
+    required this.showLetterIndex,
     required this.searchController,
     required this.focusNode,
     required this.onSearchChanged,
     required this.onClearSearch,
     required this.onToggleFavorites,
+    required this.onToggleLetterIndex,
   });
 
   final RecitersState state;
+  final bool letterIndexAvailable;
+  final bool showLetterIndex;
   final TextEditingController searchController;
   final FocusNode focusNode;
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
   final VoidCallback onToggleFavorites;
+  final VoidCallback onToggleLetterIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -590,6 +630,7 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
                         horizontal: tokens.spaceMedium,
                       ),
                       child: Row(
+                        spacing: tokens.spaceSmall,
                         children: [
                           Expanded(
                             child: _SearchField(
@@ -599,12 +640,11 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
                               onClear: onClearSearch,
                             ),
                           ),
-                          SizedBox(width: tokens.spaceSmall),
+
                           _FavoritesToggle(
                             state: state,
                             onTap: onToggleFavorites,
                           ),
-                          SizedBox(width: tokens.spaceSmall),
                           TilawaIconActionButton(
                             icon: FluentIcons.arrow_download_24_regular,
                             tooltip: context.l10n.viewDownloads,
@@ -614,6 +654,12 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
                             backgroundColor: colorScheme.surface,
                             onTap: () => const DownloadsRoute().push(context),
                           ),
+                          if (letterIndexAvailable) ...[
+                            _LetterIndexToggle(
+                              isActive: showLetterIndex,
+                              onTap: onToggleLetterIndex,
+                            ),
+                          ],
                         ],
                       ),
                     ),
@@ -751,6 +797,39 @@ class _SearchField extends StatelessWidget {
         ),
         showShadow: true,
         onTapOutside: (_) => focusNode.unfocus(),
+      ),
+    );
+  }
+}
+
+class _LetterIndexToggle extends StatelessWidget {
+  const _LetterIndexToggle({
+    required this.isActive,
+    required this.onTap,
+  });
+
+  final bool isActive;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final String label = isActive
+        ? context.l10n.hideRecitersLetterIndex
+        : context.l10n.showRecitersLetterIndex;
+
+    return Semantics(
+      identifier: ReciterSemanticsIds.recitersLetterIndexToggle,
+      child: TilawaIconActionButton(
+        icon: isActive
+            ? Icons.sort_by_alpha_rounded
+            : Icons.sort_by_alpha_outlined,
+        isActive: isActive,
+        toggled: isActive,
+        tooltip: label,
+        semanticLabel: label,
+        backgroundColor: theme.colorScheme.surface,
+        onTap: onTap,
       ),
     );
   }
@@ -955,7 +1034,7 @@ class _ReciterListSliver extends StatelessWidget {
             itemCount: itemCount,
             itemBuilder: (context, index) {
               if (index.isOdd) {
-                return SizedBox(height: tokens.spaceSmall);
+                return SizedBox(height: tokens.spaceMedium);
               }
 
               final ReciterEntity reciter = state.filteredReciters[index ~/ 2];

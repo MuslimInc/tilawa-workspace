@@ -8,6 +8,7 @@ import 'package:tilawa/features/reciters/presentation/reciter_semantics_ids.dart
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -150,7 +151,7 @@ void main() {
   });
 
   testWidgets(
-    'full-card InkWell wraps content; favorite retains inner InkWell',
+    'full-card InkWell wraps content; favorite retains its own InkWell',
     (WidgetTester tester) async {
       final cubit = await loadedCubit();
       await pumpCard(tester, cubit);
@@ -163,9 +164,10 @@ void main() {
         findsNWidgets(2),
       );
 
-      final Finder row = find.byType(Row);
       final Finder openInkWell = find.ancestor(
-        of: row,
+        of: find.bySemanticsIdentifier(
+          ReciterSemanticsIds.reciterCard(tReciter.id),
+        ),
         matching: find.byType(InkWell),
       );
       expect(openInkWell, findsOneWidget);
@@ -185,4 +187,70 @@ void main() {
       await cubit.close();
     },
   );
+
+  testWidgets('shows reciter initial in avatar', (WidgetTester tester) async {
+    final cubit = await loadedCubit();
+    await pumpCard(tester, cubit);
+
+    expect(find.text('T'), findsOneWidget);
+
+    await cubit.close();
+  });
+
+  testWidgets('shows compact moshaf label with localized more suffix', (
+    WidgetTester tester,
+  ) async {
+    const reciter = ReciterEntity(
+      id: 7,
+      name: 'Ibrahim Al-Akdar',
+      letter: 'I',
+      date: '2023',
+      moshaf: [
+        MoshafEntity(
+          id: 1,
+          name: "Rewayat Hafs A'n Assem - Murattal - Mojawwad",
+          server: 'https://example.com',
+          surahTotal: 114,
+          moshafType: 0,
+          surahList: '1',
+        ),
+        MoshafEntity(
+          id: 2,
+          name: 'Murattal',
+          server: 'https://example.com',
+          surahTotal: 114,
+          moshafType: 0,
+          surahList: '1',
+        ),
+      ],
+    );
+    final cubit = await loadedCubit();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: PrimaryColorPreset.defaultPreset.value,
+          useGoogleFontsOverride: false,
+        ),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: Center(
+            child: BlocProvider<FavoritesCubit>.value(
+              value: cubit,
+              child: const ReciterCard(reciter: reciter),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text("Hafs A'n Assem · Mojawwad · 1 more"),
+      findsOneWidget,
+    );
+
+    await cubit.close();
+  });
 }
