@@ -363,10 +363,9 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
             child: Container(
               width: componentTokens.width,
               decoration: BoxDecoration(
-                // color: theme.colorScheme.surface.withValues(
-                //   alpha: tokens.opacityGlass,
-                // ),
-                color: Colors.green,
+                color: theme.colorScheme.surface.withValues(
+                  alpha: tokens.opacityGlass,
+                ),
                 borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
               ),
               child: ListView.builder(
