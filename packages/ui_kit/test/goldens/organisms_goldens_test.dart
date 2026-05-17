@@ -69,6 +69,24 @@ void main() {
               ),
             ),
           ),
+          GoldenTestScenario(
+            name: 'Narrow compact metadata',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 360,
+                child: TilawaMediaPlayerBar(
+                  title: 'Surah Al-Fatiha',
+                  subtitle: 'Mohammad Kamal',
+                  progress: 0.35,
+                  isPlaying: true,
+                  canGoPrevious: true,
+                  canGoNext: true,
+                  isSleepTimerActive: false,
+                  isSleepTimerEnabled: true,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
