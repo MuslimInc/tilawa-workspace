@@ -10,6 +10,10 @@ const double kTilawaMediaPlayerBarMinMetadataWidth = 96.0;
 /// Artwork size on compact layouts (slightly smaller to free metadata space).
 const double kTilawaMediaPlayerBarCompactArtworkSize = 40.0;
 
+/// Typical horizontal inset outside the bar in the mini-player shell
+/// ([TilawaDesignTokens.spaceLarge] × 2). Used when [layoutWidth] is null.
+const double kTilawaMediaPlayerBarDefaultHorizontalInset = 32.0;
+
 /// UI-only widget for the bottom player that can be used in previews
 /// without any bloc dependencies.
 class TilawaMediaPlayerBar extends StatelessWidget {
@@ -25,6 +29,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     required this.canGoNext,
     this.isSleepTimerActive = false,
     this.isSleepTimerEnabled = true,
+    this.layoutWidth,
     this.onPlayPause,
     this.onPrevious,
     this.onNext,
@@ -49,6 +54,13 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   final bool canGoNext;
   final bool isSleepTimerActive;
   final bool isSleepTimerEnabled;
+
+  /// Width available to the bar's content row. When null, inferred from
+  /// [MediaQuery] minus [kTilawaMediaPlayerBarDefaultHorizontalInset].
+  /// Pass explicitly for width-constrained parents (goldens) or from a parent
+  /// [LayoutBuilder] in the app shell.
+  final double? layoutWidth;
+
   final VoidCallback? onPlayPause;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
@@ -92,6 +104,20 @@ class TilawaMediaPlayerBar extends StatelessWidget {
         openPlayerSemanticLabel ??
         (subtitle == null || subtitle!.isEmpty ? title : '$title, $subtitle');
 
+    final double resolvedLayoutWidth = resolveTilawaMediaPlayerBarLayoutWidth(
+      context,
+      layoutWidth: layoutWidth,
+    );
+    final bool showSleepTimer = isSleepTimerEnabled;
+    final bool useCompactControls = tilawaMediaPlayerBarNeedsCompactControls(
+      maxWidth: resolvedLayoutWidth,
+      tokens: componentTokens,
+      showSleepTimer: showSleepTimer,
+    );
+    final double artworkSize = useCompactControls
+        ? kTilawaMediaPlayerBarCompactArtworkSize
+        : componentTokens.artworkSize;
+
     return Container(
       decoration: BoxDecoration(
         color: componentTokens.shellBackgroundColor,
@@ -133,84 +159,69 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                       ),
                       minHeight: designTokens.progressHeight,
                     ),
-                LayoutBuilder(
-                  builder: (context, constraints) {
-                    final bool showSleepTimer = isSleepTimerEnabled;
-                    final bool useCompactControls =
-                        tilawaMediaPlayerBarNeedsCompactControls(
-                          maxWidth: constraints.maxWidth,
-                          tokens: componentTokens,
-                          showSleepTimer: showSleepTimer,
-                        );
-                    final double artworkSize = useCompactControls
-                        ? kTilawaMediaPlayerBarCompactArtworkSize
-                        : componentTokens.artworkSize;
-
-                    return Padding(
-                      padding: componentTokens.contentPadding.resolve(
-                        Directionality.of(context),
+                Padding(
+                  padding: componentTokens.contentPadding.resolve(
+                    Directionality.of(context),
+                  ),
+                  child: Row(
+                    children: [
+                      _ArtworkTile(
+                        size: artworkSize,
+                        radius: componentTokens.artworkRadius,
+                        placeholderColor:
+                            componentTokens.artworkPlaceholderColor,
+                        artwork: artwork,
+                        defaultIconSize: componentTokens.defaultIconSize,
                       ),
-                      child: Row(
-                        children: [
-                          _ArtworkTile(
-                            size: artworkSize,
-                            radius: componentTokens.artworkRadius,
-                            placeholderColor:
-                                componentTokens.artworkPlaceholderColor,
-                            artwork: artwork,
-                            defaultIconSize: componentTokens.defaultIconSize,
-                          ),
-                          SizedBox(width: componentTokens.artworkInfoGap),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: .start,
-                              mainAxisAlignment: .center,
-                              spacing: componentTokens.infoGap,
-                              children: [
-                                Text(
-                                  title,
-                                  style: titleStyle,
-                                  maxLines: 1,
-                                  overflow: .ellipsis,
-                                  textAlign: TextAlign.start,
-                                ),
-                                if (subtitle != null && subtitle!.isNotEmpty)
-                                  Text(
-                                    subtitle!,
-                                    style: subtitleStyle,
-                                    maxLines: 1,
-                                    overflow: .ellipsis,
-                                    textAlign: TextAlign.start,
-                                  ),
-                              ],
+                      SizedBox(width: componentTokens.artworkInfoGap),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: .start,
+                          mainAxisAlignment: .center,
+                          spacing: componentTokens.infoGap,
+                          children: [
+                            Text(
+                              title,
+                              style: titleStyle,
+                              maxLines: 1,
+                              overflow: .ellipsis,
+                              textAlign: TextAlign.start,
                             ),
-                          ),
-                          SizedBox(width: componentTokens.infoControlsGap),
-                          _TransportControls(
-                            designTokens: designTokens,
-                            componentTokens: componentTokens,
-                            colorScheme: colorScheme,
-                            disabledControlColor: disabledControlColor,
-                            isPlaying: isPlaying,
-                            canGoPrevious: canGoPrevious,
-                            canGoNext: canGoNext,
-                            isSleepTimerActive: isSleepTimerActive,
-                            showSleepTimer: showSleepTimer,
-                            compact: useCompactControls,
-                            onPlayPause: onPlayPause,
-                            onPrevious: onPrevious,
-                            onNext: onNext,
-                            onSleepTimerTap: onSleepTimerTap,
-                            previousTooltip: previousTooltip,
-                            playTooltip: playTooltip,
-                            pauseTooltip: pauseTooltip,
-                            nextTooltip: nextTooltip,
-                            sleepTimerTooltip: sleepTimerTooltip,
-                          ),
-                        ],
+                            if (subtitle != null && subtitle!.isNotEmpty)
+                              Text(
+                                subtitle!,
+                                style: subtitleStyle,
+                                maxLines: 1,
+                                overflow: .ellipsis,
+                                textAlign: TextAlign.start,
+                              ),
+                          ],
+                        ),
                       ),
-                    );
-                  },
+                      SizedBox(width: componentTokens.infoControlsGap),
+                      _TransportControls(
+                        designTokens: designTokens,
+                        componentTokens: componentTokens,
+                        colorScheme: colorScheme,
+                        disabledControlColor: disabledControlColor,
+                        isPlaying: isPlaying,
+                        canGoPrevious: canGoPrevious,
+                        canGoNext: canGoNext,
+                        isSleepTimerActive: isSleepTimerActive,
+                        showSleepTimer: showSleepTimer,
+                        compact: useCompactControls,
+                        onPlayPause: onPlayPause,
+                        onPrevious: onPrevious,
+                        onNext: onNext,
+                        onSleepTimerTap: onSleepTimerTap,
+                        previousTooltip: previousTooltip,
+                        playTooltip: playTooltip,
+                        pauseTooltip: pauseTooltip,
+                        nextTooltip: nextTooltip,
+                        sleepTimerTooltip: sleepTimerTooltip,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -219,6 +230,18 @@ class TilawaMediaPlayerBar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Resolves the width used for compact-layout decisions.
+double resolveTilawaMediaPlayerBarLayoutWidth(
+  BuildContext context, {
+  double? layoutWidth,
+}) {
+  if (layoutWidth != null) {
+    return layoutWidth;
+  }
+  return MediaQuery.sizeOf(context).width -
+      kTilawaMediaPlayerBarDefaultHorizontalInset;
 }
 
 /// Returns true when the bar should hide prev/next/sleep timer so metadata

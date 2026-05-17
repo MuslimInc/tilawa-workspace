@@ -69,6 +69,7 @@ void main() {
           const SizedBox(
             width: 420,
             child: TilawaMediaPlayerBar(
+              layoutWidth: 420,
               title: 'Surah',
               subtitle: 'Reciter',
               progress: 0.4,

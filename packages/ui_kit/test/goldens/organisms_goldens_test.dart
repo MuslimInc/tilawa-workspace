@@ -24,6 +24,7 @@ void main() {
               child: SizedBox(
                 width: 360,
                 child: TilawaMediaPlayerBar(
+                  layoutWidth: 360,
                   title: 'Surah Al-Fatiha',
                   subtitle: 'Abdul Basit',
                   progress: 0.4,
@@ -41,6 +42,7 @@ void main() {
               child: SizedBox(
                 width: 360,
                 child: TilawaMediaPlayerBar(
+                  layoutWidth: 360,
                   title: 'Surah Al-Fatiha',
                   subtitle: 'Abdul Basit',
                   progress: 0.0,
@@ -58,6 +60,7 @@ void main() {
               child: SizedBox(
                 width: 360,
                 child: TilawaMediaPlayerBar(
+                  layoutWidth: 360,
                   title: 'Surah Al-Fatiha',
                   subtitle: 'Abdul Basit',
                   progress: 0.6,
@@ -75,6 +78,7 @@ void main() {
               child: SizedBox(
                 width: 360,
                 child: TilawaMediaPlayerBar(
+                  layoutWidth: 360,
                   title: 'Surah Al-Fatiha',
                   subtitle: 'Mohammad Kamal',
                   progress: 0.35,

@@ -49,6 +49,7 @@ void main() {
           const SizedBox(
             width: 360,
             child: TilawaMediaPlayerBar(
+              layoutWidth: 360,
               title: 'Surah Al-Fatiha',
               subtitle: 'Mohammad Kamal',
               progress: 0.2,
@@ -72,6 +73,7 @@ void main() {
           const SizedBox(
             width: 420,
             child: TilawaMediaPlayerBar(
+              layoutWidth: 420,
               title: 'Surah Al-Fatiha',
               subtitle: 'Mohammad Kamal',
               progress: 0.2,

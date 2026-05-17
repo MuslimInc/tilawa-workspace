@@ -509,56 +509,62 @@ class _MiniPlayerOrganism extends StatelessWidget {
           tokens.spaceLarge,
           tokens.spaceTiny,
         ),
-        child: TilawaMediaPlayerBar(
-          title: audio.title,
-          subtitle: audio.artist ?? context.l10n.unknownReciter,
-          artwork: audio.artUri == null
-              ? null
-              : CachedNetworkImage(
-                  imageUrl: audio.artUri.toString(),
-                  fit: BoxFit.cover,
-                  errorWidget: (context, error, stackTrace) =>
-                      const SizedBox.shrink(),
-                  placeholder: (context, url) => const SizedBox.shrink(),
-                ),
-          progress: state.positionData?.duration.inMilliseconds.toDouble() == 0
-              ? 0.0
-              : (state.positionData?.position.inMilliseconds ?? 0) /
-                    (state.positionData?.duration.inMilliseconds ?? 1),
-          progressBarOverride: const _MiniPlayerProgressBar(),
-          isPlaying: state.isPlaying,
-          canGoPrevious: state.canGoPrevious,
-          canGoNext: state.canGoNext,
-          isSleepTimerActive: state.isSleepTimerActive,
-          isSleepTimerEnabled: context
-              .watch<SettingsCubit>()
-              .state
-              .isSleepTimerEnabled,
-          onPlayPause: () {
-            context.read<AudioPlayerBloc>().add(
-              state.isPlaying
-                  ? const AudioPlayerEvent.pauseAudio()
-                  : const AudioPlayerEvent.playAudio(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return TilawaMediaPlayerBar(
+              layoutWidth: constraints.maxWidth,
+              title: audio.title,
+              subtitle: audio.artist ?? context.l10n.unknownReciter,
+              artwork: audio.artUri == null
+                  ? null
+                  : CachedNetworkImage(
+                      imageUrl: audio.artUri.toString(),
+                      fit: BoxFit.cover,
+                      errorWidget: (context, error, stackTrace) =>
+                          const SizedBox.shrink(),
+                      placeholder: (context, url) => const SizedBox.shrink(),
+                    ),
+              progress:
+                  state.positionData?.duration.inMilliseconds.toDouble() == 0
+                  ? 0.0
+                  : (state.positionData?.position.inMilliseconds ?? 0) /
+                        (state.positionData?.duration.inMilliseconds ?? 1),
+              progressBarOverride: const _MiniPlayerProgressBar(),
+              isPlaying: state.isPlaying,
+              canGoPrevious: state.canGoPrevious,
+              canGoNext: state.canGoNext,
+              isSleepTimerActive: state.isSleepTimerActive,
+              isSleepTimerEnabled: context
+                  .watch<SettingsCubit>()
+                  .state
+                  .isSleepTimerEnabled,
+              onPlayPause: () {
+                context.read<AudioPlayerBloc>().add(
+                  state.isPlaying
+                      ? const AudioPlayerEvent.pauseAudio()
+                      : const AudioPlayerEvent.playAudio(),
+                );
+              },
+              onPrevious: () {
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.skipToPrevious(),
+                );
+              },
+              onNext: () {
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.skipToNext(),
+                );
+              },
+              onSleepTimerTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => const SleepTimerDialog(),
+                );
+              },
+              onClose: onClose,
+              onTap: onTap,
             );
           },
-          onPrevious: () {
-            context.read<AudioPlayerBloc>().add(
-              const AudioPlayerEvent.skipToPrevious(),
-            );
-          },
-          onNext: () {
-            context.read<AudioPlayerBloc>().add(
-              const AudioPlayerEvent.skipToNext(),
-            );
-          },
-          onSleepTimerTap: () {
-            showDialog(
-              context: context,
-              builder: (_) => const SleepTimerDialog(),
-            );
-          },
-          onClose: onClose,
-          onTap: onTap,
         ),
       ),
     );
