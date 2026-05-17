@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
-import 'package:tilawa_ui_kit/src/organisms/tilawa_media_player_bar.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 Widget _themed(Widget child) {

@@ -69,6 +69,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get hideRecitersLetterIndex => 'إخفاء فهرس الحروف';
 
   @override
+  String get recitersMoreActions => 'المزيد';
+
+  @override
+  String get recitersLetterIndexMenuItem => 'فهرس الحروف';
+
+  @override
   String get a11yClearRecitersSearch => 'مسح نص البحث';
 
   @override

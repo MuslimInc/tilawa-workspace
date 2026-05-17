@@ -36,6 +36,9 @@ abstract final class ReciterSemanticsIds {
   static const String recitersLetterIndexToggle =
       'reciters_letter_index_toggle';
 
+  /// Overflow menu for secondary Reciters header actions.
+  static const String recitersMoreActionsButton = 'reciters_more_actions_button';
+
   // ── Reciter cards (dynamic, per reciter) ────────────────────────────────────
 
   /// Tappable card for a specific reciter.

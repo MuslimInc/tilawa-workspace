@@ -645,21 +645,11 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
                             state: state,
                             onTap: onToggleFavorites,
                           ),
-                          TilawaIconActionButton(
-                            icon: FluentIcons.arrow_download_24_regular,
-                            tooltip: context.l10n.viewDownloads,
-                            semanticLabel: context.l10n.viewDownloads,
-                            // Quiet inset on Vellum header — tier change vs.
-                            // colorScheme.surface is the only divider needed.
-                            backgroundColor: colorScheme.surface,
-                            onTap: () => const DownloadsRoute().push(context),
+                          _RecitersHeaderOverflowMenu(
+                            letterIndexAvailable: letterIndexAvailable,
+                            showLetterIndex: showLetterIndex,
+                            onToggleLetterIndex: onToggleLetterIndex,
                           ),
-                          if (letterIndexAvailable) ...[
-                            _LetterIndexToggle(
-                              isActive: showLetterIndex,
-                              onTap: onToggleLetterIndex,
-                            ),
-                          ],
                         ],
                       ),
                     ),
@@ -802,35 +792,118 @@ class _SearchField extends StatelessWidget {
   }
 }
 
-class _LetterIndexToggle extends StatelessWidget {
-  const _LetterIndexToggle({
-    required this.isActive,
-    required this.onTap,
+class _RecitersHeaderOverflowMenu extends StatelessWidget {
+  const _RecitersHeaderOverflowMenu({
+    required this.letterIndexAvailable,
+    required this.showLetterIndex,
+    required this.onToggleLetterIndex,
   });
 
-  final bool isActive;
-  final VoidCallback onTap;
+  final bool letterIndexAvailable;
+  final bool showLetterIndex;
+  final VoidCallback onToggleLetterIndex;
+
+  static const String _downloadsValue = 'downloads';
+  static const String _letterIndexValue = 'letter_index';
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final String label = isActive
-        ? context.l10n.hideRecitersLetterIndex
-        : context.l10n.showRecitersLetterIndex;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    final double actionSize = theme.componentTokens.iconActionButton.size;
+    final double actionRadius =
+        theme.componentTokens.iconActionButton.borderRadius;
 
     return Semantics(
-      identifier: ReciterSemanticsIds.recitersLetterIndexToggle,
-      child: TilawaIconActionButton(
-        icon: isActive
-            ? Icons.sort_by_alpha_rounded
-            : Icons.sort_by_alpha_outlined,
-        isActive: isActive,
-        toggled: isActive,
-        tooltip: label,
-        semanticLabel: label,
-        backgroundColor: theme.colorScheme.surface,
-        onTap: onTap,
+      identifier: ReciterSemanticsIds.recitersMoreActionsButton,
+      button: true,
+      label: context.l10n.recitersMoreActions,
+      child: PopupMenuButton<String>(
+        tooltip: context.l10n.recitersMoreActions,
+        padding: EdgeInsets.zero,
+        offset: Offset(0, tokens.spaceSmall),
+        position: PopupMenuPosition.under,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        ),
+        style: IconButton.styleFrom(
+          minimumSize: Size.square(actionSize),
+          fixedSize: Size.square(actionSize),
+          backgroundColor: colorScheme.surface,
+          foregroundColor: colorScheme.onSurfaceVariant,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(actionRadius),
+          ),
+        ),
+        icon: Icon(
+          FluentIcons.more_horizontal_24_regular,
+          size: tokens.iconSizeMedium,
+        ),
+        onSelected: (String value) {
+          switch (value) {
+            case _downloadsValue:
+              const DownloadsRoute().push(context);
+            case _letterIndexValue:
+              onToggleLetterIndex();
+          }
+        },
+        itemBuilder: (BuildContext context) {
+          return <PopupMenuEntry<String>>[
+            PopupMenuItem<String>(
+              value: _downloadsValue,
+              child: _RecitersHeaderMenuRow(
+                icon: FluentIcons.arrow_download_24_regular,
+                label: context.l10n.viewDownloads,
+              ),
+            ),
+            if (letterIndexAvailable)
+              PopupMenuItem<String>(
+                value: _letterIndexValue,
+                child: _RecitersHeaderMenuRow(
+                  icon: showLetterIndex
+                      ? Icons.sort_by_alpha_rounded
+                      : Icons.sort_by_alpha_outlined,
+                  label: context.l10n.recitersLetterIndexMenuItem,
+                  trailing: showLetterIndex
+                      ? Icon(
+                          Icons.check_rounded,
+                          size: tokens.iconSizeSmall,
+                          color: colorScheme.primary,
+                        )
+                      : null,
+                ),
+              ),
+          ];
+        },
       ),
+    );
+  }
+}
+
+class _RecitersHeaderMenuRow extends StatelessWidget {
+  const _RecitersHeaderMenuRow({
+    required this.icon,
+    required this.label,
+    this.trailing,
+  });
+
+  final IconData icon;
+  final String label;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return Row(
+      children: [
+        Icon(icon, size: tokens.iconSizeMedium),
+        SizedBox(width: tokens.spaceSmall + tokens.spaceTiny),
+        Expanded(child: Text(label)),
+        ?trailing,
+      ],
     );
   }
 }

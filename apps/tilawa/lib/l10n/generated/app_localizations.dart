@@ -212,6 +212,18 @@ abstract class AppLocalizations {
   /// **'Hide letter index'**
   String get hideRecitersLetterIndex;
 
+  /// Tooltip for the reciters header overflow menu
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get recitersMoreActions;
+
+  /// Overflow menu item to show or hide the A–Z letter index
+  ///
+  /// In en, this message translates to:
+  /// **'Letter index'**
+  String get recitersLetterIndexMenuItem;
+
   /// Tooltip for clearing the reciters search field
   ///
   /// In en, this message translates to:

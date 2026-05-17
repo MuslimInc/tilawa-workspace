@@ -251,7 +251,8 @@ bool tilawaMediaPlayerBarNeedsCompactControls({
   required TilawaMediaPlayerBarTokens tokens,
   required bool showSleepTimer,
 }) {
-  final double metadataWidth = maxWidth -
+  final double metadataWidth =
+      maxWidth -
       _tilawaMediaPlayerBarLeadingWidth(tokens, tokens.artworkSize) -
       _tilawaMediaPlayerBarFullTransportWidth(
         tokens: tokens,

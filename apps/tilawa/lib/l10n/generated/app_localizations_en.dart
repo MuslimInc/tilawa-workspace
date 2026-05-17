@@ -69,6 +69,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get hideRecitersLetterIndex => 'Hide letter index';
 
   @override
+  String get recitersMoreActions => 'More actions';
+
+  @override
+  String get recitersLetterIndexMenuItem => 'Letter index';
+
+  @override
   String get a11yClearRecitersSearch => 'Clear search text';
 
   @override
