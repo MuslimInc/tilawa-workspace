@@ -368,8 +368,6 @@ class _RecitersSliverScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     PerfLogger.markBuild('_RecitersSliverScreen');
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
     final double headerExtent = _recitersSearchHeaderExtent(context);
     const double scrollbarVerticalMargin = 10;
@@ -422,22 +420,107 @@ class _RecitersSliverScreen extends StatelessWidget {
           ],
         ),
         if (showLetterIndexRail)
-          PositionedDirectional(
-            top: scrollbarTopOffset,
-            bottom: scrollbarVerticalMargin,
-            start: isRtl ? tokens.spaceSmall : null,
-            end: isRtl ? null : tokens.spaceSmall,
-            child: ReciterAlphabetScrollbar(
-              key: const ValueKey('alphabet_scrollbar'),
-              allReciters: (state as RecitersLoaded).reciters,
-              scrollController: scrollController,
-              onLetterSelected: onLetterSelected,
-              scrollbarSemanticsLabel: context.l10n.a11yRecitersLetterIndex,
-              scrollbarSemanticsHint:
-                  context.l10n.a11yRecitersAlphabetScrollbarHint,
-            ),
+          _RecitersLetterIndexGutter(
+            isRtl: isRtl,
+            top: headerExtent,
+            scrollbarTopOffset: scrollbarTopOffset,
+            scrollbarBottomMargin: scrollbarVerticalMargin,
+            reciters: (state as RecitersLoaded).reciters,
+            scrollController: scrollController,
+            onLetterSelected: onLetterSelected,
+            scrollbarSemanticsLabel: context.l10n.a11yRecitersLetterIndex,
+            scrollbarSemanticsHint:
+                context.l10n.a11yRecitersAlphabetScrollbarHint,
           ),
       ],
+    );
+  }
+}
+
+/// Letter-index rail with a tinted gutter and a content-facing border.
+class _RecitersLetterIndexGutter extends StatelessWidget {
+  const _RecitersLetterIndexGutter({
+    required this.isRtl,
+    required this.top,
+    required this.scrollbarTopOffset,
+    required this.scrollbarBottomMargin,
+    required this.reciters,
+    required this.scrollController,
+    required this.onLetterSelected,
+    required this.scrollbarSemanticsLabel,
+    required this.scrollbarSemanticsHint,
+  });
+
+  final bool isRtl;
+  final double top;
+  final double scrollbarTopOffset;
+  final double scrollbarBottomMargin;
+  final List<ReciterEntity> reciters;
+  final ScrollController scrollController;
+  final ValueChanged<String?> onLetterSelected;
+  final String? scrollbarSemanticsLabel;
+  final String? scrollbarSemanticsHint;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final double gutterWidth = _recitersLetterIndexGutterWidth(theme);
+    final BorderSide contentBorder = BorderSide(
+      color: colorScheme.outlineVariant.withValues(
+        alpha: tokens.opacityEmphasis,
+      ),
+      width: tokens.borderWidthThin,
+    );
+
+    return PositionedDirectional(
+      top: top,
+      bottom: 0,
+      start: isRtl ? 0 : null,
+      end: isRtl ? null : 0,
+      width: gutterWidth,
+      child: ExcludeSemantics(
+        child: ColoredBox(
+          color: colorScheme.surfaceContainerHigh.withValues(
+            alpha: tokens.opacitySubtle + tokens.opacityMedium,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              border: BorderDirectional(
+                start: isRtl ? BorderSide.none : contentBorder,
+                end: isRtl ? contentBorder : BorderSide.none,
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsetsDirectional.only(
+                start: tokens.spaceSmall,
+                end: tokens.spaceSmall,
+              ),
+              child: Column(
+                children: [
+                  SizedBox(height: scrollbarTopOffset - top),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        bottom: scrollbarBottomMargin,
+                      ),
+                      child: ReciterAlphabetScrollbar(
+                        key: const ValueKey('alphabet_scrollbar'),
+                        allReciters: reciters,
+                        scrollController: scrollController,
+                        onLetterSelected: onLetterSelected,
+                        scrollbarSemanticsLabel: scrollbarSemanticsLabel,
+                        scrollbarSemanticsHint: scrollbarSemanticsHint,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -803,81 +886,66 @@ class _RecitersHeaderOverflowMenu extends StatelessWidget {
   final bool showLetterIndex;
   final VoidCallback onToggleLetterIndex;
 
-  static const String _downloadsValue = 'downloads';
-  static const String _letterIndexValue = 'letter_index';
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    final double actionSize = theme.componentTokens.iconActionButton.size;
-    final double actionRadius =
-        theme.componentTokens.iconActionButton.borderRadius;
-
-    return Semantics(
-      identifier: ReciterSemanticsIds.recitersMoreActionsButton,
-      button: true,
-      label: context.l10n.recitersMoreActions,
-      child: PopupMenuButton<String>(
-        tooltip: context.l10n.recitersMoreActions,
-        padding: EdgeInsets.zero,
-        offset: Offset(0, tokens.spaceSmall),
-        position: PopupMenuPosition.under,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        ),
-        style: IconButton.styleFrom(
-          minimumSize: Size.square(actionSize),
-          fixedSize: Size.square(actionSize),
-          backgroundColor: colorScheme.surface,
-          foregroundColor: colorScheme.onSurfaceVariant,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(actionRadius),
+    return MenuAnchor(
+      style: MenuStyle(
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
           ),
         ),
-        icon: Icon(
-          FluentIcons.more_horizontal_24_regular,
-          size: tokens.iconSizeMedium,
-        ),
-        onSelected: (String value) {
-          switch (value) {
-            case _downloadsValue:
-              const DownloadsRoute().push(context);
-            case _letterIndexValue:
-              onToggleLetterIndex();
-          }
-        },
-        itemBuilder: (BuildContext context) {
-          return <PopupMenuEntry<String>>[
-            PopupMenuItem<String>(
-              value: _downloadsValue,
-              child: _RecitersHeaderMenuRow(
-                icon: FluentIcons.arrow_download_24_regular,
-                label: context.l10n.viewDownloads,
-              ),
-            ),
-            if (letterIndexAvailable)
-              PopupMenuItem<String>(
-                value: _letterIndexValue,
-                child: _RecitersHeaderMenuRow(
-                  icon: showLetterIndex
-                      ? Icons.sort_by_alpha_rounded
-                      : Icons.sort_by_alpha_outlined,
-                  label: context.l10n.recitersLetterIndexMenuItem,
-                  trailing: showLetterIndex
-                      ? Icon(
-                          Icons.check_rounded,
-                          size: tokens.iconSizeSmall,
-                          color: colorScheme.primary,
-                        )
-                      : null,
-                ),
-              ),
-          ];
-        },
       ),
+      alignmentOffset: Offset(0, tokens.spaceSmall),
+      builder: (BuildContext context, MenuController controller, Widget? child) {
+        return Semantics(
+          identifier: ReciterSemanticsIds.recitersMoreActionsButton,
+          child: TilawaIconActionButton(
+            icon: FluentIcons.more_horizontal_24_regular,
+            isActive: showLetterIndex,
+            tooltip: context.l10n.recitersMoreActions,
+            semanticLabel: context.l10n.recitersMoreActions,
+            backgroundColor: colorScheme.surface,
+            onTap: () {
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+          ),
+        );
+      },
+      menuChildren: <Widget>[
+        MenuItemButton(
+          onPressed: () => const DownloadsRoute().push(context),
+          child: _RecitersHeaderMenuRow(
+            icon: FluentIcons.arrow_download_24_regular,
+            label: context.l10n.viewDownloads,
+          ),
+        ),
+        if (letterIndexAvailable)
+          MenuItemButton(
+            onPressed: onToggleLetterIndex,
+            child: _RecitersHeaderMenuRow(
+              icon: showLetterIndex
+                  ? Icons.sort_by_alpha_rounded
+                  : Icons.sort_by_alpha_outlined,
+              label: context.l10n.recitersLetterIndexMenuItem,
+              trailing: showLetterIndex
+                  ? Icon(
+                      Icons.check_rounded,
+                      size: tokens.iconSizeSmall,
+                      color: colorScheme.primary,
+                    )
+                  : null,
+            ),
+          ),
+      ],
     );
   }
 }
@@ -1280,6 +1348,14 @@ double _recitersSearchHeaderExtent(BuildContext context) {
       (theme.tokens.spaceMedium * 2);
 }
 
+/// Reserved width for the letter-index gutter (rail + padding + divider lane).
+double _recitersLetterIndexGutterWidth(ThemeData theme) {
+  final tokens = theme.tokens;
+  return tokens.spaceSmall * 2 +
+      theme.componentTokens.alphabetScrollbar.width +
+      tokens.spaceMedium;
+}
+
 EdgeInsetsGeometry _recitersResultPadding(
   BuildContext context,
   SliverConstraints constraints, {
@@ -1296,7 +1372,7 @@ EdgeInsetsGeometry _recitersResultPadding(
         tokens.spaceMedium,
   );
   final double scrollbarInset = reserveScrollbarSpace
-      ? theme.componentTokens.alphabetScrollbar.width + tokens.spaceSmall
+      ? _recitersLetterIndexGutterWidth(theme)
       : 0;
 
   return EdgeInsetsDirectional.fromSTEB(
