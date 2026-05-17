@@ -208,22 +208,16 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                               ),
                             ),
 
-                            // Play/Pause
+                            // Play/Pause.
+                            // TILAWA_BRAND.md §5: the shell already carries
+                            // the player's shadow; the button paints flat
+                            // (color + circle do the affordance work).
                             Container(
                               width: componentTokens.playPauseButtonSize,
                               height: componentTokens.playPauseButtonSize,
                               decoration: BoxDecoration(
                                 shape: .circle,
                                 color: colorScheme.primary,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: componentTokens
-                                        .playPauseButtonShadowColor,
-                                    blurRadius:
-                                        componentTokens.playPauseShadowBlur,
-                                    offset: designTokens.shadowOffsetSmall,
-                                  ),
-                                ],
                               ),
                               child: IconButton(
                                 padding: EdgeInsets.zero,

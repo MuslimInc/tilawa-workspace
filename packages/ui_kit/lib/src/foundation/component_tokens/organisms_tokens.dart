@@ -168,13 +168,10 @@ class TilawaMediaPlayerBarTokens {
     required this.playPauseIconSize,
     required this.disabledControlOpacity,
     required this.shadowOpacity,
-    required this.playPauseShadowOpacity,
-    required this.playPauseShadowBlur,
     required this.shellBackgroundColor,
     required this.progressTrackBackgroundColor,
     required this.artworkPlaceholderColor,
     required this.shellOutlineColor,
-    required this.playPauseButtonShadowColor,
   });
 
   final EdgeInsetsGeometry contentPadding;
@@ -193,8 +190,6 @@ class TilawaMediaPlayerBarTokens {
   final double playPauseIconSize;
   final double disabledControlOpacity;
   final double shadowOpacity;
-  final double playPauseShadowOpacity;
-  final double playPauseShadowBlur;
 
   /// Bar surface behind controls (persistent chrome).
   final Color shellBackgroundColor;
@@ -208,9 +203,6 @@ class TilawaMediaPlayerBarTokens {
   /// Hairline border around the bar ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
   final Color shellOutlineColor;
 
-  /// [BoxShadow.color] under the circular play/pause control.
-  final Color playPauseButtonShadowColor;
-
   factory TilawaMediaPlayerBarTokens.defaults() {
     return TilawaMediaPlayerBarTokens.fromColorScheme(
       ColorScheme.fromSeed(seedColor: AppColors.defaultPrimary),
@@ -220,7 +212,6 @@ class TilawaMediaPlayerBarTokens {
   factory TilawaMediaPlayerBarTokens.fromColorScheme(ColorScheme colorScheme) {
     // fix: Accessibility — ≥48dp transport control hit targets
     const shellOutlineAlpha = 0.1;
-    const playPauseShadowOpacity = 0.3;
     return TilawaMediaPlayerBarTokens(
       // Slightly tighter vertical padding so the bar fits [playerCollapsedHeight]
       // with progress strip + 48dp artwork row inside the mini-player SizedBox
@@ -241,17 +232,12 @@ class TilawaMediaPlayerBarTokens {
       playPauseIconSize: 16,
       disabledControlOpacity: 0.3,
       shadowOpacity: 0.1,
-      playPauseShadowOpacity: playPauseShadowOpacity,
-      playPauseShadowBlur: 8,
       shellBackgroundColor: colorScheme.surfaceContainerLow,
       progressTrackBackgroundColor: colorScheme.surfaceContainerHighest
           .withValues(alpha: shellOutlineAlpha),
       artworkPlaceholderColor: colorScheme.surfaceContainerHigh,
       shellOutlineColor: colorScheme.outlineVariant.withValues(
         alpha: shellOutlineAlpha,
-      ),
-      playPauseButtonShadowColor: colorScheme.primary.withValues(
-        alpha: playPauseShadowOpacity,
       ),
     );
   }
@@ -273,13 +259,10 @@ class TilawaMediaPlayerBarTokens {
     double? playPauseIconSize,
     double? disabledControlOpacity,
     double? shadowOpacity,
-    double? playPauseShadowOpacity,
-    double? playPauseShadowBlur,
     Color? shellBackgroundColor,
     Color? progressTrackBackgroundColor,
     Color? artworkPlaceholderColor,
     Color? shellOutlineColor,
-    Color? playPauseButtonShadowColor,
   }) {
     return TilawaMediaPlayerBarTokens(
       contentPadding: contentPadding ?? this.contentPadding,
@@ -299,17 +282,12 @@ class TilawaMediaPlayerBarTokens {
       disabledControlOpacity:
           disabledControlOpacity ?? this.disabledControlOpacity,
       shadowOpacity: shadowOpacity ?? this.shadowOpacity,
-      playPauseShadowOpacity:
-          playPauseShadowOpacity ?? this.playPauseShadowOpacity,
-      playPauseShadowBlur: playPauseShadowBlur ?? this.playPauseShadowBlur,
       shellBackgroundColor: shellBackgroundColor ?? this.shellBackgroundColor,
       progressTrackBackgroundColor:
           progressTrackBackgroundColor ?? this.progressTrackBackgroundColor,
       artworkPlaceholderColor:
           artworkPlaceholderColor ?? this.artworkPlaceholderColor,
       shellOutlineColor: shellOutlineColor ?? this.shellOutlineColor,
-      playPauseButtonShadowColor:
-          playPauseButtonShadowColor ?? this.playPauseButtonShadowColor,
     );
   }
 
@@ -359,16 +337,6 @@ class TilawaMediaPlayerBarTokens {
         t,
       ),
       shadowOpacity: lerpTokenDouble(a.shadowOpacity, b.shadowOpacity, t),
-      playPauseShadowOpacity: lerpTokenDouble(
-        a.playPauseShadowOpacity,
-        b.playPauseShadowOpacity,
-        t,
-      ),
-      playPauseShadowBlur: lerpTokenDouble(
-        a.playPauseShadowBlur,
-        b.playPauseShadowBlur,
-        t,
-      ),
       shellBackgroundColor: Color.lerp(
         a.shellBackgroundColor,
         b.shellBackgroundColor,
@@ -387,11 +355,6 @@ class TilawaMediaPlayerBarTokens {
       shellOutlineColor: Color.lerp(
         a.shellOutlineColor,
         b.shellOutlineColor,
-        t,
-      )!,
-      playPauseButtonShadowColor: Color.lerp(
-        a.playPauseButtonShadowColor,
-        b.playPauseButtonShadowColor,
         t,
       )!,
     );

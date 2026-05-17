@@ -1092,6 +1092,7 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     return Row(
       mainAxisAlignment: .spaceAround,
       children: [
@@ -1113,11 +1114,25 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
           button: true,
           label: context.l10n.playbackSpeed,
           value: '${state.speed.toStringAsFixed(1)}x',
+          // TILAWA_BRAND.md §5: tappable chip-grammar affordance — pill radius
+          // resolved from the 44 dp interactive minimum; spacing from tokens.
+          // White-on-dark colors are intentional (fixed dark-palette context
+          // for the expanded player; DESIGN §12 export/composer exception).
           child: Material(
             color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(
+              tokens.resolveRadius(
+                family: TilawaRadiusFamily.pill,
+                height: tokens.minInteractiveDimension,
+              ),
+            ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(
+                tokens.resolveRadius(
+                  family: TilawaRadiusFamily.pill,
+                  height: tokens.minInteractiveDimension,
+                ),
+              ),
               onTap: () => showSliderDialog(
                 context: context,
                 title: context.l10n.playbackSpeed,
@@ -1130,9 +1145,9 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
                 ),
               ),
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                padding: EdgeInsets.symmetric(
+                  horizontal: tokens.spaceMedium,
+                  vertical: tokens.spaceSmall,
                 ),
                 child: Text(
                   '${state.speed.toStringAsFixed(1)}x',

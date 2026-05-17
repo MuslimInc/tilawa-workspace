@@ -426,10 +426,6 @@ void main() {
         tokens.shellOutlineColor,
         scheme.outlineVariant.withValues(alpha: 0.1),
       );
-      expect(
-        tokens.playPauseButtonShadowColor,
-        scheme.primary.withValues(alpha: 0.3),
-      );
     });
   });
 
