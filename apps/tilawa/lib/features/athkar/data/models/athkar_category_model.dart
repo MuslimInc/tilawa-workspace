@@ -11,7 +11,7 @@ abstract class AthkarCategoryModel extends AthkarCategory
   const factory AthkarCategoryModel({
     required int id,
     @JsonKey(name: 'name_ar') required String nameAr,
-    @JsonKey(name: 'name_en') required String nameEn,
+    @JsonKey(name: 'name_en', defaultValue: '') required String nameEn,
     required String icon,
   }) = _AthkarCategoryModel;
   const AthkarCategoryModel._() : super.empty();
