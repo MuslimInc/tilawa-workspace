@@ -101,17 +101,43 @@ class TilawaTypography {
       ),
 
       // Arabic — Amiri only. Loaded from Google Fonts on demand.
-      arabic: GoogleFonts.amiri(
+      // Fall back to a system serif in test environments where runtime
+      // font-fetching has been disabled (see flutter_test_config.dart).
+      arabic: _amiri(
         fontSize: 28,
         height: 2,
         color: ink,
       ),
-      arabicDisplay: GoogleFonts.amiri(
+      arabicDisplay: _amiri(
         fontSize: 44,
         fontWeight: FontWeight.w700,
         height: 1.8,
         color: TilawaPalette.green700,
       ),
+    );
+  }
+
+  static TextStyle _amiri({
+    double? fontSize,
+    double? height,
+    FontWeight? fontWeight,
+    Color? color,
+  }) {
+    if (GoogleFonts.config.allowRuntimeFetching) {
+      return GoogleFonts.amiri(
+        fontSize: fontSize,
+        height: height,
+        fontWeight: fontWeight,
+        color: color,
+      );
+    }
+    return TextStyle(
+      fontFamily: 'Amiri',
+      fontFamilyFallback: const ['Scheherazade New', 'Traditional Arabic', 'serif'],
+      fontSize: fontSize,
+      height: height,
+      fontWeight: fontWeight,
+      color: color,
     );
   }
 

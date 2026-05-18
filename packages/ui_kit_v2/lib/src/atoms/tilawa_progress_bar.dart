@@ -4,6 +4,9 @@ import '../foundation/foundation.dart';
 
 /// Linear progress bar (`.tw-progress`). 4px thick by default, gradient fill,
 /// optional draggable thumb (matches `.tw-progress--thumb`).
+///
+/// Uses fractional layout — safe under [IntrinsicColumnWidth] (e.g. alchemist
+/// golden cells), unlike a [LayoutBuilder]-based approach.
 class TilawaProgressBar extends StatelessWidget {
   const TilawaProgressBar({
     required this.value,
@@ -22,41 +25,54 @@ class TilawaProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final gradient = fillGradient ??
+        const LinearGradient(
+          colors: [TilawaPalette.green500, TilawaPalette.green700],
+        );
+
     return Semantics(
       value: '${(value * 100).round()}%',
-      child: LayoutBuilder(
-        builder: (context, c) {
-          final w = c.maxWidth;
-          return SizedBox(
-            height: showThumb ? 14 : height,
-            child: Stack(
+      child: SizedBox(
+        height: showThumb ? 14 : height,
+        child: Stack(
+          alignment: Alignment.centerLeft,
+          clipBehavior: Clip.none,
+          children: [
+            // Track (full width).
+            Align(
+              alignment: Alignment.center,
+              child: Container(
+                height: height,
+                decoration: BoxDecoration(
+                  color: trackColor ?? const Color(0x0F0F172A),
+                  borderRadius: TilawaRadii.brPill,
+                ),
+              ),
+            ),
+            // Fill (fractional width).
+            Align(
               alignment: Alignment.centerLeft,
-              clipBehavior: Clip.none,
-              children: [
-                Container(
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: value,
+                child: Container(
                   height: height,
                   decoration: BoxDecoration(
-                    color: trackColor ?? const Color(0x0F0F172A),
+                    gradient: gradient,
                     borderRadius: TilawaRadii.brPill,
                   ),
                 ),
-                Container(
-                  height: height,
-                  width: w * value,
-                  decoration: BoxDecoration(
-                    gradient: fillGradient ??
-                        const LinearGradient(
-                          colors: [
-                            TilawaPalette.green500,
-                            TilawaPalette.green700,
-                          ],
-                        ),
-                    borderRadius: TilawaRadii.brPill,
-                  ),
-                ),
-                if (showThumb)
-                  Positioned(
-                    left: (w * value) - 7,
+              ),
+            ),
+            // Thumb (anchored at value · width).
+            if (showThumb)
+              FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: value,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Transform.translate(
+                    offset: const Offset(7, 0),
                     child: Container(
                       width: 14,
                       height: 14,
@@ -77,10 +93,10 @@ class TilawaProgressBar extends StatelessWidget {
                       ),
                     ),
                   ),
-              ],
-            ),
-          );
-        },
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
