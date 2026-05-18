@@ -410,6 +410,9 @@ class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
 
   @override
   Future<bool> isAdhanPlaying() async => false;
+
+  @override
+  Future<String?> getActiveAdhanPayload() async => null;
 }
 
 PrayerTimeEntity _prayerDay(DateTime date, double latitude, double longitude) {

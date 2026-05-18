@@ -53,4 +53,7 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
 
   @override
   Future<bool> isAdhanPlaying() async => false;
+
+  @override
+  Future<String?> getActiveAdhanPayload() async => null;
 }

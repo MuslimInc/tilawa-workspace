@@ -215,4 +215,7 @@ class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   }) async {
     return true;
   }
+
+  @override
+  Future<String?> getActiveAdhanPayload() async => null;
 }

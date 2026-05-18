@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
@@ -19,7 +21,9 @@ import '../logging/app_logger.dart';
 /// the domain `PrayerAdhanNotificationService`.
 @lazySingleton
 class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
-  AndroidAdhanAlarmPlayer() {
+  AndroidAdhanAlarmPlayer({
+    @visibleForTesting @ignoreParam bool? isSupportedOverride,
+  }) : _isSupportedOverride = isSupportedOverride {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'onNotificationTapped') {
         final args = call.arguments;
@@ -53,8 +57,10 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     'com.tilawa.app/prayer_adhan',
   );
 
+  final bool? _isSupportedOverride;
+
   @override
-  bool get isSupported => Platform.isAndroid;
+  bool get isSupported => _isSupportedOverride ?? Platform.isAndroid;
 
   void _emitNotificationTap(String payload) {
     logger.d('[AndroidAdhanAlarmPlayer] METHOD_CHANNEL_TAP_RECEIVED');
@@ -276,6 +282,27 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     } on PlatformException catch (e) {
       logger.e('[AndroidAdhanAlarmPlayer] isAdhanPlaying failed: ${e.message}');
       return false;
+    }
+  }
+
+  @override
+  Future<String?> getActiveAdhanPayload() async {
+    if (!isSupported) return null;
+    try {
+      final dynamic raw = await _channel.invokeMethod<dynamic>(
+        'getActiveAdhanPayload',
+      );
+      if (raw == null) return null;
+      if (raw is! Map) return null;
+      final Map<String, dynamic> normalized = <String, dynamic>{
+        for (final entry in raw.entries) entry.key.toString(): entry.value,
+      };
+      return jsonEncode(normalized);
+    } on PlatformException catch (e) {
+      logger.e(
+        '[AndroidAdhanAlarmPlayer] getActiveAdhanPayload failed: ${e.message}',
+      );
+      return null;
     }
   }
 }

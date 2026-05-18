@@ -72,6 +72,13 @@ abstract interface class IAdhanAlarmPlayer {
 
   /// Returns `true` if the adhan audio is currently playing.
   Future<bool> isAdhanPlaying();
+
+  /// Returns a JSON-encoded payload describing the currently-playing adhan
+  /// (prayer name, scheduled time, sound, notification id), or `null` if no
+  /// adhan is currently playing. Used to route the user to
+  /// `PrayerNotificationStatusScreen` on resume when the foreground
+  /// notification has been swiped away.
+  Future<String?> getActiveAdhanPayload();
 }
 
 /// Tuple persisted for the boot receiver's re-arm path.

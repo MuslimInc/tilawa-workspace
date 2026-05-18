@@ -108,13 +108,44 @@ class AdhanPlaybackServiceTest {
         }
         val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
         service = controller.get()
-        
+
         // Start playback but don't finish it
         service.onStartCommand(intent, 0, 1)
-        
+
         controller.destroy()
-        
+
         // Verify abnormal termination log
         verify { anyConstructed<FirebasePrayerAnalytics>().logEvent(PrayerEvents.ABNORMAL_TERMINATION, any()) }
+    }
+
+    @Test
+    fun `activePayload captured on ACTION_PLAY and cleared on destroy`() {
+        // Ensure no leftover from another test
+        AdhanPlaybackService.setActivePayloadForTest(null)
+
+        val scheduledMs = System.currentTimeMillis() - 5000
+        val intent = Intent(context, AdhanPlaybackService::class.java).apply {
+            action = AdhanPlaybackService.ACTION_PLAY
+            putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, "dhuhr")
+            putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, "dhuhr")
+            putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, scheduledMs)
+            putExtra("receiver_time", System.currentTimeMillis() - 1000)
+            putExtra(AdhanScheduler.EXTRA_SOUND, "adhan")
+        }
+
+        val controller = Robolectric.buildService(AdhanPlaybackService::class.java, intent)
+        service = controller.get()
+        service.onStartCommand(intent, 0, 1)
+
+        val payload = AdhanPlaybackService.activePayload
+        assertNotNull(payload)
+        assertEquals("dhuhr", payload!!.prayerName)
+        assertEquals("dhuhr", payload.prayerKey)
+        assertEquals("adhan", payload.sound)
+        assertEquals(scheduledMs, payload.scheduledMs)
+
+        controller.destroy()
+
+        assertNull(AdhanPlaybackService.activePayload)
     }
 }

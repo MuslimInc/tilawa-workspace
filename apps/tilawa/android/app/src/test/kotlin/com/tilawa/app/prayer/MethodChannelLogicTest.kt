@@ -186,4 +186,43 @@ class MethodChannelLogicTest {
         logic.handleMethodCall("unknown", null, mockResult)
         verify { mockResult.notImplemented() }
     }
+
+    @Test
+    fun `getActiveAdhanPayload returns null when nothing playing`() {
+        AdhanPlaybackService.setActivePayloadForTest(null)
+
+        logic.handleMethodCall("getActiveAdhanPayload", null, mockResult)
+
+        verify { mockResult.success(null) }
+    }
+
+    @Test
+    fun `getActiveAdhanPayload returns map with payload fields when playing`() {
+        AdhanPlaybackService.setActivePayloadForTest(
+            AdhanPlaybackService.ActiveAdhanPayload(
+                prayerName = "fajr",
+                prayerKey = "fajr",
+                sound = "adhan_fajr",
+                scheduledMs = 1700000000000L,
+                notificationId = 12345,
+            )
+        )
+
+        val resultSlot = slot<Any>()
+        every { mockResult.success(capture(resultSlot)) } returns Unit
+
+        logic.handleMethodCall("getActiveAdhanPayload", null, mockResult)
+
+        @Suppress("UNCHECKED_CAST")
+        val captured = resultSlot.captured as Map<String, Any?>
+        assertEquals("fajr", captured["prayer_name"])
+        assertEquals("fajr", captured["prayer_key"])
+        assertEquals("adhan_fajr", captured["sound_name"])
+        assertEquals(1700000000000L, captured["scheduled_time_ms"])
+        assertEquals(12345, captured["notification_id"])
+        assertEquals(true, captured["adhan_enabled"])
+        assertEquals(true, captured["is_adhan_playing"])
+
+        AdhanPlaybackService.setActivePayloadForTest(null)
+    }
 }

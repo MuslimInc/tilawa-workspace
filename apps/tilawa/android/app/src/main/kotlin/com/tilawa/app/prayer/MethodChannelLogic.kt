@@ -189,6 +189,22 @@ internal class MethodChannelLogic(
             "isAdhanPlaying" -> {
                 result.success(AdhanPlaybackService.isRunning)
             }
+            "getActiveAdhanPayload" -> {
+                val payload = AdhanPlaybackService.activePayload
+                if (payload == null) {
+                    result.success(null)
+                } else {
+                    result.success(mapOf(
+                        "prayer_name" to payload.prayerName,
+                        "prayer_key" to payload.prayerKey,
+                        "sound_name" to payload.sound,
+                        "scheduled_time_ms" to payload.scheduledMs,
+                        "notification_id" to payload.notificationId,
+                        "adhan_enabled" to true,
+                        "is_adhan_playing" to true,
+                    ))
+                }
+            }
             else -> result.notImplemented()
         }
     }

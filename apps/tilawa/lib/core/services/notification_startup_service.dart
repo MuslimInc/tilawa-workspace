@@ -1,13 +1,18 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
+import '../../features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import '../../router/app_router.dart';
+import '../../router/app_router_config.dart';
 import '../bootstrap/app_startup.dart';
 import '../logging/app_logger.dart';
+
+typedef NotificationNavigator = void Function(String location, {Object? extra});
 
 // ---------------------------------------------------------------------------
 // Minimal injectable wrappers for platform-level dependencies
@@ -75,12 +80,16 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
     this._prefs,
     this._pidProvider,
     this._handlersInitializer,
-  );
+    this._adhanPlayer, {
+    @visibleForTesting @ignoreParam NotificationNavigator? navigator,
+  }) : _navigator = navigator ?? AppRouter.navigateToNotification;
 
   final INotificationDispatcher _dispatcher;
   final SharedPreferencesAsync _prefs;
   final ProcessIdProvider _pidProvider;
   final NotificationHandlersInitializer _handlersInitializer;
+  final IAdhanAlarmPlayer _adhanPlayer;
+  final NotificationNavigator _navigator;
 
   static const Duration _deferredColdStartProbeDelay = Duration(
     milliseconds: 900,
@@ -119,6 +128,14 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
     _localLaunchProbeTimer = Timer(_deferredColdStartProbeDelay, () {
       unawaited(_checkForDeferredColdStart());
     });
+
+    // If the app cold-starts while the adhan is already playing (e.g. user
+    // swiped away the foreground notification), surface the status screen so
+    // they have a way to stop it. We piggy-back on the same probe delay to
+    // avoid competing with the cold-start launch notification path.
+    Timer(_deferredColdStartProbeDelay, () {
+      unawaited(_routeToStatusIfAdhanPlaying());
+    });
   }
 
   @override
@@ -137,6 +154,12 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
     try {
       // Ensure handlers are registered before querying launch details.
       await _handlersInitializer();
+
+      // Auto-route to the status screen if an adhan is currently playing.
+      // This is the primary path for "user swiped the foreground notification
+      // away while adhan kept playing, then re-opened the app". Run before
+      // the launch-details check so it isn't suppressed by lastProcessedId.
+      await _routeToStatusIfAdhanPlaying();
 
       // getNotificationAppLaunchDetails() returns the SAME Android-Intent data
       // on every call, so we guard with lastProcessedNotificationId.
@@ -179,6 +202,37 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
   // -------------------------------------------------------------------------
   // Internal
   // -------------------------------------------------------------------------
+
+  /// Pulls the currently-playing adhan payload (if any) from the native
+  /// service and routes to [PrayerNotificationStatusRoute]. No-op if the
+  /// adhan is not playing or the user is already on the status screen.
+  Future<void> _routeToStatusIfAdhanPlaying() async {
+    try {
+      if (!_adhanPlayer.isSupported) return;
+      final bool playing = await _adhanPlayer.isAdhanPlaying();
+      if (!playing) return;
+
+      final String? payload = await _adhanPlayer.getActiveAdhanPayload();
+      if (payload == null || payload.isEmpty) {
+        logger.d(
+          '[NotificationStartupService] _routeToStatusIfAdhanPlaying: adhan playing but no payload',
+        );
+        return;
+      }
+
+      logger.d(
+        '[NotificationStartupService] _routeToStatusIfAdhanPlaying: routing to status screen',
+      );
+      _navigator(
+        const PrayerNotificationStatusRoute().location,
+        extra: payload,
+      );
+    } catch (e) {
+      logger.d(
+        '[NotificationStartupService] _routeToStatusIfAdhanPlaying failed: $e',
+      );
+    }
+  }
 
   Future<void> _checkForDeferredColdStart() async {
     if (_isChecking) {

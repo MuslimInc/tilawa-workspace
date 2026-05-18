@@ -46,7 +46,27 @@ internal class AdhanPlaybackService : Service() {
 
         var isRunning = false
             private set
+
+        /// Snapshot of the currently-playing adhan, exposed so the app can
+        /// route the user back to the status screen on resume / cold start
+        /// after the foreground notification has been swiped away.
+        @Volatile
+        var activePayload: ActiveAdhanPayload? = null
+            private set
+
+        @androidx.annotation.VisibleForTesting
+        fun setActivePayloadForTest(payload: ActiveAdhanPayload?) {
+            activePayload = payload
+        }
     }
+
+    data class ActiveAdhanPayload(
+        val prayerName: String,
+        val prayerKey: String,
+        val sound: String,
+        val scheduledMs: Long,
+        val notificationId: Int,
+    )
 
     private var mediaPlayer: MediaPlayer? = null
     private var wakeLock: PowerManager.WakeLock? = null
@@ -148,6 +168,13 @@ internal class AdhanPlaybackService : Service() {
     }
 
     private fun startPlayback(prayerName: String, prayerKey: String, sound: String, scheduledMs: Long) {
+        activePayload = ActiveAdhanPayload(
+            prayerName = prayerName,
+            prayerKey = prayerKey,
+            sound = sound,
+            scheduledMs = scheduledMs,
+            notificationId = FOREGROUND_NOTIFICATION_ID,
+        )
         val notification = buildNotification(prayerName, prayerKey, FOREGROUND_NOTIFICATION_ID, scheduledMs)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
@@ -335,6 +362,7 @@ internal class AdhanPlaybackService : Service() {
         )
         stopPlayback()
         isRunning = false
+        activePayload = null
         super.onDestroy()
     }
 

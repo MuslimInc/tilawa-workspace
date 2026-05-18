@@ -51,6 +51,14 @@ void main() {
       await expectLater(player.cancelAllAdhans(), completes);
     });
 
+    test('getActiveAdhanPayload returns null', () async {
+      expect(await player.getActiveAdhanPayload(), isNull);
+    });
+
+    test('isAdhanPlaying returns false', () async {
+      expect(await player.isAdhanPlaying(), isFalse);
+    });
+
     test('multiple concurrent calls complete without error', () async {
       await expectLater(
         Future.wait([
