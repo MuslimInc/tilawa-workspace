@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
+import '../../../../core/debug/deep_link_debug_log.dart';
 import '../../../../router/notification_navigation_resolver.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
 
@@ -24,6 +25,13 @@ class SplashCubit extends Cubit<SplashState> {
   final GetSplashNextRouteUseCase _getSplashNextRoute;
 
   Future<void> init() async {
+    // #region agent log
+    DeepLinkDebugLog.log(
+      'SplashCubit.init START',
+      scenario: 'splash',
+      hypothesisId: 'H1',
+    );
+    // #endregion
     try {
       final Future<SplashRouteResult> routeFuture = _getSplashNextRoute();
       if (flutterSplashPreviewDelay > Duration.zero) {
@@ -45,6 +53,19 @@ class SplashCubit extends Cubit<SplashState> {
       }
 
       if (isClosed) return;
+
+      // #region agent log
+      DeepLinkDebugLog.log(
+        'SplashCubit.init route resolved',
+        scenario: 'splash',
+        hypothesisId: 'H1',
+        data: <String, Object?>{
+          'destination': result.destination.name,
+          'location': location,
+          'hasExtra': extra != null,
+        },
+      );
+      // #endregion
 
       emit(switch (result.destination) {
         SplashDestination.home => const SplashNavigateToHome(),

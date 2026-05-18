@@ -8,10 +8,13 @@ void main() {
   tearDown(AppRouter.resetForTesting);
 
   group('AppRouter cold start', () {
-    test('resolveInitialLocation uses pending cold start route', () {
-      AppRouter.setPendingColdStartRoute('/reciter/7');
-      expect(AppRouter.resolveInitialLocation(), '/reciter/7');
-    });
+    test(
+      'resolveInitialLocation uses home when pending cold start route',
+      () {
+        AppRouter.setPendingColdStartRoute('/reciter/7');
+        expect(AppRouter.resolveInitialLocation(), const HomeRoute().location);
+      },
+    );
 
     test('resolveInitialLocation falls back to splash', () {
       expect(

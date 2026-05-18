@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 import '../../features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import '../debug/deep_link_debug_log.dart';
 import '../../router/app_router.dart';
 import '../../router/app_router_config.dart';
 import '../bootstrap/app_startup.dart';
@@ -116,10 +117,28 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
     // Large-scale startup pattern: avoid eager heavy notification wiring on
     // every cold start. Only process immediately when startup was actually
     // notification-driven (FCM path sets this flag during bootstrap).
+    // #region agent log
+    DeepLinkDebugLog.log(
+      'handleAppStartup',
+      scenario: 'startup_service',
+      hypothesisId: 'H5',
+      data: <String, Object?>{
+        'pendingStartup': AppRouter.pendingStartupNotificationLaunch,
+        'pendingColdStart': AppRouter.pendingColdStartLocation,
+      },
+    );
+    // #endregion
     if (AppRouter.pendingStartupNotificationLaunch ||
         AppRouter.pendingColdStartLocation != null) {
       await _handlersInitializer();
       AppRouter.pendingStartupNotificationLaunch = false;
+      // #region agent log
+      DeepLinkDebugLog.log(
+        'handleAppStartup skipped deferred probe',
+        scenario: 'startup_service',
+        hypothesisId: 'H5',
+      );
+      // #endregion
       return;
     }
 
@@ -127,6 +146,13 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
     // The timer is cancelled in dispose() if the widget unmounts first.
     _localLaunchProbeTimer?.cancel();
     _localLaunchProbeTimer = Timer(_deferredColdStartProbeDelay, () {
+      // #region agent log
+      DeepLinkDebugLog.log(
+        'deferred_cold_start_probe fired',
+        scenario: 'startup_service',
+        hypothesisId: 'H5',
+      );
+      // #endregion
       unawaited(_checkForDeferredColdStart());
     });
 

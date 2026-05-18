@@ -26,7 +26,9 @@ import 'package:tilawa/core/observers/crashlytics_bloc_observer.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
 import 'package:tilawa/core/services/crashlytics_service.dart';
 import 'package:tilawa/core/services/firebase_initialization_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
+import 'package:tilawa/core/services/notification_startup_service.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_service.dart';
 import 'package:tilawa/features/downloads/data/services/downloads_initialization_service.dart';
@@ -40,6 +42,7 @@ import 'package:tilawa/features/prayer_times/domain/services/prayer_notification
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:tilawa/core/debug/deep_link_debug_log.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
@@ -60,6 +63,8 @@ class AppStartupTasks {
   static const Duration notificationLaunchProbeTimeout = Duration(
     milliseconds: 180,
   );
+  static const String _lastNotifIdKey = '_last_notif_id';
+  static const String _lastNotifPidKey = '_last_notif_pid';
   static const Duration notificationPermissionSoftTimeout = Duration(
     milliseconds: 1500,
   );
@@ -608,6 +613,13 @@ class AppStartupTasks {
     logger.d(
       '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: Start in (${DateTime.now()})',
     );
+    // #region agent log
+    DeepLinkDebugLog.log(
+      'prepareNotificationLaunchState START',
+      scenario: 'bootstrap',
+      hypothesisId: 'H3',
+    );
+    // #endregion
     try {
       final Future<RemoteMessage?> fcmFuture = FirebaseMessaging.instance
           .getInitialMessage()
@@ -628,6 +640,10 @@ class AppStartupTasks {
       if (localLaunchResponse != null) {
         AppRouter.pendingLocalNotificationResponse = localLaunchResponse;
         AppRouter.lastProcessedNotificationId = localLaunchResponse.id;
+        final int? localId = localLaunchResponse.id;
+        if (localId != null) {
+          await _persistProcessedNotificationLaunch(localId);
+        }
       } else if (fcmInitialMessage != null) {
         AppRouter.pendingFcmMessage = fcmInitialMessage;
       }
@@ -635,6 +651,19 @@ class AppStartupTasks {
       if (localLaunchResponse != null || fcmInitialMessage != null) {
         _applyColdStartRouteFromPendingLaunch();
       }
+
+      // #region agent log
+      DeepLinkDebugLog.log(
+        'prepareNotificationLaunchState END',
+        scenario: 'bootstrap',
+        hypothesisId: 'H3',
+        data: <String, Object?>{
+          'fcm': fcmInitialMessage != null,
+          'local': localLaunchResponse != null,
+          'coldStartRoute': AppRouter.pendingColdStartLocation,
+        },
+      );
+      // #endregion
 
       logger.d(
         '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: '
@@ -668,7 +697,21 @@ class AppStartupTasks {
       if (details != null &&
           details.didNotificationLaunchApp &&
           details.notificationResponse != null) {
-        return details.notificationResponse;
+        final NotificationResponse response = details.notificationResponse!;
+        if (await _isStaleLocalLaunchOnHotRestart(response.id)) {
+          // #region agent log
+          DeepLinkDebugLog.log(
+            'suppressed stale local launch (hot restart)',
+            scenario: 'bootstrap',
+            hypothesisId: 'H7',
+            data: <String, Object?>{
+              'notificationId': response.id,
+            },
+          );
+          // #endregion
+          return null;
+        }
+        return response;
       }
     } catch (e) {
       logger.d(
@@ -676,6 +719,38 @@ class AppStartupTasks {
       );
     }
     return null;
+  }
+
+  /// Android keeps [getNotificationAppLaunchDetails] across Flutter hot restart
+  /// (same OS process). Skip re-routing when we already handled this launch.
+  Future<bool> _isStaleLocalLaunchOnHotRestart(int? launchNotificationId) async {
+    if (!getIt.isRegistered<SharedPreferencesAsync>() ||
+        !getIt.isRegistered<ProcessIdProvider>()) {
+      return false;
+    }
+    final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
+    final int currentPid = getIt<ProcessIdProvider>().currentPid;
+    final int? storedPid = await prefs.getInt(_lastNotifPidKey);
+    if (storedPid != currentPid) {
+      return false;
+    }
+    final int? storedId = await prefs.getInt(_lastNotifIdKey);
+    if (storedId != null) {
+      AppRouter.lastProcessedNotificationId = storedId;
+    }
+    return storedId != null &&
+        (launchNotificationId == null || storedId == launchNotificationId);
+  }
+
+  Future<void> _persistProcessedNotificationLaunch(int notificationId) async {
+    if (!getIt.isRegistered<SharedPreferencesAsync>() ||
+        !getIt.isRegistered<ProcessIdProvider>()) {
+      return;
+    }
+    final SharedPreferencesAsync prefs = getIt<SharedPreferencesAsync>();
+    final int currentPid = getIt<ProcessIdProvider>().currentPid;
+    await prefs.setInt(_lastNotifIdKey, notificationId);
+    await prefs.setInt(_lastNotifPidKey, currentPid);
   }
 
   void _applyColdStartRouteFromPendingLaunch() {

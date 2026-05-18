@@ -26,7 +26,9 @@ import 'features/theme/domain/primary_color_preset.dart';
 import 'features/theme/presentation/cubit/theme_cubit.dart';
 import 'features/theme/presentation/theme_state_material.dart';
 import 'l10n/generated/app_localizations.dart';
+import 'core/debug/deep_link_debug_log.dart';
 import 'router/app_router.dart';
+import 'router/app_router_config.dart';
 
 class TilawaApp extends StatefulWidget {
   const TilawaApp({super.key});
@@ -54,10 +56,42 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
         'ROUTER_READY navigatorContext=${AppRouter.navigatorKey.currentContext != null} '
         'location=${AppRouter.router.routerDelegate.currentConfiguration.uri}',
       );
-      if (AppRouter.pendingColdStartLocation != null) {
+      // #region agent log
+      DeepLinkDebugLog.log(
+        'first_frame ROUTER_READY',
+        scenario: 'bootstrap',
+        hypothesisId: 'H4',
+        data: <String, Object?>{
+          'uri': AppRouter.router.routerDelegate.currentConfiguration.uri
+              .toString(),
+          'pendingColdStart': AppRouter.pendingColdStartLocation,
+        },
+      );
+      // #endregion
+      // handleAppStartup must run before consume: consume clears
+      // pendingStartupNotificationLaunch / pendingColdStartLocation, which
+      // would incorrectly schedule the 900ms deferred local-notification probe.
+      unawaited(_notificationStartupService.handleAppStartup());
+      final String? bootstrapTarget = AppRouter.pendingColdStartLocation;
+      if (bootstrapTarget != null) {
+        final Object? bootstrapExtra = AppRouter.pendingColdStartExtra;
+        final String homeLocation = const HomeRoute().location;
+        if (bootstrapTarget != homeLocation) {
+          // #region agent log
+          DeepLinkDebugLog.log(
+            'bootstrap_push_pending',
+            scenario: 'bootstrap',
+            hypothesisId: 'H1',
+            data: <String, Object?>{
+              'target': bootstrapTarget,
+              'hasExtra': bootstrapExtra != null,
+            },
+          );
+          // #endregion
+          AppRouter.router.push(bootstrapTarget, extra: bootstrapExtra);
+        }
         AppRouter.consumePendingNotificationLaunchState();
       }
-      unawaited(_notificationStartupService.handleAppStartup());
       _scheduleUpdateCheck(
         delay: _initialUpdateCheckDelay,
         reason: 'initial-startup',

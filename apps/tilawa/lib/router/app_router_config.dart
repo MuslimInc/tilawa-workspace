@@ -34,6 +34,7 @@ import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/main_screen.dart';
+import '../core/debug/deep_link_debug_screen.dart';
 import '../screens/route_list_screen.dart';
 import 'share_composer_extra.dart';
 
@@ -208,6 +209,16 @@ class RouteListRoute extends GoRouteData with $RouteListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const RouteListScreen();
+  }
+}
+
+@TypedGoRoute<DeepLinkDebugRoute>(path: '/debug/deep-link')
+class DeepLinkDebugRoute extends GoRouteData with $DeepLinkDebugRoute {
+  const DeepLinkDebugRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DeepLinkDebugScreen();
   }
 }
 

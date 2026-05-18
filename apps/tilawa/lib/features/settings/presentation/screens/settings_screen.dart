@@ -460,6 +460,14 @@ class SettingsScreen extends StatelessWidget {
                               onTap: () => const RouteListRoute().push(context),
                               borderRadius: BorderRadius.vertical(
                                 top: Radius.circular(tokens.radiusLarge),
+                              ),
+                            ),
+                            TilawaSettingsTile(
+                              icon: FluentIcons.link_24_regular,
+                              title: 'Deep link debug',
+                              onTap: () =>
+                                  const DeepLinkDebugRoute().push(context),
+                              borderRadius: BorderRadius.vertical(
                                 bottom: Radius.circular(tokens.radiusLarge),
                               ),
                               showDivider: false,
