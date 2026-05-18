@@ -658,6 +658,7 @@ class _SettingsProfileCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
+                          spacing: tokens.spaceExtraSmall,
                           children: [
                             Text(
                               displayName,
@@ -670,10 +671,9 @@ class _SettingsProfileCard extends StatelessWidget {
                                 color: foregroundColor,
                               ),
                             ),
-                            SizedBox(height: tokens.spaceExtraSmall),
                             Text(
                               subtitle,
-                              maxLines: 1,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: context.textTheme.bodyMedium?.copyWith(
                                 color: foregroundColor.withValues(
@@ -825,6 +825,7 @@ class _GuestSignInPill extends StatelessWidget {
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 Text(
                   context.l10n.signIn,
@@ -834,7 +835,6 @@ class _GuestSignInPill extends StatelessWidget {
                     letterSpacing: 0.2,
                   ),
                 ),
-                SizedBox(width: tokens.spaceExtraSmall),
                 Icon(
                   arrow,
                   size: tokens.iconSizeSmall,
@@ -950,6 +950,7 @@ class _AppVersionInfo extends StatelessWidget {
                 )
               : Column(
                   key: ValueKey<String>('${info.version}-${info.buildNumber}'),
+                  spacing: tokens.spaceExtraSmall,
                   children: [
                     Text(
                       context.l10n.version(info.version),
@@ -960,7 +961,6 @@ class _AppVersionInfo extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(height: tokens.spaceExtraSmall),
                     Text(
                       context.l10n.build(info.buildNumber),
                       style: context.textTheme.bodySmall?.copyWith(
