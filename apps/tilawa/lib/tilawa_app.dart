@@ -51,8 +51,12 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     SchedulerBinding.instance.addPostFrameCallback((_) {
       logger.d(
-        'ROUTER_READY navigatorContext=${AppRouter.navigatorKey.currentContext != null}',
+        'ROUTER_READY navigatorContext=${AppRouter.navigatorKey.currentContext != null} '
+        'location=${AppRouter.router.routerDelegate.currentConfiguration.uri}',
       );
+      if (AppRouter.pendingColdStartLocation != null) {
+        AppRouter.consumePendingNotificationLaunchState();
+      }
       unawaited(_notificationStartupService.handleAppStartup());
       _scheduleUpdateCheck(
         delay: _initialUpdateCheckDelay,

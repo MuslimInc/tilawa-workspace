@@ -370,6 +370,8 @@ class DownloadNotificationService implements IDownloadNotificationService {
     }
 
     return jsonEncode({
+      'type': 'reciter',
+      if (reciterId != null) 'data': reciterId.toString(),
       'reciterId': ?reciterId,
       if (reciterName != null && reciterName.isNotEmpty)
         'reciterName': reciterName,

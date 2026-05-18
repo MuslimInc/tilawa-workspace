@@ -1,6 +1,6 @@
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:equatable/equatable.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart' as entity;
 import 'package:tilawa_core/errors/failures.dart';
@@ -11,7 +11,7 @@ part 'reciters_event.dart';
 part 'reciters_state.dart';
 
 @injectable
-class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
+class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   RecitersBloc(this._getRecitersUseCase) : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);
     on<SearchRecitersEvent>(_onSearchReciters);
@@ -331,17 +331,5 @@ class RecitersBloc extends HydratedBloc<RecitersEvent, RecitersState> {
       emit(currentState.copyWith(searchQuery: '', clearSelectedLetter: true));
       await _onLoadReciters(const LoadReciters(), emit);
     }
-  }
-
-  @override
-  RecitersState? fromJson(Map<String, dynamic> json) {
-    // Reciters should be loaded from repository, so we always start with initial state
-    return const RecitersInitial();
-  }
-
-  @override
-  Map<String, dynamic>? toJson(RecitersState state) {
-    // Don't persist complex reciters data - will reload from repository
-    return null;
   }
 }

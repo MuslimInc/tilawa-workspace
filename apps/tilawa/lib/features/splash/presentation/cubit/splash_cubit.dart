@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
-import '../../../notifications/presentation/services/fcm_notification_handler_service.dart';
+import '../../../../router/notification_navigation_resolver.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
 
 part 'splash_state.dart';
@@ -32,10 +32,15 @@ class SplashCubit extends Cubit<SplashState> {
       final SplashRouteResult result = await routeFuture;
 
       String? location;
+      Object? extra;
       if (result.destination == SplashDestination.notificationLaunch &&
           result.notificationData != null) {
-        location = FCMNotificationHandlerService.resolveLocation(
+        location = NotificationNavigationResolver.resolveLocation(
           result.notificationData!,
+        );
+        extra = NotificationNavigationResolver.resolveExtra(
+          result.notificationData!,
+          location,
         );
       }
 
@@ -46,7 +51,7 @@ class SplashCubit extends Cubit<SplashState> {
         SplashDestination.login => const SplashNavigateToLogin(),
         SplashDestination.onboarding => const SplashNavigateToOnboarding(),
         SplashDestination.notificationLaunch when location != null =>
-          SplashNavigateToNotification(location),
+          SplashNavigateToNotification(location, extra: extra),
         SplashDestination.notificationLaunch => const SplashNavigateToHome(),
       });
     } catch (e, stackTrace) {

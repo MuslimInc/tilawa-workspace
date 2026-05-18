@@ -12,6 +12,7 @@ void main() {
   late MockGoRouterState mockGoRouterState;
 
   setUp(() {
+    AppRouter.resetForTesting();
     AppRouter.init(); // Register JSON types
     mockGoRouterState = MockGoRouterState();
     when(mockGoRouterState.uri).thenReturn(Uri.parse('/test'));

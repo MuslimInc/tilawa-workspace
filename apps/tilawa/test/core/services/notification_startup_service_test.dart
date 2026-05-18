@@ -49,8 +49,7 @@ void main() {
     mockPlayer = MockIAdhanAlarmPlayer();
     navCalls = <({String location, Object? extra})>[];
 
-    AppRouter.pendingStartupNotificationLaunch = false;
-    AppRouter.lastProcessedNotificationId = null;
+    AppRouter.resetForTesting();
 
     when(mockInit()).thenAnswer((_) async {});
     when(mockPid.currentPid).thenReturn(1234);
@@ -197,6 +196,24 @@ void main() {
 
       expect(navCalls, isEmpty);
     });
+
+    test(
+      'skips deferred probe when pendingColdStartLocation is set',
+      () async {
+        AppRouter.pendingColdStartLocation = '/reciter/1';
+        when(mockPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
+        when(
+          mockPlayer.getActiveAdhanPayload(),
+        ).thenAnswer((_) async => '{"x":1}');
+
+        final service = makeService();
+        await service.handleAppStartup();
+        await Future<void>.delayed(const Duration(milliseconds: 1100));
+
+        expect(navCalls, isEmpty);
+        verifyNever(mockDispatcher.getNotificationAppLaunchDetails());
+      },
+    );
 
     test(
       'skips startup probe when pendingStartupNotificationLaunch is set',

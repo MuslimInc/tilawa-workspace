@@ -6,8 +6,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/router/app_links_config.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -37,6 +39,13 @@ class AppRouter {
   /// should be the only place that consumes that startup navigation.
   static bool pendingStartupNotificationLaunch = false;
 
+  /// When set before the first [router] access, [GoRouter] uses this location
+  /// instead of [SplashRoute] so notification cold start skips the second splash.
+  static String? pendingColdStartLocation;
+
+  /// Optional route extra for [pendingColdStartLocation] (e.g. [ReciterEntity]).
+  static Object? pendingColdStartExtra;
+
   /// The ID of the last local notification that was processed (cold-start or
   /// resume). Used to prevent the resume handler from re-processing the same
   /// launch notification that the splash screen already handled.
@@ -47,13 +56,15 @@ class AppRouter {
   static DateTime? _lastNotificationNavigationAt;
 
   /// Navigate to a notification destination from a cold start.
-  /// Goes to Home first, then pushes the target so back button works.
+  ///
+  /// Uses a single [GoRouter.go] when the stack is still on splash/empty so
+  /// [MainScreen] is not built before the target route.
   static void navigateFromColdStart(String location, {Object? extra}) {
     _navigateToNotificationLocation(location, extra: extra, coldStart: true);
   }
 
   /// Navigate to a notification destination while the app is already running
-  /// (foreground or background tap). Goes to Home first, then pushes the target.
+  /// (foreground or background tap). Goes to home first, then pushes the target.
   static void navigateToNotification(String location, {Object? extra}) {
     _navigateToNotificationLocation(location, extra: extra, coldStart: false);
   }
@@ -90,19 +101,30 @@ class AppRouter {
 
       disableStateRestoration = false;
       pendingStartupNotificationLaunch = false;
+      clearPendingColdStartRoute();
       final String homeLocation = const HomeRoute().location;
-      if (isPrayerStatus) {
-        // Foreground native Adhan taps can arrive while the app is actively
-        // rendering another page. Navigate directly to the status route to
-        // avoid transitional home->push races and to refresh extra payload
-        // safely when already on status.
+
+      if (isPrayerStatus || coldStart) {
+        ColdStartNavigationMetrics.logNavigation(
+          phase: isPrayerStatus ? 'prayer_direct' : 'cold_start_go',
+          location: location,
+          coldStart: coldStart,
+          extra: extra,
+        );
         router.go(location, extra: extra);
       } else {
+        ColdStartNavigationMetrics.logNavigation(
+          phase: 'warm_home_push',
+          location: location,
+          coldStart: false,
+          extra: extra,
+        );
         router.go(homeLocation);
         if (location != homeLocation) {
           router.push(location, extra: extra);
         }
       }
+      ColdStartNavigationMetrics.logMatchedLocation(_currentLocation());
       if (isPrayerStatus) {
         logger.d('[AppRouter] NAVIGATION_TO_PRAYER_STATUS_SUCCESS');
       }
@@ -135,11 +157,62 @@ class AppRouter {
 
   static GoRouter? _router;
 
+  /// Location used when constructing [router] for this process.
+  @visibleForTesting
+  static String resolveInitialLocation() {
+    final String? coldStart = pendingColdStartLocation;
+    if (coldStart != null && coldStart.isNotEmpty) {
+      return coldStart;
+    }
+    return AppLinksConfig.defaultColdStartLocation;
+  }
+
+  /// Records a notification cold-start target resolved during bootstrap.
+  static void setPendingColdStartRoute(String location, {Object? extra}) {
+    pendingColdStartLocation = location;
+    pendingColdStartExtra = extra;
+    disableStateRestoration = true;
+    pendingStartupNotificationLaunch = true;
+    ColdStartNavigationMetrics.logResolvedRoute(location, extra: extra);
+  }
+
+  static void clearPendingColdStartRoute() {
+    pendingColdStartLocation = null;
+    pendingColdStartExtra = null;
+  }
+
+  /// Clears notification launch flags after cold-start routing is consumed.
+  static void consumePendingNotificationLaunchState() {
+    pendingFcmMessage = null;
+    pendingLocalNotificationResponse = null;
+    pendingStartupNotificationLaunch = false;
+    clearPendingColdStartRoute();
+  }
+
+  @visibleForTesting
+  static void resetForTesting() {
+    _router = null;
+    disableStateRestoration = false;
+    pendingFcmMessage = null;
+    pendingLocalNotificationResponse = null;
+    pendingStartupNotificationLaunch = false;
+    clearPendingColdStartRoute();
+    lastProcessedNotificationId = null;
+    _lastNotificationNavigationSignature = null;
+    _lastNotificationNavigationAt = null;
+  }
+
   static GoRouter get router {
+    final String initialLocation = resolveInitialLocation();
+    if (initialLocation == const SplashRoute().location) {
+      ColdStartNavigationMetrics.recordRouterSplash();
+    }
     _router ??= GoRouter(
       navigatorKey: navigatorKey,
-      initialLocation: const SplashRoute().location,
-      overridePlatformDefaultLocation: true,
+      initialLocation: initialLocation,
+      initialExtra: pendingColdStartExtra,
+      overridePlatformDefaultLocation:
+          !AppLinksConfig.usePlatformDefaultLocation,
       debugLogDiagnostics: kDebugMode,
       // Disable restoration when launched from notification to prevent
       // the restored state from overriding notification navigation

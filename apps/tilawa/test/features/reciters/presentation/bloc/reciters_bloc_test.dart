@@ -4,29 +4,13 @@ import 'package:mockito/annotations.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
-import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 import 'reciters_bloc_test.mocks.dart';
-
-class FakeStorage extends Fake implements Storage {
-  @override
-  dynamic read(String key) => null;
-
-  @override
-  Future<void> write(String key, dynamic value) async {}
-
-  @override
-  Future<void> delete(String key) async {}
-
-  @override
-  Future<void> clear() async {}
-}
 
 @GenerateMocks([GetRecitersUseCase])
 void main() {
   late RecitersBloc bloc;
   late MockGetRecitersUseCase mockGetReciters;
-  late FakeStorage fakeStorage;
 
   const tReciter1 = ReciterEntity(
     id: 1,
@@ -46,9 +30,6 @@ void main() {
 
   setUp(() {
     mockGetReciters = MockGetRecitersUseCase();
-    fakeStorage = FakeStorage();
-
-    HydratedBloc.storage = fakeStorage;
     bloc = RecitersBloc(mockGetReciters);
   });
 

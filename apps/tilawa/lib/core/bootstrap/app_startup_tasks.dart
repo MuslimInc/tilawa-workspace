@@ -39,7 +39,9 @@ import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notifi
 import 'package:tilawa/features/prayer_times/domain/services/prayer_notification_watchdog_scheduler.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/firebase_options.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/observers/app_bloc_observer.dart';
@@ -86,6 +88,7 @@ class AppStartupTasks {
     AppRouter.pendingFcmMessage = null;
     AppRouter.pendingLocalNotificationResponse = null;
     AppRouter.lastProcessedNotificationId = null;
+    AppRouter.clearPendingColdStartRoute();
   }
 
   /// Clears memoized init futures. Tests re-stub getIt between cases and need
@@ -606,26 +609,108 @@ class AppStartupTasks {
       '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: Start in (${DateTime.now()})',
     );
     try {
-      // Keep pre-runApp on a fast path: only probe FCM cold-start payload.
-      // Local notification launch probing is deferred until after first frame.
-      final RemoteMessage? fcmInitialMessage = await FirebaseMessaging.instance
+      final Future<RemoteMessage?> fcmFuture = FirebaseMessaging.instance
           .getInitialMessage()
           .timeout(notificationLaunchProbeTimeout, onTimeout: () => null);
 
-      if (fcmInitialMessage != null) {
-        AppRouter.disableStateRestoration = true;
-        AppRouter.pendingStartupNotificationLaunch = true;
+      final Future<NotificationResponse?> localFuture =
+          _probeLocalNotificationLaunchResponse();
+
+      final List<Object?> results = await Future.wait<Object?>(<Future<Object?>>[
+        fcmFuture,
+        localFuture,
+      ]);
+
+      final RemoteMessage? fcmInitialMessage = results[0] as RemoteMessage?;
+      final NotificationResponse? localLaunchResponse =
+          results[1] as NotificationResponse?;
+
+      if (localLaunchResponse != null) {
+        AppRouter.pendingLocalNotificationResponse = localLaunchResponse;
+        AppRouter.lastProcessedNotificationId = localLaunchResponse.id;
+      } else if (fcmInitialMessage != null) {
         AppRouter.pendingFcmMessage = fcmInitialMessage;
       }
 
+      if (localLaunchResponse != null || fcmInitialMessage != null) {
+        _applyColdStartRouteFromPendingLaunch();
+      }
+
       logger.d(
-        '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: Notification launch state prepared (fcm-only) at (${DateTime.now()})',
+        '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: '
+        'prepared fcm=${fcmInitialMessage != null} '
+        'local=${localLaunchResponse != null} '
+        'cold_start_route=${AppRouter.pendingColdStartLocation} '
+        'at (${DateTime.now()})',
       );
     } catch (e) {
       logger.d(
         '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: Warning: Could not prepare notification launch state at (${DateTime.now()}): $e',
       );
     }
+  }
+
+  Future<NotificationResponse?> _probeLocalNotificationLaunchResponse() async {
+    if (!getIt.isRegistered<INotificationDispatcher>()) {
+      return null;
+    }
+    try {
+      final INotificationDispatcher dispatcher =
+          getIt<INotificationDispatcher>();
+      await dispatcher
+          .initialize(createHighImportanceChannel: false)
+          .timeout(notificationLaunchProbeTimeout, onTimeout: () {});
+
+      final NotificationAppLaunchDetails? details = await dispatcher
+          .getNotificationAppLaunchDetails()
+          .timeout(notificationLaunchProbeTimeout, onTimeout: () => null);
+
+      if (details != null &&
+          details.didNotificationLaunchApp &&
+          details.notificationResponse != null) {
+        return details.notificationResponse;
+      }
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks._probeLocalNotificationLaunchResponse: $e',
+      );
+    }
+    return null;
+  }
+
+  void _applyColdStartRouteFromPendingLaunch() {
+    Map<String, dynamic>? data;
+
+    final NotificationResponse? local =
+        AppRouter.pendingLocalNotificationResponse;
+    if (local != null) {
+      data = NotificationNavigationResolver.notificationDataFromPayload(
+        local.payload,
+      );
+    } else {
+      final RemoteMessage? fcm = AppRouter.pendingFcmMessage;
+      if (fcm != null) {
+        data = Map<String, dynamic>.from(fcm.data);
+      }
+    }
+
+    if (data == null) {
+      AppRouter.pendingStartupNotificationLaunch = true;
+      AppRouter.disableStateRestoration = true;
+      return;
+    }
+
+    final String location = NotificationNavigationResolver.resolveLocation(
+      data,
+    );
+    final Object? extra = NotificationNavigationResolver.resolveExtra(
+      data,
+      location,
+    );
+
+    AppRouter.setPendingColdStartRoute(location, extra: extra);
+    AppRouter.pendingFcmMessage = null;
+    AppRouter.pendingLocalNotificationResponse = null;
   }
 
   Future<void> initializeNotificationHandlers() async {

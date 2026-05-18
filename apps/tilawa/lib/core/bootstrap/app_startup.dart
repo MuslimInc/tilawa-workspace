@@ -12,6 +12,7 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/bootstrap/app_bootstrapper.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
+import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
 import 'package:tilawa/core/bootstrap/critical_init_coordinator.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';

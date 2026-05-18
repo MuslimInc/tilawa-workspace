@@ -64,6 +64,8 @@ class _BootGate extends StatefulWidget {
 }
 
 class _BootGateState extends State<_BootGate> {
+  bool _loggedBootGateSplash = false;
+
   static const Color _launchBackgroundColor = AppColors.defaultPrimary;
   static const String _launchWordmarkAsset =
       'assets/images/launch_wordmark.png';
@@ -97,6 +99,10 @@ class _BootGateState extends State<_BootGate> {
   @override
   Widget build(BuildContext context) {
     if (_ready) return widget.child;
+    if (!_loggedBootGateSplash) {
+      _loggedBootGateSplash = true;
+      ColdStartNavigationMetrics.recordBootGateSplash();
+    }
     return const _LaunchSplash(
       backgroundColor: _launchBackgroundColor,
       overlayStyle: _launchOverlayStyle,

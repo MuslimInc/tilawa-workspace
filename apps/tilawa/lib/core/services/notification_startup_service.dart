@@ -116,7 +116,8 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
     // Large-scale startup pattern: avoid eager heavy notification wiring on
     // every cold start. Only process immediately when startup was actually
     // notification-driven (FCM path sets this flag during bootstrap).
-    if (AppRouter.pendingStartupNotificationLaunch) {
+    if (AppRouter.pendingStartupNotificationLaunch ||
+        AppRouter.pendingColdStartLocation != null) {
       await _handlersInitializer();
       AppRouter.pendingStartupNotificationLaunch = false;
       return;
@@ -129,13 +130,16 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
       unawaited(_checkForDeferredColdStart());
     });
 
-    // If the app cold-starts while the adhan is already playing (e.g. user
-    // swiped away the foreground notification), surface the status screen so
-    // they have a way to stop it. We piggy-back on the same probe delay to
-    // avoid competing with the cold-start launch notification path.
-    Timer(_deferredColdStartProbeDelay, () {
-      unawaited(_routeToStatusIfAdhanPlaying());
-    });
+    if (!_shouldDeferAdhanStatusProbe()) {
+      Timer(_deferredColdStartProbeDelay, () {
+        unawaited(_routeToStatusIfAdhanPlaying());
+      });
+    }
+  }
+
+  bool _shouldDeferAdhanStatusProbe() {
+    return AppRouter.pendingStartupNotificationLaunch ||
+        AppRouter.pendingColdStartLocation != null;
   }
 
   @override
@@ -208,6 +212,9 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
   /// adhan is not playing or the user is already on the status screen.
   Future<void> _routeToStatusIfAdhanPlaying() async {
     try {
+      if (_shouldDeferAdhanStatusProbe()) {
+        return;
+      }
       if (!_adhanPlayer.isSupported) return;
       final bool playing = await _adhanPlayer.isAdhanPlaying();
       if (!playing) return;

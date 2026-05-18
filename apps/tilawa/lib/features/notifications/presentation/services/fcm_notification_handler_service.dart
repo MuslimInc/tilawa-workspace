@@ -7,6 +7,7 @@ import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
+import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
 @lazySingleton
@@ -41,7 +42,11 @@ class FCMNotificationHandlerService {
         Map<String, dynamic>.from(jsonDecode(payload) as Map),
       );
       final String location = resolveLocation(data);
-      AppRouter.navigateToNotification(location);
+      final Object? extra = NotificationNavigationResolver.resolveExtra(
+        data,
+        location,
+      );
+      AppRouter.navigateToNotification(location, extra: extra);
     } catch (e) {
       _logger.e('Error parsing notification payload: $e');
     }
