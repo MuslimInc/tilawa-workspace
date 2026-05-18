@@ -62,8 +62,11 @@ void main() {
     );
     await tester.pump();
 
-    final FilledButton primary = tester.widget<FilledButton>(
-      find.byType(FilledButton),
+    final TilawaButton primary = tester.widget<TilawaButton>(
+      find.byWidgetPredicate(
+        (Widget w) =>
+            w is TilawaButton && w.variant == TilawaButtonVariant.primary,
+      ),
     );
     expect(primary.onPressed, isNull);
   });

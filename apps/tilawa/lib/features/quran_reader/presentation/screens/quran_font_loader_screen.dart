@@ -64,7 +64,7 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
     }
     final int? initialPageNumber = _initialPageNumber;
     if (initialPageNumber != null) {
-      final Size viewportSize = MediaQuery.sizeOf(context);
+      final Size viewportSize = context.viewportSize;
       final QuranLayoutMetrics metrics = StandardQuranLayoutStrategy()
           .calculateMetrics(
             context,
@@ -102,7 +102,7 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
       return null;
     }
 
-    final Size viewportSize = MediaQuery.sizeOf(context);
+    final Size viewportSize = context.viewportSize;
     final strategy = StandardQuranLayoutStrategy();
 
     // Build a ±2 page window. Only pages whose fonts are already loaded are
@@ -665,10 +665,12 @@ class _ErrorView extends StatelessWidget {
             foregroundColor: AppColors.error,
           ),
           SizedBox(height: tokens.spaceExtraLarge),
-          FilledButton.icon(
+          TilawaButton(
+            text: context.l10n.retry,
+            variant: TilawaButtonVariant.primary,
+            leadingIcon: const Icon(Icons.refresh_rounded),
             onPressed: onRetry,
-            icon: const Icon(Icons.refresh_rounded),
-            label: Text(context.l10n.retry),
+            isFullWidth: true,
           ),
         ],
       ),

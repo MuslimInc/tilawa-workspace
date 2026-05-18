@@ -17,6 +17,7 @@ const double _kPulseBorderWidth = 2.0;
 const double _kPulseExpansion = 8.0;
 const double _kPercentageFontSize = 9.0;
 const double _kFullCircleRadius = 1000.0;
+const double _kLoadingIndicatorStrokeWidth = 2.0;
 const Duration _kPulseAnimationDuration = Duration(milliseconds: 1500);
 
 /// Download button with independent state management
@@ -242,8 +243,8 @@ class _CompletedDownloadButton extends StatelessWidget {
     final tokens = theme.tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: Center(
         child: Container(
           width: _kCircleSize,
@@ -274,8 +275,8 @@ class _PendingDownloadButton extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: Center(
         child: InkWell(
           onTap: onCancel,
@@ -293,13 +294,11 @@ class _LoadingDownloadButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final componentTokens = Theme.of(context).componentTokens;
-
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
-      child: TilawaLoadingIndicator(
-        strokeWidth: componentTokens.loadingIndicator.compactStrokeWidth,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
+      child: const TilawaLoadingIndicator(
+        strokeWidth: _kLoadingIndicatorStrokeWidth,
       ),
     );
   }
@@ -324,8 +323,8 @@ class _DownloadingProgressButton extends StatelessWidget {
     final tokens = theme.tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: Center(
         child: Stack(
           alignment: Alignment.center,
@@ -404,8 +403,8 @@ class _PausedDownloadButton extends StatelessWidget {
     final tokens = theme.tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: Center(
         child: Stack(
           alignment: Alignment.center,
@@ -456,8 +455,8 @@ class _DefaultDownloadButton extends StatelessWidget {
     final tokens = theme.tokens;
 
     return SizedBox(
-      width: kMinInteractiveDimension,
-      height: kMinInteractiveDimension,
+      width: context.minInteractiveDimension,
+      height: context.minInteractiveDimension,
       child: IconButton(
         icon: Icon(
           Icons.download_rounded,

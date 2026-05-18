@@ -180,14 +180,16 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(32),
                     border: Border.all(
-                      color: _ShareComposerColors.gold.withValues(alpha: 0.22),
+                      color: AppShareComposerColors.gold.withValues(
+                        alpha: 0.22,
+                      ),
                     ),
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        _ShareComposerColors.deepGreen,
-                        _ShareComposerColors.forestGreen,
+                        AppShareComposerColors.deepGreen,
+                        AppShareComposerColors.forestGreen,
                       ],
                     ),
                     boxShadow: [
@@ -216,7 +218,9 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                               ),
                               const SizedBox(height: 18),
                               AnimatedSwitcher(
-                                duration: const Duration(milliseconds: 240),
+                                duration: Theme.of(
+                                  context,
+                                ).tokens.durationFast,
                                 child: isReviewing
                                     ? _VideoReviewPreview(
                                         key: const ValueKey('generated_video'),
@@ -295,7 +299,13 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                 _SharingCard(label: context.l10n.sharing),
                                 const SizedBox(height: 14),
                               ],
-                              FilledButton.icon(
+                              TilawaButton(
+                                text: context.l10n.generateReel,
+                                variant: TilawaButtonVariant.primary,
+                                isFullWidth: true,
+                                leadingIcon: const Icon(
+                                  Icons.movie_creation_outlined,
+                                ),
                                 onPressed: _isValid && !isBusy
                                     ? () {
                                         context
@@ -316,26 +326,27 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                             );
                                       }
                                     : null,
-                                icon: const Icon(Icons.movie_creation_outlined),
-                                label: Text(context.l10n.generateReel),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: _ShareComposerColors.gold,
-                                  foregroundColor:
-                                      _ShareComposerColors.deepGreen,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  textStyle: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(fontWeight: FontWeight.w800),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
+                                backgroundColor: AppShareComposerColors.gold,
+                                foregroundColor:
+                                    AppShareComposerColors.deepGreen,
+                                borderRadius: 18,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
                                 ),
+                                textStyle: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w800),
                               ),
                               const SizedBox(height: 10),
-                              OutlinedButton.icon(
+                              TilawaButton(
+                                text: context.l10n.shareAudio,
+                                variant: TilawaButtonVariant.outline,
+                                isFullWidth: true,
+                                leadingIcon: const Icon(
+                                  Icons.graphic_eq_rounded,
+                                ),
                                 onPressed: _isValid && !isBusy
                                     ? () {
                                         context
@@ -347,24 +358,19 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                             );
                                       }
                                     : null,
-                                icon: const Icon(Icons.graphic_eq_rounded),
-                                label: Text(context.l10n.shareAudio),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  side: BorderSide(
-                                    color: Colors.white.withValues(alpha: 0.18),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  textStyle: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(fontWeight: FontWeight.w700),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
+                                foregroundColor: Colors.white,
+                                borderColor: Colors.white.withValues(
+                                  alpha: 0.18,
                                 ),
+                                borderRadius: 18,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 16,
+                                ),
+                                textStyle: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(fontWeight: FontWeight.w700),
                               ),
                             ],
                           ),
@@ -418,9 +424,9 @@ class _ConfigHeader extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  color: _ShareComposerColors.gold.withValues(alpha: 0.14),
+                  color: AppShareComposerColors.gold.withValues(alpha: 0.14),
                   border: Border.all(
-                    color: _ShareComposerColors.gold.withValues(alpha: 0.28),
+                    color: AppShareComposerColors.gold.withValues(alpha: 0.28),
                   ),
                 ),
                 child: Row(
@@ -429,13 +435,13 @@ class _ConfigHeader extends StatelessWidget {
                     const Icon(
                       Icons.auto_stories_rounded,
                       size: 16,
-                      color: _ShareComposerColors.gold,
+                      color: AppShareComposerColors.gold,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'Tilawa',
                       style: theme.textTheme.labelLarge?.copyWith(
-                        color: _ShareComposerColors.cream,
+                        color: AppShareComposerColors.cream,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -617,14 +623,14 @@ class _VerseDropdown extends StatelessWidget {
     return DropdownButtonFormField<int>(
       initialValue: clampedValue,
       onChanged: enabled ? (value) => onChanged(value!) : null,
-      iconEnabledColor: _ShareComposerColors.deepGreen,
-      dropdownColor: _ShareComposerColors.cream,
+      iconEnabledColor: AppShareComposerColors.deepGreen,
+      dropdownColor: AppShareComposerColors.cream,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
-        fillColor: _ShareComposerColors.cream,
+        fillColor: AppShareComposerColors.cream,
         labelStyle: const TextStyle(
-          color: _ShareComposerColors.deepGreen,
+          color: AppShareComposerColors.deepGreen,
           fontWeight: FontWeight.w600,
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -634,22 +640,22 @@ class _VerseDropdown extends StatelessWidget {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: _ShareComposerColors.deepGreen.withValues(alpha: 0.08),
+            color: AppShareComposerColors.deepGreen.withValues(alpha: 0.08),
           ),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: BorderSide(
-            color: _ShareComposerColors.deepGreen.withValues(alpha: 0.04),
+            color: AppShareComposerColors.deepGreen.withValues(alpha: 0.04),
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: _ShareComposerColors.gold),
+          borderSide: const BorderSide(color: AppShareComposerColors.gold),
         ),
       ),
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-        color: _ShareComposerColors.deepGreen,
+        color: AppShareComposerColors.deepGreen,
         fontWeight: FontWeight.w700,
       ),
       items: List.generate(max - min + 1, (index) {
@@ -691,7 +697,7 @@ class _LiveVideoPreview extends StatelessWidget {
               const Spacer(),
               const Icon(
                 Icons.play_circle_outline_rounded,
-                color: _ShareComposerColors.gold,
+                color: AppShareComposerColors.gold,
               ),
             ],
           ),
@@ -760,20 +766,21 @@ class _ProgressCard extends StatelessWidget {
               minHeight: 8,
               backgroundColor: Colors.white.withValues(alpha: 0.08),
               valueColor: const AlwaysStoppedAnimation<Color>(
-                _ShareComposerColors.gold,
+                AppShareComposerColors.gold,
               ),
             ),
           ),
           const SizedBox(height: 14),
           Align(
             alignment: Alignment.centerRight,
-            child: TextButton.icon(
+            child: TilawaButton(
+              text: context.l10n.cancel,
+              variant: TilawaButtonVariant.ghost,
+              size: TilawaButtonSize.small,
+              shrinkWrapTapTarget: true,
+              leadingIcon: const Icon(Icons.close_rounded),
               onPressed: onCancel,
-              icon: const Icon(Icons.close_rounded),
-              label: Text(context.l10n.cancel),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white.withValues(alpha: 0.84),
-              ),
+              foregroundColor: Colors.white.withValues(alpha: 0.84),
             ),
           ),
         ],
@@ -807,7 +814,7 @@ class _SharingCard extends StatelessWidget {
               centered: false,
               strokeWidth: 2.5,
               valueColor: AlwaysStoppedAnimation<Color>(
-                _ShareComposerColors.gold,
+                AppShareComposerColors.gold,
               ),
             ),
           ),
@@ -829,8 +836,8 @@ class _SharingCard extends StatelessWidget {
 
 class _FeedbackCard extends StatelessWidget {
   const _FeedbackCard.error({required this.message})
-    : backgroundColor = const Color(0xFF5B1F1F),
-      outlineColor = const Color(0xFFFFB4AB),
+    : backgroundColor = AppShareComposerColors.feedbackErrorBackground,
+      outlineColor = AppShareComposerColors.feedbackErrorOutline,
       icon = Icons.error_outline_rounded;
 
   final String message;
@@ -888,7 +895,7 @@ class _MetadataPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: _ShareComposerColors.gold),
+          Icon(icon, size: 16, color: AppShareComposerColors.gold),
           const SizedBox(width: 6),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 220),
@@ -923,11 +930,11 @@ class _SelectionBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final backgroundColor = isError
-        ? const Color(0xFF5B1F1F)
+        ? AppShareComposerColors.feedbackErrorBackground
         : Colors.black.withValues(alpha: 0.16);
     final accent = isError
-        ? const Color(0xFFFFB4AB)
-        : _ShareComposerColors.mint;
+        ? AppShareComposerColors.feedbackErrorOutline
+        : AppShareComposerColors.mint;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -1044,30 +1051,20 @@ class _VideoReviewPreviewState extends State<_VideoReviewPreview> {
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
+            child: TilawaButton(
+              text: context.l10n.shareReel,
+              variant: TilawaButtonVariant.primary,
+              isFullWidth: true,
+              leadingIcon: const Icon(Icons.share_rounded),
               onPressed: widget.onShare,
-              icon: const Icon(Icons.share_rounded),
-              label: Text(context.l10n.shareReel),
-              style: FilledButton.styleFrom(
-                backgroundColor: _ShareComposerColors.mint,
-                foregroundColor: _ShareComposerColors.deepGreen,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-              ),
+              backgroundColor: AppShareComposerColors.mint,
+              foregroundColor: AppShareComposerColors.deepGreen,
+              borderRadius: 18,
+              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 24),
             ),
           ),
         ],
       ),
     );
   }
-}
-
-abstract final class _ShareComposerColors {
-  static const Color deepGreen = Color(0xFF0D3933);
-  static const Color forestGreen = Color(0xFF165147);
-  static const Color gold = Color(0xFFE1C17B);
-  static const Color mint = Color(0xFF8FDFC0);
-  static const Color cream = Color(0xFFF7F1E1);
 }

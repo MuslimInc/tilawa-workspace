@@ -28,20 +28,8 @@ class AthkarDetailsHeader extends StatelessWidget {
       leading: context.canPop()
           ? TilawaBackButton(color: appBarForegroundColor)
           : null,
-      flexibleSpace: FlexibleSpaceBar(
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                theme.primaryColor,
-                theme.primaryColor.withValues(alpha: 0.8),
-              ],
-            ),
-          ),
-        ),
-      ),
+      elevation: 0,
+      scrolledUnderElevation: 0,
       title: Column(
         children: [
           Text(

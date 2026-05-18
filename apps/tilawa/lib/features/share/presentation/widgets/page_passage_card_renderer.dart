@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'reader_page_content_renderer.dart';
 
@@ -36,8 +37,8 @@ class PagePassageCardRenderer extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              _PagePosterPalette.deepGreen,
-              _PagePosterPalette.forestGreen,
+              AppPagePassagePosterColors.deepGreen,
+              AppPagePassagePosterColors.forestGreen,
             ],
           ),
         ),
@@ -48,7 +49,7 @@ class PagePassageCardRenderer extends StatelessWidget {
               right: _PagePosterLayout.topOrbRight,
               child: _PosterOrb(
                 size: _PagePosterLayout.topOrbSize,
-                color: _PagePosterPalette.mint,
+                color: AppPagePassagePosterColors.mint,
                 opacity: 0.12,
               ),
             ),
@@ -57,7 +58,7 @@ class PagePassageCardRenderer extends StatelessWidget {
               left: _PagePosterLayout.bottomOrbLeft,
               child: _PosterOrb(
                 size: _PagePosterLayout.bottomOrbSize,
-                color: _PagePosterPalette.gold,
+                color: AppPagePassagePosterColors.gold,
                 opacity: 0.12,
               ),
             ),
@@ -70,15 +71,17 @@ class PagePassageCardRenderer extends StatelessWidget {
                     _PagePosterLayout.contentRadius,
                   ),
                   border: Border.all(
-                    color: _PagePosterPalette.gold.withValues(alpha: 0.42),
+                    color: AppPagePassagePosterColors.gold.withValues(
+                      alpha: 0.42,
+                    ),
                     width: 2,
                   ),
                   gradient: const LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      _PagePosterPalette.parchment,
-                      _PagePosterPalette.warmParchment,
+                      AppPagePassagePosterColors.parchment,
+                      AppPagePassagePosterColors.warmParchment,
                     ],
                   ),
                 ),
@@ -107,7 +110,7 @@ class PagePassageCardRenderer extends StatelessWidget {
                         fontSize: _PagePosterLayout.arabicTitleSize,
                         height: _PagePosterLayout.arabicTitleHeight,
                         fontWeight: FontWeight.w700,
-                        color: _PagePosterPalette.deepGreen,
+                        color: AppPagePassagePosterColors.deepGreen,
                       ),
                     ),
                     const SizedBox(height: _PagePosterLayout.subtitleGap),
@@ -121,7 +124,7 @@ class PagePassageCardRenderer extends StatelessWidget {
                         letterSpacing:
                             _PagePosterLayout.englishTitleLetterSpacing,
                         fontWeight: FontWeight.w600,
-                        color: _PagePosterPalette.deepGreen.withValues(
+                        color: AppPagePassagePosterColors.deepGreen.withValues(
                           alpha: 0.72,
                         ),
                       ),
@@ -139,7 +142,7 @@ class PagePassageCardRenderer extends StatelessWidget {
                           ),
                           color: Colors.white.withValues(alpha: 0.42),
                           border: Border.all(
-                            color: _PagePosterPalette.gold.withValues(
+                            color: AppPagePassagePosterColors.gold.withValues(
                               alpha: 0.22,
                             ),
                           ),
@@ -200,7 +203,7 @@ class _PosterPill extends StatelessWidget {
         padding: _PagePosterLayout.pillPadding,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(_PagePosterLayout.pillRadius),
-          color: _PagePosterPalette.deepGreen.withValues(alpha: 0.08),
+          color: AppPagePassagePosterColors.deepGreen.withValues(alpha: 0.08),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -208,7 +211,7 @@ class _PosterPill extends StatelessWidget {
             Icon(
               icon,
               size: _PagePosterLayout.pillIconSize,
-              color: _PagePosterPalette.gold,
+              color: AppPagePassagePosterColors.gold,
             ),
             const SizedBox(width: _PagePosterLayout.pillIconGap),
             Flexible(
@@ -219,7 +222,7 @@ class _PosterPill extends StatelessWidget {
                 style: GoogleFonts.alexandria(
                   fontSize: _PagePosterLayout.pillTextSize,
                   fontWeight: FontWeight.w600,
-                  color: _PagePosterPalette.deepGreen,
+                  color: AppPagePassagePosterColors.deepGreen,
                 ),
               ),
             ),
@@ -295,13 +298,4 @@ abstract final class _PagePosterLayout {
   static const double pillIconSize = 16;
   static const double pillIconGap = 8;
   static const double pillTextSize = 16;
-}
-
-abstract final class _PagePosterPalette {
-  static const Color deepGreen = Color(0xFF0B342E);
-  static const Color forestGreen = Color(0xFF145247);
-  static const Color gold = Color(0xFFE1C17B);
-  static const Color mint = Color(0xFF8FDFC0);
-  static const Color parchment = Color(0xFFF7F1E1);
-  static const Color warmParchment = Color(0xFFEFE1C2);
 }

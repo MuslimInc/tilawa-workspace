@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/services/adhan_qa_service.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -45,111 +46,101 @@ class _PrayerSettingsSheetState extends State<PrayerSettingsSheet> {
 
     return ConstrainedBox(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.86,
+        maxHeight: context.viewportHeight * 0.86,
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(tokens.radiusExtraLarge),
-          ),
-        ),
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const TilawaSheetHandle(),
-              _SheetHeader(onClose: _close, tokens: tokens, theme: theme),
-              const TilawaDivider(height: 1),
-              Flexible(
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.all(tokens.spaceLarge),
-                  children: [
-                    _SectionTitle(
-                      title: context.l10n.calculationMethod,
-                      tokens: tokens,
-                      theme: theme,
-                    ),
-                    _SettingsDropdown<CalculationMethod>(
-                      value: settings.calculationMethod,
-                      items: CalculationMethod.values,
-                      labelBuilder: (method) => method.localize(context.l10n),
-                      onChanged: (method) {
-                        if (method != null) {
-                          _updateSettings(
-                            settings.copyWith(calculationMethod: method),
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: tokens.spaceLarge),
-                    _SectionTitle(
-                      title: context.l10n.asrCalculation,
-                      tokens: tokens,
-                      theme: theme,
-                    ),
-                    _SettingsDropdown<AsrJuristicMethod>(
-                      value: settings.asrJuristicMethod,
-                      items: AsrJuristicMethod.values,
-                      labelBuilder: (method) => method.localize(context.l10n),
-                      onChanged: (method) {
-                        if (method != null) {
-                          _updateSettings(
-                            settings.copyWith(asrJuristicMethod: method),
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: tokens.spaceLarge),
-                    _SectionTitle(
-                      title: context.l10n.displayOptions,
-                      tokens: tokens,
-                      theme: theme,
-                    ),
-                    _SettingsSwitch(
-                      title: context.l10n.use24HourFormat,
-                      value: settings.use24HourFormat,
-                      onChanged: (value) {
+      child: SafeArea(
+        top: false,
+        child: TilawaBottomSheetScaffold(
+          topBar: _SheetHeader(onClose: _close, tokens: tokens, theme: theme),
+          betweenTopBarAndBody: const [TilawaDivider(height: 1)],
+          children: [
+            Flexible(
+              child: ListView(
+                shrinkWrap: true,
+                padding: TilawaBottomSheetScaffold.resolvedBodyPadding(context),
+                children: [
+                  _SectionTitle(
+                    title: context.l10n.calculationMethod,
+                    tokens: tokens,
+                    theme: theme,
+                  ),
+                  _SettingsDropdown<CalculationMethod>(
+                    value: settings.calculationMethod,
+                    items: CalculationMethod.values,
+                    labelBuilder: (method) => method.localize(context.l10n),
+                    onChanged: (method) {
+                      if (method != null) {
                         _updateSettings(
-                          settings.copyWith(use24HourFormat: value),
+                          settings.copyWith(calculationMethod: method),
                         );
-                      },
-                    ),
-                    _SettingsSwitch(
-                      title: context.l10n.showSunrise,
-                      value: settings.showSunrise,
-                      onChanged: (value) {
-                        _updateSettings(settings.copyWith(showSunrise: value));
-                      },
-                    ),
-                    BlocBuilder<SettingsCubit, SettingsState>(
-                      builder: (context, appSettings) {
-                        return _SettingsSwitch(
-                          title: context.l10n.showPrayerTimesAlertChipLabels,
-                          value: appSettings.showPrayerTimesAlertChipLabels,
-                          onChanged: (value) {
-                            context
-                                .read<SettingsCubit>()
-                                .setShowPrayerTimesAlertChipLabels(value);
-                          },
+                      }
+                    },
+                  ),
+                  SizedBox(height: tokens.spaceLarge),
+                  _SectionTitle(
+                    title: context.l10n.asrCalculation,
+                    tokens: tokens,
+                    theme: theme,
+                  ),
+                  _SettingsDropdown<AsrJuristicMethod>(
+                    value: settings.asrJuristicMethod,
+                    items: AsrJuristicMethod.values,
+                    labelBuilder: (method) => method.localize(context.l10n),
+                    onChanged: (method) {
+                      if (method != null) {
+                        _updateSettings(
+                          settings.copyWith(asrJuristicMethod: method),
                         );
-                      },
-                    ),
-                    // TODO: Re-enable Time Adjustments after the Prayer Times
-                    // UX stabilizes. The feature is intentionally hidden for
-                    // now to keep settings simple and avoid advanced controls.
-                    if (AdhanQAService.isEnabled) ...[
-                      SizedBox(height: tokens.spaceLarge),
-                      const _QASection(),
-                      SizedBox(height: tokens.spaceLarge),
-                    ],
+                      }
+                    },
+                  ),
+                  SizedBox(height: tokens.spaceLarge),
+                  _SectionTitle(
+                    title: context.l10n.displayOptions,
+                    tokens: tokens,
+                    theme: theme,
+                  ),
+                  _SettingsSwitch(
+                    title: context.l10n.use24HourFormat,
+                    value: settings.use24HourFormat,
+                    onChanged: (value) {
+                      _updateSettings(
+                        settings.copyWith(use24HourFormat: value),
+                      );
+                    },
+                  ),
+                  _SettingsSwitch(
+                    title: context.l10n.showSunrise,
+                    value: settings.showSunrise,
+                    onChanged: (value) {
+                      _updateSettings(settings.copyWith(showSunrise: value));
+                    },
+                  ),
+                  BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (context, appSettings) {
+                      return _SettingsSwitch(
+                        title: context.l10n.showPrayerTimesAlertChipLabels,
+                        value: appSettings.showPrayerTimesAlertChipLabels,
+                        onChanged: (value) {
+                          context
+                              .read<SettingsCubit>()
+                              .setShowPrayerTimesAlertChipLabels(value);
+                        },
+                      );
+                    },
+                  ),
+                  // TODO: Re-enable Time Adjustments after the Prayer Times
+                  // UX stabilizes. The feature is intentionally hidden for
+                  // now to keep settings simple and avoid advanced controls.
+                  if (AdhanQAService.isEnabled) ...[
+                    SizedBox(height: tokens.spaceLarge),
+                    const _QASection(),
+                    SizedBox(height: tokens.spaceLarge),
                   ],
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -169,29 +160,22 @@ class _SheetHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Row(
-        children: [
-          Text(
-            context.l10n.prayerSettings,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+    return Row(
+      children: [
+        Text(
+          context.l10n.prayerSettings,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w800,
           ),
-          const Spacer(),
-          TextButton(
-            onPressed: onClose,
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
-            ),
-            child: Text(
-              context.l10n.done,
-              style: const TextStyle(fontWeight: FontWeight.w800),
-            ),
-          ),
-        ],
-      ),
+        ),
+        const Spacer(),
+        TilawaButton(
+          text: context.l10n.done,
+          variant: TilawaButtonVariant.ghost,
+          size: TilawaButtonSize.small,
+          onPressed: onClose,
+        ),
+      ],
     );
   }
 }
@@ -326,18 +310,11 @@ class _QASectionState extends State<_QASection> {
     try {
       await _qaService.scheduleTestAdhan(delayMinutes: minutes);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Scheduled Adhan in $minutes minutes')),
-        );
+        ToastUtils.showSuccessToast('Scheduled Adhan in $minutes minutes');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        ToastUtils.showErrorToast('Failed: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -349,18 +326,11 @@ class _QASectionState extends State<_QASection> {
     try {
       await _qaService.cancelTestAdhan();
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Cancelled test Adhan')));
+        ToastUtils.showToast(msg: 'Cancelled test Adhan');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        ToastUtils.showErrorToast('Failed: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -385,16 +355,20 @@ class _QASectionState extends State<_QASection> {
           ),
         ),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: 'Clear',
+            variant: TilawaButtonVariant.danger,
+            size: TilawaButtonSize.small,
             onPressed: () async {
               await _qaService.clearLogs();
               if (context.mounted) Navigator.pop(context);
             },
-            child: const Text('Clear'),
           ),
-          TextButton(
+          TilawaButton(
+            text: 'Close',
+            variant: TilawaButtonVariant.ghost,
+            size: TilawaButtonSize.small,
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
           ),
         ],
       ),
@@ -429,22 +403,30 @@ class _QASectionState extends State<_QASection> {
                 spacing: tokens.spaceSmall,
                 runSpacing: tokens.spaceSmall,
                 children: [
-                  FilledButton.tonal(
+                  TilawaButton(
+                    text: 'Schedule 2m',
+                    variant: TilawaButtonVariant.secondary,
+                    size: TilawaButtonSize.small,
                     onPressed: _isLoading ? null : () => _schedule(2),
-                    child: const Text('Schedule 2m'),
                   ),
-                  FilledButton.tonal(
+                  TilawaButton(
+                    text: 'Schedule 5m',
+                    variant: TilawaButtonVariant.secondary,
+                    size: TilawaButtonSize.small,
                     onPressed: _isLoading ? null : () => _schedule(5),
-                    child: const Text('Schedule 5m'),
                   ),
-                  OutlinedButton(
+                  TilawaButton(
+                    text: 'Cancel Test',
+                    variant: TilawaButtonVariant.outline,
+                    size: TilawaButtonSize.small,
                     onPressed: _isLoading ? null : _cancel,
-                    child: const Text('Cancel Test'),
                   ),
-                  TextButton.icon(
+                  TilawaButton(
+                    text: 'Logs',
+                    variant: TilawaButtonVariant.ghost,
+                    size: TilawaButtonSize.small,
+                    leadingIcon: const Icon(Icons.list_alt),
                     onPressed: _viewLogs,
-                    icon: const Icon(Icons.list_alt),
-                    label: const Text('Logs'),
                   ),
                 ],
               ),

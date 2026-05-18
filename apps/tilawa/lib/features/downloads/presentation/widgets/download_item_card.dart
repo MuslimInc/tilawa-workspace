@@ -219,6 +219,8 @@ class DownloadItemCard extends StatelessWidget {
       DownloadStatus.pending => Icons.schedule_rounded,
     };
 
+    // TILAWA_BRAND.md §5: in-card decorative icon. Tinted fill + hairline,
+    // no shadow — the status color carries the meaning.
     return Container(
       padding: EdgeInsets.all(tokens.spaceSmall),
       decoration: BoxDecoration(
@@ -228,13 +230,6 @@ class DownloadItemCard extends StatelessWidget {
           color: color.withValues(alpha: tokens.opacitySubtle),
           width: tokens.borderWidthThin,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: tokens.opacityShadow * 0.22),
-            blurRadius: tokens.blurShadow * 0.5,
-            offset: tokens.shadowOffsetSmall,
-          ),
-        ],
       ),
       child: Icon(icon, color: color, size: tokens.iconSizeMedium),
     );
@@ -283,24 +278,24 @@ class DownloadItemCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) {
-        final colorScheme = Theme.of(context).colorScheme;
         return AlertDialog(
           title: Text(context.l10n.deleteDownload),
           content: Text(
             context.l10n.deleteDownloadConfirmation(download.title),
           ),
           actions: [
-            TextButton(
+            TilawaButton(
+              text: context.l10n.cancel,
+              variant: TilawaButtonVariant.ghost,
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(context.l10n.cancel),
             ),
-            TextButton(
+            TilawaButton(
+              text: context.l10n.delete,
+              variant: TilawaButtonVariant.danger,
               onPressed: () {
                 Navigator.of(context).pop();
                 onDelete();
               },
-              style: TextButton.styleFrom(foregroundColor: colorScheme.error),
-              child: Text(context.l10n.delete),
             ),
           ],
         );

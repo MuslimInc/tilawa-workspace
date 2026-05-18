@@ -14,12 +14,13 @@ import 'package:quran_image/quran_image_reader.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/share_composer_extra.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa_core/services/app_system_chrome_style.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/di/injection.dart';
+import '../../../../core/extensions.dart';
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
@@ -103,7 +104,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     _navigationBloc = NavigationBloc()
       ..add(NavigationInitialized(initialPage: initialPage));
     logger.d(
-      '[QuranImageReaderScreen] NavigationBloc initialized with page: $initialPage',
+      '[QuranImagesPerformance] source=QuranImageReaderScreen NavigationBloc initialized with page: $initialPage',
     );
   }
 
@@ -112,7 +113,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
     _initNavigationBloc();
     setState(() => _isPreloaded = true);
     logger.d(
-      '[QuranImageReaderScreen] preload complete — '
+      '[QuranImagesPerformance] source=QuranImageReaderScreen preload complete — '
       'transitioning to reader',
     );
   }
@@ -288,39 +289,21 @@ class _ReaderShell extends StatelessWidget {
 
         if (state is NavigationError) {
           return Scaffold(
-            backgroundColor: const Color(0xFFFFF9F2),
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(32),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.error_outline_rounded,
-                      size: 48,
-                      color: Color(0xFF8A2D2D),
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Failed to initialize the reader.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Color(0xFF5D4037)),
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: () => context.read<NavigationBloc>().add(
-                        const NavigationRetryRequested(),
-                      ),
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
+            body: TilawaErrorState(
+              icon: Icons.error_outline_rounded,
+              title: context.l10n.error,
+              retryLabel: context.l10n.retry,
+              onRetry: () => context.read<NavigationBloc>().add(
+                const NavigationRetryRequested(),
               ),
+              iconColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
 
-        return const Scaffold(backgroundColor: Color(0xFFFFF9F2));
+        return const Scaffold(
+          body: TilawaLoadingIndicator(),
+        );
       },
     );
   }

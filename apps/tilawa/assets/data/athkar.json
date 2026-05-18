@@ -3,11 +3,13 @@
         {
             "id": 1,
             "name_ar": "أذكار الصباح",
+            "name_en": "Morning Athkar",
             "icon": "wb_sunny_rounded"
         },
         {
             "id": 2,
             "name_ar": "أذكار المساء",
+            "name_en": "Evening Athkar",
             "icon": "nights_stay_rounded"
         }
     ],

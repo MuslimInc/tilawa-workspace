@@ -27,6 +27,7 @@ class TilawaSearchField extends StatelessWidget {
     this.onTapOutside,
     this.errorText,
     this.errorStyle,
+    this.clearButtonTooltip,
   });
 
   final String hintText;
@@ -60,6 +61,9 @@ class TilawaSearchField extends StatelessWidget {
   /// [ColorScheme.error].
   final TextStyle? errorStyle;
 
+  /// Tooltip and accessibility hint for the clear suffix control.
+  final String? clearButtonTooltip;
+
   @override
   Widget build(BuildContext context) {
     final listenables = <Listenable>[?controller, ?focusNode];
@@ -88,6 +92,7 @@ class TilawaSearchField extends StatelessWidget {
         onTapOutside: onTapOutside,
         errorText: errorText,
         errorStyle: errorStyle,
+        clearButtonTooltip: clearButtonTooltip,
         hasText: controller?.text.isNotEmpty ?? false,
         isFocused: focusNode?.hasFocus ?? false,
       );
@@ -130,6 +135,7 @@ class _SearchFieldBody extends StatelessWidget {
     required this.isFocused,
     this.errorText,
     this.errorStyle,
+    this.clearButtonTooltip,
   });
 
   final String hintText;
@@ -156,6 +162,7 @@ class _SearchFieldBody extends StatelessWidget {
   final bool isFocused;
   final String? errorText;
   final TextStyle? errorStyle;
+  final String? clearButtonTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -240,6 +247,7 @@ class _SearchFieldBody extends StatelessWidget {
           ),
           suffixIcon: hasText && onClear != null
               ? IconButton(
+                  tooltip: clearButtonTooltip,
                   icon: Icon(clearIcon, size: componentTokens.iconSize),
                   onPressed: onClear,
                 )

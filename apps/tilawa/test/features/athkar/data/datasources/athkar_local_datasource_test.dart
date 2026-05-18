@@ -66,6 +66,7 @@ void main() {
       expect(result.first, isA<AthkarCategoryModel>());
       expect(result.first.id, 1);
       expect(result.first.nameAr, 'أذكار الصباح');
+      expect(result.first.nameEn, 'Morning Athkar');
       verify(mockAssetBundle.loadString(tAssetPath));
     });
   });

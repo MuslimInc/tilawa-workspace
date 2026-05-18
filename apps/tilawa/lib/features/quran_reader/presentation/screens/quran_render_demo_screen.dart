@@ -105,6 +105,7 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
   @override
   Widget build(BuildContext context) {
     final readerTheme = QuranReaderTheme.of(context);
+    final tokens = Theme.of(context).tokens;
 
     return Scaffold(
       backgroundColor: readerTheme.pageBackground,
@@ -123,7 +124,7 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(tokens.radiusMedium),
               ),
               child: PageView.builder(
                 controller: _pageController,

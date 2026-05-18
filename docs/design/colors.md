@@ -1,34 +1,72 @@
-# Tilawa color system (design policy)
+# Tilawa colour system (design policy)
 
-This document describes **Phase C1** primitives and the intended direction for later phases. Product UI should consume colors only through allowed sources.
+Tilawa's visual identity is **calm, modern, and premium**. The palette is intentionally small: one user-selectable brand accent, a quiet neutral surface ramp, and three semantic colours. Decorative parallel palettes are *not* part of the system.
+
+> Spec reference: [`specs/012-visual-simplification/`](../../specs/012-visual-simplification/spec.md).
+
+## The four colour roles
+
+| Role | Examples (from `ColorScheme`) | Where to use it |
+| ------ | ----------------------------- | --------------- |
+| **Accent** (brand primary) | `primary`, `onPrimary`, `primaryContainer`, `onPrimaryContainer` | Switches ON, primary buttons, active nav, selected chips, progress fill, focus rings, settings tile icons, hero call-to-action backgrounds. **One per screen.** |
+| **Surface** (neutral ramp) | `surface`, `surfaceContainerLow`, `surfaceContainerHigh`, `surfaceContainerHighest` | Scaffold, cards, sheets, bottom nav, dialogs, app bars. Quiet, near-monochrome. |
+| **Foreground** | `onSurface`, `onSurfaceVariant` | Body and secondary text, icon colours, dividers when emphasised. |
+| **Semantic** | `error` / `success` / `warning` from `AppColors` (mapped to `ColorScheme.error` etc.) | Destructive actions, validation, permission warnings. Never reused as decoration. |
+
+A fifth role — **outline** (`outlineVariant`) — is the hairline that separates calm surfaces from each other. It is the *only* allowed border in product chrome.
 
 ## Allowed sources
 
-1. **`AppColors`** (`packages/ui_kit`) — Brand presets, neutral ramp, semantic bases, settings/notification accents, and **all hex values used to build** `ColorScheme` in `AppTheme`. Do not duplicate those hex values elsewhere.
-2. **`AppTheme`** — Builds `ThemeData` and `ColorScheme` from `AppColors` + user-selected primary. Defines **how** primary maps to containers (e.g. `_containerForPrimary`, `_blendSurfaceTowardPrimary`). Should not introduce raw `Color(0x…)` literals; add new primitives to `AppColors` first.
+1. **`AppColors`** (`packages/ui_kit`) — Brand presets, neutral ramp, `AppTheme` scheme bases, three semantic colours, and `notificationAccent`. **All hex values used to build** `ColorScheme` in `AppTheme` live here so there is one source of truth.
+2. **`AppTheme`** — Builds `ThemeData` and `ColorScheme` from `AppColors` plus the user-selected primary. Defines how primary maps to containers (`_containerForPrimary`, `_blendSurfaceTowardPrimary`). Must not introduce raw `Color(0x…)` literals.
 3. **`TilawaComponentTokens`** — Component-level fills and blends; formulas live in **token factories**, not in widgets.
-4. **Feature themes / palettes** — Quran reader, share/reel, media player: centralized palette files or `ThemeExtension`s (later phases).
-5. **Exceptions** — `Colors.transparent`; color-picker named-color data; tests/previews/debug; third-party packages.
+4. **Feature palettes** — Closed-scope feature themes (Quran reader, share/reel composer): centralised palette files or `ThemeExtension`s.
+5. **Exceptions** — `Colors.transparent`; the colour-picker tool data; tests / previews / debug; third-party packages.
 
-## Policy: primary vs surfaces
+## Policy: accent vs surfaces
 
-- **User-selected primary** should drive **accent / interactive** roles (selected nav, primary buttons, switches ON, active chips, progress value, focus/selection) as defined by `ColorScheme` and tokens.
-- **Stable neutral surfaces** (scaffold, fixed bottom nav chrome, cards, sheets where specified) use **fixed primitives** or tiers derived from **neutral bases** in `AppColors`, not ad-hoc widget literals.
-- **Semantic colors** (`error`, `success`, `warning`, and related) are defined in `AppColors` and must not be derived from user primary.
+- **User-selected primary** drives the **accent / interactive** role only.
+- **Stable neutral surfaces** (scaffold, fixed bottom nav chrome, cards, sheets) use **fixed primitives** or tiers derived from **neutral bases** in `AppColors`, not ad-hoc widget literals.
+- **Semantic colours** are defined in `AppColors` and must not be derived from user primary.
 
-Light and dark **Flex** scheme colors (secondary/tertiary containers, dark error tone for scheme, true-black tiers, etc.) live under the **“AppTheme”** sections in `app_colors.dart` so there is a single source of truth.
+## Gradients
 
-## Forbidden (in product widgets)
+Gradients are **not** part of the product visual system. They are reserved for:
 
-- Raw `Color(0x…)` for product chrome (except documented feature palettes after migration).
+1. **The colour-picker tool** (`features/color_picker/`) — gradient *is* the tool.
+2. **Share / reel composer output** (`features/share/presentation/widgets/page_passage_card_renderer.dart`, `share_audio_config_sheet.dart`) — generated poster artwork, not chrome.
+3. **`CustomPainter` shaders** — e.g. the Qibla compass needle.
+4. **Focused state badges in molecules** (e.g. `tilawa_count_progress_ring`) — narrow, indicator-only use.
+5. **Preview dev tools** (`atoms_preview.dart`, `organisms_preview.dart`) — non-production.
+
+Outside of these, gradients are forbidden in product UI. Cards, app bars, headers, banners, hero panels are flat.
+
+## Forbidden in product widgets
+
+- Raw `Color(0x…)` for product chrome.
+- `LinearGradient` / `RadialGradient` / `SweepGradient` in product chrome (see the allow-list above).
 - Ad-hoc `Color.lerp` / `Color.alphaBlend` in widgets for persistent backgrounds — use tokens.
 - Duplicating hex values that already exist in `AppColors` or `AppTheme` assembly.
+- Parallel "category palettes" (Settings used to have eleven distinct hues — removed).
+- "Decorative" `Positioned` circles, oversized background icons, or other ornament that does not serve content.
+
+## Elevation
+
+A card picks **one** depth cue, not all of them at once:
+
+- **Raised** — solid surface fill + hairline outline + soft drop shadow. Default for top-level cards on a scaffold.
+- **Flat** — solid surface fill + hairline outline (no shadow). For cards nested inside another elevated surface.
+- **Outline** — hairline outline only, transparent fill. Use sparingly.
+
+These map directly to `TilawaCardSurface { raised, flat, outline }` on `TilawaCard`.
 
 ## Migration phases (reference)
 
-- **C1 (done here):** Centralize `AppTheme` literals in `AppColors`; document policy.
-- **C2+:** Move widget-level blends into tokens; feature palettes; app-wide cleanup.
+- **C1**: Centralise `AppTheme` literals in `AppColors`; document policy.
+- **C2**: Move widget-level blends into tokens; feature palettes; app-wide cleanup.
+- **C3 (this change, 2026-05-15)**: Strip product-chrome gradients; collapse Settings category palette; introduce `TilawaCardSurface`.
 
 ## Related tests
 
 - `packages/ui_kit/test/theme/app_theme_color_roles_test.dart` — contrast and scheme roles.
+- `packages/ui_kit/test/goldens/` — atom and molecule goldens (494 passing after C3).

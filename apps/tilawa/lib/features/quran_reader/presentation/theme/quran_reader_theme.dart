@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Theme extension for the Quran Reader feature.
 ///
@@ -29,65 +30,65 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
 
   /// Pre-built light-mode instance.
   static const QuranReaderTheme light = QuranReaderTheme(
-    pageBackground: Color(0xFFFFF9F1),
-    textColor: Color(0xFF000000),
-    primaryColor: Color(0xFF8B6B23), // Deep Gold/Brown
-    headerBackground: Color(0xFFF4EAD2),
-    headerTextColor: Color(0xFF000000),
+    pageBackground: AppQuranReaderLegacyColors.lightPageBackground,
+    textColor: AppQuranReaderLegacyColors.lightOnSurface,
+    primaryColor: AppQuranReaderLegacyColors.lightPrimary,
+    headerBackground: AppQuranReaderLegacyColors.lightHeaderBackground,
+    headerTextColor: AppQuranReaderLegacyColors.lightOnSurface,
     headerImageFilter: null,
-    systemBarColor: Color(0xFFFFF9F1),
+    systemBarColor: AppQuranReaderLegacyColors.lightSystemBar,
     statusBarIconBrightness: Brightness.dark,
     statusBarBrightness: Brightness.light,
     sliderRangeTextStyle: TextStyle(
-      color: Color(0x99000000),
+      color: AppQuranReaderLegacyColors.lightMutedOnSurface,
       fontSize: 10,
       fontWeight: FontWeight.w800,
     ),
     pillSurahTextStyle: TextStyle(
-      color: Color(0xFF000000),
+      color: AppQuranReaderLegacyColors.lightOnSurface,
       fontSize: 13,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.2,
     ),
     pillPageTextStyle: TextStyle(
-      color: Color(0xFF8B6B23),
+      color: AppQuranReaderLegacyColors.lightPrimary,
       fontSize: 11,
       fontWeight: FontWeight.w700,
     ),
     cardPageBadgeTextStyle: TextStyle(
-      color: Color(0xFF8B6B23),
+      color: AppQuranReaderLegacyColors.lightPrimary,
       fontWeight: FontWeight.w900,
       fontSize: 12,
     ),
     cardContextSummaryTextStyle: TextStyle(
-      color: Color(0x99000000),
+      color: AppQuranReaderLegacyColors.lightMutedOnSurface,
       fontSize: 12,
       fontWeight: FontWeight.w600,
       letterSpacing: -0.1,
     ),
     indexTitleTextStyle: TextStyle(
-      color: Color(0xFF000000),
+      color: AppQuranReaderLegacyColors.lightOnSurface,
       fontSize: 20,
       fontWeight: FontWeight.w800,
       letterSpacing: -0.5,
     ),
     indexSubtitleTextStyle: TextStyle(
-      color: Color(0x99000000),
+      color: AppQuranReaderLegacyColors.lightMutedOnSurface,
       fontSize: 12,
       fontWeight: FontWeight.w500,
     ),
     surahTileNameTextStyle: TextStyle(
-      color: Color(0xFF000000),
+      color: AppQuranReaderLegacyColors.lightOnSurface,
       fontSize: 14,
       fontWeight: FontWeight.w700,
     ),
     surahTileMetaTextStyle: TextStyle(
-      color: Color(0x99000000),
+      color: AppQuranReaderLegacyColors.lightMutedOnSurface,
       fontSize: 11,
       fontWeight: FontWeight.w500,
     ),
     surahTileArabicNameTextStyle: TextStyle(
-      color: Color(0xFF8B6B23),
+      color: AppQuranReaderLegacyColors.lightPrimary,
       fontSize: 18,
       fontWeight: FontWeight.w800,
     ),
@@ -95,11 +96,11 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
 
   /// Pre-built dark-mode instance.
   static const QuranReaderTheme dark = QuranReaderTheme(
-    pageBackground: Color(0xFF0E0E0E),
-    textColor: Color(0xFFFFFFFF),
-    primaryColor: Color(0xFF9E9E9E),
-    headerBackground: Color(0xFF1A1A1A),
-    headerTextColor: Color(0xE6FFFFFF), // white with ~90% opacity
+    pageBackground: AppQuranReaderLegacyColors.darkPageBackground,
+    textColor: AppQuranReaderLegacyColors.darkOnSurface,
+    primaryColor: AppQuranReaderLegacyColors.darkPrimary,
+    headerBackground: AppQuranReaderLegacyColors.darkHeaderBackground,
+    headerTextColor: AppQuranReaderLegacyColors.darkHeaderOnSurface,
     headerImageFilter: ColorFilter.matrix([
       -0.8,
       0,
@@ -122,59 +123,59 @@ class QuranReaderTheme extends ThemeExtension<QuranReaderTheme> {
       1,
       0,
     ]),
-    systemBarColor: Color(0xFF0E0E0E),
+    systemBarColor: AppQuranReaderLegacyColors.darkSystemBar,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
     sliderRangeTextStyle: TextStyle(
-      color: Color(0xA6E0E0E0),
+      color: AppQuranReaderLegacyColors.darkMutedCaption,
       fontSize: 10,
       fontWeight: FontWeight.w800,
     ),
     pillSurahTextStyle: TextStyle(
-      color: Color(0xFFE0E0E0),
+      color: AppQuranReaderLegacyColors.darkPillSurah,
       fontSize: 13,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.2,
     ),
     pillPageTextStyle: TextStyle(
-      color: Color(0xFF9E9E9E),
+      color: AppQuranReaderLegacyColors.darkPrimary,
       fontSize: 11,
       fontWeight: FontWeight.w700,
     ),
     cardPageBadgeTextStyle: TextStyle(
-      color: Color(0xFF9E9E9E),
+      color: AppQuranReaderLegacyColors.darkPrimary,
       fontWeight: FontWeight.w900,
       fontSize: 12,
     ),
     cardContextSummaryTextStyle: TextStyle(
-      color: Color(0xA6E0E0E0),
+      color: AppQuranReaderLegacyColors.darkMutedCaption,
       fontSize: 12,
       fontWeight: FontWeight.w600,
       letterSpacing: -0.1,
     ),
     indexTitleTextStyle: TextStyle(
-      color: Color(0xE6FFFFFF),
+      color: AppQuranReaderLegacyColors.darkHeaderOnSurface,
       fontSize: 20,
       fontWeight: FontWeight.w800,
       letterSpacing: -0.5,
     ),
     indexSubtitleTextStyle: TextStyle(
-      color: Color(0xA6E0E0E0),
+      color: AppQuranReaderLegacyColors.darkMutedCaption,
       fontSize: 12,
       fontWeight: FontWeight.w500,
     ),
     surahTileNameTextStyle: TextStyle(
-      color: Color(0xFFE0E0E0),
+      color: AppQuranReaderLegacyColors.darkSurahTileName,
       fontSize: 14,
       fontWeight: FontWeight.w700,
     ),
     surahTileMetaTextStyle: TextStyle(
-      color: Color(0xA6E0E0E0),
+      color: AppQuranReaderLegacyColors.darkMutedCaption,
       fontSize: 11,
       fontWeight: FontWeight.w500,
     ),
     surahTileArabicNameTextStyle: TextStyle(
-      color: Color(0xFFD4AF37),
+      color: AppQuranReaderLegacyColors.darkArabicAccent,
       fontSize: 18,
       fontWeight: FontWeight.w700,
     ),
@@ -972,6 +973,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
     required this.tileBorderWidth,
     required this.tileNumberSize,
     required this.tileNumberRadius,
+    required this.tileNumberFontSize,
     required this.tileArabicNameSize,
     required this.tileMetaFontSize,
   });
@@ -993,6 +995,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
   final double tileBorderWidth;
   final double tileNumberSize;
   final double tileNumberRadius;
+  final double tileNumberFontSize;
   final double tileArabicNameSize;
   final double tileMetaFontSize;
 
@@ -1014,6 +1017,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
     tileBorderWidth: 0.6,
     tileNumberSize: 40.0,
     tileNumberRadius: 10.0,
+    tileNumberFontSize: 13.0,
     tileArabicNameSize: 18.0,
     tileMetaFontSize: 11.0,
   );
@@ -1041,6 +1045,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
     double? tileBorderWidth,
     double? tileNumberSize,
     double? tileNumberRadius,
+    double? tileNumberFontSize,
     double? tileArabicNameSize,
     double? tileMetaFontSize,
   }) {
@@ -1063,6 +1068,7 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
       tileBorderWidth: tileBorderWidth ?? this.tileBorderWidth,
       tileNumberSize: tileNumberSize ?? this.tileNumberSize,
       tileNumberRadius: tileNumberRadius ?? this.tileNumberRadius,
+      tileNumberFontSize: tileNumberFontSize ?? this.tileNumberFontSize,
       tileArabicNameSize: tileArabicNameSize ?? this.tileArabicNameSize,
       tileMetaFontSize: tileMetaFontSize ?? this.tileMetaFontSize,
     );
@@ -1122,6 +1128,11 @@ class SurahIndexTheme extends ThemeExtension<SurahIndexTheme> {
       tileNumberRadius: lerpDouble(
         tileNumberRadius,
         other.tileNumberRadius,
+        t,
+      )!,
+      tileNumberFontSize: lerpDouble(
+        tileNumberFontSize,
+        other.tileNumberFontSize,
         t,
       )!,
       tileArabicNameSize: lerpDouble(

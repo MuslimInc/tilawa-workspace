@@ -34,7 +34,7 @@ class QuranImageDependenciesModule {
 
     if (alreadyHasPrefs) {
       logger.d(
-        '[QuranImageDI] SharedPreferencesAsync already registered — '
+        '[QuranImagesPerformance] source=QuranImageDI SharedPreferencesAsync already registered — '
         'package will skip its own registration',
       );
     }
@@ -42,12 +42,16 @@ class QuranImageDependenciesModule {
     await quran_image_di.initDependencies();
 
     if (alreadyHasPrefs) {
-      logger.d('[QuranImageDI] SharedPreferencesAsync reuse successful');
+      logger.d(
+        '[QuranImagesPerformance] source=QuranImageDI SharedPreferencesAsync reuse successful',
+      );
     }
 
     _configureImageCache();
 
-    logger.d('[QuranImageDI] quran_image dependencies initialized');
+    logger.d(
+      '[QuranImagesPerformance] source=QuranImageDI quran_image dependencies initialized',
+    );
   }
 
   /// Configures the Flutter image cache for the Quran image reader.
@@ -65,7 +69,7 @@ class QuranImageDependenciesModule {
     imageCache.maximumSize = 300;
 
     logger.d(
-      '[QuranImageDI] image cache configured: '
+      '[QuranImagesPerformance] source=QuranImageDI image cache configured: '
       'maxBytes=${imageCache.maximumSizeBytes ~/ bytesPerMb}MB '
       'maxEntries=${imageCache.maximumSize}',
     );

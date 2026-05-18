@@ -41,15 +41,31 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: PrimaryColorPreset.defaultPreset.value,
-          density: TilawaDensity.comfortable,
           useGoogleFontsOverride: false,
         ),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         home: BlocProvider<PrayerTimesBloc>.value(
           value: bloc,
-          child: const Scaffold(
-            body: MonthlyPrayerTimesView(latitude: 30, longitude: 31),
+          child: Scaffold(
+            body: NestedScrollView(
+              headerSliverBuilder:
+                  (BuildContext context, bool innerBoxIsScrolled) {
+                    return [
+                      SliverOverlapAbsorber(
+                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                          context,
+                        ),
+                        sliver: const SliverAppBar(
+                          pinned: true,
+                          automaticallyImplyLeading: false,
+                          toolbarHeight: 0,
+                        ),
+                      ),
+                    ];
+                  },
+              body: const MonthlyPrayerTimesView(latitude: 30, longitude: 31),
+            ),
           ),
         ),
       ),

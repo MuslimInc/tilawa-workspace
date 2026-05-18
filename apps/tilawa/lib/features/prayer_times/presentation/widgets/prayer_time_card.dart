@@ -32,10 +32,10 @@ class PrayerTimeCard extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Thresholds for compact mode to avoid overflows on small screens
-        final bool compact =
-            constraints.maxWidth < tokens.cardCompactWidthThreshold ||
-            constraints.maxHeight < tokens.cardCompactHeightThreshold;
+        // When the card is narrow or short, use tighter typography and icon size.
+        final bool narrowTile =
+            constraints.maxWidth < tokens.narrowCardWidthThreshold ||
+            constraints.maxHeight < tokens.narrowCardHeightThreshold;
         final bool tightHeight =
             constraints.maxHeight < tokens.cardTightHeightThreshold;
 
@@ -44,17 +44,21 @@ class PrayerTimeCard extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerLow,
+            color: isNext
+                ? colorScheme.primaryContainer.withValues(
+                    alpha: tokens.opacityMedium,
+                  )
+                : colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
             border: Border.all(
               color: isNext
-                  ? accentColor.withValues(alpha: tokens.opacityMedium)
+                  ? colorScheme.primary.withValues(
+                      alpha: tokens.opacitySubtle * 1.5,
+                    )
                   : colorScheme.outlineVariant.withValues(
                       alpha: tokens.opacityMedium,
                     ),
-              width: isNext
-                  ? tokens.borderWidthThin * 3
-                  : tokens.borderWidthThin * 2,
+              width: tokens.borderWidthThin * 2,
             ),
           ),
           child: Padding(
@@ -64,7 +68,7 @@ class PrayerTimeCard extends StatelessWidget {
             ),
             child: _MainColumn(
               constraints: constraints,
-              compact: compact,
+              narrowTile: narrowTile,
               tightHeight: tightHeight,
               prayer: prayer,
               isNext: isNext,
@@ -83,7 +87,7 @@ class PrayerTimeCard extends StatelessWidget {
 class _MainColumn extends StatelessWidget {
   const _MainColumn({
     required this.constraints,
-    required this.compact,
+    required this.narrowTile,
     required this.tightHeight,
     required this.prayer,
     required this.isNext,
@@ -94,7 +98,7 @@ class _MainColumn extends StatelessWidget {
   });
 
   final BoxConstraints constraints;
-  final bool compact;
+  final bool narrowTile;
   final bool tightHeight;
   final PrayerTimeItem prayer;
   final bool isNext;
@@ -114,13 +118,13 @@ class _MainColumn extends StatelessWidget {
           prayer: prayer,
           isNext: isNext,
           hasPassed: hasPassed,
-          compact: compact,
+          narrowTile: narrowTile,
           tightHeight: tightHeight,
         ),
         _PrayerTimeLabel(
           prayer: prayer,
           hasPassed: hasPassed,
-          compact: compact,
+          narrowTile: narrowTile,
           emphasisColor: emphasisColor,
         ),
         _PrayerTimeValue(
@@ -140,14 +144,14 @@ class _HeaderRow extends StatelessWidget {
     required this.prayer,
     required this.isNext,
     required this.hasPassed,
-    required this.compact,
+    required this.narrowTile,
     required this.tightHeight,
   });
 
   final PrayerTimeItem prayer;
   final bool isNext;
   final bool hasPassed;
-  final bool compact;
+  final bool narrowTile;
   final bool tightHeight;
 
   @override
@@ -161,7 +165,7 @@ class _HeaderRow extends StatelessWidget {
       children: [
         TilawaIconBox(
           icon: prayer.type.icon,
-          size: compact ? 16 : 24,
+          size: narrowTile ? 16 : 24,
           padding: tightHeight ? tokens.spaceExtraSmall : tokens.spaceSmall,
           backgroundColor: colorScheme.surfaceContainerHighest.withValues(
             alpha: tokens.opacityMedium,
@@ -194,24 +198,24 @@ class _PrayerTimeLabel extends StatelessWidget {
   const _PrayerTimeLabel({
     required this.prayer,
     required this.hasPassed,
-    required this.compact,
+    required this.narrowTile,
     required this.emphasisColor,
   });
 
   final PrayerTimeItem prayer;
   final bool hasPassed;
-  final bool compact;
+  final bool narrowTile;
   final Color emphasisColor;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final double baseFontSize = theme.textTheme.titleMedium?.fontSize ?? 18;
-    final double fontSize = compact ? baseFontSize - 1 : baseFontSize;
+    final double fontSize = narrowTile ? baseFontSize - 1 : baseFontSize;
 
     return Text(
       prayer.type.localizedName(context),
-      maxLines: compact ? 1 : 2,
+      maxLines: narrowTile ? 1 : 2,
       overflow: TextOverflow.ellipsis,
       style: theme.textTheme.titleLarge?.copyWith(
         fontSize: fontSize,

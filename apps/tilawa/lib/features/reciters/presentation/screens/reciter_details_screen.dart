@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,7 +81,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     HapticFeedback.lightImpact();
     _scrollController.animateTo(
       0,
-      duration: const Duration(milliseconds: 400),
+      duration: context.tokens.durationMedium,
       curve: Curves.easeOut,
     );
   }
@@ -90,9 +92,20 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         bloc.state.selectedMoshaf ??
         (widget.reciter.moshaf.isNotEmpty ? widget.reciter.moshaf.first : null);
     if (moshaf == null) return;
+
+    final completer = Completer<void>();
+    late final StreamSubscription<ReciterDetailsState> subscription;
+    subscription = bloc.stream.listen((state) {
+      if (state.status == ReciterDetailsStatus.loaded ||
+          state.status == ReciterDetailsStatus.error) {
+        subscription.cancel();
+        completer.complete();
+      }
+    });
+
     bloc.add(LoadSurahList(reciter: widget.reciter, moshaf: moshaf));
     bloc.add(LoadReciterHistory(widget.reciter.id.toString()));
-    await Future<void>.delayed(const Duration(milliseconds: 800));
+    await completer.future;
   }
 
   void _scrollToPlayingSurah(List<SurahEntity> surahs) {
@@ -148,7 +161,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   void _ensureVisibleForKey(GlobalKey key) {
     Scrollable.ensureVisible(
       key.currentContext!,
-      duration: const Duration(milliseconds: 300),
+      duration: context.tokens.durationFast,
       curve: Curves.easeOut,
       alignment: 0.0,
     );
@@ -170,12 +183,12 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           // Scroll-to-top FAB
           floatingActionButton: AnimatedSlide(
             offset: _showScrollToTop ? Offset.zero : const Offset(0, 2),
-            duration: const Duration(milliseconds: 250),
+            duration: tokens.durationFast,
             child: IgnorePointer(
               ignoring: !_showScrollToTop,
               child: AnimatedOpacity(
                 opacity: _showScrollToTop ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 250),
+                duration: tokens.durationFast,
                 child: FloatingActionButton.small(
                   onPressed: _scrollToTop,
                   backgroundColor: theme.colorScheme.primary,
@@ -354,7 +367,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
 }
 
 /// Row containing "Surahs (count)" on the left and the Download All
-/// button on the right. Keeps everything compact in one line.
+/// button on the right. Keeps the row to a single line.
 class _SurahHeaderRow extends StatelessWidget {
   const _SurahHeaderRow({
     required this.count,
@@ -444,7 +457,10 @@ class _ReciterDetailsContent extends StatelessWidget {
                   style: theme.textTheme.bodyLarge,
                 ),
                 SizedBox(height: tokens.spaceLarge),
-                ElevatedButton.icon(
+                TilawaButton(
+                  text: context.l10n.retry,
+                  variant: TilawaButtonVariant.primary,
+                  leadingIcon: const Icon(Icons.refresh_rounded),
                   onPressed: () {
                     if (reciter.moshaf.isNotEmpty) {
                       context.read<ReciterDetailsBloc>().add(
@@ -455,17 +471,6 @@ class _ReciterDetailsContent extends StatelessWidget {
                       );
                     }
                   },
-                  icon: const Icon(Icons.refresh_rounded),
-                  label: Text(context.l10n.retry),
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceExtraLarge,
-                      vertical: tokens.spaceMedium,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                    ),
-                  ),
                 ),
               ],
             ),
@@ -531,10 +536,10 @@ class _ReciterDetailsContent extends StatelessWidget {
             ),
             sliver: SliverGrid(
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: tokens.cardCompactWidthThreshold,
+                maxCrossAxisExtent: tokens.narrowCardWidthThreshold,
                 mainAxisSpacing: tokens.spaceMedium,
                 crossAxisSpacing: tokens.spaceMedium,
-                mainAxisExtent: tokens.cardCompactHeightThreshold,
+                mainAxisExtent: tokens.narrowCardHeightThreshold,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final SurahEntity surah = filteredSurahs[index];

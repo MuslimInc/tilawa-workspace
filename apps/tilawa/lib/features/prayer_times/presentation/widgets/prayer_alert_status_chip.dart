@@ -3,22 +3,49 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../models/prayer_row_view_data.dart';
 
-/// Compact Prayer Times alert state chip.
+/// Dense Prayer Times alert state chip.
 class PrayerAlertStatusChip extends StatelessWidget {
   const PrayerAlertStatusChip({
     super.key,
     required this.alert,
     this.showLabel = true,
+    this.dense = false,
+    this.quiet = false,
+    this.onTap,
   });
 
   final PrayerAlertViewData alert;
   final bool showLabel;
+
+  /// Tighter padding for dense list rows (e.g. Prayer Times today list).
+  final bool dense;
+
+  /// Icon-only hint (no pill). Use on dense lists to reduce visual noise.
+  final bool quiet;
+
+  /// Optional tap handler. Forwarded to the underlying TilawaStatusChip so the
+  /// ink splash conforms to the painted pill exactly.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final colors = _alertColors(colorScheme, alert.state);
     final tokens = Theme.of(context).tokens;
+
+    if (quiet) {
+      final double iconSize = dense
+          ? tokens.iconSizeSmall
+          : tokens.iconSizeMedium;
+      return Semantics(
+        label: alert.label,
+        child: Icon(
+          _alertIcon(alert.state),
+          size: iconSize,
+          color: colors.$2,
+        ),
+      );
+    }
 
     return Semantics(
       label: alert.label,
@@ -28,9 +55,10 @@ class PrayerAlertStatusChip extends StatelessWidget {
         backgroundColor: colors.$1,
         foregroundColor: colors.$2,
         showLabel: showLabel,
+        onTap: onTap,
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceSmall,
-          vertical: tokens.spaceSmall,
+          vertical: dense ? tokens.spaceExtraSmall : tokens.spaceSmall,
         ),
       ),
     );

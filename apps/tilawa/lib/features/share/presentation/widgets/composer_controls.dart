@@ -122,37 +122,34 @@ class ComposerControls extends StatelessWidget {
             ),
           ],
           SizedBox(height: tokens.spaceMedium),
-          FilledButton.icon(
-            onPressed: (!isBusy && rangeIsValid) ? onPrimaryAction : null,
-            icon: isGeneratingVideo
-                ? SizedBox(
-                    width: tokens.iconSizeMedium,
-                    height: tokens.iconSizeMedium,
-                    child: TilawaLoadingIndicator(
-                      centered: false,
-                      strokeWidth: 2,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                  )
-                : Icon(
+          TilawaButton(
+            text: isGeneratingVideo
+                ? context.l10n.preparingReelStatus
+                : isError
+                ? context.l10n.retry
+                : context.l10n.generateReel,
+            variant: TilawaButtonVariant.primary,
+            isLoading: isGeneratingVideo,
+            leadingIcon: !isGeneratingVideo
+                ? Icon(
                     isError
                         ? Icons.refresh_rounded
                         : Icons.movie_creation_rounded,
-                  ),
-            label: Text(
-              isGeneratingVideo
-                  ? context.l10n.preparingReelStatus
-                  : isError
-                  ? context.l10n.retry
-                  : context.l10n.generateReel,
-            ),
+                  )
+                : null,
+            onPressed: (!isBusy && rangeIsValid && !isGeneratingVideo)
+                ? onPrimaryAction
+                : null,
+            isFullWidth: true,
           ),
           if (isGeneratingVideo) ...[
             SizedBox(height: tokens.spaceSmall),
-            OutlinedButton.icon(
+            TilawaButton(
+              text: context.l10n.cancel,
+              variant: TilawaButtonVariant.outline,
+              leadingIcon: const Icon(Icons.close_rounded),
               onPressed: onCancel,
-              icon: const Icon(Icons.close_rounded),
-              label: Text(context.l10n.cancel),
+              isFullWidth: true,
             ),
           ],
         ],

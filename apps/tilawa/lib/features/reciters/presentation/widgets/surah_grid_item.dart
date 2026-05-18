@@ -68,6 +68,9 @@ class SurahGridItem extends StatelessWidget {
           }
         },
         child: Container(
+          // TILAWA_BRAND.md §5: list-item cards are flat fill + hairline. No
+          // box shadow. Active state earns differentiation via tier change
+          // (primaryContainer fill) and a thicker hairline border.
           decoration: BoxDecoration(
             color: isCurrentItem
                 ? colorScheme.primaryContainer.withValues(alpha: 0.42)
@@ -83,26 +86,6 @@ class SurahGridItem extends StatelessWidget {
                   ? tokens.borderWidthThin * 3
                   : tokens.borderWidthThin * 2,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: isCurrentItem
-                    ? colorScheme.primary.withValues(
-                        alpha: tokens.opacitySubtle,
-                      )
-                    : colorScheme.shadow.withValues(
-                        alpha: tokens.opacitySubtle / 2,
-                      ),
-                blurRadius: tokens.blurGlass,
-                offset: tokens.shadowOffsetMedium,
-              ),
-              BoxShadow(
-                color: colorScheme.shadow.withValues(
-                  alpha: tokens.opacitySubtle / 4,
-                ),
-                blurRadius: tokens.spaceExtraSmall,
-                offset: tokens.shadowOffsetSmall,
-              ),
-            ],
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {

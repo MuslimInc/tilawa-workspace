@@ -157,34 +157,33 @@ class _StatusContent extends StatelessWidget {
             if (isAdhanPlaying)
               SizedBox(
                 width: double.infinity,
-                child: FilledButton.icon(
+                child: TilawaButton(
+                  text: l10n.stopAdhan,
+                  variant: TilawaButtonVariant.danger,
+                  leadingIcon: const Icon(Icons.stop),
                   onPressed: () =>
                       context.read<PrayerStatusCubit>().stopAdhan(),
-                  icon: const Icon(Icons.stop),
-                  label: Text(l10n.stopAdhan),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: context.colorScheme.error,
-                    foregroundColor: context.colorScheme.onError,
-                    padding: EdgeInsets.symmetric(vertical: tokens.spaceLarge),
-                  ),
+                  isFullWidth: true,
                 ),
               ),
             SizedBox(height: tokens.spaceLarge),
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
+              child: TilawaButton(
+                text: l10n.viewAllPrayerTimes,
+                variant: TilawaButtonVariant.outline,
+                leadingIcon: const Icon(Icons.calendar_today),
                 onPressed: () => const PrayerTimesRoute().go(context),
-                icon: const Icon(Icons.calendar_today),
-                label: Text(l10n.viewAllPrayerTimes),
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: tokens.spaceLarge),
-                ),
+                isFullWidth: true,
               ),
             ),
             SizedBox(height: tokens.spaceLarge),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.close),
+            Center(
+              child: TilawaButton(
+                text: l10n.close,
+                variant: TilawaButtonVariant.ghost,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
             ),
           ],
         ),
@@ -260,9 +259,10 @@ class _ErrorView extends StatelessWidget {
         title: context.l10n.error,
         subtitle: failure.localizedMessage(context),
         icon: Icons.error_outline,
-        action: OutlinedButton(
+        action: TilawaButton(
+          text: context.l10n.close,
+          variant: TilawaButtonVariant.outline,
           onPressed: () => Navigator.of(context).pop(),
-          child: Text(context.l10n.close),
         ),
       ),
     );

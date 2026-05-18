@@ -15,7 +15,7 @@ The kit follows Atomic Design:
 - **Molecules**: composed controls made from atoms and Material primitives, such as chips, search fields, selection tiles, segmented controls, and media seek bars.
 - **Organisms**: larger UI sections or surfaces that coordinate multiple pieces, such as adaptive navigation, media player bars, and immersive composer scaffolds.
 - **Templates**: page-level layout patterns. No public `templates` folder or template barrel exists today; some current organisms are template-like and are noted in the backlog.
-- **Tokens**: theme extensions and constants that define spacing, radii, sizes, colors, durations, shadows, component sizing, density, and responsive layout decisions.
+- **Tokens**: theme extensions and constants that define spacing, radii, sizes, colors, durations, shadows, component sizing, and responsive layout decisions.
 
 ### Theme And Token Relationship
 
@@ -449,7 +449,7 @@ Current exported inventory:
 
 - **Level**: Organism, template-like
 - **Path**: `packages/ui_kit/lib/src/organisms/tilawa_adaptive_shell.dart`
-- **Purpose**: Responsive app shell that switches between compact bottom navigation and medium/expanded side navigation rail while hosting content and bottom player.
+- **Purpose**: Responsive app shell that switches between **phone** bottom navigation (narrow window class) and medium/expanded side navigation rail while hosting content and bottom player.
 - **Main API**: `destinations`, `selectedIndex`, `onDestinationSelected`, `child`, `bottomPlayer`, optional bottom bar padding/decoration, `avoidDisplayFeatures`; helper `TilawaNavDestination`.
 - **Typical usage**: Main app shell.
 - **Tokens/theme**: Uses `componentTokens.adaptiveShell`, `TilawaDesignTokens`, breakpoints, content bounds, display feature insets, safe-area extensions.
@@ -534,14 +534,14 @@ Until a templates layer exists, do not create one-off page scaffolds in UI Kit u
 - **Path**: `packages/ui_kit/lib/src/foundation/app_theme.dart`
 - **Purpose**: Central light/dark theme factory.
 - **Key APIs**: `AppTheme.getLightTheme(...)`, `AppTheme.getDarkTheme(...)`, `AppTheme.useGoogleFonts`.
-- **Responsibilities**: Build FlexColorScheme themes, refine surfaces, configure typography, support density, install `TilawaDesignTokens` and `TilawaComponentTokens`.
+- **Responsibilities**: Build FlexColorScheme themes, refine surfaces, configure typography, install `TilawaDesignTokens` and `TilawaComponentTokens`.
 - **Usage rule**: App theme changes must be reviewed as system-wide changes and validated in light/dark modes.
 
 ### `TilawaDesignTokens`
 
 - **Path**: `packages/ui_kit/lib/src/foundation/design_tokens.dart`
 - **Purpose**: Global theme extension for reusable design values.
-- **Includes**: Spacing, radii, opacity, blur, shadow offsets, border width, progress height, icon sizes, text height, durations, content max widths, player thresholds, density support, `copyWith`, `lerp`, and `ThemeData.tokens` extension.
+- **Includes**: Spacing, radii, opacity, blur, shadow offsets, border width, progress height, icon sizes, text height, durations, content max widths, player thresholds, `copyWith`, `lerp`, and `ThemeData.tokens` extension.
 - **Usage rule**: Use these tokens for cross-component spacing/sizing before adding component-specific values.
 
 ### `TilawaComponentTokens`
@@ -629,7 +629,7 @@ Foundation layout and extension utilities:
 - Add widget tests for behavior, states, callbacks, assertions, and accessibility where meaningful.
 - Add golden coverage for stable visual components.
 - Avoid golden coverage for highly animated or overlay-heavy components unless stabilized.
-- Add preview scenarios for default, dark, RTL where relevant, compact density where supported, and representative states.
+- Add preview scenarios for default, dark, RTL where relevant, and representative states.
 - Keep generated golden failure artifacts out of commits.
 
 ### Naming

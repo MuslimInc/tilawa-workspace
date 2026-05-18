@@ -173,17 +173,8 @@ class _TasbeehOptionCard extends StatelessWidget {
     return TilawaCard(
       onTap: onTap,
       borderRadius: tokens.radiusExtraLarge,
-      borderColor: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-      gradient: LinearGradient(
-        begin: AlignmentDirectional.topStart,
-        end: AlignmentDirectional.bottomEnd,
-        colors: [
-          colorScheme.surfaceContainerLow.withValues(
-            alpha: tokens.opacityGlass,
-          ),
-          colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-        ],
-      ),
+      surface: TilawaCardSurface.raised,
+      backgroundColor: colorScheme.surface,
       child: Row(
         children: [
           TilawaIconBox(
@@ -248,21 +239,8 @@ class _TasbeehCreateView extends StatelessWidget {
               constraints: BoxConstraints(minHeight: constraints.maxHeight),
               child: TilawaCard(
                 borderRadius: tokens.radiusExtraLarge,
-                borderColor: theme.colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
-                gradient: LinearGradient(
-                  begin: AlignmentDirectional.topStart,
-                  end: AlignmentDirectional.bottomEnd,
-                  colors: [
-                    theme.colorScheme.surfaceContainerLow.withValues(
-                      alpha: tokens.opacityGlass,
-                    ),
-                    theme.colorScheme.surface.withValues(
-                      alpha: tokens.opacityGlass,
-                    ),
-                  ],
-                ),
+                surface: TilawaCardSurface.raised,
+                backgroundColor: theme.colorScheme.surface,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
@@ -391,6 +369,8 @@ class _TasbeehHistoryView extends StatelessWidget {
                               SizedBox(width: tokens.spaceSmall),
                               TilawaIconActionButton(
                                 icon: Icons.delete_outline_rounded,
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainerHigh,
                                 onTap: () async {
                                   final shouldDelete = await showDialog<bool>(
                                     context: context,
@@ -460,21 +440,8 @@ class _TasbeehCountingView extends StatelessWidget {
                   trigger: state.vibrationEventCount,
                   child: TilawaCard(
                     borderRadius: tokens.radiusExtraLarge,
-                    borderColor: colorScheme.primary.withValues(
-                      alpha: tokens.opacitySubtle,
-                    ),
-                    gradient: LinearGradient(
-                      begin: AlignmentDirectional.topStart,
-                      end: AlignmentDirectional.bottomEnd,
-                      colors: [
-                        colorScheme.surfaceContainerLow.withValues(
-                          alpha: tokens.opacityGlass,
-                        ),
-                        colorScheme.surface.withValues(
-                          alpha: tokens.opacityGlass,
-                        ),
-                      ],
-                    ),
+                    surface: TilawaCardSurface.raised,
+                    backgroundColor: colorScheme.surface,
                     child: Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -663,9 +630,11 @@ class _TasbeehCountingActions extends StatelessWidget {
           ),
           SizedBox(height: tokens.spaceSmall),
         ],
-        OutlinedButton(
+        TilawaButton(
+          text: context.l10n.reset,
+          variant: TilawaButtonVariant.outline,
+          isFullWidth: true,
           onPressed: state.selectedDhikr == null ? null : cubit.resetSelected,
-          child: Text(context.l10n.reset),
         ),
       ],
     );
@@ -683,13 +652,15 @@ class _TasbeehDeleteConfirmationDialog extends StatelessWidget {
       title: Text(context.l10n.delete),
       content: Text(context.l10n.tasbeehDeleteConfirmationMessage(tasbeehText)),
       actions: [
-        TextButton(
+        TilawaButton(
+          text: context.l10n.cancel,
+          variant: TilawaButtonVariant.ghost,
           onPressed: () => Navigator.of(context).pop(false),
-          child: Text(context.l10n.cancel),
         ),
-        FilledButton(
+        TilawaButton(
+          text: context.l10n.delete,
+          variant: TilawaButtonVariant.danger,
           onPressed: () => Navigator.of(context).pop(true),
-          child: Text(context.l10n.delete),
         ),
       ],
     );
@@ -707,6 +678,8 @@ class _ShakeOnTrigger extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       key: ValueKey<int>(trigger),
       tween: Tween<double>(begin: 0, end: trigger == 0 ? 0 : 1),
+      // Bespoke shake-feedback timing: chrome tokens would dampen the visible
+      // tasbeeh-count snap. Hand-tuned with the haptic pulse.
       duration: const Duration(milliseconds: 420),
       builder: (context, value, animatedChild) {
         final offsetX = math.sin(value * math.pi * 6) * 10 * (1 - value);

@@ -57,12 +57,48 @@ class TilawaChip extends StatelessWidget {
     final effectiveBorderColor =
         borderColor ?? componentTokens.defaultBorderColor;
 
+    // Tappable chips honor the Tilawa 44 dp interactive minimum. At that size
+    // the dense 8 dp corner radius reads as a square button, so the corner
+    // rule shifts: pill rounding (radius = height / 2). Icon-only tappable
+    // chips become 44 dp circles for free since width == height. Static
+    // (label) chips keep their dense rounding.
+    final double resolvedRadius = onTap != null
+        ? kTilawaMinInteractiveDimension / 2
+        : effectiveRadius;
+
     final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(effectiveRadius),
+      borderRadius: BorderRadius.circular(resolvedRadius),
       side: BorderSide(
         color: effectiveBorderColor,
         width: componentTokens.borderWidth,
       ),
+    );
+
+    // The visible chip body — sized to its content via Row(mainAxisSize: min).
+    final Widget chipRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: componentTokens.contentGap,
+      children: [
+        if (icon != null)
+          Icon(
+            icon,
+            size: iconSize ?? componentTokens.iconSize,
+            color: effectiveForeground,
+          ),
+        if (showLabel || icon == null)
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style:
+                  textStyle ??
+                  theme.textTheme.labelLarge?.copyWith(
+                    color: effectiveForeground,
+                  ),
+            ),
+          ),
+      ],
     );
 
     final Widget content = Container(
@@ -82,31 +118,7 @@ class TilawaChip extends StatelessWidget {
               ]
             : null,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: componentTokens.contentGap,
-        children: [
-          if (icon != null)
-            Icon(
-              icon,
-              size: iconSize ?? componentTokens.iconSize,
-              color: effectiveForeground,
-            ),
-          if (showLabel || icon == null)
-            Flexible(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style:
-                    textStyle ??
-                    theme.textTheme.labelLarge?.copyWith(
-                      color: effectiveForeground,
-                    ),
-              ),
-            ),
-        ],
-      ),
+      child: chipRow,
     );
 
     if (onTap == null) {
@@ -115,18 +127,45 @@ class TilawaChip extends StatelessWidget {
           : content;
     }
 
-    // fix: Accessibility — explicit button role and label (no MergeSemantics: avoids engine merge bugs)
+    // fix: Accessibility — tappable chips paint at their intrinsic content
+    // size (so dense layouts stay dense) while reserving a 44 dp tap-area
+    // around the painted pill. The outer Center collapses unbounded parents
+    // to the chip's intrinsic size; the Container's alignment lets the
+    // painted Material keep that intrinsic size while the box itself extends
+    // to at least 44 dp for the hit target. Static (label) chips bypass this
+    // branch entirely.
+    // Explicit button role / label avoids MergeSemantics (engine merge bugs).
+    // Background is painted by the Container inside [content]; Material here
+    // only provides the ink-splash canvas (transparent fill avoids double
+    // paint).
+    final Widget paintedChip = Material(
+      color: Colors.transparent,
+      shape: shape,
+      child: InkWell(
+        onTap: onTap,
+        customBorder: shape,
+        child: content,
+      ),
+    );
+
+    // Collapse only the height axis so the chip never grows taller than its
+    // content (preventing the "fill grid cell" regression in unbounded
+    // parents). Let the chip stretch horizontally when the parent provides
+    // bounded width — that matches selection-pill and segmented-control
+    // grammars. The 44 dp minimum keeps the hit-target accessible.
     return Semantics(
       button: true,
       label: label,
       selected: semanticsSelected,
-      child: Material(
-        color: Colors.transparent,
-        shape: shape,
-        child: InkWell(
-          onTap: onTap,
-          customBorder: shape,
-          child: content,
+      child: Align(
+        alignment: Alignment.center,
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: kTilawaMinInteractiveDimension,
+            minHeight: kTilawaMinInteractiveDimension,
+          ),
+          child: paintedChip,
         ),
       ),
     );

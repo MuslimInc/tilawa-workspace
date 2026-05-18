@@ -58,25 +58,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
       clipBehavior: Clip.antiAlias,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: [
-              colorScheme.surfaceContainerLow.withValues(
-                alpha: tokens.opacityGlass,
-              ),
-              colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-            ],
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.shadow.withValues(
-                alpha: tokens.opacityShadow * 0.3,
-              ),
-              blurRadius: tokens.blurShadow,
-              offset: tokens.shadowOffsetSmall,
-            ),
-          ],
+          color: colorScheme.surface,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -370,21 +352,20 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
           )!.deleteAllDownloadsConfirmation(widget.reciterName),
         ),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: context.l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
           ),
-          TextButton(
+          TilawaButton(
+            text: context.l10n.deleteAll,
+            variant: TilawaButtonVariant.danger,
             onPressed: () {
               Navigator.of(context).pop();
               context.read<DownloadsBloc>().add(
                 DeleteReciterDownloads(reciterName: widget.reciterName),
               );
             },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(context.l10n.deleteAll),
           ),
         ],
       ),

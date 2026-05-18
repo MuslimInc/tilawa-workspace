@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 import 'breakpoints.dart';
 
 abstract final class _ResponsiveTypeScale {
-  // Compact (phones, < 600 dp): tiny size nudges plus explicit height
+  // Narrow window class (phones, < 600 dp): tiny size nudges plus explicit
+  // height
   // and letterSpacing to add presence without inflating the scale. These
   // close most of the perceived gap between "looks great on emulator"
   // (which usually crosses into medium/expanded) and a real ~412 dp phone.
-  static const double compactTitleLarge = 23;
-  static const double compactBodyLarge = 16.5;
-  static const double compactHeadlineHeight = 1.25;
-  static const double compactBodyHeight = 1.4;
-  static const double compactDisplayLetterSpacing = -0.2;
+  static const double narrowTitleLarge = 23;
+  static const double narrowBodyLarge = 16.5;
+  static const double narrowHeadlineHeight = 1.25;
+  static const double narrowBodyHeight = 1.4;
+  static const double narrowDisplayLetterSpacing = -0.2;
 
   static const double mediumDisplayLarge = 60;
   static const double mediumDisplayMedium = 48;
@@ -105,44 +106,44 @@ extension TilawaResponsiveTypography on BuildContext {
       );
     }
 
-    // Compact (phones): close the asymmetry where only larger windows got
+    // Narrow (phones): close the asymmetry where only larger windows got
     // typography love. Sub-pt size nudges plus explicit height/letterSpacing
     // give headlines presence and body text breathing room on ~412 dp screens.
     return base.copyWith(
       displayLarge: base.displayLarge?.copyWith(
-        height: _ResponsiveTypeScale.compactHeadlineHeight,
-        letterSpacing: _ResponsiveTypeScale.compactDisplayLetterSpacing,
+        height: _ResponsiveTypeScale.narrowHeadlineHeight,
+        letterSpacing: _ResponsiveTypeScale.narrowDisplayLetterSpacing,
       ),
       displayMedium: base.displayMedium?.copyWith(
-        height: _ResponsiveTypeScale.compactHeadlineHeight,
-        letterSpacing: _ResponsiveTypeScale.compactDisplayLetterSpacing,
+        height: _ResponsiveTypeScale.narrowHeadlineHeight,
+        letterSpacing: _ResponsiveTypeScale.narrowDisplayLetterSpacing,
       ),
       displaySmall: base.displaySmall?.copyWith(
-        height: _ResponsiveTypeScale.compactHeadlineHeight,
-        letterSpacing: _ResponsiveTypeScale.compactDisplayLetterSpacing,
+        height: _ResponsiveTypeScale.narrowHeadlineHeight,
+        letterSpacing: _ResponsiveTypeScale.narrowDisplayLetterSpacing,
       ),
       headlineLarge: base.headlineLarge?.copyWith(
-        height: _ResponsiveTypeScale.compactHeadlineHeight,
+        height: _ResponsiveTypeScale.narrowHeadlineHeight,
       ),
       headlineMedium: base.headlineMedium?.copyWith(
-        height: _ResponsiveTypeScale.compactHeadlineHeight,
+        height: _ResponsiveTypeScale.narrowHeadlineHeight,
       ),
       headlineSmall: base.headlineSmall?.copyWith(
-        height: _ResponsiveTypeScale.compactHeadlineHeight,
+        height: _ResponsiveTypeScale.narrowHeadlineHeight,
       ),
       titleLarge: base.titleLarge?.copyWith(
-        fontSize: _ResponsiveTypeScale.compactTitleLarge,
-        height: _ResponsiveTypeScale.compactHeadlineHeight,
+        fontSize: _ResponsiveTypeScale.narrowTitleLarge,
+        height: _ResponsiveTypeScale.narrowHeadlineHeight,
       ),
       bodyLarge: base.bodyLarge?.copyWith(
-        fontSize: _ResponsiveTypeScale.compactBodyLarge,
-        height: _ResponsiveTypeScale.compactBodyHeight,
+        fontSize: _ResponsiveTypeScale.narrowBodyLarge,
+        height: _ResponsiveTypeScale.narrowBodyHeight,
       ),
       bodyMedium: base.bodyMedium?.copyWith(
-        height: _ResponsiveTypeScale.compactBodyHeight,
+        height: _ResponsiveTypeScale.narrowBodyHeight,
       ),
       bodySmall: base.bodySmall?.copyWith(
-        height: _ResponsiveTypeScale.compactBodyHeight,
+        height: _ResponsiveTypeScale.narrowBodyHeight,
       ),
     );
   }

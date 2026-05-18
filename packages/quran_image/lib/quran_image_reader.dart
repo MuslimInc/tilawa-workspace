@@ -82,6 +82,14 @@ class _QuranImageReaderState extends State<QuranImageReader>
       LinkedHashMap<String, ui.Image>();
   static const int _maxSnapshotEntries = 1;
   static const int _maxSnapshotAttempts = 8;
+  static const Duration _orientationPrewarmPause = Duration(milliseconds: 500);
+  static const Duration _postLongJumpSettledDelay = Duration(milliseconds: 450);
+  static const Duration _postJumpPhase1Delay = Duration(milliseconds: 350);
+  bool _isOrientationTransitionActive = false;
+  Timer? _orientationTransitionTimer;
+  Timer? _postLongJumpSettledTimer;
+  Timer? _postJumpPhase1Timer;
+  int _pendingLongJumpTargetIndex = -1;
 
   // Tracks whether the app is in the foreground. Set to false on
   // AppLifecycleState.paused/hidden so that memory pressure events arriving
@@ -209,6 +217,15 @@ class _QuranImageReaderState extends State<QuranImageReader>
     // landscape frame. Pre-rasterize the current page off-screen so Impeller
     // can upload textures at the new size before the visible frame is due.
     if (orientationChanged) {
+      _isOrientationTransitionActive = true;
+      _orientationTransitionTimer?.cancel();
+      _orientationTransitionTimer = Timer(_orientationPrewarmPause, () {
+        _isOrientationTransitionActive = false;
+        PerfLogger.log(
+          widgetName: 'QuranImageReader',
+          message: 'orientation transition ended',
+        );
+      });
       _scheduleOrientationPrewarm();
     }
   }
@@ -273,6 +290,9 @@ class _QuranImageReaderState extends State<QuranImageReader>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _backgroundMarkerWarmUpTimer?.cancel();
+    _orientationTransitionTimer?.cancel();
+    _postLongJumpSettledTimer?.cancel();
+    _postJumpPhase1Timer?.cancel();
     _previewPageStateNotifier.dispose();
     _hiddenWarmupPagesNotifier.dispose();
     _jumpTransitionSnapshotNotifier.dispose();
@@ -404,6 +424,9 @@ class _QuranImageReaderState extends State<QuranImageReader>
   /// only when the rounded page changes — avoiding a prewarmCurrentTarget call
   /// on every sub-pixel scroll event (which fires 60–120 times per second).
   void _onScrollPositionChanged() {
+    if (_isOrientationTransitionActive) {
+      return;
+    }
     final page = _pageController.page;
     if (page == null) return;
     // Round to nearest page index (0-based) then convert to 1-based page number.
@@ -492,10 +515,15 @@ class _QuranImageReaderState extends State<QuranImageReader>
   }
 
   void _navigateToPage(int pageNumber) {
+    PerfLogger.log(
+      widgetName: 'QuranImageReader',
+      message: 'navigate requested targetPage=$pageNumber',
+    );
     unawaited(_navigateToPageAsync(pageNumber));
   }
 
   Future<void> _navigateToPageAsync(int pageNumber) async {
+    final navTimer = Stopwatch()..start();
     final requestGeneration = ++_navigationRequestGeneration;
     _jumpTransitionSnapshotNotifier.value = null;
     final safePageNumber = pageNumber
@@ -504,10 +532,22 @@ class _QuranImageReaderState extends State<QuranImageReader>
     final targetIndex = safePageNumber - 1;
     if (targetIndex == _lastSettledPageIndex) {
       _clearPreviewPage();
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message:
+            'navigate skipped already-settled page=$safePageNumber '
+            'elapsedMs=${navTimer.elapsedMilliseconds}',
+      );
       return;
     }
 
     if (!_pageController.hasClients) {
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message:
+            'navigate aborted reason=no-clients targetPage=$safePageNumber '
+            'elapsedMs=${navTimer.elapsedMilliseconds}',
+      );
       return;
     }
 
@@ -558,6 +598,13 @@ class _QuranImageReaderState extends State<QuranImageReader>
     if (!mounted ||
         requestGeneration != _navigationRequestGeneration ||
         !_pageController.hasClients) {
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message:
+            'navigate aborted reason=stale-request '
+            'targetPage=$safePageNumber '
+            'elapsedMs=${navTimer.elapsedMilliseconds}',
+      );
       return;
     }
 
@@ -626,6 +673,13 @@ class _QuranImageReaderState extends State<QuranImageReader>
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+    PerfLogger.log(
+      widgetName: 'QuranImageReader',
+      message:
+          'navigate animated completed '
+          'targetPage=$safePageNumber '
+          'totalNavigateMs=${navTimer.elapsedMilliseconds}',
+    );
   }
 
   void _onReaderPageChanged(int pageNumber) {
@@ -634,10 +688,58 @@ class _QuranImageReaderState extends State<QuranImageReader>
     _clearPreviewPage();
     PerfLogger.log(widgetName: 'PageView', message: 'swiped page=$pageNumber');
     context.read<NavigationBloc>().add(PageChanged(pageNumber));
-    _imagePrewarmer.prewarmSettledWindow(
-      pageNumber: pageNumber,
-      cacheWidth: _cacheWidth,
-    );
+    final isSettledAfterLongJump = pageIndex == _pendingLongJumpTargetIndex;
+    if (isSettledAfterLongJump) {
+      _pendingLongJumpTargetIndex = -1;
+      _postJumpPhase1Timer?.cancel();
+      _postLongJumpSettledTimer?.cancel();
+      _postLongJumpSettledTimer = Timer(_postLongJumpSettledDelay, () {
+        if (!mounted || _isOrientationTransitionActive) return;
+        if (_lastSettledPageIndex != pageIndex) return;
+        _imagePrewarmer.prewarmSettledWindow(
+          pageNumber: pageNumber,
+          cacheWidth: _cacheWidth,
+          radius: 0,
+        );
+        PerfLogger.log(
+          widgetName: 'QuranImageReader',
+          message:
+              'post-jump settled prewarm phase-1 (reduced-radius) '
+              'page=$pageNumber '
+              'delayMs=${_postLongJumpSettledDelay.inMilliseconds}',
+        );
+        _postJumpPhase1Timer = Timer(_postJumpPhase1Delay, () {
+          if (!mounted || _isOrientationTransitionActive) return;
+          if (_lastSettledPageIndex != pageIndex) return;
+          _imagePrewarmer.prewarmSettledWindow(
+            pageNumber: pageNumber,
+            cacheWidth: _cacheWidth,
+            radius: 1,
+          );
+          PerfLogger.log(
+            widgetName: 'QuranImageReader',
+            message:
+                'post-jump settled prewarm phase-2 (full-radius) '
+                'page=$pageNumber '
+                'delayMs=${_postJumpPhase1Delay.inMilliseconds}',
+          );
+        });
+      });
+      PerfLogger.log(
+        widgetName: 'QuranImageReader',
+        message:
+            'post-jump settled prewarm delayed '
+            'page=$pageNumber '
+            'delayMs=${_postLongJumpSettledDelay.inMilliseconds}',
+      );
+      return;
+    }
+    if (!_isOrientationTransitionActive) {
+      _imagePrewarmer.prewarmSettledWindow(
+        pageNumber: pageNumber,
+        cacheWidth: _cacheWidth,
+      );
+    }
   }
 
   void _navigateToPreviousPage() {
@@ -646,6 +748,12 @@ class _QuranImageReaderState extends State<QuranImageReader>
         currentState.pageState.currentPage <= 1) {
       return;
     }
+    PerfLogger.log(
+      widgetName: 'QuranImageReader',
+      message:
+          'navigate previous from=${currentState.pageState.currentPage} '
+          'to=${currentState.pageState.currentPage - 1}',
+    );
     _clearPreviewPage();
     _navigateToPage(currentState.pageState.currentPage - 1);
   }
@@ -657,6 +765,12 @@ class _QuranImageReaderState extends State<QuranImageReader>
             currentState.pageState.totalPages) {
       return;
     }
+    PerfLogger.log(
+      widgetName: 'QuranImageReader',
+      message:
+          'navigate next from=${currentState.pageState.currentPage} '
+          'to=${currentState.pageState.currentPage + 1}',
+    );
     _clearPreviewPage();
     _navigateToPage(currentState.pageState.currentPage + 1);
   }

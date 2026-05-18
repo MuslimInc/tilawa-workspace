@@ -1,8 +1,8 @@
 import 'package:quran_image/core/perf_logger.dart';
 
-/// Thin facade over [PerfLogger] kept for call-site compatibility.
+/// Thin facade over [AppLaunch] kept for call-site compatibility.
 ///
-/// Prefer calling [PerfLogger] directly in new code.
+/// Prefer calling [AppLaunch] directly in new code.
 class PerformanceMonitor {
   static final PerformanceMonitor instance = PerformanceMonitor._();
   PerformanceMonitor._();

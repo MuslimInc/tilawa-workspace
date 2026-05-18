@@ -104,7 +104,7 @@ class AudioClipService {
     CancelToken? cancelToken,
   }) async {
     logger.d(
-      '[AppLaunch][AudioClipService.generateAudioClip]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AudioClipService.generateAudioClip: Start in (${DateTime.now()})',
     );
     if (localSurahPath != null && File(localSurahPath).existsSync()) {
       return _generateFromLocalFile(

@@ -15,7 +15,11 @@ abstract class QuranImagePrewarmer {
     required int cacheWidth,
   });
 
-  void prewarmSettledWindow({required int pageNumber, required int cacheWidth});
+  void prewarmSettledWindow({
+    required int pageNumber,
+    required int cacheWidth,
+    int radius = 1,
+  });
 
   void handleMemoryPressure();
 

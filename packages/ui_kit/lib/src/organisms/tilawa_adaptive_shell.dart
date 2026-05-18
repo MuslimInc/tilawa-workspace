@@ -11,10 +11,10 @@ import '../foundation/safe_area_ext.dart';
 
 /// [ValueListenable] that is always `true` and never notifies.
 ///
-/// Used as the default for [TilawaAdaptiveShell.compactBottomNavigationBarVisible]
+/// Used as the default for [TilawaAdaptiveShell.phoneBottomNavigationBarVisible]
 /// so the shell does not need a long-lived [ValueNotifier].
-class _AlwaysShowCompactBottomNavListenable implements ValueListenable<bool> {
-  const _AlwaysShowCompactBottomNavListenable();
+class _AlwaysShowPhoneBottomNavListenable implements ValueListenable<bool> {
+  const _AlwaysShowPhoneBottomNavListenable();
 
   @override
   bool get value => true;
@@ -26,7 +26,7 @@ class _AlwaysShowCompactBottomNavListenable implements ValueListenable<bool> {
   void removeListener(VoidCallback listener) {}
 }
 
-const _kAlwaysShowCompactBottomNav = _AlwaysShowCompactBottomNavListenable();
+const _kAlwaysShowPhoneBottomNav = _AlwaysShowPhoneBottomNavListenable();
 
 /// Builds the icon widget for a nav destination. Receives selection state and
 /// the resolved tint the shell would apply to a material [Icon]; callers may
@@ -64,11 +64,11 @@ class TilawaNavDestination {
 
 /// A shell that adapts its navigation based on the window size.
 ///
-/// - Compact: [BottomNavigationBar] is laid out in a [Column] under an
+/// - Phone (narrow): [BottomNavigationBar] is laid out in a [Column] under an
 ///   [Expanded] body region (not [Scaffold.bottomNavigationBar]) so nested
-///   tab [Scaffold]s receive bounded constraints. Optional
-///   [compactBottomNavigationBarVisible] can hide the bar (e.g. full-screen
-///   player). [Scaffold.extendBody] is false.
+///   tab [Scaffold]s receive bounded constraints. Destination **labels are always
+///   shown** (icons + text). Optional [phoneBottomNavigationBarVisible] can hide
+///   the bar (e.g. full-screen player). [Scaffold.extendBody] is false.
 /// - Medium/Expanded: Shows a side navigation rail.
 ///
 /// This shell also respects [DisplayFeature]s (hinges/folds) on foldable
@@ -81,7 +81,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
     required this.onDestinationSelected,
     required this.child,
     required this.bottomPlayer,
-    this.compactBottomNavigationBarVisible,
+    this.phoneBottomNavigationBarVisible,
     this.bottomBarPadding,
     this.bottomBarDecoration,
     this.avoidDisplayFeatures = true,
@@ -96,14 +96,15 @@ class TilawaAdaptiveShell extends StatelessWidget {
   /// the navigation bar/rail boundaries.
   final Widget bottomPlayer;
 
-  /// When non-null, compact mode shows the bottom bar only while this value is
+  /// When non-null, narrow (phone) window class shows the bottom bar only
+  /// while this value is
   /// true (e.g. hide while a full-screen sheet covers the tab bar).
-  final ValueListenable<bool>? compactBottomNavigationBarVisible;
+  final ValueListenable<bool>? phoneBottomNavigationBarVisible;
 
-  /// Optional padding for the bottom bar in compact mode.
+  /// Optional padding for the bottom bar on phone layouts.
   final EdgeInsetsGeometry? bottomBarPadding;
 
-  /// Optional decoration for the bottom bar in compact mode.
+  /// Optional decoration for the bottom bar on phone layouts.
   final Decoration? bottomBarDecoration;
 
   /// Whether to avoid placing content under display features (hinges/folds).
@@ -116,31 +117,47 @@ class TilawaAdaptiveShell extends StatelessWidget {
     final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
     final bool isKeyboardOpen = context.isKeyboardVisible;
 
-    if (windowSize == TilawaWindowSize.compact) {
-      final ValueListenable<bool> compactNavListenable =
-          compactBottomNavigationBarVisible ?? _kAlwaysShowCompactBottomNav;
+    if (windowSize == TilawaWindowSize.narrow) {
+      final ValueListenable<bool> phoneNavListenable =
+          phoneBottomNavigationBarVisible ?? _kAlwaysShowPhoneBottomNav;
+
+      final Color shellChromeColor = Theme.of(
+        context,
+      ).componentTokens.adaptiveShell.bottomNavBackgroundColor;
 
       return ValueListenableBuilder<bool>(
-        valueListenable: compactNavListenable,
+        valueListenable: phoneNavListenable,
         builder: (context, bottomNavVisible, _) {
+          // Do NOT wrap the whole [Scaffold] in [MediaQuery.removeViewPadding]
+          // (removeBottom: true): [BottomNavigationBar] reads
+          // [MediaQuery.viewPaddingOf] bottom and adds that as insets to the
+          // icon+label row (see Material bottom_navigation_bar.dart ~1107).
+          // Stripping view padding here made labels sit flush on newer
+          // Android gesture nav. Only the scrolling body should ignore the
+          // bottom inset so content can extend behind the bar.
           return Scaffold(
+            backgroundColor: shellChromeColor,
             extendBody: false,
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Positioned.fill(
-                        child: MediaQuery.removePadding(
-                          context: context,
-                          removeBottom: true,
-                          child: child,
+                  child: MediaQuery.removeViewPadding(
+                    context: context,
+                    removeBottom: true,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Positioned.fill(
+                          child: MediaQuery.removePadding(
+                            context: context,
+                            removeBottom: true,
+                            child: child,
+                          ),
                         ),
-                      ),
-                      Positioned.fill(child: bottomPlayer),
-                    ],
+                        Positioned.fill(child: bottomPlayer),
+                      ],
+                    ),
                   ),
                 ),
                 if (isKeyboardOpen || !bottomNavVisible)
@@ -270,6 +287,15 @@ class _BottomNavBar extends StatelessWidget {
       );
     }
 
+    inactiveGlyph = Padding(
+      padding: EdgeInsets.only(bottom: tokens.navButtonGap),
+      child: inactiveGlyph,
+    );
+    activeGlyph = Padding(
+      padding: EdgeInsets.only(bottom: tokens.navButtonGap),
+      child: activeGlyph,
+    );
+
     return BottomNavigationBarItem(
       icon: inactiveGlyph,
       activeIcon: tabIsSelected ? activeGlyph : inactiveGlyph,
@@ -281,20 +307,7 @@ class _BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
-    // Horizontal placement uses [bottomNavHorizontalMargin] (0 =
-    // edge-to-edge). Bottom inset is hardware safe area only (no
-    // [floatingBottomPadding] buffer).
-    final double bottomOuterPadding = context.systemBottomSafeArea;
-    final double estimatedInnerWidth =
-        MediaQuery.sizeOf(context).width -
-        2 * tokens.bottomNavHorizontalMargin -
-        2 * tokens.bottomNavBorderWidth;
-    final bool iconOnlyBar =
-        estimatedInnerWidth <
-        TilawaBreakpoints.compactBottomNavAllLabelsMinInnerWidth;
-    final double topInset = iconOnlyBar
-        ? tokens.bottomNavIconOnlyVerticalMargin
-        : tokens.bottomNavVerticalMargin;
+    final Color navColor = tokens.bottomNavBackgroundColor;
 
     final BorderRadius shellRadius = BorderRadius.vertical(
       top: Radius.circular(tokens.bottomNavRadius),
@@ -325,97 +338,122 @@ class _BottomNavBar extends StatelessWidget {
       context,
     ).scale(1.0).clamp(0.01, 1.0);
 
-    return TilawaContentBounds(
-      kind: TilawaContentKind.media,
-      alignment: .bottomCenter,
-      child: Padding(
-        padding:
-            padding ??
-            EdgeInsets.fromLTRB(
-              tokens.bottomNavHorizontalMargin,
-              topInset,
-              tokens.bottomNavHorizontalMargin,
-              bottomOuterPadding,
-            ),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: shellRadius,
-            boxShadow: tokens.bottomNavShadowOpacity > 0
-                ? [
-                    BoxShadow(
-                      color: theme.colorScheme.shadow.withValues(
-                        alpha: tokens.bottomNavShadowOpacity,
+    final SystemUiOverlayStyle bottomNavOverlayStyle = SystemUiOverlayStyle(
+      systemNavigationBarColor: navColor.withValues(alpha: 1),
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness:
+          ThemeData.estimateBrightnessForColor(navColor) == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: bottomNavOverlayStyle,
+      child: ColoredBox(
+        color: navColor,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TilawaContentBounds(
+              kind: TilawaContentKind.media,
+              alignment: .bottomCenter,
+              child: Padding(
+                padding:
+                    padding ??
+                    EdgeInsets.fromLTRB(
+                      tokens.bottomNavHorizontalMargin,
+                      0,
+                      tokens.bottomNavHorizontalMargin,
+                      0,
+                    ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: shellRadius,
+                    boxShadow: tokens.bottomNavShadowOpacity > 0
+                        ? [
+                            BoxShadow(
+                              color: theme.colorScheme.shadow.withValues(
+                                alpha: tokens.bottomNavShadowOpacity,
+                              ),
+                              blurRadius: tokens.bottomNavShadowBlur,
+                              offset: tokens.bottomNavShadowOffset,
+                            ),
+                          ]
+                        : const [],
+                  ),
+                  child: Material(
+                    color: tokens.bottomNavBackgroundColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: shellRadius,
+                      side: BorderSide(
+                        color: tokens.bottomNavOutlineColor,
+                        width: tokens.bottomNavBorderWidth,
                       ),
-                      blurRadius: tokens.bottomNavShadowBlur,
-                      offset: tokens.bottomNavShadowOffset,
                     ),
-                  ]
-                : const [],
-          ),
-          child: Material(
-            color: tokens.bottomNavBackgroundColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: shellRadius,
-              side: BorderSide(
-                color: tokens.bottomNavOutlineColor,
-                width: tokens.bottomNavBorderWidth,
-              ),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: DecoratedBox(
-              decoration: decoration ?? const BoxDecoration(),
-              child: MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  textScaler: TextScaler.linear(bottomBarTextScale),
-                ),
-                child: Theme(
-                  data: theme.copyWith(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                  ),
-                  child: BottomNavigationBar(
-                    type: BottomNavigationBarType.fixed,
-                    currentIndex: barIndex,
-                    onTap: (int index) {
-                      HapticFeedback.selectionClick();
-                      onDestinationSelected(index);
-                    },
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    showSelectedLabels: !iconOnlyBar,
-                    showUnselectedLabels: !iconOnlyBar,
-                    selectedItemColor: hasSelection
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.onSurfaceVariant,
-                    unselectedItemColor: theme.colorScheme.onSurfaceVariant,
-                    selectedLabelStyle: selectedLabelStyle,
-                    unselectedLabelStyle: unselectedLabelStyle,
-                    selectedIconTheme: IconThemeData(
-                      size: tokens.navButtonIconSize,
-                      color: hasSelection
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.onSurfaceVariant,
-                    ),
-                    unselectedIconTheme: IconThemeData(
-                      size: tokens.navButtonIconSize,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    items: [
-                      for (int i = 0; i < count; i++)
-                        _barItem(
-                          context,
-                          destinations[i],
-                          tokens,
-                          theme,
-                          tabIsSelected: hasSelection && selectedIndex == i,
+                    clipBehavior: Clip.antiAlias,
+                    child: DecoratedBox(
+                      decoration: decoration ?? const BoxDecoration(),
+                      child: MediaQuery(
+                        data: MediaQuery.of(context).copyWith(
+                          textScaler: TextScaler.linear(bottomBarTextScale),
                         ),
-                    ],
+                        child: Theme(
+                          data: theme.copyWith(
+                            splashColor: Colors.transparent,
+                            highlightColor: Colors.transparent,
+                            hoverColor: Colors.transparent,
+                          ),
+                          child: BottomNavigationBar(
+                            type: BottomNavigationBarType.fixed,
+                            currentIndex: barIndex,
+                            onTap: (int index) {
+                              HapticFeedback.selectionClick();
+                              onDestinationSelected(index);
+                            },
+                            showSelectedLabels: true,
+                            showUnselectedLabels: true,
+                            backgroundColor: Colors.transparent,
+                            elevation: 0,
+                            selectedItemColor: hasSelection
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurfaceVariant,
+                            unselectedItemColor:
+                                theme.colorScheme.onSurfaceVariant,
+                            selectedLabelStyle: selectedLabelStyle,
+                            unselectedLabelStyle: unselectedLabelStyle,
+                            selectedIconTheme: IconThemeData(
+                              size: tokens.navButtonIconSize,
+                              color: hasSelection
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurfaceVariant,
+                            ),
+                            unselectedIconTheme: IconThemeData(
+                              size: tokens.navButtonIconSize,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            items: [
+                              for (int i = 0; i < count; i++)
+                                _barItem(
+                                  context,
+                                  destinations[i],
+                                  tokens,
+                                  theme,
+                                  tabIsSelected:
+                                      hasSelection && selectedIndex == i,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

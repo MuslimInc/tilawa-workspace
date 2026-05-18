@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 /// A boolean icon toggle: shows [activeIcon] over `primaryContainer` when on,
 /// [icon] over `surfaceContainerHigh` when off.
@@ -43,6 +44,7 @@ class TilawaIconToggle extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.iconToggle;
+    final designTokens = theme.tokens;
 
     final double effectiveRadius = borderRadius ?? tokens.borderRadius;
     final Color background = value
@@ -57,10 +59,10 @@ class TilawaIconToggle extends StatelessWidget {
       toggled: value,
       label: semanticLabel,
       child: ConstrainedBox(
-        // fix: Accessibility — enforce ≥48×48dp hit target
-        constraints: const BoxConstraints(
-          minWidth: kMinInteractiveDimension,
-          minHeight: kMinInteractiveDimension,
+        // fix: Accessibility — enforce Tilawa hit target (44 dp).
+        constraints: BoxConstraints(
+          minWidth: designTokens.minInteractiveDimension,
+          minHeight: designTokens.minInteractiveDimension,
         ),
         child: Material(
           color: background,

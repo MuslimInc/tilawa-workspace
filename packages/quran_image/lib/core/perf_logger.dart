@@ -448,7 +448,12 @@ abstract final class PerfLogger {
   static void _log(String message) => print(message);
 
   static void _logForWidget(String widgetName, String message) {
-    _log('[AppLaunch][$widgetName]: $message at (${DateTime.now()})');
+    _log(
+      '[QuranImagesPerformance] '
+      'source=$widgetName '
+      '$message '
+      'at (${DateTime.now()})',
+    );
   }
 }
 
@@ -484,7 +489,7 @@ class PerfTracked extends StatelessWidget {
 // On-device overlay
 // ─────────────────────────────────────────────────────────────────────────────
 
-/// Wraps the widget tree and shows a heads-up banner whenever [PerfLogger]
+/// Wraps the widget tree and shows a heads-up banner whenever [QuranImagesPerformance]
 /// detects a slow frame.
 ///
 /// Place **once** in [MaterialApp.builder] to cover the entire app:

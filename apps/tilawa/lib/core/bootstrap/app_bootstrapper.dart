@@ -17,7 +17,7 @@ class AppBootstrapper {
     DiConfigurator? diConfigurator,
   }) async {
     logger.d(
-      '[AppLaunch][AppBootstrapper.bootstrap]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppBootstrapper.bootstrap: Start in (${DateTime.now()})',
     );
     final AppRunner run = runner ?? runApp;
     final DiConfigurator configureDI = diConfigurator ?? configureDependencies;

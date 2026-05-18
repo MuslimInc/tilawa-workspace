@@ -73,9 +73,10 @@ class BackgroundSourceDialog extends StatelessWidget {
         ),
       ),
       actions: [
-        TextButton(
+        TilawaButton(
+          text: context.l10n.close,
+          variant: TilawaButtonVariant.ghost,
           onPressed: () => Navigator.pop(context),
-          child: Text(context.l10n.close),
         ),
       ],
     );

@@ -24,6 +24,7 @@ void main() {
               child: SizedBox(
                 width: 360,
                 child: TilawaMediaPlayerBar(
+                  layoutWidth: 360,
                   title: 'Surah Al-Fatiha',
                   subtitle: 'Abdul Basit',
                   progress: 0.4,
@@ -41,6 +42,7 @@ void main() {
               child: SizedBox(
                 width: 360,
                 child: TilawaMediaPlayerBar(
+                  layoutWidth: 360,
                   title: 'Surah Al-Fatiha',
                   subtitle: 'Abdul Basit',
                   progress: 0.0,
@@ -58,6 +60,7 @@ void main() {
               child: SizedBox(
                 width: 360,
                 child: TilawaMediaPlayerBar(
+                  layoutWidth: 360,
                   title: 'Surah Al-Fatiha',
                   subtitle: 'Abdul Basit',
                   progress: 0.6,
@@ -65,6 +68,25 @@ void main() {
                   canGoPrevious: true,
                   canGoNext: true,
                   isSleepTimerActive: true,
+                ),
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Narrow compact metadata',
+            child: const TilawaPreviewWrapper(
+              child: SizedBox(
+                width: 360,
+                child: TilawaMediaPlayerBar(
+                  layoutWidth: 360,
+                  title: 'Surah Al-Fatiha',
+                  subtitle: 'Mohammad Kamal',
+                  progress: 0.35,
+                  isPlaying: true,
+                  canGoPrevious: true,
+                  canGoNext: true,
+                  isSleepTimerActive: false,
+                  isSleepTimerEnabled: true,
                 ),
               ),
             ),
@@ -145,79 +167,6 @@ void main() {
     );
 
     goldenTest(
-      'TilawaSettingsGroup compact',
-      fileName: 'organisms/tilawa_settings_group_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 340,
-                child: TilawaSettingsGroup(
-                  title: 'Preferences',
-                  children: [
-                    TilawaSettingsTile(
-                      icon: Icons.language,
-                      title: 'Language',
-                      onTap: () {},
-                    ),
-                    TilawaSettingsSwitchTile(
-                      icon: Icons.dark_mode_outlined,
-                      title: 'Dark mode',
-                      value: false,
-                      onChanged: (_) {},
-                    ),
-                    TilawaSettingsTile(
-                      icon: Icons.notifications_outlined,
-                      title: 'Notifications',
-                      onTap: () {},
-                      showDivider: false,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: TilawaPreviewWrapper(
-              isDark: true,
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 340,
-                child: TilawaSettingsGroup(
-                  title: 'Preferences',
-                  children: [
-                    TilawaSettingsTile(
-                      icon: Icons.language,
-                      title: 'Language',
-                      onTap: () {},
-                    ),
-                    TilawaSettingsSwitchTile(
-                      icon: Icons.dark_mode_outlined,
-                      title: 'Dark mode',
-                      value: false,
-                      onChanged: (_) {},
-                    ),
-                    TilawaSettingsTile(
-                      icon: Icons.notifications_outlined,
-                      title: 'Notifications',
-                      onTap: () {},
-                      showDivider: false,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
       'TilawaShareFooterBar',
       fileName: 'organisms/tilawa_share_footer_bar',
       builder: () => GoldenTestGroup(
@@ -238,43 +187,6 @@ void main() {
           GoldenTestScenario(
             name: 'Dark',
             child: TilawaPreviewWrapper(
-              isDark: true,
-              child: SizedBox(
-                width: 360,
-                child: TilawaShareFooterBar(
-                  primaryLabel: 'Surah Al-Fatiha',
-                  secondaryLabel: 'Abdul Basit',
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    goldenTest(
-      'TilawaShareFooterBar compact',
-      fileName: 'organisms/tilawa_share_footer_bar_compact',
-      builder: () => GoldenTestGroup(
-        scenarioConstraints: kUiKitGoldenScenarioConstraints,
-        children: [
-          GoldenTestScenario(
-            name: 'Default (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
-              child: SizedBox(
-                width: 360,
-                child: TilawaShareFooterBar(
-                  primaryLabel: 'Surah Al-Fatiha',
-                  secondaryLabel: 'Abdul Basit',
-                ),
-              ),
-            ),
-          ),
-          GoldenTestScenario(
-            name: 'Dark (compact)',
-            child: TilawaPreviewWrapper(
-              density: TilawaDensity.compact,
               isDark: true,
               child: SizedBox(
                 width: 360,

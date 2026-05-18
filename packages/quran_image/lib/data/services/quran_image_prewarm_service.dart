@@ -15,10 +15,6 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   }) : _imageCacheRepository = imageCacheRepository,
        _decodedImageCache = decodedImageCache;
 
-  static const int _prewarmRadius = 1;
-  // 5 images per batch keeps decode-completion callback bursts small enough
-  // that the main isolate can respond to vsync signals between completions.
-  // 8 was causing 45-image bursts that stalled vsync for 60-140ms.
   static const int _prewarmImagesPerBatch = 5;
   static const int _prewarmBatchBudgetMs = 2;
   // 32ms (2 frames at 60Hz) between batches gives the event loop time to
@@ -28,6 +24,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   static const Duration _settledWindowPrewarmDelay = Duration(
     milliseconds: 220,
   );
+  static const Duration _rapidPagingThreshold = Duration(milliseconds: 450);
   static const Duration _initialWindowPrewarmDelay = Duration(
     milliseconds: 1500,
   );
@@ -55,6 +52,8 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   int _lastPreviewImmediateCacheWidth = -1;
   int _pendingPreviewImmediatePage = -1;
   int _pendingPreviewImmediateCacheWidth = -1;
+  int _lastSettledWindowCenter = -1;
+  DateTime? _lastSettledWindowAt;
 
   @override
   void startInitialPrewarm({
@@ -168,6 +167,11 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     final pending = _pageWarmFutures.remove(pageKey);
     if (pending != null) {
       _pageWarmFutures[pageKey] = pending;
+      PerfLogger.log(
+        widgetName: 'QuranImagePrewarmService',
+        message:
+            'ensure ready await pending page=$safeTarget cacheWidth=$cacheWidth',
+      );
       await pending;
       if (profileSw != null && requestGeneration == _generation) {
         PerfLogger.logQuranPerf(
@@ -306,12 +310,42 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   void prewarmSettledWindow({
     required int pageNumber,
     required int cacheWidth,
+    int radius = 1,
   }) {
+    final now = DateTime.now();
+    final previousCenter = _lastSettledWindowCenter;
+    final previousAt = _lastSettledWindowAt;
+    _lastSettledWindowCenter = pageNumber;
+    _lastSettledWindowAt = now;
+
+    final bool isRapidAdjacentPaging =
+        previousCenter != -1 &&
+        (pageNumber - previousCenter).abs() <= 1 &&
+        previousAt != null &&
+        now.difference(previousAt) < _rapidPagingThreshold;
+
+    // During rapid swipes, a radius=1 settled-window prewarm (45 images)
+    // can queue continuously and compete with interactive frames. The
+    // current-target path is already warming the destination page, so we skip
+    // the heavier settled burst until paging cadence slows down.
+    if (isRapidAdjacentPaging) {
+      PerfLogger.log(
+        widgetName: 'QuranImagePrewarmService',
+        message:
+            'settled-window skipped '
+            'reason=rapid-paging '
+            'page=$pageNumber '
+            'cacheWidth=$cacheWidth',
+      );
+      return;
+    }
+
     _scheduleWindowPrewarm(
       pageNumber,
       cacheWidth: cacheWidth,
       reason: 'settled-window',
       delay: _settledWindowPrewarmDelay,
+      radius: radius,
     );
   }
 
@@ -335,6 +369,8 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     _pendingPreviewImmediateCacheWidth = -1;
     _pageWarmFutures.clear();
     _readyPageKeys.clear();
+    _lastSettledWindowCenter = -1;
+    _lastSettledWindowAt = null;
   }
 
   @override
@@ -376,13 +412,14 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     required int cacheWidth,
     required String reason,
     required Duration delay,
+    int radius = 1,
   }) {
     _windowPrewarmTimer?.cancel();
     _windowPrewarmTimer = Timer(delay, () {
       _prewarmAround(
         centerPageNumber,
         cacheWidth: cacheWidth,
-        radius: _prewarmRadius,
+        radius: radius,
         reason: reason,
       );
     });
@@ -457,6 +494,12 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
   void _scheduleDrain() {
     if (_prewarmDrainScheduled || _prewarmQueue.isEmpty) return;
     _prewarmDrainScheduled = true;
+    PerfLogger.log(
+      widgetName: 'QuranImagePrewarmService',
+      message:
+          'drain scheduled queueDepth=${_prewarmQueue.length} '
+          'delayMs=${_prewarmBatchDelay.inMilliseconds}',
+    );
     // Use _prewarmBatchDelay (32ms) for the initial drain too, not Duration.zero.
     // Duration.zero fires on the next event-loop tick (before the next vsync),
     // causing the first batch's resolve() calls to compete with the current frame
@@ -469,6 +512,7 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
     _prewarmDrainScheduled = false;
     if (_prewarmQueue.isEmpty) return;
 
+    final queueDepthBefore = _prewarmQueue.length;
     final sw = Stopwatch()..start();
     var scheduled = 0;
 
@@ -489,6 +533,17 @@ class QuranImagePrewarmService implements QuranImagePrewarmer {
       _prewarmDrainScheduled = true;
       _prewarmDrainTimer = Timer(_prewarmBatchDelay, _drainBatch);
     }
+
+    PerfLogger.log(
+      widgetName: 'QuranImagePrewarmService',
+      message:
+          'drain batch '
+          'scheduled=$scheduled '
+          'queueBefore=$queueDepthBefore '
+          'queueAfter=${_prewarmQueue.length} '
+          'elapsedMs=${sw.elapsedMilliseconds} '
+          'rescheduled=${_prewarmQueue.isNotEmpty}',
+    );
   }
 
   void _rememberReadyPageKey(String key) {

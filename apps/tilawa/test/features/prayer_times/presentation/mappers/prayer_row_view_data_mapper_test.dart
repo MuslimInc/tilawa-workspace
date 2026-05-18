@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
+import 'package:tilawa/features/prayer_times/domain/prayer_times_clock.dart';
 import 'package:tilawa/features/prayer_times/presentation/mappers/prayer_row_view_data_mapper.dart';
 import 'package:tilawa/features/prayer_times/presentation/models/prayer_row_view_data.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -128,17 +129,124 @@ void main() {
       expect(fajr.alert.state, PrayerAlertViewState.off);
       expect(fajr.alert.label, l10n.prayerAlertModeOff);
       expect(fajr.statusText, l10n.prayerTimesPassed);
+      expect(dhuhr.statusText, '');
       expect(dhuhr.notificationEnabled, isTrue);
       expect(dhuhr.adhanEnabled, isFalse);
       expect(dhuhr.alert.state, PrayerAlertViewState.notification);
       expect(dhuhr.alert.label, l10n.prayerAlertModeNotifyOnly);
-      expect(dhuhr.statusText, l10n.prayerTimesUpcoming);
       expect(asr.notificationEnabled, isTrue);
       expect(asr.adhanEnabled, isTrue);
       expect(asr.alert.state, PrayerAlertViewState.adhan);
       expect(asr.alert.label, l10n.prayerAlertModeAdhan);
-      expect(asr.statusText, l10n.prayerTimesUpcoming);
+      expect(asr.statusText, '');
     });
+
+    testWidgets(
+      'omits the hero next-prayer row when it is the same instant',
+      (tester) async {
+        late AppLocalizations l10n;
+        addTearDown(PrayerTimesClock.clearTestingOverride);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Builder(
+              builder: (context) {
+                l10n = AppLocalizations.of(context)!;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        PrayerTimesClock.overrideForTesting(() => DateTime(2030, 6, 15, 10));
+        final prayerTimes = PrayerTimeEntity(
+          date: DateTime(2030, 6, 15),
+          fajr: DateTime(2030, 6, 15, 4),
+          sunrise: DateTime(2030, 6, 15, 5),
+          dhuhr: DateTime(2030, 6, 15, 12, 30),
+          asr: DateTime(2030, 6, 15, 16),
+          maghrib: DateTime(2030, 6, 15, 18, 30),
+          isha: DateTime(2030, 6, 15, 20),
+          midnight: DateTime(2030, 6, 15, 23),
+          lastThird: DateTime(2030, 6, 16, 1),
+        );
+        const settings = PrayerSettingsEntity(showSunrise: true);
+        final heroNext = prayerTimes.getCurrentOrNextPrayer()!;
+
+        final withOmit = PrayerRowViewDataMapper.map(
+          prayerTimes: prayerTimes,
+          settings: settings,
+          currentPrayer: heroNext,
+          l10n: l10n,
+          isArabic: false,
+          omitFromListWhenSameInstantAs: heroNext,
+        );
+        final withoutOmit = PrayerRowViewDataMapper.map(
+          prayerTimes: prayerTimes,
+          settings: settings,
+          currentPrayer: heroNext,
+          l10n: l10n,
+          isArabic: false,
+        );
+
+        expect(heroNext.type, PrayerType.dhuhr);
+        expect(withOmit.any((row) => row.type == PrayerType.dhuhr), isFalse);
+        expect(withoutOmit.any((row) => row.type == PrayerType.dhuhr), isTrue);
+      },
+    );
+
+    testWidgets(
+      'keeps today Fajr in list when hero counts down to tomorrow Fajr',
+      (tester) async {
+        late AppLocalizations l10n;
+        addTearDown(PrayerTimesClock.clearTestingOverride);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Builder(
+              builder: (context) {
+                l10n = AppLocalizations.of(context)!;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+
+        PrayerTimesClock.overrideForTesting(() => DateTime(2030, 6, 15, 21));
+        final prayerTimes = PrayerTimeEntity(
+          date: DateTime(2030, 6, 15),
+          fajr: DateTime(2030, 6, 15, 4),
+          sunrise: DateTime(2030, 6, 15, 5),
+          dhuhr: DateTime(2030, 6, 15, 12, 30),
+          asr: DateTime(2030, 6, 15, 16),
+          maghrib: DateTime(2030, 6, 15, 18, 30),
+          isha: DateTime(2030, 6, 15, 20),
+          midnight: DateTime(2030, 6, 15, 23),
+          lastThird: DateTime(2030, 6, 16, 1),
+        );
+        const settings = PrayerSettingsEntity(showSunrise: false);
+        final heroNext = prayerTimes.getCurrentOrNextPrayer()!;
+
+        final rows = PrayerRowViewDataMapper.map(
+          prayerTimes: prayerTimes,
+          settings: settings,
+          currentPrayer: heroNext,
+          l10n: l10n,
+          isArabic: false,
+          omitFromListWhenSameInstantAs: heroNext,
+        );
+
+        expect(heroNext.type, PrayerType.fajr);
+        expect(heroNext.time, DateTime(2030, 6, 16, 4));
+        final fajrRow = rows.firstWhere((row) => row.type == PrayerType.fajr);
+        expect(fajrRow.isCurrent, isFalse);
+        expect(fajrRow.statusText, l10n.prayerTimesPassed);
+      },
+    );
 
     test('toggles notification settings for supported prayer', () {
       const settings = PrayerSettingsEntity(

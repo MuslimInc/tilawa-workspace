@@ -44,7 +44,7 @@ class QiblaCompassWidget extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final screenSize = MediaQuery.sizeOf(context);
+        final screenSize = context.viewportSize;
         final boundedWidth = constraints.hasBoundedWidth
             ? constraints.maxWidth
             : screenSize.shortestSide;

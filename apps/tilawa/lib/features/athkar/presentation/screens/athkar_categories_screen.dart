@@ -14,6 +14,15 @@ import '../cubit/athkar_state.dart';
 import '../widgets/athkar_ambient_background.dart';
 import '../widgets/athkar_category_card.dart';
 
+String _localizedAthkarCategoryTitle(
+  BuildContext context,
+  AthkarCategory category,
+) {
+  if (context.isArabic) return category.nameAr;
+  final String english = category.nameEn.trim();
+  return english.isNotEmpty ? english : category.nameAr;
+}
+
 class AthkarCategoriesScreen extends StatelessWidget {
   const AthkarCategoriesScreen({super.key});
 
@@ -79,7 +88,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final AthkarCategory category = categories[index];
                       return AthkarCategoryCard(
-                        name: category.nameAr,
+                        name: _localizedAthkarCategoryTitle(context, category),
                         icon: category.icon,
                         onTap: () {
                           if (category.id == TasbeehConstants.categoryId) {
@@ -89,7 +98,10 @@ class AthkarCategoriesScreen extends StatelessWidget {
 
                           AthkarDetailsRoute(
                             categoryId: category.id,
-                            categoryName: category.nameAr,
+                            categoryName: _localizedAthkarCategoryTitle(
+                              context,
+                              category,
+                            ),
                           ).push(context);
                         },
                       );

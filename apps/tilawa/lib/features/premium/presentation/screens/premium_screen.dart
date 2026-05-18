@@ -57,9 +57,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   ToastUtils.showSuccessToast(message);
                 },
                 trialNotEligible: (message) {
+                  // §3: not a CTA, not an error — informational. Vellum tier
+                  // is the quiet raised neutral, no second accent needed.
                   ToastUtils.showToast(
                     msg: message,
-                    backgroundColor: Theme.of(context).colorScheme.tertiary,
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainerHigh,
                   );
                 },
               );
@@ -122,13 +126,16 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final accent = canDownload ? colorScheme.primary : colorScheme.tertiary;
+    // TILAWA_BRAND.md §3: one accent per screen — Ink. The "not yet premium"
+    // state earns differentiation via a quieter surface tier, not a second
+    // (Gilding) accent.
+    final accent = colorScheme.primary;
     final container = canDownload
         ? colorScheme.primaryContainer
-        : colorScheme.tertiaryContainer;
+        : colorScheme.surfaceContainerLow;
     final onContainer = canDownload
         ? colorScheme.onPrimaryContainer
-        : colorScheme.onTertiaryContainer;
+        : colorScheme.onSurface;
 
     return Card(
       elevation: 0,
@@ -305,10 +312,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
             SizedBox(height: tokens.spaceMedium),
             SizedBox(
               width: double.infinity,
-              child: FilledButton.icon(
+              child: TilawaButton(
+                text: context.l10n.startFreeTrial,
+                variant: TilawaButtonVariant.primary,
+                leadingIcon: const Icon(Icons.play_arrow_rounded),
                 onPressed: () => _startTrial(context),
-                icon: const Icon(Icons.play_arrow_rounded),
-                label: Text(context.l10n.startFreeTrial),
+                isFullWidth: true,
               ),
             ),
           ],
@@ -333,11 +342,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
       icon: Icons.check_circle_outline_rounded,
       iconColor: Theme.of(context).colorScheme.primary,
       title: message,
-      action: ElevatedButton(
+      action: TilawaButton(
+        text: context.l10n.continueButton,
+        variant: TilawaButtonVariant.primary,
         onPressed: () {
           context.read<PremiumBloc>().add(const LoadPremiumStatus());
         },
-        child: Text(context.l10n.continueButton),
       ),
     );
   }

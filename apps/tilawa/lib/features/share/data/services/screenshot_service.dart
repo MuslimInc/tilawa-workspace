@@ -31,7 +31,7 @@ class ScreenshotService {
     int? targetHeight,
   }) async {
     logger.d(
-      '[AppLaunch][ScreenshotService.captureRaw]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ScreenshotService.captureRaw: Start in (${DateTime.now()})',
     );
     final pageImage = await _captureBoundaryImage(
       boundaryKey: boundaryKey,
@@ -162,12 +162,12 @@ class ScreenshotService {
     double pixelRatio = 2.0,
   }) async {
     logger.d(
-      '[AppLaunch][ScreenshotService.captureAndBrand]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=ScreenshotService.captureAndBrand: Start in (${DateTime.now()})',
     );
-    const Color defaultFooterBg = Color(0xFF1B4060);
+    const Color defaultFooterBg = AppExportScreenshotColors.footerBackground;
     final Color brandColor = footerBackgroundColor ?? defaultFooterBg;
     final Color foregroundColor =
-        footerForegroundColor ?? const Color(0xFFFFFFFF);
+        footerForegroundColor ?? AppExportScreenshotColors.footerForeground;
     final pageImage = await _captureBoundaryImage(
       boundaryKey: boundaryKey,
       pixelRatio: pixelRatio,

@@ -1,0 +1,88 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
+import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
+import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
+import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
+
+/// Locks key behaviors described in root [DESIGN.md] (§1, §4, §6, §7).
+void main() {
+  group('AppTheme DESIGN.md compliance', () {
+    test(
+      'light theme uses comfortable density, M3 extensions, neutral elevation tint',
+      () {
+        final ThemeData theme = AppTheme.getLightTheme(
+          primaryColor: AppColors.defaultPrimary,
+          useGoogleFontsOverride: false,
+        );
+
+        expect(theme.useMaterial3, isTrue);
+        expect(theme.visualDensity, FlexColorScheme.comfortablePlatformDensity);
+
+        final TilawaDesignTokens? design = theme
+            .extension<TilawaDesignTokens>();
+        expect(design, isNotNull);
+        expect(design!.opacityShadow, 0.18);
+        expect(design.opacityShadowStrong, 0.28);
+        expect(design.shadowOffsetSmall, const Offset(0, 2));
+        expect(design.shadowOffsetMedium, const Offset(0, 4));
+
+        expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+
+        expect(theme.cardTheme.surfaceTintColor, Colors.transparent);
+        expect(theme.dialogTheme.surfaceTintColor, Colors.transparent);
+        expect(theme.bottomSheetTheme.surfaceTintColor, Colors.transparent);
+
+        expect(
+          theme.appBarTheme.surfaceTintColor,
+          theme.scaffoldBackgroundColor,
+        );
+        expect(
+          theme.appBarTheme.backgroundColor,
+          theme.scaffoldBackgroundColor,
+        );
+      },
+    );
+
+    test(
+      'dark theme uses comfortable density, M3 extensions, neutral elevation tint',
+      () {
+        final ThemeData theme = AppTheme.getDarkTheme(
+          primaryColor: AppColors.defaultPrimary,
+          isDefaultPreset: true,
+          useGoogleFontsOverride: false,
+          darkIsTrueBlack: false,
+        );
+
+        expect(theme.useMaterial3, isTrue);
+        expect(theme.visualDensity, FlexColorScheme.comfortablePlatformDensity);
+
+        expect(theme.extension<TilawaDesignTokens>(), isNotNull);
+        expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+
+        expect(theme.cardTheme.surfaceTintColor, Colors.transparent);
+        expect(theme.dialogTheme.surfaceTintColor, Colors.transparent);
+        expect(theme.bottomSheetTheme.surfaceTintColor, Colors.transparent);
+
+        expect(
+          theme.appBarTheme.surfaceTintColor,
+          theme.scaffoldBackgroundColor,
+        );
+        expect(
+          theme.appBarTheme.backgroundColor,
+          theme.scaffoldBackgroundColor,
+        );
+      },
+    );
+
+    test('light theme registers design and component token extensions', () {
+      final ThemeData theme = AppTheme.getLightTheme(
+        primaryColor: AppColors.defaultPrimary,
+        useGoogleFontsOverride: false,
+      );
+      expect(theme.extension<TilawaDesignTokens>(), isNotNull);
+      expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+    });
+  });
+}

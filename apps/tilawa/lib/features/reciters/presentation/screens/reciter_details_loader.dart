@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+import '../../../../core/extensions.dart';
 import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
 import '../cubit/reciter_details_loader_cubit.dart';
 import '../cubit/reciter_details_loader_state.dart';
-
 import 'reciter_details_screen.dart';
 
 class ReciterDetailsLoader extends StatelessWidget {
@@ -29,7 +30,7 @@ class ReciterDetailsLoader extends StatelessWidget {
               return TilawaErrorState(
                 icon: Icons.error_outline,
                 title: state.message,
-                retryLabel: 'Retry',
+                retryLabel: context.l10n.retry,
                 onRetry: () {
                   context.read<ReciterDetailsLoaderCubit>().loadReciter(
                     reciterId,

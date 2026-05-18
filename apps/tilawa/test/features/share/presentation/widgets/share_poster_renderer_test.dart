@@ -194,7 +194,7 @@ void main() {
     await QuranQcfLocator.resetForTests();
   });
 
-  testWidgets('SharePosterRenderer avoids preview overflow on compact layout', (
+  testWidgets('SharePosterRenderer avoids preview overflow on narrow layout', (
     WidgetTester tester,
   ) async {
     tester.view.physicalSize = const Size(720, 1280);

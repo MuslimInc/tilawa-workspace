@@ -9,15 +9,26 @@ class TilawaIconActionButton extends StatefulWidget {
     required this.icon,
     required this.onTap,
     this.isActive = false,
+    this.enabled = true,
+    this.toggled,
     this.size,
     this.iconSize,
     this.tooltip,
     this.semanticLabel,
+    this.backgroundColor,
   });
 
   final IconData icon;
   final VoidCallback onTap;
   final bool isActive;
+
+  /// When `false`, the control does not accept taps and is marked disabled in
+  /// the semantics tree.
+  final bool enabled;
+
+  /// When non-null, exposes a toggle semantics value (e.g. filter on/off).
+  final bool? toggled;
+
   final double? size;
   final double? iconSize;
 
@@ -27,6 +38,12 @@ class TilawaIconActionButton extends StatefulWidget {
 
   /// Screen reader label for the control.
   final String? semanticLabel;
+
+  /// Optional fill colour. When `null` (default) the button uses
+  /// `ColorScheme.surface` — visually transparent on a `surface` background.
+  /// Pass `ColorScheme.surfaceContainerHigh` (or similar) to render a quiet
+  /// pill when the button sits on a `surface`-coloured header.
+  final Color? backgroundColor;
 
   @override
   State<TilawaIconActionButton> createState() => _TilawaIconActionButtonState();
@@ -52,6 +69,9 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
   }
 
   void _handlePress() {
+    if (!widget.enabled) {
+      return;
+    }
     _animationController.forward().then((_) {
       _animationController.reverse();
     });
@@ -69,11 +89,17 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
       componentTokens.borderRadius,
     );
 
+    final Color iconColor = !widget.enabled
+        ? theme.colorScheme.onSurface.withValues(alpha: 0.38)
+        : widget.isActive
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurfaceVariant;
+
     Widget result = SizedBox(
       width: effectiveSize,
       height: effectiveSize,
       child: Material(
-        color: theme.colorScheme.surface,
+        color: widget.backgroundColor ?? theme.colorScheme.surface,
         borderRadius: effectiveBorderRadius,
         child: ScaleTransition(
           scale: Tween<double>(begin: 1.0, end: 0.92).animate(
@@ -84,14 +110,12 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
           ),
           child: InkWell(
             borderRadius: effectiveBorderRadius,
-            onTap: _handlePress,
+            onTap: widget.enabled ? _handlePress : null,
             child: Center(
               child: Icon(
                 widget.icon,
                 size: effectiveIconSize,
-                color: widget.isActive
-                    ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurfaceVariant,
+                color: iconColor,
               ),
             ),
           ),
@@ -107,6 +131,8 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
     // fix: Accessibility — explicit name for icon-only control
     return Semantics(
       button: true,
+      enabled: widget.enabled,
+      toggled: widget.toggled,
       label: widget.semanticLabel ?? widget.tooltip,
       child: result,
     );

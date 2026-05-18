@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// A developer tool widget that overlays a specified reference image (like an Ayah
 /// app screenshot) on top of your live UI. Allows tuning the layout pixel by pixel.
@@ -43,6 +44,8 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
       return widget.child;
     }
 
+    final tokens = Theme.of(context).tokens;
+
     return Stack(
       children: [
         // Live App UI
@@ -82,10 +85,10 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                 if (_isVisible)
                   Container(
                     width: 280,
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(tokens.spaceSmall),
                     decoration: BoxDecoration(
                       color: Colors.black87,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(tokens.radiusMedium),
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -176,6 +179,9 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                           ],
                         ),
                         TextButton(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white70,
+                          ),
                           onPressed: () {
                             setState(() {
                               _offset = Offset.zero;

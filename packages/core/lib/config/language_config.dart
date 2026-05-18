@@ -3,6 +3,12 @@ import 'dart:ui';
 const arabicLanguageCode = 'ar';
 const englishLanguageCode = 'en';
 
+/// Display emoji for Arabic in language pickers.
+const arabicLanguageEmoji = '🇪🇬';
+
+/// Display emoji for English in language pickers.
+const englishLanguageEmoji = '🇺🇸';
+
 /// API language codes
 const _arabicApiLanguageCode = 'ar';
 const _englishApiLanguageCode = 'eng';
@@ -45,4 +51,13 @@ class LanguageConfig {
 
   /// Get supported language codes
   static List<String> getSupportedLanguageCodes() => supportedLanguageCodes;
+
+  /// Returns the display emoji for a supported app [languageCode].
+  static String emojiForLanguageCode(String languageCode) {
+    return switch (languageCode) {
+      arabicLanguageCode => arabicLanguageEmoji,
+      englishLanguageCode => englishLanguageEmoji,
+      _ => '',
+    };
+  }
 }

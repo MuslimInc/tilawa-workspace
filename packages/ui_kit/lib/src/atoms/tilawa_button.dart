@@ -22,7 +22,7 @@ enum TilawaButtonVariant {
 
 /// Sizes for [TilawaButton] determining its height and padding.
 enum TilawaButtonSize {
-  /// Smallest height, useful for dense UI or small cards.
+  /// Smallest height, useful for tight vertical spacing or small cards.
   small,
 
   /// Standard height for most mobile interactions.
@@ -37,7 +37,11 @@ enum TilawaButtonSize {
 /// Supports multiple variants, sizes, and states (including loading and disabled).
 ///
 /// [TilawaButton] handles its own internal layout, including icons and
-/// loading indicators, while ensuring a minimum touch target of 48x48.
+/// loading indicators, while ensuring a minimum touch target of 48×48
+/// unless [shrinkWrapTapTarget] is true (e.g. inline text-link actions).
+///
+/// Optional [backgroundColor], [foregroundColor], and [borderColor] override
+/// the colours implied by [variant] for branded or marketing surfaces.
 class TilawaButton extends StatelessWidget {
   /// Creates a [TilawaButton].
   const TilawaButton({
@@ -51,6 +55,13 @@ class TilawaButton extends StatelessWidget {
     this.isLoading = false,
     this.isFullWidth = false,
     this.semanticLabel,
+    this.backgroundColor,
+    this.foregroundColor,
+    this.borderColor,
+    this.borderRadius,
+    this.padding,
+    this.textStyle,
+    this.shrinkWrapTapTarget = false,
   });
 
   /// The text label to display.
@@ -81,6 +92,29 @@ class TilawaButton extends StatelessWidget {
   /// Optional accessibility label. Defaults to [text] if not provided.
   final String? semanticLabel;
 
+  /// When non-null, replaces the background colour from [variant].
+  final Color? backgroundColor;
+
+  /// When non-null, replaces the foreground / label colour from [variant].
+  final Color? foregroundColor;
+
+  /// When non-null, replaces the outline border colour (outline variant only
+  /// unless you also set a transparent [backgroundColor] for a stroked look).
+  final Color? borderColor;
+
+  /// Corner radius; defaults to [TilawaDesignTokens.radiusMedium] from theme.
+  final double? borderRadius;
+
+  /// Insets for label and icons; defaults to horizontal padding from [size].
+  final EdgeInsetsGeometry? padding;
+
+  /// Merged on top of the built-in label [TextStyle] (font size from [size]).
+  final TextStyle? textStyle;
+
+  /// When true, skips the 48×48 minimum and uses a shrink-wrapped tap
+  /// target ([MaterialTapTargetSize.shrinkWrap]).
+  final bool shrinkWrapTapTarget;
+
   /// Whether the button is effectively disabled.
   bool get _isDisabled => onPressed == null || isLoading;
 
@@ -90,60 +124,76 @@ class TilawaButton extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     // Resolve colors based on variant
-    final (backgroundColor, foregroundColor, borderColor) = _getColors(
+    final (Color variantBg, Color variantFg, Color? variantBorder) = _getColors(
       colorScheme,
     );
+    final Color resolvedBg = backgroundColor ?? variantBg;
+    final Color resolvedFg = foregroundColor ?? variantFg;
+    final Color? resolvedBorder = borderColor ?? variantBorder;
 
     // Resolve dimensions based on size
     final (height, horizontalPadding, fontSize, iconSize) = _getDimensions();
 
     final designTokens = theme.extension<TilawaDesignTokens>();
-    final borderRadius = designTokens?.radiusMedium ?? 12.0;
+    final double resolvedRadius =
+        borderRadius ?? designTokens?.radiusMedium ?? 12.0;
+    final EdgeInsetsGeometry resolvedPadding =
+        padding ?? EdgeInsets.symmetric(horizontal: horizontalPadding);
+
+    final Color overlayBase = resolvedFg;
 
     final buttonStyle = ButtonStyle(
       minimumSize: WidgetStateProperty.all(
-        Size(isFullWidth ? double.infinity : 0, height),
+        Size(
+          isFullWidth ? double.infinity : 0,
+          shrinkWrapTapTarget ? 0 : height,
+        ),
       ),
-      padding: WidgetStateProperty.all(
-        EdgeInsets.symmetric(horizontal: horizontalPadding),
-      ),
+      padding: WidgetStateProperty.all(resolvedPadding),
+      tapTargetSize: shrinkWrapTapTarget
+          ? MaterialTapTargetSize.shrinkWrap
+          : MaterialTapTargetSize.padded,
       backgroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
           return colorScheme.onSurface.withValues(alpha: 0.12);
         }
-        return backgroundColor;
+        return resolvedBg;
       }),
       foregroundColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.disabled)) {
           return colorScheme.onSurface.withValues(alpha: 0.38);
         }
-        return foregroundColor;
+        return resolvedFg;
       }),
       overlayColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.pressed)) {
-          return foregroundColor.withValues(alpha: 0.1);
+          return overlayBase.withValues(alpha: 0.1);
         }
         if (states.contains(WidgetState.hovered)) {
-          return foregroundColor.withValues(alpha: 0.04);
+          return overlayBase.withValues(alpha: 0.04);
         }
         return null;
       }),
       side: WidgetStateProperty.resolveWith((states) {
-        if (borderColor == null) return BorderSide.none;
+        if (resolvedBorder == null) return BorderSide.none;
         if (states.contains(WidgetState.disabled)) {
           return BorderSide(
             color: colorScheme.onSurface.withValues(alpha: 0.12),
           );
         }
-        return BorderSide(color: borderColor);
+        return BorderSide(color: resolvedBorder);
       }),
       shape: WidgetStateProperty.all(
         RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(resolvedRadius),
         ),
       ),
       elevation: WidgetStateProperty.all(0),
     );
+
+    final Color contentFg = _isDisabled
+        ? colorScheme.onSurface.withValues(alpha: 0.38)
+        : resolvedFg;
 
     final content = _ButtonContent(
       text: text,
@@ -151,11 +201,16 @@ class TilawaButton extends StatelessWidget {
       trailingIcon: trailingIcon,
       isLoading: isLoading,
       isFullWidth: isFullWidth,
-      foregroundColor: _isDisabled
-          ? colorScheme.onSurface.withValues(alpha: 0.38)
-          : foregroundColor,
+      foregroundColor: contentFg,
       fontSize: fontSize,
       iconSize: iconSize,
+      textStyle: textStyle,
+    );
+
+    final TextButton textButton = TextButton(
+      onPressed: _isDisabled ? null : onPressed,
+      style: buttonStyle,
+      child: content,
     );
 
     return Semantics(
@@ -164,14 +219,12 @@ class TilawaButton extends StatelessWidget {
           : (semanticLabel ?? text),
       button: true,
       enabled: !_isDisabled,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-        child: TextButton(
-          onPressed: _isDisabled ? null : onPressed,
-          style: buttonStyle,
-          child: content,
-        ),
-      ),
+      child: shrinkWrapTapTarget
+          ? textButton
+          : ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+              child: textButton,
+            ),
     );
   }
 
@@ -212,6 +265,7 @@ class _ButtonContent extends StatelessWidget {
     this.trailingIcon,
     this.isLoading = false,
     this.isFullWidth = false,
+    this.textStyle,
   });
 
   final String text;
@@ -222,6 +276,7 @@ class _ButtonContent extends StatelessWidget {
   final Color foregroundColor;
   final double fontSize;
   final double iconSize;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -246,7 +301,7 @@ class _ButtonContent extends StatelessWidget {
         fontSize: fontSize,
         fontWeight: FontWeight.w600,
         color: foregroundColor,
-      ),
+      ).merge(textStyle),
     );
 
     return Row(

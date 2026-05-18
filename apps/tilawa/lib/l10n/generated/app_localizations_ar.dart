@@ -48,6 +48,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get noRecitersMatchSearch => 'لا يوجد قراء يطابقون البحث';
 
   @override
+  String a11yOpenReciterDetails(String reciterName) {
+    return 'فتح $reciterName';
+  }
+
+  @override
+  String get a11yFavoriteRecitersOnlyFilter => 'عرض المفضلين فقط';
+
+  @override
+  String get a11yRecitersLetterIndex => 'فهرس الحروف';
+
+  @override
+  String get a11yRecitersAlphabetScrollbarHint =>
+      'اسحب لأعلى أو لأسفل للانتقال إلى حرف';
+
+  @override
+  String get showRecitersLetterIndex => 'إظهار فهرس الحروف';
+
+  @override
+  String get hideRecitersLetterIndex => 'إخفاء فهرس الحروف';
+
+  @override
+  String get recitersMoreActions => 'المزيد';
+
+  @override
+  String get recitersLetterIndexMenuItem => 'فهرس الحروف';
+
+  @override
+  String get a11yClearRecitersSearch => 'مسح نص البحث';
+
+  @override
   String get filteredByLetter => 'مفلتر بالحرف:';
 
   @override
@@ -440,12 +470,20 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
+  String reciterAdditionalMoshafCount(int count) {
+    return ' · $count أخرى';
+  }
+
+  @override
   String loadingReciterSurahs(String reciterName) {
     return 'جاري تحميل سور $reciterName...';
   }
 
   @override
   String get addToFavorites => 'إضافة إلى المفضلة';
+
+  @override
+  String get removeFromFavorites => 'إزالة من المفضلة';
 
   @override
   String get createFirstPlaylistMessage =>
@@ -537,6 +575,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get colorPurple => 'أرجواني';
 
   @override
+  String get colorGold => 'ذهبي';
+
+  @override
   String get theme => 'السمة';
 
   @override
@@ -547,9 +588,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get darkTheme => 'الوضع الداكن';
-
-  @override
-  String get compactDesign => 'تصميم مضغوط';
 
   @override
   String get chooseTheme => 'اختر السمة';
@@ -1178,6 +1216,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String prayerTimesTimeRemainingUntil(String prayerName) {
     return 'الوقت المتبقي حتى صلاة $prayerName';
   }
+
+  @override
+  String get prayerTimesTimeRemainingCaption => 'الوقت المتبقي';
 
   @override
   String get prayerTimesScheduled => 'الموعد';
@@ -1867,4 +1908,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorInvalidNotificationPayload => 'بيانات التنبيه غير صالحة.';
+
+  @override
+  String get moreOptions => 'المزيد';
 }

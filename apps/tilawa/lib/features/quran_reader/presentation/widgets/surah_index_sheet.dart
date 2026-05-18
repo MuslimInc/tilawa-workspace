@@ -203,14 +203,14 @@ class _IndexHeader extends StatelessWidget {
     final l10n = context.l10n;
     final Color primaryColor = readerTheme.primaryColor;
     final FocusNode? focusNode = FocusScope.of(context).focusedChild;
-    final bool compactHeader = focusNode != null || context.isKeyboardVisible;
+    final bool tightHeader = focusNode != null || context.isKeyboardVisible;
 
     return Padding(
       padding: EdgeInsetsDirectional.fromSTEB(
         tokens.spaceExtraLarge,
-        compactHeader ? 10 : 16,
+        tightHeader ? 10 : 16,
         tokens.spaceExtraLarge,
-        compactHeader ? 6 : 8,
+        tightHeader ? 6 : 8,
       ),
       child: Row(
         children: [
@@ -423,7 +423,7 @@ class _SurahTile extends StatelessWidget {
                     '$surahNumber',
                     style: readerTheme.pillPageTextStyle.copyWith(
                       color: colorScheme.onPrimaryContainer,
-                      fontSize: 13,
+                      fontSize: indexTheme.tileNumberFontSize,
                     ),
                   ),
                 ),

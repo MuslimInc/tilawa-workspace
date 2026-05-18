@@ -72,10 +72,13 @@ class ScreenshotComposerControls extends StatelessWidget {
             ),
           ],
           SizedBox(height: tokens.spaceMedium),
-          FilledButton.icon(
-            onPressed: isBusy ? null : onPrimaryAction,
-            icon: const Icon(Icons.screenshot_rounded),
-            label: Text(primaryLabel ?? context.l10n.shareScreenshot),
+          TilawaButton(
+            text: primaryLabel ?? context.l10n.shareScreenshot,
+            variant: TilawaButtonVariant.primary,
+            leadingIcon: const Icon(Icons.screenshot_rounded),
+            onPressed: onPrimaryAction,
+            isLoading: isBusy,
+            isFullWidth: true,
           ),
         ],
       ),

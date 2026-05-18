@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 /// A short inline banner that surfaces a missing permission or capability and
 /// offers a single trailing call-to-action.
@@ -37,6 +38,7 @@ class TilawaPermissionBanner extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.componentTokens.permissionBanner;
+    final designTokens = theme.tokens;
 
     final Color bg = backgroundColor ?? colorScheme.tertiaryContainer;
     final Color fg = foregroundColor ?? colorScheme.onTertiaryContainer;
@@ -64,9 +66,9 @@ class TilawaPermissionBanner extends StatelessWidget {
             onPressed: onAction,
             style: TextButton.styleFrom(
               padding: EdgeInsets.symmetric(horizontal: tokens.actionSpacing),
-              minimumSize: const Size(
-                kMinInteractiveDimension,
-                kMinInteractiveDimension,
+              minimumSize: Size(
+                designTokens.minInteractiveDimension,
+                designTokens.minInteractiveDimension,
               ),
               tapTargetSize: MaterialTapTargetSize.padded,
             ),

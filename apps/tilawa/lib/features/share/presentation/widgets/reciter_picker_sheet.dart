@@ -41,7 +41,7 @@ class _ReciterPickerSheetState extends State<ReciterPickerSheet> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       borderColor: Colors.transparent,
       child: SizedBox(
-        height: MediaQuery.sizeOf(context).height * 0.8,
+        height: context.viewportHeight * 0.8,
         child: Column(
           children: [
             const TilawaSheetHandle(),

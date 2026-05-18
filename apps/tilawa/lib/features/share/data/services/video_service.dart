@@ -56,7 +56,7 @@ class VideoService {
     CancelToken? cancelToken,
   }) async {
     logger.d(
-      '[AppLaunch][VideoService.generateVideo]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=VideoService.generateVideo: Start in (${DateTime.now()})',
     );
     final List<String> effectiveScreenshotPaths = screenshotPaths
         .where((path) => path.trim().isNotEmpty)

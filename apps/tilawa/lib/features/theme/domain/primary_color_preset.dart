@@ -9,6 +9,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 enum PrimaryColorPreset {
   teal(id: 'teal', value: AppColors.primaryTeal),
   sage(id: 'sage', value: AppColors.primarySage),
+  gold(id: 'gold', value: AppColors.primaryGold),
   brown(id: 'brown', value: AppColors.primaryBrown),
   purple(id: 'purple', value: AppColors.primaryPurple)
   ;

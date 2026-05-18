@@ -10,8 +10,8 @@ import 'content_bounds.dart';
 class TilawaBreakpoints {
   const TilawaBreakpoints._();
 
-  /// Upper bound for compact (phones in portrait).
-  static const double compact = 600;
+  /// Upper bound for the narrow window class (typical phones in portrait).
+  static const double narrowUpperBound = 600;
 
   /// Upper bound for medium (small tablets, foldable inner displays in
   /// portrait, phones in landscape).
@@ -19,23 +19,12 @@ class TilawaBreakpoints {
 
   /// Upper bound for expanded (tablets, foldables in landscape).
   static const double expanded = 1200;
-
-  /// Minimum **inner** width of the compact bottom nav row (constraints on
-  /// the destination [Row]) for which every item keeps a visible text label.
-  ///
-  /// Below this, [TilawaAdaptiveShell] shows **icons only** with equal-width
-  /// slots; full titles stay on [Semantics] for screen readers.
-  ///
-  /// Tuned near where five equal columns fall under ~72 logical px each
-  /// after default horizontal margins, which commonly produces clipped labels
-  /// on ~360–400dp phones.
-  static const double compactBottomNavAllLabelsMinInnerWidth = 400;
 }
 
 /// Discrete window-size class, aligned with Material 3 window size classes.
 enum TilawaWindowSize {
   /// width < 600
-  compact,
+  narrow,
 
   /// 600 ≤ width < 840
   medium,
@@ -49,19 +38,33 @@ enum TilawaWindowSize {
 
 /// Ergonomic access to the current window-size class and common predicates.
 extension TilawaWindowSizeX on BuildContext {
-  /// Resolves the current [TilawaWindowSize] from `MediaQuery.sizeOf(this)`.
+  /// Full logical viewport size from [MediaQuery.sizeOf].
+  ///
+  /// Use for **proportional** layout (e.g. sheet `maxHeight` as a fraction of
+  /// the viewport). For **width-class** branching, prefer [windowSize].
+  Size get viewportSize => MediaQuery.sizeOf(this);
+
+  /// Shorthand for [viewportSize.height].
+  double get viewportHeight => viewportSize.height;
+
+  /// Shorthand for [viewportSize.width].
+  double get viewportWidth => viewportSize.width;
+
+  /// Resolves the current [TilawaWindowSize] from [viewportSize].
   ///
   /// Uses [MediaQuery.sizeOf] (narrow dependency) so callers do not rebuild on
   /// unrelated MediaQuery changes (e.g. keyboard open, textScaler change).
   TilawaWindowSize get windowSize {
-    final width = MediaQuery.sizeOf(this).width;
+    final width = viewportWidth;
     if (width >= TilawaBreakpoints.expanded) return TilawaWindowSize.large;
     if (width >= TilawaBreakpoints.medium) return TilawaWindowSize.expanded;
-    if (width >= TilawaBreakpoints.compact) return TilawaWindowSize.medium;
-    return TilawaWindowSize.compact;
+    if (width >= TilawaBreakpoints.narrowUpperBound) {
+      return TilawaWindowSize.medium;
+    }
+    return TilawaWindowSize.narrow;
   }
 
-  bool get isCompact => windowSize == TilawaWindowSize.compact;
+  bool get isNarrow => windowSize == TilawaWindowSize.narrow;
 
   bool get isAtLeastMedium => windowSize.index >= TilawaWindowSize.medium.index;
 
@@ -77,7 +80,7 @@ extension TilawaWindowSizeX on BuildContext {
   /// Use this for layout math (like scroll-to-index offsets) that must
   /// remain accurate on wide screens.
   double resolveContentWidth(TilawaContentKind kind) {
-    final screenWidth = MediaQuery.sizeOf(this).width;
+    final screenWidth = viewportWidth;
     final maxWidth = TilawaContentBounds.resolveMaxWidth(this, kind);
     return screenWidth < maxWidth ? screenWidth : maxWidth;
   }

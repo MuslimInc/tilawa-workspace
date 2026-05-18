@@ -25,7 +25,7 @@ abstract class QuranLayoutStrategy {
 /// The standard implementation of Quran layout logic.
 ///
 /// - **Portrait**: Fits exactly 15 lines into the available vertical space (minus safe areas).
-/// - **Landscape**: Uses a compact scrollable layout closer to printed mushaf apps.
+/// - **Landscape**: Uses a tight scrollable layout closer to printed mushaf apps.
 class StandardQuranLayoutStrategy implements QuranLayoutStrategy {
   static const double _fontHeight = 1.85;
   static const double _ayahLineHeightReferencePixels = 174.0;

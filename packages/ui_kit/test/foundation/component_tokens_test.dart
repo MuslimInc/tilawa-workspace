@@ -165,7 +165,7 @@ void main() {
   group('TilawaIconActionButtonTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaIconActionButtonTokens.defaults();
-      expect(tokens.size, kMinInteractiveDimension);
+      expect(tokens.size, 44.0);
       expect(tokens.borderRadius, 16.0);
       expect(tokens.activeBackgroundOpacity, 0.12);
       expect(tokens.activeBorderOpacity, 0.35);
@@ -207,7 +207,7 @@ void main() {
   group('TilawaSearchFieldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSearchFieldTokens.defaults();
-      expect(tokens.height, kMinInteractiveDimension);
+      expect(tokens.height, 44.0);
       expect(tokens.backgroundColor, isA<Color>());
       expect(tokens.borderRadius, 16.0);
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
@@ -426,10 +426,6 @@ void main() {
         tokens.shellOutlineColor,
         scheme.outlineVariant.withValues(alpha: 0.1),
       );
-      expect(
-        tokens.playPauseButtonShadowColor,
-        scheme.primary.withValues(alpha: 0.3),
-      );
     });
   });
 
@@ -438,7 +434,7 @@ void main() {
       final tokens = TilawaSettingsGroupTokens.defaults();
       expect(tokens.groupBorderRadius, 20.0);
       expect(tokens.groupShadowOpacity, 0.06);
-      expect(tokens.tileTitleFontSize, 15.5);
+      expect(tokens.tileTitleFontSize, 14.5);
       expect(tokens.tileSubtitleOpacity, 0.6);
       expect(tokens.switchActiveTrackOpacity, 0.5);
       expect(tokens.selectionTileSelectedBackgroundColor, isA<Color>());
@@ -608,10 +604,39 @@ void main() {
     });
   });
 
+  group('TilawaBottomSheetScaffoldTokens', () {
+    test('defaults creates expected values', () {
+      final tokens = TilawaBottomSheetScaffoldTokens.defaults();
+      expect(tokens.topRadius, 28.0);
+      expect(
+        tokens.headerPadding,
+        const EdgeInsets.fromLTRB(16, 8, 12, 12),
+      );
+      expect(
+        tokens.bodyPadding,
+        const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      );
+      expect(tokens.closeButtonSize, 40.0);
+    });
+
+    test('copyWith updates padding and sizes', () {
+      final original = TilawaBottomSheetScaffoldTokens.defaults();
+      final updated = original.copyWith(
+        topRadius: 24,
+        closeButtonSize: 44,
+        bodyPadding: const EdgeInsets.all(16),
+      );
+      expect(updated.topRadius, 24.0);
+      expect(updated.closeButtonSize, 44.0);
+      expect(updated.bodyPadding, const EdgeInsets.all(16));
+      expect(updated.headerPadding, original.headerPadding);
+    });
+  });
+
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.compactBottomNavBarBaseHeight, closeTo(57.7, 0.05));
+      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(61.7, 0.05));
       expect(tokens.navButtonSelectionContainerVerticalPadding, 5.0);
       expect(tokens.navButtonIconOnlyMinHeight, 40.0);
       expect(tokens.navButtonIconOnlyVerticalPadding, 1.0);
@@ -621,7 +646,7 @@ void main() {
       );
       expect(tokens.bottomNavIconOnlyVerticalMargin, 2.0);
       expect(
-        tokens.compactBottomNavIconOnlyLayoutHeight(TextScaler.linear(1)),
+        tokens.phoneBottomNavIconOnlyLayoutHeight(TextScaler.linear(1)),
         closeTo(40.0, 0.05),
       );
       expect(tokens.bottomNavHorizontalMargin, 0.0);
@@ -630,22 +655,22 @@ void main() {
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());
     });
 
-    test('compactBottomNavLayoutHeight grows with text scale', () {
+    test('phoneBottomNavLayoutHeight grows with text scale', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      final unit = tokens.compactBottomNavLayoutHeight(TextScaler.linear(1));
-      final scaled = tokens.compactBottomNavLayoutHeight(
+      final unit = tokens.phoneBottomNavLayoutHeight(TextScaler.linear(1));
+      final scaled = tokens.phoneBottomNavLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(57.7, 0.05));
+      expect(unit, closeTo(61.7, 0.05));
       expect(scaled, greaterThan(unit));
     });
 
-    test('compactBottomNavIconOnlyLayoutHeight grows with text scale', () {
+    test('phoneBottomNavIconOnlyLayoutHeight grows with text scale', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      final unit = tokens.compactBottomNavIconOnlyLayoutHeight(
+      final unit = tokens.phoneBottomNavIconOnlyLayoutHeight(
         TextScaler.linear(1),
       );
-      final scaled = tokens.compactBottomNavIconOnlyLayoutHeight(
+      final scaled = tokens.phoneBottomNavIconOnlyLayoutHeight(
         TextScaler.linear(2),
       );
       expect(unit, closeTo(40.0, 0.05));
@@ -763,24 +788,24 @@ void main() {
       );
     });
 
-    test('copyWith updates compact bottom nav bar base height', () {
+    test('copyWith updates phone bottom nav bar base height', () {
       final original = TilawaAdaptiveShellTokens.defaults();
       const backgroundColor = Color(0xFFEEE5D2);
       const selectedBackgroundColor = Color(0xFFD8EFEA);
       final updated = original.copyWith(
-        compactBottomNavBarBaseHeight: 92.0,
+        phoneBottomNavBarBaseHeight: 92.0,
         bottomNavBackgroundColor: backgroundColor,
         navButtonSelectedBackgroundColor: selectedBackgroundColor,
       );
-      expect(updated.compactBottomNavBarBaseHeight, 92.0);
+      expect(updated.phoneBottomNavBarBaseHeight, 92.0);
       expect(updated.bottomNavBackgroundColor, backgroundColor);
       expect(updated.navButtonSelectedBackgroundColor, selectedBackgroundColor);
       expect(updated.bottomNavRadius, original.bottomNavRadius);
     });
 
-    test('lerp interpolates compact bottom nav bar base height', () {
+    test('lerp interpolates phone bottom nav bar base height', () {
       const first = TilawaAdaptiveShellTokens(
-        compactBottomNavBarBaseHeight: 88.0,
+        phoneBottomNavBarBaseHeight: 88.0,
         bottomNavHorizontalMargin: 16.0,
         bottomNavVerticalMargin: 4.0,
         bottomNavIconOnlyVerticalMargin: 2.0,
@@ -820,7 +845,7 @@ void main() {
         navButtonIconOnlySelectionContainerVerticalPadding: 3,
       );
       const second = TilawaAdaptiveShellTokens(
-        compactBottomNavBarBaseHeight: 96.0,
+        phoneBottomNavBarBaseHeight: 96.0,
         bottomNavHorizontalMargin: 20.0,
         bottomNavVerticalMargin: 8.0,
         bottomNavIconOnlyVerticalMargin: 4.0,
@@ -881,7 +906,7 @@ void main() {
         result.navButtonSelectionContainerVerticalPadding,
         closeTo(5.5, 0.01),
       );
-      expect(result.compactBottomNavBarBaseHeight, closeTo(92.0, 0.01));
+      expect(result.phoneBottomNavBarBaseHeight, closeTo(92.0, 0.01));
       expect(result.bottomNavHorizontalMargin, closeTo(18.0, 0.01));
       expect(result.navButtonIconSize, closeTo(23.0, 0.01));
       expect(
@@ -959,9 +984,9 @@ void main() {
       expect(tokens.backgroundBlurScale, 0.9);
       expect(tokens.backgroundOverlayOpacity, 0.42);
       expect(tokens.overlayBorderOpacity, 0.1);
-      expect(tokens.compactHeightBreakpoint, 760.0);
-      expect(tokens.compactPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, 48.0);
+      expect(tokens.shortWindowHeightBreakpoint, 760.0);
+      expect(tokens.shortWindowPanelHeightFactor, 0.5);
+      expect(tokens.headerButtonSize, 44.0);
       expect(tokens.composerSurfaceColor, isA<Color>());
       expect(tokens.panelBorderColor, isA<Color>());
     });
@@ -991,10 +1016,10 @@ void main() {
       final original = TilawaImmersiveComposerTokens.defaults();
       final updated = original.copyWith(
         backgroundOverlayOpacity: 0.5,
-        compactPanelHeightFactor: 0.55,
+        shortWindowPanelHeightFactor: 0.55,
       );
       expect(updated.backgroundOverlayOpacity, 0.5);
-      expect(updated.compactPanelHeightFactor, 0.55);
+      expect(updated.shortWindowPanelHeightFactor, 0.55);
       expect(updated.backgroundBlurScale, original.backgroundBlurScale);
     });
 
@@ -1005,10 +1030,10 @@ void main() {
         backgroundBlurScale: 0.8,
         backgroundOverlayOpacity: 0.4,
         overlayBorderOpacity: 0.08,
-        compactHeightBreakpoint: 700.0,
-        compactPanelHeightFactor: 0.45,
+        shortWindowHeightBreakpoint: 700.0,
+        shortWindowPanelHeightFactor: 0.45,
         regularPanelHeightFactor: 0.4,
-        compactPreviewHeightFactor: 0.38,
+        shortWindowPreviewHeightFactor: 0.38,
         regularPreviewHeightFactor: 0.45,
         panelMinHeight: 200.0,
         previewMaxHeight: 400.0,
@@ -1026,10 +1051,10 @@ void main() {
         backgroundBlurScale: 0.95,
         backgroundOverlayOpacity: 0.5,
         overlayBorderOpacity: 0.12,
-        compactHeightBreakpoint: 800.0,
-        compactPanelHeightFactor: 0.55,
+        shortWindowHeightBreakpoint: 800.0,
+        shortWindowPanelHeightFactor: 0.55,
         regularPanelHeightFactor: 0.5,
-        compactPreviewHeightFactor: 0.48,
+        shortWindowPreviewHeightFactor: 0.48,
         regularPreviewHeightFactor: 0.55,
         panelMinHeight: 250.0,
         previewMaxHeight: 500.0,
@@ -1044,7 +1069,7 @@ void main() {
 
       final result = TilawaImmersiveComposerTokens.lerp(first, second, 0.5);
       expect(result.backgroundBlurScale, closeTo(0.875, 0.01));
-      expect(result.compactHeightBreakpoint, closeTo(750.0, 0.1));
+      expect(result.shortWindowHeightBreakpoint, closeTo(750.0, 0.1));
       expect(result.headerButtonSize, closeTo(44.0, 0.01));
       expect(
         result.composerSurfaceColor,

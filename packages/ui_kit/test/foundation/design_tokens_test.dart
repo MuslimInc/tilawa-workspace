@@ -5,7 +5,6 @@ import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 void main() {
   group('TilawaDesignTokens', () {
     const defaultTokens = TilawaDesignTokens(
-      density: TilawaDensity.comfortable,
       spaceTiny: 2.0,
       spaceExtraSmall: 4.0,
       spaceSmall: 8.0,
@@ -33,7 +32,8 @@ void main() {
       iconSizeMedium: 20.0,
       iconSizeLarge: 24.0,
       iconSizeLargePlus: 42.0,
-      iconSizeExtraLarge: 48.0,
+      iconSizeExtraLarge: 44.0,
+      minInteractiveDimension: 44.0,
       textHeightLoose: 1.8,
       durationFast: Duration(milliseconds: 200),
       durationMedium: Duration(milliseconds: 400),
@@ -42,8 +42,8 @@ void main() {
       contentMaxWidthForm: 560,
       contentMaxWidthMedia: 1200,
       contentMaxWidthSettings: 760,
-      cardCompactWidthThreshold: 180.0,
-      cardCompactHeightThreshold: 155.0,
+      narrowCardWidthThreshold: 180.0,
+      narrowCardHeightThreshold: 155.0,
       cardTightHeightThreshold: 145.0,
       playerCollapsedHeight: 100.0,
       playerDismissThreshold: 80.0,
@@ -83,7 +83,7 @@ void main() {
         expect(light.iconSizeMedium, 20.0);
         expect(light.iconSizeLarge, 24.0);
         expect(light.iconSizeLargePlus, 42.0);
-        expect(light.iconSizeExtraLarge, 48.0);
+        expect(light.iconSizeExtraLarge, 44.0);
         expect(light.textHeightLoose, 2.0);
         expect(light.durationFast, const Duration(milliseconds: 200));
         expect(light.durationMedium, const Duration(milliseconds: 400));
@@ -92,8 +92,8 @@ void main() {
         expect(light.contentMaxWidthForm, 560);
         expect(light.contentMaxWidthMedia, 1200);
         expect(light.contentMaxWidthSettings, 760);
-        expect(light.cardCompactWidthThreshold, 180.0);
-        expect(light.cardCompactHeightThreshold, 155.0);
+        expect(light.narrowCardWidthThreshold, 180.0);
+        expect(light.narrowCardHeightThreshold, 155.0);
         expect(light.cardTightHeightThreshold, 145.0);
       });
 
@@ -103,31 +103,6 @@ void main() {
         expect(dark.spaceExtraSmall, light.spaceExtraSmall);
         expect(dark.spaceSmall, light.spaceSmall);
         expect(dark.radiusSmall, light.radiusSmall);
-      });
-
-      test('compact density tightens medium/large spacing and radii', () {
-        final comfortable = TilawaDesignTokens.light();
-        final compact = TilawaDesignTokens.light(
-          density: TilawaDensity.compact,
-        );
-
-        // Tiny/small spacing is shared: shrinking further would erode hit
-        // margins around touch targets.
-        expect(compact.spaceTiny, comfortable.spaceTiny);
-        expect(compact.spaceExtraSmall, comfortable.spaceExtraSmall);
-        expect(compact.spaceSmall, comfortable.spaceSmall);
-
-        // Medium spacing tightens on compact; larger steps match
-        // comfortable on the current 8dp grid.
-        expect(compact.spaceMedium, lessThan(comfortable.spaceMedium));
-        expect(compact.spaceLarge, comfortable.spaceLarge);
-        expect(compact.spaceExtraLarge, comfortable.spaceExtraLarge);
-
-        // Radii: compact matches comfortable at large tiers today.
-        expect(compact.radiusSmall, comfortable.radiusSmall);
-        expect(compact.radiusMedium, comfortable.radiusMedium);
-        expect(compact.radiusLarge, comfortable.radiusLarge);
-        expect(compact.radiusExtraLarge, comfortable.radiusExtraLarge);
       });
     });
 
@@ -213,7 +188,6 @@ void main() {
     group('lerp()', () {
       test('returns first value at t=0', () {
         const first = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -247,11 +221,12 @@ void main() {
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
           contentMaxWidthSettings: 760,
-          cardCompactWidthThreshold: 180.0,
-          cardCompactHeightThreshold: 194.0,
+          narrowCardWidthThreshold: 180.0,
+          narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
+          minInteractiveDimension: 44.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
           playerDismissThreshold: 80.0,
@@ -264,7 +239,6 @@ void main() {
           playerAlphaScalingFactor: 2.5,
         );
         const second = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -298,11 +272,12 @@ void main() {
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
           contentMaxWidthSettings: 900,
-          cardCompactWidthThreshold: 200.0,
-          cardCompactHeightThreshold: 220.0,
+          narrowCardWidthThreshold: 200.0,
+          narrowCardHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
+          minInteractiveDimension: 44.0,
           textHeightLoose: 2.0,
           playerCollapsedHeight: 120.0,
           playerDismissThreshold: 100.0,
@@ -324,7 +299,6 @@ void main() {
       test('returns second value at t=1', () {
         final first = TilawaDesignTokens.light();
         const second = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -358,11 +332,12 @@ void main() {
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
           contentMaxWidthSettings: 900,
-          cardCompactWidthThreshold: 200.0,
-          cardCompactHeightThreshold: 220.0,
+          narrowCardWidthThreshold: 200.0,
+          narrowCardHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
+          minInteractiveDimension: 44.0,
           textHeightLoose: 2.0,
           playerCollapsedHeight: 120.0,
           playerDismissThreshold: 100.0,
@@ -382,7 +357,6 @@ void main() {
 
       test('returns middle value at t=0.5', () {
         const first = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 2.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -416,11 +390,12 @@ void main() {
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
           contentMaxWidthSettings: 760,
-          cardCompactWidthThreshold: 180.0,
-          cardCompactHeightThreshold: 194.0,
+          narrowCardWidthThreshold: 180.0,
+          narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
+          minInteractiveDimension: 44.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
           playerDismissThreshold: 80.0,
@@ -433,7 +408,6 @@ void main() {
           playerAlphaScalingFactor: 2.5,
         );
         const second = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 8.0,
           spaceSmall: 16.0,
@@ -467,11 +441,12 @@ void main() {
           contentMaxWidthForm: 700,
           contentMaxWidthMedia: 1400,
           contentMaxWidthSettings: 900,
-          cardCompactWidthThreshold: 200.0,
-          cardCompactHeightThreshold: 220.0,
+          narrowCardWidthThreshold: 200.0,
+          narrowCardHeightThreshold: 220.0,
           cardTightHeightThreshold: 160.0,
           iconSizeExtraSmall: 18,
           iconSizeExtraLarge: 72,
+          minInteractiveDimension: 44.0,
           textHeightLoose: 2.0,
           playerCollapsedHeight: 120.0,
           playerDismissThreshold: 100.0,
@@ -490,14 +465,13 @@ void main() {
         expect(lerped.opacitySubtle, closeTo(0.15, 0.01));
         expect(lerped.contentMaxWidthReader, closeTo(810, 1.0));
         expect(lerped.iconSizeExtraSmall, closeTo(15.0, 0.01));
-        expect(lerped.iconSizeExtraLarge, closeTo(60.0, 0.01));
+        expect(lerped.iconSizeExtraLarge, closeTo(58.0, 0.01));
         expect(lerped.textHeightLoose, closeTo(1.9, 0.01));
       });
 
       test('interpolates Offset values', () {
         final first = TilawaDesignTokens.light();
         const second = TilawaDesignTokens(
-          density: TilawaDensity.comfortable,
           spaceTiny: 4.0,
           spaceExtraSmall: 4.0,
           spaceSmall: 8.0,
@@ -531,11 +505,12 @@ void main() {
           contentMaxWidthForm: 560,
           contentMaxWidthMedia: 1200,
           contentMaxWidthSettings: 760,
-          cardCompactWidthThreshold: 180.0,
-          cardCompactHeightThreshold: 194.0,
+          narrowCardWidthThreshold: 180.0,
+          narrowCardHeightThreshold: 194.0,
           cardTightHeightThreshold: 145.0,
           iconSizeExtraSmall: 12,
-          iconSizeExtraLarge: 48,
+          iconSizeExtraLarge: 44,
+          minInteractiveDimension: 44.0,
           textHeightLoose: 1.8,
           playerCollapsedHeight: 100.0,
           playerDismissThreshold: 80.0,
@@ -556,7 +531,6 @@ void main() {
         'handles Duration differently (discrete at t<0.5 returns first)',
         () {
           const first = TilawaDesignTokens(
-            density: TilawaDensity.comfortable,
             spaceTiny: 4.0,
             spaceExtraSmall: 4.0,
             spaceSmall: 8.0,
@@ -584,7 +558,8 @@ void main() {
             iconSizeMedium: 20.0,
             iconSizeLarge: 24.0,
             iconSizeLargePlus: 42.0,
-            iconSizeExtraLarge: 48.0,
+            iconSizeExtraLarge: 44.0,
+            minInteractiveDimension: 44.0,
             textHeightLoose: 1.8,
             durationFast: Duration(milliseconds: 200),
             durationMedium: Duration(milliseconds: 400),
@@ -593,8 +568,8 @@ void main() {
             contentMaxWidthForm: 560,
             contentMaxWidthMedia: 1200,
             contentMaxWidthSettings: 760,
-            cardCompactWidthThreshold: 180.0,
-            cardCompactHeightThreshold: 194.0,
+            narrowCardWidthThreshold: 180.0,
+            narrowCardHeightThreshold: 194.0,
             cardTightHeightThreshold: 145.0,
             playerCollapsedHeight: 100.0,
             playerDismissThreshold: 80.0,
@@ -607,7 +582,6 @@ void main() {
             playerAlphaScalingFactor: 2.5,
           );
           const second = TilawaDesignTokens(
-            density: TilawaDensity.comfortable,
             spaceTiny: 4.0,
             spaceExtraSmall: 8.0,
             spaceSmall: 16.0,
@@ -636,6 +610,7 @@ void main() {
             iconSizeLarge: 40.0,
             iconSizeLargePlus: 56.0,
             iconSizeExtraLarge: 96.0,
+            minInteractiveDimension: 44.0,
             textHeightLoose: 2.0,
             durationFast: Duration(milliseconds: 300),
             durationMedium: Duration(milliseconds: 600),
@@ -644,8 +619,8 @@ void main() {
             contentMaxWidthForm: 700,
             contentMaxWidthMedia: 1400,
             contentMaxWidthSettings: 900,
-            cardCompactWidthThreshold: 200.0,
-            cardCompactHeightThreshold: 220.0,
+            narrowCardWidthThreshold: 200.0,
+            narrowCardHeightThreshold: 220.0,
             cardTightHeightThreshold: 160.0,
             playerCollapsedHeight: 120.0,
             playerDismissThreshold: 100.0,
@@ -685,6 +660,28 @@ void main() {
                 final accessedTokens = Theme.of(context).tokens;
                 expect(accessedTokens.spaceSmall, 8.0);
                 expect(accessedTokens.radiusSmall, 8.0);
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
+      });
+    });
+
+    group('TilawaIconSizeX extension', () {
+      testWidgets('exposes icon size steps including largePlus', (
+        WidgetTester tester,
+      ) async {
+        final tokens = TilawaDesignTokens.light();
+        final theme = ThemeData(extensions: [tokens]);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: Builder(
+              builder: (context) {
+                expect(context.iconSizeExtraLarge, 44.0);
+                expect(context.iconSizeLargePlus, 42.0);
                 return const SizedBox.shrink();
               },
             ),

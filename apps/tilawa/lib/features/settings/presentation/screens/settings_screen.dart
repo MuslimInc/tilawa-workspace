@@ -32,15 +32,10 @@ void _showColorPicker(
   PrimaryColorSource currentSource,
   String? currentPresetId,
 ) {
-  final tokens = Theme.of(context).tokens;
   showTilawaModalBottomSheet<void>(
     context: context,
     backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens.radiusExtraLarge),
-      ),
-    ),
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     builder: (sheetContext) => _ColorPickerSheet(
       currentColor: currentColor,
       currentSource: currentSource,
@@ -69,18 +64,20 @@ void _showCustomColorPicker(BuildContext context, Color currentColor) {
           ),
         ),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: ctx.l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(ctx.l10n.cancel),
           ),
-          TextButton(
+          TilawaButton(
+            text: ctx.l10n.save,
+            variant: TilawaButtonVariant.primary,
             onPressed: () {
               ctx.read<ThemeCubit>().setPrimaryColorArgb(
                 pickerColor.toARGB32(),
               );
               Navigator.of(ctx).pop();
             },
-            child: Text(ctx.l10n.save),
           ),
         ],
       );
@@ -90,30 +87,20 @@ void _showCustomColorPicker(BuildContext context, Color currentColor) {
 
 void _showLanguagePicker(BuildContext context, Locale currentLocale) {
   final theme = Theme.of(context);
-  final tokens = theme.tokens;
   showTilawaModalBottomSheet<void>(
     context: context,
     backgroundColor: theme.colorScheme.surfaceContainerLow,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens.radiusExtraLarge),
-      ),
-    ),
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     builder: (_) => _LanguagePickerSheet(currentLocale: currentLocale),
   );
 }
 
 void _showConcurrentDownloadsPicker(BuildContext context, int currentValue) {
   final theme = Theme.of(context);
-  final tokens = theme.tokens;
   showTilawaModalBottomSheet<void>(
     context: context,
     backgroundColor: theme.colorScheme.surfaceContainerLow,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens.radiusExtraLarge),
-      ),
-    ),
+    shape: TilawaBottomSheetScaffold.modalShape(context),
     builder: (_) => _ConcurrentDownloadsSheet(currentValue: currentValue),
   );
 }
@@ -125,19 +112,18 @@ void _showLogoutDialog(BuildContext context) {
       title: Text(ctx.l10n.logout),
       content: Text(ctx.l10n.logoutConfirmation),
       actions: [
-        TextButton(
+        TilawaButton(
+          text: ctx.l10n.cancel,
+          variant: TilawaButtonVariant.ghost,
           onPressed: () => Navigator.pop(ctx),
-          child: Text(ctx.l10n.cancel),
         ),
-        TextButton(
+        TilawaButton(
+          text: ctx.l10n.logout,
+          variant: TilawaButtonVariant.danger,
           onPressed: () {
             Navigator.pop(ctx);
             ctx.read<AuthBloc>().add(const SignOutEvent());
           },
-          child: Text(
-            ctx.l10n.logout,
-            style: const TextStyle(color: AppColors.error),
-          ),
         ),
       ],
     ),
@@ -149,6 +135,7 @@ String _localizedPresetName(BuildContext context, PrimaryColorPreset preset) {
   return switch (preset) {
     PrimaryColorPreset.teal => l10n.colorCyan,
     PrimaryColorPreset.sage => l10n.colorGreen,
+    PrimaryColorPreset.gold => l10n.colorGold,
     PrimaryColorPreset.brown => l10n.colorBrown,
     PrimaryColorPreset.purple => l10n.colorPurple,
   };
@@ -303,7 +290,6 @@ class SettingsScreen extends StatelessWidget {
                                 children: [
                                   TilawaSettingsSwitchTile(
                                     icon: FluentIcons.dark_theme_24_regular,
-                                    iconColor: AppColors.settingsTheme,
                                     title: context.l10n.darkTheme,
                                     value: state.mode == AppThemeMode.dark,
                                     onChanged: (value) => context
@@ -313,23 +299,8 @@ class SettingsScreen extends StatelessWidget {
                                       top: Radius.circular(tokens.radiusLarge),
                                     ),
                                   ),
-                                  BlocBuilder<SettingsCubit, SettingsState>(
-                                    builder: (context, settingsState) {
-                                      return TilawaSettingsSwitchTile(
-                                        icon: FluentIcons
-                                            .arrow_minimize_24_regular,
-                                        iconColor: AppColors.settingsTheme,
-                                        title: context.l10n.compactDesign,
-                                        value: settingsState.useCompactDesign,
-                                        onChanged: (value) => context
-                                            .read<SettingsCubit>()
-                                            .setUseCompactDesign(value),
-                                      );
-                                    },
-                                  ),
                                   TilawaSettingsTile(
                                     icon: FluentIcons.color_24_regular,
-                                    iconColor: AppColors.settingsColor,
                                     title: context.l10n.primaryColor,
                                     trailing: _PrimaryColorTileTrailing(
                                       color: state.primaryColor,
@@ -349,7 +320,6 @@ class SettingsScreen extends StatelessWidget {
                             builder: (context, state) {
                               return TilawaSettingsTile(
                                 icon: FluentIcons.local_language_24_regular,
-                                iconColor: AppColors.settingsLanguage,
                                 title: context.l10n.language,
                                 onTap: () =>
                                     _showLanguagePicker(context, state.locale),
@@ -375,7 +345,6 @@ class SettingsScreen extends StatelessWidget {
                                 children: [
                                   TilawaSettingsSwitchTile(
                                     icon: FluentIcons.history_24_regular,
-                                    iconColor: AppColors.settingsPlayback,
                                     title: context.l10n.restorePlaybackState,
                                     value: state.restorePlaybackState,
                                     onChanged: (value) => context
@@ -387,7 +356,6 @@ class SettingsScreen extends StatelessWidget {
                                   ),
                                   TilawaSettingsSwitchTile(
                                     icon: FluentIcons.timer_24_regular,
-                                    iconColor: AppColors.settingsDuration,
                                     title:
                                         context.l10n.enableRecitationDuration,
                                     value: state.isSleepTimerEnabled,
@@ -416,7 +384,6 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           TilawaSettingsTile(
                             icon: FluentIcons.bookmark_24_regular,
-                            iconColor: AppColors.settingsBookmarks,
                             title: context.l10n.bookmarks,
                             onTap: () => const BookmarksRoute().push(context),
                             borderRadius: BorderRadius.vertical(
@@ -425,19 +392,16 @@ class SettingsScreen extends StatelessWidget {
                           ),
                           TilawaSettingsTile(
                             icon: FluentIcons.history_24_regular,
-                            iconColor: AppColors.settingsHistory,
                             title: context.l10n.listeningHistory,
                             onTap: () => const HistoryRoute().push(context),
                           ),
                           TilawaSettingsTile(
                             icon: FluentIcons.clock_24_regular,
-                            iconColor: AppColors.settingsPrayer,
                             title: context.l10n.prayerTimes,
                             onTap: () => const PrayerTimesRoute().push(context),
                           ),
                           TilawaSettingsTile(
                             icon: FluentIcons.book_24_regular,
-                            iconColor: AppColors.settingsQuran,
                             title: context.l10n.quranReader,
                             onTap: () =>
                                 const QuranLastReadRoute().push(context),
@@ -457,7 +421,6 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           TilawaSettingsTile(
                             icon: FluentIcons.folder_24_regular,
-                            iconColor: AppColors.settingsStorage,
                             title: context.l10n.manageStorage,
                             onTap: () => const DownloadsRoute().push(context),
                             borderRadius: BorderRadius.vertical(
@@ -468,7 +431,6 @@ class SettingsScreen extends StatelessWidget {
                             builder: (context, state) {
                               return TilawaSettingsTile(
                                 icon: FluentIcons.arrow_download_24_regular,
-                                iconColor: AppColors.settingsDownloads,
                                 title: context.l10n.concurrentDownloads,
                                 onTap: () => _showConcurrentDownloadsPicker(
                                   context,
@@ -494,7 +456,6 @@ class SettingsScreen extends StatelessWidget {
                           children: [
                             TilawaSettingsTile(
                               icon: FluentIcons.apps_list_24_regular,
-                              iconColor: AppColors.settingsBookmarks,
                               title: 'Route list',
                               onTap: () => const RouteListRoute().push(context),
                               borderRadius: BorderRadius.vertical(
@@ -655,115 +616,84 @@ class _SettingsProfileCard extends StatelessWidget {
             : context.l10n.signInToSync;
 
         final Color primary = colorScheme.primary;
-        final Color gradientHi = Color.lerp(
-          primary,
-          colorScheme.surface,
-          context.isDarkMode ? 0.1 : 0.16,
-        )!;
-        final Color gradientLo = Color.lerp(
-          primary,
-          colorScheme.onSurface,
-          context.isDarkMode ? 0.14 : 0.05,
-        )!;
 
         void onGuestTap() => const LoginRoute().push(context);
 
-        final Widget card = Container(
-          decoration: BoxDecoration(
-            borderRadius: borderRadius,
-            boxShadow: [
-              BoxShadow(
-                color: primary.withValues(
-                  alpha: context.isDarkMode
-                      ? tokens.opacityShadowStrong
-                      : tokens.opacityShadow,
-                ),
-                blurRadius: tokens.blurShadow * 1.5,
-                offset: tokens.shadowOffsetMedium,
-                spreadRadius: -tokens.spaceSmall,
+        final Widget card = ClipRRect(
+          borderRadius: borderRadius,
+          child: Material(
+            color: primary,
+            child: InkWell(
+              onTap: isGuest ? onGuestTap : null,
+              mouseCursor: isGuest
+                  ? SystemMouseCursors.click
+                  : MouseCursor.defer,
+              splashColor: foregroundColor.withValues(
+                alpha: tokens.opacityMedium,
               ),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: borderRadius,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: isGuest ? onGuestTap : null,
-                mouseCursor: isGuest
-                    ? SystemMouseCursors.click
-                    : MouseCursor.defer,
-                splashColor: foregroundColor.withValues(
-                  alpha: tokens.opacityMedium,
+              highlightColor: foregroundColor.withValues(
+                alpha: tokens.opacitySubtle * 2,
+              ),
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: primary,
                 ),
-                highlightColor: foregroundColor.withValues(
-                  alpha: tokens.opacitySubtle * 2,
-                ),
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [gradientHi, gradientLo],
-                    ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceExtraLarge,
+                    vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceExtraLarge,
-                      vertical: tokens.spaceLarge + tokens.spaceExtraSmall,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        _SettingsProfileAvatar(
-                          tokens: tokens,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _SettingsProfileAvatar(
+                        tokens: tokens,
+                        foregroundColor: foregroundColor,
+                        photoUrl: user?.photoUrl,
+                      ),
+                      SizedBox(
+                        width: tokens.spaceLarge + tokens.spaceSmall,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              displayName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0,
+                                height: 1.2,
+                                color: foregroundColor,
+                              ),
+                            ),
+                            SizedBox(height: tokens.spaceExtraSmall),
+                            Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                color: foregroundColor.withValues(
+                                  alpha: tokens.opacityGlass,
+                                ),
+                                fontWeight: FontWeight.w500,
+                                height: 1.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (isGuest) ...[
+                        SizedBox(width: tokens.spaceSmall),
+                        _GuestSignInPill(
                           foregroundColor: foregroundColor,
-                          photoUrl: user?.photoUrl,
+                          tokens: tokens,
                         ),
-                        SizedBox(
-                          width: tokens.spaceLarge + tokens.spaceSmall,
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                displayName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0,
-                                  height: 1.2,
-                                  color: foregroundColor,
-                                ),
-                              ),
-                              SizedBox(height: tokens.spaceExtraSmall),
-                              Text(
-                                subtitle,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: context.textTheme.bodyMedium?.copyWith(
-                                  color: foregroundColor.withValues(
-                                    alpha: tokens.opacityGlass,
-                                  ),
-                                  fontWeight: FontWeight.w500,
-                                  height: 1.25,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        if (isGuest) ...[
-                          SizedBox(width: tokens.spaceSmall),
-                          _GuestSignInPill(
-                            foregroundColor: foregroundColor,
-                            tokens: tokens,
-                          ),
-                        ],
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),
@@ -833,7 +763,8 @@ class _SettingsProfileAvatar extends StatelessWidget {
                   child: SizedBox(
                     width: tokens.spaceLarge,
                     height: tokens.spaceLarge,
-                    child: CircularProgressIndicator(
+                    child: TilawaLoadingIndicator(
+                      centered: false,
                       strokeWidth: 2,
                       color: foregroundColor.withValues(
                         alpha: tokens.opacityGlass,
@@ -997,7 +928,8 @@ class _AppVersionInfo extends StatelessWidget {
                       SizedBox(
                         width: tokens.iconSizeSmall,
                         height: tokens.iconSizeSmall,
-                        child: CircularProgressIndicator(
+                        child: TilawaLoadingIndicator(
+                          centered: false,
                           strokeWidth: 2,
                           color: colorScheme.primary.withValues(
                             alpha: tokens.opacityEmphasis,
@@ -1060,8 +992,8 @@ class _ColorPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final isCustom = currentSource == PrimaryColorSource.custom;
 
     return SafeArea(
@@ -1099,7 +1031,7 @@ class _ColorPickerSheet extends StatelessWidget {
                     TilawaSettingsScreenTokens.primaryPickerPresetSwatchRadius,
                 backgroundColor: isCustom
                     ? currentColor
-                    : colorScheme.surfaceContainerHigh,
+                    : theme.colorScheme.surfaceContainerHigh,
                 child: isCustom
                     ? null
                     : Icon(
@@ -1108,7 +1040,7 @@ class _ColorPickerSheet extends StatelessWidget {
                             TilawaSettingsScreenTokens
                                 .primaryPickerCustomSwatchSize *
                             0.5,
-                        color: colorScheme.primary,
+                        color: theme.colorScheme.primary,
                       ),
               ),
               title: context.l10n.custom,

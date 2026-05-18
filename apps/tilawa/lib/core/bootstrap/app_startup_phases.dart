@@ -10,7 +10,7 @@ extension AppStartupCriticalPhases on AppStartupTasks {
     LaunchTimeline timeline,
   ) async {
     logger.d(
-      '[AppLaunch][AppStartupCriticalPhases.initializeFirebaseAndHydratedStorage]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupCriticalPhases.initializeFirebaseAndHydratedStorage: Start in (${DateTime.now()})',
     );
     bool firebaseOk = false;
     timeline.resetPhase();
@@ -48,7 +48,7 @@ extension AppStartupCriticalPhases on AppStartupTasks {
     required LaunchTimeline timeline,
   }) async {
     logger.d(
-      '[AppLaunch][AppStartupCriticalPhases.configurePostFirebaseServices]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupCriticalPhases.configurePostFirebaseServices: Start in (${DateTime.now()})',
     );
     if (firebaseOk && launchConfig.foregroundMessaging) {
       try {
@@ -57,7 +57,7 @@ extension AppStartupCriticalPhases on AppStartupTasks {
         timeline.log('FCM setup');
       } catch (e) {
         logger.d(
-          '[AppLaunch][AppStartupCriticalPhases.configurePostFirebaseServices]: FCM setup FAILED at (${DateTime.now()}): $e',
+          '[AppLaunch] source=AppStartupCriticalPhases.configurePostFirebaseServices: FCM setup FAILED at (${DateTime.now()}): $e',
         );
       }
     } else {
@@ -71,7 +71,7 @@ extension AppStartupCriticalPhases on AppStartupTasks {
     required LaunchTimeline timeline,
   }) async {
     logger.d(
-      '[AppLaunch][AppStartupCriticalPhases.runDependencyInjection]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupCriticalPhases.runDependencyInjection: Start in (${DateTime.now()})',
     );
     timeline.resetPhase();
     QuranQcfLocator.setup();
@@ -97,7 +97,7 @@ extension AppStartupCriticalPhases on AppStartupTasks {
     required LaunchTimeline timeline,
   }) async {
     logger.d(
-      '[AppLaunch][AppStartupCriticalPhases.configurePreRenderServices]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupCriticalPhases.configurePreRenderServices: Start in (${DateTime.now()})',
     );
     // Notification probe and SystemChrome don't block provider mount but we
     // want them done before the first route renders so splash sees correct
@@ -124,7 +124,7 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
   /// Phase 0: Initialize Hive with stagger delay.
   Future<void> runPhase0Hive(LaunchTimeline timeline) async {
     logger.d(
-      '[AppLaunch][AppStartupBackgroundPhases.runPhase0Hive]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupBackgroundPhases.runPhase0Hive: Start in (${DateTime.now()})',
     );
     try {
       if (launchConfig.hiveInit) {
@@ -134,7 +134,7 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
       await Future<void>.delayed(const Duration(milliseconds: 250));
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupBackgroundPhases.runPhase0Hive]: Phase0 error at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupBackgroundPhases.runPhase0Hive: Phase0 error at (${DateTime.now()}): $e',
       );
     }
   }
@@ -142,7 +142,7 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
   /// Phase 1: Initialize credential manager and analytics in parallel.
   Future<void> runPhase1CredentialAndAnalytics(LaunchTimeline timeline) async {
     logger.d(
-      '[AppLaunch][AppStartupBackgroundPhases.runPhase1CredentialAndAnalytics]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupBackgroundPhases.runPhase1CredentialAndAnalytics: Start in (${DateTime.now()})',
     );
     try {
       timeline.resetPhase();
@@ -167,7 +167,7 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
       await Future<void>.delayed(const Duration(milliseconds: 250));
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupBackgroundPhases.runPhase1CredentialAndAnalytics]: Phase1 error at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupBackgroundPhases.runPhase1CredentialAndAnalytics: Phase1 error at (${DateTime.now()}): $e',
       );
     }
   }
@@ -175,7 +175,7 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
   /// Phase 3: Initialize notifications, athkar, downloads, and audio service.
   Future<void> runPhase3NotificationsAndAudio(LaunchTimeline timeline) async {
     logger.d(
-      '[AppLaunch][AppStartupBackgroundPhases.runPhase3NotificationsAndAudio]: Start in (${DateTime.now()})',
+      '[AppLaunch] source=AppStartupBackgroundPhases.runPhase3NotificationsAndAudio: Start in (${DateTime.now()})',
     );
     try {
       timeline.resetPhase();
@@ -207,7 +207,7 @@ extension AppStartupBackgroundPhases on AppStartupTasks {
       await Future<void>.delayed(const Duration(milliseconds: 250));
     } catch (e) {
       logger.d(
-        '[AppLaunch][AppStartupBackgroundPhases.runPhase3NotificationsAndAudio]: Phase3 error at (${DateTime.now()}): $e',
+        '[AppLaunch] source=AppStartupBackgroundPhases.runPhase3NotificationsAndAudio: Phase3 error at (${DateTime.now()}): $e',
       );
     }
   }

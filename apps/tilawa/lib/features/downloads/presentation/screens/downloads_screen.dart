@@ -123,19 +123,18 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         title: Text(context.l10n.clearAllDownloads),
         content: Text(context.l10n.clearAllDownloadsMessage),
         actions: [
-          TextButton(
+          TilawaButton(
+            text: context.l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
             onPressed: () => Navigator.of(context).pop(),
-            child: Text(context.l10n.cancel),
           ),
-          TextButton(
+          TilawaButton(
+            text: context.l10n.deleteAll,
+            variant: TilawaButtonVariant.danger,
             onPressed: () {
               Navigator.of(context).pop();
               context.read<DownloadsBloc>().add(const ClearAllDownloads());
             },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(context.l10n.deleteAll),
           ),
         ],
       ),
@@ -343,32 +342,12 @@ class _DownloadsSummaryCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(tokens.spaceLarge),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: AlignmentDirectional.topStart,
-            end: AlignmentDirectional.bottomEnd,
-            colors: [
-              colorScheme.primaryContainer.withValues(
-                alpha: tokens.opacityGlass,
-              ),
-              colorScheme.surfaceContainerLow.withValues(
-                alpha: tokens.opacityGlass,
-              ),
-            ],
-          ),
+          color: colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(tokens.radiusLarge),
           border: Border.all(
-            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            color: colorScheme.outlineVariant,
             width: tokens.borderWidthThin,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.shadow.withValues(
-                alpha: tokens.opacityShadow * 0.36,
-              ),
-              blurRadius: tokens.blurShadow,
-              offset: tokens.shadowOffsetSmall,
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

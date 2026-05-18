@@ -4,9 +4,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -112,98 +113,190 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final tokens = theme.tokens;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: context.canPop() ? const TilawaBackButton() : null,
-        title: Text(context.l10n.prayerTimes),
-        actionsPadding: EdgeInsetsDirectional.only(end: tokens.spaceMedium),
-        actions: [
-          Semantics(
-            identifier: PrayerNotificationSemanticsIds.prayerSettingsButton,
-            child: TilawaIconActionButton(
-              icon: Icons.settings,
-              onTap: () => _showSettingsDialog(context),
-            ),
-          ),
-          SizedBox(width: tokens.spaceExtraSmall),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(64),
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              tokens.spaceLarge,
-              0,
-              tokens.spaceLarge,
-              tokens.spaceMedium,
-            ),
-            child: TilawaSegmentedControl<String>(
-              segments: [
-                TilawaSegment(value: 'today', label: context.l10n.today),
-                TilawaSegment(value: 'monthly', label: context.l10n.monthly),
-              ],
-              selectedValue: _selectedIndex == 0 ? 'today' : 'monthly',
-              selectedColor: theme.colorScheme.surfaceContainerHigh,
-              selectedTextColor: theme.colorScheme.primary,
-              onValueChanged: _onSegmentChanged,
-            ),
-          ),
-        ),
-      ),
+      // Parchment surface when opened as a standalone route (debug route list,
+      // deep links). In the main tab the shell still paints behind us, but an
+      // opaque surface avoids the black void from a transparent scaffold.
+      backgroundColor: theme.colorScheme.surface,
       // floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
-      body: BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
-        buildWhen: (previous, current) {
-          return previous.status != current.status ||
-              previous.todayPrayerTimes != current.todayPrayerTimes ||
-              previous.monthlyPrayerTimes != current.monthlyPrayerTimes ||
-              previous.settings != current.settings ||
-              previous.latitude != current.latitude ||
-              previous.longitude != current.longitude ||
-              previous.locationName != current.locationName ||
-              previous.errorMessage != current.errorMessage ||
-              previous.isLoadingLocation != current.isLoadingLocation;
-        },
-        builder: (context, state) {
-          if (PrayerTimesScreenLoadingPreview.enabled) {
-            return _prayerTimesLoadingIndicator(context);
-          }
-          switch (state.status) {
-            case PrayerTimesStatus.initial:
-            case PrayerTimesStatus.loading:
-              return _prayerTimesLoadingIndicator(context);
-
-            case PrayerTimesStatus.error:
-              return TilawaIllustratedState(
-                visual: const TilawaStateVisual(
-                  icon: Icons.event_busy_rounded,
-                  tone: TilawaStateVisualTone.error,
-                ),
-                title: state.errorMessage,
-                semanticLabel: state.errorMessage,
-                primaryAction: TilawaButton(
-                  text: context.l10n.retry,
-                  variant: TilawaButtonVariant.secondary,
-                  leadingIcon: const Icon(Icons.refresh_rounded),
-                  onPressed: () {
-                    context.read<PrayerTimesBloc>().add(
-                      const PrayerTimesEvent.loadPrayerTimes(),
-                    );
-                  },
-                ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          const Positioned.fill(child: _PrayerTimesAmbientBackground()),
+          BlocBuilder<PrayerTimesBloc, PrayerTimesState>(
+            buildWhen: (previous, current) {
+              return previous.status != current.status ||
+                  previous.todayPrayerTimes != current.todayPrayerTimes ||
+                  previous.monthlyPrayerTimes != current.monthlyPrayerTimes ||
+                  previous.settings != current.settings ||
+                  previous.latitude != current.latitude ||
+                  previous.longitude != current.longitude ||
+                  previous.locationName != current.locationName ||
+                  previous.errorMessage != current.errorMessage ||
+                  previous.isLoadingLocation != current.isLoadingLocation;
+            },
+            builder: (context, state) {
+              return NestedScrollView(
+                headerSliverBuilder: (context, innerBoxIsScrolled) {
+                  return [
+                    SliverOverlapAbsorber(
+                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context,
+                      ),
+                      sliver: SliverAppBar(
+                        pinned: true,
+                        automaticallyImplyLeading: false,
+                        leading: context.canPop()
+                            ? const TilawaBackButton()
+                            : null,
+                        backgroundColor: theme.colorScheme.surfaceContainer,
+                        surfaceTintColor: Colors.transparent,
+                        elevation: 0,
+                        scrolledUnderElevation: 0,
+                        title: Text(
+                          context.l10n.prayerTimes,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        actions: [
+                          Semantics(
+                            identifier: PrayerNotificationSemanticsIds
+                                .prayerSettingsButton,
+                            child: TilawaIconActionButton(
+                              icon: Icons.settings,
+                              onTap: () => _showSettingsDialog(context),
+                            ),
+                          ),
+                          SizedBox(width: tokens.spaceExtraSmall),
+                        ],
+                        bottom: PreferredSize(
+                          preferredSize: Size.fromHeight(
+                            tokens.minInteractiveDimension +
+                                tokens.spaceSmall +
+                                tokens.spaceTiny,
+                          ),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.surfaceContainer,
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: theme.colorScheme.outlineVariant
+                                      .withValues(alpha: tokens.opacityMedium),
+                                ),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                tokens.spaceLarge,
+                                tokens.spaceTiny,
+                                tokens.spaceLarge,
+                                tokens.spaceTiny,
+                              ),
+                              child: TilawaSegmentedControl<String>(
+                                segments: [
+                                  TilawaSegment(
+                                    value: 'today',
+                                    label: context.l10n.today,
+                                  ),
+                                  TilawaSegment(
+                                    value: 'monthly',
+                                    label: context.l10n.monthly,
+                                  ),
+                                ],
+                                selectedValue: _selectedIndex == 0
+                                    ? 'today'
+                                    : 'monthly',
+                                // Selected pill matches the Parchment card tier
+                                // used by the body cards (TilawaCard / surface)
+                                // so the picked tab reads as "the page below."
+                                backgroundColor:
+                                    theme.colorScheme.surfaceContainer,
+                                selectedColor: theme.colorScheme.surface,
+                                selectedTextColor: theme.colorScheme.primary,
+                                // Match the body cards' rounding so the header
+                                // chrome and the cards share the same rhythm.
+                                // TILAWA_BRAND.md §5 — `card` family.
+                                containerRadius: tokens.resolveRadius(
+                                  family: TilawaRadiusFamily.card,
+                                ),
+                                onValueChanged: _onSegmentChanged,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ];
+                },
+                body: _buildBody(context, state),
               );
-
-            case PrayerTimesStatus.locationRequired:
-              return _buildLocationRequiredView(context, state);
-
-            case PrayerTimesStatus.loaded:
-              return IndexedStack(
-                index: _selectedIndex,
-                children: [
-                  _buildTodayView(context, state),
-                  _buildMonthlyView(context, state),
-                ],
-              );
-          }
-        },
+            },
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildBody(BuildContext context, PrayerTimesState state) {
+    if (PrayerTimesScreenLoadingPreview.enabled) {
+      return _nonScrollableBody(_prayerTimesLoadingIndicator(context));
+    }
+
+    switch (state.status) {
+      case PrayerTimesStatus.initial:
+      case PrayerTimesStatus.loading:
+        return _nonScrollableBody(_prayerTimesLoadingIndicator(context));
+
+      case PrayerTimesStatus.error:
+        return _nonScrollableBody(
+          TilawaIllustratedState(
+            visual: const TilawaStateVisual(
+              icon: Icons.event_busy_rounded,
+              tone: TilawaStateVisualTone.error,
+            ),
+            title: state.errorMessage,
+            semanticLabel: state.errorMessage,
+            primaryAction: TilawaButton(
+              text: context.l10n.retry,
+              variant: TilawaButtonVariant.secondary,
+              leadingIcon: const Icon(Icons.refresh_rounded),
+              onPressed: () {
+                context.read<PrayerTimesBloc>().add(
+                  const PrayerTimesEvent.loadPrayerTimes(),
+                );
+              },
+            ),
+          ),
+        );
+
+      case PrayerTimesStatus.locationRequired:
+        return _nonScrollableBody(_buildLocationRequiredView(context, state));
+
+      case PrayerTimesStatus.loaded:
+        return IndexedStack(
+          index: _selectedIndex,
+          children: [
+            _buildTodayView(context, state),
+            _buildMonthlyView(context, state),
+          ],
+        );
+    }
+  }
+
+  /// Wraps a non-scrollable body in a CustomScrollView so NestedScrollView's
+  /// header overlap is properly absorbed even when there's nothing to scroll.
+  Widget _nonScrollableBody(Widget child) {
+    return Builder(
+      builder: (context) {
+        return CustomScrollView(
+          slivers: [
+            SliverOverlapInjector(
+              handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            ),
+            SliverFillRemaining(hasScrollBody: false, child: child),
+          ],
+        );
+      },
     );
   }
 
@@ -263,7 +356,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   Widget _buildTodayView(BuildContext context, PrayerTimesState state) {
     if (state.todayPrayerTimes == null) {
-      return _prayerTimesLoadingIndicator(context);
+      return _nonScrollableBody(_prayerTimesLoadingIndicator(context));
     }
 
     final tokens = Theme.of(context).tokens;
@@ -274,40 +367,49 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           const PrayerTimesEvent.loadPrayerTimes(),
         );
       },
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          const Positioned.fill(child: _PrayerTimesAmbientBackground()),
-          ListView(
+      child: Builder(
+        builder: (context) {
+          return CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
             ),
-            padding: EdgeInsets.only(
-              top: tokens.spaceMedium,
-              bottom: tokens.spaceExtraLarge,
-            ),
-            children: [
-              _LocationUtilityCard(
-                locationName: state.locationName,
-                onUpdateLocation: () {
-                  context.read<PrayerTimesBloc>().add(
-                    const PrayerTimesEvent.updateLocation(),
-                  );
-                },
-                isLoading: state.isLoadingLocation,
+            slivers: [
+              SliverOverlapInjector(
+                handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                  context,
+                ),
               ),
-              _CountdownCardSection(),
-              _TodayPrayerList(
-                prayerTimes: state.todayPrayerTimes!,
-                settings: state.settings,
-              ),
-              _BottomUtilitiesCard(
-                onOpenQibla: () => const QiblaRoute().push(context),
-                onManageAlertsTap: () => _showNotificationDialog(context),
+              SliverPadding(
+                padding: EdgeInsets.only(
+                  top: tokens.spaceSmall,
+                  bottom: prayerTimesScrollBottomPadding(context),
+                ),
+                sliver: SliverList.list(
+                  children: [
+                    _LocationUtilityCard(
+                      locationName: state.locationName,
+                      onUpdateLocation: () {
+                        context.read<PrayerTimesBloc>().add(
+                          const PrayerTimesEvent.updateLocation(),
+                        );
+                      },
+                      isLoading: state.isLoadingLocation,
+                    ),
+                    _CountdownCardSection(),
+                    _TodayPrayerList(
+                      prayerTimes: state.todayPrayerTimes!,
+                      settings: state.settings,
+                    ),
+                    _BottomUtilitiesCard(
+                      onOpenQibla: () => const QiblaRoute().push(context),
+                      onManageAlertsTap: () => _showNotificationDialog(context),
+                    ),
+                  ],
+                ),
               ),
             ],
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -338,9 +440,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final PrayerPermissionsCubit permissionsCubit = context
         .read<PrayerPermissionsCubit>();
 
-    showModalBottomSheet(
+    showTilawaModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
       builder: (modalContext) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: bloc),
@@ -356,9 +460,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     final PrayerPermissionsCubit permissionsCubit = context
         .read<PrayerPermissionsCubit>();
 
-    showModalBottomSheet(
+    showTilawaModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
       builder: (modalContext) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: bloc),
@@ -549,17 +655,32 @@ class _CountdownTickerState extends State<_CountdownTicker> {
       (c) => c.state.showPrayerTimesAlertChipLabels,
     );
 
+    final heroRow = PrayerRowViewDataMapper.rowForPrayerItem(
+      prayerTimes: widget.prayerTimes,
+      settings: widget.settings,
+      item: nextPrayer,
+      currentPrayer: nextPrayer,
+      l10n: context.l10n,
+      isArabic: context.isArabic,
+    );
+
     return NextPrayerCountdownCard(
       nextPrayer: nextPrayer,
       timeUntil: timeUntil,
       use24HourFormat: widget.settings.use24HourFormat,
       dateMetaLabel: widget.dateMetaLabel,
-      alert: PrayerRowViewDataMapper.alertViewData(
-        settings: widget.settings,
-        type: nextPrayer.type,
-        l10n: context.l10n,
-      ),
+      alert: heroRow.alert,
       showPrayerTimeChipLabels: showAlertChipLabels,
+      onAlertTap: heroRow.alert.supportsAlerts
+          ? () => _openPrayerAlertQuickSheet(
+              context,
+              settings: widget.settings,
+              row: heroRow,
+            )
+          : null,
+      alertTooltip: heroRow.alert.supportsAlerts
+          ? context.l10n.prayerNotifications
+          : null,
     );
   }
 }
@@ -638,17 +759,15 @@ class _LocationUtilityCard extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         tokens.spaceLarge,
-        tokens.spaceSmall,
+        0,
         tokens.spaceLarge,
         0,
       ),
       child: TilawaCard(
-        flat: true,
-        borderRadius: tokens.radiusLarge,
-        backgroundColor: colorScheme.surfaceContainerLow,
-        borderColor: colorScheme.outlineVariant.withValues(
-          alpha: tokens.opacityMedium,
-        ),
+        surface: TilawaCardSurface.raised,
+        // TILAWA_BRAND.md §5 — `card` family.
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
+        backgroundColor: colorScheme.surface,
         onTap: isLoading ? null : onUpdateLocation,
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceSmall,
@@ -656,7 +775,7 @@ class _LocationUtilityCard extends StatelessWidget {
         ),
         child: _UtilityActionRow(
           icon: Icons.location_on_outlined,
-          label: PrayerLocationLabelFormatter.compactLabel(
+          label: PrayerLocationLabelFormatter.abbreviatedLocationLabel(
             locationName: locationName,
             l10n: context.l10n,
           ),
@@ -704,12 +823,10 @@ class _BottomUtilitiesCard extends StatelessWidget {
         0,
       ),
       child: TilawaCard(
-        flat: true,
-        borderRadius: tokens.radiusLarge,
-        backgroundColor: colorScheme.surfaceContainerLow,
-        borderColor: colorScheme.outlineVariant.withValues(
-          alpha: tokens.opacityMedium,
-        ),
+        surface: TilawaCardSurface.raised,
+        // TILAWA_BRAND.md §5 — `card` family.
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
+        backgroundColor: colorScheme.surface,
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceSmall,
           vertical: tokens.spaceExtraSmall,
@@ -808,14 +925,21 @@ class _UtilityInlineAction extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
+    // Concentric corner rule: row radius = card radius - card horizontal padding.
+    // _BottomUtilitiesCard: cardRadius=radiusExtraLarge, hPad=spaceSmall.
+    final double inkRadius = tokens.concentricInner(
+      outerRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
+      padding: tokens.spaceSmall,
+    );
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+        borderRadius: BorderRadius.circular(inkRadius),
         child: ConstrainedBox(
-          constraints: const BoxConstraints(
-            minHeight: kMinInteractiveDimension,
+          constraints: BoxConstraints(
+            minHeight: context.minInteractiveDimension,
           ),
           child: _UtilityActionRow(
             semanticsId: semanticsId,
@@ -889,6 +1013,36 @@ class _UtilityActionRow extends StatelessWidget {
   }
 }
 
+void _openPrayerAlertQuickSheet(
+  BuildContext context, {
+  required PrayerSettingsEntity settings,
+  required PrayerRowViewData row,
+}) {
+  final bloc = context.read<PrayerTimesBloc>();
+  showTilawaModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shape: TilawaBottomSheetScaffold.modalShape(context),
+    builder: (modalContext) => BlocProvider.value(
+      value: bloc,
+      child: _PrayerAlertQuickSheet(
+        row: row,
+        onModeSelected: (mode) {
+          final updated = PrayerRowViewDataMapper.updatedAlertModeSettings(
+            settings,
+            row.type,
+            mode,
+          );
+          if (updated == null) return;
+          bloc.add(PrayerTimesEvent.updateSettings(updated));
+          Navigator.of(modalContext).pop();
+        },
+      ),
+    ),
+  );
+}
+
 class _TodayPrayerListSection extends StatelessWidget {
   const _TodayPrayerListSection({
     required this.prayerTimes,
@@ -916,6 +1070,7 @@ class _TodayPrayerListSection extends StatelessWidget {
       currentPrayer: currentPrayer,
       l10n: context.l10n,
       isArabic: isArabic,
+      omitFromListWhenSameInstantAs: currentPrayer,
     );
 
     return Padding(
@@ -926,62 +1081,57 @@ class _TodayPrayerListSection extends StatelessWidget {
         0,
       ),
       child: TilawaCard(
-        flat: true,
-        borderRadius: tokens.radiusLarge,
-        backgroundColor: colorScheme.surfaceContainerLow,
-        borderColor: colorScheme.outlineVariant.withValues(
-          alpha: tokens.opacityMedium,
-        ),
+        surface: TilawaCardSurface.raised,
+        // TILAWA_BRAND.md §5 — `card` family.
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
+        backgroundColor: colorScheme.surface,
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceMedium,
           vertical: tokens.spaceSmall,
         ),
         child: Column(
-          spacing: tokens.spaceExtraSmall,
-          children: rows.map((row) {
-            return _TodayPrayerListRow(
-              row: row,
-              prayerName: row.prayerName,
-              prayerTime: row.prayerTime,
-              statusText: row.statusText,
-              isCurrent: row.isCurrent,
-              hasPassed: row.hasPassed,
-              isSecondary: row.isSecondary,
-              showAlertIndicators: row.showAlertIndicators,
-              showAlertChipLabels: showAlertChipLabels,
-              onTap: row.alert.supportsAlerts
-                  ? () => _showPrayerAlertSheet(context, row)
-                  : null,
-            );
-          }).toList(),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: tokens.spaceTiny,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                tokens.spaceExtraSmall,
+                tokens.spaceTiny,
+                tokens.spaceExtraSmall,
+                tokens.spaceExtraSmall,
+              ),
+              child: Text(
+                context.l10n.prayerTimesTodaySchedule,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            ...rows.map((row) {
+              return _TodayPrayerListRow(
+                row: row,
+                prayerName: row.prayerName,
+                prayerTime: row.prayerTime,
+                statusText: row.statusText,
+                isCurrent: row.isCurrent,
+                hasPassed: row.hasPassed,
+                isSecondary: row.isSecondary,
+                showAlertIndicators: row.showAlertIndicators,
+                showAlertChipLabels: showAlertChipLabels,
+                onTap: row.alert.supportsAlerts
+                    ? () => _showPrayerAlertSheet(context, row)
+                    : null,
+              );
+            }),
+          ],
         ),
       ),
     );
   }
 
   void _showPrayerAlertSheet(BuildContext context, PrayerRowViewData row) {
-    final bloc = context.read<PrayerTimesBloc>();
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (modalContext) => BlocProvider.value(
-        value: bloc,
-        child: _PrayerAlertQuickSheet(
-          row: row,
-          onModeSelected: (mode) {
-            final updated = PrayerRowViewDataMapper.updatedAlertModeSettings(
-              settings,
-              row.type,
-              mode,
-            );
-            if (updated == null) return;
-            bloc.add(PrayerTimesEvent.updateSettings(updated));
-            Navigator.of(modalContext).pop();
-          },
-        ),
-      ),
-    );
+    _openPrayerAlertQuickSheet(context, settings: settings, row: row);
   }
 }
 
@@ -1015,149 +1165,121 @@ class _TodayPrayerListRow extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final Color rowColor = isCurrent
+    final Color emphasisColor = isCurrent
         ? colorScheme.primary
         : colorScheme.onSurface;
     final double rowAlpha = isSecondary
         ? tokens.opacityEmphasis
         : (hasPassed ? tokens.opacityEmphasis : 1);
 
+    // Concentric corner rule: row radius = card radius - card horizontal padding.
+    // _TodayPrayerListSection: cardRadius=radiusExtraLarge, hPad=spaceMedium.
+    final double rowRadius = tokens.concentricInner(
+      outerRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
+      padding: tokens.spaceMedium,
+    );
+
     return Material(
       color: Colors.transparent,
-      borderRadius: BorderRadius.circular(tokens.radiusMedium),
+      borderRadius: BorderRadius.circular(rowRadius),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
+        borderRadius: BorderRadius.circular(rowRadius),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: isCurrent
                 ? colorScheme.primaryContainer.withValues(
-                    alpha: tokens.opacitySubtle,
+                    alpha: tokens.opacityMedium,
                   )
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(tokens.radiusMedium),
-            border: isCurrent
-                ? Border.all(
-                    color: colorScheme.primary.withValues(
-                      alpha: tokens.opacityMedium,
-                    ),
-                    width: tokens.borderWidthThin * 2,
-                  )
-                : null,
+            borderRadius: BorderRadius.circular(rowRadius),
           ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: tokens.spaceExtraSmall,
-              horizontal: tokens.spaceSmall,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: tokens.minInteractiveDimension,
             ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final narrow = PrayerTimesLayout.isNarrowWidth(
-                  constraints.maxWidth,
-                );
-                final bool compactChipLabels = showAlertChipLabels && !narrow;
-                final TextStyle nameStyle =
-                    theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                      color: rowColor.withValues(alpha: rowAlpha),
-                    ) ??
-                    TextStyle(
-                      fontWeight: isCurrent ? FontWeight.w800 : FontWeight.w600,
-                      color: rowColor.withValues(alpha: rowAlpha),
-                      fontSize: 15,
-                    );
-                final TextStyle statusStyle =
-                    theme.textTheme.labelSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isCurrent
-                          ? rowColor.withValues(alpha: rowAlpha)
-                          : colorScheme.onSurfaceVariant.withValues(
-                              alpha: 0.92,
-                            ),
-                    ) ??
-                    TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                      color: isCurrent
-                          ? rowColor.withValues(alpha: rowAlpha)
-                          : colorScheme.onSurfaceVariant.withValues(
-                              alpha: 0.92,
-                            ),
-                    );
-                final TextStyle timeStyle =
-                    theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: rowColor.withValues(alpha: rowAlpha),
-                    ) ??
-                    TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: rowColor.withValues(alpha: rowAlpha),
-                      fontSize: 18,
-                    );
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: tokens.spaceExtraSmall + tokens.spaceTiny,
+                horizontal: tokens.spaceSmall,
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final narrow = PrayerTimesLayout.isNarrowWidth(
+                    constraints.maxWidth,
+                  );
+                  final bool abbreviatedChipLabels =
+                      showAlertChipLabels && !narrow;
+                  final TextStyle nameStyle = theme.textTheme.titleSmall!
+                      .copyWith(
+                        fontWeight: isCurrent
+                            ? FontWeight.w700
+                            : FontWeight.w600,
+                        height: 1.2,
+                        color: emphasisColor.withValues(alpha: rowAlpha),
+                      );
+                  final TextStyle statusStyle = theme.textTheme.labelSmall!
+                      .copyWith(
+                        fontWeight: FontWeight.w500,
+                        height: 1.15,
+                        color: isCurrent
+                            ? colorScheme.primary.withValues(
+                                alpha: rowAlpha * 0.92,
+                              )
+                            : colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.92,
+                              ),
+                      );
+                  final TextStyle timeStyle = theme.textTheme.titleSmall!
+                      .copyWith(
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                        color: emphasisColor.withValues(alpha: rowAlpha),
+                      );
 
-                if (narrow) {
-                  return Row(
+                  final Widget leftBlock = Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(prayerName, style: nameStyle),
-                            SizedBox(height: tokens.spaceExtraSmall / 2),
-                            Text(statusText, style: statusStyle),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: tokens.spaceSmall),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            prayerTime,
-                            style: timeStyle,
-                            textAlign: TextAlign.end,
-                          ),
-                          if (showAlertIndicators) ...[
-                            SizedBox(height: tokens.spaceExtraSmall),
-                            PrayerAlertStatusChip(
-                              alert: row.alert,
-                              showLabel: compactChipLabels,
-                            ),
-                          ],
-                        ],
-                      ),
+                      Text(prayerName, style: nameStyle),
+                      if (statusText.isNotEmpty)
+                        Text(statusText, style: statusStyle),
                     ],
                   );
-                }
 
-                return Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(prayerName, style: nameStyle),
-                          SizedBox(height: tokens.spaceExtraSmall / 2),
-                          Text(statusText, style: statusStyle),
-                        ],
+                  final Widget trailingBlock = Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        prayerTime,
+                        style: timeStyle,
+                        textAlign: TextAlign.end,
                       ),
-                    ),
-                    SizedBox(width: tokens.spaceSmall),
-                    Text(prayerTime, style: timeStyle),
-                    if (showAlertIndicators) ...[
-                      SizedBox(width: tokens.spaceMedium),
-                      PrayerAlertStatusChip(
-                        alert: row.alert,
-                        showLabel: showAlertChipLabels,
-                      ),
+                      if (showAlertIndicators) ...[
+                        SizedBox(width: tokens.spaceSmall),
+                        PrayerAlertStatusChip(
+                          alert: row.alert,
+                          showLabel: narrow
+                              ? abbreviatedChipLabels
+                              : showAlertChipLabels,
+                          dense: true,
+                          quiet: true,
+                        ),
+                      ],
                     ],
-                  ],
-                );
-              },
+                  );
+
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: leftBlock),
+                      SizedBox(width: tokens.spaceSmall),
+                      trailingBlock,
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -1181,72 +1303,64 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
     final tokens = theme.tokens;
     final bottomPadding = context.floatingBottomPadding;
     final currentMode = _modeForState(row.alert.state);
+    final bp = TilawaBottomSheetScaffold.resolvedBodyPadding(context);
+    final paddedBody = bp.copyWith(bottom: bp.bottom + bottomPadding);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(tokens.radiusExtraLarge),
-        ),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            tokens.spaceLarge,
-            tokens.spaceSmall,
-            tokens.spaceLarge,
-            bottomPadding + tokens.spaceLarge,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TilawaSheetHandle(),
-              SizedBox(height: tokens.spaceLarge),
-              Text(
-                row.prayerName,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
+    return SafeArea(
+      top: false,
+      child: TilawaBottomSheetScaffold(
+        showHandle: true,
+        children: [
+          Padding(
+            padding: paddedBody,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  row.prayerName,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              SizedBox(height: tokens.spaceExtraSmall),
-              Text(
-                '${row.prayerTime} · ${context.l10n.prayerNotifications}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+                SizedBox(height: tokens.spaceExtraSmall),
+                Text(
+                  '${row.prayerTime} · ${context.l10n.prayerNotifications}',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              SizedBox(height: tokens.spaceMedium),
-              _AlertModeTile(
-                title: context.l10n.prayerAlertModeOff,
-                subtitle: context.l10n.prayerAlertModeOffDescription,
-                icon: Icons.notifications_off_outlined,
-                value: PrayerAlertMode.none,
-                groupValue: currentMode,
-                onChanged: onModeSelected,
-              ),
-              _AlertModeTile(
-                title: context.l10n.prayerAlertModeNotifyOnly,
-                subtitle: context.l10n.prayerAlertModeNotifyOnlyDescription,
-                icon: Icons.notifications_active_outlined,
-                value: PrayerAlertMode.notification,
-                groupValue: currentMode,
-                onChanged: onModeSelected,
-              ),
-              if (row.alert.supportsAdhan)
+                SizedBox(height: tokens.spaceMedium),
                 _AlertModeTile(
-                  title: context.l10n.prayerAlertModeAdhan,
-                  subtitle: context.l10n.prayerAlertModeAdhanDescription,
-                  icon: Icons.volume_up_outlined,
-                  value: PrayerAlertMode.adhan,
+                  title: context.l10n.prayerAlertModeOff,
+                  subtitle: context.l10n.prayerAlertModeOffDescription,
+                  icon: Icons.notifications_off_outlined,
+                  value: PrayerAlertMode.none,
                   groupValue: currentMode,
                   onChanged: onModeSelected,
                 ),
-            ],
+                _AlertModeTile(
+                  title: context.l10n.prayerAlertModeNotifyOnly,
+                  subtitle: context.l10n.prayerAlertModeNotifyOnlyDescription,
+                  icon: Icons.notifications_active_outlined,
+                  value: PrayerAlertMode.notification,
+                  groupValue: currentMode,
+                  onChanged: onModeSelected,
+                ),
+                if (row.alert.supportsAdhan)
+                  _AlertModeTile(
+                    title: context.l10n.prayerAlertModeAdhan,
+                    subtitle: context.l10n.prayerAlertModeAdhanDescription,
+                    icon: Icons.volume_up_outlined,
+                    value: PrayerAlertMode.adhan,
+                    groupValue: currentMode,
+                    onChanged: onModeSelected,
+                  ),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1286,7 +1400,7 @@ class _AlertModeTile extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(bottom: tokens.spaceSmall),
       child: TilawaCard(
-        flat: true,
+        surface: TilawaCardSurface.flat,
         backgroundColor: selected
             ? theme.colorScheme.primaryContainer.withValues(
                 alpha: tokens.opacitySubtle,
@@ -1297,7 +1411,8 @@ class _AlertModeTile extends StatelessWidget {
             : theme.colorScheme.outlineVariant.withValues(
                 alpha: tokens.opacityMedium,
               ),
-        borderRadius: tokens.radiusLarge,
+        // TILAWA_BRAND.md §5 — `chrome` family: tile nested inside the sheet.
+        borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
         onTap: selected ? null : () => onChanged(value),
         padding: EdgeInsets.symmetric(
           horizontal: tokens.spaceMedium,
@@ -1381,13 +1496,8 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
         playAdhan: _playAdhan,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '🔔 Test fired: ${_selectedPrayer.name} (adhan=$_playAdhan)',
-            ),
-            duration: const Duration(seconds: 2),
-          ),
+        ToastUtils.showToast(
+          msg: '🔔 Test fired: ${_selectedPrayer.name} (adhan=$_playAdhan)',
         );
       }
     } finally {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -22,22 +23,27 @@ class QuranReaderBottomBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withValues(alpha: 0.95),
+        color: colorScheme.surface.withValues(alpha: 0.95),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
+            color: colorScheme.shadow.withValues(alpha: tokens.opacityShadow),
+            blurRadius: tokens.blurShadow,
+            offset: tokens.shadowOffsetSmall,
           ),
         ],
       ),
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceLarge,
+            vertical: tokens.spaceSmall,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -46,8 +52,8 @@ class QuranReaderBottomBar extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.text_fields,
-                    size: 16,
-                    color: theme.colorScheme.primary,
+                    size: tokens.iconSizeSmall,
+                    color: colorScheme.primary,
                   ),
                   Expanded(
                     child: Slider(
@@ -60,8 +66,8 @@ class QuranReaderBottomBar extends StatelessWidget {
                   ),
                   Icon(
                     Icons.text_fields,
-                    size: 24,
-                    color: theme.colorScheme.primary,
+                    size: tokens.iconSizeLarge,
+                    color: colorScheme.primary,
                   ),
                 ],
               ),
@@ -70,31 +76,25 @@ class QuranReaderBottomBar extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton.icon(
+                  TilawaButton(
+                    text: context.l10n.previous,
+                    variant: TilawaButtonVariant.ghost,
+                    size: TilawaButtonSize.small,
+                    leadingIcon: const Icon(Icons.chevron_left),
                     onPressed: onPreviousSurah,
-                    icon: const Icon(Icons.chevron_left),
-                    label: Text(context.l10n.previous),
-                    style: TextButton.styleFrom(
-                      foregroundColor: onPreviousSurah != null
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline,
-                    ),
                   ),
                   Text(
                     context.l10n.surahProgress(surahNumber, 114),
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  TextButton.icon(
+                  TilawaButton(
+                    text: context.l10n.next,
+                    variant: TilawaButtonVariant.ghost,
+                    size: TilawaButtonSize.small,
+                    trailingIcon: const Icon(Icons.chevron_right),
                     onPressed: onNextSurah,
-                    icon: Text(context.l10n.next),
-                    label: const Icon(Icons.chevron_right),
-                    style: TextButton.styleFrom(
-                      foregroundColor: onNextSurah != null
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline,
-                    ),
                   ),
                 ],
               ),

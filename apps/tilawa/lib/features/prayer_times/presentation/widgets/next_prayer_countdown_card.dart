@@ -3,8 +3,8 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
-import '../formatters/prayer_time_label_formatter.dart';
 import '../extensions/prayer_type_ui.dart';
+import '../formatters/prayer_time_label_formatter.dart';
 import '../layout/prayer_times_layout.dart';
 import '../models/prayer_row_view_data.dart';
 import 'prayer_alert_status_chip.dart';
@@ -19,6 +19,8 @@ class NextPrayerCountdownCard extends StatelessWidget {
     this.dateMetaLabel,
     this.alert,
     this.showPrayerTimeChipLabels = true,
+    this.onAlertTap,
+    this.alertTooltip,
   });
 
   final PrayerTimeItem nextPrayer;
@@ -27,6 +29,12 @@ class NextPrayerCountdownCard extends StatelessWidget {
   final String? dateMetaLabel;
   final PrayerAlertViewData? alert;
   final bool showPrayerTimeChipLabels;
+
+  /// Opens the same per-prayer alert sheet as Today's schedule rows.
+  final VoidCallback? onAlertTap;
+
+  /// Tooltip / semantics hint for the alert control (e.g. "Prayer notifications").
+  final String? alertTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -42,11 +50,8 @@ class NextPrayerCountdownCard extends StatelessWidget {
     final int seconds = remaining.inSeconds.remainder(60);
 
     final String prayerName = nextPrayer.type.localizedName(context);
-    final String nextPrayerLabel = context.l10n.nextPrayer;
-    final String scheduledLabel = context.l10n.prayerTimesScheduled;
-    final String remainingLabel = context.l10n.prayerTimesTimeRemainingUntil(
-      prayerName,
-    );
+    final String remainingCaption =
+        context.l10n.prayerTimesTimeRemainingCaption;
     final String prayerTime = PrayerTimeLabelFormatter.formatItem(
       nextPrayer,
       use24HourFormat: use24HourFormat,
@@ -56,34 +61,21 @@ class NextPrayerCountdownCard extends StatelessWidget {
     final tokens = theme.tokens;
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceLarge,
-        vertical: tokens.spaceSmall,
+      padding: EdgeInsets.fromLTRB(
+        tokens.spaceLarge,
+        tokens.spaceSmall,
+        tokens.spaceLarge,
+        0,
       ),
       child: TilawaCard(
-        flat: true,
+        surface: TilawaCardSurface.raised,
         borderRadius: tokens.radiusExtraLarge,
-        gradient: LinearGradient(
-          begin: AlignmentDirectional.topStart,
-          end: AlignmentDirectional.bottomEnd,
-          colors: [
-            Color.alphaBlend(
-              colorScheme.primary.withValues(
-                alpha: tokens.opacitySubtle * 0.85,
-              ),
-              colorScheme.surface,
-            ),
-            colorScheme.surfaceContainerLow,
-          ],
-        ),
-        borderColor: colorScheme.primary.withValues(
-          alpha: tokens.opacitySubtle * 1.4,
-        ),
+        backgroundColor: colorScheme.surface,
         padding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,
           tokens.spaceMedium,
           tokens.spaceLarge,
-          tokens.spaceMedium,
+          tokens.spaceSmall,
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -91,169 +83,93 @@ class NextPrayerCountdownCard extends StatelessWidget {
               constraints.maxWidth,
             );
             final bool heroChipLabels = showPrayerTimeChipLabels && !narrow;
-            final TextStyle scheduledStyle =
-                theme.textTheme.labelMedium?.copyWith(
+            final TextStyle metaStyle =
+                theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ) ??
                 TextStyle(
                   color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
-                  fontSize: theme.textTheme.labelMedium?.fontSize ?? 12,
+                  fontWeight: FontWeight.w500,
+                  fontSize: theme.textTheme.bodySmall?.fontSize ?? 12,
                 );
+
+            final List<String> metaParts = <String>[
+              if (dateMetaLabel != null && dateMetaLabel!.isNotEmpty)
+                dateMetaLabel!,
+              prayerTime,
+            ];
+            final String metaLine = metaParts.join(' · ');
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (narrow) ...[
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: AlignmentDirectional.centerStart,
-                      child: TilawaStatusChip(
-                        label: nextPrayerLabel,
-                        backgroundColor: accentColor,
-                        foregroundColor: colorScheme.onPrimary,
-                        icon: Icons.notifications_active_rounded,
-                        showLabel: heroChipLabels,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: tokens.spaceExtraSmall),
-                  Text(
-                    '$scheduledLabel • $prayerTime',
-                    style: scheduledStyle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ] else ...[
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: AlignmentDirectional.centerStart,
-                            child: TilawaStatusChip(
-                              label: nextPrayerLabel,
-                              backgroundColor: accentColor,
-                              foregroundColor: colorScheme.onPrimary,
-                              icon: Icons.notifications_active_rounded,
-                              showLabel: showPrayerTimeChipLabels,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: tokens.spaceSmall),
-                      Expanded(
-                        child: Text(
-                          '$scheduledLabel • $prayerTime',
-                          style: scheduledStyle,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.end,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-                if (dateMetaLabel != null) ...[
-                  SizedBox(height: tokens.spaceExtraSmall),
-                  Text(
-                    dateMetaLabel!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: narrow ? 2 : 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-                SizedBox(height: tokens.spaceMedium),
+                Text(
+                  metaLine,
+                  style: metaStyle,
+                  maxLines: narrow ? 3 : 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: tokens.spaceSmall),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: tokens.spaceMedium,
                   children: [
                     Expanded(
                       child: Text(
                         prayerName,
-                        style: theme.textTheme.headlineSmall?.copyWith(
+                        style: theme.textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w800,
+                          height: 1.15,
                           color: colorScheme.onSurface,
                         ),
                       ),
                     ),
-                    SizedBox(width: tokens.spaceMedium),
                     _NextPrayerVisual(icon: nextPrayer.type.icon),
                   ],
                 ),
                 SizedBox(height: tokens.spaceSmall),
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tokens.spaceMedium,
-                    vertical: tokens.spaceSmall,
-                  ),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface.withValues(
-                      alpha: tokens.opacityMedium,
-                    ),
-                    borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                    border: Border.all(
-                      color: colorScheme.primary.withValues(
-                        alpha: tokens.opacitySubtle,
-                      ),
-                      width: tokens.borderWidthThin,
-                    ),
-                  ),
-                  child: Text(
-                    remainingLabel,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                SizedBox(height: tokens.spaceSmall),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  spacing: tokens.spaceSmall,
+                  mainAxisAlignment: .spaceBetween,
                   children: [
                     Expanded(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(
-                          '${hours.toString().padLeft(2, '0')}'
-                          ':${minutes.toString().padLeft(2, '0')}'
-                          ':${seconds.toString().padLeft(2, '0')}',
-                          style: theme.textTheme.displaySmall?.copyWith(
-                            color: accentColor,
-                            fontWeight: FontWeight.w800,
-                            fontFeatures: const [
-                              FontFeature.tabularFigures(),
-                            ],
-                          ),
+                      child: Text(
+                        remainingCaption,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                     if (alert != null && alert.supportsAlerts) ...[
-                      SizedBox(width: tokens.spaceSmall),
-                      Flexible(
-                        child: Align(
-                          alignment: AlignmentDirectional.bottomEnd,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: AlignmentDirectional.centerEnd,
-                            child: PrayerAlertStatusChip(
-                              alert: alert,
-                              showLabel: heroChipLabels,
-                            ),
-                          ),
-                        ),
+                      _HeroAlertControl(
+                        alert: alert,
+                        showLabel: heroChipLabels,
+                        onTap: onAlertTap,
+                        tooltip: alertTooltip,
+                        tokens: tokens,
                       ),
                     ],
                   ],
+                ),
+                SizedBox(height: tokens.spaceTiny),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Text(
+                    '${hours.toString().padLeft(2, '0')}'
+                    ':${minutes.toString().padLeft(2, '0')}'
+                    ':${seconds.toString().padLeft(2, '0')}',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      color: accentColor,
+                      fontWeight: FontWeight.w800,
+                      height: 1.05,
+                      fontFeatures: const [FontFeature.tabularFigures()],
+                    ),
+                  ),
                 ),
               ],
             );
@@ -261,6 +177,62 @@ class NextPrayerCountdownCard extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _HeroAlertControl extends StatelessWidget {
+  const _HeroAlertControl({
+    required this.alert,
+    required this.showLabel,
+    required this.onTap,
+    required this.tooltip,
+    required this.tokens,
+  });
+
+  final PrayerAlertViewData alert;
+  final bool showLabel;
+  final VoidCallback? onTap;
+  final String? tooltip;
+  final TilawaDesignTokens tokens;
+
+  @override
+  Widget build(BuildContext context) {
+    // TILAWA_BRAND.md §3 + §9: card chrome recedes; the state is signalled by
+    // the icon shape (bell / bell-off / speaker), not by a competing colored
+    // background. Same icon-action grammar as the screen's gear button.
+    final onTapCallback = onTap;
+    if (onTapCallback == null) {
+      return PrayerAlertStatusChip(
+        alert: alert,
+        showLabel: showLabel,
+        dense: true,
+      );
+    }
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final bool isActive = alert.state != PrayerAlertViewState.off;
+    final String? tooltipMessage = tooltip;
+    final String semantics = tooltipMessage != null && tooltipMessage.isNotEmpty
+        ? '${alert.label}. $tooltipMessage'
+        : alert.label;
+
+    return TilawaIconActionButton(
+      icon: _alertIcon(alert.state),
+      onTap: onTapCallback,
+      isActive: isActive,
+      toggled: isActive,
+      tooltip: tooltipMessage,
+      semanticLabel: semantics,
+      backgroundColor: colorScheme.surface,
+    );
+  }
+
+  IconData _alertIcon(PrayerAlertViewState state) {
+    return switch (state) {
+      PrayerAlertViewState.off => Icons.notifications_off_outlined,
+      PrayerAlertViewState.notification => Icons.notifications_active_outlined,
+      PrayerAlertViewState.adhan => Icons.volume_up_outlined,
+    };
   }
 }
 
@@ -276,24 +248,11 @@ class _NextPrayerVisual extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      width: tokens.iconSizeExtraLarge + tokens.spaceLarge,
-      height: tokens.iconSizeExtraLarge + tokens.spaceLarge,
+      width: tokens.iconSizeLargePlus,
+      height: tokens.iconSizeLargePlus,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: colorScheme.primaryContainer.withValues(
-          alpha: tokens.opacityMedium,
-        ),
-        border: Border.all(
-          color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-          width: tokens.borderWidthThin,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
-            blurRadius: tokens.blurShadow,
-            offset: tokens.shadowOffsetSmall,
-          ),
-        ],
+        color: colorScheme.primaryContainer,
       ),
       child: Icon(
         icon,

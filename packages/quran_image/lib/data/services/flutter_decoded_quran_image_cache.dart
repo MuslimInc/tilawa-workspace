@@ -9,11 +9,15 @@ import 'package:quran_image/domain/services/decoded_quran_image_cache.dart';
 
 class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
   static const int _lineCountPerPage = 15;
-  static const int _maxWarmPages = 6;
+  // Keep a wider provider window to reduce trim churn after long jumps
+  // followed by rapid swipes.
+  static const int _maxWarmPages = 10;
   static const int _maxFileEntries = 8;
   static const int _maxProviderEntries =
       (_maxWarmPages * _lineCountPerPage) + _maxFileEntries;
   static const int _maxWarmEntries = _maxProviderEntries;
+  static const int _evictionsPerBatch = 2;
+  static const Duration _trimPaceDelay = Duration(milliseconds: 16);
 
   final LinkedHashMap<String, ImageProvider<Object>> _providerCache =
       LinkedHashMap<String, ImageProvider<Object>>();
@@ -21,6 +25,8 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
   final LinkedHashMap<String, Future<void>> _pendingWarmups =
       LinkedHashMap<String, Future<void>>();
   int _generation = 0;
+  bool _trimFrameScheduled = false;
+  Timer? _trimPaceTimer;
 
   @override
   Future<void> prewarmLineImage({
@@ -40,6 +46,9 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
   @override
   void handleMemoryPressure() {
     _generation++;
+    _trimPaceTimer?.cancel();
+    _trimPaceTimer = null;
+    _trimFrameScheduled = false;
     final providerCount = _providerCache.length;
     final warmCount = _warmKeys.length;
     for (final provider in _providerCache.values) {
@@ -106,12 +115,20 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
   }) {
     if (_warmKeys.remove(cacheKey)) {
       _warmKeys.add(cacheKey);
+      PerfLogger.log(
+        widgetName: 'FlutterDecodedQuranImageCache',
+        message: 'warm cache hit key=$cacheKey',
+      );
       return SynchronousFuture<void>(null);
     }
 
     final pending = _pendingWarmups.remove(cacheKey);
     if (pending != null) {
       _pendingWarmups[cacheKey] = pending;
+      PerfLogger.log(
+        widgetName: 'FlutterDecodedQuranImageCache',
+        message: 'warm await pending key=$cacheKey',
+      );
       return pending;
     }
 
@@ -176,13 +193,49 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
       '$cacheWidth:$imagePath';
 
   void _trimProviderCache() {
-    while (_providerCache.length > _maxProviderEntries) {
+    if (_providerCache.length <= _maxProviderEntries) {
+      return;
+    }
+
+    // Guard against bursty call-sites (multiple provider insertions in the
+    // same window). Once a paced trim is scheduled, we let that timer own
+    // further eviction work for this window.
+    if (_trimFrameScheduled) {
+      return;
+    }
+
+    int evicted = 0;
+    while (_providerCache.length > _maxProviderEntries &&
+        evicted < _evictionsPerBatch) {
       final eldestKey = _providerCache.keys.first;
       final provider = _providerCache.remove(eldestKey);
       _warmKeys.remove(eldestKey);
       if (provider != null) {
         unawaited(provider.evict());
       }
+      PerfLogger.log(
+        widgetName: 'FlutterDecodedQuranImageCache',
+        message: 'provider evicted key=$eldestKey reason=provider-cache-trim',
+      );
+      evicted++;
+    }
+
+    if (_providerCache.length > _maxProviderEntries && !_trimFrameScheduled) {
+      _trimFrameScheduled = true;
+      _trimPaceTimer?.cancel();
+      _trimPaceTimer = Timer(_trimPaceDelay, () {
+        _trimFrameScheduled = false;
+        _trimPaceTimer = null;
+        _trimProviderCache();
+      });
+      PerfLogger.log(
+        widgetName: 'FlutterDecodedQuranImageCache',
+        message:
+            'provider cache trim pacing scheduled '
+            'evictedInBatch=$evicted '
+            'delayMs=${_trimPaceDelay.inMilliseconds} '
+            'remaining=${_providerCache.length}',
+      );
     }
   }
 
@@ -194,6 +247,10 @@ class FlutterDecodedQuranImageCache implements DecodedQuranImageCache {
       if (provider != null) {
         unawaited(provider.evict());
       }
+      PerfLogger.log(
+        widgetName: 'FlutterDecodedQuranImageCache',
+        message: 'provider evicted key=$eldestKey reason=warm-cache-trim',
+      );
     }
   }
 }

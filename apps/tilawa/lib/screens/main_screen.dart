@@ -34,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
     milliseconds: 600,
   );
 
-  final ValueNotifier<bool> _compactBottomNavVisible = ValueNotifier<bool>(
+  final ValueNotifier<bool> _phoneBottomNavVisible = ValueNotifier<bool>(
     true,
   );
 
@@ -43,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
-    _compactBottomNavVisible.dispose();
+    _phoneBottomNavVisible.dispose();
     super.dispose();
   }
 
@@ -87,7 +87,11 @@ class _MainScreenState extends State<MainScreen> {
         label: context.l10n.prayerTimes,
         identifier: 'prayer_times_tab',
       ),
-      _NavDestination(icon: Icons.menu_book_rounded, label: context.l10n.quran),
+      _NavDestination(
+        label: context.l10n.quran,
+        icon: Icons.menu_book_rounded,
+        identifier: 'quran_last_read_nav',
+      ),
       _NavDestination(
         index: 2,
         icon: FluentIcons.book_open_24_regular,
@@ -150,35 +154,16 @@ class _MainScreenState extends State<MainScreen> {
                 context,
               ).componentTokens.adaptiveShell;
               final textScaler = MediaQuery.textScalerOf(context);
-              final double estimatedBottomNavInnerWidth =
-                  MediaQuery.sizeOf(context).width -
-                  2 * adaptiveShellTokens.bottomNavHorizontalMargin -
-                  2 * adaptiveShellTokens.bottomNavBorderWidth;
-              final bool compactIconOnlyBottomNav =
-                  context.isCompact &&
-                  estimatedBottomNavInnerWidth <
-                      TilawaBreakpoints.compactBottomNavAllLabelsMinInnerWidth;
-              final double compactNavRowHeight = compactIconOnlyBottomNav
-                  ? adaptiveShellTokens.compactBottomNavIconOnlyLayoutHeight(
-                      textScaler,
-                    )
-                  : adaptiveShellTokens.compactBottomNavLayoutHeight(
-                      textScaler,
-                    );
-              final double compactNavContentGap = compactIconOnlyBottomNav
-                  ? context.tokens.spaceLarge
-                  : context.tokens.spaceExtraLarge;
-              // Total visual footprint of the floating bottom nav bar =
-              // row height + safe-area bottom + vertical margin + a visual gap
-              // so overlapping widgets sit clearly above the bar.
-              final double compactNavTopMargin = compactIconOnlyBottomNav
-                  ? adaptiveShellTokens.bottomNavIconOnlyVerticalMargin
-                  : adaptiveShellTokens.bottomNavVerticalMargin;
-              final double bottomNavBarHeight = context.isCompact
-                  ? (compactNavRowHeight +
+              final double phoneNavRowHeight = adaptiveShellTokens
+                  .phoneBottomNavLayoutHeight(textScaler);
+              final double phoneNavContentGap = context.tokens.spaceExtraLarge;
+              final double phoneNavTopMargin =
+                  adaptiveShellTokens.bottomNavVerticalMargin;
+              final double bottomNavBarHeight = context.isNarrow
+                  ? (phoneNavRowHeight +
                         context.systemBottomSafeArea +
-                        compactNavTopMargin +
-                        compactNavContentGap)
+                        phoneNavTopMargin +
+                        phoneNavContentGap)
                   : context.floatingBottomPadding;
 
               final List<_NavDestination> navDestinations = _buildDestinations(
@@ -226,7 +211,7 @@ class _MainScreenState extends State<MainScreen> {
                   navDestinations: navDestinations,
                   bottomNavBarHeight: bottomNavBarHeight,
                   isKeyboardOpen: isKeyboardOpen,
-                  compactBottomNavVisible: _compactBottomNavVisible,
+                  phoneBottomNavVisible: _phoneBottomNavVisible,
                 ),
               );
             },
@@ -246,7 +231,7 @@ class _MainShellContent extends StatelessWidget {
     required this.navDestinations,
     required this.bottomNavBarHeight,
     required this.isKeyboardOpen,
-    required this.compactBottomNavVisible,
+    required this.phoneBottomNavVisible,
   });
 
   final MainScreenState state;
@@ -254,7 +239,7 @@ class _MainShellContent extends StatelessWidget {
   final List<_NavDestination> navDestinations;
   final double bottomNavBarHeight;
   final bool isKeyboardOpen;
-  final ValueNotifier<bool> compactBottomNavVisible;
+  final ValueNotifier<bool> phoneBottomNavVisible;
 
   @override
   Widget build(BuildContext context) {
@@ -270,12 +255,12 @@ class _MainShellContent extends StatelessWidget {
         ? context.tokens.playerCollapsedHeight
         : 0;
     final double overlayBleedBuffer =
-        (playerShouldShow && !isKeyboardOpen && !context.isCompact)
+        (playerShouldShow && !isKeyboardOpen && !context.isNarrow)
         ? context.tokens.spaceSmall
         : 0;
     final double contentBottomPadding = isKeyboardOpen
         ? 0
-        : context.isCompact
+        : context.isNarrow
         ? (playerShouldShow ? playerHeight + overlayBleedBuffer : 0)
         : bottomNavBarHeight + playerHeight + overlayBleedBuffer;
 
@@ -293,14 +278,14 @@ class _MainShellContent extends StatelessWidget {
           navDestinations[index].index!,
         );
       },
-      compactBottomNavigationBarVisible: compactBottomNavVisible,
+      phoneBottomNavigationBarVisible: phoneBottomNavVisible,
       bottomPlayer: MainBottomOverlay(
-        bottomNavBarHeight: context.isCompact ? 0 : bottomNavBarHeight,
+        bottomNavBarHeight: context.isNarrow ? 0 : bottomNavBarHeight,
         isKeyboardOpen: isKeyboardOpen,
         isAudioBindingDeferred: state.isAudioBindingDeferred,
         isOfflineIndicatorReady: state.isOfflineIndicatorReady,
-        compactBottomNavBarVisible: compactBottomNavVisible,
-        hostAbsorbsBottomSafeArea: context.isCompact,
+        phoneBottomNavBarVisible: phoneBottomNavVisible,
+        hostAbsorbsBottomSafeArea: context.isNarrow,
       ),
       child: state.isInitialTabMounted
           ? MainTabViewport(

@@ -41,7 +41,7 @@ Future<BuildContext> _pump(
 
 void main() {
   group('TilawaResponsiveTypography', () {
-    group('responsiveTextTheme on compact screens', () {
+    group('responsiveTextTheme on narrow window class', () {
       testInBothDirections('preserves display/headline font sizes', (
         tester,
         direction,
@@ -52,7 +52,7 @@ void main() {
         final responsive = ctx.responsiveTextTheme;
         final base = Theme.of(ctx).textTheme;
 
-        // Compact does not change display/headline font sizes — it only
+        // Narrow window class does not change display/headline font sizes — it only
         // tunes height and letterSpacing for presence on small screens.
         expect(responsive.displayLarge?.fontSize, base.displayLarge?.fontSize);
         expect(
@@ -75,7 +75,7 @@ void main() {
       );
 
       testInBothDirections(
-        'applies explicit height and letterSpacing on compact',
+        'applies explicit height and letterSpacing on narrow class',
         (tester, direction) async {
           const size = Size(412, 800);
           final ctx = await _pump(tester, size, direction);

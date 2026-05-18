@@ -184,5 +184,56 @@ void main() {
         expect(_labelParagraph(tester).didExceedMaxLines, isFalse);
       },
     );
+
+    testWidgets('shrinkWrapTapTarget skips 48×48 outer minimum constraints', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          TilawaButton(
+            text: 'Link',
+            variant: TilawaButtonVariant.ghost,
+            shrinkWrapTapTarget: true,
+            onPressed: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(
+        find.byWidgetPredicate(
+          (Widget w) =>
+              w is ConstrainedBox &&
+              w.constraints ==
+                  const BoxConstraints(minHeight: 48, minWidth: 48),
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('custom backgroundColor applies to enabled state', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          TilawaButton(
+            text: 'Brand',
+            variant: TilawaButtonVariant.primary,
+            backgroundColor: const Color(0xFFE1C17B),
+            foregroundColor: const Color(0xFF0D3933),
+            onPressed: () {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      final Text textWidget = tester.widget(
+        find.descendant(
+          of: find.byType(TilawaButton),
+          matching: find.byType(Text),
+        ),
+      );
+      expect(textWidget.style?.color, const Color(0xFF0D3933));
+    });
   });
 }

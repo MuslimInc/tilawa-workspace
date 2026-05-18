@@ -48,6 +48,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noRecitersMatchSearch => 'No reciters match your search';
 
   @override
+  String a11yOpenReciterDetails(String reciterName) {
+    return 'Open $reciterName';
+  }
+
+  @override
+  String get a11yFavoriteRecitersOnlyFilter => 'Show favorite reciters only';
+
+  @override
+  String get a11yRecitersLetterIndex => 'Letter index';
+
+  @override
+  String get a11yRecitersAlphabetScrollbarHint =>
+      'Drag up or down to jump to a letter';
+
+  @override
+  String get showRecitersLetterIndex => 'Show letter index';
+
+  @override
+  String get hideRecitersLetterIndex => 'Hide letter index';
+
+  @override
+  String get recitersMoreActions => 'More actions';
+
+  @override
+  String get recitersLetterIndexMenuItem => 'Letter index';
+
+  @override
+  String get a11yClearRecitersSearch => 'Clear search text';
+
+  @override
   String get filteredByLetter => 'Filtered by letter:';
 
   @override
@@ -442,12 +472,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String reciterAdditionalMoshafCount(int count) {
+    return ' · $count more';
+  }
+
+  @override
   String loadingReciterSurahs(String reciterName) {
     return 'Loading $reciterName surahs...';
   }
 
   @override
   String get addToFavorites => 'Add to Favorites';
+
+  @override
+  String get removeFromFavorites => 'Remove from favorites';
 
   @override
   String get createFirstPlaylistMessage =>
@@ -540,6 +578,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get colorPurple => 'Purple';
 
   @override
+  String get colorGold => 'Gold';
+
+  @override
   String get theme => 'Theme';
 
   @override
@@ -550,9 +591,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get darkTheme => 'Dark Mode';
-
-  @override
-  String get compactDesign => 'Compact design';
 
   @override
   String get chooseTheme => 'Choose Theme';
@@ -1188,6 +1226,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String prayerTimesTimeRemainingUntil(String prayerName) {
     return 'Time remaining until $prayerName';
   }
+
+  @override
+  String get prayerTimesTimeRemainingCaption => 'Time remaining';
 
   @override
   String get prayerTimesScheduled => 'Scheduled';
@@ -1877,4 +1918,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorInvalidNotificationPayload => 'Invalid notification payload.';
+
+  @override
+  String get moreOptions => 'More options';
 }
