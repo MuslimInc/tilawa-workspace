@@ -1120,7 +1120,7 @@ class _PlayerSecondaryControlsMolecule extends StatelessWidget {
           button: true,
           label: context.l10n.playbackSpeed,
           value: '${state.speed.toStringAsFixed(1)}x',
-          // TILAWA_BRAND.md §5: tappable chip-grammar affordance — pill radius
+          // docs/tilawa_brand.md §5: tappable chip-grammar affordance — pill radius
           // resolved from the 44 dp interactive minimum; spacing from tokens.
           // White-on-dark colors are intentional (fixed dark-palette context
           // for the expanded player; DESIGN §12 export/composer exception).

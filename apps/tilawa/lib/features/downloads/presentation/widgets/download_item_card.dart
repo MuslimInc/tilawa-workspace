@@ -219,7 +219,7 @@ class DownloadItemCard extends StatelessWidget {
       DownloadStatus.pending => Icons.schedule_rounded,
     };
 
-    // TILAWA_BRAND.md §5: in-card decorative icon. Tinted fill + hairline,
+    // docs/tilawa_brand.md §5: in-card decorative icon. Tinted fill + hairline,
     // no shadow — the status color carries the meaning.
     return Container(
       padding: EdgeInsets.all(tokens.spaceSmall),

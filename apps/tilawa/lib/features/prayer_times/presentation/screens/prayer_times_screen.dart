@@ -215,7 +215,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                                 selectedTextColor: theme.colorScheme.primary,
                                 // Match the body cards' rounding so the header
                                 // chrome and the cards share the same rhythm.
-                                // TILAWA_BRAND.md §5 — `card` family.
+                                // docs/tilawa_brand.md §5 — `card` family.
                                 containerRadius: tokens.resolveRadius(
                                   family: TilawaRadiusFamily.card,
                                 ),
@@ -765,7 +765,7 @@ class _LocationUtilityCard extends StatelessWidget {
       ),
       child: TilawaCard(
         surface: TilawaCardSurface.raised,
-        // TILAWA_BRAND.md §5 — `card` family.
+        // docs/tilawa_brand.md §5 — `card` family.
         borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
         backgroundColor: colorScheme.surface,
         onTap: isLoading ? null : onUpdateLocation,
@@ -824,7 +824,7 @@ class _BottomUtilitiesCard extends StatelessWidget {
       ),
       child: TilawaCard(
         surface: TilawaCardSurface.raised,
-        // TILAWA_BRAND.md §5 — `card` family.
+        // docs/tilawa_brand.md §5 — `card` family.
         borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
         backgroundColor: colorScheme.surface,
         padding: EdgeInsets.symmetric(
@@ -1082,7 +1082,7 @@ class _TodayPrayerListSection extends StatelessWidget {
       ),
       child: TilawaCard(
         surface: TilawaCardSurface.raised,
-        // TILAWA_BRAND.md §5 — `card` family.
+        // docs/tilawa_brand.md §5 — `card` family.
         borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.card),
         backgroundColor: colorScheme.surface,
         padding: EdgeInsets.symmetric(
@@ -1411,7 +1411,7 @@ class _AlertModeTile extends StatelessWidget {
             : theme.colorScheme.outlineVariant.withValues(
                 alpha: tokens.opacityMedium,
               ),
-        // TILAWA_BRAND.md §5 — `chrome` family: tile nested inside the sheet.
+        // docs/tilawa_brand.md §5 — `chrome` family: tile nested inside the sheet.
         borderRadius: tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
         onTap: selected ? null : () => onChanged(value),
         padding: EdgeInsets.symmetric(

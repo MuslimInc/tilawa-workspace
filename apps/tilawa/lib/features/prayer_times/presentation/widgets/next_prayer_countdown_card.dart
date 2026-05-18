@@ -197,7 +197,7 @@ class _HeroAlertControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TILAWA_BRAND.md §3 + §9: card chrome recedes; the state is signalled by
+    // docs/tilawa_brand.md §3 + §9: card chrome recedes; the state is signalled by
     // the icon shape (bell / bell-off / speaker), not by a competing colored
     // background. Same icon-action grammar as the screen's gear button.
     final onTapCallback = onTap;

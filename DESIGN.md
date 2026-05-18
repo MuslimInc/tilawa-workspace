@@ -3,7 +3,7 @@
 Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilawa app** (`apps/tilawa`). This document is for humans and coding agents. Implementation truth lives in code; update this file when tokens or theme behavior change in meaningful ways.
 
 **Companion:** `AGENTS.md` (how to build). This file is how the product should **look and feel**.
-**Brand intent layer:** `TILAWA_BRAND.md` — names Tilawa's Islamic-brand roles on top of the tokens here (Mushaf gold, scholarly sage, parchment, hairline grammar). When intent and implementation conflict, this file wins on implementation; `TILAWA_BRAND.md` wins on intent.
+**Brand intent layer:** [`docs/tilawa_brand.md`](docs/tilawa_brand.md) — names Tilawa's Islamic-brand roles on top of the tokens here (Mushaf gold, scholarly sage, parchment, hairline grammar). When intent and implementation conflict, this file wins on implementation; [`docs/tilawa_brand.md`](docs/tilawa_brand.md) wins on intent.
 
 ---
 
@@ -223,13 +223,13 @@ reference hex into feature code unless it becomes a deliberate token in
 
 ## 14. Active design initiative (rolling)
 
-**Status:** Brand identity layer `TILAWA_BRAND.md` authored on top of these tokens (Islamic-brand roles: Ink/Gilding/Scholar/Parchment/Vellum/Hairline). Reciters screen is the first brand exemplar on branch `fix/reciters-screen-ui-ux`.
+**Status:** Brand identity layer [`docs/tilawa_brand.md`](docs/tilawa_brand.md) authored on top of these tokens (Islamic-brand roles: Ink/Gilding/Scholar/Parchment/Vellum/Hairline). Reciters screen is the first brand exemplar on branch `fix/reciters-screen-ui-ux`.
 
 | Field | Detail |
 |-------|--------|
 | **Reference moodboard** | [`design-md/apple/DESIGN.md`](design-md/apple/DESIGN.md) — for rhythm and restraint only (color change as divider, single shadow on the artifact). Tilawa palette and Arabic-first type are unchanged. |
-| **Tilawa implementation** | `TILAWA_BRAND.md` maps brand roles onto existing `ColorScheme` and `TilawaDesignTokens` — no new hex, no new schemes. Reciters screen (`apps/tilawa/lib/features/reciters/presentation/screens/reciters_screen.dart`) carries the §5 rhythm rule (Vellum header on `surfaceContainerHigh`, flat cards with hairline, ambient ornament at low opacity). |
-| **Next candidates** | Apply brand layer to Surah list, player bar, and Settings sections per `TILAWA_BRAND.md` §9 priority order. |
+| **Tilawa implementation** | [`docs/tilawa_brand.md`](docs/tilawa_brand.md) maps brand roles onto existing `ColorScheme` and `TilawaDesignTokens` — no new hex, no new schemes. Reciters screen (`apps/tilawa/lib/features/reciters/presentation/screens/reciters_screen.dart`) carries the §5 rhythm rule (Vellum header on `surfaceContainerHigh`, flat cards with hairline, ambient ornament at low opacity). |
+| **Next candidates** | Apply brand layer to Surah list, player bar, and Settings sections per [`docs/tilawa_brand.md`](docs/tilawa_brand.md) §9 priority order. |
 
 Replace or extend this section when the initiative completes or a new one starts.
 

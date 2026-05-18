@@ -1,4 +1,4 @@
-# Tilawa — TILAWA_BRAND.md
+# Tilawa Brand
 
 Islamic-brand identity layer for **Tilawa**. Sits **on top of** `DESIGN.md` and `AGENTS.md` — it does not replace tokens, redefine the palette, or introduce a new scheme. It names the *feeling* and the *cultural anchor*, and binds those to the tokens and `ColorScheme` roles that already exist.
 

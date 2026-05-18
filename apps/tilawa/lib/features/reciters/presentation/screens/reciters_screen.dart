@@ -689,7 +689,7 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
         label: context.l10n.reciters,
         explicitChildNodes: true,
         child: DecoratedBox(
-          // TILAWA_BRAND.md §3: header chrome is "Vellum" — sits slightly above
+          // docs/tilawa_brand.md §3: header chrome is "Vellum" — sits slightly above
           // the page (Parchment) without elevating to a card. One hairline below.
           decoration: BoxDecoration(
             color: colorScheme.surfaceContainerHigh,
@@ -1033,7 +1033,7 @@ class _FavoritesToggle extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     // Ring blends into the Vellum header (surfaceContainerHigh)
-                    // when inactive — TILAWA_BRAND.md §3 Vellum role.
+                    // when inactive — docs/tilawa_brand.md §3 Vellum role.
                     color: isActive
                         ? theme.colorScheme.surfaceContainerHigh
                         : theme.colorScheme.primary,

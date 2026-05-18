@@ -621,7 +621,7 @@ extension TilawaConcentricRadiusX on TilawaDesignTokens {
 /// component sizes, so [TilawaRadiusResolverX.resolveRadius] takes both the
 /// family and the component height into account.
 ///
-/// See `TILAWA_BRAND.md` §5 (Rhythm and elevation).
+/// See `docs/tilawa_brand.md` §5 (Rhythm and elevation).
 enum TilawaRadiusFamily {
   /// Containers that hold content (`TilawaCard`, sheets, body cards). Stays
   /// at [TilawaDesignTokens.radiusExtraLarge] regardless of height, never

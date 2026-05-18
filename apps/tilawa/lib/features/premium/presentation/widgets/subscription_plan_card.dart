@@ -18,7 +18,7 @@ class SubscriptionPlanCard extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    // TILAWA_BRAND.md §3: Gilding (tertiary) is decorative, never a CTA color.
+    // docs/tilawa_brand.md §3: Gilding (tertiary) is decorative, never a CTA color.
     // The "Popular" plan earns loudness from the badge + outlined border, not
     // from a gold subscribe button. Both plans share the Ink (primary) accent.
     final Color accent = colorScheme.primary;
@@ -64,7 +64,7 @@ class SubscriptionPlanCard extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       // One-accent rule: badge keeps the same Ink family as the
-                      // Subscribe CTA below it (TILAWA_BRAND.md §10).
+                      // Subscribe CTA below it (docs/tilawa_brand.md §10).
                       color: colorScheme.primary,
                       borderRadius: BorderRadius.circular(tokens.radiusMedium),
                     ),

@@ -68,7 +68,7 @@ class SurahGridItem extends StatelessWidget {
           }
         },
         child: Container(
-          // TILAWA_BRAND.md §5: list-item cards are flat fill + hairline. No
+          // docs/tilawa_brand.md §5: list-item cards are flat fill + hairline. No
           // box shadow. Active state earns differentiation via tier change
           // (primaryContainer fill) and a thicker hairline border.
           decoration: BoxDecoration(

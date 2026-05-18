@@ -66,7 +66,7 @@ All items below were verified by inspecting specific files in the codebase.
     `getCategories()` and `getAthkarByCategory(int categoryId)` fully wired
   - `apps/tilawa/lib/features/athkar/domain/constants/tasbeeh_constants.dart` — Tasbeeh counter
   - `apps/tilawa/lib/features/athkar/presentation/screens/tasbeeh_screen.dart` — Tasbeeh UI
-- **Gap confirmed**: Only 2 of the ~10 athkar categories documented in MISSING_FEATURES.md are
+- **Gap confirmed**: Only 2 of the ~10 athkar categories documented in docs/missing_features.md are
   present in the data file. Infrastructure fully supports adding more.
 
 ### 1.5 Athkar Notifications
@@ -371,7 +371,7 @@ expected ~10 Islamic athkar categories are present. Adding data alone unlocks th
 **Evidence**:
 - `athkar.json` has only `أذكار الصباح` and `أذكار المساء`
 - `AthkarLocalDataSourceImpl.getCategories()` reads from the same JSON
-- The MISSING_FEATURES.md documents 10 expected categories (sleep, waking, after-prayer, wudu,
+- The docs/missing_features.md documents 10 expected categories (sleep, waking, after-prayer, wudu,
   travel, food, mosque, ruqyah, duas from Quran, duas from Sunnah)
 
 **Suggested implementation approach**:

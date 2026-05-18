@@ -126,7 +126,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    // TILAWA_BRAND.md §3: one accent per screen — Ink. The "not yet premium"
+    // docs/tilawa_brand.md §3: one accent per screen — Ink. The "not yet premium"
     // state earns differentiation via a quieter surface tier, not a second
     // (Gilding) accent.
     final accent = colorScheme.primary;
