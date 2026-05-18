@@ -9,6 +9,8 @@ workspace:
   - packages/core
   - packages/qibla
   - packages/ui_kit
+  - packages/ui_kit_v2
+  - packages/ui_kit_v2/example
   - packages/quran_qcf
   - packages/quran_image
   - packages/flex_color_scheme

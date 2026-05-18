@@ -1,0 +1,37 @@
+name: tilawa_ui_kit_v2
+resolution: workspace
+description: Tilawa Design System v2 — atomic UI kit (atoms, molecules, organisms) mirroring the Claude Design handoff bundle.
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^8.1.0
+  flutter_svg: ^2.0.10+1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Alexandria
+      fonts:
+        - asset: assets/fonts/Alexandria-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Alexandria-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Alexandria-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Alexandria-Bold.ttf
+          weight: 700
+
+  assets:
+    - assets/logos/
