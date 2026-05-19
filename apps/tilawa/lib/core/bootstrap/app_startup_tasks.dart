@@ -628,10 +628,12 @@ class AppStartupTasks {
       final Future<NotificationResponse?> localFuture =
           _probeLocalNotificationLaunchResponse();
 
-      final List<Object?> results = await Future.wait<Object?>(<Future<Object?>>[
-        fcmFuture,
-        localFuture,
-      ]);
+      final List<Object?> results = await Future.wait<Object?>(
+        <Future<Object?>>[
+          fcmFuture,
+          localFuture,
+        ],
+      );
 
       final RemoteMessage? fcmInitialMessage = results[0] as RemoteMessage?;
       final NotificationResponse? localLaunchResponse =
@@ -723,7 +725,9 @@ class AppStartupTasks {
 
   /// Android keeps [getNotificationAppLaunchDetails] across Flutter hot restart
   /// (same OS process). Skip re-routing when we already handled this launch.
-  Future<bool> _isStaleLocalLaunchOnHotRestart(int? launchNotificationId) async {
+  Future<bool> _isStaleLocalLaunchOnHotRestart(
+    int? launchNotificationId,
+  ) async {
     if (!getIt.isRegistered<SharedPreferencesAsync>() ||
         !getIt.isRegistered<ProcessIdProvider>()) {
       return false;

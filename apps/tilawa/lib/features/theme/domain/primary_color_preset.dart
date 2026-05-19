@@ -11,8 +11,7 @@ enum PrimaryColorPreset {
   sage(id: 'sage', value: AppColors.primarySage),
   gold(id: 'gold', value: AppColors.primaryGold),
   brown(id: 'brown', value: AppColors.primaryBrown),
-  purple(id: 'purple', value: AppColors.primaryPurple)
-  ;
+  purple(id: 'purple', value: AppColors.primaryPurple);
 
   const PrimaryColorPreset({required this.id, required this.value});
 

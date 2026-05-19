@@ -14,17 +14,12 @@ part 'bookmarks_state.dart';
 @injectable
 class BookmarksBloc extends Bloc<BookmarksEvent, BookmarksState> {
   BookmarksBloc({
-    required GetAllBookmarksUseCase getAllBookmarksUseCase,
-    required CreateBookmarkUseCase createBookmarkUseCase,
-    required DeleteBookmarkUseCase deleteBookmarkUseCase,
-    required UpdateBookmarkLabelUseCase updateBookmarkLabelUseCase,
-    required SearchBookmarksUseCase searchBookmarksUseCase,
-  }) : _getAllBookmarksUseCase = getAllBookmarksUseCase,
-       _createBookmarkUseCase = createBookmarkUseCase,
-       _deleteBookmarkUseCase = deleteBookmarkUseCase,
-       _updateBookmarkLabelUseCase = updateBookmarkLabelUseCase,
-       _searchBookmarksUseCase = searchBookmarksUseCase,
-       super(const BookmarksState.initial()) {
+    required this._getAllBookmarksUseCase,
+    required this._createBookmarkUseCase,
+    required this._deleteBookmarkUseCase,
+    required this._updateBookmarkLabelUseCase,
+    required this._searchBookmarksUseCase,
+  }) : super(const BookmarksState.initial()) {
     on<LoadBookmarksEvent>(_onLoadBookmarks);
     on<CreateBookmarkEvent>(_onCreateBookmark);
     on<DeleteBookmarkEvent>(_onDeleteBookmark);

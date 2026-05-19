@@ -157,8 +157,8 @@ class AppRouter {
           'matchedLocation': _currentLocation(),
           'coldStart': coldStart,
           'isPrayerStatus': isPrayerStatus,
-          'stackDepth': router.routerDelegate.currentConfiguration.matches
-              .length,
+          'stackDepth':
+              router.routerDelegate.currentConfiguration.matches.length,
         },
       );
       // #endregion
@@ -265,22 +265,22 @@ class AppRouter {
         ColdStartNavigationMetrics.recordRouterSplash();
       }
       _router = GoRouter(
-      navigatorKey: navigatorKey,
-      initialLocation: initialLocation,
-      initialExtra: null,
-      overridePlatformDefaultLocation:
-          !AppLinksConfig.usePlatformDefaultLocation,
-      debugLogDiagnostics: kDebugMode,
-      // Disable restoration when launched from notification to prevent
-      // the restored state from overriding notification navigation
-      restorationScopeId: disableStateRestoration
-          ? null
-          : AppStrings.routerRestorationScopeId,
-      redirect: redirect,
-      routes: $appRoutes,
-      errorBuilder: errorBuilder,
-      extraCodec: const AppRouterExtraCodec(),
-      observers: _getObservers(),
+        navigatorKey: navigatorKey,
+        initialLocation: initialLocation,
+        initialExtra: null,
+        overridePlatformDefaultLocation:
+            !AppLinksConfig.usePlatformDefaultLocation,
+        debugLogDiagnostics: kDebugMode,
+        // Disable restoration when launched from notification to prevent
+        // the restored state from overriding notification navigation
+        restorationScopeId: disableStateRestoration
+            ? null
+            : AppStrings.routerRestorationScopeId,
+        redirect: redirect,
+        routes: $appRoutes,
+        errorBuilder: errorBuilder,
+        extraCodec: const AppRouterExtraCodec(),
+        observers: _getObservers(),
       );
     }
     return _router!;

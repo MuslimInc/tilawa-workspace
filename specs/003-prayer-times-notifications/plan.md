@@ -95,7 +95,7 @@ Visual Component     →  Option A: FLN + flutter_timezone
 
 ## Technical Context
 
-**Language/Version**: Flutter 3.41.7, Dart 3.11.5 (via fvm), `sdk: ^3.11.5`
+**Language/Version**: Flutter 3.41.7, Dart 3.11.5 (via fvm), `sdk: ^3.12.0`
 **Target Platform**: **Android 8.0+ (API 26+).** iOS is future work (documented; no iOS code added in this feature).
 **Performance Goals**: Scheduling completes in background Phase 3; no UI-thread blocking; zero jank
 **Constraints**: RTL/LTR, offline-first (scheduling from saved location), exact alarm fallback to inexact

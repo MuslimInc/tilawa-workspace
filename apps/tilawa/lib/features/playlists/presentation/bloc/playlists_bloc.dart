@@ -15,23 +15,15 @@ part 'playlists_state.dart';
 @injectable
 class PlaylistsBloc extends HydratedBloc<PlaylistsEvent, PlaylistsState> {
   PlaylistsBloc({
-    required GetAllPlaylistsUseCase getAllPlaylistsUseCase,
-    required CreatePlaylistUseCase createPlaylistUseCase,
-    required UpdatePlaylistUseCase updatePlaylistUseCase,
-    required DeletePlaylistUseCase deletePlaylistUseCase,
-    required AddItemToPlaylistUseCase addItemToPlaylistUseCase,
-    required RemoveItemFromPlaylistUseCase removeItemFromPlaylistUseCase,
-    required SearchPlaylistsUseCase searchPlaylistsUseCase,
-    required ToggleFavoritePlaylistUseCase toggleFavoritePlaylistUseCase,
-  }) : _getAllPlaylistsUseCase = getAllPlaylistsUseCase,
-       _createPlaylistUseCase = createPlaylistUseCase,
-       _updatePlaylistUseCase = updatePlaylistUseCase,
-       _deletePlaylistUseCase = deletePlaylistUseCase,
-       _addItemToPlaylistUseCase = addItemToPlaylistUseCase,
-       _removeItemFromPlaylistUseCase = removeItemFromPlaylistUseCase,
-       _searchPlaylistsUseCase = searchPlaylistsUseCase,
-       _toggleFavoritePlaylistUseCase = toggleFavoritePlaylistUseCase,
-       super(const PlaylistsState.initial()) {
+    required this._getAllPlaylistsUseCase,
+    required this._createPlaylistUseCase,
+    required this._updatePlaylistUseCase,
+    required this._deletePlaylistUseCase,
+    required this._addItemToPlaylistUseCase,
+    required this._removeItemFromPlaylistUseCase,
+    required this._searchPlaylistsUseCase,
+    required this._toggleFavoritePlaylistUseCase,
+  }) : super(const PlaylistsState.initial()) {
     on<LoadPlaylistsEvent>(_onLoadPlaylists);
     on<CreatePlaylistEvent>(_onCreatePlaylist);
     on<UpdatePlaylistEvent>(_onUpdatePlaylist);

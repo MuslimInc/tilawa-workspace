@@ -133,10 +133,9 @@ class FakeAsyncPlan {
 
 class FakeAsyncHandle implements FFmpegRunHandle {
   FakeAsyncHandle({
-    required FakeAsyncPlan plan,
-    required void Function(FFmpegStatsSnapshot stats)? onStats,
-  }) : _plan = plan,
-       _onStats = onStats;
+    required this._plan,
+    required this._onStats,
+  });
 
   static int _nextSessionId = 1;
 

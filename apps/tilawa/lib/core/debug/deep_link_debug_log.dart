@@ -27,8 +27,7 @@ abstract final class DeepLinkDebugLog {
   }) {
     final int elapsedMs = _sw.elapsedMilliseconds;
     final int id = ++_seq;
-    final String scenarioPart =
-        scenario == null ? '' : ' scenario=$scenario';
+    final String scenarioPart = scenario == null ? '' : ' scenario=$scenario';
     debugPrint(
       '$_tag t=${elapsedMs}ms #$id$scenarioPart $message'
       '${data == null ? '' : ' ${jsonEncode(data)}'}',
@@ -119,10 +118,10 @@ abstract final class DeepLinkDebugLog {
         'message': message,
         'data': <String, Object?>{
           'elapsedMs': elapsedMs,
-          if (scenario != null) 'scenario': scenario,
-          if (data != null) ...data,
+          'scenario': ?scenario,
+          ...?data,
         },
-        if (hypothesisId != null) 'hypothesisId': hypothesisId,
+        'hypothesisId': ?hypothesisId,
       };
       File(_logPath).writeAsStringSync(
         '${jsonEncode(payload)}\n',

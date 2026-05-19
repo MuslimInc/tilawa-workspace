@@ -15,7 +15,7 @@ ProgressIndicatorThemeData _progressIndicatorTheme({
   /// Color of the track being filled by the linear indicator.
   ///
   /// If [linearTrackSchemeColor] is null then in M2 mode
-  /// the ambient theme's deprecated [ColorScheme.background] color is used
+  /// the ambient theme's deprecated [ColorScheme.surface] color is used
   /// In M3 mode [ColorScheme.secondaryContainer] is used as default.
   final SchemeColor? linearTrackSchemeColor,
 

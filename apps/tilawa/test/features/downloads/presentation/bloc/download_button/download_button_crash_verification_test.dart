@@ -38,9 +38,7 @@ class TestDownloading extends TestDownloadState {
 
 /// Bloc WITHOUT the isClosed check - this WILL crash
 class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
-  BlocWithoutFix({required Stream<double> progressStream})
-    : _progressStream = progressStream,
-      super(TestInitial()) {
+  BlocWithoutFix({required this._progressStream}) : super(TestInitial()) {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - NO isClosed check
       emit(TestDownloading(0.0));
@@ -71,9 +69,7 @@ class BlocWithoutFix extends Bloc<TestDownloadEvent, TestDownloadState> {
 
 /// Bloc WITH the isClosed check - this will NOT crash
 class BlocWithFix extends Bloc<TestDownloadEvent, TestDownloadState> {
-  BlocWithFix({required Stream<double> progressStream})
-    : _progressStream = progressStream,
-      super(TestInitial()) {
+  BlocWithFix({required this._progressStream}) : super(TestInitial()) {
     on<TestInitialize>((event, emit) async {
       // Start listening to progress - WITH isClosed check
       emit(TestDownloading(0.0));

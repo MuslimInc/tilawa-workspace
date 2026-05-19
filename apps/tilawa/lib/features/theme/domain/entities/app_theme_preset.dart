@@ -1,8 +1,7 @@
 enum AppThemePreset {
   defaultMode,
   highContrast,
-  trueBlack
-  ;
+  trueBlack;
 
   String get displayName {
     return switch (this) {

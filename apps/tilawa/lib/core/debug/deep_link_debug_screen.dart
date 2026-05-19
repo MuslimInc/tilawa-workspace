@@ -188,9 +188,7 @@ class DeepLinkDebugScreen extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
               title: Text(action.label),
-              subtitle: action.subtitle == null
-                  ? null
-                  : Text(action.subtitle!),
+              subtitle: action.subtitle == null ? null : Text(action.subtitle!),
               trailing: const Icon(Icons.play_arrow),
               onTap: action.onTap,
             ),
@@ -332,8 +330,7 @@ class DeepLinkDebugScreen extends StatelessWidget {
       scenario: 'arm_local',
     );
     AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
-      notificationResponseType:
-          NotificationResponseType.selectedNotification,
+      notificationResponseType: NotificationResponseType.selectedNotification,
       payload: '{"type":"reciter","data":"7","reciterId":7}',
     );
     AppRouter.setPendingColdStartRoute(
@@ -432,8 +429,11 @@ class DeepLinkDebugScreen extends StatelessWidget {
 
   static void _logRouterState() {
     try {
-      final String? loc = AppRouter.router.routerDelegate
-          .currentConfiguration.uri
+      final String loc = AppRouter
+          .router
+          .routerDelegate
+          .currentConfiguration
+          .uri
           .toString();
       DeepLinkDebugLog.log(
         'router_state',

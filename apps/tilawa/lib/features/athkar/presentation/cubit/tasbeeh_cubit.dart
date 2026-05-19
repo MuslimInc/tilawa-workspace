@@ -15,21 +15,14 @@ import 'tasbeeh_state.dart';
 
 class TasbeehCubit extends Cubit<TasbeehState> {
   TasbeehCubit({
-    required GetSavedTasbeehUseCase getSavedTasbeeh,
-    required SaveCustomTasbeehUseCase saveCustomTasbeeh,
-    required IncrementTasbeehCountUseCase incrementTasbeehCount,
-    required ResetTasbeehCountUseCase resetTasbeehCount,
-    required SetTasbeehTargetCountUseCase setTasbeehTargetCount,
-    required DeleteTasbeehDhikrUseCase deleteTasbeehDhikr,
-    required TasbeehTargetFeedbackService feedbackService,
-  }) : _getSavedTasbeeh = getSavedTasbeeh,
-       _saveCustomTasbeeh = saveCustomTasbeeh,
-       _incrementTasbeehCount = incrementTasbeehCount,
-       _resetTasbeehCount = resetTasbeehCount,
-       _setTasbeehTargetCount = setTasbeehTargetCount,
-       _deleteTasbeehDhikr = deleteTasbeehDhikr,
-       _feedbackService = feedbackService,
-       super(const TasbeehState());
+    required this._getSavedTasbeeh,
+    required this._saveCustomTasbeeh,
+    required this._incrementTasbeehCount,
+    required this._resetTasbeehCount,
+    required this._setTasbeehTargetCount,
+    required this._deleteTasbeehDhikr,
+    required this._feedbackService,
+  }) : super(const TasbeehState());
 
   final GetSavedTasbeehUseCase _getSavedTasbeeh;
   final SaveCustomTasbeehUseCase _saveCustomTasbeeh;

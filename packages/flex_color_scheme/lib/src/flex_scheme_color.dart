@@ -38,22 +38,19 @@ class FlexSchemeColor with Diagnosticable {
   /// are null, they will be provided by defaults in theme creation later.
   const FlexSchemeColor({
     required this.primary,
-    Color? primaryContainer,
+    this._primaryContainer,
     this.primaryLightRef,
     required this.secondary,
-    Color? secondaryContainer,
+    this._secondaryContainer,
     this.secondaryLightRef,
-    Color? tertiary,
-    Color? tertiaryContainer,
+    this._tertiary,
+    this._tertiaryContainer,
     this.tertiaryLightRef,
     this.appBarColor,
     this.error,
     this.errorContainer,
     this.swapOnMaterial3 = false,
-  }) : _primaryContainer = primaryContainer,
-       _secondaryContainer = secondaryContainer,
-       _tertiary = tertiary,
-       _tertiaryContainer = tertiaryContainer;
+  });
 
   /// The color displayed most frequently across your application's screens
   /// and components.

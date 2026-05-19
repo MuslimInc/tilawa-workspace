@@ -7,9 +7,9 @@ import '../../domain/entities/subscription_plan.dart';
 
 class SubscriptionPlansService {
   SubscriptionPlansService({
-    required FirebaseFirestore firestore,
+    required this._firestore,
     this.firestoreCatalogEnabled = true,
-  }) : _firestore = firestore;
+  });
 
   final FirebaseFirestore _firestore;
 

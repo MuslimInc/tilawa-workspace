@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import '../../../quran_qcf.dart';
 import '../../helpers/app_logger.dart';
@@ -159,10 +160,12 @@ class _QuranPageViewState extends State<QuranPageView> {
         child: ColoredBox(
           color: widget.pageBackgroundColor,
           child: CustomScrollView(
+            scrollCacheExtent: ScrollCacheExtent.pixels(
+              widget.cacheExtentListenable?.value ?? 800,
+            ),
             scrollDirection: Axis.horizontal,
             controller: widget.controller,
             physics: const PageScrollPhysics(),
-            cacheExtent: widget.cacheExtentListenable?.value ?? 800,
             slivers: [
               SliverFillViewport(
                 padEnds: false,

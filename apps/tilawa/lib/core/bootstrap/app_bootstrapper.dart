@@ -7,8 +7,7 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 class AppBootstrapper {
-  const AppBootstrapper({required AppStartupTasks startupTasks})
-    : _startupTasks = startupTasks;
+  const AppBootstrapper({required this._startupTasks});
 
   final AppStartupTasks _startupTasks;
 
