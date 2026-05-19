@@ -3,15 +3,13 @@ import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
 import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
 import 'package:tilawa/core/debug/deep_link_debug_log.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
-import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
-import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 
@@ -33,7 +31,6 @@ class DeepLinkDebugScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: context.canPop() ? const TilawaBackButton() : null,
         title: const Text('Deep link debug'),
       ),
       body: ListView(

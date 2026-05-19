@@ -12,9 +12,7 @@ import '../../domain/services/download_queue_service_interface.dart';
 import '../bloc/downloads_bloc.dart';
 import '../extensions/download_item_extensions.dart';
 
-// Component-local constants that do not map to global tokens.
-const double _kStatusDotSize = 6.0;
-const double _kProgressMinHeight = 4.0;
+const double _kProgressMinHeight = 3.0;
 const int _kStuckThresholdSeconds = 30;
 
 class DownloadItemCard extends StatelessWidget {
@@ -33,234 +31,206 @@ class DownloadItemCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
 
-    final String surahName = download.getLocalizedSurahName(context);
+    return Dismissible(
+      key: ValueKey('download_${download.id}'),
+      direction: DismissDirection.endToStart,
+      background: _DismissBackground(colorScheme: colorScheme, tokens: tokens),
+      confirmDismiss: (_) => _confirmDelete(context),
+      onDismissed: (_) => onDelete(),
+      child: _DownloadRow(download: download),
+    );
+  }
 
-    return ListTile(
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceSmall,
-      ),
-      leading: _buildStatusIcon(context),
-      title: Text(
-        surahName,
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.titleSmall?.copyWith(
-          color: colorScheme.onSurface,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (download.status == DownloadStatus.downloading)
-            Padding(
-              padding: EdgeInsets.only(
-                top: tokens.spaceSmall,
-                bottom: tokens.spaceTiny,
-              ),
-              child: LinearProgressIndicator(
-                value: download.progress,
-                backgroundColor: colorScheme.outline.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
-                borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                minHeight: _kProgressMinHeight,
-                valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
-              ),
-            ),
-          SizedBox(height: tokens.spaceTiny),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (download.status != DownloadStatus.downloading) ...[
-                Container(
-                  width: _kStatusDotSize,
-                  height: _kStatusDotSize,
-                  decoration: BoxDecoration(
-                    color: _getStatusColor(colorScheme),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                SizedBox(width: _kStatusDotSize),
-              ],
-              Flexible(
-                child: Text(
-                  _getStatusText(context),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              if (download.fileSize > 0) ...[
-                SizedBox(width: tokens.spaceSmall),
-                Text('•', style: theme.textTheme.bodySmall),
-                SizedBox(width: tokens.spaceSmall),
-                Expanded(
-                  child: Text(
-                    '${_formatFileSize(context, download.downloadedSize)} / ${_formatFileSize(context, download.fileSize)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-              ],
-            ],
+  Future<bool> _confirmDelete(BuildContext context) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(context.l10n.deleteDownload),
+        content: Text(context.l10n.deleteDownloadConfirmation(download.title)),
+        actions: [
+          TilawaButton(
+            text: context.l10n.cancel,
+            variant: TilawaButtonVariant.ghost,
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TilawaButton(
+            text: context.l10n.delete,
+            variant: TilawaButtonVariant.danger,
+            onPressed: () => Navigator.of(context).pop(true),
           ),
         ],
       ),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Failed / Stuck -> Retry
-          if (download.status == DownloadStatus.failed ||
-              _isDownloadStuck(download))
-            IconButton(
-              icon: Icon(Icons.refresh_rounded, color: colorScheme.error),
-              onPressed: () => _handleRetryDownload(context),
-              tooltip: context.l10n.retryDownloadTooltip,
-            ),
+    );
+    return confirmed ?? false;
+  }
+}
 
-          // Downloading / Pending -> Cancel
-          if (download.status == DownloadStatus.downloading ||
-              download.status == DownloadStatus.pending)
-            IconButton(
-              icon: Icon(Icons.close_rounded, color: colorScheme.outline),
-              onPressed: () => _showDeleteDialog(context),
-              tooltip: context.l10n.cancel,
-            ),
+class _DismissBackground extends StatelessWidget {
+  const _DismissBackground({required this.colorScheme, required this.tokens});
 
-          // Completed -> Play/Pause
-          if (download.status == DownloadStatus.completed)
-            BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-              buildWhen: (previous, current) =>
-                  previous.currentAudio != current.currentAudio ||
-                  previous.isPlaying != current.isPlaying,
-              builder: (context, audioState) {
-                final bool isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
-                return IconButton.filled(
-                  style: IconButton.styleFrom(
-                    backgroundColor: isCurrentlyPlaying
-                        ? colorScheme.primary
-                        : colorScheme.primary.withValues(
-                            alpha: tokens.opacitySubtle,
-                          ),
-                    foregroundColor: isCurrentlyPlaying
-                        ? colorScheme.onPrimary
-                        : colorScheme.primary,
-                  ),
-                  icon: Icon(
-                    isCurrentlyPlaying &&
-                            (audioState.playbackState?.isPlaying ?? false)
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
-                  ),
-                  onPressed: () => _handlePlayPause(context, audioState),
-                  tooltip:
-                      isCurrentlyPlaying &&
-                          (audioState.playbackState?.isPlaying ?? false)
-                      ? context.l10n.pause
-                      : context.l10n.play,
-                );
-              },
-            ),
+  final ColorScheme colorScheme;
+  final TilawaDesignTokens tokens;
 
-          // Menu for additional actions
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_horiz_rounded),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(tokens.radiusLarge),
-            ),
-            onSelected: (value) {
-              if (value == 'delete') {
-                _showDeleteDialog(context);
-              }
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'delete',
-                child: Row(
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: AlignmentDirectional.centerEnd,
+      padding: EdgeInsetsDirectional.only(end: tokens.spaceLarge),
+      color: colorScheme.error,
+      child: Icon(
+        Icons.delete_outline_rounded,
+        color: colorScheme.onError,
+      ),
+    );
+  }
+}
+
+class _DownloadRow extends StatelessWidget {
+  const _DownloadRow({required this.download});
+
+  final DownloadItem download;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final String surahName = download.getLocalizedSurahName(context);
+    final bool isInFlight =
+        download.status == DownloadStatus.downloading ||
+        download.status == DownloadStatus.pending;
+    final bool isCompleted = download.status == DownloadStatus.completed;
+    final bool isFailed =
+        download.status == DownloadStatus.failed || _isStuck(download);
+
+    return Material(
+      color: colorScheme.surface,
+      child: InkWell(
+        onTap: isCompleted ? () => _playOrPause(context) : null,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceLarge,
+            vertical: tokens.spaceSmall,
+          ),
+          child: Row(
+            children: [
+              _StatusIcon(status: download.status, isStuck: _isStuck(download)),
+              SizedBox(width: tokens.spaceMedium),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.delete_outline_rounded,
-                      color: colorScheme.error,
-                      size: tokens.iconSizeMedium,
-                    ),
-                    SizedBox(width: tokens.spaceSmall + tokens.spaceTiny),
                     Text(
-                      context.l10n.delete,
-                      style: TextStyle(color: colorScheme.error),
+                      surahName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
+                    if (isInFlight) ...[
+                      SizedBox(height: tokens.spaceExtraSmall),
+                      _InFlightProgress(download: download),
+                    ] else if (download.fileSize > 0) ...[
+                      SizedBox(height: tokens.spaceTiny),
+                      Text(
+                        FileSizeFormatter.formatBytes(
+                          context,
+                          download.fileSize,
+                        ),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
+              SizedBox(width: tokens.spaceSmall),
+              _TrailingAction(
+                download: download,
+                isCompleted: isCompleted,
+                isFailed: isFailed,
+                isInFlight: isInFlight,
+              ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatusIcon(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).tokens;
-    final color = _getStatusColor(colorScheme);
+  void _playOrPause(BuildContext context) {
+    final audioState = context.read<AudioPlayerBloc>().state;
+    final fileUri = Uri.file(download.filePath).toString();
+    final bool isThisPlaying = audioState.currentAudio?.id == fileUri;
 
-    final icon = switch (download.status) {
-      DownloadStatus.completed => Icons.check_rounded,
-      DownloadStatus.downloading => Icons.download_rounded,
-      DownloadStatus.failed => Icons.error_outline_rounded,
-      DownloadStatus.paused => Icons.pause_circle_outline_rounded,
-      DownloadStatus.cancelled => Icons.cancel_outlined,
-      DownloadStatus.pending => Icons.schedule_rounded,
-    };
+    if (isThisPlaying) {
+      if (audioState.playbackState?.isPlaying ?? false) {
+        context.read<AudioPlayerBloc>().add(
+          const AudioPlayerEvent.pauseAudio(),
+        );
+      } else {
+        context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.playAudio());
+      }
+      return;
+    }
+    context.read<DownloadsBloc>().add(
+      DownloadsEvent.playDownloadedSurah(downloadId: download.id),
+    );
+  }
 
-    // docs/tilawa_brand.md §5: in-card decorative icon. Tinted fill + hairline,
-    // no shadow — the status color carries the meaning.
+  static bool _isStuck(DownloadItem download) {
+    if (download.status != DownloadStatus.downloading) return false;
+    if (download.progress > 0.0) return false;
+    return DateTime.now().difference(download.createdAt).inSeconds >
+        _kStuckThresholdSeconds;
+  }
+}
+
+class _StatusIcon extends StatelessWidget {
+  const _StatusIcon({required this.status, required this.isStuck});
+
+  final DownloadStatus status;
+  final bool isStuck;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final Color color = _color(colorScheme);
+    final IconData icon = _icon();
+
     return Container(
-      padding: EdgeInsets.all(tokens.spaceSmall),
+      width: 32,
+      height: 32,
+      alignment: Alignment.center,
       decoration: BoxDecoration(
         color: color.withValues(alpha: tokens.opacitySubtle),
         shape: BoxShape.circle,
-        border: Border.all(
-          color: color.withValues(alpha: tokens.opacitySubtle),
-          width: tokens.borderWidthThin,
-        ),
       ),
-      child: Icon(icon, color: color, size: tokens.iconSizeMedium),
+      child: Icon(icon, color: color, size: 18),
     );
   }
 
-  String _getStatusText(BuildContext context) {
-    final int progress = (download.progress * 100).toInt();
-    final downloading = '${context.l10n.downloading} $progress%';
-
-    if (download.status == DownloadStatus.pending) {
-      final int queuePosition = getIt<IDownloadQueueService>().getQueuePosition(
-        download.id,
-      );
-      if (queuePosition > 0) {
-        return '${context.l10n.pending} (#$queuePosition)';
-      }
-      return context.l10n.pending;
-    }
-
-    return switch (download.status) {
-      DownloadStatus.pending => context.l10n.pending,
-      DownloadStatus.downloading => downloading,
-      DownloadStatus.completed => context.l10n.completed,
-      DownloadStatus.failed => context.l10n.error,
-      DownloadStatus.paused => context.l10n.pause,
-      DownloadStatus.cancelled => context.l10n.cancelled,
+  IconData _icon() {
+    if (isStuck) return Icons.error_outline_rounded;
+    return switch (status) {
+      DownloadStatus.completed => Icons.check_rounded,
+      DownloadStatus.downloading => Icons.downloading_rounded,
+      DownloadStatus.failed => Icons.error_outline_rounded,
+      DownloadStatus.paused => Icons.pause_rounded,
+      DownloadStatus.cancelled => Icons.cancel_outlined,
+      DownloadStatus.pending => Icons.schedule_rounded,
     };
   }
 
-  Color _getStatusColor(ColorScheme colorScheme) {
-    return switch (download.status) {
+  Color _color(ColorScheme colorScheme) {
+    if (isStuck) return colorScheme.error;
+    return switch (status) {
       DownloadStatus.completed => colorScheme.primary,
       DownloadStatus.downloading => colorScheme.primary,
       DownloadStatus.failed => colorScheme.error,
@@ -269,58 +239,139 @@ class DownloadItemCard extends StatelessWidget {
       DownloadStatus.pending => colorScheme.outline,
     };
   }
+}
 
-  String _formatFileSize(BuildContext context, int bytes) {
-    return FileSizeFormatter.formatBytes(context, bytes);
-  }
+class _InFlightProgress extends StatelessWidget {
+  const _InFlightProgress({required this.download});
 
-  void _showDeleteDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(context.l10n.deleteDownload),
-          content: Text(
-            context.l10n.deleteDownloadConfirmation(download.title),
+  final DownloadItem download;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final int percent = (download.progress * 100).toInt();
+    final String label = download.status == DownloadStatus.pending
+        ? _pendingLabel(context)
+        : '${context.l10n.downloading} $percent%';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(tokens.radiusSmall),
+          child: LinearProgressIndicator(
+            value: download.status == DownloadStatus.pending
+                ? null
+                : download.progress,
+            backgroundColor: colorScheme.outline.withValues(
+              alpha: tokens.opacitySubtle,
+            ),
+            valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+            minHeight: _kProgressMinHeight,
           ),
-          actions: [
-            TilawaButton(
-              text: context.l10n.cancel,
-              variant: TilawaButtonVariant.ghost,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TilawaButton(
-              text: context.l10n.delete,
-              variant: TilawaButtonVariant.danger,
-              onPressed: () {
-                Navigator.of(context).pop();
-                onDelete();
-              },
-            ),
-          ],
-        );
-      },
+        ),
+        SizedBox(height: tokens.spaceTiny),
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 
-  /// Check if this download is currently playing
-  bool _isCurrentlyPlaying(AudioPlayerState audioState) {
-    final AudioEntity? currentAudio = audioState.currentAudio;
-    if (currentAudio == null) {
-      return false;
+  String _pendingLabel(BuildContext context) {
+    final int queuePosition =
+        getIt<IDownloadQueueService>().getQueuePosition(download.id);
+    if (queuePosition > 0) {
+      return '${context.l10n.pending} (#$queuePosition)';
+    }
+    return context.l10n.pending;
+  }
+}
+
+class _TrailingAction extends StatelessWidget {
+  const _TrailingAction({
+    required this.download,
+    required this.isCompleted,
+    required this.isFailed,
+    required this.isInFlight,
+  });
+
+  final DownloadItem download;
+  final bool isCompleted;
+  final bool isFailed;
+  final bool isInFlight;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    if (isFailed) {
+      return IconButton(
+        icon: Icon(Icons.refresh_rounded, color: colorScheme.error),
+        onPressed: () => context.read<DownloadsBloc>().add(
+          DownloadsEvent.retryDownload(downloadId: download.id),
+        ),
+        tooltip: context.l10n.retryDownloadTooltip,
+      );
     }
 
-    // Check if the current audio entity matches this download
+    if (isInFlight) {
+      // No trailing button — swipe to cancel/delete.
+      return const SizedBox.shrink();
+    }
+
+    if (isCompleted) {
+      return BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+        buildWhen: (previous, current) =>
+            previous.currentAudio != current.currentAudio ||
+            previous.isPlaying != current.isPlaying,
+        builder: (context, audioState) {
+          final bool isThisPlaying = _isCurrentlyPlaying(audioState);
+          final bool isPlaying =
+              isThisPlaying && (audioState.playbackState?.isPlaying ?? false);
+
+          return IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: isPlaying
+                  ? colorScheme.primary
+                  : colorScheme.primary.withValues(
+                      alpha: theme.tokens.opacitySubtle,
+                    ),
+              foregroundColor: isPlaying
+                  ? colorScheme.onPrimary
+                  : colorScheme.primary,
+              visualDensity: VisualDensity.compact,
+            ),
+            icon: Icon(
+              isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+            ),
+            onPressed: () => _playOrPause(context, audioState),
+            tooltip: isPlaying ? context.l10n.pause : context.l10n.play,
+          );
+        },
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  bool _isCurrentlyPlaying(AudioPlayerState audioState) {
+    final AudioEntity? currentAudio = audioState.currentAudio;
+    if (currentAudio == null) return false;
     final fileUri = Uri.file(download.filePath).toString();
     return currentAudio.id == fileUri;
   }
 
-  /// Handle play/pause button press
-  void _handlePlayPause(BuildContext context, AudioPlayerState audioState) {
-    final bool isCurrentlyPlaying = _isCurrentlyPlaying(audioState);
-
-    if (isCurrentlyPlaying) {
-      // If this download is currently playing, toggle play/pause
+  void _playOrPause(BuildContext context, AudioPlayerState audioState) {
+    if (_isCurrentlyPlaying(audioState)) {
       if (audioState.playbackState?.isPlaying ?? false) {
         context.read<AudioPlayerBloc>().add(
           const AudioPlayerEvent.pauseAudio(),
@@ -328,37 +379,10 @@ class DownloadItemCard extends StatelessWidget {
       } else {
         context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.playAudio());
       }
-    } else {
-      // If this download is not playing, start playing it
-      _playDownloadedSurah(context);
+      return;
     }
-  }
-
-  /// Play the downloaded surah
-  void _playDownloadedSurah(BuildContext context) {
     context.read<DownloadsBloc>().add(
       DownloadsEvent.playDownloadedSurah(downloadId: download.id),
     );
-  }
-
-  /// Handle retry download button press
-  void _handleRetryDownload(BuildContext context) {
-    context.read<DownloadsBloc>().add(
-      DownloadsEvent.retryDownload(downloadId: download.id),
-    );
-  }
-
-  /// Check if download is stuck (at 0% for more than 30 seconds)
-  bool _isDownloadStuck(DownloadItem download) {
-    if (download.status != DownloadStatus.downloading) {
-      return false;
-    }
-    if (download.progress > 0.0) {
-      return false;
-    }
-    final Duration timeSinceCreated = DateTime.now().difference(
-      download.createdAt,
-    );
-    return timeSinceCreated.inSeconds > _kStuckThresholdSeconds;
   }
 }

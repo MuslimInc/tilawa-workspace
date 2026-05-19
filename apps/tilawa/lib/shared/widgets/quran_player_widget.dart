@@ -3,6 +3,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
@@ -19,6 +20,7 @@ import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
+import 'quran_player_chrome.dart';
 
 /// A YouTube/Spotify-style sliding player panel.
 ///
@@ -47,17 +49,42 @@ class QuranPlayerWidget extends StatefulWidget {
   /// Use this to inset content (lists, FABs, scrollbars) so it isn't
   /// covered by the player.
   ///
-  /// `bottomNavBarHeight` must match what the host shell passes to the
-  /// [QPlayer] mounted on this route. Standalone routes that
-  /// mount their own player without a nav bar should pass 0.
+  /// Insets scroll content so it is not covered by the global mini-player.
+  ///
+  /// On `/`, reads [QuranPlayerChromeNotifier] published by [MainScreen].
+  /// On other routes (e.g. `/downloads`), uses [floatingBottomPadding] only.
   static double collapsedFootprint(
     BuildContext context, {
     double bottomNavBarHeight = 0,
     bool hostAbsorbsBottomSafeArea = false,
-  }) =>
-      collapsedHeight(context) +
-      bottomNavBarHeight +
-      (hostAbsorbsBottomSafeArea ? 0 : context.floatingBottomPadding);
+  }) {
+    final String location = GoRouterState.of(context).uri.path;
+    if (!QuranPlayerRoutePolicy.shouldShowPlayer(location)) {
+      return 0;
+    }
+
+    if (QuranPlayerRoutePolicy.isMainShell(location)) {
+      final QuranPlayerShellChrome? shell = context
+          .read<QuranPlayerChromeNotifier>()
+          .shellChrome;
+      if (shell != null) {
+        // Phone tab body sits above the shell bottom nav; only reserve player
+        // height. The global overlay positions the player via [bottomNavBarHeight].
+        if (context.isNarrow && shell.bottomNavBarHeight > 0) {
+          return collapsedHeight(context);
+        }
+        return collapsedHeight(context) +
+            shell.bottomNavBarHeight +
+            (shell.hostAbsorbsBottomSafeArea
+                ? 0
+                : context.floatingBottomPadding);
+      }
+    }
+
+    return collapsedHeight(context) +
+        bottomNavBarHeight +
+        (hostAbsorbsBottomSafeArea ? 0 : context.floatingBottomPadding);
+  }
 
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
@@ -86,10 +113,17 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     with TickerProviderStateMixin {
   late AnimationController _expandController;
 
+  /// Hosts the player overlay. The expanded sheet uses the full overlay;
+  /// the mini player is positioned via [OverlayChildLayoutInfo] to match the
+  /// host slot from [GlobalQuranPlayerHost].
+  final OverlayPortalController _portalController = OverlayPortalController();
+
   /// Controls the swipe-down-to-dismiss offset for the mini player.
   double _dismissOffsetY = 0;
   Animation<double>? _dismissAnimation;
   late AnimationController _dismissAnimController;
+
+  bool _portalVisibilitySyncScheduled = false;
 
   /// The height of the mini player bar (excluding nav bar offset).
   /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
@@ -119,14 +153,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       duration: const Duration(milliseconds: 200),
     );
 
-    _expandController.addStatusListener((status) {
-      debugPrint(
-        '[QPlayer] expandController status=${status.name}, value=${_expandController.value.toStringAsFixed(3)}',
-      );
-    });
     _expandController.addListener(_syncPhoneBottomNavBarVisible);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _syncPhoneBottomNavBarVisible();
+      if (mounted) {
+        _syncPhoneBottomNavBarVisible();
+        _schedulePortalVisibilitySync();
+      }
     });
   }
 
@@ -146,15 +178,34 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     super.dispose();
   }
 
+  /// Schedules [OverlayPortalController.show]/[hide] after build. Calling them
+  /// from [build] triggers a framework assertion during route transitions.
+  void _schedulePortalVisibilitySync() {
+    if (_portalVisibilitySyncScheduled) {
+      return;
+    }
+    _portalVisibilitySyncScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _portalVisibilitySyncScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      _applyPortalVisibility();
+    });
+  }
+
+  void _applyPortalVisibility() {
+    if (!_portalController.isShowing) {
+      _portalController.show();
+    }
+  }
+
   /// Expand the player to full-screen.
   ///
   /// Uses [Curves.easeOutBack] for a spring-like overshoot that feels
   /// like YouTube Music's player sheet expansion.
   void expand() {
     HapticFeedback.lightImpact();
-    debugPrint(
-      '[QPlayer] expand() called, current=${_expandController.value}, status=${_expandController.status}',
-    );
     _expandController.animateTo(
       1.0,
       duration: const Duration(milliseconds: 450),
@@ -168,9 +219,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   /// Avoids [Curves.easeInOutCubicEmphasized] which stalls visually
   /// (lingers at ~0.8–0.9 then snaps to 0).
   void collapse() {
-    debugPrint(
-      '[QPlayer] collapse() called, current=${_expandController.value}, status=${_expandController.status}',
-    );
     _expandController.animateTo(
       0.0,
       duration: const Duration(milliseconds: 350),
@@ -194,12 +242,24 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     n.value = true;
   }
 
+  /// Current route path without [GoRouterState.of] (overlay is above the router).
+  static String _currentRoutePath() =>
+      QuranPlayerRoutePolicy.currentMatchedLocation();
+
+  /// Bottom offset for the mini player above nav chrome and the home indicator.
+  double _resolveBottomInset(BuildContext context) {
+    final bool navVisible = widget.phoneBottomNavBarVisible?.value ?? true;
+    return QuranPlayerLayoutInsets.miniPlayerBottomInset(
+      context: context,
+      hostBottomNavBarHeight: widget.bottomNavBarHeight,
+      hostAbsorbsBottomSafeArea: widget.hostAbsorbsBottomSafeArea,
+      phoneNavVisible: navVisible,
+      routePath: _currentRoutePath(),
+    );
+  }
+
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     final primaryDelta = details.primaryDelta ?? 0;
-    debugPrint(
-      '[QPlayer] dragUpdate delta=$primaryDelta, expand=${_expandController.value.toStringAsFixed(3)}, dismissOffsetY=$_dismissOffsetY',
-    );
-
     if ((_expandController.value == 0 && primaryDelta > 0) ||
         _dismissOffsetY > 0) {
       setState(() {
@@ -222,17 +282,11 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   void _onVerticalDragEnd(DragEndDetails details) {
     final tokens = context.tokens;
     final primaryVelocity = details.primaryVelocity ?? 0;
-    debugPrint(
-      '[QPlayer] dragEnd velocity=$primaryVelocity, expand=${_expandController.value.toStringAsFixed(3)}, dismissOffsetY=$_dismissOffsetY',
-    );
-
     if (_dismissOffsetY > 0) {
       if (primaryVelocity > tokens.playerDismissVelocityThreshold ||
           _dismissOffsetY > tokens.playerDismissThreshold) {
-        debugPrint('[QPlayer] dragEnd → dismiss (velocity)');
         _dismissWithUndo();
       } else {
-        debugPrint('[QPlayer] dragEnd → reset dismiss');
         _animateDismissReset();
       }
       return;
@@ -270,6 +324,40 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranPlayerWidget');
 
+    _schedulePortalVisibilitySync();
+
+    return OverlayPortal.overlayChildLayoutBuilder(
+      controller: _portalController,
+      overlayChildBuilder: _buildOverlayChild,
+      child: const SizedBox.expand(),
+    );
+  }
+
+  Widget _buildOverlayChild(
+    BuildContext overlayContext,
+    OverlayChildLayoutInfo layoutInfo,
+  ) {
+    if (layoutInfo.childPaintTransform.determinant() == 0.0) {
+      return const SizedBox.shrink();
+    }
+
+    final Rect hostRect = MatrixUtils.transformRect(
+      layoutInfo.childPaintTransform,
+      Offset.zero & layoutInfo.childSize,
+    );
+
+    return _buildPlayerTree(
+      overlayContext,
+      hostRect: hostRect,
+      overlaySize: layoutInfo.overlaySize,
+    );
+  }
+
+  Widget _buildPlayerTree(
+    BuildContext context, {
+    required Rect hostRect,
+    required Size overlaySize,
+  }) {
     return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
       listenWhen: (previous, current) {
         return previous.currentAudio?.id != current.currentAudio?.id ||
@@ -314,90 +402,91 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           return const SizedBox.shrink();
         }
 
-        final screenHeight = context.viewportHeight;
+        final double screenHeight = overlaySize.height;
+        final Listenable animation = widget.phoneBottomNavBarVisible == null
+            ? _expandController
+            : Listenable.merge(<Listenable>[
+                _expandController,
+                widget.phoneBottomNavBarVisible!,
+              ]);
 
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: AnimatedBuilder(
-            animation: _expandController,
-            builder: (context, _) {
-              final progress = _expandController.value;
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, _) {
+            final progress = _expandController.value;
 
-              // Bottom inset above the layout bottom / overlaid nav. When the
-              // host stacks bottom chrome below this subtree
-              // ([hostAbsorbsBottomSafeArea]), skip [floatingBottomPadding] so we
-              // do not double-count the home indicator already inside the bar.
-              final double layoutBottomInset =
-                  widget.hostAbsorbsBottomSafeArea &&
-                      widget.bottomNavBarHeight <= 0
-                  ? 0.0
-                  : context.floatingBottomPadding;
-              final bottomInset = widget.bottomNavBarHeight > 0
-                  ? widget.bottomNavBarHeight
-                  : layoutBottomInset;
+            final bottomInset = _resolveBottomInset(context);
+            final bool hideForModal =
+                QuranPlayerLayoutInsets.shouldHideMiniPlayerForModal(context);
 
-              // Bottom sheet slide:
-              // The expanded player translates from fully off-screen
-              // (progress=0, translateY=screenHeight) to fully on-screen
-              // (progress=1, translateY=0). This is the standard pattern
-              // used by YouTube Music and Spotify.
-              final sheetOffsetY = screenHeight * (1 - progress);
+            // Bottom sheet slide:
+            // The expanded player translates from fully off-screen
+            // (progress=0, translateY=screenHeight) to fully on-screen
+            // (progress=1, translateY=0). This is the standard pattern
+            // used by YouTube Music and Spotify.
+            final sheetOffsetY = screenHeight * (1 - progress);
 
-              // Mini player fades and slides to avoid overlapping with the
-              // expanded player. During expand: slides down and fades out.
-              // During collapse: slides up from below and fades in.
-              final miniOpacity = (1 - progress * 2).clamp(0.0, 1.0);
-              final miniSlideY = (1 - miniOpacity) * _miniPlayerHeight;
+            // Mini player fades and slides to avoid overlapping with the
+            // expanded player. During expand: slides down and fades out.
+            // During collapse: slides up from below and fades in.
+            final miniOpacity = (1 - progress * 2).clamp(0.0, 1.0);
+            final miniSlideY = (1 - miniOpacity) * _miniPlayerHeight;
 
-              return SizedBox(
-                height: screenHeight,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Backdrop scrim — only while expanding; omit at progress==0
-                    // so no full-screen layer sits above the scaffold behind the
-                    // bottom nav.
-                    if (progress > 0)
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: Container(
-                            color: Colors.black.withValues(
-                              alpha: progress * 0.5,
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                // Expanded sheet + scrim cover the full overlay so they paint
+                // above AppBars and nested scaffolds.
+                SizedBox(
+                  height: screenHeight,
+                  width: overlaySize.width,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (progress > 0)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: Container(
+                              color: Colors.black.withValues(
+                                alpha: progress * 0.5,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    // Expanded player — slides up from below during expand,
-                    // slides down below during collapse.
-                    if (progress > 0.01)
-                      Transform.translate(
-                        offset: Offset(0, sheetOffsetY),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onVerticalDragUpdate: _onVerticalDragUpdate,
-                          onVerticalDragEnd: _onVerticalDragEnd,
-                          child: _ExpandedPlayerOrganism(
-                            state: state,
-                            audio: audio,
-                            onCollapse: collapse,
-                            onDismiss: _dismissWithUndo,
-                            expandProgress: 0,
+                      if (progress > 0.01)
+                        Transform.translate(
+                          offset: Offset(0, sheetOffsetY),
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onVerticalDragUpdate: _onVerticalDragUpdate,
+                            onVerticalDragEnd: _onVerticalDragEnd,
+                            child: _ExpandedPlayerOrganism(
+                              state: state,
+                              audio: audio,
+                              onCollapse: collapse,
+                              onDismiss: _dismissWithUndo,
+                              expandProgress: 0,
+                            ),
                           ),
                         ),
-                      ),
-                    // Mini player — slides down and fades out during expand
-                    // to avoid overlapping with the arriving expanded player.
-                    // Slides up from below during collapse.
-                    if (progress < 0.55)
-                      Positioned(
-                        bottom: bottomInset - miniSlideY,
-                        left: 0,
-                        right: 0,
-                        child: Opacity(
-                          opacity: miniOpacity,
-                          child: SizedBox(
-                            height: _miniPlayerHeight,
+                    ],
+                  ),
+                ),
+                // Mini player is scoped to the host slot (shell bottom overlay
+                // or route Stack), not the full window.
+                if (progress < 0.55 && !hideForModal)
+                  Positioned.fromRect(
+                    rect: hostRect,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: bottomInset - miniSlideY,
+                          height: _miniPlayerHeight,
+                          child: Opacity(
+                            opacity: miniOpacity,
                             child: _MiniPlayerTransition(
                               progress: progress,
                               state: state,
@@ -412,12 +501,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-              );
-            },
-          ),
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          },
         );
       },
     );
@@ -507,7 +596,7 @@ class _MiniPlayerOrganism extends StatelessWidget {
           tokens.spaceLarge,
           tokens.spaceTiny,
           tokens.spaceLarge,
-          tokens.spaceTiny,
+          0,
         ),
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -591,7 +680,6 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
     final tokens = Theme.of(context).tokens;
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
-    final topPadding = MediaQuery.paddingOf(context).top;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -703,18 +791,6 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                       },
                     ),
                   ),
-                ),
-              ),
-
-            // Drag handle
-            if (!isLandscape)
-              Positioned(
-                top: topPadding + 8,
-                left: 0,
-                right: 0,
-                child: TilawaSheetHandle(
-                  omitTopMargin: true,
-                  color: Colors.white.withAlpha(0x4D),
                 ),
               ),
           ],

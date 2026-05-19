@@ -1,17 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 import 'package:tilawa/shared/widgets/quran_player_widget.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 Widget _wrap({
   required Widget child,
   EdgeInsets viewPadding = EdgeInsets.zero,
+  String initialLocation = '/downloads',
 }) {
+  final GoRouter router = GoRouter(
+    initialLocation: initialLocation,
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => child,
+      ),
+      GoRoute(
+        path: '/downloads',
+        builder: (context, state) => child,
+      ),
+    ],
+  );
+
   return MediaQuery(
     data: MediaQueryData(viewPadding: viewPadding),
-    child: MaterialApp(
-      theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
-      home: child,
+    child: ChangeNotifierProvider(
+      create: (_) => QuranPlayerChromeNotifier(),
+      child: MaterialApp.router(
+        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        routerConfig: router,
+      ),
     ),
   );
 }

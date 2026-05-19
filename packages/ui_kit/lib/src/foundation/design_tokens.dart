@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 
 /// Tilawa minimum interactive (hit-target) dimension, in logical pixels.
 ///
-/// **44 dp** — matches Apple HIG; denser than Material's 48 dp default
-/// (`kMinInteractiveDimension`) without dropping below the iOS
-/// accessibility floor. Single source of truth for hit targets across the
-/// design system; consumed by [TilawaDesignTokens.minInteractiveDimension]
-/// and by every component-token factory (icon action button, search field,
-/// seek bar, alphabet scrollbar, media player controls, immersive composer).
+/// **48 dp** — aligns with Material Design 3 and Flutter's
+/// `kMinInteractiveDimension`, and satisfies WCAG 2.5.5 (Target Size)
+/// at the Level AAA recommended size. Comfortably above the iOS HIG
+/// 44 pt floor, with extra margin for one-handed reach and broader
+/// accessibility (relevant for the wide age range of Quran-app users).
+/// Single source of truth for hit targets across the design system;
+/// consumed by [TilawaDesignTokens.minInteractiveDimension] and by every
+/// component-token factory (icon action button, search field, seek bar,
+/// alphabet scrollbar, media player controls, immersive composer).
 ///
 /// Use this (or `context.minInteractiveDimension` /
 /// `tokens.minInteractiveDimension`) instead of Flutter's
 /// `kMinInteractiveDimension` for all in-product hit targets.
-const double kTilawaMinInteractiveDimension = 44.0;
+const double kTilawaMinInteractiveDimension = 48.0;
 
 /// Design tokens for the Tilawa UI Kit to avoid magic numbers
 /// and ensure consistency across components.
@@ -158,14 +161,15 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 42.0
   final double iconSizeLargePlus;
 
-  /// 44.0 — largest *glyph* size in the default ramp; matches
-  /// [kTilawaMinInteractiveDimension] so the top-of-ramp icon aligns with the
-  /// kit’s minimum hit target. Use [minInteractiveDimension] for layout limits
-  /// on tappable chrome, not necessarily every decorative icon.
+  /// 44.0 — largest *glyph* size in the default ramp. Sits just below
+  /// [kTilawaMinInteractiveDimension] (48 dp) so a top-of-ramp icon fits
+  /// comfortably inside the minimum hit target with breathing room.
+  /// Use [minInteractiveDimension] for layout limits on tappable chrome,
+  /// not necessarily every decorative icon.
   final double iconSizeExtraLarge;
 
   /// Tilawa minimum interactive (hit-target) dimension. Defaults to
-  /// [kTilawaMinInteractiveDimension] (44 dp). Use this for *all* in-product
+  /// [kTilawaMinInteractiveDimension] (48 dp). Use this for *all* in-product
   /// hit targets (cards, list rows, icon buttons, chips, settings tiles,
   /// search-field height, player controls) instead of Flutter's
   /// `kMinInteractiveDimension`.
@@ -265,7 +269,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       iconSizeMedium: 20.0,
       iconSizeLarge: 24.0,
       iconSizeLargePlus: 42.0,
-      iconSizeExtraLarge: kTilawaMinInteractiveDimension,
+      iconSizeExtraLarge: 44.0,
       minInteractiveDimension: kTilawaMinInteractiveDimension,
       textHeightLoose: 2.0,
       durationFast: const Duration(milliseconds: 200),

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../shared/widgets/tilawa_back_button.dart';
-
 import '../router/app_router_config.dart';
 
 class RouteListScreen extends StatelessWidget {
@@ -20,7 +18,6 @@ class RouteListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        leading: context.canPop() ? const TilawaBackButton() : null,
         title: const Text('All Routes'),
       ),
       body: ListView.separated(

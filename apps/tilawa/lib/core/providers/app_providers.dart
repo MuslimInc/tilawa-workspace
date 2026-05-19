@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
 import 'package:tilawa_core/di/injection.dart';
 
@@ -21,6 +22,7 @@ import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../features/share/presentation/cubit/share_cubit.dart';
 import '../../features/theme/presentation/cubit/theme_cubit.dart';
 import '../presentation/cubit/ui_visibility_cubit.dart';
+import '../../shared/widgets/quran_player_chrome.dart';
 
 /// Centralized configuration for all BlocProviders in the application.
 /// This class provides a single place to manage all state management providers.
@@ -102,7 +104,13 @@ class AppProviders {
   static Widget create({required Widget child}) {
     return MultiRepositoryProvider(
       providers: repositories,
-      child: MultiBlocProvider(providers: providers, child: child),
+      child: MultiBlocProvider(
+        providers: providers,
+        child: ChangeNotifierProvider<QuranPlayerChromeNotifier>(
+          create: (_) => QuranPlayerChromeNotifier(),
+          child: child,
+        ),
+      ),
     );
   }
 }

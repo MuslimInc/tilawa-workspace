@@ -1,19 +1,13 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/utils/file_size_formatter.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/quran_player_widget.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
-import '../bloc/downloads_status.dart';
 import '../widgets/reciter_downloads_section.dart';
 
 class DownloadsScreen extends StatefulWidget {
@@ -70,25 +64,19 @@ class _DownloadsScreenState extends State<DownloadsScreen>
           current.uiNotificationSeq != previous.uiNotificationSeq &&
           current.uiNotification != null,
       listener: (BuildContext context, DownloadsState state) {
-        final DownloadsStatus status = state.uiNotification!;
-        status.mapOrNull(
-          error: (s) {
-            final String msg =
-                (s.message.contains('No internet') ||
-                    s.message.contains('internet'))
-                ? context.l10n.networkError
-                : s.message;
-            ToastUtils.showToast(msg: msg);
-          },
-          premiumRequired: (s) => ToastUtils.showToast(msg: s.message),
-          playbackInitiated: (s) => ToastUtils.showToast(msg: s.message),
-        );
         context.read<DownloadsBloc>().add(const ClearDownloadsUiNotification());
       },
       child: Scaffold(
         appBar: AppBar(
-          leading: context.canPop() ? const TilawaBackButton() : null,
-          title: Text(context.l10n.downloads),
+          title: BlocBuilder<DownloadsBloc, DownloadsState>(
+            buildWhen: (previous, current) =>
+                previous.totalDownloadsSize != current.totalDownloadsSize,
+            builder: (context, state) {
+              return _DownloadsAppBarTitle(
+                totalBytes: state.totalDownloadsSize,
+              );
+            },
+          ),
           actions: [
             TilawaIconActionButton(
               icon: Icons.refresh_rounded,
@@ -102,15 +90,10 @@ class _DownloadsScreenState extends State<DownloadsScreen>
             SizedBox(width: 8),
           ],
         ),
-        body: Stack(
-          children: [
-            BlocBuilder<DownloadsBloc, DownloadsState>(
-              builder: (context, state) {
-                return _DownloadsBody(state: state);
-              },
-            ),
-            const Positioned.fill(child: QuranPlayerWidget()),
-          ],
+        body: BlocBuilder<DownloadsBloc, DownloadsState>(
+          builder: (context, state) {
+            return _DownloadsBody(state: state);
+          },
         ),
       ),
     );
@@ -149,27 +132,16 @@ class _DownloadsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        const Positioned.fill(child: _DownloadsAmbientBackground()),
-        Positioned.fill(
-          child: switch (state.status) {
-            DownloadsStateStatus.initial ||
-            DownloadsStateStatus.loading => const TilawaLoadingIndicator(),
-            DownloadsStateStatus.loaded => _DownloadsList(
-              downloadsByReciter: state.downloads,
-              formattedSize: FileSizeFormatter.formatBytes(
-                context,
-                state.totalDownloadsSize,
-              ),
-            ),
-            DownloadsStateStatus.error => _ErrorView(
-              message: state.errorMessage ?? context.l10n.error,
-            ),
-          },
-        ),
-      ],
-    );
+    return switch (state.status) {
+      DownloadsStateStatus.initial ||
+      DownloadsStateStatus.loading => const TilawaLoadingIndicator(),
+      DownloadsStateStatus.loaded => _DownloadsList(
+        downloadsByReciter: state.downloads,
+      ),
+      DownloadsStateStatus.error => _ErrorView(
+        message: state.errorMessage ?? context.l10n.error,
+      ),
+    };
   }
 }
 
@@ -202,13 +174,9 @@ class _ErrorView extends StatelessWidget {
 }
 
 class _DownloadsList extends StatelessWidget {
-  const _DownloadsList({
-    required this.downloadsByReciter,
-    required this.formattedSize,
-  });
+  const _DownloadsList({required this.downloadsByReciter});
 
   final Map<String, Map<String, List<DownloadItem>>> downloadsByReciter;
-  final String formattedSize;
 
   @override
   Widget build(BuildContext context) {
@@ -216,51 +184,59 @@ class _DownloadsList extends StatelessWidget {
       return const _EmptyDownloadsView();
     }
 
-    final List<DownloadItem> downloads = downloadsByReciter.values
-        .expand((narratives) => narratives.values)
-        .expand((items) => items)
-        .toList(growable: false);
-    final int completedCount = downloads
-        .where((download) => download.status == DownloadStatus.completed)
-        .length;
-    final int downloadingCount = downloads
-        .where(
-          (download) => download.status == DownloadStatus.downloading,
-        )
-        .length;
-
-    return _DownloadsContentBounds(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    final tokens = Theme.of(context).tokens;
+    return TilawaContentBounds(
+      kind: TilawaContentKind.settings,
+      child: ListView(
+        padding: EdgeInsets.only(top: tokens.spaceSmall, bottom: 120),
         children: [
-          _DownloadsSummaryCard(
-            formattedSize: formattedSize,
-            totalCount: downloads.length,
-            completedCount: completedCount,
-            downloadingCount: downloadingCount,
-          ),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.only(bottom: 120),
-              children: [
-                for (int i = 0; i < downloadsByReciter.length; i++)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: ReciterDownloadsSection(
-                      reciterName: downloadsByReciter.keys.elementAt(i),
-                      downloadsByNarrative: downloadsByReciter.values.elementAt(
-                        i,
-                      ),
-                    ),
-                  ),
-              ],
+          for (int i = 0; i < downloadsByReciter.length; i++)
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceLarge,
+                vertical: tokens.spaceSmall,
+              ),
+              child: ReciterDownloadsSection(
+                reciterName: downloadsByReciter.keys.elementAt(i),
+                downloadsByNarrative: downloadsByReciter.values.elementAt(i),
+              ),
             ),
-          ),
         ],
       ),
+    );
+  }
+}
+
+class _DownloadsAppBarTitle extends StatelessWidget {
+  const _DownloadsAppBarTitle({required this.totalBytes});
+
+  final int totalBytes;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final String title = context.l10n.downloads;
+
+    if (totalBytes <= 0) {
+      return Text(title);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(title),
+        Text(
+          context.l10n.storageUsed(
+            FileSizeFormatter.formatBytes(context, totalBytes),
+          ),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -287,246 +263,3 @@ class _EmptyDownloadsView extends StatelessWidget {
   }
 }
 
-class _DownloadsContentBounds extends StatelessWidget {
-  const _DownloadsContentBounds({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Align(
-          alignment: Alignment.topCenter,
-          child: SizedBox(
-            width: math.min(
-              constraints.maxWidth,
-              tokens.contentMaxWidthSettings,
-            ),
-            height: constraints.maxHeight,
-            child: child,
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _DownloadsSummaryCard extends StatelessWidget {
-  const _DownloadsSummaryCard({
-    required this.formattedSize,
-    required this.totalCount,
-    required this.completedCount,
-    required this.downloadingCount,
-  });
-
-  final String formattedSize;
-  final int totalCount;
-  final int completedCount;
-  final int downloadingCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final TextTheme textTheme = theme.textTheme;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceLarge,
-        vertical: tokens.spaceMedium,
-      ),
-      child: Container(
-        padding: EdgeInsets.all(tokens.spaceLarge),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(tokens.radiusLarge),
-          border: Border.all(
-            color: colorScheme.outlineVariant,
-            width: tokens.borderWidthThin,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                TilawaIconBox(
-                  icon: Icons.offline_pin_rounded,
-                  iconColor: colorScheme.primary,
-                  backgroundColor: colorScheme.surface.withValues(
-                    alpha: tokens.opacityGlass,
-                  ),
-                ),
-                SizedBox(width: tokens.spaceMedium),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        context.l10n.downloads,
-                        style: textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      SizedBox(height: tokens.spaceExtraSmall),
-                      Text(
-                        context.l10n.storageUsed(formattedSize),
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: tokens.spaceLarge),
-            Wrap(
-              spacing: tokens.spaceSmall,
-              runSpacing: tokens.spaceSmall,
-              children: [
-                _DownloadsMetricChip(
-                  icon: Icons.library_music_rounded,
-                  label: '$totalCount ${context.l10n.surahs}',
-                ),
-                _DownloadsMetricChip(
-                  icon: Icons.check_circle_rounded,
-                  label: '${context.l10n.completed}: $completedCount',
-                ),
-                if (downloadingCount > 0)
-                  _DownloadsMetricChip(
-                    icon: Icons.downloading_rounded,
-                    label: '${context.l10n.downloading}: $downloadingCount',
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DownloadsMetricChip extends StatelessWidget {
-  const _DownloadsMetricChip({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceSmall,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.surface.withValues(alpha: tokens.opacityGlass),
-        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-        border: Border.all(
-          color: colorScheme.outlineVariant.withValues(
-            alpha: tokens.opacitySubtle,
-          ),
-          width: tokens.borderWidthThin,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: tokens.iconSizeSmall, color: colorScheme.primary),
-          SizedBox(width: tokens.spaceExtraSmall),
-          Text(
-            label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DownloadsAmbientBackground extends StatelessWidget {
-  const _DownloadsAmbientBackground();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ExcludeSemantics(
-      child: CustomPaint(
-        painter: _DownloadsAmbientPainter(
-          colorScheme: theme.colorScheme,
-          tokens: theme.tokens,
-        ),
-      ),
-    );
-  }
-}
-
-class _DownloadsAmbientPainter extends CustomPainter {
-  const _DownloadsAmbientPainter({
-    required this.colorScheme,
-    required this.tokens,
-  });
-
-  final ColorScheme colorScheme;
-  final TilawaDesignTokens tokens;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final shortest = size.shortestSide;
-    final topCenter = Offset(size.width * 0.18, size.height * 0.12);
-    final lowerCenter = Offset(size.width * 0.82, size.height * 0.72);
-
-    final primaryStroke = Paint()
-      ..color = colorScheme.primary.withValues(
-        alpha: tokens.opacitySubtle * 0.34,
-      )
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = tokens.borderWidthThin;
-    final tertiaryStroke = Paint()
-      ..color = colorScheme.tertiary.withValues(
-        alpha: tokens.opacitySubtle * 0.28,
-      )
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = tokens.borderWidthThin;
-
-    for (final factor in <double>[0.46, 0.7]) {
-      canvas.drawArc(
-        Rect.fromCircle(center: topCenter, radius: shortest * factor),
-        -math.pi * 0.1,
-        math.pi * 0.5,
-        false,
-        primaryStroke,
-      );
-    }
-
-    for (final factor in <double>[0.48, 0.74]) {
-      canvas.drawArc(
-        Rect.fromCircle(center: lowerCenter, radius: shortest * factor),
-        math.pi * 0.92,
-        math.pi * 0.46,
-        false,
-        tertiaryStroke,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DownloadsAmbientPainter oldDelegate) {
-    return oldDelegate.colorScheme != colorScheme ||
-        oldDelegate.tokens != tokens;
-  }
-}

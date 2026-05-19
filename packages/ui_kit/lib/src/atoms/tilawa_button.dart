@@ -249,7 +249,7 @@ class TilawaButton extends StatelessWidget {
   (double, double, double, double) _getDimensions() {
     return switch (size) {
       TilawaButtonSize.small => (32.0, 12.0, 12.0, 16.0),
-      TilawaButtonSize.medium => (44.0, 16.0, 14.0, 20.0),
+      TilawaButtonSize.medium => (48.0, 16.0, 14.0, 20.0),
       TilawaButtonSize.large => (56.0, 24.0, 16.0, 24.0),
     };
   }

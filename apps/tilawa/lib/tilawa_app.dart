@@ -29,6 +29,7 @@ import 'l10n/generated/app_localizations.dart';
 import 'core/debug/deep_link_debug_log.dart';
 import 'router/app_router.dart';
 import 'router/app_router_config.dart';
+import 'shared/widgets/global_quran_player_host.dart';
 
 class TilawaApp extends StatefulWidget {
   const TilawaApp({super.key});
@@ -205,7 +206,7 @@ class _PlayerApp extends StatelessWidget {
                             maxScaleFactor: _kTextScaleClampMax,
                           ),
                     ),
-                    child: routedChild,
+                    child: GlobalQuranPlayerHost(child: routedChild),
                   );
                 },
                 theme: AppTheme.getLightTheme(

@@ -3,6 +3,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
@@ -19,6 +20,7 @@ import '../features/qibla/presentation/bloc/qibla_bloc.dart';
 import '../router/app_router_config.dart';
 import 'cubit/main_screen_cubit.dart';
 import 'cubit/main_screen_state.dart';
+import '../shared/widgets/quran_player_chrome.dart';
 import 'widgets/main_bottom_overlay.dart';
 import 'widgets/main_tab_viewport.dart';
 
@@ -40,9 +42,17 @@ class _MainScreenState extends State<MainScreen> {
 
   bool _prayerTimesLoadScheduled = false;
   int _lastHandledIndex = 0;
+  QuranPlayerChromeNotifier? _chromeNotifier;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _chromeNotifier = context.read<QuranPlayerChromeNotifier>();
+  }
 
   @override
   void dispose() {
+    _chromeNotifier?.clearShellChrome();
     _phoneBottomNavVisible.dispose();
     super.dispose();
   }
@@ -150,20 +160,8 @@ class _MainScreenState extends State<MainScreen> {
               }
 
               final bool isKeyboardOpen = context.isKeyboardVisible;
-              final adaptiveShellTokens = Theme.of(
-                context,
-              ).componentTokens.adaptiveShell;
-              final textScaler = MediaQuery.textScalerOf(context);
-              final double phoneNavRowHeight = adaptiveShellTokens
-                  .phoneBottomNavLayoutHeight(textScaler);
-              final double phoneNavContentGap = context.tokens.spaceExtraLarge;
-              final double phoneNavTopMargin =
-                  adaptiveShellTokens.bottomNavVerticalMargin;
               final double bottomNavBarHeight = context.isNarrow
-                  ? (phoneNavRowHeight +
-                        context.systemBottomSafeArea +
-                        phoneNavTopMargin +
-                        phoneNavContentGap)
+                  ? QuranPlayerLayoutInsets.phoneShellBottomReserve(context)
                   : context.floatingBottomPadding;
 
               final List<_NavDestination> navDestinations = _buildDestinations(
@@ -243,6 +241,18 @@ class _MainShellContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    context.read<QuranPlayerChromeNotifier>().updateShellChrome(
+      QuranPlayerShellChrome(
+        // Global overlay player sits above the shell; pass full nav height on
+        // phone so the mini player clears the bottom bar and home indicator.
+        bottomNavBarHeight: bottomNavBarHeight,
+        isKeyboardOpen: isKeyboardOpen,
+        isAudioBindingDeferred: state.isAudioBindingDeferred,
+        hostAbsorbsBottomSafeArea: false,
+        phoneBottomNavBarVisible: phoneBottomNavVisible,
+      ),
+    );
+
     final bool playerShouldShow = state.isAudioBindingDeferred
         ? false
         : context.select((AudioPlayerBloc bloc) {
@@ -280,12 +290,7 @@ class _MainShellContent extends StatelessWidget {
       },
       phoneBottomNavigationBarVisible: phoneBottomNavVisible,
       bottomPlayer: MainBottomOverlay(
-        bottomNavBarHeight: context.isNarrow ? 0 : bottomNavBarHeight,
-        isKeyboardOpen: isKeyboardOpen,
-        isAudioBindingDeferred: state.isAudioBindingDeferred,
         isOfflineIndicatorReady: state.isOfflineIndicatorReady,
-        phoneBottomNavBarVisible: phoneBottomNavVisible,
-        hostAbsorbsBottomSafeArea: context.isNarrow,
       ),
       child: state.isInitialTabMounted
           ? MainTabViewport(

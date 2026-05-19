@@ -165,7 +165,7 @@ void main() {
   group('TilawaIconActionButtonTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaIconActionButtonTokens.defaults();
-      expect(tokens.size, 44.0);
+      expect(tokens.size, 48.0);
       expect(tokens.borderRadius, 16.0);
       expect(tokens.activeBackgroundOpacity, 0.12);
       expect(tokens.activeBorderOpacity, 0.35);
@@ -207,7 +207,7 @@ void main() {
   group('TilawaSearchFieldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSearchFieldTokens.defaults();
-      expect(tokens.height, 44.0);
+      expect(tokens.height, 48.0);
       expect(tokens.backgroundColor, isA<Color>());
       expect(tokens.borderRadius, 16.0);
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
@@ -986,7 +986,7 @@ void main() {
       expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.shortWindowHeightBreakpoint, 760.0);
       expect(tokens.shortWindowPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, 44.0);
+      expect(tokens.headerButtonSize, 48.0);
       expect(tokens.composerSurfaceColor, isA<Color>());
       expect(tokens.panelBorderColor, isA<Color>());
     });

@@ -57,23 +57,20 @@ class _MainTabViewportState extends State<MainTabViewport> {
     // The explicit Padding widget below it applies the actual visual inset.
     return TilawaShellPadding(
       padding: widget.contentBottomPadding,
-      child: Padding(
-        padding: EdgeInsets.only(bottom: widget.contentBottomPadding),
-        child: Stack(
-          children: List<Widget>.generate(4, (int index) {
-            if (!widget.builtTabIndexes.contains(index)) {
-              return const SizedBox.shrink();
-            }
-            final bool isActive = widget.currentIndex == index;
-            return Offstage(
-              offstage: !isActive,
-              child: TickerMode(
-                enabled: isActive,
-                child: _buildScreenForIndex(index),
-              ),
-            );
-          }),
-        ),
+      child: Stack(
+        children: List<Widget>.generate(4, (int index) {
+          if (!widget.builtTabIndexes.contains(index)) {
+            return const SizedBox.shrink();
+          }
+          final bool isActive = widget.currentIndex == index;
+          return Offstage(
+            offstage: !isActive,
+            child: TickerMode(
+              enabled: isActive,
+              child: _buildScreenForIndex(index),
+            ),
+          );
+        }),
       ),
     );
   }

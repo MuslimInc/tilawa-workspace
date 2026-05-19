@@ -342,7 +342,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             ),
           ),
         ),
-        const Positioned.fill(child: QuranPlayerWidget()),
       ],
     );
   }
