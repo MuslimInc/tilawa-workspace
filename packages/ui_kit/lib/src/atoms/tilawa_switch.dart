@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
 
 /// Adaptive switch with a guaranteed [kTilawaMinInteractiveDimension] hit target.
 ///
@@ -48,7 +49,14 @@ class TilawaSwitch extends StatelessWidget {
               alignment: Alignment.center,
               child: Switch.adaptive(
                 value: value,
-                onChanged: onChanged,
+                onChanged: onChanged == null
+                    ? null
+                    : (next) {
+                        TilawaInteractionFeedback.trigger(
+                          TilawaHaptic.selection,
+                        );
+                        onChanged!(next);
+                      },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 activeTrackColor: activeTrackColor,
                 activeThumbColor: activeThumbColor,

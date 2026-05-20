@@ -986,7 +986,7 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaImmersiveComposerTokens.defaults();
       expect(tokens.defaultAutoHideDuration, const Duration(seconds: 3));
-      expect(tokens.transitionDuration, const Duration(milliseconds: 300));
+      expect(tokens.transitionDuration, const Duration(milliseconds: 400));
       expect(tokens.backgroundBlurScale, 0.9);
       expect(tokens.backgroundOverlayOpacity, 0.42);
       expect(tokens.overlayBorderOpacity, 0.1);

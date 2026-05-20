@@ -31,24 +31,24 @@
 
 ### Interaction feedback
 
-- [ ] **T-B01**: Create `lib/src/foundation/tilawa_interaction_feedback.dart` with haptic tiers and global `enabled` flag for tests.
-- [ ] **T-B02**: Create `TilawaPressAnimation` (or integrate into existing button internals) using `durationFast` / `durationMedium`.
-- [ ] **T-B03**: Wire press animation into `TilawaButton` and `TilawaIconActionButton`.
-- [ ] **T-B04**: Wire toggle haptics into `TilawaSwitch`, `TilawaCheckbox`, `TilawaIconToggle`, `TilawaSegmentedControl`.
-- [ ] **T-B05**: Migrate alphabet scrollbar overlay fade duration to `TilawaDesignTokens` (closes 014 F-005).
-- [ ] **T-B06**: Migrate `TilawaSegmentedControlTokens.transitionDuration` to design token default (closes 014 F-005).
-- [ ] **T-B07**: Widget tests with `TilawaInteractionFeedback.enabled = false`; verify animation uses token duration via theme override.
+- [x] **T-B01**: Create `lib/src/foundation/tilawa_interaction_feedback.dart` with haptic tiers and global `enabled` flag for tests.
+- [x] **T-B02**: Create `TilawaPressAnimation` (or integrate into existing button internals) using `durationFast` / `durationMedium`.
+- [x] **T-B03**: Wire press animation into `TilawaButton` and `TilawaIconActionButton`.
+- [x] **T-B04**: Wire toggle haptics into `TilawaSwitch`, `TilawaCheckbox`, `TilawaIconToggle`, `TilawaSegmentedControl`.
+- [x] **T-B05**: Migrate alphabet scrollbar overlay fade duration to `TilawaDesignTokens` (closes 014 F-005).
+- [x] **T-B06**: Migrate `TilawaImmersiveComposerTokens.transitionDuration` to design token default (closes 014 F-005).
+- [x] **T-B07**: Widget tests with `TilawaInteractionFeedback.enabled = false`; verify animation uses token duration via theme override.
 
 ### Async content
 
-- [ ] **T-C01**: Create `TilawaAsyncContentState` enum and `TilawaAsyncContent` organism with four slots + defaults.
-- [ ] **T-C02**: Implement retry-in-flight on error primary action (loading affordance on button).
-- [ ] **T-C03**: Widget tests: all state transitions; empty vs error distinct; skeleton slot renders when provided.
-- [ ] **T-C04**: Gallery demo: state switcher (loading / empty / error / content).
+- [x] **T-C01**: Create `TilawaAsyncContentState` enum and `TilawaAsyncContent` organism with four slots + defaults.
+- [x] **T-C02**: Implement retry-in-flight on error primary action (loading affordance on button).
+- [x] **T-C03**: Widget tests: all state transitions; empty vs error distinct; skeleton slot renders when provided.
+- [x] **T-C04**: Gallery demo: state switcher (loading / empty / error / content).
 
 ### Verification
 
-- [ ] **T-B90**: `dart analyze` + full ui_kit test suite green.
+- [x] **T-B90**: `dart analyze` + full ui_kit test suite green.
 
 ---
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
 
 /// Adaptive checkbox with a guaranteed [kTilawaMinInteractiveDimension] hit
 /// target.
@@ -50,7 +51,14 @@ class TilawaCheckbox extends StatelessWidget {
               child: Checkbox.adaptive(
                 value: value,
                 tristate: tristate,
-                onChanged: onChanged,
+                onChanged: onChanged == null
+                    ? null
+                    : (next) {
+                        TilawaInteractionFeedback.trigger(
+                          TilawaHaptic.selection,
+                        );
+                        onChanged!(next);
+                      },
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 activeColor: activeColor,
               ),

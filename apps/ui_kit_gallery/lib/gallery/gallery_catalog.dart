@@ -251,6 +251,13 @@ const List<GalleryEntry> galleryCatalog = [
     category: GalleryCategory.organisms,
     builder: OrganismsDemos.shareFooterBar,
   ),
+  GalleryEntry(
+    id: 'tilawa_async_content',
+    name: 'TilawaAsyncContent',
+    category: GalleryCategory.organisms,
+    description: 'Loading, empty, error, and content states with retry.',
+    builder: OrganismsDemos.asyncContent,
+  ),
 
   // Foundation
   GalleryEntry(

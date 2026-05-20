@@ -177,6 +177,10 @@ abstract final class OrganismsDemos {
     );
   }
 
+  static Widget asyncContent(BuildContext context) {
+    return const _AsyncContentDemo();
+  }
+
   static Future<void> _openSheet(BuildContext context) {
     return showTilawaModalBottomSheet<void>(
       context: context,
@@ -197,6 +201,96 @@ abstract final class OrganismsDemos {
         );
       },
     );
+  }
+}
+
+class _AsyncContentDemo extends StatefulWidget {
+  const _AsyncContentDemo();
+
+  @override
+  State<_AsyncContentDemo> createState() => _AsyncContentDemoState();
+}
+
+class _AsyncContentDemoState extends State<_AsyncContentDemo> {
+  TilawaAsyncContentState _state = TilawaAsyncContentState.loading;
+  var _isRetrying = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GalleryDemoFrame(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SegmentedButton<TilawaAsyncContentState>(
+            segments: const [
+              ButtonSegment(
+                value: TilawaAsyncContentState.loading,
+                label: Text('Loading'),
+              ),
+              ButtonSegment(
+                value: TilawaAsyncContentState.empty,
+                label: Text('Empty'),
+              ),
+              ButtonSegment(
+                value: TilawaAsyncContentState.error,
+                label: Text('Error'),
+              ),
+              ButtonSegment(
+                value: TilawaAsyncContentState.content,
+                label: Text('Content'),
+              ),
+            ],
+            selected: {_state},
+            onSelectionChanged: (selection) {
+              setState(() {
+                _state = selection.first;
+                _isRetrying = false;
+              });
+            },
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: TilawaAsyncContent(
+              state: _state,
+              skeleton: const _AsyncContentSkeleton(),
+              onRetry: _state == TilawaAsyncContentState.error
+                  ? () {
+                      setState(() => _isRetrying = true);
+                      Future<void>.delayed(const Duration(seconds: 1), () {
+                        if (mounted) {
+                          setState(() {
+                            _isRetrying = false;
+                            _state = TilawaAsyncContentState.content;
+                          });
+                        }
+                      });
+                    }
+                  : null,
+              isRetrying: _isRetrying,
+              builder: (context) => const _AsyncContentLoaded(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AsyncContentSkeleton extends StatelessWidget {
+  const _AsyncContentSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Skeleton placeholder'));
+  }
+}
+
+class _AsyncContentLoaded extends StatelessWidget {
+  const _AsyncContentLoaded();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Loaded content'));
   }
 }
 

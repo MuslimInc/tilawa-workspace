@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
 
 /// A boolean icon toggle: shows [activeIcon] over `primaryContainer` when on,
 /// [icon] over `surfaceContainerHigh` when off.
@@ -68,7 +69,10 @@ class TilawaIconToggle extends StatelessWidget {
           color: background,
           borderRadius: BorderRadius.circular(effectiveRadius),
           child: InkWell(
-            onTap: () => onChanged(!value),
+            onTap: () {
+              TilawaInteractionFeedback.trigger(TilawaHaptic.selection);
+              onChanged(!value);
+            },
             borderRadius: BorderRadius.circular(effectiveRadius),
             child: Center(
               child: Padding(

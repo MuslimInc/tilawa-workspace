@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
 
 class TilawaIconActionButton extends StatefulWidget {
   const TilawaIconActionButton({
@@ -75,6 +76,7 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
     if (!widget.enabled) {
       return;
     }
+    TilawaInteractionFeedback.trigger(TilawaHaptic.lightImpact);
     _animationController.forward().then((_) {
       _animationController.reverse();
     });
@@ -105,7 +107,7 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
         color: widget.backgroundColor ?? theme.colorScheme.surface,
         borderRadius: effectiveBorderRadius,
         child: ScaleTransition(
-          scale: Tween<double>(begin: 1.0, end: 0.92).animate(
+          scale: Tween<double>(begin: 1.0, end: TilawaInteractionFeedback.pressScaleEnd).animate(
             CurvedAnimation(
               parent: _animationController,
               curve: Curves.easeInOut,

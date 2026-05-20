@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
 import './tilawa_loading_indicator.dart';
 
 /// Variants for [TilawaButton] determining its visual prominence.
@@ -219,12 +220,15 @@ class TilawaButton extends StatelessWidget {
           : (semanticLabel ?? text),
       button: true,
       enabled: !_isDisabled,
-      child: shrinkWrapTapTarget
-          ? textButton
-          : ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-              child: textButton,
-            ),
+      child: TilawaPressAnimation(
+        enabled: !_isDisabled,
+        child: shrinkWrapTapTarget
+            ? textButton
+            : ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+                child: textButton,
+              ),
+      ),
     );
   }
 

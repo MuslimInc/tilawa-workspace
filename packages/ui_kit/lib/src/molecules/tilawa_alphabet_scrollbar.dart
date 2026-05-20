@@ -106,7 +106,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
       final target = index * componentTokens.itemExtent;
       _scrollController.animateTo(
         target.clamp(0.0, _scrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 300),
+        duration: theme.tokens.durationMedium,
         curve: Curves.easeInOut,
       );
     }
@@ -211,7 +211,7 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                   fontSize: componentTokens.overlayFontSize,
                 ),
                 child: TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 200),
+                  duration: theme.tokens.durationFast,
                   curve: Curves.easeOutBack,
                   tween: Tween(begin: 0.0, end: 1.0),
                   builder: (context, value, child) {

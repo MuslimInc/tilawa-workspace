@@ -1498,7 +1498,7 @@ class TilawaImmersiveComposerTokens {
     final surface = colorScheme.surface;
     return TilawaImmersiveComposerTokens(
       defaultAutoHideDuration: const Duration(seconds: 3),
-      transitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 400),
       backgroundBlurScale: backgroundBlurScale,
       backgroundOverlayOpacity: backgroundOverlayOpacity,
       overlayBorderOpacity: overlayBorderOpacity,
