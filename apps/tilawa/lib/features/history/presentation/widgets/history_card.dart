@@ -134,20 +134,30 @@ class HistoryCard extends StatelessWidget {
                           color: colorScheme.onSurfaceVariant,
                         ),
                         SizedBox(width: tokens.spaceTiny),
-                        Text(
-                          '${history.formattedLastPosition} / ${history.formattedDuration}',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                        Expanded(
+                          child: Text(
+                            '${history.formattedLastPosition} / '
+                            '${history.formattedDuration}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
 
-                        const Spacer(),
+                        SizedBox(width: tokens.spaceSmall),
 
                         // Played time ago
-                        Text(
-                          history.formattedPlayedAt,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colorScheme.onSurfaceVariant,
+                        Flexible(
+                          child: Text(
+                            history.formattedPlayedAt,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            textAlign: TextAlign.end,
                           ),
                         ),
                       ],
