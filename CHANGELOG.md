@@ -7,7 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.0.1+26] - 2026-05-10 [Google Play Release]
+## [1.0.3+28] - 2026-05-20 [Google Play Release]
+
+### Added
+
+- UI kit interaction feedback (press animation, haptics) and async content states for loading, empty, and error screens.
+- Sheet footer pattern for modal forms, pickers, and confirmations.
+
+### Changed
+
+- Settings screen simplified for clearer navigation and production-ready layout.
+- Default app language is Arabic for new installs.
+- Onboarding start button copy shortened (ابدأ / Get started).
+- Confirm bottom sheets size to content instead of forcing half-screen height.
+
+### Fixed
+
+- Prayer notification status close action returns users to home when there is no back stack.
+- Main screen startup widget tests aligned with shell cubit lifecycle.
+
+## [1.0.2+27] - 2026-05-15 [Google Play Release]
 
 ### Added
 

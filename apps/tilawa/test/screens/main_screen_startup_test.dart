@@ -3,7 +3,9 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
@@ -22,7 +24,9 @@ import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 import 'package:tilawa/screens/main_screen.dart';
+import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
@@ -135,17 +139,38 @@ void main() {
     when(() => mockAudioPlayerBloc.state).thenReturn(
       const AudioPlayerState(status: AudioPlayerStatus.initial),
     );
+
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const MainScreen(),
+        ),
+      ],
+    );
+
     return MultiBlocProvider(
       providers: [
+        BlocProvider<MainScreenCubit>(create: (_) => MainScreenCubit()),
         BlocProvider<PlayerBackgroundCubit>.value(
           value: mockPlayerBackgroundCubit,
         ),
         BlocProvider<AudioPlayerBloc>.value(value: mockAudioPlayerBloc),
       ],
-      child: MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: const MainScreen(),
+      child: ChangeNotifierProvider(
+        create: (_) => QuranPlayerChromeNotifier(),
+        child: MaterialApp.router(
+          theme: ThemeData(
+            extensions: [
+              TilawaDesignTokens.light(),
+              TilawaComponentTokens.light(),
+            ],
+          ),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
       ),
     );
   }
@@ -230,7 +255,7 @@ void main() {
   ) async {
     await tester.pumpWidget(buildTestApp());
 
-    await tester.pump(const Duration(milliseconds: 1200));
+    await tester.pump(const Duration(milliseconds: 1300));
     await tester.pump();
 
     expect(find.byType(RecitersScreen), findsOneWidget);
@@ -241,7 +266,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(buildTestApp());
 
-      await tester.pump(const Duration(milliseconds: 1200));
+      await tester.pump(const Duration(milliseconds: 1300));
       await tester.pump();
       expect(find.byType(RecitersScreen), findsOneWidget);
 

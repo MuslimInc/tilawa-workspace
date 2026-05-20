@@ -24,8 +24,10 @@
 
 ## 4. Build Artifacts
 
-- [ ] Build production AAB: cd apps/tilawa && flutter build appbundle --release
-- [ ] Verify artifact exists: apps/tilawa/build/app/outputs/bundle/release/app-release.aab
+- [ ] Build production AAB with Shorebird (required when native/Kotlin or plugin native code changed):
+      `cd apps/tilawa && shorebird release android --flutter-version=3.44.0`
+- [ ] Verify artifact exists: `apps/tilawa/build/app/outputs/bundle/release/app-release.aab`
+- [ ] Do **not** use `shorebird patch` for this release if Kotlin, plugins, or assets changed.
 - [ ] Smoke test release build on physical Android devices.
 
 ## 5. Play Console Readiness

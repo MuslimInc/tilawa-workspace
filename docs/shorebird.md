@@ -32,7 +32,7 @@ If any "No" row applies to your change, cut a full release instead.
 3. Build and release:
    ```bash
    cd apps/tilawa
-   shorebird release android --flutter-version=3.41.9
+   shorebird release android --flutter-version=3.44.0
    ```
 4. Upload the AAB at `apps/tilawa/build/app/outputs/bundle/release/app-release.aab` to the Play Console.
 5. Push the tag:
