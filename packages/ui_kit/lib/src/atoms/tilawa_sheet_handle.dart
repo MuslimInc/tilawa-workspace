@@ -26,15 +26,12 @@ class TilawaSheetHandle extends StatelessWidget {
   final double? width;
   final double? height;
 
-  /// When null, uses token [TilawaSheetHandleTokens.marginTop] and
-  /// [TilawaSheetHandleTokens.marginBottom]. When set, replaces that default
-  /// entirely.
+  /// Optional margin around the drag pill. When null, no inset is applied;
+  /// parent layout owns spacing around the handle.
   final EdgeInsetsGeometry? margin;
   final Color? color;
 
-  /// When true and [margin] is null, top inset is zero so a parent
-  /// ([Positioned], padding, etc.) can own vertical placement; bottom still
-  /// uses the token.
+  /// No longer applies default insets; kept for call-site compatibility.
   final bool omitTopMargin;
 
   /// When true, downward drags on the expanded handle region dismiss the sheet.
@@ -54,16 +51,10 @@ class TilawaSheetHandle extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final EdgeInsetsGeometry resolvedMargin =
-        margin ??
-        EdgeInsets.only(
-          top: omitTopMargin ? 0 : componentTokens.marginTop,
-          bottom: componentTokens.marginBottom,
-        );
-
     final Widget pill = Container(
       width: width ?? componentTokens.width,
       height: height ?? componentTokens.height,
+      margin: margin,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(componentTokens.cornerRadius),
         color:
@@ -74,13 +65,10 @@ class TilawaSheetHandle extends StatelessWidget {
       ),
     );
 
-    final Widget handleBody = Padding(
-      padding: resolvedMargin,
-      child: SizedBox(
-        width: double.infinity,
-        height: kTilawaMinInteractiveDimension,
-        child: Center(child: pill),
-      ),
+    final Widget handleBody = SizedBox(
+      width: double.infinity,
+      height: kTilawaMinInteractiveDimension,
+      child: Center(child: pill),
     );
 
     if (!enableDragToDismiss) {
