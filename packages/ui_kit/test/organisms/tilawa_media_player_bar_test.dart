@@ -41,7 +41,9 @@ void main() {
   });
 
   group('TilawaMediaPlayerBar layout', () {
-    testWidgets('hides prev/next on narrow widths', (tester) async {
+    testWidgets('hides prev and sleep timer on narrow widths, keeps next', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         _themed(
           const SizedBox(
@@ -61,7 +63,8 @@ void main() {
       );
 
       expect(find.byTooltip('Previous track'), findsNothing);
-      expect(find.byTooltip('Next track'), findsNothing);
+      expect(find.byTooltip('Next track'), findsOneWidget);
+      expect(find.byTooltip('Sleep timer'), findsNothing);
       expect(find.byTooltip('Pause'), findsOneWidget);
     });
 
@@ -87,6 +90,63 @@ void main() {
       expect(find.byTooltip('Previous track'), findsOneWidget);
       expect(find.byTooltip('Next track'), findsOneWidget);
       expect(find.byTooltip('Sleep timer'), findsOneWidget);
+    });
+
+    testWidgets('transport tap does not fire bar onTap', (tester) async {
+      var barTapped = false;
+      var playTapped = false;
+
+      await tester.pumpWidget(
+        _themed(
+          SizedBox(
+            width: 420,
+            child: TilawaMediaPlayerBar(
+              layoutWidth: 420,
+              title: 'Surah Al-Fatiha',
+              subtitle: 'Mohammad Kamal',
+              progress: 0.2,
+              isPlaying: false,
+              canGoPrevious: true,
+              canGoNext: true,
+              onTap: () => barTapped = true,
+              onPlayPause: () => playTapped = true,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byTooltip('Play'));
+      await tester.pumpAndSettle();
+
+      expect(playTapped, isTrue);
+      expect(barTapped, isFalse);
+    });
+
+    testWidgets('metadata tap fires bar onTap', (tester) async {
+      var barTapped = false;
+
+      await tester.pumpWidget(
+        _themed(
+          SizedBox(
+            width: 420,
+            child: TilawaMediaPlayerBar(
+              layoutWidth: 420,
+              title: 'Surah Al-Fatiha',
+              subtitle: 'Mohammad Kamal',
+              progress: 0.2,
+              isPlaying: false,
+              canGoPrevious: true,
+              canGoNext: true,
+              onTap: () => barTapped = true,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Surah Al-Fatiha'));
+      await tester.pumpAndSettle();
+
+      expect(barTapped, isTrue);
     });
   });
 }
