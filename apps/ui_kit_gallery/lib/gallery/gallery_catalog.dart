@@ -98,8 +98,8 @@ const List<GalleryEntry> galleryCatalog = [
 
   // Molecules
   GalleryEntry(
-    id: 'alphabet_scrollbar',
-    name: 'ArabicAlphabetScrollbar',
+    id: 'tilawa_alphabet_scrollbar',
+    name: 'TilawaAlphabetScrollbar',
     category: GalleryCategory.molecules,
     builder: MoleculesDemos.alphabetScrollbar,
   ),
@@ -164,8 +164,8 @@ const List<GalleryEntry> galleryCatalog = [
     builder: MoleculesDemos.sectionHeader,
   ),
   GalleryEntry(
-    id: 'seek_bar',
-    name: 'SeekBar',
+    id: 'tilawa_seek_bar',
+    name: 'TilawaSeekBar',
     category: GalleryCategory.molecules,
     builder: MoleculesDemos.seekBar,
   ),

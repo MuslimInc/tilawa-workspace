@@ -63,7 +63,3 @@ class TilawaSelectionPill extends StatelessWidget {
     );
   }
 }
-
-/// Deprecated. Use [TilawaSelectionPill] instead.
-@Deprecated('Use TilawaSelectionPill instead')
-typedef SelectionPill = TilawaSelectionPill;

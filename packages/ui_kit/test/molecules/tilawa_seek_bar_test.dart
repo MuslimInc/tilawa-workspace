@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../lib/src/foundation/component_tokens/component_tokens_theme.dart';
 import '../../lib/src/foundation/design_tokens.dart';
-import '../../lib/src/molecules/seek_bar.dart';
+import '../../lib/src/molecules/tilawa_seek_bar.dart';
 
 Widget _wrap(Widget child, {TextDirection textDirection = TextDirection.ltr}) {
   return MaterialApp(
@@ -18,13 +18,13 @@ Widget _wrap(Widget child, {TextDirection textDirection = TextDirection.ltr}) {
 }
 
 void main() {
-  group('SeekBar', () {
+  group('TilawaSeekBar', () {
     testWidgets('renders with given duration, position, and bufferedPosition', (
       tester,
     ) async {
       await tester.pumpWidget(
         _wrap(
-          const SeekBar(
+          const TilawaSeekBar(
             duration: Duration(minutes: 5),
             position: Duration(minutes: 2),
             bufferedPosition: Duration(minutes: 3),
@@ -59,7 +59,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          SeekBar(
+          TilawaSeekBar(
             duration: const Duration(minutes: 5),
             position: const Duration(minutes: 1),
             bufferedPosition: const Duration(minutes: 2),
@@ -86,7 +86,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          SeekBar(
+          TilawaSeekBar(
             duration: const Duration(minutes: 5),
             position: const Duration(minutes: 1),
             bufferedPosition: const Duration(minutes: 2),
@@ -110,7 +110,7 @@ void main() {
 
         await tester.pumpWidget(
           _wrap(
-            SeekBar(
+            TilawaSeekBar(
               duration: Duration.zero,
               position: Duration.zero,
               bufferedPosition: Duration.zero,
@@ -130,7 +130,7 @@ void main() {
     testWidgets('does not throw when position > duration', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const SeekBar(
+          const TilawaSeekBar(
             duration: Duration(seconds: 30),
             position: Duration(seconds: 90),
             bufferedPosition: Duration(seconds: 10),
@@ -152,7 +152,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          const SeekBar(
+          const TilawaSeekBar(
             duration: Duration(seconds: 30),
             position: Duration(seconds: 10),
             bufferedPosition: Duration(seconds: 90),
@@ -172,7 +172,7 @@ void main() {
     testWidgets('rtl rendering smoke test', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          const SeekBar(
+          const TilawaSeekBar(
             duration: Duration(minutes: 1),
             position: Duration(seconds: 20),
             bufferedPosition: Duration(seconds: 40),
@@ -190,7 +190,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          const SeekBar(
+          const TilawaSeekBar(
             duration: Duration(minutes: 5),
             position: Duration(minutes: 1),
             bufferedPosition: Duration(minutes: 2),
@@ -198,7 +198,7 @@ void main() {
         ),
       );
 
-      final seekFinder = find.byType(SeekBar);
+      final seekFinder = find.byType(TilawaSeekBar);
       final stackFinder = find.descendant(
         of: seekFinder,
         matching: find.byType(Stack),

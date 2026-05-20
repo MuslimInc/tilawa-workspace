@@ -2248,7 +2248,7 @@ class _ExpandedProgressBar extends StatelessWidget {
                     ),
                     overlayShape: SliderComponentShape.noOverlay,
                   ),
-                  child: SeekBar(
+                  child: TilawaSeekBar(
                     duration: positionData.duration,
                     position: positionData.position,
                     bufferedPosition: positionData.bufferedPosition,

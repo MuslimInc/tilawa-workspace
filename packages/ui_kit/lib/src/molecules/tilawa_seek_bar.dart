@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import '../atoms/hidden_thumb_shape.dart';
 import '../foundation/component_tokens.dart';
 
-class SeekBar extends StatefulWidget {
-  const SeekBar({
+class TilawaSeekBar extends StatefulWidget {
+  const TilawaSeekBar({
     super.key,
     required this.duration,
     required this.position,
@@ -29,10 +29,10 @@ class SeekBar extends StatefulWidget {
   final ValueChanged<Duration>? onChangeEnd;
 
   @override
-  SeekBarState createState() => SeekBarState();
+  TilawaSeekBarState createState() => TilawaSeekBarState();
 }
 
-class SeekBarState extends State<SeekBar> {
+class TilawaSeekBarState extends State<TilawaSeekBar> {
   double? _dragValue;
   bool _dragging = false;
   late SliderThemeData _sliderThemeData;

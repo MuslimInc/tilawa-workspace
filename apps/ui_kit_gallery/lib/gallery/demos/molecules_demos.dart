@@ -9,7 +9,7 @@ abstract final class MoleculesDemos {
     return GalleryDemoFrame(
       child: SizedBox(
         height: 420,
-        child: ArabicAlphabetScrollbar(
+        child: TilawaAlphabetScrollbar(
           letters: const ['ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د'],
           selectedLetter: 'ت',
           onLetterSelected: (_) {},
@@ -164,7 +164,7 @@ abstract final class MoleculesDemos {
 
   static Widget seekBar(BuildContext context) {
     return GalleryDemoFrame(
-      child: SeekBar(
+      child: TilawaSeekBar(
         duration: const Duration(minutes: 5),
         position: const Duration(minutes: 2, seconds: 30),
         bufferedPosition: const Duration(minutes: 3),

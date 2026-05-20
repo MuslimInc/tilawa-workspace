@@ -1320,7 +1320,7 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
         .state
         .selectedLetter;
 
-    return ArabicAlphabetScrollbar(
+    return TilawaAlphabetScrollbar(
       key: const ValueKey('alphabet_scrollbar'),
       letters: _letters,
       selectedLetter: selectedLetter,

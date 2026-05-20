@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../lib/src/foundation/component_tokens/component_tokens_theme.dart';
 import '../../lib/src/foundation/design_tokens.dart';
-import '../../lib/src/molecules/alphabet_scrollbar.dart';
+import '../../lib/src/molecules/tilawa_alphabet_scrollbar.dart';
 
 Widget _wrap(Widget child) {
   return MaterialApp(
@@ -15,13 +15,13 @@ Widget _wrap(Widget child) {
 }
 
 void main() {
-  group('ArabicAlphabetScrollbar', () {
+  group('TilawaAlphabetScrollbar', () {
     final letters = ['ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر'];
 
     testWidgets('renders all letters', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: null,
             onLetterSelected: (_) {},
@@ -42,7 +42,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: null,
             onLetterSelected: (letter) => selected = letter,
@@ -64,7 +64,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: null,
             onLetterSelected: selections.add,
@@ -91,7 +91,7 @@ void main() {
           width: 400,
           height: 600,
           child: _wrap(
-            ArabicAlphabetScrollbar(
+            TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: null,
               onLetterSelected: selections.add,
@@ -126,7 +126,7 @@ void main() {
     testWidgets('selected letter shows highlighted state', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: 'ب',
             onLetterSelected: (_) {},
@@ -167,7 +167,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: null,
             onLetterSelected: (_) {},
@@ -195,7 +195,7 @@ void main() {
           width: 400,
           height: 600,
           child: _wrap(
-            ArabicAlphabetScrollbar(
+            TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: null,
               onLetterSelected: selections.add,
@@ -231,7 +231,7 @@ void main() {
         SizedBox(
           height: 100, // Constrain height to force scrolling
           child: _wrap(
-            ArabicAlphabetScrollbar(
+            TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: 'ا',
               onLetterSelected: (_) {},
@@ -253,7 +253,7 @@ void main() {
     testWidgets('empty letters list renders without error', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: const [],
             selectedLetter: null,
             onLetterSelected: (_) {},
@@ -272,7 +272,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: null,
             onLetterSelected: selections.add,
@@ -296,7 +296,7 @@ void main() {
 
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: selected,
             onLetterSelected: (letter) => selected = letter,
@@ -323,7 +323,7 @@ void main() {
             builder: (context, setState) {
               outerSetState = setState;
               return _wrap(
-                ArabicAlphabetScrollbar(
+                TilawaAlphabetScrollbar(
                   letters: letters,
                   selectedLetter: currentLetter,
                   onLetterSelected: (_) {},
@@ -369,7 +369,7 @@ void main() {
           width: 400,
           height: 600,
           child: _wrap(
-            ArabicAlphabetScrollbar(
+            TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: null,
               onLetterSelected: (_) {},
@@ -400,7 +400,7 @@ void main() {
           width: 400,
           height: 600,
           child: _wrap(
-            ArabicAlphabetScrollbar(
+            TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: null,
               onLetterSelected: (_) {},
@@ -413,10 +413,10 @@ void main() {
       );
 
       final scrollbarRect = tester.getRect(
-        find.byType(ArabicAlphabetScrollbar),
+        find.byType(TilawaAlphabetScrollbar),
       );
       final theme = Theme.of(
-        tester.element(find.byType(ArabicAlphabetScrollbar)),
+        tester.element(find.byType(TilawaAlphabetScrollbar)),
       );
       final tokens = theme.componentTokens.alphabetScrollbar;
       final letterHeight = tokens.itemExtent;
@@ -445,7 +445,7 @@ void main() {
           width: 400,
           height: 600,
           child: _wrap(
-            ArabicAlphabetScrollbar(
+            TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: null,
               onLetterSelected: selections.add,
@@ -458,10 +458,10 @@ void main() {
       );
 
       final scrollbarRect = tester.getRect(
-        find.byType(ArabicAlphabetScrollbar),
+        find.byType(TilawaAlphabetScrollbar),
       );
       final theme = Theme.of(
-        tester.element(find.byType(ArabicAlphabetScrollbar)),
+        tester.element(find.byType(TilawaAlphabetScrollbar)),
       );
       final tokens = theme.componentTokens.alphabetScrollbar;
       final letterHeight = tokens.itemExtent;
@@ -500,7 +500,7 @@ void main() {
           width: 400,
           height: 600,
           child: _wrap(
-            ArabicAlphabetScrollbar(
+            TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: null,
               onLetterSelected: selections.add,
@@ -513,7 +513,7 @@ void main() {
       );
 
       final scrollbarRect = tester.getRect(
-        find.byType(ArabicAlphabetScrollbar),
+        find.byType(TilawaAlphabetScrollbar),
       );
 
       // Start pan on the last letter
@@ -538,7 +538,7 @@ void main() {
     testWidgets('overlay is dismissed after tap completes', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: null,
             onLetterSelected: (_) {},
@@ -563,7 +563,7 @@ void main() {
     testWidgets('onTapCancel dismisses overlay immediately', (tester) async {
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: null,
             onLetterSelected: (_) {},
@@ -588,7 +588,7 @@ void main() {
           width: 400,
           height: 600,
           child: _wrap(
-            ArabicAlphabetScrollbar(
+            TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: null,
               onLetterSelected: (_) {},
@@ -624,7 +624,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         _wrap(
-          ArabicAlphabetScrollbar(
+          TilawaAlphabetScrollbar(
             letters: letters,
             selectedLetter: null,
             onLetterSelected: (_) {},
@@ -664,7 +664,7 @@ void main() {
             return _wrap(
               SizedBox(
                 height: 120, // force scrollbar to scroll
-                child: ArabicAlphabetScrollbar(
+                child: TilawaAlphabetScrollbar(
                   letters: manyLetters,
                   selectedLetter: currentLetter,
                   onLetterSelected: (_) {},

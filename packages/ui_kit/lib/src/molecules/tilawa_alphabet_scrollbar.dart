@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 
-class ArabicAlphabetScrollbar extends StatefulWidget {
-  const ArabicAlphabetScrollbar({
+class TilawaAlphabetScrollbar extends StatefulWidget {
+  const TilawaAlphabetScrollbar({
     super.key,
     required this.letters,
     required this.selectedLetter,
@@ -39,11 +39,11 @@ class ArabicAlphabetScrollbar extends StatefulWidget {
   final String? scrollbarSemanticsHint;
 
   @override
-  State<ArabicAlphabetScrollbar> createState() =>
-      _ArabicAlphabetScrollbarState();
+  State<TilawaAlphabetScrollbar> createState() =>
+      _TilawaAlphabetScrollbarState();
 }
 
-class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
+class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
   final Map<String, Widget> _itemCache = {};
   final _overlayController = OverlayPortalController();
   final _scrollController = ScrollController();
@@ -67,7 +67,7 @@ class _ArabicAlphabetScrollbarState extends State<ArabicAlphabetScrollbar> {
   }
 
   @override
-  void didUpdateWidget(covariant ArabicAlphabetScrollbar oldWidget) {
+  void didUpdateWidget(covariant TilawaAlphabetScrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedLetter != oldWidget.selectedLetter) {
       // If no pan/long-press is actively driving updates, the selection change

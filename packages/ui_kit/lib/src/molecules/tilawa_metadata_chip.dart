@@ -45,7 +45,3 @@ class TilawaMetadataChip extends StatelessWidget {
     );
   }
 }
-
-/// Deprecated. Use [TilawaMetadataChip] instead.
-@Deprecated('Use TilawaMetadataChip instead')
-typedef MetadataChip = TilawaMetadataChip;

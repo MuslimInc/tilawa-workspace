@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const allowlist = <String>{
     'atoms/tilawa_sheet_handle.dart',
-    'molecules/alphabet_scrollbar.dart',
+    'molecules/tilawa_alphabet_scrollbar.dart',
     'organisms/tilawa_media_player_bar.dart',
     'organisms/immersive_composer_scaffold.dart',
   };
