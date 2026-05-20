@@ -15,6 +15,20 @@ import 'package:flutter/material.dart';
 /// Use this (or `context.minInteractiveDimension` /
 /// `tokens.minInteractiveDimension`) instead of Flutter's
 /// `kMinInteractiveDimension` for all in-product hit targets.
+///
+/// ## Companion rule: `HitTestBehavior.opaque`
+///
+/// Every `GestureDetector` in this kit that wraps a visible interactive
+/// surface must declare `behavior: HitTestBehavior.opaque` so taps on
+/// transparent padding inside the declared bounds still register. Bare
+/// `GestureDetector`s without `behavior` are reserved for non-visible
+/// regions only — pan handlers, pan-to-dismiss layers, and similar
+/// edge-of-screen gesture surfaces. A grep-based contract test in
+/// `test/foundation/kit_contracts_test.dart` enforces this by allow-listing
+/// the current `GestureDetector` call sites; new sites need to either
+/// declare `behavior: HitTestBehavior.opaque` and update the allow-list,
+/// or use a Material primitive (`InkWell`, `IconButton`, `ListTile`)
+/// which already provides the hit-slop and ripple.
 const double kTilawaMinInteractiveDimension = 48.0;
 
 /// Design tokens for the Tilawa UI Kit to avoid magic numbers

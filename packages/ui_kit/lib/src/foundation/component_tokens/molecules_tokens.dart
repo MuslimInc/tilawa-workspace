@@ -282,8 +282,8 @@ class TilawaIconActionButtonTokens {
   final double inactiveBorderOpacity;
 
   factory TilawaIconActionButtonTokens.defaults() {
-    // Size = Tilawa hit-target floor (44 dp). At the floor; do not shrink
-    // further.
+    // Size = Tilawa hit-target floor (kTilawaMinInteractiveDimension, 48 dp).
+    // At the floor; do not shrink further.
     return const TilawaIconActionButtonTokens(
       size: kTilawaMinInteractiveDimension,
       borderRadius: 16,

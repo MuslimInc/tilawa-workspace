@@ -51,15 +51,18 @@ class TilawaIconActionButton extends StatefulWidget {
 
 class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+  late final AnimationController _animationController = AnimationController(
+    vsync: this,
+  );
 
   @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Press animation honours the kit's motion budget. Read from theme here —
+    // initState can't, but didChangeDependencies fires before the first build
+    // and again on theme/locale changes, so the controller always matches the
+    // current durationMedium token.
+    _animationController.duration = Theme.of(context).tokens.durationMedium;
   }
 
   @override
