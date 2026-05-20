@@ -14,12 +14,54 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
+import '../../../../screens/cubit/main_screen_cubit.dart';
+import '../../../../screens/cubit/main_screen_state.dart';
+import '../../../../shared/widgets/quran_player_chrome.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 import '../reciter_semantics_ids.dart';
+
+/// System back may close the app only from the active reciters main tab.
+///
+/// Wrap [MainTabViewport] (not individual tab caches) so [PopScope.canPop]
+/// updates when [MainScreenCubit.currentIndex] changes. A [PopScope] inside
+/// offstage [RecitersScreen] would stay stale and allow exit from other tabs.
+class RecitersRootBackScope extends StatelessWidget {
+  const RecitersRootBackScope({super.key, required this.child});
+
+  final Widget child;
+
+  static bool canExitApp(int mainTabIndex) {
+    if (mainTabIndex != 0) {
+      return false;
+    }
+    return QuranPlayerRoutePolicy.isMainShell(
+      QuranPlayerRoutePolicy.currentMatchedLocation(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocSelector<MainScreenCubit, MainScreenState, int>(
+      selector: (MainScreenState state) => state.currentIndex,
+      builder: (BuildContext context, int tabIndex) {
+        return PopScope(
+          canPop: canExitApp(tabIndex),
+          onPopInvokedWithResult: (bool didPop, Object? result) {
+            if (didPop || tabIndex == 0) {
+              return;
+            }
+            context.read<MainScreenCubit>().selectTab(0);
+          },
+          child: child,
+        );
+      },
+    );
+  }
+}
 
 class RecitersScreen extends StatefulWidget {
   const RecitersScreen({super.key});
@@ -224,81 +266,83 @@ class _RecitersScreenState extends State<RecitersScreen> {
     }
 
     return BlocProvider.value(
-      value: _favoritesCubit,
-      child: Builder(
-        builder: (innerContext) => MultiBlocListener(
-          listeners: [
-            BlocListener<LocalizationBloc, LocalizationState>(
-              listener: (context, state) {
-                _searchController.clear();
-                context.read<AlphabetScrollbarBloc>().add(
-                  const ClearSelection(),
-                );
-                context.read<RecitersBloc>().add(const LanguageChanged());
-              },
-            ),
-            BlocListener<RecitersBloc, RecitersState>(
-              listenWhen: (previous, current) =>
-                  previous is! RecitersLoaded && current is RecitersLoaded,
-              listener: (context, state) {
-                _scheduleLoadedResultsActivation();
-              },
-            ),
-            BlocListener<FavoritesCubit, FavoritesState>(
-              listenWhen: (_, current) => current is FavoritesLoaded,
-              listener: (context, state) {
-                if (state is FavoritesLoaded) {
-                  context.read<RecitersBloc>().add(
-                    SyncFavoriteIds(state.favoriteIds.toList()),
+        value: _favoritesCubit,
+        child: Builder(
+          builder: (innerContext) => MultiBlocListener(
+            listeners: [
+              BlocListener<LocalizationBloc, LocalizationState>(
+                listener: (context, state) {
+                  _searchController.clear();
+                  context.read<AlphabetScrollbarBloc>().add(
+                    const ClearSelection(),
                   );
+                  context.read<RecitersBloc>().add(const LanguageChanged());
+                },
+              ),
+              BlocListener<RecitersBloc, RecitersState>(
+                listenWhen: (previous, current) =>
+                    previous is! RecitersLoaded && current is RecitersLoaded,
+                listener: (context, state) {
+                  _scheduleLoadedResultsActivation();
+                },
+              ),
+              BlocListener<FavoritesCubit, FavoritesState>(
+                listenWhen: (_, current) => current is FavoritesLoaded,
+                listener: (context, state) {
+                  if (state is FavoritesLoaded) {
+                    context.read<RecitersBloc>().add(
+                      SyncFavoriteIds(state.favoriteIds.toList()),
+                    );
+                  }
+                },
+              ),
+            ],
+            child: BlocBuilder<RecitersBloc, RecitersState>(
+              buildWhen: (previous, current) {
+                // Skip rebuild when only favoriteIds changed — _FavoriteButton
+                // handles that independently via context.select<FavoritesCubit>.
+                if (previous is RecitersLoaded && current is RecitersLoaded) {
+                  // Check if only favoriteIds changed (filteredReciters gets
+                  // re-sorted by _filterReciters but we don't need to rebuild)
+                  final onlyFavoritesChanged =
+                      previous.favoriteIds != current.favoriteIds &&
+                      previous.searchQuery == current.searchQuery &&
+                      previous.selectedLetter == current.selectedLetter &&
+                      previous.showFavoritesOnly == current.showFavoritesOnly;
+
+                  if (onlyFavoritesChanged) {
+                    return false;
+                  }
+
+                  return previous.filteredReciters !=
+                          current.filteredReciters ||
+                      previous.searchQuery != current.searchQuery ||
+                      previous.selectedLetter != current.selectedLetter ||
+                      previous.showFavoritesOnly != current.showFavoritesOnly;
                 }
+                return true;
               },
-            ),
-          ],
-          child: BlocBuilder<RecitersBloc, RecitersState>(
-            buildWhen: (previous, current) {
-              // Skip rebuild when only favoriteIds changed — _FavoriteButton
-              // handles that independently via context.select<FavoritesCubit>.
-              if (previous is RecitersLoaded && current is RecitersLoaded) {
-                // Check if only favoriteIds changed (filteredReciters gets
-                // re-sorted by _filterReciters but we don't need to rebuild)
-                final onlyFavoritesChanged =
-                    previous.favoriteIds != current.favoriteIds &&
-                    previous.searchQuery == current.searchQuery &&
-                    previous.selectedLetter == current.selectedLetter &&
-                    previous.showFavoritesOnly == current.showFavoritesOnly;
-
-                if (onlyFavoritesChanged) {
-                  return false;
-                }
-
-                return previous.filteredReciters != current.filteredReciters ||
-                    previous.searchQuery != current.searchQuery ||
-                    previous.selectedLetter != current.selectedLetter ||
-                    previous.showFavoritesOnly != current.showFavoritesOnly;
-              }
-              return true;
-            },
-            builder: (context, state) {
-              return Scaffold(
-                resizeToAvoidBottomInset: false,
-                body: _RecitersSliverScreen(
-                  state: state,
-                  allowHeavyLoadedResults: _allowHeavyLoadedResults,
-                  showLetterIndex: _showLetterIndex,
-                  searchController: _searchController,
-                  focusNode: _focusNode,
-                  scrollController: _scrollController,
-                  onSearchChanged: _onSearchChanged,
-                  onClearSearch: _clearSearch,
-                  onToggleFavorites: () => _toggleFavoritesFilter(innerContext),
-                  onToggleLetterIndex: _toggleLetterIndex,
-                  onClearAll: _clearAllFilters,
-                  onLetterSelected: _onLetterSelected,
-                  onRetry: _refreshReciters,
-                ),
-              );
-            },
+              builder: (context, state) {
+                return Scaffold(
+                  resizeToAvoidBottomInset: false,
+                  body: _RecitersSliverScreen(
+                    state: state,
+                    allowHeavyLoadedResults: _allowHeavyLoadedResults,
+                    showLetterIndex: _showLetterIndex,
+                    searchController: _searchController,
+                    focusNode: _focusNode,
+                    scrollController: _scrollController,
+                    onSearchChanged: _onSearchChanged,
+                    onClearSearch: _clearSearch,
+                    onToggleFavorites: () =>
+                        _toggleFavoritesFilter(innerContext),
+                    onToggleLetterIndex: _toggleLetterIndex,
+                    onClearAll: _clearAllFilters,
+                    onLetterSelected: _onLetterSelected,
+                    onRetry: _refreshReciters,
+                  ),
+                );
+              },
           ),
         ),
       ),
