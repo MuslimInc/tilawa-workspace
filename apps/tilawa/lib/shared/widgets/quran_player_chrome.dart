@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../router/app_router.dart';
+import '../../router/shell_route_location.dart';
 
 /// Layout chrome published by [AppShellScreen] for the mini-player.
 @immutable
@@ -133,22 +134,12 @@ abstract final class QuranPlayerRoutePolicy {
       AppShellRoutePolicy.showsBottomNavigation(location) ||
       isMainShell(location);
 
-  /// Top-of-stack route (e.g. `/reciter/1`), not [Uri.path] alone (`/`).
+  /// Top-of-stack route (e.g. `/history`), including shell pushes.
   ///
-  /// [GoRouter]'s [RouteMatchList.uri] reflects the stack root; use
-  /// [RouteMatch.matchedLocation] for the visible screen.
-  static String currentMatchedLocation() {
-    try {
-      final List<RouteMatchBase> matches =
-          AppRouter.router.routerDelegate.currentConfiguration.matches;
-      if (matches.isEmpty) {
-        return '/';
-      }
-      return matches.last.matchedLocation;
-    } catch (_) {
-      return '/';
-    }
-  }
+  /// Drills through [ShellRouteMatch] / [ImperativeRouteMatch] so policy code
+  /// sees `/history`, not only the shell root `/`.
+  static String currentMatchedLocation() =>
+      ShellRouteLocation.activeMatchedLocation();
 }
 
 /// Bottom navigation visibility for [AppShellScreen].
@@ -172,12 +163,14 @@ abstract final class AppShellRoutePolicy {
     return true;
   }
 
-  /// Athkar routes and the Athkar tab on home hide bottom navigation.
-  static bool isAthkarContext(String location, int mainTabIndex) {
-    if (location.startsWith('/athkar')) {
+  /// Immersive Athkar sub-routes (details, tasbeeh) hide shell chrome.
+  ///
+  /// [AthkarCategoriesScreen] on the main Athkar tab keeps bottom navigation.
+  static bool isAthkarContext(String location) {
+    if (location == '/athkar/tasbeeh') {
       return true;
     }
-    return (location == '/' || location.isEmpty) && mainTabIndex == 2;
+    return location.startsWith('/athkar/') && location != '/athkar';
   }
 
   /// Whether the expanded player may hide the phone bottom bar.

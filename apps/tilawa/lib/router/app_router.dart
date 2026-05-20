@@ -16,6 +16,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'app_router_config.dart';
+import 'shell_route_location.dart';
 import 'json_type_registry.dart';
 
 class AppRouter {
@@ -358,10 +359,7 @@ class AppRouter {
 
   static String? _currentLocation() {
     try {
-      final List<RouteMatchBase> matches =
-          router.routerDelegate.currentConfiguration.matches;
-      if (matches.isEmpty) return null;
-      return matches.last.matchedLocation;
+      return ShellRouteLocation.activeMatchedLocation();
     } catch (_) {
       return null;
     }
