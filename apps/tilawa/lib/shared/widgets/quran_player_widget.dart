@@ -12,6 +12,7 @@ import 'package:tilawa/features/audio_player/presentation/cubit/player_backgroun
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/cubit/player_background_cubit.dart';
 import '../../features/audio_player/presentation/widgets/background_source_dialog.dart';
@@ -22,11 +23,11 @@ import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
 import 'quran_player_chrome.dart';
 
-/// A YouTube/Spotify-style sliding player panel.
+/// A YouTube Music-style sliding player panel.
 ///
-/// When collapsed, shows a mini player bar at the bottom.
-/// Tap or swipe up to expand to a full-screen player.
-/// Swipe down or tap the chevron to collapse back.
+/// When collapsed, shows a compact mini player above the bottom nav.
+/// Tap or swipe up to expand to a full-screen now-playing sheet with queue.
+/// Swipe down on the sheet or tap the chevron to collapse.
 class QuranPlayerWidget extends StatefulWidget {
   const QuranPlayerWidget({
     super.key,
@@ -34,6 +35,7 @@ class QuranPlayerWidget extends StatefulWidget {
     this.isKeyboardOpen = false,
     this.phoneBottomNavBarVisible,
     this.hostAbsorbsBottomSafeArea = false,
+    this.embeddedInShellFooter = false,
   });
 
   static double collapsedHeight(BuildContext context) =>
@@ -63,13 +65,11 @@ class QuranPlayerWidget extends StatefulWidget {
       return 0;
     }
 
-    if (QuranPlayerRoutePolicy.isMainShell(location)) {
+    if (QuranPlayerRoutePolicy.isInAppShell(location)) {
       final QuranPlayerShellChrome? shell = context
           .read<QuranPlayerChromeNotifier>()
           .shellChrome;
       if (shell != null) {
-        // Phone tab body sits above the shell bottom nav; only reserve player
-        // height. The global overlay positions the player via [bottomNavBarHeight].
         if (context.isNarrow && shell.bottomNavBarHeight > 0) {
           return collapsedHeight(context);
         }
@@ -105,6 +105,11 @@ class QuranPlayerWidget extends StatefulWidget {
   /// includes the system gesture inset.
   final bool hostAbsorbsBottomSafeArea;
 
+  /// When true, the mini player is laid out in [TilawaAdaptiveShell]'s
+  /// [TilawaAdaptiveShell.phoneFooterAboveNav] slot (above the bottom nav).
+  /// The expanded sheet is rendered in the root overlay via [OverlayPortal].
+  final bool embeddedInShellFooter;
+
   @override
   State<QuranPlayerWidget> createState() => QuranPlayerWidgetState();
 }
@@ -112,18 +117,14 @@ class QuranPlayerWidget extends StatefulWidget {
 class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     with TickerProviderStateMixin {
   late AnimationController _expandController;
-
-  /// Hosts the player overlay. The expanded sheet uses the full overlay;
-  /// the mini player is positioned via [OverlayChildLayoutInfo] to match the
-  /// host slot from [GlobalQuranPlayerHost].
   final OverlayPortalController _portalController = OverlayPortalController();
+  bool _portalVisibilitySyncScheduled = false;
+  String? _lastSyncedRoutePath;
 
   /// Controls the swipe-down-to-dismiss offset for the mini player.
   double _dismissOffsetY = 0;
   Animation<double>? _dismissAnimation;
   late AnimationController _dismissAnimController;
-
-  bool _portalVisibilitySyncScheduled = false;
 
   /// The height of the mini player bar (excluding nav bar offset).
   /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
@@ -157,9 +158,21 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _syncPhoneBottomNavBarVisible();
-        _schedulePortalVisibilitySync();
+        if (widget.embeddedInShellFooter) {
+          _schedulePortalVisibilitySync();
+        }
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final String path = _currentRoutePath();
+    if (_lastSyncedRoutePath != path) {
+      _lastSyncedRoutePath = path;
+      _syncPhoneBottomNavBarVisible();
+    }
   }
 
   @override
@@ -178,8 +191,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     super.dispose();
   }
 
-  /// Schedules [OverlayPortalController.show]/[hide] after build. Calling them
-  /// from [build] triggers a framework assertion during route transitions.
   void _schedulePortalVisibilitySync() {
     if (_portalVisibilitySyncScheduled) {
       return;
@@ -190,26 +201,22 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       if (!mounted) {
         return;
       }
-      _applyPortalVisibility();
+      if (!_portalController.isShowing) {
+        _portalController.show();
+      }
     });
-  }
-
-  void _applyPortalVisibility() {
-    if (!_portalController.isShowing) {
-      _portalController.show();
-    }
   }
 
   /// Expand the player to full-screen.
   ///
-  /// Uses [Curves.easeOutBack] for a spring-like overshoot that feels
-  /// like YouTube Music's player sheet expansion.
+  /// Uses [Curves.easeOutCubic] for a smooth slide-up like YouTube Music
+  /// (no overshoot — [Curves.easeOutBack] reads as a bounce, not YT).
   void expand() {
     HapticFeedback.lightImpact();
     _expandController.animateTo(
       1.0,
-      duration: const Duration(milliseconds: 450),
-      curve: Curves.easeOutBack,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
     );
   }
 
@@ -229,8 +236,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   void _syncPhoneBottomNavBarVisible() {
     final ValueNotifier<bool>? n = widget.phoneBottomNavBarVisible;
     if (n == null || !mounted) return;
+    final String location = _currentRoutePath();
+    final bool hideNavWhenExpanded =
+        AppShellRoutePolicy.shouldHideBottomNavWhenPlayerExpanded(location);
     final double threshold = context.tokens.playerProgressThreshold;
-    final bool showBar = _expandController.value < threshold;
+    final bool showBar =
+        !hideNavWhenExpanded || _expandController.value < threshold;
     if (n.value != showBar) {
       n.value = showBar;
     }
@@ -324,16 +335,55 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranPlayerWidget');
 
-    _schedulePortalVisibilitySync();
+    if (widget.embeddedInShellFooter) {
+      _schedulePortalVisibilitySync();
+      return OverlayPortal.overlayChildLayoutBuilder(
+        controller: _portalController,
+        overlayChildBuilder: _buildExpandedOverlay,
+        child: _buildShellFooterMini(context),
+      );
+    }
 
-    return OverlayPortal.overlayChildLayoutBuilder(
-      controller: _portalController,
-      overlayChildBuilder: _buildOverlayChild,
-      child: const SizedBox.expand(),
+    final Size size = MediaQuery.sizeOf(context);
+    if (size.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final double bottomInset = _resolveBottomInset(context);
+    final double miniHeight = _miniPlayerHeight;
+    final Rect hostRect = Rect.fromLTWH(
+      0,
+      size.height - bottomInset - miniHeight,
+      size.width,
+      miniHeight,
+    );
+
+    return _buildPlayerTree(
+      context,
+      hostRect: hostRect,
+      overlaySize: size,
+      showMiniInTree: true,
     );
   }
 
-  Widget _buildOverlayChild(
+  /// Mini player anchored in the shell footer column (YouTube Music style).
+  Widget _buildShellFooterMini(BuildContext context) {
+    return SizedBox(
+      height: _miniPlayerHeight,
+      width: double.infinity,
+      child: _buildPlayerTree(
+        context,
+        hostRect:
+            Offset.zero &
+            Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
+        overlaySize: MediaQuery.sizeOf(context),
+        showMiniInTree: true,
+        miniAnchoredInFooter: true,
+      ),
+    );
+  }
+
+  Widget _buildExpandedOverlay(
     BuildContext overlayContext,
     OverlayChildLayoutInfo layoutInfo,
   ) {
@@ -350,6 +400,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       overlayContext,
       hostRect: hostRect,
       overlaySize: layoutInfo.overlaySize,
+      showMiniInTree: false,
     );
   }
 
@@ -357,6 +408,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     BuildContext context, {
     required Rect hostRect,
     required Size overlaySize,
+    required bool showMiniInTree,
+    bool miniAnchoredInFooter = false,
   }) {
     return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
       listenWhen: (previous, current) {
@@ -392,10 +445,13 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       },
       builder: (context, state) {
         final audio = state.currentAudio;
+        final bool isCurrentAudioDismissed =
+            audio != null && state.dismissedAudioId == audio.id;
+        final bool hideForKeyboard = widget.isKeyboardOpen && !isExpanding;
+        final bool shouldHideTree =
+            audio == null || isCurrentAudioDismissed || hideForKeyboard;
 
-        if (!state.shouldShowBottomPlayer ||
-            audio == null ||
-            (widget.isKeyboardOpen && !isExpanding)) {
+        if (shouldHideTree) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) _ensurePhoneBottomNavBarShown();
           });
@@ -415,28 +471,91 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           builder: (context, _) {
             final progress = _expandController.value;
 
-            final bottomInset = _resolveBottomInset(context);
-            final bool hideForModal =
-                QuranPlayerLayoutInsets.shouldHideMiniPlayerForModal(context);
+            // Bottom sheet slide: expanded player rides up from below the
+            // mini-player slot (YouTube Music attaches the sheet to the bar).
+            final double expandCurve = Curves.easeOutCubic.transform(progress);
+            final double collapseStart = hostRect.bottom;
+            final sheetOffsetY =
+                (screenHeight - collapseStart) * (1 - expandCurve);
 
-            // Bottom sheet slide:
-            // The expanded player translates from fully off-screen
-            // (progress=0, translateY=screenHeight) to fully on-screen
-            // (progress=1, translateY=0). This is the standard pattern
-            // used by YouTube Music and Spotify.
-            final sheetOffsetY = screenHeight * (1 - progress);
+            // Mini player fades quickly so the expanding sheet reads as one
+            // continuous surface (YT cross-fades the bar into the sheet).
+            final miniOpacity = (1 - expandCurve * 2.5).clamp(0.0, 1.0);
+            final miniSlideY = (1 - miniOpacity) * _miniPlayerHeight * 0.35;
 
-            // Mini player fades and slides to avoid overlapping with the
-            // expanded player. During expand: slides down and fades out.
-            // During collapse: slides up from below and fades in.
-            final miniOpacity = (1 - progress * 2).clamp(0.0, 1.0);
-            final miniSlideY = (1 - miniOpacity) * _miniPlayerHeight;
+            final Widget miniPlayer = Opacity(
+              opacity: miniOpacity,
+              child: Transform.translate(
+                offset: Offset(0, miniSlideY),
+                child: _MiniPlayerTransition(
+                  progress: progress,
+                  state: state,
+                  audio: audio,
+                  dismissAnimController: _dismissAnimController,
+                  dismissAnimation: _dismissAnimation,
+                  dismissOffsetY: _dismissOffsetY,
+                  onVerticalDragUpdate: _onVerticalDragUpdate,
+                  onVerticalDragEnd: _onVerticalDragEnd,
+                  onTap: expand,
+                  onClose: _dismissWithUndo,
+                ),
+              ),
+            );
+
+            if (!showMiniInTree) {
+              return SizedBox(
+                height: screenHeight,
+                width: overlaySize.width,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (progress > 0)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: Container(
+                            color: Colors.black.withValues(
+                              alpha: progress * 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (progress > 0.01)
+                      Transform.translate(
+                        offset: Offset(0, sheetOffsetY),
+                        child: Transform.scale(
+                          scale: 0.94 + 0.06 * expandCurve,
+                          alignment: Alignment.bottomCenter,
+                          child: _ExpandedPlayerOrganism(
+                            state: state,
+                            audio: audio,
+                            onCollapse: collapse,
+                            onDismiss: _dismissWithUndo,
+                            expandProgress: expandCurve,
+                            onExpandDragUpdate: _onVerticalDragUpdate,
+                            onExpandDragEnd: _onVerticalDragEnd,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            }
+
+            if (miniAnchoredInFooter) {
+              return Stack(
+                fit: StackFit.expand,
+                clipBehavior: Clip.none,
+                children: [
+                  if (progress < 0.55) Positioned.fill(child: miniPlayer),
+                ],
+              );
+            }
+
+            final double bottomInset = _resolveBottomInset(context);
 
             return Stack(
               fit: StackFit.expand,
               children: [
-                // Expanded sheet + scrim cover the full overlay so they paint
-                // above AppBars and nested scaffolds.
                 SizedBox(
                   height: screenHeight,
                   width: overlaySize.width,
@@ -456,53 +575,30 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                       if (progress > 0.01)
                         Transform.translate(
                           offset: Offset(0, sheetOffsetY),
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onVerticalDragUpdate: _onVerticalDragUpdate,
-                            onVerticalDragEnd: _onVerticalDragEnd,
+                          child: Transform.scale(
+                            scale: 0.94 + 0.06 * expandCurve,
+                            alignment: Alignment.bottomCenter,
                             child: _ExpandedPlayerOrganism(
                               state: state,
                               audio: audio,
                               onCollapse: collapse,
                               onDismiss: _dismissWithUndo,
-                              expandProgress: 0,
+                              expandProgress: expandCurve,
+                              onExpandDragUpdate: _onVerticalDragUpdate,
+                              onExpandDragEnd: _onVerticalDragEnd,
                             ),
                           ),
                         ),
                     ],
                   ),
                 ),
-                // Mini player is scoped to the host slot (shell bottom overlay
-                // or route Stack), not the full window.
-                if (progress < 0.55 && !hideForModal)
-                  Positioned.fromRect(
-                    rect: hostRect,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Positioned(
-                          left: 0,
-                          right: 0,
-                          bottom: bottomInset - miniSlideY,
-                          height: _miniPlayerHeight,
-                          child: Opacity(
-                            opacity: miniOpacity,
-                            child: _MiniPlayerTransition(
-                              progress: progress,
-                              state: state,
-                              audio: audio,
-                              dismissAnimController: _dismissAnimController,
-                              dismissAnimation: _dismissAnimation,
-                              dismissOffsetY: _dismissOffsetY,
-                              onVerticalDragUpdate: _onVerticalDragUpdate,
-                              onVerticalDragEnd: _onVerticalDragEnd,
-                              onTap: expand,
-                              onClose: _dismissWithUndo,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                if (progress < 0.55)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: bottomInset - miniSlideY,
+                    height: _miniPlayerHeight,
+                    child: miniPlayer,
                   ),
               ],
             );
@@ -598,75 +694,26 @@ class _MiniPlayerOrganism extends StatelessWidget {
           tokens.spaceLarge,
           0,
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return TilawaMediaPlayerBar(
-              layoutWidth: constraints.maxWidth,
-              title: audio.title,
-              subtitle: audio.artist ?? context.l10n.unknownReciter,
-              artwork: audio.artUri == null
-                  ? null
-                  : CachedNetworkImage(
-                      imageUrl: audio.artUri.toString(),
-                      fit: BoxFit.cover,
-                      errorWidget: (context, error, stackTrace) =>
-                          const SizedBox.shrink(),
-                      placeholder: (context, url) => const SizedBox.shrink(),
-                    ),
-              progress:
-                  state.positionData?.duration.inMilliseconds.toDouble() == 0
-                  ? 0.0
-                  : (state.positionData?.position.inMilliseconds ?? 0) /
-                        (state.positionData?.duration.inMilliseconds ?? 1),
-              progressBarOverride: const _MiniPlayerProgressBar(),
-              isPlaying: state.isPlaying,
-              canGoPrevious: state.canGoPrevious,
-              canGoNext: state.canGoNext,
-              isSleepTimerActive: state.isSleepTimerActive,
-              isSleepTimerEnabled: context
-                  .watch<SettingsCubit>()
-                  .state
-                  .isSleepTimerEnabled,
-              onPlayPause: () {
-                context.read<AudioPlayerBloc>().add(
-                  state.isPlaying
-                      ? const AudioPlayerEvent.pauseAudio()
-                      : const AudioPlayerEvent.playAudio(),
-                );
-              },
-              onPrevious: () {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.skipToPrevious(),
-                );
-              },
-              onNext: () {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.skipToNext(),
-                );
-              },
-              onSleepTimerTap: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => const SleepTimerDialog(),
-                );
-              },
-              onClose: onClose,
-              onTap: onTap,
-            );
-          },
+        child: _YtMusicMiniPlayer(
+          state: state,
+          audio: audio,
+          onTap: onTap,
+          onClose: onClose,
         ),
       ),
     );
   }
 }
 
-class _ExpandedPlayerOrganism extends StatelessWidget {
+class _ExpandedPlayerOrganism extends StatefulWidget {
   const _ExpandedPlayerOrganism({
     required this.state,
     required this.audio,
     required this.onCollapse,
     required this.onDismiss,
     required this.expandProgress,
+    required this.onExpandDragUpdate,
+    required this.onExpandDragEnd,
   });
 
   final AudioPlayerState state;
@@ -674,6 +721,63 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
   final VoidCallback onCollapse;
   final VoidCallback onDismiss;
   final double expandProgress;
+  final GestureDragUpdateCallback onExpandDragUpdate;
+  final GestureDragEndCallback onExpandDragEnd;
+
+  @override
+  State<_ExpandedPlayerOrganism> createState() =>
+      _ExpandedPlayerOrganismState();
+}
+
+class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
+  static const double _queuePeekSize = 0.20;
+  static const double _queueMidSize = 0.48;
+  static const double _queueFullSize = 0.90;
+
+  final DraggableScrollableController _queueController =
+      DraggableScrollableController();
+
+  @override
+  void initState() {
+    super.initState();
+    _queueController.addListener(_onQueueSheetChanged);
+  }
+
+  @override
+  void dispose() {
+    _queueController.removeListener(_onQueueSheetChanged);
+    _queueController.dispose();
+    super.dispose();
+  }
+
+  void _onQueueSheetChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ExpandedPlayerOrganism oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.expandProgress >= 1.0 && oldWidget.expandProgress < 1.0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _queueController.isAttached) {
+          _queueController.jumpTo(_queuePeekSize);
+        }
+      });
+    }
+  }
+
+  double get _queueReveal {
+    if (!_queueController.isAttached) {
+      return 0;
+    }
+    return ((_queueController.size - _queuePeekSize) /
+            (_queueFullSize - _queuePeekSize))
+        .clamp(0.0, 1.0);
+  }
+
+  bool get _queueAtPeek => !_queueController.isAttached || _queueReveal < 0.04;
 
   @override
   Widget build(BuildContext context) {
@@ -691,13 +795,12 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
       ),
       child: Material(
         color: Colors.black,
-        elevation: expandProgress * 16,
+        elevation: widget.expandProgress * 16,
         shape: const RoundedRectangleBorder(),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Background
             const PlayerBackgroundLayer(),
             Positioned.fill(
               child: BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
@@ -705,12 +808,12 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                   if (bgState.config.type == PlayerBackgroundType.custom) {
                     return const SizedBox.shrink();
                   }
-                  return audio.artUri != null
+                  return widget.audio.artUri != null
                       ? Stack(
                           fit: StackFit.expand,
                           children: [
                             CachedNetworkImage(
-                              imageUrl: audio.artUri!,
+                              imageUrl: widget.audio.artUri!,
                               fit: BoxFit.cover,
                             ),
                             Container(
@@ -724,14 +827,12 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                 },
               ),
             ),
-
-            // Content
             if (isLandscape)
               _ExpandedPlayerLandscape(
-                state: state,
-                audio: audio,
-                onCollapse: onCollapse,
-                onDismiss: onDismiss,
+                state: widget.state,
+                audio: widget.audio,
+                onCollapse: widget.onCollapse,
+                onDismiss: widget.onDismiss,
               )
             else
               Positioned.fill(
@@ -740,59 +841,242 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
                     kind: TilawaContentKind.media,
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        return SingleChildScrollView(
-                          physics: const NeverScrollableScrollPhysics(),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: constraints.maxHeight,
+                        final double sheetHeight = _queueController.isAttached
+                            ? _queueController.size * constraints.maxHeight
+                            : _queuePeekSize * constraints.maxHeight;
+
+                        return Stack(
+                          children: [
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: sheetHeight,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onVerticalDragUpdate: (details) {
+                                  if (_queueAtPeek) {
+                                    widget.onExpandDragUpdate(details);
+                                  }
+                                },
+                                onVerticalDragEnd: (details) {
+                                  if (_queueAtPeek) {
+                                    widget.onExpandDragEnd(details);
+                                  }
+                                },
+                                child: _YtMusicNowPlayingStage(
+                                  state: widget.state,
+                                  audio: widget.audio,
+                                  expandProgress: widget.expandProgress,
+                                  queueReveal: _queueReveal,
+                                  onCollapse: widget.onCollapse,
+                                ),
+                              ),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _PlayerHeaderMolecule(
-                                  state: state,
-                                  onCollapse: onCollapse,
-                                  onDismiss: onDismiss,
-                                ),
-
-                                // Artwork
-                                _PlayerArtAtom(
-                                  artUri: audio.artUri,
-                                  maxHeight: constraints.maxHeight * 0.35,
-                                ),
-
-                                // Metadata
-                                _PlayerMetadataMolecule(
-                                  title: audio.title,
-                                  artist: audio.artist,
-                                ),
-
-                                // Progress & Controls (Thumb-friendly zone)
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const _ExpandedProgressBar(),
-                                    SizedBox(height: tokens.spaceLarge),
-                                    _PlayerMainControlsMolecule(
-                                      state: state,
-                                      isPlaying: state.isPlaying,
-                                    ),
-                                    SizedBox(height: tokens.spaceMedium),
-                                    _PlayerSecondaryControlsMolecule(
-                                      state: state,
-                                    ),
-                                    SizedBox(height: tokens.spaceExtraLarge),
-                                  ],
-                                ),
+                            DraggableScrollableSheet(
+                              controller: _queueController,
+                              initialChildSize: _queuePeekSize,
+                              minChildSize: 0.12,
+                              maxChildSize: _queueFullSize,
+                              snap: true,
+                              snapSizes: const <double>[
+                                _queuePeekSize,
+                                _queueMidSize,
+                                _queueFullSize,
                               ],
+                              builder: (context, scrollController) {
+                                return _PlayerQueueSheet(
+                                  scrollController: scrollController,
+                                  state: widget.state,
+                                  currentAudio: widget.audio,
+                                );
+                              },
                             ),
-                          ),
+                          ],
                         );
                       },
                     ),
                   ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Now-playing body that shrinks and fades as the queue sheet slides up.
+class _YtMusicNowPlayingStage extends StatelessWidget {
+  const _YtMusicNowPlayingStage({
+    required this.state,
+    required this.audio,
+    required this.expandProgress,
+    required this.queueReveal,
+    required this.onCollapse,
+  });
+
+  final AudioPlayerState state;
+  final AudioEntity audio;
+  final double expandProgress;
+  final double queueReveal;
+  final VoidCallback onCollapse;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final bool showCompactBar = queueReveal > 0.62;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool tightStage = constraints.maxHeight < 140;
+
+        if (showCompactBar || tightStage) {
+          return _CompactNowPlayingBar(
+            audio: audio,
+            state: state,
+            onCollapse: onCollapse,
+            opacity: showCompactBar
+                ? ((queueReveal - 0.62) / 0.25).clamp(0.0, 1.0)
+                : 1.0,
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _YtMusicPlayerHeader(state: state, onCollapse: onCollapse),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: tokens.spaceLarge,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _PlayerArtAtom(artUri: audio.artUri),
+                    SizedBox(height: tokens.spaceLarge),
+                    _PlayerMetadataMolecule(
+                      title: audio.title,
+                      artist: audio.artist,
+                    ),
+                    SizedBox(height: tokens.spaceMedium),
+                    _PlayerActionPillsMolecule(state: state),
+                    SizedBox(height: tokens.spaceMedium),
+                    const _ExpandedProgressBar(),
+                    SizedBox(height: tokens.spaceLarge),
+                    _PlayerTransportRow(
+                      state: state,
+                      isPlaying: state.isPlaying,
+                    ),
+                    SizedBox(height: tokens.spaceMedium),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Collapsed player strip shown when the queue sheet is fully raised.
+class _CompactNowPlayingBar extends StatelessWidget {
+  const _CompactNowPlayingBar({
+    required this.audio,
+    required this.state,
+    required this.onCollapse,
+    required this.opacity,
+  });
+
+  final AudioEntity audio;
+  final AudioPlayerState state;
+  final VoidCallback onCollapse;
+  final double opacity;
+
+  static const BoxConstraints _iconConstraints = BoxConstraints(
+    minWidth: 40,
+    minHeight: 40,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final TextStyle? titleStyle = Theme.of(context).textTheme.titleSmall
+        ?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          height: 1.15,
+        );
+    final TextStyle? artistStyle = Theme.of(context).textTheme.bodySmall
+        ?.copyWith(
+          color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
+          height: 1.15,
+        );
+
+    return Opacity(
+      opacity: opacity,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceSmall,
+          vertical: tokens.spaceExtraSmall,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            IconButton(
+              constraints: _iconConstraints,
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                FluentIcons.chevron_down_24_regular,
+                color: Colors.white,
+                size: tokens.iconSizeLarge,
+              ),
+              onPressed: onCollapse,
+            ),
+            _MiniArtwork(artUri: audio.artUri, size: 40),
+            SizedBox(width: tokens.spaceSmall),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    audio.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: titleStyle,
+                  ),
+                  Text(
+                    audio.artist ?? context.l10n.unknownReciter,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: artistStyle,
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              constraints: _iconConstraints,
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                state.isPlaying
+                    ? FluentIcons.pause_24_filled
+                    : FluentIcons.play_24_filled,
+                color: Colors.white,
+                size: tokens.iconSizeLarge,
+              ),
+              onPressed: () {
+                context.read<AudioPlayerBloc>().add(
+                  state.isPlaying
+                      ? const AudioPlayerEvent.pauseAudio()
+                      : const AudioPlayerEvent.playAudio(),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -899,7 +1183,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
 
             // Center: Primary Controls
             Center(
-              child: _PlayerMainControlsMolecule(
+              child: _PlayerTransportRow(
                 state: state,
                 isPlaying: state.isPlaying,
               ),
@@ -925,17 +1209,21 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                           children: [
                             TilawaIconActionButton(
                               icon: FluentIcons.speaker_2_24_regular,
-                              onTap: () => showSliderDialog(
-                                context: context,
-                                title: context.l10n.adjustVolume,
-                                divisions: 10,
-                                min: 0.0,
-                                max: 1.0,
-                                value: state.volume,
-                                onChanged: (v) => context
-                                    .read<AudioPlayerBloc>()
-                                    .add(AudioPlayerEvent.setVolume(v)),
-                              ),
+                              onTap: () {
+                                final AudioPlayerBloc bloc = context
+                                    .read<AudioPlayerBloc>();
+                                showSliderDialog(
+                                  context: context,
+                                  title: context.l10n.adjustVolume,
+                                  divisions: 10,
+                                  min: 0.0,
+                                  max: 1.0,
+                                  value: state.volume,
+                                  onChanged: (double v) {
+                                    bloc.add(AudioPlayerEvent.setVolume(v));
+                                  },
+                                );
+                              },
                             ),
                             Row(
                               children: [
@@ -986,70 +1274,108 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
 // Molecules
 // ---------------------------------------------------------------------------
 
-class _PlayerHeaderMolecule extends StatelessWidget {
-  const _PlayerHeaderMolecule({
+class _YtMusicPlayerHeader extends StatelessWidget {
+  const _YtMusicPlayerHeader({
     required this.state,
     required this.onCollapse,
-    required this.onDismiss,
   });
 
   final AudioPlayerState state;
   final VoidCallback onCollapse;
-  final VoidCallback onDismiss;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(
-          FluentIcons.chevron_down_24_regular,
-          color: Colors.white,
-          size: tokens.iconSizeLarge + tokens.spaceExtraSmall,
-        ),
-        onPressed: onCollapse,
-      ),
-      title: Text(
-        context.l10n.currentPlaying,
-        style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
-      ),
-      actions: [
-        if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
+    final tokens = Theme.of(context).tokens;
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+      child: Row(
+        children: [
           IconButton(
             icon: Icon(
-              state.isSleepTimerActive
-                  ? FluentIcons.timer_24_filled
-                  : FluentIcons.timer_24_regular,
-              color: state.isSleepTimerActive
-                  ? Theme.of(context).primaryColor
-                  : Colors.white,
+              FluentIcons.chevron_down_24_regular,
+              color: Colors.white,
+              size: tokens.iconSizeLarge,
             ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => const SleepTimerDialog(),
-              );
-            },
+            onPressed: onCollapse,
+            tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           ),
-        IconButton(
-          icon: const Icon(FluentIcons.image_24_regular, color: Colors.white),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => BackgroundSourceDialog(
-                onSourceSelected: (source) {
-                  context.read<PlayerBackgroundCubit>().pickImage(source);
-                },
-              ),
-            );
-          },
-        ),
-      ],
+          const Spacer(),
+          IconButton(
+            icon: const Icon(
+              FluentIcons.more_vertical_24_regular,
+              color: Colors.white,
+            ),
+            onPressed: () => _showExpandedPlayerMenu(context, state),
+          ),
+        ],
+      ),
     );
   }
+}
+
+Future<void> _showExpandedPlayerMenu(
+  BuildContext context,
+  AudioPlayerState state,
+) async {
+  await showTilawaModalBottomSheet<void>(
+    context: context,
+    builder: (sheetContext) {
+      final bool sleepEnabled = context
+          .read<SettingsCubit>()
+          .state
+          .isSleepTimerEnabled;
+      return Padding(
+        padding: EdgeInsets.only(bottom: sheetContext.floatingBottomPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const TilawaSheetHandle(),
+            if (sleepEnabled)
+              ListTile(
+                leading: Icon(
+                  state.isSleepTimerActive
+                      ? FluentIcons.timer_24_filled
+                      : FluentIcons.timer_24_regular,
+                ),
+                title: Text(sheetContext.l10n.recitationDuration),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  showDialog(
+                    context: context,
+                    builder: (_) => const SleepTimerDialog(),
+                  );
+                },
+              ),
+            ListTile(
+              leading: const Icon(FluentIcons.image_24_regular),
+              title: Text(sheetContext.l10n.chooseBackgroundSource),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                showDialog(
+                  context: context,
+                  builder: (dialogContext) => BackgroundSourceDialog(
+                    onSourceSelected: (source) {
+                      context.read<PlayerBackgroundCubit>().pickImage(source);
+                    },
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(FluentIcons.stop_24_regular),
+              title: Text(sheetContext.l10n.stopPlayback),
+              onTap: () {
+                Navigator.of(sheetContext).pop();
+                context.read<AudioPlayerBloc>().add(
+                  const AudioPlayerEvent.stopAudio(),
+                );
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _PlayerMetadataMolecule extends StatelessWidget {
@@ -1061,39 +1387,36 @@ class _PlayerMetadataMolecule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraLarge),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: context
-                .responsiveStyle((t) => t.headlineMedium)
-                ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          Text(
-            artist ?? context.l10n.unknownReciter,
-            style: context
-                .responsiveStyle((t) => t.bodyLarge)
-                ?.copyWith(
-                  color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
-                ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
+    final TextStyle? titleStyle = context
+        .responsiveStyle((t) => t.titleLarge)
+        ?.copyWith(color: Colors.white, fontWeight: FontWeight.w600);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          title,
+          style: titleStyle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: tokens.spaceExtraSmall),
+        Text(
+          artist ?? context.l10n.unknownReciter,
+          style: context
+              .responsiveStyle((t) => t.bodyMedium)
+              ?.copyWith(
+                color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
+              ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
     );
   }
 }
 
-class _PlayerMainControlsMolecule extends StatelessWidget {
-  const _PlayerMainControlsMolecule({
+class _PlayerTransportRow extends StatelessWidget {
+  const _PlayerTransportRow({
     required this.state,
     required this.isPlaying,
   });
@@ -1104,24 +1427,37 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final previousIcon = isRtl
-        ? FluentIcons.next_24_filled
-        : FluentIcons.previous_24_filled;
-    final nextIcon = isRtl
-        ? FluentIcons.previous_24_filled
-        : FluentIcons.next_24_filled;
-    // Thumb-friendly layout: Primary actions (Play/Next) grouped and sized
+    final bool shuffleOn = state.shuffleMode == AudioShuffleMode.all;
+    final Color enabled = Colors.white;
+    final Color disabled = Colors.white.withValues(
+      alpha: tokens.opacitySubtle,
+    );
+    final IconData repeatIcon = switch (state.repeatMode) {
+      AudioRepeatMode.one => Icons.repeat_one,
+      AudioRepeatMode.all => Icons.repeat,
+      AudioRepeatMode.none => Icons.repeat,
+    };
+    final bool repeatActive = state.repeatMode != AudioRepeatMode.none;
+
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Previous
+        IconButton(
+          icon: Icon(Icons.shuffle, color: shuffleOn ? enabled : disabled),
+          onPressed: () {
+            final AudioShuffleMode next = shuffleOn
+                ? AudioShuffleMode.none
+                : AudioShuffleMode.all;
+            context.read<AudioPlayerBloc>().add(
+              AudioPlayerEvent.setShuffleMode(next),
+            );
+          },
+          tooltip: context.l10n.shufflePlaylist,
+        ),
         IconButton(
           icon: Icon(
-            previousIcon,
-            color: state.canGoPrevious
-                ? Colors.white
-                : Colors.white.withValues(alpha: tokens.opacitySubtle),
+            Icons.skip_previous,
+            color: state.canGoPrevious ? enabled : disabled,
             size: tokens.iconSizeLarge,
           ),
           onPressed: state.canGoPrevious
@@ -1130,9 +1466,6 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
                 )
               : null,
         ),
-        SizedBox(width: tokens.spaceLarge),
-
-        // Play/Pause (Centerpiece)
         _PlayerPlayPauseAtom(
           isPlaying: isPlaying,
           onTap: () {
@@ -1143,16 +1476,10 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
             );
           },
         ),
-
-        SizedBox(width: tokens.spaceLarge),
-
-        // Next (Most common thumb action after play)
         IconButton(
           icon: Icon(
-            nextIcon,
-            color: state.canGoNext
-                ? Colors.white
-                : Colors.white.withValues(alpha: tokens.opacitySubtle),
+            Icons.skip_next,
+            color: state.canGoNext ? enabled : disabled,
             size: tokens.iconSizeLarge,
           ),
           onPressed: state.canGoNext
@@ -1161,88 +1488,154 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
                 )
               : null,
         ),
+        IconButton(
+          icon: Icon(
+            repeatIcon,
+            color: repeatActive ? enabled : disabled,
+          ),
+          onPressed: () {
+            final AudioRepeatMode next = switch (state.repeatMode) {
+              AudioRepeatMode.none => AudioRepeatMode.all,
+              AudioRepeatMode.all => AudioRepeatMode.one,
+              AudioRepeatMode.one => AudioRepeatMode.none,
+            };
+            context.read<AudioPlayerBloc>().add(
+              AudioPlayerEvent.setRepeatMode(next),
+            );
+          },
+        ),
       ],
     );
   }
 }
 
-class _PlayerSecondaryControlsMolecule extends StatelessWidget {
-  const _PlayerSecondaryControlsMolecule({required this.state});
+class _PlayerActionPillsMolecule extends StatelessWidget {
+  const _PlayerActionPillsMolecule({required this.state});
 
   final AudioPlayerState state;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    return Row(
-      mainAxisAlignment: .spaceAround,
-      children: [
-        TilawaIconActionButton(
-          icon: FluentIcons.speaker_2_24_regular,
-          onTap: () => showSliderDialog(
-            context: context,
-            title: context.l10n.adjustVolume,
-            divisions: 10,
-            min: 0.0,
-            max: 1.0,
-            value: state.volume,
-            onChanged: (v) => context.read<AudioPlayerBloc>().add(
-              AudioPlayerEvent.setVolume(v),
-            ),
-          ),
-        ),
-        Semantics(
-          button: true,
-          label: context.l10n.playbackSpeed,
-          value: '${state.speed.toStringAsFixed(1)}x',
-          // docs/tilawa_brand.md §5: tappable chip-grammar affordance — pill radius
-          // resolved from the 44 dp interactive minimum; spacing from tokens.
-          // White-on-dark colors are intentional (fixed dark-palette context
-          // for the expanded player; DESIGN §12 export/composer exception).
-          child: Material(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(
-              tokens.resolveRadius(
-                family: TilawaRadiusFamily.pill,
-                height: tokens.minInteractiveDimension,
-              ),
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(
-                tokens.resolveRadius(
-                  family: TilawaRadiusFamily.pill,
-                  height: tokens.minInteractiveDimension,
-                ),
-              ),
-              onTap: () => showSliderDialog(
+    final tokens = Theme.of(context).tokens;
+    final bool sleepEnabled = context
+        .watch<SettingsCubit>()
+        .state
+        .isSleepTimerEnabled;
+    return SizedBox(
+      height: tokens.minInteractiveDimension,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          _YtMusicActionPill(
+            label: '${state.speed.toStringAsFixed(1)}x',
+            icon: FluentIcons.gauge_24_regular,
+            onTap: () {
+              final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+              showSliderDialog(
                 context: context,
                 title: context.l10n.playbackSpeed,
                 divisions: 8,
                 min: 0.5,
                 max: 2.5,
                 value: state.speed,
-                onChanged: (s) => context.read<AudioPlayerBloc>().add(
-                  AudioPlayerEvent.setSpeed(s),
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceMedium,
-                  vertical: tokens.spaceSmall,
-                ),
-                child: Text(
-                  '${state.speed.toStringAsFixed(1)}x',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                onChanged: (double speed) {
+                  bloc.add(AudioPlayerEvent.setSpeed(speed));
+                },
+              );
+            },
+          ),
+          SizedBox(width: tokens.spaceSmall),
+          _YtMusicActionPill(
+            icon: FluentIcons.speaker_2_24_regular,
+            onTap: () {
+              final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+              showSliderDialog(
+                context: context,
+                title: context.l10n.adjustVolume,
+                divisions: 10,
+                min: 0.0,
+                max: 1.0,
+                value: state.volume,
+                onChanged: (double volume) {
+                  bloc.add(AudioPlayerEvent.setVolume(volume));
+                },
+              );
+            },
+          ),
+          if (sleepEnabled) ...[
+            SizedBox(width: tokens.spaceSmall),
+            _YtMusicActionPill(
+              icon: state.isSleepTimerActive
+                  ? FluentIcons.timer_24_filled
+                  : FluentIcons.timer_24_regular,
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (_) => const SleepTimerDialog(),
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _YtMusicActionPill extends StatelessWidget {
+  const _YtMusicActionPill({
+    this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String? label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final double radius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.pill,
+      height: tokens.minInteractiveDimension,
+    );
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: tokens.minInteractiveDimension,
+        minHeight: tokens.minInteractiveDimension,
+      ),
+      child: Material(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(radius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(radius),
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceMedium,
+              vertical: tokens.spaceSmall,
+            ),
+            child: Row(
+              mainAxisSize: .min,
+              mainAxisAlignment: .center,
+              children: [
+                Icon(icon, color: Colors.white, size: tokens.iconSizeMedium),
+                if (label != null) ...[
+                  SizedBox(width: tokens.spaceExtraSmall),
+                  Text(
+                    label!,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ),
+                ],
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -1316,20 +1709,17 @@ Future<void> _showPlaybackActions(BuildContext context) async {
 // ---------------------------------------------------------------------------
 
 class _PlayerArtAtom extends StatelessWidget {
-  const _PlayerArtAtom({this.artUri, required this.maxHeight});
+  const _PlayerArtAtom({this.artUri});
 
   final String? artUri;
-  final double maxHeight;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final artSize = tokens.contentMaxWidthMedia / 4.2; // approx 280
-    return SizedBox(
-      width: artSize,
-      height: maxHeight.clamp(0.0, artSize),
+    return AspectRatio(
+      aspectRatio: 16 / 9,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         child: artUri != null
             ? CachedNetworkImage(
                 imageUrl: artUri!,
@@ -1392,37 +1782,345 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
   }
 }
 
-class _MiniPlayerProgressBar extends StatelessWidget {
-  const _MiniPlayerProgressBar();
+class _YtMusicMiniPlayer extends StatelessWidget {
+  const _YtMusicMiniPlayer({
+    required this.state,
+    required this.audio,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final AudioPlayerState state;
+  final AudioEntity audio;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    return BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
-      selector: (state) {
-        final PositionData pos =
-            state.positionData ??
-            const PositionData(
-              position: Duration.zero,
-              bufferedPosition: Duration.zero,
-              duration: Duration.zero,
-            );
-        if (pos.duration.inMilliseconds <= 0) return 0.0;
-        return (pos.position.inMilliseconds / pos.duration.inMilliseconds)
-            .clamp(0.0, 1.0);
-      },
-      builder: (context, progress) {
-        return LinearProgressIndicator(
-          value: progress,
-          backgroundColor: colorScheme.primaryContainer.withValues(
-            alpha: tokens.opacitySubtle,
+    final tokens = Theme.of(context).tokens;
+    final double progress =
+        state.positionData?.duration.inMilliseconds.toDouble() == 0
+        ? 0.0
+        : (state.positionData?.position.inMilliseconds ?? 0) /
+              (state.positionData?.duration.inMilliseconds ?? 1);
+
+    return Material(
+      color: const Color(0xFF1C1C1C),
+      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            LinearProgressIndicator(
+              value: progress.clamp(0.0, 1.0),
+              minHeight: 2,
+              backgroundColor: Colors.white.withValues(
+                alpha: tokens.opacitySubtle,
+              ),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                tokens.spaceMedium,
+                tokens.spaceSmall,
+                tokens.spaceSmall,
+                tokens.spaceSmall,
+              ),
+              child: Row(
+                children: [
+                  _MiniArtwork(artUri: audio.artUri, size: 44),
+                  SizedBox(width: tokens.spaceMedium),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          audio.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        Text(
+                          audio.artist ?? context.l10n.unknownReciter,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(
+                                  alpha: tokens.opacityEmphasis,
+                                ),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      state.isPlaying
+                          ? FluentIcons.pause_24_filled
+                          : FluentIcons.play_24_filled,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      context.read<AudioPlayerBloc>().add(
+                        state.isPlaying
+                            ? const AudioPlayerEvent.pauseAudio()
+                            : const AudioPlayerEvent.playAudio(),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      FluentIcons.dismiss_24_regular,
+                      color: Colors.white.withValues(
+                        alpha: tokens.opacityEmphasis,
+                      ),
+                      size: tokens.iconSizeMedium,
+                    ),
+                    onPressed: onClose,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniArtwork extends StatelessWidget {
+  const _MiniArtwork({required this.artUri, required this.size});
+
+  final String? artUri;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(tokens.radiusSmall),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: artUri == null
+            ? ColoredBox(
+                color: Colors.white.withValues(alpha: tokens.opacitySubtle),
+                child: Icon(
+                  FluentIcons.music_note_2_24_filled,
+                  color: Colors.white54,
+                ),
+              )
+            : CachedNetworkImage(
+                imageUrl: artUri!,
+                fit: BoxFit.cover,
+                errorWidget: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
+              ),
+      ),
+    );
+  }
+}
+
+class _PlayerQueueSheet extends StatelessWidget {
+  const _PlayerQueueSheet({
+    required this.scrollController,
+    required this.state,
+    required this.currentAudio,
+  });
+
+  final ScrollController scrollController;
+  final AudioPlayerState state;
+  final AudioEntity currentAudio;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final List<AudioEntity> queue =
+        state.playbackState?.queue ?? <AudioEntity>[];
+    final int? currentIndex = state.playbackState?.currentIndex;
+    final String sourceLabel =
+        currentAudio.album ??
+        currentAudio.artist ??
+        context.l10n.unknownReciter;
+
+    return Material(
+      color: const Color(0xFF1A1A1A),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(tokens.radiusExtraLarge),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: CustomScrollView(
+        controller: scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Center(
+              child: TilawaSheetHandle(
+                color:
+                    Theme.of(
+                      context,
+                    ).colorScheme.surfaceContainer.withValues(
+                      alpha: tokens.opacityEmphasis,
+                    ),
+              ),
+            ),
           ),
-          valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
-          minHeight: tokens.progressHeight,
-        );
-      },
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                tokens.spaceLarge,
+                tokens.spaceSmall,
+                tokens.spaceLarge,
+                tokens.spaceMedium,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.playingFrom,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: Colors.white.withValues(
+                        alpha: tokens.opacityEmphasis,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    sourceLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (queue.length > 1)
+            SliverReorderableList(
+              itemBuilder: (context, index) {
+                final AudioEntity item = queue[index];
+                final bool isCurrent = currentIndex == index;
+                return ReorderableDelayedDragStartListener(
+                  key: ValueKey<String>(item.id),
+                  index: index,
+                  child: _QueueTrackTile(
+                    audio: item,
+                    isCurrent: isCurrent,
+                    isPlaying: isCurrent && state.isPlaying,
+                    onTap: () {
+                      if (!isCurrent) {
+                        context.read<AudioPlayerBloc>().add(
+                          AudioPlayerEvent.skipToQueueItem(index),
+                        );
+                      }
+                    },
+                  ),
+                );
+              },
+              itemCount: queue.length,
+              onReorderItem: (int oldIndex, int newIndex) {
+                context.read<AudioPlayerBloc>().add(
+                  AudioPlayerEvent.moveQueueItem(oldIndex, newIndex),
+                );
+              },
+            )
+          else
+            SliverToBoxAdapter(
+              child: SizedBox(height: tokens.spaceExtraLarge),
+            ),
+          SliverPadding(
+            padding: EdgeInsets.only(bottom: tokens.spaceLarge),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QueueTrackTile extends StatelessWidget {
+  const _QueueTrackTile({
+    required this.audio,
+    required this.isCurrent,
+    required this.isPlaying,
+    required this.onTap,
+  });
+
+  final AudioEntity audio;
+  final bool isCurrent;
+  final bool isPlaying;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    return Material(
+      color: isCurrent
+          ? Colors.white.withValues(alpha: 0.08)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceLarge,
+            vertical: tokens.spaceSmall,
+          ),
+          child: Row(
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  _MiniArtwork(artUri: audio.artUri, size: 48),
+                  if (isCurrent && isPlaying)
+                    Icon(
+                      Icons.equalizer,
+                      color: Colors.white,
+                      size: tokens.iconSizeMedium,
+                    ),
+                ],
+              ),
+              SizedBox(width: tokens.spaceMedium),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      audio.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: isCurrent ? FontWeight.w600 : null,
+                      ),
+                    ),
+                    Text(
+                      audio.artist ?? context.l10n.unknownReciter,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.white.withValues(
+                          alpha: tokens.opacityEmphasis,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.drag_handle,
+                color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1455,19 +2153,28 @@ class _ExpandedProgressBar extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Column(
             children: [
-              SeekBar(
-                duration: positionData.duration,
-                position: positionData.position,
-                bufferedPosition: positionData.bufferedPosition,
-                activeColor: seekActiveColor,
-                thumbColor: seekThumbColor,
-                bufferedColor: seekBufferedColor,
-                inactiveColor: seekInactiveColor,
-                onChangeEnd: (newPosition) {
-                  context.read<AudioPlayerBloc>().add(
-                    AudioPlayerEvent.seekTo(newPosition),
-                  );
-                },
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  trackHeight: 3,
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 0,
+                  ),
+                  overlayShape: SliderComponentShape.noOverlay,
+                ),
+                child: SeekBar(
+                  duration: positionData.duration,
+                  position: positionData.position,
+                  bufferedPosition: positionData.bufferedPosition,
+                  activeColor: seekActiveColor,
+                  thumbColor: seekThumbColor,
+                  bufferedColor: seekBufferedColor,
+                  inactiveColor: seekInactiveColor,
+                  onChangeEnd: (newPosition) {
+                    context.read<AudioPlayerBloc>().add(
+                      AudioPlayerEvent.seekTo(newPosition),
+                    );
+                  },
+                ),
               ),
               SizedBox(height: tokens.spaceExtraSmall),
               Row(

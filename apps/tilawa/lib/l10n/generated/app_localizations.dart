@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'Now Playing'**
   String get currentPlaying;
 
+  /// Label above the queue source in the expanded player
+  ///
+  /// In en, this message translates to:
+  /// **'Playing from'**
+  String get playingFrom;
+
   /// Duration label
   ///
   /// In en, this message translates to:

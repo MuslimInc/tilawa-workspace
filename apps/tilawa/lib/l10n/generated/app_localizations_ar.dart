@@ -111,6 +111,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get currentPlaying => 'جاري التشغيل';
 
   @override
+  String get playingFrom => 'قيد التشغيل من';
+
+  @override
   String get duration => 'المدة';
 
   @override

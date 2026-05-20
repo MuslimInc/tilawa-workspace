@@ -81,6 +81,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
     required this.onDestinationSelected,
     required this.child,
     required this.bottomPlayer,
+    this.phoneFooterAboveNav,
     this.phoneBottomNavigationBarVisible,
     this.bottomBarPadding,
     this.bottomBarDecoration,
@@ -95,6 +96,11 @@ class TilawaAdaptiveShell extends StatelessWidget {
   /// The bottom player (or similar floating control) that should respect
   /// the navigation bar/rail boundaries.
   final Widget bottomPlayer;
+
+  /// Optional chrome laid out directly above the phone [BottomNavigationBar]
+  /// (e.g. a mini media player). Rendered below the scrolling body, not as a
+  /// full-screen overlay on top of it.
+  final Widget? phoneFooterAboveNav;
 
   /// When non-null, narrow (phone) window class shows the bottom bar only
   /// while this value is
@@ -160,6 +166,9 @@ class TilawaAdaptiveShell extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (isKeyboardOpen || !bottomNavVisible)
+                  const SizedBox.shrink()
+                else ?phoneFooterAboveNav,
                 if (isKeyboardOpen || !bottomNavVisible)
                   const SizedBox.shrink()
                 else

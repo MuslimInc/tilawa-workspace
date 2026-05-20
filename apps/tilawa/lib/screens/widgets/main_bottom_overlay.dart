@@ -4,7 +4,7 @@ import '../../core/presentation/widgets/offline_indicator_widget.dart';
 
 /// Deferred startup overlays in the shell bottom slot (offline banner only).
 ///
-/// The Quran mini-player is hosted globally by [GlobalQuranPlayerHost].
+/// The Quran mini-player is hosted by [AppShellScreen] above the bottom nav.
 class MainBottomOverlay extends StatelessWidget {
   const MainBottomOverlay({
     super.key,

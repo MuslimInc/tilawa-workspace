@@ -33,14 +33,44 @@ import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
-import '../screens/main_screen.dart';
 import '../core/debug/deep_link_debug_screen.dart';
+import '../screens/app_shell_screen.dart';
+import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
 import 'share_composer_extra.dart';
 
 part 'app_router_config.g.dart';
 
-@TypedGoRoute<HomeRoute>(path: '/')
+@TypedShellRoute<AppShellRoute>(
+  routes: <TypedRoute<RouteData>>[
+    TypedGoRoute<HomeRoute>(path: '/'),
+    TypedGoRoute<ReciterDetailsRoute>(path: '/reciter/:reciterId'),
+    TypedGoRoute<PremiumRoute>(path: '/premium'),
+    TypedGoRoute<SettingsRoute>(path: '/settings'),
+    TypedGoRoute<DownloadsRoute>(path: '/downloads'),
+    TypedGoRoute<ErrorRoute>(path: '/error'),
+    TypedGoRoute<FavoritesRoute>(path: '/favorites'),
+    TypedGoRoute<BookmarksRoute>(path: '/bookmarks'),
+    TypedGoRoute<HistoryRoute>(path: '/history'),
+    TypedGoRoute<QiblaRoute>(path: '/qibla'),
+    TypedGoRoute<RouteListRoute>(path: '/routes'),
+    TypedGoRoute<DeepLinkDebugRoute>(path: '/debug/deep-link'),
+    TypedGoRoute<PrayerNotificationStatusRoute>(
+      path: '/prayer-notification-status',
+    ),
+    TypedGoRoute<PrayerTimesRoute>(path: '/prayer-times'),
+    TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo'),
+  ],
+)
+class AppShellRoute extends ShellRouteData {
+  const AppShellRoute();
+
+  @override
+  Widget builder(BuildContext context, GoRouterState state, Widget navigator) {
+    return AppShellScreen(child: navigator);
+  }
+}
+
 class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute();
 
@@ -60,7 +90,6 @@ class OnboardingRoute extends GoRouteData with $OnboardingRoute {
   }
 }
 
-@TypedGoRoute<ReciterDetailsRoute>(path: '/reciter/:reciterId')
 class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
   const ReciterDetailsRoute({this.$extra, required this.reciterId});
 
@@ -82,7 +111,6 @@ class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
   }
 }
 
-@TypedGoRoute<PremiumRoute>(path: '/premium')
 class PremiumRoute extends GoRouteData with $PremiumRoute {
   const PremiumRoute();
 
@@ -92,7 +120,6 @@ class PremiumRoute extends GoRouteData with $PremiumRoute {
   }
 }
 
-@TypedGoRoute<SettingsRoute>(path: '/settings')
 class SettingsRoute extends GoRouteData with $SettingsRoute {
   const SettingsRoute();
 
@@ -112,7 +139,6 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   }
 }
 
-@TypedGoRoute<DownloadsRoute>(path: '/downloads')
 class DownloadsRoute extends GoRouteData with $DownloadsRoute {
   const DownloadsRoute();
 
@@ -122,7 +148,6 @@ class DownloadsRoute extends GoRouteData with $DownloadsRoute {
   }
 }
 
-@TypedGoRoute<ErrorRoute>(path: '/error')
 class ErrorRoute extends GoRouteData with $ErrorRoute {
   const ErrorRoute({this.error});
 
@@ -141,7 +166,6 @@ class ErrorRoute extends GoRouteData with $ErrorRoute {
   }
 }
 
-@TypedGoRoute<FavoritesRoute>(path: '/favorites')
 class FavoritesRoute extends GoRouteData with $FavoritesRoute {
   const FavoritesRoute();
 
@@ -192,7 +216,6 @@ class AthkarDetailsRoute extends GoRouteData with $AthkarDetailsRoute {
   }
 }
 
-@TypedGoRoute<QiblaRoute>(path: '/qibla')
 class QiblaRoute extends GoRouteData with $QiblaRoute {
   const QiblaRoute();
 
@@ -202,7 +225,6 @@ class QiblaRoute extends GoRouteData with $QiblaRoute {
   }
 }
 
-@TypedGoRoute<RouteListRoute>(path: '/routes')
 class RouteListRoute extends GoRouteData with $RouteListRoute {
   const RouteListRoute();
 
@@ -212,7 +234,6 @@ class RouteListRoute extends GoRouteData with $RouteListRoute {
   }
 }
 
-@TypedGoRoute<DeepLinkDebugRoute>(path: '/debug/deep-link')
 class DeepLinkDebugRoute extends GoRouteData with $DeepLinkDebugRoute {
   const DeepLinkDebugRoute();
 
@@ -232,7 +253,6 @@ class SplashRoute extends GoRouteData with $SplashRoute {
   }
 }
 
-@TypedGoRoute<BookmarksRoute>(path: '/bookmarks')
 class BookmarksRoute extends GoRouteData with $BookmarksRoute {
   const BookmarksRoute();
 
@@ -246,7 +266,6 @@ class BookmarksRoute extends GoRouteData with $BookmarksRoute {
   }
 }
 
-@TypedGoRoute<HistoryRoute>(path: '/history')
 class HistoryRoute extends GoRouteData with $HistoryRoute {
   const HistoryRoute();
 
@@ -260,9 +279,6 @@ class HistoryRoute extends GoRouteData with $HistoryRoute {
   }
 }
 
-@TypedGoRoute<PrayerNotificationStatusRoute>(
-  path: '/prayer-notification-status',
-)
 class PrayerNotificationStatusRoute extends GoRouteData
     with $PrayerNotificationStatusRoute {
   const PrayerNotificationStatusRoute({this.$extra});
@@ -275,7 +291,6 @@ class PrayerNotificationStatusRoute extends GoRouteData
   }
 }
 
-@TypedGoRoute<PrayerTimesRoute>(path: '/prayer-times')
 class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
   const PrayerTimesRoute();
 
@@ -365,7 +380,6 @@ class VideoReelComposerRoute extends GoRouteData with $VideoReelComposerRoute {
   }
 }
 
-@TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo')
 class QuranRenderDemoRoute extends GoRouteData with $QuranRenderDemoRoute {
   const QuranRenderDemoRoute();
 

@@ -138,6 +138,10 @@
     "@currentPlaying": {
         "description": "Current playing indicator"
     },
+    "playingFrom": "قيد التشغيل من",
+    "@playingFrom": {
+        "description": "Label above the queue source in the expanded player"
+    },
     "duration": "المدة",
     "@duration": {
         "description": "Duration label"

@@ -287,12 +287,15 @@ class AppRouter {
   }
 
   static List<NavigatorObserver> _getObservers() {
+    final List<NavigatorObserver> observers = <NavigatorObserver>[];
     try {
-      return [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)];
+      observers.add(
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      );
     } catch (e) {
-      // In tests or if Firebase is not initialized, return an empty list
-      return [];
+      // In tests or if Firebase is not initialized, skip analytics observer.
     }
+    return observers;
   }
 
   static bool _isDuplicateNotificationNavigation(

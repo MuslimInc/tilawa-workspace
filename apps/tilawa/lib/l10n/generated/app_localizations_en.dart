@@ -111,6 +111,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentPlaying => 'Now Playing';
 
   @override
+  String get playingFrom => 'Playing from';
+
+  @override
   String get duration => 'Duration';
 
   @override

@@ -138,6 +138,10 @@
     "@currentPlaying": {
         "description": "Current playing indicator"
     },
+    "playingFrom": "Playing from",
+    "@playingFrom": {
+        "description": "Label above the queue source in the expanded player"
+    },
     "duration": "Duration",
     "@duration": {
         "description": "Duration label"

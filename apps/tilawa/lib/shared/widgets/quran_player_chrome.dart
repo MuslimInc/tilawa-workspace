@@ -5,7 +5,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../router/app_router.dart';
 
-/// Layout chrome published by [MainScreen] for the global mini-player on `/`.
+/// Layout chrome published by [AppShellScreen] for the mini-player.
 @immutable
 class QuranPlayerShellChrome {
   const QuranPlayerShellChrome({
@@ -43,7 +43,7 @@ class QuranPlayerShellChrome {
   );
 }
 
-/// Publishes main-shell chrome while [MainScreen] is mounted.
+/// Publishes app-shell chrome while [AppShellScreen] is mounted.
 class QuranPlayerChromeNotifier extends ChangeNotifier {
   QuranPlayerShellChrome? _shellChrome;
   bool _notifyScheduled = false;
@@ -52,7 +52,7 @@ class QuranPlayerChromeNotifier extends ChangeNotifier {
 
   /// Updates shell layout chrome for the global player.
   ///
-  /// [MainScreen] publishes from [build]; listeners are notified after the
+  /// [AppShellScreen] publishes from [build]; listeners are notified after the
   /// frame so [Provider] does not mark dependents dirty during build.
   void updateShellChrome(QuranPlayerShellChrome? chrome) {
     if (_shellChrome == chrome) {
@@ -101,6 +101,11 @@ abstract final class QuranPlayerRoutePolicy {
   static bool isMainShell(String location) =>
       location == '/' || location.isEmpty;
 
+  /// Whether [location] is under the app navigation shell (bottom nav).
+  static bool isInAppShell(String location) =>
+      AppShellRoutePolicy.showsBottomNavigation(location) ||
+      isMainShell(location);
+
   /// Top-of-stack route (e.g. `/reciter/1`), not [Uri.path] alone (`/`).
   ///
   /// [GoRouter]'s [RouteMatchList.uri] reflects the stack root; use
@@ -119,9 +124,66 @@ abstract final class QuranPlayerRoutePolicy {
   }
 }
 
-/// Bottom spacing for the global [QuranPlayerWidget] overlay.
+/// Bottom navigation visibility for [AppShellScreen].
+abstract final class AppShellRoutePolicy {
+  static const List<String> _noBottomNavPrefixes = <String>[
+    '/quran-reader',
+    '/quran-last-read',
+    '/athkar',
+    '/splash',
+    '/onboarding',
+    '/login',
+    '/share/',
+  ];
+
+  static bool showsBottomNavigation(String location) {
+    for (final String prefix in _noBottomNavPrefixes) {
+      if (location.startsWith(prefix)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /// Athkar routes and the Athkar tab on home hide bottom navigation.
+  static bool isAthkarContext(String location, int mainTabIndex) {
+    if (location.startsWith('/athkar')) {
+      return true;
+    }
+    return (location == '/' || location.isEmpty) && mainTabIndex == 2;
+  }
+
+  /// Whether the expanded player may hide the phone bottom bar.
+  ///
+  /// Always false: bottom nav stays visible on every shell screen while the
+  /// player is expanded.
+  static bool shouldHideBottomNavWhenPlayerExpanded(String location) => false;
+
+  /// Highlights a main-shell tab for pushed routes inside the shell.
+  static int? navIndexForLocation(String location) {
+    if (location == '/' || location.isEmpty) {
+      return null;
+    }
+    if (location.startsWith('/reciter') ||
+        location.startsWith('/downloads') ||
+        location.startsWith('/favorites') ||
+        location.startsWith('/bookmarks') ||
+        location.startsWith('/history')) {
+      return 0;
+    }
+    if (location.startsWith('/prayer') || location == '/qibla') {
+      return 1;
+    }
+    if (location.startsWith('/settings') || location == '/premium') {
+      return 3;
+    }
+    return null;
+  }
+}
+
+/// Bottom spacing for the [QuranPlayerWidget] in [AppShellScreen].
 abstract final class QuranPlayerLayoutInsets {
-  /// Prefer the navigator subtree for [MediaQuery] (overlay sits above routes).
+  /// Prefer the navigator subtree for [MediaQuery].
   static BuildContext mediaQueryContext(BuildContext context) =>
       AppRouter.navigatorKey.currentContext ?? context;
 
@@ -135,8 +197,7 @@ abstract final class QuranPlayerLayoutInsets {
     final double rowHeight = shellTokens.phoneBottomNavLayoutHeight(textScaler);
     return rowHeight +
         context.systemBottomSafeArea +
-        shellTokens.bottomNavVerticalMargin +
-        Theme.of(context).tokens.spaceSmall;
+        shellTokens.bottomNavVerticalMargin;
   }
 
   /// Bottom inset on routes without the shell nav (e.g. `/reciter/:id`).
@@ -149,16 +210,6 @@ abstract final class QuranPlayerLayoutInsets {
     return Theme.of(mq).tokens.spaceSmall;
   }
 
-  /// Whether a modal route (sheet, dialog) covers the screen bottom.
-  static bool shouldHideMiniPlayerForModal(BuildContext context) {
-    final ModalRoute<dynamic>? route = ModalRoute.of(mediaQueryContext(context));
-    if (route == null || !route.isActive) {
-      return false;
-    }
-    final Color? barrier = route.barrierColor;
-    return barrier != null && barrier.a > 0;
-  }
-
   /// Bottom offset for the collapsed mini player.
   static double miniPlayerBottomInset({
     required BuildContext context,
@@ -167,10 +218,11 @@ abstract final class QuranPlayerLayoutInsets {
     required bool phoneNavVisible,
     String? routePath,
   }) {
-    final String location = routePath ?? QuranPlayerRoutePolicy.currentMatchedLocation();
+    final String location =
+        routePath ?? QuranPlayerRoutePolicy.currentMatchedLocation();
 
     double shellReserve = hostBottomNavBarHeight;
-    if (QuranPlayerRoutePolicy.isMainShell(location)) {
+    if (QuranPlayerRoutePolicy.isInAppShell(location)) {
       final QuranPlayerShellChrome? chrome = context
           .read<QuranPlayerChromeNotifier>()
           .shellChrome;

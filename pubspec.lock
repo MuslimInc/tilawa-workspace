@@ -1115,10 +1115,10 @@ packages:
     dependency: transitive
     description:
       name: google_sign_in_android
-      sha256: be0d0733a6a7c5da165879d844a239aa87587a3c767a9163faedde581f731f76
+      sha256: df5c15533814ed20b7d9e1c5a40a73f174e5d5017bd2669b1c72fb6596fde812
       url: "https://pub.dev"
     source: hosted
-    version: "7.2.10"
+    version: "7.2.11"
   google_sign_in_ios:
     dependency: transitive
     description:
@@ -1556,14 +1556,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.4"
-  native_toolchain_c:
-    dependency: transitive
-    description:
-      name: native_toolchain_c
-      sha256: "6ba77bb18063eebe9de401f5e6437e95e1438af0a87a3a39084fbd37c90df572"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.17.6"
   nested:
     dependency: transitive
     description:
@@ -1592,10 +1584,10 @@ packages:
     dependency: transitive
     description:
       name: objective_c
-      sha256: "100a1c87616ab6ed41ec263b083c0ef3261ee6cd1dc3b0f35f8ddfa4f996fe52"
+      sha256: "02f4ff97ac95fa4abe561242eb033239e08e8903a46eaecf61b047761b89fe1f"
       url: "https://pub.dev"
     source: hosted
-    version: "9.3.0"
+    version: "9.4.0"
   octo_image:
     dependency: transitive
     description:
@@ -2261,10 +2253,10 @@ packages:
     dependency: transitive
     description:
       name: video_player_avfoundation
-      sha256: a39d6f28f8069564d8cc17396472f958dd9eaddf2d5c8e90aad4d793ac369bf3
+      sha256: "9338f3ec22774f88146b22f13273a446719b1da010fd200c4d1d97802156ac58"
       url: "https://pub.dev"
     source: hosted
-    version: "2.9.6"
+    version: "2.9.7"
   video_player_platform_interface:
     dependency: transitive
     description:
