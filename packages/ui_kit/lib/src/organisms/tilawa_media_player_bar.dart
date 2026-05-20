@@ -247,8 +247,8 @@ double resolveTilawaMediaPlayerBarLayoutWidth(
       kTilawaMediaPlayerBarDefaultHorizontalInset;
 }
 
-/// Returns true when the bar should collapse prev/sleep timer (keeping play +
-/// next) so metadata keeps at least [kTilawaMediaPlayerBarMinMetadataWidth]
+/// Returns true when the bar should hide the sleep timer (keeping play/pause)
+/// so metadata keeps at least [kTilawaMediaPlayerBarMinMetadataWidth]
 /// logical pixels.
 bool tilawaMediaPlayerBarNeedsCompactControls({
   required double maxWidth,
@@ -279,14 +279,14 @@ double _tilawaMediaPlayerBarFullTransportWidth({
   required TilawaMediaPlayerBarTokens tokens,
   required bool showSleepTimer,
 }) {
-  final int controlCount = showSleepTimer ? 4 : 3;
+  final int controlCount = showSleepTimer ? 2 : 1;
   return controlCount * tokens.controlButtonSize +
       (controlCount - 1) * tokens.controlsGap;
 }
 
 /// Artwork + metadata strip that opens the full player when tapped.
 ///
-/// Transport controls sit outside this target so play/pause/next taps never
+/// Transport controls sit outside this target so play/pause taps never
 /// also fire [TilawaMediaPlayerBar.onTap] (FR-003).
 class _OpenPlayerTapTarget extends StatelessWidget {
   const _OpenPlayerTapTarget({
@@ -405,27 +405,12 @@ class _TransportControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Transport order stays LTR (prev | play | next) per platform convention,
-    // even when the app locale is Arabic.
     return Directionality(
       textDirection: .ltr,
       child: Row(
         mainAxisSize: .min,
         spacing: componentTokens.controlsGap,
         children: [
-          if (!compact) ...[
-            _TransportIconButton(
-              size: componentTokens.controlButtonSize,
-              tooltip: previousTooltip ?? 'Previous track',
-              icon: FluentIcons.previous_20_filled,
-              iconSize: designTokens.iconSizeMedium,
-              enabled: canGoPrevious,
-              color: canGoPrevious
-                  ? colorScheme.onSurfaceVariant
-                  : disabledControlColor,
-              onPressed: canGoPrevious ? onPrevious : null,
-            ),
-          ],
           _PlayPauseButton(
             size: componentTokens.playPauseButtonSize,
             iconSize: componentTokens.playPauseIconSize,
@@ -433,17 +418,6 @@ class _TransportControls extends StatelessWidget {
             playTooltip: playTooltip,
             pauseTooltip: pauseTooltip,
             onPressed: onPlayPause,
-          ),
-          _TransportIconButton(
-            size: componentTokens.controlButtonSize,
-            tooltip: nextTooltip ?? 'Next track',
-            icon: FluentIcons.next_20_filled,
-            iconSize: designTokens.iconSizeMedium,
-            enabled: canGoNext,
-            color: canGoNext
-                ? colorScheme.onSurfaceVariant
-                : disabledControlColor,
-            onPressed: canGoNext ? onNext : null,
           ),
           if (!compact && showSleepTimer)
             _TransportIconButton(
