@@ -168,7 +168,10 @@ class TilawaAdaptiveShell extends StatelessWidget {
                 ),
                 if (isKeyboardOpen || !bottomNavVisible)
                   const SizedBox.shrink()
-                else ?phoneFooterAboveNav,
+                else if (phoneFooterAboveNav != null) ...[
+                  phoneFooterAboveNav!,
+                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                ],
                 if (isKeyboardOpen || !bottomNavVisible)
                   const SizedBox.shrink()
                 else

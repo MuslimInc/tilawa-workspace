@@ -1861,111 +1861,78 @@ class _YtMusicMiniPlayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final barTokens = Theme.of(context).componentTokens.mediaPlayerBar;
     final double progress =
         state.positionData?.duration.inMilliseconds.toDouble() == 0
         ? 0.0
         : (state.positionData?.position.inMilliseconds ?? 0) /
               (state.positionData?.duration.inMilliseconds ?? 1);
+    final bool sleepTimerEnabled = context
+        .watch<SettingsCubit>()
+        .state
+        .isSleepTimerEnabled;
+    final Widget? artwork = audio.artUri == null
+        ? null
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(barTokens.artworkRadius),
+            child: CachedNetworkImage(
+              imageUrl: audio.artUri!,
+              fit: BoxFit.cover,
+              errorWidget: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
+            ),
+          );
 
     return Semantics(
       identifier: QuranPlayerSemanticsIds.miniPlayer,
       container: true,
-      child: Material(
-        color: const Color(0xFF1C1C1C),
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              LinearProgressIndicator(
-                value: progress.clamp(0.0, 1.0),
-                minHeight: 2,
-                backgroundColor: Colors.white.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  tokens.spaceMedium,
-                  tokens.spaceSmall,
-                  tokens.spaceSmall,
-                  tokens.spaceSmall,
-                ),
-                child: Row(
-                  children: [
-                    _MiniArtwork(artUri: audio.artUri, size: 44),
-                    SizedBox(width: tokens.spaceMedium),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            audio.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                          Text(
-                            audio.artist ?? context.l10n.unknownReciter,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: Colors.white.withValues(
-                                    alpha: tokens.opacityEmphasis,
-                                  ),
-                                ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Semantics(
-                      identifier: QuranPlayerSemanticsIds.miniPlayerPlayPause,
-                      button: true,
-                      child: IconButton(
-                        icon: Icon(
-                          state.isPlaying
-                              ? FluentIcons.pause_24_filled
-                              : FluentIcons.play_24_filled,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                          context.read<AudioPlayerBloc>().add(
-                            state.isPlaying
-                                ? const AudioPlayerEvent.pauseAudio()
-                                : const AudioPlayerEvent.playAudio(),
-                          );
-                        },
-                      ),
-                    ),
-                    Semantics(
-                      identifier: QuranPlayerSemanticsIds.miniPlayerClose,
-                      button: true,
-                      child: IconButton(
-                        icon: Icon(
-                          FluentIcons.dismiss_24_regular,
-                          color: Colors.white.withValues(
-                            alpha: tokens.opacityEmphasis,
-                          ),
-                          size: tokens.iconSizeMedium,
-                        ),
-                        onPressed: onClose,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return TilawaMediaPlayerBar(
+            layoutWidth: constraints.maxWidth,
+            title: audio.title,
+            subtitle: audio.artist ?? context.l10n.unknownReciter,
+            artwork: artwork,
+            progress: progress.clamp(0.0, 1.0),
+            isPlaying: state.isPlaying,
+            canGoPrevious: state.canGoPrevious,
+            canGoNext: state.canGoNext,
+            isSleepTimerActive: state.isSleepTimerActive,
+            isSleepTimerEnabled: sleepTimerEnabled,
+            onTap: onTap,
+            onClose: onClose,
+            onPlayPause: () {
+              context.read<AudioPlayerBloc>().add(
+                state.isPlaying
+                    ? const AudioPlayerEvent.pauseAudio()
+                    : const AudioPlayerEvent.playAudio(),
+              );
+            },
+            onPrevious: state.canGoPrevious
+                ? () => context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.skipToPrevious(),
+                  )
+                : null,
+            onNext: state.canGoNext
+                ? () => context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.skipToNext(),
+                  )
+                : null,
+            onSleepTimerTap: sleepTimerEnabled
+                ? () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => const SleepTimerDialog(),
+                    );
+                  }
+                : null,
+            playTooltip: context.l10n.play,
+            pauseTooltip: context.l10n.pause,
+            previousTooltip: context.l10n.previous,
+            nextTooltip: context.l10n.next,
+            openPlayerSemanticLabel: audio.title,
+          );
+        },
       ),
     );
   }
@@ -1980,6 +1947,8 @@ class _MiniArtwork extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final barTokens = Theme.of(context).componentTokens.mediaPlayerBar;
+    final colorScheme = Theme.of(context).colorScheme;
     return ClipRRect(
       borderRadius: BorderRadius.circular(tokens.radiusSmall),
       child: SizedBox(
@@ -1987,10 +1956,10 @@ class _MiniArtwork extends StatelessWidget {
         height: size,
         child: artUri == null
             ? ColoredBox(
-                color: Colors.white.withValues(alpha: tokens.opacitySubtle),
+                color: barTokens.artworkPlaceholderColor,
                 child: Icon(
                   FluentIcons.music_note_2_24_filled,
-                  color: Colors.white54,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               )
             : CachedNetworkImage(
@@ -2030,7 +1999,7 @@ class _PlayerQueueSheet extends StatelessWidget {
       identifier: QuranPlayerSemanticsIds.queueSheet,
       container: true,
       child: Material(
-      color: const Color(0xFF1A1A1A),
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(tokens.radiusExtraLarge),
       ),

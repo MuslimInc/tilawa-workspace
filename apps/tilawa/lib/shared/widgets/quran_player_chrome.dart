@@ -233,7 +233,7 @@ abstract final class QuranPlayerLayoutInsets {
 
     final double navColumn = phoneNavVisible ? shellReserve : 0;
     if (navColumn > 0) {
-      return navColumn;
+      return navColumn + Theme.of(context).tokens.spaceSmall;
     }
     if (hostAbsorbsBottomSafeArea && hostBottomNavBarHeight <= 0) {
       return 0;
