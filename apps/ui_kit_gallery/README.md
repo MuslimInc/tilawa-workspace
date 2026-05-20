@@ -20,7 +20,7 @@ flutter run -d chrome
 
 ## Features
 
-- Browse **Atoms**, **Molecules**, and **Organisms** in one list
+- Browse **Atoms**, **Molecules**, **Organisms**, and **Foundation** in one list
 - Search components by name
 - Per-screen **light/dark** and **LTR/RTL** toggles
 - Live demos with interactive state where needed (switches, segmented controls, adaptive shell)

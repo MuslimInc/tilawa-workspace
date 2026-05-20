@@ -13,5 +13,6 @@ void main() {
     expect(categories.contains(GalleryCategory.atoms), isTrue);
     expect(categories.contains(GalleryCategory.molecules), isTrue);
     expect(categories.contains(GalleryCategory.organisms), isTrue);
+    expect(categories.contains(GalleryCategory.foundation), isTrue);
   });
 }

@@ -74,6 +74,14 @@ abstract final class MoleculesDemos {
             icon: Icons.warning_amber_rounded,
             message: 'Check your settings',
             variant: TilawaFeedbackVariant.warning,
+            backgroundColor: scheme.tertiaryContainer,
+            foregroundColor: scheme.onTertiaryContainer,
+          ),
+          const SizedBox(height: 12),
+          TilawaFeedbackStrip(
+            icon: Icons.error_outline_rounded,
+            message: 'Something went wrong',
+            variant: TilawaFeedbackVariant.error,
             backgroundColor: scheme.errorContainer,
             foregroundColor: scheme.onErrorContainer,
           ),
@@ -207,17 +215,19 @@ abstract final class MoleculesDemos {
     );
   }
 
+  static Widget settingsSwitchTile(BuildContext context) {
+    return GalleryDemoFrame(
+      child: _SettingsSwitchDemo(showDivider: false),
+    );
+  }
+
   static Widget settingsTile(BuildContext context) {
     return GalleryDemoFrame(
-      child: Column(
-        children: [
-          TilawaSettingsTile(
-            icon: Icons.language,
-            title: 'Language',
-            onTap: () {},
-          ),
-          _SettingsSwitchDemo(),
-        ],
+      child: TilawaSettingsTile(
+        icon: Icons.language,
+        title: 'Language',
+        onTap: () {},
+        showDivider: false,
       ),
     );
   }
@@ -301,6 +311,10 @@ class _SegmentedControlDemoState extends State<_SegmentedControlDemo> {
 }
 
 class _SettingsSwitchDemo extends StatefulWidget {
+  const _SettingsSwitchDemo({this.showDivider = true});
+
+  final bool showDivider;
+
   @override
   State<_SettingsSwitchDemo> createState() => _SettingsSwitchDemoState();
 }
@@ -315,7 +329,7 @@ class _SettingsSwitchDemoState extends State<_SettingsSwitchDemo> {
       title: 'Dark mode',
       value: _darkMode,
       onChanged: (v) => setState(() => _darkMode = v),
-      showDivider: false,
+      showDivider: widget.showDivider,
     );
   }
 }

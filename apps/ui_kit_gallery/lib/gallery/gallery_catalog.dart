@@ -1,4 +1,5 @@
 import 'demos/atoms_demos.dart';
+import 'demos/foundation_demos.dart';
 import 'demos/molecules_demos.dart';
 import 'demos/organisms_demos.dart';
 import 'gallery_entry.dart';
@@ -60,6 +61,13 @@ const List<GalleryEntry> galleryCatalog = [
     name: 'TilawaLoadingIndicator',
     category: GalleryCategory.atoms,
     builder: AtomsDemos.loadingIndicator,
+  ),
+  GalleryEntry(
+    id: 'tilawa_state_visual',
+    name: 'TilawaStateVisual',
+    category: GalleryCategory.atoms,
+    description: 'Tone-based icon visual for empty and error states.',
+    builder: AtomsDemos.stateVisual,
   ),
   GalleryEntry(
     id: 'tilawa_section_title',
@@ -132,8 +140,8 @@ const List<GalleryEntry> galleryCatalog = [
     builder: MoleculesDemos.languageSwitcher,
   ),
   GalleryEntry(
-    id: 'metadata_chip',
-    name: 'MetadataChip',
+    id: 'tilawa_metadata_chip',
+    name: 'TilawaMetadataChip',
     category: GalleryCategory.molecules,
     builder: MoleculesDemos.metadataChip,
   ),
@@ -168,8 +176,8 @@ const List<GalleryEntry> galleryCatalog = [
     builder: MoleculesDemos.segmentedControl,
   ),
   GalleryEntry(
-    id: 'selection_pill',
-    name: 'SelectionPill',
+    id: 'tilawa_selection_pill',
+    name: 'TilawaSelectionPill',
     category: GalleryCategory.molecules,
     builder: MoleculesDemos.selectionPill,
   ),
@@ -183,8 +191,14 @@ const List<GalleryEntry> galleryCatalog = [
     id: 'tilawa_settings_tile',
     name: 'TilawaSettingsTile',
     category: GalleryCategory.molecules,
-    description: 'Includes TilawaSettingsSwitchTile.',
     builder: MoleculesDemos.settingsTile,
+  ),
+  GalleryEntry(
+    id: 'tilawa_settings_switch_tile',
+    name: 'TilawaSettingsSwitchTile',
+    category: GalleryCategory.molecules,
+    description: 'Settings row with TilawaSwitch trailing control.',
+    builder: MoleculesDemos.settingsSwitchTile,
   ),
   GalleryEntry(
     id: 'tilawa_status_chip',
@@ -236,6 +250,29 @@ const List<GalleryEntry> galleryCatalog = [
     name: 'TilawaShareFooterBar',
     category: GalleryCategory.organisms,
     builder: OrganismsDemos.shareFooterBar,
+  ),
+
+  // Foundation
+  GalleryEntry(
+    id: 'tilawa_content_bounds',
+    name: 'TilawaContentBounds',
+    category: GalleryCategory.foundation,
+    description: 'Token-backed max-width clamp for reader, form, media, settings.',
+    builder: FoundationDemos.contentBounds,
+  ),
+  GalleryEntry(
+    id: 'tilawa_content_grid',
+    name: 'TilawaContentGrid',
+    category: GalleryCategory.foundation,
+    description: 'Responsive grid with max cross-axis extent.',
+    builder: FoundationDemos.contentGrid,
+  ),
+  GalleryEntry(
+    id: 'show_tilawa_modal_bottom_sheet',
+    name: 'showTilawaModalBottomSheet',
+    category: GalleryCategory.foundation,
+    description: 'Modal sheet helper composed with TilawaBottomSheetScaffold.',
+    builder: FoundationDemos.modalBottomSheet,
   ),
 ];
 

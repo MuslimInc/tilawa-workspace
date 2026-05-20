@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 enum GalleryCategory {
   atoms('Atoms'),
   molecules('Molecules'),
-  organisms('Organisms');
+  organisms('Organisms'),
+  foundation('Foundation');
 
   const GalleryCategory(this.label);
 

@@ -154,8 +154,21 @@ abstract final class AtomsDemos {
   }
 
   static Widget iconBox(BuildContext context) {
-    return const GalleryDemoFrame(
-      child: TilawaIconBox(icon: Icons.bookmark_rounded),
+    final scheme = Theme.of(context).colorScheme;
+    return GalleryDemoFrame(
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 16,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          const TilawaIconBox(icon: Icons.bookmark_rounded),
+          TilawaIconBox(
+            icon: Icons.favorite_rounded,
+            backgroundColor: scheme.primaryContainer,
+            iconColor: scheme.onPrimaryContainer,
+          ),
+        ],
+      ),
     );
   }
 
@@ -183,7 +196,37 @@ abstract final class AtomsDemos {
 
   static Widget loadingIndicator(BuildContext context) {
     return const GalleryDemoFrame(
-      child: TilawaLoadingIndicator(semanticsLabel: 'Loading'),
+      child: Wrap(
+        spacing: 24,
+        children: [
+          TilawaLoadingIndicator(semanticsLabel: 'Loading'),
+          TilawaLoadingIndicator(strokeWidth: 2),
+        ],
+      ),
+    );
+  }
+
+  static Widget stateVisual(BuildContext context) {
+    return GalleryDemoFrame(
+      child: Wrap(
+        spacing: 16,
+        runSpacing: 16,
+        alignment: WrapAlignment.center,
+        children: [
+          for (final tone in TilawaStateVisualTone.values)
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
+              children: [
+                TilawaStateVisual(
+                  icon: Icons.inbox_outlined,
+                  tone: tone,
+                ),
+                Text(tone.name),
+              ],
+            ),
+        ],
+      ),
     );
   }
 
