@@ -81,6 +81,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
     required this.onDestinationSelected,
     required this.child,
     required this.bottomPlayer,
+    this.phoneFooterAboveNav,
     this.phoneBottomNavigationBarVisible,
     this.bottomBarPadding,
     this.bottomBarDecoration,
@@ -95,6 +96,11 @@ class TilawaAdaptiveShell extends StatelessWidget {
   /// The bottom player (or similar floating control) that should respect
   /// the navigation bar/rail boundaries.
   final Widget bottomPlayer;
+
+  /// Optional chrome laid out directly above the phone [BottomNavigationBar]
+  /// (e.g. a mini media player). Rendered below the scrolling body, not as a
+  /// full-screen overlay on top of it.
+  final Widget? phoneFooterAboveNav;
 
   /// When non-null, narrow (phone) window class shows the bottom bar only
   /// while this value is
@@ -160,6 +166,12 @@ class TilawaAdaptiveShell extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (isKeyboardOpen || !bottomNavVisible)
+                  const SizedBox.shrink()
+                else if (phoneFooterAboveNav != null) ...[
+                  phoneFooterAboveNav!,
+                  SizedBox(height: Theme.of(context).tokens.spaceSmall),
+                ],
                 if (isKeyboardOpen || !bottomNavVisible)
                   const SizedBox.shrink()
                 else
@@ -309,10 +321,6 @@ class _BottomNavBar extends StatelessWidget {
     final tokens = theme.componentTokens.adaptiveShell;
     final Color navColor = tokens.bottomNavBackgroundColor;
 
-    final BorderRadius shellRadius = BorderRadius.vertical(
-      top: Radius.circular(tokens.bottomNavRadius),
-    );
-
     final int count = destinations.length;
     final bool hasSelection = selectedIndex != null;
     final int barIndex = hasSelection ? selectedIndex!.clamp(0, count - 1) : 0;
@@ -371,7 +379,6 @@ class _BottomNavBar extends StatelessWidget {
                     ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: shellRadius,
                     boxShadow: tokens.bottomNavShadowOpacity > 0
                         ? [
                             BoxShadow(
@@ -387,7 +394,6 @@ class _BottomNavBar extends StatelessWidget {
                   child: Material(
                     color: tokens.bottomNavBackgroundColor,
                     shape: RoundedRectangleBorder(
-                      borderRadius: shellRadius,
                       side: BorderSide(
                         color: tokens.bottomNavOutlineColor,
                         width: tokens.bottomNavBorderWidth,

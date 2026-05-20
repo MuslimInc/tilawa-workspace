@@ -4,7 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../lib/src/foundation/app_colors.dart';
 import '../../lib/src/foundation/app_theme.dart';
 import '../../lib/src/foundation/component_tokens/component_tokens_theme.dart';
+import '../../lib/src/foundation/tilawa_bottom_sheet_actions.dart';
 import '../../lib/src/foundation/tilawa_bottom_sheet_scaffold.dart';
+import '../../lib/src/foundation/tilawa_bottom_sheet_title_row.dart';
+import '../../lib/src/atoms/tilawa_button.dart';
 import '../../lib/src/atoms/tilawa_sheet_handle.dart';
 
 void main() {
@@ -30,6 +33,93 @@ void main() {
     expect(find.byType(TilawaSheetHandle), findsOneWidget);
     expect(find.text('Title'), findsOneWidget);
     expect(find.text('Content'), findsOneWidget);
+  });
+
+  testWidgets('footer stays visible while list scrolls', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: AppColors.defaultPrimary,
+          useGoogleFontsOverride: false,
+        ),
+        home: Scaffold(
+          body: SizedBox(
+            height: 400,
+            child: TilawaBottomSheetScaffold(
+              topBar: const TilawaBottomSheetTitleRow(title: 'Settings'),
+              footer: TilawaBottomSheetActions(
+                primaryLabel: 'Save',
+                onPrimary: () {},
+                secondaryLabel: 'Cancel',
+                onSecondary: () {},
+              ),
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: 40,
+                    itemBuilder: (context, index) => ListTile(
+                      title: Text('Row $index'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Save'), findsOneWidget);
+    expect(find.text('Row 0'), findsOneWidget);
+
+    await tester.drag(find.text('Row 0'), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Save'), findsOneWidget);
+    expect(find.text('Row 0'), findsNothing);
+  });
+
+  testWidgets('title row close button pops navigator route', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: AppColors.defaultPrimary,
+          useGoogleFontsOverride: false,
+        ),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              return TilawaButton(
+                text: 'Open',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => Scaffold(
+                        body: TilawaBottomSheetScaffold(
+                          topBar: const TilawaBottomSheetTitleRow(
+                            title: 'Sheet',
+                            trailingClose: true,
+                          ),
+                          children: const [Text('Body')],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.close_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Body'), findsNothing);
   });
 
   testWidgets('modalShape uses scaffold top radius from tokens', (

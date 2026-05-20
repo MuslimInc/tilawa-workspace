@@ -142,7 +142,7 @@ void main() {
     );
 
     goldenTest(
-      'MetadataChip',
+      'TilawaMetadataChip',
       fileName: 'molecules/tilawa_metadata_chip',
       builder: () => GoldenTestGroup(
         scenarioConstraints: kUiKitGoldenScenarioConstraints,
@@ -150,7 +150,7 @@ void main() {
           GoldenTestScenario(
             name: 'Default icon + label',
             child: const TilawaPreviewWrapper(
-              child: MetadataChip(
+              child: TilawaMetadataChip(
                 label: '604 pages',
                 icon: Icons.menu_book_rounded,
               ),
@@ -159,14 +159,14 @@ void main() {
           GoldenTestScenario(
             name: 'Label only',
             child: const TilawaPreviewWrapper(
-              child: MetadataChip(label: '604 pages'),
+              child: TilawaMetadataChip(label: '604 pages'),
             ),
           ),
           GoldenTestScenario(
             name: 'Dark',
             child: const TilawaPreviewWrapper(
               isDark: true,
-              child: MetadataChip(
+              child: TilawaMetadataChip(
                 label: '604 pages',
                 icon: Icons.menu_book_rounded,
               ),
@@ -177,7 +177,7 @@ void main() {
     );
 
     goldenTest(
-      'SelectionPill',
+      'TilawaSelectionPill',
       fileName: 'molecules/tilawa_selection_pill',
       builder: () => GoldenTestGroup(
         scenarioConstraints: kUiKitGoldenScenarioConstraints,
@@ -185,13 +185,17 @@ void main() {
           GoldenTestScenario(
             name: 'Selected',
             child: TilawaPreviewWrapper(
-              child: SelectionPill(label: 'All', selected: true, onTap: () {}),
+              child: TilawaSelectionPill(
+                label: 'All',
+                selected: true,
+                onTap: () {},
+              ),
             ),
           ),
           GoldenTestScenario(
             name: 'Unselected with icon',
             child: TilawaPreviewWrapper(
-              child: SelectionPill(
+              child: TilawaSelectionPill(
                 label: 'Recent',
                 selected: false,
                 icon: Icons.history,
@@ -203,7 +207,11 @@ void main() {
             name: 'Dark selected',
             child: TilawaPreviewWrapper(
               isDark: true,
-              child: SelectionPill(label: 'All', selected: true, onTap: () {}),
+              child: TilawaSelectionPill(
+                label: 'All',
+                selected: true,
+                onTap: () {},
+              ),
             ),
           ),
         ],
@@ -571,7 +579,7 @@ void main() {
     );
 
     goldenTest(
-      'LanguageSwitcher',
+      'TilawaLanguageSwitcher',
       fileName: 'molecules/tilawa_language_switcher',
       builder: () => GoldenTestGroup(
         scenarioConstraints: kUiKitGoldenScenarioConstraints,

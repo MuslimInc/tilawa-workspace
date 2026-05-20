@@ -111,6 +111,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get currentPlaying => 'Now Playing';
 
   @override
+  String get playingFrom => 'Playing from';
+
+  @override
   String get duration => 'Duration';
 
   @override
@@ -942,7 +945,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Every verse you hear and every dhikr you repeat is an ongoing charity for our friend and brother Abu Hudhayfah Ahmed Mahmoud Toni, may God have mercy on him, forgive him, and grant him the highest level of Paradise.';
 
   @override
-  String get startJourney => 'Let\'s start our journey with the Quran';
+  String get startJourney => 'Get started';
 
   @override
   String get recitationDuration => 'Recitation Duration';

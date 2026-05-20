@@ -155,7 +155,7 @@ BottomNavigationBarThemeData _bottomNavigationBarTheme({
   ///
   /// Flutter defaults to [ThemeData.canvasColor] from the [Material] widgets
   /// default color. Typically this is same as [ColorScheme.surface], or it
-  /// should and will be, since [ColorScheme.background] is deprecated.
+  /// should and will be, since [ColorScheme.surface] is deprecated.
   final SchemeColor? backgroundSchemeColor,
 
   /// BottomNavigationBar background opacity.

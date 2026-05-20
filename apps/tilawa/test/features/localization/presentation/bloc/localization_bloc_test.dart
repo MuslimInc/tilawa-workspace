@@ -124,10 +124,10 @@ void main() {
           reset(mockGetCurrentLanguageUseCase);
           reset(mockSetLanguageUseCase);
 
-          // Mock GetCurrentLanguageUseCase to return Arabic (different from default 'en')
+          // Mock GetCurrentLanguageUseCase to return English (different from default Arabic)
           when(
             mockGetCurrentLanguageUseCase(),
-          ).thenAnswer((_) async => const Right('ar'));
+          ).thenAnswer((_) async => const Right('en'));
 
           // Mock SetLanguageUseCase to return success
           when(
@@ -155,7 +155,7 @@ void main() {
           // (at least once from the test action, possibly also from initialization)
           verify(mockSetLanguageUseCase(any));
         },
-        expect: () => [const LocalizationState(locale: Locale('ar'))],
+        expect: () => [const LocalizationState(locale: Locale('en'))],
       );
 
       blocTest<LocalizationBloc, LocalizationState>(
@@ -240,16 +240,17 @@ void main() {
       blocTest<LocalizationBloc, LocalizationState>(
         'emits [LocalizationState] when language is changed successfully',
         build: () => bloc,
-        act: (bloc) => bloc.add(const ChangeLanguage(Locale('ar'))),
+        act: (bloc) => bloc.add(const ChangeLanguage(Locale('en'))),
         verify: (_) {
           // Verify that SetLanguageUseCase was called with the new language
-          verify(mockSetLanguageUseCase('ar')).called(1);
+          verify(mockSetLanguageUseCase('en')).called(1);
         },
-        expect: () => [const LocalizationState(locale: Locale('ar'))],
+        expect: () => [const LocalizationState(locale: Locale('en'))],
       );
 
       blocTest<LocalizationBloc, LocalizationState>(
         'emits [LocalizationState] with Arabic locale when changing to Arabic',
+        seed: () => const LocalizationState(locale: Locale('en')),
         build: () => bloc,
         act: (bloc) => bloc.add(const ChangeLanguage(Locale('ar'))),
         expect: () => [const LocalizationState(locale: Locale('ar'))],

@@ -3,8 +3,8 @@ import 'package:tilawa/core/logging/app_logger.dart';
 
 class FirebaseInitializationService {
   FirebaseInitializationService({
-    required SubscriptionPlansService subscriptionPlansService,
-  }) : _subscriptionPlansService = subscriptionPlansService;
+    required this._subscriptionPlansService,
+  });
   final SubscriptionPlansService _subscriptionPlansService;
 
   /// Initialize read-only Firebase data (e.g. cache subscription plans).

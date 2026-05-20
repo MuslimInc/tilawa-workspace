@@ -1020,7 +1020,7 @@ abstract final class FlexSubThemes {
     ///
     /// Flutter defaults to [ThemeData.canvasColor] from the [Material] widgets
     /// default color. Typically this is same as [ColorScheme.surface], or it
-    /// should and will be, since [ColorScheme.background] is deprecated.
+    /// should and will be, since [ColorScheme.surface] is deprecated.
     final SchemeColor? backgroundSchemeColor,
 
     /// BottomNavigationBar background opacity.
@@ -6288,7 +6288,7 @@ abstract final class FlexSubThemes {
     /// Color of the track being filled by the linear indicator.
     ///
     /// If [linearTrackSchemeColor] is null then in M2 mode
-    /// the ambient theme's deprecated [ColorScheme.background] color is used
+    /// the ambient theme's deprecated [ColorScheme.surface] color is used
     /// In M3 mode [ColorScheme.secondaryContainer] is used as default.
     final SchemeColor? linearTrackSchemeColor,
 
@@ -7961,7 +7961,7 @@ abstract final class FlexSubThemes {
     ///
     /// If null and [useMaterial3] is true, [TabBarThemeData.dividerColor]
     /// color is used. If that is null and [useMaterial3] is true,
-    /// [ColorScheme.surfaceVariant] will be used,
+    /// [ColorScheme.surfaceContainerHighest] will be used,
     /// otherwise divider will not be drawn.
     final Color? dividerColor,
 

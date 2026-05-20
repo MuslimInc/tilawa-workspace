@@ -3,6 +3,7 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
@@ -11,20 +12,23 @@ import 'package:tilawa/features/audio_player/presentation/cubit/player_backgroun
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/cubit/player_background_cubit.dart';
+import '../../features/audio_player/presentation/quran_player_semantics_ids.dart';
 import '../../features/audio_player/presentation/widgets/background_source_dialog.dart';
 import '../../features/audio_player/presentation/widgets/player_background_layer.dart';
 import '../../features/audio_player/presentation/widgets/sleep_timer_dialog.dart';
 import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
+import 'quran_player_chrome.dart';
 
-/// A YouTube/Spotify-style sliding player panel.
+/// A YouTube Music-style sliding player panel.
 ///
-/// When collapsed, shows a mini player bar at the bottom.
-/// Tap or swipe up to expand to a full-screen player.
-/// Swipe down or tap the chevron to collapse back.
+/// When collapsed, shows a compact mini player above the bottom nav.
+/// Tap or swipe up to expand to a full-screen now-playing sheet with queue.
+/// Swipe down on the sheet or tap the chevron to collapse.
 class QuranPlayerWidget extends StatefulWidget {
   const QuranPlayerWidget({
     super.key,
@@ -32,6 +36,7 @@ class QuranPlayerWidget extends StatefulWidget {
     this.isKeyboardOpen = false,
     this.phoneBottomNavBarVisible,
     this.hostAbsorbsBottomSafeArea = false,
+    this.embeddedInShellFooter = false,
   });
 
   static double collapsedHeight(BuildContext context) =>
@@ -47,17 +52,63 @@ class QuranPlayerWidget extends StatefulWidget {
   /// Use this to inset content (lists, FABs, scrollbars) so it isn't
   /// covered by the player.
   ///
-  /// `bottomNavBarHeight` must match what the host shell passes to the
-  /// [QPlayer] mounted on this route. Standalone routes that
-  /// mount their own player without a nav bar should pass 0.
+  /// Insets scroll content so it is not covered by the global mini-player.
+  ///
+  /// On `/`, reads [QuranPlayerChromeNotifier] published by [MainScreen].
+  /// On other routes (e.g. `/downloads`), uses [floatingBottomPadding] only.
   static double collapsedFootprint(
     BuildContext context, {
     double bottomNavBarHeight = 0,
     bool hostAbsorbsBottomSafeArea = false,
-  }) =>
-      collapsedHeight(context) +
-      bottomNavBarHeight +
-      (hostAbsorbsBottomSafeArea ? 0 : context.floatingBottomPadding);
+  }) {
+    final String location = GoRouterState.of(context).uri.path;
+    if (!QuranPlayerRoutePolicy.shouldShowPlayer(location)) {
+      return 0;
+    }
+
+    if (QuranPlayerRoutePolicy.isInAppShell(location)) {
+      final QuranPlayerShellChrome? shell = context
+          .read<QuranPlayerChromeNotifier>()
+          .shellChrome;
+      if (shell != null) {
+        if (context.isNarrow && shell.bottomNavBarHeight > 0) {
+          return collapsedHeight(context);
+        }
+        return collapsedHeight(context) +
+            shell.bottomNavBarHeight +
+            (shell.hostAbsorbsBottomSafeArea
+                ? 0
+                : context.floatingBottomPadding);
+      }
+    }
+
+    return collapsedHeight(context) +
+        bottomNavBarHeight +
+        (hostAbsorbsBottomSafeArea ? 0 : context.floatingBottomPadding);
+  }
+
+  /// Bottom inset for a [FloatingActionButton] on the current route.
+  ///
+  /// On phone shell layouts the mini-player sits in the shell footer column
+  /// below this [Scaffold], so only a small margin is needed. When the player
+  /// overlays the scaffold (e.g. wide layout), use [collapsedFootprint].
+  static double fabBottomOffset(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
+    if (!QuranPlayerRoutePolicy.shouldShowPlayer(location)) {
+      return context.tokens.spaceMedium;
+    }
+
+    if (QuranPlayerRoutePolicy.isInAppShell(location)) {
+      final QuranPlayerShellChrome? shell = context
+          .read<QuranPlayerChromeNotifier>()
+          .shellChrome;
+      if (shell != null && context.isNarrow && shell.bottomNavBarHeight > 0) {
+        return context.tokens.spaceSmall;
+      }
+    }
+
+    return collapsedFootprint(context);
+  }
 
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
@@ -78,6 +129,11 @@ class QuranPlayerWidget extends StatefulWidget {
   /// includes the system gesture inset.
   final bool hostAbsorbsBottomSafeArea;
 
+  /// When true, the mini player is laid out in [TilawaAdaptiveShell]'s
+  /// [TilawaAdaptiveShell.phoneFooterAboveNav] slot (above the bottom nav).
+  /// The expanded sheet is rendered in the root overlay via [OverlayPortal].
+  final bool embeddedInShellFooter;
+
   @override
   State<QuranPlayerWidget> createState() => QuranPlayerWidgetState();
 }
@@ -85,6 +141,9 @@ class QuranPlayerWidget extends StatefulWidget {
 class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     with TickerProviderStateMixin {
   late AnimationController _expandController;
+  final OverlayPortalController _portalController = OverlayPortalController();
+  bool _portalVisibilitySyncScheduled = false;
+  String? _lastSyncedRoutePath;
 
   /// Controls the swipe-down-to-dismiss offset for the mini player.
   double _dismissOffsetY = 0;
@@ -119,15 +178,27 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       duration: const Duration(milliseconds: 200),
     );
 
-    _expandController.addStatusListener((status) {
-      debugPrint(
-        '[QPlayer] expandController status=${status.name}, value=${_expandController.value.toStringAsFixed(3)}',
-      );
-    });
     _expandController.addListener(_syncPhoneBottomNavBarVisible);
+    _expandController.addListener(_syncExpandedPlayerSystemChrome);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _syncPhoneBottomNavBarVisible();
+      if (mounted) {
+        _syncPhoneBottomNavBarVisible();
+        _syncExpandedPlayerSystemChrome();
+        if (widget.embeddedInShellFooter) {
+          _schedulePortalVisibilitySync();
+        }
+      }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final String path = _currentRoutePath();
+    if (_lastSyncedRoutePath != path) {
+      _lastSyncedRoutePath = path;
+      _syncPhoneBottomNavBarVisible();
+    }
   }
 
   @override
@@ -139,26 +210,68 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   }
 
   @override
+  void deactivate() {
+    context
+        .read<QuranPlayerChromeNotifier>()
+        .clearSystemNavigationBarColorOverride();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _expandController.removeListener(_syncPhoneBottomNavBarVisible);
+    _expandController.removeListener(_syncExpandedPlayerSystemChrome);
     _expandController.dispose();
     _dismissAnimController.dispose();
     super.dispose();
   }
 
+  /// Edge-to-edge nav is transparent; publish the queue sheet color app-wide
+  /// so [TilawaApp] does not reset the gesture strip to white each frame.
+  void _syncExpandedPlayerSystemChrome() {
+    if (!mounted) {
+      return;
+    }
+    final QuranPlayerChromeNotifier notifier = context
+        .read<QuranPlayerChromeNotifier>();
+    final bool overlayActive = _expandController.value > 0.01 &&
+        (!widget.embeddedInShellFooter || _portalController.isShowing);
+    if (overlayActive) {
+      notifier.setSystemNavigationBarColorOverride(
+        quranPlayerQueueSheetColor(Theme.of(context).colorScheme),
+      );
+    } else {
+      notifier.clearSystemNavigationBarColorOverride();
+    }
+  }
+
+  void _schedulePortalVisibilitySync() {
+    if (_portalVisibilitySyncScheduled) {
+      return;
+    }
+    _portalVisibilitySyncScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _portalVisibilitySyncScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      if (!_portalController.isShowing) {
+        _portalController.show();
+      }
+      _syncExpandedPlayerSystemChrome();
+    });
+  }
+
   /// Expand the player to full-screen.
   ///
-  /// Uses [Curves.easeOutBack] for a spring-like overshoot that feels
-  /// like YouTube Music's player sheet expansion.
+  /// Uses [Curves.easeOutCubic] for a smooth slide-up like YouTube Music
+  /// (no overshoot — [Curves.easeOutBack] reads as a bounce, not YT).
   void expand() {
     HapticFeedback.lightImpact();
-    debugPrint(
-      '[QPlayer] expand() called, current=${_expandController.value}, status=${_expandController.status}',
-    );
     _expandController.animateTo(
       1.0,
-      duration: const Duration(milliseconds: 450),
-      curve: Curves.easeOutBack,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
     );
   }
 
@@ -168,9 +281,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   /// Avoids [Curves.easeInOutCubicEmphasized] which stalls visually
   /// (lingers at ~0.8–0.9 then snaps to 0).
   void collapse() {
-    debugPrint(
-      '[QPlayer] collapse() called, current=${_expandController.value}, status=${_expandController.status}',
-    );
     _expandController.animateTo(
       0.0,
       duration: const Duration(milliseconds: 350),
@@ -181,8 +291,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   void _syncPhoneBottomNavBarVisible() {
     final ValueNotifier<bool>? n = widget.phoneBottomNavBarVisible;
     if (n == null || !mounted) return;
+    final String location = _currentRoutePath();
+    final bool hideNavWhenExpanded =
+        AppShellRoutePolicy.shouldHideBottomNavWhenPlayerExpanded(location);
     final double threshold = context.tokens.playerProgressThreshold;
-    final bool showBar = _expandController.value < threshold;
+    final bool showBar =
+        !hideNavWhenExpanded || _expandController.value < threshold;
     if (n.value != showBar) {
       n.value = showBar;
     }
@@ -194,12 +308,24 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     n.value = true;
   }
 
+  /// Current route path without [GoRouterState.of] (overlay is above the router).
+  static String _currentRoutePath() =>
+      QuranPlayerRoutePolicy.currentMatchedLocation();
+
+  /// Bottom offset for the mini player above nav chrome and the home indicator.
+  double _resolveBottomInset(BuildContext context) {
+    final bool navVisible = widget.phoneBottomNavBarVisible?.value ?? true;
+    return QuranPlayerLayoutInsets.miniPlayerBottomInset(
+      context: context,
+      hostBottomNavBarHeight: widget.bottomNavBarHeight,
+      hostAbsorbsBottomSafeArea: widget.hostAbsorbsBottomSafeArea,
+      phoneNavVisible: navVisible,
+      routePath: _currentRoutePath(),
+    );
+  }
+
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     final primaryDelta = details.primaryDelta ?? 0;
-    debugPrint(
-      '[QPlayer] dragUpdate delta=$primaryDelta, expand=${_expandController.value.toStringAsFixed(3)}, dismissOffsetY=$_dismissOffsetY',
-    );
-
     if ((_expandController.value == 0 && primaryDelta > 0) ||
         _dismissOffsetY > 0) {
       setState(() {
@@ -222,17 +348,11 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   void _onVerticalDragEnd(DragEndDetails details) {
     final tokens = context.tokens;
     final primaryVelocity = details.primaryVelocity ?? 0;
-    debugPrint(
-      '[QPlayer] dragEnd velocity=$primaryVelocity, expand=${_expandController.value.toStringAsFixed(3)}, dismissOffsetY=$_dismissOffsetY',
-    );
-
     if (_dismissOffsetY > 0) {
       if (primaryVelocity > tokens.playerDismissVelocityThreshold ||
           _dismissOffsetY > tokens.playerDismissThreshold) {
-        debugPrint('[QPlayer] dragEnd → dismiss (velocity)');
         _dismissWithUndo();
       } else {
-        debugPrint('[QPlayer] dragEnd → reset dismiss');
         _animateDismissReset();
       }
       return;
@@ -270,6 +390,82 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranPlayerWidget');
 
+    if (widget.embeddedInShellFooter) {
+      _schedulePortalVisibilitySync();
+      return OverlayPortal.overlayChildLayoutBuilder(
+        controller: _portalController,
+        overlayChildBuilder: _buildExpandedOverlay,
+        child: _buildShellFooterMini(context),
+      );
+    }
+
+    final Size size = MediaQuery.sizeOf(context);
+    if (size.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final double bottomInset = _resolveBottomInset(context);
+    final double miniHeight = _miniPlayerHeight;
+    final Rect hostRect = Rect.fromLTWH(
+      0,
+      size.height - bottomInset - miniHeight,
+      size.width,
+      miniHeight,
+    );
+
+    return _buildPlayerTree(
+      context,
+      hostRect: hostRect,
+      overlaySize: size,
+      showMiniInTree: true,
+    );
+  }
+
+  /// Mini player anchored in the shell footer column (YouTube Music style).
+  Widget _buildShellFooterMini(BuildContext context) {
+    return SizedBox(
+      height: _miniPlayerHeight,
+      width: double.infinity,
+      child: _buildPlayerTree(
+        context,
+        hostRect:
+            Offset.zero &
+            Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
+        overlaySize: MediaQuery.sizeOf(context),
+        showMiniInTree: true,
+        miniAnchoredInFooter: true,
+      ),
+    );
+  }
+
+  Widget _buildExpandedOverlay(
+    BuildContext overlayContext,
+    OverlayChildLayoutInfo layoutInfo,
+  ) {
+    if (layoutInfo.childPaintTransform.determinant() == 0.0) {
+      return const SizedBox.shrink();
+    }
+
+    final Rect hostRect = MatrixUtils.transformRect(
+      layoutInfo.childPaintTransform,
+      Offset.zero & layoutInfo.childSize,
+    );
+
+    return _buildPlayerTree(
+      overlayContext,
+      hostRect: hostRect,
+      overlaySize: layoutInfo.overlaySize,
+      showMiniInTree: false,
+    );
+  }
+
+  Widget _buildPlayerTree(
+    BuildContext context, {
+    required Rect hostRect,
+    required Size overlaySize,
+    required bool showMiniInTree,
+    bool miniAnchoredInFooter = false,
+  }) {
     return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
       listenWhen: (previous, current) {
         return previous.currentAudio?.id != current.currentAudio?.id ||
@@ -304,120 +500,162 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       },
       builder: (context, state) {
         final audio = state.currentAudio;
+        final bool isCurrentAudioDismissed =
+            audio != null && state.dismissedAudioId == audio.id;
+        final bool hideForKeyboard = widget.isKeyboardOpen && !isExpanding;
+        final bool shouldHideTree =
+            audio == null || isCurrentAudioDismissed || hideForKeyboard;
 
-        if (!state.shouldShowBottomPlayer ||
-            audio == null ||
-            (widget.isKeyboardOpen && !isExpanding)) {
+        if (shouldHideTree) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) _ensurePhoneBottomNavBarShown();
           });
           return const SizedBox.shrink();
         }
 
-        final screenHeight = context.viewportHeight;
+        final double screenHeight = overlaySize.height;
+        final Listenable animation = widget.phoneBottomNavBarVisible == null
+            ? _expandController
+            : Listenable.merge(<Listenable>[
+                _expandController,
+                widget.phoneBottomNavBarVisible!,
+              ]);
 
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: AnimatedBuilder(
-            animation: _expandController,
-            builder: (context, _) {
-              final progress = _expandController.value;
+        return AnimatedBuilder(
+          animation: animation,
+          builder: (context, _) {
+            final progress = _expandController.value;
 
-              // Bottom inset above the layout bottom / overlaid nav. When the
-              // host stacks bottom chrome below this subtree
-              // ([hostAbsorbsBottomSafeArea]), skip [floatingBottomPadding] so we
-              // do not double-count the home indicator already inside the bar.
-              final double layoutBottomInset =
-                  widget.hostAbsorbsBottomSafeArea &&
-                      widget.bottomNavBarHeight <= 0
-                  ? 0.0
-                  : context.floatingBottomPadding;
-              final bottomInset = widget.bottomNavBarHeight > 0
-                  ? widget.bottomNavBarHeight
-                  : layoutBottomInset;
+            // Bottom sheet slide: expanded player rides up from below the
+            // mini-player slot (YouTube Music attaches the sheet to the bar).
+            final double expandCurve = Curves.easeOutCubic.transform(progress);
+            final double collapseStart = hostRect.bottom;
+            final sheetOffsetY =
+                (screenHeight - collapseStart) * (1 - expandCurve);
 
-              // Bottom sheet slide:
-              // The expanded player translates from fully off-screen
-              // (progress=0, translateY=screenHeight) to fully on-screen
-              // (progress=1, translateY=0). This is the standard pattern
-              // used by YouTube Music and Spotify.
-              final sheetOffsetY = screenHeight * (1 - progress);
+            // Mini player fades quickly so the expanding sheet reads as one
+            // continuous surface (YT cross-fades the bar into the sheet).
+            final miniOpacity = (1 - expandCurve * 2.5).clamp(0.0, 1.0);
+            final miniSlideY = (1 - miniOpacity) * _miniPlayerHeight * 0.35;
 
-              // Mini player fades and slides to avoid overlapping with the
-              // expanded player. During expand: slides down and fades out.
-              // During collapse: slides up from below and fades in.
-              final miniOpacity = (1 - progress * 2).clamp(0.0, 1.0);
-              final miniSlideY = (1 - miniOpacity) * _miniPlayerHeight;
+            final Widget miniPlayer = Opacity(
+              opacity: miniOpacity,
+              child: Transform.translate(
+                offset: Offset(0, miniSlideY),
+                child: _MiniPlayerTransition(
+                  progress: progress,
+                  state: state,
+                  audio: audio,
+                  dismissAnimController: _dismissAnimController,
+                  dismissAnimation: _dismissAnimation,
+                  dismissOffsetY: _dismissOffsetY,
+                  onVerticalDragUpdate: _onVerticalDragUpdate,
+                  onVerticalDragEnd: _onVerticalDragEnd,
+                  onTap: expand,
+                  onClose: _dismissWithUndo,
+                ),
+              ),
+            );
 
+            if (!showMiniInTree) {
               return SizedBox(
                 height: screenHeight,
-                width: double.infinity,
+                width: overlaySize.width,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    // Backdrop scrim — only while expanding; omit at progress==0
-                    // so no full-screen layer sits above the scaffold behind the
-                    // bottom nav.
                     if (progress > 0)
                       Positioned.fill(
                         child: IgnorePointer(
                           child: Container(
-                            color: Colors.black.withValues(
-                              alpha: progress * 0.5,
-                            ),
+                            color: Theme.of(context).colorScheme.scrim
+                                .withValues(alpha: progress * 0.5),
                           ),
                         ),
                       ),
-                    // Expanded player — slides up from below during expand,
-                    // slides down below during collapse.
                     if (progress > 0.01)
                       Transform.translate(
                         offset: Offset(0, sheetOffsetY),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onVerticalDragUpdate: _onVerticalDragUpdate,
-                          onVerticalDragEnd: _onVerticalDragEnd,
+                        child: Transform.scale(
+                          scale: 0.94 + 0.06 * expandCurve,
+                          alignment: Alignment.bottomCenter,
                           child: _ExpandedPlayerOrganism(
                             state: state,
                             audio: audio,
                             onCollapse: collapse,
                             onDismiss: _dismissWithUndo,
-                            expandProgress: 0,
-                          ),
-                        ),
-                      ),
-                    // Mini player — slides down and fades out during expand
-                    // to avoid overlapping with the arriving expanded player.
-                    // Slides up from below during collapse.
-                    if (progress < 0.55)
-                      Positioned(
-                        bottom: bottomInset - miniSlideY,
-                        left: 0,
-                        right: 0,
-                        child: Opacity(
-                          opacity: miniOpacity,
-                          child: SizedBox(
-                            height: _miniPlayerHeight,
-                            child: _MiniPlayerTransition(
-                              progress: progress,
-                              state: state,
-                              audio: audio,
-                              dismissAnimController: _dismissAnimController,
-                              dismissAnimation: _dismissAnimation,
-                              dismissOffsetY: _dismissOffsetY,
-                              onVerticalDragUpdate: _onVerticalDragUpdate,
-                              onVerticalDragEnd: _onVerticalDragEnd,
-                              onTap: expand,
-                              onClose: _dismissWithUndo,
-                            ),
+                            expandProgress: expandCurve,
+                            onExpandDragUpdate: _onVerticalDragUpdate,
+                            onExpandDragEnd: _onVerticalDragEnd,
                           ),
                         ),
                       ),
                   ],
                 ),
               );
-            },
-          ),
+            }
+
+            if (miniAnchoredInFooter) {
+              return Stack(
+                fit: StackFit.expand,
+                clipBehavior: Clip.none,
+                children: [
+                  if (progress < 0.55) Positioned.fill(child: miniPlayer),
+                ],
+              );
+            }
+
+            final double bottomInset = _resolveBottomInset(context);
+
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                SizedBox(
+                  height: screenHeight,
+                  width: overlaySize.width,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      if (progress > 0)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: Container(
+                              color: Theme.of(context).colorScheme.scrim
+                                  .withValues(alpha: progress * 0.5),
+                            ),
+                          ),
+                        ),
+                      if (progress > 0.01)
+                        Transform.translate(
+                          offset: Offset(0, sheetOffsetY),
+                          child: Transform.scale(
+                            scale: 0.94 + 0.06 * expandCurve,
+                            alignment: Alignment.bottomCenter,
+                            child: _ExpandedPlayerOrganism(
+                              state: state,
+                              audio: audio,
+                              onCollapse: collapse,
+                              onDismiss: _dismissWithUndo,
+                              expandProgress: expandCurve,
+                              onExpandDragUpdate: _onVerticalDragUpdate,
+                              onExpandDragEnd: _onVerticalDragEnd,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (progress < 0.55)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: bottomInset - miniSlideY,
+                    height: _miniPlayerHeight,
+                    child: miniPlayer,
+                  ),
+              ],
+            );
+          },
         );
       },
     );
@@ -507,77 +745,148 @@ class _MiniPlayerOrganism extends StatelessWidget {
           tokens.spaceLarge,
           tokens.spaceTiny,
           tokens.spaceLarge,
-          tokens.spaceTiny,
+          0,
         ),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return TilawaMediaPlayerBar(
-              layoutWidth: constraints.maxWidth,
-              title: audio.title,
-              subtitle: audio.artist ?? context.l10n.unknownReciter,
-              artwork: audio.artUri == null
-                  ? null
-                  : CachedNetworkImage(
-                      imageUrl: audio.artUri.toString(),
-                      fit: BoxFit.cover,
-                      errorWidget: (context, error, stackTrace) =>
-                          const SizedBox.shrink(),
-                      placeholder: (context, url) => const SizedBox.shrink(),
-                    ),
-              progress:
-                  state.positionData?.duration.inMilliseconds.toDouble() == 0
-                  ? 0.0
-                  : (state.positionData?.position.inMilliseconds ?? 0) /
-                        (state.positionData?.duration.inMilliseconds ?? 1),
-              progressBarOverride: const _MiniPlayerProgressBar(),
-              isPlaying: state.isPlaying,
-              canGoPrevious: state.canGoPrevious,
-              canGoNext: state.canGoNext,
-              isSleepTimerActive: state.isSleepTimerActive,
-              isSleepTimerEnabled: context
-                  .watch<SettingsCubit>()
-                  .state
-                  .isSleepTimerEnabled,
-              onPlayPause: () {
-                context.read<AudioPlayerBloc>().add(
-                  state.isPlaying
-                      ? const AudioPlayerEvent.pauseAudio()
-                      : const AudioPlayerEvent.playAudio(),
-                );
-              },
-              onPrevious: () {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.skipToPrevious(),
-                );
-              },
-              onNext: () {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.skipToNext(),
-                );
-              },
-              onSleepTimerTap: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => const SleepTimerDialog(),
-                );
-              },
-              onClose: onClose,
-              onTap: onTap,
-            );
-          },
+        child: _YtMusicMiniPlayer(
+          state: state,
+          audio: audio,
+          onTap: onTap,
+          onClose: onClose,
         ),
       ),
     );
   }
 }
 
-class _ExpandedPlayerOrganism extends StatelessWidget {
+/// Themed colors for the expanded now-playing stage (not the queue sheet).
+@immutable
+class _ExpandedPlayerPalette {
+  const _ExpandedPlayerPalette({
+    required this.foreground,
+    required this.secondary,
+    required this.disabled,
+    required this.pillBackground,
+    required this.artworkBackground,
+    required this.artworkIcon,
+    required this.playButtonBackground,
+    required this.playButtonIcon,
+    required this.playButtonGlow,
+    required this.seekActive,
+    required this.seekBuffered,
+    required this.seekInactive,
+    required this.artOverlay,
+  });
+
+  final Color foreground;
+  final Color secondary;
+  final Color disabled;
+  final Color pillBackground;
+  final Color artworkBackground;
+  final Color artworkIcon;
+  final Color playButtonBackground;
+  final Color playButtonIcon;
+  final Color playButtonGlow;
+  final Color seekActive;
+  final Color seekBuffered;
+  final Color seekInactive;
+  final Color artOverlay;
+
+  factory _ExpandedPlayerPalette.resolve(
+    BuildContext context, {
+    required bool onImageBackdrop,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final barTokens = theme.componentTokens.mediaPlayerBar;
+    final bgTokens = theme.componentTokens.playerBackground;
+
+    if (onImageBackdrop) {
+      return _ExpandedPlayerPalette(
+        foreground: colorScheme.onInverseSurface,
+        secondary: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacityEmphasis,
+        ),
+        disabled: colorScheme.onInverseSurface.withValues(
+          alpha: barTokens.disabledControlOpacity,
+        ),
+        pillBackground: colorScheme.onInverseSurface.withValues(alpha: 0.12),
+        artworkBackground: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacitySubtle,
+        ),
+        artworkIcon: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacityEmphasis / 3,
+        ),
+        playButtonBackground: colorScheme.onInverseSurface,
+        playButtonIcon: colorScheme.surface,
+        playButtonGlow: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacityMedium,
+        ),
+        seekActive: colorScheme.onInverseSurface,
+        seekBuffered: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacityMedium,
+        ),
+        seekInactive: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacitySubtle,
+        ),
+        artOverlay: bgTokens.overlayColor.withValues(
+          alpha: bgTokens.defaultOverlayOpacity,
+        ),
+      );
+    }
+
+    return _ExpandedPlayerPalette(
+      foreground: colorScheme.onSurface,
+      secondary: colorScheme.onSurfaceVariant,
+      disabled: colorScheme.onSurfaceVariant.withValues(
+        alpha: barTokens.disabledControlOpacity,
+      ),
+      pillBackground: colorScheme.surfaceContainerHigh,
+      artworkBackground: barTokens.artworkPlaceholderColor,
+      artworkIcon: colorScheme.onSurfaceVariant,
+      playButtonBackground: colorScheme.primary,
+      playButtonIcon: colorScheme.onPrimary,
+      playButtonGlow: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+      seekActive: colorScheme.primary,
+      seekBuffered: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+      seekInactive: barTokens.progressTrackBackgroundColor,
+      artOverlay: bgTokens.overlayColor.withValues(
+        alpha: bgTokens.defaultOverlayOpacity,
+      ),
+    );
+  }
+
+  static _ExpandedPlayerPalette of(BuildContext context) =>
+      _ExpandedPlayerScope.paletteOf(context);
+}
+
+class _ExpandedPlayerScope extends InheritedWidget {
+  const _ExpandedPlayerScope({
+    required this.palette,
+    required super.child,
+  });
+
+  final _ExpandedPlayerPalette palette;
+
+  static _ExpandedPlayerPalette paletteOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<_ExpandedPlayerScope>()!
+          .palette;
+
+  @override
+  bool updateShouldNotify(_ExpandedPlayerScope oldWidget) =>
+      oldWidget.palette != palette;
+}
+
+class _ExpandedPlayerOrganism extends StatefulWidget {
   const _ExpandedPlayerOrganism({
     required this.state,
     required this.audio,
     required this.onCollapse,
     required this.onDismiss,
     required this.expandProgress,
+    required this.onExpandDragUpdate,
+    required this.onExpandDragEnd,
   });
 
   final AudioPlayerState state;
@@ -585,138 +894,405 @@ class _ExpandedPlayerOrganism extends StatelessWidget {
   final VoidCallback onCollapse;
   final VoidCallback onDismiss;
   final double expandProgress;
+  final GestureDragUpdateCallback onExpandDragUpdate;
+  final GestureDragEndCallback onExpandDragEnd;
+
+  @override
+  State<_ExpandedPlayerOrganism> createState() =>
+      _ExpandedPlayerOrganismState();
+}
+
+class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
+  static const double _queuePeekSize = 0.20;
+  static const double _queueMidSize = 0.48;
+  static const double _queueFullSize = 0.90;
+
+  final DraggableScrollableController _queueController =
+      DraggableScrollableController();
+
+  @override
+  void initState() {
+    super.initState();
+    _queueController.addListener(_onQueueSheetChanged);
+  }
+
+  @override
+  void dispose() {
+    _queueController.removeListener(_onQueueSheetChanged);
+    _queueController.dispose();
+    super.dispose();
+  }
+
+  void _onQueueSheetChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ExpandedPlayerOrganism oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.expandProgress >= 1.0 && oldWidget.expandProgress < 1.0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _queueController.isAttached) {
+          _queueController.jumpTo(_queuePeekSize);
+        }
+      });
+    }
+  }
+
+  double get _queueReveal {
+    if (!_queueController.isAttached) {
+      return 0;
+    }
+    return ((_queueController.size - _queuePeekSize) /
+            (_queueFullSize - _queuePeekSize))
+        .clamp(0.0, 1.0);
+  }
+
+  bool get _queueAtPeek => !_queueController.isAttached || _queueReveal < 0.04;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final isLandscape =
+        MediaQuery.orientationOf(context) == Orientation.landscape;
+    final PlayerBackgroundState bgState = context
+        .watch<PlayerBackgroundCubit>()
+        .state;
+    final bool hasCustomBackground =
+        bgState.config.type == PlayerBackgroundType.custom &&
+        bgState.config.customImagePath != null;
+    final bool onImageBackdrop =
+        hasCustomBackground || widget.audio.artUri != null;
+    final _ExpandedPlayerPalette palette = _ExpandedPlayerPalette.resolve(
+      context,
+      onImageBackdrop: onImageBackdrop,
+    );
+    final Brightness statusBarIconBrightness =
+        theme.brightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+    final Color queueSheetColor = quranPlayerQueueSheetColor(colorScheme);
+    final Brightness navBarIconBrightness =
+        ThemeData.estimateBrightnessForColor(queueSheetColor) ==
+            Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    return _ExpandedPlayerScope(
+      palette: palette,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: statusBarIconBrightness,
+          statusBarBrightness: statusBarIconBrightness == Brightness.dark
+              ? Brightness.light
+              : Brightness.dark,
+          systemNavigationBarColor: queueSheetColor,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarContrastEnforced: false,
+          systemNavigationBarIconBrightness: navBarIconBrightness,
+        ),
+        child: Material(
+          color: colorScheme.surface,
+          elevation: widget.expandProgress * tokens.spaceSmall,
+          shape: const RoundedRectangleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const PlayerBackgroundLayer(),
+              Positioned.fill(
+                child: BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
+                  builder: (context, bgState) {
+                    if (bgState.config.type == PlayerBackgroundType.custom) {
+                      return const SizedBox.shrink();
+                    }
+                    if (widget.audio.artUri == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: widget.audio.artUri!,
+                          fit: BoxFit.cover,
+                        ),
+                        ColoredBox(color: palette.artOverlay),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            if (isLandscape)
+              _ExpandedPlayerLandscape(
+                state: widget.state,
+                audio: widget.audio,
+                onCollapse: widget.onCollapse,
+                onDismiss: widget.onDismiss,
+              )
+            else
+              Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: MediaQuery.paddingOf(context).bottom,
+                    child: ColoredBox(color: queueSheetColor),
+                  ),
+                  Positioned.fill(
+                    child: SafeArea(
+                      bottom: false,
+                      child: TilawaContentBounds(
+                        kind: TilawaContentKind.media,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final double sheetHeight =
+                                _queueController.isAttached
+                                ? _queueController.size * constraints.maxHeight
+                                : _queuePeekSize * constraints.maxHeight;
+
+                            return Stack(
+                              children: [
+                            Positioned(
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: sheetHeight,
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onVerticalDragUpdate: (details) {
+                                  if (_queueAtPeek) {
+                                    widget.onExpandDragUpdate(details);
+                                  }
+                                },
+                                onVerticalDragEnd: (details) {
+                                  if (_queueAtPeek) {
+                                    widget.onExpandDragEnd(details);
+                                  }
+                                },
+                                child: _YtMusicNowPlayingStage(
+                                  state: widget.state,
+                                  audio: widget.audio,
+                                  expandProgress: widget.expandProgress,
+                                  queueReveal: _queueReveal,
+                                  onCollapse: widget.onCollapse,
+                                ),
+                              ),
+                            ),
+                            DraggableScrollableSheet(
+                              controller: _queueController,
+                              initialChildSize: _queuePeekSize,
+                              minChildSize: 0.12,
+                              maxChildSize: _queueFullSize,
+                              snap: true,
+                              snapSizes: const <double>[
+                                _queuePeekSize,
+                                _queueMidSize,
+                                _queueFullSize,
+                              ],
+                              builder: (context, scrollController) {
+                                return _PlayerQueueSheet(
+                                  scrollController: scrollController,
+                                  state: widget.state,
+                                  currentAudio: widget.audio,
+                                );
+                              },
+                            ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Now-playing body that shrinks and fades as the queue sheet slides up.
+class _YtMusicNowPlayingStage extends StatelessWidget {
+  const _YtMusicNowPlayingStage({
+    required this.state,
+    required this.audio,
+    required this.expandProgress,
+    required this.queueReveal,
+    required this.onCollapse,
+  });
+
+  final AudioPlayerState state;
+  final AudioEntity audio;
+  final double expandProgress;
+  final double queueReveal;
+  final VoidCallback onCollapse;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final isLandscape =
-        MediaQuery.orientationOf(context) == Orientation.landscape;
-    final topPadding = MediaQuery.paddingOf(context).top;
+    final bool showCompactBar = queueReveal > 0.62;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.black,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-      child: Material(
-        color: Colors.black,
-        elevation: expandProgress * 16,
-        shape: const RoundedRectangleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          fit: StackFit.expand,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool tightStage = constraints.maxHeight < 140;
+
+        if (showCompactBar || tightStage) {
+          return _CompactNowPlayingBar(
+            audio: audio,
+            state: state,
+            onCollapse: onCollapse,
+            opacity: showCompactBar
+                ? ((queueReveal - 0.62) / 0.25).clamp(0.0, 1.0)
+                : 1.0,
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Background
-            const PlayerBackgroundLayer(),
-            Positioned.fill(
-              child: BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
-                builder: (context, bgState) {
-                  if (bgState.config.type == PlayerBackgroundType.custom) {
-                    return const SizedBox.shrink();
-                  }
-                  return audio.artUri != null
-                      ? Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: audio.artUri!,
-                              fit: BoxFit.cover,
-                            ),
-                            Container(
-                              color: Colors.black.withValues(
-                                alpha: tokens.opacityMedium,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Container(color: Colors.black);
-                },
+            _YtMusicPlayerHeader(state: state, onCollapse: onCollapse),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: tokens.spaceLarge,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _PlayerArtAtom(artUri: audio.artUri),
+                    SizedBox(height: tokens.spaceLarge),
+                    _PlayerMetadataMolecule(
+                      title: audio.title,
+                      artist: audio.artist,
+                    ),
+                    SizedBox(height: tokens.spaceMedium),
+                    _PlayerActionPillsMolecule(state: state),
+                    SizedBox(height: tokens.spaceMedium),
+                    const _ExpandedProgressBar(),
+                    SizedBox(height: tokens.spaceLarge),
+                    _PlayerTransportRow(
+                      state: state,
+                      isPlaying: state.isPlaying,
+                    ),
+                    SizedBox(height: tokens.spaceMedium),
+                  ],
+                ),
               ),
             ),
+          ],
+        );
+      },
+    );
+  }
+}
 
-            // Content
-            if (isLandscape)
-              _ExpandedPlayerLandscape(
-                state: state,
-                audio: audio,
-                onCollapse: onCollapse,
-                onDismiss: onDismiss,
-              )
-            else
-              Positioned.fill(
-                child: SafeArea(
-                  child: TilawaContentBounds(
-                    kind: TilawaContentKind.media,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return SingleChildScrollView(
-                          physics: const NeverScrollableScrollPhysics(),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: constraints.maxHeight,
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _PlayerHeaderMolecule(
-                                  state: state,
-                                  onCollapse: onCollapse,
-                                  onDismiss: onDismiss,
-                                ),
+/// Collapsed player strip shown when the queue sheet is fully raised.
+class _CompactNowPlayingBar extends StatelessWidget {
+  const _CompactNowPlayingBar({
+    required this.audio,
+    required this.state,
+    required this.onCollapse,
+    required this.opacity,
+  });
 
-                                // Artwork
-                                _PlayerArtAtom(
-                                  artUri: audio.artUri,
-                                  maxHeight: constraints.maxHeight * 0.35,
-                                ),
+  final AudioEntity audio;
+  final AudioPlayerState state;
+  final VoidCallback onCollapse;
+  final double opacity;
 
-                                // Metadata
-                                _PlayerMetadataMolecule(
-                                  title: audio.title,
-                                  artist: audio.artist,
-                                ),
+  static const BoxConstraints _iconConstraints = BoxConstraints(
+    minWidth: 40,
+    minHeight: 40,
+  );
 
-                                // Progress & Controls (Thumb-friendly zone)
-                                Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const _ExpandedProgressBar(),
-                                    SizedBox(height: tokens.spaceLarge),
-                                    _PlayerMainControlsMolecule(
-                                      state: state,
-                                      isPlaying: state.isPlaying,
-                                    ),
-                                    SizedBox(height: tokens.spaceMedium),
-                                    _PlayerSecondaryControlsMolecule(
-                                      state: state,
-                                    ),
-                                    SizedBox(height: tokens.spaceExtraLarge),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
+    final TextStyle? titleStyle = Theme.of(context).textTheme.titleSmall
+        ?.copyWith(
+          color: palette.foreground,
+          fontWeight: FontWeight.w600,
+          height: 1.15,
+        );
+    final TextStyle? artistStyle = Theme.of(context).textTheme.bodySmall
+        ?.copyWith(
+          color: palette.secondary,
+          height: 1.15,
+        );
+
+    return Opacity(
+      opacity: opacity,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceSmall,
+          vertical: tokens.spaceExtraSmall,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            IconButton(
+              constraints: _iconConstraints,
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                FluentIcons.chevron_down_24_regular,
+                color: palette.foreground,
+                size: tokens.iconSizeLarge,
+              ),
+              onPressed: onCollapse,
+            ),
+            _MiniArtwork(artUri: audio.artUri, size: 40),
+            SizedBox(width: tokens.spaceSmall),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    audio.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: titleStyle,
                   ),
-                ),
+                  Text(
+                    audio.artist ?? context.l10n.unknownReciter,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: artistStyle,
+                  ),
+                ],
               ),
-
-            // Drag handle
-            if (!isLandscape)
-              Positioned(
-                top: topPadding + 8,
-                left: 0,
-                right: 0,
-                child: TilawaSheetHandle(
-                  omitTopMargin: true,
-                  color: Colors.white.withAlpha(0x4D),
-                ),
+            ),
+            IconButton(
+              constraints: _iconConstraints,
+              padding: EdgeInsets.zero,
+              icon: Icon(
+                state.isPlaying
+                    ? FluentIcons.pause_24_filled
+                    : FluentIcons.play_24_filled,
+                color: palette.foreground,
+                size: tokens.iconSizeLarge,
               ),
+              onPressed: () {
+                context.read<AudioPlayerBloc>().add(
+                  state.isPlaying
+                      ? const AudioPlayerEvent.pauseAudio()
+                      : const AudioPlayerEvent.playAudio(),
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -741,6 +1317,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Positioned.fill(
@@ -757,7 +1334,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                   IconButton(
                     icon: Icon(
                       FluentIcons.chevron_down_24_regular,
-                      color: Colors.white,
+                      color: palette.foreground,
                       size: tokens.iconSizeLarge,
                     ),
                     onPressed: onCollapse,
@@ -770,7 +1347,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                       Text(
                         audio.title,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
+                          color: palette.foreground,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,
@@ -779,9 +1356,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                       Text(
                         audio.artist ?? context.l10n.unknownReciter,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(
-                            alpha: tokens.opacityEmphasis,
-                          ),
+                          color: palette.secondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -800,9 +1375,9 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       FluentIcons.image_24_regular,
-                      color: Colors.white,
+                      color: palette.foreground,
                     ),
                     onPressed: () {
                       showDialog(
@@ -823,7 +1398,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
 
             // Center: Primary Controls
             Center(
-              child: _PlayerMainControlsMolecule(
+              child: _PlayerTransportRow(
                 state: state,
                 isPlaying: state.isPlaying,
               ),
@@ -849,17 +1424,21 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                           children: [
                             TilawaIconActionButton(
                               icon: FluentIcons.speaker_2_24_regular,
-                              onTap: () => showSliderDialog(
-                                context: context,
-                                title: context.l10n.adjustVolume,
-                                divisions: 10,
-                                min: 0.0,
-                                max: 1.0,
-                                value: state.volume,
-                                onChanged: (v) => context
-                                    .read<AudioPlayerBloc>()
-                                    .add(AudioPlayerEvent.setVolume(v)),
-                              ),
+                              onTap: () {
+                                final AudioPlayerBloc bloc = context
+                                    .read<AudioPlayerBloc>();
+                                showSliderDialog(
+                                  context: context,
+                                  title: context.l10n.adjustVolume,
+                                  divisions: 10,
+                                  min: 0.0,
+                                  max: 1.0,
+                                  value: state.volume,
+                                  onChanged: (double v) {
+                                    bloc.add(AudioPlayerEvent.setVolume(v));
+                                  },
+                                );
+                              },
                             ),
                             Row(
                               children: [
@@ -873,8 +1452,8 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                                           ? FluentIcons.timer_24_filled
                                           : FluentIcons.timer_24_regular,
                                       color: state.isSleepTimerActive
-                                          ? Theme.of(context).primaryColor
-                                          : Colors.white,
+                                          ? theme.colorScheme.primary
+                                          : palette.foreground,
                                     ),
                                     onPressed: () {
                                       showDialog(
@@ -910,70 +1489,129 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
 // Molecules
 // ---------------------------------------------------------------------------
 
-class _PlayerHeaderMolecule extends StatelessWidget {
-  const _PlayerHeaderMolecule({
+class _YtMusicPlayerHeader extends StatelessWidget {
+  const _YtMusicPlayerHeader({
     required this.state,
     required this.onCollapse,
-    required this.onDismiss,
   });
 
   final AudioPlayerState state;
   final VoidCallback onCollapse;
-  final VoidCallback onDismiss;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    return AppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      leading: IconButton(
-        icon: Icon(
-          FluentIcons.chevron_down_24_regular,
-          color: Colors.white,
-          size: tokens.iconSizeLarge + tokens.spaceExtraSmall,
-        ),
-        onPressed: onCollapse,
-      ),
-      title: Text(
-        context.l10n.currentPlaying,
-        style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
-      ),
-      actions: [
-        if (context.watch<SettingsCubit>().state.isSleepTimerEnabled)
-          IconButton(
-            icon: Icon(
-              state.isSleepTimerActive
-                  ? FluentIcons.timer_24_filled
-                  : FluentIcons.timer_24_regular,
-              color: state.isSleepTimerActive
-                  ? Theme.of(context).primaryColor
-                  : Colors.white,
-            ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => const SleepTimerDialog(),
-              );
-            },
-          ),
-        IconButton(
-          icon: const Icon(FluentIcons.image_24_regular, color: Colors.white),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => BackgroundSourceDialog(
-                onSourceSelected: (source) {
-                  context.read<PlayerBackgroundCubit>().pickImage(source);
-                },
+    final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+      child: Row(
+        children: [
+          Semantics(
+            identifier: QuranPlayerSemanticsIds.expandedCollapseButton,
+            button: true,
+            child: IconButton(
+              icon: Icon(
+                FluentIcons.chevron_down_24_regular,
+                color: palette.foreground,
+                size: tokens.iconSizeLarge,
               ),
-            );
-          },
-        ),
-      ],
+              onPressed: onCollapse,
+              tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+            ),
+          ),
+          const Spacer(),
+          Semantics(
+            identifier: QuranPlayerSemanticsIds.expandedMoreMenu,
+            button: true,
+            child: IconButton(
+              icon: Icon(
+                FluentIcons.more_vertical_24_regular,
+                color: palette.foreground,
+              ),
+              onPressed: () => _showExpandedPlayerMenu(context, state),
+            ),
+          ),
+        ],
+      ),
     );
   }
+}
+
+Future<void> _showExpandedPlayerMenu(
+  BuildContext context,
+  AudioPlayerState state,
+) async {
+  await showTilawaModalBottomSheet<void>(
+    context: context,
+    builder: (sheetContext) {
+      final bool sleepEnabled = context
+          .read<SettingsCubit>()
+          .state
+          .isSleepTimerEnabled;
+      return Padding(
+        padding: EdgeInsets.only(bottom: sheetContext.floatingBottomPadding),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const TilawaSheetHandle(),
+            if (sleepEnabled)
+              Semantics(
+                identifier: QuranPlayerSemanticsIds.menuSheetSleepTimer,
+                button: true,
+                child: ListTile(
+                  leading: Icon(
+                    state.isSleepTimerActive
+                        ? FluentIcons.timer_24_filled
+                        : FluentIcons.timer_24_regular,
+                  ),
+                  title: Text(sheetContext.l10n.recitationDuration),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    showDialog(
+                      context: context,
+                      builder: (_) => const SleepTimerDialog(),
+                    );
+                  },
+                ),
+              ),
+            Semantics(
+              identifier: QuranPlayerSemanticsIds.menuSheetBackground,
+              button: true,
+              child: ListTile(
+                leading: const Icon(FluentIcons.image_24_regular),
+                title: Text(sheetContext.l10n.chooseBackgroundSource),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  showDialog(
+                    context: context,
+                    builder: (dialogContext) => BackgroundSourceDialog(
+                      onSourceSelected: (source) {
+                        context.read<PlayerBackgroundCubit>().pickImage(source);
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            Semantics(
+              identifier: QuranPlayerSemanticsIds.menuSheetStop,
+              button: true,
+              child: ListTile(
+                leading: const Icon(FluentIcons.stop_24_regular),
+                title: Text(sheetContext.l10n.stopPlayback),
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.stopAudio(),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class _PlayerMetadataMolecule extends StatelessWidget {
@@ -985,39 +1623,43 @@ class _PlayerMetadataMolecule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraLarge),
-      child: Column(
-        children: [
-          Text(
+    final palette = _ExpandedPlayerPalette.of(context);
+    final TextStyle? titleStyle = context
+        .responsiveStyle((t) => t.titleLarge)
+        ?.copyWith(color: palette.foreground, fontWeight: FontWeight.w600);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          identifier: QuranPlayerSemanticsIds.expandedTrackTitle,
+          child: Text(
             title,
-            style: context
-                .responsiveStyle((t) => t.headlineMedium)
-                ?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+            style: titleStyle,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: tokens.spaceSmall),
-          Text(
+        ),
+        SizedBox(height: tokens.spaceExtraSmall),
+        Semantics(
+          identifier: QuranPlayerSemanticsIds.expandedTrackArtist,
+          child: Text(
             artist ?? context.l10n.unknownReciter,
             style: context
-                .responsiveStyle((t) => t.bodyLarge)
+                .responsiveStyle((t) => t.bodyMedium)
                 ?.copyWith(
-                  color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
+                  color: palette.secondary,
                 ),
-            textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _PlayerMainControlsMolecule extends StatelessWidget {
-  const _PlayerMainControlsMolecule({
+class _PlayerTransportRow extends StatelessWidget {
+  const _PlayerTransportRow({
     required this.state,
     required this.isPlaying,
   });
@@ -1028,145 +1670,260 @@ class _PlayerMainControlsMolecule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
-    final previousIcon = isRtl
-        ? FluentIcons.next_24_filled
-        : FluentIcons.previous_24_filled;
-    final nextIcon = isRtl
-        ? FluentIcons.previous_24_filled
-        : FluentIcons.next_24_filled;
-    // Thumb-friendly layout: Primary actions (Play/Next) grouped and sized
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+    final palette = _ExpandedPlayerPalette.of(context);
+    final bool shuffleOn = state.shuffleMode == AudioShuffleMode.all;
+    final Color enabled = palette.foreground;
+    final Color disabled = palette.disabled;
+    final IconData repeatIcon = switch (state.repeatMode) {
+      AudioRepeatMode.one => Icons.repeat_one,
+      AudioRepeatMode.all => Icons.repeat,
+      AudioRepeatMode.none => Icons.repeat,
+    };
+    final bool repeatActive = state.repeatMode != AudioRepeatMode.none;
+    final bool swapSkipSidesForArabic = context.isArabic;
+
+    final Widget previousControl = Semantics(
+      identifier: QuranPlayerSemanticsIds.transportPrevious,
+      button: true,
+      child: IconButton(
+        icon: Icon(
+          swapSkipSidesForArabic ? Icons.skip_next : Icons.skip_previous,
+          color: state.canGoPrevious ? enabled : disabled,
+          size: tokens.iconSizeLarge,
+        ),
+        onPressed: state.canGoPrevious
+            ? () => context.read<AudioPlayerBloc>().add(
+                const AudioPlayerEvent.skipToPrevious(),
+              )
+            : null,
+      ),
+    );
+    final Widget nextControl = Semantics(
+      identifier: QuranPlayerSemanticsIds.transportNext,
+      button: true,
+      child: IconButton(
+        icon: Icon(
+          swapSkipSidesForArabic ? Icons.skip_previous : Icons.skip_next,
+          color: state.canGoNext ? enabled : disabled,
+          size: tokens.iconSizeLarge,
+        ),
+        onPressed: state.canGoNext
+            ? () => context.read<AudioPlayerBloc>().add(
+                const AudioPlayerEvent.skipToNext(),
+              )
+            : null,
+      ),
+    );
+
+    // App locale is RTL for Arabic; keep transport LTR so skip sides do not
+    // mirror twice (Row flip would undo the Arabic-only swap).
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Previous
-        IconButton(
-          icon: Icon(
-            previousIcon,
-            color: state.canGoPrevious
-                ? Colors.white
-                : Colors.white.withValues(alpha: tokens.opacitySubtle),
-            size: tokens.iconSizeLarge,
+        Semantics(
+          identifier: QuranPlayerSemanticsIds.transportShuffle,
+          button: true,
+          child: IconButton(
+            icon: Icon(Icons.shuffle, color: shuffleOn ? enabled : disabled),
+            onPressed: () {
+              final AudioShuffleMode next = shuffleOn
+                  ? AudioShuffleMode.none
+                  : AudioShuffleMode.all;
+              context.read<AudioPlayerBloc>().add(
+                AudioPlayerEvent.setShuffleMode(next),
+              );
+            },
+            tooltip: context.l10n.shufflePlaylist,
           ),
-          onPressed: state.canGoPrevious
-              ? () => context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.skipToPrevious(),
-                )
-              : null,
         ),
-        SizedBox(width: tokens.spaceLarge),
-
-        // Play/Pause (Centerpiece)
-        _PlayerPlayPauseAtom(
-          isPlaying: isPlaying,
-          onTap: () {
-            context.read<AudioPlayerBloc>().add(
-              isPlaying
-                  ? const AudioPlayerEvent.pauseAudio()
-                  : const AudioPlayerEvent.playAudio(),
-            );
-          },
-        ),
-
-        SizedBox(width: tokens.spaceLarge),
-
-        // Next (Most common thumb action after play)
-        IconButton(
-          icon: Icon(
-            nextIcon,
-            color: state.canGoNext
-                ? Colors.white
-                : Colors.white.withValues(alpha: tokens.opacitySubtle),
-            size: tokens.iconSizeLarge,
+        if (swapSkipSidesForArabic) nextControl else previousControl,
+        Semantics(
+          identifier: QuranPlayerSemanticsIds.transportPlayPause,
+          button: true,
+          child: _PlayerPlayPauseAtom(
+            isPlaying: isPlaying,
+            onTap: () {
+              context.read<AudioPlayerBloc>().add(
+                isPlaying
+                    ? const AudioPlayerEvent.pauseAudio()
+                    : const AudioPlayerEvent.playAudio(),
+              );
+            },
           ),
-          onPressed: state.canGoNext
-              ? () => context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.skipToNext(),
-                )
-              : null,
+        ),
+        if (swapSkipSidesForArabic) previousControl else nextControl,
+        Semantics(
+          identifier: QuranPlayerSemanticsIds.transportRepeat,
+          button: true,
+          child: IconButton(
+            icon: Icon(
+              repeatIcon,
+              color: repeatActive ? enabled : disabled,
+            ),
+            onPressed: () {
+              final AudioRepeatMode next = switch (state.repeatMode) {
+                AudioRepeatMode.none => AudioRepeatMode.all,
+                AudioRepeatMode.all => AudioRepeatMode.one,
+                AudioRepeatMode.one => AudioRepeatMode.none,
+              };
+              context.read<AudioPlayerBloc>().add(
+                AudioPlayerEvent.setRepeatMode(next),
+              );
+            },
+          ),
         ),
       ],
+      ),
     );
   }
 }
 
-class _PlayerSecondaryControlsMolecule extends StatelessWidget {
-  const _PlayerSecondaryControlsMolecule({required this.state});
+class _PlayerActionPillsMolecule extends StatelessWidget {
+  const _PlayerActionPillsMolecule({required this.state});
 
   final AudioPlayerState state;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    return Row(
-      mainAxisAlignment: .spaceAround,
-      children: [
-        TilawaIconActionButton(
-          icon: FluentIcons.speaker_2_24_regular,
-          onTap: () => showSliderDialog(
-            context: context,
-            title: context.l10n.adjustVolume,
-            divisions: 10,
-            min: 0.0,
-            max: 1.0,
-            value: state.volume,
-            onChanged: (v) => context.read<AudioPlayerBloc>().add(
-              AudioPlayerEvent.setVolume(v),
+    final tokens = Theme.of(context).tokens;
+    final bool sleepEnabled = context
+        .watch<SettingsCubit>()
+        .state
+        .isSleepTimerEnabled;
+    return SizedBox(
+      height: tokens.minInteractiveDimension,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+          Semantics(
+            identifier: QuranPlayerSemanticsIds.actionPillSpeed,
+            button: true,
+            child: _YtMusicActionPill(
+              label: '${state.speed.toStringAsFixed(1)}x',
+              icon: FluentIcons.gauge_24_regular,
+              onTap: () {
+                final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+                showSliderDialog(
+                  context: context,
+                  title: context.l10n.playbackSpeed,
+                  divisions: 8,
+                  min: 0.5,
+                  max: 2.5,
+                  value: state.speed,
+                  onChanged: (double speed) {
+                    bloc.add(AudioPlayerEvent.setSpeed(speed));
+                  },
+                );
+              },
             ),
           ),
-        ),
-        Semantics(
-          button: true,
-          label: context.l10n.playbackSpeed,
-          value: '${state.speed.toStringAsFixed(1)}x',
-          // docs/tilawa_brand.md §5: tappable chip-grammar affordance — pill radius
-          // resolved from the 44 dp interactive minimum; spacing from tokens.
-          // White-on-dark colors are intentional (fixed dark-palette context
-          // for the expanded player; DESIGN §12 export/composer exception).
-          child: Material(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(
-              tokens.resolveRadius(
-                family: TilawaRadiusFamily.pill,
-                height: tokens.minInteractiveDimension,
+          SizedBox(width: tokens.spaceSmall),
+          Semantics(
+            identifier: QuranPlayerSemanticsIds.actionPillVolume,
+            button: true,
+            child: _YtMusicActionPill(
+              icon: FluentIcons.speaker_2_24_regular,
+              onTap: () {
+                final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+                showSliderDialog(
+                  context: context,
+                  title: context.l10n.adjustVolume,
+                  divisions: 10,
+                  min: 0.0,
+                  max: 1.0,
+                  value: state.volume,
+                  onChanged: (double volume) {
+                    bloc.add(AudioPlayerEvent.setVolume(volume));
+                  },
+                );
+              },
+            ),
+          ),
+          if (sleepEnabled) ...[
+            SizedBox(width: tokens.spaceSmall),
+            Semantics(
+              identifier: QuranPlayerSemanticsIds.actionPillSleepTimer,
+              button: true,
+              child: _YtMusicActionPill(
+                icon: state.isSleepTimerActive
+                    ? FluentIcons.timer_24_filled
+                    : FluentIcons.timer_24_regular,
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (_) => const SleepTimerDialog(),
+                  );
+                },
               ),
             ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(
-                tokens.resolveRadius(
-                  family: TilawaRadiusFamily.pill,
-                  height: tokens.minInteractiveDimension,
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _YtMusicActionPill extends StatelessWidget {
+  const _YtMusicActionPill({
+    this.label,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String? label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
+    final double radius = tokens.resolveRadius(
+      family: TilawaRadiusFamily.pill,
+      height: tokens.minInteractiveDimension,
+    );
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        minWidth: tokens.minInteractiveDimension,
+        minHeight: tokens.minInteractiveDimension,
+      ),
+      child: Material(
+        color: palette.pillBackground,
+        borderRadius: BorderRadius.circular(radius),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(radius),
+          onTap: onTap,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceMedium,
+              vertical: tokens.spaceSmall,
+            ),
+            child: Row(
+              mainAxisSize: .min,
+              mainAxisAlignment: .center,
+              children: [
+                Icon(
+                  icon,
+                  color: palette.foreground,
+                  size: tokens.iconSizeMedium,
                 ),
-              ),
-              onTap: () => showSliderDialog(
-                context: context,
-                title: context.l10n.playbackSpeed,
-                divisions: 8,
-                min: 0.5,
-                max: 2.5,
-                value: state.speed,
-                onChanged: (s) => context.read<AudioPlayerBloc>().add(
-                  AudioPlayerEvent.setSpeed(s),
-                ),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: tokens.spaceMedium,
-                  vertical: tokens.spaceSmall,
-                ),
-                child: Text(
-                  '${state.speed.toStringAsFixed(1)}x',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                if (label != null) ...[
+                  SizedBox(width: tokens.spaceExtraSmall),
+                  Text(
+                    label!,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: palette.foreground,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ),
+                ],
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 }
@@ -1240,40 +1997,43 @@ Future<void> _showPlaybackActions(BuildContext context) async {
 // ---------------------------------------------------------------------------
 
 class _PlayerArtAtom extends StatelessWidget {
-  const _PlayerArtAtom({this.artUri, required this.maxHeight});
+  const _PlayerArtAtom({this.artUri});
 
   final String? artUri;
-  final double maxHeight;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final artSize = tokens.contentMaxWidthMedia / 4.2; // approx 280
-    return SizedBox(
-      width: artSize,
-      height: maxHeight.clamp(0.0, artSize),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-        child: artUri != null
-            ? CachedNetworkImage(
-                imageUrl: artUri!,
-                fit: BoxFit.cover,
-                errorWidget: (context, url, error) => _buildDefaultArt(context),
-              )
-            : _buildDefaultArt(context),
+    return Semantics(
+      identifier: QuranPlayerSemanticsIds.expandedArtwork,
+      image: true,
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+          child: artUri != null
+              ? CachedNetworkImage(
+                  imageUrl: artUri!,
+                  fit: BoxFit.cover,
+                  errorWidget: (context, url, error) =>
+                      _buildDefaultArt(context),
+                )
+              : _buildDefaultArt(context),
+        ),
       ),
     );
   }
 
   Widget _buildDefaultArt(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    return Container(
-      color: Colors.white.withValues(alpha: tokens.opacitySubtle),
+    final palette = _ExpandedPlayerPalette.of(context);
+    return ColoredBox(
+      color: palette.artworkBackground,
       child: Center(
         child: Icon(
           FluentIcons.music_note_2_24_filled,
           size: tokens.iconSizeLarge * 3.3, // approx 80
-          color: Colors.white.withValues(alpha: tokens.opacityEmphasis / 3),
+          color: palette.artworkIcon,
         ),
       ),
     );
@@ -1289,16 +2049,17 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     final buttonSize = tokens.iconSizeLarge * 3.3; // approx 80
     return Container(
       width: buttonSize,
       height: buttonSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white,
+        color: palette.playButtonBackground,
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withValues(alpha: tokens.opacityMedium),
+            color: palette.playButtonGlow,
             blurRadius: tokens.spaceLarge,
             spreadRadius: tokens.spaceTiny,
           ),
@@ -1307,7 +2068,7 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
       child: IconButton(
         icon: Icon(
           isPlaying ? FluentIcons.pause_48_filled : FluentIcons.play_48_filled,
-          color: Colors.black,
+          color: palette.playButtonIcon,
           size: tokens.iconSizeLarge * 1.6, // approx 40
         ),
         onPressed: onTap,
@@ -1316,37 +2077,343 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
   }
 }
 
-class _MiniPlayerProgressBar extends StatelessWidget {
-  const _MiniPlayerProgressBar();
+class _YtMusicMiniPlayer extends StatelessWidget {
+  const _YtMusicMiniPlayer({
+    required this.state,
+    required this.audio,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final AudioPlayerState state;
+  final AudioEntity audio;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final barTokens = Theme.of(context).componentTokens.mediaPlayerBar;
+    final double progress =
+        state.positionData?.duration.inMilliseconds.toDouble() == 0
+        ? 0.0
+        : (state.positionData?.position.inMilliseconds ?? 0) /
+              (state.positionData?.duration.inMilliseconds ?? 1);
+    final bool sleepTimerEnabled = context
+        .watch<SettingsCubit>()
+        .state
+        .isSleepTimerEnabled;
+    final Widget? artwork = audio.artUri == null
+        ? null
+        : ClipRRect(
+            borderRadius: BorderRadius.circular(barTokens.artworkRadius),
+            child: CachedNetworkImage(
+              imageUrl: audio.artUri!,
+              fit: BoxFit.cover,
+              errorWidget: (context, error, stackTrace) =>
+                  const SizedBox.shrink(),
+            ),
+          );
+
+    return Semantics(
+      identifier: QuranPlayerSemanticsIds.miniPlayer,
+      container: true,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return TilawaMediaPlayerBar(
+            layoutWidth: constraints.maxWidth,
+            title: audio.title,
+            subtitle: audio.artist ?? context.l10n.unknownReciter,
+            artwork: artwork,
+            progress: progress.clamp(0.0, 1.0),
+            isPlaying: state.isPlaying,
+            canGoPrevious: state.canGoPrevious,
+            canGoNext: state.canGoNext,
+            isSleepTimerActive: state.isSleepTimerActive,
+            isSleepTimerEnabled: sleepTimerEnabled,
+            onTap: onTap,
+            onClose: onClose,
+            onPlayPause: () {
+              context.read<AudioPlayerBloc>().add(
+                state.isPlaying
+                    ? const AudioPlayerEvent.pauseAudio()
+                    : const AudioPlayerEvent.playAudio(),
+              );
+            },
+            onPrevious: state.canGoPrevious
+                ? () => context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.skipToPrevious(),
+                  )
+                : null,
+            onNext: state.canGoNext
+                ? () => context.read<AudioPlayerBloc>().add(
+                    const AudioPlayerEvent.skipToNext(),
+                  )
+                : null,
+            onSleepTimerTap: sleepTimerEnabled
+                ? () {
+                    showDialog<void>(
+                      context: context,
+                      builder: (_) => const SleepTimerDialog(),
+                    );
+                  }
+                : null,
+            playTooltip: context.l10n.play,
+            pauseTooltip: context.l10n.pause,
+            previousTooltip: context.l10n.previous,
+            nextTooltip: context.l10n.next,
+            openPlayerSemanticLabel: audio.title,
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _MiniArtwork extends StatelessWidget {
+  const _MiniArtwork({required this.artUri, required this.size});
+
+  final String? artUri;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final barTokens = Theme.of(context).componentTokens.mediaPlayerBar;
+    final colorScheme = Theme.of(context).colorScheme;
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(tokens.radiusSmall),
+      child: SizedBox(
+        width: size,
+        height: size,
+        child: artUri == null
+            ? ColoredBox(
+                color: barTokens.artworkPlaceholderColor,
+                child: Icon(
+                  FluentIcons.music_note_2_24_filled,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              )
+            : CachedNetworkImage(
+                imageUrl: artUri!,
+                fit: BoxFit.cover,
+                errorWidget: (context, error, stackTrace) =>
+                    const SizedBox.shrink(),
+              ),
+      ),
+    );
+  }
+}
+
+class _PlayerQueueSheet extends StatelessWidget {
+  const _PlayerQueueSheet({
+    required this.scrollController,
+    required this.state,
+    required this.currentAudio,
+  });
+
+  final ScrollController scrollController;
+  final AudioPlayerState state;
+  final AudioEntity currentAudio;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    return BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
-      selector: (state) {
-        final PositionData pos =
-            state.positionData ??
-            const PositionData(
-              position: Duration.zero,
-              bufferedPosition: Duration.zero,
-              duration: Duration.zero,
-            );
-        if (pos.duration.inMilliseconds <= 0) return 0.0;
-        return (pos.position.inMilliseconds / pos.duration.inMilliseconds)
-            .clamp(0.0, 1.0);
-      },
-      builder: (context, progress) {
-        return LinearProgressIndicator(
-          value: progress,
-          backgroundColor: colorScheme.primaryContainer.withValues(
-            alpha: tokens.opacitySubtle,
+    final tokens = theme.tokens;
+    final List<AudioEntity> queue =
+        state.playbackState?.queue ?? <AudioEntity>[];
+    final int? currentIndex = state.playbackState?.currentIndex;
+    final String sourceLabel =
+        currentAudio.album ??
+        currentAudio.artist ??
+        context.l10n.unknownReciter;
+    final Color queueSheetColor = quranPlayerQueueSheetColor(colorScheme);
+
+    final BorderRadius sheetRadius = BorderRadius.vertical(
+      top: Radius.circular(tokens.radiusExtraLarge),
+    );
+
+    return Semantics(
+      identifier: QuranPlayerSemanticsIds.queueSheet,
+      container: true,
+      child: Material(
+      color: queueSheetColor,
+      elevation: tokens.spaceTiny,
+      shadowColor: colorScheme.shadow,
+      shape: RoundedRectangleBorder(
+        borderRadius: sheetRadius,
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: CustomScrollView(
+        controller: scrollController,
+        slivers: [
+          SliverToBoxAdapter(
+            child: Center(
+              child: TilawaSheetHandle(
+                color: colorScheme.onSurfaceVariant.withValues(
+                  alpha: tokens.opacityEmphasis,
+                ),
+              ),
+            ),
           ),
-          valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
-          minHeight: tokens.progressHeight,
-        );
-      },
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                tokens.spaceLarge,
+                tokens.spaceSmall,
+                tokens.spaceLarge,
+                tokens.spaceMedium,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.l10n.playingFrom,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    sourceLabel,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (queue.length > 1)
+            SliverReorderableList(
+              itemBuilder: (context, index) {
+                final AudioEntity item = queue[index];
+                final bool isCurrent = currentIndex == index;
+                return ReorderableDelayedDragStartListener(
+                  key: ValueKey<String>(item.id),
+                  index: index,
+                  child: Semantics(
+                    identifier: QuranPlayerSemanticsIds.queueItem(item.id),
+                    button: true,
+                    child: _QueueTrackTile(
+                      audio: item,
+                      isCurrent: isCurrent,
+                      isPlaying: isCurrent && state.isPlaying,
+                      onTap: () {
+                        if (!isCurrent) {
+                          context.read<AudioPlayerBloc>().add(
+                            AudioPlayerEvent.skipToQueueItem(index),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                );
+              },
+              itemCount: queue.length,
+              onReorderItem: (int oldIndex, int newIndex) {
+                context.read<AudioPlayerBloc>().add(
+                  AudioPlayerEvent.moveQueueItem(oldIndex, newIndex),
+                );
+              },
+            )
+          else
+            SliverToBoxAdapter(
+              child: SizedBox(height: tokens.spaceExtraLarge),
+            ),
+          SliverPadding(
+            padding: EdgeInsets.only(
+              bottom: tokens.spaceLarge + MediaQuery.paddingOf(context).bottom,
+            ),
+          ),
+        ],
+      ),
+      ),
+    );
+  }
+}
+
+class _QueueTrackTile extends StatelessWidget {
+  const _QueueTrackTile({
+    required this.audio,
+    required this.isCurrent,
+    required this.isPlaying,
+    required this.onTap,
+  });
+
+  final AudioEntity audio;
+  final bool isCurrent;
+  final bool isPlaying;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    return Material(
+      color: isCurrent
+          ? colorScheme.secondaryContainer.withValues(alpha: 0.55)
+          : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: tokens.spaceLarge,
+            vertical: tokens.spaceSmall,
+          ),
+          child: Row(
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  _MiniArtwork(artUri: audio.artUri, size: 48),
+                  if (isCurrent && isPlaying)
+                    Icon(
+                      Icons.equalizer,
+                      color: colorScheme.primary,
+                      size: tokens.iconSizeMedium,
+                    ),
+                ],
+              ),
+              SizedBox(width: tokens.spaceMedium),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      audio.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: isCurrent
+                            ? colorScheme.primary
+                            : colorScheme.onSurface,
+                        fontWeight: isCurrent ? FontWeight.w600 : null,
+                      ),
+                    ),
+                    Text(
+                      audio.artist ?? context.l10n.unknownReciter,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.drag_handle,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1367,49 +2434,61 @@ class _ExpandedProgressBar extends StatelessWidget {
       builder: (context, positionData) {
         final theme = Theme.of(context);
         final tokens = theme.tokens;
-        final seekActiveColor = Colors.white;
-        final seekThumbColor = Colors.white;
-        final seekBufferedColor = Colors.white.withValues(
-          alpha: tokens.opacityMedium,
-        );
-        final seekInactiveColor = Colors.white.withValues(
-          alpha: tokens.opacitySubtle,
-        );
+        final palette = _ExpandedPlayerPalette.of(context);
+        final seekActiveColor = palette.seekActive;
+        final seekThumbColor = palette.seekActive;
+        final seekBufferedColor = palette.seekBuffered;
+        final seekInactiveColor = palette.seekInactive;
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Column(
             children: [
-              SeekBar(
-                duration: positionData.duration,
-                position: positionData.position,
-                bufferedPosition: positionData.bufferedPosition,
-                activeColor: seekActiveColor,
-                thumbColor: seekThumbColor,
-                bufferedColor: seekBufferedColor,
-                inactiveColor: seekInactiveColor,
-                onChangeEnd: (newPosition) {
-                  context.read<AudioPlayerBloc>().add(
-                    AudioPlayerEvent.seekTo(newPosition),
-                  );
-                },
+              Semantics(
+                identifier: QuranPlayerSemanticsIds.progressSeekBar,
+                slider: true,
+                child: SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    trackHeight: 3,
+                    thumbShape: const RoundSliderThumbShape(
+                      enabledThumbRadius: 0,
+                    ),
+                    overlayShape: SliderComponentShape.noOverlay,
+                  ),
+                  child: TilawaSeekBar(
+                    duration: positionData.duration,
+                    position: positionData.position,
+                    bufferedPosition: positionData.bufferedPosition,
+                    activeColor: seekActiveColor,
+                    thumbColor: seekThumbColor,
+                    bufferedColor: seekBufferedColor,
+                    inactiveColor: seekInactiveColor,
+                    onChangeEnd: (newPosition) {
+                      context.read<AudioPlayerBloc>().add(
+                        AudioPlayerEvent.seekTo(newPosition),
+                      );
+                    },
+                  ),
+                ),
               ),
               SizedBox(height: tokens.spaceExtraSmall),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    _formatDuration(positionData.position),
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: Colors.white.withValues(
-                        alpha: tokens.opacityEmphasis - 0.1,
+                  Semantics(
+                    identifier: QuranPlayerSemanticsIds.progressPosition,
+                    child: Text(
+                      _formatDuration(positionData.position),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: palette.secondary,
                       ),
                     ),
                   ),
-                  Text(
-                    _formatDuration(positionData.duration),
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: Colors.white.withValues(
-                        alpha: tokens.opacityEmphasis - 0.1,
+                  Semantics(
+                    identifier: QuranPlayerSemanticsIds.progressDuration,
+                    child: Text(
+                      _formatDuration(positionData.duration),
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: palette.secondary,
                       ),
                     ),
                   ),

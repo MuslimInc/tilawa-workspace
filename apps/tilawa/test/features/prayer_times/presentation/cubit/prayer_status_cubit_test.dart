@@ -157,8 +157,7 @@ Matcher _loadedState({
 }
 
 class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
-  _FakeAdhanAlarmPlayer({required Future<bool> Function() onIsAdhanPlaying})
-    : _onIsAdhanPlaying = onIsAdhanPlaying;
+  _FakeAdhanAlarmPlayer({required this._onIsAdhanPlaying});
 
   final Future<bool> Function() _onIsAdhanPlaying;
   int isAdhanPlayingCallCount = 0;

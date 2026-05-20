@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa_core/entities/audio.dart';
+import 'package:tilawa/core/utils/file_size_formatter.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
-import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../domain/entities/download_item.dart';
 import '../bloc/downloads_bloc.dart';
 import 'download_item_card.dart';
+
+// Auto-expand when the list is short enough that the expand affordance adds
+// friction without payoff.
+const int _kAutoExpandItemThreshold = 3;
 
 class ReciterDownloadsSection extends StatefulWidget {
   const ReciterDownloadsSection({
@@ -26,13 +29,16 @@ class ReciterDownloadsSection extends StatefulWidget {
 }
 
 class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
-  bool _isExpanded = false;
+  late bool _isExpanded;
 
-  // Get all downloads (flatten map)
-  List<DownloadItem> get _allDownloads {
-    return widget.downloadsByNarrative.values
-        .expand((downloads) => downloads)
-        .toList();
+  List<DownloadItem> get _allDownloads => widget.downloadsByNarrative.values
+      .expand((downloads) => downloads)
+      .toList();
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = _allDownloads.length <= _kAutoExpandItemThreshold;
   }
 
   @override
@@ -57,9 +63,7 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
       ),
       clipBehavior: Clip.antiAlias,
       child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colorScheme.surface,
-        ),
+        decoration: BoxDecoration(color: colorScheme.surface),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -69,10 +73,10 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
               firstChild: const SizedBox(height: 0, width: double.infinity),
               secondChild: Column(
                 children: [
-                  Divider(
+                  TilawaDivider(
                     height: 1,
                     color: colorScheme.outlineVariant.withValues(
-                      alpha: tokens.opacityMedium,
+                      alpha: tokens.opacitySubtle,
                     ),
                   ),
                   _buildDownloadsList(context),
@@ -98,133 +102,49 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
     final colorScheme = theme.colorScheme;
 
     return InkWell(
-      onTap: () {
-        setState(() {
-          _isExpanded = !_isExpanded;
-        });
-      },
+      onTap: () => setState(() => _isExpanded = !_isExpanded),
       child: Padding(
-        padding: EdgeInsets.all(tokens.spaceLarge),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceLarge,
+          vertical: tokens.spaceMedium,
+        ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Reciter Avatar
-            Container(
-              padding: EdgeInsets.all(tokens.spaceTiny),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
-                border: Border.all(
-                  color: colorScheme.primary.withValues(
-                    alpha: tokens.opacitySubtle,
-                  ),
-                  width: 2,
-                ),
-              ),
-              child: CircleAvatar(
-                radius: 20,
-                backgroundColor: colorScheme.primaryContainer,
-                child: Text(
-                  widget.reciterName.isNotEmpty
-                      ? widget.reciterName[0].toUpperCase()
-                      : 'R',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    color: colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: tokens.spaceLarge),
-            // Info
+            _ReciterAvatar(reciterName: widget.reciterName),
+            SizedBox(width: tokens.spaceMedium),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     widget.reciterName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: colorScheme.onSurface,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  SizedBox(height: tokens.spaceExtraSmall),
-                  Text(
-                    '${downloads.length} ${context.l10n.surahs}${widget.downloadsByNarrative.length > 1 ? " • ${widget.downloadsByNarrative.length} narratives" : ""}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  SizedBox(height: tokens.spaceSmall),
-                  _DownloadHealthPill(downloads: downloads),
+                  SizedBox(height: tokens.spaceTiny),
+                  _ReciterMetaLine(downloads: downloads),
                 ],
               ),
             ),
-            // Actions
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_hasCompletedDownloads())
-                  BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
-                    buildWhen: (previous, current) =>
-                        previous.currentAudio != current.currentAudio ||
-                        previous.isPlaying != current.isPlaying,
-                    builder: (context, audioState) {
-                      final bool isPlayingFromThisReciter =
-                          _isPlayingFromThisReciter(audioState);
-                      final bool isPlaying =
-                          isPlayingFromThisReciter &&
-                          (audioState.playbackState?.isPlaying ?? false);
-
-                      return IconButton.filledTonal(
-                        style: IconButton.styleFrom(padding: EdgeInsets.zero),
-                        icon: Icon(
-                          isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                          size: 20,
-                        ),
-                        onPressed: () =>
-                            _handlePlayAllPlayPause(context, audioState),
-                        tooltip: isPlaying
-                            ? context.l10n.pauseAll
-                            : context.l10n.playAll,
-                      );
-                    },
-                  ),
-                SizedBox(width: tokens.spaceExtraSmall),
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert_rounded),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                  ),
-                  onSelected: (value) {
-                    if (value == 'delete_all') {
-                      _showDeleteReciterDialog(context);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'delete_all',
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.delete_outline_rounded,
-                            color: colorScheme.error,
-                            size: tokens.iconSizeMedium,
-                          ),
-                          SizedBox(width: tokens.spaceMedium),
-                          Text(
-                            context.l10n.deleteAll,
-                            style: TextStyle(color: colorScheme.error),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            AnimatedRotation(
+              turns: _isExpanded ? 0.5 : 0,
+              duration: tokens.durationFast,
+              child: Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 18,
+                color: colorScheme.onSurfaceVariant.withValues(
+                  alpha: tokens.opacityMedium,
                 ),
-              ],
+              ),
+            ),
+            _OverflowMenu(
+              onDeleteAll: () => _showDeleteReciterDialog(context),
             ),
           ],
         ),
@@ -236,108 +156,64 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final Color dividerColor = colorScheme.outlineVariant.withValues(
+      alpha: tokens.opacitySubtle,
+    );
 
     if (widget.downloadsByNarrative.length == 1) {
-      // Single narrative: just show the list
       final List<DownloadItem> downloads =
           widget.downloadsByNarrative.values.first;
-      return Column(
-        children: downloads.asMap().entries.map((entry) {
-          final int index = entry.key;
-          final DownloadItem download = entry.value;
-          return Column(
-            children: [
-              DownloadItemCard(
-                download: download,
-                onDelete: () {
-                  context.read<DownloadsBloc>().add(
-                    DeleteDownloadEvent(downloadId: download.id),
-                  );
-                },
-              ),
-              if (index != downloads.length - 1)
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
-                  child: TilawaDivider(
-                    height: 1,
-                    color: colorScheme.outlineVariant.withValues(
-                      alpha: tokens.opacitySubtle,
-                    ),
-                  ),
-                ),
-            ],
-          );
-        }).toList(),
+      return _DownloadList(
+        downloads: downloads,
+        dividerColor: dividerColor,
+        horizontalPadding: tokens.spaceLarge,
+        onDelete: _dispatchDelete,
       );
     }
 
-    // Multiple narratives: Show header for each narrative
     return Column(
       children: widget.downloadsByNarrative.entries.map((entry) {
         final String narrativeName = entry.key;
         final List<DownloadItem> narrativeDownloads = entry.value;
+        final bool isLastNarrative =
+            entry.key == widget.downloadsByNarrative.keys.last;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Narrative Header
             Container(
               width: double.infinity,
               padding: EdgeInsets.symmetric(
                 horizontal: tokens.spaceLarge,
-                vertical: tokens.spaceMedium,
+                vertical: tokens.spaceSmall,
               ),
               color: colorScheme.surfaceContainerLowest,
               child: Text(
                 narrativeName,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
                   color: colorScheme.primary,
+                  letterSpacing: 0.4,
                 ),
               ),
             ),
-            // Downloads for this narrative
-            ...narrativeDownloads.asMap().entries.map((downloadEntry) {
-              final int index = downloadEntry.key;
-              final DownloadItem download = downloadEntry.value;
-              return Column(
-                children: [
-                  DownloadItemCard(
-                    download: download,
-                    onDelete: () {
-                      context.read<DownloadsBloc>().add(
-                        DeleteDownloadEvent(downloadId: download.id),
-                      );
-                    },
-                  ),
-                  // Show divider unless it's the last item in this narrative
-                  if (index != narrativeDownloads.length - 1)
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: tokens.spaceLarge,
-                      ),
-                      child: TilawaDivider(
-                        height: 1,
-                        color: colorScheme.outlineVariant.withValues(
-                          alpha: tokens.opacitySubtle,
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            }),
-            // Divider between narrative sections (except after the last one)
-            if (entry.key != widget.downloadsByNarrative.keys.last)
-              TilawaDivider(
-                height: 1,
-                thickness: 4,
-                color: colorScheme.outlineVariant.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
-              ),
+            _DownloadList(
+              downloads: narrativeDownloads,
+              dividerColor: dividerColor,
+              horizontalPadding: tokens.spaceLarge,
+              onDelete: _dispatchDelete,
+            ),
+            if (!isLastNarrative)
+              TilawaDivider(height: 1, color: dividerColor),
           ],
         );
       }).toList(),
+    );
+  }
+
+  void _dispatchDelete(String downloadId) {
+    context.read<DownloadsBloc>().add(
+      DeleteDownloadEvent(downloadId: downloadId),
     );
   }
 
@@ -372,101 +248,155 @@ class _ReciterDownloadsSectionState extends State<ReciterDownloadsSection> {
     );
   }
 
-  /// Check if there are any completed downloads
-  bool _hasCompletedDownloads() {
-    return _allDownloads.any(
-      (download) => download.status == DownloadStatus.completed,
-    );
-  }
+}
 
-  /// Check if any download from this reciter is currently playing
-  bool _isPlayingFromThisReciter(AudioPlayerState audioState) {
-    final AudioEntity? currentAudio = audioState.currentAudio;
-    if (currentAudio == null) {
-      return false;
-    }
+class _ReciterAvatar extends StatelessWidget {
+  const _ReciterAvatar({required this.reciterName});
 
-    // Check if the current audio entity is from this reciter
-    return currentAudio.artist == widget.reciterName;
-  }
+  final String reciterName;
 
-  /// Handle play all/pause all button press
-  void _handlePlayAllPlayPause(
-    BuildContext context,
-    AudioPlayerState audioState,
-  ) {
-    final bool isPlayingFromThisReciter = _isPlayingFromThisReciter(audioState);
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final String initial = reciterName.isNotEmpty
+        ? reciterName.characters.first.toUpperCase()
+        : 'R';
 
-    if (isPlayingFromThisReciter) {
-      // If playing from this reciter, toggle play/pause
-      if (audioState.playbackState?.isPlaying ?? false) {
-        context.read<AudioPlayerBloc>().add(
-          const AudioPlayerEvent.pauseAudio(),
-        );
-      } else {
-        context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.playAudio());
-      }
-    } else {
-      // If not playing from this reciter, start playing all downloads
-      _playAllDownloads(context);
-    }
-  }
-
-  /// Play all completed downloads for this reciter
-  void _playAllDownloads(BuildContext context) {
-    context.read<DownloadsBloc>().add(
-      DownloadsEvent.playAllDownloads(reciterName: widget.reciterName),
+    return Container(
+      width: 44,
+      height: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: colorScheme.primaryContainer,
+        border: Border.all(
+          color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+          width: tokens.borderWidthThin,
+        ),
+      ),
+      child: Text(
+        initial,
+        style: theme.textTheme.titleMedium?.copyWith(
+          color: colorScheme.onPrimaryContainer,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
     );
   }
 }
 
-class _DownloadHealthPill extends StatelessWidget {
-  const _DownloadHealthPill({required this.downloads});
+class _ReciterMetaLine extends StatelessWidget {
+  const _ReciterMetaLine({required this.downloads});
 
   final List<DownloadItem> downloads;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final int completedCount = downloads
-        .where((download) => download.status == DownloadStatus.completed)
-        .length;
-    final bool hasIssues = downloads.any(
-      (download) =>
-          download.status == DownloadStatus.failed ||
-          download.status == DownloadStatus.cancelled,
+    final int count = downloads.length;
+    final String surahWord =
+        count == 1 ? 'surah' : context.l10n.surahs.toLowerCase();
+    final int totalBytes = downloads.fold<int>(
+      0,
+      (sum, d) => sum + (d.fileSize > 0 ? d.fileSize : d.downloadedSize),
     );
+    final String sizeText = totalBytes > 0
+        ? ' · ${FileSizeFormatter.formatBytes(context, totalBytes)}'
+        : '';
 
-    final Color accent = hasIssues ? colorScheme.error : colorScheme.primary;
-    final IconData icon = hasIssues
-        ? Icons.error_outline_rounded
-        : Icons.check_rounded;
+    return Text(
+      '$count $surahWord$sizeText',
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: colorScheme.onSurfaceVariant,
+      ),
+    );
+  }
+}
 
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceSmall,
-        vertical: tokens.spaceExtraSmall,
+class _OverflowMenu extends StatelessWidget {
+  const _OverflowMenu({required this.onDeleteAll});
+
+  final VoidCallback onDeleteAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+
+    return PopupMenuButton<String>(
+      icon: Icon(
+        Icons.more_vert_rounded,
+        color: colorScheme.onSurfaceVariant,
       ),
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: tokens.opacitySubtle),
-        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+      tooltip: context.l10n.deleteAll,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(tokens.radiusMedium),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: tokens.iconSizeSmall, color: accent),
-          SizedBox(width: tokens.spaceExtraSmall),
-          Text(
-            '$completedCount/${downloads.length}',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: accent,
-              fontWeight: FontWeight.w800,
-            ),
+      onSelected: (value) {
+        if (value == 'delete_all') onDeleteAll();
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'delete_all',
+          child: Row(
+            children: [
+              Icon(
+                Icons.delete_outline_rounded,
+                color: colorScheme.error,
+                size: tokens.iconSizeMedium,
+              ),
+              SizedBox(width: tokens.spaceMedium),
+              Text(
+                context.l10n.deleteAll,
+                style: TextStyle(color: colorScheme.error),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DownloadList extends StatelessWidget {
+  const _DownloadList({
+    required this.downloads,
+    required this.dividerColor,
+    required this.horizontalPadding,
+    required this.onDelete,
+  });
+
+  final List<DownloadItem> downloads;
+  final Color dividerColor;
+  final double horizontalPadding;
+  final void Function(String downloadId) onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: downloads.asMap().entries.map((entry) {
+        final int index = entry.key;
+        final DownloadItem download = entry.value;
+        return Column(
+          children: [
+            DownloadItemCard(
+              download: download,
+              onDelete: () => onDelete(download.id),
+            ),
+            if (index != downloads.length - 1)
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                child: TilawaDivider(height: 1, color: dividerColor),
+              ),
+          ],
+        );
+      }).toList(),
     );
   }
 }

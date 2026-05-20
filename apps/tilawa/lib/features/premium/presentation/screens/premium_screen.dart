@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/quran_player_widget.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
 import '../bloc/premium_bloc.dart';
@@ -35,7 +32,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
       children: [
         Scaffold(
           appBar: AppBar(
-            leading: context.canPop() ? const TilawaBackButton() : null,
             title: Text(context.l10n.premium),
           ),
           body: BlocConsumer<PremiumBloc, PremiumState>(
@@ -87,7 +83,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
             },
           ),
         ),
-        const Positioned.fill(child: QuranPlayerWidget()),
       ],
     );
   }

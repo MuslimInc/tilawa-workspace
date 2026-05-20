@@ -7,7 +7,7 @@ import '../lib/src/atoms/tilawa_error_state.dart';
 import '../lib/src/atoms/tilawa_icon_toggle.dart';
 import '../lib/src/foundation/component_tokens/component_tokens_theme.dart';
 import '../lib/src/foundation/design_tokens.dart';
-import '../lib/src/molecules/language_switcher.dart';
+import '../lib/src/molecules/tilawa_language_switcher.dart';
 import '../lib/src/molecules/tilawa_feedback_strip.dart';
 import '../lib/src/molecules/tilawa_permission_banner.dart';
 import '../lib/src/molecules/tilawa_selection_tile.dart';

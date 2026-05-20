@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
 
 class TilawaIconActionButton extends StatefulWidget {
   const TilawaIconActionButton({
@@ -51,15 +52,18 @@ class TilawaIconActionButton extends StatefulWidget {
 
 class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
     with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
+  late final AnimationController _animationController = AnimationController(
+    vsync: this,
+  );
 
   @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Press animation honours the kit's motion budget. Read from theme here —
+    // initState can't, but didChangeDependencies fires before the first build
+    // and again on theme/locale changes, so the controller always matches the
+    // current durationMedium token.
+    _animationController.duration = Theme.of(context).tokens.durationMedium;
   }
 
   @override
@@ -72,6 +76,7 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
     if (!widget.enabled) {
       return;
     }
+    TilawaInteractionFeedback.trigger(TilawaHaptic.lightImpact);
     _animationController.forward().then((_) {
       _animationController.reverse();
     });
@@ -102,7 +107,7 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
         color: widget.backgroundColor ?? theme.colorScheme.surface,
         borderRadius: effectiveBorderRadius,
         child: ScaleTransition(
-          scale: Tween<double>(begin: 1.0, end: 0.92).animate(
+          scale: Tween<double>(begin: 1.0, end: TilawaInteractionFeedback.pressScaleEnd).animate(
             CurvedAnimation(
               parent: _animationController,
               curve: Curves.easeInOut,

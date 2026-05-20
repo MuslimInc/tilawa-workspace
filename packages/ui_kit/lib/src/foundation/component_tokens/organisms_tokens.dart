@@ -1498,7 +1498,7 @@ class TilawaImmersiveComposerTokens {
     final surface = colorScheme.surface;
     return TilawaImmersiveComposerTokens(
       defaultAutoHideDuration: const Duration(seconds: 3),
-      transitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 400),
       backgroundBlurScale: backgroundBlurScale,
       backgroundOverlayOpacity: backgroundOverlayOpacity,
       overlayBorderOpacity: overlayBorderOpacity,
@@ -1681,6 +1681,9 @@ class TilawaBottomSheetScaffoldTokens {
     required this.headerPadding,
     required this.bodyPadding,
     required this.closeButtonSize,
+    required this.footerPadding,
+    required this.footerActionGap,
+    required this.footerTopBorderWidth,
   });
 
   final double topRadius;
@@ -1688,12 +1691,24 @@ class TilawaBottomSheetScaffoldTokens {
   final EdgeInsetsGeometry bodyPadding;
   final double closeButtonSize;
 
+  /// Insets around the sticky [TilawaBottomSheetScaffold.footer] slot.
+  final EdgeInsetsGeometry footerPadding;
+
+  /// Horizontal or vertical gap between primary and secondary footer actions.
+  final double footerActionGap;
+
+  /// Hairline above the footer separating scroll body from thumb-zone actions.
+  final double footerTopBorderWidth;
+
   factory TilawaBottomSheetScaffoldTokens.defaults() {
     return const TilawaBottomSheetScaffoldTokens(
       topRadius: 28,
       headerPadding: EdgeInsets.fromLTRB(16, 8, 12, 12),
       bodyPadding: EdgeInsets.fromLTRB(16, 12, 16, 24),
       closeButtonSize: 40,
+      footerPadding: EdgeInsets.fromLTRB(16, 12, 16, 16),
+      footerActionGap: 12,
+      footerTopBorderWidth: 0.5,
     );
   }
 
@@ -1702,12 +1717,18 @@ class TilawaBottomSheetScaffoldTokens {
     EdgeInsetsGeometry? headerPadding,
     EdgeInsetsGeometry? bodyPadding,
     double? closeButtonSize,
+    EdgeInsetsGeometry? footerPadding,
+    double? footerActionGap,
+    double? footerTopBorderWidth,
   }) {
     return TilawaBottomSheetScaffoldTokens(
       topRadius: topRadius ?? this.topRadius,
       headerPadding: headerPadding ?? this.headerPadding,
       bodyPadding: bodyPadding ?? this.bodyPadding,
       closeButtonSize: closeButtonSize ?? this.closeButtonSize,
+      footerPadding: footerPadding ?? this.footerPadding,
+      footerActionGap: footerActionGap ?? this.footerActionGap,
+      footerTopBorderWidth: footerTopBorderWidth ?? this.footerTopBorderWidth,
     );
   }
 
@@ -1725,6 +1746,17 @@ class TilawaBottomSheetScaffoldTokens {
       )!,
       bodyPadding: EdgeInsetsGeometry.lerp(a.bodyPadding, b.bodyPadding, t)!,
       closeButtonSize: lerpTokenDouble(a.closeButtonSize, b.closeButtonSize, t),
+      footerPadding: EdgeInsetsGeometry.lerp(
+        a.footerPadding,
+        b.footerPadding,
+        t,
+      )!,
+      footerActionGap: lerpTokenDouble(a.footerActionGap, b.footerActionGap, t),
+      footerTopBorderWidth: lerpTokenDouble(
+        a.footerTopBorderWidth,
+        b.footerTopBorderWidth,
+        t,
+      ),
     );
   }
 }

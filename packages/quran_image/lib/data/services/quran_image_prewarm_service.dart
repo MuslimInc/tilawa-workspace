@@ -10,10 +10,9 @@ import 'package:quran_image/domain/services/quran_image_prewarmer.dart';
 
 class QuranImagePrewarmService implements QuranImagePrewarmer {
   QuranImagePrewarmService({
-    required QuranImageCacheRepository imageCacheRepository,
-    required DecodedQuranImageCache decodedImageCache,
-  }) : _imageCacheRepository = imageCacheRepository,
-       _decodedImageCache = decodedImageCache;
+    required this._imageCacheRepository,
+    required this._decodedImageCache,
+  });
 
   static const int _prewarmImagesPerBatch = 5;
   static const int _prewarmBatchBudgetMs = 2;

@@ -296,6 +296,12 @@ abstract class AppLocalizations {
   /// **'Now Playing'**
   String get currentPlaying;
 
+  /// Label above the queue source in the expanded player
+  ///
+  /// In en, this message translates to:
+  /// **'Playing from'**
+  String get playingFrom;
+
   /// Duration label
   ///
   /// In en, this message translates to:
@@ -1757,7 +1763,7 @@ abstract class AppLocalizations {
   /// Start button text
   ///
   /// In en, this message translates to:
-  /// **'Let\'s start our journey with the Quran'**
+  /// **'Get started'**
   String get startJourney;
 
   /// Sleep timer dialog title

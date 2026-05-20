@@ -165,7 +165,7 @@ void main() {
   group('TilawaIconActionButtonTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaIconActionButtonTokens.defaults();
-      expect(tokens.size, 44.0);
+      expect(tokens.size, 48.0);
       expect(tokens.borderRadius, 16.0);
       expect(tokens.activeBackgroundOpacity, 0.12);
       expect(tokens.activeBorderOpacity, 0.35);
@@ -207,7 +207,7 @@ void main() {
   group('TilawaSearchFieldTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSearchFieldTokens.defaults();
-      expect(tokens.height, 44.0);
+      expect(tokens.height, 48.0);
       expect(tokens.backgroundColor, isA<Color>());
       expect(tokens.borderRadius, 16.0);
       expect(tokens.contentPadding, const EdgeInsets.symmetric(vertical: 12));
@@ -617,6 +617,12 @@ void main() {
         const EdgeInsets.fromLTRB(16, 12, 16, 24),
       );
       expect(tokens.closeButtonSize, 40.0);
+      expect(
+        tokens.footerPadding,
+        const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      );
+      expect(tokens.footerActionGap, 12.0);
+      expect(tokens.footerTopBorderWidth, 0.5);
     });
 
     test('copyWith updates padding and sizes', () {
@@ -980,13 +986,13 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaImmersiveComposerTokens.defaults();
       expect(tokens.defaultAutoHideDuration, const Duration(seconds: 3));
-      expect(tokens.transitionDuration, const Duration(milliseconds: 300));
+      expect(tokens.transitionDuration, const Duration(milliseconds: 400));
       expect(tokens.backgroundBlurScale, 0.9);
       expect(tokens.backgroundOverlayOpacity, 0.42);
       expect(tokens.overlayBorderOpacity, 0.1);
       expect(tokens.shortWindowHeightBreakpoint, 760.0);
       expect(tokens.shortWindowPanelHeightFactor, 0.5);
-      expect(tokens.headerButtonSize, 44.0);
+      expect(tokens.headerButtonSize, 48.0);
       expect(tokens.composerSurfaceColor, isA<Color>());
       expect(tokens.panelBorderColor, isA<Color>());
     });

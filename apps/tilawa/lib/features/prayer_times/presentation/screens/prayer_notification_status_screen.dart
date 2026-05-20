@@ -182,7 +182,7 @@ class _StatusContent extends StatelessWidget {
               child: TilawaButton(
                 text: l10n.close,
                 variant: TilawaButtonVariant.ghost,
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => const HomeRoute().go(context),
               ),
             ),
           ],
@@ -262,7 +262,7 @@ class _ErrorView extends StatelessWidget {
         action: TilawaButton(
           text: context.l10n.close,
           variant: TilawaButtonVariant.outline,
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => const HomeRoute().go(context),
         ),
       ),
     );

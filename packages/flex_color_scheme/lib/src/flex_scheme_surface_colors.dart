@@ -31,14 +31,14 @@ class FlexSchemeSurfaceColors with Diagnosticable {
   /// the [FlexSchemeSurfaceColors.blend] factory.
   const FlexSchemeSurfaceColors({
     required this.surface,
-    Color? surfaceDim,
-    Color? surfaceBright,
-    Color? surfaceContainerLowest,
-    Color? surfaceContainerLow,
-    Color? surfaceContainer,
-    Color? surfaceContainerHigh,
-    Color? surfaceContainerHighest,
-    Color? inverseSurface,
+    this._surfaceDim,
+    this._surfaceBright,
+    this._surfaceContainerLowest,
+    this._surfaceContainerLow,
+    this._surfaceContainer,
+    this._surfaceContainerHigh,
+    this._surfaceContainerHighest,
+    this._inverseSurface,
     required this.scaffoldBackground,
     required this.dialogBackground,
     @Deprecated(
@@ -53,14 +53,7 @@ class FlexSchemeSurfaceColors with Diagnosticable {
       'It no longer has any function in FCS v8 and will be removed in v9.',
     )
     this.background,
-  }) : _surfaceDim = surfaceDim,
-       _surfaceBright = surfaceBright,
-       _surfaceContainerLowest = surfaceContainerLowest,
-       _surfaceContainerLow = surfaceContainerLow,
-       _surfaceContainer = surfaceContainer,
-       _surfaceContainerHigh = surfaceContainerHigh,
-       _surfaceContainerHighest = surfaceContainerHighest,
-       _inverseSurface = inverseSurface;
+  });
 
   /// The background color for widgets like [Card] and [Dialog].
   ///

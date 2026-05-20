@@ -16,6 +16,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'app_router_config.dart';
+import 'shell_route_location.dart';
 import 'json_type_registry.dart';
 
 class AppRouter {
@@ -157,8 +158,8 @@ class AppRouter {
           'matchedLocation': _currentLocation(),
           'coldStart': coldStart,
           'isPrayerStatus': isPrayerStatus,
-          'stackDepth': router.routerDelegate.currentConfiguration.matches
-              .length,
+          'stackDepth':
+              router.routerDelegate.currentConfiguration.matches.length,
         },
       );
       // #endregion
@@ -265,34 +266,37 @@ class AppRouter {
         ColdStartNavigationMetrics.recordRouterSplash();
       }
       _router = GoRouter(
-      navigatorKey: navigatorKey,
-      initialLocation: initialLocation,
-      initialExtra: null,
-      overridePlatformDefaultLocation:
-          !AppLinksConfig.usePlatformDefaultLocation,
-      debugLogDiagnostics: kDebugMode,
-      // Disable restoration when launched from notification to prevent
-      // the restored state from overriding notification navigation
-      restorationScopeId: disableStateRestoration
-          ? null
-          : AppStrings.routerRestorationScopeId,
-      redirect: redirect,
-      routes: $appRoutes,
-      errorBuilder: errorBuilder,
-      extraCodec: const AppRouterExtraCodec(),
-      observers: _getObservers(),
+        navigatorKey: navigatorKey,
+        initialLocation: initialLocation,
+        initialExtra: null,
+        overridePlatformDefaultLocation:
+            !AppLinksConfig.usePlatformDefaultLocation,
+        debugLogDiagnostics: kDebugMode,
+        // Disable restoration when launched from notification to prevent
+        // the restored state from overriding notification navigation
+        restorationScopeId: disableStateRestoration
+            ? null
+            : AppStrings.routerRestorationScopeId,
+        redirect: redirect,
+        routes: $appRoutes,
+        errorBuilder: errorBuilder,
+        extraCodec: const AppRouterExtraCodec(),
+        observers: _getObservers(),
       );
     }
     return _router!;
   }
 
   static List<NavigatorObserver> _getObservers() {
+    final List<NavigatorObserver> observers = <NavigatorObserver>[];
     try {
-      return [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)];
+      observers.add(
+        FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance),
+      );
     } catch (e) {
-      // In tests or if Firebase is not initialized, return an empty list
-      return [];
+      // In tests or if Firebase is not initialized, skip analytics observer.
     }
+    return observers;
   }
 
   static bool _isDuplicateNotificationNavigation(
@@ -355,10 +359,7 @@ class AppRouter {
 
   static String? _currentLocation() {
     try {
-      final List<RouteMatchBase> matches =
-          router.routerDelegate.currentConfiguration.matches;
-      if (matches.isEmpty) return null;
-      return matches.last.matchedLocation;
+      return ShellRouteLocation.activeMatchedLocation();
     } catch (_) {
       return null;
     }

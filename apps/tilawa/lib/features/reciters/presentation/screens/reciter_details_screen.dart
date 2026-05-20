@@ -200,9 +200,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
           ),
           floatingActionButtonLocation: showBottomPlayer
               ? _CustomFloatingActionButtonLocation(
-                  offset:
-                      QuranPlayerWidget.collapsedFootprint(context) +
-                      tokens.spaceExtraLarge,
+                  offset: QuranPlayerWidget.fabBottomOffset(context),
                 )
               : FloatingActionButtonLocation.endFloat,
           body: TilawaContentBounds(
@@ -342,7 +340,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
             ),
           ),
         ),
-        const Positioned.fill(child: QuranPlayerWidget()),
       ],
     );
   }

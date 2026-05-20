@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
 
 /// A segmented control widget for switching between a small number of options.
 ///
@@ -94,7 +95,12 @@ class TilawaSegmentedControl<T> extends StatelessWidget {
             child: _SegmentButton(
               label: segment.label,
               isSelected: isSelected,
-              onTap: () => onValueChanged(segment.value),
+              onTap: () {
+                if (enabled && segment.value != selectedValue) {
+                  TilawaInteractionFeedback.trigger(TilawaHaptic.selection);
+                }
+                onValueChanged(segment.value);
+              },
               selectedBackgroundColor: effectiveSelectedColor,
               selectedTextColor: effectiveSelectedTextColor,
               unselectedTextColor: effectiveUnselectedTextColor,

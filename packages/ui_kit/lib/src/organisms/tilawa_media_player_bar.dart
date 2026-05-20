@@ -4,7 +4,8 @@ import 'package:tilawa_ui_kit/src/foundation/component_tokens.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 
 /// Minimum horizontal space reserved for surah + reciter before the bar
-/// collapses secondary transport controls (prev / next / sleep timer).
+/// collapses secondary transport controls (prev / sleep timer). Next track
+/// stays visible in compact layout (FR-004).
 const double kTilawaMediaPlayerBarMinMetadataWidth = 96.0;
 
 /// Artwork size on compact layouts (slightly smaller to free metadata space).
@@ -138,94 +139,96 @@ class TilawaMediaPlayerBar extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: borderRadius,
-        child: Semantics(
-          button: onTap != null,
-          enabled: onTap != null,
-          label: onTap != null ? resolvedOpenPlayerLabel : null,
-          child: GestureDetector(
-            onTap: onTap,
-            behavior: .opaque,
-            child: Column(
-              mainAxisSize: .min,
-              children: [
-                // Progress Bar (Slim at top)
-                progressBarOverride ??
-                    LinearProgressIndicator(
-                      value: progress,
-                      backgroundColor:
-                          componentTokens.progressTrackBackgroundColor,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        colorScheme.primary,
-                      ),
-                      minHeight: designTokens.progressHeight,
-                    ),
-                Padding(
-                  padding: componentTokens.contentPadding.resolve(
-                    Directionality.of(context),
+        child: Column(
+          mainAxisSize: .min,
+          children: [
+            // Progress Bar (Slim at top)
+            progressBarOverride ??
+                LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: componentTokens.progressTrackBackgroundColor,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    colorScheme.primary,
                   ),
-                  child: Row(
-                    children: [
-                      _ArtworkTile(
-                        size: artworkSize,
-                        radius: componentTokens.artworkRadius,
-                        placeholderColor:
-                            componentTokens.artworkPlaceholderColor,
-                        artwork: artwork,
-                        defaultIconSize: componentTokens.defaultIconSize,
-                      ),
-                      SizedBox(width: componentTokens.artworkInfoGap),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: .start,
-                          mainAxisAlignment: .center,
-                          spacing: componentTokens.infoGap,
-                          children: [
-                            Text(
-                              title,
-                              style: titleStyle,
-                              maxLines: 1,
-                              overflow: .ellipsis,
-                              textAlign: TextAlign.start,
-                            ),
-                            if (subtitle != null && subtitle!.isNotEmpty)
-                              Text(
-                                subtitle!,
-                                style: subtitleStyle,
-                                maxLines: 1,
-                                overflow: .ellipsis,
-                                textAlign: TextAlign.start,
-                              ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: componentTokens.infoControlsGap),
-                      _TransportControls(
-                        designTokens: designTokens,
-                        componentTokens: componentTokens,
-                        colorScheme: colorScheme,
-                        disabledControlColor: disabledControlColor,
-                        isPlaying: isPlaying,
-                        canGoPrevious: canGoPrevious,
-                        canGoNext: canGoNext,
-                        isSleepTimerActive: isSleepTimerActive,
-                        showSleepTimer: showSleepTimer,
-                        compact: useCompactControls,
-                        onPlayPause: onPlayPause,
-                        onPrevious: onPrevious,
-                        onNext: onNext,
-                        onSleepTimerTap: onSleepTimerTap,
-                        previousTooltip: previousTooltip,
-                        playTooltip: playTooltip,
-                        pauseTooltip: pauseTooltip,
-                        nextTooltip: nextTooltip,
-                        sleepTimerTooltip: sleepTimerTooltip,
-                      ),
-                    ],
-                  ),
+                  minHeight: designTokens.progressHeight,
                 ),
-              ],
+            Padding(
+              padding: componentTokens.contentPadding.resolve(
+                Directionality.of(context),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _OpenPlayerTapTarget(
+                      onTap: onTap,
+                      semanticLabel: onTap != null
+                          ? resolvedOpenPlayerLabel
+                          : null,
+                      child: Row(
+                        children: [
+                          _ArtworkTile(
+                            size: artworkSize,
+                            radius: componentTokens.artworkRadius,
+                            placeholderColor:
+                                componentTokens.artworkPlaceholderColor,
+                            artwork: artwork,
+                            defaultIconSize: componentTokens.defaultIconSize,
+                          ),
+                          SizedBox(width: componentTokens.artworkInfoGap),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: .start,
+                              mainAxisAlignment: .center,
+                              spacing: componentTokens.infoGap,
+                              children: [
+                                Text(
+                                  title,
+                                  style: titleStyle,
+                                  maxLines: 1,
+                                  overflow: .ellipsis,
+                                  textAlign: TextAlign.start,
+                                ),
+                                if (subtitle != null && subtitle!.isNotEmpty)
+                                  Text(
+                                    subtitle!,
+                                    style: subtitleStyle,
+                                    maxLines: 1,
+                                    overflow: .ellipsis,
+                                    textAlign: TextAlign.start,
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: componentTokens.infoControlsGap),
+                  _TransportControls(
+                    designTokens: designTokens,
+                    componentTokens: componentTokens,
+                    colorScheme: colorScheme,
+                    disabledControlColor: disabledControlColor,
+                    isPlaying: isPlaying,
+                    canGoPrevious: canGoPrevious,
+                    canGoNext: canGoNext,
+                    isSleepTimerActive: isSleepTimerActive,
+                    showSleepTimer: showSleepTimer,
+                    compact: useCompactControls,
+                    onPlayPause: onPlayPause,
+                    onPrevious: onPrevious,
+                    onNext: onNext,
+                    onSleepTimerTap: onSleepTimerTap,
+                    previousTooltip: previousTooltip,
+                    playTooltip: playTooltip,
+                    pauseTooltip: pauseTooltip,
+                    nextTooltip: nextTooltip,
+                    sleepTimerTooltip: sleepTimerTooltip,
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -244,8 +247,9 @@ double resolveTilawaMediaPlayerBarLayoutWidth(
       kTilawaMediaPlayerBarDefaultHorizontalInset;
 }
 
-/// Returns true when the bar should hide prev/next/sleep timer so metadata
-/// keeps at least [kTilawaMediaPlayerBarMinMetadataWidth] logical pixels.
+/// Returns true when the bar should hide the sleep timer (keeping play/pause)
+/// so metadata keeps at least [kTilawaMediaPlayerBarMinMetadataWidth]
+/// logical pixels.
 bool tilawaMediaPlayerBarNeedsCompactControls({
   required double maxWidth,
   required TilawaMediaPlayerBarTokens tokens,
@@ -275,9 +279,42 @@ double _tilawaMediaPlayerBarFullTransportWidth({
   required TilawaMediaPlayerBarTokens tokens,
   required bool showSleepTimer,
 }) {
-  final int controlCount = showSleepTimer ? 4 : 3;
+  final int controlCount = showSleepTimer ? 2 : 1;
   return controlCount * tokens.controlButtonSize +
       (controlCount - 1) * tokens.controlsGap;
+}
+
+/// Artwork + metadata strip that opens the full player when tapped.
+///
+/// Transport controls sit outside this target so play/pause taps never
+/// also fire [TilawaMediaPlayerBar.onTap] (FR-003).
+class _OpenPlayerTapTarget extends StatelessWidget {
+  const _OpenPlayerTapTarget({
+    required this.onTap,
+    required this.semanticLabel,
+    required this.child,
+  });
+
+  final VoidCallback? onTap;
+  final String? semanticLabel;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onTap == null) {
+      return child;
+    }
+
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: .opaque,
+        child: child,
+      ),
+    );
+  }
 }
 
 class _ArtworkTile extends StatelessWidget {
@@ -368,27 +405,12 @@ class _TransportControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Transport order stays LTR (prev | play | next) per platform convention,
-    // even when the app locale is Arabic.
     return Directionality(
       textDirection: .ltr,
       child: Row(
         mainAxisSize: .min,
         spacing: componentTokens.controlsGap,
         children: [
-          if (!compact) ...[
-            _TransportIconButton(
-              size: componentTokens.controlButtonSize,
-              tooltip: previousTooltip ?? 'Previous track',
-              icon: FluentIcons.previous_20_filled,
-              iconSize: designTokens.iconSizeMedium,
-              enabled: canGoPrevious,
-              color: canGoPrevious
-                  ? colorScheme.onSurfaceVariant
-                  : disabledControlColor,
-              onPressed: canGoPrevious ? onPrevious : null,
-            ),
-          ],
           _PlayPauseButton(
             size: componentTokens.playPauseButtonSize,
             iconSize: componentTokens.playPauseIconSize,
@@ -397,33 +419,20 @@ class _TransportControls extends StatelessWidget {
             pauseTooltip: pauseTooltip,
             onPressed: onPlayPause,
           ),
-          if (!compact) ...[
+          if (!compact && showSleepTimer)
             _TransportIconButton(
               size: componentTokens.controlButtonSize,
-              tooltip: nextTooltip ?? 'Next track',
-              icon: FluentIcons.next_20_filled,
+              tooltip: sleepTimerTooltip ?? 'Sleep timer',
+              icon: isSleepTimerActive
+                  ? FluentIcons.timer_20_filled
+                  : FluentIcons.timer_20_regular,
               iconSize: designTokens.iconSizeMedium,
-              enabled: canGoNext,
-              color: canGoNext
-                  ? colorScheme.onSurfaceVariant
+              enabled: true,
+              color: isSleepTimerActive
+                  ? colorScheme.primary
                   : disabledControlColor,
-              onPressed: canGoNext ? onNext : null,
+              onPressed: onSleepTimerTap,
             ),
-            if (showSleepTimer)
-              _TransportIconButton(
-                size: componentTokens.controlButtonSize,
-                tooltip: sleepTimerTooltip ?? 'Sleep timer',
-                icon: isSleepTimerActive
-                    ? FluentIcons.timer_20_filled
-                    : FluentIcons.timer_20_regular,
-                iconSize: designTokens.iconSizeMedium,
-                enabled: true,
-                color: isSleepTimerActive
-                    ? colorScheme.primary
-                    : disabledControlColor,
-                onPressed: onSleepTimerTap,
-              ),
-          ],
         ],
       ),
     );

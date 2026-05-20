@@ -13,8 +13,7 @@ abstract class AthkarLocalDataSource {
 
 @LazySingleton(as: AthkarLocalDataSource)
 class AthkarLocalDataSourceImpl implements AthkarLocalDataSource {
-  AthkarLocalDataSourceImpl({required AssetBundle assetBundle})
-    : _assetBundle = assetBundle;
+  AthkarLocalDataSourceImpl({required this._assetBundle});
 
   final AssetBundle _assetBundle;
   static const String _assetPath = 'assets/data/athkar.json';

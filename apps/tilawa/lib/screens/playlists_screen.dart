@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/playlists/domain/entities/playlist.dart';
@@ -33,7 +31,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: context.canPop() ? const TilawaBackButton() : null,
         title: Text(l10n.playlists),
         actions: [
           IconButton(

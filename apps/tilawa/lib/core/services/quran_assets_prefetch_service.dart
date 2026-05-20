@@ -15,16 +15,12 @@ enum _QuranAssetKind { images, fonts }
 /// Best-effort background preparation for large Quran asset bundles.
 class QuranAssetsPrefetchService {
   QuranAssetsPrefetchService({
-    required Connectivity connectivity,
-    required PrepareQuranImageCacheUseCase prepareQuranImageCacheUseCase,
-    required QuranImageCacheRepository imageCacheRepository,
-    required QuranFontService quranFontService,
-    required QuranAssetsPrefetchPolicyService policyService,
-  }) : _connectivity = connectivity,
-       _prepareQuranImageCacheUseCase = prepareQuranImageCacheUseCase,
-       _imageCacheRepository = imageCacheRepository,
-       _quranFontService = quranFontService,
-       _policyService = policyService;
+    required this._connectivity,
+    required this._prepareQuranImageCacheUseCase,
+    required this._imageCacheRepository,
+    required this._quranFontService,
+    required this._policyService,
+  });
 
   final Connectivity _connectivity;
   final PrepareQuranImageCacheUseCase _prepareQuranImageCacheUseCase;

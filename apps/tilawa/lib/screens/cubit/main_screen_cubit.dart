@@ -123,8 +123,13 @@ class MainScreenCubit extends Cubit<MainScreenState> {
 
   /// Switches the active tab and marks it as built so [MainTabViewport] keeps
   /// its subtree alive.
-  void selectTab(int index) {
-    if (state.currentIndex == index) return;
+  ///
+  /// When [force] is true, emits even if [index] is already active (e.g. after
+  /// popping a shell push route back to home on the same tab).
+  void selectTab(int index, {bool force = false}) {
+    if (!force && state.currentIndex == index) {
+      return;
+    }
     emit(
       state.copyWith(
         currentIndex: index,

@@ -79,4 +79,9 @@ abstract final class ReciterSemanticsIds {
   /// [surahId] is [SurahEntity.formattedId] (e.g. "001") or a fallback index.
   static String surahDownloadButton(String surahId) =>
       'surah_download_button_$surahId';
+
+  /// Tappable row for an individual surah on the Reciter Details screen.
+  /// Tapping it starts playback of that surah.
+  /// [surahId] is [SurahEntity.formattedId] (e.g. "001") or a fallback index.
+  static String surahRow(String surahId) => 'surah_row_$surahId';
 }

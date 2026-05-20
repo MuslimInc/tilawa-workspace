@@ -218,8 +218,8 @@ class _TestQuranImageCacheRepository implements QuranImageCacheRepository {
     required this.linePathsByPage,
     this.prepareStatuses = const <QuranImageCacheStatus>[],
     this.finalStatus = const QuranImageCacheStatus.ready(),
-    List<QuranImageCacheStatus>? finalStatuses,
-  }) : _finalStatuses = finalStatuses;
+    this._finalStatuses,
+  });
 
   final Map<int, Map<int, String>> linePathsByPage;
   final List<QuranImageCacheStatus> prepareStatuses;

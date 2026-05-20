@@ -22,8 +22,8 @@ import '../logging/app_logger.dart';
 @lazySingleton
 class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   AndroidAdhanAlarmPlayer({
-    @visibleForTesting @ignoreParam bool? isSupportedOverride,
-  }) : _isSupportedOverride = isSupportedOverride {
+    @visibleForTesting @ignoreParam this._isSupportedOverride,
+  }) {
     _channel.setMethodCallHandler((call) async {
       if (call.method == 'onNotificationTapped') {
         final args = call.arguments;

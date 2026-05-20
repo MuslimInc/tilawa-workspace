@@ -3,13 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/quran_player_widget.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/entities/qibla_direction_entity.dart';
 import '../bloc/qibla_bloc.dart';
 import '../constants/qibla_constants.dart';
@@ -84,7 +81,7 @@ class _QiblaScreenState extends State<QiblaScreen> {
             backgroundColor: colorScheme.surface,
             appBar: AppBar(
               elevation: 0,
-              leading: context.canPop() ? const TilawaBackButton() : null,
+
               title: Text(context.l10n.qiblaDirection),
             ),
             body: SafeArea(
@@ -112,7 +109,6 @@ class _QiblaScreenState extends State<QiblaScreen> {
             ),
           ),
         ),
-        const Positioned.fill(child: QuranPlayerWidget()),
       ],
     );
   }

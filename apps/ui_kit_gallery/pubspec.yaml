@@ -1,0 +1,23 @@
+name: ui_kit_gallery
+resolution: workspace
+description: Interactive gallery for Tilawa UI Kit components.
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  cupertino_icons: ^1.0.8
+  flutter:
+    sdk: flutter
+  tilawa_ui_kit:
+    path: ../../packages/ui_kit
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 const arabicLanguageCode = 'ar';
 const englishLanguageCode = 'en';
 
@@ -18,14 +16,8 @@ class LanguageConfig {
   // Private constructor to prevent instantiation
   LanguageConfig._();
 
-  /// Default language code for the app
-  static String get defaultLanguageCode {
-    final String deviceLocal = PlatformDispatcher.instance.locale.languageCode;
-    if (supportedLanguageCodes.contains(deviceLocal)) {
-      return deviceLocal;
-    }
-    return arabicLanguageCode;
-  }
+  /// Default language code for the app (first launch and fallbacks).
+  static const String defaultLanguageCode = arabicLanguageCode;
 
   /// Supported language codes in order of preference
   static const List<String> supportedLanguageCodes = [
@@ -38,14 +30,10 @@ class LanguageConfig {
 
   /// Convert app language code to API language code
   static String convertToApiLanguageCode(String? languageCode) {
-    final String deviceLocal = PlatformDispatcher.instance.locale.languageCode;
     return switch (languageCode) {
       englishLanguageCode => _englishApiLanguageCode,
       arabicLanguageCode => _arabicApiLanguageCode,
-      _ =>
-        deviceLocal == arabicLanguageCode
-            ? _arabicApiLanguageCode
-            : _englishApiLanguageCode,
+      _ => _arabicApiLanguageCode,
     };
   }
 

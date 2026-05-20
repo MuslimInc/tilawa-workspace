@@ -138,6 +138,10 @@
     "@currentPlaying": {
         "description": "Current playing indicator"
     },
+    "playingFrom": "قيد التشغيل من",
+    "@playingFrom": {
+        "description": "Label above the queue source in the expanded player"
+    },
     "duration": "المدة",
     "@duration": {
         "description": "Duration label"
@@ -1280,7 +1284,7 @@
     "@onboardingDesc3": {
         "description": "Onboarding page 3 description"
     },
-    "startJourney": "لنبدأ رحلتنا مع القرآن",
+    "startJourney": "ابدأ",
     "@startJourney": {
         "description": "Start button text"
     },

@@ -14,16 +14,16 @@ PreviewThemeData moleculesPreviewTheme() {
 }
 
 @Preview(
-  name: 'ArabicAlphabetScrollbar',
+  name: 'TilawaAlphabetScrollbar',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
 )
-Widget previewArabicAlphabetScrollbar() {
+Widget previewTilawaAlphabetScrollbar() {
   return Scaffold(
     body: Center(
       child: SizedBox(
         height: 480,
-        child: ArabicAlphabetScrollbar(
+        child: TilawaAlphabetScrollbar(
           letters: const ['ا', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د'],
           selectedLetter: 'ت',
           onLetterSelected: (_) {},
@@ -37,11 +37,11 @@ Widget previewArabicAlphabetScrollbar() {
 }
 
 @Preview(
-  name: 'LanguageSwitcher',
+  name: 'TilawaLanguageSwitcher',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
 )
-Widget previewLanguageSwitcher() {
+Widget previewTilawaLanguageSwitcher() {
   return Scaffold(
     body: Center(
       child: Padding(
@@ -58,11 +58,11 @@ Widget previewLanguageSwitcher() {
 }
 
 @Preview(
-  name: 'LanguageSwitcher (Arabic selected)',
+  name: 'TilawaLanguageSwitcher (Arabic selected)',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
 )
-Widget previewLanguageSwitcherArabicSelected() {
+Widget previewTilawaLanguageSwitcherArabicSelected() {
   return Scaffold(
     body: Center(
       child: Padding(
@@ -78,36 +78,50 @@ Widget previewLanguageSwitcherArabicSelected() {
   );
 }
 
-@Preview(name: 'MetadataChip', group: 'Molecules', theme: moleculesPreviewTheme)
-Widget previewMetadataChip() {
+@Preview(
+  name: 'TilawaMetadataChip',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaMetadataChip() {
   return const Scaffold(
     body: Center(
-      child: MetadataChip(label: '604 pages', icon: Icons.menu_book_rounded),
+      child: TilawaMetadataChip(
+        label: '604 pages',
+        icon: Icons.menu_book_rounded,
+      ),
     ),
   );
 }
 
 @Preview(
-  name: 'MetadataChip (dark)',
+  name: 'TilawaMetadataChip (dark)',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
 )
-Widget previewMetadataChipDark() {
+Widget previewTilawaMetadataChipDark() {
   return const Scaffold(
     backgroundColor: Colors.black,
     body: Center(
-      child: MetadataChip(label: '604 pages', icon: Icons.menu_book_rounded),
+      child: TilawaMetadataChip(
+        label: '604 pages',
+        icon: Icons.menu_book_rounded,
+      ),
     ),
   );
 }
 
-@Preview(name: 'SeekBar', group: 'Molecules', theme: moleculesPreviewTheme)
-Widget previewSeekBar() {
+@Preview(
+  name: 'TilawaSeekBar',
+  group: 'Molecules',
+  theme: moleculesPreviewTheme,
+)
+Widget previewTilawaSeekBar() {
   return Scaffold(
     body: Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Center(
-        child: SeekBar(
+        child: TilawaSeekBar(
           duration: const Duration(minutes: 5),
           position: const Duration(minutes: 2, seconds: 30),
           bufferedPosition: const Duration(minutes: 3),
@@ -119,18 +133,18 @@ Widget previewSeekBar() {
 }
 
 @Preview(
-  name: 'SelectionPill',
+  name: 'TilawaSelectionPill',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
 )
-Widget previewSelectionPill() {
+Widget previewTilawaSelectionPill() {
   return Scaffold(
     body: Center(
       child: Wrap(
         spacing: 12,
         children: [
-          SelectionPill(label: 'All', selected: true, onTap: () {}),
-          SelectionPill(
+          TilawaSelectionPill(label: 'All', selected: true, onTap: () {}),
+          TilawaSelectionPill(
             label: 'Recent',
             selected: false,
             icon: Icons.history,
@@ -143,15 +157,15 @@ Widget previewSelectionPill() {
 }
 
 @Preview(
-  name: 'SelectionPill (dark)',
+  name: 'TilawaSelectionPill (dark)',
   group: 'Molecules',
   theme: moleculesPreviewTheme,
 )
-Widget previewSelectionPillDark() {
+Widget previewTilawaSelectionPillDark() {
   return Scaffold(
     backgroundColor: Colors.black,
     body: Center(
-      child: SelectionPill(label: 'All', selected: true, onTap: () {}),
+      child: TilawaSelectionPill(label: 'All', selected: true, onTap: () {}),
     ),
   );
 }

@@ -4,7 +4,7 @@ import 'package:injectable/injectable.dart';
 
 @lazySingleton
 class AuthService {
-  AuthService({required FirebaseAuth auth}) : _auth = auth;
+  AuthService({required this._auth});
   final FirebaseAuth _auth;
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();

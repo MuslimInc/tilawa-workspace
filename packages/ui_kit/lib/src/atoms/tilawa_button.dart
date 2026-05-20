@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+
 import '../foundation/design_tokens.dart';
+import '../foundation/tilawa_interaction_feedback.dart';
 import './tilawa_loading_indicator.dart';
 
 /// Variants for [TilawaButton] determining its visual prominence.
@@ -219,12 +221,15 @@ class TilawaButton extends StatelessWidget {
           : (semanticLabel ?? text),
       button: true,
       enabled: !_isDisabled,
-      child: shrinkWrapTapTarget
-          ? textButton
-          : ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
-              child: textButton,
-            ),
+      child: TilawaPressAnimation(
+        enabled: !_isDisabled,
+        child: shrinkWrapTapTarget
+            ? textButton
+            : ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 48, minWidth: 48),
+                child: textButton,
+              ),
+      ),
     );
   }
 
@@ -249,7 +254,7 @@ class TilawaButton extends StatelessWidget {
   (double, double, double, double) _getDimensions() {
     return switch (size) {
       TilawaButtonSize.small => (32.0, 12.0, 12.0, 16.0),
-      TilawaButtonSize.medium => (44.0, 16.0, 14.0, 20.0),
+      TilawaButtonSize.medium => (48.0, 16.0, 14.0, 20.0),
       TilawaButtonSize.large => (56.0, 24.0, 16.0, 24.0),
     };
   }
@@ -292,16 +297,18 @@ class _ButtonContent extends StatelessWidget {
     // main axis when the parent is bounded, so ellipsis works without
     // [LayoutBuilder] (intrinsic-safe for e.g. Alchemist golden [Table] probes).
     // Full-width: [Expanded] unchanged.
-    final label = Text(
-      text,
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-      softWrap: false,
-      style: TextStyle(
-        fontSize: fontSize,
-        fontWeight: FontWeight.w600,
-        color: foregroundColor,
-      ).merge(textStyle),
+    final label = Center(
+      child: Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        softWrap: false,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          color: foregroundColor,
+        ).merge(textStyle),
+      ),
     );
 
     return Row(

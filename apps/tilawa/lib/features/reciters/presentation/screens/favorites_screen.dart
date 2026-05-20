@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/di/injection.dart';
@@ -8,8 +7,6 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
-import '../../../../shared/widgets/quran_player_widget.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 import '../widgets/reciter_card.dart';
@@ -38,7 +35,6 @@ class FavoritesScreen extends StatelessWidget {
           children: [
             Scaffold(
               appBar: AppBar(
-                leading: context.canPop() ? const TilawaBackButton() : null,
                 title: Text(context.l10n.favorites),
               ),
               body: BlocBuilder<FavoritesCubit, FavoritesState>(
@@ -98,7 +94,6 @@ class FavoritesScreen extends StatelessWidget {
                 },
               ),
             ),
-            const Positioned.fill(child: QuranPlayerWidget()),
           ],
         ),
       ),

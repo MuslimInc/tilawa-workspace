@@ -8,6 +8,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/player_background_configuration.dart';
 import '../cubit/player_background_cubit.dart';
 import '../cubit/player_background_state.dart';
+import '../quran_player_semantics_ids.dart';
 
 class BackgroundSourceDialog extends StatelessWidget {
   const BackgroundSourceDialog({super.key, required this.onSourceSelected});
@@ -18,67 +19,90 @@ class BackgroundSourceDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
 
-    return AlertDialog(
-      title: Text(
-        context.l10n.chooseBackgroundSource,
-        style: context.textTheme.titleLarge,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
-      ),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _SourceOption(
-              icon: FluentIcons.image_24_regular,
-              label: context.l10n.gallery,
-              onTap: () {
-                Navigator.pop(context);
-                onSourceSelected(ImageSource.gallery);
-              },
-            ),
-            SizedBox(height: tokens.spaceSmall),
-            _SourceOption(
-              icon: FluentIcons.camera_24_regular,
-              label: context.l10n.camera,
-              onTap: () {
-                Navigator.pop(context);
-                onSourceSelected(ImageSource.camera);
-              },
-            ),
-            BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
-              builder: (context, state) {
-                if (state.config.type == PlayerBackgroundType.defaultType) {
-                  return const SizedBox.shrink();
-                }
+    return Semantics(
+      identifier: QuranPlayerSemanticsIds.backgroundSourceDialog,
+      container: true,
+      child: AlertDialog(
+        title: Text(
+          context.l10n.chooseBackgroundSource,
+          style: context.textTheme.titleLarge,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Semantics(
+                identifier: QuranPlayerSemanticsIds.backgroundSourceGallery,
+                button: true,
+                child: _SourceOption(
+                  icon: FluentIcons.image_24_regular,
+                  label: context.l10n.gallery,
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSourceSelected(ImageSource.gallery);
+                  },
+                ),
+              ),
+              SizedBox(height: tokens.spaceSmall),
+              Semantics(
+                identifier: QuranPlayerSemanticsIds.backgroundSourceCamera,
+                button: true,
+                child: _SourceOption(
+                  icon: FluentIcons.camera_24_regular,
+                  label: context.l10n.camera,
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSourceSelected(ImageSource.camera);
+                  },
+                ),
+              ),
+              BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
+                builder: (context, state) {
+                  if (state.config.type == PlayerBackgroundType.defaultType) {
+                    return const SizedBox.shrink();
+                  }
 
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Divider(),
-                    _SourceOption(
-                      icon: FluentIcons.delete_24_regular,
-                      label: context.l10n.resetToDefault,
-                      onTap: () {
-                        Navigator.pop(context);
-                        context.read<PlayerBackgroundCubit>().resetToDefault();
-                      },
-                    ),
-                  ],
-                );
-              },
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Divider(),
+                      Semantics(
+                        identifier:
+                            QuranPlayerSemanticsIds.backgroundSourceReset,
+                        button: true,
+                        child: _SourceOption(
+                          icon: FluentIcons.delete_24_regular,
+                          label: context.l10n.resetToDefault,
+                          onTap: () {
+                            Navigator.pop(context);
+                            context
+                                .read<PlayerBackgroundCubit>()
+                                .resetToDefault();
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          Semantics(
+            identifier: QuranPlayerSemanticsIds.backgroundSourceClose,
+            button: true,
+            child: TilawaButton(
+              text: context.l10n.close,
+              variant: TilawaButtonVariant.ghost,
+              onPressed: () => Navigator.pop(context),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      actions: [
-        TilawaButton(
-          text: context.l10n.close,
-          variant: TilawaButtonVariant.ghost,
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
     );
   }
 }

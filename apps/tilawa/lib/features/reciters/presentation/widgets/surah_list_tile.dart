@@ -53,7 +53,12 @@ class SurahListTile extends StatelessWidget {
           return (playing, isCurrent);
         });
 
-    return Container(
+    return Semantics(
+      identifier: ReciterSemanticsIds.surahRow(
+        surah.formattedId.isNotEmpty ? surah.formattedId : '${index + 1}',
+      ),
+      button: true,
+      child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(tileRadius),
         border: isCurrentItem
@@ -203,6 +208,7 @@ class SurahListTile extends StatelessWidget {
             ),
           ),
         ),
+      ),
       ),
     );
   }

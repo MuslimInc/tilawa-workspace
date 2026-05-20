@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../features/audio_player/presentation/quran_player_semantics_ids.dart';
+
 void showSliderDialog({
   required BuildContext context,
   required String title,
@@ -57,33 +59,44 @@ class _VolumeSliderState extends State<_VolumeSlider> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.title, textAlign: TextAlign.center),
-      content: SizedBox(
-        height: 100.0,
-        child: Column(
-          children: [
-            Text(
-              '${currentValue.toStringAsFixed(1)}${widget.valueSuffix}',
-              style: const TextStyle(
-                fontFamily: 'Fixed',
-                fontWeight: FontWeight.bold,
-                fontSize: 24.0,
+    return Semantics(
+      identifier: QuranPlayerSemanticsIds.sliderDialog,
+      container: true,
+      child: AlertDialog(
+        title: Text(widget.title, textAlign: TextAlign.center),
+        content: SizedBox(
+          height: 100.0,
+          child: Column(
+            children: [
+              Semantics(
+                identifier: QuranPlayerSemanticsIds.sliderDialogValue,
+                child: Text(
+                  '${currentValue.toStringAsFixed(1)}${widget.valueSuffix}',
+                  style: const TextStyle(
+                    fontFamily: 'Fixed',
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24.0,
+                  ),
+                ),
               ),
-            ),
-            Slider(
-              divisions: widget.divisions,
-              min: widget.min,
-              max: widget.max,
-              value: currentValue,
-              onChanged: (newValue) {
-                setState(() {
-                  currentValue = newValue;
-                });
-                widget.onChanged(newValue);
-              },
-            ),
-          ],
+              Semantics(
+                identifier: QuranPlayerSemanticsIds.sliderDialogSlider,
+                slider: true,
+                child: Slider(
+                  divisions: widget.divisions,
+                  min: widget.min,
+                  max: widget.max,
+                  value: currentValue,
+                  onChanged: (newValue) {
+                    setState(() {
+                      currentValue = newValue;
+                    });
+                    widget.onChanged(newValue);
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

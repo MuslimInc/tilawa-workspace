@@ -28,6 +28,7 @@ import 'features/theme/presentation/theme_state_material.dart';
 import 'l10n/generated/app_localizations.dart';
 import 'core/debug/deep_link_debug_log.dart';
 import 'router/app_router.dart';
+import 'shared/widgets/quran_player_chrome.dart';
 import 'router/app_router_config.dart';
 
 class TilawaApp extends StatefulWidget {
@@ -266,12 +267,15 @@ class _DefaultRouteSystemUiOverlayState
 
   void _syncSystemUiOverlay() {
     final theme = Theme.of(context);
+    final Color? playerNavOverride = context
+        .read<QuranPlayerChromeNotifier>()
+        .systemNavigationBarColorOverride;
     // Match the OS gesture strip to the Tilawa floating bottom-nav so the
     // two read as one continuous surface — otherwise the strip leaks the
     // primary-harmonised `colorScheme.surface` underneath the white nav.
     final overlayStyle = AppSystemChromeStyle.buildDefaultAppStyle(
       theme,
-      navigationBarColor:
+      navigationBarColor: playerNavOverride ??
           theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
     );
     if (_lastAppliedStyle == overlayStyle) {
@@ -284,6 +288,7 @@ class _DefaultRouteSystemUiOverlayState
 
   @override
   Widget build(BuildContext context) {
+    context.watch<QuranPlayerChromeNotifier>();
     _syncSystemUiOverlay();
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _lastAppliedStyle!,

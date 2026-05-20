@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../domain/constants/tasbeeh_constants.dart';
 import '../../domain/entities/athkar_category.dart';
 import '../cubit/athkar_cubit.dart';
@@ -32,7 +30,6 @@ class AthkarCategoriesScreen extends StatelessWidget {
       create: (context) => getIt<AthkarCubit>()..loadCategories(),
       child: Scaffold(
         appBar: AppBar(
-          leading: context.canPop() ? const TilawaBackButton() : null,
           title: Text(context.l10n.athkar),
         ),
         body: Stack(

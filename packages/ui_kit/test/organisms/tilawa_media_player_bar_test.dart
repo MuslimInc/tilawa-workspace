@@ -25,7 +25,7 @@ void main() {
       );
     });
 
-    test('is true at 360dp with sleep timer (phone-width)', () {
+    test('is false at 360dp with play and sleep timer only', () {
       final tokens = TilawaMediaPlayerBarTokens.fromColorScheme(
         ColorScheme.fromSeed(seedColor: Colors.green),
       );
@@ -35,19 +35,19 @@ void main() {
           tokens: tokens,
           showSleepTimer: true,
         ),
-        isTrue,
+        isFalse,
       );
     });
   });
 
   group('TilawaMediaPlayerBar layout', () {
-    testWidgets('hides prev/next on narrow widths', (tester) async {
+    testWidgets('shows play/pause and sleep timer only', (tester) async {
       await tester.pumpWidget(
         _themed(
           const SizedBox(
-            width: 360,
+            width: 420,
             child: TilawaMediaPlayerBar(
-              layoutWidth: 360,
+              layoutWidth: 420,
               title: 'Surah Al-Fatiha',
               subtitle: 'Mohammad Kamal',
               progress: 0.2,
@@ -62,13 +62,17 @@ void main() {
 
       expect(find.byTooltip('Previous track'), findsNothing);
       expect(find.byTooltip('Next track'), findsNothing);
+      expect(find.byTooltip('Sleep timer'), findsOneWidget);
       expect(find.byTooltip('Pause'), findsOneWidget);
     });
 
-    testWidgets('shows full transport cluster on wide widths', (tester) async {
+    testWidgets('transport tap does not fire bar onTap', (tester) async {
+      var barTapped = false;
+      var playTapped = false;
+
       await tester.pumpWidget(
         _themed(
-          const SizedBox(
+          SizedBox(
             width: 420,
             child: TilawaMediaPlayerBar(
               layoutWidth: 420,
@@ -78,15 +82,45 @@ void main() {
               isPlaying: false,
               canGoPrevious: true,
               canGoNext: true,
-              isSleepTimerEnabled: true,
+              onTap: () => barTapped = true,
+              onPlayPause: () => playTapped = true,
             ),
           ),
         ),
       );
 
-      expect(find.byTooltip('Previous track'), findsOneWidget);
-      expect(find.byTooltip('Next track'), findsOneWidget);
-      expect(find.byTooltip('Sleep timer'), findsOneWidget);
+      await tester.tap(find.byTooltip('Play'));
+      await tester.pumpAndSettle();
+
+      expect(playTapped, isTrue);
+      expect(barTapped, isFalse);
+    });
+
+    testWidgets('metadata tap fires bar onTap', (tester) async {
+      var barTapped = false;
+
+      await tester.pumpWidget(
+        _themed(
+          SizedBox(
+            width: 420,
+            child: TilawaMediaPlayerBar(
+              layoutWidth: 420,
+              title: 'Surah Al-Fatiha',
+              subtitle: 'Mohammad Kamal',
+              progress: 0.2,
+              isPlaying: false,
+              canGoPrevious: true,
+              canGoNext: true,
+              onTap: () => barTapped = true,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Surah Al-Fatiha'));
+      await tester.pumpAndSettle();
+
+      expect(barTapped, isTrue);
     });
   });
 }
