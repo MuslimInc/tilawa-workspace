@@ -19,6 +19,7 @@ import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/qibla/presentation/bloc/qibla_bloc.dart';
+import '../router/app_router.dart';
 import '../router/app_router_config.dart';
 import '../shared/widgets/quran_player_chrome.dart';
 import '../shared/widgets/quran_player_widget.dart';
@@ -47,12 +48,20 @@ class _AppShellScreenState extends State<AppShellScreen> {
 
   bool _prayerTimesLoadScheduled = false;
   int _lastHandledIndex = 0;
+  late final MainScreenCubit _mainScreenCubit;
+
+  @override
+  void initState() {
+    super.initState();
+    _mainScreenCubit = MainScreenCubit();
+  }
 
   @override
   void dispose() {
     try {
       context.read<QuranPlayerChromeNotifier>().clearShellChrome();
     } catch (_) {}
+    _mainScreenCubit.close();
     _phoneBottomNavVisible.dispose();
     super.dispose();
   }
@@ -131,6 +140,21 @@ class _AppShellScreenState extends State<AppShellScreen> {
     return destinations.indexWhere((d) => d.index == state.currentIndex);
   }
 
+  void _navigateToShellTab(BuildContext context, int tabIndex) {
+    final String location = QuranPlayerRoutePolicy.currentMatchedLocation();
+    final bool onMainShell = QuranPlayerRoutePolicy.isMainShell(location);
+
+    if (!onMainShell) {
+      try {
+        const HomeRoute().go(context);
+      } catch (_) {
+        AppRouter.router.go(const HomeRoute().location);
+      }
+    }
+
+    _mainScreenCubit.selectTab(tabIndex, force: !onMainShell);
+  }
+
   void _onDestinationSelected(
     BuildContext context,
     int index,
@@ -142,18 +166,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
       return;
     }
 
-    final int tabIndex = destination.index!;
-    final String location = QuranPlayerRoutePolicy.currentMatchedLocation();
-    if (location == '/' || location.isEmpty) {
-      context.read<MainScreenCubit>().selectTab(tabIndex);
-      return;
-    }
-
-    const HomeRoute().go(context);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.mounted) return;
-      context.read<MainScreenCubit>().selectTab(tabIndex);
-    });
+    _navigateToShellTab(context, destination.index!);
   }
 
   @override
@@ -161,7 +174,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
     PerfLogger.markBuild('AppShellScreen');
     return MultiBlocProvider(
       providers: [
-        BlocProvider<MainScreenCubit>(create: (_) => MainScreenCubit()),
+        BlocProvider<MainScreenCubit>.value(value: _mainScreenCubit),
         BlocProvider<PrayerPermissionsCubit>(
           create: (_) => getIt<PrayerPermissionsCubit>()..checkCapability(),
         ),
@@ -301,7 +314,7 @@ class _AppShellChrome extends StatelessWidget {
     );
     final bool showPlayer =
         QuranPlayerRoutePolicy.shouldShowPlayer(location) &&
-        !AppShellRoutePolicy.isAthkarContext(location, state.currentIndex);
+        !AppShellRoutePolicy.isAthkarContext(location);
 
     final bool playerShouldShow = showPlayer &&
         (state.isAudioBindingDeferred
@@ -368,21 +381,20 @@ class _AppShellChrome extends StatelessWidget {
       canPop: _canPopShell(context, location, state),
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        if (location == '/' || location.isEmpty) {
-          context.read<MainScreenCubit>().selectTab(0);
+        final MainScreenCubit mainScreenCubit = context.read<MainScreenCubit>();
+        if (!QuranPlayerRoutePolicy.isMainShell(location)) {
+          const HomeRoute().go(context);
+          mainScreenCubit.selectTab(0);
           return;
         }
-        const HomeRoute().go(context);
       },
       child: ListenableBuilder(
         listenable: phoneBottomNavVisible,
         builder: (context, _) {
           final bool policyShowsNav =
               AppShellRoutePolicy.showsBottomNavigation(location);
-          final bool isAthkar = AppShellRoutePolicy.isAthkarContext(
-            location,
-            state.currentIndex,
-          );
+          final bool isAthkar =
+              AppShellRoutePolicy.isAthkarContext(location);
           final bool navVisible =
               policyShowsNav && !isAthkar && phoneBottomNavVisible.value;
 
@@ -433,14 +445,12 @@ class _AppShellChrome extends StatelessWidget {
     );
   }
 
+  /// Shell never exits the app; [RecitersScreen] is the only exit point.
   bool _canPopShell(
     BuildContext context,
     String location,
     MainScreenState state,
   ) {
-    if (location == '/' || location.isEmpty) {
-      return state.currentIndex == 0;
-    }
     return false;
   }
 }
