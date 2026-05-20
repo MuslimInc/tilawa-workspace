@@ -617,6 +617,12 @@ void main() {
         const EdgeInsets.fromLTRB(16, 12, 16, 24),
       );
       expect(tokens.closeButtonSize, 40.0);
+      expect(
+        tokens.footerPadding,
+        const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      );
+      expect(tokens.footerActionGap, 12.0);
+      expect(tokens.footerTopBorderWidth, 0.5);
     });
 
     test('copyWith updates padding and sizes', () {

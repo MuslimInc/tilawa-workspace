@@ -9,20 +9,20 @@
 
 ### Tokens & scaffold
 
-- [ ] **T-A01**: Add `footerPadding`, `footerGap`, and `footerBackgroundColor` (or reuse surface token) to `TilawaBottomSheetScaffoldTokens` in `molecules_tokens.dart` / `component_tokens_theme.dart`.
-- [ ] **T-A02**: Add optional `footer` parameter to `TilawaBottomSheetScaffold`; render below `children`, wrapped in `SafeArea(top: false)` and tokenised padding; apply `MediaQuery.viewInsets.bottom` for keyboard.
-- [ ] **T-A03**: Add `TilawaBottomSheetTitleRow` molecule (title + optional `trailingClose` using tokenised icon button) OR document pattern for `topBar` composition — pick one approach in implementation.
-- [ ] **T-A04**: Add `TilawaBottomSheetActions` molecule (primary + optional secondary, full-width on narrow, side-by-side when width allows).
+- [x] **T-A01**: Add `footerPadding`, `footerGap`, and `footerBackgroundColor` (or reuse surface token) to `TilawaBottomSheetScaffoldTokens` in `molecules_tokens.dart` / `component_tokens_theme.dart`.
+- [x] **T-A02**: Add optional `footer` parameter to `TilawaBottomSheetScaffold`; render below `children`, wrapped in `SafeArea(top: false)` and tokenised padding; apply `MediaQuery.viewInsets.bottom` for keyboard.
+- [x] **T-A03**: Add `TilawaBottomSheetTitleRow` molecule (title + optional `trailingClose` using tokenised icon button) OR document pattern for `topBar` composition — pick one approach in implementation.
+- [x] **T-A04**: Add `TilawaBottomSheetActions` molecule (primary + optional secondary, full-width on narrow, side-by-side when width allows).
 
 ### Helpers & docs
 
-- [ ] **T-A05**: Add sheet preset helpers on `showTilawaModalBottomSheet` or sibling file: `showTilawaFormSheet`, `showTilawaPickerSheet`, `showTilawaConfirmSheet` (thin wrappers).
-- [ ] **T-A06**: Widget tests: footer stays fixed while list scrolls; handle dismiss still works; RTL close button on end edge.
-- [ ] **T-A07**: Gallery demos: form sheet with footer actions; picker sheet with list + Done footer.
+- [x] **T-A05**: Add sheet preset helpers on `showTilawaModalBottomSheet` or sibling file: `showTilawaFormSheet`, `showTilawaPickerSheet`, `showTilawaConfirmSheet` (thin wrappers).
+- [x] **T-A06**: Widget tests: footer stays fixed while list scrolls; handle dismiss still works; RTL close button on end edge.
+- [x] **T-A07**: Gallery demos: form sheet with footer actions; picker sheet with list + Done footer.
 
 ### Verification
 
-- [ ] **T-A90**: `flutter test` green for `tilawa_bottom_sheet_scaffold_test.dart` + new tests.
+- [x] **T-A90**: `flutter test` green for `tilawa_bottom_sheet_scaffold_test.dart` + new tests.
 - [ ] **T-A91**: Manual thumb-zone check on SE viewport (gallery).
 
 ---

@@ -12,6 +12,10 @@ import 'component_tokens.dart';
 /// Place scrollable regions (e.g. [ListView] inside [Flexible]) in [children];
 /// apply [resolvedBodyPadding] inside the scrollable viewport when the child
 /// cannot be wrapped in [Padding] (e.g. when using [Flexible]).
+///
+/// When [footer] is set, it renders below [children] outside the scroll
+/// viewport with safe-area and keyboard insets so primary actions stay in the
+/// thumb zone (spec 015 FR-A01).
 class TilawaBottomSheetScaffold extends StatelessWidget {
   const TilawaBottomSheetScaffold({
     super.key,
@@ -19,6 +23,7 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
     this.topBar,
     this.betweenTopBarAndBody = const <Widget>[],
     required this.children,
+    this.footer,
   });
 
   final bool showHandle;
@@ -34,9 +39,16 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
   /// Remaining column children (e.g. [Flexible] + [ListView]).
   final List<Widget> children;
 
+  /// Sticky actions below the scroll body (not scrolled with [children]).
+  final Widget? footer;
+
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).componentTokens.bottomSheetScaffold;
+    final theme = Theme.of(context);
+    final tokens = theme.componentTokens.bottomSheetScaffold;
+    final direction = Directionality.of(context);
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -49,6 +61,25 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
           ),
         ...betweenTopBarAndBody,
         ...children,
+        if (footer != null) ...[
+          Divider(
+            height: tokens.footerTopBorderWidth,
+            thickness: tokens.footerTopBorderWidth,
+            color: theme.colorScheme.outlineVariant,
+          ),
+          Material(
+            color: theme.colorScheme.surface,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: tokens.footerPadding
+                    .resolve(direction)
+                    .add(EdgeInsets.only(bottom: bottomInset)),
+                child: footer,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

@@ -55,22 +55,36 @@ abstract final class FoundationDemos {
     return GalleryDemoFrame(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
         children: [
           const Text(
-            'Opens via showTilawaModalBottomSheet with tokenized shape '
-            'and max height.',
+            'Sheet presets with sticky footer actions in the thumb zone.',
           ),
-          const SizedBox(height: 16),
           TilawaButton(
-            text: 'Show modal sheet',
-            onPressed: () => _openModal(context),
+            text: 'Basic modal',
+            variant: TilawaButtonVariant.outline,
+            onPressed: () => _openBasicModal(context),
+          ),
+          TilawaButton(
+            text: 'Form sheet',
+            onPressed: () => _openFormSheet(context),
+          ),
+          TilawaButton(
+            text: 'Picker sheet',
+            variant: TilawaButtonVariant.secondary,
+            onPressed: () => _openPickerSheet(context),
+          ),
+          TilawaButton(
+            text: 'Confirm sheet',
+            variant: TilawaButtonVariant.danger,
+            onPressed: () => _openConfirmSheet(context),
           ),
         ],
       ),
     );
   }
 
-  static Future<void> _openModal(BuildContext context) {
+  static Future<void> _openBasicModal(BuildContext context) {
     return showTilawaModalBottomSheet<void>(
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -78,9 +92,9 @@ abstract final class FoundationDemos {
       sheetSemanticsLabel: 'Example sheet',
       builder: (sheetContext) {
         return TilawaBottomSheetScaffold(
-          topBar: Text(
-            'Modal sheet',
-            style: Theme.of(sheetContext).textTheme.titleMedium,
+          topBar: const TilawaBottomSheetTitleRow(
+            title: 'Modal sheet',
+            trailingClose: true,
           ),
           children: const [
             Padding(
@@ -92,6 +106,72 @@ abstract final class FoundationDemos {
       },
     );
   }
+
+  static Future<void> _openFormSheet(BuildContext context) {
+    return showTilawaFormSheet<void>(
+      context: context,
+      title: 'Notification settings',
+      sheetSemanticsLabel: 'Notification settings form',
+      primaryLabel: 'Save',
+      onPrimary: () => Navigator.pop(context),
+      secondaryLabel: 'Cancel',
+      onSecondary: () => Navigator.pop(context),
+      bodyBuilder: (ctx) {
+        final padding = TilawaBottomSheetScaffold.resolvedBodyPadding(ctx);
+        return ListView(
+          padding: padding,
+          children: const [
+            TilawaSettingsSwitchTile(
+              icon: Icons.notifications_active_outlined,
+              title: 'Prayer reminders',
+              value: true,
+              onChanged: _noop,
+            ),
+            TilawaSettingsSwitchTile(
+              icon: Icons.volume_up_outlined,
+              title: 'Play adhan',
+              value: false,
+              onChanged: _noop,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  static Future<void> _openPickerSheet(BuildContext context) {
+    return showTilawaPickerSheet<void>(
+      context: context,
+      title: 'Choose reciter',
+      doneLabel: 'Done',
+      onDone: () => Navigator.pop(context),
+      bodyBuilder: (ctx) {
+        final padding = TilawaBottomSheetScaffold.resolvedBodyPadding(ctx);
+        return ListView.builder(
+          padding: padding,
+          itemCount: 8,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text('Reciter ${index + 1}'),
+              onTap: () {},
+            );
+          },
+        );
+      },
+    );
+  }
+
+  static Future<void> _openConfirmSheet(BuildContext context) {
+    return showTilawaConfirmSheet(
+      context: context,
+      title: 'Delete bookmark?',
+      message: 'This removes the bookmark from your saved list.',
+      confirmLabel: 'Delete',
+      onConfirm: () => Navigator.pop(context, true),
+    );
+  }
+
+  static void _noop(bool _) {}
 }
 
 class _BoundsSample extends StatelessWidget {

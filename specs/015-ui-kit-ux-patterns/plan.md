@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feature/ui-kit-2`
 **Created**: 2026-05-20
-**Status**: Draft
+**Status**: Draft — **Batch 1 complete**
 **Spec**: [spec.md](spec.md)
 
 ## Summary
