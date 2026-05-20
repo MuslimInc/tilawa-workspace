@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feature/ui-kit-2`
 **Created**: 2026-05-20
-**Status**: Complete (mechanical batch)
+**Status**: Complete
 **Scope**: FR-002, FR-006, FR-007. See [plan.md](plan.md).
 
 ## Doc-comment drift (FR-002)
@@ -29,6 +29,6 @@
 
 - [X] **F-001**: FR-003 — disambiguate `TilawaMediaPlayerBar.onTap` from inline transport taps.
 - [X] **F-002**: FR-004 — keep "next track" visible in compact mini-player layout.
-- [ ] **F-003**: FR-005 — sheet drag-to-dismiss or trailing close slot.
-- [ ] **F-004**: FR-001 / FR-008 — self-sized 48 dp `TilawaSwitch` atom; no Maestro identifier regressions.
+- [X] **F-003**: FR-005 — sheet drag-to-dismiss or trailing close slot.
+- [X] **F-004**: FR-001 / FR-008 — self-sized 48 dp `TilawaSwitch` atom; no Maestro identifier regressions.
 - [ ] **F-005**: Adjacent motion drift in [alphabet_scrollbar.dart:109](../../packages/ui_kit/lib/src/molecules/alphabet_scrollbar.dart#L109) and the segmented-control 300 ms `transitionDuration` token. Out of scope here; mention if they get touched incidentally.

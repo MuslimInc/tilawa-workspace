@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
-
-/// Visual slot for [Switch.adaptive] in settings rows. M3 switches request
-/// about 52x40 dp plus theme padding; fitting to this box keeps [ListTile] at
-/// [TilawaDesignTokens.minInteractiveDimension] without inflating the row.
-const Size _kSettingsSwitchSlotSize = Size(48, 30);
+import '../atoms/tilawa_switch.dart';
 
 class TilawaSettingsTile extends StatelessWidget {
   const TilawaSettingsTile({
@@ -253,28 +249,11 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                 textAlign: TextAlign.start,
                 style: titleStyle,
               ),
-              trailing: Theme(
-                data: theme.copyWith(
-                  switchTheme: theme.switchTheme.copyWith(
-                    padding: EdgeInsets.zero,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                ),
-                child: SizedBox(
-                  width: _kSettingsSwitchSlotSize.width,
-                  height: _kSettingsSwitchSlotSize.height,
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    alignment: Alignment.center,
-                    child: Switch.adaptive(
-                      value: value,
-                      onChanged: onChanged,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      activeTrackColor: tokens.switchActiveTrackColor,
-                      activeThumbColor: tokens.switchActiveThumbColor,
-                    ),
-                  ),
-                ),
+              trailing: TilawaSwitch(
+                value: value,
+                onChanged: onChanged,
+                activeTrackColor: tokens.switchActiveTrackColor,
+                activeThumbColor: tokens.switchActiveThumbColor,
               ),
               onTap: () => onChanged(!value),
             ),

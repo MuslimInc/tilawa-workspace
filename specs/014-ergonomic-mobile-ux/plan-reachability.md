@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feature/ui-kit-2`
 **Created**: 2026-05-20
-**Status**: In Progress
+**Status**: Complete
 **Scope**: FR-003, FR-004, FR-005, FR-001. See [spec.md](spec.md).
 
 ## Completed in this batch
@@ -19,24 +19,27 @@ The open-player `GestureDetector` now wraps only the artwork + title strip via
 `_OpenPlayerTapTarget`. Transport controls sit outside the detector so
 play/pause/next taps never also fire `onTap`. Widget tests cover both paths.
 
-## Remaining work
+### FR-005 — sheet drag-to-dismiss (F-003)
 
-**Decision needed**: drag-to-dismiss handle **or** trailing close slot.
+`TilawaSheetHandle` expands to a 48 dp-tall hit strip and dismisses the modal
+route on a downward fling (`playerDismissVelocityThreshold`). Used by default
+from `TilawaBottomSheetScaffold`. Optional `onDismiss` override for tests.
 
-Recommended: **drag-to-dismiss on `TilawaSheetHandle`** — handle is already
-at the bottom; adding `onVerticalDragEnd` with velocity threshold keeps the
-title row clean. Limit drag to the handle only (not scrollable content).
+### FR-001 — self-sized 48 dp switch (F-004)
 
-### FR-001 / FR-008 — self-sized 48 dp switch (F-004)
-
-Introduce `TilawaSwitch` atom wrapping `Switch.adaptive` in a fixed 48×48
-hit box (same `FittedBox` slot pattern as `TilawaSettingsSwitchTile`). Wire into
-settings tile; verify Maestro identifiers unchanged.
+New `TilawaSwitch` atom guarantees `kTilawaMinInteractiveDimension` on both
+axes. `TilawaSettingsSwitchTile` now composes it; Maestro identifier surface
+unchanged (no new semantics identifiers on the tile).
 
 ## Verification gates
 
-After each sub-task:
+All passed:
 
 1. `dart analyze` in `packages/ui_kit`
-2. `flutter test` in `packages/ui_kit`
-3. Regenerate goldens only when pixel output changes; eyeball diffs.
+2. `flutter test` in `packages/ui_kit` (359 tests)
+3. Goldens updated for sheet handle hit strip and compact mini-player
+
+## Optional follow-up (F-005)
+
+Adjacent motion drift in `alphabet_scrollbar.dart` and segmented-control
+`transitionDuration` token — out of scope for this spec batch.
