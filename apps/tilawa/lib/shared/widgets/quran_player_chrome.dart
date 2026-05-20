@@ -43,12 +43,23 @@ class QuranPlayerShellChrome {
   );
 }
 
+/// Queue sheet surface; keep in sync with [_PlayerQueueSheet] and expanded-player
+/// system chrome overrides.
+Color quranPlayerQueueSheetColor(ColorScheme colorScheme) =>
+    colorScheme.surfaceContainer;
+
 /// Publishes app-shell chrome while [AppShellScreen] is mounted.
 class QuranPlayerChromeNotifier extends ChangeNotifier {
   QuranPlayerShellChrome? _shellChrome;
+  Color? _systemNavigationBarColorOverride;
   bool _notifyScheduled = false;
 
   QuranPlayerShellChrome? get shellChrome => _shellChrome;
+
+  /// While the expanded player overlay is open, matches the queue sheet so the
+  /// edge-to-edge gesture strip does not show the default white bottom nav.
+  Color? get systemNavigationBarColorOverride =>
+      _systemNavigationBarColorOverride;
 
   /// Updates shell layout chrome for the global player.
   ///
@@ -64,6 +75,22 @@ class QuranPlayerChromeNotifier extends ChangeNotifier {
 
   void clearShellChrome() {
     updateShellChrome(null);
+  }
+
+  void setSystemNavigationBarColorOverride(Color color) {
+    if (_systemNavigationBarColorOverride == color) {
+      return;
+    }
+    _systemNavigationBarColorOverride = color;
+    notifyListeners();
+  }
+
+  void clearSystemNavigationBarColorOverride() {
+    if (_systemNavigationBarColorOverride == null) {
+      return;
+    }
+    _systemNavigationBarColorOverride = null;
+    notifyListeners();
   }
 
   void _scheduleNotifyListeners() {
