@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
 import './tilawa_loading_indicator.dart';
@@ -296,16 +297,18 @@ class _ButtonContent extends StatelessWidget {
     // main axis when the parent is bounded, so ellipsis works without
     // [LayoutBuilder] (intrinsic-safe for e.g. Alchemist golden [Table] probes).
     // Full-width: [Expanded] unchanged.
-    final label = Text(
-      text,
-      overflow: TextOverflow.ellipsis,
-      maxLines: 1,
-      softWrap: false,
-      style: TextStyle(
-        fontSize: fontSize,
-        fontWeight: FontWeight.w600,
-        color: foregroundColor,
-      ).merge(textStyle),
+    final label = Center(
+      child: Text(
+        text,
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        softWrap: false,
+        style: TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          color: foregroundColor,
+        ).merge(textStyle),
+      ),
     );
 
     return Row(

@@ -120,11 +120,12 @@ Future<bool?> showTilawaConfirmSheet({
   String? sheetSemanticsLabel,
   double maxHeightFraction = 0.5,
 }) {
-  return showTilawaFormSheet<bool>(
+  return _showTilawaPresetSheet<bool>(
     context: context,
     title: title,
     sheetSemanticsLabel: sheetSemanticsLabel,
     maxHeightFraction: maxHeightFraction,
+    shrinkWrapBody: true,
     trailingClose: trailingClose,
     onClose: onClose,
     primaryLabel: confirmLabel,
@@ -134,7 +135,7 @@ Future<bool?> showTilawaConfirmSheet({
     onSecondary: onClose ?? () => Navigator.maybePop(context, false),
     bodyBuilder: (ctx) {
       final padding = TilawaBottomSheetScaffold.resolvedBodyPadding(ctx);
-      return SingleChildScrollView(
+      return Padding(
         padding: padding,
         child: Text(
           message,
@@ -158,6 +159,7 @@ Future<T?> _showTilawaPresetSheet<T>({
   VoidCallback? onClose,
   String? sheetSemanticsLabel,
   double maxHeightFraction = 0.75,
+  bool shrinkWrapBody = false,
 }) {
   final colorScheme = Theme.of(context).colorScheme;
   return showTilawaModalBottomSheet<T>(
@@ -166,9 +168,12 @@ Future<T?> _showTilawaPresetSheet<T>({
     shape: TilawaBottomSheetScaffold.modalShape(context),
     sheetSemanticsLabel: sheetSemanticsLabel ?? title,
     builder: (sheetContext) {
-      final height = MediaQuery.sizeOf(sheetContext).height * maxHeightFraction;
-      return SizedBox(
-        height: height,
+      final maxHeight =
+          MediaQuery.sizeOf(sheetContext).height * maxHeightFraction;
+      final body = bodyBuilder(sheetContext);
+
+      return ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
         child: TilawaBottomSheetScaffold(
           topBar: TilawaBottomSheetTitleRow(
             title: title,
@@ -183,7 +188,7 @@ Future<T?> _showTilawaPresetSheet<T>({
             primaryVariant: primaryVariant,
           ),
           children: [
-            Expanded(child: bodyBuilder(sheetContext)),
+            if (shrinkWrapBody) body else Expanded(child: body),
           ],
         ),
       );

@@ -47,6 +47,12 @@ void main() {
             height: 400,
             child: TilawaBottomSheetScaffold(
               topBar: const TilawaBottomSheetTitleRow(title: 'Settings'),
+              footer: TilawaBottomSheetActions(
+                primaryLabel: 'Save',
+                onPrimary: () {},
+                secondaryLabel: 'Cancel',
+                onSecondary: () {},
+              ),
               children: [
                 Expanded(
                   child: ListView.builder(
@@ -57,12 +63,6 @@ void main() {
                   ),
                 ),
               ],
-              footer: TilawaBottomSheetActions(
-                primaryLabel: 'Save',
-                onPrimary: () {},
-                secondaryLabel: 'Cancel',
-                onSecondary: () {},
-              ),
             ),
           ),
         ),

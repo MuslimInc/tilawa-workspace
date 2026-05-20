@@ -1763,7 +1763,7 @@ abstract class AppLocalizations {
   /// Start button text
   ///
   /// In en, this message translates to:
-  /// **'Let\'s start our journey with the Quran'**
+  /// **'Get started'**
   String get startJourney;
 
   /// Sleep timer dialog title

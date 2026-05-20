@@ -1284,7 +1284,7 @@
     "@onboardingDesc3": {
         "description": "Onboarding page 3 description"
     },
-    "startJourney": "Let's start our journey with the Quran",
+    "startJourney": "Get started",
     "@startJourney": {
         "description": "Start button text"
     },

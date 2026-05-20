@@ -73,10 +73,9 @@ class TilawaLanguageSwitcher extends StatelessWidget {
                           : Text(
                               label,
                               style: theme.textTheme.labelLarge?.copyWith(
-                                // fix: Visual hierarchy — use theme role, not raw TextStyle
                                 color: isSelected
                                     ? theme.colorScheme.onPrimary
-                                    : theme.colorScheme.onSurface,
+                                    : theme.colorScheme.surface,
                                 fontWeight: isSelected
                                     ? tokens.selectedFontWeight
                                     : tokens.unselectedFontWeight,

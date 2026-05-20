@@ -1284,7 +1284,7 @@
     "@onboardingDesc3": {
         "description": "Onboarding page 3 description"
     },
-    "startJourney": "لنبدأ رحلتنا مع القرآن",
+    "startJourney": "ابدأ",
     "@startJourney": {
         "description": "Start button text"
     },

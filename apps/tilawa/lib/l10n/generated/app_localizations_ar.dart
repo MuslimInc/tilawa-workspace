@@ -935,7 +935,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'كل آية تسمعها وكل ذكر تردده هو صدقة جارية لصديقنا وأخانا أبو حذيفة أحمد محمود توني رحمه الله وغفرله وأسكنه فسيح جناته';
 
   @override
-  String get startJourney => 'لنبدأ رحلتنا مع القرآن';
+  String get startJourney => 'ابدأ';
 
   @override
   String get recitationDuration => 'مدة التلاوة';
