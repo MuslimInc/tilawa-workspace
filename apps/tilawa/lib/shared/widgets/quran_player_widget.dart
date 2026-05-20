@@ -87,6 +87,29 @@ class QuranPlayerWidget extends StatefulWidget {
         (hostAbsorbsBottomSafeArea ? 0 : context.floatingBottomPadding);
   }
 
+  /// Bottom inset for a [FloatingActionButton] on the current route.
+  ///
+  /// On phone shell layouts the mini-player sits in the shell footer column
+  /// below this [Scaffold], so only a small margin is needed. When the player
+  /// overlays the scaffold (e.g. wide layout), use [collapsedFootprint].
+  static double fabBottomOffset(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.path;
+    if (!QuranPlayerRoutePolicy.shouldShowPlayer(location)) {
+      return context.tokens.spaceMedium;
+    }
+
+    if (QuranPlayerRoutePolicy.isInAppShell(location)) {
+      final QuranPlayerShellChrome? shell = context
+          .read<QuranPlayerChromeNotifier>()
+          .shellChrome;
+      if (shell != null && context.isNarrow && shell.bottomNavBarHeight > 0) {
+        return context.tokens.spaceSmall;
+      }
+    }
+
+    return collapsedFootprint(context);
+  }
+
   /// Height of the bottom navigation bar to offset the mini player.
   final double bottomNavBarHeight;
 
@@ -156,9 +179,11 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
 
     _expandController.addListener(_syncPhoneBottomNavBarVisible);
+    _expandController.addListener(_syncExpandedPlayerSystemChrome);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _syncPhoneBottomNavBarVisible();
+        _syncExpandedPlayerSystemChrome();
         if (widget.embeddedInShellFooter) {
           _schedulePortalVisibilitySync();
         }
@@ -185,11 +210,39 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   }
 
   @override
+  void deactivate() {
+    context
+        .read<QuranPlayerChromeNotifier>()
+        .clearSystemNavigationBarColorOverride();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     _expandController.removeListener(_syncPhoneBottomNavBarVisible);
+    _expandController.removeListener(_syncExpandedPlayerSystemChrome);
     _expandController.dispose();
     _dismissAnimController.dispose();
     super.dispose();
+  }
+
+  /// Edge-to-edge nav is transparent; publish the queue sheet color app-wide
+  /// so [TilawaApp] does not reset the gesture strip to white each frame.
+  void _syncExpandedPlayerSystemChrome() {
+    if (!mounted) {
+      return;
+    }
+    final QuranPlayerChromeNotifier notifier = context
+        .read<QuranPlayerChromeNotifier>();
+    final bool overlayActive = _expandController.value > 0.01 &&
+        (!widget.embeddedInShellFooter || _portalController.isShowing);
+    if (overlayActive) {
+      notifier.setSystemNavigationBarColorOverride(
+        quranPlayerQueueSheetColor(Theme.of(context).colorScheme),
+      );
+    } else {
+      notifier.clearSystemNavigationBarColorOverride();
+    }
   }
 
   void _schedulePortalVisibilitySync() {
@@ -205,6 +258,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       if (!_portalController.isShowing) {
         _portalController.show();
       }
+      _syncExpandedPlayerSystemChrome();
     });
   }
 
@@ -514,9 +568,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                       Positioned.fill(
                         child: IgnorePointer(
                           child: Container(
-                            color: Colors.black.withValues(
-                              alpha: progress * 0.5,
-                            ),
+                            color: Theme.of(context).colorScheme.scrim
+                                .withValues(alpha: progress * 0.5),
                           ),
                         ),
                       ),
@@ -567,9 +620,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                         Positioned.fill(
                           child: IgnorePointer(
                             child: Container(
-                              color: Colors.black.withValues(
-                                alpha: progress * 0.5,
-                              ),
+                              color: Theme.of(context).colorScheme.scrim
+                                  .withValues(alpha: progress * 0.5),
                             ),
                           ),
                         ),
@@ -706,6 +758,126 @@ class _MiniPlayerOrganism extends StatelessWidget {
   }
 }
 
+/// Themed colors for the expanded now-playing stage (not the queue sheet).
+@immutable
+class _ExpandedPlayerPalette {
+  const _ExpandedPlayerPalette({
+    required this.foreground,
+    required this.secondary,
+    required this.disabled,
+    required this.pillBackground,
+    required this.artworkBackground,
+    required this.artworkIcon,
+    required this.playButtonBackground,
+    required this.playButtonIcon,
+    required this.playButtonGlow,
+    required this.seekActive,
+    required this.seekBuffered,
+    required this.seekInactive,
+    required this.artOverlay,
+  });
+
+  final Color foreground;
+  final Color secondary;
+  final Color disabled;
+  final Color pillBackground;
+  final Color artworkBackground;
+  final Color artworkIcon;
+  final Color playButtonBackground;
+  final Color playButtonIcon;
+  final Color playButtonGlow;
+  final Color seekActive;
+  final Color seekBuffered;
+  final Color seekInactive;
+  final Color artOverlay;
+
+  factory _ExpandedPlayerPalette.resolve(
+    BuildContext context, {
+    required bool onImageBackdrop,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
+    final barTokens = theme.componentTokens.mediaPlayerBar;
+    final bgTokens = theme.componentTokens.playerBackground;
+
+    if (onImageBackdrop) {
+      return _ExpandedPlayerPalette(
+        foreground: colorScheme.onInverseSurface,
+        secondary: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacityEmphasis,
+        ),
+        disabled: colorScheme.onInverseSurface.withValues(
+          alpha: barTokens.disabledControlOpacity,
+        ),
+        pillBackground: colorScheme.onInverseSurface.withValues(alpha: 0.12),
+        artworkBackground: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacitySubtle,
+        ),
+        artworkIcon: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacityEmphasis / 3,
+        ),
+        playButtonBackground: colorScheme.onInverseSurface,
+        playButtonIcon: colorScheme.surface,
+        playButtonGlow: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacityMedium,
+        ),
+        seekActive: colorScheme.onInverseSurface,
+        seekBuffered: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacityMedium,
+        ),
+        seekInactive: colorScheme.onInverseSurface.withValues(
+          alpha: tokens.opacitySubtle,
+        ),
+        artOverlay: bgTokens.overlayColor.withValues(
+          alpha: bgTokens.defaultOverlayOpacity,
+        ),
+      );
+    }
+
+    return _ExpandedPlayerPalette(
+      foreground: colorScheme.onSurface,
+      secondary: colorScheme.onSurfaceVariant,
+      disabled: colorScheme.onSurfaceVariant.withValues(
+        alpha: barTokens.disabledControlOpacity,
+      ),
+      pillBackground: colorScheme.surfaceContainerHigh,
+      artworkBackground: barTokens.artworkPlaceholderColor,
+      artworkIcon: colorScheme.onSurfaceVariant,
+      playButtonBackground: colorScheme.primary,
+      playButtonIcon: colorScheme.onPrimary,
+      playButtonGlow: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+      seekActive: colorScheme.primary,
+      seekBuffered: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+      seekInactive: barTokens.progressTrackBackgroundColor,
+      artOverlay: bgTokens.overlayColor.withValues(
+        alpha: bgTokens.defaultOverlayOpacity,
+      ),
+    );
+  }
+
+  static _ExpandedPlayerPalette of(BuildContext context) =>
+      _ExpandedPlayerScope.paletteOf(context);
+}
+
+class _ExpandedPlayerScope extends InheritedWidget {
+  const _ExpandedPlayerScope({
+    required this.palette,
+    required super.child,
+  });
+
+  final _ExpandedPlayerPalette palette;
+
+  static _ExpandedPlayerPalette paletteOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<_ExpandedPlayerScope>()!
+          .palette;
+
+  @override
+  bool updateShouldNotify(_ExpandedPlayerScope oldWidget) =>
+      oldWidget.palette != palette;
+}
+
 class _ExpandedPlayerOrganism extends StatefulWidget {
   const _ExpandedPlayerOrganism({
     required this.state,
@@ -782,52 +954,79 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
+    final PlayerBackgroundState bgState = context
+        .watch<PlayerBackgroundCubit>()
+        .state;
+    final bool hasCustomBackground =
+        bgState.config.type == PlayerBackgroundType.custom &&
+        bgState.config.customImagePath != null;
+    final bool onImageBackdrop =
+        hasCustomBackground || widget.audio.artUri != null;
+    final _ExpandedPlayerPalette palette = _ExpandedPlayerPalette.resolve(
+      context,
+      onImageBackdrop: onImageBackdrop,
+    );
+    final Brightness statusBarIconBrightness =
+        theme.brightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+    final Color queueSheetColor = quranPlayerQueueSheetColor(colorScheme);
+    final Brightness navBarIconBrightness =
+        ThemeData.estimateBrightnessForColor(queueSheetColor) ==
+            Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.black,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-      child: Material(
-        color: Colors.black,
-        elevation: widget.expandProgress * 16,
-        shape: const RoundedRectangleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            const PlayerBackgroundLayer(),
-            Positioned.fill(
-              child: BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
-                builder: (context, bgState) {
-                  if (bgState.config.type == PlayerBackgroundType.custom) {
-                    return const SizedBox.shrink();
-                  }
-                  return widget.audio.artUri != null
-                      ? Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: widget.audio.artUri!,
-                              fit: BoxFit.cover,
-                            ),
-                            Container(
-                              color: Colors.black.withValues(
-                                alpha: tokens.opacityMedium,
-                              ),
-                            ),
-                          ],
-                        )
-                      : Container(color: Colors.black);
-                },
+    return _ExpandedPlayerScope(
+      palette: palette,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: statusBarIconBrightness,
+          statusBarBrightness: statusBarIconBrightness == Brightness.dark
+              ? Brightness.light
+              : Brightness.dark,
+          systemNavigationBarColor: queueSheetColor,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarContrastEnforced: false,
+          systemNavigationBarIconBrightness: navBarIconBrightness,
+        ),
+        child: Material(
+          color: colorScheme.surface,
+          elevation: widget.expandProgress * tokens.spaceSmall,
+          shape: const RoundedRectangleBorder(),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const PlayerBackgroundLayer(),
+              Positioned.fill(
+                child: BlocBuilder<PlayerBackgroundCubit, PlayerBackgroundState>(
+                  builder: (context, bgState) {
+                    if (bgState.config.type == PlayerBackgroundType.custom) {
+                      return const SizedBox.shrink();
+                    }
+                    if (widget.audio.artUri == null) {
+                      return const SizedBox.shrink();
+                    }
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CachedNetworkImage(
+                          imageUrl: widget.audio.artUri!,
+                          fit: BoxFit.cover,
+                        ),
+                        ColoredBox(color: palette.artOverlay),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
             if (isLandscape)
               _ExpandedPlayerLandscape(
                 state: widget.state,
@@ -836,18 +1035,30 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                 onDismiss: widget.onDismiss,
               )
             else
-              Positioned.fill(
-                child: SafeArea(
-                  child: TilawaContentBounds(
-                    kind: TilawaContentKind.media,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final double sheetHeight = _queueController.isAttached
-                            ? _queueController.size * constraints.maxHeight
-                            : _queuePeekSize * constraints.maxHeight;
+              Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: MediaQuery.paddingOf(context).bottom,
+                    child: ColoredBox(color: queueSheetColor),
+                  ),
+                  Positioned.fill(
+                    child: SafeArea(
+                      bottom: false,
+                      child: TilawaContentBounds(
+                        kind: TilawaContentKind.media,
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final double sheetHeight =
+                                _queueController.isAttached
+                                ? _queueController.size * constraints.maxHeight
+                                : _queuePeekSize * constraints.maxHeight;
 
-                        return Stack(
-                          children: [
+                            return Stack(
+                              children: [
                             Positioned(
                               top: 0,
                               left: 0,
@@ -893,14 +1104,17 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                 );
                               },
                             ),
-                          ],
-                        );
-                      },
+                              ],
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -1005,15 +1219,16 @@ class _CompactNowPlayingBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     final TextStyle? titleStyle = Theme.of(context).textTheme.titleSmall
         ?.copyWith(
-          color: Colors.white,
+          color: palette.foreground,
           fontWeight: FontWeight.w600,
           height: 1.15,
         );
     final TextStyle? artistStyle = Theme.of(context).textTheme.bodySmall
         ?.copyWith(
-          color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
+          color: palette.secondary,
           height: 1.15,
         );
 
@@ -1032,7 +1247,7 @@ class _CompactNowPlayingBar extends StatelessWidget {
               padding: EdgeInsets.zero,
               icon: Icon(
                 FluentIcons.chevron_down_24_regular,
-                color: Colors.white,
+                color: palette.foreground,
                 size: tokens.iconSizeLarge,
               ),
               onPressed: onCollapse,
@@ -1067,7 +1282,7 @@ class _CompactNowPlayingBar extends StatelessWidget {
                 state.isPlaying
                     ? FluentIcons.pause_24_filled
                     : FluentIcons.play_24_filled,
-                color: Colors.white,
+                color: palette.foreground,
                 size: tokens.iconSizeLarge,
               ),
               onPressed: () {
@@ -1102,6 +1317,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     final isRtl = Directionality.of(context) == TextDirection.rtl;
 
     return Positioned.fill(
@@ -1118,7 +1334,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                   IconButton(
                     icon: Icon(
                       FluentIcons.chevron_down_24_regular,
-                      color: Colors.white,
+                      color: palette.foreground,
                       size: tokens.iconSizeLarge,
                     ),
                     onPressed: onCollapse,
@@ -1131,7 +1347,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                       Text(
                         audio.title,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white,
+                          color: palette.foreground,
                           fontWeight: FontWeight.bold,
                         ),
                         maxLines: 1,
@@ -1140,9 +1356,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                       Text(
                         audio.artist ?? context.l10n.unknownReciter,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(
-                            alpha: tokens.opacityEmphasis,
-                          ),
+                          color: palette.secondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -1161,9 +1375,9 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(
+                    icon: Icon(
                       FluentIcons.image_24_regular,
-                      color: Colors.white,
+                      color: palette.foreground,
                     ),
                     onPressed: () {
                       showDialog(
@@ -1238,8 +1452,8 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                                           ? FluentIcons.timer_24_filled
                                           : FluentIcons.timer_24_regular,
                                       color: state.isSleepTimerActive
-                                          ? Theme.of(context).primaryColor
-                                          : Colors.white,
+                                          ? theme.colorScheme.primary
+                                          : palette.foreground,
                                     ),
                                     onPressed: () {
                                       showDialog(
@@ -1287,6 +1501,7 @@ class _YtMusicPlayerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
       child: Row(
@@ -1297,7 +1512,7 @@ class _YtMusicPlayerHeader extends StatelessWidget {
             child: IconButton(
               icon: Icon(
                 FluentIcons.chevron_down_24_regular,
-                color: Colors.white,
+                color: palette.foreground,
                 size: tokens.iconSizeLarge,
               ),
               onPressed: onCollapse,
@@ -1309,9 +1524,9 @@ class _YtMusicPlayerHeader extends StatelessWidget {
             identifier: QuranPlayerSemanticsIds.expandedMoreMenu,
             button: true,
             child: IconButton(
-              icon: const Icon(
+              icon: Icon(
                 FluentIcons.more_vertical_24_regular,
-                color: Colors.white,
+                color: palette.foreground,
               ),
               onPressed: () => _showExpandedPlayerMenu(context, state),
             ),
@@ -1408,9 +1623,10 @@ class _PlayerMetadataMolecule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     final TextStyle? titleStyle = context
         .responsiveStyle((t) => t.titleLarge)
-        ?.copyWith(color: Colors.white, fontWeight: FontWeight.w600);
+        ?.copyWith(color: palette.foreground, fontWeight: FontWeight.w600);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1431,7 +1647,7 @@ class _PlayerMetadataMolecule extends StatelessWidget {
             style: context
                 .responsiveStyle((t) => t.bodyMedium)
                 ?.copyWith(
-                  color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
+                  color: palette.secondary,
                 ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -1454,19 +1670,56 @@ class _PlayerTransportRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     final bool shuffleOn = state.shuffleMode == AudioShuffleMode.all;
-    final Color enabled = Colors.white;
-    final Color disabled = Colors.white.withValues(
-      alpha: tokens.opacitySubtle,
-    );
+    final Color enabled = palette.foreground;
+    final Color disabled = palette.disabled;
     final IconData repeatIcon = switch (state.repeatMode) {
       AudioRepeatMode.one => Icons.repeat_one,
       AudioRepeatMode.all => Icons.repeat,
       AudioRepeatMode.none => Icons.repeat,
     };
     final bool repeatActive = state.repeatMode != AudioRepeatMode.none;
+    final bool swapSkipSidesForArabic = context.isArabic;
 
-    return Row(
+    final Widget previousControl = Semantics(
+      identifier: QuranPlayerSemanticsIds.transportPrevious,
+      button: true,
+      child: IconButton(
+        icon: Icon(
+          swapSkipSidesForArabic ? Icons.skip_next : Icons.skip_previous,
+          color: state.canGoPrevious ? enabled : disabled,
+          size: tokens.iconSizeLarge,
+        ),
+        onPressed: state.canGoPrevious
+            ? () => context.read<AudioPlayerBloc>().add(
+                const AudioPlayerEvent.skipToPrevious(),
+              )
+            : null,
+      ),
+    );
+    final Widget nextControl = Semantics(
+      identifier: QuranPlayerSemanticsIds.transportNext,
+      button: true,
+      child: IconButton(
+        icon: Icon(
+          swapSkipSidesForArabic ? Icons.skip_previous : Icons.skip_next,
+          color: state.canGoNext ? enabled : disabled,
+          size: tokens.iconSizeLarge,
+        ),
+        onPressed: state.canGoNext
+            ? () => context.read<AudioPlayerBloc>().add(
+                const AudioPlayerEvent.skipToNext(),
+              )
+            : null,
+      ),
+    );
+
+    // App locale is RTL for Arabic; keep transport LTR so skip sides do not
+    // mirror twice (Row flip would undo the Arabic-only swap).
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Semantics(
@@ -1485,22 +1738,7 @@ class _PlayerTransportRow extends StatelessWidget {
             tooltip: context.l10n.shufflePlaylist,
           ),
         ),
-        Semantics(
-          identifier: QuranPlayerSemanticsIds.transportPrevious,
-          button: true,
-          child: IconButton(
-            icon: Icon(
-              Icons.skip_previous,
-              color: state.canGoPrevious ? enabled : disabled,
-              size: tokens.iconSizeLarge,
-            ),
-            onPressed: state.canGoPrevious
-                ? () => context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.skipToPrevious(),
-                  )
-                : null,
-          ),
-        ),
+        if (swapSkipSidesForArabic) nextControl else previousControl,
         Semantics(
           identifier: QuranPlayerSemanticsIds.transportPlayPause,
           button: true,
@@ -1515,22 +1753,7 @@ class _PlayerTransportRow extends StatelessWidget {
             },
           ),
         ),
-        Semantics(
-          identifier: QuranPlayerSemanticsIds.transportNext,
-          button: true,
-          child: IconButton(
-            icon: Icon(
-              Icons.skip_next,
-              color: state.canGoNext ? enabled : disabled,
-              size: tokens.iconSizeLarge,
-            ),
-            onPressed: state.canGoNext
-                ? () => context.read<AudioPlayerBloc>().add(
-                    const AudioPlayerEvent.skipToNext(),
-                  )
-                : null,
-          ),
-        ),
+        if (swapSkipSidesForArabic) previousControl else nextControl,
         Semantics(
           identifier: QuranPlayerSemanticsIds.transportRepeat,
           button: true,
@@ -1552,6 +1775,7 @@ class _PlayerTransportRow extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 }
@@ -1655,6 +1879,7 @@ class _YtMusicActionPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     final double radius = tokens.resolveRadius(
       family: TilawaRadiusFamily.pill,
       height: tokens.minInteractiveDimension,
@@ -1665,7 +1890,7 @@ class _YtMusicActionPill extends StatelessWidget {
         minHeight: tokens.minInteractiveDimension,
       ),
       child: Material(
-        color: Colors.white.withValues(alpha: 0.12),
+        color: palette.pillBackground,
         borderRadius: BorderRadius.circular(radius),
         child: InkWell(
           borderRadius: BorderRadius.circular(radius),
@@ -1679,13 +1904,17 @@ class _YtMusicActionPill extends StatelessWidget {
               mainAxisSize: .min,
               mainAxisAlignment: .center,
               children: [
-                Icon(icon, color: Colors.white, size: tokens.iconSizeMedium),
+                Icon(
+                  icon,
+                  color: palette.foreground,
+                  size: tokens.iconSizeMedium,
+                ),
                 if (label != null) ...[
                   SizedBox(width: tokens.spaceExtraSmall),
                   Text(
                     label!,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
+                      color: palette.foreground,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1797,13 +2026,14 @@ class _PlayerArtAtom extends StatelessWidget {
 
   Widget _buildDefaultArt(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    return Container(
-      color: Colors.white.withValues(alpha: tokens.opacitySubtle),
+    final palette = _ExpandedPlayerPalette.of(context);
+    return ColoredBox(
+      color: palette.artworkBackground,
       child: Center(
         child: Icon(
           FluentIcons.music_note_2_24_filled,
           size: tokens.iconSizeLarge * 3.3, // approx 80
-          color: Colors.white.withValues(alpha: tokens.opacityEmphasis / 3),
+          color: palette.artworkIcon,
         ),
       ),
     );
@@ -1819,16 +2049,17 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final palette = _ExpandedPlayerPalette.of(context);
     final buttonSize = tokens.iconSizeLarge * 3.3; // approx 80
     return Container(
       width: buttonSize,
       height: buttonSize,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: Colors.white,
+        color: palette.playButtonBackground,
         boxShadow: [
           BoxShadow(
-            color: Colors.white.withValues(alpha: tokens.opacityMedium),
+            color: palette.playButtonGlow,
             blurRadius: tokens.spaceLarge,
             spreadRadius: tokens.spaceTiny,
           ),
@@ -1837,7 +2068,7 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
       child: IconButton(
         icon: Icon(
           isPlaying ? FluentIcons.pause_48_filled : FluentIcons.play_48_filled,
-          color: Colors.black,
+          color: palette.playButtonIcon,
           size: tokens.iconSizeLarge * 1.6, // approx 40
         ),
         onPressed: onTap,
@@ -1986,7 +2217,9 @@ class _PlayerQueueSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final List<AudioEntity> queue =
         state.playbackState?.queue ?? <AudioEntity>[];
     final int? currentIndex = state.playbackState?.currentIndex;
@@ -1994,14 +2227,22 @@ class _PlayerQueueSheet extends StatelessWidget {
         currentAudio.album ??
         currentAudio.artist ??
         context.l10n.unknownReciter;
+    final Color queueSheetColor = quranPlayerQueueSheetColor(colorScheme);
+
+    final BorderRadius sheetRadius = BorderRadius.vertical(
+      top: Radius.circular(tokens.radiusExtraLarge),
+    );
 
     return Semantics(
       identifier: QuranPlayerSemanticsIds.queueSheet,
       container: true,
       child: Material(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(tokens.radiusExtraLarge),
+      color: queueSheetColor,
+      elevation: tokens.spaceTiny,
+      shadowColor: colorScheme.shadow,
+      shape: RoundedRectangleBorder(
+        borderRadius: sheetRadius,
+        side: BorderSide(color: colorScheme.outlineVariant),
       ),
       clipBehavior: Clip.antiAlias,
       child: CustomScrollView(
@@ -2010,12 +2251,9 @@ class _PlayerQueueSheet extends StatelessWidget {
           SliverToBoxAdapter(
             child: Center(
               child: TilawaSheetHandle(
-                color:
-                    Theme.of(
-                      context,
-                    ).colorScheme.surfaceContainer.withValues(
-                      alpha: tokens.opacityEmphasis,
-                    ),
+                color: colorScheme.onSurfaceVariant.withValues(
+                  alpha: tokens.opacityEmphasis,
+                ),
               ),
             ),
           ),
@@ -2032,18 +2270,16 @@ class _PlayerQueueSheet extends StatelessWidget {
                 children: [
                   Text(
                     context.l10n.playingFrom,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: Colors.white.withValues(
-                        alpha: tokens.opacityEmphasis,
-                      ),
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
                     ),
                   ),
                   Text(
                     sourceLabel,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: Colors.white,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -2089,7 +2325,9 @@ class _PlayerQueueSheet extends StatelessWidget {
               child: SizedBox(height: tokens.spaceExtraLarge),
             ),
           SliverPadding(
-            padding: EdgeInsets.only(bottom: tokens.spaceLarge),
+            padding: EdgeInsets.only(
+              bottom: tokens.spaceLarge + MediaQuery.paddingOf(context).bottom,
+            ),
           ),
         ],
       ),
@@ -2113,10 +2351,12 @@ class _QueueTrackTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
     return Material(
       color: isCurrent
-          ? Colors.white.withValues(alpha: 0.08)
+          ? colorScheme.secondaryContainer.withValues(alpha: 0.55)
           : Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -2134,7 +2374,7 @@ class _QueueTrackTile extends StatelessWidget {
                   if (isCurrent && isPlaying)
                     Icon(
                       Icons.equalizer,
-                      color: Colors.white,
+                      color: colorScheme.primary,
                       size: tokens.iconSizeMedium,
                     ),
                 ],
@@ -2148,8 +2388,10 @@ class _QueueTrackTile extends StatelessWidget {
                       audio.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.white,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color: isCurrent
+                            ? colorScheme.primary
+                            : colorScheme.onSurface,
                         fontWeight: isCurrent ? FontWeight.w600 : null,
                       ),
                     ),
@@ -2157,10 +2399,8 @@ class _QueueTrackTile extends StatelessWidget {
                       audio.artist ?? context.l10n.unknownReciter,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: tokens.opacityEmphasis,
-                        ),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -2168,7 +2408,7 @@ class _QueueTrackTile extends StatelessWidget {
               ),
               Icon(
                 Icons.drag_handle,
-                color: Colors.white.withValues(alpha: tokens.opacityEmphasis),
+                color: colorScheme.onSurfaceVariant,
               ),
             ],
           ),
@@ -2194,14 +2434,11 @@ class _ExpandedProgressBar extends StatelessWidget {
       builder: (context, positionData) {
         final theme = Theme.of(context);
         final tokens = theme.tokens;
-        final seekActiveColor = Colors.white;
-        final seekThumbColor = Colors.white;
-        final seekBufferedColor = Colors.white.withValues(
-          alpha: tokens.opacityMedium,
-        );
-        final seekInactiveColor = Colors.white.withValues(
-          alpha: tokens.opacitySubtle,
-        );
+        final palette = _ExpandedPlayerPalette.of(context);
+        final seekActiveColor = palette.seekActive;
+        final seekThumbColor = palette.seekActive;
+        final seekBufferedColor = palette.seekBuffered;
+        final seekInactiveColor = palette.seekInactive;
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Column(
@@ -2242,9 +2479,7 @@ class _ExpandedProgressBar extends StatelessWidget {
                     child: Text(
                       _formatDuration(positionData.position),
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: tokens.opacityEmphasis - 0.1,
-                        ),
+                        color: palette.secondary,
                       ),
                     ),
                   ),
@@ -2253,9 +2488,7 @@ class _ExpandedProgressBar extends StatelessWidget {
                     child: Text(
                       _formatDuration(positionData.duration),
                       style: theme.textTheme.labelMedium?.copyWith(
-                        color: Colors.white.withValues(
-                          alpha: tokens.opacityEmphasis - 0.1,
-                        ),
+                        color: palette.secondary,
                       ),
                     ),
                   ),
