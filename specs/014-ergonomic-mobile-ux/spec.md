@@ -3,11 +3,11 @@
 **Feature Branch**: `feature/ui-kit-2`
 **Created**: 2026-05-20
 **Status**: Draft
-**Input**: Audit of `packages/ui_kit/` (v1, the production kit — *not* `ui_kit_v2/`) for thumb-zone reachability and tap-target / hit-slop compliance. Goal: close the remaining ergonomic gaps in the kit that ships to users today, before any further screen-by-screen v2 migration.
+**Input**: Audit of `packages/ui_kit/` for thumb-zone reachability and tap-target / hit-slop compliance. Goal: close the remaining ergonomic gaps in the production kit before more screens migrate onto it.
 
 ## Intent
 
-The v1 kit is already disciplined on the 48 dp hit-target floor: `kTilawaMinInteractiveDimension` is wired into `TilawaButton`, `TilawaChip`, `TilawaSelectionPill`, `TilawaSettingsTile`, `TilawaSearchField`, `TilawaIconActionButton`, the media-player transport tokens, and the seek bar's touch strip. Most controls route through Material widgets (`IconButton`, `ListTile`, `InkWell`, `Tooltip`, `Switch.adaptive`) so they pick up Material's hit-slop, ripple, and accessibility scaffolding for free.
+The kit is already disciplined on the 48 dp hit-target floor: `kTilawaMinInteractiveDimension` is wired into `TilawaButton`, `TilawaChip`, `TilawaSelectionPill`, `TilawaSettingsTile`, `TilawaSearchField`, `TilawaIconActionButton`, the media-player transport tokens, and the seek bar's touch strip. Most controls route through Material widgets (`IconButton`, `ListTile`, `InkWell`, `Tooltip`, `Switch.adaptive`) so they pick up Material's hit-slop, ripple, and accessibility scaffolding for free.
 
 The remaining ergonomic gaps are subtler:
 
@@ -16,7 +16,7 @@ The remaining ergonomic gaps are subtler:
 - High-frequency actions (skip surah, dismiss sheet, reach "more options" on the player) are still pinned to the top corners or hidden behind compact-mode collapsing, forcing the user out of the thumb zone for routine taps.
 - Doc-comment drift suggests "44 dp" in a couple of places while the kit actually targets 48 dp — small, but it confuses future contributors.
 
-This spec captures the ergonomic floor we want every v1 kit component to meet, then narrows in on the reachability gaps that affect daily use.
+This spec captures the ergonomic floor we want every kit component to meet, then narrows in on the reachability gaps that affect daily use.
 
 ## User scenarios
 
@@ -70,9 +70,7 @@ As a future contributor reading the kit's token comments to decide what size to 
 
 ## Out of scope
 
-- **`ui_kit_v2/` ergonomic work.** The v2 kit ships a 44 dp floor against the v1 kit's 48 dp; that mismatch is a separate decision (align v2 up or document the divergence) and is not addressed here.
 - **Haptic feedback parity across all interactive widgets.** Today only the adaptive shell's bottom nav fires haptics. Extending haptics to toggles, sheet snaps, and transport is a separate spec.
 - **Replacing `showModalBottomSheet` with `DraggableScrollableSheet` across the app.** This spec only adds a dismiss-from-bottom affordance to the kit's sheet helpers; app-level migration to fully draggable sheets is downstream.
 - **Profile/settings entry points on the home header.** The audit notes that top-right avatar buttons live outside one-thumb reach on large phones, but the fix is a navigation decision (route Profile through the bottom tab bar) not a kit change.
 - **`TilawaAdaptiveShell` thumb-zone rework.** The shell already uses Material's `BottomNavigationBar` with proper viewPadding handling and selection haptics; no further ergonomic gap was identified.
-- **v2 kit's seek-bar / progress-bar atoms.** v1's `SeekBar` already uses Material's `Slider` (with tokenised `touchExtent`) and passes the audit.
