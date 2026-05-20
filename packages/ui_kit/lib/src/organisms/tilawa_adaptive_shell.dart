@@ -321,10 +321,6 @@ class _BottomNavBar extends StatelessWidget {
     final tokens = theme.componentTokens.adaptiveShell;
     final Color navColor = tokens.bottomNavBackgroundColor;
 
-    final BorderRadius shellRadius = BorderRadius.vertical(
-      top: Radius.circular(tokens.bottomNavRadius),
-    );
-
     final int count = destinations.length;
     final bool hasSelection = selectedIndex != null;
     final int barIndex = hasSelection ? selectedIndex!.clamp(0, count - 1) : 0;
@@ -383,7 +379,6 @@ class _BottomNavBar extends StatelessWidget {
                     ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: shellRadius,
                     boxShadow: tokens.bottomNavShadowOpacity > 0
                         ? [
                             BoxShadow(
@@ -399,7 +394,6 @@ class _BottomNavBar extends StatelessWidget {
                   child: Material(
                     color: tokens.bottomNavBackgroundColor,
                     shape: RoundedRectangleBorder(
-                      borderRadius: shellRadius,
                       side: BorderSide(
                         color: tokens.bottomNavOutlineColor,
                         width: tokens.bottomNavBorderWidth,
