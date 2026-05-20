@@ -6,6 +6,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa/core/extensions.dart';
 import '../../../../shared/models/position_data.dart';
 import '../bloc/audio_player_bloc.dart';
+import '../quran_player_semantics_ids.dart';
 
 class SleepTimerDialog extends StatelessWidget {
   const SleepTimerDialog({super.key});
@@ -16,7 +17,10 @@ class SleepTimerDialog extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
 
-    return Dialog(
+    return Semantics(
+      identifier: QuranPlayerSemanticsIds.sleepTimerDialog,
+      container: true,
+      child: Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
       ),
@@ -57,26 +61,46 @@ class SleepTimerDialog extends StatelessWidget {
                   runSpacing: tokens.spaceMedium,
                   alignment: WrapAlignment.center,
                   children: [
-                    _buildTimerChip(
-                      context,
-                      context.l10n.minutes15,
-                      const Duration(minutes: 15),
-                      state,
+                    Semantics(
+                      identifier: QuranPlayerSemanticsIds.sleepTimer15,
+                      button: true,
+                      child: _buildTimerChip(
+                        context,
+                        context.l10n.minutes15,
+                        const Duration(minutes: 15),
+                        state,
+                      ),
                     ),
-                    _buildTimerChip(
-                      context,
-                      context.l10n.minutes30,
-                      const Duration(minutes: 30),
-                      state,
+                    Semantics(
+                      identifier: QuranPlayerSemanticsIds.sleepTimer30,
+                      button: true,
+                      child: _buildTimerChip(
+                        context,
+                        context.l10n.minutes30,
+                        const Duration(minutes: 30),
+                        state,
+                      ),
                     ),
-                    _buildTimerChip(
-                      context,
-                      context.l10n.minutes60,
-                      const Duration(minutes: 60),
-                      state,
+                    Semantics(
+                      identifier: QuranPlayerSemanticsIds.sleepTimer60,
+                      button: true,
+                      child: _buildTimerChip(
+                        context,
+                        context.l10n.minutes60,
+                        const Duration(minutes: 60),
+                        state,
+                      ),
                     ),
-                    _buildEndTrackChip(context, state),
-                    _buildCustomChip(context, state),
+                    Semantics(
+                      identifier: QuranPlayerSemanticsIds.sleepTimerEndOfTrack,
+                      button: true,
+                      child: _buildEndTrackChip(context, state),
+                    ),
+                    Semantics(
+                      identifier: QuranPlayerSemanticsIds.sleepTimerCustom,
+                      button: true,
+                      child: _buildCustomChip(context, state),
+                    ),
                   ],
                 ),
 
@@ -84,29 +108,38 @@ class SleepTimerDialog extends StatelessWidget {
 
                 // Cancel Button
                 if (state.isSleepTimerActive)
-                  TilawaButton(
-                    text: context.l10n.cancelTimer,
-                    variant: TilawaButtonVariant.danger,
-                    isFullWidth: true,
-                    leadingIcon: const Icon(Icons.timer_off_outlined),
-                    onPressed: () {
-                      context.read<AudioPlayerBloc>().add(
-                        const AudioPlayerEvent.cancelSleepTimer(),
-                      );
-                      context.pop();
-                    },
+                  Semantics(
+                    identifier: QuranPlayerSemanticsIds.sleepTimerCancel,
+                    button: true,
+                    child: TilawaButton(
+                      text: context.l10n.cancelTimer,
+                      variant: TilawaButtonVariant.danger,
+                      isFullWidth: true,
+                      leadingIcon: const Icon(Icons.timer_off_outlined),
+                      onPressed: () {
+                        context.read<AudioPlayerBloc>().add(
+                          const AudioPlayerEvent.cancelSleepTimer(),
+                        );
+                        context.pop();
+                      },
+                    ),
                   )
                 else
-                  TilawaButton(
-                    text: context.l10n.cancel,
-                    variant: TilawaButtonVariant.ghost,
-                    isFullWidth: true,
-                    onPressed: () => context.pop(),
+                  Semantics(
+                    identifier: QuranPlayerSemanticsIds.sleepTimerClose,
+                    button: true,
+                    child: TilawaButton(
+                      text: context.l10n.cancel,
+                      variant: TilawaButtonVariant.ghost,
+                      isFullWidth: true,
+                      onPressed: () => context.pop(),
+                    ),
                   ),
               ],
             );
           },
         ),
+      ),
       ),
     );
   }
