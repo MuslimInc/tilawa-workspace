@@ -79,9 +79,8 @@ class TilawaSeekBarState extends State<TilawaSeekBar> {
     return Column(
       children: [
         // Progress bar
-        Container(
+        SizedBox(
           height: tokens.touchExtent,
-          margin: EdgeInsets.symmetric(horizontal: tokens.horizontalMargin),
           child: Stack(
             alignment: .center, // Center the sliders vertically
             clipBehavior: .none,
