@@ -31,6 +31,14 @@ class AnalyticsEvents {
   static const String subscriptionStart = 'subscription_start';
   static const String subscriptionCancel = 'subscription_cancel';
 
+  // Support Tilawa (voluntary one-time)
+  static const String supportScreenViewed = 'support_screen_viewed';
+  static const String supportTierSelected = 'support_tier_selected';
+  static const String supportPurchaseStarted = 'support_purchase_started';
+  static const String supportPurchaseVerified = 'support_purchase_verified';
+  static const String supportPurchaseFailed = 'support_purchase_failed';
+  static const String supportRestoreTapped = 'support_restore_tapped';
+
   // Engagement
   static const String search = 'search';
   static const String share = 'share';
@@ -81,6 +89,8 @@ class AnalyticsParams {
   static const String currency = 'currency';
   static const String planId = 'plan_id';
   static const String subscriptionId = 'subscription_id';
+  static const String productId = 'product_id';
+  static const String purchaseReason = 'purchase_reason';
 
   // Other
   static const String searchTerm = 'search_term';

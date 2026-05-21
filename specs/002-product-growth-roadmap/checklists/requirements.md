@@ -31,8 +31,9 @@
 
 - [ ] **DECISION-001**: Prayer notification toggle — verify whether UI toggle exists and
   is connected to any scheduling logic before Sprint 2 work begins
-- [ ] **DECISION-002**: Premium screen access — audit whether premium screen is reachable
-  in current production build and gate behind feature flag if so
+- [x] **DECISION-002**: Support Tilawa — superseded by
+  [`specs/016-support-tilawa/spec.md`](../../016-support-tilawa/spec.md): `/support`
+  route, `TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED` flag, no “Premium” user copy in MVP
 - [ ] **DECISION-003**: Reel aspect ratio — confirm `_outputVideoWidth`/`_outputVideoHeight`
   in `video_service.dart` matches 9:16 for Instagram Stories before watermark sprint
 - [ ] **DECISION-004**: Athkar content — scholarly review of new athkar JSON content required

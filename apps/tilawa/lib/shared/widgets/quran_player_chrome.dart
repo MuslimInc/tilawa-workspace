@@ -194,7 +194,9 @@ abstract final class AppShellRoutePolicy {
     if (location.startsWith('/prayer') || location == '/qibla') {
       return 1;
     }
-    if (location.startsWith('/settings') || location == '/premium') {
+    if (location.startsWith('/settings') ||
+        location == '/support' ||
+        location == '/premium') {
       return 3;
     }
     return null;

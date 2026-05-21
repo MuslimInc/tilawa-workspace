@@ -6,7 +6,9 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../../core/bootstrap/app_launch_config.dart';
 import '../../../../router/app_router_config.dart';
+import 'package:tilawa_core/di/injection.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/domain/app_theme_mode.dart';
@@ -204,6 +206,22 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                if (getIt<AppLaunchConfig>().supportTilawaEnabled) ...[
+                  const SettingsSectionGap(),
+                  TilawaSettingsGroup(
+                    title: l10n.supportSettingsGroupTitle,
+                    children: [
+                      TilawaSettingsTile(
+                        icon: FluentIcons.heart_24_regular,
+                        title: l10n.supportTilawa,
+                        onTap: () => const SupportRoute().push(context),
+                        showDivider: false,
+                        borderRadius: SettingsTileCorners.all(tokens),
+                      ),
+                    ],
+                  ),
+                ],
 
                 const SettingsSectionGap(),
                 SettingsLogoutTile(

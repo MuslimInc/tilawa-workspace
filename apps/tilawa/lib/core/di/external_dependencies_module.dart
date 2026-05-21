@@ -1,6 +1,8 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:credential_manager/credential_manager.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -37,6 +39,13 @@ abstract class ExternalDependenciesModule {
 
   @singleton
   FirebaseFirestore get firestore => FirebaseFirestore.instance;
+
+  @singleton
+  FirebaseFunctions get firebaseFunctions =>
+      FirebaseFunctions.instanceFor(region: 'us-central1');
+
+  @singleton
+  InAppPurchase get inAppPurchase => InAppPurchase.instance;
 
   @singleton
   FirebaseAuth get firebaseAuth => FirebaseAuth.instance;

@@ -1914,4 +1914,129 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get moreOptions => 'المزيد';
+
+  @override
+  String get supportTilawa => 'ادعم تلاوة';
+
+  @override
+  String get supportTilawaSubtitle =>
+      'اختياري. ساهم في إبقاء تلاوة هادئة وجميلة ومجانية للجميع.';
+
+  @override
+  String get supportMissionBody =>
+      'بُنيت تلاوة للقراءة والاستماع بعناية. دعمك يساعدنا على صيانة التطبيق دون إعلانات أو ضغط.';
+
+  @override
+  String get supportImpactTitle => 'ماذا يساعد دعمك';
+
+  @override
+  String get supportImpactQuranHosting => 'استضافة قارئ القرآن وتوصيله';
+
+  @override
+  String get supportImpactReciterAudio => 'تخزين وبث صوتيات القراء';
+
+  @override
+  String get supportImpactPrayerTools => 'حسابات أوقات الصلاة والأدوات';
+
+  @override
+  String get supportImpactDevelopment => 'التطوير والصيانة المستمرة';
+
+  @override
+  String get supportImpactAdFree => 'إبقاء تلاوة بلا إعلانات';
+
+  @override
+  String get supportTierSmall => 'دعم صغير';
+
+  @override
+  String get supportTierKind => 'دعم كريم';
+
+  @override
+  String get supportTierGenerous => 'دعم سخي';
+
+  @override
+  String get supportContinueWithPlay => 'المتابعة عبر Google Play';
+
+  @override
+  String get supportConfirmationTitle => 'تأكيد الدعم';
+
+  @override
+  String get supportConfirmationBody =>
+      'ستكمل الدفع بأمان عبر Google Play. تلاوة لا تحفظ بيانات البطاقة.';
+
+  @override
+  String get supportConfirm => 'متابعة';
+
+  @override
+  String get supportCancel => 'إلغاء';
+
+  @override
+  String get supportThankYouTitle => 'شكرًا لك';
+
+  @override
+  String get supportThankYouBody =>
+      'شكرًا لك. دعمك يساعد في إبقاء تلاوة مجانية للجميع.';
+
+  @override
+  String get supportDone => 'تم';
+
+  @override
+  String get supportRestorePurchases => 'استعادة المشتريات';
+
+  @override
+  String get supportRestoreHint => 'إذا لم يكتمل دعم سابق، اضغط استعادة.';
+
+  @override
+  String get supportPlayFooter => 'تتم المدفوعات عبر Google Play.';
+
+  @override
+  String get supportDisclaimer =>
+      'هذا الدعم للتطبيق تلاوة وليس لجهة خيرية مسجلة.';
+
+  @override
+  String get supportOfflineMessage => 'اتصل بالإنترنت لعرض خيارات الدعم.';
+
+  @override
+  String get supportBillingUnavailable =>
+      'الفوترة عبر Google Play غير متاحة على هذا الجهاز.';
+
+  @override
+  String get supportProductsUnavailable =>
+      'خيارات الدعم غير متاحة الآن. حاول لاحقًا.';
+
+  @override
+  String get supportPurchasePending => 'دعمك قيد المعالجة عبر Google Play.';
+
+  @override
+  String get supportPurchaseVerifyFailed =>
+      'لم نتمكن من تأكيد دعمك بعد. جرّب الاستعادة لاحقًا.';
+
+  @override
+  String get supportRestoreNothingFound => 'لم يُعثر على دعم سابق لهذا الحساب.';
+
+  @override
+  String get supportRestoreComplete => 'اكتملت الاستعادة.';
+
+  @override
+  String get supportSelectTier => 'اختر مبلغًا';
+
+  @override
+  String get supportSettingsGroupTitle => 'الدعم';
+
+  @override
+  String get supportHelpKeepFree => 'ساهم في إبقاء تلاوة مجانية';
+
+  @override
+  String get purchaseBillingUnavailable => 'المشتريات غير متاحة حاليًا.';
+
+  @override
+  String get purchaseProductNotFound => 'خيار الدعم هذا غير متاح.';
+
+  @override
+  String get purchaseVerificationFailed => 'تعذر تأكيد دعمك. حاول مرة أخرى.';
+
+  @override
+  String get purchasePending => 'دعمك ما زال قيد المعالجة.';
+
+  @override
+  String get purchaseAlreadyOwned => 'تم إكمال هذا الدعم مسبقًا.';
 }

@@ -2580,5 +2580,161 @@
     "moreOptions": "More options",
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
+    },
+    "supportTilawa": "Support Tilawa",
+    "@supportTilawa": {
+        "description": "Support Tilawa screen and settings entry title"
+    },
+    "supportTilawaSubtitle": "Optional. Help keep Tilawa calm, beautiful, and free for everyone.",
+    "@supportTilawaSubtitle": {
+        "description": "Support screen hero subtitle"
+    },
+    "supportMissionBody": "Tilawa is built for reading and listening with care. Your support helps us maintain it without ads or pressure.",
+    "@supportMissionBody": {
+        "description": "Support screen mission paragraph"
+    },
+    "supportImpactTitle": "What your support helps with",
+    "@supportImpactTitle": {
+        "description": "Support impact section title"
+    },
+    "supportImpactQuranHosting": "Quran reader hosting and delivery",
+    "@supportImpactQuranHosting": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactReciterAudio": "Reciter audio storage and streaming",
+    "@supportImpactReciterAudio": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactPrayerTools": "Prayer time calculations and tools",
+    "@supportImpactPrayerTools": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactDevelopment": "Ongoing development and maintenance",
+    "@supportImpactDevelopment": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactAdFree": "Keeping Tilawa ad-free",
+    "@supportImpactAdFree": {
+        "description": "Support impact bullet"
+    },
+    "supportTierSmall": "Small support",
+    "@supportTierSmall": {
+        "description": "Smallest one-time support tier label"
+    },
+    "supportTierKind": "Kind support",
+    "@supportTierKind": {
+        "description": "Middle one-time support tier label"
+    },
+    "supportTierGenerous": "Generous support",
+    "@supportTierGenerous": {
+        "description": "Largest one-time support tier label"
+    },
+    "supportContinueWithPlay": "Continue with Google Play",
+    "@supportContinueWithPlay": {
+        "description": "Primary support purchase CTA"
+    },
+    "supportConfirmationTitle": "Confirm your support",
+    "@supportConfirmationTitle": {
+        "description": "Support purchase confirmation sheet title"
+    },
+    "supportConfirmationBody": "You will complete payment securely in Google Play. Tilawa does not store card details.",
+    "@supportConfirmationBody": {
+        "description": "Support purchase confirmation sheet body"
+    },
+    "supportConfirm": "Continue",
+    "@supportConfirm": {
+        "description": "Support confirmation sheet confirm button"
+    },
+    "supportCancel": "Cancel",
+    "@supportCancel": {
+        "description": "Support confirmation sheet cancel button"
+    },
+    "supportThankYouTitle": "Thank you",
+    "@supportThankYouTitle": {
+        "description": "Support thank-you state title"
+    },
+    "supportThankYouBody": "Thank you. Your support helps keep Tilawa free for everyone.",
+    "@supportThankYouBody": {
+        "description": "Support thank-you state body"
+    },
+    "supportDone": "Done",
+    "@supportDone": {
+        "description": "Support thank-you dismiss button"
+    },
+    "supportRestorePurchases": "Restore purchases",
+    "@supportRestorePurchases": {
+        "description": "Restore purchases action"
+    },
+    "supportRestoreHint": "If a previous support did not complete, tap restore.",
+    "@supportRestoreHint": {
+        "description": "Restore purchases helper text"
+    },
+    "supportPlayFooter": "Payments are processed by Google Play.",
+    "@supportPlayFooter": {
+        "description": "Support screen legal footer"
+    },
+    "supportDisclaimer": "This supports the Tilawa app, not a registered charity.",
+    "@supportDisclaimer": {
+        "description": "Support legal disclaimer"
+    },
+    "supportOfflineMessage": "Connect to the internet to see support options.",
+    "@supportOfflineMessage": {
+        "description": "Offline message on support screen"
+    },
+    "supportBillingUnavailable": "Google Play billing is not available on this device.",
+    "@supportBillingUnavailable": {
+        "description": "Billing unavailable error"
+    },
+    "supportProductsUnavailable": "Support options are not available right now. Please try again later.",
+    "@supportProductsUnavailable": {
+        "description": "Products query failed error"
+    },
+    "supportPurchasePending": "Your support is processing with Google Play.",
+    "@supportPurchasePending": {
+        "description": "Pending purchase message"
+    },
+    "supportPurchaseVerifyFailed": "We could not confirm your support yet. Try restore later.",
+    "@supportPurchaseVerifyFailed": {
+        "description": "Verification failed message"
+    },
+    "supportRestoreNothingFound": "No previous support was found for this account.",
+    "@supportRestoreNothingFound": {
+        "description": "Restore found nothing message"
+    },
+    "supportRestoreComplete": "Restore finished.",
+    "@supportRestoreComplete": {
+        "description": "Restore completed message"
+    },
+    "supportSelectTier": "Choose an amount",
+    "@supportSelectTier": {
+        "description": "Prompt when no tier selected"
+    },
+    "supportSettingsGroupTitle": "Support",
+    "@supportSettingsGroupTitle": {
+        "description": "Settings group title for support entry"
+    },
+    "supportHelpKeepFree": "Help keep Tilawa free",
+    "@supportHelpKeepFree": {
+        "description": "Settings support tile subtitle"
+    },
+    "purchaseBillingUnavailable": "Purchases are not available right now.",
+    "@purchaseBillingUnavailable": {
+        "description": "Localized purchase billing unavailable failure"
+    },
+    "purchaseProductNotFound": "This support option is not available.",
+    "@purchaseProductNotFound": {
+        "description": "Localized purchase product not found failure"
+    },
+    "purchaseVerificationFailed": "We could not confirm your support. Please try again.",
+    "@purchaseVerificationFailed": {
+        "description": "Localized purchase verification failed failure"
+    },
+    "purchasePending": "Your support is still processing.",
+    "@purchasePending": {
+        "description": "Localized purchase pending failure"
+    },
+    "purchaseAlreadyOwned": "This support was already completed.",
+    "@purchaseAlreadyOwned": {
+        "description": "Localized purchase already owned failure"
     }
 }

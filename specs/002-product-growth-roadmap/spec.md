@@ -476,39 +476,47 @@ Store listing converts more impressions to installs.
 
 ---
 
-### 4.11 Ethical Monetization
+### 4.11 Ethical Monetization → Support Tilawa
 
-**Why it matters**: The premium architecture is built but the payment flow is a Firestore stub
-with no actual payment SDK. Monetization must be ethical for an Islamic app — core Quran
-access must always be free.
+**Canonical spec (read first):** [`specs/016-support-tilawa/spec.md`](../016-support-tilawa/spec.md)
 
-**Evidence**: `purchaseSubscription()` in `premium_remote_datasource.dart` writes
-`status: 'completed'` directly to Firestore without calling any payment provider. There is
-no `in_app_purchase`, `purchases_flutter`, or RevenueCat package in `pubspec.yaml`.
+**Why it matters**: Tilawa must remain trustworthy for worship. Monetization is
+**voluntary support**, not a premium subscription funnel. Core Quran, prayer, and
+athkar access stay free forever.
 
-**Recommended monetization principles**:
-- Core Quran access (reading, listening, basic reciters) must always be free
-- Premium features should be purely additive, not restrictive
-- Framing: "Support Tilawa" / "Sadaqah Jariyah" — not "Upgrade to unlock"
+**Historical evidence (superseded for MVP):** Legacy `features/premium` used a
+Firestore stub (`purchaseSubscription()` without Play verification). MVP replaces
+that pattern with **Google Play Billing + `verifySupportPurchase` Cloud Function**.
+Do not reintroduce client-only Firestore completion as purchase truth.
 
-**Suggested premium features**:
-1. **Cloud sync** — sync bookmarks, favorites, playlists, settings across devices
-2. **Extra customization** — custom player backgrounds, expanded theme tokens
-3. **Offline download quotas** — free tier has reasonable limit (e.g., 5 reciters);
-   premium removes limit
-4. **Early access** to new reciters and features
-5. **Donation tier** — one-time support option, no feature gate
+**Product philosophy**:
+- Positioning: *A respectful Quran and worship app that stays calm, beautiful,
+  and ad-free because users voluntarily support it.*
+- User-facing vocabulary: **Support Tilawa / Supporter** — not Premium, Pro, VIP,
+  Unlock, or Upgrade.
+- No intrusive monetization, worship interruption, feature gating, or dark patterns.
 
-**Implementation requirement**: Before launching premium, integrate a real payment SDK.
-Recommended: `in_app_purchase` (first-party Flutter plugin) or RevenueCat for cross-platform
-subscription management.
+**MVP scope (Android)** — see spec §4:
+- Google Play **consumable** one-time tiers only (`support_once_small|kind|generous`)
+- Settings / About / Profile entry only; **no** reader or prayer prompts
+- Lightweight server verification; **no** entitlement mirror or subscriptions in MVP
+- Feature flag: `TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED`
 
-**Priority**: Medium (payment SDK integration required before any monetization)
-**Effort**: Large (payment SDK integration + backend webhook + receipt validation)
-**Growth impact**: Medium (revenue enables sustainability, not direct downloads)
-**Retention impact**: Low
-**Technical complexity**: High (payment SDK, server-side validation, receipt handling)
-**Islamic sensitivity**: Very High — must never gate Quran access, must be clearly optional
+**Post-MVP roadmap (separate specs required)**:
+1. Optional monthly “sustain Tilawa” subscription (Play subscriptions + RTDN)
+2. **Cloud sync** — additive perk, not a worship gate
+3. **Cosmetic perks** — private Settings badge, themes (never gate Quran/prayer)
+4. Early access to new reciters — only if clearly additive
+
+**Deferred / out of policy**: RevenueCat until iOS need is proven; download quotas
+as paywall; ads on worship surfaces (default: no ads).
+
+**Priority**: Medium (MVP support behind feature flag until Play + Function verified)
+**Effort**: Medium (MVP) → Large (subscriptions + entitlements later)
+**Growth impact**: Medium (sustainability, not discovery)
+**Retention impact**: Low if ethics are preserved; **negative** if worship is gated
+**Technical complexity**: Medium (MVP billing + verify) / High (post-MVP entitlements)
+**Islamic sensitivity**: Very High — ethics doc is binding via spec 016
 
 ---
 

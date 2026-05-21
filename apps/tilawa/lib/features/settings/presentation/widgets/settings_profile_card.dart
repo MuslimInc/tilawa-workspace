@@ -5,7 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../../core/bootstrap/app_launch_config.dart';
 import '../../../../router/app_router_config.dart';
+import 'package:tilawa_core/di/injection.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 
@@ -69,6 +71,26 @@ class SettingsProfileCard extends StatelessWidget {
                             ),
                           ),
                         ),
+                        if (getIt<AppLaunchConfig>().supportTilawaEnabled)
+                          Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: TextButton(
+                              onPressed: () =>
+                                  const SupportRoute().push(context),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                foregroundColor: colorScheme.onPrimaryContainer,
+                              ),
+                              child: Text(
+                                context.l10n.supportTilawa,
+                                style: context.textTheme.labelLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),

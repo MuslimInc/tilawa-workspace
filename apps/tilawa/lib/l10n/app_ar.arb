@@ -2580,5 +2580,161 @@
     "moreOptions": "المزيد",
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
+    },
+    "supportTilawa": "ادعم تلاوة",
+    "@supportTilawa": {
+        "description": "Support Tilawa screen and settings entry title"
+    },
+    "supportTilawaSubtitle": "اختياري. ساهم في إبقاء تلاوة هادئة وجميلة ومجانية للجميع.",
+    "@supportTilawaSubtitle": {
+        "description": "Support screen hero subtitle"
+    },
+    "supportMissionBody": "بُنيت تلاوة للقراءة والاستماع بعناية. دعمك يساعدنا على صيانة التطبيق دون إعلانات أو ضغط.",
+    "@supportMissionBody": {
+        "description": "Support screen mission paragraph"
+    },
+    "supportImpactTitle": "ماذا يساعد دعمك",
+    "@supportImpactTitle": {
+        "description": "Support impact section title"
+    },
+    "supportImpactQuranHosting": "استضافة قارئ القرآن وتوصيله",
+    "@supportImpactQuranHosting": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactReciterAudio": "تخزين وبث صوتيات القراء",
+    "@supportImpactReciterAudio": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactPrayerTools": "حسابات أوقات الصلاة والأدوات",
+    "@supportImpactPrayerTools": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactDevelopment": "التطوير والصيانة المستمرة",
+    "@supportImpactDevelopment": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactAdFree": "إبقاء تلاوة بلا إعلانات",
+    "@supportImpactAdFree": {
+        "description": "Support impact bullet"
+    },
+    "supportTierSmall": "دعم صغير",
+    "@supportTierSmall": {
+        "description": "Smallest one-time support tier label"
+    },
+    "supportTierKind": "دعم كريم",
+    "@supportTierKind": {
+        "description": "Middle one-time support tier label"
+    },
+    "supportTierGenerous": "دعم سخي",
+    "@supportTierGenerous": {
+        "description": "Largest one-time support tier label"
+    },
+    "supportContinueWithPlay": "المتابعة عبر Google Play",
+    "@supportContinueWithPlay": {
+        "description": "Primary support purchase CTA"
+    },
+    "supportConfirmationTitle": "تأكيد الدعم",
+    "@supportConfirmationTitle": {
+        "description": "Support purchase confirmation sheet title"
+    },
+    "supportConfirmationBody": "ستكمل الدفع بأمان عبر Google Play. تلاوة لا تحفظ بيانات البطاقة.",
+    "@supportConfirmationBody": {
+        "description": "Support purchase confirmation sheet body"
+    },
+    "supportConfirm": "متابعة",
+    "@supportConfirm": {
+        "description": "Support confirmation sheet confirm button"
+    },
+    "supportCancel": "إلغاء",
+    "@supportCancel": {
+        "description": "Support confirmation sheet cancel button"
+    },
+    "supportThankYouTitle": "شكرًا لك",
+    "@supportThankYouTitle": {
+        "description": "Support thank-you state title"
+    },
+    "supportThankYouBody": "شكرًا لك. دعمك يساعد في إبقاء تلاوة مجانية للجميع.",
+    "@supportThankYouBody": {
+        "description": "Support thank-you state body"
+    },
+    "supportDone": "تم",
+    "@supportDone": {
+        "description": "Support thank-you dismiss button"
+    },
+    "supportRestorePurchases": "استعادة المشتريات",
+    "@supportRestorePurchases": {
+        "description": "Restore purchases action"
+    },
+    "supportRestoreHint": "إذا لم يكتمل دعم سابق، اضغط استعادة.",
+    "@supportRestoreHint": {
+        "description": "Restore purchases helper text"
+    },
+    "supportPlayFooter": "تتم المدفوعات عبر Google Play.",
+    "@supportPlayFooter": {
+        "description": "Support screen legal footer"
+    },
+    "supportDisclaimer": "هذا الدعم للتطبيق تلاوة وليس لجهة خيرية مسجلة.",
+    "@supportDisclaimer": {
+        "description": "Support legal disclaimer"
+    },
+    "supportOfflineMessage": "اتصل بالإنترنت لعرض خيارات الدعم.",
+    "@supportOfflineMessage": {
+        "description": "Offline message on support screen"
+    },
+    "supportBillingUnavailable": "الفوترة عبر Google Play غير متاحة على هذا الجهاز.",
+    "@supportBillingUnavailable": {
+        "description": "Billing unavailable error"
+    },
+    "supportProductsUnavailable": "خيارات الدعم غير متاحة الآن. حاول لاحقًا.",
+    "@supportProductsUnavailable": {
+        "description": "Products query failed error"
+    },
+    "supportPurchasePending": "دعمك قيد المعالجة عبر Google Play.",
+    "@supportPurchasePending": {
+        "description": "Pending purchase message"
+    },
+    "supportPurchaseVerifyFailed": "لم نتمكن من تأكيد دعمك بعد. جرّب الاستعادة لاحقًا.",
+    "@supportPurchaseVerifyFailed": {
+        "description": "Verification failed message"
+    },
+    "supportRestoreNothingFound": "لم يُعثر على دعم سابق لهذا الحساب.",
+    "@supportRestoreNothingFound": {
+        "description": "Restore found nothing message"
+    },
+    "supportRestoreComplete": "اكتملت الاستعادة.",
+    "@supportRestoreComplete": {
+        "description": "Restore completed message"
+    },
+    "supportSelectTier": "اختر مبلغًا",
+    "@supportSelectTier": {
+        "description": "Prompt when no tier selected"
+    },
+    "supportSettingsGroupTitle": "الدعم",
+    "@supportSettingsGroupTitle": {
+        "description": "Settings group title for support entry"
+    },
+    "supportHelpKeepFree": "ساهم في إبقاء تلاوة مجانية",
+    "@supportHelpKeepFree": {
+        "description": "Settings support tile subtitle"
+    },
+    "purchaseBillingUnavailable": "المشتريات غير متاحة حاليًا.",
+    "@purchaseBillingUnavailable": {
+        "description": "Localized purchase billing unavailable failure"
+    },
+    "purchaseProductNotFound": "خيار الدعم هذا غير متاح.",
+    "@purchaseProductNotFound": {
+        "description": "Localized purchase product not found failure"
+    },
+    "purchaseVerificationFailed": "تعذر تأكيد دعمك. حاول مرة أخرى.",
+    "@purchaseVerificationFailed": {
+        "description": "Localized purchase verification failed failure"
+    },
+    "purchasePending": "دعمك ما زال قيد المعالجة.",
+    "@purchasePending": {
+        "description": "Localized purchase pending failure"
+    },
+    "purchaseAlreadyOwned": "تم إكمال هذا الدعم مسبقًا.",
+    "@purchaseAlreadyOwned": {
+        "description": "Localized purchase already owned failure"
     }
 }

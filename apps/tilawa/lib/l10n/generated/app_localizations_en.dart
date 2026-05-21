@@ -1924,4 +1924,135 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get moreOptions => 'More options';
+
+  @override
+  String get supportTilawa => 'Support Tilawa';
+
+  @override
+  String get supportTilawaSubtitle =>
+      'Optional. Help keep Tilawa calm, beautiful, and free for everyone.';
+
+  @override
+  String get supportMissionBody =>
+      'Tilawa is built for reading and listening with care. Your support helps us maintain it without ads or pressure.';
+
+  @override
+  String get supportImpactTitle => 'What your support helps with';
+
+  @override
+  String get supportImpactQuranHosting => 'Quran reader hosting and delivery';
+
+  @override
+  String get supportImpactReciterAudio => 'Reciter audio storage and streaming';
+
+  @override
+  String get supportImpactPrayerTools => 'Prayer time calculations and tools';
+
+  @override
+  String get supportImpactDevelopment => 'Ongoing development and maintenance';
+
+  @override
+  String get supportImpactAdFree => 'Keeping Tilawa ad-free';
+
+  @override
+  String get supportTierSmall => 'Small support';
+
+  @override
+  String get supportTierKind => 'Kind support';
+
+  @override
+  String get supportTierGenerous => 'Generous support';
+
+  @override
+  String get supportContinueWithPlay => 'Continue with Google Play';
+
+  @override
+  String get supportConfirmationTitle => 'Confirm your support';
+
+  @override
+  String get supportConfirmationBody =>
+      'You will complete payment securely in Google Play. Tilawa does not store card details.';
+
+  @override
+  String get supportConfirm => 'Continue';
+
+  @override
+  String get supportCancel => 'Cancel';
+
+  @override
+  String get supportThankYouTitle => 'Thank you';
+
+  @override
+  String get supportThankYouBody =>
+      'Thank you. Your support helps keep Tilawa free for everyone.';
+
+  @override
+  String get supportDone => 'Done';
+
+  @override
+  String get supportRestorePurchases => 'Restore purchases';
+
+  @override
+  String get supportRestoreHint =>
+      'If a previous support did not complete, tap restore.';
+
+  @override
+  String get supportPlayFooter => 'Payments are processed by Google Play.';
+
+  @override
+  String get supportDisclaimer =>
+      'This supports the Tilawa app, not a registered charity.';
+
+  @override
+  String get supportOfflineMessage =>
+      'Connect to the internet to see support options.';
+
+  @override
+  String get supportBillingUnavailable =>
+      'Google Play billing is not available on this device.';
+
+  @override
+  String get supportProductsUnavailable =>
+      'Support options are not available right now. Please try again later.';
+
+  @override
+  String get supportPurchasePending =>
+      'Your support is processing with Google Play.';
+
+  @override
+  String get supportPurchaseVerifyFailed =>
+      'We could not confirm your support yet. Try restore later.';
+
+  @override
+  String get supportRestoreNothingFound =>
+      'No previous support was found for this account.';
+
+  @override
+  String get supportRestoreComplete => 'Restore finished.';
+
+  @override
+  String get supportSelectTier => 'Choose an amount';
+
+  @override
+  String get supportSettingsGroupTitle => 'Support';
+
+  @override
+  String get supportHelpKeepFree => 'Help keep Tilawa free';
+
+  @override
+  String get purchaseBillingUnavailable =>
+      'Purchases are not available right now.';
+
+  @override
+  String get purchaseProductNotFound => 'This support option is not available.';
+
+  @override
+  String get purchaseVerificationFailed =>
+      'We could not confirm your support. Please try again.';
+
+  @override
+  String get purchasePending => 'Your support is still processing.';
+
+  @override
+  String get purchaseAlreadyOwned => 'This support was already completed.';
 }

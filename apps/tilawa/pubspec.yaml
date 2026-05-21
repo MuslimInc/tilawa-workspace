@@ -3,7 +3,7 @@ resolution: workspace
 description: An Audio Quran Player project.
 
 publish_to: none
-version: 1.0.3+28
+version: 1.0.4+29
 
 environment:
   sdk: ^3.12.0
@@ -56,7 +56,9 @@ dependencies:
   http: ^1.6.0
   hugeicons: ^1.1.4
   hydrated_bloc: ^11.0.0
+  in_app_purchase: ^3.2.3
   in_app_update: ^4.2.5
+  cloud_functions: ^6.3.1
   injectable: ^3.0.0
   intl: ^0.20.2
   json_annotation: ^4.10.0

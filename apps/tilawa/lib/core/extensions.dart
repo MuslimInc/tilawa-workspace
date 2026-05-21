@@ -54,6 +54,17 @@ extension FailureExtensions on Failure {
         NotificationFailureReason.invalidPayload =>
           l10n.errorInvalidNotificationPayload,
       },
+      PurchaseFailure(reason: final reason) => switch (reason) {
+        PurchaseFailureReason.billingUnavailable =>
+          l10n.purchaseBillingUnavailable,
+        PurchaseFailureReason.productNotFound => l10n.purchaseProductNotFound,
+        PurchaseFailureReason.userCancelled => '',
+        PurchaseFailureReason.pending => l10n.purchasePending,
+        PurchaseFailureReason.verificationFailed =>
+          l10n.purchaseVerificationFailed,
+        PurchaseFailureReason.alreadyOwned => l10n.purchaseAlreadyOwned,
+        PurchaseFailureReason.network => l10n.networkError,
+      },
     };
   }
 }

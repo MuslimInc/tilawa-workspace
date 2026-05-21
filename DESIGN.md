@@ -4,6 +4,7 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 
 **Companion:** `AGENTS.md` (how to build). This file is how the product should **look and feel**.
 **Brand intent layer:** [`docs/tilawa_brand.md`](docs/tilawa_brand.md) — names Tilawa's Islamic-brand roles on top of the tokens here (Mushaf gold, scholarly sage, parchment, hairline grammar). When intent and implementation conflict, this file wins on implementation; [`docs/tilawa_brand.md`](docs/tilawa_brand.md) wins on intent.
+**Voluntary support (monetization UX):** [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md) — product ethics and entry points; [`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md) — support screen visuals.
 
 ---
 
@@ -139,7 +140,42 @@ Includes (non-exhaustive): section titles, sheet handle, **card**, icon box, loa
 
 ---
 
-## 9. Do’s and don’ts
+## 9. Support Tilawa surfaces (voluntary contribution)
+
+Tilawa uses **Support Tilawa**, not “Premium” or “Pro,” for optional financial
+contribution. Full product rules live in
+[`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md); visual
+detail in
+[`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md).
+
+### Terminology (user-facing)
+
+| Avoid | Use |
+|-------|-----|
+| Premium, Pro, VIP, Unlock, Upgrade | Support Tilawa, Supporter, Help keep Tilawa free |
+
+### UX placement (allowed vs forbidden)
+
+| Allowed | Forbidden |
+|---------|-----------|
+| Settings, About, Profile | Quran reader, prayer times, athkar, onboarding, cold-start popups |
+
+### Visual rules (summary)
+
+- **Calm:** `surfaceContainerLow`, hairlines, one **Ink** (`primary`) CTA per screen.
+- **No gold pay chrome:** Gilding (`tertiary`) is not for purchase buttons (see brand doc §3).
+- **No aggressive success UI:** `TilawaEmptyState` thank-you — no confetti, gold gradients, or “benefits unlocked” lists.
+- **Transparent:** impact bullets + “Payments processed by Google Play” footer.
+
+### MVP implementation constraints (design-relevant)
+
+- Android + Google Play consumables only; prices from Play strings, not hard-coded currency.
+- Feature flag: `TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED` (default **on**; set `false` to hide entries).
+- No subscription/perk UI in MVP.
+
+---
+
+## 10. Do’s and don’ts
 
 **Do**
 
@@ -155,10 +191,11 @@ Includes (non-exhaustive): section titles, sheet handle, **card**, icon box, loa
 - Rely on Flutter’s default **48 dp** minimum when Tilawa tokens specify **44 dp** — follow the kit.
 - Assume **compact** VisualDensity; the kit is tuned for **comfortable** density.
 - Ignore **text scaler clamp** when auditing layouts (test at scale **1.4**).
+- Add support/donation UI only per **§9** entry-point policy — never on worship surfaces.
 
 ---
 
-## 10. Responsive behavior (checklist)
+## 11. Responsive behavior (checklist)
 
 - [ ] Narrow: single column; bottom nav with icon + label where shell applies.
 - [ ] Medium / expanded: consider rails, split columns, and larger content caps via `resolveContentWidth`.
@@ -167,7 +204,7 @@ Includes (non-exhaustive): section titles, sheet handle, **card**, icon box, loa
 
 ---
 
-## 11. Agent prompt guide
+## 12. Agent prompt guide
 
 Short prompts that align outputs with this repo:
 
@@ -176,10 +213,11 @@ Short prompts that align outputs with this repo:
 - *“Branch layout on **`context.windowSize`** (narrow vs expanded), not raw `MediaQuery` width.”*
 - *“Primary is user-configurable; use **`ColorScheme.primary`** / **onPrimary**, not `AppColors.primaryTeal` in feature code.”*
 - *“Match **adaptive shell** bottom nav: use component tokens for nav height, spacing, and label styling.”*
+- *“Support flow: read **§9** and `specs/016-support-tilawa/spec.md` — calm surfaces, no Premium copy, no reader/prayer entry points.”*
 
 ---
 
-## 12. Key file map
+## 13. Key file map
 
 | Area | Path |
 |------|------|
@@ -194,12 +232,15 @@ Short prompts that align outputs with this repo:
 | Bottom sheet shell | `packages/ui_kit/lib/src/foundation/tilawa_bottom_sheet_scaffold.dart` |
 | Primary presets | `apps/tilawa/lib/features/theme/domain/primary_color_preset.dart` |
 | Deeper color docs | `docs/design/colors.md` |
+| Support product spec | `specs/016-support-tilawa/spec.md` |
+| Support visual rules | `packages/ui_kit/docs/support_visual_system.md` |
+| Play product IDs | `docs/support_play_products.md` |
 | External DESIGN.md catalog (index) | `docs/design/awesome-design-md-readme.md` |
 | Third-party reference designs (per brand) | `design-md/<brand>/DESIGN.md` |
 
 ---
 
-## 13. External design references
+## 14. External design references
 
 **Canonical for Tilawa:** this file (`DESIGN.md` at repo root) plus code in `packages/ui_kit`.
 
@@ -221,15 +262,15 @@ reference hex into feature code unless it becomes a deliberate token in
 
 ---
 
-## 14. Active design initiative (rolling)
+## 15. Active design initiative (rolling)
 
-**Status:** Brand identity layer [`docs/tilawa_brand.md`](docs/tilawa_brand.md) authored on top of these tokens (Islamic-brand roles: Ink/Gilding/Scholar/Parchment/Vellum/Hairline). Reciters screen is the first brand exemplar on branch `fix/reciters-screen-ui-ux`.
+**Status:** Support Tilawa product rules documented — [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md), DESIGN §9, [`support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md).
 
 | Field | Detail |
 |-------|--------|
-| **Reference moodboard** | [`design-md/apple/DESIGN.md`](design-md/apple/DESIGN.md) — for rhythm and restraint only (color change as divider, single shadow on the artifact). Tilawa palette and Arabic-first type are unchanged. |
-| **Tilawa implementation** | [`docs/tilawa_brand.md`](docs/tilawa_brand.md) maps brand roles onto existing `ColorScheme` and `TilawaDesignTokens` — no new hex, no new schemes. Reciters screen (`apps/tilawa/lib/features/reciters/presentation/screens/reciters_screen.dart`) carries the §5 rhythm rule (Vellum header on `surfaceContainerHigh`, flat cards with hairline, ambient ornament at low opacity). |
-| **Next candidates** | Apply brand layer to Surah list, player bar, and Settings sections per [`docs/tilawa_brand.md`](docs/tilawa_brand.md) §9 priority order. |
+| **Reference moodboard** | [`design-md/apple/DESIGN.md`](design-md/apple/DESIGN.md) — rhythm and restraint only. |
+| **Tilawa implementation** | Support UI in `apps/tilawa/lib/features/support/`; flag `TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED`. No worship-surface entry points. |
+| **Next candidates** | Play Console SKUs + deploy `verifySupportPurchase`; purge legacy Premium user strings. |
 
 Replace or extend this section when the initiative completes or a new one starts.
 

@@ -3541,6 +3541,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'More options'**
   String get moreOptions;
+
+  /// Support Tilawa screen and settings entry title
+  ///
+  /// In en, this message translates to:
+  /// **'Support Tilawa'**
+  String get supportTilawa;
+
+  /// Support screen hero subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Optional. Help keep Tilawa calm, beautiful, and free for everyone.'**
+  String get supportTilawaSubtitle;
+
+  /// Support screen mission paragraph
+  ///
+  /// In en, this message translates to:
+  /// **'Tilawa is built for reading and listening with care. Your support helps us maintain it without ads or pressure.'**
+  String get supportMissionBody;
+
+  /// Support impact section title
+  ///
+  /// In en, this message translates to:
+  /// **'What your support helps with'**
+  String get supportImpactTitle;
+
+  /// Support impact bullet
+  ///
+  /// In en, this message translates to:
+  /// **'Quran reader hosting and delivery'**
+  String get supportImpactQuranHosting;
+
+  /// Support impact bullet
+  ///
+  /// In en, this message translates to:
+  /// **'Reciter audio storage and streaming'**
+  String get supportImpactReciterAudio;
+
+  /// Support impact bullet
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer time calculations and tools'**
+  String get supportImpactPrayerTools;
+
+  /// Support impact bullet
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing development and maintenance'**
+  String get supportImpactDevelopment;
+
+  /// Support impact bullet
+  ///
+  /// In en, this message translates to:
+  /// **'Keeping Tilawa ad-free'**
+  String get supportImpactAdFree;
+
+  /// Smallest one-time support tier label
+  ///
+  /// In en, this message translates to:
+  /// **'Small support'**
+  String get supportTierSmall;
+
+  /// Middle one-time support tier label
+  ///
+  /// In en, this message translates to:
+  /// **'Kind support'**
+  String get supportTierKind;
+
+  /// Largest one-time support tier label
+  ///
+  /// In en, this message translates to:
+  /// **'Generous support'**
+  String get supportTierGenerous;
+
+  /// Primary support purchase CTA
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with Google Play'**
+  String get supportContinueWithPlay;
+
+  /// Support purchase confirmation sheet title
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm your support'**
+  String get supportConfirmationTitle;
+
+  /// Support purchase confirmation sheet body
+  ///
+  /// In en, this message translates to:
+  /// **'You will complete payment securely in Google Play. Tilawa does not store card details.'**
+  String get supportConfirmationBody;
+
+  /// Support confirmation sheet confirm button
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get supportConfirm;
+
+  /// Support confirmation sheet cancel button
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get supportCancel;
+
+  /// Support thank-you state title
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you'**
+  String get supportThankYouTitle;
+
+  /// Support thank-you state body
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you. Your support helps keep Tilawa free for everyone.'**
+  String get supportThankYouBody;
+
+  /// Support thank-you dismiss button
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get supportDone;
+
+  /// Restore purchases action
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get supportRestorePurchases;
+
+  /// Restore purchases helper text
+  ///
+  /// In en, this message translates to:
+  /// **'If a previous support did not complete, tap restore.'**
+  String get supportRestoreHint;
+
+  /// Support screen legal footer
+  ///
+  /// In en, this message translates to:
+  /// **'Payments are processed by Google Play.'**
+  String get supportPlayFooter;
+
+  /// Support legal disclaimer
+  ///
+  /// In en, this message translates to:
+  /// **'This supports the Tilawa app, not a registered charity.'**
+  String get supportDisclaimer;
+
+  /// Offline message on support screen
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to see support options.'**
+  String get supportOfflineMessage;
+
+  /// Billing unavailable error
+  ///
+  /// In en, this message translates to:
+  /// **'Google Play billing is not available on this device.'**
+  String get supportBillingUnavailable;
+
+  /// Products query failed error
+  ///
+  /// In en, this message translates to:
+  /// **'Support options are not available right now. Please try again later.'**
+  String get supportProductsUnavailable;
+
+  /// Pending purchase message
+  ///
+  /// In en, this message translates to:
+  /// **'Your support is processing with Google Play.'**
+  String get supportPurchasePending;
+
+  /// Verification failed message
+  ///
+  /// In en, this message translates to:
+  /// **'We could not confirm your support yet. Try restore later.'**
+  String get supportPurchaseVerifyFailed;
+
+  /// Restore found nothing message
+  ///
+  /// In en, this message translates to:
+  /// **'No previous support was found for this account.'**
+  String get supportRestoreNothingFound;
+
+  /// Restore completed message
+  ///
+  /// In en, this message translates to:
+  /// **'Restore finished.'**
+  String get supportRestoreComplete;
+
+  /// Prompt when no tier selected
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an amount'**
+  String get supportSelectTier;
+
+  /// Settings group title for support entry
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get supportSettingsGroupTitle;
+
+  /// Settings support tile subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Help keep Tilawa free'**
+  String get supportHelpKeepFree;
+
+  /// Localized purchase billing unavailable failure
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases are not available right now.'**
+  String get purchaseBillingUnavailable;
+
+  /// Localized purchase product not found failure
+  ///
+  /// In en, this message translates to:
+  /// **'This support option is not available.'**
+  String get purchaseProductNotFound;
+
+  /// Localized purchase verification failed failure
+  ///
+  /// In en, this message translates to:
+  /// **'We could not confirm your support. Please try again.'**
+  String get purchaseVerificationFailed;
+
+  /// Localized purchase pending failure
+  ///
+  /// In en, this message translates to:
+  /// **'Your support is still processing.'**
+  String get purchasePending;
+
+  /// Localized purchase already owned failure
+  ///
+  /// In en, this message translates to:
+  /// **'This support was already completed.'**
+  String get purchaseAlreadyOwned;
 }
 
 class _AppLocalizationsDelegate

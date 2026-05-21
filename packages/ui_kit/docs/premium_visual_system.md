@@ -1,10 +1,14 @@
 # Tilawa Premium Visual System
 
 This document defines the rules for keeping Tilawa visually calm, modern, and
-premium while still allowing emotional and editorial moments where they earn
-their place.
+**high-quality** (“premium” = craft, not paid tier).
 
-> Last revised 2026-05-15 alongside
+> **Voluntary support / monetization UI** uses different rules — see
+> [`support_visual_system.md`](support_visual_system.md) and
+> [`specs/016-support-tilawa/spec.md`](../../../specs/016-support-tilawa/spec.md).
+> Do not use “Premium / Pro / VIP” on support screens; do not use gold pay CTAs.
+
+> Last revised 2026-05-22 (cross-link support spec). Visual simplification:
 > [`specs/012-visual-simplification/`](../../../specs/012-visual-simplification/spec.md).
 
 ## Principles
