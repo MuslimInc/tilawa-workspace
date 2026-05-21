@@ -28,6 +28,8 @@ class TilawaAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.showActionControlBackground =
         TilawaAppBarConfig.showActionControlBackground,
     this.showBottomHairline = TilawaAppBarConfig.showBottomHairline,
+    this.showElevationShadow = TilawaAppBarConfig.showElevationShadow,
+    this.toolbarHeight,
   });
 
   final String? title;
@@ -41,11 +43,17 @@ class TilawaAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showLeadingControlBackground;
   final bool showActionControlBackground;
   final bool showBottomHairline;
+  final bool showElevationShadow;
+
+  /// When `null`, uses [kToolbarHeight]. Set to `0` for bottom-only chrome
+  /// (e.g. reciters search header).
+  final double? toolbarHeight;
 
   @override
   Size get preferredSize {
+    final double toolbar = toolbarHeight ?? kToolbarHeight;
     final double bottomHeight = bottom?.preferredSize.height ?? 0;
-    return Size.fromHeight(kToolbarHeight + bottomHeight);
+    return Size.fromHeight(toolbar + bottomHeight);
   }
 
   @override
@@ -64,6 +72,8 @@ class TilawaAppBar extends StatelessWidget implements PreferredSizeWidget {
         automaticallyImplyLeading: automaticallyImplyLeading,
         surface: surface,
         showBottomHairline: showBottomHairline,
+        showElevationShadow: showElevationShadow,
+        toolbarHeight: toolbarHeight,
       ),
     );
   }
@@ -73,6 +83,7 @@ class _TilawaAppBarBody extends StatelessWidget {
   const _TilawaAppBarBody({
     required this.surface,
     required this.showBottomHairline,
+    required this.showElevationShadow,
     this.title,
     this.titleWidget,
     this.leading,
@@ -81,6 +92,7 @@ class _TilawaAppBarBody extends StatelessWidget {
     this.centerTitle = TilawaAppBarConfig.centerTitle,
     this.automaticallyImplyLeading =
         TilawaAppBarConfig.automaticallyImplyLeading,
+    this.toolbarHeight,
   });
 
   final String? title;
@@ -92,6 +104,8 @@ class _TilawaAppBarBody extends StatelessWidget {
   final bool automaticallyImplyLeading;
   final TilawaAppBarSurface surface;
   final bool showBottomHairline;
+  final bool showElevationShadow;
+  final double? toolbarHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -127,8 +141,16 @@ class _TilawaAppBarBody extends StatelessWidget {
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
+      shadowColor: TilawaAppBarChrome.elevationShadowColor(
+        colorScheme,
+        tokens,
+        enabled: showElevationShadow,
+      ),
+      elevation: TilawaAppBarChrome.elevation(enabled: showElevationShadow),
+      scrolledUnderElevation: TilawaAppBarChrome.scrolledUnderElevation(
+        enabled: showElevationShadow,
+      ),
+      toolbarHeight: toolbarHeight ?? kToolbarHeight,
       centerTitle: centerTitle,
       automaticallyImplyLeading: leadingConfig.automaticallyImplyLeading,
       leading: leadingConfig.leading,
@@ -167,6 +189,7 @@ class TilawaSliverAppBar extends StatelessWidget {
     this.showActionControlBackground =
         TilawaAppBarConfig.showActionControlBackground,
     this.showBottomHairline = TilawaAppBarConfig.showBottomHairline,
+    this.showElevationShadow = TilawaAppBarConfig.showElevationShadow,
   });
 
   final String? title;
@@ -185,6 +208,7 @@ class TilawaSliverAppBar extends StatelessWidget {
   final bool showLeadingControlBackground;
   final bool showActionControlBackground;
   final bool showBottomHairline;
+  final bool showElevationShadow;
 
   @override
   Widget build(BuildContext context) {
@@ -207,6 +231,7 @@ class TilawaSliverAppBar extends StatelessWidget {
         expandedHeight: expandedHeight,
         surface: surface,
         showBottomHairline: showBottomHairline,
+        showElevationShadow: showElevationShadow,
       ),
     );
   }
@@ -216,6 +241,7 @@ class _TilawaSliverAppBarBody extends StatelessWidget {
   const _TilawaSliverAppBarBody({
     required this.surface,
     required this.showBottomHairline,
+    required this.showElevationShadow,
     this.title,
     this.titleWidget,
     this.leading,
@@ -245,6 +271,7 @@ class _TilawaSliverAppBarBody extends StatelessWidget {
   final double? expandedHeight;
   final TilawaAppBarSurface surface;
   final bool showBottomHairline;
+  final bool showElevationShadow;
 
   @override
   Widget build(BuildContext context) {
@@ -282,11 +309,21 @@ class _TilawaSliverAppBarBody extends StatelessWidget {
       snap: snap,
       stretch: stretch,
       expandedHeight: expandedHeight,
+      // Pinned slivers skip elevation at rest unless forced; match
+      // [TilawaAppBar] which always paints the chrome shadow.
+      forceElevated: showElevationShadow,
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
       surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      scrolledUnderElevation: 0,
+      shadowColor: TilawaAppBarChrome.elevationShadowColor(
+        colorScheme,
+        tokens,
+        enabled: showElevationShadow,
+      ),
+      elevation: TilawaAppBarChrome.elevation(enabled: showElevationShadow),
+      scrolledUnderElevation: TilawaAppBarChrome.scrolledUnderElevation(
+        enabled: showElevationShadow,
+      ),
       centerTitle: centerTitle,
       automaticallyImplyLeading: leadingConfig.automaticallyImplyLeading,
       leading: leadingConfig.leading,

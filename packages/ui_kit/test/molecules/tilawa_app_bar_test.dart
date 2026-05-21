@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
+import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 import 'package:tilawa_ui_kit/src/molecules/tilawa_app_bar_config.dart';
 
 ThemeData _lightTheme() => AppTheme.getLightTheme(
@@ -45,6 +46,34 @@ void main() {
         ),
         Colors.transparent,
       );
+    });
+  });
+
+  group('TilawaAppBarChrome elevation shadow', () {
+    test('enabled uses scheme.shadow at opacityShadowStrong', () {
+      final theme = _lightTheme();
+      final scheme = theme.colorScheme;
+      final tokens = theme.extension<TilawaDesignTokens>()!;
+      expect(
+        TilawaAppBarChrome.elevationShadowColor(scheme, tokens),
+        scheme.shadow.withValues(alpha: tokens.opacityShadowStrong),
+      );
+    });
+
+    test('disabled returns transparent shadow and zero elevation', () {
+      final theme = _lightTheme();
+      final scheme = theme.colorScheme;
+      final tokens = theme.extension<TilawaDesignTokens>()!;
+      expect(
+        TilawaAppBarChrome.elevationShadowColor(
+          scheme,
+          tokens,
+          enabled: false,
+        ),
+        Colors.transparent,
+      );
+      expect(TilawaAppBarChrome.elevation(enabled: false), 0);
+      expect(TilawaAppBarChrome.scrolledUnderElevation(enabled: false), 0);
     });
   });
 

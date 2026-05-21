@@ -20,10 +20,24 @@ abstract final class TilawaAppBarConfig {
   static const bool showLeadingControlBackground = false;
   static const bool showActionControlBackground = false;
   static const bool showBottomHairline = true;
+  static const bool showElevationShadow = true;
+
+  /// Material [AppBar.elevation] when [showElevationShadow] is true.
+  static const double elevation = 2;
+
+  /// Material [AppBar.scrolledUnderElevation] when [showElevationShadow] is true.
+  static const double scrolledUnderElevation = 2;
+
   static const bool pinned = true;
   static const bool floating = false;
   static const bool snap = false;
   static const bool stretch = false;
+
+  /// Default [AppBar.bottom] height for a single [TilawaSearchField] row.
+  static double searchBottomHeight(ThemeData theme) {
+    return theme.componentTokens.searchField.height +
+        theme.tokens.spaceMedium * 2;
+  }
 }
 
 /// Toolbar chrome policy for descendants of [TilawaAppBar] /
@@ -83,6 +97,33 @@ abstract final class TilawaAppBarChrome {
   }
 
   static Color foregroundColor(ColorScheme scheme) => scheme.onSurface;
+
+  /// Soft drop shadow under the app bar ([ColorScheme.shadow] ×
+  /// [TilawaDesignTokens.opacityShadowStrong]).
+  static Color elevationShadowColor(
+    ColorScheme scheme,
+    TilawaDesignTokens tokens, {
+    bool enabled = true,
+  }) {
+    if (!enabled || !TilawaAppBarConfig.showElevationShadow) {
+      return Colors.transparent;
+    }
+    return scheme.shadow.withValues(alpha: tokens.opacityShadowStrong);
+  }
+
+  static double elevation({bool enabled = true}) {
+    if (!enabled || !TilawaAppBarConfig.showElevationShadow) {
+      return 0;
+    }
+    return TilawaAppBarConfig.elevation;
+  }
+
+  static double scrolledUnderElevation({bool enabled = true}) {
+    if (!enabled || !TilawaAppBarConfig.showElevationShadow) {
+      return 0;
+    }
+    return TilawaAppBarConfig.scrolledUnderElevation;
+  }
 
   static ShapeBorder bottomHairline(
     ColorScheme scheme,
