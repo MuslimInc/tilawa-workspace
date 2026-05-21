@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import '../foundation/tilawa_interaction_feedback.dart';
+import 'tilawa_app_bar_config.dart';
 
 class TilawaIconActionButton extends StatefulWidget {
   const TilawaIconActionButton({
@@ -40,10 +41,9 @@ class TilawaIconActionButton extends StatefulWidget {
   /// Screen reader label for the control.
   final String? semanticLabel;
 
-  /// Optional fill colour. When `null` (default) the button uses
-  /// `ColorScheme.surface` — visually transparent on a `surface` background.
-  /// Pass `ColorScheme.surfaceContainerHigh` (or similar) to render a quiet
-  /// pill when the button sits on a `surface`-coloured header.
+  /// Optional fill colour. When `null`, uses [TilawaAppBarScope] toolbar fill
+  /// inside [TilawaAppBar] / [TilawaSliverAppBar]; otherwise
+  /// `ColorScheme.surface`.
   final Color? backgroundColor;
 
   @override
@@ -100,11 +100,17 @@ class _TilawaIconActionButtonState extends State<TilawaIconActionButton>
         ? theme.colorScheme.primary
         : theme.colorScheme.onSurfaceVariant;
 
+    final TilawaAppBarScope? appBarScope = TilawaAppBarScope.maybeOf(context);
+    final Color fillColor = widget.backgroundColor ??
+        (appBarScope != null
+            ? appBarScope.actionControlFillColor(theme.colorScheme)
+            : theme.colorScheme.surface);
+
     Widget result = SizedBox(
       width: effectiveSize,
       height: effectiveSize,
       child: Material(
-        color: widget.backgroundColor ?? theme.colorScheme.surface,
+        color: fillColor,
         borderRadius: effectiveBorderRadius,
         child: ScaleTransition(
           scale: Tween<double>(begin: 1.0, end: TilawaInteractionFeedback.pressScaleEnd).animate(

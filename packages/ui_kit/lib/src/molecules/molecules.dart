@@ -1,3 +1,4 @@
+export 'tilawa_app_bar_config.dart';
 export 'tilawa_app_bar.dart';
 export 'tilawa_alphabet_scrollbar.dart';
 export 'tilawa_language_switcher.dart';
