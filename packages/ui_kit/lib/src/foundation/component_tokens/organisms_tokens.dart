@@ -568,7 +568,7 @@ class TilawaAdaptiveShellTokens {
         textScaler.scale(navButtonLabelFontSize) * labelLineHeight;
     final double iconBlock =
         navButtonVerticalPadding * 2 +
-        navButtonIconSize * navButtonSelectedCenterScale;
+        textScaler.scale(navButtonIconSize) * navButtonSelectedCenterScale;
     final double pillVerticalInset =
         2 * navButtonSelectionContainerVerticalPadding;
     return math.max(
@@ -590,13 +590,13 @@ class TilawaAdaptiveShellTokens {
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     final bool lightChrome = colorScheme.brightness == Brightness.light;
-    const double navButtonMinHeight = 54;
-    const double navButtonVerticalPadding = 4;
+    const double navButtonMinHeight = 100;
+    const double navButtonVerticalPadding = 6;
     const double navButtonIconSize = 22;
     const double navButtonSelectedCenterScale = 1.1;
-    const double navButtonGap = 8;
+    const double navButtonGap = 10;
     const double navButtonLabelFontSize = 10;
-    const double navButtonSelectionContainerVerticalPadding = 5;
+    const double navButtonSelectionContainerVerticalPadding = 6;
     const double navButtonIconOnlyMinHeight = 40;
     const double navButtonIconOnlyVerticalPadding = 1;
     const double navButtonIconOnlySelectionContainerVerticalPadding = 2;
@@ -616,7 +616,7 @@ class TilawaAdaptiveShellTokens {
     return TilawaAdaptiveShellTokens(
       phoneBottomNavBarBaseHeight: phoneBottomNavBarBaseHeight,
       bottomNavHorizontalMargin: 0,
-      bottomNavVerticalMargin: 4,
+      bottomNavVerticalMargin: 8,
       bottomNavIconOnlyVerticalMargin: 2,
       bottomNavInternalPadding: 8,
       bottomNavInnerRadius: 24,

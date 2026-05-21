@@ -345,6 +345,8 @@ class _BottomNavBar extends StatelessWidget {
     final double bottomBarTextScale = MediaQuery.textScalerOf(
       context,
     ).scale(1.0).clamp(0.01, 1.0);
+    final TextScaler barTextScaler = TextScaler.linear(bottomBarTextScale);
+    final double barHeight = tokens.phoneBottomNavLayoutHeight(barTextScaler);
 
     final SystemUiOverlayStyle bottomNavOverlayStyle = SystemUiOverlayStyle(
       systemNavigationBarColor: navColor.withValues(alpha: 1),
@@ -412,45 +414,48 @@ class _BottomNavBar extends StatelessWidget {
                             highlightColor: Colors.transparent,
                             hoverColor: Colors.transparent,
                           ),
-                          child: BottomNavigationBar(
-                            type: BottomNavigationBarType.fixed,
-                            currentIndex: barIndex,
-                            onTap: (int index) {
-                              HapticFeedback.selectionClick();
-                              onDestinationSelected(index);
-                            },
-                            showSelectedLabels: true,
-                            showUnselectedLabels: true,
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                            selectedItemColor: hasSelection
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurfaceVariant,
-                            unselectedItemColor:
-                                theme.colorScheme.onSurfaceVariant,
-                            selectedLabelStyle: selectedLabelStyle,
-                            unselectedLabelStyle: unselectedLabelStyle,
-                            selectedIconTheme: IconThemeData(
-                              size: tokens.navButtonIconSize,
-                              color: hasSelection
+                          child: SizedBox(
+                            height: barHeight,
+                            child: BottomNavigationBar(
+                              type: BottomNavigationBarType.fixed,
+                              currentIndex: barIndex,
+                              onTap: (int index) {
+                                HapticFeedback.selectionClick();
+                                onDestinationSelected(index);
+                              },
+                              showSelectedLabels: true,
+                              showUnselectedLabels: true,
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                              selectedItemColor: hasSelection
                                   ? theme.colorScheme.primary
                                   : theme.colorScheme.onSurfaceVariant,
+                              unselectedItemColor:
+                                  theme.colorScheme.onSurfaceVariant,
+                              selectedLabelStyle: selectedLabelStyle,
+                              unselectedLabelStyle: unselectedLabelStyle,
+                              selectedIconTheme: IconThemeData(
+                                size: tokens.navButtonIconSize,
+                                color: hasSelection
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant,
+                              ),
+                              unselectedIconTheme: IconThemeData(
+                                size: tokens.navButtonIconSize,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              items: [
+                                for (int i = 0; i < count; i++)
+                                  _barItem(
+                                    context,
+                                    destinations[i],
+                                    tokens,
+                                    theme,
+                                    tabIsSelected:
+                                        hasSelection && selectedIndex == i,
+                                  ),
+                              ],
                             ),
-                            unselectedIconTheme: IconThemeData(
-                              size: tokens.navButtonIconSize,
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                            items: [
-                              for (int i = 0; i < count; i++)
-                                _barItem(
-                                  context,
-                                  destinations[i],
-                                  tokens,
-                                  theme,
-                                  tabIsSelected:
-                                      hasSelection && selectedIndex == i,
-                                ),
-                            ],
                           ),
                         ),
                       ),
