@@ -67,16 +67,16 @@ void main() {
       await tester.pumpWidget(
         _themed(
           const SizedBox(
-            width: 420,
+            width: 600,
             child: TilawaMediaPlayerBar(
-              layoutWidth: 420,
+              layoutWidth: 600,
               title: 'Surah',
               subtitle: 'Reciter',
               progress: 0.4,
               isPlaying: false,
               canGoPrevious: true,
               canGoNext: true,
-              isSleepTimerEnabled: false,
+              isSleepTimerEnabled: true,
             ),
           ),
         ),
@@ -87,18 +87,17 @@ void main() {
       expect(tokens.controlButtonSize, greaterThanOrEqualTo(44));
       expect(tokens.playPauseButtonSize, greaterThanOrEqualTo(44));
 
-      int transportTargets = 0;
-      for (final element in find.byType(SizedBox).evaluate()) {
-        final w = element.widget;
-        if (w is SizedBox &&
-            w.width != null &&
-            w.height != null &&
-            w.width! >= 44 &&
-            w.height! >= 44) {
-          transportTargets++;
-        }
+      final transportButtons = find.descendant(
+        of: find.byType(TilawaMediaPlayerBar),
+        matching: find.byType(IconButton),
+      );
+      expect(transportButtons, findsAtLeast(2));
+
+      for (final element in transportButtons.evaluate()) {
+        final box = element.renderObject! as RenderBox;
+        expect(box.size.width, greaterThanOrEqualTo(44));
+        expect(box.size.height, greaterThanOrEqualTo(44));
       }
-      expect(transportTargets, greaterThanOrEqualTo(2));
     });
   });
 

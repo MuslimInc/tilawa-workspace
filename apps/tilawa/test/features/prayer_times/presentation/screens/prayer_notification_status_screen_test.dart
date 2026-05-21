@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
@@ -26,11 +27,22 @@ void main() {
   });
 
   Widget createWidget({String? payloadJson}) {
-    return MaterialApp(
+    final screen = PrayerNotificationStatusScreen(payloadJson: payloadJson);
+    final router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => screen,
+        ),
+      ],
+    );
+
+    return MaterialApp.router(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
-      home: PrayerNotificationStatusScreen(payloadJson: payloadJson),
+      routerConfig: router,
     );
   }
 
