@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/support_product.dart';
 
@@ -25,7 +26,7 @@ abstract class SupportState with _$SupportState {
     @Default(SupportPurchasePhase.idle) SupportPurchasePhase purchasePhase,
     @Default(<SupportProduct>[]) List<SupportProduct> products,
     String? selectedProductId,
-    String? errorMessage,
+    Failure? failure,
     String? thankYouProductId,
     @Default(false) bool isOffline,
   }) = _SupportState;

@@ -40,7 +40,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     Emitter<SupportState> emit,
   ) async {
     await _analytics.logEvent(AnalyticsEvents.supportScreenViewed);
-    emit(state.copyWith(status: SupportStatus.loading, errorMessage: null));
+    emit(state.copyWith(status: SupportStatus.loading, failure: null));
 
     final List<ConnectivityResult> connectivity =
         await _connectivity.checkConnectivity();
@@ -51,7 +51,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
         state.copyWith(
           status: SupportStatus.error,
           isOffline: true,
-          errorMessage: null,
+          failure: null,
         ),
       );
       return;
@@ -67,7 +67,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
         emit(
           state.copyWith(
             status: SupportStatus.error,
-            errorMessage: _messageForFailure(failure),
+            failure: failure,
             isOffline: false,
           ),
         );
@@ -78,7 +78,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
             status: SupportStatus.ready,
             products: products,
             isOffline: false,
-            errorMessage: null,
+            failure: null,
           ),
         );
       },
@@ -119,7 +119,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     emit(
       state.copyWith(
         purchasePhase: SupportPurchasePhase.purchasing,
-        errorMessage: null,
+        failure: null,
       ),
     );
 
@@ -144,7 +144,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
         emit(
           state.copyWith(
             purchasePhase: SupportPurchasePhase.idle,
-            errorMessage: _messageForFailure(failure),
+            failure: failure,
           ),
         );
       },
@@ -153,7 +153,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
           state.copyWith(
             purchasePhase: SupportPurchasePhase.thanked,
             thankYouProductId: outcome.productId,
-            errorMessage: null,
+            failure: null,
           ),
         );
       },
@@ -178,9 +178,9 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
             failure.reason == PurchaseFailureReason.userCancelled) {
           return;
         }
-        emit(state.copyWith(errorMessage: _messageForFailure(failure)));
+        emit(state.copyWith(failure: failure));
       },
-      (_) => emit(state.copyWith(errorMessage: null)),
+      (_) => emit(state.copyWith(failure: null)),
     );
   }
 
@@ -194,26 +194,5 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
         thankYouProductId: null,
       ),
     );
-  }
-
-  String _messageForFailure(Failure failure) {
-    if (failure is PurchaseFailure) {
-      return switch (failure.reason) {
-        PurchaseFailureReason.billingUnavailable =>
-          'Purchases are not available right now.',
-        PurchaseFailureReason.productNotFound =>
-          'This support option is not available.',
-        PurchaseFailureReason.verificationFailed =>
-          'We could not confirm your support. Please try again.',
-        PurchaseFailureReason.pending =>
-          'Your support is still processing.',
-        PurchaseFailureReason.alreadyOwned =>
-          'This support was already completed.',
-        PurchaseFailureReason.network =>
-          'Network error. Check your connection and try again.',
-        PurchaseFailureReason.userCancelled => '',
-      };
-    }
-    return failure.message ?? 'Something went wrong.';
   }
 }
