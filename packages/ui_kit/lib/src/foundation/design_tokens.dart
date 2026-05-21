@@ -201,6 +201,13 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 600ms
   final Duration durationSlow;
 
+  /// Horizontal inset from the screen edge to toolbar leading/actions.
+  double get appBarEdgePadding => spaceMedium;
+
+  /// Trailing inset for [AppBar.actions] (pairs with [appBarEdgePadding] on leading).
+  EdgeInsetsDirectional get appBarActionsPadding =>
+      EdgeInsetsDirectional.only(end: appBarEdgePadding);
+
   /// 720 — max width for the Quran reader body.
   final double contentMaxWidthReader;
 

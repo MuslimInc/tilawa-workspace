@@ -318,11 +318,17 @@ class AppTheme {
       cardColor: colorScheme.surface,
       switchTheme: _switchTheme(colorScheme),
       appBarTheme: theme.appBarTheme.copyWith(
-        backgroundColor: scaffoldBackgroundColor,
+        // Vellum header (docs/tilawa_brand.md §3) — aligns with [TilawaAppBar].
+        backgroundColor: colorScheme.surfaceContainerHigh,
         foregroundColor: colorScheme.onSurface,
-        // Match scaffold so M3 elevation tint does not re-introduce cream/primary
-        // wash on the app bar (see [AppColors.lightBackground] / surface low).
-        surfaceTintColor: scaffoldBackgroundColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
+        titleTextStyle: theme.textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: colorScheme.onSurface,
+        ),
+        actionsPadding: TilawaDesignTokens.light().appBarActionsPadding,
       ),
       cardTheme: theme.cardTheme.copyWith(
         color: colorScheme.surface,

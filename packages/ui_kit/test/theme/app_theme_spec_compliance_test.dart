@@ -34,14 +34,13 @@ void main() {
         expect(theme.dialogTheme.surfaceTintColor, Colors.transparent);
         expect(theme.bottomSheetTheme.surfaceTintColor, Colors.transparent);
 
-        expect(
-          theme.appBarTheme.surfaceTintColor,
-          theme.scaffoldBackgroundColor,
-        );
+        expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
         expect(
           theme.appBarTheme.backgroundColor,
-          theme.scaffoldBackgroundColor,
+          theme.colorScheme.surfaceContainerHigh,
         );
+        expect(theme.appBarTheme.elevation, 0);
+        expect(theme.appBarTheme.scrolledUnderElevation, 0);
       },
     );
 
@@ -65,14 +64,13 @@ void main() {
         expect(theme.dialogTheme.surfaceTintColor, Colors.transparent);
         expect(theme.bottomSheetTheme.surfaceTintColor, Colors.transparent);
 
-        expect(
-          theme.appBarTheme.surfaceTintColor,
-          theme.scaffoldBackgroundColor,
-        );
+        expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
         expect(
           theme.appBarTheme.backgroundColor,
-          theme.scaffoldBackgroundColor,
+          theme.colorScheme.surfaceContainerHigh,
         );
+        expect(theme.appBarTheme.elevation, 0);
+        expect(theme.appBarTheme.scrolledUnderElevation, 0);
       },
     );
 
