@@ -189,43 +189,50 @@ class RecitersRepositoryImpl implements RecitersRepository {
     }
   }
 
+  Future<void> _syncFavoriteToggleToRemote({
+    required int id,
+    required bool wasFavorite,
+  }) async {
+    final String userId = _authService.currentUser!.uid;
+    if (wasFavorite) {
+      await _favoritesDataSource.removeFavoriteReciter(
+        userId: userId,
+        reciterId: id,
+      );
+      return;
+    }
+
+    final List<ReciterModel> reciters = await _getRecitersData();
+    final ReciterModel? reciter = reciters
+        .where((r) => r.id == id)
+        .firstOrNull;
+    if (reciter != null) {
+      await _favoritesDataSource.addFavoriteReciter(
+        userId: userId,
+        reciterId: id,
+        reciterName: reciter.name,
+      );
+    }
+  }
+
   @override
   ResultFuture<void> toggleFavoriteReciter(int id) async {
     try {
-      final isAuth = _authService.currentUser != null;
-
-      if (isAuth) {
-        final String userId = _authService.currentUser!.uid;
-        final List<String> currentIds = await _favoritesDataSource
-            .getFavoriteReciterIds(userId: userId);
-        if (currentIds.contains(id.toString())) {
-          await _favoritesDataSource.removeFavoriteReciter(
-            userId: userId,
-            reciterId: id,
-          );
-        } else {
-          final List<ReciterModel> reciters = await _getRecitersData();
-          final ReciterModel? reciter = reciters
-              .where((r) => r.id == id)
-              .firstOrNull;
-
-          if (reciter != null) {
-            await _favoritesDataSource.addFavoriteReciter(
-              userId: userId,
-              reciterId: id,
-              reciterName: reciter.name,
-            );
-          }
-        }
-      }
-
-      // Always update local storage for offline capability / consistency
       final List<String> currentLocalIds = await _localDataSource
           .getFavoriteReciterIds();
-      if (currentLocalIds.contains(id.toString())) {
+      final bool wasFavorite = currentLocalIds.contains(id.toString());
+      if (wasFavorite) {
         await _localDataSource.removeFavoriteReciterId(id);
       } else {
         await _localDataSource.saveFavoriteReciterId(id);
+      }
+
+      if (_authService.currentUser != null) {
+        try {
+          await _syncFavoriteToggleToRemote(id: id, wasFavorite: wasFavorite);
+        } catch (_) {
+          // Local toggle already applied; cloud sync can retry when online.
+        }
       }
 
       return const Right(null);

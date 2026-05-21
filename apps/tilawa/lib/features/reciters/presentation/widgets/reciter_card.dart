@@ -377,9 +377,9 @@ class _FavoriteButton extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     final bool isFavorite = context.select<FavoritesCubit, bool>((cubit) {
-      final FavoritesState state = cubit.state;
-
-      return state is FavoritesLoaded && state.favoriteIds.contains(reciter.id);
+      final FavoritesState favoritesState = cubit.state;
+      return favoritesState is FavoritesLoaded &&
+          favoritesState.favoriteIds.contains(reciter.id);
     });
 
     return Semantics(

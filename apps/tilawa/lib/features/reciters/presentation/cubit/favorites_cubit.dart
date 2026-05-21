@@ -47,58 +47,72 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
     _pendingReciterIds.add(reciter.id);
 
+    final FavoritesLoaded snapshot = _snapshotLoadedState();
+    _currentFavoriteIds = Set<int>.from(snapshot.favoriteIds);
+    final bool wasFavorite = snapshot.favoriteIds.contains(reciter.id);
+
     try {
-      // Optimistic update
-      final bool isFav = _isFavorite(reciter.id);
-      if (isFav) {
+      if (wasFavorite) {
         _currentFavoriteIds.remove(reciter.id);
       } else {
         _currentFavoriteIds.add(reciter.id);
       }
 
-      // Emit loaded state immediately with updated IDs to reflect UI change fast
-      if (!isClosed && state is FavoritesLoaded) {
-        final List<ReciterEntity> currentReciters =
-            (state as FavoritesLoaded).favorites;
-        List<ReciterEntity> updatedReciters;
-        if (isFav) {
-          updatedReciters = currentReciters
-              .where((r) => r.id != reciter.id)
-              .toList();
-        } else {
-          updatedReciters = [...currentReciters, reciter];
-        }
-        emit(
-          FavoritesLoaded(
-            favorites: updatedReciters,
-            favoriteIds: Set.from(_currentFavoriteIds),
-            removedReciter: isFav ? reciter : null,
-          ),
-        );
-      }
+      _emitLoadedAfterToggle(
+        reciter: reciter,
+        wasFavorite: wasFavorite,
+        previousFavorites: snapshot.favorites,
+      );
 
       final Either<Failure, void> result = await _toggleFavorite(reciter.id);
       if (isClosed) return;
 
       result.fold(
-        (failure) {
-          // Revert on failure
-          if (isFav) {
-            _currentFavoriteIds.add(reciter.id);
-          } else {
-            _currentFavoriteIds.remove(reciter.id);
-          }
-          loadFavorites(); // Re-sync with source of truth
-          emit(FavoritesError(failure));
-        },
         (_) {
-          // Success - ensure our list is fully synced or just rely on optimistic
-          // Depending on UX requirements, better to keep it optimistic.
+          _currentFavoriteIds = Set<int>.from(snapshot.favoriteIds);
+          if (!isClosed) {
+            emit(snapshot);
+          }
         },
+        (_) {},
       );
     } finally {
       _pendingReciterIds.remove(reciter.id);
     }
+  }
+
+  FavoritesLoaded _snapshotLoadedState() {
+    if (state is FavoritesLoaded) {
+      final FavoritesLoaded loaded = state as FavoritesLoaded;
+      return FavoritesLoaded(
+        favorites: List<ReciterEntity>.from(loaded.favorites),
+        favoriteIds: Set<int>.from(loaded.favoriteIds),
+      );
+    }
+    return FavoritesLoaded(
+      favorites: const <ReciterEntity>[],
+      favoriteIds: Set<int>.from(_currentFavoriteIds),
+    );
+  }
+
+  void _emitLoadedAfterToggle({
+    required ReciterEntity reciter,
+    required bool wasFavorite,
+    required List<ReciterEntity> previousFavorites,
+  }) {
+    if (isClosed) return;
+
+    final List<ReciterEntity> updatedFavorites = wasFavorite
+        ? previousFavorites.where((r) => r.id != reciter.id).toList()
+        : [...previousFavorites, reciter];
+
+    emit(
+      FavoritesLoaded(
+        favorites: updatedFavorites,
+        favoriteIds: Set<int>.from(_currentFavoriteIds),
+        removedReciter: wasFavorite ? reciter : null,
+      ),
+    );
   }
 
   Future<void> clearAllFavorites() async {
@@ -143,10 +157,4 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     );
   }
 
-  bool _isFavorite(int id) {
-    if (state is FavoritesLoaded) {
-      return (state as FavoritesLoaded).favoriteIds.contains(id);
-    }
-    return _currentFavoriteIds.contains(id);
-  }
 }

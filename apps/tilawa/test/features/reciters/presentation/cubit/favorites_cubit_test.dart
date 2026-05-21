@@ -86,6 +86,43 @@ void main() {
   });
 
   group('toggleFavorite', () {
+    group('offline and persistence', () {
+      blocTest<FavoritesCubit, FavoritesState>(
+        'reverts optimistic add when persistence fails (signed-in offline)',
+        build: () {
+          when(
+            mockToggleFavorite(any),
+          ).thenAnswer((_) async => const Left(ServerFailure('offline')));
+          return cubit;
+        },
+        seed: () => const FavoritesLoaded(favorites: [], favoriteIds: {}),
+        act: (cubit) => cubit.toggleFavorite(tReciter),
+        expect: () => [
+          const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+          const FavoritesLoaded(favorites: [], favoriteIds: {}),
+        ],
+      );
+
+      blocTest<FavoritesCubit, FavoritesState>(
+        'keeps optimistic add when persistence succeeds after offline delay',
+        build: () {
+          when(mockToggleFavorite(any)).thenAnswer((_) async {
+            await Future<void>.delayed(const Duration(milliseconds: 50));
+            return const Right(null);
+          });
+          return cubit;
+        },
+        seed: () => const FavoritesLoaded(favorites: [], favoriteIds: {}),
+        act: (cubit) async {
+          await cubit.toggleFavorite(tReciter);
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+        },
+        expect: () => [
+          const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+        ],
+      );
+    });
+
     blocTest<FavoritesCubit, FavoritesState>(
       'optimistically updates state and calls usecase',
       build: () {
@@ -107,11 +144,8 @@ void main() {
     );
 
     blocTest<FavoritesCubit, FavoritesState>(
-      'reverts state on failure',
+      'reverts optimistic state on failure without reloading',
       build: () {
-        when(
-          mockGetFavorites(any),
-        ).thenAnswer((_) async => const Right([])); // For the revert reload
         when(
           mockToggleFavorite(any),
         ).thenAnswer((_) async => const Left(ServerFailure('Fail')));
@@ -120,14 +154,12 @@ void main() {
       seed: () => const FavoritesLoaded(favorites: [], favoriteIds: {}),
       act: (cubit) => cubit.toggleFavorite(tReciter),
       expect: () => [
-        // Optimistic add
         const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
-        FavoritesLoading(), // from loadFavorites() called on revert
-        // Error emitted immediately after calling loadFavorites
-        const FavoritesError(ServerFailure('Fail')),
-        // Revert (loadFavorites completion) -> Loaded empty
         const FavoritesLoaded(favorites: [], favoriteIds: {}),
       ],
+      verify: (_) {
+        verifyNever(mockGetFavorites(any));
+      },
     );
 
     blocTest<FavoritesCubit, FavoritesState>(
@@ -158,11 +190,8 @@ void main() {
     );
 
     blocTest<FavoritesCubit, FavoritesState>(
-      'reverts removal from state on failure',
+      'reverts optimistic removal on failure without reloading',
       build: () {
-        when(
-          mockGetFavorites(any),
-        ).thenAnswer((_) async => const Right([tReciter])); // Re-sync
         when(
           mockToggleFavorite(any),
         ).thenAnswer((_) async => const Left(ServerFailure('Fail')));
@@ -172,16 +201,16 @@ void main() {
           const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
       act: (cubit) => cubit.toggleFavorite(tReciter),
       expect: () => [
-        // Optimistic remove
         const FavoritesLoaded(
           favorites: [],
           favoriteIds: {},
           removedReciter: tReciter,
         ),
-        FavoritesLoading(),
-        const FavoritesError(ServerFailure('Fail')),
         const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
       ],
+      verify: (_) {
+        verifyNever(mockGetFavorites(any));
+      },
     );
 
     blocTest<FavoritesCubit, FavoritesState>(
@@ -214,18 +243,19 @@ void main() {
     );
 
     blocTest<FavoritesCubit, FavoritesState>(
-      'handles toggle when state is not FavoritesLoaded (covers fallback)',
+      'optimistically emits loaded state when favorites are not loaded yet',
       build: () {
         when(
           mockToggleFavorite(any),
         ).thenAnswer((_) async => const Right(null));
         return cubit;
       },
-      // State is FavoritesInitial
       act: (cubit) => cubit.toggleFavorite(tReciter),
-      expect: () =>
-          [], // No state change emitted because it's not FavoritesLoaded
+      expect: () => [
+        const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+      ],
       verify: (_) {
+        expect(cubit.state, const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}));
         verify(mockToggleFavorite(1)).called(1);
       },
     );

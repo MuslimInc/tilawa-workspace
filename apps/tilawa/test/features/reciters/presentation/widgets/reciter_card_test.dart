@@ -139,6 +139,48 @@ void main() {
     await cubit.close();
   });
 
+  testWidgets('favorite icon reverts when persistence fails (offline)', (
+    WidgetTester tester,
+  ) async {
+    final cubit = await loadedCubit();
+    when(mockToggleFavorite(any)).thenAnswer((_) async {
+      await Future<void>.delayed(const Duration(milliseconds: 10));
+      return const Left(ServerFailure('offline'));
+    });
+    await pumpCard(tester, cubit);
+
+    await tester.tap(find.bySemanticsLabel('Add to Favorites'));
+    await tester.pump();
+    expect(find.bySemanticsLabel('Remove from favorites'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Add to Favorites'), findsOneWidget);
+    expect(find.bySemanticsLabel('Remove from favorites'), findsNothing);
+
+    await cubit.close();
+  });
+
+  testWidgets('favorite icon updates optimistically before network settles', (
+    WidgetTester tester,
+  ) async {
+    when(mockToggleFavorite(any)).thenAnswer((_) async {
+      await Future<void>.delayed(const Duration(seconds: 1));
+      return const Right(null);
+    });
+    final cubit = await loadedCubit();
+    await pumpCard(tester, cubit);
+
+    expect(find.bySemanticsLabel('Add to Favorites'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Add to Favorites'));
+    await tester.pump();
+
+    expect(find.bySemanticsLabel('Remove from favorites'), findsOneWidget);
+    expect(find.bySemanticsLabel('Add to Favorites'), findsNothing);
+
+    await cubit.close();
+  });
+
   testWidgets('when reciter is favorited, shows remove semantics', (
     WidgetTester tester,
   ) async {
