@@ -23,6 +23,7 @@ import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
 import 'quran_player_chrome.dart';
+import 'quran_player_system_back.dart';
 
 /// A YouTube Music-style sliding player panel.
 ///
@@ -144,6 +145,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   final OverlayPortalController _portalController = OverlayPortalController();
   bool _portalVisibilitySyncScheduled = false;
   String? _lastSyncedRoutePath;
+  late final void Function() _systemBackHandle;
+  late AudioPlayerBloc _audioBloc;
 
   /// Controls the swipe-down-to-dismiss offset for the mini player.
   double _dismissOffsetY = 0;
@@ -180,6 +183,9 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 
     _expandController.addListener(_syncPhoneBottomNavBarVisible);
     _expandController.addListener(_syncExpandedPlayerSystemChrome);
+    _expandController.addListener(_syncSystemBackIntercepts);
+
+    _systemBackHandle = handleSystemBack;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _syncPhoneBottomNavBarVisible();
@@ -194,6 +200,9 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _audioBloc = context.read<AudioPlayerBloc>();
+    QuranPlayerSystemBackCoordinator.bind(handle: _systemBackHandle);
+    _syncSystemBackIntercepts();
     final String path = _currentRoutePath();
     if (_lastSyncedRoutePath != path) {
       _lastSyncedRoutePath = path;
@@ -211,6 +220,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 
   @override
   void deactivate() {
+    QuranPlayerSystemBackCoordinator.setIntercepts(false);
+    QuranPlayerSystemBackCoordinator.unbind(handle: _systemBackHandle);
     context
         .read<QuranPlayerChromeNotifier>()
         .clearSystemNavigationBarColorOverride();
@@ -219,11 +230,36 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 
   @override
   void dispose() {
+    QuranPlayerSystemBackCoordinator.unbind(handle: _systemBackHandle);
     _expandController.removeListener(_syncPhoneBottomNavBarVisible);
     _expandController.removeListener(_syncExpandedPlayerSystemChrome);
+    _expandController.removeListener(_syncSystemBackIntercepts);
     _expandController.dispose();
     _dismissAnimController.dispose();
     super.dispose();
+  }
+
+  void _syncSystemBackIntercepts() {
+    if (!mounted) {
+      QuranPlayerSystemBackCoordinator.setIntercepts(false);
+      return;
+    }
+    final bool intercepts =
+        QuranPlayerRoutePolicy.shouldShowPlayer(_currentRoutePath()) &&
+        _audioBloc.state.shouldShowBottomPlayer &&
+        isExpanding;
+    QuranPlayerSystemBackCoordinator.setIntercepts(intercepts);
+  }
+
+  /// Collapse the expanded now-playing sheet on system back.
+  ///
+  /// The mini player is not stopped here; dismissal stays on swipe-down or the
+  /// overflow menu stop action.
+  void handleSystemBack() {
+    if (!mounted || !isExpanding) {
+      return;
+    }
+    collapse();
   }
 
   /// Edge-to-edge nav is transparent; publish the queue sheet color app-wide
@@ -485,6 +521,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           previous.speed != current.speed ||
           previous.dismissedAudioId != current.dismissedAudioId,
       listener: (context, state) {
+        _syncSystemBackIntercepts();
         // Reset dismiss animation so the mini player is not offset off-screen
         // from a previous dismiss gesture.
         if (_dismissAnimation != null ||
@@ -499,6 +536,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         }
       },
       builder: (context, state) {
+        _syncSystemBackIntercepts();
         final audio = state.currentAudio;
         final bool isCurrentAudioDismissed =
             audio != null && state.dismissedAudioId == audio.id;

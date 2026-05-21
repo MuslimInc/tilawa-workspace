@@ -17,6 +17,7 @@ import '../../../../router/app_router_config.dart';
 import '../../../../screens/cubit/main_screen_cubit.dart';
 import '../../../../screens/cubit/main_screen_state.dart';
 import '../../../../shared/widgets/quran_player_chrome.dart';
+import '../../../../shared/widgets/quran_player_system_back.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../bloc/reciters_bloc.dart';
@@ -24,7 +25,7 @@ import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 import '../reciter_semantics_ids.dart';
 
-/// System back may close the app only from the active reciters main tab.
+/// Main-shell system back: collapse expanded player, tab focus, then exit.
 ///
 /// Wrap [MainTabViewport] (not individual tab caches) so [PopScope.canPop]
 /// updates when [MainScreenCubit.currentIndex] changes. A [PopScope] inside
@@ -43,18 +44,31 @@ class RecitersRootBackScope extends StatelessWidget {
     );
   }
 
+  static bool canPop(int mainTabIndex) {
+    if (QuranPlayerSystemBackCoordinator.interceptsSystemBack) {
+      return false;
+    }
+    return canExitApp(mainTabIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocSelector<MainScreenCubit, MainScreenState, int>(
       selector: (MainScreenState state) => state.currentIndex,
       builder: (BuildContext context, int tabIndex) {
         return PopScope(
-          canPop: canExitApp(tabIndex),
+          canPop: canPop(tabIndex),
           onPopInvokedWithResult: (bool didPop, Object? result) {
-            if (didPop || tabIndex == 0) {
+            if (didPop) {
               return;
             }
-            context.read<MainScreenCubit>().selectTab(0);
+            if (QuranPlayerSystemBackCoordinator.interceptsSystemBack) {
+              QuranPlayerSystemBackCoordinator.handleSystemBack();
+              return;
+            }
+            if (tabIndex != 0) {
+              context.read<MainScreenCubit>().selectTab(0);
+            }
           },
           child: child,
         );
