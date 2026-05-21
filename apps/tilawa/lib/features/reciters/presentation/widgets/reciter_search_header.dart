@@ -1,11 +1,30 @@
-import 'dart:ui';
-
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/reciter_semantics_ids.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+
+/// Pinned search + view-toggle row under [ReciterDetailsAppBar].
+///
+/// Matches reciters list header chrome: quiet [ColorScheme.surfaceContainerHigh]
+/// with a hairline bottom edge — no glass blur or custom responsive lerps.
+double reciterDetailsSearchHeaderExtent(BuildContext context) {
+  final ThemeData theme = Theme.of(context);
+  return theme.componentTokens.searchField.height +
+      (theme.tokens.spaceMedium * 2);
+}
+
+/// [RefreshIndicator.edgeOffset] below pinned app bar + search header.
+///
+/// [SliverAppBar] with `primary: true` includes [MediaQuery.padding] top; omitting
+/// it places the spinner over the search field.
+double reciterDetailsRefreshIndicatorEdgeOffset(BuildContext context) {
+  return MediaQuery.paddingOf(context).top +
+      kToolbarHeight +
+      reciterDetailsSearchHeaderExtent(context);
+}
 
 class ReciterSearchHeader extends StatelessWidget {
   const ReciterSearchHeader({super.key, required this.controller});
@@ -15,133 +34,98 @@ class ReciterSearchHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final InputBorder? themedInputBorder =
-        theme.inputDecorationTheme.focusedBorder ??
-        theme.inputDecorationTheme.enabledBorder ??
-        theme.inputDecorationTheme.border;
-    final BorderRadius inputBorderRadius =
-        themedInputBorder is OutlineInputBorder
-        ? themedInputBorder.borderRadius
-        : BorderRadius.circular(tokens.radiusLarge);
-    final double screenWidth = context.resolveContentWidth(
-      TilawaContentKind.media,
-    );
-    final double textScaleFactor = MediaQuery.textScalerOf(
-      context,
-    ).scale(1).clamp(1.0, 1.3).toDouble();
-    final double widthFactor = ((screenWidth - 320) / 120)
-        .clamp(0.0, 1.0)
-        .toDouble();
-    final double headerScale = ((textScaleFactor - 1.0) / 0.3)
-        .clamp(0.0, 1.0)
-        .toDouble();
-    final double headerHeight = lerpDouble(64, 72, headerScale)!;
-    final double horizontalPadding = lerpDouble(12, 16, widthFactor)!;
-    final double outerVerticalPadding = ((headerHeight - 48) / 2)
-        .clamp(8.0, 12.0)
-        .toDouble();
-    final double inputHorizontalPadding = lerpDouble(12, 16, widthFactor)!;
-    final double inputVerticalPadding =
-        (lerpDouble(10, 12, widthFactor)! / textScaleFactor)
-            .clamp(8.0, 12.0)
-            .toDouble();
-    final double headerBlur = tokens.blurGlass;
+    final TilawaDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final double extent = reciterDetailsSearchHeaderExtent(context);
 
     return SliverPersistentHeader(
       pinned: true,
-      delegate: _StickyHeaderDelegate(
-        minHeight: headerHeight,
-        maxHeight: headerHeight,
-        child: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: headerBlur, sigmaY: headerBlur),
-            child: Container(
-              color: colorScheme.surface.withValues(
-                alpha: tokens.opacityEmphasis,
+      delegate: _ReciterSearchHeaderDelegate(
+        extent: extent,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHigh,
+            border: Border(
+              bottom: BorderSide(
+                color: colorScheme.outlineVariant,
+                width: tokens.borderWidthThin,
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: horizontalPadding,
-                  vertical: outerVerticalPadding,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Semantics(
-                        identifier:
-                            ReciterSemanticsIds.reciterDetailsSurahSearch,
-                        child: TilawaSearchField(
-                          controller: controller,
-                          hintText: context.l10n.searchSurah,
-                          borderRadius: inputBorderRadius,
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: inputHorizontalPadding,
-                            vertical: inputVerticalPadding,
-                          ),
-                          onClear: () {
-                            controller.clear();
-                            context.read<ReciterDetailsBloc>().add(
-                              const FilterSurahs(''),
-                            );
-                          },
-                          onChanged: (query) {
-                            context.read<ReciterDetailsBloc>().add(
-                              FilterSurahs(query),
-                            );
-                          },
-                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: tokens.spaceSmall),
-                    Semantics(
-                      identifier: ReciterSemanticsIds.reciterDetailsViewToggle,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          // color: colorScheme.surfaceContainerLow.withValues(
-                          //   alpha: tokens.opacityEmphasis,
-                          // ),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: colorScheme.primary.withValues(
-                              alpha: tokens.opacitySubtle,
+            ),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: tokens.contentMaxWidthMedia,
+                  ),
+                  child: Row(
+                    spacing: tokens.spaceSmall,
+                    children: [
+                      Expanded(
+                        child: Semantics(
+                          identifier:
+                              ReciterSemanticsIds.reciterDetailsSurahSearch,
+                          child: TilawaSearchField(
+                            controller: controller,
+                            hintText: context.l10n.searchSurah,
+                            prefixIcon: FluentIcons.search_24_regular,
+                            clearIcon: FluentIcons.dismiss_24_regular,
+                            borderRadius: BorderRadius.circular(
+                              tokens.radiusLarge,
                             ),
+                            showShadow: true,
+                            onClear: () {
+                              controller.clear();
+                              context.read<ReciterDetailsBloc>().add(
+                                const FilterSurahs(''),
+                              );
+                            },
+                            onChanged: (String query) {
+                              context.read<ReciterDetailsBloc>().add(
+                                FilterSurahs(query),
+                              );
+                            },
+                            onTapOutside: (_) =>
+                                FocusScope.of(context).unfocus(),
                           ),
-                        ),
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          style: IconButton.styleFrom(
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            shape: const CircleBorder(),
-                            padding: EdgeInsets.zero,
-                          ),
-                          icon:
-                              BlocBuilder<
-                                ReciterDetailsBloc,
-                                ReciterDetailsState
-                              >(
-                                buildWhen: (previous, current) =>
-                                    previous.viewMode != current.viewMode,
-                                builder: (context, state) {
-                                  return Icon(
-                                    state.viewMode == ReciterViewMode.list
-                                        ? Icons.grid_view_rounded
-                                        : Icons.view_list_rounded,
-                                    color: colorScheme.primary,
-                                  );
-                                },
-                              ),
-                          onPressed: () {
-                            context.read<ReciterDetailsBloc>().add(
-                              const ToggleViewMode(),
-                            );
-                          },
                         ),
                       ),
-                    ),
-                  ],
+                      Semantics(
+                        identifier:
+                            ReciterSemanticsIds.reciterDetailsViewToggle,
+                        child:
+                            BlocBuilder<
+                              ReciterDetailsBloc,
+                              ReciterDetailsState
+                            >(
+                              buildWhen:
+                                  (ReciterDetailsState previous,
+                                      ReciterDetailsState current) =>
+                                      previous.viewMode != current.viewMode,
+                              builder: (BuildContext context, state) {
+                                final bool isList =
+                                    state.viewMode == ReciterViewMode.list;
+                                return TilawaIconActionButton(
+                                  icon: isList
+                                      ? FluentIcons.grid_24_regular
+                                      : FluentIcons.list_24_regular,
+                                  isActive: !isList,
+                                  toggled: !isList,
+                                  backgroundColor: colorScheme.surface,
+                                  onTap: () {
+                                    context.read<ReciterDetailsBloc>().add(
+                                      const ToggleViewMode(),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -152,22 +136,17 @@ class ReciterSearchHeader extends StatelessWidget {
   }
 }
 
-class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
-  _StickyHeaderDelegate({
-    required this.minHeight,
-    required this.maxHeight,
-    required this.child,
-  });
+class _ReciterSearchHeaderDelegate extends SliverPersistentHeaderDelegate {
+  _ReciterSearchHeaderDelegate({required this.extent, required this.child});
 
-  final double minHeight;
-  final double maxHeight;
+  final double extent;
   final Widget child;
 
   @override
-  double get minExtent => minHeight;
+  double get minExtent => extent;
 
   @override
-  double get maxExtent => maxHeight;
+  double get maxExtent => extent;
 
   @override
   Widget build(
@@ -175,13 +154,11 @@ class _StickyHeaderDelegate extends SliverPersistentHeaderDelegate {
     double shrinkOffset,
     bool overlapsContent,
   ) {
-    return SizedBox.expand(child: child);
+    return SizedBox(height: extent, child: child);
   }
 
   @override
-  bool shouldRebuild(_StickyHeaderDelegate oldDelegate) {
-    return maxHeight != oldDelegate.maxHeight ||
-        minHeight != oldDelegate.minHeight ||
-        child != oldDelegate.child;
+  bool shouldRebuild(_ReciterSearchHeaderDelegate oldDelegate) {
+    return extent != oldDelegate.extent || child != oldDelegate.child;
   }
 }

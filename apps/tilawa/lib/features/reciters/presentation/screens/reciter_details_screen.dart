@@ -273,7 +273,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
               builder: (context, state) {
                 return RefreshIndicator(
                   onRefresh: _onRefresh,
-                  edgeOffset: kToolbarHeight + 64,
+                  edgeOffset: reciterDetailsRefreshIndicatorEdgeOffset(
+                    context,
+                  ),
                   child: CustomScrollView(
                     controller: _scrollController,
                     keyboardDismissBehavior:

@@ -3,10 +3,8 @@ import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Dense app bar showing the reciter name on a single solid primary
-/// surface. Decorative circles and gradient fills were intentionally
-/// removed in the visual-simplification pass — the goal is to let the
-/// reciter name be the focal element, not the chrome.
+/// Dense app bar showing the reciter name on the same vellum surface as
+/// [ReciterSearchHeader] ([ColorScheme.surfaceContainerHigh]).
 class ReciterDetailsAppBar extends StatelessWidget {
   const ReciterDetailsAppBar({super.key, required this.reciter});
 
@@ -17,11 +15,13 @@ class ReciterDetailsAppBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final Color appBarForegroundColor = colorScheme.onPrimary;
+    final Color headerColor = colorScheme.surfaceContainerHigh;
+    final Color appBarForegroundColor = colorScheme.onSurface;
 
     return SliverAppBar(
       pinned: true,
-      backgroundColor: colorScheme.primary,
+      backgroundColor: headerColor,
+      surfaceTintColor: Colors.transparent,
       foregroundColor: appBarForegroundColor,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -32,11 +32,13 @@ class ReciterDetailsAppBar extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor: appBarForegroundColor.withValues(alpha: 0.18),
+            backgroundColor: colorScheme.primary.withValues(
+              alpha: tokens.opacitySubtle,
+            ),
             child: Text(
               reciter.name[0],
               style: theme.textTheme.labelLarge?.copyWith(
-                color: appBarForegroundColor,
+                color: colorScheme.primary,
                 fontWeight: FontWeight.w700,
               ),
             ),
