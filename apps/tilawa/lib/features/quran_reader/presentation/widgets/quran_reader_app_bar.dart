@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -25,18 +26,11 @@ class QuranReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final Color iconColor = colorScheme.onSurfaceVariant;
 
     return TilawaAppBar(
       surface: TilawaAppBarSurface.parchment,
       automaticallyImplyLeading: false,
-      leading: IconButton(
-        onPressed: onBack,
-        color: iconColor,
-        icon: const Icon(Icons.arrow_back),
-        tooltip: context.l10n.back,
-      ),
+      leading: TilawaBackButton(onPressed: onBack),
       titleWidget: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -44,31 +38,29 @@ class QuranReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
             Text(
               title,
               style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurface,
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.w800,
               ),
             ),
             Text(
               subtitle,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],
         ],
       ),
       actions: [
-        IconButton(
-          onPressed: onSearch,
-          color: iconColor,
-          icon: const Icon(Icons.search),
+        TilawaIconActionButton(
+          icon: Icons.search,
           tooltip: context.l10n.searchSurah,
+          onTap: onSearch,
         ),
-        IconButton(
-          onPressed: onSettings,
-          color: iconColor,
-          icon: const Icon(Icons.settings),
+        TilawaIconActionButton(
+          icon: Icons.settings,
           tooltip: context.l10n.settings,
+          onTap: onSettings,
         ),
       ],
     );
