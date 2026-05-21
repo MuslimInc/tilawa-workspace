@@ -248,6 +248,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
     if (_isStartupLiteUi) {
       return Scaffold(
         resizeToAvoidBottomInset: false,
+        appBar: TilawaAppBar(
+          title: context.l10n.reciters,
+          automaticallyImplyLeading: false,
+        ),
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -323,20 +327,36 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 return true;
               },
               builder: (context, state) {
+                final bool letterIndexAvailable =
+                    state is RecitersLoaded &&
+                    _allowHeavyLoadedResults &&
+                    state.filteredReciters.isNotEmpty &&
+                    state.searchQuery.isEmpty;
+
                 return Scaffold(
                   resizeToAvoidBottomInset: false,
+                  appBar: PreferredSize(
+                    preferredSize: Size.fromHeight(
+                      _recitersAppBarExtent(context),
+                    ),
+                    child: _RecitersTilawaAppBar(
+                      state: state,
+                      letterIndexAvailable: letterIndexAvailable,
+                      showLetterIndex: _showLetterIndex,
+                      searchController: _searchController,
+                      focusNode: _focusNode,
+                      onSearchChanged: _onSearchChanged,
+                      onClearSearch: _clearSearch,
+                      onToggleFavorites: () =>
+                          _toggleFavoritesFilter(innerContext),
+                      onToggleLetterIndex: _toggleLetterIndex,
+                    ),
+                  ),
                   body: _RecitersSliverScreen(
                     state: state,
                     allowHeavyLoadedResults: _allowHeavyLoadedResults,
                     showLetterIndex: _showLetterIndex,
-                    searchController: _searchController,
-                    focusNode: _focusNode,
                     scrollController: _scrollController,
-                    onSearchChanged: _onSearchChanged,
-                    onClearSearch: _clearSearch,
-                    onToggleFavorites: () =>
-                        _toggleFavoritesFilter(innerContext),
-                    onToggleLetterIndex: _toggleLetterIndex,
                     onClearAll: _clearAllFilters,
                     onLetterSelected: _onLetterSelected,
                     onRetry: _refreshReciters,
@@ -383,13 +403,7 @@ class _RecitersSliverScreen extends StatelessWidget {
     required this.state,
     required this.allowHeavyLoadedResults,
     required this.showLetterIndex,
-    required this.searchController,
-    required this.focusNode,
     required this.scrollController,
-    required this.onSearchChanged,
-    required this.onClearSearch,
-    required this.onToggleFavorites,
-    required this.onToggleLetterIndex,
     required this.onClearAll,
     required this.onLetterSelected,
     required this.onRetry,
@@ -398,13 +412,7 @@ class _RecitersSliverScreen extends StatelessWidget {
   final RecitersState state;
   final bool allowHeavyLoadedResults;
   final bool showLetterIndex;
-  final TextEditingController searchController;
-  final FocusNode focusNode;
   final ScrollController scrollController;
-  final ValueChanged<String> onSearchChanged;
-  final VoidCallback onClearSearch;
-  final VoidCallback onToggleFavorites;
-  final VoidCallback onToggleLetterIndex;
   final VoidCallback onClearAll;
   final ValueChanged<String?> onLetterSelected;
   final Future<void> Function() onRetry;
@@ -413,7 +421,7 @@ class _RecitersSliverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     PerfLogger.markBuild('_RecitersSliverScreen');
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
-    final double headerExtent = _recitersSearchHeaderExtent(context);
+    final double headerExtent = _recitersAppBarExtent(context);
     const double scrollbarVerticalMargin = 10;
     final double scrollbarTopOffset = headerExtent + scrollbarVerticalMargin;
     final bool letterIndexAvailable =
@@ -427,41 +435,24 @@ class _RecitersSliverScreen extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         const Positioned.fill(child: _RecitersAmbientBackground()),
-        Column(
-          children: [
-            _RecitersSearchHeaderBar(
-              state: state,
-              letterIndexAvailable: letterIndexAvailable,
-              showLetterIndex: showLetterIndex,
-              searchController: searchController,
-              focusNode: focusNode,
-              onSearchChanged: onSearchChanged,
-              onClearSearch: onClearSearch,
-              onToggleFavorites: onToggleFavorites,
-              onToggleLetterIndex: onToggleLetterIndex,
+        RefreshIndicator.adaptive(
+          onRefresh: onRetry,
+          child: CustomScrollView(
+            controller: scrollController,
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
             ),
-            Expanded(
-              child: RefreshIndicator.adaptive(
-                onRefresh: onRetry,
-                child: CustomScrollView(
-                  controller: scrollController,
-                  physics: const AlwaysScrollableScrollPhysics(
-                    parent: BouncingScrollPhysics(),
-                  ),
-                  slivers: [
-                    _RecitersResultSection(
-                      state: state,
-                      allowHeavyLoadedResults: allowHeavyLoadedResults,
-                      reserveScrollbarSpace: showLetterIndexRail,
-                      reserveScrollbarOnLeading: isRtl,
-                      onClearAll: onClearAll,
-                      onRetry: onRetry,
-                    ),
-                  ],
-                ),
+            slivers: [
+              _RecitersResultSection(
+                state: state,
+                allowHeavyLoadedResults: allowHeavyLoadedResults,
+                reserveScrollbarSpace: showLetterIndexRail,
+                reserveScrollbarOnLeading: isRtl,
+                onClearAll: onClearAll,
+                onRetry: onRetry,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         if (showLetterIndexRail)
           _RecitersLetterIndexGutter(
@@ -696,8 +687,9 @@ class _RecitersEmptySliver extends StatelessWidget {
   }
 }
 
-class _RecitersSearchHeaderBar extends StatelessWidget {
-  const _RecitersSearchHeaderBar({
+/// Reciters list chrome: [TilawaAppBar] with search row in [AppBar.bottom].
+class _RecitersTilawaAppBar extends StatelessWidget {
+  const _RecitersTilawaAppBar({
     required this.state,
     required this.letterIndexAvailable,
     required this.showLetterIndex,
@@ -721,67 +713,44 @@ class _RecitersSearchHeaderBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final double searchFieldHeight = theme.componentTokens.searchField.height;
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final double bottomHeight = TilawaAppBarConfig.searchBottomHeight(theme);
 
-    return SizedBox(
-      height: _recitersSearchHeaderExtent(context),
-      child: Semantics(
-        header: true,
-        label: context.l10n.reciters,
-        explicitChildNodes: true,
-        child: DecoratedBox(
-          // docs/tilawa_brand.md §3: header chrome is "Vellum" — sits slightly above
-          // the page (Parchment) without elevating to a card. One hairline below.
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHigh,
-            border: Border(
-              bottom: BorderSide(
-                color: colorScheme.outlineVariant,
-                width: tokens.borderWidthThin,
-              ),
-            ),
-          ),
-          child: Material(
-            color: Colors.transparent,
+    return TilawaAppBar(
+      automaticallyImplyLeading: false,
+      centerTitle: false,
+      toolbarHeight: 0,
+      bottom: PreferredSize(
+        preferredSize: Size.fromHeight(bottomHeight),
+        child: Semantics(
+          header: true,
+          label: context.l10n.reciters,
+          explicitChildNodes: true,
+          child: _ConstrainedHeaderContent(
             child: Padding(
-              padding: EdgeInsets.only(top: context.contentTopSafePadding),
-              child: Center(
-                child: SizedBox(
-                  height: searchFieldHeight,
-                  child: _ConstrainedHeaderContent(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: tokens.spaceMedium,
-                      ),
-                      child: Row(
-                        spacing: tokens.spaceSmall,
-                        children: [
-                          Expanded(
-                            child: _SearchField(
-                              controller: searchController,
-                              focusNode: focusNode,
-                              onChanged: onSearchChanged,
-                              onClear: onClearSearch,
-                            ),
-                          ),
-
-                          _FavoritesToggle(
-                            state: state,
-                            onTap: onToggleFavorites,
-                          ),
-                          _RecitersHeaderOverflowMenu(
-                            letterIndexAvailable: letterIndexAvailable,
-                            showLetterIndex: showLetterIndex,
-                            onToggleLetterIndex: onToggleLetterIndex,
-                          ),
-                        ],
-                      ),
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceMedium,
+                vertical: tokens.spaceMedium,
+              ),
+              child: Row(
+                spacing: tokens.spaceSmall,
+                children: [
+                  Expanded(
+                    child: _SearchField(
+                      controller: searchController,
+                      focusNode: focusNode,
+                      onChanged: onSearchChanged,
+                      onClear: onClearSearch,
                     ),
                   ),
-                ),
+                  _FavoritesToggle(state: state, onTap: onToggleFavorites),
+                  _RecitersHeaderOverflowMenu(
+                    letterIndexAvailable: letterIndexAvailable,
+                    showLetterIndex: showLetterIndex,
+                    onToggleLetterIndex: onToggleLetterIndex,
+                  ),
+                ],
               ),
             ),
           ),
@@ -954,7 +923,6 @@ class _RecitersHeaderOverflowMenu extends StatelessWidget {
                 isActive: showLetterIndex,
                 tooltip: context.l10n.recitersMoreActions,
                 semanticLabel: context.l10n.recitersMoreActions,
-                backgroundColor: colorScheme.surface,
                 onTap: () {
                   if (controller.isOpen) {
                     controller.close();
@@ -1052,7 +1020,6 @@ class _FavoritesToggle extends StatelessWidget {
             toggled: isActive,
             tooltip: filterLabel,
             semanticLabel: filterLabel,
-            backgroundColor: theme.colorScheme.surface,
             onTap: onTap,
           ),
           PositionedDirectional(
@@ -1385,12 +1352,10 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
   }
 }
 
-double _recitersSearchHeaderExtent(BuildContext context) {
-  final theme = Theme.of(context);
-  final topPadding = context.contentTopSafePadding;
-  return theme.componentTokens.searchField.height +
-      topPadding +
-      (theme.tokens.spaceMedium * 2);
+/// Total height of [Scaffold.appBar] (status bar + search bottom chrome).
+double _recitersAppBarExtent(BuildContext context) {
+  return MediaQuery.paddingOf(context).top +
+      TilawaAppBarConfig.searchBottomHeight(Theme.of(context));
 }
 
 /// Reserved width for the letter-index gutter (rail + padding + divider lane).

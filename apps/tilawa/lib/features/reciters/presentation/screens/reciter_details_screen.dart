@@ -282,8 +282,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     restorationId: 'reciter_details_scroll_view',
                     slivers: [
-                      ReciterDetailsAppBar(reciter: widget.reciter),
-                      ReciterSearchHeader(controller: _searchController),
+                      ReciterDetailsAppBar(
+                        reciter: widget.reciter,
+                        searchController: _searchController,
+                      ),
 
                       // Continue Listening chips
                       if (state.listeningHistory.isNotEmpty &&
