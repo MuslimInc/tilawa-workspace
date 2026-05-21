@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
