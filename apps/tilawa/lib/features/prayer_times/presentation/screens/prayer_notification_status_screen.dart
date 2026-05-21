@@ -264,7 +264,8 @@ class _ErrorView extends StatelessWidget {
     return Center(
       child: TilawaEmptyState(
         title: context.l10n.error,
-        subtitle: failure.localizedMessage(context),
+        subtitle: failure.localizedMessage(context) ??
+            context.l10n.unexpectedError,
         icon: Icons.error_outline,
         action: TilawaButton(
           text: context.l10n.close,

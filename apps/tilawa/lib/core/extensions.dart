@@ -18,7 +18,19 @@ extension BuildContextThemeX on BuildContext {
 }
 
 extension FailureExtensions on Failure {
-  String localizedMessage(BuildContext context) {
+  /// Whether this failure should surface in toasts or error UI.
+  bool get shouldShowToUser => switch (this) {
+    UserCancelledFailure() => false,
+    PurchaseFailure(reason: PurchaseFailureReason.userCancelled) => false,
+    _ => true,
+  };
+
+  /// Localized user-facing text, or [null] when [shouldShowToUser] is false.
+  String? localizedMessage(BuildContext context) {
+    if (!shouldShowToUser) {
+      return null;
+    }
+
     final l10n = context.l10n;
 
     return switch (this) {
@@ -47,7 +59,7 @@ extension FailureExtensions on Failure {
       UnexpectedFailure() => l10n.unexpectedError,
       PersistenceFailure() => l10n.persistenceError,
       UIError() => l10n.uiError,
-      UserCancelledFailure() => '',
+      UserCancelledFailure() => null,
       NotificationFailure(reason: final reason) => switch (reason) {
         NotificationFailureReason.missingPayload =>
           l10n.errorMissingNotificationPayload,
@@ -58,7 +70,7 @@ extension FailureExtensions on Failure {
         PurchaseFailureReason.billingUnavailable =>
           l10n.purchaseBillingUnavailable,
         PurchaseFailureReason.productNotFound => l10n.purchaseProductNotFound,
-        PurchaseFailureReason.userCancelled => '',
+        PurchaseFailureReason.userCancelled => null,
         PurchaseFailureReason.pending => l10n.purchasePending,
         PurchaseFailureReason.verificationFailed =>
           l10n.purchaseVerificationFailed,

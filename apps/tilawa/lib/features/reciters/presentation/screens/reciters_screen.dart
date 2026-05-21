@@ -599,9 +599,9 @@ class _RecitersResultSection extends StatelessWidget {
 
     if (state is RecitersError) {
       return _RecitersErrorSliver(
-        failureMessage: (state as RecitersError).failure.localizedMessage(
-          context,
-        ),
+        failureMessage:
+            (state as RecitersError).failure.localizedMessage(context) ??
+            context.l10n.unexpectedError,
         onRetry: onRetry,
       );
     }

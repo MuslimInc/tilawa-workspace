@@ -531,8 +531,9 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           _dismissAnimController.value = 0;
           _dismissOffsetY = 0;
         }
-        if (state.failure != null) {
-          ToastUtils.showErrorToast(state.failure!.localizedMessage(context));
+        final String? message = state.failure?.localizedMessage(context);
+        if (message != null) {
+          ToastUtils.showErrorToast(message);
         }
       },
       builder: (context, state) {

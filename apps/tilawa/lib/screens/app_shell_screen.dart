@@ -191,7 +191,10 @@ class _AppShellScreenState extends State<AppShellScreen> {
         listenWhen: (previous, current) => current is PlayerBackgroundError,
         listener: (context, state) {
           if (state is PlayerBackgroundError) {
-            ToastUtils.showErrorToast(state.failure.localizedMessage(context));
+            final String? message = state.failure.localizedMessage(context);
+            if (message != null) {
+              ToastUtils.showErrorToast(message);
+            }
           }
         },
         child: BlocListener<MainScreenCubit, MainScreenState>(
