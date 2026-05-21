@@ -36,14 +36,7 @@ class SettingsScreen extends StatelessWidget {
         );
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            l10n.settings,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
+        appBar: TilawaAppBar(title: l10n.settings),
         body: TilawaContentBounds(
           kind: TilawaContentKind.settings,
           child: SingleChildScrollView(

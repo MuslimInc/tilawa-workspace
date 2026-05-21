@@ -22,8 +22,8 @@ class BookmarksScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.bookmarks),
+      appBar: TilawaAppBar(
+        title: context.l10n.bookmarks,
         actions: [
           TilawaIconActionButton(
             icon: Icons.refresh,

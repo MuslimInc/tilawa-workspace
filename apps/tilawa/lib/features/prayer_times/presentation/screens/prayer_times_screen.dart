@@ -142,22 +142,12 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
                         context,
                       ),
-                      sliver: SliverAppBar(
-                        pinned: true,
+                      sliver: TilawaSliverAppBar(
                         automaticallyImplyLeading: false,
                         leading: context.canPop()
                             ? const TilawaBackButton()
                             : null,
-                        backgroundColor: theme.colorScheme.surfaceContainer,
-                        surfaceTintColor: Colors.transparent,
-                        elevation: 0,
-                        scrolledUnderElevation: 0,
-                        title: Text(
-                          context.l10n.prayerTimes,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
+                        title: context.l10n.prayerTimes,
                         actions: [
                           Semantics(
                             identifier: PrayerNotificationSemanticsIds
@@ -167,7 +157,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                               onTap: () => _showSettingsDialog(context),
                             ),
                           ),
-                          SizedBox(width: tokens.spaceExtraSmall),
                         ],
                         bottom: PreferredSize(
                           preferredSize: Size.fromHeight(
@@ -177,7 +166,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                           ),
                           child: DecoratedBox(
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.surfaceContainer,
+                              color: TilawaAppBarChrome.backgroundColor(
+                                theme.colorScheme,
+                                TilawaAppBarSurface.vellum,
+                              ),
                               border: Border(
                                 bottom: BorderSide(
                                   color: theme.colorScheme.outlineVariant

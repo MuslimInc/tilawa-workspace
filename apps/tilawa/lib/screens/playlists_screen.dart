@@ -30,8 +30,8 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.playlists),
+      appBar: TilawaAppBar(
+        title: l10n.playlists,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

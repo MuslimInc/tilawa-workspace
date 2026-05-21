@@ -107,10 +107,9 @@ class _QuranRenderDemoScreenState extends State<QuranRenderDemoScreen> {
 
     return Scaffold(
       backgroundColor: readerTheme.pageBackground,
-      appBar: AppBar(
-        title: const Text('PageView Render Benchmark (5-20)'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+      appBar: const TilawaAppBar(
+        title: 'PageView Render Benchmark (5-20)',
+        showBottomHairline: false,
       ),
       body: Column(
         children: [

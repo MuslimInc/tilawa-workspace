@@ -48,7 +48,8 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
       child: BlocBuilder<AthkarCubit, AthkarState>(
         builder: (context, state) {
           return Scaffold(
-            appBar: AppBar(
+            appBar: TilawaAppBar(
+              title: widget.categoryName,
               actions: [
                 if (state is AthkarItemsLoaded) ...[
                   Container(
@@ -79,7 +80,6 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
                   SizedBox(width: tokens.spaceLarge),
                 ],
               ],
-              title: Text(widget.categoryName),
             ),
             body: Builder(
               builder: (context) {

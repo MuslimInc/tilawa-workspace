@@ -40,8 +40,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(context.l10n.listeningHistory),
+      appBar: TilawaAppBar(
+        title: context.l10n.listeningHistory,
         actions: [
           BlocBuilder<HistoryBloc, HistoryState>(
             builder: (context, state) {

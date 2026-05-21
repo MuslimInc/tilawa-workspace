@@ -34,9 +34,7 @@ class FavoritesScreen extends StatelessWidget {
         child: Stack(
           children: [
             Scaffold(
-              appBar: AppBar(
-                title: Text(context.l10n.favorites),
-              ),
+              appBar: TilawaAppBar(title: context.l10n.favorites),
               body: BlocBuilder<FavoritesCubit, FavoritesState>(
                 builder: (context, state) {
                   if (state is FavoritesLoading) {

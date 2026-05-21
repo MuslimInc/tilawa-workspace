@@ -67,8 +67,8 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         context.read<DownloadsBloc>().add(const ClearDownloadsUiNotification());
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: BlocBuilder<DownloadsBloc, DownloadsState>(
+        appBar: TilawaAppBar(
+          titleWidget: BlocBuilder<DownloadsBloc, DownloadsState>(
             buildWhen: (previous, current) =>
                 previous.totalDownloadsSize != current.totalDownloadsSize,
             builder: (context, state) {
@@ -82,7 +82,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
               icon: Icons.refresh_rounded,
               onTap: _loadDownloads,
             ),
-            SizedBox(width: 8),
             TilawaIconActionButton(
               icon: Icons.delete_sweep_rounded,
               onTap: () => _showClearAllDialog(context),

@@ -17,9 +17,7 @@ class RouteListScreen extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('All Routes'),
-      ),
+      appBar: const TilawaAppBar(title: 'All Routes'),
       body: ListView.separated(
         itemCount: interactions.length,
         separatorBuilder: (context, index) => const TilawaDivider(height: 1),

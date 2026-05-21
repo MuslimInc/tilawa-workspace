@@ -12,6 +12,7 @@ import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// In-app panel to exercise notification / deep-link routing scenarios.
 ///
@@ -30,9 +31,7 @@ class DeepLinkDebugScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Deep link debug'),
-      ),
+      appBar: const TilawaAppBar(title: 'Deep link debug'),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: <Widget>[

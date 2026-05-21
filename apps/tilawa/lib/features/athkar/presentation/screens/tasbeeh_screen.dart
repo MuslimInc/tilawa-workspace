@@ -80,13 +80,14 @@ class _TasbeehView extends StatelessWidget {
         }
 
         return Scaffold(
-          appBar: AppBar(
+          appBar: TilawaAppBar(
             leading: state.viewMode != TasbeehViewMode.options
                 ? TilawaBackButton(onPressed: cubit.showOptionsView)
                 : context.canPop()
                 ? const TilawaBackButton()
                 : null,
-            title: Text(context.l10n.tasbeehCategory),
+            automaticallyImplyLeading: false,
+            title: context.l10n.tasbeehCategory,
           ),
           body: Stack(
             children: [
