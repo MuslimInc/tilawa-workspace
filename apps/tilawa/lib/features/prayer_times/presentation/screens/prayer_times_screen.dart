@@ -7,12 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:go_router/go_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../shared/widgets/tilawa_back_button.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/prayer_times_clock.dart';
@@ -110,7 +108,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
 
     return Scaffold(
       // Parchment surface when opened as a standalone route (debug route list,
@@ -142,80 +139,10 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                       handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
                         context,
                       ),
-                      sliver: TilawaSliverAppBar(
-                        automaticallyImplyLeading: false,
-                        leading: context.canPop()
-                            ? const TilawaBackButton()
-                            : null,
-                        title: context.l10n.prayerTimes,
-                        actions: [
-                          Semantics(
-                            identifier: PrayerNotificationSemanticsIds
-                                .prayerSettingsButton,
-                            child: TilawaIconActionButton(
-                              icon: Icons.settings,
-                              onTap: () => _showSettingsDialog(context),
-                            ),
-                          ),
-                        ],
-                        bottom: PreferredSize(
-                          preferredSize: Size.fromHeight(
-                            tokens.minInteractiveDimension +
-                                tokens.spaceSmall +
-                                tokens.spaceTiny,
-                          ),
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: TilawaAppBarChrome.backgroundColor(
-                                theme.colorScheme,
-                                TilawaAppBarSurface.vellum,
-                              ),
-                              border: Border(
-                                bottom: BorderSide(
-                                  color: theme.colorScheme.outlineVariant
-                                      .withValues(alpha: tokens.opacityMedium),
-                                ),
-                              ),
-                            ),
-                            child: Padding(
-                              padding: EdgeInsets.fromLTRB(
-                                tokens.spaceLarge,
-                                tokens.spaceTiny,
-                                tokens.spaceLarge,
-                                tokens.spaceTiny,
-                              ),
-                              child: TilawaSegmentedControl<String>(
-                                segments: [
-                                  TilawaSegment(
-                                    value: 'today',
-                                    label: context.l10n.today,
-                                  ),
-                                  TilawaSegment(
-                                    value: 'monthly',
-                                    label: context.l10n.monthly,
-                                  ),
-                                ],
-                                selectedValue: _selectedIndex == 0
-                                    ? 'today'
-                                    : 'monthly',
-                                // Selected pill matches the Parchment card tier
-                                // used by the body cards (TilawaCard / surface)
-                                // so the picked tab reads as "the page below."
-                                backgroundColor:
-                                    theme.colorScheme.surfaceContainer,
-                                selectedColor: theme.colorScheme.surface,
-                                selectedTextColor: theme.colorScheme.primary,
-                                // Match the body cards' rounding so the header
-                                // chrome and the cards share the same rhythm.
-                                // docs/tilawa_brand.md §5 — `card` family.
-                                containerRadius: tokens.resolveRadius(
-                                  family: TilawaRadiusFamily.card,
-                                ),
-                                onValueChanged: _onSegmentChanged,
-                              ),
-                            ),
-                          ),
-                        ),
+                      sliver: PrayerTimesAppBar(
+                        selectedIndex: _selectedIndex,
+                        onSegmentChanged: _onSegmentChanged,
+                        onSettingsTap: () => _showSettingsDialog(context),
                       ),
                     ),
                   ];
@@ -359,6 +286,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
           const PrayerTimesEvent.loadPrayerTimes(),
         );
       },
+      edgeOffset: prayerTimesRefreshIndicatorEdgeOffset(context),
       child: Builder(
         builder: (context) {
           return CustomScrollView(
