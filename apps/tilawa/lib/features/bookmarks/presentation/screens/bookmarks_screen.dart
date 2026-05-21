@@ -1,8 +1,10 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -21,9 +23,17 @@ class BookmarksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final double searchBottomHeight = TilawaAppBarConfig.searchBottomHeight(
+      theme,
+    );
+
     return Scaffold(
       appBar: TilawaAppBar(
         title: context.l10n.bookmarks,
+        automaticallyImplyLeading: false,
+        leading: context.canPop() ? const TilawaBackButton() : null,
         actions: [
           TilawaIconActionButton(
             icon: Icons.refresh,
@@ -32,6 +42,27 @@ class BookmarksScreen extends StatelessWidget {
             },
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(searchBottomHeight),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceMedium,
+              vertical: tokens.spaceMedium,
+            ),
+            child: BookmarkSearchBar(
+              onSearchChanged: (query) {
+                context.read<BookmarksBloc>().add(
+                  SearchBookmarksEvent(query: query),
+                );
+              },
+              onClearSearch: () {
+                context.read<BookmarksBloc>().add(
+                  const ClearBookmarksSearchEvent(),
+                );
+              },
+            ),
+          ),
+        ),
       ),
       body: TilawaContentBounds(
         kind: TilawaContentKind.media,
@@ -63,20 +94,6 @@ class BookmarksScreen extends StatelessWidget {
                         Positioned.fill(
                           child: CustomScrollView(
                             slivers: [
-                              SliverToBoxAdapter(
-                                child: BookmarkSearchBar(
-                                  onSearchChanged: (query) {
-                                    context.read<BookmarksBloc>().add(
-                                      SearchBookmarksEvent(query: query),
-                                    );
-                                  },
-                                  onClearSearch: () {
-                                    context.read<BookmarksBloc>().add(
-                                      const ClearBookmarksSearchEvent(),
-                                    );
-                                  },
-                                ),
-                              ),
                               SliverFillRemaining(
                                 hasScrollBody: filteredBookmarks.isNotEmpty,
                                 child: filteredBookmarks.isEmpty
