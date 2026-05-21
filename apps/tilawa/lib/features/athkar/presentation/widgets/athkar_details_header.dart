@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../shared/widgets/tilawa_back_button.dart';
+import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class AthkarDetailsHeader extends StatelessWidget {
   const AthkarDetailsHeader({
@@ -17,25 +18,23 @@ class AthkarDetailsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color appBarForegroundColor = theme.colorScheme.onPrimary;
+    final Color foregroundColor = TilawaAppBarChrome.foregroundColor(
+      theme.colorScheme,
+    );
 
-    return SliverAppBar(
-      expandedHeight: 100.0,
-      pinned: true,
+    return TilawaSliverAppBar(
+      expandedHeight: 100,
       stretch: true,
-      backgroundColor: theme.primaryColor,
-      foregroundColor: appBarForegroundColor,
       leading: context.canPop()
-          ? TilawaBackButton(color: appBarForegroundColor)
+          ? TilawaBackButton(color: foregroundColor)
           : null,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      title: Column(
+      automaticallyImplyLeading: false,
+      titleWidget: Column(
         children: [
           Text(
             categoryName,
             style: theme.textTheme.titleLarge?.copyWith(
-              color: appBarForegroundColor,
+              color: foregroundColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -43,7 +42,7 @@ class AthkarDetailsHeader extends StatelessWidget {
             Text(
               '${currentPage + 1} / $totalItems',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: appBarForegroundColor.withValues(alpha: 0.9),
+                color: foregroundColor.withValues(alpha: 0.9),
               ),
             ),
         ],
@@ -54,10 +53,8 @@ class AthkarDetailsHeader extends StatelessWidget {
               preferredSize: const Size.fromHeight(4),
               child: LinearProgressIndicator(
                 value: (currentPage + 1) / totalItems,
-                backgroundColor: appBarForegroundColor.withValues(alpha: 0.2),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  appBarForegroundColor,
-                ),
+                backgroundColor: foregroundColor.withValues(alpha: 0.2),
+                valueColor: AlwaysStoppedAnimation<Color>(foregroundColor),
               ),
             )
           : null,

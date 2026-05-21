@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-class QuranReaderAppBar extends StatelessWidget {
+/// Reader chrome: parchment surface + hairline, built on [TilawaAppBar].
+class QuranReaderAppBar extends StatelessWidget implements PreferredSizeWidget {
   const QuranReaderAppBar({
     super.key,
     required this.title,
@@ -19,73 +20,57 @@ class QuranReaderAppBar extends StatelessWidget {
   final VoidCallback onSettings;
 
   @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Color iconColor = colorScheme.onSurfaceVariant;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: colorScheme.outlineVariant,
-            width: tokens.borderWidthThin,
-          ),
-        ),
+    return TilawaAppBar(
+      surface: TilawaAppBarSurface.parchment,
+      automaticallyImplyLeading: false,
+      leading: IconButton(
+        onPressed: onBack,
+        color: iconColor,
+        icon: const Icon(Icons.arrow_back),
+        tooltip: context.l10n.back,
       ),
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceSmall,
-            vertical: tokens.spaceExtraSmall,
-          ),
-          child: Row(
-            children: [
-              IconButton(
-                onPressed: onBack,
+      titleWidget: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (title.isNotEmpty) ...[
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              subtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                icon: const Icon(Icons.arrow_back),
-                tooltip: context.l10n.back,
               ),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (title.isNotEmpty) ...[
-                      Text(
-                        title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      Text(
-                        subtitle,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              IconButton(
-                onPressed: onSearch,
-                color: colorScheme.onSurfaceVariant,
-                icon: const Icon(Icons.search),
-                tooltip: context.l10n.searchSurah,
-              ),
-              IconButton(
-                onPressed: onSettings,
-                color: colorScheme.onSurfaceVariant,
-                icon: const Icon(Icons.settings),
-                tooltip: context.l10n.settings,
-              ),
-            ],
-          ),
-        ),
+            ),
+          ],
+        ],
       ),
+      actions: [
+        IconButton(
+          onPressed: onSearch,
+          color: iconColor,
+          icon: const Icon(Icons.search),
+          tooltip: context.l10n.searchSurah,
+        ),
+        IconButton(
+          onPressed: onSettings,
+          color: iconColor,
+          icon: const Icon(Icons.settings),
+          tooltip: context.l10n.settings,
+        ),
+      ],
     );
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Dense app bar showing the reciter name on the same vellum surface as
-/// [ReciterSearchHeader] ([ColorScheme.surfaceContainerHigh]).
+/// Reciter name row on vellum chrome, flush with [ReciterSearchHeader] below.
 class ReciterDetailsAppBar extends StatelessWidget {
   const ReciterDetailsAppBar({super.key, required this.reciter});
 
@@ -15,19 +15,15 @@ class ReciterDetailsAppBar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    final Color headerColor = colorScheme.surfaceContainerHigh;
-    final Color appBarForegroundColor = colorScheme.onSurface;
+    final Color foregroundColor = TilawaAppBarChrome.foregroundColor(
+      colorScheme,
+    );
 
-    return SliverAppBar(
-      pinned: true,
-      backgroundColor: headerColor,
-      surfaceTintColor: Colors.transparent,
-      foregroundColor: appBarForegroundColor,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      leading: TilawaBackButton(color: appBarForegroundColor),
+    return TilawaSliverAppBar(
+      showBottomHairline: false,
+      leading: TilawaBackButton(color: foregroundColor),
       centerTitle: true,
-      title: Row(
+      titleWidget: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
@@ -50,7 +46,7 @@ class ReciterDetailsAppBar extends StatelessWidget {
               style: context
                   .responsiveStyle((t) => t.titleLarge)
                   ?.copyWith(
-                    color: appBarForegroundColor,
+                    color: foregroundColor,
                     fontWeight: FontWeight.w700,
                   ),
               overflow: TextOverflow.ellipsis,
