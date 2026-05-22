@@ -2,8 +2,8 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/support_product.dart';
@@ -89,7 +89,8 @@ class _SupportTilawaScreenState extends State<SupportTilawaScreen>
           if (state.status == SupportStatus.error && state.products.isEmpty) {
             return TilawaErrorState(
               icon: FluentIcons.error_circle_24_regular,
-              title: state.failure?.localizedMessage(context) ??
+              title:
+                  state.failure?.localizedMessage(context) ??
                   l10n.supportProductsUnavailable,
               onRetry: () => context.read<SupportBloc>().add(
                 const SupportEvent.started(),
@@ -132,7 +133,6 @@ class _SupportBody extends StatelessWidget {
           spacing: tokens.spaceLarge + tokens.spaceSmall,
           children: [
             Container(
-              padding: EdgeInsets.all(tokens.spaceLarge),
               decoration: BoxDecoration(
                 color: colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(tokens.radiusLarge),
