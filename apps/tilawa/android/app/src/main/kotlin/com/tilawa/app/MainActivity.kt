@@ -6,6 +6,7 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ryanheise.audioservice.AudioServiceActivity
+import com.tilawa.app.auth.GoogleSignInPrepareChannel
 import com.tilawa.app.prayer.AdhanScheduler
 import com.tilawa.app.prayer.PrayerAdhanMethodChannel
 import com.tilawa.app.prayer.PrayerNotificationsWatchdogScheduler
@@ -104,6 +105,11 @@ class MainActivity : AudioServiceActivity() {
             }
 
         PrayerAdhanMethodChannel.register(
+            flutterEngine.dartExecutor.binaryMessenger,
+            this,
+        )
+
+        GoogleSignInPrepareChannel.register(
             flutterEngine.dartExecutor.binaryMessenger,
             this,
         )
