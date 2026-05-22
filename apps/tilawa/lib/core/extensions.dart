@@ -31,7 +31,9 @@ extension FailureExtensions on Failure {
       return null;
     }
 
-    final l10n = context.l10n;
+    final AppLocalizations l10n = lookupAppLocalizations(
+      Localizations.localeOf(context),
+    );
 
     return switch (this) {
       OfflinePlaybackFailure(reason: final reason) => switch (reason) {
