@@ -180,7 +180,7 @@ void main() {
       );
     });
 
-    test('does not rebuild when only playback position would change', () {
+    test('rebuilds when position data changes', () {
       final AudioPlayerState previous = _baseState();
       final AudioPlayerState current = previous.copyWith(
         positionData: const PositionData(
@@ -192,7 +192,7 @@ void main() {
 
       expect(
         QuranPlayerTransportControls.playerTreeBuildWhen(previous, current),
-        isFalse,
+        isTrue,
       );
     });
   });

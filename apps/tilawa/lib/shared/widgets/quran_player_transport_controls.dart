@@ -46,5 +46,6 @@ abstract final class QuranPlayerTransportControls {
       previous.speed != current.speed ||
       previous.repeatMode != current.repeatMode ||
       previous.shuffleMode != current.shuffleMode ||
-      previous.dismissedAudioId != current.dismissedAudioId;
+      previous.dismissedAudioId != current.dismissedAudioId ||
+      previous.positionData != current.positionData;
 }
