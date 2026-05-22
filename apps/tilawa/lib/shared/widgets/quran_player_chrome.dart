@@ -83,7 +83,7 @@ class QuranPlayerChromeNotifier extends ChangeNotifier {
       return;
     }
     _systemNavigationBarColorOverride = color;
-    notifyListeners();
+    _scheduleNotifyListeners();
   }
 
   void clearSystemNavigationBarColorOverride() {
@@ -91,7 +91,7 @@ class QuranPlayerChromeNotifier extends ChangeNotifier {
       return;
     }
     _systemNavigationBarColorOverride = null;
-    notifyListeners();
+    _scheduleNotifyListeners();
   }
 
   void _scheduleNotifyListeners() {

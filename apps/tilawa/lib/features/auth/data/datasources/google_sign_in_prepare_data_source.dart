@@ -26,10 +26,9 @@ class GoogleSignInPrepareDataSourceImpl implements GoogleSignInPrepareDataSource
   @visibleForTesting
   GoogleSignInPrepareDataSourceImpl.withOptions(
     this._googleSignIn, {
-    bool? useAndroidCredentialManager,
-    bool? useGoogleSignInPath,
-  }) : _useAndroidCredentialManager = useAndroidCredentialManager,
-       _useGoogleSignInPath = useGoogleSignInPath;
+    this._useAndroidCredentialManager,
+    this._useGoogleSignInPath,
+  });
 
   @visibleForTesting
   static void resetPrepareStateForTesting() {
