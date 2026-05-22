@@ -21,7 +21,8 @@ Configure the Dart analyzer using the `analysis_options.yaml` file located at th
 - **Base Configuration:** Always include a standard rule set (e.g., `package:lints/recommended.yaml` or `package:flutter_lints/flutter.yaml`) using the `include:` directive.
 - **Strict Type Checks:** Enable strict type checks under the `analyzer: language:` node to prevent implicit downcasts and dynamic inferences. Set `strict-casts: true`, `strict-inference: true`, and `strict-raw-types: true`.
 - **Linter Rules:** Explicitly enable or disable specific rules under the `linter: rules:` node. Use a key-value map (`rule_name: true/false`) when overriding included rules, or a list (`- rule_name`) when defining a fresh set. Do not mix list and map syntax in the same `rules` block.
-- **Formatter Configuration:** Configure `dart format` behavior under the `formatter:` node. Set `page_width` (default 80) and `trailing_commas` (`automate` or `preserve`).
+- **Formatter Configuration:** Configure `dart format` under `formatter:`. In
+  Tilawa, use `page_width: 80` per `AGENTS.md`.
 - **Analyzer Plugins:** Enable custom diagnostics by adding plugins under the `analyzer: plugins:` node. Ensure the plugin package is added as a `dev_dependency` in `pubspec.yaml`.
 
 ## Diagnostic Suppression
@@ -84,7 +85,7 @@ linter:
     use_super_parameters: true
 
 formatter:
-  page_width: 100
+  page_width: 80
   trailing_commas: preserve
 ```
 

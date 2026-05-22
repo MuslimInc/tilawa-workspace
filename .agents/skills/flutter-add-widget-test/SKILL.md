@@ -1,11 +1,22 @@
 ---
 name: flutter-add-widget-test
-description: Implement a component-level test using `WidgetTester` to verify UI rendering and user interactions (tapping, scrolling, entering text). Use when validating that a specific widget displays correct data and responds to events as expected.
+description: >-
+  Widget tests with WidgetTester. In Tilawa, wrap with MaterialApp/theme,
+  prefer package:checks assertions, and pump BlocProvider with test fakes.
 metadata:
   model: models/gemini-3.1-pro-preview
-  last_modified: Tue, 21 Apr 2026 21:15:41 GMT
+  last_modified: Sat, 23 May 2026 12:00:00 GMT
 ---
 # Writing Flutter Widget Tests
+
+## Tilawa conventions
+
+- Wrap widgets in `MaterialApp` (and theme extensions from `ui_kit` if needed).
+- Provide `BlocProvider` / `RepositoryProvider` with **fakes**, not production
+  `get_it` unless testing integration.
+- Prefer **`package:checks`** where the package already depends on it.
+- Run: `flutter test test/<file>_test.dart` from the app package root
+  (`apps/tilawa`).
 
 ## Contents
 - [Setup & Configuration](#setup--configuration)
@@ -28,7 +39,8 @@ Utilize the following `flutter_test` components to interact with and validate th
 
 *   **`WidgetTester`**: The primary interface for building and interacting with widgets in the test environment. Provided automatically by the `testWidgets()` function.
 *   **`Finder`**: Locates widgets in the test environment (e.g., `find.text('Submit')`, `find.byType(TextField)`, `find.byKey(Key('submit_btn'))`).
-*   **`Matcher`**: Verifies the presence or state of widgets located by a `Finder` (e.g., `findsOneWidget`, `findsNothing`, `findsNWidgets(2)`, `matchesGoldenFile`).
+*   **`Matcher` / checks**: Use `findsOneWidget` with `expect`, or
+    `check(that).matches(...)` when using `package:checks`.
 
 ## Workflow: Implementing a Widget Test
 
