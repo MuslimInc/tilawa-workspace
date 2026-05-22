@@ -19,14 +19,18 @@ abstract final class TilawaAppBarConfig {
   static const bool automaticallyImplyLeading = true;
   static const bool showLeadingControlBackground = false;
   static const bool showActionControlBackground = false;
+  /// Hairline under the bar — primary chrome separation (see brand §5).
   static const bool showBottomHairline = true;
-  static const bool showElevationShadow = true;
+
+  /// Drop shadow under the bar. Off by default; vellum uses surface tier +
+  /// [showBottomHairline] instead of Material elevation (brand §5).
+  static const bool showElevationShadow = false;
 
   /// Material [AppBar.elevation] when [showElevationShadow] is true.
-  static const double elevation = 2;
+  static const double elevation = 1;
 
   /// Material [AppBar.scrolledUnderElevation] when [showElevationShadow] is true.
-  static const double scrolledUnderElevation = 2;
+  static const double scrolledUnderElevation = 1;
 
   static const bool pinned = true;
   static const bool floating = false;
@@ -98,28 +102,29 @@ abstract final class TilawaAppBarChrome {
 
   static Color foregroundColor(ColorScheme scheme) => scheme.onSurface;
 
-  /// Soft drop shadow under the app bar ([ColorScheme.shadow] ×
-  /// [TilawaDesignTokens.opacityShadowStrong]).
+  /// Optional drop shadow ([ColorScheme.shadow] × [opacityShadow]).
+  ///
+  /// Prefer [showBottomHairline]; elevation is opt-in for rare scroll chrome.
   static Color elevationShadowColor(
     ColorScheme scheme,
     TilawaDesignTokens tokens, {
     bool enabled = true,
   }) {
-    if (!enabled || !TilawaAppBarConfig.showElevationShadow) {
+    if (!enabled) {
       return Colors.transparent;
     }
-    return scheme.shadow.withValues(alpha: tokens.opacityShadowStrong);
+    return scheme.shadow.withValues(alpha: tokens.opacityShadow);
   }
 
   static double elevation({bool enabled = true}) {
-    if (!enabled || !TilawaAppBarConfig.showElevationShadow) {
+    if (!enabled) {
       return 0;
     }
     return TilawaAppBarConfig.elevation;
   }
 
   static double scrolledUnderElevation({bool enabled = true}) {
-    if (!enabled || !TilawaAppBarConfig.showElevationShadow) {
+    if (!enabled) {
       return 0;
     }
     return TilawaAppBarConfig.scrolledUnderElevation;
@@ -131,7 +136,9 @@ abstract final class TilawaAppBarChrome {
   ) {
     return RoundedRectangleBorder(
       side: BorderSide(
-        color: scheme.outlineVariant,
+        color: scheme.outlineVariant.withValues(
+          alpha: tokens.opacitySubtle * 2.5,
+        ),
         width: tokens.borderWidthThin,
       ),
     );

@@ -49,15 +49,38 @@ void main() {
     });
   });
 
+  group('TilawaAppBarConfig defaults', () {
+    test('elevation shadow is off; hairline is on', () {
+      expect(TilawaAppBarConfig.showElevationShadow, isFalse);
+      expect(TilawaAppBarConfig.showBottomHairline, isTrue);
+      expect(TilawaAppBarConfig.elevation, 1);
+    });
+  });
+
   group('TilawaAppBarChrome elevation shadow', () {
-    test('enabled uses scheme.shadow at opacityShadowStrong', () {
+    test('enabled uses scheme.shadow at opacityShadow', () {
       final theme = _lightTheme();
       final scheme = theme.colorScheme;
       final tokens = theme.extension<TilawaDesignTokens>()!;
       expect(
         TilawaAppBarChrome.elevationShadowColor(scheme, tokens),
-        scheme.shadow.withValues(alpha: tokens.opacityShadowStrong),
+        scheme.shadow.withValues(alpha: tokens.opacityShadow),
       );
+    });
+
+    test('bottom hairline uses softened outlineVariant', () {
+      final theme = _lightTheme();
+      final scheme = theme.colorScheme;
+      final tokens = theme.extension<TilawaDesignTokens>()!;
+      final RoundedRectangleBorder shape = TilawaAppBarChrome.bottomHairline(
+        scheme,
+        tokens,
+      ) as RoundedRectangleBorder;
+      expect(
+        shape.side.color,
+        scheme.outlineVariant.withValues(alpha: tokens.opacitySubtle * 2.5),
+      );
+      expect(shape.side.width, tokens.borderWidthThin);
     });
 
     test('disabled returns transparent shadow and zero elevation', () {
