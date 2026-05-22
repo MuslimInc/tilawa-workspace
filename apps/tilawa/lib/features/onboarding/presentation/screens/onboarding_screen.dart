@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +8,7 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
+import '../../../auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../widgets/onboarding_content.dart';
 import '../widgets/onboarding_page.dart';
@@ -67,6 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       child: BlocConsumer<OnboardingCubit, OnboardingState>(
         listener: (context, state) {
           if (state is OnboardingCompleted) {
+            unawaited(getIt<PrepareGoogleSignInUseCase>()());
             const LoginRoute().go(context);
           }
         },
@@ -89,6 +93,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       onPageChanged: (index) {
                         setState(() => _currentPage = index);
                         context.read<OnboardingCubit>().pageChanged(index);
+                        if (index == pages.length - 1) {
+                          unawaited(getIt<PrepareGoogleSignInUseCase>()());
+                        }
                       },
                       itemBuilder: (context, index) {
                         return OnboardingPage(content: pages[index]);

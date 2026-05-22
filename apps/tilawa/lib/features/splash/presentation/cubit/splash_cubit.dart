@@ -4,6 +4,7 @@ import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../../../core/debug/deep_link_debug_log.dart';
 import '../../../../router/notification_navigation_resolver.dart';
+import '../../../auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
 
 part 'splash_state.dart';
@@ -20,9 +21,15 @@ class SplashCubit extends Cubit<SplashState> {
   // Set to Duration.zero to disable.
   static const Duration flutterSplashPreviewDelay = Duration.zero;
 
-  SplashCubit(this._getSplashNextRoute) : super(const SplashInitial());
+  SplashCubit(
+    this._getSplashNextRoute,
+    this._prepareGoogleSignIn,
+  ) : super(const SplashInitial());
 
   final GetSplashNextRouteUseCase _getSplashNextRoute;
+  final PrepareGoogleSignInUseCase _prepareGoogleSignIn;
+
+  static const Duration _googlePrepareTimeout = Duration(seconds: 2);
 
   Future<void> init() async {
     // #region agent log
@@ -49,6 +56,15 @@ class SplashCubit extends Cubit<SplashState> {
         extra = NotificationNavigationResolver.resolveExtra(
           result.notificationData!,
           location,
+        );
+      }
+
+      if (isClosed) return;
+
+      if (result.destination == SplashDestination.login) {
+        await _prepareGoogleSignIn().timeout(
+          _googlePrepareTimeout,
+          onTimeout: () {},
         );
       }
 
