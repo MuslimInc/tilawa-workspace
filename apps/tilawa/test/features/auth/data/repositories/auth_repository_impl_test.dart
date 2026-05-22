@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/auth/data/datasources/google_sign_in_prepare_data_source.dart';
 import 'package:tilawa/features/auth/data/providers/auth_provider_factory.dart';
 import 'package:tilawa/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
@@ -10,19 +11,28 @@ import 'package:tilawa/features/auth/domain/repositories/user_repository.dart';
 
 import 'auth_repository_impl_test.mocks.dart';
 
-@GenerateMocks([AuthProviderFactory, AuthProviderInterface, UserRepository])
+@GenerateMocks([
+  AuthProviderFactory,
+  AuthProviderInterface,
+  UserRepository,
+  GoogleSignInPrepareDataSource,
+])
 void main() {
   late AuthRepositoryImpl authRepository;
   late MockAuthProviderFactory mockFactory;
   late MockAuthProviderInterface mockAuthProvider;
+  late MockGoogleSignInPrepareDataSource mockPrepare;
 
   setUp(() {
     mockFactory = MockAuthProviderFactory();
     mockAuthProvider = MockAuthProviderInterface();
+    mockPrepare = MockGoogleSignInPrepareDataSource();
 
     when(mockFactory.createAuthProvider()).thenReturn(mockAuthProvider);
+    when(mockPrepare.prepare()).thenAnswer((_) async {});
+    when(mockPrepare.clear()).thenAnswer((_) async {});
 
-    authRepository = AuthRepositoryImpl(mockFactory);
+    authRepository = AuthRepositoryImpl(mockFactory, mockPrepare);
   });
 
   group('AuthRepositoryImpl', () {
@@ -72,12 +82,17 @@ void main() {
       verify(mockAuthProvider.authStateChanges);
     });
 
-    test('signOut should delegate to provider', () async {
-      // Act
+    test('signOut should clear prepare cache and delegate to provider', () async {
       await authRepository.signOut();
 
-      // Assert
+      verify(mockPrepare.clear()).called(1);
       verify(mockAuthProvider.signOut()).called(1);
+    });
+
+    test('prepareGoogleSignIn should delegate to data source', () async {
+      await authRepository.prepareGoogleSignIn();
+
+      verify(mockPrepare.prepare()).called(1);
     });
 
     test('currentUser should delegate to provider', () {
