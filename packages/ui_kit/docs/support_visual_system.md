@@ -27,25 +27,26 @@ They must **not** feel like a SaaS upgrade page, fintech upsell, or game reward 
 
 | Rule | Implementation |
 |------|----------------|
-| One accent per screen | `colorScheme.primary` (Ink) for **Continue with Google Play** only |
+| One **interactive** accent per screen | `colorScheme.primary` (Ink) for **Continue on Google Play** only |
+| Tier identity washes | Muted tints from `primary` / `secondary` / `tertiary` @ ~7–16% on `surface` — decorative, not second CTAs |
 | No gold pay CTA | Do **not** use `tertiary` (Gilding) on purchase buttons — brand anti-pattern |
 | No gold gradients | No VIP headers, metallic meshes, or “luxury tier” backgrounds |
-| Surfaces | Hero: `surfaceContainerLow`; tiers: `surfaceContainerLow` + hairline `outlineVariant` |
-| Selected tier | `primaryContainer` + thin `primary` border — not Gilding fill |
+| Surfaces | Intro: plain text; tier **group**: `surfaceContainerLow`; cards: `surface` + hairline `outlineVariant` |
+| Selected tier | Tier accent border (~1.25 dp) + stronger tint + check in tier accent — not shared `primaryContainer` for all |
 | Success | `TilawaEmptyState` with neutral icon (`favorite_outline` or calm check) — not green confetti |
 
-Subtle spiritual styling: optional ambient line work (same grammar as reciters
-ambient painter) at ≤ `opacitySubtle × 0.4`, primary-tinted, **never** framing the CTA.
+Subtle spiritual styling: open-corner arc painter per tier at ≤ `opacitySubtle × 0.4`,
+**never** framing the CTA.
 
 ---
 
 ## 3. Typography and copy presentation
 
-- **Title:** `supportTilawa` — `titleLarge` / app bar via `TilawaAppBar`
-- **Subtitle / mission:** `bodyMedium`, `onSurfaceVariant`, `textHeightLoose` where Arabic appears
-- **Impact section:** `titleSmall` `w700` + `bodyMedium` bullets — not marketing headlines
-- **Tier labels:** `titleSmall` + Play-formatted price in `bodyMedium`
-- **Footer / disclaimer:** `bodySmall` / `labelSmall`, `onSurfaceVariant`
+- **Title:** `supportTilawa` — app bar via `TilawaAppBar`
+- **Intro:** single `supportIntroLine` — `bodyMedium`, `onSurfaceVariant`, `textHeightLoose` (Arabic)
+- **Impact:** collapsible `supportImpactWhyTitle`, three `bodyMedium` bullets when expanded
+- **Tier labels:** `titleSmall` w700 + price `titleMedium` w600; icons in 44 dp capsule
+- **Trust:** one `supportTrustLine` — `labelSmall`, `onSurfaceVariant`
 
 Avoid `displayLarge`, “% OFF”, streak counters, and exclamation marks.
 
@@ -57,7 +58,7 @@ Avoid `displayLarge`, “% OFF”, streak counters, and exclamation marks.
 |----------|----------------|
 | Screen scaffold | `TilawaAppBar` + `TilawaContentBounds` (`form`, max 560) |
 | Impact list | Custom rows or `TilawaEmptyState`-level spacing — hairline-free bullets with quiet icons |
-| Tier selector | Feature `SupportTierSelector` — card rows, 44 dp min height |
+| Tier selector | `SupportTierSelector` group + `SupportTierCard` (accent, arc, capsule icon) |
 | Primary CTA | `TilawaButton` primary variant; `isLoading` during purchase |
 | Secondary restore | `TextButton` or `TilawaSettingsTile` pattern — not a second primary |
 | Confirmation | `TilawaBottomSheetScaffold` + `TilawaBottomSheetTitleRow` |

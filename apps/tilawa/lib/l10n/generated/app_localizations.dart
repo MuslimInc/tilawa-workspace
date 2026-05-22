@@ -1724,41 +1724,53 @@ abstract class AppLocalizations {
   /// **'Compass accuracy is low. Move your phone in a figure-eight motion to calibrate it.'**
   String get qiblaCompassAccuracyPoor;
 
-  /// Onboarding page 1 title
+  /// Onboarding page 1 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'Minutes from the Quran... change your whole day'**
+  /// **'Minutes with the Quran…\nChanges your whole day'**
   String get onboardingTitle1;
 
   /// Onboarding page 1 description
   ///
   /// In en, this message translates to:
-  /// **'When you feel life\'s constraints, remember there are verses in the Quran that speak exactly to your state. Just search for them and you will find tranquility.'**
+  /// **'Find verses that fit what you\'re going through, and take quiet minutes to read or listen.'**
   String get onboardingDesc1;
 
-  /// Onboarding page 2 title
+  /// Onboarding page 2 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'A spiritual journey with multiple Quranic voices'**
+  /// **'Many reciter voices\nListen your way'**
   String get onboardingTitle2;
 
   /// Onboarding page 2 description
   ///
   /// In en, this message translates to:
-  /// **'Here, the voices of reciters from all over the nation gather, in recitations that weave the beauty of letters with the light of meaning.'**
+  /// **'Different reciters and riwayat — choose the voice and style that feels right.'**
   String get onboardingDesc2;
 
-  /// Onboarding page 3 title
+  /// Onboarding page 3 title (line break intentional)
   ///
   /// In en, this message translates to:
-  /// **'Every verse and dhikr is an ongoing charity for Abu Hudhayfah'**
+  /// **'Every verse and dhikr\nOngoing charity for Abu Hudhayfah'**
   String get onboardingTitle3;
 
   /// Onboarding page 3 description
   ///
   /// In en, this message translates to:
-  /// **'Every verse you hear and every dhikr you repeat is an ongoing charity for our friend and brother Abu Hudhayfah Ahmed Mahmoud Toni, may God have mercy on him, forgive him, and grant him the highest level of Paradise.'**
+  /// **'Every Qur\'an listen and every dhikr you repeat is ongoing charity for our brother Abu Hudhayfah Ahmad Mahmud Toni — may God have mercy on him and forgive him.'**
   String get onboardingDesc3;
+
+  /// TalkBack label for onboarding carousel page
+  ///
+  /// In en, this message translates to:
+  /// **'Screen {current} of {total}'**
+  String onboardingPageSemantics(int current, int total);
+
+  /// Short caption under onboarding slide 2 device preview
+  ///
+  /// In en, this message translates to:
+  /// **'Browse reciters with search and favorites'**
+  String get onboardingVisualHint2;
 
   /// Start button text
   ///
@@ -3548,88 +3560,100 @@ abstract class AppLocalizations {
   /// **'Support Tilawa'**
   String get supportTilawa;
 
-  /// Support screen hero subtitle
+  /// Support screen single-line intro under app bar
   ///
   /// In en, this message translates to:
-  /// **'Optional. Help keep Tilawa calm, beautiful, and free for everyone.'**
+  /// **'Your contribution helps keep Tilawa going.'**
+  String get supportIntroLine;
+
+  /// Legacy alias; prefer supportIntroLine
+  ///
+  /// In en, this message translates to:
+  /// **'Your contribution helps keep Tilawa going.'**
   String get supportTilawaSubtitle;
 
-  /// Support screen mission paragraph
+  /// Legacy alias; unused on support screen
   ///
   /// In en, this message translates to:
-  /// **'Tilawa is built for reading and listening with care. Your support helps us maintain it without ads or pressure.'**
+  /// **'Your contribution helps keep Tilawa going.'**
   String get supportMissionBody;
 
-  /// Support impact section title
+  /// Collapsible impact section title on support screen
   ///
   /// In en, this message translates to:
-  /// **'What your support helps with'**
+  /// **'Why?'**
+  String get supportImpactWhyTitle;
+
+  /// Legacy impact section title
+  ///
+  /// In en, this message translates to:
+  /// **'Where your contribution goes'**
   String get supportImpactTitle;
 
-  /// Support impact bullet
+  /// Support impact bullet — Mushaf and audio
   ///
   /// In en, this message translates to:
-  /// **'Quran reader hosting and delivery'**
+  /// **'Mushaf and recitation audio'**
   String get supportImpactQuranHosting;
 
-  /// Support impact bullet
+  /// Legacy alias; merged into supportImpactQuranHosting
   ///
   /// In en, this message translates to:
-  /// **'Reciter audio storage and streaming'**
+  /// **'Mushaf and recitation audio'**
   String get supportImpactReciterAudio;
 
   /// Support impact bullet
   ///
   /// In en, this message translates to:
-  /// **'Prayer time calculations and tools'**
+  /// **'Prayer times and tools'**
   String get supportImpactPrayerTools;
 
   /// Support impact bullet
   ///
   /// In en, this message translates to:
-  /// **'Ongoing development and maintenance'**
+  /// **'Operations and development'**
   String get supportImpactDevelopment;
 
-  /// Support impact bullet
+  /// Legacy alias; unused on support screen
   ///
   /// In en, this message translates to:
-  /// **'Keeping Tilawa ad-free'**
+  /// **'Operations and development'**
   String get supportImpactAdFree;
 
   /// Smallest one-time support tier label
   ///
   /// In en, this message translates to:
-  /// **'Small support'**
+  /// **'Light'**
   String get supportTierSmall;
 
   /// Middle one-time support tier label
   ///
   /// In en, this message translates to:
-  /// **'Kind support'**
+  /// **'Kind'**
   String get supportTierKind;
 
   /// Largest one-time support tier label
   ///
   /// In en, this message translates to:
-  /// **'Generous support'**
+  /// **'Generous'**
   String get supportTierGenerous;
 
   /// Primary support purchase CTA
   ///
   /// In en, this message translates to:
-  /// **'Continue with Google Play'**
+  /// **'Continue on Google Play'**
   String get supportContinueWithPlay;
 
   /// Support purchase confirmation sheet title
   ///
   /// In en, this message translates to:
-  /// **'Confirm your support'**
+  /// **'Confirm'**
   String get supportConfirmationTitle;
 
   /// Support purchase confirmation sheet body
   ///
   /// In en, this message translates to:
-  /// **'You will complete payment securely in Google Play. Tilawa does not store card details.'**
+  /// **'Payment via Google Play. Tilawa does not store your card details.'**
   String get supportConfirmationBody;
 
   /// Support confirmation sheet confirm button
@@ -3653,7 +3677,7 @@ abstract class AppLocalizations {
   /// Support thank-you state body
   ///
   /// In en, this message translates to:
-  /// **'Thank you. Your support helps keep Tilawa free for everyone.'**
+  /// **'Your contribution went through. We appreciate your trust.'**
   String get supportThankYouBody;
 
   /// Support thank-you dismiss button
@@ -3665,67 +3689,109 @@ abstract class AppLocalizations {
   /// Restore purchases action
   ///
   /// In en, this message translates to:
-  /// **'Restore purchases'**
+  /// **'Restore'**
   String get supportRestorePurchases;
 
-  /// Restore purchases helper text
+  /// Legacy restore helper; unused on support screen
   ///
   /// In en, this message translates to:
-  /// **'If a previous support did not complete, tap restore.'**
+  /// **'If a payment did not finish, tap Restore.'**
   String get supportRestoreHint;
 
-  /// Support screen legal footer
+  /// Support trust line before charities link label
   ///
   /// In en, this message translates to:
-  /// **'Payments are processed by Google Play.'**
+  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities ('**
+  String get supportTrustLinePrefix;
+
+  /// Tappable label for partner charities list URL
+  ///
+  /// In en, this message translates to:
+  /// **'partner charities list'**
+  String get supportCharitiesLinkLabel;
+
+  /// Bottom sheet title listing partner charity links
+  ///
+  /// In en, this message translates to:
+  /// **'Partner charities'**
+  String get supportCharitiesSheetTitle;
+
+  /// Partner charity — Dar Al-Arqam Quran center
+  ///
+  /// In en, this message translates to:
+  /// **'Dar Al-Arqam Quran Center'**
+  String get supportCharityDarAlArqam;
+
+  /// Partner charity — islaheg.com
+  ///
+  /// In en, this message translates to:
+  /// **'islaheg.com'**
+  String get supportCharityIslaheg;
+
+  /// Support trust line after charities link label
+  ///
+  /// In en, this message translates to:
+  /// **')'**
+  String get supportTrustLineSuffix;
+
+  /// Full trust line for legacy use; UI uses prefix/link/suffix
+  ///
+  /// In en, this message translates to:
+  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
+  String get supportTrustLine;
+
+  /// Legacy alias; prefer supportTrustLinePrefix + link + suffix
+  ///
+  /// In en, this message translates to:
+  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
   String get supportPlayFooter;
 
-  /// Support legal disclaimer
+  /// Legacy alias; prefer supportTrustLinePrefix + link + suffix
   ///
   /// In en, this message translates to:
-  /// **'This supports the Tilawa app, not a registered charity.'**
+  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
   String get supportDisclaimer;
 
   /// Offline message on support screen
   ///
   /// In en, this message translates to:
-  /// **'Connect to the internet to see support options.'**
+  /// **'An internet connection is required.'**
   String get supportOfflineMessage;
 
   /// Billing unavailable error
   ///
   /// In en, this message translates to:
-  /// **'Google Play billing is not available on this device.'**
+  /// **'Google Play payment is not available on this device.'**
   String get supportBillingUnavailable;
 
   /// Products query failed error
   ///
   /// In en, this message translates to:
-  /// **'Support options are not available right now. Please try again later.'**
+  /// **'Options are unavailable right now. Try again later.'**
   String get supportProductsUnavailable;
 
   /// Pending purchase message
   ///
   /// In en, this message translates to:
-  /// **'Your support is processing with Google Play.'**
+  /// **'Processing in Google Play.'**
   String get supportPurchasePending;
 
   /// Verification failed message
   ///
   /// In en, this message translates to:
-  /// **'We could not confirm your support yet. Try restore later.'**
+  /// **'Could not confirm yet. Try Restore.'**
   String get supportPurchaseVerifyFailed;
 
   /// Restore found nothing message
   ///
   /// In en, this message translates to:
-  /// **'No previous support was found for this account.'**
+  /// **'No previous payment found for this account.'**
   String get supportRestoreNothingFound;
 
   /// Restore completed message
   ///
   /// In en, this message translates to:
-  /// **'Restore finished.'**
+  /// **'Restore complete.'**
   String get supportRestoreComplete;
 
   /// Prompt when no tier selected
@@ -3737,43 +3803,43 @@ abstract class AppLocalizations {
   /// Settings group title for support entry
   ///
   /// In en, this message translates to:
-  /// **'Support'**
+  /// **'Support Tilawa'**
   String get supportSettingsGroupTitle;
 
   /// Settings support tile subtitle
   ///
   /// In en, this message translates to:
-  /// **'Help keep Tilawa free'**
+  /// **'Optional'**
   String get supportHelpKeepFree;
 
   /// Localized purchase billing unavailable failure
   ///
   /// In en, this message translates to:
-  /// **'Purchases are not available right now.'**
+  /// **'Payment is not available right now.'**
   String get purchaseBillingUnavailable;
 
   /// Localized purchase product not found failure
   ///
   /// In en, this message translates to:
-  /// **'This support option is not available.'**
+  /// **'This option is not available.'**
   String get purchaseProductNotFound;
 
   /// Localized purchase verification failed failure
   ///
   /// In en, this message translates to:
-  /// **'We could not confirm your support. Please try again.'**
+  /// **'Could not confirm. Try again or Restore.'**
   String get purchaseVerificationFailed;
 
   /// Localized purchase pending failure
   ///
   /// In en, this message translates to:
-  /// **'Your support is still processing.'**
+  /// **'Still processing.'**
   String get purchasePending;
 
   /// Localized purchase already owned failure
   ///
   /// In en, this message translates to:
-  /// **'This support was already completed.'**
+  /// **'This contribution was already completed.'**
   String get purchaseAlreadyOwned;
 
   /// In-app review API unavailable (simulator, old OS, etc.)

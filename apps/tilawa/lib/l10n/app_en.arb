@@ -1260,29 +1260,45 @@
     "@qiblaCompassAccuracyPoor": {
         "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
     },
-    "onboardingTitle1": "Minutes from the Quran... change your whole day",
+    "onboardingTitle1": "Minutes with the Quran…\nChanges your whole day",
     "@onboardingTitle1": {
-        "description": "Onboarding page 1 title"
+        "description": "Onboarding page 1 title (line break intentional)"
     },
-    "onboardingDesc1": "When you feel life's constraints, remember there are verses in the Quran that speak exactly to your state. Just search for them and you will find tranquility.",
+    "onboardingDesc1": "Find verses that fit what you're going through, and take quiet minutes to read or listen.",
     "@onboardingDesc1": {
         "description": "Onboarding page 1 description"
     },
-    "onboardingTitle2": "A spiritual journey with multiple Quranic voices",
+    "onboardingTitle2": "Many reciter voices\nListen your way",
     "@onboardingTitle2": {
-        "description": "Onboarding page 2 title"
+        "description": "Onboarding page 2 title (line break intentional)"
     },
-    "onboardingDesc2": "Here, the voices of reciters from all over the nation gather, in recitations that weave the beauty of letters with the light of meaning.",
+    "onboardingDesc2": "Different reciters and riwayat — choose the voice and style that feels right.",
     "@onboardingDesc2": {
         "description": "Onboarding page 2 description"
     },
-    "onboardingTitle3": "Every verse and dhikr is an ongoing charity for Abu Hudhayfah",
+    "onboardingTitle3": "Every verse and dhikr\nOngoing charity for Abu Hudhayfah",
     "@onboardingTitle3": {
-        "description": "Onboarding page 3 title"
+        "description": "Onboarding page 3 title (line break intentional)"
     },
-    "onboardingDesc3": "Every verse you hear and every dhikr you repeat is an ongoing charity for our friend and brother Abu Hudhayfah Ahmed Mahmoud Toni, may God have mercy on him, forgive him, and grant him the highest level of Paradise.",
+    "onboardingDesc3": "Every Qur'an listen and every dhikr you repeat is ongoing charity for our brother Abu Hudhayfah Ahmad Mahmud Toni — may God have mercy on him and forgive him.",
     "@onboardingDesc3": {
         "description": "Onboarding page 3 description"
+    },
+    "onboardingPageSemantics": "Screen {current} of {total}",
+    "@onboardingPageSemantics": {
+        "description": "TalkBack label for onboarding carousel page",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "onboardingVisualHint2": "Browse reciters with search and favorites",
+    "@onboardingVisualHint2": {
+        "description": "Short caption under onboarding slide 2 device preview"
     },
     "startJourney": "Get started",
     "@startJourney": {
@@ -2585,59 +2601,67 @@
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
-    "supportTilawaSubtitle": "Optional. Help keep Tilawa calm, beautiful, and free for everyone.",
+    "supportIntroLine": "Your contribution helps keep Tilawa going.",
+    "@supportIntroLine": {
+        "description": "Support screen single-line intro under app bar"
+    },
+    "supportTilawaSubtitle": "Your contribution helps keep Tilawa going.",
     "@supportTilawaSubtitle": {
-        "description": "Support screen hero subtitle"
+        "description": "Legacy alias; prefer supportIntroLine"
     },
-    "supportMissionBody": "Tilawa is built for reading and listening with care. Your support helps us maintain it without ads or pressure.",
+    "supportMissionBody": "Your contribution helps keep Tilawa going.",
     "@supportMissionBody": {
-        "description": "Support screen mission paragraph"
+        "description": "Legacy alias; unused on support screen"
     },
-    "supportImpactTitle": "What your support helps with",
+    "supportImpactWhyTitle": "Why?",
+    "@supportImpactWhyTitle": {
+        "description": "Collapsible impact section title on support screen"
+    },
+    "supportImpactTitle": "Where your contribution goes",
     "@supportImpactTitle": {
-        "description": "Support impact section title"
+        "description": "Legacy impact section title"
     },
-    "supportImpactQuranHosting": "Quran reader hosting and delivery",
+    "supportImpactQuranHosting": "Mushaf and recitation audio",
     "@supportImpactQuranHosting": {
-        "description": "Support impact bullet"
+        "description": "Support impact bullet — Mushaf and audio"
     },
-    "supportImpactReciterAudio": "Reciter audio storage and streaming",
+    "supportImpactReciterAudio": "Mushaf and recitation audio",
     "@supportImpactReciterAudio": {
-        "description": "Support impact bullet"
+        "description": "Legacy alias; merged into supportImpactQuranHosting"
     },
-    "supportImpactPrayerTools": "Prayer time calculations and tools",
+    "supportImpactPrayerTools": "Prayer times and tools",
     "@supportImpactPrayerTools": {
         "description": "Support impact bullet"
     },
-    "supportImpactDevelopment": "Ongoing development and maintenance",
+    "supportImpactDevelopment": "Operations and development",
     "@supportImpactDevelopment": {
         "description": "Support impact bullet"
     },
-    "supportImpactAdFree": "Keeping Tilawa ad-free",
+    "supportImpactAdFree": "Operations and development",
     "@supportImpactAdFree": {
-        "description": "Support impact bullet"
+        "description": "Legacy alias; unused on support screen"
     },
-    "supportTierSmall": "Small support",
+    "supportTierSmall": "Light",
     "@supportTierSmall": {
         "description": "Smallest one-time support tier label"
     },
-    "supportTierKind": "Kind support",
+    "supportTierKind": "Kind",
     "@supportTierKind": {
         "description": "Middle one-time support tier label"
     },
-    "supportTierGenerous": "Generous support",
+    "supportTierGenerous": "Generous",
     "@supportTierGenerous": {
         "description": "Largest one-time support tier label"
     },
-    "supportContinueWithPlay": "Continue with Google Play",
+    "supportContinueWithPlay": "Continue on Google Play",
     "@supportContinueWithPlay": {
         "description": "Primary support purchase CTA"
     },
-    "supportConfirmationTitle": "Confirm your support",
+    "supportConfirmationTitle": "Confirm",
     "@supportConfirmationTitle": {
         "description": "Support purchase confirmation sheet title"
     },
-    "supportConfirmationBody": "You will complete payment securely in Google Play. Tilawa does not store card details.",
+    "supportConfirmationBody": "Payment via Google Play. Tilawa does not store your card details.",
     "@supportConfirmationBody": {
         "description": "Support purchase confirmation sheet body"
     },
@@ -2653,7 +2677,7 @@
     "@supportThankYouTitle": {
         "description": "Support thank-you state title"
     },
-    "supportThankYouBody": "Thank you. Your support helps keep Tilawa free for everyone.",
+    "supportThankYouBody": "Your contribution went through. We appreciate your trust.",
     "@supportThankYouBody": {
         "description": "Support thank-you state body"
     },
@@ -2661,47 +2685,75 @@
     "@supportDone": {
         "description": "Support thank-you dismiss button"
     },
-    "supportRestorePurchases": "Restore purchases",
+    "supportRestorePurchases": "Restore",
     "@supportRestorePurchases": {
         "description": "Restore purchases action"
     },
-    "supportRestoreHint": "If a previous support did not complete, tap restore.",
+    "supportRestoreHint": "If a payment did not finish, tap Restore.",
     "@supportRestoreHint": {
-        "description": "Restore purchases helper text"
+        "description": "Legacy restore helper; unused on support screen"
     },
-    "supportPlayFooter": "Payments are processed by Google Play.",
+    "supportTrustLinePrefix": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (",
+    "@supportTrustLinePrefix": {
+        "description": "Support trust line before charities link label"
+    },
+    "supportCharitiesLinkLabel": "partner charities list",
+    "@supportCharitiesLinkLabel": {
+        "description": "Tappable label for partner charities list URL"
+    },
+    "supportCharitiesSheetTitle": "Partner charities",
+    "@supportCharitiesSheetTitle": {
+        "description": "Bottom sheet title listing partner charity links"
+    },
+    "supportCharityDarAlArqam": "Dar Al-Arqam Quran Center",
+    "@supportCharityDarAlArqam": {
+        "description": "Partner charity — Dar Al-Arqam Quran center"
+    },
+    "supportCharityIslaheg": "islaheg.com",
+    "@supportCharityIslaheg": {
+        "description": "Partner charity — islaheg.com"
+    },
+    "supportTrustLineSuffix": ")",
+    "@supportTrustLineSuffix": {
+        "description": "Support trust line after charities link label"
+    },
+    "supportTrustLine": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
+    "@supportTrustLine": {
+        "description": "Full trust line for legacy use; UI uses prefix/link/suffix"
+    },
+    "supportPlayFooter": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
     "@supportPlayFooter": {
-        "description": "Support screen legal footer"
+        "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
     },
-    "supportDisclaimer": "This supports the Tilawa app, not a registered charity.",
+    "supportDisclaimer": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
     "@supportDisclaimer": {
-        "description": "Support legal disclaimer"
+        "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
     },
-    "supportOfflineMessage": "Connect to the internet to see support options.",
+    "supportOfflineMessage": "An internet connection is required.",
     "@supportOfflineMessage": {
         "description": "Offline message on support screen"
     },
-    "supportBillingUnavailable": "Google Play billing is not available on this device.",
+    "supportBillingUnavailable": "Google Play payment is not available on this device.",
     "@supportBillingUnavailable": {
         "description": "Billing unavailable error"
     },
-    "supportProductsUnavailable": "Support options are not available right now. Please try again later.",
+    "supportProductsUnavailable": "Options are unavailable right now. Try again later.",
     "@supportProductsUnavailable": {
         "description": "Products query failed error"
     },
-    "supportPurchasePending": "Your support is processing with Google Play.",
+    "supportPurchasePending": "Processing in Google Play.",
     "@supportPurchasePending": {
         "description": "Pending purchase message"
     },
-    "supportPurchaseVerifyFailed": "We could not confirm your support yet. Try restore later.",
+    "supportPurchaseVerifyFailed": "Could not confirm yet. Try Restore.",
     "@supportPurchaseVerifyFailed": {
         "description": "Verification failed message"
     },
-    "supportRestoreNothingFound": "No previous support was found for this account.",
+    "supportRestoreNothingFound": "No previous payment found for this account.",
     "@supportRestoreNothingFound": {
         "description": "Restore found nothing message"
     },
-    "supportRestoreComplete": "Restore finished.",
+    "supportRestoreComplete": "Restore complete.",
     "@supportRestoreComplete": {
         "description": "Restore completed message"
     },
@@ -2709,31 +2761,31 @@
     "@supportSelectTier": {
         "description": "Prompt when no tier selected"
     },
-    "supportSettingsGroupTitle": "Support",
+    "supportSettingsGroupTitle": "Support Tilawa",
     "@supportSettingsGroupTitle": {
         "description": "Settings group title for support entry"
     },
-    "supportHelpKeepFree": "Help keep Tilawa free",
+    "supportHelpKeepFree": "Optional",
     "@supportHelpKeepFree": {
         "description": "Settings support tile subtitle"
     },
-    "purchaseBillingUnavailable": "Purchases are not available right now.",
+    "purchaseBillingUnavailable": "Payment is not available right now.",
     "@purchaseBillingUnavailable": {
         "description": "Localized purchase billing unavailable failure"
     },
-    "purchaseProductNotFound": "This support option is not available.",
+    "purchaseProductNotFound": "This option is not available.",
     "@purchaseProductNotFound": {
         "description": "Localized purchase product not found failure"
     },
-    "purchaseVerificationFailed": "We could not confirm your support. Please try again.",
+    "purchaseVerificationFailed": "Could not confirm. Try again or Restore.",
     "@purchaseVerificationFailed": {
         "description": "Localized purchase verification failed failure"
     },
-    "purchasePending": "Your support is still processing.",
+    "purchasePending": "Still processing.",
     "@purchasePending": {
         "description": "Localized purchase pending failure"
     },
-    "purchaseAlreadyOwned": "This support was already completed.",
+    "purchaseAlreadyOwned": "This contribution was already completed.",
     "@purchaseAlreadyOwned": {
         "description": "Localized purchase already owned failure"
     },

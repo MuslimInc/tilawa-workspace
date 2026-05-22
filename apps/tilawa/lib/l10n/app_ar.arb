@@ -1260,29 +1260,45 @@
     "@qiblaCompassAccuracyPoor": {
         "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
     },
-    "onboardingTitle1": "دقائق من القرآن... تغير يومك كله",
+    "onboardingTitle1": "دقائق من القرآن…\nيغيّر يومك كله",
     "@onboardingTitle1": {
-        "description": "Onboarding page 1 title"
+        "description": "Onboarding page 1 title (line break intentional)"
     },
-    "onboardingDesc1": "حين تشعر بضيق الحياة، تذكر أن هناك آيات في القرآن تتحدث عن حالتك تمامًا، فقط ابحث عنها وستجد السكينة.",
+    "onboardingDesc1": "ابحث عن آيات تلائم ما تعيشه، وخُذ لنفسك دقائق هادئة للقراءة أو الاستماع.",
     "@onboardingDesc1": {
         "description": "Onboarding page 1 description"
     },
-    "onboardingTitle2": "رحلة إيمانية مع أصوات قرانية متعددة",
+    "onboardingTitle2": "أصوات قرّاء متعددة\nاستمع كما تريد",
     "@onboardingTitle2": {
-        "description": "Onboarding page 2 title"
+        "description": "Onboarding page 2 title (line break intentional)"
     },
-    "onboardingDesc2": "هنا تجتمع أصوات القراء من كل أرجاء الأمة، في روايات تنسج جمال الحروف بنور المعاني.",
+    "onboardingDesc2": "قرّاء وروايات مختلفة — اختر الصوت والأسلوب الذي يريحك.",
     "@onboardingDesc2": {
         "description": "Onboarding page 2 description"
     },
-    "onboardingTitle3": "كل آية وذكر صدقة جارية لأبي حذيفة",
+    "onboardingTitle3": "كل آية وذكر\nصدقة جارية لأبي حذيفة",
     "@onboardingTitle3": {
-        "description": "Onboarding page 3 title"
+        "description": "Onboarding page 3 title (line break intentional)"
     },
-    "onboardingDesc3": "كل آية تسمعها وكل ذكر تردده هو صدقة جارية لصديقنا وأخانا أبو حذيفة أحمد محمود توني رحمه الله وغفرله وأسكنه فسيح جناته",
+    "onboardingDesc3": "كل ما تسمعه من القرآن وكل ذكر تردّده صدقة جارية لأخينا أبو حذيفة أحمد محمود توني رحمه الله وغفر له.",
     "@onboardingDesc3": {
         "description": "Onboarding page 3 description"
+    },
+    "onboardingPageSemantics": "الشاشة {current} من {total}",
+    "@onboardingPageSemantics": {
+        "description": "TalkBack label for onboarding carousel page",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "onboardingVisualHint2": "تصفّح القرّاء مع البحث والمفضلة",
+    "@onboardingVisualHint2": {
+        "description": "Short caption under onboarding slide 2 device preview"
     },
     "startJourney": "ابدأ",
     "@startJourney": {
@@ -2585,59 +2601,67 @@
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
-    "supportTilawaSubtitle": "اختياري. ساهم في إبقاء تلاوة هادئة وجميلة ومجانية للجميع.",
+    "supportIntroLine": "مشاركتك تساعدنا على استمرار تلاوة.",
+    "@supportIntroLine": {
+        "description": "Support screen single-line intro under app bar"
+    },
+    "supportTilawaSubtitle": "مشاركتك تساعدنا على استمرار تلاوة.",
     "@supportTilawaSubtitle": {
-        "description": "Support screen hero subtitle"
+        "description": "Legacy alias; prefer supportIntroLine"
     },
-    "supportMissionBody": "بُنيت تلاوة للقراءة والاستماع بعناية. دعمك يساعدنا على صيانة التطبيق دون إعلانات أو ضغط.",
+    "supportMissionBody": "مشاركتك تساعدنا على استمرار تلاوة.",
     "@supportMissionBody": {
-        "description": "Support screen mission paragraph"
+        "description": "Legacy alias; unused on support screen"
     },
-    "supportImpactTitle": "ماذا يساعد دعمك",
+    "supportImpactWhyTitle": "لماذا؟",
+    "@supportImpactWhyTitle": {
+        "description": "Collapsible impact section title on support screen"
+    },
+    "supportImpactTitle": "أين تذهب مشاركتك",
     "@supportImpactTitle": {
-        "description": "Support impact section title"
+        "description": "Legacy impact section title"
     },
-    "supportImpactQuranHosting": "استضافة قارئ القرآن وتوصيله",
+    "supportImpactQuranHosting": "المصحف والتلاوات الصوتية",
     "@supportImpactQuranHosting": {
-        "description": "Support impact bullet"
+        "description": "Support impact bullet — Mushaf and audio"
     },
-    "supportImpactReciterAudio": "تخزين وبث صوتيات القراء",
+    "supportImpactReciterAudio": "المصحف والتلاوات الصوتية",
     "@supportImpactReciterAudio": {
-        "description": "Support impact bullet"
+        "description": "Legacy alias; merged into supportImpactQuranHosting"
     },
-    "supportImpactPrayerTools": "حسابات أوقات الصلاة والأدوات",
+    "supportImpactPrayerTools": "مواقيت الصلاة والأدوات",
     "@supportImpactPrayerTools": {
         "description": "Support impact bullet"
     },
-    "supportImpactDevelopment": "التطوير والصيانة المستمرة",
+    "supportImpactDevelopment": "التشغيل والتطوير",
     "@supportImpactDevelopment": {
         "description": "Support impact bullet"
     },
-    "supportImpactAdFree": "إبقاء تلاوة بلا إعلانات",
+    "supportImpactAdFree": "التشغيل والتطوير",
     "@supportImpactAdFree": {
-        "description": "Support impact bullet"
+        "description": "Legacy alias; unused on support screen"
     },
-    "supportTierSmall": "دعم صغير",
+    "supportTierSmall": "يسير",
     "@supportTierSmall": {
         "description": "Smallest one-time support tier label"
     },
-    "supportTierKind": "دعم كريم",
+    "supportTierKind": "كريم",
     "@supportTierKind": {
         "description": "Middle one-time support tier label"
     },
-    "supportTierGenerous": "دعم سخي",
+    "supportTierGenerous": "وافر",
     "@supportTierGenerous": {
         "description": "Largest one-time support tier label"
     },
-    "supportContinueWithPlay": "المتابعة عبر Google Play",
+    "supportContinueWithPlay": "متابعة على Google Play",
     "@supportContinueWithPlay": {
         "description": "Primary support purchase CTA"
     },
-    "supportConfirmationTitle": "تأكيد الدعم",
+    "supportConfirmationTitle": "تأكيد",
     "@supportConfirmationTitle": {
         "description": "Support purchase confirmation sheet title"
     },
-    "supportConfirmationBody": "ستكمل الدفع بأمان عبر Google Play. تلاوة لا تحفظ بيانات البطاقة.",
+    "supportConfirmationBody": "الدفع بـ Google Play. تلاوة لا يحفظ بيانات البطاقة.",
     "@supportConfirmationBody": {
         "description": "Support purchase confirmation sheet body"
     },
@@ -2649,11 +2673,11 @@
     "@supportCancel": {
         "description": "Support confirmation sheet cancel button"
     },
-    "supportThankYouTitle": "شكرًا لك",
+    "supportThankYouTitle": "شكرًا جزيلًا",
     "@supportThankYouTitle": {
         "description": "Support thank-you state title"
     },
-    "supportThankYouBody": "شكرًا لك. دعمك يساعد في إبقاء تلاوة مجانية للجميع.",
+    "supportThankYouBody": "وصلت مشاركتك. نقدّر ثقتك.",
     "@supportThankYouBody": {
         "description": "Support thank-you state body"
     },
@@ -2661,79 +2685,107 @@
     "@supportDone": {
         "description": "Support thank-you dismiss button"
     },
-    "supportRestorePurchases": "استعادة المشتريات",
+    "supportRestorePurchases": "استعادة",
     "@supportRestorePurchases": {
         "description": "Restore purchases action"
     },
-    "supportRestoreHint": "إذا لم يكتمل دعم سابق، اضغط استعادة.",
+    "supportRestoreHint": "إن لم تُكتمل عملية دفع سابقة، اضغط «استعادة».",
     "@supportRestoreHint": {
-        "description": "Restore purchases helper text"
+        "description": "Legacy restore helper; unused on support screen"
     },
-    "supportPlayFooter": "تتم المدفوعات عبر Google Play.",
+    "supportTrustLinePrefix": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (",
+    "@supportTrustLinePrefix": {
+        "description": "Support trust line before charities link label"
+    },
+    "supportCharitiesLinkLabel": "رابط الجمعيات الخيرية",
+    "@supportCharitiesLinkLabel": {
+        "description": "Tappable label for partner charities list URL"
+    },
+    "supportCharitiesSheetTitle": "الجمعيات الخيرية الشريكة",
+    "@supportCharitiesSheetTitle": {
+        "description": "Bottom sheet title listing partner charity links"
+    },
+    "supportCharityDarAlArqam": "دار الأرقم لتحفيظ القرآن",
+    "@supportCharityDarAlArqam": {
+        "description": "Partner charity — Dar Al-Arqam Quran center"
+    },
+    "supportCharityIslaheg": "islaheg.com",
+    "@supportCharityIslaheg": {
+        "description": "Partner charity — islaheg.com"
+    },
+    "supportTrustLineSuffix": ")",
+    "@supportTrustLineSuffix": {
+        "description": "Support trust line after charities link label"
+    },
+    "supportTrustLine": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
+    "@supportTrustLine": {
+        "description": "Full trust line for legacy use; UI uses prefix/link/suffix"
+    },
+    "supportPlayFooter": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
     "@supportPlayFooter": {
-        "description": "Support screen legal footer"
+        "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
     },
-    "supportDisclaimer": "هذا الدعم للتطبيق تلاوة وليس لجهة خيرية مسجلة.",
+    "supportDisclaimer": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
     "@supportDisclaimer": {
-        "description": "Support legal disclaimer"
+        "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
     },
-    "supportOfflineMessage": "اتصل بالإنترنت لعرض خيارات الدعم.",
+    "supportOfflineMessage": "يلزم اتصال بالإنترنت.",
     "@supportOfflineMessage": {
         "description": "Offline message on support screen"
     },
-    "supportBillingUnavailable": "الفوترة عبر Google Play غير متاحة على هذا الجهاز.",
+    "supportBillingUnavailable": "الدفع عبر Google Play غير متاح على هذا الجهاز.",
     "@supportBillingUnavailable": {
         "description": "Billing unavailable error"
     },
-    "supportProductsUnavailable": "خيارات الدعم غير متاحة الآن. حاول لاحقًا.",
+    "supportProductsUnavailable": "الخيارات غير متاحة حاليًا. جرّب لاحقًا.",
     "@supportProductsUnavailable": {
         "description": "Products query failed error"
     },
-    "supportPurchasePending": "دعمك قيد المعالجة عبر Google Play.",
+    "supportPurchasePending": "قيد المعالجة في Google Play.",
     "@supportPurchasePending": {
         "description": "Pending purchase message"
     },
-    "supportPurchaseVerifyFailed": "لم نتمكن من تأكيد دعمك بعد. جرّب الاستعادة لاحقًا.",
+    "supportPurchaseVerifyFailed": "تعذّر التأكيد. جرّب «استعادة».",
     "@supportPurchaseVerifyFailed": {
         "description": "Verification failed message"
     },
-    "supportRestoreNothingFound": "لم يُعثر على دعم سابق لهذا الحساب.",
+    "supportRestoreNothingFound": "لا توجد عملية سابقة لهذا الحساب.",
     "@supportRestoreNothingFound": {
         "description": "Restore found nothing message"
     },
-    "supportRestoreComplete": "اكتملت الاستعادة.",
+    "supportRestoreComplete": "تمت الاستعادة.",
     "@supportRestoreComplete": {
         "description": "Restore completed message"
     },
-    "supportSelectTier": "اختر مبلغًا",
+    "supportSelectTier": "اختر المبلغ",
     "@supportSelectTier": {
         "description": "Prompt when no tier selected"
     },
-    "supportSettingsGroupTitle": "الدعم",
+    "supportSettingsGroupTitle": "ادعم تلاوة",
     "@supportSettingsGroupTitle": {
         "description": "Settings group title for support entry"
     },
-    "supportHelpKeepFree": "ساهم في إبقاء تلاوة مجانية",
+    "supportHelpKeepFree": "اختياري",
     "@supportHelpKeepFree": {
         "description": "Settings support tile subtitle"
     },
-    "purchaseBillingUnavailable": "المشتريات غير متاحة حاليًا.",
+    "purchaseBillingUnavailable": "الدفع غير متاح حاليًا.",
     "@purchaseBillingUnavailable": {
         "description": "Localized purchase billing unavailable failure"
     },
-    "purchaseProductNotFound": "خيار الدعم هذا غير متاح.",
+    "purchaseProductNotFound": "هذا الخيار غير متاح.",
     "@purchaseProductNotFound": {
         "description": "Localized purchase product not found failure"
     },
-    "purchaseVerificationFailed": "تعذر تأكيد دعمك. حاول مرة أخرى.",
+    "purchaseVerificationFailed": "تعذّر التأكيد. أعد المحاولة أو استعادة.",
     "@purchaseVerificationFailed": {
         "description": "Localized purchase verification failed failure"
     },
-    "purchasePending": "دعمك ما زال قيد المعالجة.",
+    "purchasePending": "ما زالت قيد المعالجة.",
     "@purchasePending": {
         "description": "Localized purchase pending failure"
     },
-    "purchaseAlreadyOwned": "تم إكمال هذا الدعم مسبقًا.",
+    "purchaseAlreadyOwned": "تمت هذه المشاركة مسبقًا.",
     "@purchaseAlreadyOwned": {
         "description": "Localized purchase already owned failure"
     },

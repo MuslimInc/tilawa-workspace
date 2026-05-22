@@ -11,7 +11,7 @@ import '../bloc/support_bloc.dart';
 import '../bloc/support_event.dart';
 import '../bloc/support_state.dart';
 import '../widgets/support_confirmation_sheet.dart';
-import '../widgets/support_impact_section.dart';
+import '../widgets/support_footer_section.dart';
 import '../widgets/support_thank_you_view.dart';
 import '../widgets/support_tier_selector.dart';
 
@@ -118,46 +118,28 @@ class _SupportBody extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final bool purchasing =
         state.purchasePhase == SupportPurchasePhase.purchasing;
+    final bool hasTier = state.selectedProductId != null;
 
     return TilawaContentBounds(
       kind: TilawaContentKind.form,
       child: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(
           tokens.spaceLarge,
-          tokens.spaceLarge,
+          tokens.spaceMedium,
           tokens.spaceLarge,
           tokens.spaceExtraLarge,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: tokens.spaceLarge + tokens.spaceSmall,
+          spacing: tokens.spaceMedium,
           children: [
-            Container(
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(tokens.radiusLarge),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: tokens.spaceSmall,
-                children: [
-                  Text(
-                    l10n.supportTilawaSubtitle,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    l10n.supportMissionBody,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                      height: tokens.textHeightLoose,
-                    ),
-                  ),
-                ],
+            Text(
+              l10n.supportIntroLine,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+                height: tokens.textHeightLoose,
               ),
             ),
-            const SupportImpactSection(),
             SupportTierSelector(
               products: state.products,
               selectedProductId: state.selectedProductId,
@@ -165,42 +147,18 @@ class _SupportBody extends StatelessWidget {
                 SupportEvent.tierSelected(id),
               ),
             ),
-            TilawaButton(
-              text: l10n.supportContinueWithPlay,
-              isLoading: purchasing,
-              onPressed: state.selectedProductId == null || purchasing
-                  ? null
-                  : () => _onContinue(context, state),
-            ),
-            TextButton(
-              onPressed: purchasing
-                  ? null
-                  : () => context.read<SupportBloc>().add(
-                      const SupportEvent.restoreRequested(),
-                    ),
-              child: Text(l10n.supportRestorePurchases),
-            ),
-            Text(
-              l10n.supportRestoreHint,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
+            AnimatedOpacity(
+              opacity: hasTier ? 1 : 0.5,
+              duration: tokens.durationFast,
+              child: TilawaButton(
+                text: l10n.supportContinueWithPlay,
+                isLoading: purchasing,
+                onPressed: !hasTier || purchasing
+                    ? null
+                    : () => _onContinue(context, state),
               ),
             ),
-            Text(
-              l10n.supportPlayFooter,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            Text(
-              l10n.supportDisclaimer,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
+            const SupportFooterSection(),
           ],
         ),
       ),

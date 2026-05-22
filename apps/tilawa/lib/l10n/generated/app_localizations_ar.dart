@@ -914,25 +914,33 @@ class AppLocalizationsAr extends AppLocalizations {
       'دقة البوصلة منخفضة. حرّك هاتفك على شكل رقم 8 لمعايرتها.';
 
   @override
-  String get onboardingTitle1 => 'دقائق من القرآن... تغير يومك كله';
+  String get onboardingTitle1 => 'دقائق من القرآن…\nيغيّر يومك كله';
 
   @override
   String get onboardingDesc1 =>
-      'حين تشعر بضيق الحياة، تذكر أن هناك آيات في القرآن تتحدث عن حالتك تمامًا، فقط ابحث عنها وستجد السكينة.';
+      'ابحث عن آيات تلائم ما تعيشه، وخُذ لنفسك دقائق هادئة للقراءة أو الاستماع.';
 
   @override
-  String get onboardingTitle2 => 'رحلة إيمانية مع أصوات قرانية متعددة';
+  String get onboardingTitle2 => 'أصوات قرّاء متعددة\nاستمع كما تريد';
 
   @override
   String get onboardingDesc2 =>
-      'هنا تجتمع أصوات القراء من كل أرجاء الأمة، في روايات تنسج جمال الحروف بنور المعاني.';
+      'قرّاء وروايات مختلفة — اختر الصوت والأسلوب الذي يريحك.';
 
   @override
-  String get onboardingTitle3 => 'كل آية وذكر صدقة جارية لأبي حذيفة';
+  String get onboardingTitle3 => 'كل آية وذكر\nصدقة جارية لأبي حذيفة';
 
   @override
   String get onboardingDesc3 =>
-      'كل آية تسمعها وكل ذكر تردده هو صدقة جارية لصديقنا وأخانا أبو حذيفة أحمد محمود توني رحمه الله وغفرله وأسكنه فسيح جناته';
+      'كل ما تسمعه من القرآن وكل ذكر تردّده صدقة جارية لأخينا أبو حذيفة أحمد محمود توني رحمه الله وغفر له.';
+
+  @override
+  String onboardingPageSemantics(int current, int total) {
+    return 'الشاشة $current من $total';
+  }
+
+  @override
+  String get onboardingVisualHint2 => 'تصفّح القرّاء مع البحث والمفضلة';
 
   @override
   String get startJourney => 'ابدأ';
@@ -1919,49 +1927,53 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportTilawa => 'ادعم تلاوة';
 
   @override
-  String get supportTilawaSubtitle =>
-      'اختياري. ساهم في إبقاء تلاوة هادئة وجميلة ومجانية للجميع.';
+  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار تلاوة.';
 
   @override
-  String get supportMissionBody =>
-      'بُنيت تلاوة للقراءة والاستماع بعناية. دعمك يساعدنا على صيانة التطبيق دون إعلانات أو ضغط.';
+  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار تلاوة.';
 
   @override
-  String get supportImpactTitle => 'ماذا يساعد دعمك';
+  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار تلاوة.';
 
   @override
-  String get supportImpactQuranHosting => 'استضافة قارئ القرآن وتوصيله';
+  String get supportImpactWhyTitle => 'لماذا؟';
 
   @override
-  String get supportImpactReciterAudio => 'تخزين وبث صوتيات القراء';
+  String get supportImpactTitle => 'أين تذهب مشاركتك';
 
   @override
-  String get supportImpactPrayerTools => 'حسابات أوقات الصلاة والأدوات';
+  String get supportImpactQuranHosting => 'المصحف والتلاوات الصوتية';
 
   @override
-  String get supportImpactDevelopment => 'التطوير والصيانة المستمرة';
+  String get supportImpactReciterAudio => 'المصحف والتلاوات الصوتية';
 
   @override
-  String get supportImpactAdFree => 'إبقاء تلاوة بلا إعلانات';
+  String get supportImpactPrayerTools => 'مواقيت الصلاة والأدوات';
 
   @override
-  String get supportTierSmall => 'دعم صغير';
+  String get supportImpactDevelopment => 'التشغيل والتطوير';
 
   @override
-  String get supportTierKind => 'دعم كريم';
+  String get supportImpactAdFree => 'التشغيل والتطوير';
 
   @override
-  String get supportTierGenerous => 'دعم سخي';
+  String get supportTierSmall => 'يسير';
 
   @override
-  String get supportContinueWithPlay => 'المتابعة عبر Google Play';
+  String get supportTierKind => 'كريم';
 
   @override
-  String get supportConfirmationTitle => 'تأكيد الدعم';
+  String get supportTierGenerous => 'وافر';
+
+  @override
+  String get supportContinueWithPlay => 'متابعة على Google Play';
+
+  @override
+  String get supportConfirmationTitle => 'تأكيد';
 
   @override
   String get supportConfirmationBody =>
-      'ستكمل الدفع بأمان عبر Google Play. تلاوة لا تحفظ بيانات البطاقة.';
+      'الدفع بـ Google Play. تلاوة لا يحفظ بيانات البطاقة.';
 
   @override
   String get supportConfirm => 'متابعة';
@@ -1970,75 +1982,99 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportCancel => 'إلغاء';
 
   @override
-  String get supportThankYouTitle => 'شكرًا لك';
+  String get supportThankYouTitle => 'شكرًا جزيلًا';
 
   @override
-  String get supportThankYouBody =>
-      'شكرًا لك. دعمك يساعد في إبقاء تلاوة مجانية للجميع.';
+  String get supportThankYouBody => 'وصلت مشاركتك. نقدّر ثقتك.';
 
   @override
   String get supportDone => 'تم';
 
   @override
-  String get supportRestorePurchases => 'استعادة المشتريات';
+  String get supportRestorePurchases => 'استعادة';
 
   @override
-  String get supportRestoreHint => 'إذا لم يكتمل دعم سابق، اضغط استعادة.';
+  String get supportRestoreHint =>
+      'إن لم تُكتمل عملية دفع سابقة، اضغط «استعادة».';
 
   @override
-  String get supportPlayFooter => 'تتم المدفوعات عبر Google Play.';
+  String get supportTrustLinePrefix =>
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (';
+
+  @override
+  String get supportCharitiesLinkLabel => 'رابط الجمعيات الخيرية';
+
+  @override
+  String get supportCharitiesSheetTitle => 'الجمعيات الخيرية الشريكة';
+
+  @override
+  String get supportCharityDarAlArqam => 'دار الأرقم لتحفيظ القرآن';
+
+  @override
+  String get supportCharityIslaheg => 'islaheg.com';
+
+  @override
+  String get supportTrustLineSuffix => ')';
+
+  @override
+  String get supportTrustLine =>
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+
+  @override
+  String get supportPlayFooter =>
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
 
   @override
   String get supportDisclaimer =>
-      'هذا الدعم للتطبيق تلاوة وليس لجهة خيرية مسجلة.';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
 
   @override
-  String get supportOfflineMessage => 'اتصل بالإنترنت لعرض خيارات الدعم.';
+  String get supportOfflineMessage => 'يلزم اتصال بالإنترنت.';
 
   @override
   String get supportBillingUnavailable =>
-      'الفوترة عبر Google Play غير متاحة على هذا الجهاز.';
+      'الدفع عبر Google Play غير متاح على هذا الجهاز.';
 
   @override
   String get supportProductsUnavailable =>
-      'خيارات الدعم غير متاحة الآن. حاول لاحقًا.';
+      'الخيارات غير متاحة حاليًا. جرّب لاحقًا.';
 
   @override
-  String get supportPurchasePending => 'دعمك قيد المعالجة عبر Google Play.';
+  String get supportPurchasePending => 'قيد المعالجة في Google Play.';
 
   @override
-  String get supportPurchaseVerifyFailed =>
-      'لم نتمكن من تأكيد دعمك بعد. جرّب الاستعادة لاحقًا.';
+  String get supportPurchaseVerifyFailed => 'تعذّر التأكيد. جرّب «استعادة».';
 
   @override
-  String get supportRestoreNothingFound => 'لم يُعثر على دعم سابق لهذا الحساب.';
+  String get supportRestoreNothingFound => 'لا توجد عملية سابقة لهذا الحساب.';
 
   @override
-  String get supportRestoreComplete => 'اكتملت الاستعادة.';
+  String get supportRestoreComplete => 'تمت الاستعادة.';
 
   @override
-  String get supportSelectTier => 'اختر مبلغًا';
+  String get supportSelectTier => 'اختر المبلغ';
 
   @override
-  String get supportSettingsGroupTitle => 'الدعم';
+  String get supportSettingsGroupTitle => 'ادعم تلاوة';
 
   @override
-  String get supportHelpKeepFree => 'ساهم في إبقاء تلاوة مجانية';
+  String get supportHelpKeepFree => 'اختياري';
 
   @override
-  String get purchaseBillingUnavailable => 'المشتريات غير متاحة حاليًا.';
+  String get purchaseBillingUnavailable => 'الدفع غير متاح حاليًا.';
 
   @override
-  String get purchaseProductNotFound => 'خيار الدعم هذا غير متاح.';
+  String get purchaseProductNotFound => 'هذا الخيار غير متاح.';
 
   @override
-  String get purchaseVerificationFailed => 'تعذر تأكيد دعمك. حاول مرة أخرى.';
+  String get purchaseVerificationFailed =>
+      'تعذّر التأكيد. أعد المحاولة أو استعادة.';
 
   @override
-  String get purchasePending => 'دعمك ما زال قيد المعالجة.';
+  String get purchasePending => 'ما زالت قيد المعالجة.';
 
   @override
-  String get purchaseAlreadyOwned => 'تم إكمال هذا الدعم مسبقًا.';
+  String get purchaseAlreadyOwned => 'تمت هذه المشاركة مسبقًا.';
 
   @override
   String get appReviewUnavailable =>

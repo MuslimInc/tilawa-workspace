@@ -14,9 +14,7 @@ class SupportThankYouView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final tokens = Theme.of(context).tokens;
 
     return Padding(
       padding: EdgeInsets.all(tokens.spaceLarge),
@@ -33,13 +31,6 @@ class SupportThankYouView extends StatelessWidget {
           TilawaButton(
             text: l10n.supportDone,
             onPressed: onDone,
-          ),
-          Text(
-            l10n.supportPlayFooter,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
           ),
         ],
       ),

@@ -922,27 +922,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingTitle1 =>
-      'Minutes from the Quran... change your whole day';
+      'Minutes with the Quran…\nChanges your whole day';
 
   @override
   String get onboardingDesc1 =>
-      'When you feel life\'s constraints, remember there are verses in the Quran that speak exactly to your state. Just search for them and you will find tranquility.';
+      'Find verses that fit what you\'re going through, and take quiet minutes to read or listen.';
 
   @override
-  String get onboardingTitle2 =>
-      'A spiritual journey with multiple Quranic voices';
+  String get onboardingTitle2 => 'Many reciter voices\nListen your way';
 
   @override
   String get onboardingDesc2 =>
-      'Here, the voices of reciters from all over the nation gather, in recitations that weave the beauty of letters with the light of meaning.';
+      'Different reciters and riwayat — choose the voice and style that feels right.';
 
   @override
   String get onboardingTitle3 =>
-      'Every verse and dhikr is an ongoing charity for Abu Hudhayfah';
+      'Every verse and dhikr\nOngoing charity for Abu Hudhayfah';
 
   @override
   String get onboardingDesc3 =>
-      'Every verse you hear and every dhikr you repeat is an ongoing charity for our friend and brother Abu Hudhayfah Ahmed Mahmoud Toni, may God have mercy on him, forgive him, and grant him the highest level of Paradise.';
+      'Every Qur\'an listen and every dhikr you repeat is ongoing charity for our brother Abu Hudhayfah Ahmad Mahmud Toni — may God have mercy on him and forgive him.';
+
+  @override
+  String onboardingPageSemantics(int current, int total) {
+    return 'Screen $current of $total';
+  }
+
+  @override
+  String get onboardingVisualHint2 =>
+      'Browse reciters with search and favorites';
 
   @override
   String get startJourney => 'Get started';
@@ -1929,49 +1937,54 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportTilawa => 'Support Tilawa';
 
   @override
+  String get supportIntroLine => 'Your contribution helps keep Tilawa going.';
+
+  @override
   String get supportTilawaSubtitle =>
-      'Optional. Help keep Tilawa calm, beautiful, and free for everyone.';
+      'Your contribution helps keep Tilawa going.';
 
   @override
-  String get supportMissionBody =>
-      'Tilawa is built for reading and listening with care. Your support helps us maintain it without ads or pressure.';
+  String get supportMissionBody => 'Your contribution helps keep Tilawa going.';
 
   @override
-  String get supportImpactTitle => 'What your support helps with';
+  String get supportImpactWhyTitle => 'Why?';
 
   @override
-  String get supportImpactQuranHosting => 'Quran reader hosting and delivery';
+  String get supportImpactTitle => 'Where your contribution goes';
 
   @override
-  String get supportImpactReciterAudio => 'Reciter audio storage and streaming';
+  String get supportImpactQuranHosting => 'Mushaf and recitation audio';
 
   @override
-  String get supportImpactPrayerTools => 'Prayer time calculations and tools';
+  String get supportImpactReciterAudio => 'Mushaf and recitation audio';
 
   @override
-  String get supportImpactDevelopment => 'Ongoing development and maintenance';
+  String get supportImpactPrayerTools => 'Prayer times and tools';
 
   @override
-  String get supportImpactAdFree => 'Keeping Tilawa ad-free';
+  String get supportImpactDevelopment => 'Operations and development';
 
   @override
-  String get supportTierSmall => 'Small support';
+  String get supportImpactAdFree => 'Operations and development';
 
   @override
-  String get supportTierKind => 'Kind support';
+  String get supportTierSmall => 'Light';
 
   @override
-  String get supportTierGenerous => 'Generous support';
+  String get supportTierKind => 'Kind';
 
   @override
-  String get supportContinueWithPlay => 'Continue with Google Play';
+  String get supportTierGenerous => 'Generous';
 
   @override
-  String get supportConfirmationTitle => 'Confirm your support';
+  String get supportContinueWithPlay => 'Continue on Google Play';
+
+  @override
+  String get supportConfirmationTitle => 'Confirm';
 
   @override
   String get supportConfirmationBody =>
-      'You will complete payment securely in Google Play. Tilawa does not store card details.';
+      'Payment via Google Play. Tilawa does not store your card details.';
 
   @override
   String get supportConfirm => 'Continue';
@@ -1984,77 +1997,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportThankYouBody =>
-      'Thank you. Your support helps keep Tilawa free for everyone.';
+      'Your contribution went through. We appreciate your trust.';
 
   @override
   String get supportDone => 'Done';
 
   @override
-  String get supportRestorePurchases => 'Restore purchases';
+  String get supportRestorePurchases => 'Restore';
 
   @override
-  String get supportRestoreHint =>
-      'If a previous support did not complete, tap restore.';
+  String get supportRestoreHint => 'If a payment did not finish, tap Restore.';
 
   @override
-  String get supportPlayFooter => 'Payments are processed by Google Play.';
+  String get supportTrustLinePrefix =>
+      'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (';
+
+  @override
+  String get supportCharitiesLinkLabel => 'partner charities list';
+
+  @override
+  String get supportCharitiesSheetTitle => 'Partner charities';
+
+  @override
+  String get supportCharityDarAlArqam => 'Dar Al-Arqam Quran Center';
+
+  @override
+  String get supportCharityIslaheg => 'islaheg.com';
+
+  @override
+  String get supportTrustLineSuffix => ')';
+
+  @override
+  String get supportTrustLine =>
+      'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)';
+
+  @override
+  String get supportPlayFooter =>
+      'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)';
 
   @override
   String get supportDisclaimer =>
-      'This supports the Tilawa app, not a registered charity.';
+      'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)';
 
   @override
-  String get supportOfflineMessage =>
-      'Connect to the internet to see support options.';
+  String get supportOfflineMessage => 'An internet connection is required.';
 
   @override
   String get supportBillingUnavailable =>
-      'Google Play billing is not available on this device.';
+      'Google Play payment is not available on this device.';
 
   @override
   String get supportProductsUnavailable =>
-      'Support options are not available right now. Please try again later.';
+      'Options are unavailable right now. Try again later.';
 
   @override
-  String get supportPurchasePending =>
-      'Your support is processing with Google Play.';
+  String get supportPurchasePending => 'Processing in Google Play.';
 
   @override
   String get supportPurchaseVerifyFailed =>
-      'We could not confirm your support yet. Try restore later.';
+      'Could not confirm yet. Try Restore.';
 
   @override
   String get supportRestoreNothingFound =>
-      'No previous support was found for this account.';
+      'No previous payment found for this account.';
 
   @override
-  String get supportRestoreComplete => 'Restore finished.';
+  String get supportRestoreComplete => 'Restore complete.';
 
   @override
   String get supportSelectTier => 'Choose an amount';
 
   @override
-  String get supportSettingsGroupTitle => 'Support';
+  String get supportSettingsGroupTitle => 'Support Tilawa';
 
   @override
-  String get supportHelpKeepFree => 'Help keep Tilawa free';
+  String get supportHelpKeepFree => 'Optional';
 
   @override
   String get purchaseBillingUnavailable =>
-      'Purchases are not available right now.';
+      'Payment is not available right now.';
 
   @override
-  String get purchaseProductNotFound => 'This support option is not available.';
+  String get purchaseProductNotFound => 'This option is not available.';
 
   @override
   String get purchaseVerificationFailed =>
-      'We could not confirm your support. Please try again.';
+      'Could not confirm. Try again or Restore.';
 
   @override
-  String get purchasePending => 'Your support is still processing.';
+  String get purchasePending => 'Still processing.';
 
   @override
-  String get purchaseAlreadyOwned => 'This support was already completed.';
+  String get purchaseAlreadyOwned => 'This contribution was already completed.';
 
   @override
   String get appReviewUnavailable =>
