@@ -1158,6 +1158,10 @@
     "@reset": {
         "description": "Reset label for thikr"
     },
+    "athkarResetConfirmationMessage": "إعادة ضبط عدّاد هذا الذكر؟ سيتم مسح تقدّمك فيه.",
+    "@athkarResetConfirmationMessage": {
+        "description": "Confirmation message before resetting Athkar count for the current item"
+    },
     "qibla": "القبلة",
     "@qibla": {
         "description": "Qibla tab label"

@@ -830,6 +830,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reset => 'إعادة ضبط';
 
   @override
+  String get athkarResetConfirmationMessage =>
+      'إعادة ضبط عدّاد هذا الذكر؟ سيتم مسح تقدّمك فيه.';
+
+  @override
   String get qibla => 'القبلة';
 
   @override

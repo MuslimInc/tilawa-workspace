@@ -836,6 +836,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reset => 'Reset';
 
   @override
+  String get athkarResetConfirmationMessage =>
+      'Reset the count for this dhikr? Your progress on it will be cleared.';
+
+  @override
   String get qibla => 'Qibla';
 
   @override

@@ -1158,6 +1158,10 @@
     "@reset": {
         "description": "Reset label for thikr"
     },
+    "athkarResetConfirmationMessage": "Reset the count for this dhikr? Your progress on it will be cleared.",
+    "@athkarResetConfirmationMessage": {
+        "description": "Confirmation message before resetting Athkar count for the current item"
+    },
     "qibla": "Qibla",
     "@qibla": {
         "description": "Qibla tab label"

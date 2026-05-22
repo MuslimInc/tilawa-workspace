@@ -52,13 +52,16 @@ class _AthkarDetailsBodyState extends State<AthkarDetailsBody> {
         itemBuilder: (context, index) {
           final AthkarItem item = widget.items[index];
           final int currentCount = widget.currentCounts[item.id] ?? 0;
-          return AthkarItemWidget(
-            item: item,
-            currentCount: currentCount,
-            onTap: () => _onItemTap(context, item, index, currentCount),
-            onReset: () {
-              context.read<AthkarCubit>().resetCount(item.id);
-            },
+          return SafeArea(
+            top: false,
+            child: AthkarItemWidget(
+              item: item,
+              currentCount: currentCount,
+              onTap: () => _onItemTap(context, item, index, currentCount),
+              onReset: () {
+                context.read<AthkarCubit>().resetCount(item.id);
+              },
+            ),
           );
         },
       ),

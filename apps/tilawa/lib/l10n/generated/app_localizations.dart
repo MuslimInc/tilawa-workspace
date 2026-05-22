@@ -1622,6 +1622,12 @@ abstract class AppLocalizations {
   /// **'Reset'**
   String get reset;
 
+  /// Confirmation message before resetting Athkar count for the current item
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the count for this dhikr? Your progress on it will be cleared.'**
+  String get athkarResetConfirmationMessage;
+
   /// Qibla tab label
   ///
   /// In en, this message translates to:
