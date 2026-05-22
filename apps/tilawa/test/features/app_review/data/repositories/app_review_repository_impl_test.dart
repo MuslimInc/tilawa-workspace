@@ -64,4 +64,13 @@ void main() {
     await repository.openStoreListing();
     expect(platform.storeCount, 1);
   });
+
+  test('requestReview propagates platform failures', () async {
+    platform.available = true;
+    platform.throwOnRequest = true;
+    expect(
+      repository.requestReview,
+      throwsA(isA<AppReviewFailure>()),
+    );
+  });
 }
