@@ -77,6 +77,14 @@ extension FailureExtensions on Failure {
         PurchaseFailureReason.alreadyOwned => l10n.purchaseAlreadyOwned,
         PurchaseFailureReason.network => l10n.networkError,
       },
+      AppReviewFailure(reason: final reason) => switch (reason) {
+        AppReviewFailureReason.unavailable => l10n.appReviewUnavailable,
+        AppReviewFailureReason.requestFailed => l10n.appReviewRequestFailed,
+        AppReviewFailureReason.storeListingFailed =>
+          l10n.appReviewStoreListingFailed,
+        AppReviewFailureReason.platformUnsupported =>
+          l10n.appReviewPlatformUnsupported,
+      },
     };
   }
 }

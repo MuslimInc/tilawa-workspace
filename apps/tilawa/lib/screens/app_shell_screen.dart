@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
@@ -8,10 +9,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_blocked_flow.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_flow_guard.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -69,9 +75,32 @@ class _AppShellScreenState extends State<AppShellScreen> {
   void _handleTabSideEffects(BuildContext context, int previous, int next) {
     final PrayerTimesBloc prayerTimesBloc = context.read<PrayerTimesBloc>();
     final QiblaBloc qiblaBloc = context.read<QiblaBloc>();
+    final AppReviewFlowGuard flowGuard = getIt<AppReviewFlowGuard>();
+    final AppReviewTriggerManager reviewTrigger =
+        getIt<AppReviewTriggerManager>();
+
+    _syncSacredTabFlow(flowGuard, next);
 
     if (previous == 1 && next != 1) {
       qiblaBloc.add(const StopQiblaStream());
+      unawaited(
+        reviewTrigger.recordSignal(AppReviewSignal.prayerTimesTabVisited),
+      );
+      if (next == 0) {
+        unawaited(
+          reviewTrigger.tryPromptIfEligible(
+            AppReviewPromptMoment.leftPrayerTimesTab,
+          ),
+        );
+      }
+    }
+
+    if (previous == 2 && next == 0) {
+      unawaited(
+        reviewTrigger.tryPromptIfEligible(
+          AppReviewPromptMoment.returnedToRecitersTab,
+        ),
+      );
     }
 
     if (next != 1) {
@@ -85,6 +114,10 @@ class _AppShellScreenState extends State<AppShellScreen> {
         prayerTimesBloc.add(const PrayerTimesEvent.loadPrayerTimes());
       });
     }
+  }
+
+  void _syncSacredTabFlow(AppReviewFlowGuard guard, int tabIndex) {
+    guard.syncMainShellTab(tabIndex);
   }
 
   List<_NavDestination> _buildDestinations(

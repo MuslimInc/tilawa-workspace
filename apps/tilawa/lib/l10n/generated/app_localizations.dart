@@ -3775,6 +3775,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This support was already completed.'**
   String get purchaseAlreadyOwned;
+
+  /// In-app review API unavailable (simulator, old OS, etc.)
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews are not available on this device right now.'**
+  String get appReviewUnavailable;
+
+  /// In-app review request failed
+  ///
+  /// In en, this message translates to:
+  /// **'We could not open the review dialog. Please try again.'**
+  String get appReviewRequestFailed;
+
+  /// Store listing fallback failed
+  ///
+  /// In en, this message translates to:
+  /// **'We could not open the app store. Please try again.'**
+  String get appReviewStoreListingFailed;
+
+  /// In-app review not supported (e.g. web)
+  ///
+  /// In en, this message translates to:
+  /// **'Store reviews are not supported on this platform.'**
+  String get appReviewPlatformUnsupported;
 }
 
 class _AppLocalizationsDelegate

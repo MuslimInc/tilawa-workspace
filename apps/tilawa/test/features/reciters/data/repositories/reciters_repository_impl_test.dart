@@ -8,6 +8,9 @@ import 'package:tilawa/features/reciters/data/datasources/reciters_favorites_dat
 import 'package:tilawa/features/reciters/data/datasources/reciters_local_datasource.dart';
 import 'package:tilawa/features/reciters/data/datasources/reciters_remote_datasource.dart';
 import 'package:tilawa/features/reciters/data/models/reciter_model.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa/features/reciters/data/repositories/reciters_repository_impl.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -25,6 +28,9 @@ class MockAuthService extends Mock implements AuthService {}
 class MockSharedPreferencesAsync extends Mock
     implements SharedPreferencesAsync {}
 
+class MockAppReviewTriggerManager extends Mock
+    implements AppReviewTriggerManager {}
+
 class _TestUser extends Fake implements User {
   _TestUser(this.uid);
 
@@ -39,6 +45,7 @@ void main() {
   late MockRecitersFavoritesDataSource mockFavorites;
   late MockAuthService mockAuth;
   late MockSharedPreferencesAsync mockPrefs;
+  late MockAppReviewTriggerManager mockAppReviewTriggerManager;
 
   const int tReciterId = 7;
   const String tUserId = 'user-offline';
@@ -52,6 +59,8 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(tReciterModel);
+    registerFallbackValue(AppReviewSignal.favoriteReciterAdded);
+    registerFallbackValue(AppReviewPromptMoment.favoriteReciterAdded);
   });
 
   setUp(() {
@@ -60,12 +69,22 @@ void main() {
     mockFavorites = MockRecitersFavoritesDataSource();
     mockAuth = MockAuthService();
     mockPrefs = MockSharedPreferencesAsync();
+    mockAppReviewTriggerManager = MockAppReviewTriggerManager();
+    when(() => mockAppReviewTriggerManager.onSessionStarted())
+        .thenAnswer((_) async {});
+    when(
+      () => mockAppReviewTriggerManager.recordSignal(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockAppReviewTriggerManager.tryPromptIfEligible(any()),
+    ).thenAnswer((_) async => false);
     repository = RecitersRepositoryImpl(
       mockRemote,
       mockLocal,
       mockFavorites,
       mockAuth,
       mockPrefs,
+      mockAppReviewTriggerManager,
     );
     when(() => mockPrefs.getString(any())).thenAnswer((_) async => null);
   });

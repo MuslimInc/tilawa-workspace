@@ -2736,5 +2736,21 @@
     "purchaseAlreadyOwned": "تم إكمال هذا الدعم مسبقًا.",
     "@purchaseAlreadyOwned": {
         "description": "Localized purchase already owned failure"
+    },
+    "appReviewUnavailable": "التقييمات غير متاحة على هذا الجهاز حاليًا.",
+    "@appReviewUnavailable": {
+        "description": "In-app review API unavailable (simulator, old OS, etc.)"
+    },
+    "appReviewRequestFailed": "تعذر فتح نافذة التقييم. حاول مرة أخرى.",
+    "@appReviewRequestFailed": {
+        "description": "In-app review request failed"
+    },
+    "appReviewStoreListingFailed": "تعذر فتح متجر التطبيقات. حاول مرة أخرى.",
+    "@appReviewStoreListingFailed": {
+        "description": "Store listing fallback failed"
+    },
+    "appReviewPlatformUnsupported": "تقييمات المتجر غير مدعومة على هذه المنصة.",
+    "@appReviewPlatformUnsupported": {
+        "description": "In-app review not supported (e.g. web)"
     }
 }

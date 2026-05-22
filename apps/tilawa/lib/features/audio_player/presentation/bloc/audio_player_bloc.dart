@@ -12,6 +12,9 @@ import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
+import '../../../app_review/domain/entities/app_review_prompt_moment.dart';
+import '../../../app_review/domain/entities/app_review_signal.dart';
+import '../../../app_review/domain/services/app_review_trigger_manager.dart';
 import '../../../history/domain/usecases/add_or_update_history_use_case.dart';
 import '../../../settings/domain/services/sleep_timer_settings.dart';
 import '../../domain/entities/audio_modes.dart';
@@ -49,6 +52,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._sleepTimerSettings,
     this._addOrUpdateHistory,
     this._analyticsService,
+    this._appReviewTriggerManager,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
     on<ResetAudioPlayer>(_onResetAudioPlayer);
@@ -108,6 +112,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final SleepTimerSettings _sleepTimerSettings;
   final AddOrUpdateHistoryUseCase _addOrUpdateHistory;
   final AnalyticsService _analyticsService;
+  final AppReviewTriggerManager _appReviewTriggerManager;
 
   /// Stream subscriptions to be cancelled on close to prevent memory leaks.
   final List<StreamSubscription<dynamic>> _subscriptions = [];
@@ -321,6 +326,16 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       if (completedAudio != null) {
         await _saveHistory(completedAudio, isCompleted: true);
         _completedAudioIds.add(completedAudio.id);
+        unawaited(
+          _appReviewTriggerManager.recordSignal(
+            AppReviewSignal.listeningSessionCompleted,
+          ),
+        );
+        unawaited(
+          _appReviewTriggerManager.tryPromptIfEligible(
+            AppReviewPromptMoment.listeningSessionCompleted,
+          ),
+        );
       }
     }
 

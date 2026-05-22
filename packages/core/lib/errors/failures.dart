@@ -178,3 +178,35 @@ final class PurchaseFailure extends Failure {
   @override
   List<Object?> get props => [message, reason];
 }
+
+enum AppReviewFailureReason {
+  unavailable,
+  requestFailed,
+  storeListingFailed,
+  platformUnsupported,
+}
+
+/// In-app review or store-listing failures.
+final class AppReviewFailure extends Failure {
+  const AppReviewFailure([
+    super.message,
+    this.reason = AppReviewFailureReason.requestFailed,
+  ]);
+
+  const AppReviewFailure.unavailable()
+    : this(null, AppReviewFailureReason.unavailable);
+
+  const AppReviewFailure.requestFailed([String? message])
+    : this(message, AppReviewFailureReason.requestFailed);
+
+  const AppReviewFailure.storeListingFailed([String? message])
+    : this(message, AppReviewFailureReason.storeListingFailed);
+
+  const AppReviewFailure.platformUnsupported()
+    : this(null, AppReviewFailureReason.platformUnsupported);
+
+  final AppReviewFailureReason reason;
+
+  @override
+  List<Object?> get props => [message, reason];
+}

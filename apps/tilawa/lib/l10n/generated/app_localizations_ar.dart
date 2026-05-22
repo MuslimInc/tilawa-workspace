@@ -2039,4 +2039,19 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get purchaseAlreadyOwned => 'تم إكمال هذا الدعم مسبقًا.';
+
+  @override
+  String get appReviewUnavailable =>
+      'التقييمات غير متاحة على هذا الجهاز حاليًا.';
+
+  @override
+  String get appReviewRequestFailed => 'تعذر فتح نافذة التقييم. حاول مرة أخرى.';
+
+  @override
+  String get appReviewStoreListingFailed =>
+      'تعذر فتح متجر التطبيقات. حاول مرة أخرى.';
+
+  @override
+  String get appReviewPlatformUnsupported =>
+      'تقييمات المتجر غير مدعومة على هذه المنصة.';
 }

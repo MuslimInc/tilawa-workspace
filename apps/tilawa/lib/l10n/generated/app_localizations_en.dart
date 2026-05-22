@@ -2055,4 +2055,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get purchaseAlreadyOwned => 'This support was already completed.';
+
+  @override
+  String get appReviewUnavailable =>
+      'Reviews are not available on this device right now.';
+
+  @override
+  String get appReviewRequestFailed =>
+      'We could not open the review dialog. Please try again.';
+
+  @override
+  String get appReviewStoreListingFailed =>
+      'We could not open the app store. Please try again.';
+
+  @override
+  String get appReviewPlatformUnsupported =>
+      'Store reviews are not supported on this platform.';
 }

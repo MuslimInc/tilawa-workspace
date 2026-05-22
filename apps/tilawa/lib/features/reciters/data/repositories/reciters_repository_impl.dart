@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -15,12 +20,13 @@ import '../models/reciter_model.dart';
 
 @LazySingleton(as: RecitersRepository)
 class RecitersRepositoryImpl implements RecitersRepository {
-  const RecitersRepositoryImpl(
+  RecitersRepositoryImpl(
     this._remoteDataSource,
     this._localDataSource,
     this._favoritesDataSource,
     this._authService,
     this._prefs,
+    this._appReviewTriggerManager,
   );
 
   final RecitersRemoteDataSource _remoteDataSource;
@@ -28,6 +34,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
   final RecitersFavoritesDataSource _favoritesDataSource;
   final AuthService _authService;
   final SharedPreferencesAsync _prefs;
+  final AppReviewTriggerManager _appReviewTriggerManager;
 
   Future<void> _saveFavoriteIdsLocally(Iterable<String> ids) async {
     final List<String> localIds = await _localDataSource
@@ -233,6 +240,19 @@ class RecitersRepositoryImpl implements RecitersRepository {
         } catch (_) {
           // Local toggle already applied; cloud sync can retry when online.
         }
+      }
+
+      if (!wasFavorite) {
+        unawaited(
+          _appReviewTriggerManager.recordSignal(
+            AppReviewSignal.favoriteReciterAdded,
+          ),
+        );
+        unawaited(
+          _appReviewTriggerManager.tryPromptIfEligible(
+            AppReviewPromptMoment.favoriteReciterAdded,
+          ),
+        );
       }
 
       return const Right(null);

@@ -1,7 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../features/app_review/domain/services/app_review_flow_guard.dart';
+import '../features/app_review/domain/services/app_review_trigger_manager.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../shared/widgets/quran_player_widget.dart';
 import 'cubit/main_screen_cubit.dart';
@@ -14,11 +19,18 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MainScreenCubit, MainScreenState>(
-      builder: (context, state) {
-        if (!state.isShellActivated) {
-          return const _MainShellPlaceholderScaffold();
-        }
+    return BlocListener<MainScreenCubit, MainScreenState>(
+      listenWhen: (MainScreenState prev, MainScreenState next) =>
+          !prev.isShellActivated && next.isShellActivated,
+      listener: (_, MainScreenState state) {
+        getIt<AppReviewFlowGuard>().syncMainShellTab(state.currentIndex);
+        unawaited(getIt<AppReviewTriggerManager>().onSessionStarted());
+      },
+      child: BlocBuilder<MainScreenCubit, MainScreenState>(
+        builder: (context, state) {
+          if (!state.isShellActivated) {
+            return const _MainShellPlaceholderScaffold();
+          }
 
         final bool isKeyboardOpen = context.isKeyboardVisible;
         final bool playerShouldShow = state.isAudioBindingDeferred
@@ -53,7 +65,8 @@ class MainScreen extends StatelessWidget {
                 padding: contentBottomPadding,
                 child: const _MainShellPlaceholder(),
               );
-      },
+        },
+      ),
     );
   }
 }

@@ -2736,5 +2736,21 @@
     "purchaseAlreadyOwned": "This support was already completed.",
     "@purchaseAlreadyOwned": {
         "description": "Localized purchase already owned failure"
+    },
+    "appReviewUnavailable": "Reviews are not available on this device right now.",
+    "@appReviewUnavailable": {
+        "description": "In-app review API unavailable (simulator, old OS, etc.)"
+    },
+    "appReviewRequestFailed": "We could not open the review dialog. Please try again.",
+    "@appReviewRequestFailed": {
+        "description": "In-app review request failed"
+    },
+    "appReviewStoreListingFailed": "We could not open the app store. Please try again.",
+    "@appReviewStoreListingFailed": {
+        "description": "Store listing fallback failed"
+    },
+    "appReviewPlatformUnsupported": "Store reviews are not supported on this platform.",
+    "@appReviewPlatformUnsupported": {
+        "description": "In-app review not supported (e.g. web)"
     }
 }
