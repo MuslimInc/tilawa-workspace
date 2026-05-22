@@ -23,6 +23,7 @@ import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
 import 'quran_player_chrome.dart';
 import 'quran_player_system_back.dart';
+import 'quran_player_progress_display.dart';
 import 'quran_player_transport_controls.dart';
 
 /// A YouTube Music-style sliding player panel.
@@ -1122,7 +1123,7 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                   DraggableScrollableSheet(
                                     controller: _queueController,
                                     initialChildSize: _queuePeekSize,
-                                    minChildSize: 0.12,
+                                    minChildSize: _queuePeekSize,
                                     maxChildSize: _queueFullSize,
                                     snap: true,
                                     snapSizes: const <double>[
@@ -1133,6 +1134,14 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                     builder: (context, scrollController) {
                                       return _PlayerQueueSheet(
                                         scrollController: scrollController,
+                                        queueController: _queueController,
+                                        sheetParentHeight:
+                                            constraints.maxHeight,
+                                        snapSizes: const <double>[
+                                          _queuePeekSize,
+                                          _queueMidSize,
+                                          _queueFullSize,
+                                        ],
                                         state: widget.state,
                                         currentAudio: widget.audio,
                                       );
@@ -1191,7 +1200,11 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
           );
         }
 
-        final double maxArtHeight = constraints.maxHeight * 0.45;
+        final double artReveal =
+            (1 - (queueReveal / 0.55).clamp(0.0, 1.0));
+        final double maxArtHeight =
+            constraints.maxHeight * 0.45 * artReveal;
+        final bool showArt = artReveal > 0.08;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1207,24 +1220,35 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
                       padding: EdgeInsets.symmetric(
                         horizontal: tokens.spaceLarge,
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _PlayerArtAtom(
-                            artUri: audio.artUri,
-                            maxHeight: maxArtHeight,
-                          ),
-                          SizedBox(height: tokens.spaceLarge),
-                          _PlayerMetadataMolecule(
-                            title: audio.title,
-                            artist: audio.artist,
-                            centerAlign: true,
-                          ),
-                        ],
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minHeight: constraints.maxHeight * 0.35,
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (showArt) ...[
+                              _PlayerArtAtom(
+                                artUri: audio.artUri,
+                                maxHeight: maxArtHeight,
+                              ),
+                              SizedBox(height: tokens.spaceLarge),
+                            ],
+                            _PlayerMetadataMolecule(
+                              title: audio.title,
+                              artist: audio.artist,
+                              centerAlign: true,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                  _PlayerPlaybackCluster(state: state),
+                  _PlayerPlaybackCluster(
+                    state: state,
+                    queueReveal: queueReveal,
+                  ),
                 ],
               ),
             ),
@@ -1590,13 +1614,18 @@ Future<void> _showExpandedPlayerMenu(
 
 /// Progress, transport, and adjustment pills pinned as one control band.
 class _PlayerPlaybackCluster extends StatelessWidget {
-  const _PlayerPlaybackCluster({required this.state});
+  const _PlayerPlaybackCluster({
+    required this.state,
+    this.queueReveal = 0,
+  });
 
   final AudioPlayerState state;
+  final double queueReveal;
 
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
+    final double queueInset = tokens.spaceMedium * queueReveal.clamp(0.0, 1.0);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1609,7 +1638,7 @@ class _PlayerPlaybackCluster extends StatelessWidget {
         ),
         SizedBox(height: tokens.spaceMedium),
         _PlayerActionPillsMolecule(state: state),
-        SizedBox(height: tokens.spaceSmall),
+        SizedBox(height: tokens.spaceSmall + queueInset),
       ],
     );
   }
@@ -2168,14 +2197,107 @@ class _MiniArtwork extends StatelessWidget {
   }
 }
 
+/// Drag handle that resizes the queue [DraggableScrollableSheet] between snap
+/// points (peek ↔ full) instead of only scrolling the list.
+class _PlayerQueueSheetHandle extends StatelessWidget {
+  const _PlayerQueueSheetHandle({
+    required this.controller,
+    required this.sheetParentHeight,
+    required this.snapSizes,
+    required this.color,
+  });
+
+  final DraggableScrollableController controller;
+  final double sheetParentHeight;
+  final List<double> snapSizes;
+  final Color color;
+
+  static const Duration _snapAnimationDuration = Duration(milliseconds: 280);
+
+  void _snapToNearest() {
+    if (!controller.isAttached || snapSizes.isEmpty) {
+      return;
+    }
+    final double size = controller.size;
+    double nearest = snapSizes.first;
+    double minDistance = (size - nearest).abs();
+    for (final double snap in snapSizes) {
+      final double distance = (size - snap).abs();
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = snap;
+      }
+    }
+    controller.animateTo(
+      nearest,
+      duration: _snapAnimationDuration,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _toggleMinMax() {
+    if (!controller.isAttached || snapSizes.length < 2) {
+      return;
+    }
+    final double minSize = snapSizes.reduce(
+      (double a, double b) => a < b ? a : b,
+    );
+    final double maxSize = snapSizes.reduce(
+      (double a, double b) => a > b ? a : b,
+    );
+    final double midpoint = (minSize + maxSize) / 2;
+    final double target = controller.size >= midpoint ? minSize : maxSize;
+    controller.animateTo(
+      target,
+      duration: _snapAnimationDuration,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final double minSize = snapSizes.reduce((double a, double b) => a < b ? a : b);
+    final double maxSize = snapSizes.reduce((double a, double b) => a > b ? a : b);
+
+    return Semantics(
+      identifier: QuranPlayerSemanticsIds.queueSheetHandle,
+      button: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _toggleMinMax,
+        onVerticalDragUpdate: (DragUpdateDetails details) {
+          if (!controller.isAttached || sheetParentHeight <= 0) {
+            return;
+          }
+          final double nextSize = (controller.size -
+                  details.delta.dy / sheetParentHeight)
+              .clamp(minSize, maxSize);
+          controller.jumpTo(nextSize);
+        },
+        onVerticalDragEnd: (_) => _snapToNearest(),
+        child: TilawaSheetHandle(
+          color: color,
+          enableDragToDismiss: false,
+        ),
+      ),
+    );
+  }
+}
+
 class _PlayerQueueSheet extends StatelessWidget {
   const _PlayerQueueSheet({
     required this.scrollController,
+    required this.queueController,
+    required this.sheetParentHeight,
+    required this.snapSizes,
     required this.state,
     required this.currentAudio,
   });
 
   final ScrollController scrollController;
+  final DraggableScrollableController queueController;
+  final double sheetParentHeight;
+  final List<double> snapSizes;
   final AudioPlayerState state;
   final AudioEntity currentAudio;
 
@@ -2209,18 +2331,20 @@ class _PlayerQueueSheet extends StatelessWidget {
           side: BorderSide(color: colorScheme.outlineVariant),
         ),
         clipBehavior: Clip.antiAlias,
-        child: CustomScrollView(
-          controller: scrollController,
-          slivers: [
-            SliverToBoxAdapter(
-              child: Center(
-                child: TilawaSheetHandle(
-                  color: colorScheme.onSurfaceVariant.withValues(
-                    alpha: tokens.opacityEmphasis,
-                  ),
-                ),
+        child: Column(
+          children: [
+            _PlayerQueueSheetHandle(
+              controller: queueController,
+              sheetParentHeight: sheetParentHeight,
+              snapSizes: snapSizes,
+              color: colorScheme.onSurfaceVariant.withValues(
+                alpha: tokens.opacityEmphasis,
               ),
             ),
+            Expanded(
+              child: CustomScrollView(
+                controller: scrollController,
+                slivers: [
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
@@ -2266,6 +2390,10 @@ class _PlayerQueueSheet extends StatelessWidget {
                         audio: item,
                         isCurrent: isCurrent,
                         isPlaying: isCurrent && state.isPlaying,
+                        subtitle: item.artist != null &&
+                                item.artist != sourceLabel
+                            ? item.artist
+                            : null,
                         onTap: () {
                           if (!isCurrent) {
                             context.read<AudioPlayerBloc>().add(
@@ -2294,6 +2422,9 @@ class _PlayerQueueSheet extends StatelessWidget {
                     tokens.spaceLarge + MediaQuery.paddingOf(context).bottom,
               ),
             ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -2306,12 +2437,14 @@ class _QueueTrackTile extends StatelessWidget {
     required this.audio,
     required this.isCurrent,
     required this.isPlaying,
+    this.subtitle,
     required this.onTap,
   });
 
   final AudioEntity audio;
   final bool isCurrent;
   final bool isPlaying;
+  final String? subtitle;
   final VoidCallback onTap;
 
   @override
@@ -2360,14 +2493,15 @@ class _QueueTrackTile extends StatelessWidget {
                         fontWeight: isCurrent ? FontWeight.w600 : null,
                       ),
                     ),
-                    Text(
-                      audio.artist ?? context.l10n.unknownReciter,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                    if (subtitle != null)
+                      Text(
+                        subtitle!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -2404,6 +2538,9 @@ class _ExpandedProgressBar extends StatelessWidget {
         final seekThumbColor = palette.seekActive;
         final seekBufferedColor = palette.seekBuffered;
         final seekInactiveColor = palette.seekInactive;
+        final PlayerProgressTimes times = resolvePlayerProgressTimes(
+          positionData,
+        );
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Column(
@@ -2422,7 +2559,7 @@ class _ExpandedProgressBar extends StatelessWidget {
                   ),
                   child: TilawaSeekBar(
                     duration: positionData.duration,
-                    position: positionData.position,
+                    position: times.elapsed,
                     bufferedPosition: positionData.bufferedPosition,
                     activeColor: seekActiveColor,
                     thumbColor: seekThumbColor,
@@ -2442,7 +2579,7 @@ class _ExpandedProgressBar extends StatelessWidget {
                   Semantics(
                     identifier: QuranPlayerSemanticsIds.progressPosition,
                     child: Text(
-                      _formatDuration(positionData.position),
+                      formatPlayerDuration(times.elapsed),
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: palette.secondary,
                       ),
@@ -2451,7 +2588,7 @@ class _ExpandedProgressBar extends StatelessWidget {
                   Semantics(
                     identifier: QuranPlayerSemanticsIds.progressDuration,
                     child: Text(
-                      _formatDuration(positionData.duration),
+                      times.remainingLabel,
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: palette.secondary,
                       ),
@@ -2467,13 +2604,3 @@ class _ExpandedProgressBar extends StatelessWidget {
   }
 }
 
-String _formatDuration(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, '0');
-  final String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-  final String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-  if (duration.inHours > 0) {
-    return '${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds';
-  } else {
-    return '$twoDigitMinutes:$twoDigitSeconds';
-  }
-}
