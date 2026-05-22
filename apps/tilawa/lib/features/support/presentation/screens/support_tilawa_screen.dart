@@ -16,15 +16,38 @@ import '../widgets/support_thank_you_view.dart';
 import '../widgets/support_tier_selector.dart';
 
 /// Voluntary one-time support for Tilawa via Google Play.
-class SupportTilawaScreen extends StatelessWidget {
+class SupportTilawaScreen extends StatefulWidget {
   const SupportTilawaScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
+  State<SupportTilawaScreen> createState() => _SupportTilawaScreenState();
+}
 
+class _SupportTilawaScreenState extends State<SupportTilawaScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<SupportBloc>().add(const SupportEvent.appResumed());
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TilawaAppBar(title: l10n.supportTilawa),
+      appBar: TilawaAppBar(title: context.l10n.supportTilawa),
       body: BlocConsumer<SupportBloc, SupportState>(
         listenWhen: (SupportState prev, SupportState next) =>
             prev.failure != next.failure && next.failure != null,
@@ -39,6 +62,8 @@ class SupportTilawaScreen extends StatelessWidget {
           }
         },
         builder: (BuildContext context, SupportState state) {
+          final l10n = context.l10n;
+
           if (state.purchasePhase == SupportPurchasePhase.thanked) {
             return SupportThankYouView(
               onDone: () => context.read<SupportBloc>().add(

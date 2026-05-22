@@ -6,6 +6,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../domain/usecases/get_support_products_use_case.dart';
+import '../../domain/usecases/prepare_support_session_use_case.dart';
 import '../../domain/usecases/purchase_support_product_use_case.dart';
 import '../../domain/usecases/restore_purchases_use_case.dart';
 import 'support_event.dart';
@@ -14,6 +15,7 @@ import 'support_state.dart';
 @injectable
 class SupportBloc extends Bloc<SupportEvent, SupportState> {
   SupportBloc(
+    this._prepareSession,
     this._getProducts,
     this._purchase,
     this._restore,
@@ -27,8 +29,10 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     on<SupportPurchaseDismissed>(_onPurchaseDismissed);
     on<SupportRestoreRequested>(_onRestoreRequested);
     on<SupportThankYouDismissed>(_onThankYouDismissed);
+    on<SupportAppResumed>(_onAppResumed);
   }
 
+  final PrepareSupportSessionUseCase _prepareSession;
   final GetSupportProductsUseCase _getProducts;
   final PurchaseSupportProductUseCase _purchase;
   final RestorePurchasesUseCase _restore;
@@ -40,7 +44,14 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     Emitter<SupportState> emit,
   ) async {
     await _analytics.logEvent(AnalyticsEvents.supportScreenViewed);
-    emit(state.copyWith(status: SupportStatus.loading, failure: null));
+    await _prepareSession();
+    emit(
+      state.copyWith(
+        status: SupportStatus.loading,
+        failure: null,
+        purchasePhase: SupportPurchasePhase.idle,
+      ),
+    );
 
     final List<ConnectivityResult> connectivity =
         await _connectivity.checkConnectivity();
@@ -124,8 +135,14 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     );
 
     final result = await _purchase(productId);
+    if (state.purchasePhase != SupportPurchasePhase.purchasing) {
+      return;
+    }
     result.fold(
       (Failure failure) {
+        if (state.purchasePhase != SupportPurchasePhase.purchasing) {
+          return;
+        }
         if (failure is PurchaseFailure &&
             failure.reason == PurchaseFailureReason.userCancelled) {
           emit(
@@ -149,6 +166,9 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
         );
       },
       (outcome) {
+        if (state.purchasePhase != SupportPurchasePhase.purchasing) {
+          return;
+        }
         emit(
           state.copyWith(
             purchasePhase: SupportPurchasePhase.thanked,
@@ -164,7 +184,12 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     SupportPurchaseDismissed event,
     Emitter<SupportState> emit,
   ) {
-    emit(state.copyWith(purchasePhase: SupportPurchasePhase.idle));
+    emit(
+      state.copyWith(
+        purchasePhase: SupportPurchasePhase.idle,
+        failure: null,
+      ),
+    );
   }
 
   Future<void> _onRestoreRequested(
@@ -194,5 +219,26 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
         thankYouProductId: null,
       ),
     );
+  }
+
+  Future<void> _onAppResumed(
+    SupportAppResumed event,
+    Emitter<SupportState> emit,
+  ) async {
+    if (state.purchasePhase == SupportPurchasePhase.purchasing) {
+      await _prepareSession(resetWaiters: true);
+      emit(
+        state.copyWith(
+          purchasePhase: SupportPurchasePhase.idle,
+          failure: null,
+        ),
+      );
+      return;
+    }
+    await _prepareSession(resetWaiters: false);
+    if (state.failure != null &&
+        state.purchasePhase == SupportPurchasePhase.idle) {
+      emit(state.copyWith(failure: null));
+    }
   }
 }

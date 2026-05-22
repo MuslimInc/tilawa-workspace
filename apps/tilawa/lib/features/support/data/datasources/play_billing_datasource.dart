@@ -40,6 +40,9 @@ abstract class PlayBillingDataSource {
 
   Future<void> completePurchase(PurchaseDetails details);
 
+  /// Acknowledges stale Play purchases; optionally cancels active waiters.
+  Future<void> prepareForSupportScreen({bool cancelActiveWaiters = true});
+
   void dispose();
 }
 
@@ -109,13 +112,21 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
     await _inAppPurchase.restorePurchases();
   }
 
+  static const Duration _purchaseWaitTimeout = Duration(minutes: 5);
+
   /// Waits until Play delivers a purchasable event for [productId].
   @override
   Future<PlayPurchaseEvent> waitForPurchaseEvent(String productId) {
     _ensurePurchaseListener();
-    return _pendingByProduct
-        .putIfAbsent(productId, Completer<PlayPurchaseEvent>.new)
-        .future;
+    final Completer<PlayPurchaseEvent> completer = _pendingByProduct
+        .putIfAbsent(productId, Completer<PlayPurchaseEvent>.new);
+    return completer.future.timeout(
+      _purchaseWaitTimeout,
+      onTimeout: () {
+        _failPending(productId, const PurchaseFailure.userCancelled());
+        throw const PurchaseFailure.userCancelled();
+      },
+    );
   }
 
   @override
@@ -123,6 +134,27 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
     if (details.pendingCompletePurchase) {
       await _inAppPurchase.completePurchase(details);
     }
+  }
+
+  @override
+  Future<void> prepareForSupportScreen({
+    bool cancelActiveWaiters = true,
+  }) async {
+    if (cancelActiveWaiters) {
+      _cancelPendingPurchases();
+    }
+    _ensurePurchaseListener();
+    await _inAppPurchase.restorePurchases();
+  }
+
+  void _cancelPendingPurchases() {
+    for (final Completer<PlayPurchaseEvent> completer
+        in _pendingByProduct.values) {
+      if (!completer.isCompleted) {
+        completer.completeError(const PurchaseFailure.userCancelled());
+      }
+    }
+    _pendingByProduct.clear();
   }
 
   void _ensurePurchaseListener() {
@@ -155,10 +187,8 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
         case PurchaseStatus.restored:
           final String token = purchase.verificationData.serverVerificationData;
           if (token.isEmpty) {
-            _failPending(
-              productId,
-              const PurchaseFailure.verificationFailed(),
-            );
+            // Play may emit a token-less update when the app resumes; wait for
+            // the next purchaseStream event instead of failing verification.
             break;
           }
           final PlayPurchaseEvent event = PlayPurchaseEvent(
@@ -170,7 +200,11 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
           _eventsController.add(event);
           final Completer<PlayPurchaseEvent>? pending = _pendingByProduct
               .remove(productId);
-          pending?.complete(event);
+          if (pending != null && !pending.isCompleted) {
+            pending.complete(event);
+          } else if (purchase.pendingCompletePurchase) {
+            unawaited(completePurchase(purchase));
+          }
         }
     }
   }

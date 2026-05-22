@@ -6,6 +6,9 @@ abstract class SupportRepository {
 
   Future<List<SupportProduct>> getSupportProducts();
 
+  /// Drains stale Play purchases; cancels abandoned waiters when [resetWaiters].
+  Future<void> prepareSupportSession({bool resetWaiters = true});
+
   Future<PurchaseOutcome> purchaseSupportProduct(String productId);
 
   Future<void> restorePurchases();

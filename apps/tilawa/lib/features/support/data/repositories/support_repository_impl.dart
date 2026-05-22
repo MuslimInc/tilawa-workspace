@@ -40,6 +40,10 @@ class SupportRepositoryImpl implements SupportRepository {
       _billing.queryProducts();
 
   @override
+  Future<void> prepareSupportSession({bool resetWaiters = true}) =>
+      _billing.prepareForSupportScreen(cancelActiveWaiters: resetWaiters);
+
+  @override
   Future<PurchaseOutcome> purchaseSupportProduct(String productId) async {
     await _analytics.logEvent(
       AnalyticsEvents.supportPurchaseStarted,

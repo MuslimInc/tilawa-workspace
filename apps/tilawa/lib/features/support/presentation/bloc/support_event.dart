@@ -12,4 +12,5 @@ class SupportEvent with _$SupportEvent {
   const factory SupportEvent.purchaseDismissed() = SupportPurchaseDismissed;
   const factory SupportEvent.restoreRequested() = SupportRestoreRequested;
   const factory SupportEvent.thankYouDismissed() = SupportThankYouDismissed;
+  const factory SupportEvent.appResumed() = SupportAppResumed;
 }
