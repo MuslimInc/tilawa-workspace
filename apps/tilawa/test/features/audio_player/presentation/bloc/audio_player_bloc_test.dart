@@ -6,12 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/check_audio_playability_use_case.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_use_case.dart';
-import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
-import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
-import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/usecases/add_or_update_history_use_case.dart';
@@ -131,7 +129,9 @@ void main() {
     mockAddOrUpdateHistory = MockAddOrUpdateHistoryUseCase();
     mockAnalyticsService = MockAnalyticsService();
     mockAppReviewTriggerManager = MockAppReviewTriggerManager();
-    when(mockAppReviewTriggerManager.onSessionStarted()).thenAnswer((_) async {});
+    when(
+      mockAppReviewTriggerManager.onSessionStarted(),
+    ).thenAnswer((_) async {});
     when(
       mockAppReviewTriggerManager.recordSignal(any),
     ).thenAnswer((_) async {});

@@ -42,12 +42,12 @@ class FirebasePurchaseVerificationClient implements PurchaseVerificationClient {
         'purchaseToken': purchaseToken,
         'packageName': SupportProductIds.androidPackageName,
       });
-      final Map<String, dynamic>? data = result.data;
-      final bool verified = data?['verified'] == true;
+      final Map<String, dynamic> data = result.data;
+      final bool verified = data['verified'] == true;
       if (!verified) {
         throw const PurchaseFailure.verificationFailed();
       }
-      final String orderId = data?['orderId'] as String? ?? '';
+      final String orderId = data['orderId'] as String? ?? '';
       return VerifiedPurchase(orderId: orderId, productId: productId);
     } on FirebaseFunctionsException catch (e) {
       if (e.code == 'already-exists') {

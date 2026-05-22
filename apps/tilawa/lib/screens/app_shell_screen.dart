@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_image/core/perf_logger.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/app_review/domain/entities/app_review_blocked_flow.dart';
 import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
 import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
 import 'package:tilawa/features/app_review/domain/services/app_review_flow_guard.dart';
@@ -17,7 +17,6 @@ import 'package:tilawa/features/app_review/domain/services/app_review_trigger_ma
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -352,7 +351,8 @@ class _AppShellChrome extends StatelessWidget {
         QuranPlayerRoutePolicy.shouldShowPlayer(location) &&
         !AppShellRoutePolicy.isAthkarContext(location);
 
-    final bool playerShouldShow = showPlayer &&
+    final bool playerShouldShow =
+        showPlayer &&
         (state.isAudioBindingDeferred
             ? false
             : context.select((AudioPlayerBloc bloc) {
@@ -369,8 +369,9 @@ class _AppShellChrome extends StatelessWidget {
         ? context.tokens.spaceSmall
         : 0;
 
-    final AudioPlayerState audioSnapshot =
-        context.read<AudioPlayerBloc>().state;
+    final AudioPlayerState audioSnapshot = context
+        .read<AudioPlayerBloc>()
+        .state;
     if (showPlayer && context.isNarrow) {
       final String shellSig = <String>[
         'route=$location',
@@ -411,7 +412,9 @@ class _AppShellChrome extends StatelessWidget {
       }
     }
 
-    final Widget shellChild = state.isShellActivated ? child : const SizedBox.shrink();
+    final Widget shellChild = state.isShellActivated
+        ? child
+        : const SizedBox.shrink();
 
     return PopScope(
       canPop: _canPopShell(context, location, state),
@@ -427,17 +430,16 @@ class _AppShellChrome extends StatelessWidget {
       child: ListenableBuilder(
         listenable: phoneBottomNavVisible,
         builder: (context, _) {
-          final bool policyShowsNav =
-              AppShellRoutePolicy.showsBottomNavigation(location);
-          final bool isAthkar =
-              AppShellRoutePolicy.isAthkarContext(location);
+          final bool policyShowsNav = AppShellRoutePolicy.showsBottomNavigation(
+            location,
+          );
+          final bool isAthkar = AppShellRoutePolicy.isAthkarContext(location);
           final bool navVisible =
               policyShowsNav && !isAthkar && phoneBottomNavVisible.value;
 
           final bool narrow = context.isNarrow;
-          final Widget? shellFooterPlayer = showPlayer &&
-                  playerHeight > 0 &&
-                  narrow
+          final Widget? shellFooterPlayer =
+              showPlayer && playerHeight > 0 && narrow
               ? SizedBox(
                   height: playerHeight + overlayBleedBuffer,
                   child: QuranPlayerWidget(
