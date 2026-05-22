@@ -19,6 +19,14 @@ interface PrayerAnalytics {
 }
 
 /**
+ * Parameter keys for native prayer analytics events.
+ */
+object PrayerAnalyticsParams {
+    /** Wall-clock time when the action occurred on device (ms since epoch). */
+    const val CLIENT_TIMESTAMP_MS = "client_timestamp_ms"
+}
+
+/**
  * Production implementation using Firebase Analytics and Crashlytics.
  */
 class FirebasePrayerAnalytics(context: Context) : PrayerAnalytics {
@@ -26,8 +34,10 @@ class FirebasePrayerAnalytics(context: Context) : PrayerAnalytics {
     private val crashlytics by lazy { FirebaseCrashlytics.getInstance() }
 
     override fun logEvent(name: String, params: Map<String, Any?>) {
+        val enriched = params + (PrayerAnalyticsParams.CLIENT_TIMESTAMP_MS to
+            System.currentTimeMillis())
         val bundle = Bundle().apply {
-            params.forEach { (key, value) ->
+            enriched.forEach { (key, value) ->
                 when (value) {
                     is String -> putString(key, value)
                     is Int -> putInt(key, value)

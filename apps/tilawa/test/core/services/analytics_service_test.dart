@@ -6,6 +6,15 @@ import 'package:tilawa_core/constants/analytics_constants.dart';
 
 class MockFirebaseAnalytics extends Mock implements FirebaseAnalytics {}
 
+/// Verifies Firebase [parameters] include [expected] and [client_timestamp_ms].
+Matcher analyticsParams(Map<String, Object> expected) =>
+    predicate<Map<String, Object>>(
+      (Map<String, Object> actual) =>
+          actual[AnalyticsParams.clientTimestampMs] is int &&
+          expected.entries.every((e) => actual[e.key] == e.value),
+      'parameters with client_timestamp_ms and $expected',
+    );
+
 void main() {
   late FirebaseAnalyticsService service;
   late MockFirebaseAnalytics mockAnalytics;
@@ -14,6 +23,12 @@ void main() {
     mockAnalytics = MockFirebaseAnalytics();
     when(
       () => mockAnalytics.setAnalyticsCollectionEnabled(any()),
+    ).thenAnswer((_) async {});
+    when(
+      () => mockAnalytics.logEvent(
+        name: any(named: 'name'),
+        parameters: any(named: 'parameters'),
+      ),
     ).thenAnswer((_) async {});
     service = FirebaseAnalyticsService(mockAnalytics);
     service.testMode = true;
@@ -80,13 +95,15 @@ void main() {
     });
 
     test('logEvent calls underlying SDK when debugMode is false', () async {
-      final params = {'key': 'value'};
-      when(
-        () => mockAnalytics.logEvent(name: 'test_event', parameters: params),
-      ).thenAnswer((_) async {});
-      await service.logEvent('test_event', parameters: params);
+      await service.logEvent('test_event', parameters: {'key': 'value'});
       verify(
-        () => mockAnalytics.logEvent(name: 'test_event', parameters: params),
+        () => mockAnalytics.logEvent(
+          name: 'test_event',
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({'key': 'value'}),
+          ),
+        ),
       ).called(1);
     });
 
@@ -102,147 +119,97 @@ void main() {
     });
 
     test('logLogin calls logEvent with correct parameters', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.login,
-          parameters: {AnalyticsParams.method: 'google'},
-        ),
-      ).thenAnswer((_) async {});
       await service.logLogin(loginMethod: 'google');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.login,
-          parameters: {AnalyticsParams.method: 'google'},
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({AnalyticsParams.method: 'google'}),
+          ),
         ),
       ).called(1);
     });
 
     test('logSignUp calls logEvent with correct parameters', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.signUp,
-          parameters: {AnalyticsParams.method: 'email'},
-        ),
-      ).thenAnswer((_) async {});
       await service.logSignUp(signUpMethod: 'email');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.signUp,
-          parameters: {AnalyticsParams.method: 'email'},
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({AnalyticsParams.method: 'email'}),
+          ),
         ),
       ).called(1);
     });
 
     test('logScreenView calls logEvent with correct parameters', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.screenView,
-          parameters: {
-            AnalyticsParams.screenName: 'Home',
-            AnalyticsParams.screenClass: 'HomeScreen',
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logScreenView('Home', screenClass: 'HomeScreen');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.screenView,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.screenName: 'Home',
             AnalyticsParams.screenClass: 'HomeScreen',
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logAudioPlay cleans parameters and calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.audioPlay,
-          parameters: {
-            AnalyticsParams.audioId: '1',
-            AnalyticsParams.audioName: 'Surah',
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logAudioPlay('1', audioName: 'Surah');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.audioPlay,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.audioId: '1',
             AnalyticsParams.audioName: 'Surah',
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logAudioPause calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.audioPause,
-          parameters: {AnalyticsParams.audioId: '1'},
-        ),
-      ).thenAnswer((_) async {});
       await service.logAudioPause('1');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.audioPause,
-          parameters: {AnalyticsParams.audioId: '1'},
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({AnalyticsParams.audioId: '1'}),
+          ),
         ),
       ).called(1);
     });
 
     test('logAudioStop calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.audioStop,
-          parameters: {AnalyticsParams.audioId: '1'},
-        ),
-      ).thenAnswer((_) async {});
       await service.logAudioStop('1');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.audioStop,
-          parameters: {AnalyticsParams.audioId: '1'},
+          parameters: any(
+            named: 'parameters',
+            that: analyticsParams({AnalyticsParams.audioId: '1'}),
+          ),
         ),
       ).called(1);
     });
 
     test('logAudioSeek calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.audioSeek,
-          parameters: {
-            AnalyticsParams.audioId: '1',
-            AnalyticsParams.position: 100,
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logAudioSeek('1', 100);
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.audioSeek,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.audioId: '1',
             AnalyticsParams.position: 100,
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logPurchase calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.purchase,
-          parameters: {
-            AnalyticsParams.transactionId: 't1',
-            AnalyticsParams.value: 9.99,
-            AnalyticsParams.currency: 'USD',
-            AnalyticsParams.itemId: 'i1',
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logPurchase(
         't1',
         value: 9.99,
@@ -252,28 +219,17 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.purchase,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.transactionId: 't1',
             AnalyticsParams.value: 9.99,
             AnalyticsParams.currency: 'USD',
             AnalyticsParams.itemId: 'i1',
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logSubscriptionStart calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.subscriptionStart,
-          parameters: {
-            AnalyticsParams.subscriptionId: 's1',
-            AnalyticsParams.planId: 'monthly',
-            AnalyticsParams.value: 4.99,
-            AnalyticsParams.currency: 'USD',
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logSubscriptionStart(
         's1',
         planId: 'monthly',
@@ -283,124 +239,78 @@ void main() {
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.subscriptionStart,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.subscriptionId: 's1',
             AnalyticsParams.planId: 'monthly',
             AnalyticsParams.value: 4.99,
             AnalyticsParams.currency: 'USD',
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logSubscriptionCancel calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.subscriptionCancel,
-          parameters: {
-            AnalyticsParams.subscriptionId: 's1',
-            AnalyticsParams.planId: 'monthly',
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logSubscriptionCancel('s1', planId: 'monthly');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.subscriptionCancel,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.subscriptionId: 's1',
             AnalyticsParams.planId: 'monthly',
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logSearch calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.search,
-          parameters: {
-            AnalyticsParams.searchTerm: 'test',
-            AnalyticsParams.resultCount: 5,
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logSearch('test', resultCount: 5);
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.search,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.searchTerm: 'test',
             AnalyticsParams.resultCount: 5,
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logShare calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.share,
-          parameters: {
-            AnalyticsParams.contentType: 'audio',
-            AnalyticsParams.itemId: '1',
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logShare('audio', itemId: '1');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.share,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.contentType: 'audio',
             AnalyticsParams.itemId: '1',
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logFavorite calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.favorite,
-          parameters: {
-            AnalyticsParams.itemId: '1',
-            AnalyticsParams.itemType: 'audio',
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logFavorite('1', itemType: 'audio');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.favorite,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.itemId: '1',
             AnalyticsParams.itemType: 'audio',
-          },
+          })),
         ),
       ).called(1);
     });
 
     test('logRating calls SDK', () async {
-      when(
-        () => mockAnalytics.logEvent(
-          name: AnalyticsEvents.rating,
-          parameters: {
-            AnalyticsParams.ratingValue: 5,
-            AnalyticsParams.itemId: '1',
-            AnalyticsParams.itemType: 'audio',
-          },
-        ),
-      ).thenAnswer((_) async {});
       await service.logRating(5, itemId: '1', itemType: 'audio');
       verify(
         () => mockAnalytics.logEvent(
           name: AnalyticsEvents.rating,
-          parameters: {
+          parameters: any(named: 'parameters', that: analyticsParams({
             AnalyticsParams.ratingValue: 5,
             AnalyticsParams.itemId: '1',
             AnalyticsParams.itemType: 'audio',
-          },
+          })),
         ),
       ).called(1);
     });
