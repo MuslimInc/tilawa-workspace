@@ -590,7 +590,7 @@ class TilawaAdaptiveShellTokens {
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     final bool lightChrome = colorScheme.brightness == Brightness.light;
-    const double navButtonMinHeight = 100;
+    const double navButtonMinHeight = 90;
     const double navButtonVerticalPadding = 6;
     const double navButtonIconSize = 22;
     const double navButtonSelectedCenterScale = 1.1;
