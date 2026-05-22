@@ -3,16 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../../auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../widgets/onboarding_content.dart';
+import '../widgets/onboarding_footer_bar.dart';
+import '../widgets/onboarding_hero_visual.dart';
 import '../widgets/onboarding_page.dart';
 
+/// First-run onboarding carousel before sign-in.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -30,165 +33,105 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
+  void _goToPage(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: Theme.of(context).tokens.durationMedium,
+      curve: Curves.easeOutCubic,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final double indicatorHeight = tokens.spaceSmall - tokens.spaceTiny;
-    final double activeIndicatorWidth = tokens.spaceExtraLarge;
-    final double inactiveIndicatorWidth = tokens.spaceSmall;
-    final double indicatorRadius = tokens.radiusSmall / 2;
-    final Color statusBarColor = theme.colorScheme.surface;
-    final Brightness statusBarBrightness = ThemeData.estimateBrightnessForColor(
-      statusBarColor,
-    );
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme colorScheme = theme.colorScheme;
+    final Brightness statusBarBrightness =
+        ThemeData.estimateBrightnessForColor(colorScheme.surface);
     final Brightness statusBarIconBrightness =
         statusBarBrightness == Brightness.dark
         ? Brightness.light
         : Brightness.dark;
 
-    final pages = <OnboardingContent>[
+    final List<OnboardingContent> pages = <OnboardingContent>[
       OnboardingContent(
         imagePath: 'assets/images/listener.png',
         title: context.l10n.onboardingTitle1,
         description: context.l10n.onboardingDesc1,
+        heroStyle: OnboardingHeroStyle.illustration,
       ),
       OnboardingContent(
         imagePath: 'assets/images/reciters.png',
         title: context.l10n.onboardingTitle2,
         description: context.l10n.onboardingDesc2,
+        heroStyle: OnboardingHeroStyle.devicePreview,
+        visualHint: context.l10n.onboardingVisualHint2,
       ),
       OnboardingContent(
         imagePath: 'assets/images/ahmed.png',
         title: context.l10n.onboardingTitle3,
         description: context.l10n.onboardingDesc3,
+        heroStyle: OnboardingHeroStyle.portrait,
       ),
     ];
+    final int pageCount = pages.length;
 
     return BlocProvider(
       create: (_) => getIt<OnboardingCubit>(),
       child: BlocConsumer<OnboardingCubit, OnboardingState>(
-        listener: (context, state) {
+        listener: (BuildContext context, OnboardingState state) {
           if (state is OnboardingCompleted) {
             unawaited(getIt<PrepareGoogleSignInUseCase>()());
             const LoginRoute().go(context);
           }
         },
-        builder: (context, state) {
+        builder: (BuildContext context, OnboardingState state) {
           return AnnotatedRegion<SystemUiOverlayStyle>(
             value: SystemUiOverlayStyle(
-              statusBarColor: statusBarColor,
+              statusBarColor: colorScheme.surface,
               statusBarIconBrightness: statusBarIconBrightness,
               statusBarBrightness: statusBarBrightness,
             ),
             child: Scaffold(
-              backgroundColor: statusBarColor,
-              body: Column(
-                spacing: tokens.spaceExtraLarge,
-                children: [
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: pages.length,
-                      onPageChanged: (index) {
-                        setState(() => _currentPage = index);
-                        context.read<OnboardingCubit>().pageChanged(index);
-                        if (index == pages.length - 1) {
-                          unawaited(getIt<PrepareGoogleSignInUseCase>()());
-                        }
-                      },
-                      itemBuilder: (context, index) {
-                        return OnboardingPage(content: pages[index]);
-                      },
-                    ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      pages.length,
-                      (index) => AnimatedContainer(
-                        duration: tokens.durationMedium,
-                        margin: EdgeInsets.symmetric(
-                          horizontal: tokens.spaceExtraSmall,
-                        ),
-                        height: indicatorHeight,
-                        width: _currentPage == index
-                            ? activeIndicatorWidth
-                            : inactiveIndicatorWidth,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.primaryContainer,
-                          borderRadius: BorderRadius.circular(indicatorRadius),
-                        ),
+              backgroundColor: colorScheme.surface,
+              body: SafeArea(
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: PageView.builder(
+                        controller: _pageController,
+                        itemCount: pageCount,
+                        onPageChanged: (int index) {
+                          setState(() => _currentPage = index);
+                          context.read<OnboardingCubit>().pageChanged(index);
+                          if (index == pageCount - 1) {
+                            unawaited(getIt<PrepareGoogleSignInUseCase>()());
+                          }
+                        },
+                        itemBuilder: (BuildContext context, int index) {
+                          return OnboardingPage(
+                            content: pages[index],
+                            semanticsLabel: context.l10n.onboardingPageSemantics(
+                              index + 1,
+                              pageCount,
+                            ),
+                          );
+                        },
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      tokens.spaceExtraLarge,
-                      0,
-                      tokens.spaceExtraLarge,
-                      context.floatingBottomPadding,
+                    OnboardingFooterBar(
+                      pageCount: pageCount,
+                      currentPage: _currentPage,
+                      backLabel: context.l10n.previous,
+                      nextLabel: context.l10n.next,
+                      completeLabel: context.l10n.startJourney,
+                      onBack: () => _goToPage(_currentPage - 1),
+                      onNext: () => _goToPage(_currentPage + 1),
+                      onComplete: () => context
+                          .read<OnboardingCubit>()
+                          .completeOnboarding(),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (_currentPage > 0)
-                          IconButton(
-                            onPressed: () {
-                              _pageController.previousPage(
-                                duration: tokens.durationMedium,
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                            icon: const Icon(Icons.arrow_back_ios_new),
-                            style: IconButton.styleFrom(
-                              backgroundColor:
-                                  theme.colorScheme.surfaceContainerHighest,
-                            ),
-                            tooltip: context.l10n.previous,
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        if (_currentPage == pages.length - 1)
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsetsDirectional.only(
-                                start: tokens.spaceLarge,
-                              ),
-                              child: TilawaButton(
-                                text: context.l10n.startJourney,
-                                variant: TilawaButtonVariant.primary,
-                                size: TilawaButtonSize.large,
-                                isFullWidth: true,
-                                onPressed: () {
-                                  context
-                                      .read<OnboardingCubit>()
-                                      .completeOnboarding();
-                                },
-                              ),
-                            ),
-                          )
-                        else
-                          SizedBox(
-                            width: tokens.spaceExtraLarge * 4,
-                            child: TilawaButton(
-                              text: context.l10n.next,
-                              variant: TilawaButtonVariant.primary,
-                              size: TilawaButtonSize.large,
-                              onPressed: () {
-                                _pageController.nextPage(
-                                  duration: tokens.durationMedium,
-                                  curve: Curves.easeInOut,
-                                );
-                              },
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );
