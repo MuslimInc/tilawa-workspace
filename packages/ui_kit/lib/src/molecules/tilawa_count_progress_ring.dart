@@ -112,16 +112,25 @@ class TilawaCountProgressRing extends StatelessWidget {
                                 doneForegroundColor ?? colorScheme.onTertiary,
                             size: componentTokens.doneIconSize,
                           )
-                        : Text(
-                            key: ValueKey(currentCount),
-                            '$currentCount',
-                            style: theme.textTheme.displaySmall?.copyWith(
-                              color:
-                                  activeForegroundColor ??
-                                  colorScheme.onPrimary,
-                              fontWeight: .bold,
-                              fontSize: componentTokens.countFontSize,
-                              height: componentTokens.countLineHeight,
+                        : Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: componentTokens.countHorizontalPadding,
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                key: ValueKey(currentCount),
+                                '$currentCount',
+                                maxLines: 1,
+                                style: theme.textTheme.displaySmall?.copyWith(
+                                  color:
+                                      activeForegroundColor ??
+                                      colorScheme.onPrimary,
+                                  fontWeight: .bold,
+                                  fontSize: componentTokens.countFontSize,
+                                  height: componentTokens.countLineHeight,
+                                ),
+                              ),
                             ),
                           ),
                   ),
