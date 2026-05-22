@@ -78,11 +78,7 @@ extension AppStartupCriticalPhases on AppStartupTasks {
     timeline.log('DI quranQcfLocator');
 
     timeline.resetPhase();
-    if (getIt.isRegistered<AppLaunchConfig>()) {
-      getIt.unregister<AppLaunchConfig>();
-    }
-    getIt.registerSingleton<AppLaunchConfig>(launchConfig);
-    await configureDI();
+    await configureDI(launchConfig: launchConfig);
     timeline.log('DI configureDependencies');
 
     timeline.resetPhase();

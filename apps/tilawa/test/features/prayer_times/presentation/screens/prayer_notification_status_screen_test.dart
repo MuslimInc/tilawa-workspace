@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 

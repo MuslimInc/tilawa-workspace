@@ -9,7 +9,7 @@ import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/utils/reciter_list_moshaf_label.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 

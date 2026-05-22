@@ -20,6 +20,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../firebase_options.dart';
 import '../../router/app_router.dart';
 import '../../tilawa_app.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
+
 import '../di/injection.dart';
 import '../di/quran_image_dependencies_module.dart';
 import '../logging/app_logger.dart';
@@ -29,7 +31,8 @@ part 'app_startup_phases.dart';
 part 'app_startup_widgets.dart';
 
 typedef AppRunner = void Function(Widget widget);
-typedef DiConfigurator = Future<void> Function();
+typedef DiConfigurator =
+    Future<void> Function({AppLaunchConfig? launchConfig});
 
 AppLaunchConfig _appLaunchConfig = AppLaunchConfig.fromEnvironment();
 AppStartupTasks _startupTasks = AppStartupTasks(launchConfig: _appLaunchConfig);

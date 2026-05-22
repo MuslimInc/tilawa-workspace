@@ -434,7 +434,8 @@ void main() {
 
       await bootstrap(
         runner: (widget) => runnerCalled = true,
-        diConfigurator: () async => diCalled = true,
+        diConfigurator: ({AppLaunchConfig? launchConfig}) async =>
+            diCalled = true,
       );
 
       expect(runnerCalled, isTrue);
@@ -450,7 +451,8 @@ void main() {
       // Simulate failure in DI
       await bootstrap(
         runner: (widget) {},
-        diConfigurator: () async => throw Exception('Fatal'),
+        diConfigurator: ({AppLaunchConfig? launchConfig}) async =>
+            throw Exception('Fatal'),
       );
 
       // Logs are printed, and runner is called (bootstrap catches errors and continues)
@@ -471,7 +473,7 @@ void main() {
             throw Exception('Crash');
           }
         },
-        diConfigurator: () async {},
+        diConfigurator: ({AppLaunchConfig? launchConfig}) async {},
       );
 
       // It should have caught 'Crash' and logged it.
@@ -489,7 +491,7 @@ void main() {
             runCount++;
             throw Exception('Crash $runCount');
           },
-          diConfigurator: () async {},
+          diConfigurator: ({AppLaunchConfig? launchConfig}) async {},
         );
       } catch (e) {
         // Expected to rethrow after 2nd failure

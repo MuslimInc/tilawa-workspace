@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/cubit/player_background_cubit.dart';

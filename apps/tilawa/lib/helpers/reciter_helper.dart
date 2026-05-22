@@ -1,4 +1,4 @@
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';

@@ -7,7 +7,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/bootstrap/app_launch_config.dart';
 import '../../../../router/app_router_config.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 
