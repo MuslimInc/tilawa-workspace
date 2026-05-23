@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:credential_manager/credential_manager.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -118,6 +119,27 @@ class AppStartupTasks {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    await _activateAppCheck();
+  }
+
+  /// Activates Firebase App Check so callable Cloud Functions (notably
+  /// verifySupportPurchase) can enforce attested clients. Failures are
+  /// non-fatal — App Check will fall back to unattested mode and the function
+  /// will reject the call with an `unauthenticated` error, which the support
+  /// flow already maps to a localized "purchase verification failed".
+  Future<void> _activateAppCheck() async {
+    try {
+      await FirebaseAppCheck.instance.activate(
+        providerAndroid: kDebugMode
+            ? const AndroidDebugProvider()
+            : const AndroidPlayIntegrityProvider(),
+        providerApple: kDebugMode
+            ? const AppleDebugProvider()
+            : const AppleAppAttestWithDeviceCheckFallbackProvider(),
+      );
+    } catch (e, st) {
+      logger.e('App Check activation failed: $e', stackTrace: st);
+    }
   }
 
   Future<void> configureForegroundMessaging() async {
