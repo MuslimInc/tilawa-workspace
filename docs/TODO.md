@@ -9,6 +9,7 @@ something comes to mind; check boxes when done.
 - [`specs/002-product-growth-roadmap/spec.md`](../specs/002-product-growth-roadmap/spec.md) — roadmap spec
 - [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md) — Support Tilawa rules
 - [`release_notes.md`](release_notes.md) — Play Console copy per release
+- [`startup_splash_plan.md`](startup_splash_plan.md) — P0 splash-held startup (Noon/Amazon style)
 
 **Conventions**
 
@@ -67,10 +68,13 @@ _Code health, architecture, tests — not user-visible features._
   Confirm production builds do not seed/write `subscription_plans` from the app
   (see [`google_play_pre_release_audit_2026-03-25.md`](../apps/tilawa/docs/reviews/25_mar_2026/google_play_pre_release_audit_2026-03-25.md)).
 
-- [ ] **Startup — run preparation during splash** `P1`  
-  Move eligible startup preparation work into the splash phase (while splash
-  is visible) so the first interactive screen feels faster; keep hard
-  dependencies ordered and avoid blocking splash longer than needed.
+- [ ] **Startup — splash-held readiness (Noon / Amazon style)** `P0` ← **current focus**  
+  Full plan: [`startup_splash_plan.md`](startup_splash_plan.md).  
+  **Phase 1:** `AppStartupReadiness` gate — splash stays until critical init +
+  route decision + shell/first-tab prep complete; move `MainScreenCubit` 260ms /
+  1200ms delays behind splash; 10s cap + timeout path.  
+  **Phase 2:** Single splash surface (`_BootGate` + `/splash`).  
+  **Phase 3:** Re-budget background init + lazy first-visit loading.
 
 - [ ] _Your next refactor_
 
@@ -109,4 +113,4 @@ _Move completed items here with date._
 
 ---
 
-*Last touched: 2026-05-23 (user backlog items)*
+*Last touched: 2026-05-23 (P0 startup splash plan)*
