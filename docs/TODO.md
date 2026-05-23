@@ -38,6 +38,20 @@ _Add new product work here._
   Purge remaining user-facing “Premium” strings; align with
   [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md).
 
+- [ ] **Share — disable video reel; keep screenshot only** `P1`  
+  Disable or comment out the generate-video-reel flow; keep only custom surah/
+  ayah **screenshot** sharing. Goal: reduce app size (e.g. drop or slim heavy
+  video/ffmpeg dependencies where possible).
+
+- [ ] **Settings — Preferences screen** `P2`  
+  Add `settings.preferences` (or equivalent route): user can show/hide
+  **alphabet index on Reciters**; move selected items from main Settings into
+  Preferences for a cleaner layout.
+
+- [ ] **Prayer — change Adhan audio file** `P2`  
+  Replace the default Adhan sound asset with the chosen production file; verify
+  notification and foreground playback paths.
+
 - [ ] _Your next feature idea_
 
 ---
@@ -52,6 +66,11 @@ _Code health, architecture, tests — not user-visible features._
 - [ ] **Firestore client bootstrap** `P1`  
   Confirm production builds do not seed/write `subscription_plans` from the app
   (see [`google_play_pre_release_audit_2026-03-25.md`](../apps/tilawa/docs/reviews/25_mar_2026/google_play_pre_release_audit_2026-03-25.md)).
+
+- [ ] **Startup — run preparation during splash** `P1`  
+  Move eligible startup preparation work into the splash phase (while splash
+  is visible) so the first interactive screen feels faster; keep hard
+  dependencies ordered and avoid blocking splash longer than needed.
 
 - [ ] _Your next refactor_
 
@@ -90,4 +109,4 @@ _Move completed items here with date._
 
 ---
 
-*Last touched: 2026-05-23*
+*Last touched: 2026-05-23 (user backlog items)*
