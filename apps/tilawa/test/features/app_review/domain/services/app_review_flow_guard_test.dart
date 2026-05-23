@@ -13,7 +13,7 @@ void main() {
     expect(guard.isSacredFlowActive, isFalse);
     guard.enter(AppReviewBlockedFlow.quranReading);
     expect(guard.isSacredFlowActive, isTrue);
-    expect(guard.activeFlows, [AppReviewBlockedFlow.quranReading]);
+    expect(guard.activeFlows, contains(AppReviewBlockedFlow.quranReading));
     guard.exit(AppReviewBlockedFlow.quranReading);
     expect(guard.isSacredFlowActive, isFalse);
   });
@@ -43,4 +43,17 @@ void main() {
       ..syncMainShellTab(0);
     expect(guard.isSacredFlowActive, isFalse);
   });
+
+  test(
+    'nested scope exit does not unblock while tab sacred flow is active',
+    () {
+      guard.syncMainShellTab(2);
+      guard.enter(AppReviewBlockedFlow.athkar);
+      expect(guard.isSacredFlowActive, isTrue);
+      guard.exit(AppReviewBlockedFlow.athkar);
+      expect(guard.isSacredFlowActive, isTrue);
+      guard.syncMainShellTab(0);
+      expect(guard.isSacredFlowActive, isFalse);
+    },
+  );
 }

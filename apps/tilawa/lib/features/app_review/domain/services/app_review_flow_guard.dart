@@ -4,36 +4,52 @@ import '../entities/app_review_blocked_flow.dart';
 
 /// Tracks worship-focused surfaces where review prompts must never appear.
 ///
-/// Uses a small stack so nested flows (e.g. Athkar tab + details) compose safely.
+/// Tab selection and nested scopes (e.g. Athkar tab + details) use separate
+/// ref counts so one [exit] does not clear blocking while the user remains
+/// in the same sacred flow.
 @lazySingleton
 class AppReviewFlowGuard {
-  final Set<AppReviewBlockedFlow> _activeFlows = <AppReviewBlockedFlow>{};
+  final Map<AppReviewBlockedFlow, int> _scopeRefCounts =
+      <AppReviewBlockedFlow, int>{};
+  final Set<AppReviewBlockedFlow> _tabFlows = <AppReviewBlockedFlow>{};
 
-  bool get isSacredFlowActive => _activeFlows.isNotEmpty;
+  bool get isSacredFlowActive =>
+      _tabFlows.isNotEmpty || _scopeRefCounts.isNotEmpty;
 
   Iterable<AppReviewBlockedFlow> get activeFlows =>
-      List<AppReviewBlockedFlow>.unmodifiable(_activeFlows);
+      <AppReviewBlockedFlow>{..._tabFlows, ..._scopeRefCounts.keys};
 
   void enter(AppReviewBlockedFlow flow) {
-    _activeFlows.add(flow);
+    _scopeRefCounts[flow] = (_scopeRefCounts[flow] ?? 0) + 1;
   }
 
   void exit(AppReviewBlockedFlow flow) {
-    _activeFlows.remove(flow);
+    final int? count = _scopeRefCounts[flow];
+    if (count == null) {
+      return;
+    }
+    if (count <= 1) {
+      _scopeRefCounts.remove(flow);
+    } else {
+      _scopeRefCounts[flow] = count - 1;
+    }
   }
 
   void clear() {
-    _activeFlows.clear();
+    _scopeRefCounts.clear();
+    _tabFlows.clear();
   }
 
   /// Keeps tab-owned sacred flows aligned with [MainScreen] index.
   void syncMainShellTab(int tabIndex) {
-    exit(AppReviewBlockedFlow.prayer);
-    exit(AppReviewBlockedFlow.athkar);
-    return switch (tabIndex) {
-      1 => enter(AppReviewBlockedFlow.prayer),
-      2 => enter(AppReviewBlockedFlow.athkar),
-      _ => null,
-    };
+    _tabFlows
+      ..remove(AppReviewBlockedFlow.prayer)
+      ..remove(AppReviewBlockedFlow.athkar);
+    switch (tabIndex) {
+      case 1:
+        _tabFlows.add(AppReviewBlockedFlow.prayer);
+      case 2:
+        _tabFlows.add(AppReviewBlockedFlow.athkar);
+    }
   }
 }

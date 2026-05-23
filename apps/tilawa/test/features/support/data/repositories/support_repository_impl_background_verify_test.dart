@@ -7,6 +7,7 @@ import 'package:tilawa/features/support/data/datasources/support_local_datasourc
 import 'package:tilawa/features/support/data/repositories/support_repository_impl.dart';
 import 'package:tilawa/features/support/data/services/purchase_verification_client.dart';
 import 'package:tilawa/features/support/domain/constants/support_product_ids.dart';
+import 'package:tilawa/features/support/domain/entities/purchase_outcome.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../helpers/support_purchase_test_helpers.dart';
@@ -132,4 +133,54 @@ void main() {
       ),
     ).called(1);
   });
+
+  test(
+    'purchaseSupportProduct returns outcome when stream verifies first',
+    () async {
+      const String token = 'race-token';
+      final PlayPurchaseEvent event = PlayPurchaseEvent(
+        productId: SupportProductIds.small,
+        purchaseToken: token,
+        purchaseId: 'order-race',
+        details: supportPurchaseDetails(serverToken: token),
+      );
+
+      when(() => billing.buyConsumable(any())).thenAnswer((_) async {});
+      when(() => billing.waitForPurchaseEvent(any())).thenAnswer((_) async {
+        events.add(event);
+        await Future<void>.delayed(Duration.zero);
+        return event;
+      });
+      when(
+        () => verifyClient.verify(
+          productId: any(named: 'productId'),
+          purchaseToken: any(named: 'purchaseToken'),
+        ),
+      ).thenAnswer(
+        (_) async => const VerifiedPurchase(
+          orderId: 'order-race',
+          productId: SupportProductIds.small,
+        ),
+      );
+
+      final SupportRepositoryImpl repository = SupportRepositoryImpl(
+        billing,
+        local,
+        verifyClient,
+        analytics,
+      );
+
+      final PurchaseOutcome outcome = await repository.purchaseSupportProduct(
+        SupportProductIds.small,
+      );
+
+      expect(outcome.productId, SupportProductIds.small);
+      verify(
+        () => verifyClient.verify(
+          productId: SupportProductIds.small,
+          purchaseToken: token,
+        ),
+      ).called(1);
+    },
+  );
 }
