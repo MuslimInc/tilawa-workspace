@@ -1,50 +1,50 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../../../core/debug/deep_link_debug_log.dart';
 import '../../../../router/notification_navigation_resolver.dart';
 import '../../../auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
+import 'splash_event.dart';
+import 'splash_state.dart';
 
-part 'splash_state.dart';
-
-/// Cubit responsible for splash screen logic and initial navigation.
-///
-/// Determines the next destination based on:
-/// - Notification launch (highest priority)
-/// - Onboarding completion status
-/// - User authentication status
+/// Orchestrates splash-held startup and initial navigation.
 @injectable
-class SplashCubit extends Cubit<SplashState> {
-  // Temporary preview delay for checking the Flutter splash.
-  // Set to Duration.zero to disable.
-  static const Duration flutterSplashPreviewDelay = Duration.zero;
-
-  SplashCubit(
+class SplashBloc extends Bloc<SplashEvent, SplashState> {
+  SplashBloc(
     this._getSplashNextRoute,
     this._prepareGoogleSignIn,
-  ) : super(const SplashInitial());
+    this._readiness,
+  ) : super(const SplashLoading()) {
+    on<SplashStarted>(_onStarted);
+  }
 
   final GetSplashNextRouteUseCase _getSplashNextRoute;
   final PrepareGoogleSignInUseCase _prepareGoogleSignIn;
+  final AppStartupReadiness _readiness;
 
   static const Duration _googlePrepareTimeout = Duration(seconds: 2);
 
-  Future<void> init() async {
-    // #region agent log
+  Future<void> _onStarted(
+    SplashStarted event,
+    Emitter<SplashState> emit,
+  ) async {
     DeepLinkDebugLog.log(
-      'SplashCubit.init START',
+      'SplashBloc.started',
       scenario: 'splash',
       hypothesisId: 'H1',
     );
-    // #endregion
+
     try {
-      final Future<SplashRouteResult> routeFuture = _getSplashNextRoute();
-      if (flutterSplashPreviewDelay > Duration.zero) {
-        await Future<void>.delayed(flutterSplashPreviewDelay);
-      }
-      final SplashRouteResult result = await routeFuture;
+      final SplashRouteResult result = await _getSplashNextRoute();
+
+      final bool prepareShell =
+          result.destination == SplashDestination.home;
+      await _readiness.waitUntilReady(prepareShell: prepareShell);
 
       String? location;
       Object? extra;
@@ -59,8 +59,6 @@ class SplashCubit extends Cubit<SplashState> {
         );
       }
 
-      if (isClosed) return;
-
       if (result.destination == SplashDestination.login) {
         await _prepareGoogleSignIn().timeout(
           _googlePrepareTimeout,
@@ -68,36 +66,44 @@ class SplashCubit extends Cubit<SplashState> {
         );
       }
 
-      if (isClosed) return;
+      if (isClosed) {
+        return;
+      }
 
-      // #region agent log
       DeepLinkDebugLog.log(
-        'SplashCubit.init route resolved',
+        'SplashBloc.route resolved',
         scenario: 'splash',
         hypothesisId: 'H1',
         data: <String, Object?>{
           'destination': result.destination.name,
           'location': location,
           'hasExtra': extra != null,
+          'shellPrepOnSplash': prepareShell,
+          'timedOut': _readiness.timedOut,
         },
       );
-      // #endregion
 
-      emit(switch (result.destination) {
-        SplashDestination.home => const SplashNavigateToHome(),
-        SplashDestination.login => const SplashNavigateToLogin(),
-        SplashDestination.onboarding => const SplashNavigateToOnboarding(),
-        SplashDestination.notificationLaunch when location != null =>
-          SplashNavigateToNotification(location, extra: extra),
-        SplashDestination.notificationLaunch => const SplashNavigateToHome(),
-      });
+      switch (result.destination) {
+        case SplashDestination.home:
+          emit(SplashNavigateToHome(timedOut: _readiness.timedOut));
+        case SplashDestination.login:
+          emit(const SplashNavigateToLogin());
+        case SplashDestination.onboarding:
+          emit(const SplashNavigateToOnboarding());
+        case SplashDestination.notificationLaunch when location != null:
+          emit(SplashNavigateToNotification(location, extra: extra));
+        case SplashDestination.notificationLaunch:
+          emit(SplashNavigateToHome(timedOut: _readiness.timedOut));
+      }
     } catch (e, stackTrace) {
       logger.e(
-        'Splash init failed, falling back to home',
+        'SplashBloc failed, falling back to home',
         error: e,
         stackTrace: stackTrace,
       );
-      emit(const SplashNavigateToHome());
+      if (!isClosed) {
+        emit(const SplashNavigateToHome());
+      }
     }
   }
 }

@@ -68,13 +68,12 @@ _Code health, architecture, tests — not user-visible features._
   Confirm production builds do not seed/write `subscription_plans` from the app
   (see [`google_play_pre_release_audit_2026-03-25.md`](../apps/tilawa/docs/reviews/25_mar_2026/google_play_pre_release_audit_2026-03-25.md)).
 
-- [ ] **Startup — splash-held readiness (Noon / Amazon style)** `P0` ← **current focus**  
+- [~] **Startup — splash-held readiness (Noon / Amazon style)** `P0` ← **current focus**  
   Full plan: [`startup_splash_plan.md`](startup_splash_plan.md).  
-  **Phase 1:** `AppStartupReadiness` gate — splash stays until critical init +
-  route decision + shell/first-tab prep complete; move `MainScreenCubit` 260ms /
-  1200ms delays behind splash; 10s cap + timeout path.  
-  **Phase 2:** Single splash surface (`_BootGate` + `/splash`).  
-  **Phase 3:** Re-budget background init + lazy first-visit loading.
+  **Done (Phase 1 MVP):** `AppStartupReadiness`, `SplashBloc` (migrated from cubit),
+  shell prep on splash for home; `MainScreenCubit` skips prep when already done.  
+  **Next:** Single splash surface (`_BootGate` + `/splash`); profile cold start;
+  re-budget background init.
 
 - [ ] _Your next refactor_
 

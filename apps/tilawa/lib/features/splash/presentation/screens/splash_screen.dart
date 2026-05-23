@@ -8,7 +8,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../cubit/splash_cubit.dart';
+import '../bloc/splash_bloc.dart';
+import '../bloc/splash_event.dart';
+import '../bloc/splash_state.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -33,30 +35,24 @@ class _SplashScreenState extends State<SplashScreen> {
     systemNavigationBarContrastEnforced: false,
   );
 
-  late final SplashCubit _splashCubit;
+  late final SplashBloc _splashBloc;
 
   @override
   void initState() {
     super.initState();
-    _splashCubit = getIt<SplashCubit>();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_splashCubit.isClosed) {
-        _splashCubit.init();
-      }
-    });
+    _splashBloc = getIt<SplashBloc>()..add(const SplashStarted());
   }
 
   @override
   void dispose() {
-    _splashCubit.close();
+    _splashBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: _splashCubit,
+      value: _splashBloc,
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           state.when(
@@ -72,40 +68,41 @@ class _SplashScreenState extends State<SplashScreen> {
             },
           );
         },
-        child: BlocListener<SplashCubit, SplashState>(
+        child: BlocListener<SplashBloc, SplashState>(
           listener: (context, state) {
-            if (state is SplashNavigateToHome) {
-              AppRouter.disableStateRestoration = false;
-              AppRouter.pendingStartupNotificationLaunch = false;
-              AppRouter.router.go(const HomeRoute().location);
-            } else if (state is SplashNavigateToLogin) {
-              AppRouter.disableStateRestoration = false;
-              AppRouter.pendingStartupNotificationLaunch = false;
-              AppRouter.router.go(const LoginRoute().location);
-            } else if (state is SplashNavigateToOnboarding) {
-              AppRouter.disableStateRestoration = false;
-              AppRouter.pendingStartupNotificationLaunch = false;
-              AppRouter.router.go(const OnboardingRoute().location);
-            } else if (state is SplashNavigateToNotification) {
-              AppRouter.navigateFromColdStart(
-                state.location,
-                extra: state.extra,
-              );
+            switch (state) {
+              case SplashLoading():
+                break;
+              case SplashNavigateToHome():
+                AppRouter.disableStateRestoration = false;
+                AppRouter.pendingStartupNotificationLaunch = false;
+                AppRouter.router.go(const HomeRoute().location);
+              case SplashNavigateToLogin():
+                AppRouter.disableStateRestoration = false;
+                AppRouter.pendingStartupNotificationLaunch = false;
+                AppRouter.router.go(const LoginRoute().location);
+              case SplashNavigateToOnboarding():
+                AppRouter.disableStateRestoration = false;
+                AppRouter.pendingStartupNotificationLaunch = false;
+                AppRouter.router.go(const OnboardingRoute().location);
+              case SplashNavigateToNotification(:final location, :final extra):
+                AppRouter.navigateFromColdStart(location, extra: extra);
+              case SplashFailure():
+                AppRouter.disableStateRestoration = false;
+                AppRouter.pendingStartupNotificationLaunch = false;
+                AppRouter.router.go(const HomeRoute().location);
             }
           },
           child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: _launchOverlayStyle,
             child: ColoredBox(
               color: _launchBackgroundColor,
-              child: SizedBox.expand(
-                child: Center(
-                  child: SizedBox.square(
-                    dimension: _androidSplashWordmarkBoxSize,
-                    child: Image.asset(
-                      _launchWordmarkAsset,
-                      filterQuality: FilterQuality.high,
-                      fit: BoxFit.fill,
-                    ),
+              child: Center(
+                child: SizedBox.square(
+                  dimension: _androidSplashWordmarkBoxSize,
+                  child: Image.asset(
+                    _launchWordmarkAsset,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
