@@ -2,6 +2,9 @@
 
 This document outlines features that are commonly found in Quran/Islamic apps but are currently missing from Tilawa.
 
+**Active team backlog (features + refactors you update often):**
+[`TODO.md`](TODO.md).
+
 ---
 
 ## ✅ Implemented Features

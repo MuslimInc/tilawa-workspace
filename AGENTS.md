@@ -11,6 +11,7 @@ project design spec:
 **Voluntary support (monetization ethics, entry points, MVP scope):**
 [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md) and
 [`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md).
+**Living backlog (features / refactors):** [`docs/TODO.md`](docs/TODO.md).
 Optional **external reference** library (per-brand moodboards):
 [`design-md/`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/design-md)
 and catalog index
