@@ -149,6 +149,13 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   late final void Function() _systemBackHandle;
   late AudioPlayerBloc _audioBloc;
 
+  /// Set by [collapse] until the sheet settles at progress 0.
+  ///
+  /// [AnimationController.status] stays [AnimationStatus.forward] during
+  /// [AnimationController.animateTo] toward 0 on some runtimes, so we cannot
+  /// rely on [AnimationStatus.reverse] to detect collapse.
+  bool _isCollapsing = false;
+
   /// Controls the swipe-down-to-dismiss offset for the mini player.
   double _dismissOffsetY = 0;
   Animation<double>? _dismissAnimation;
@@ -185,6 +192,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     _expandController.addListener(_syncPhoneBottomNavBarVisible);
     _expandController.addListener(_syncExpandedPlayerSystemChrome);
     _expandController.addListener(_syncSystemBackIntercepts);
+    _expandController.addStatusListener(_onExpandAnimationStatus);
 
     _systemBackHandle = handleSystemBack;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -232,6 +240,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   @override
   void dispose() {
     QuranPlayerSystemBackCoordinator.unbind(handle: _systemBackHandle);
+    _expandController.removeStatusListener(_onExpandAnimationStatus);
     _expandController.removeListener(_syncPhoneBottomNavBarVisible);
     _expandController.removeListener(_syncExpandedPlayerSystemChrome);
     _expandController.removeListener(_syncSystemBackIntercepts);
@@ -306,6 +315,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   /// (no overshoot — [Curves.easeOutBack] reads as a bounce, not YT).
   void expand() {
     HapticFeedback.lightImpact();
+    _isCollapsing = false;
     _expandController.animateTo(
       1.0,
       duration: const Duration(milliseconds: 400),
@@ -314,16 +324,33 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   }
 
   /// Collapse the player back to the mini bar.
-  ///
-  /// Uses [Curves.easeOutCubic] for a smooth, natural deceleration.
-  /// Avoids [Curves.easeInOutCubicEmphasized] which stalls visually
-  /// (lingers at ~0.8–0.9 then snaps to 0).
   void collapse() {
+    _isCollapsing = true;
     _expandController.animateTo(
       0.0,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
+      duration: const Duration(milliseconds: 320),
+      curve: Curves.easeInOutCubic,
     );
+  }
+
+  /// Phone shell: animate sheet + mini in one overlay layer to avoid desync.
+  bool get _animateShellInOverlay =>
+      widget.embeddedInShellFooter && _expandController.isAnimating;
+
+  void _onExpandAnimationStatus(AnimationStatus status) {
+    if (!mounted) {
+      return;
+    }
+    if (status == AnimationStatus.completed ||
+        status == AnimationStatus.dismissed) {
+      if (_expandController.value <= 0.01) {
+        _isCollapsing = false;
+      }
+      if (_expandController.value >= 0.99) {
+        _isCollapsing = false;
+      }
+      _syncPhoneBottomNavBarVisible();
+    }
   }
 
   void _syncPhoneBottomNavBarVisible() {
@@ -332,12 +359,55 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     final String location = _currentRoutePath();
     final bool hideNavWhenExpanded =
         AppShellRoutePolicy.shouldHideBottomNavWhenPlayerExpanded(location);
+    if (!hideNavWhenExpanded) {
+      if (!n.value) {
+        n.value = true;
+      }
+      return;
+    }
+
+    // Hold nav hidden for the whole programmatic collapse. animateTo(0) may
+    // report AnimationStatus.forward, not reverse, on some runtimes.
+    if (_isCollapsing && _expandController.isAnimating) {
+      if (n.value) {
+        n.value = false;
+      }
+      return;
+    }
+
     final double threshold = context.tokens.playerProgressThreshold;
-    final bool showBar =
-        !hideNavWhenExpanded || _expandController.value < threshold;
+    final bool showBar = _expandController.value < threshold;
     if (n.value != showBar) {
       n.value = showBar;
     }
+  }
+
+  /// Mini bar fade: fast hide on expand, linear reveal on collapse.
+  double _miniOpacityForProgress(double progress) {
+    if (_isCollapsing) {
+      return (1 - progress).clamp(0.0, 1.0);
+    }
+    return (1 - progress * 2.5).clamp(0.0, 1.0);
+  }
+
+  /// Bottom inset for the floating mini player while [progress] is animating.
+  double _miniPlayerBottomInsetForProgress(
+    BuildContext context,
+    double progress,
+  ) {
+    final String location = _currentRoutePath();
+    final bool hideNavWhenExpanded =
+        AppShellRoutePolicy.shouldHideBottomNavWhenPlayerExpanded(location);
+    final double threshold = context.tokens.playerProgressThreshold;
+    final bool phoneNavVisible =
+        !hideNavWhenExpanded || progress < threshold;
+    return QuranPlayerLayoutInsets.miniPlayerBottomInset(
+      context: context,
+      hostBottomNavBarHeight: widget.bottomNavBarHeight,
+      hostAbsorbsBottomSafeArea: widget.hostAbsorbsBottomSafeArea,
+      phoneNavVisible: phoneNavVisible,
+      routePath: location,
+    );
   }
 
   void _ensurePhoneBottomNavBarShown() {
@@ -546,29 +616,34 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         }
 
         final double screenHeight = overlaySize.height;
-        final Listenable animation = widget.phoneBottomNavBarVisible == null
-            ? _expandController
-            : Listenable.merge(<Listenable>[
-                _expandController,
-                widget.phoneBottomNavBarVisible!,
-              ]);
+
+        final Widget expandedPlayer = RepaintBoundary(
+          child: _ExpandedPlayerOrganism(
+            state: state,
+            audio: audio,
+            expandAnimation: _expandController,
+            onCollapse: collapse,
+            onDismiss: _dismissWithUndo,
+            onExpandDragUpdate: _onVerticalDragUpdate,
+            onExpandDragEnd: _onVerticalDragEnd,
+          ),
+        );
 
         return AnimatedBuilder(
-          animation: animation,
-          builder: (context, _) {
+          animation: _expandController,
+          child: expandedPlayer,
+          builder: (context, expandedChild) {
+            // [AnimationController.animateTo] already applies the curve; do
+            // not transform progress again or collapse feels sluggish.
             final progress = _expandController.value;
-
-            // Bottom sheet slide: expanded player rides up from below the
-            // mini-player slot (YouTube Music attaches the sheet to the bar).
-            final double expandCurve = Curves.easeOutCubic.transform(progress);
             final double collapseStart = hostRect.bottom;
-            final sheetOffsetY =
-                (screenHeight - collapseStart) * (1 - expandCurve);
 
-            // Mini player fades quickly so the expanding sheet reads as one
-            // continuous surface (YT cross-fades the bar into the sheet).
-            final miniOpacity = (1 - expandCurve * 2.5).clamp(0.0, 1.0);
+            // Mini player fades quickly on expand; linear reveal on collapse.
+            final miniOpacity = _miniOpacityForProgress(progress);
             final miniSlideY = (1 - miniOpacity) * _miniPlayerHeight * 0.35;
+            final bool showExpandedSheet =
+                progress > 0.001 && expandedChild != null;
+            final bool animateShellInOverlay = _animateShellInOverlay;
 
             final Widget miniPlayer = Opacity(
               opacity: miniOpacity,
@@ -576,7 +651,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                 offset: Offset(0, miniSlideY),
                 child: _MiniPlayerTransition(
                   progress: progress,
-                  state: state,
                   audio: audio,
                   dismissAnimController: _dismissAnimController,
                   dismissAnimation: _dismissAnimation,
@@ -605,22 +679,21 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                           ),
                         ),
                       ),
-                    if (progress > 0.01)
-                      Transform.translate(
-                        offset: Offset(0, sheetOffsetY),
-                        child: Transform.scale(
-                          scale: 0.94 + 0.06 * expandCurve,
-                          alignment: Alignment.bottomCenter,
-                          child: _ExpandedPlayerOrganism(
-                            state: state,
-                            audio: audio,
-                            onCollapse: collapse,
-                            onDismiss: _dismissWithUndo,
-                            expandProgress: expandCurve,
-                            onExpandDragUpdate: _onVerticalDragUpdate,
-                            onExpandDragEnd: _onVerticalDragEnd,
-                          ),
-                        ),
+                    if (showExpandedSheet)
+                      _ExpandedPlayerMotion(
+                        progress: progress,
+                        screenHeight: screenHeight,
+                        collapseStart: collapseStart,
+                        sheetOpacity: _isCollapsing ? progress.clamp(0.0, 1.0) : 1.0,
+                        child: expandedChild,
+                      ),
+                    if (animateShellInOverlay)
+                      Positioned(
+                        top: collapseStart - _miniPlayerHeight,
+                        left: 0,
+                        right: 0,
+                        height: _miniPlayerHeight,
+                        child: miniPlayer,
                       ),
                   ],
                 ),
@@ -628,16 +701,22 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             }
 
             if (miniAnchoredInFooter) {
-              return Stack(
-                fit: StackFit.expand,
-                clipBehavior: Clip.none,
-                children: [
-                  if (progress < 0.55) Positioned.fill(child: miniPlayer),
-                ],
+              return SizedBox(
+                height: _miniPlayerHeight,
+                child: animateShellInOverlay
+                    ? const SizedBox.shrink()
+                    : IgnorePointer(
+                        ignoring: progress >
+                            context.tokens.playerIgnorePointerThreshold,
+                        child: miniPlayer,
+                      ),
               );
             }
 
-            final double bottomInset = _resolveBottomInset(context);
+            final double bottomInset = _miniPlayerBottomInsetForProgress(
+              context,
+              progress,
+            );
 
             return Stack(
               fit: StackFit.expand,
@@ -657,34 +736,27 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                             ),
                           ),
                         ),
-                      if (progress > 0.01)
-                        Transform.translate(
-                          offset: Offset(0, sheetOffsetY),
-                          child: Transform.scale(
-                            scale: 0.94 + 0.06 * expandCurve,
-                            alignment: Alignment.bottomCenter,
-                            child: _ExpandedPlayerOrganism(
-                              state: state,
-                              audio: audio,
-                              onCollapse: collapse,
-                              onDismiss: _dismissWithUndo,
-                              expandProgress: expandCurve,
-                              onExpandDragUpdate: _onVerticalDragUpdate,
-                              onExpandDragEnd: _onVerticalDragEnd,
-                            ),
-                          ),
+                      if (showExpandedSheet)
+                        _ExpandedPlayerMotion(
+                          progress: progress,
+                          screenHeight: screenHeight,
+                          collapseStart: collapseStart,
+                          sheetOpacity: _isCollapsing ? progress.clamp(0.0, 1.0) : 1.0,
+                          child: expandedChild,
                         ),
                     ],
                   ),
                 ),
-                if (progress < 0.55)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: bottomInset - miniSlideY,
-                    height: _miniPlayerHeight,
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: bottomInset - miniSlideY,
+                  height: _miniPlayerHeight,
+                  child: IgnorePointer(
+                    ignoring: miniOpacity < 0.01,
                     child: miniPlayer,
                   ),
+                ),
               ],
             );
           },
@@ -698,6 +770,40 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 // Organisms
 // ---------------------------------------------------------------------------
 
+/// Slide/scale motion for the expanded sheet during expand/collapse.
+///
+/// Kept separate from [_ExpandedPlayerOrganism] so only this lightweight
+/// layer rebuilds each animation tick.
+class _ExpandedPlayerMotion extends StatelessWidget {
+  const _ExpandedPlayerMotion({
+    required this.progress,
+    required this.screenHeight,
+    required this.collapseStart,
+    required this.sheetOpacity,
+    required this.child,
+  });
+
+  final double progress;
+  final double screenHeight;
+  final double collapseStart;
+  final double sheetOpacity;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final sheetOffsetY = (screenHeight - collapseStart) * (1 - progress);
+    return RepaintBoundary(
+      child: Transform.translate(
+        offset: Offset(0, sheetOffsetY),
+        child: Opacity(
+          opacity: sheetOpacity.clamp(0.0, 1.0),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
 /// Wraps the mini player organism with swipe-to-dismiss gesture handling
 /// and the dismiss translation animation. Kept separate so the heavy
 /// `AnimatedBuilder` subtree rebuilds only when the dismiss controller
@@ -705,7 +811,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 class _MiniPlayerTransition extends StatelessWidget {
   const _MiniPlayerTransition({
     required this.progress,
-    required this.state,
     required this.audio,
     required this.dismissAnimController,
     required this.dismissAnimation,
@@ -717,7 +822,6 @@ class _MiniPlayerTransition extends StatelessWidget {
   });
 
   final double progress;
-  final AudioPlayerState state;
   final AudioEntity audio;
   final AnimationController dismissAnimController;
   final Animation<double>? dismissAnimation;
@@ -742,7 +846,6 @@ class _MiniPlayerTransition extends StatelessWidget {
             return Transform.translate(offset: Offset(0, offset), child: child);
           },
           child: _MiniPlayerOrganism(
-            state: state,
             audio: audio,
             onTap: onTap,
             onClose: onClose,
@@ -755,13 +858,11 @@ class _MiniPlayerTransition extends StatelessWidget {
 
 class _MiniPlayerOrganism extends StatelessWidget {
   const _MiniPlayerOrganism({
-    required this.state,
     required this.audio,
     required this.onTap,
     required this.onClose,
   });
 
-  final AudioPlayerState state;
   final AudioEntity audio;
   final VoidCallback onTap;
   final VoidCallback onClose;
@@ -780,7 +881,6 @@ class _MiniPlayerOrganism extends StatelessWidget {
           0,
         ),
         child: _YtMusicMiniPlayer(
-          state: state,
           audio: audio,
           onTap: onTap,
           onClose: onClose,
@@ -917,7 +1017,7 @@ class _ExpandedPlayerOrganism extends StatefulWidget {
     required this.audio,
     required this.onCollapse,
     required this.onDismiss,
-    required this.expandProgress,
+    required this.expandAnimation,
     required this.onExpandDragUpdate,
     required this.onExpandDragEnd,
   });
@@ -926,7 +1026,7 @@ class _ExpandedPlayerOrganism extends StatefulWidget {
   final AudioEntity audio;
   final VoidCallback onCollapse;
   final VoidCallback onDismiss;
-  final double expandProgress;
+  final Animation<double> expandAnimation;
   final GestureDragUpdateCallback onExpandDragUpdate;
   final GestureDragEndCallback onExpandDragEnd;
 
@@ -943,14 +1043,19 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
   final DraggableScrollableController _queueController =
       DraggableScrollableController();
 
+  double? _lastExpandValue;
+
   @override
   void initState() {
     super.initState();
     _queueController.addListener(_onQueueSheetChanged);
+    widget.expandAnimation.addListener(_onExpandAnimationTick);
+    _lastExpandValue = widget.expandAnimation.value;
   }
 
   @override
   void dispose() {
+    widget.expandAnimation.removeListener(_onExpandAnimationTick);
     _queueController.removeListener(_onQueueSheetChanged);
     _queueController.dispose();
     super.dispose();
@@ -962,16 +1067,18 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
     }
   }
 
-  @override
-  void didUpdateWidget(covariant _ExpandedPlayerOrganism oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.expandProgress >= 1.0 && oldWidget.expandProgress < 1.0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _queueController.isAttached) {
-          _queueController.jumpTo(_queuePeekSize);
-        }
-      });
+  void _onExpandAnimationTick() {
+    final double value = widget.expandAnimation.value;
+    final double? last = _lastExpandValue;
+    _lastExpandValue = value;
+    if (last == null || last >= 1.0 || value < 1.0) {
+      return;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _queueController.isAttached) {
+        _queueController.jumpTo(_queuePeekSize);
+      }
+    });
   }
 
   double get _queueReveal {
@@ -1030,7 +1137,7 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
         ),
         child: Material(
           color: colorScheme.surface,
-          elevation: widget.expandProgress * tokens.spaceSmall,
+          elevation: tokens.spaceSmall,
           shape: const RoundedRectangleBorder(),
           clipBehavior: Clip.antiAlias,
           child: Stack(
@@ -1114,7 +1221,6 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                       child: _YtMusicNowPlayingStage(
                                         state: widget.state,
                                         audio: widget.audio,
-                                        expandProgress: widget.expandProgress,
                                         queueReveal: _queueReveal,
                                         onCollapse: widget.onCollapse,
                                       ),
@@ -1169,14 +1275,12 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
   const _YtMusicNowPlayingStage({
     required this.state,
     required this.audio,
-    required this.expandProgress,
     required this.queueReveal,
     required this.onCollapse,
   });
 
   final AudioPlayerState state;
   final AudioEntity audio;
-  final double expandProgress;
   final double queueReveal;
   final VoidCallback onCollapse;
 
@@ -2070,27 +2174,100 @@ class _PlayerPlayPauseAtom extends StatelessWidget {
   }
 }
 
+@immutable
+class _MiniPlayerSnapshot {
+  const _MiniPlayerSnapshot({
+    required this.progress,
+    required this.isPlaying,
+    required this.canGoPrevious,
+    required this.canGoNext,
+    required this.isSleepTimerActive,
+  });
+
+  final double progress;
+  final bool isPlaying;
+  final bool canGoPrevious;
+  final bool canGoNext;
+  final bool isSleepTimerActive;
+
+  static _MiniPlayerSnapshot fromState(AudioPlayerState state) {
+    final PositionData? data = state.positionData;
+    final double progress =
+        data == null || data.duration.inMilliseconds == 0
+        ? 0.0
+        : data.position.inMilliseconds / data.duration.inMilliseconds;
+    return _MiniPlayerSnapshot(
+      progress: progress.clamp(0.0, 1.0),
+      isPlaying: state.isPlaying,
+      canGoPrevious: state.canGoPrevious,
+      canGoNext: state.canGoNext,
+      isSleepTimerActive: state.isSleepTimerActive,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _MiniPlayerSnapshot &&
+          progress == other.progress &&
+          isPlaying == other.isPlaying &&
+          canGoPrevious == other.canGoPrevious &&
+          canGoNext == other.canGoNext &&
+          isSleepTimerActive == other.isSleepTimerActive;
+
+  @override
+  int get hashCode => Object.hash(
+    progress,
+    isPlaying,
+    canGoPrevious,
+    canGoNext,
+    isSleepTimerActive,
+  );
+}
+
 class _YtMusicMiniPlayer extends StatelessWidget {
   const _YtMusicMiniPlayer({
-    required this.state,
     required this.audio,
     required this.onTap,
     required this.onClose,
   });
 
-  final AudioPlayerState state;
   final AudioEntity audio;
   final VoidCallback onTap;
   final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
+    return BlocSelector<AudioPlayerBloc, AudioPlayerState, _MiniPlayerSnapshot>(
+      selector: _MiniPlayerSnapshot.fromState,
+      builder: (context, snapshot) {
+        return _YtMusicMiniPlayerBody(
+          audio: audio,
+          snapshot: snapshot,
+          onTap: onTap,
+          onClose: onClose,
+        );
+      },
+    );
+  }
+}
+
+class _YtMusicMiniPlayerBody extends StatelessWidget {
+  const _YtMusicMiniPlayerBody({
+    required this.audio,
+    required this.snapshot,
+    required this.onTap,
+    required this.onClose,
+  });
+
+  final AudioEntity audio;
+  final _MiniPlayerSnapshot snapshot;
+  final VoidCallback onTap;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
     final barTokens = Theme.of(context).componentTokens.mediaPlayerBar;
-    final double progress =
-        state.positionData?.duration.inMilliseconds.toDouble() == 0
-        ? 0.0
-        : (state.positionData?.position.inMilliseconds ?? 0) /
-              (state.positionData?.duration.inMilliseconds ?? 1);
     final bool sleepTimerEnabled = context
         .watch<SettingsCubit>()
         .state
@@ -2117,27 +2294,27 @@ class _YtMusicMiniPlayer extends StatelessWidget {
             title: audio.title,
             subtitle: audio.artist ?? context.l10n.unknownReciter,
             artwork: artwork,
-            progress: progress.clamp(0.0, 1.0),
-            isPlaying: state.isPlaying,
-            canGoPrevious: state.canGoPrevious,
-            canGoNext: state.canGoNext,
-            isSleepTimerActive: state.isSleepTimerActive,
+            progress: snapshot.progress,
+            isPlaying: snapshot.isPlaying,
+            canGoPrevious: snapshot.canGoPrevious,
+            canGoNext: snapshot.canGoNext,
+            isSleepTimerActive: snapshot.isSleepTimerActive,
             isSleepTimerEnabled: sleepTimerEnabled,
             onTap: onTap,
             onClose: onClose,
             onPlayPause: () {
               context.read<AudioPlayerBloc>().add(
-                state.isPlaying
+                snapshot.isPlaying
                     ? const AudioPlayerEvent.pauseAudio()
                     : const AudioPlayerEvent.playAudio(),
               );
             },
-            onPrevious: state.canGoPrevious
+            onPrevious: snapshot.canGoPrevious
                 ? () => context.read<AudioPlayerBloc>().add(
                     const AudioPlayerEvent.skipToPrevious(),
                   )
                 : null,
-            onNext: state.canGoNext
+            onNext: snapshot.canGoNext
                 ? () => context.read<AudioPlayerBloc>().add(
                     const AudioPlayerEvent.skipToNext(),
                   )

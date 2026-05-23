@@ -46,6 +46,7 @@ abstract final class QuranPlayerTransportControls {
       previous.speed != current.speed ||
       previous.repeatMode != current.repeatMode ||
       previous.shuffleMode != current.shuffleMode ||
-      previous.dismissedAudioId != current.dismissedAudioId ||
-      previous.positionData != current.positionData;
+      previous.dismissedAudioId != current.dismissedAudioId;
+  // [positionData] is excluded so expand/collapse animations are not
+  // interrupted by per-tick progress rebuilds of the expanded sheet.
 }
