@@ -2,11 +2,13 @@ package com.tilawa.app.auth
 
 import android.content.Context
 import android.os.Build
+import android.util.Base64
 import androidx.annotation.VisibleForTesting
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.PrepareGetCredentialResponse
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import java.security.SecureRandom
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -62,7 +64,7 @@ object GoogleSignInPrepareBridge {
                 val option = GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
                     .setServerClientId(googleClientId)
-                    .setNonce(System.currentTimeMillis().toString())
+                    .setNonce(generateNonce())
                     .build()
                 val request = GetCredentialRequest.Builder()
                     .addCredentialOption(option)
@@ -79,6 +81,23 @@ object GoogleSignInPrepareBridge {
     fun clear() {
         prepareResponse = null
         isPrepareRunning = false
+    }
+
+    private const val NONCE_BYTES = 24
+
+    /**
+     * Generates a cryptographically-random nonce for the Google ID token
+     * request. A predictable nonce (e.g. epoch ms) defeats the replay
+     * protection that Sign in with Google's nonce field is designed for.
+     */
+    @VisibleForTesting
+    internal fun generateNonce(): String {
+        val bytes = ByteArray(NONCE_BYTES)
+        SecureRandom().nextBytes(bytes)
+        return Base64.encodeToString(
+            bytes,
+            Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP,
+        )
     }
 
     @VisibleForTesting
