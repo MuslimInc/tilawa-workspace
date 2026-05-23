@@ -10,7 +10,7 @@ import '../../domain/usecases/get_reciters_use_case.dart';
 part 'reciters_event.dart';
 part 'reciters_state.dart';
 
-@injectable
+@lazySingleton
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
   RecitersBloc(this._getRecitersUseCase) : super(const RecitersInitial()) {
     on<LoadReciters>(_onLoadReciters);

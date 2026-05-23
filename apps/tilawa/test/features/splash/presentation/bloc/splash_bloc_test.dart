@@ -31,6 +31,7 @@ void main() {
       mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
     ).thenAnswer((_) async {});
     when(mockReadiness.timedOut).thenReturn(false);
+    when(mockReadiness.recitersDataReady).thenReturn(false);
     bloc = SplashBloc(
       mockGetSplashNextRouteUseCase,
       mockPrepareGoogleSignIn,
@@ -117,6 +118,93 @@ void main() {
         verify(
           mockReadiness.waitUntilReady(prepareShell: false),
         ).called(1);
+        verifyNever(
+          mockReadiness.waitUntilReady(prepareShell: true),
+        );
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
+      'emits notification route for reciter deep link without shell prep',
+      build: () {
+        when(mockGetSplashNextRouteUseCase.call()).thenAnswer(
+          (_) async => const SplashRouteResult(
+            SplashDestination.notificationLaunch,
+            notificationData: {'type': 'reciter', 'reciterId': '42'},
+          ),
+        );
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const SplashStarted()),
+      expect: () => [
+        isA<SplashNavigateToNotification>().having(
+          (state) => state.location,
+          'location',
+          '/reciter/42',
+        ),
+      ],
+      verify: (_) {
+        verify(
+          mockReadiness.waitUntilReady(prepareShell: false),
+        ).called(1);
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
+      'falls back to home when notification launch has no payload data',
+      build: () {
+        when(mockGetSplashNextRouteUseCase.call()).thenAnswer(
+          (_) async => const SplashRouteResult(
+            SplashDestination.notificationLaunch,
+          ),
+        );
+        when(mockReadiness.timedOut).thenReturn(false);
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const SplashStarted()),
+      expect: () => [const SplashNavigateToHome(timedOut: false)],
+      verify: (_) {
+        verify(
+          mockReadiness.waitUntilReady(prepareShell: false),
+        ).called(1);
+        verifyNever(
+          mockReadiness.waitUntilReady(prepareShell: true),
+        );
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
+      'emits home with timedOut when shell prep timed out on splash',
+      build: () {
+        when(
+          mockGetSplashNextRouteUseCase.call(),
+        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        when(mockReadiness.timedOut).thenReturn(true);
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const SplashStarted()),
+      expect: () => [const SplashNavigateToHome(timedOut: true)],
+      verify: (_) {
+        verify(
+          mockReadiness.waitUntilReady(prepareShell: true),
+        ).called(1);
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
+      'falls back to home when route resolution throws',
+      build: () {
+        when(
+          mockGetSplashNextRouteUseCase.call(),
+        ).thenThrow(Exception('route failure'));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const SplashStarted()),
+      expect: () => [const SplashNavigateToHome()],
+      verify: (_) {
+        verifyNever(
+          mockReadiness.waitUntilReady(prepareShell: anyNamed('prepareShell')),
+        );
       },
     );
   });

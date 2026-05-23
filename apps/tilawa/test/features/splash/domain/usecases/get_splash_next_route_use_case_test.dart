@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use_case.dart';
@@ -66,6 +67,48 @@ void main() {
         expect(result.notificationData, {'type': 'quran', 'surahNumber': '2'});
         expect(AppRouter.pendingFcmMessage, isNull);
         verifyNever(() => mockCheckOnboardingStatus.call());
+        verifyNever(() => mockGetCurrentUserUseCase.call());
+      },
+    );
+
+    test('returns home when signed in and no notification pending', () async {
+      when(() => mockCheckOnboardingStatus()).thenAnswer((_) async => true);
+      when(() => mockGetCurrentUserUseCase()).thenReturn(
+        UserEntity(
+          id: '1',
+          email: 'a@b.com',
+          displayName: 'Test',
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      final result = await useCase();
+
+      expect(result.destination, SplashDestination.home);
+      expect(result.notificationData, isNull);
+    });
+
+    test(
+      'local notification takes priority over signed-in home routing',
+      () async {
+        when(() => mockCheckOnboardingStatus()).thenAnswer((_) async => true);
+        when(() => mockGetCurrentUserUseCase()).thenReturn(
+          UserEntity(
+            id: '1',
+            email: 'a@b.com',
+            displayName: 'Test',
+            createdAt: DateTime(2026),
+          ),
+        );
+        AppRouter.pendingLocalNotificationResponse = const NotificationResponse(
+          notificationResponseType:
+              NotificationResponseType.selectedNotification,
+          payload: '{"type":"settings"}',
+        );
+
+        final result = await useCase();
+
+        expect(result.destination, SplashDestination.notificationLaunch);
         verifyNever(() => mockGetCurrentUserUseCase.call());
       },
     );

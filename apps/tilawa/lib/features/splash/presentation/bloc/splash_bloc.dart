@@ -79,6 +79,7 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
           'location': location,
           'hasExtra': extra != null,
           'shellPrepOnSplash': prepareShell,
+          'recitersReady': _readiness.recitersDataReady,
           'timedOut': _readiness.timedOut,
         },
       );

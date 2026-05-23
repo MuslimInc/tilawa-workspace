@@ -111,6 +111,22 @@ class _RecitersScreenState extends State<RecitersScreen> {
   void initState() {
     super.initState();
     _favoritesCubit = getIt<FavoritesCubit>();
+    final RecitersBloc recitersBloc = context.read<RecitersBloc>();
+    final RecitersState startupState = recitersBloc.state;
+
+    if (startupState is RecitersLoaded) {
+      _isStartupLiteUi = false;
+      _allowHeavyLoadedResults = true;
+      _favoritesCubit.loadFavorites();
+      return;
+    }
+
+    if (startupState is RecitersLoading) {
+      _isStartupLiteUi = false;
+      _favoritesCubit.loadFavorites();
+      return;
+    }
+
     _startupLiteUiTimer = Timer(_startupLiteUiDuration, () {
       if (!mounted) return;
       setState(() {
@@ -127,7 +143,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
       _initialLoadTimer = Timer(_initialRecitersLoadDelay, () {
         if (!mounted) return;
         debugPrint('[AppLaunch] source=RecitersScreen initial-load started');
-        context.read<RecitersBloc>().add(const LoadReciters());
+        recitersBloc.add(const LoadReciters());
       });
     });
   }
@@ -631,7 +647,7 @@ class _RecitersResultSection extends StatelessWidget {
       );
     }
 
-    return const SliverToBoxAdapter(child: SizedBox.shrink());
+    return _RecitersLoadingSection();
   }
 }
 

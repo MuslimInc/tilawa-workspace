@@ -5,44 +5,42 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 
 void main() {
   group('NotificationNavigationResolver', () {
-    test('resolveLocation maps reciter type', () {
+    test('resolveLocation maps settings notification to settings route', () {
       final String location = NotificationNavigationResolver.resolveLocation(
-        const {'type': 'reciter', 'data': '42'},
+        const {'type': 'settings'},
       );
-      expect(location, '/reciter/42');
+
+      expect(location, const SettingsRoute().location);
     });
 
-    test('resolveExtra returns embedded reciter map', () {
-      const reciter = ReciterEntity(
-        id: 42,
-        name: 'Test Reciter',
-        letter: 'T',
-        date: '2024-01-01',
-        moshaf: [],
+    test('resolveLocation maps reciter notification to reciter details', () {
+      final String location = NotificationNavigationResolver.resolveLocation(
+        const {'type': 'reciter', 'reciterId': '7'},
       );
+
+      expect(location, const ReciterDetailsRoute(reciterId: '7').location);
+    });
+
+    test('resolveExtra returns embedded reciter entity for reciter routes', () {
+      final String location = const ReciterDetailsRoute(reciterId: '9').location;
+
       final Object? extra = NotificationNavigationResolver.resolveExtra(
-        {
+        <String, dynamic>{
           'type': 'reciter',
-          'reciter': {
-            'id': 42,
-            'name': 'Test Reciter',
+          'reciterId': '9',
+          'reciter': <String, dynamic>{
+            'id': 9,
+            'name': 'Test',
             'letter': 'T',
-            'date': '2024-01-01',
-            'moshaf': <Map<String, dynamic>>[],
+            'date': '',
+            'moshaf': <dynamic>[],
           },
         },
-        '/reciter/42',
-      );
-      expect(extra, reciter);
-    });
-
-    test('resolveExtra returns prayer payload string', () {
-      final String location = const PrayerNotificationStatusRoute().location;
-      final Object? extra = NotificationNavigationResolver.resolveExtra(
-        {'payload': '{"prayer_name":"asr"}'},
         location,
       );
-      expect(extra, '{"prayer_name":"asr"}');
+
+      expect(extra, isA<ReciterEntity>());
+      expect((extra! as ReciterEntity).id, 9);
     });
   });
 }
