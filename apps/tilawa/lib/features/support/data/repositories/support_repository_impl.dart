@@ -35,10 +35,10 @@ class SupportRepositoryImpl implements SupportRepository {
   final StreamController<PurchaseOutcome> _verifiedController =
       StreamController<PurchaseOutcome>.broadcast();
 
-  /// Tokens already (or currently) being verified — prevents double-processing
-  /// when both the active waiter and the broadcast stream fire for the same
-  /// event, or when restorePurchases() re-emits a token we just handled.
-  final Set<String> _handledTokens = <String>{};
+  /// In-flight or completed verification per token. Collapses duplicate work
+  /// when the broadcast stream and [purchaseSupportProduct] see the same event.
+  final Map<String, Future<PurchaseOutcome>> _verificationByToken =
+      <String, Future<PurchaseOutcome>>{};
 
   @override
   Stream<PurchaseOutcome> get watchVerifiedPurchases =>
@@ -79,13 +79,16 @@ class SupportRepositoryImpl implements SupportRepository {
     return _verifyAndComplete(event);
   }
 
-  Future<PurchaseOutcome> _verifyAndComplete(PlayPurchaseEvent event) async {
-    if (!_handledTokens.add(event.purchaseToken)) {
-      // Already verified (or being verified) in this app session. The server
-      // ledger is idempotent on the same token hash, so we just need to keep
-      // local side-effects to one emission.
-      throw const PurchaseFailure.alreadyOwned();
-    }
+  Future<PurchaseOutcome> _verifyAndComplete(PlayPurchaseEvent event) {
+    return _verificationByToken.putIfAbsent(
+      event.purchaseToken,
+      () => _runVerifyAndComplete(event),
+    );
+  }
+
+  Future<PurchaseOutcome> _runVerifyAndComplete(
+    PlayPurchaseEvent event,
+  ) async {
     try {
       final VerifiedPurchase verified = await _verification.verify(
         productId: event.productId,
@@ -116,8 +119,8 @@ class SupportRepositoryImpl implements SupportRepository {
       _verifiedController.add(outcome);
       return outcome;
     } catch (_) {
-      // Allow a retry on the same token if verification failed transiently.
-      _handledTokens.remove(event.purchaseToken);
+      // Drop the cached future so a retry can re-verify the same token.
+      _verificationByToken.remove(event.purchaseToken);
       rethrow;
     }
   }
@@ -126,15 +129,16 @@ class SupportRepositoryImpl implements SupportRepository {
     try {
       await _verifyAndComplete(event);
     } on PurchaseFailure catch (failure) {
-      // Already-handled dedupe or transient verify failure; do not crash the
-      // singleton's broadcast subscription. The active purchase flow (if any)
-      // reports failures through its own path.
+      // Background-only path: never tear down the process-wide purchaseEvents
+      // subscription. Foreground [purchaseSupportProduct] awaits the same
+      // verification future and surfaces failures to the Support UI.
       developer.log(
         'background purchase verification failed: ${failure.reason}',
         name: 'tilawa.support.repo',
         level: 900,
       );
     } catch (e, st) {
+      // Same subscription safety as above for unexpected errors.
       developer.log(
         'background purchase verification crashed',
         name: 'tilawa.support.repo',

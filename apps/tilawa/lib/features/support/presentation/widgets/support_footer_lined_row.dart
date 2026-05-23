@@ -28,7 +28,7 @@ class SupportFooterLinedRow extends StatelessWidget {
           SizedBox(
             width: slot,
             height: slot,
-            child: Center(child: leading ?? const SizedBox.shrink()),
+            child: Center(child: leading!),
           ),
         Expanded(child: content),
       ],
