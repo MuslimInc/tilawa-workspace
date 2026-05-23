@@ -518,6 +518,36 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// Single-word label for the reciters tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Reciters'**
+  String get bottomNavReciters;
+
+  /// Single-word label for the prayer times tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer'**
+  String get bottomNavPrayer;
+
+  /// Single-word label for the Quran tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get bottomNavQuran;
+
+  /// Single-word label for the athkar tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Athkar'**
+  String get bottomNavAthkar;
+
+  /// Single-word label for the settings tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get bottomNavSettings;
+
   /// Audio settings section title
   ///
   /// In en, this message translates to:

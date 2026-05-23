@@ -286,6 +286,26 @@
     "@settings": {
         "description": "Settings section title"
     },
+    "bottomNavReciters": "Reciters",
+    "@bottomNavReciters": {
+        "description": "Single-word label for the reciters tab in the phone bottom navigation bar"
+    },
+    "bottomNavPrayer": "Prayer",
+    "@bottomNavPrayer": {
+        "description": "Single-word label for the prayer times tab in the phone bottom navigation bar"
+    },
+    "bottomNavQuran": "Quran",
+    "@bottomNavQuran": {
+        "description": "Single-word label for the Quran tab in the phone bottom navigation bar"
+    },
+    "bottomNavAthkar": "Athkar",
+    "@bottomNavAthkar": {
+        "description": "Single-word label for the athkar tab in the phone bottom navigation bar"
+    },
+    "bottomNavSettings": "Settings",
+    "@bottomNavSettings": {
+        "description": "Single-word label for the settings tab in the phone bottom navigation bar"
+    },
     "audioSettings": "Audio",
     "@audioSettings": {
         "description": "Audio settings section title"

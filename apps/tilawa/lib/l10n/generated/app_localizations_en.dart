@@ -224,6 +224,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get bottomNavReciters => 'Reciters';
+
+  @override
+  String get bottomNavPrayer => 'Prayer';
+
+  @override
+  String get bottomNavQuran => 'Quran';
+
+  @override
+  String get bottomNavAthkar => 'Athkar';
+
+  @override
+  String get bottomNavSettings => 'Settings';
+
+  @override
   String get audioSettings => 'Audio';
 
   @override

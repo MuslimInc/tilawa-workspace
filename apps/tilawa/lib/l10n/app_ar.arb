@@ -286,6 +286,11 @@
     "@settings": {
         "description": "Settings section title"
     },
+    "bottomNavReciters": "القراء",
+    "bottomNavPrayer": "الصلاة",
+    "bottomNavQuran": "القرآن",
+    "bottomNavAthkar": "الأذكار",
+    "bottomNavSettings": "الإعدادات",
     "audioSettings": "الصوتيات",
     "@audioSettings": {
         "description": "Audio settings section title"

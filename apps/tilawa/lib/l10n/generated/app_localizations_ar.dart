@@ -223,6 +223,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings => 'الإعدادات';
 
   @override
+  String get bottomNavReciters => 'القراء';
+
+  @override
+  String get bottomNavPrayer => 'الصلاة';
+
+  @override
+  String get bottomNavQuran => 'القرآن';
+
+  @override
+  String get bottomNavAthkar => 'الأذكار';
+
+  @override
+  String get bottomNavSettings => 'الإعدادات';
+
+  @override
   String get audioSettings => 'الصوتيات';
 
   @override
