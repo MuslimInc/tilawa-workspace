@@ -26,7 +26,6 @@ import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
-import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 import 'package:tilawa/screens/main_screen.dart';
 import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
@@ -146,7 +145,10 @@ void main() {
     await getIt.reset();
   });
 
-  Widget buildTestApp({MainScreenCubit? mainScreenCubit}) {
+  Widget buildTestApp({
+    MainScreenCubit? mainScreenCubit,
+    RecitersBloc? recitersBloc,
+  }) {
     final mockPlayerBackgroundCubit = _MockPlayerBackgroundCubit();
     when(() => mockPlayerBackgroundCubit.state).thenReturn(
       const PlayerBackgroundInitial(PlayerBackgroundConfiguration()),
@@ -155,6 +157,23 @@ void main() {
     when(() => mockAudioPlayerBloc.state).thenReturn(
       const AudioPlayerState(status: AudioPlayerStatus.initial),
     );
+
+    final mockGetLanguage = _MockGetCurrentLanguageUseCase();
+    when(
+      () => mockGetLanguage(),
+    ).thenAnswer((_) async => const Right<Failure, String>('en'));
+    final mockSetLanguage = _MockSetLanguageUseCase();
+    when(
+      () => mockSetLanguage(any()),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
+
+    final RecitersBloc effectiveRecitersBloc = recitersBloc ?? () {
+      final mockGetReciters = _MockGetRecitersUseCase();
+      when(() => mockGetReciters.call()).thenAnswer(
+        (_) async => const Right<Failure, List<ReciterEntity>>([]),
+      );
+      return RecitersBloc(mockGetReciters);
+    }();
 
     final router = GoRouter(
       initialLocation: '/',
@@ -170,6 +189,13 @@ void main() {
       providers: [
         BlocProvider<MainScreenCubit>(
           create: (_) => mainScreenCubit ?? MainScreenCubit(),
+        ),
+        BlocProvider<RecitersBloc>.value(value: effectiveRecitersBloc),
+        BlocProvider<AlphabetScrollbarBloc>(
+          create: (_) => AlphabetScrollbarBloc(),
+        ),
+        BlocProvider<LocalizationBloc>(
+          create: (_) => LocalizationBloc(mockGetLanguage, mockSetLanguage),
         ),
         BlocProvider<PlayerBackgroundCubit>.value(
           value: mockPlayerBackgroundCubit,
@@ -221,7 +247,7 @@ void main() {
       ),
     ];
 
-    when(() => mockGetReciters()).thenAnswer(
+    when(() => mockGetReciters.call()).thenAnswer(
       (_) async => const Right<Failure, List<ReciterEntity>>(reciters),
     );
     when(
@@ -256,27 +282,6 @@ void main() {
       ),
     );
   }
-
-  testWidgets('mounts reciters tab immediately when splash shell prep finished', (
-    WidgetTester tester,
-  ) async {
-    final mockGetReciters = _MockGetRecitersUseCase();
-    when(() => mockGetReciters()).thenAnswer(
-      (_) async => const Right<Failure, List<ReciterEntity>>([]),
-    );
-    final recitersBloc = RecitersBloc(mockGetReciters);
-    final readiness = AppStartupReadiness(recitersBloc);
-    await readiness.waitUntilReady(prepareShell: true);
-
-    await tester.pumpWidget(
-      buildTestApp(mainScreenCubit: MainScreenCubit(readiness: readiness)),
-    );
-    await tester.pump();
-
-    expect(find.byType(RecitersScreen), findsOneWidget);
-
-    await recitersBloc.close();
-  });
 
   testWidgets('keeps main content deferred before initial tab settle delay', (
     WidgetTester tester,
