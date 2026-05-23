@@ -129,12 +129,16 @@ class SupportRepositoryImpl implements SupportRepository {
     try {
       await _verifyAndComplete(event);
     } on PurchaseFailure catch (failure) {
+      // Background-only path: never tear down the process-wide purchaseEvents
+      // subscription. Foreground [purchaseSupportProduct] awaits the same
+      // verification future and surfaces failures to the Support UI.
       developer.log(
         'background purchase verification failed: ${failure.reason}',
         name: 'tilawa.support.repo',
         level: 900,
       );
     } catch (e, st) {
+      // Same subscription safety as above for unexpected errors.
       developer.log(
         'background purchase verification crashed',
         name: 'tilawa.support.repo',
