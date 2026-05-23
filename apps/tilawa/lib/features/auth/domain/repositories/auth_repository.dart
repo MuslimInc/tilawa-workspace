@@ -6,6 +6,9 @@ abstract class AuthRepository {
 
   Future<AuthResult> signInWithGoogle();
 
+  /// Pre-warms Google account UI (Credential Manager on Android).
+  Future<void> prepareGoogleSignIn();
+
   Future<void> signOut();
 
   UserEntity? get currentUser;

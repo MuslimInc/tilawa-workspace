@@ -4,7 +4,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:quran_image/domain/repositories/quran_image_cache_repository.dart';
 import 'package:quran_image/domain/usecases/prepare_quran_image_cache.dart';
 import 'package:quran_qcf/quran_qcf.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/services/performance_monitoring_service.dart';
 
 import '../logging/app_logger.dart';

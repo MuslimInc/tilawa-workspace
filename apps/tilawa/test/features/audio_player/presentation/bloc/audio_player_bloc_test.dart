@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/check_audio_playability_use_case.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_use_case.dart';
@@ -43,6 +44,7 @@ import 'audio_player_bloc_test.mocks.dart';
   CheckAudioPlayabilityUseCase,
   AddOrUpdateHistoryUseCase,
   AnalyticsService,
+  AppReviewTriggerManager,
 ])
 void main() {
   setUpAll(() async {
@@ -94,6 +96,7 @@ void main() {
   late MockCheckAudioPlayabilityUseCase mockCheckAudioPlayability;
   late MockAddOrUpdateHistoryUseCase mockAddOrUpdateHistory;
   late MockAnalyticsService mockAnalyticsService;
+  late MockAppReviewTriggerManager mockAppReviewTriggerManager;
 
   late BehaviorSubject<AudioEntity?> currentAudioSubject;
   late BehaviorSubject<PlaybackStateEntity> playbackStateSubject;
@@ -125,6 +128,16 @@ void main() {
     mockCheckAudioPlayability = MockCheckAudioPlayabilityUseCase();
     mockAddOrUpdateHistory = MockAddOrUpdateHistoryUseCase();
     mockAnalyticsService = MockAnalyticsService();
+    mockAppReviewTriggerManager = MockAppReviewTriggerManager();
+    when(
+      mockAppReviewTriggerManager.onSessionStarted(),
+    ).thenAnswer((_) async {});
+    when(
+      mockAppReviewTriggerManager.recordSignal(any),
+    ).thenAnswer((_) async {});
+    when(
+      mockAppReviewTriggerManager.tryPromptIfEligible(any),
+    ).thenAnswer((_) async => false);
 
     currentAudioSubject = BehaviorSubject<AudioEntity?>();
     playbackStateSubject = BehaviorSubject<PlaybackStateEntity>();
@@ -237,6 +250,7 @@ void main() {
       mockSettingsCubit,
       mockAddOrUpdateHistory,
       mockAnalyticsService,
+      mockAppReviewTriggerManager,
     );
   }
 

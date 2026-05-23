@@ -1,11 +1,52 @@
 ---
 name: flutter-apply-architecture-best-practices
-description: Architects a Flutter application using the recommended layered approach (UI, Logic, Data). Use when structuring a new project or refactoring for scalability.
+description: >-
+  Architects a Flutter application using layered UI, domain, and data design.
+  For the Tilawa app monorepo, follow the Tilawa section (Bloc, get_it,
+  feature folders). Use when structuring features or refactoring for scale.
 metadata:
   model: models/gemini-3.1-pro-preview
-  last_modified: Tue, 21 Apr 2026 20:11:20 GMT
+  last_modified: Sat, 23 May 2026 12:00:00 GMT
 ---
 # Architecting Flutter Applications
+
+## Tilawa app (`apps/tilawa`)
+
+In this monorepo, **Tilawa uses Bloc/Cubit**, not MVVM with `ChangeNotifier`.
+Follow `AGENTS.md` and existing features under `lib/features/<name>/`.
+
+### Layers (per feature)
+
+```text
+lib/features/<feature_name>/
+├── data/           # models, services, repository implementations
+├── domain/         # entities, repository interfaces, use cases
+└── presentation/   # blocs, cubits, screens, widgets
+```
+
+Shared app wiring: `lib/core/di/injection.dart` (`get_it`), `go_router` in
+`lib/router/`, global providers in `lib/core/providers/app_providers.dart`.
+
+### State management
+
+- **Bloc** for event-driven flows (lists, downloads, auth).
+- **Cubit** for simpler toggles/settings.
+- Inject repositories and use cases via constructor; register in `get_it`.
+- Return failures as `Either<Failure, T>` (or project equivalent); do not rely
+  on uncaught exceptions for expected errors.
+
+### Workflow: new Tilawa feature
+
+- [ ] Domain models and repository interface in `domain/`
+- [ ] Repository impl and services in `data/`
+- [ ] Use cases when logic is reused or non-trivial
+- [ ] Bloc/Cubit + events/states in `presentation/`
+- [ ] Register types in `injection.dart`; add `BlocProvider` if global
+- [ ] Unit tests for domain/data; bloc tests where behavior is critical
+
+For pre-release review of Tilawa code, use `tilawa-strict-code-review`.
+
+---
 
 ## Contents
 - [Architectural Layers](#architectural-layers)

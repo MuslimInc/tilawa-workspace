@@ -1,9 +1,8 @@
-import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 
-import 'injection.config.dart';
-
-final GetIt getIt = GetIt.instance;
-
-@InjectableInit(initializerName: 'initCore')
-Future<void> configureCoreDependencies() async => getIt.initCore();
+/// Micro-package entry for [injectable] 3.x code generation.
+///
+/// Generates [TilawaCorePackageModule]; the host app must include it via
+/// [InjectableInit.externalPackageModulesBefore].
+@InjectableInit.microPackage()
+void initMicroPackage() {}

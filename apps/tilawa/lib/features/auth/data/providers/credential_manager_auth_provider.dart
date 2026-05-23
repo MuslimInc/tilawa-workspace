@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
-import 'package:tilawa/core/logging/app_logger.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
@@ -27,7 +26,6 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
   @override
   Future<AuthResult> signIn() async {
     try {
-      // Use credential manager to save Google credential
       final GoogleIdTokenCredential? credential = await _credentialManager
           .saveGoogleCredential();
 
@@ -50,18 +48,9 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
 
       return AuthResult.success(user: user);
     } on PlatformException catch (e) {
-      // Handle PlatformException from credential manager
-      // Code 204 means "No credentials available" - user cancelled or no saved credentials
-      logger.d(
-        '[CredentialManagerAuthProvider] Caught PlatformException: code=${e.code}, message=${e.message}',
-      );
       if (e.code == '204' ||
           (e.message?.contains('No credentials available') ?? false) ||
           (e.message?.contains('Login failed') ?? false)) {
-        // Treat as cancelled - user needs to sign in again
-        logger.d(
-          '[CredentialManagerAuthProvider] No credentials available (code 204) - treating as cancelled',
-        );
         return const AuthResult.cancelled();
       }
       return AuthResult.failure(
@@ -75,20 +64,12 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
         message: e.message ?? 'Firebase authentication failed',
         code: e.code,
       );
-    } catch (e, stackTrace) {
-      // Catch any other exceptions, including PlatformException that might escape
-      logger.w(
-        '[CredentialManagerAuthProvider] Caught unexpected exception: $e\n$stackTrace',
-      );
+    } catch (e) {
       final errorString = e.toString();
       if (errorString.contains('PlatformException') &&
           (errorString.contains('204') ||
               errorString.contains('No credentials available') ||
               errorString.contains('Login failed'))) {
-        // Treat as cancelled
-        logger.d(
-          '[CredentialManagerAuthProvider] Detected PlatformException 204 in error string - treating as cancelled',
-        );
         return const AuthResult.cancelled();
       }
       return AuthResult.failure(message: errorString);
@@ -98,7 +79,11 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
   @override
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
-    await _credentialManager.logout();
+    try {
+      await _credentialManager.logout();
+    } catch (_) {
+      // Logout is best-effort after Firebase sign-out.
+    }
   }
 
   @override

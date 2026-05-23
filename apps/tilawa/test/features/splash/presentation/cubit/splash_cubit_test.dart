@@ -2,19 +2,23 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
+import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use_case.dart';
 import 'package:tilawa/features/splash/presentation/cubit/splash_cubit.dart';
 
 import 'splash_cubit_test.mocks.dart';
 
-@GenerateMocks([GetSplashNextRouteUseCase])
+@GenerateMocks([GetSplashNextRouteUseCase, PrepareGoogleSignInUseCase])
 void main() {
   late SplashCubit cubit;
   late MockGetSplashNextRouteUseCase mockGetSplashNextRouteUseCase;
+  late MockPrepareGoogleSignInUseCase mockPrepareGoogleSignIn;
 
   setUp(() {
     mockGetSplashNextRouteUseCase = MockGetSplashNextRouteUseCase();
-    cubit = SplashCubit(mockGetSplashNextRouteUseCase);
+    mockPrepareGoogleSignIn = MockPrepareGoogleSignInUseCase();
+    when(mockPrepareGoogleSignIn.call()).thenAnswer((_) async {});
+    cubit = SplashCubit(mockGetSplashNextRouteUseCase, mockPrepareGoogleSignIn);
   });
 
   tearDown(() {
@@ -48,6 +52,9 @@ void main() {
       },
       act: (cubit) => cubit.init(),
       expect: () => [const SplashNavigateToLogin()],
+      verify: (_) {
+        verify(mockPrepareGoogleSignIn.call()).called(1);
+      },
     );
 
     blocTest<SplashCubit, SplashState>(

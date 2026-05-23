@@ -4,10 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_image_reader_screen.dart';
 import 'package:tilawa/features/quran_reader/presentation/screens/quran_render_demo_screen.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/features/support/presentation/bloc/support_bloc.dart';
+import 'package:tilawa/features/support/presentation/bloc/support_event.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../features/app_review/domain/entities/app_review_blocked_flow.dart';
+import '../features/app_review/presentation/widgets/app_review_sacred_flow_scope.dart';
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
 import '../features/athkar/presentation/screens/tasbeeh_screen.dart';
@@ -22,7 +26,7 @@ import '../features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
-import '../features/premium/presentation/screens/premium_screen.dart';
+import '../features/support/presentation/screens/support_tilawa_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
@@ -45,6 +49,7 @@ part 'app_router_config.g.dart';
   routes: <TypedRoute<RouteData>>[
     TypedGoRoute<HomeRoute>(path: '/'),
     TypedGoRoute<ReciterDetailsRoute>(path: '/reciter/:reciterId'),
+    TypedGoRoute<SupportRoute>(path: '/support'),
     TypedGoRoute<PremiumRoute>(path: '/premium'),
     TypedGoRoute<SettingsRoute>(path: '/settings'),
     TypedGoRoute<DownloadsRoute>(path: '/downloads'),
@@ -111,12 +116,28 @@ class ReciterDetailsRoute extends GoRouteData with $ReciterDetailsRoute {
   }
 }
 
+class SupportRoute extends GoRouteData with $SupportRoute {
+  const SupportRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return BlocProvider(
+      create: (_) => getIt<SupportBloc>()..add(const SupportEvent.started()),
+      child: const SupportTilawaScreen(),
+    );
+  }
+}
+
+/// Legacy `/premium` path — same screen as [SupportRoute].
 class PremiumRoute extends GoRouteData with $PremiumRoute {
   const PremiumRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const PremiumScreen();
+    return BlocProvider(
+      create: (_) => getIt<SupportBloc>()..add(const SupportEvent.started()),
+      child: const SupportTilawaScreen(),
+    );
   }
 }
 
@@ -319,7 +340,10 @@ class QuranLastReadRoute extends GoRouteData with $QuranLastReadRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const QuranImageReaderScreen(surahNumber: 0);
+    return const AppReviewSacredFlowScope(
+      flow: AppReviewBlockedFlow.quranReading,
+      child: QuranImageReaderScreen(surahNumber: 0),
+    );
   }
 }
 
@@ -332,9 +356,12 @@ class QuranReaderRoute extends GoRouteData with $QuranReaderRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return QuranImageReaderScreen(
-      surahNumber: surahNumber,
-      initialAyah: ayahNumber,
+    return AppReviewSacredFlowScope(
+      flow: AppReviewBlockedFlow.quranReading,
+      child: QuranImageReaderScreen(
+        surahNumber: surahNumber,
+        initialAyah: ayahNumber,
+      ),
     );
   }
 }

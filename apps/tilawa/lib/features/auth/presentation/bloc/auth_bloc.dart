@@ -45,8 +45,12 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
         unawaited(_syncDeviceToken(user.id).catchError((_) {}));
         emit(AuthState.authenticated(user: user));
       },
-      failure: (message, code) => emit(AuthState.error(message: message)),
-      cancelled: () => emit(const AuthState.unauthenticated()),
+      failure: (message, code) {
+        emit(AuthState.error(message: message));
+      },
+      cancelled: () {
+        emit(const AuthState.unauthenticated());
+      },
     );
   }
 

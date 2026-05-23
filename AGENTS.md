@@ -7,6 +7,10 @@ shell commands, and other important information, read the current plan:
 For **visual and UX rules** (colors, tokens, layout, components), read the
 project design spec:
 [`DESIGN.md`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/DESIGN.md).
+**Brand intent:** [`docs/tilawa_brand.md`](docs/tilawa_brand.md).
+**Voluntary support (monetization ethics, entry points, MVP scope):**
+[`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md) and
+[`packages/ui_kit/docs/support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md).
 Optional **external reference** library (per-brand moodboards):
 [`design-md/`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/design-md)
 and catalog index

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/cubit/player_background_cubit.dart';
@@ -11,7 +11,6 @@ import '../../features/downloads/domain/repositories/downloads_repository.dart';
 import '../../features/downloads/presentation/bloc/downloads_bloc.dart';
 import '../../features/localization/presentation/bloc/localization_bloc.dart';
 import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
-import '../../features/premium/presentation/bloc/premium_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
 import '../../features/quran_reader/presentation/cubit/quran_settings_cubit.dart';
@@ -61,7 +60,6 @@ class AppProviders {
     ),
     BlocProvider<DownloadsBloc>(create: (context) => getIt<DownloadsBloc>()),
     BlocProvider<PlaylistsBloc>(create: (context) => getIt<PlaylistsBloc>()),
-    BlocProvider<PremiumBloc>(create: (context) => getIt<PremiumBloc>()),
     BlocProvider<QiblaBloc>(create: (context) => getIt<QiblaBloc>()),
 
     // Auth provider with initialization

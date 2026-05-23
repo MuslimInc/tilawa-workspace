@@ -137,3 +137,76 @@ final class NotificationFailure extends Failure {
   @override
   List<Object?> get props => [message, reason];
 }
+
+enum PurchaseFailureReason {
+  billingUnavailable,
+  productNotFound,
+  userCancelled,
+  pending,
+  verificationFailed,
+  alreadyOwned,
+  network,
+}
+
+final class PurchaseFailure extends Failure {
+  const PurchaseFailure([
+    super.message,
+    this.reason = PurchaseFailureReason.verificationFailed,
+  ]);
+
+  const PurchaseFailure.billingUnavailable()
+    : this(null, PurchaseFailureReason.billingUnavailable);
+
+  const PurchaseFailure.productNotFound()
+    : this(null, PurchaseFailureReason.productNotFound);
+
+  const PurchaseFailure.userCancelled()
+    : this(null, PurchaseFailureReason.userCancelled);
+
+  const PurchaseFailure.pending() : this(null, PurchaseFailureReason.pending);
+
+  const PurchaseFailure.verificationFailed()
+    : this(null, PurchaseFailureReason.verificationFailed);
+
+  const PurchaseFailure.alreadyOwned()
+    : this(null, PurchaseFailureReason.alreadyOwned);
+
+  const PurchaseFailure.network() : this(null, PurchaseFailureReason.network);
+
+  final PurchaseFailureReason reason;
+
+  @override
+  List<Object?> get props => [message, reason];
+}
+
+enum AppReviewFailureReason {
+  unavailable,
+  requestFailed,
+  storeListingFailed,
+  platformUnsupported,
+}
+
+/// In-app review or store-listing failures.
+final class AppReviewFailure extends Failure {
+  const AppReviewFailure([
+    super.message,
+    this.reason = AppReviewFailureReason.requestFailed,
+  ]);
+
+  const AppReviewFailure.unavailable()
+    : this(null, AppReviewFailureReason.unavailable);
+
+  const AppReviewFailure.requestFailed([String? message])
+    : this(message, AppReviewFailureReason.requestFailed);
+
+  const AppReviewFailure.storeListingFailed([String? message])
+    : this(message, AppReviewFailureReason.storeListingFailed);
+
+  const AppReviewFailure.platformUnsupported()
+    : this(null, AppReviewFailureReason.platformUnsupported);
+
+  final AppReviewFailureReason reason;
+
+  @override
+  List<Object?> get props => [message, reason];
+}

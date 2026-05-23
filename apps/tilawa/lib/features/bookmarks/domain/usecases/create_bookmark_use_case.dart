@@ -1,15 +1,24 @@
+import 'dart:async';
+
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import '../entities/bookmark_entity.dart';
 import '../repositories/bookmarks_repository.dart';
 
 @lazySingleton
 class CreateBookmarkUseCase {
-  const CreateBookmarkUseCase(this._repository);
+  CreateBookmarkUseCase(
+    this._repository,
+    this._appReviewTriggerManager,
+  );
 
   final BookmarksRepository _repository;
+  final AppReviewTriggerManager _appReviewTriggerManager;
 
   Future<Either<Failure, BookmarkEntity>> call({
     required int surahId,
@@ -39,6 +48,14 @@ class CreateBookmarkUseCase {
         audioUrl: audioUrl,
         label: label,
         artworkUrl: artworkUrl,
+      );
+      unawaited(
+        _appReviewTriggerManager.recordSignal(AppReviewSignal.bookmarkCreated),
+      );
+      unawaited(
+        _appReviewTriggerManager.tryPromptIfEligible(
+          AppReviewPromptMoment.bookmarkCreated,
+        ),
       );
       return Right(bookmark);
     } catch (e) {

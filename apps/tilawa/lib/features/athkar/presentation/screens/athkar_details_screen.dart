@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/features/app_review/domain/entities/app_review_blocked_flow.dart';
+import 'package:tilawa/features/app_review/presentation/widgets/app_review_sacred_flow_scope.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -43,11 +45,13 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    return BlocProvider(
-      create: (context) => getIt<AthkarCubit>()..loadAthkar(widget.categoryId),
-      child: BlocBuilder<AthkarCubit, AthkarState>(
-        builder: (context, state) {
-          return Scaffold(
+    return AppReviewSacredFlowScope(
+      flow: AppReviewBlockedFlow.athkar,
+      child: BlocProvider(
+        create: (context) => getIt<AthkarCubit>()..loadAthkar(widget.categoryId),
+        child: BlocBuilder<AthkarCubit, AthkarState>(
+          builder: (context, state) {
+            return Scaffold(
             appBar: TilawaAppBar(
               title: widget.categoryName,
               actions: [
@@ -130,7 +134,8 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
               },
             ),
           );
-        },
+          },
+        ),
       ),
     );
   }

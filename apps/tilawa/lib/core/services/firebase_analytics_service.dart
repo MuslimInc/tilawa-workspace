@@ -26,7 +26,10 @@ class FirebaseAnalyticsService implements AnalyticsService {
       return;
     }
     try {
-      await _analytics.logEvent(name: name, parameters: parameters);
+      await _analytics.logEvent(
+        name: name,
+        parameters: _withClientTimestamp(parameters),
+      );
     } catch (e) {
       // Log error but don't throw to avoid breaking app functionality
       logger.d('Analytics error: $e');
@@ -236,6 +239,14 @@ class FirebaseAnalyticsService implements AnalyticsService {
         AnalyticsParams.source: source,
       },
     );
+  }
+
+  Map<String, Object> _withClientTimestamp(Map<String, Object>? parameters) {
+    return _cleanParameters(<String, Object?>{
+      AnalyticsParams.clientTimestampMs:
+          DateTime.now().millisecondsSinceEpoch,
+      ...?parameters,
+    });
   }
 
   Map<String, Object> _cleanParameters(Map<String, Object?> parameters) {

@@ -1,11 +1,20 @@
 ---
 name: dart-add-unit-test
-description: Write and organize unit tests for functions, methods, and classes using `package:test`. Use when creating new logic or fixing bugs to ensure code remains correct and regression-free.
+description: >-
+  Write unit tests with package:test. In Tilawa, prefer package:checks
+  assertions and fake/stub dependencies over mockito unless mocks are required.
 metadata:
   model: models/gemini-3.1-pro-preview
-  last_modified: Fri, 24 Apr 2026 15:07:58 GMT
+  last_modified: Sat, 23 May 2026 12:00:00 GMT
 ---
 # Testing Dart and Flutter Applications
+
+## Tilawa conventions
+
+- Prefer **`package:checks`** for assertions (`dart-migrate-to-checks-package`).
+- Prefer **fakes or stubs** over mocks; use `mockito` only when interaction
+  verification or codegen mocks are explicitly needed.
+- Mirror `lib/` under `test/`; run with `flutter test` in app packages.
 
 ## Contents
 - [Structuring Test Files](#structuring-test-files)
@@ -24,13 +33,17 @@ Organize test files to mirror the `lib` directory structure to maintain predicta
 ## Writing Tests
 Utilize `package:test` as the standard testing library for Dart applications.
 
-* Import `package:test/test.dart` (or `package:flutter_test/flutter_test.dart` for Flutter).
-* Group related tests using the `group()` function to provide shared context.
-* Define individual test cases using the `test()` function.
-* Validate outcomes using the `expect()` function alongside matchers (e.g., `equals()`, `isTrue`, `throwsA()`).
-* Write asynchronous tests using standard `async`/`await` syntax. The test runner automatically waits for the `Future` to complete.
-* Manage test setup and teardown using `setUp()` and `tearDown()` callbacks.
-* If testing code that relies on dependency injection, use `package:mockito` alongside `package:test` to generate mock objects, configure fixed scenarios, and verify interactions.
+* Import `package:test/test.dart` (or `package:flutter_test/flutter_test.dart`
+  for Flutter).
+* In Tilawa packages that use checks: `import 'package:checks/checks.dart';`
+* Group related tests using `group()`.
+* Define cases with `test()`.
+* **Assertions:** Prefer `package:checks` (e.g. `check(that).equals(...)`).
+  Legacy `expect()` + matchers are acceptable in packages not yet migrated.
+* Use `async`/`await` for asynchronous tests.
+* Use `setUp()` and `tearDown()` for shared fixtures.
+* **Dependencies:** Inject fakes/stubs implementing the same interface. Use
+  `mockito` only when the user requests mocks or interaction verification.
 
 ## Executing Tests
 Select the appropriate test runner based on the project type and test location.
@@ -82,7 +95,23 @@ void main() {
 }
 ```
 
-### Mocking with Mockito
+### Fake repository (preferred in Tilawa)
+
+```dart
+class FakeUserRepository implements UserRepository {
+  User? user;
+
+  @override
+  Future<Either<Failure, User>> getUser(String id) async {
+    if (user == null) {
+      return Left(ServerFailure());
+    }
+    return Right(user!);
+  }
+}
+```
+
+### Mocking with Mockito (when required)
 Demonstrates configuring a mock object for dependency injection testing.
 
 ```dart

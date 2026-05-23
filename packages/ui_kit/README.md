@@ -93,6 +93,14 @@ Interactive previews are available via the `Widget Previewer` (if configured) or
 flutter run lib/previews/preview_main.dart # If available
 ```
 
+## Design documentation
+
+| Doc | Purpose |
+|-----|---------|
+| [`docs/premium_visual_system.md`](docs/premium_visual_system.md) | Calm, high-quality product chrome (not paid tiers) |
+| [`docs/support_visual_system.md`](docs/support_visual_system.md) | Support Tilawa voluntary contribution surfaces |
+| [`../../specs/016-support-tilawa/spec.md`](../../specs/016-support-tilawa/spec.md) | Monetization ethics, MVP scope, architecture |
+
 ## Implementation Guidelines
 - **Do**: Use existing design tokens via `AppTheme`.
 - **Do**: Ensure all interactive elements have a minimum touch target of 48x48.

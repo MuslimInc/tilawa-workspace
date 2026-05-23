@@ -166,6 +166,9 @@ abstract final class QuranPlayerSemanticsIds {
   /// Bottom-sheet "queue" section on the expanded player.
   static const String queueSheet = 'quran_player_queue_sheet';
 
+  /// Drag handle that resizes the queue sheet between peek and full height.
+  static const String queueSheetHandle = 'quran_player_queue_handle';
+
   /// Tappable queue track tile.
   /// [audioId] is [AudioEntity.id] (typically a stable surah id).
   static String queueItem(String audioId) => 'quran_player_queue_item_$audioId';

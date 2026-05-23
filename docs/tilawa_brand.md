@@ -2,7 +2,7 @@
 
 Islamic-brand identity layer for **Tilawa**. Sits **on top of** `DESIGN.md` and `AGENTS.md` — it does not replace tokens, redefine the palette, or introduce a new scheme. It names the *feeling* and the *cultural anchor*, and binds those to the tokens and `ColorScheme` roles that already exist.
 
-**Read order:** `AGENTS.md` (how to build) → `DESIGN.md` (what tokens exist) → **this file** (how to make it feel like Tilawa). When this file conflicts with `DESIGN.md`, `DESIGN.md` wins on implementation; this file wins on intent.
+**Read order:** `AGENTS.md` (how to build) → `DESIGN.md` (what tokens exist) → **this file** (how to make it feel like Tilawa) → [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md) (voluntary support ethics). When this file conflicts with `DESIGN.md`, `DESIGN.md` wins on implementation; this file wins on intent.
 
 **Reference moodboard:** [`design-md/apple/DESIGN.md`](design-md/apple/DESIGN.md) — for **rhythm, restraint, and reverence** only. We borrow Apple's discipline (the artifact speaks, the chrome recedes, exactly one shadow on the artifact, surface-color change as the divider). We do **not** borrow Apple's palette, type, or pill grammar. Tilawa's accent is teal; the artifact is the Mushaf page, not a phone.
 
@@ -50,7 +50,7 @@ These are **names for existing tokens**, not new hexes. Feature code still reads
 | **Vellum** (raised quiet container) | `colorScheme.surfaceContainerHigh` | Header bars, search field surrounds, action-button rests. Reads as "slightly above the page," never as "elevated card." |
 
 **Anti-patterns:**
-- Don't paint Gilding (`tertiary`) onto a button — it becomes a gold CTA that screams "premium." Gilding is decorative, never interactive.
+- Don't paint Gilding (`tertiary`) onto a button — it becomes a gold CTA that screams paywall or "VIP." Gilding is decorative, never interactive (especially never on Support Tilawa CTAs).
 - Don't use Scholar (`secondary`) as a co-primary. There is one accent per screen.
 - Don't introduce a second neutral ramp. Parchment + Vellum are the only surface tiers in feature code.
 
@@ -125,7 +125,8 @@ For inner elements nested inside a known outer container with known padding, pre
 - **Calm, second-person, no exclamation marks in chrome.** "Search reciters", not "Find your favorite reciter!"
 - **Respectful religious vocabulary.** "Surah", "Juz", "Hizb", "Mushaf" stay capitalized in English copy. Arabic UI uses native diacritics where the localization already supplies them.
 - **Errors apologize gently, suggest the next step.** "We couldn't reach the audio server. Try again in a moment." Not "Error 500." (Concrete error codes belong in logs, not chrome.)
-- **No marketing superlatives.** "Premium", "AI-powered", "best-in-class" do not appear.
+- **No marketing superlatives.** "Premium", "Pro", "VIP", "AI-powered", "best-in-class" do not appear in user-facing copy.
+- **Support, not upgrade.** Say "Support Tilawa" and "Thank you" — never "Unlock Premium" or "Upgrade now."
 
 (Concrete strings live in `*.arb` files; this is the voice they should land in.)
 
@@ -141,6 +142,7 @@ The screens and components that most define the Tilawa feeling — invest brand 
 4. **Player bar** — the persistent floating chrome; only the player + nav get the strong layered shadow.
 5. **Bottom-sheet scaffold** — already standardized (`TilawaBottomSheetScaffold`); brand rule is *Hairline only*, no card shadow inside sheets.
 6. **Settings** — calm, grouped, parchment-on-parchment with surface-tier change as the section break.
+7. **Support Tilawa** — voluntary contribution; grateful tone; transparent impact copy (see §12).
 
 Everything else inherits.
 
@@ -159,16 +161,60 @@ Everything else inherits.
 - Don't use gold (Gilding) as a CTA color, ever.
 - Don't add a second accent because "the screen feels flat." Flat is the brand.
 - Don't paste an external brand's palette (Apple Action Blue, Starbucks green) — see DESIGN §13.
+- Don't add support prompts to Quran reader, prayer, or athkar — see §12.
 
 ---
 
-## 11. Active brand initiative (rolling)
+## 12. Support Tilawa (voluntary contribution)
+
+Tilawa is sustained by **optional support**, not a premium subscription ladder.
+
+**Canonical positioning:** *A respectful Quran and worship app that stays calm,
+beautiful, and ad-free because users voluntarily support it.*
+
+### Product ethics (brand-level)
+
+| Principle | Brand expression |
+|-----------|------------------|
+| Worship stays free | No gates on Quran, prayer, athkar, or reasonable listening/downloads |
+| No intrusion | No launch popups, onboarding paywalls, or worship-time banners |
+| No dark patterns | No guilt, urgency timers, streaks, or public spend comparison |
+| Transparency | Explain what support funds (hosting, audio, tools, development, ad-free) |
+| Gratitude | Success feels like "thank you," not "you unlocked VIP" |
+
+### Entry points (only these by default)
+
+- **Settings** (Support group)
+- **About** / app info near version footer
+- **Profile** card link — quiet, optional
+
+**Never:** Quran reader chrome, prayer countdown, athkar flow, first launch.
+
+### Visual voice for support screens
+
+Follow [`packages/ui_kit/docs/support_visual_system.md`](../packages/ui_kit/docs/support_visual_system.md):
+
+- Calm parchment surfaces; one Ink CTA; hairline tier cards
+- Subtle geometric atmosphere only (§7 ornament rules) — no gold gradient heroes
+- Thank-you: restrained `TilawaEmptyState` — no confetti, crowns, or benefit unlock lists
+
+### Terminology
+
+| Do not say (UI) | Say instead |
+|-----------------|-------------|
+| Premium, Pro, VIP, Unlock, Upgrade | Support Tilawa, Supporter, Help keep Tilawa free |
+
+Engineering and MVP scope: [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md).
+
+---
+
+## 13. Active brand initiative (rolling)
 
 | Field | Detail |
 |---|---|
-| **Initiative** | Reciters screen brand exemplar |
-| **Status** | In progress on branch `fix/reciters-screen-ui-ux`. Surface tier and hairline grammar already in place; ambient ornament present and on-brand. |
-| **Brand check** | Reverent ✓ (no shadows on cards, ambient arcs subtle) · Scholarly ✓ (Alexandria, `textHeightLoose` ready) · Welcoming — improve via section breathing and warmer surface tier rhythm. |
-| **Next** | Apply §5 rhythm rule to the reciter list: lean on surface-tier change instead of hairlines for section grouping; ensure header bar uses Vellum (`surfaceContainerHigh`) consistently with bottom-nav family. |
+| **Initiative** | Support Tilawa — product philosophy & calm support surfaces |
+| **Status** | Spec [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md) approved; DESIGN §9 + `support_visual_system.md` authored. |
+| **Brand check** | Reverent ✓ (no worship CTAs) · Scholarly ✓ (transparent impact copy) · Welcoming ✓ (grateful, optional tone). |
+| **Next** | Remove remaining "Premium" user strings in legacy modules; validate support screen in AR/EN on device. |
 
 Replace or extend this section when the initiative completes or a new one begins.

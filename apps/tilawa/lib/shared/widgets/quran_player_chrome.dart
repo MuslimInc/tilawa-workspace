@@ -83,7 +83,7 @@ class QuranPlayerChromeNotifier extends ChangeNotifier {
       return;
     }
     _systemNavigationBarColorOverride = color;
-    notifyListeners();
+    _scheduleNotifyListeners();
   }
 
   void clearSystemNavigationBarColorOverride() {
@@ -91,7 +91,7 @@ class QuranPlayerChromeNotifier extends ChangeNotifier {
       return;
     }
     _systemNavigationBarColorOverride = null;
-    notifyListeners();
+    _scheduleNotifyListeners();
   }
 
   void _scheduleNotifyListeners() {
@@ -194,7 +194,9 @@ abstract final class AppShellRoutePolicy {
     if (location.startsWith('/prayer') || location == '/qibla') {
       return 1;
     }
-    if (location.startsWith('/settings') || location == '/premium') {
+    if (location.startsWith('/settings') ||
+        location == '/support' ||
+        location == '/premium') {
       return 3;
     }
     return null;

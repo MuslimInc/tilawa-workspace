@@ -1158,6 +1158,10 @@
     "@reset": {
         "description": "Reset label for thikr"
     },
+    "athkarResetConfirmationMessage": "Reset the count for this dhikr? Your progress on it will be cleared.",
+    "@athkarResetConfirmationMessage": {
+        "description": "Confirmation message before resetting Athkar count for the current item"
+    },
     "qibla": "Qibla",
     "@qibla": {
         "description": "Qibla tab label"
@@ -1260,29 +1264,45 @@
     "@qiblaCompassAccuracyPoor": {
         "description": "SnackBar message shown when Qibla compass sensor accuracy is poor"
     },
-    "onboardingTitle1": "Minutes from the Quran... change your whole day",
+    "onboardingTitle1": "Minutes with the Quran…\nChanges your whole day",
     "@onboardingTitle1": {
-        "description": "Onboarding page 1 title"
+        "description": "Onboarding page 1 title (line break intentional)"
     },
-    "onboardingDesc1": "When you feel life's constraints, remember there are verses in the Quran that speak exactly to your state. Just search for them and you will find tranquility.",
+    "onboardingDesc1": "Find verses that fit what you're going through, and take quiet minutes to read or listen.",
     "@onboardingDesc1": {
         "description": "Onboarding page 1 description"
     },
-    "onboardingTitle2": "A spiritual journey with multiple Quranic voices",
+    "onboardingTitle2": "Many reciter voices\nListen your way",
     "@onboardingTitle2": {
-        "description": "Onboarding page 2 title"
+        "description": "Onboarding page 2 title (line break intentional)"
     },
-    "onboardingDesc2": "Here, the voices of reciters from all over the nation gather, in recitations that weave the beauty of letters with the light of meaning.",
+    "onboardingDesc2": "Different reciters and riwayat — choose the voice and style that feels right.",
     "@onboardingDesc2": {
         "description": "Onboarding page 2 description"
     },
-    "onboardingTitle3": "Every verse and dhikr is an ongoing charity for Abu Hudhayfah",
+    "onboardingTitle3": "Every verse and dhikr\nOngoing charity for Abu Hudhayfah",
     "@onboardingTitle3": {
-        "description": "Onboarding page 3 title"
+        "description": "Onboarding page 3 title (line break intentional)"
     },
-    "onboardingDesc3": "Every verse you hear and every dhikr you repeat is an ongoing charity for our friend and brother Abu Hudhayfah Ahmed Mahmoud Toni, may God have mercy on him, forgive him, and grant him the highest level of Paradise.",
+    "onboardingDesc3": "Every Qur'an listen and every dhikr you repeat is ongoing charity for our brother Abu Hudhayfah Ahmad Mahmud Toni — may God have mercy on him and forgive him.",
     "@onboardingDesc3": {
         "description": "Onboarding page 3 description"
+    },
+    "onboardingPageSemantics": "Screen {current} of {total}",
+    "@onboardingPageSemantics": {
+        "description": "TalkBack label for onboarding carousel page",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "onboardingVisualHint2": "Browse reciters with search and favorites",
+    "@onboardingVisualHint2": {
+        "description": "Short caption under onboarding slide 2 device preview"
     },
     "startJourney": "Get started",
     "@startJourney": {
@@ -2580,5 +2600,213 @@
     "moreOptions": "More options",
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
+    },
+    "supportTilawa": "Support Tilawa",
+    "@supportTilawa": {
+        "description": "Support Tilawa screen and settings entry title"
+    },
+    "supportIntroLine": "Your contribution helps keep Tilawa going.",
+    "@supportIntroLine": {
+        "description": "Support screen single-line intro under app bar"
+    },
+    "supportTilawaSubtitle": "Your contribution helps keep Tilawa going.",
+    "@supportTilawaSubtitle": {
+        "description": "Legacy alias; prefer supportIntroLine"
+    },
+    "supportMissionBody": "Your contribution helps keep Tilawa going.",
+    "@supportMissionBody": {
+        "description": "Legacy alias; unused on support screen"
+    },
+    "supportImpactWhyTitle": "Why?",
+    "@supportImpactWhyTitle": {
+        "description": "Collapsible impact section title on support screen"
+    },
+    "supportImpactTitle": "Where your contribution goes",
+    "@supportImpactTitle": {
+        "description": "Legacy impact section title"
+    },
+    "supportImpactQuranHosting": "Mushaf and recitation audio",
+    "@supportImpactQuranHosting": {
+        "description": "Support impact bullet — Mushaf and audio"
+    },
+    "supportImpactReciterAudio": "Mushaf and recitation audio",
+    "@supportImpactReciterAudio": {
+        "description": "Legacy alias; merged into supportImpactQuranHosting"
+    },
+    "supportImpactPrayerTools": "Prayer times and tools",
+    "@supportImpactPrayerTools": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactDevelopment": "Operations and development",
+    "@supportImpactDevelopment": {
+        "description": "Support impact bullet"
+    },
+    "supportImpactAdFree": "Operations and development",
+    "@supportImpactAdFree": {
+        "description": "Legacy alias; unused on support screen"
+    },
+    "supportTierSmall": "Light",
+    "@supportTierSmall": {
+        "description": "Smallest one-time support tier label"
+    },
+    "supportTierKind": "Kind",
+    "@supportTierKind": {
+        "description": "Middle one-time support tier label"
+    },
+    "supportTierGenerous": "Generous",
+    "@supportTierGenerous": {
+        "description": "Largest one-time support tier label"
+    },
+    "supportContinueWithPlay": "Continue on Google Play",
+    "@supportContinueWithPlay": {
+        "description": "Primary support purchase CTA"
+    },
+    "supportConfirmationTitle": "Confirm",
+    "@supportConfirmationTitle": {
+        "description": "Support purchase confirmation sheet title"
+    },
+    "supportConfirmationBody": "Payment via Google Play. Tilawa does not store your card details.",
+    "@supportConfirmationBody": {
+        "description": "Support purchase confirmation sheet body"
+    },
+    "supportConfirm": "Continue",
+    "@supportConfirm": {
+        "description": "Support confirmation sheet confirm button"
+    },
+    "supportCancel": "Cancel",
+    "@supportCancel": {
+        "description": "Support confirmation sheet cancel button"
+    },
+    "supportThankYouTitle": "Thank you",
+    "@supportThankYouTitle": {
+        "description": "Support thank-you state title"
+    },
+    "supportThankYouBody": "Your contribution went through. We appreciate your trust.",
+    "@supportThankYouBody": {
+        "description": "Support thank-you state body"
+    },
+    "supportDone": "Done",
+    "@supportDone": {
+        "description": "Support thank-you dismiss button"
+    },
+    "supportRestorePurchases": "Restore",
+    "@supportRestorePurchases": {
+        "description": "Restore purchases action"
+    },
+    "supportRestoreHint": "If a payment did not finish, tap Restore.",
+    "@supportRestoreHint": {
+        "description": "Legacy restore helper; unused on support screen"
+    },
+    "supportTrustLinePrefix": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (",
+    "@supportTrustLinePrefix": {
+        "description": "Support trust line before charities link label"
+    },
+    "supportCharitiesLinkLabel": "partner charities list",
+    "@supportCharitiesLinkLabel": {
+        "description": "Tappable label for partner charities list URL"
+    },
+    "supportCharitiesSheetTitle": "Partner charities",
+    "@supportCharitiesSheetTitle": {
+        "description": "Bottom sheet title listing partner charity links"
+    },
+    "supportCharityDarAlArqam": "Dar Al-Arqam Quran Center",
+    "@supportCharityDarAlArqam": {
+        "description": "Partner charity — Dar Al-Arqam Quran center"
+    },
+    "supportCharityIslaheg": "Al-Islah Charitable Foundation",
+    "@supportCharityIslaheg": {
+        "description": "Partner charity — Al-Islah Charitable Foundation"
+    },
+    "supportTrustLineSuffix": ")",
+    "@supportTrustLineSuffix": {
+        "description": "Support trust line after charities link label"
+    },
+    "supportTrustLine": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
+    "@supportTrustLine": {
+        "description": "Full trust line for legacy use; UI uses prefix/link/suffix"
+    },
+    "supportPlayFooter": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
+    "@supportPlayFooter": {
+        "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
+    },
+    "supportDisclaimer": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
+    "@supportDisclaimer": {
+        "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
+    },
+    "supportOfflineMessage": "An internet connection is required.",
+    "@supportOfflineMessage": {
+        "description": "Offline message on support screen"
+    },
+    "supportBillingUnavailable": "Google Play payment is not available on this device.",
+    "@supportBillingUnavailable": {
+        "description": "Billing unavailable error"
+    },
+    "supportProductsUnavailable": "Options are unavailable right now. Try again later.",
+    "@supportProductsUnavailable": {
+        "description": "Products query failed error"
+    },
+    "supportPurchasePending": "Processing in Google Play.",
+    "@supportPurchasePending": {
+        "description": "Pending purchase message"
+    },
+    "supportPurchaseVerifyFailed": "Could not confirm yet. Try again later.",
+    "@supportPurchaseVerifyFailed": {
+        "description": "Verification failed message"
+    },
+    "supportRestoreNothingFound": "No previous payment found for this account.",
+    "@supportRestoreNothingFound": {
+        "description": "Restore found nothing message"
+    },
+    "supportRestoreComplete": "Restore complete.",
+    "@supportRestoreComplete": {
+        "description": "Restore completed message"
+    },
+    "supportSelectTier": "Choose an amount",
+    "@supportSelectTier": {
+        "description": "Prompt when no tier selected"
+    },
+    "supportSettingsGroupTitle": "Support Tilawa",
+    "@supportSettingsGroupTitle": {
+        "description": "Settings group title for support entry"
+    },
+    "supportHelpKeepFree": "Optional",
+    "@supportHelpKeepFree": {
+        "description": "Settings support tile subtitle"
+    },
+    "purchaseBillingUnavailable": "Payment is not available right now.",
+    "@purchaseBillingUnavailable": {
+        "description": "Localized purchase billing unavailable failure"
+    },
+    "purchaseProductNotFound": "This option is not available.",
+    "@purchaseProductNotFound": {
+        "description": "Localized purchase product not found failure"
+    },
+    "purchaseVerificationFailed": "Could not confirm. Try again later.",
+    "@purchaseVerificationFailed": {
+        "description": "Localized purchase verification failed failure"
+    },
+    "purchasePending": "Still processing.",
+    "@purchasePending": {
+        "description": "Localized purchase pending failure"
+    },
+    "purchaseAlreadyOwned": "This contribution was already completed.",
+    "@purchaseAlreadyOwned": {
+        "description": "Localized purchase already owned failure"
+    },
+    "appReviewUnavailable": "Reviews are not available on this device right now.",
+    "@appReviewUnavailable": {
+        "description": "In-app review API unavailable (simulator, old OS, etc.)"
+    },
+    "appReviewRequestFailed": "We could not open the review dialog. Please try again.",
+    "@appReviewRequestFailed": {
+        "description": "In-app review request failed"
+    },
+    "appReviewStoreListingFailed": "We could not open the app store. Please try again.",
+    "@appReviewStoreListingFailed": {
+        "description": "Store listing fallback failed"
+    },
+    "appReviewPlatformUnsupported": "Store reviews are not supported on this platform.",
+    "@appReviewPlatformUnsupported": {
+        "description": "In-app review not supported (e.g. web)"
     }
 }

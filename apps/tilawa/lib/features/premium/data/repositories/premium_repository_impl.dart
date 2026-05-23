@@ -1,8 +1,8 @@
 import 'package:injectable/injectable.dart';
-
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/config/currency_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
-import 'package:tilawa/core/logging/app_logger.dart';
+
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
 import '../../domain/repositories/premium_repository.dart';
@@ -174,13 +174,12 @@ class PremiumRepositoryImpl implements PremiumRepository {
 
   @override
   Future<bool> canAccessFeature(String featureName) async {
-    final PremiumStatus status = await getPremiumStatus();
-
     // Define which features require premium
     const premiumFeatures = ['download', 'offline_mode', 'high_quality'];
 
     if (premiumFeatures.contains(featureName)) {
-      return status.canDownload;
+      // Worship utilities stay free; support is voluntary.
+      return true;
     }
 
     return true; // Free features
@@ -188,7 +187,7 @@ class PremiumRepositoryImpl implements PremiumRepository {
 
   @override
   Future<bool> canDownload() async {
-    return canAccessFeature('download');
+    return true;
   }
 
   @override

@@ -830,6 +830,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get reset => 'إعادة ضبط';
 
   @override
+  String get athkarResetConfirmationMessage =>
+      'إعادة ضبط عدّاد هذا الذكر؟ سيتم مسح تقدّمك فيه.';
+
+  @override
   String get qibla => 'القبلة';
 
   @override
@@ -914,25 +918,33 @@ class AppLocalizationsAr extends AppLocalizations {
       'دقة البوصلة منخفضة. حرّك هاتفك على شكل رقم 8 لمعايرتها.';
 
   @override
-  String get onboardingTitle1 => 'دقائق من القرآن... تغير يومك كله';
+  String get onboardingTitle1 => 'دقائق من القرآن…\nيغيّر يومك كله';
 
   @override
   String get onboardingDesc1 =>
-      'حين تشعر بضيق الحياة، تذكر أن هناك آيات في القرآن تتحدث عن حالتك تمامًا، فقط ابحث عنها وستجد السكينة.';
+      'ابحث عن آيات تلائم ما تعيشه، وخُذ لنفسك دقائق هادئة للقراءة أو الاستماع.';
 
   @override
-  String get onboardingTitle2 => 'رحلة إيمانية مع أصوات قرانية متعددة';
+  String get onboardingTitle2 => 'أصوات قرّاء متعددة\nاستمع كما تريد';
 
   @override
   String get onboardingDesc2 =>
-      'هنا تجتمع أصوات القراء من كل أرجاء الأمة، في روايات تنسج جمال الحروف بنور المعاني.';
+      'قرّاء وروايات مختلفة — اختر الصوت والأسلوب الذي يريحك.';
 
   @override
-  String get onboardingTitle3 => 'كل آية وذكر صدقة جارية لأبي حذيفة';
+  String get onboardingTitle3 => 'كل آية وذكر\nصدقة جارية لأبي حذيفة';
 
   @override
   String get onboardingDesc3 =>
-      'كل آية تسمعها وكل ذكر تردده هو صدقة جارية لصديقنا وأخانا أبو حذيفة أحمد محمود توني رحمه الله وغفرله وأسكنه فسيح جناته';
+      'كل ما تسمعه من القرآن وكل ذكر تردّده صدقة جارية لأخينا أبو حذيفة أحمد محمود توني رحمه الله وغفر له.';
+
+  @override
+  String onboardingPageSemantics(int current, int total) {
+    return 'الشاشة $current من $total';
+  }
+
+  @override
+  String get onboardingVisualHint2 => 'تصفّح القرّاء مع البحث والمفضلة';
 
   @override
   String get startJourney => 'ابدأ';
@@ -1914,4 +1926,172 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get moreOptions => 'المزيد';
+
+  @override
+  String get supportTilawa => 'ادعم تلاوة';
+
+  @override
+  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار تلاوة.';
+
+  @override
+  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار تلاوة.';
+
+  @override
+  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار تلاوة.';
+
+  @override
+  String get supportImpactWhyTitle => 'لماذا؟';
+
+  @override
+  String get supportImpactTitle => 'أين تذهب مشاركتك';
+
+  @override
+  String get supportImpactQuranHosting => 'المصحف والتلاوات الصوتية';
+
+  @override
+  String get supportImpactReciterAudio => 'المصحف والتلاوات الصوتية';
+
+  @override
+  String get supportImpactPrayerTools => 'مواقيت الصلاة والأدوات';
+
+  @override
+  String get supportImpactDevelopment => 'التشغيل والتطوير';
+
+  @override
+  String get supportImpactAdFree => 'التشغيل والتطوير';
+
+  @override
+  String get supportTierSmall => 'يسير';
+
+  @override
+  String get supportTierKind => 'كريم';
+
+  @override
+  String get supportTierGenerous => 'وافر';
+
+  @override
+  String get supportContinueWithPlay => 'متابعة على Google Play';
+
+  @override
+  String get supportConfirmationTitle => 'تأكيد';
+
+  @override
+  String get supportConfirmationBody =>
+      'الدفع بـ Google Play. تلاوة لا يحفظ بيانات البطاقة.';
+
+  @override
+  String get supportConfirm => 'متابعة';
+
+  @override
+  String get supportCancel => 'إلغاء';
+
+  @override
+  String get supportThankYouTitle => 'شكرًا جزيلًا';
+
+  @override
+  String get supportThankYouBody => 'وصلت مشاركتك. نقدّر ثقتك.';
+
+  @override
+  String get supportDone => 'تم';
+
+  @override
+  String get supportRestorePurchases => 'استعادة';
+
+  @override
+  String get supportRestoreHint =>
+      'إن لم تُكتمل عملية دفع سابقة، اضغط «استعادة».';
+
+  @override
+  String get supportTrustLinePrefix =>
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (';
+
+  @override
+  String get supportCharitiesLinkLabel => 'رابط الجمعيات الخيرية';
+
+  @override
+  String get supportCharitiesSheetTitle => 'الجمعيات الخيرية الشريكة';
+
+  @override
+  String get supportCharityDarAlArqam => 'دار الأرقم لتحفيظ القرآن';
+
+  @override
+  String get supportCharityIslaheg => 'مؤسسة الإصلاح الخيرية';
+
+  @override
+  String get supportTrustLineSuffix => ')';
+
+  @override
+  String get supportTrustLine =>
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+
+  @override
+  String get supportPlayFooter =>
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+
+  @override
+  String get supportDisclaimer =>
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+
+  @override
+  String get supportOfflineMessage => 'يلزم اتصال بالإنترنت.';
+
+  @override
+  String get supportBillingUnavailable =>
+      'الدفع عبر Google Play غير متاح على هذا الجهاز.';
+
+  @override
+  String get supportProductsUnavailable =>
+      'الخيارات غير متاحة حاليًا. جرّب لاحقًا.';
+
+  @override
+  String get supportPurchasePending => 'قيد المعالجة في Google Play.';
+
+  @override
+  String get supportPurchaseVerifyFailed => 'تعذّر التأكيد. جرّب «استعادة».';
+
+  @override
+  String get supportRestoreNothingFound => 'لا توجد عملية سابقة لهذا الحساب.';
+
+  @override
+  String get supportRestoreComplete => 'تمت الاستعادة.';
+
+  @override
+  String get supportSelectTier => 'اختر المبلغ';
+
+  @override
+  String get supportSettingsGroupTitle => 'ادعم تلاوة';
+
+  @override
+  String get supportHelpKeepFree => 'اختياري';
+
+  @override
+  String get purchaseBillingUnavailable => 'الدفع غير متاح حاليًا.';
+
+  @override
+  String get purchaseProductNotFound => 'هذا الخيار غير متاح.';
+
+  @override
+  String get purchaseVerificationFailed =>
+      'تعذّر التأكيد. أعد المحاولة لاحقًا.';
+
+  @override
+  String get purchasePending => 'ما زالت قيد المعالجة.';
+
+  @override
+  String get purchaseAlreadyOwned => 'تمت هذه المشاركة مسبقًا.';
+
+  @override
+  String get appReviewUnavailable =>
+      'التقييمات غير متاحة على هذا الجهاز حاليًا.';
+
+  @override
+  String get appReviewRequestFailed => 'تعذر فتح نافذة التقييم. حاول مرة أخرى.';
+
+  @override
+  String get appReviewStoreListingFailed =>
+      'تعذر فتح متجر التطبيقات. حاول مرة أخرى.';
+
+  @override
+  String get appReviewPlatformUnsupported =>
+      'تقييمات المتجر غير مدعومة على هذه المنصة.';
 }

@@ -86,14 +86,42 @@ class _BootGateState extends State<_BootGate> {
   @override
   void initState() {
     super.initState();
+    _awaitCriticalInit();
+  }
+
+  @override
+  void reassemble() {
+    super.reassemble();
+    // Hot reload rebuilds providers without re-running bootstrap DI.
+    if (!getIt.isRegistered<SettingsCubit>()) {
+      _ready = false;
+      _awaitCriticalInit();
+    }
+  }
+
+  void _awaitCriticalInit() {
     // Bootstrap() schedules critical init from its own post-frame callback;
     // here we just await the resulting future so we can swap in the real app
     // when it completes. Calling startCriticalInit() is a no-op if bootstrap
     // already kicked it off, which it will have in production.
-    widget.startCriticalInit().whenComplete(() {
+    widget.startCriticalInit().then((_) async {
+      await _ensureDependenciesRegistered();
       if (!mounted) return;
       setState(() => _ready = true);
+    }).catchError((Object error, StackTrace stackTrace) {
+      logger.e(
+        'Critical init failed; staying on launch splash',
+        error: error,
+        stackTrace: stackTrace,
+      );
     });
+  }
+
+  Future<void> _ensureDependenciesRegistered() async {
+    if (getIt.isRegistered<SettingsCubit>()) return;
+    // Firebase singletons in DI must not run before initializeApp() completes.
+    if (Firebase.apps.isEmpty) return;
+    await configureDependencies(launchConfig: appLaunchConfig);
   }
 
   @override

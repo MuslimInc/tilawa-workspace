@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -43,8 +43,10 @@ class FavoritesScreen extends StatelessWidget {
                     return TilawaIllustratedState(
                       icon: Icons.error_outline_rounded,
                       iconColor: colorScheme.error,
-                      title: state.failure.localizedMessage(context),
-                      semanticLabel: state.failure.localizedMessage(context),
+                      title: state.failure.localizedMessage(context) ??
+                          context.l10n.unexpectedError,
+                      semanticLabel: state.failure.localizedMessage(context) ??
+                          context.l10n.unexpectedError,
                     );
                   } else if (state is FavoritesLoaded) {
                     if (state.favorites.isEmpty) {

@@ -205,9 +205,12 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
               current.mapOrNull(error: (_) => true) ?? false,
           listener: (context, state) {
             state.mapOrNull(
-              error: (s) => ToastUtils.showErrorToast(
-                s.failure.localizedMessage(context),
-              ),
+              error: (s) {
+                final String? message = s.failure.localizedMessage(context);
+                if (message != null) {
+                  ToastUtils.showErrorToast(message);
+                }
+              },
             );
           },
         ),
@@ -300,7 +303,8 @@ class _QuranFontLoaderScreenState extends State<QuranFontLoaderScreen> {
             return Scaffold(
               body: _FontLoaderSurface(
                 child: _ErrorView(
-                  message: error.failure.localizedMessage(context),
+                  message: error.failure.localizedMessage(context) ??
+                      context.l10n.unexpectedError,
                   onRetry: () {
                     final page = initialPageNumber;
                     if (page != null) {

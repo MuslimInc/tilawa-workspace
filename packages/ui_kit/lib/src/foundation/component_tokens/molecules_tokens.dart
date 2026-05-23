@@ -1057,6 +1057,7 @@ class TilawaCountProgressRingTokens {
     required this.doneIconSize,
     required this.countFontSize,
     required this.countLineHeight,
+    required this.countHorizontalPadding,
     required this.doneBorderWidth,
     required this.doneBorderOpacity,
     required this.activeGradientEndOpacity,
@@ -1073,6 +1074,7 @@ class TilawaCountProgressRingTokens {
   final double doneIconSize;
   final double countFontSize;
   final double countLineHeight;
+  final double countHorizontalPadding;
   final double doneBorderWidth;
   final double doneBorderOpacity;
   final double activeGradientEndOpacity;
@@ -1090,6 +1092,7 @@ class TilawaCountProgressRingTokens {
       doneIconSize: 50,
       countFontSize: 36,
       countLineHeight: 1,
+      countHorizontalPadding: 6,
       doneBorderWidth: 2,
       doneBorderOpacity: 0.3,
       activeGradientEndOpacity: 0.8,
@@ -1108,6 +1111,7 @@ class TilawaCountProgressRingTokens {
     double? doneIconSize,
     double? countFontSize,
     double? countLineHeight,
+    double? countHorizontalPadding,
     double? doneBorderWidth,
     double? doneBorderOpacity,
     double? activeGradientEndOpacity,
@@ -1124,6 +1128,8 @@ class TilawaCountProgressRingTokens {
       doneIconSize: doneIconSize ?? this.doneIconSize,
       countFontSize: countFontSize ?? this.countFontSize,
       countLineHeight: countLineHeight ?? this.countLineHeight,
+      countHorizontalPadding:
+          countHorizontalPadding ?? this.countHorizontalPadding,
       doneBorderWidth: doneBorderWidth ?? this.doneBorderWidth,
       doneBorderOpacity: doneBorderOpacity ?? this.doneBorderOpacity,
       activeGradientEndOpacity:
@@ -1151,6 +1157,11 @@ class TilawaCountProgressRingTokens {
       doneIconSize: lerpTokenDouble(a.doneIconSize, b.doneIconSize, t),
       countFontSize: lerpTokenDouble(a.countFontSize, b.countFontSize, t),
       countLineHeight: lerpTokenDouble(a.countLineHeight, b.countLineHeight, t),
+      countHorizontalPadding: lerpTokenDouble(
+        a.countHorizontalPadding,
+        b.countHorizontalPadding,
+        t,
+      ),
       doneBorderWidth: lerpTokenDouble(a.doneBorderWidth, b.doneBorderWidth, t),
       doneBorderOpacity: lerpTokenDouble(
         a.doneBorderOpacity,

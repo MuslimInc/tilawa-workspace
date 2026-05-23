@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
@@ -165,9 +167,33 @@ class AppTheme {
         .toColor();
   }
 
+  /// Picks white or near-black label color on [background] for ≥ 4.5:1 contrast.
+  static Color _accessibleOnColor(Color background) {
+    const Color white = Colors.white;
+    const Color black = Color(0xFF1A1A1A);
+    final double whiteRatio = _contrastRatio(white, background);
+    final double blackRatio = _contrastRatio(black, background);
+    if (whiteRatio >= blackRatio && whiteRatio >= 4.5) {
+      return white;
+    }
+    if (blackRatio >= 4.5) {
+      return black;
+    }
+    return whiteRatio >= blackRatio ? white : black;
+  }
+
+  static double _contrastRatio(Color foreground, Color background) {
+    final double luminanceA = foreground.computeLuminance();
+    final double luminanceB = background.computeLuminance();
+    final double lighter = math.max(luminanceA, luminanceB);
+    final double darker = math.min(luminanceA, luminanceB);
+    return (lighter + 0.05) / (darker + 0.05);
+  }
+
   static ColorScheme _refineLightColorScheme(ColorScheme scheme) {
     final Color primary = scheme.primary;
     return scheme.copyWith(
+      onPrimary: _accessibleOnColor(primary),
       surface: AppColors.lightSurface,
       surfaceContainerLowest: Colors.white,
       surfaceContainerLow: AppColors.lightBackground,
@@ -318,11 +344,12 @@ class AppTheme {
       cardColor: colorScheme.surface,
       switchTheme: _switchTheme(colorScheme),
       appBarTheme: theme.appBarTheme.copyWith(
-        // Vellum header (docs/tilawa_brand.md §3) — aligns with [TilawaAppBar].
+        // Vellum header (docs/tilawa_brand.md §5) — aligns with [TilawaAppBar].
         backgroundColor: colorScheme.surfaceContainerHigh,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
+        shadowColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         titleTextStyle: theme.textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w700,

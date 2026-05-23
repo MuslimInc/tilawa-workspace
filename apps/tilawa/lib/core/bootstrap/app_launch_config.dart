@@ -8,8 +8,11 @@ import 'package:flutter/foundation.dart';
 /// Firestore usage in `SubscriptionPlansService` (catalog, premium status,
 /// purchase records) stays off until explicitly enabled.
 ///
+/// [supportTilawaEnabled] defaults to **true** (Settings/Profile Support entry).
+///
 /// Example: `--dart-define=TILAWA_LAUNCH_FIREBASE_INIT=false`
 /// Example: `--dart-define=TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED=true`
+/// Example: `--dart-define=TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED=false`
 @immutable
 class AppLaunchConfig extends Equatable {
   const AppLaunchConfig({
@@ -38,6 +41,7 @@ class AppLaunchConfig extends Equatable {
     this.quranAssetsPrefetch = true,
     this.firebaseDataInit = true,
     this.subscriptionServiceEnabled = false,
+    this.supportTilawaEnabled = true,
     this.notificationPermissionRequest = true,
   });
 
@@ -143,6 +147,10 @@ class AppLaunchConfig extends Equatable {
         'TILAWA_LAUNCH_SUBSCRIPTION_SERVICE_ENABLED',
         defaultValue: false,
       ),
+      supportTilawaEnabled: bool.fromEnvironment(
+        'TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED',
+        defaultValue: true,
+      ),
       notificationPermissionRequest: bool.fromEnvironment(
         'TILAWA_LAUNCH_NOTIFICATION_PERMISSION_REQUEST',
         defaultValue: true,
@@ -175,6 +183,7 @@ class AppLaunchConfig extends Equatable {
   final bool quranAssetsPrefetch;
   final bool firebaseDataInit;
   final bool subscriptionServiceEnabled;
+  final bool supportTilawaEnabled;
   final bool notificationPermissionRequest;
 
   @override
@@ -204,6 +213,7 @@ class AppLaunchConfig extends Equatable {
     quranAssetsPrefetch,
     firebaseDataInit,
     subscriptionServiceEnabled,
+    supportTilawaEnabled,
     notificationPermissionRequest,
   ];
 }

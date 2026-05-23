@@ -12,9 +12,14 @@ import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../../../shared/models/position_data.dart';
 import '../../../../shared/models/queue_state.dart';
+import '../../../app_review/domain/entities/app_review_prompt_moment.dart';
+import '../../../app_review/domain/entities/app_review_signal.dart';
+import '../../../app_review/domain/services/app_review_trigger_manager.dart';
 import '../../../history/domain/usecases/add_or_update_history_use_case.dart';
 import '../../../settings/domain/services/sleep_timer_settings.dart';
 import '../../domain/entities/audio_modes.dart';
+import '../../domain/resolved_playback_duration.dart';
+import '../../domain/resolve_playback_display_position.dart';
 import '../../domain/usecases/audio_player_usecases.dart';
 import '../../domain/usecases/check_audio_playability_use_case.dart';
 import '../../domain/usecases/get_audio_streams_use_case.dart';
@@ -49,6 +54,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._sleepTimerSettings,
     this._addOrUpdateHistory,
     this._analyticsService,
+    this._appReviewTriggerManager,
   ) : super(const AudioPlayerState(status: AudioPlayerStatus.initial)) {
     // State update events
     on<ResetAudioPlayer>(_onResetAudioPlayer);
@@ -108,6 +114,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final SleepTimerSettings _sleepTimerSettings;
   final AddOrUpdateHistoryUseCase _addOrUpdateHistory;
   final AnalyticsService _analyticsService;
+  final AppReviewTriggerManager _appReviewTriggerManager;
 
   /// Stream subscriptions to be cancelled on close to prevent memory leaks.
   final List<StreamSubscription<dynamic>> _subscriptions = [];
@@ -118,6 +125,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   bool _isSleepTimerEnabled = true;
   String? _lastPersistedStateJson;
   AudioPlayerState? _lastPersistedState;
+  Duration _lastStreamPosition = Duration.zero;
 
   /// Maximum number of cached entries before eviction.
   static const int _maxCacheSize = 50;
@@ -179,19 +187,22 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     );
 
     _subscriptions.add(
-      _getAudioStreams.position.listen((position) {
+      _getAudioStreams.position.listen((streamPosition) {
         final AudioEntity? currentAudio = state.currentAudio;
-        final PlaybackStateEntity? playbackState = state.playbackState;
-
-        Duration duration = currentAudio?.duration ?? Duration.zero;
-
-        // If metadata duration is zero, try to use playback state duration
-        if (duration <= Duration.zero &&
-            playbackState != null &&
-            playbackState.duration > Duration.zero) {
-          duration = playbackState.duration;
+        if (currentAudio == null) {
+          return;
         }
-
+        final PlaybackStateEntity? playbackState = state.playbackState;
+        final Duration duration = _resolveDuration(
+          currentAudio,
+          playbackState,
+          true,
+        );
+        _lastStreamPosition = streamPosition;
+        final Duration position = resolvePlaybackDisplayPosition(
+          playbackState: playbackState,
+          streamPosition: streamPosition,
+        );
         final Duration buffered =
             playbackState?.bufferedPosition ?? Duration.zero;
 
@@ -268,6 +279,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       // Clear the completed marker for this audio so future replays
       // are tracked normally.
       _completedAudioIds.remove(oldId);
+      _lastStreamPosition = Duration.zero;
     }
 
     if (event.audio != null) {
@@ -321,6 +333,16 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
       if (completedAudio != null) {
         await _saveHistory(completedAudio, isCompleted: true);
         _completedAudioIds.add(completedAudio.id);
+        unawaited(
+          _appReviewTriggerManager.recordSignal(
+            AppReviewSignal.listeningSessionCompleted,
+          ),
+        );
+        unawaited(
+          _appReviewTriggerManager.tryPromptIfEligible(
+            AppReviewPromptMoment.listeningSessionCompleted,
+          ),
+        );
       }
     }
 
@@ -388,16 +410,17 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     final PlaybackStateEntity? playbackState = state.playbackState;
     if (audio == null) return;
 
-    final Duration position = playbackState?.position ?? Duration.zero;
+    final Duration position = resolvePlaybackDisplayPosition(
+      playbackState: playbackState,
+      streamPosition: _lastStreamPosition,
+    );
     final Duration buffered = playbackState?.bufferedPosition ?? Duration.zero;
-    final Duration duration = _resolveDuration(audio, playbackState, true);
-
     add(
       AudioPlayerEvent.updatePositionData(
         PositionData(
           position: position,
           bufferedPosition: buffered,
-          duration: duration,
+          duration: _resolveDuration(audio, playbackState, true),
         ),
       ),
     );
@@ -800,33 +823,12 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     PlaybackStateEntity? playbackState,
     bool isCurrentPlayback,
   ) {
-    if (audio.duration > Duration.zero) {
-      return audio.duration;
-    }
-
-    final Duration cachedDuration =
-        _lastKnownDurations[audio.id] ?? Duration.zero;
-    if (cachedDuration > Duration.zero) {
-      return cachedDuration;
-    }
-
-    if (isCurrentPlayback && playbackState != null) {
-      final Duration playbackDuration = playbackState.duration;
-      if (playbackDuration > Duration.zero) {
-        return playbackDuration;
-      }
-    }
-
-    if (playbackState != null) {
-      for (final AudioEntity queuedAudio in playbackState.queue) {
-        if (queuedAudio.id == audio.id &&
-            queuedAudio.duration > Duration.zero) {
-          return queuedAudio.duration;
-        }
-      }
-    }
-
-    return Duration.zero;
+    return resolvePlaybackDisplayDuration(
+      audio: audio,
+      playbackState: playbackState,
+      isCurrentPlayback: isCurrentPlayback,
+      cachedDurations: _lastKnownDurations,
+    );
   }
 
   Duration _clampToDuration(Duration value, Duration max) {

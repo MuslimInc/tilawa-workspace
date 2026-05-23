@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
-import 'package:tilawa_core/di/injection.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -264,7 +264,8 @@ class _ErrorView extends StatelessWidget {
     return Center(
       child: TilawaEmptyState(
         title: context.l10n.error,
-        subtitle: failure.localizedMessage(context),
+        subtitle: failure.localizedMessage(context) ??
+            context.l10n.unexpectedError,
         icon: Icons.error_outline,
         action: TilawaButton(
           text: context.l10n.close,

@@ -8,6 +8,8 @@ import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_flow_guard.dart';
+import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
@@ -58,6 +60,9 @@ class _MockInternetStatusBloc extends MockCubit<InternetStatusState>
     implements InternetStatusBloc {}
 
 class _MockSetLanguageUseCase extends Mock implements SetLanguageUseCase {}
+
+class _MockAppReviewTriggerManager extends Mock
+    implements AppReviewTriggerManager {}
 
 class _FakeStorage extends Fake implements Storage {
   @override
@@ -121,6 +126,16 @@ void main() {
       const InternetStatusState.connected(),
     );
     getIt.registerSingleton<InternetStatusBloc>(mockInternetStatusBloc);
+
+    getIt.registerSingleton<AppReviewFlowGuard>(AppReviewFlowGuard());
+
+    final mockAppReviewTriggerManager = _MockAppReviewTriggerManager();
+    when(
+      () => mockAppReviewTriggerManager.onSessionStarted(),
+    ).thenAnswer((_) async {});
+    getIt.registerSingleton<AppReviewTriggerManager>(
+      mockAppReviewTriggerManager,
+    );
   });
 
   tearDown(() async {

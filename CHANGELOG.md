@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4+31] - 2026-05-23 [Google Play Release]
+
+### Added
+
+- **Support Tilawa**: Optional one-time Google Play contributions (small, kind,
+  generous tiers) with calm thank-you flow; server-verified purchases and local
+  support history without worship paywalls.
+- **Quran player**: Elapsed and remaining time labels on the expanded player;
+  refined expanded layout and queue sheet handle.
+- **Google sign-in (Android)**: Credential Manager prepare step before the sign-in
+  sheet for more reliable Google login on recent Android versions.
+- **Athkar**: Clearer details layout, tap feedback, and counter interaction on
+  session screens.
+
+### Changed
+
+- **Support screen**: Redesigned tiers, charities sheet, and Arabic copy aligned
+  with the support visual system.
+- **Onboarding**: Carousel and RTL footer aligned with ui_kit patterns.
+- **Bottom navigation (phone)**: Slightly shorter bar height for thumb reach.
+- **ui_kit**: App bar uses hairline chrome instead of a heavy drop shadow; count
+  ring digits scale to stay inside the circle.
+
+### Fixed
+
+- **Quran player**: Smoother collapse from expanded player to the mini bar;
+  progress duration and position stay in sync with live playback.
+- **Support purchases**: Background and resume flows complete verification when
+  Play delivers a purchase after the sheet closes; stale billing waiters clear
+  after a short grace period; purchase failure messages follow the active locale.
+- **Google sign-in (Android)**: Cryptographically secure nonce for the prepare
+  bridge instead of a predictable timestamp.
+- **Prayer notification status**: Close action returns to home when there is no
+  back stack (carried from prior release hardening).
+
+### Security
+
+- **Firebase App Check**: Release builds attest via Play Integrity before
+  `verifySupportPurchase` runs; Cloud Function enforces App Check and replay-safe
+  token handling.
+
 ## [1.0.3+28] - 2026-05-20 [Google Play Release]
 
 ### Added

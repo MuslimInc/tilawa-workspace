@@ -636,7 +636,7 @@ void main() {
     });
 
     test(
-      'should return true for premium feature when user is premium',
+      'should return true for worship utility feature regardless of premium',
       () async {
         // Arrange
         when(
@@ -655,7 +655,7 @@ void main() {
     );
 
     test(
-      'should return false for premium feature when user is not premium',
+      'should return true for worship utility when user is not premium',
       () async {
         // Arrange
         when(
@@ -669,35 +669,20 @@ void main() {
         final bool result = await repository.canAccessFeature('download');
 
         // Assert
-        expect(result, false);
+        expect(result, true);
       },
     );
   });
 
   group('canDownload', () {
-    test('should delegate to canAccessFeature("download")', () async {
-      // Arrange
-      const tStatus = PremiumStatus(
-        isPremium: true,
-        subscriptionStartDate: null,
-        subscriptionEndDate: null,
-        subscriptionType: 'monthly',
-        isTrialUsed: false,
-        trialStartDate: null,
-        trialEndDate: null,
-      );
-      when(
-        mockRemoteDataSource.getPremiumStatus(),
-      ).thenAnswer((_) async => null);
-      when(
-        mockLocalDataSource.getPremiumStatus(),
-      ).thenAnswer((_) async => tStatus);
-
+    test('should allow download without premium gating', () async {
       // Act
       final bool result = await repository.canDownload();
 
       // Assert
       expect(result, true);
+      verifyNever(mockRemoteDataSource.getPremiumStatus());
+      verifyNever(mockLocalDataSource.getPremiumStatus());
     });
   });
 

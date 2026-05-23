@@ -18,8 +18,22 @@ extension BuildContextThemeX on BuildContext {
 }
 
 extension FailureExtensions on Failure {
-  String localizedMessage(BuildContext context) {
-    final l10n = context.l10n;
+  /// Whether this failure should surface in toasts or error UI.
+  bool get shouldShowToUser => switch (this) {
+    UserCancelledFailure() => false,
+    PurchaseFailure(reason: PurchaseFailureReason.userCancelled) => false,
+    _ => true,
+  };
+
+  /// Localized user-facing text, or [null] when [shouldShowToUser] is false.
+  String? localizedMessage(BuildContext context) {
+    if (!shouldShowToUser) {
+      return null;
+    }
+
+    final AppLocalizations l10n = lookupAppLocalizations(
+      Localizations.localeOf(context),
+    );
 
     return switch (this) {
       OfflinePlaybackFailure(reason: final reason) => switch (reason) {
@@ -47,12 +61,31 @@ extension FailureExtensions on Failure {
       UnexpectedFailure() => l10n.unexpectedError,
       PersistenceFailure() => l10n.persistenceError,
       UIError() => l10n.uiError,
-      UserCancelledFailure() => '',
+      UserCancelledFailure() => null,
       NotificationFailure(reason: final reason) => switch (reason) {
         NotificationFailureReason.missingPayload =>
           l10n.errorMissingNotificationPayload,
         NotificationFailureReason.invalidPayload =>
           l10n.errorInvalidNotificationPayload,
+      },
+      PurchaseFailure(reason: final reason) => switch (reason) {
+        PurchaseFailureReason.billingUnavailable =>
+          l10n.purchaseBillingUnavailable,
+        PurchaseFailureReason.productNotFound => l10n.purchaseProductNotFound,
+        PurchaseFailureReason.userCancelled => null,
+        PurchaseFailureReason.pending => l10n.purchasePending,
+        PurchaseFailureReason.verificationFailed =>
+          l10n.purchaseVerificationFailed,
+        PurchaseFailureReason.alreadyOwned => l10n.purchaseAlreadyOwned,
+        PurchaseFailureReason.network => l10n.networkError,
+      },
+      AppReviewFailure(reason: final reason) => switch (reason) {
+        AppReviewFailureReason.unavailable => l10n.appReviewUnavailable,
+        AppReviewFailureReason.requestFailed => l10n.appReviewRequestFailed,
+        AppReviewFailureReason.storeListingFailed =>
+          l10n.appReviewStoreListingFailed,
+        AppReviewFailureReason.platformUnsupported =>
+          l10n.appReviewPlatformUnsupported,
       },
     };
   }
