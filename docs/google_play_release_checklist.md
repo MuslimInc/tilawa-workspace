@@ -4,7 +4,8 @@
 
 - [ ] Confirm release branch is stable and merged to master.
 - [ ] Update app version in apps/tilawa/pubspec.yaml.
-- [ ] Update CHANGELOG.md with release notes.
+- [ ] Update [`CHANGELOG.md`](../CHANGELOG.md) and Play copy in
+      [`release_notes.md`](release_notes.md) (en-US + ar).
 - [ ] Create and push release tag (example: v0.1.4+21).
 
 ## 2. Security and Signing
