@@ -259,7 +259,7 @@ void main() {
     ) async {
       const destinations = <TilawaNavDestination>[
         TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
-        TilawaNavDestination(label: 'Prayer Times', icon: Icons.schedule),
+        TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
         TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
         TilawaNavDestination(label: 'Athkar', icon: Icons.self_improvement),
         TilawaNavDestination(label: 'Settings', icon: Icons.settings_outlined),
@@ -294,7 +294,7 @@ void main() {
       (tester) async {
         const destinations = <TilawaNavDestination>[
           TilawaNavDestination(label: 'Reciters', icon: Icons.person_outline),
-          TilawaNavDestination(label: 'Prayer Times', icon: Icons.schedule),
+          TilawaNavDestination(label: 'Prayer', icon: Icons.schedule),
           TilawaNavDestination(label: 'Quran', icon: Icons.menu_book_outlined),
           TilawaNavDestination(label: 'Athkar', icon: Icons.self_improvement),
           TilawaNavDestination(
@@ -331,7 +331,7 @@ void main() {
         expect(bar.showUnselectedLabels, isTrue);
 
         expect(find.text('Reciters'), findsOneWidget);
-        expect(find.text('Prayer Times'), findsOneWidget);
+        expect(find.text('Prayer'), findsOneWidget);
         expect(find.text('Quran'), findsOneWidget);
         expect(find.text('Athkar'), findsOneWidget);
         expect(find.text('Settings'), findsOneWidget);
@@ -342,7 +342,7 @@ void main() {
         );
         expect(
           tester.getSemantics(find.byIcon(Icons.schedule)).label,
-          startsWith('Prayer Times'),
+          startsWith('Prayer'),
         );
       },
     );
@@ -352,7 +352,7 @@ void main() {
       (tester, direction) async {
         const destinations = <TilawaNavDestination>[
           TilawaNavDestination(label: 'القراء', icon: Icons.person_outline),
-          TilawaNavDestination(label: 'أوقات الصلاة', icon: Icons.schedule),
+          TilawaNavDestination(label: 'الصلاة', icon: Icons.schedule),
           TilawaNavDestination(
             label: 'القرآن',
             icon: Icons.menu_book_outlined,
@@ -386,12 +386,12 @@ void main() {
         expect(bar.showSelectedLabels, isTrue);
         expect(bar.showUnselectedLabels, isTrue);
 
-        expect(find.text('أوقات الصلاة'), findsWidgets);
+        expect(find.text('الصلاة'), findsWidgets);
         expect(find.text('القراء'), findsWidgets);
 
         expect(
           tester.getSemantics(find.byIcon(Icons.schedule)).label,
-          startsWith('أوقات الصلاة'),
+          startsWith('الصلاة'),
         );
         expect(
           tester.getSemantics(find.byIcon(Icons.person_outline)).label,
