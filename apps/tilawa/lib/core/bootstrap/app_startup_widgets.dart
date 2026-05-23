@@ -82,10 +82,12 @@ class _BootGateState extends State<_BootGate> {
   );
 
   bool _ready = false;
+  bool _handoffToAppStarted = false;
 
   @override
   void initState() {
     super.initState();
+    SplashLaunchHandoff.resetForNewLaunch();
     _awaitCriticalInit();
   }
 
@@ -106,7 +108,8 @@ class _BootGateState extends State<_BootGate> {
     // already kicked it off, which it will have in production.
     widget.startCriticalInit().then((_) async {
       await _ensureDependenciesRegistered();
-      if (!mounted) return;
+      if (!mounted || _handoffToAppStarted) return;
+      _handoffToAppStarted = true;
       setState(() => _ready = true);
     }).catchError((Object error, StackTrace stackTrace) {
       logger.e(
@@ -126,7 +129,30 @@ class _BootGateState extends State<_BootGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_ready) return widget.child;
+    if (_ready) {
+      return ValueListenableBuilder<bool>(
+        valueListenable: SplashLaunchHandoff.splashRouteHasPainted,
+        builder: (BuildContext context, bool painted, Widget? _) {
+          final bool showOverlay = !painted;
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                widget.child,
+                if (showOverlay)
+                  const _LaunchSplash(
+                    backgroundColor: _launchBackgroundColor,
+                    overlayStyle: _launchOverlayStyle,
+                    wordmarkAsset: _launchWordmarkAsset,
+                    wordmarkBoxSize: _wordmarkBoxSize,
+                  ),
+              ],
+            ),
+          );
+        },
+      );
+    }
     if (!_loggedBootGateSplash) {
       _loggedBootGateSplash = true;
       ColdStartNavigationMetrics.recordBootGateSplash();

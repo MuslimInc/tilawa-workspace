@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/core/di/injection.dart';
@@ -41,6 +43,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _splashBloc = getIt<SplashBloc>()..add(const SplashStarted());
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      SplashLaunchHandoff.markSplashRoutePainted();
+    });
   }
 
   @override
