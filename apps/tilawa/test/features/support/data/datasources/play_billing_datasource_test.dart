@@ -71,8 +71,53 @@ void main() {
     });
 
     test(
-      'stale purchased event is acknowledged when no waiter exists',
+      'productID-less error event fails every active waiter so the UI '
+      'recovers from "billing unavailable" dialogs',
       () async {
+        final Future<PlayPurchaseEvent> pending = dataSource
+            .waitForPurchaseEvent(SupportProductIds.small);
+
+        final Future<void> failed = expectLater(
+          pending,
+          throwsA(
+            isA<PurchaseFailure>().having(
+              (PurchaseFailure f) => f.reason,
+              'reason',
+              // _mapError maps an unrecognized code to verificationFailed,
+              // which the bloc surfaces as a localized error.
+              PurchaseFailureReason.verificationFailed,
+            ),
+          ),
+        );
+
+        // Simulate Play emitting an error event without a productID — this
+        // is what some Play states (e.g. "not configured for billing") do
+        // after the dialog is dismissed.
+        final PurchaseDetails productIdLessError = PurchaseDetails(
+          productID: '',
+          status: PurchaseStatus.error,
+          transactionDate: '2026-05-23',
+          purchaseID: '',
+          verificationData: PurchaseVerificationData(
+            localVerificationData: '',
+            serverVerificationData: '',
+            source: 'google_play',
+          ),
+        );
+        purchaseStream.add(<PurchaseDetails>[productIdLessError]);
+        await failed;
+      },
+    );
+
+    test(
+      'stale purchased event is broadcast for verification, never auto-acknowledged',
+      () async {
+        // Subscribe to the broadcast so listeners (e.g. SupportRepositoryImpl)
+        // are the only path that can verify + complete the purchase.
+        final List<PlayPurchaseEvent> received = <PlayPurchaseEvent>[];
+        final subscription = dataSource.purchaseEvents.listen(received.add);
+        addTearDown(subscription.cancel);
+
         await dataSource.restorePurchases();
 
         purchaseStream.add(<PurchaseDetails>[
@@ -80,7 +125,9 @@ void main() {
         ]);
         await Future<void>.delayed(Duration.zero);
 
-        verify(() => mockInAppPurchase.completePurchase(any())).called(1);
+        expect(received, hasLength(1));
+        expect(received.single.purchaseToken, 'stale-token');
+        verifyNever(() => mockInAppPurchase.completePurchase(any()));
       },
     );
   });
@@ -105,7 +152,10 @@ void main() {
       await dataSource.prepareForSupportScreen();
       await cancelled;
 
-      verify(() => mockInAppPurchase.restorePurchases()).called(1);
+      // prepareForSupportScreen must NOT call restorePurchases — that path
+      // re-emits stale consumables into purchaseStream and risks consuming
+      // them without server verification.
+      verifyNever(() => mockInAppPurchase.restorePurchases());
     });
 
     test('canceled purchase status completes the waiter with userCancelled', () async {

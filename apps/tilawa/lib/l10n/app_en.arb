@@ -2713,9 +2713,9 @@
     "@supportCharityDarAlArqam": {
         "description": "Partner charity — Dar Al-Arqam Quran center"
     },
-    "supportCharityIslaheg": "islaheg.com",
+    "supportCharityIslaheg": "Al-Islah Charitable Foundation",
     "@supportCharityIslaheg": {
-        "description": "Partner charity — islaheg.com"
+        "description": "Partner charity — Al-Islah Charitable Foundation"
     },
     "supportTrustLineSuffix": ")",
     "@supportTrustLineSuffix": {
@@ -2749,7 +2749,7 @@
     "@supportPurchasePending": {
         "description": "Pending purchase message"
     },
-    "supportPurchaseVerifyFailed": "Could not confirm yet. Try Restore.",
+    "supportPurchaseVerifyFailed": "Could not confirm yet. Try again later.",
     "@supportPurchaseVerifyFailed": {
         "description": "Verification failed message"
     },
@@ -2781,7 +2781,7 @@
     "@purchaseProductNotFound": {
         "description": "Localized purchase product not found failure"
     },
-    "purchaseVerificationFailed": "Could not confirm. Try again or Restore.",
+    "purchaseVerificationFailed": "Could not confirm. Try again later.",
     "@purchaseVerificationFailed": {
         "description": "Localized purchase verification failed failure"
     },

@@ -2015,7 +2015,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportCharityDarAlArqam => 'دار الأرقم لتحفيظ القرآن';
 
   @override
-  String get supportCharityIslaheg => 'islaheg.com';
+  String get supportCharityIslaheg => 'مؤسسة الإصلاح الخيرية';
 
   @override
   String get supportTrustLineSuffix => ')';
@@ -2072,7 +2072,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get purchaseVerificationFailed =>
-      'تعذّر التأكيد. أعد المحاولة أو استعادة.';
+      'تعذّر التأكيد. أعد المحاولة لاحقًا.';
 
   @override
   String get purchasePending => 'ما زالت قيد المعالجة.';

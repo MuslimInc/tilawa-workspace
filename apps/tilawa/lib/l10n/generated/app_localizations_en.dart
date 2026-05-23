@@ -2026,7 +2026,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportCharityDarAlArqam => 'Dar Al-Arqam Quran Center';
 
   @override
-  String get supportCharityIslaheg => 'islaheg.com';
+  String get supportCharityIslaheg => 'Al-Islah Charitable Foundation';
 
   @override
   String get supportTrustLineSuffix => ')';
@@ -2059,7 +2059,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportPurchaseVerifyFailed =>
-      'Could not confirm yet. Try Restore.';
+      'Could not confirm yet. Try again later.';
 
   @override
   String get supportRestoreNothingFound =>
@@ -2086,7 +2086,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get purchaseVerificationFailed =>
-      'Could not confirm. Try again or Restore.';
+      'Could not confirm. Try again later.';
 
   @override
   String get purchasePending => 'Still processing.';

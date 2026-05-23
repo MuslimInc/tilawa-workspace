@@ -22,6 +22,9 @@ void main() {
 
   setUp(() {
     mockBilling = MockPlayBillingDataSource();
+    when(() => mockBilling.purchaseEvents).thenAnswer(
+      (_) => const Stream<PlayPurchaseEvent>.empty(),
+    );
     repository = SupportRepositoryImpl(
       mockBilling,
       MockSupportLocalDataSource(),

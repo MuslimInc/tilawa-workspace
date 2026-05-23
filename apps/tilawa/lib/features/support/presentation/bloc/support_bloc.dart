@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -5,6 +7,7 @@ import 'package:tilawa_core/constants/analytics_constants.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
+import '../../domain/usecases/abort_pending_purchase_use_case.dart';
 import '../../domain/usecases/get_support_products_use_case.dart';
 import '../../domain/usecases/prepare_support_session_use_case.dart';
 import '../../domain/usecases/purchase_support_product_use_case.dart';
@@ -19,6 +22,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     this._getProducts,
     this._purchase,
     this._restore,
+    this._abortPending,
     this._connectivity,
     this._analytics,
   ) : super(const SupportState()) {
@@ -32,12 +36,28 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     on<SupportAppResumed>(_onAppResumed);
   }
 
+  /// Grace window after `appResumed` while a purchase is in flight. If Play
+  /// has not delivered a purchaseStream event by then, the sheet was closed
+  /// without producing a result (e.g. the "not configured for billing"
+  /// dialog), and we surface a billing-unavailable failure so the spinner
+  /// clears immediately instead of waiting for the 5-minute waiter timeout.
+  static const Duration _resumeGrace = Duration(milliseconds: 1500);
+
   final PrepareSupportSessionUseCase _prepareSession;
   final GetSupportProductsUseCase _getProducts;
   final PurchaseSupportProductUseCase _purchase;
   final RestorePurchasesUseCase _restore;
+  final AbortPendingPurchaseUseCase _abortPending;
   final Connectivity _connectivity;
   final AnalyticsService _analytics;
+
+  Timer? _resumeGraceTimer;
+
+  @override
+  Future<void> close() {
+    _resumeGraceTimer?.cancel();
+    return super.close();
+  }
 
   Future<void> _onStarted(
     SupportStarted event,
@@ -135,6 +155,7 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     );
 
     final result = await _purchase(productId);
+    _resumeGraceTimer?.cancel();
     if (state.purchasePhase != SupportPurchasePhase.purchasing) {
       return;
     }
@@ -225,15 +246,27 @@ class SupportBloc extends Bloc<SupportEvent, SupportState> {
     SupportAppResumed event,
     Emitter<SupportState> emit,
   ) async {
+    // Never cancel an in-flight purchase waiter on resume up front. If the
+    // user completed the Play sheet, purchaseStream will deliver the event
+    // and _onPurchaseConfirmed will move us to "thanked". If they cancelled,
+    // Play sends PurchaseStatus.canceled which also resolves the waiter.
+    //
+    // Some Play states (e.g. "not configured for billing") show a dialog
+    // without emitting any stream event. After a short grace window we
+    // assume that's what happened and abort the waiter so the spinner
+    // clears instead of hanging until the 5-minute timeout.
     if (state.purchasePhase == SupportPurchasePhase.purchasing) {
-      await _prepareSession(resetWaiters: true);
-      emit(
-        state.copyWith(
-          purchasePhase: SupportPurchasePhase.idle,
-          failure: null,
-        ),
-      );
-      return;
+      final String? productId = state.selectedProductId;
+      _resumeGraceTimer?.cancel();
+      if (productId != null) {
+        _resumeGraceTimer = Timer(_resumeGrace, () {
+          if (isClosed) return;
+          if (state.purchasePhase != SupportPurchasePhase.purchasing) {
+            return;
+          }
+          _abortPending(productId);
+        });
+      }
     }
     await _prepareSession(resetWaiters: false);
     if (state.failure != null &&

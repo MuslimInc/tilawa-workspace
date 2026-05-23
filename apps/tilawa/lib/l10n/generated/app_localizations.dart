@@ -3728,10 +3728,10 @@ abstract class AppLocalizations {
   /// **'Dar Al-Arqam Quran Center'**
   String get supportCharityDarAlArqam;
 
-  /// Partner charity — islaheg.com
+  /// Partner charity — Al-Islah Charitable Foundation
   ///
   /// In en, this message translates to:
-  /// **'islaheg.com'**
+  /// **'Al-Islah Charitable Foundation'**
   String get supportCharityIslaheg;
 
   /// Support trust line after charities link label
@@ -3785,7 +3785,7 @@ abstract class AppLocalizations {
   /// Verification failed message
   ///
   /// In en, this message translates to:
-  /// **'Could not confirm yet. Try Restore.'**
+  /// **'Could not confirm yet. Try again later.'**
   String get supportPurchaseVerifyFailed;
 
   /// Restore found nothing message
@@ -3833,7 +3833,7 @@ abstract class AppLocalizations {
   /// Localized purchase verification failed failure
   ///
   /// In en, this message translates to:
-  /// **'Could not confirm. Try again or Restore.'**
+  /// **'Could not confirm. Try again later.'**
   String get purchaseVerificationFailed;
 
   /// Localized purchase pending failure

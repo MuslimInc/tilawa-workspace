@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/features/support/domain/usecases/abort_pending_purchase_use_case.dart';
 import 'package:tilawa/features/support/domain/usecases/get_support_products_use_case.dart';
 import 'package:tilawa/features/support/domain/usecases/prepare_support_session_use_case.dart';
 import 'package:tilawa/features/support/domain/usecases/purchase_support_product_use_case.dart';
@@ -30,6 +31,9 @@ class MockPurchaseSupportProductUseCase extends Mock
 class MockRestorePurchasesUseCase extends Mock
     implements RestorePurchasesUseCase {}
 
+class MockAbortPendingPurchaseUseCase extends Mock
+    implements AbortPendingPurchaseUseCase {}
+
 class MockConnectivity extends Mock implements Connectivity {}
 
 class MockAnalyticsService extends Mock implements AnalyticsService {}
@@ -39,6 +43,7 @@ void main() {
   late MockGetSupportProductsUseCase mockGetProducts;
   late MockPurchaseSupportProductUseCase mockPurchase;
   late MockRestorePurchasesUseCase mockRestore;
+  late MockAbortPendingPurchaseUseCase mockAbort;
   late MockConnectivity mockConnectivity;
   late MockAnalyticsService mockAnalytics;
   late AppLocalizations ar;
@@ -54,10 +59,12 @@ void main() {
     mockGetProducts = MockGetSupportProductsUseCase();
     mockPurchase = MockPurchaseSupportProductUseCase();
     mockRestore = MockRestorePurchasesUseCase();
+    mockAbort = MockAbortPendingPurchaseUseCase();
     mockConnectivity = MockConnectivity();
     mockAnalytics = MockAnalyticsService();
 
     when(() => mockPrepare()).thenAnswer((_) async {});
+    when(() => mockAbort(any())).thenReturn(true);
     when(() => mockAnalytics.logEvent(any(), parameters: any(named: 'parameters')))
         .thenAnswer((_) async {});
     when(() => mockConnectivity.checkConnectivity()).thenAnswer(
@@ -92,6 +99,7 @@ void main() {
         mockGetProducts,
         mockPurchase,
         mockRestore,
+        mockAbort,
         mockConnectivity,
         mockAnalytics,
       );
@@ -116,6 +124,7 @@ void main() {
         mockGetProducts,
         mockPurchase,
         mockRestore,
+        mockAbort,
         mockConnectivity,
         mockAnalytics,
       );
@@ -150,6 +159,7 @@ void main() {
         mockGetProducts,
         mockPurchase,
         mockRestore,
+        mockAbort,
         mockConnectivity,
         mockAnalytics,
       );
@@ -175,6 +185,7 @@ void main() {
         mockGetProducts,
         mockPurchase,
         mockRestore,
+        mockAbort,
         mockConnectivity,
         mockAnalytics,
       );
@@ -217,6 +228,7 @@ void main() {
       mockGetProducts,
       mockPurchase,
       mockRestore,
+      mockAbort,
       mockConnectivity,
       mockAnalytics,
     ),

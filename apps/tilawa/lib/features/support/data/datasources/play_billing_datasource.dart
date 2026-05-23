@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:injectable/injectable.dart';
@@ -43,12 +44,25 @@ abstract class PlayBillingDataSource {
   /// Acknowledges stale Play purchases; optionally cancels active waiters.
   Future<void> prepareForSupportScreen({bool cancelActiveWaiters = true});
 
+  /// Fails the in-flight waiter for [productId] with [failure] if any. Used
+  /// to recover the UI when Play closes its sheet without emitting a stream
+  /// event (e.g. the "not configured for billing" dialog), so the user is not
+  /// stuck on a spinner until the 5-minute waiter timeout.
+  ///
+  /// Returns `true` if a pending waiter was failed, `false` otherwise.
+  bool failPendingPurchase(String productId, PurchaseFailure failure);
+
   void dispose();
 }
 
 @LazySingleton(as: PlayBillingDataSource)
 class PlayBillingDataSourceImpl implements PlayBillingDataSource {
-  PlayBillingDataSourceImpl(this._inAppPurchase);
+  PlayBillingDataSourceImpl(this._inAppPurchase) {
+    // Subscribe at construction so purchases delivered before the support
+    // screen opens (cold start after an interrupted purchase) still flow to
+    // listeners. _onPurchaseUpdate is a no-op when no purchase is in flight.
+    _ensurePurchaseListener();
+  }
 
   final InAppPurchase _inAppPurchase;
   final StreamController<PlayPurchaseEvent> _eventsController =
@@ -123,8 +137,12 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
     return completer.future.timeout(
       _purchaseWaitTimeout,
       onTimeout: () {
-        _failPending(productId, const PurchaseFailure.userCancelled());
-        throw const PurchaseFailure.userCancelled();
+        // Treat as "still pending in Play" rather than user-cancelled: a
+        // background verification may still complete the donation later. The
+        // bloc surfaces a pending message so the user doesn't think they were
+        // wrongly charged.
+        _failPending(productId, const PurchaseFailure.pending());
+        throw const PurchaseFailure.pending();
       },
     );
   }
@@ -144,7 +162,16 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
       _cancelPendingPurchases();
     }
     _ensurePurchaseListener();
-    await _inAppPurchase.restorePurchases();
+  }
+
+  @override
+  bool failPendingPurchase(String productId, PurchaseFailure failure) {
+    final Completer<PlayPurchaseEvent>? pending = _pendingByProduct[productId];
+    if (pending == null || pending.isCompleted) {
+      return false;
+    }
+    _failPending(productId, failure);
+    return true;
   }
 
   void _cancelPendingPurchases() {
@@ -164,6 +191,13 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
   void _onPurchaseUpdate(List<PurchaseDetails> purchases) {
     for (final PurchaseDetails purchase in purchases) {
       final String productId = purchase.productID;
+      developer.log(
+        'event status=${purchase.status} productID="$productId" '
+        'errorCode=${purchase.error?.code} '
+        'errorMessage=${purchase.error?.message} '
+        'tokenLen=${purchase.verificationData.serverVerificationData.length}',
+        name: 'tilawa.support.billing',
+      );
       switch (purchase.status) {
         case PurchaseStatus.pending:
           _failPending(
@@ -171,24 +205,34 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
             const PurchaseFailure.pending(),
           );
         case PurchaseStatus.error:
-          _failPending(
-            productId,
-            PurchaseFailure(
-              purchase.error?.message,
-              _mapError(purchase.error?.code),
-            ),
+          // Play sometimes emits error events with an empty productID (e.g.
+          // "billing unavailable" / "not configured" dialogs that fire before
+          // the product is bound to the flow). In that case, fail every
+          // active waiter so the UI can recover instead of hanging until the
+          // 5-minute timeout.
+          final PurchaseFailure failure = PurchaseFailure(
+            purchase.error?.message,
+            _mapError(purchase.error?.code),
           );
+          if (productId.isEmpty) {
+            _failAllPending(failure);
+          } else {
+            _failPending(productId, failure);
+          }
         case PurchaseStatus.canceled:
-          _failPending(
-            productId,
-            const PurchaseFailure.userCancelled(),
-          );
+          if (productId.isEmpty) {
+            _failAllPending(const PurchaseFailure.userCancelled());
+          } else {
+            _failPending(productId, const PurchaseFailure.userCancelled());
+          }
         case PurchaseStatus.purchased:
         case PurchaseStatus.restored:
           final String token = purchase.verificationData.serverVerificationData;
           if (token.isEmpty) {
-            // Play may emit a token-less update when the app resumes; wait for
-            // the next purchaseStream event instead of failing verification.
+            // Play occasionally emits token-less updates (e.g. on resume).
+            // Without a token we cannot verify; do not resolve the waiter and
+            // do not consume the purchase — the next stream event for this
+            // product will carry the real token.
             break;
           }
           final PlayPurchaseEvent event = PlayPurchaseEvent(
@@ -197,15 +241,25 @@ class PlayBillingDataSourceImpl implements PlayBillingDataSource {
             purchaseId: purchase.purchaseID ?? '',
             details: purchase,
           );
+          // Always broadcast so listeners (repository) can verify the purchase
+          // server-side before completing it. Never call completePurchase here.
           _eventsController.add(event);
           final Completer<PlayPurchaseEvent>? pending = _pendingByProduct
               .remove(productId);
           if (pending != null && !pending.isCompleted) {
             pending.complete(event);
-          } else if (purchase.pendingCompletePurchase) {
-            unawaited(completePurchase(purchase));
           }
         }
+    }
+  }
+
+  /// Fails every active waiter with [failure]. Used for Play stream events
+  /// that arrive without a productID (e.g. "billing unavailable" dialogs),
+  /// so the UI can recover instead of hanging until the waiter timeout.
+  void _failAllPending(PurchaseFailure failure) {
+    final List<String> productIds = _pendingByProduct.keys.toList();
+    for (final String productId in productIds) {
+      _failPending(productId, failure);
     }
   }
 

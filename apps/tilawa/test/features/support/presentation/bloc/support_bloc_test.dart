@@ -4,6 +4,7 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/support/domain/entities/support_product.dart';
+import 'package:tilawa/features/support/domain/usecases/abort_pending_purchase_use_case.dart';
 import 'package:tilawa/features/support/domain/usecases/get_support_products_use_case.dart';
 import 'package:tilawa/features/support/domain/usecases/prepare_support_session_use_case.dart';
 import 'package:tilawa/features/support/domain/usecases/purchase_support_product_use_case.dart';
@@ -26,6 +27,9 @@ class MockPurchaseSupportProductUseCase extends Mock
 class MockRestorePurchasesUseCase extends Mock
     implements RestorePurchasesUseCase {}
 
+class MockAbortPendingPurchaseUseCase extends Mock
+    implements AbortPendingPurchaseUseCase {}
+
 class MockConnectivity extends Mock implements Connectivity {}
 
 class MockAnalyticsService extends Mock implements AnalyticsService {}
@@ -44,6 +48,7 @@ SupportBloc _buildBloc({
   required MockGetSupportProductsUseCase getProducts,
   required MockPurchaseSupportProductUseCase purchase,
   required MockRestorePurchasesUseCase restore,
+  required MockAbortPendingPurchaseUseCase abort,
   required MockConnectivity connectivity,
   required MockAnalyticsService analytics,
 }) {
@@ -52,6 +57,7 @@ SupportBloc _buildBloc({
     getProducts,
     purchase,
     restore,
+    abort,
     connectivity,
     analytics,
   );
@@ -62,6 +68,7 @@ void main() {
   late MockGetSupportProductsUseCase mockGetProducts;
   late MockPurchaseSupportProductUseCase mockPurchase;
   late MockRestorePurchasesUseCase mockRestore;
+  late MockAbortPendingPurchaseUseCase mockAbort;
   late MockConnectivity mockConnectivity;
   late MockAnalyticsService mockAnalytics;
 
@@ -70,12 +77,14 @@ void main() {
     mockGetProducts = MockGetSupportProductsUseCase();
     mockPurchase = MockPurchaseSupportProductUseCase();
     mockRestore = MockRestorePurchasesUseCase();
+    mockAbort = MockAbortPendingPurchaseUseCase();
     mockConnectivity = MockConnectivity();
     mockAnalytics = MockAnalyticsService();
 
     when(() => mockPrepare()).thenAnswer((_) async {});
     when(() => mockPrepare(resetWaiters: any(named: 'resetWaiters')))
         .thenAnswer((_) async {});
+    when(() => mockAbort(any())).thenReturn(true);
     when(() => mockAnalytics.logEvent(any(), parameters: any(named: 'parameters')))
         .thenAnswer((_) async {});
     when(() => mockConnectivity.checkConnectivity()).thenAnswer(
@@ -93,6 +102,7 @@ void main() {
       getProducts: mockGetProducts,
       purchase: mockPurchase,
       restore: mockRestore,
+      abort: mockAbort,
       connectivity: mockConnectivity,
       analytics: mockAnalytics,
     ),
@@ -134,6 +144,7 @@ void main() {
       getProducts: mockGetProducts,
       purchase: mockPurchase,
       restore: mockRestore,
+      abort: mockAbort,
       connectivity: mockConnectivity,
       analytics: mockAnalytics,
     ),
@@ -157,12 +168,14 @@ void main() {
   );
 
   blocTest<SupportBloc, SupportState>(
-    'appResumed during purchasing cancels billing and clears loading',
+    'appResumed during purchasing preserves the in-flight waiter '
+    'but aborts it after the grace window if Play never delivers',
     build: () => _buildBloc(
       prepare: mockPrepare,
       getProducts: mockGetProducts,
       purchase: mockPurchase,
       restore: mockRestore,
+      abort: mockAbort,
       connectivity: mockConnectivity,
       analytics: mockAnalytics,
     ),
@@ -173,19 +186,20 @@ void main() {
       purchasePhase: SupportPurchasePhase.purchasing,
       failure: const PurchaseFailure.verificationFailed(),
     ),
-    act: (SupportBloc bloc) => bloc.add(const SupportEvent.appResumed()),
-    verify: (_) {
-      verify(() => mockPrepare(resetWaiters: true)).called(1);
+    act: (SupportBloc bloc) async {
+      bloc.add(const SupportEvent.appResumed());
+      // Wait long enough for the 1.5s grace window to elapse.
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
     },
-    expect: () => <dynamic>[
-      isA<SupportState>()
-          .having(
-            (SupportState s) => s.purchasePhase,
-            'purchasePhase',
-            SupportPurchasePhase.idle,
-          )
-          .having((SupportState s) => s.failure, 'failure', isNull),
-    ],
+    verify: (_) {
+      // Do NOT reset waiters on resume — Play might still deliver.
+      verify(() => mockPrepare(resetWaiters: false)).called(1);
+      verifyNever(() => mockPrepare(resetWaiters: true));
+      // After the grace, the waiter is aborted as billing-unavailable so
+      // the UI clears the spinner instead of waiting 5 minutes.
+      verify(() => mockAbort(_product.id)).called(1);
+    },
+    expect: () => <dynamic>[],
   );
 
   blocTest<SupportBloc, SupportState>(
@@ -195,6 +209,7 @@ void main() {
       getProducts: mockGetProducts,
       purchase: mockPurchase,
       restore: mockRestore,
+      abort: mockAbort,
       connectivity: mockConnectivity,
       analytics: mockAnalytics,
     ),
@@ -230,6 +245,7 @@ void main() {
       getProducts: mockGetProducts,
       purchase: mockPurchase,
       restore: mockRestore,
+      abort: mockAbort,
       connectivity: mockConnectivity,
       analytics: mockAnalytics,
     ),

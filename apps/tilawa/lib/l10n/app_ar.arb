@@ -2713,9 +2713,9 @@
     "@supportCharityDarAlArqam": {
         "description": "Partner charity — Dar Al-Arqam Quran center"
     },
-    "supportCharityIslaheg": "islaheg.com",
+    "supportCharityIslaheg": "مؤسسة الإصلاح الخيرية",
     "@supportCharityIslaheg": {
-        "description": "Partner charity — islaheg.com"
+        "description": "Partner charity — Al-Islah Charitable Foundation"
     },
     "supportTrustLineSuffix": ")",
     "@supportTrustLineSuffix": {
@@ -2781,7 +2781,7 @@
     "@purchaseProductNotFound": {
         "description": "Localized purchase product not found failure"
     },
-    "purchaseVerificationFailed": "تعذّر التأكيد. أعد المحاولة أو استعادة.",
+    "purchaseVerificationFailed": "تعذّر التأكيد. أعد المحاولة لاحقًا.",
     "@purchaseVerificationFailed": {
         "description": "Localized purchase verification failed failure"
     },

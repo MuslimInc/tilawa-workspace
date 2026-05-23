@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
+import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../domain/entities/purchase_outcome.dart';
@@ -18,7 +20,12 @@ class SupportRepositoryImpl implements SupportRepository {
     this._local,
     this._verification,
     this._analytics,
-  );
+  ) {
+    // Singleton: subscription lives for the app process. Background verifies
+    // any Play purchase the user completed off-screen (cold start, resume,
+    // notification) without needing the support UI to be mounted.
+    _billing.purchaseEvents.listen(_onPurchaseEvent);
+  }
 
   final PlayBillingDataSource _billing;
   final SupportLocalDataSource _local;
@@ -27,6 +34,11 @@ class SupportRepositoryImpl implements SupportRepository {
 
   final StreamController<PurchaseOutcome> _verifiedController =
       StreamController<PurchaseOutcome>.broadcast();
+
+  /// Tokens already (or currently) being verified — prevents double-processing
+  /// when both the active waiter and the broadcast stream fire for the same
+  /// event, or when restorePurchases() re-emits a token we just handled.
+  final Set<String> _handledTokens = <String>{};
 
   @override
   Stream<PurchaseOutcome> get watchVerifiedPurchases =>
@@ -44,6 +56,13 @@ class SupportRepositoryImpl implements SupportRepository {
       _billing.prepareForSupportScreen(cancelActiveWaiters: resetWaiters);
 
   @override
+  bool abortPendingPurchaseAsUnavailable(String productId) =>
+      _billing.failPendingPurchase(
+        productId,
+        const PurchaseFailure.billingUnavailable(),
+      );
+
+  @override
   Future<PurchaseOutcome> purchaseSupportProduct(String productId) async {
     await _analytics.logEvent(
       AnalyticsEvents.supportPurchaseStarted,
@@ -57,34 +76,73 @@ class SupportRepositoryImpl implements SupportRepository {
     final PlayPurchaseEvent event =
         await _billing.waitForPurchaseEvent(productId);
 
-    final VerifiedPurchase verified = await _verification.verify(
-      productId: event.productId,
-      purchaseToken: event.purchaseToken,
-    );
+    return _verifyAndComplete(event);
+  }
 
-    await _billing.completePurchase(event.details);
+  Future<PurchaseOutcome> _verifyAndComplete(PlayPurchaseEvent event) async {
+    if (!_handledTokens.add(event.purchaseToken)) {
+      // Already verified (or being verified) in this app session. The server
+      // ledger is idempotent on the same token hash, so we just need to keep
+      // local side-effects to one emission.
+      throw const PurchaseFailure.alreadyOwned();
+    }
+    try {
+      final VerifiedPurchase verified = await _verification.verify(
+        productId: event.productId,
+        purchaseToken: event.purchaseToken,
+      );
 
-    final PurchaseOutcome outcome = PurchaseOutcome(
-      productId: verified.productId,
-      orderId: verified.orderId.isNotEmpty
-          ? verified.orderId
-          : event.purchaseId,
-    );
+      await _billing.completePurchase(event.details);
 
-    await _local.saveLastSupport(
-      productId: outcome.productId,
-      at: DateTime.now(),
-    );
+      final PurchaseOutcome outcome = PurchaseOutcome(
+        productId: verified.productId,
+        orderId: verified.orderId.isNotEmpty
+            ? verified.orderId
+            : event.purchaseId,
+      );
 
-    await _analytics.logEvent(
-      AnalyticsEvents.supportPurchaseVerified,
-      parameters: <String, Object>{
-        AnalyticsParams.productId: outcome.productId,
-      },
-    );
+      await _local.saveLastSupport(
+        productId: outcome.productId,
+        at: DateTime.now(),
+      );
 
-    _verifiedController.add(outcome);
-    return outcome;
+      await _analytics.logEvent(
+        AnalyticsEvents.supportPurchaseVerified,
+        parameters: <String, Object>{
+          AnalyticsParams.productId: outcome.productId,
+        },
+      );
+
+      _verifiedController.add(outcome);
+      return outcome;
+    } catch (_) {
+      // Allow a retry on the same token if verification failed transiently.
+      _handledTokens.remove(event.purchaseToken);
+      rethrow;
+    }
+  }
+
+  Future<void> _onPurchaseEvent(PlayPurchaseEvent event) async {
+    try {
+      await _verifyAndComplete(event);
+    } on PurchaseFailure catch (failure) {
+      // Already-handled dedupe or transient verify failure; do not crash the
+      // singleton's broadcast subscription. The active purchase flow (if any)
+      // reports failures through its own path.
+      developer.log(
+        'background purchase verification failed: ${failure.reason}',
+        name: 'tilawa.support.repo',
+        level: 900,
+      );
+    } catch (e, st) {
+      developer.log(
+        'background purchase verification crashed',
+        name: 'tilawa.support.repo',
+        error: e,
+        stackTrace: st,
+        level: 1000,
+      );
+    }
   }
 
   @override
