@@ -31,6 +31,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **App size**: Native FFmpeg frozen (not linked) to reduce download size;
   full share/reel Dart code preserved under `apps/tilawa/frozen/share/`.
   Screenshot sharing remains available from the Quran reader.
+- **Bundled assets**: Drop duplicate `qpc-v4.json` / `quran_page_index.json`
+  from `quran_image` (canonical copies stay in `quran_qcf`); stop shipping
+  unused `quran.realm`; release Android builds ship **arm64-v8a** native libs only
+  for smaller Play downloads.
 
 ### Frozen (not shipped in this build)
 
