@@ -904,13 +904,13 @@ class _UtilityActionRow extends StatelessWidget {
         vertical: tokens.spaceExtraSmall,
       ),
       child: Row(
+        spacing: tokens.spaceSmall,
         children: [
           Icon(
             icon,
             size: tokens.iconSizeSmall,
             color: colorScheme.onSurfaceVariant,
           ),
-          SizedBox(width: tokens.spaceSmall),
           Expanded(
             child: Text(
               label,
@@ -923,7 +923,6 @@ class _UtilityActionRow extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: tokens.spaceSmall),
           trailing,
         ],
       ),
@@ -1236,6 +1235,7 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 Text(
                   row.prayerName,
@@ -1243,7 +1243,6 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: tokens.spaceExtraSmall),
                 Text(
                   '${row.prayerTime} · ${context.l10n.prayerNotifications}',
                   style: theme.textTheme.bodyMedium?.copyWith(

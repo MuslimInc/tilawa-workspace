@@ -114,6 +114,7 @@ class _LocationInfo extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: tokens.spaceExtraSmall,
         children: [
           Text(
             context.l10n.currentLocation,
@@ -122,7 +123,6 @@ class _LocationInfo extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: tokens.spaceExtraSmall),
           Text(
             (locationName != null && locationName!.isNotEmpty)
                 ? locationName!
@@ -237,13 +237,13 @@ class _QiblaActionRow extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
               child: Row(
+                spacing: tokens.spaceSmall,
                 children: [
                   Icon(
                     Icons.explore_outlined,
                     size: tokens.iconSizeMedium,
                     color: colorScheme.primary,
                   ),
-                  SizedBox(width: tokens.spaceSmall),
                   Expanded(
                     child: Text(
                       context.l10n.qiblaDirection,
@@ -254,7 +254,6 @@ class _QiblaActionRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(width: tokens.spaceSmall),
                   Icon(
                     Icons.chevron_right,
                     size: tokens.iconSizeMedium,

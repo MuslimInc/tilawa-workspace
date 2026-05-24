@@ -96,6 +96,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: tokens.spaceSmall,
               children: [
                 _CatalogTitleRow(
                   leading: TilawaAppBarChrome.resolveCatalogRowLeading(
@@ -107,10 +108,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
                   title: titleChild,
                   actions: actions,
                 ),
-                if (bottomContent != null) ...<Widget>[
-                  SizedBox(height: tokens.spaceSmall),
-                  bottomContent!,
-                ],
+                ?bottomContent,
               ],
             ),
           ),

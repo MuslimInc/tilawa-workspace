@@ -91,9 +91,9 @@ class PlaylistCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'play',
                       child: Row(
+                        spacing: tokens.spaceSmall,
                         children: [
                           const Icon(Icons.play_arrow),
-                          SizedBox(width: tokens.spaceSmall),
                           Expanded(child: Text(l10n.playPlaylist)),
                         ],
                       ),
@@ -101,9 +101,9 @@ class PlaylistCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'edit',
                       child: Row(
+                        spacing: tokens.spaceSmall,
                         children: [
                           const Icon(Icons.edit),
-                          SizedBox(width: tokens.spaceSmall),
                           Expanded(child: Text(l10n.editPlaylist)),
                         ],
                       ),
@@ -111,6 +111,7 @@ class PlaylistCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'favorite',
                       child: Row(
+                        spacing: tokens.spaceSmall,
                         children: [
                           Icon(
                             playlist.isFavorite
@@ -120,7 +121,6 @@ class PlaylistCard extends StatelessWidget {
                                 ? colorScheme.error
                                 : null,
                           ),
-                          SizedBox(width: tokens.spaceSmall),
                           Expanded(
                             child: Text(
                               playlist.isFavorite
@@ -135,9 +135,9 @@ class PlaylistCard extends StatelessWidget {
                     PopupMenuItem(
                       value: 'delete',
                       child: Row(
+                        spacing: tokens.spaceSmall,
                         children: [
                           Icon(Icons.delete, color: colorScheme.error),
-                          SizedBox(width: tokens.spaceSmall),
                           Expanded(
                             child: Text(
                               l10n.deletePlaylist,

@@ -463,13 +463,13 @@ class _PermissionBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
       ),
       child: Row(
+        spacing: tokens.spaceSmall,
         children: [
           Icon(
             Icons.info_outline,
             size: 16,
             color: colorScheme.onTertiaryContainer,
           ),
-          SizedBox(width: tokens.spaceSmall),
           Expanded(
             child: Text(
               message,
@@ -520,13 +520,13 @@ class _InfoBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
       ),
       child: Row(
+        spacing: tokens.spaceSmall,
         children: [
           Icon(
             Icons.info_outline,
             size: 16,
             color: colorScheme.onSecondaryContainer,
           ),
-          SizedBox(width: tokens.spaceSmall),
           Expanded(
             child: Text(
               message,

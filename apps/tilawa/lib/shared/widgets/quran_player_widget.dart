@@ -1705,12 +1705,12 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
+                          spacing: tokens.spaceLarge,
                           children: [
                             _PlayerArtAtom(
                               artUri: audio.artUri,
                               maxHeight: constraints.maxHeight * 0.45,
                             ),
-                            SizedBox(height: tokens.spaceLarge),
                             _PlayerMetadataMolecule(
                               title: audio.title,
                               artist: audio.artist,
@@ -1983,6 +1983,7 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
               left: isRtl ? null : tokens.spaceMedium,
               right: isRtl ? tokens.spaceMedium : null,
               child: Row(
+                spacing: tokens.spaceSmall,
                 children: [
                   IconButton(
                     icon: Icon(
@@ -1992,10 +1993,10 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
                     ),
                     onPressed: onCollapse,
                   ),
-                  SizedBox(width: tokens.spaceSmall),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
+                    spacing: tokens.spaceExtraSmall,
                     children: [
                       Text(
                         audio.title,
@@ -2260,6 +2261,7 @@ class _PlayerMetadataMolecule extends StatelessWidget {
         : CrossAxisAlignment.stretch;
     return Column(
       crossAxisAlignment: crossAlign,
+      spacing: tokens.spaceExtraSmall,
       children: [
         Semantics(
           identifier: QuranPlayerSemanticsIds.expandedTrackTitle,
@@ -2271,7 +2273,6 @@ class _PlayerMetadataMolecule extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        SizedBox(height: tokens.spaceExtraSmall),
         Semantics(
           identifier: QuranPlayerSemanticsIds.expandedTrackArtist,
           child: Text(
@@ -2545,14 +2546,14 @@ class _YtMusicActionPill extends StatelessWidget {
             child: Row(
               mainAxisSize: .min,
               mainAxisAlignment: .center,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 Icon(
                   icon,
                   color: palette.foreground,
                   size: tokens.iconSizeMedium,
                 ),
-                if (label != null) ...[
-                  SizedBox(width: tokens.spaceExtraSmall),
+                if (label != null)
                   Text(
                     label!,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -2560,7 +2561,6 @@ class _YtMusicActionPill extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
               ],
             ),
           ),
@@ -3042,13 +3042,13 @@ class _QueueSheetExpandHint extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
+            spacing: tokens.spaceTiny,
             children: [
               Icon(
                 FluentIcons.chevron_up_24_regular,
                 size: tokens.iconSizeSmall,
                 color: color,
               ),
-              SizedBox(width: tokens.spaceTiny),
               Text(
                 context.l10n.playerQueueExpandHint,
                 style: theme.textTheme.labelSmall?.copyWith(

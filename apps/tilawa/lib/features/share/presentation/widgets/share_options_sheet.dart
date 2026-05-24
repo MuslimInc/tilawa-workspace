@@ -255,6 +255,7 @@ class _ShareOptionCard extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: tokens.spaceExtraSmall,
                     children: [
                       Text(
                         title,
@@ -263,7 +264,6 @@ class _ShareOptionCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(height: tokens.spaceExtraSmall),
                       Text(
                         description,
                         maxLines: 2,

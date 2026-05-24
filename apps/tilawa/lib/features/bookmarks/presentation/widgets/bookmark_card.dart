@@ -58,6 +58,7 @@ class BookmarkCard extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 // Surah name
                 Text(
@@ -69,7 +70,6 @@ class BookmarkCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: tokens.spaceExtraSmall),
                 // Reciter name
                 Text(
                   bookmark.reciterName,
@@ -79,7 +79,6 @@ class BookmarkCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: tokens.spaceExtraSmall),
                 // Position and label
                 Row(
                   children: [

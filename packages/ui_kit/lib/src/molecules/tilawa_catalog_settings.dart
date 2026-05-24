@@ -95,10 +95,10 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: tokens.spaceTiny,
                   children: [
                     Text(title, style: titleStyle),
-                    if (subtitle != null) ...[
-                      SizedBox(height: tokens.spaceTiny),
+                    if (subtitle != null)
                       Text(
                         subtitle!,
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -108,7 +108,6 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
                           height: 1.3,
                         ),
                       ),
-                    ],
                   ],
                 ),
               ),
@@ -229,6 +228,7 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: tokens.spaceTiny,
                   children: [
                     Text(
                       title,
@@ -239,7 +239,6 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
                         color: colorScheme.onSurface,
                       ),
                     ),
-                    SizedBox(height: tokens.spaceTiny),
                     Text(
                       subtitle,
                       maxLines: 2,

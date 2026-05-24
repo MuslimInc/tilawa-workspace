@@ -170,6 +170,7 @@ class _TasbeehOptionCard extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 Text(
                   title,
@@ -178,7 +179,6 @@ class _TasbeehOptionCard extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: tokens.spaceExtraSmall),
                 Text(
                   subtitle,
                   style: theme.textTheme.bodySmall?.copyWith(
