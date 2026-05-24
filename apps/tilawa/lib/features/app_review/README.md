@@ -16,9 +16,9 @@ Provider-agnostic in-app review with **engagement-based** triggers — no launch
 
 Tune in `di/app_review_policy_module.dart`:
 
-- ≥ 4 distinct app days (sessions)
-- ≥ 2 active days with signals
-- ≥ 3 days since install
+- ≥ 2 distinct app days (sessions)
+- ≥ 1 active day with signals
+- ≥ 1 day since install
 - At least one value moment (listening complete, prayer tab visits, favorite, bookmark)
 - Max **2** lifetime prompts
 - **90-day** cooldown between prompts

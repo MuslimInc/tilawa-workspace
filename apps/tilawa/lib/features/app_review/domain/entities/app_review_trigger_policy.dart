@@ -8,13 +8,13 @@ import 'app_review_prompt_moment.dart';
 @immutable
 class AppReviewTriggerPolicy {
   const AppReviewTriggerPolicy({
-    this.minSessionCount = 4,
-    this.minDistinctActiveDays = 2,
+    this.minSessionCount = 2,
+    this.minDistinctActiveDays = 1,
     this.minListeningCompletions = 1,
-    this.minPrayerTimesTabVisits = 3,
+    this.minPrayerTimesTabVisits = 2,
     this.minEngagementActions = 1,
     this.cooldownBetweenPrompts = const Duration(days: 90),
-    this.minimumAppAgeBeforePrompt = const Duration(days: 3),
+    this.minimumAppAgeBeforePrompt = const Duration(days: 1),
     this.maxLifetimePrompts = 2,
     this.promptDelay = const Duration(milliseconds: 1800),
     this.allowedPromptMoments = const {

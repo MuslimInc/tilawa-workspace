@@ -24,6 +24,10 @@ void main() {
       const AppReviewEngagement(favoriteAdds: 1).hasValueMoment,
       isTrue,
     );
+    expect(
+      const AppReviewEngagement(bookmarkCreates: 1).hasValueMoment,
+      isTrue,
+    );
   });
 
   test('copyWith overrides provided fields', () {
