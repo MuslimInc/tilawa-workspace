@@ -2187,4 +2187,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appReviewPlatformUnsupported =>
       'Store reviews are not supported on this platform.';
+
+  @override
+  String get tourActionNext => 'Next';
+
+  @override
+  String get tourActionFinish => 'Got it';
+
+  @override
+  String get tourActionSkip => 'Skip';
+
+  @override
+  String tourStepSemantics(int current, int total) {
+    return 'Tour step $current of $total';
+  }
+
+  @override
+  String get tourDebugResetTitle => 'Reset product tours';
+
+  @override
+  String get tourDebugResetSubtitle =>
+      'Show contextual tours again on the next trigger';
+
+  @override
+  String get tourDebugResetDone => 'Product tours reset';
+
+  @override
+  String get tourRecitersSearchTitle => 'Find a reciter';
+
+  @override
+  String get tourRecitersSearchDescription =>
+      'Search by name to jump straight to the voice you want.';
+
+  @override
+  String get tourRecitersFavoritesTitle => 'Save favourites';
+
+  @override
+  String get tourRecitersFavoritesDescription =>
+      'Tap the heart to filter your saved reciters anytime.';
+
+  @override
+  String get tourRecitersOpenReciterTitle => 'Open a reciter';
+
+  @override
+  String get tourRecitersOpenReciterDescription =>
+      'Choose a reciter to browse surahs and start listening.';
+
+  @override
+  String get tourReciterPlaybackPlayingTitle => 'Now playing';
+
+  @override
+  String get tourReciterPlaybackPlayingDescription =>
+      'The surah you tapped stays highlighted while it plays.';
+
+  @override
+  String get tourReciterPlaybackMiniPlayerTitle => 'Control playback';
+
+  @override
+  String get tourReciterPlaybackMiniPlayerDescription =>
+      'Use the mini player to pause, skip, or expand for more controls.';
 }

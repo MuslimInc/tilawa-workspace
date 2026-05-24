@@ -20,6 +20,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
+import '../features/reciters/presentation/tour/reciters_tour_targets.dart';
+import '../features/tour_guide/presentation/widgets/tour_target.dart';
 import '../router/app_router.dart';
 import '../router/app_router_config.dart';
 import '../shared/widgets/quran_player_chrome.dart';
@@ -394,16 +396,20 @@ class _AppShellChrome extends StatelessWidget {
               policyShowsNav && !isAthkar && phoneBottomNavVisible.value;
 
           final bool narrow = context.isNarrow;
+          final Widget player = QuranPlayerWidget(
+            key: const ValueKey<String>('app_shell_quran_player'),
+            embeddedInShellFooter: true,
+            isKeyboardOpen: isKeyboardOpen,
+            phoneBottomNavBarVisible: phoneBottomNavVisible,
+            hostAbsorbsBottomSafeArea: true,
+          );
           final Widget? shellFooterPlayer =
               showPlayer && playerHeight > 0 && narrow
               ? SizedBox(
                   height: playerHeight + overlayBleedBuffer,
-                  child: QuranPlayerWidget(
-                    key: const ValueKey<String>('app_shell_quran_player'),
-                    embeddedInShellFooter: true,
-                    isKeyboardOpen: isKeyboardOpen,
-                    phoneBottomNavBarVisible: phoneBottomNavVisible,
-                    hostAbsorbsBottomSafeArea: true,
+                  child: TourTarget(
+                    targetId: RecitersTourTargets.miniPlayer,
+                    child: player,
                   ),
                 )
               : null;
@@ -424,12 +430,15 @@ class _AppShellChrome extends StatelessWidget {
               ),
               if (showPlayer && !narrow)
                 Positioned.fill(
-                  child: QuranPlayerWidget(
-                    key: const ValueKey<String>('app_shell_quran_player'),
-                    bottomNavBarHeight: bottomNavBarHeight,
-                    isKeyboardOpen: isKeyboardOpen,
-                    phoneBottomNavBarVisible: phoneBottomNavVisible,
-                    hostAbsorbsBottomSafeArea: false,
+                  child: TourTarget(
+                    targetId: RecitersTourTargets.miniPlayer,
+                    child: QuranPlayerWidget(
+                      key: const ValueKey<String>('app_shell_quran_player'),
+                      bottomNavBarHeight: bottomNavBarHeight,
+                      isKeyboardOpen: isKeyboardOpen,
+                      phoneBottomNavBarVisible: phoneBottomNavVisible,
+                      hostAbsorbsBottomSafeArea: false,
+                    ),
                   ),
                 ),
             ],

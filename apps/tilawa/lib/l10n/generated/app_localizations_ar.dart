@@ -2173,4 +2173,63 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appReviewPlatformUnsupported =>
       'تقييمات المتجر غير مدعومة على هذه المنصة.';
+
+  @override
+  String get tourActionNext => 'التالي';
+
+  @override
+  String get tourActionFinish => 'فهمت';
+
+  @override
+  String get tourActionSkip => 'تخطّي';
+
+  @override
+  String tourStepSemantics(int current, int total) {
+    return 'خطوة $current من $total في الجولة';
+  }
+
+  @override
+  String get tourDebugResetTitle => 'إعادة ضبط جولات التطبيق';
+
+  @override
+  String get tourDebugResetSubtitle =>
+      'إظهار الجولات السياقية مجدداً عند التفعيل التالي';
+
+  @override
+  String get tourDebugResetDone => 'تمت إعادة ضبط جولات التطبيق';
+
+  @override
+  String get tourRecitersSearchTitle => 'ابحث عن قارئ';
+
+  @override
+  String get tourRecitersSearchDescription =>
+      'ابحث بالاسم للوصول مباشرة إلى الصوت الذي تريده.';
+
+  @override
+  String get tourRecitersFavoritesTitle => 'احفظ المفضّلة';
+
+  @override
+  String get tourRecitersFavoritesDescription =>
+      'اضغط على القلب لتصفية قرّائك المحفوظين في أي وقت.';
+
+  @override
+  String get tourRecitersOpenReciterTitle => 'افتح قارئاً';
+
+  @override
+  String get tourRecitersOpenReciterDescription =>
+      'اختر قارئاً لتصفّح السور والاستماع.';
+
+  @override
+  String get tourReciterPlaybackPlayingTitle => 'قيد التشغيل';
+
+  @override
+  String get tourReciterPlaybackPlayingDescription =>
+      'تبقى السورة التي ضغطت عليها مميّزة أثناء التشغيل.';
+
+  @override
+  String get tourReciterPlaybackMiniPlayerTitle => 'تحكّم بالتشغيل';
+
+  @override
+  String get tourReciterPlaybackMiniPlayerDescription =>
+      'استخدم المشغّل المصغّر للإيقاف أو التخطّي أو التوسيع لمزيد من التحكم.';
 }

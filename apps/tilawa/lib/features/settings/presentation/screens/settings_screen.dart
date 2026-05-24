@@ -14,6 +14,7 @@ import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/domain/app_theme_mode.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../../../theme/presentation/theme_state_material.dart';
+import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
 import '../cubit/settings_cubit.dart';
 import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_profile_card.dart';
@@ -198,6 +199,7 @@ class _SettingsScreenBody extends StatelessWidget {
                       title: 'Deep link debug',
                       onTap: () => const DeepLinkDebugRoute().push(context),
                     ),
+                    const TourGuideDebugResetTile(),
                   ],
                 ),
               const SettingsAppVersionFooter(),

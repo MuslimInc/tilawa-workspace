@@ -3997,6 +3997,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Store reviews are not supported on this platform.'**
   String get appReviewPlatformUnsupported;
+
+  /// Primary action to advance an in-app product tour step
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get tourActionNext;
+
+  /// Primary action on the last step of a product tour
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get tourActionFinish;
+
+  /// Dismiss the entire product tour without finishing every step
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get tourActionSkip;
+
+  /// Screen reader label for a product tour tooltip
+  ///
+  /// In en, this message translates to:
+  /// **'Tour step {current} of {total}'**
+  String tourStepSemantics(int current, int total);
+
+  /// Developer settings row to clear tour completion flags
+  ///
+  /// In en, this message translates to:
+  /// **'Reset product tours'**
+  String get tourDebugResetTitle;
+
+  /// Subtitle for developer tour reset row
+  ///
+  /// In en, this message translates to:
+  /// **'Show contextual tours again on the next trigger'**
+  String get tourDebugResetSubtitle;
+
+  /// Snackbar after clearing tour completion state
+  ///
+  /// In en, this message translates to:
+  /// **'Product tours reset'**
+  String get tourDebugResetDone;
+
+  /// Reciters intro tour — search step title
+  ///
+  /// In en, this message translates to:
+  /// **'Find a reciter'**
+  String get tourRecitersSearchTitle;
+
+  /// Reciters intro tour — search step body
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name to jump straight to the voice you want.'**
+  String get tourRecitersSearchDescription;
+
+  /// Reciters intro tour — favourites step title
+  ///
+  /// In en, this message translates to:
+  /// **'Save favourites'**
+  String get tourRecitersFavoritesTitle;
+
+  /// Reciters intro tour — favourites step body
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart to filter your saved reciters anytime.'**
+  String get tourRecitersFavoritesDescription;
+
+  /// Reciters intro tour — open reciter step title
+  ///
+  /// In en, this message translates to:
+  /// **'Open a reciter'**
+  String get tourRecitersOpenReciterTitle;
+
+  /// Reciters intro tour — open reciter step body
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a reciter to browse surahs and start listening.'**
+  String get tourRecitersOpenReciterDescription;
+
+  /// Reciter details playback tour — active surah step title
+  ///
+  /// In en, this message translates to:
+  /// **'Now playing'**
+  String get tourReciterPlaybackPlayingTitle;
+
+  /// Reciter details playback tour — active surah step body
+  ///
+  /// In en, this message translates to:
+  /// **'The surah you tapped stays highlighted while it plays.'**
+  String get tourReciterPlaybackPlayingDescription;
+
+  /// Reciter details playback tour — mini player step title
+  ///
+  /// In en, this message translates to:
+  /// **'Control playback'**
+  String get tourReciterPlaybackMiniPlayerTitle;
+
+  /// Reciter details playback tour — mini player step body
+  ///
+  /// In en, this message translates to:
+  /// **'Use the mini player to pause, skip, or expand for more controls.'**
+  String get tourReciterPlaybackMiniPlayerDescription;
 }
 
 class _AppLocalizationsDelegate

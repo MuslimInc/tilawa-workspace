@@ -195,7 +195,31 @@ detail in
 
 ---
 
-## 10. Do’s and don’ts
+## 11. Product tours (contextual coach marks)
+
+In-app **product tours** highlight existing controls with a dark scrim and
+token-backed tooltip cards. They are separate from first-run **onboarding**
+(full-screen carousel).
+
+### UX placement (allowed vs forbidden)
+
+| Allowed | Forbidden |
+|---------|-----------|
+| Feature discovery after calm entry (e.g. Reciters tab mounted) | Quran reader, prayer times, athkar during active worship |
+| Settings-triggered debug replay (developer builds) | Cold-start popups, launch overlays |
+
+### Visual rules
+
+- Scrim: ~72% opacity neutral shadow (adaptive light/dark).
+- Tooltip: `surfaceContainerHigh`, `radiusLarge`, primary **Next** / **Got it**
+  CTA; secondary **Skip** text button.
+- Focus ring padding: 8 dp; respect safe areas and text-scale clamp (§3).
+
+Implementation: `apps/tilawa/lib/features/tour_guide/` — see feature README.
+
+---
+
+## 12. Do’s and don’ts
 
 **Do**
 

@@ -2912,5 +2912,81 @@
     "appReviewPlatformUnsupported": "Store reviews are not supported on this platform.",
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
+    },
+    "tourActionNext": "Next",
+    "@tourActionNext": {
+        "description": "Primary action to advance an in-app product tour step"
+    },
+    "tourActionFinish": "Got it",
+    "@tourActionFinish": {
+        "description": "Primary action on the last step of a product tour"
+    },
+    "tourActionSkip": "Skip",
+    "@tourActionSkip": {
+        "description": "Dismiss the entire product tour without finishing every step"
+    },
+    "tourStepSemantics": "Tour step {current} of {total}",
+    "@tourStepSemantics": {
+        "description": "Screen reader label for a product tour tooltip",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "tourDebugResetTitle": "Reset product tours",
+    "@tourDebugResetTitle": {
+        "description": "Developer settings row to clear tour completion flags"
+    },
+    "tourDebugResetSubtitle": "Show contextual tours again on the next trigger",
+    "@tourDebugResetSubtitle": {
+        "description": "Subtitle for developer tour reset row"
+    },
+    "tourDebugResetDone": "Product tours reset",
+    "@tourDebugResetDone": {
+        "description": "Snackbar after clearing tour completion state"
+    },
+    "tourRecitersSearchTitle": "Find a reciter",
+    "@tourRecitersSearchTitle": {
+        "description": "Reciters intro tour — search step title"
+    },
+    "tourRecitersSearchDescription": "Search by name to jump straight to the voice you want.",
+    "@tourRecitersSearchDescription": {
+        "description": "Reciters intro tour — search step body"
+    },
+    "tourRecitersFavoritesTitle": "Save favourites",
+    "@tourRecitersFavoritesTitle": {
+        "description": "Reciters intro tour — favourites step title"
+    },
+    "tourRecitersFavoritesDescription": "Tap the heart to filter your saved reciters anytime.",
+    "@tourRecitersFavoritesDescription": {
+        "description": "Reciters intro tour — favourites step body"
+    },
+    "tourRecitersOpenReciterTitle": "Open a reciter",
+    "@tourRecitersOpenReciterTitle": {
+        "description": "Reciters intro tour — open reciter step title"
+    },
+    "tourRecitersOpenReciterDescription": "Choose a reciter to browse surahs and start listening.",
+    "@tourRecitersOpenReciterDescription": {
+        "description": "Reciters intro tour — open reciter step body"
+    },
+    "tourReciterPlaybackPlayingTitle": "Now playing",
+    "@tourReciterPlaybackPlayingTitle": {
+        "description": "Reciter details playback tour — active surah step title"
+    },
+    "tourReciterPlaybackPlayingDescription": "The surah you tapped stays highlighted while it plays.",
+    "@tourReciterPlaybackPlayingDescription": {
+        "description": "Reciter details playback tour — active surah step body"
+    },
+    "tourReciterPlaybackMiniPlayerTitle": "Control playback",
+    "@tourReciterPlaybackMiniPlayerTitle": {
+        "description": "Reciter details playback tour — mini player step title"
+    },
+    "tourReciterPlaybackMiniPlayerDescription": "Use the mini player to pause, skip, or expand for more controls.",
+    "@tourReciterPlaybackMiniPlayerDescription": {
+        "description": "Reciter details playback tour — mini player step body"
     }
 }

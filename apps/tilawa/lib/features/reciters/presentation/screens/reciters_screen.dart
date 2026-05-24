@@ -7,9 +7,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/features/reciters/presentation/utils/reciter_list_moshaf_label.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
-import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/tour_guide/presentation/widgets/tour_target.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -24,6 +25,8 @@ import '../bloc/reciters_bloc.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 import '../reciter_semantics_ids.dart';
+import '../tour/reciters_tour_launcher.dart';
+import '../tour/reciters_tour_targets.dart';
 
 /// Main-shell system back: collapse expanded player, tab focus, then exit.
 ///
@@ -105,6 +108,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
   bool _allowHeavyLoadedResults = false;
   bool _showLetterIndex = false;
   bool _letterIndexDefaultResolved = false;
+  bool _introTourAttempted = false;
   late final FavoritesCubit _favoritesCubit;
 
   @override
@@ -118,6 +122,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
       _isStartupLiteUi = false;
       _allowHeavyLoadedResults = true;
       _favoritesCubit.loadFavorites();
+      _scheduleRecitersIntroTour();
       return;
     }
 
@@ -154,6 +159,30 @@ class _RecitersScreenState extends State<RecitersScreen> {
       if (!mounted || _allowHeavyLoadedResults) return;
       setState(() {
         _allowHeavyLoadedResults = true;
+      });
+      _scheduleRecitersIntroTour();
+    });
+  }
+
+  void _scheduleRecitersIntroTour() {
+    if (_introTourAttempted || !_allowHeavyLoadedResults) {
+      return;
+    }
+    final RecitersState state = context.read<RecitersBloc>().state;
+    if (state is! RecitersLoaded || state.filteredReciters.isEmpty) {
+      return;
+    }
+    _introTourAttempted = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 450), () {
+        if (!mounted) {
+          return;
+        }
+        final RecitersState latest = context.read<RecitersBloc>().state;
+        if (latest is! RecitersLoaded || latest.filteredReciters.isEmpty) {
+          return;
+        }
+        unawaited(getIt<RecitersTourLauncher>().maybeShowRecitersIntro(context));
       });
     });
   }
@@ -320,6 +349,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
                     previous is! RecitersLoaded && current is RecitersLoaded,
                 listener: (context, state) {
                   _scheduleLoadedResultsActivation();
+                  if (_allowHeavyLoadedResults) {
+                    _scheduleRecitersIntroTour();
+                  }
                 },
               ),
               BlocListener<FavoritesCubit, FavoritesState>(
@@ -785,7 +817,7 @@ class _RecitersTilawaAppBar extends StatelessWidget
   }
 }
 
-/// Booking-style quick filters under search (favorites, A–Z, overflow).
+/// Booking-style quick filters under search (favorites, A–Z, downloads).
 class _RecitersQuickFilterBar extends StatelessWidget {
   const _RecitersQuickFilterBar({
     required this.state,
@@ -827,42 +859,58 @@ class _RecitersQuickFilterBar extends StatelessWidget {
     final bool showClearAll =
         loadedState != null && _showHeaderClearAll(loadedState);
 
+    final bool showFavoritesCountOnly =
+        !favoritesSelected && favoriteCount > 0;
     final String favoritesLabel = favoritesSelected || favoriteCount == 0
         ? l10n.recitersFilterChipFavorites
-        : l10n.recitersFilterPillFavoritesCount(favoriteCount);
+        : favoriteCount.toString();
+    final IconData favoritesIcon = favoritesSelected
+        ? Icons.favorite_rounded
+        : Icons.favorite_border_rounded;
 
     TilawaSelectionPill catalogFilterPill({
       required String label,
       required bool selected,
       required VoidCallback? onTap,
       IconData? icon,
+      bool showLabel = true,
     }) {
       return TilawaSelectionPill(
         label: label,
         icon: icon,
         selected: selected,
         onTap: onTap,
+        showLabel: showLabel,
         style: TilawaSelectionPillStyle.catalog,
         elevatedWhenSelected: false,
       );
     }
 
     final List<Widget> pills = <Widget>[
-      Semantics(
-        identifier: ReciterSemanticsIds.recitersFavoritesToggle,
-        child: catalogFilterPill(
-          label: favoritesLabel,
-          icon: Icons.favorite_border_rounded,
-          selected: favoritesSelected,
-          onTap: favoritesReady ? onToggleFavorites : null,
+      TourTarget(
+        targetId: RecitersTourTargets.favoritesToggle,
+        child: Semantics(
+          identifier: ReciterSemanticsIds.recitersFavoritesToggle,
+          label: showFavoritesCountOnly
+              ? l10n.recitersFilterPillFavoritesCount(favoriteCount)
+              : null,
+          child: catalogFilterPill(
+            label: favoritesLabel,
+            icon: favoritesIcon,
+            selected: favoritesSelected,
+            onTap: favoritesReady ? onToggleFavorites : null,
+          ),
         ),
       ),
       if (letterIndexAvailable)
-        catalogFilterPill(
-          label: l10n.recitersFilterPillAlphabet,
-          icon: Icons.sort_by_alpha_rounded,
-          selected: showLetterIndex,
-          onTap: onToggleLetterIndex,
+        Semantics(
+          identifier: ReciterSemanticsIds.recitersLetterIndexToggle,
+          child: catalogFilterPill(
+            label: l10n.recitersFilterPillAlphabet,
+            icon: Icons.sort_by_alpha_rounded,
+            selected: showLetterIndex,
+            onTap: onToggleLetterIndex,
+          ),
         ),
       if (selectedLetter != null && !showLetterIndex)
         catalogFilterPill(
@@ -870,15 +918,27 @@ class _RecitersQuickFilterBar extends StatelessWidget {
           selected: true,
           onTap: onClearLetterFilter,
         ),
+      const _RecitersFilterNavigationDivider(),
+      Semantics(
+        identifier: ReciterSemanticsIds.recitersViewDownloads,
+        label: l10n.viewDownloads,
+        button: true,
+        child: Tooltip(
+          message: l10n.viewDownloads,
+          child: catalogFilterPill(
+            label: l10n.viewDownloads,
+            icon: Icons.file_download_outlined,
+            selected: false,
+            showLabel: false,
+            onTap: () => const DownloadsRoute().push(context),
+          ),
+        ),
+      ),
     ];
 
     return TilawaQuickFilterBar(
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: tokens.spaceExtraSmall,
-        children: [
-          if (showClearAll)
-            TextButton(
+      trailing: showClearAll
+          ? TextButton(
               onPressed: onClearAllFilters,
               style: TextButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
@@ -886,11 +946,32 @@ class _RecitersQuickFilterBar extends StatelessWidget {
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               child: Text(l10n.clearAll),
-            ),
-          const _RecitersHeaderOverflowMenu(),
-        ],
-      ),
+            )
+          : null,
       children: pills,
+    );
+  }
+}
+
+/// Separates stateful catalog filters from the downloads navigation control.
+class _RecitersFilterNavigationDivider extends StatelessWidget {
+  const _RecitersFilterNavigationDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceTiny),
+      child: SizedBox(
+        height: tokens.iconSizeMedium,
+        child: VerticalDivider(
+          width: tokens.spaceTiny,
+          thickness: tokens.borderWidthThin,
+          color: colorScheme.outlineVariant,
+        ),
+      ),
     );
   }
 }
@@ -959,90 +1040,23 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      identifier: ReciterSemanticsIds.recitersSearchField,
-      child: TilawaSearchField(
-        controller: controller,
-        focusNode: focusNode,
-        hintText: context.l10n.searchReciters,
-        prefixIcon: FluentIcons.search_24_regular,
-        clearIcon: FluentIcons.dismiss_24_regular,
-        onChanged: onChanged,
-        onClear: onClear,
-        clearButtonTooltip: context.l10n.a11yClearRecitersSearch,
-        showShadow: false,
-        onTapOutside: (_) => focusNode.unfocus(),
-      ),
-    );
-  }
-}
-
-class _RecitersHeaderOverflowMenu extends StatelessWidget {
-  const _RecitersHeaderOverflowMenu();
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-
-    return MenuAnchor(
-      style: MenuStyle(
-        shape: WidgetStatePropertyAll(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(tokens.radiusLarge),
-          ),
+    return TourTarget(
+      targetId: RecitersTourTargets.searchField,
+      child: Semantics(
+        identifier: ReciterSemanticsIds.recitersSearchField,
+        child: TilawaSearchField(
+          controller: controller,
+          focusNode: focusNode,
+          hintText: context.l10n.searchReciters,
+          prefixIcon: FluentIcons.search_24_regular,
+          clearIcon: FluentIcons.dismiss_24_regular,
+          onChanged: onChanged,
+          onClear: onClear,
+          clearButtonTooltip: context.l10n.a11yClearRecitersSearch,
+          showShadow: false,
+          onTapOutside: (_) => focusNode.unfocus(),
         ),
       ),
-      alignmentOffset: Offset(0, tokens.spaceSmall),
-      builder:
-          (BuildContext context, MenuController controller, Widget? child) {
-            return Semantics(
-              identifier: ReciterSemanticsIds.recitersMoreActionsButton,
-              child: TilawaIconActionButton(
-                icon: FluentIcons.more_horizontal_24_regular,
-                tooltip: context.l10n.recitersMoreActions,
-                semanticLabel: context.l10n.recitersMoreActions,
-                onTap: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-              ),
-            );
-          },
-      menuChildren: <Widget>[
-        MenuItemButton(
-          onPressed: () => const DownloadsRoute().push(context),
-          child: _RecitersHeaderMenuRow(
-            icon: FluentIcons.arrow_download_24_regular,
-            label: context.l10n.viewDownloads,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _RecitersHeaderMenuRow extends StatelessWidget {
-  const _RecitersHeaderMenuRow({
-    required this.icon,
-    required this.label,
-  });
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-
-    return Row(
-      children: [
-        Icon(icon, size: tokens.iconSizeMedium),
-        SizedBox(width: tokens.spaceSmall + tokens.spaceTiny),
-        Expanded(child: Text(label)),
-      ],
     );
   }
 }
@@ -1169,11 +1183,18 @@ class _ReciterListSliver extends StatelessWidget {
 
                   final ReciterEntity reciter =
                       state.filteredReciters[index ~/ 2];
-                  return ReciterCard(
+                  final Widget card = ReciterCard(
                     key: ValueKey(reciter.id),
                     reciter: reciter,
                     favoritesOnlyContext: state.showFavoritesOnly,
                   );
+                  if (index == 0) {
+                    return TourTarget(
+                      targetId: RecitersTourTargets.firstReciterCard,
+                      child: card,
+                    );
+                  }
+                  return card;
                 },
               ),
             ],
