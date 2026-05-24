@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
@@ -13,16 +14,17 @@ import '../../domain/usecases/save_custom_tasbeeh_use_case.dart';
 import '../../domain/usecases/set_tasbeeh_target_count_use_case.dart';
 import 'tasbeeh_state.dart';
 
+@injectable
 class TasbeehCubit extends Cubit<TasbeehState> {
-  TasbeehCubit({
-    required this._getSavedTasbeeh,
-    required this._saveCustomTasbeeh,
-    required this._incrementTasbeehCount,
-    required this._resetTasbeehCount,
-    required this._setTasbeehTargetCount,
-    required this._deleteTasbeehDhikr,
-    required this._feedbackService,
-  }) : super(const TasbeehState());
+  TasbeehCubit(
+    this._getSavedTasbeeh,
+    this._saveCustomTasbeeh,
+    this._incrementTasbeehCount,
+    this._resetTasbeehCount,
+    this._setTasbeehTargetCount,
+    this._deleteTasbeehDhikr,
+    this._feedbackService,
+  ) : super(const TasbeehState());
 
   final GetSavedTasbeehUseCase _getSavedTasbeeh;
   final SaveCustomTasbeehUseCase _saveCustomTasbeeh;

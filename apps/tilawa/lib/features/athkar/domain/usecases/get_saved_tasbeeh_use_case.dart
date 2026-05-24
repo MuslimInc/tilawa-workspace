@@ -1,10 +1,12 @@
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../entities/tasbeeh_dhikr.dart';
 import '../repositories/tasbeeh_repository.dart';
 
+@lazySingleton
 class GetSavedTasbeehUseCase implements UseCase<List<TasbeehDhikr>, NoParams> {
   GetSavedTasbeehUseCase(this._repository);
 

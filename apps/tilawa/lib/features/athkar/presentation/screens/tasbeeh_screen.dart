@@ -3,25 +3,15 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_ce/hive.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../data/datasources/tasbeeh_local_datasource.dart';
-import '../../data/repositories/tasbeeh_repository_impl.dart';
 import '../../domain/constants/tasbeeh_constants.dart';
-import '../../domain/services/tasbeeh_target_feedback_service.dart';
-import '../../domain/usecases/delete_tasbeeh_dhikr_use_case.dart';
-import '../../domain/usecases/get_saved_tasbeeh_use_case.dart';
-import '../../domain/usecases/increment_tasbeeh_count_use_case.dart';
-import '../../domain/usecases/reset_tasbeeh_count_use_case.dart';
-import '../../domain/usecases/save_custom_tasbeeh_use_case.dart';
-import '../../domain/usecases/set_tasbeeh_target_count_use_case.dart';
 import '../cubit/tasbeeh_cubit.dart';
 import '../cubit/tasbeeh_state.dart';
-import '../services/haptic_tasbeeh_target_feedback_service.dart';
 import '../widgets/athkar_ambient_background.dart';
 
 class TasbeehScreen extends StatelessWidget {
@@ -32,25 +22,8 @@ class TasbeehScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<TasbeehCubit>(
-      create: (_) => cubit ?? _buildCubit()
-        ..loadSavedDhikr(),
+      create: (_) => cubit ?? getIt<TasbeehCubit>()..loadSavedDhikr(),
       child: const _TasbeehView(),
-    );
-  }
-
-  TasbeehCubit _buildCubit() {
-    final localDataSource = TasbeehLocalDataSourceImpl(Hive);
-    final repository = TasbeehRepositoryImpl(localDataSource);
-    final TasbeehTargetFeedbackService feedbackService =
-        HapticTasbeehTargetFeedbackService();
-    return TasbeehCubit(
-      getSavedTasbeeh: GetSavedTasbeehUseCase(repository),
-      saveCustomTasbeeh: SaveCustomTasbeehUseCase(repository),
-      incrementTasbeehCount: IncrementTasbeehCountUseCase(repository),
-      resetTasbeehCount: ResetTasbeehCountUseCase(repository),
-      setTasbeehTargetCount: SetTasbeehTargetCountUseCase(repository),
-      deleteTasbeehDhikr: DeleteTasbeehDhikrUseCase(repository),
-      feedbackService: feedbackService,
     );
   }
 }

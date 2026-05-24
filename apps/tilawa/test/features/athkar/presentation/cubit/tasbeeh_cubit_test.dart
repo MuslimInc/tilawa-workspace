@@ -129,13 +129,13 @@ void main() {
     repository = _InMemoryTasbeehRepository();
     feedbackService = _FakeTasbeehTargetFeedbackService();
     cubit = TasbeehCubit(
-      getSavedTasbeeh: GetSavedTasbeehUseCase(repository),
-      saveCustomTasbeeh: SaveCustomTasbeehUseCase(repository),
-      incrementTasbeehCount: IncrementTasbeehCountUseCase(repository),
-      resetTasbeehCount: ResetTasbeehCountUseCase(repository),
-      setTasbeehTargetCount: SetTasbeehTargetCountUseCase(repository),
-      deleteTasbeehDhikr: DeleteTasbeehDhikrUseCase(repository),
-      feedbackService: feedbackService,
+      GetSavedTasbeehUseCase(repository),
+      SaveCustomTasbeehUseCase(repository),
+      IncrementTasbeehCountUseCase(repository),
+      ResetTasbeehCountUseCase(repository),
+      SetTasbeehTargetCountUseCase(repository),
+      DeleteTasbeehDhikrUseCase(repository),
+      feedbackService,
     );
   });
 
