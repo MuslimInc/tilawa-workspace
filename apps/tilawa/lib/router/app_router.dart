@@ -257,6 +257,7 @@ class AppRouter {
     lastProcessedNotificationId = null;
     _lastNotificationNavigationSignature = null;
     _lastNotificationNavigationAt = null;
+    isOnPrayerNotificationStatusRouteOverride = null;
   }
 
   static GoRouter get router {
@@ -362,6 +363,30 @@ class AppRouter {
       return ShellRouteLocation.activeMatchedLocation();
     } catch (_) {
       return null;
+    }
+  }
+
+  /// Optional override for unit tests that cannot mount [GoRouter].
+  @visibleForTesting
+  static bool Function()? isOnPrayerNotificationStatusRouteOverride;
+
+  /// Whether the active route is the prayer notification status screen.
+  static bool isOnPrayerNotificationStatusRoute() {
+    final bool Function()? override = isOnPrayerNotificationStatusRouteOverride;
+    if (override != null) {
+      return override();
+    }
+
+    final String target = const PrayerNotificationStatusRoute().location;
+    try {
+      final String activePath =
+          router.routerDelegate.currentConfiguration.uri.path;
+      if (activePath == target) {
+        return true;
+      }
+      return ShellRouteLocation.matchedLocationStack().contains(target);
+    } catch (_) {
+      return false;
     }
   }
 

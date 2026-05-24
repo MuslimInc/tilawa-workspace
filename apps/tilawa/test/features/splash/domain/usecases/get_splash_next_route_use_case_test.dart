@@ -7,6 +7,7 @@ import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.d
 import 'package:tilawa/features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use_case.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/app_router_config.dart';
 
 class MockGetCurrentUserUseCase extends Mock implements GetCurrentUserUseCase {}
 
@@ -24,14 +25,10 @@ void main() {
       mockGetCurrentUserUseCase,
       mockCheckOnboardingStatus,
     );
-    AppRouter.pendingFcmMessage = null;
-    AppRouter.pendingLocalNotificationResponse = null;
+    AppRouter.resetForTesting();
   });
 
-  tearDown(() {
-    AppRouter.pendingFcmMessage = null;
-    AppRouter.pendingLocalNotificationResponse = null;
-  });
+  tearDown(AppRouter.resetForTesting);
 
   group('GetSplashNextRouteUseCase', () {
     test(
@@ -87,6 +84,25 @@ void main() {
       expect(result.destination, SplashDestination.home);
       expect(result.notificationData, isNull);
     });
+
+    test(
+      'returns notification launch for pending native adhan cold start',
+      () async {
+        const String payload =
+            '{"type":"prayer","prayer_key":"fajr","is_adhan_playing":true}';
+        AppRouter.setPendingColdStartRoute(
+          const PrayerNotificationStatusRoute().location,
+          extra: payload,
+        );
+
+        final result = await useCase();
+
+        expect(result.destination, SplashDestination.notificationLaunch);
+        expect(result.notificationData?['prayer_key'], 'fajr');
+        verifyNever(() => mockCheckOnboardingStatus.call());
+        verifyNever(() => mockGetCurrentUserUseCase.call());
+      },
+    );
 
     test(
       'local notification takes priority over signed-in home routing',
