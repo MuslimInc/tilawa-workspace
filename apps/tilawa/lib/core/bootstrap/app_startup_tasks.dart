@@ -32,6 +32,7 @@ import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/core/services/notification_startup_service.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_service.dart';
+import 'package:tilawa/features/auth/core/auth_config.dart';
 import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
@@ -504,6 +505,9 @@ class AppStartupTasks {
       launchConfig.credentialManagerInit,
       'CREDENTIAL_MANAGER_INIT',
     )) {
+      return;
+    }
+    if (!AuthConfig.useCredentialManager) {
       return;
     }
     logger.d(
