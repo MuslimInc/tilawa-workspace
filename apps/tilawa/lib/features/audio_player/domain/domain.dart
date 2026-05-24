@@ -1,6 +1,8 @@
 export 'entities/reciter_audio_catalog.dart';
 export 'repositories/repositories.dart';
-export 'services/artist_playlist_builder.dart';
+export 'services/artist_media_playlist_cache.dart';
+export 'services/audio_entity_media_item_mapper.dart';
+export 'services/moshaf_surah_audio_list_builder.dart';
 export 'services/playback_uri_resolver.dart';
 export 'services/reciter_audio_catalog_builder.dart';
 export 'services/reciter_audio_catalog_cache.dart';

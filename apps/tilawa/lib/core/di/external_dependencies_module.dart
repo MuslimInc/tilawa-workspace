@@ -19,7 +19,9 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:tilawa/features/audio_player/domain/services/artist_playlist_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/artist_media_playlist_cache.dart';
+import 'package:tilawa/features/audio_player/domain/services/audio_entity_media_item_mapper.dart';
+import 'package:tilawa/features/audio_player/domain/services/moshaf_surah_audio_list_builder.dart';
 import 'package:tilawa/features/audio_player/domain/services/playback_uri_resolver.dart';
 import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
 import 'package:tilawa/features/premium/data/services/subscription_plans_service.dart';
@@ -28,6 +30,7 @@ import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../shared/audio/audio_player_handler.dart';
 import '../../shared/audio/audio_player_handler_impl.dart';
+
 @module
 abstract class ExternalDependenciesModule {
   @singleton
@@ -99,7 +102,6 @@ abstract class ExternalDependenciesModule {
     firestoreCatalogEnabled: launchConfig.subscriptionServiceEnabled,
   );
 
-
   @singleton
   List<MediaItem> mediaItemList() => [];
 
@@ -107,10 +109,11 @@ abstract class ExternalDependenciesModule {
   AudioPlayerHandler audioPlayerHandler(
     List<MediaItem> mediaItems,
     AnalyticsService analyticsService,
-    SharedPreferencesAsync prefs,
     ReciterAudioCatalogCache catalogCache,
     PlaybackUriResolver playbackUriResolver,
-    ArtistPlaylistBuilder artistPlaylistBuilder,
+    MoshafSurahAudioListBuilder moshafSurahAudioListBuilder,
+    ArtistMediaPlaylistCache artistMediaPlaylistCache,
+    AudioEntityMediaItemMapper mediaItemMapper,
   ) {
     // Create the handler synchronously so DI doesn't block the first frame.
     // AudioService.init() (the platform notification bridge) is deferred to
@@ -118,10 +121,11 @@ abstract class ExternalDependenciesModule {
     return AudioPlayerHandlerImpl(
       mediaItems,
       analyticsService,
-      prefs,
       catalogCache,
       playbackUriResolver,
-      artistPlaylistBuilder,
+      moshafSurahAudioListBuilder,
+      artistMediaPlaylistCache,
+      mediaItemMapper,
     );
   }
 

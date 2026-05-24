@@ -3,23 +3,19 @@ import 'dart:developer';
 
 import 'package:audio_service/audio_service.dart' as audio_service;
 import 'package:audio_session/audio_session.dart';
-import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
-import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
-import 'package:tilawa_core/utils/url_validator.dart';
-
 import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/audio_player/domain/entities/reciter_audio_catalog.dart';
-import '../../features/audio_player/domain/services/artist_playlist_builder.dart';
+import '../../features/audio_player/domain/services/artist_media_playlist_cache.dart';
+import '../../features/audio_player/domain/services/audio_entity_media_item_mapper.dart';
+import '../../features/audio_player/domain/services/moshaf_surah_audio_list_builder.dart';
 import '../../features/audio_player/domain/services/playback_uri_resolver.dart';
 import '../../features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
@@ -33,10 +29,11 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   AudioPlayerHandlerImpl(
     this.newList,
     this._analyticsService,
-    this._prefs,
     this._catalogCache,
     this._playbackUriResolver,
-    this._artistPlaylistBuilder, {
+    this._moshafSurahAudioListBuilder,
+    this._artistMediaPlaylistCache,
+    this._mediaItemMapper, {
     AudioPlayer? player,
     AudioSession? audioSession, // For testing
   }) : _player = player ?? AudioPlayer(),
@@ -49,10 +46,11 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       BehaviorSubject.seeded(<audio_service.MediaItem>[]);
   final List<audio_service.MediaItem> newList;
   final AnalyticsService _analyticsService;
-  final SharedPreferencesAsync _prefs;
   final ReciterAudioCatalogCache _catalogCache;
   final PlaybackUriResolver _playbackUriResolver;
-  final ArtistPlaylistBuilder _artistPlaylistBuilder;
+  final MoshafSurahAudioListBuilder _moshafSurahAudioListBuilder;
+  final ArtistMediaPlaylistCache _artistMediaPlaylistCache;
+  final AudioEntityMediaItemMapper _mediaItemMapper;
   final _items = <String, List<audio_service.MediaItem>>{};
   final AudioPlayer _player;
   @override
@@ -62,8 +60,6 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   final _mediaItemMap = <String, audio_service.MediaItem>{};
 
   // Caching and pagination
-
-  final Map<String, List<audio_service.MediaItem>> _artistPlaylists = {};
 
   // Audio loading management
   bool _isLoadingAudio = false;
@@ -693,63 +689,13 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     MoshafEntity moshaf, {
     String? reciterName,
     String? reciterId,
-  }) async {
-    try {
-      final List<String> surahList = moshaf.surahList.split(',');
-      final audioEntities = <AudioEntity>[];
-
-      for (final surahId in surahList) {
-        final int surahNumber = int.parse(surahId);
-        final String formattedSurahId = surahId.padLeft(3, '0');
-        final audioId = '${moshaf.server}$formattedSurahId.mp3';
-
-        // Validate the constructed URL
-        if (!UrlValidator.isValid(audioId)) {
-          log('Skipping invalid audio URL: $audioId for surah $surahId');
-          continue; // Skip this entry
-        }
-
-        final String surahName = await _getSurahName(surahNumber);
-
-        audioEntities.add(
-          AudioEntity(
-            id: audioId,
-            title: surahName,
-            url: audioId,
-            duration: Duration.zero,
-            artist: reciterName,
-            album: moshaf.name,
-            extras: {
-              'reciterId': ?reciterId,
-              'moshafId': moshaf.id,
-              'surahId': surahNumber,
-            },
-          ),
-        );
-      }
-
-      return audioEntities;
-    } catch (e) {
-      log('Exception getting surah list: $e');
-      return null;
-    }
+  }) {
+    return _moshafSurahAudioListBuilder.build(
+      moshaf,
+      reciterName: reciterName,
+      reciterId: reciterId,
+    );
   }
-
-  /// Get surah name by surah number based on selected language
-  Future<String> _getSurahName(int surahNumber) async {
-    final String currentLanguage =
-        await _prefs.getString(LanguageConfig.languageKey) ??
-        LanguageConfig.defaultLanguageCode;
-
-    if (currentLanguage == 'en') {
-      return SurahNames.getEnglishSurahName(surahNumber);
-    } else {
-      return SurahNames.getArabicSurahName(surahNumber);
-    }
-  }
-
-  // Removed _getArabicSurahName and _getEnglishSurahName
-  // They are now in SurahNames helper
 
   // Future<void> playArtistPlaylist(String artistId) async {
   //   final reciters = await getReciters();
@@ -774,9 +720,10 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       _currentLoadingArtist = artistId;
 
       // Check if we already have this artist's playlist cached
-      if (_artistPlaylists.containsKey(artistId)) {
-        final List<audio_service.MediaItem> artistPlaylist =
-            _artistPlaylists[artistId]!;
+      final List<audio_service.MediaItem>? cachedPlaylist =
+          _artistMediaPlaylistCache.playlistFor(artistId);
+      if (cachedPlaylist != null) {
+        final List<audio_service.MediaItem> artistPlaylist = cachedPlaylist;
         log(
           'Using cached playlist for artist: $artistId (${artistPlaylist.length} items)',
         );
@@ -802,10 +749,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
           );
 
           final List<audio_service.MediaItem> artistPlaylist =
-              artistAudioEntities.map(_mapAudioEntityToMediaItem).toList();
+              artistAudioEntities.map(_mediaItemMapper.toMediaItem).toList();
 
-          // Cache the artist's playlist
-          _artistPlaylists[artistId] = artistPlaylist;
+          _artistMediaPlaylistCache.store(artistId, artistPlaylist);
 
           // Update the queue with the artist's playlist
           await updateQueue(artistPlaylist);
@@ -826,18 +772,6 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     } finally {
       _currentLoadingArtist = null;
     }
-  }
-
-  audio_service.MediaItem _mapAudioEntityToMediaItem(AudioEntity entity) {
-    return audio_service.MediaItem(
-      id: entity.id,
-      title: entity.title,
-      duration: entity.duration,
-      artist: entity.artist,
-      album: entity.album,
-      artUri: entity.artUri != null ? Uri.parse(entity.artUri!) : null,
-      extras: {'url': entity.url},
-    );
   }
 
   @override

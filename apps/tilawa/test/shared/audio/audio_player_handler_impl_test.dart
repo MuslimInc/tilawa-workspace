@@ -11,7 +11,9 @@ import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
-import 'package:tilawa/features/audio_player/domain/services/artist_playlist_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/artist_media_playlist_cache.dart';
+import 'package:tilawa/features/audio_player/domain/services/audio_entity_media_item_mapper.dart';
+import 'package:tilawa/features/audio_player/domain/services/moshaf_surah_audio_list_builder.dart';
 import 'package:tilawa/features/audio_player/domain/services/playback_uri_resolver.dart';
 import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
 import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
@@ -235,13 +237,14 @@ void main() {
     handler = AudioPlayerHandlerImpl(
       [],
       mockAnalytics,
-      mockPrefs,
       ReciterAudioCatalogCache(
         mockRepo,
         const ReciterAudioCatalogBuilder(),
       ),
       PlaybackUriResolver(mockDownloadsRepo),
-      const ArtistPlaylistBuilder(),
+      MoshafSurahAudioListBuilder(mockPrefs),
+      ArtistMediaPlaylistCache(),
+      const AudioEntityMediaItemMapper(),
       player: mockPlayer,
       audioSession: mockAudioSession,
     );
@@ -327,13 +330,14 @@ void main() {
         final freshHandler = AudioPlayerHandlerImpl(
           [],
           mockAnalytics,
-          mockPrefs,
           ReciterAudioCatalogCache(
             mockRepo,
             const ReciterAudioCatalogBuilder(),
           ),
           PlaybackUriResolver(mockDownloadsRepo),
-          const ArtistPlaylistBuilder(),
+          MoshafSurahAudioListBuilder(mockPrefs),
+          ArtistMediaPlaylistCache(),
+          const AudioEntityMediaItemMapper(),
           player: mockPlayer,
         );
 
@@ -1058,13 +1062,14 @@ void main() {
       final localHandler = AudioPlayerHandlerImpl(
         items,
         mockAnalytics,
-        mockPrefs,
         ReciterAudioCatalogCache(
           mockRepo,
           const ReciterAudioCatalogBuilder(),
         ),
         PlaybackUriResolver(mockDownloadsRepo),
-        const ArtistPlaylistBuilder(),
+        MoshafSurahAudioListBuilder(mockPrefs),
+        ArtistMediaPlaylistCache(),
+        const AudioEntityMediaItemMapper(),
         player: mockPlayer,
       );
 
@@ -1126,13 +1131,14 @@ void main() {
       AudioPlayerHandlerImpl(
         items,
         mockAnalytics,
-        mockPrefs,
         ReciterAudioCatalogCache(
           mockRepo,
           const ReciterAudioCatalogBuilder(),
         ),
         PlaybackUriResolver(mockDownloadsRepo),
-        const ArtistPlaylistBuilder(),
+        MoshafSurahAudioListBuilder(mockPrefs),
+        ArtistMediaPlaylistCache(),
+        const AudioEntityMediaItemMapper(),
         player: mockPlayer,
         audioSession: mockAudioSession,
       );
@@ -1195,13 +1201,14 @@ void main() {
         AudioPlayerHandlerImpl(
           [],
           mockAnalytics,
-          mockPrefs,
           ReciterAudioCatalogCache(
             mockRepo,
             const ReciterAudioCatalogBuilder(),
           ),
           PlaybackUriResolver(mockDownloadsRepo),
-          const ArtistPlaylistBuilder(),
+          MoshafSurahAudioListBuilder(mockPrefs),
+          ArtistMediaPlaylistCache(),
+          const AudioEntityMediaItemMapper(),
         );
       } catch (e) {
         // Line is covered even if it throws
@@ -1254,13 +1261,14 @@ void main() {
       final localHandler = AudioPlayerHandlerImpl(
         [],
         mockAnalytics,
-        mockPrefs,
         ReciterAudioCatalogCache(
           mockRepo,
           const ReciterAudioCatalogBuilder(),
         ),
         PlaybackUriResolver(mockDownloadsRepo),
-        const ArtistPlaylistBuilder(),
+        MoshafSurahAudioListBuilder(mockPrefs),
+        ArtistMediaPlaylistCache(),
+        const AudioEntityMediaItemMapper(),
         player: mockPlayer,
       );
 

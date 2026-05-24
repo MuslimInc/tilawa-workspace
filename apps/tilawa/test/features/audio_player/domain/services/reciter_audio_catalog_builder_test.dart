@@ -30,7 +30,15 @@ void main() {
     expect(catalog.tracks, hasLength(2));
     expect(catalog.tracksForArtist('Test Reciter'), hasLength(2));
     expect(catalog.tracksForArtist('Unknown'), isEmpty);
-    expect(identical(catalog.tracksForArtist('Test Reciter').first, catalog.tracks.first), isTrue);
+    expect(catalog.reciterNamed('test reciter'), reciter);
+    expect(catalog.reciterNamed('Unknown'), isNull);
+    expect(
+      identical(
+        catalog.tracksForArtist('Test Reciter').first,
+        catalog.tracks.first,
+      ),
+      isTrue,
+    );
   });
 
   test('skips invalid constructed URLs', () {
