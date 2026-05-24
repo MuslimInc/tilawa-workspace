@@ -5,8 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quran_image/core/perf_logger.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/features/history/domain/entities/history_entity.dart';
+import 'package:tilawa/features/history/domain/usecases/get_history_by_reciter_use_case.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/reciter_history_section.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa_core/entities/audio.dart';
@@ -25,6 +29,23 @@ import 'quran_player_chrome.dart';
 import 'quran_player_system_back.dart';
 import 'quran_player_progress_display.dart';
 import 'quran_player_transport_controls.dart';
+
+/// Debug logging for player expand/collapse and queue sheet motion.
+abstract final class _PlayerAnimationLog {
+  static void log(String event, [Map<String, Object?> fields = const {}]) {
+    if (fields.isEmpty) {
+      // ignore: avoid_print
+      print('[PlayerAnimation] $event');
+      return;
+    }
+    final StringBuffer buffer = StringBuffer('[PlayerAnimation] $event');
+    for (final MapEntry<String, Object?> entry in fields.entries) {
+      buffer.write(' | ${entry.key}=${entry.value}');
+    }
+    // ignore: avoid_print
+    print(buffer.toString());
+  }
+}
 
 /// A YouTube Music-style sliding player panel.
 ///
@@ -316,6 +337,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   void expand() {
     HapticFeedback.lightImpact();
     _isCollapsing = false;
+    _PlayerAnimationLog.log(
+      'expand.start',
+      <String, Object?>{
+        'from': _expandController.value.toStringAsFixed(3),
+      },
+    );
     _expandController.animateTo(
       1.0,
       duration: const Duration(milliseconds: 400),
@@ -326,6 +353,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   /// Collapse the player back to the mini bar.
   void collapse() {
     _isCollapsing = true;
+    _PlayerAnimationLog.log(
+      'collapse.start',
+      <String, Object?>{
+        'from': _expandController.value.toStringAsFixed(3),
+      },
+    );
     _expandController.animateTo(
       0.0,
       duration: const Duration(milliseconds: 320),
@@ -341,6 +374,15 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     if (!mounted) {
       return;
     }
+    _PlayerAnimationLog.log(
+      'expand.status',
+      <String, Object?>{
+        'status': status.name,
+        'value': _expandController.value.toStringAsFixed(3),
+        'isAnimating': _expandController.isAnimating,
+        'isCollapsing': _isCollapsing,
+      },
+    );
     if (status == AnimationStatus.completed ||
         status == AnimationStatus.dismissed) {
       if (_expandController.value <= 0.01) {
@@ -432,6 +474,16 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
   }
 
+  void _onVerticalDragStart(DragStartDetails details) {
+    _PlayerAnimationLog.log(
+      'mini.dragStart',
+      <String, Object?>{
+        'expandProgress': _expandController.value.toStringAsFixed(3),
+        'dismissOffsetY': _dismissOffsetY.toStringAsFixed(1),
+      },
+    );
+  }
+
   void _onVerticalDragUpdate(DragUpdateDetails details) {
     final primaryDelta = details.primaryDelta ?? 0;
     if ((_expandController.value == 0 && primaryDelta > 0) ||
@@ -448,15 +500,39 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     final screenHeight = context.viewportHeight;
     // Negative primaryDelta = dragging up = expanding
     final delta = -primaryDelta / screenHeight;
+    final double previous = _expandController.value;
     _expandController.value =
         (_expandController.value + delta * context.tokens.playerDragSensitivity)
             .clamp(0.0, 1.0);
+    if ((previous - _expandController.value).abs() >= 0.02) {
+      _PlayerAnimationLog.log(
+        'mini.dragUpdate',
+        <String, Object?>{
+          'expandProgress': _expandController.value.toStringAsFixed(3),
+          'primaryDelta': primaryDelta.toStringAsFixed(1),
+        },
+      );
+    }
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
     final tokens = context.tokens;
     final primaryVelocity = details.primaryVelocity ?? 0;
     if (_dismissOffsetY > 0) {
+      final String decision =
+          primaryVelocity > tokens.playerDismissVelocityThreshold ||
+              _dismissOffsetY > tokens.playerDismissThreshold
+          ? 'dismiss'
+          : 'dismissReset';
+      _PlayerAnimationLog.log(
+        'mini.dragEnd',
+        <String, Object?>{
+          'mode': 'dismiss',
+          'decision': decision,
+          'dismissOffsetY': _dismissOffsetY.toStringAsFixed(1),
+          'velocity': primaryVelocity.toStringAsFixed(1),
+        },
+      );
       if (primaryVelocity > tokens.playerDismissVelocityThreshold ||
           _dismissOffsetY > tokens.playerDismissThreshold) {
         _dismissWithUndo();
@@ -467,17 +543,37 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     }
 
     final negVelocity = -primaryVelocity;
+    final String decision;
     if (negVelocity > tokens.playerVelocityThreshold ||
         _expandController.value > tokens.playerProgressThreshold) {
+      decision = 'expand';
       expand();
     } else if (negVelocity < -tokens.playerVelocityThreshold ||
         _expandController.value <= tokens.playerProgressThreshold) {
+      decision = 'collapse';
       collapse();
+    } else {
+      decision = 'noAction';
     }
+    _PlayerAnimationLog.log(
+      'mini.dragEnd',
+      <String, Object?>{
+        'mode': 'expand',
+        'decision': decision,
+        'expandProgress': _expandController.value.toStringAsFixed(3),
+        'velocity': primaryVelocity.toStringAsFixed(1),
+        'progressThreshold': tokens.playerProgressThreshold,
+        'velocityThreshold': tokens.playerVelocityThreshold,
+      },
+    );
   }
 
   /// Cancel the dismiss gesture and spring back.
   void _animateDismissReset() {
+    _PlayerAnimationLog.log(
+      'mini.dismissReset',
+      <String, Object?>{'fromOffsetY': _dismissOffsetY.toStringAsFixed(1)},
+    );
     _dismissAnimation = Tween<double>(begin: _dismissOffsetY, end: 0).animate(
       CurvedAnimation(parent: _dismissAnimController, curve: Curves.easeOut),
     );
@@ -490,6 +586,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   }
 
   void _dismissWithUndo() {
+    _PlayerAnimationLog.log('mini.dismiss');
     HapticFeedback.lightImpact();
     context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
   }
@@ -653,6 +750,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                   dismissAnimController: _dismissAnimController,
                   dismissAnimation: _dismissAnimation,
                   dismissOffsetY: _dismissOffsetY,
+                  onVerticalDragStart: _onVerticalDragStart,
                   onVerticalDragUpdate: _onVerticalDragUpdate,
                   onVerticalDragEnd: _onVerticalDragEnd,
                   onTap: expand,
@@ -813,6 +911,7 @@ class _MiniPlayerTransition extends StatelessWidget {
     required this.dismissAnimController,
     required this.dismissAnimation,
     required this.dismissOffsetY,
+    required this.onVerticalDragStart,
     required this.onVerticalDragUpdate,
     required this.onVerticalDragEnd,
     required this.onTap,
@@ -824,6 +923,7 @@ class _MiniPlayerTransition extends StatelessWidget {
   final AnimationController dismissAnimController;
   final Animation<double>? dismissAnimation;
   final double dismissOffsetY;
+  final GestureDragStartCallback onVerticalDragStart;
   final GestureDragUpdateCallback onVerticalDragUpdate;
   final GestureDragEndCallback onVerticalDragEnd;
   final VoidCallback onTap;
@@ -835,6 +935,7 @@ class _MiniPlayerTransition extends StatelessWidget {
       ignoring: progress > context.tokens.playerIgnorePointerThreshold,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onVerticalDragStart: onVerticalDragStart,
         onVerticalDragUpdate: onVerticalDragUpdate,
         onVerticalDragEnd: onVerticalDragEnd,
         child: AnimatedBuilder(
@@ -1039,6 +1140,12 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
 
   double? _lastExpandValue;
 
+  bool _queueHandleDragMoved = false;
+  bool _suppressQueueHandleTap = false;
+
+  DateTime? _lastQueueSizeLogAt;
+  double? _lastLoggedQueueSize;
+
   @override
   void initState() {
     super.initState();
@@ -1056,9 +1163,135 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
   }
 
   void _onQueueSheetChanged() {
-    if (mounted) {
-      setState(() {});
+    if (!mounted) {
+      return;
     }
+    final bool attached = _queueController.isAttached;
+    final double? size = attached ? _queueController.size : null;
+    _maybeLogQueueSize(size, attached);
+  }
+
+  void _maybeLogQueueSize(
+    double? size,
+    bool attached,
+  ) {
+    if (!attached || size == null) {
+      return;
+    }
+    final DateTime now = DateTime.now();
+    final bool sizeJump =
+        _lastLoggedQueueSize == null ||
+        (size - _lastLoggedQueueSize!).abs() >= 0.03;
+    final bool timeElapsed =
+        _lastQueueSizeLogAt == null ||
+        now.difference(_lastQueueSizeLogAt!) >
+            const Duration(milliseconds: 250);
+    if (!sizeJump && !timeElapsed) {
+      return;
+    }
+    _lastLoggedQueueSize = size;
+    _lastQueueSizeLogAt = now;
+    _PlayerAnimationLog.log(
+      'queue.size',
+      <String, Object?>{
+        'size': size.toStringAsFixed(3),
+        'reveal': _queueReveal.toStringAsFixed(3),
+        'atPeek': _queueAtPeek,
+      },
+    );
+  }
+
+  void _suppressHandleTapBriefly() {
+    _suppressQueueHandleTap = true;
+    Future<void>.delayed(const Duration(milliseconds: 250), () {
+      if (mounted) {
+        _suppressQueueHandleTap = false;
+      }
+    });
+  }
+
+  void _onQueueHandleDragStart() {
+    _queueHandleDragMoved = false;
+  }
+
+  void _onQueueHandleDragUpdate(double deltaDy) {
+    if (deltaDy.abs() > 2) {
+      _queueHandleDragMoved = true;
+    }
+  }
+
+  void _onQueueHandleDragEnd(DragEndDetails details) {
+    if (_queueHandleDragMoved) {
+      _suppressHandleTapBriefly();
+    }
+    _queueHandleDragMoved = false;
+    final double dismissVelocity =
+        Theme.of(context).tokens.playerDismissVelocityThreshold;
+    final double? velocity = details.primaryVelocity;
+    if (velocity != null &&
+        velocity > dismissVelocity &&
+        _queueReveal >
+            _YtMusicNowPlayingStage.queueControlsFocusThreshold) {
+      _collapseQueueSheetToPeek();
+    }
+  }
+
+  void _onQueueHandleTap() {
+    if (_suppressQueueHandleTap) {
+      _PlayerAnimationLog.log('queue.handleTap.ignored');
+      return;
+    }
+    if (_queueReveal > _YtMusicNowPlayingStage.queueControlsFocusThreshold) {
+      _PlayerAnimationLog.log('queue.handleTap.collapse');
+      _collapseQueueSheetToPeek();
+      return;
+    }
+    if (_queueController.isAttached &&
+        _QueueSheetSnap.isAtPeek(
+          controller: _queueController,
+          peekSize: _queuePeekSize,
+        )) {
+      _PlayerAnimationLog.log(
+        'queue.handleTap.expandToMid',
+        <String, Object?>{'to': _queueMidSize},
+      );
+      _queueController.animateTo(
+        _queueMidSize,
+        duration: _QueueSheetSnap.animationDuration,
+        curve: _QueueSheetSnap.animationCurve,
+      );
+      return;
+    }
+    _PlayerAnimationLog.log('queue.handleTap.toggle');
+    _QueueSheetSnap.toggleMinMax(
+      controller: _queueController,
+      snapSizes: const <double>[
+        _queuePeekSize,
+        _queueMidSize,
+        _queueFullSize,
+      ],
+    );
+  }
+
+  void _collapseQueueSheetToPeek() {
+    _suppressHandleTapBriefly();
+    _PlayerAnimationLog.log(
+      'queue.collapseToPeek',
+      <String, Object?>{
+        'size': _queueController.isAttached
+            ? _queueController.size.toStringAsFixed(3)
+            : null,
+        'reveal': _queueReveal.toStringAsFixed(3),
+      },
+    );
+    if (!_queueController.isAttached) {
+      return;
+    }
+    _queueController.animateTo(
+      _queuePeekSize,
+      duration: _QueueSheetSnap.animationDuration,
+      curve: _QueueSheetSnap.animationCurve,
+    );
   }
 
   void _onExpandAnimationTick() {
@@ -1070,6 +1303,10 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _queueController.isAttached) {
+        _PlayerAnimationLog.log(
+          'queue.resetOnPlayerExpand',
+          <String, Object?>{'peekSize': _queuePeekSize},
+        );
         _queueController.jumpTo(_queuePeekSize);
       }
     });
@@ -1187,85 +1424,114 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                           kind: TilawaContentKind.media,
                           child: LayoutBuilder(
                             builder: (context, constraints) {
-                              final double sheetHeight =
-                                  _queueController.isAttached
-                                  ? _queueController.size *
-                                        constraints.maxHeight
-                                  : _queuePeekSize * constraints.maxHeight;
+                              const List<double> snapSizes = <double>[
+                                _queuePeekSize,
+                                _queueMidSize,
+                                _queueFullSize,
+                              ];
+                              return ListenableBuilder(
+                                listenable: _queueController,
+                                builder: (context, _) {
+                                  final double sheetHeight =
+                                      _queueController.isAttached
+                                      ? _queueController.size *
+                                            constraints.maxHeight
+                                      : _queuePeekSize *
+                                            constraints.maxHeight;
+                                  final double queueReveal = _queueReveal;
 
-                              return Stack(
-                                children: [
-                                  Positioned(
-                                    top: 0,
-                                    left: 0,
-                                    right: 0,
-                                    bottom: sheetHeight,
-                                    child: GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onVerticalDragUpdate: (details) {
-                                        if (_queueAtPeek) {
-                                          _QueueSheetSnap.applyDragDelta(
-                                            controller: _queueController,
+                                  return Stack(
+                                    children: [
+                                      Positioned(
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: sheetHeight,
+                                        child: IgnorePointer(
+                                          ignoring: !_queueAtPeek,
+                                          child: GestureDetector(
+                                            behavior: HitTestBehavior.opaque,
+                                            onVerticalDragStart: (_) {
+                                              _PlayerAnimationLog.log(
+                                                'queue.stageDragStart',
+                                                <String, Object?>{
+                                                  'atPeek': _queueAtPeek,
+                                                },
+                                              );
+                                            },
+                                            onVerticalDragUpdate: (details) {
+                                              _QueueSheetSnap.applyDragDelta(
+                                                controller: _queueController,
+                                                sheetParentHeight:
+                                                    constraints.maxHeight,
+                                                snapSizes: snapSizes,
+                                                deltaDy: details.delta.dy,
+                                              );
+                                            },
+                                            onVerticalDragEnd: (details) {
+                                              _PlayerAnimationLog.log(
+                                                'queue.stageDragEnd',
+                                                <String, Object?>{
+                                                  'velocity': (details
+                                                          .primaryVelocity ??
+                                                      0)
+                                                      .toStringAsFixed(1),
+                                                  'size': _queueController
+                                                          .isAttached
+                                                      ? _queueController.size
+                                                          .toStringAsFixed(3)
+                                                      : null,
+                                                },
+                                              );
+                                              _QueueSheetSnap.snapToNearest(
+                                                controller: _queueController,
+                                                snapSizes: snapSizes,
+                                              );
+                                            },
+                                            child: _YtMusicNowPlayingStage(
+                                              state: widget.state,
+                                              audio: widget.audio,
+                                              queueReveal: queueReveal,
+                                              onCollapse: widget.onCollapse,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      DraggableScrollableSheet(
+                                        controller: _queueController,
+                                        initialChildSize: _queuePeekSize,
+                                        minChildSize: _queuePeekSize,
+                                        maxChildSize: _queueFullSize,
+                                        snap: true,
+                                        snapSizes: snapSizes,
+                                        builder: (
+                                          context,
+                                          scrollController,
+                                        ) {
+                                          return _PlayerQueueSheet(
+                                            scrollController:
+                                                scrollController,
+                                            queueController: _queueController,
                                             sheetParentHeight:
                                                 constraints.maxHeight,
-                                            snapSizes: const <double>[
-                                              _queuePeekSize,
-                                              _queueMidSize,
-                                              _queueFullSize,
-                                            ],
-                                            deltaDy: details.delta.dy,
+                                            peekSize: _queuePeekSize,
+                                            snapSizes: snapSizes,
+                                            state: widget.state,
+                                            currentAudio: widget.audio,
+                                            onCollapseToPeek:
+                                                _collapseQueueSheetToPeek,
+                                            onHandleTap: _onQueueHandleTap,
+                                            onHandleDragStart:
+                                                _onQueueHandleDragStart,
+                                            onHandleDragUpdate:
+                                                _onQueueHandleDragUpdate,
+                                            onHandleDragEnd: _onQueueHandleDragEnd,
                                           );
-                                        }
-                                      },
-                                      onVerticalDragEnd: (_) {
-                                        if (_queueAtPeek) {
-                                          _QueueSheetSnap.snapToNearest(
-                                            controller: _queueController,
-                                            snapSizes: const <double>[
-                                              _queuePeekSize,
-                                              _queueMidSize,
-                                              _queueFullSize,
-                                            ],
-                                          );
-                                        }
-                                      },
-                                      child: _YtMusicNowPlayingStage(
-                                        state: widget.state,
-                                        audio: widget.audio,
-                                        queueReveal: _queueReveal,
-                                        onCollapse: widget.onCollapse,
+                                        },
                                       ),
-                                    ),
-                                  ),
-                                  DraggableScrollableSheet(
-                                    controller: _queueController,
-                                    initialChildSize: _queuePeekSize,
-                                    minChildSize: _queuePeekSize,
-                                    maxChildSize: _queueFullSize,
-                                    snap: true,
-                                    snapSizes: const <double>[
-                                      _queuePeekSize,
-                                      _queueMidSize,
-                                      _queueFullSize,
                                     ],
-                                    builder: (context, scrollController) {
-                                      return _PlayerQueueSheet(
-                                        scrollController: scrollController,
-                                        queueController: _queueController,
-                                        sheetParentHeight:
-                                            constraints.maxHeight,
-                                        peekSize: _queuePeekSize,
-                                        snapSizes: const <double>[
-                                          _queuePeekSize,
-                                          _queueMidSize,
-                                          _queueFullSize,
-                                        ],
-                                        state: widget.state,
-                                        currentAudio: widget.audio,
-                                      );
-                                    },
-                                  ),
-                                ],
+                                  );
+                                },
                               );
                             },
                           ),
@@ -1291,6 +1557,12 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
     required this.onCollapse,
   });
 
+  /// Artwork hides; controls + history show in the upper stage.
+  static const double queueControlsFocusThreshold = 0.08;
+
+  /// Thin strip when the queue nears full height.
+  static const double compactBarThreshold = 0.62;
+
   final AudioPlayerState state;
   final AudioEntity audio;
   final double queueReveal;
@@ -1298,29 +1570,46 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-    final bool showCompactBar = queueReveal > 0.62;
-
     return LayoutBuilder(
       builder: (context, constraints) {
         final bool tightStage = constraints.maxHeight < 140;
+        final bool showCompactBar =
+            queueReveal > compactBarThreshold || tightStage;
+        final bool showQueueFocused =
+            queueReveal > queueControlsFocusThreshold && !showCompactBar;
 
-        if (showCompactBar || tightStage) {
+        if (showCompactBar) {
           return _CompactNowPlayingBar(
             audio: audio,
             state: state,
             onCollapse: onCollapse,
-            opacity: showCompactBar
-                ? ((queueReveal - 0.62) / 0.25).clamp(0.0, 1.0)
+            opacity: showCompactBar && !tightStage
+                ? ((queueReveal - compactBarThreshold) / 0.25).clamp(0.0, 1.0)
                 : 1.0,
           );
         }
 
-        final double artReveal =
-            (1 - (queueReveal / 0.55).clamp(0.0, 1.0));
-        final double maxArtHeight =
-            constraints.maxHeight * 0.45 * artReveal;
-        final bool showArt = artReveal > 0.08;
+        if (showQueueFocused) {
+          final tokens = Theme.of(context).tokens;
+          return SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _YtMusicPlayerHeader(state: state, onCollapse: onCollapse),
+                _PlayerReciterHistorySection(audio: audio, state: state),
+                _PlayerPlaybackCluster(
+                  state: state,
+                  queueReveal: queueReveal,
+                ),
+                SizedBox(height: tokens.spaceSmall),
+              ],
+            ),
+          );
+        }
+
+        final tokens = Theme.of(context).tokens;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1344,13 +1633,11 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (showArt) ...[
-                              _PlayerArtAtom(
-                                artUri: audio.artUri,
-                                maxHeight: maxArtHeight,
-                              ),
-                              SizedBox(height: tokens.spaceLarge),
-                            ],
+                            _PlayerArtAtom(
+                              artUri: audio.artUri,
+                              maxHeight: constraints.maxHeight * 0.45,
+                            ),
+                            SizedBox(height: tokens.spaceLarge),
                             _PlayerMetadataMolecule(
                               title: audio.title,
                               artist: audio.artist,
@@ -1369,6 +1656,100 @@ class _YtMusicNowPlayingStage extends StatelessWidget {
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+}
+
+/// Loads reciter listening history for the expanded player queue-focused layout.
+class _PlayerReciterHistorySection extends StatefulWidget {
+  const _PlayerReciterHistorySection({
+    required this.audio,
+    required this.state,
+  });
+
+  final AudioEntity audio;
+  final AudioPlayerState state;
+
+  @override
+  State<_PlayerReciterHistorySection> createState() =>
+      _PlayerReciterHistorySectionState();
+}
+
+class _PlayerReciterHistorySectionState extends State<_PlayerReciterHistorySection> {
+  Future<List<HistoryEntity>>? _historyFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _reloadHistory();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PlayerReciterHistorySection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.audio.id != widget.audio.id) {
+      _reloadHistory();
+    }
+  }
+
+  void _reloadHistory() {
+    final String? reciterId = widget.audio.extras?['reciterId'] as String?;
+    if (reciterId == null || reciterId.isEmpty) {
+      _historyFuture = Future<List<HistoryEntity>>.value(const <HistoryEntity>[]);
+      return;
+    }
+    _historyFuture = getIt<GetHistoryByReciterUseCase>()(reciterId).then(
+      (result) => result.fold(
+        (_) => const <HistoryEntity>[],
+        (List<HistoryEntity> list) => list,
+      ),
+    );
+  }
+
+  void _onPlayHistory(HistoryEntity history) {
+    HapticFeedback.lightImpact();
+    final List<AudioEntity> queue =
+        widget.state.playbackState?.queue ?? const <AudioEntity>[];
+    final int index = queue.indexWhere((AudioEntity track) {
+      final Object? surahId = track.extras?['surahId'];
+      return surahId != null &&
+          surahId.toString() == history.surahId.toString();
+    });
+    if (index < 0) {
+      return;
+    }
+    final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+    bloc.add(AudioPlayerEvent.skipToQueueItem(index));
+    if (history.lastPositionMs > 0 && !history.completed) {
+      bloc.add(
+        AudioPlayerEvent.seekTo(
+          Duration(milliseconds: history.lastPositionMs),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<HistoryEntity>>(
+      future: _historyFuture,
+      builder: (context, snapshot) {
+        final List<HistoryEntity> history =
+            snapshot.data ?? const <HistoryEntity>[];
+        if (history.isEmpty) {
+          return const SizedBox.shrink();
+        }
+        return Padding(
+          padding: EdgeInsets.only(
+            top: Theme.of(context).tokens.spaceSmall,
+            bottom: Theme.of(context).tokens.spaceSmall,
+          ),
+          child: ReciterHistorySection(
+            historyList: history,
+            onPlay: _onPlayHistory,
+          ),
         );
       },
     );
@@ -2406,7 +2787,7 @@ class _MiniArtwork extends StatelessWidget {
 
 /// Snap and drag helpers for the queue [DraggableScrollableSheet].
 abstract final class _QueueSheetSnap {
-  static const Duration animationDuration = Duration(milliseconds: 280);
+  static const Duration animationDuration = Duration(milliseconds: 320);
   static const Curve animationCurve = Curves.easeOutCubic;
   static const double _peekEpsilon = 0.02;
 
@@ -2425,6 +2806,10 @@ abstract final class _QueueSheetSnap {
     required List<double> snapSizes,
   }) {
     if (!controller.isAttached || snapSizes.isEmpty) {
+      _PlayerAnimationLog.log(
+        'queue.snapToNearest.skip',
+        <String, Object?>{'attached': controller.isAttached},
+      );
       return;
     }
     final double size = controller.size;
@@ -2437,6 +2822,13 @@ abstract final class _QueueSheetSnap {
         nearest = snap;
       }
     }
+    _PlayerAnimationLog.log(
+      'queue.snapToNearest',
+      <String, Object?>{
+        'from': size.toStringAsFixed(3),
+        'to': nearest.toStringAsFixed(3),
+      },
+    );
     controller.animateTo(
       nearest,
       duration: animationDuration,
@@ -2459,6 +2851,13 @@ abstract final class _QueueSheetSnap {
     );
     final double midpoint = (minSize + maxSize) / 2;
     final double target = controller.size >= midpoint ? minSize : maxSize;
+    _PlayerAnimationLog.log(
+      'queue.toggleMinMax',
+      <String, Object?>{
+        'from': controller.size.toStringAsFixed(3),
+        'to': target.toStringAsFixed(3),
+      },
+    );
     controller.animateTo(
       target,
       duration: animationDuration,
@@ -2537,6 +2936,11 @@ class _PlayerQueueSheetHandle extends StatelessWidget {
     required this.snapSizes,
     required this.color,
     required this.showExpandHint,
+    this.onCollapseToPeek,
+    required this.onHandleTap,
+    required this.onHandleDragStart,
+    required this.onHandleDragUpdate,
+    required this.onHandleDragEnd,
   });
 
   final DraggableScrollableController controller;
@@ -2544,6 +2948,11 @@ class _PlayerQueueSheetHandle extends StatelessWidget {
   final List<double> snapSizes;
   final Color color;
   final bool showExpandHint;
+  final VoidCallback? onCollapseToPeek;
+  final VoidCallback onHandleTap;
+  final VoidCallback onHandleDragStart;
+  final ValueChanged<double> onHandleDragUpdate;
+  final ValueChanged<DragEndDetails> onHandleDragEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -2553,11 +2962,20 @@ class _PlayerQueueSheetHandle extends StatelessWidget {
       label: context.l10n.playerQueueHandleSemanticLabel,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: () => _QueueSheetSnap.toggleMinMax(
-          controller: controller,
-          snapSizes: snapSizes,
-        ),
+        onTap: onHandleTap,
+        onVerticalDragStart: (_) {
+          onHandleDragStart();
+          _PlayerAnimationLog.log(
+            'queue.handleDragStart',
+            <String, Object?>{
+              'size': controller.isAttached
+                  ? controller.size.toStringAsFixed(3)
+                  : null,
+            },
+          );
+        },
         onVerticalDragUpdate: (DragUpdateDetails details) {
+          onHandleDragUpdate(details.delta.dy);
           _QueueSheetSnap.applyDragDelta(
             controller: controller,
             sheetParentHeight: sheetParentHeight,
@@ -2565,10 +2983,22 @@ class _PlayerQueueSheetHandle extends StatelessWidget {
             deltaDy: details.delta.dy,
           );
         },
-        onVerticalDragEnd: (_) => _QueueSheetSnap.snapToNearest(
-          controller: controller,
-          snapSizes: snapSizes,
-        ),
+        onVerticalDragEnd: (DragEndDetails details) {
+          _PlayerAnimationLog.log(
+            'queue.handleDragEnd',
+            <String, Object?>{
+              'velocity': (details.primaryVelocity ?? 0).toStringAsFixed(1),
+              'size': controller.isAttached
+                  ? controller.size.toStringAsFixed(3)
+                  : null,
+            },
+          );
+          _QueueSheetSnap.snapToNearest(
+            controller: controller,
+            snapSizes: snapSizes,
+          );
+          onHandleDragEnd(details);
+        },
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -2594,6 +3024,11 @@ class _PlayerQueueSheet extends StatelessWidget {
     required this.snapSizes,
     required this.state,
     required this.currentAudio,
+    required this.onCollapseToPeek,
+    required this.onHandleTap,
+    required this.onHandleDragStart,
+    required this.onHandleDragUpdate,
+    required this.onHandleDragEnd,
   });
 
   final ScrollController scrollController;
@@ -2603,6 +3038,11 @@ class _PlayerQueueSheet extends StatelessWidget {
   final List<double> snapSizes;
   final AudioPlayerState state;
   final AudioEntity currentAudio;
+  final VoidCallback onCollapseToPeek;
+  final VoidCallback onHandleTap;
+  final VoidCallback onHandleDragStart;
+  final ValueChanged<double> onHandleDragUpdate;
+  final ValueChanged<DragEndDetails> onHandleDragEnd;
 
   @override
   Widget build(BuildContext context) {
@@ -2674,6 +3114,11 @@ class _PlayerQueueSheet extends StatelessWidget {
               sheetParentHeight: sheetParentHeight,
               snapSizes: snapSizes,
               showExpandHint: atPeek,
+              onCollapseToPeek: onCollapseToPeek,
+              onHandleTap: onHandleTap,
+              onHandleDragStart: onHandleDragStart,
+              onHandleDragUpdate: onHandleDragUpdate,
+              onHandleDragEnd: onHandleDragEnd,
               color: colorScheme.onSurfaceVariant.withValues(
                 alpha: tokens.opacityEmphasis,
               ),

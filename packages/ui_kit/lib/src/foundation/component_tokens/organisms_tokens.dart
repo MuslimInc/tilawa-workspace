@@ -504,8 +504,9 @@ class TilawaAdaptiveShellTokens {
   /// Height of the phone bottom nav row for [textScaler] (icon column + one
   /// label line), floored at [navButtonMinHeight].
   ///
-  /// Matches the phone bottom nav column (icon + gap + label line + pill
-  /// padding) so [TilawaShellPadding] can clear the painted bar.
+  /// This is the **content** height only. [BottomNavigationBar] also consumes
+  /// [MediaQuery.viewPadding] bottom inside its layout; use
+  /// [phoneBottomNavPaintedHeight] for the outer [SizedBox] and host reserves.
   double phoneBottomNavLayoutHeight(TextScaler textScaler) =>
       TilawaAdaptiveShellTokens._phoneBottomNavLayoutHeight(
         navButtonMinHeight: navButtonMinHeight,
@@ -518,6 +519,14 @@ class TilawaAdaptiveShellTokens {
             navButtonSelectionContainerVerticalPadding,
         textScaler: textScaler,
       );
+
+  /// Total painted height of the phone bottom nav, including the system
+  /// navigation inset that Material subtracts inside [BottomNavigationBar].
+  double phoneBottomNavPaintedHeight(
+    TextScaler textScaler,
+    double systemBottomViewPadding,
+  ) =>
+      phoneBottomNavLayoutHeight(textScaler) + systemBottomViewPadding;
 
   /// Height of the phone bottom nav row in **icon-only** mode.
   ///
@@ -590,7 +599,7 @@ class TilawaAdaptiveShellTokens {
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     final bool lightChrome = colorScheme.brightness == Brightness.light;
-    const double navButtonMinHeight = 90;
+    const double navButtonMinHeight = 80;
     const double navButtonVerticalPadding = 6;
     const double navButtonIconSize = 22;
     const double navButtonSelectedCenterScale = 1.1;
