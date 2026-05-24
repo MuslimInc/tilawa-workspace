@@ -53,7 +53,6 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
   const TilawaCatalogSettingsLinkRow({
     super.key,
     required this.title,
-    this.subtitle,
     this.trailing,
     this.onTap,
     this.showChevron = true,
@@ -61,7 +60,6 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
   });
 
   final String title;
-  final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
   final bool showChevron;
@@ -93,22 +91,11 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: tokens.spaceTiny,
-                  children: [
-                    Text(title, style: titleStyle),
-                    if (subtitle != null)
-                      Text(
-                        subtitle!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: tokens.opacityEmphasis,
-                          ),
-                          height: 1.3,
-                        ),
-                      ),
-                  ],
+                child: Text(
+                  title,
+                  style: titleStyle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (trailing != null) ...[
@@ -189,19 +176,17 @@ class TilawaCatalogSettingsSwitchRow extends StatelessWidget {
   }
 }
 
-/// Profile header row for catalog settings (avatar + title + subtitle).
+/// Profile header row for catalog settings (avatar + title).
 class TilawaCatalogSettingsProfileRow extends StatelessWidget {
   const TilawaCatalogSettingsProfileRow({
     super.key,
     required this.avatar,
     required this.title,
-    required this.subtitle,
     this.onTap,
   });
 
   final Widget avatar;
   final String title;
-  final String subtitle;
   final VoidCallback? onTap;
 
   @override
@@ -226,30 +211,14 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
               avatar,
               SizedBox(width: tokens.spaceMedium),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  spacing: tokens.spaceTiny,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(
-                          alpha: tokens.opacityEmphasis,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ),
               if (onTap != null)

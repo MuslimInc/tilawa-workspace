@@ -62,21 +62,6 @@ class TilawaSettingsTile extends StatelessWidget {
           color: colorScheme.onSurface,
           height: 1.2,
         );
-    final TextStyle subtitleStyle =
-        theme.textTheme.bodySmall?.copyWith(
-          fontSize: tokens.tileSubtitleFontSize,
-          color: colorScheme.onSurfaceVariant.withValues(
-            alpha: tokens.tileSubtitleOpacity.clamp(0.55, 0.85),
-          ),
-          height: 1.35,
-        ) ??
-        TextStyle(
-          fontSize: tokens.tileSubtitleFontSize,
-          color: colorScheme.onSurfaceVariant.withValues(
-            alpha: tokens.tileSubtitleOpacity.clamp(0.55, 0.85),
-          ),
-        );
-
     return Column(
       children: [
         Material(
@@ -91,7 +76,6 @@ class TilawaSettingsTile extends StatelessWidget {
               minTileHeight: designTokens.minInteractiveDimension,
               minVerticalPadding: 0,
               titleTextStyle: titleStyle,
-              subtitleTextStyle: subtitleStyle,
             ),
             child: ListTile(
               minTileHeight: designTokens.minInteractiveDimension,
@@ -198,21 +182,6 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
           color: colorScheme.onSurface,
           height: 1.2,
         );
-    final TextStyle subtitleStyle =
-        theme.textTheme.bodySmall?.copyWith(
-          fontSize: tokens.tileSubtitleFontSize,
-          color: colorScheme.onSurfaceVariant.withValues(
-            alpha: tokens.tileSubtitleOpacity.clamp(0.55, 0.85),
-          ),
-          height: 1.35,
-        ) ??
-        TextStyle(
-          fontSize: tokens.tileSubtitleFontSize,
-          color: colorScheme.onSurfaceVariant.withValues(
-            alpha: tokens.tileSubtitleOpacity.clamp(0.55, 0.85),
-          ),
-        );
-
     return Column(
       children: [
         Material(
@@ -227,7 +196,6 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
               minTileHeight: designTokens.minInteractiveDimension,
               minVerticalPadding: 0,
               titleTextStyle: titleStyle,
-              subtitleTextStyle: subtitleStyle,
             ),
             child: ListTile(
               minTileHeight: designTokens.minInteractiveDimension,
