@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5+32] - 2026-05-24 [Google Play Release]
+
+### Added
+
+- **In-app review**: Calm engagement-based review prompts after value moments
+  (listening, prayer tab, favorites, bookmarks); **Rate Tilawa** in Settings
+  opens the store listing directly.
+- **Startup**: Splash-held readiness gate — shell tabs stay gated until core
+  services are ready; launch overlay stays until the splash route paints.
+- **Reciters**: Shared catalog chrome and app bar for consistent list styling;
+  clearer favorites screen and reciter cards.
+- **Navigation**: Single-word bottom nav labels (Reciters, Prayer, Quran, Athkar,
+  Settings) for clearer thumb reach on phone.
+
+### Changed
+
+- **Theme**: Primary accent refreshed to coral; search field and catalog screens
+  aligned with the updated visual system.
+- **Settings**: Cleaner layout and localization for support and app actions.
+- **App review policy**: Prompts stay blocked on Athkar while you remain on the
+  Athkar tab after closing a details screen.
+
+### Fixed
+
+- **Startup**: Launch splash no longer flickers away before the splash screen
+  is visible.
+- **Reciters grid**: Tablet/wide layouts no longer clip reciter names when many
+  columns fit on screen.
+- **Support purchases** (from 1.0.4 follow-up): Background and resume flows no
+  longer show a false failure when verification runs concurrently on the support
+  screen.
+
 ## [1.0.4+31] - 2026-05-23 [Google Play Release]
 
 ### Added

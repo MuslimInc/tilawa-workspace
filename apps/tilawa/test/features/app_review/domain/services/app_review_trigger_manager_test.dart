@@ -28,7 +28,7 @@ void main() {
         minDistinctActiveDays: 2,
         minListeningCompletions: 1,
         promptDelay: Duration.zero,
-        minimumAppAgeBeforePrompt: const Duration(days: 1),
+        minimumAppAgeBeforePrompt: Duration(days: 1),
       ),
     );
   });
@@ -103,15 +103,18 @@ void main() {
       expect(prompted, isFalse);
     });
 
-    test('returns false when distinct active days are below threshold', () async {
-      engagementRepo.state = engagementRepo.state.copyWith(
-        distinctActiveDays: 1,
-      );
-      final bool prompted = await manager.tryPromptIfEligible(
-        AppReviewPromptMoment.listeningSessionCompleted,
-      );
-      expect(prompted, isFalse);
-    });
+    test(
+      'returns false when distinct active days are below threshold',
+      () async {
+        engagementRepo.state = engagementRepo.state.copyWith(
+          distinctActiveDays: 1,
+        );
+        final bool prompted = await manager.tryPromptIfEligible(
+          AppReviewPromptMoment.listeningSessionCompleted,
+        );
+        expect(prompted, isFalse);
+      },
+    );
 
     test('returns false when there is no value moment', () async {
       engagementRepo.state = engagementRepo.state.copyWith(
@@ -266,18 +269,21 @@ void main() {
       expect(prompted, isTrue);
     });
 
-    test('does not prompt on leftPrayerTimesTab below visit threshold', () async {
-      engagementRepo.state = engagementRepo.state.copyWith(
-        listeningCompletions: 0,
-        prayerTimesTabVisits: 1,
-        favoriteAdds: 0,
-        bookmarkCreates: 0,
-      );
-      final bool prompted = await manager.tryPromptIfEligible(
-        AppReviewPromptMoment.leftPrayerTimesTab,
-      );
-      expect(prompted, isFalse);
-    });
+    test(
+      'does not prompt on leftPrayerTimesTab below visit threshold',
+      () async {
+        engagementRepo.state = engagementRepo.state.copyWith(
+          listeningCompletions: 0,
+          prayerTimesTabVisits: 1,
+          favoriteAdds: 0,
+          bookmarkCreates: 0,
+        );
+        final bool prompted = await manager.tryPromptIfEligible(
+          AppReviewPromptMoment.leftPrayerTimesTab,
+        );
+        expect(prompted, isFalse);
+      },
+    );
 
     test('prompts on favoriteReciterAdded when favorite exists', () async {
       engagementRepo.state = engagementRepo.state.copyWith(

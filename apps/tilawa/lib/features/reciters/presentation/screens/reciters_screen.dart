@@ -1252,9 +1252,9 @@ class _ReciterGridSliver extends StatelessWidget {
               SliverGrid.builder(
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: targetItemExtent,
+                  mainAxisExtent: targetItemHeight,
                   mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
                   crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
-                  childAspectRatio: targetItemExtent / targetItemHeight,
                 ),
                 itemCount: state.filteredReciters.length,
                 itemBuilder: (context, index) {
