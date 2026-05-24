@@ -28,6 +28,21 @@ class GetSplashNextRouteUseCase {
   final CheckOnboardingStatus _checkOnboardingStatus;
 
   Future<SplashRouteResult> call() async {
+    final String? pendingColdStartLocation = AppRouter.pendingColdStartLocation;
+    if (pendingColdStartLocation != null) {
+      Map<String, dynamic>? data;
+      final Object? extra = AppRouter.pendingColdStartExtra;
+      if (extra is String && extra.isNotEmpty) {
+        try {
+          data = Map<String, dynamic>.from(jsonDecode(extra) as Map);
+        } catch (_) {}
+      }
+      return SplashRouteResult(
+        SplashDestination.notificationLaunch,
+        notificationData: data,
+      );
+    }
+
     final localNotificationResponse =
         AppRouter.pendingLocalNotificationResponse;
     if (localNotificationResponse != null) {

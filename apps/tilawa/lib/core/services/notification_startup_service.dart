@@ -241,6 +241,13 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
       if (_shouldDeferAdhanStatusProbe()) {
         return;
       }
+      if (AppRouter.isOnPrayerNotificationStatusRoute()) {
+        logger.d(
+          '[NotificationStartupService] _routeToStatusIfAdhanPlaying: '
+          'skipped – already on status screen',
+        );
+        return;
+      }
       if (!_adhanPlayer.isSupported) return;
       final bool playing = await _adhanPlayer.isAdhanPlaying();
       if (!playing) return;

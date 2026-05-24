@@ -45,7 +45,9 @@ import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tilawa/core/debug/deep_link_debug_log.dart';
+import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/notification_navigation_resolver.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
@@ -689,6 +691,8 @@ class AppStartupTasks {
 
       if (localLaunchResponse != null || fcmInitialMessage != null) {
         _applyColdStartRouteFromPendingLaunch();
+      } else {
+        await _applyNativeAdhanColdStartIfNeeded();
       }
 
       // #region agent log
@@ -792,6 +796,45 @@ class AppStartupTasks {
     final int currentPid = getIt<ProcessIdProvider>().currentPid;
     await prefs.setInt(_lastNotifIdKey, notificationId);
     await prefs.setInt(_lastNotifPidKey, currentPid);
+  }
+
+  Future<void> _applyNativeAdhanColdStartIfNeeded() async {
+    if (!Platform.isAndroid ||
+        !getIt.isRegistered<IAdhanAlarmPlayer>()) {
+      return;
+    }
+
+    final IAdhanAlarmPlayer player = getIt<IAdhanAlarmPlayer>();
+    if (!player.isSupported) {
+      return;
+    }
+
+    try {
+      final String? payload = await player.pullPendingNotificationTapPayload();
+      if (payload == null || payload.isEmpty) {
+        return;
+      }
+
+      final NotificationPayloadKind kind = classifyPrayerNotificationPayload(
+        payload,
+      );
+      if (!isPrayerPayloadOwnedByPrayerService(kind)) {
+        return;
+      }
+
+      AppRouter.setPendingColdStartRoute(
+        const PrayerNotificationStatusRoute().location,
+        extra: payload,
+      );
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks._applyNativeAdhanColdStartIfNeeded: '
+        'prepared prayer status cold start',
+      );
+    } catch (e) {
+      logger.d(
+        '[AppLaunch] source=AppStartupTasks._applyNativeAdhanColdStartIfNeeded: $e',
+      );
+    }
   }
 
   void _applyColdStartRouteFromPendingLaunch() {
