@@ -1,3 +1,4 @@
+import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
@@ -7,15 +8,18 @@ import '../../domain/usecases/reset_all_tours.dart';
 
 /// Developer-only control to clear persisted tour completion state.
 class TourGuideDebugResetTile extends StatelessWidget {
-  const TourGuideDebugResetTile({super.key});
+  const TourGuideDebugResetTile({super.key, this.isLast = false});
+
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = AppLocalizations.of(context)!;
 
-    return TilawaCatalogSettingsLinkRow(
+    return TilawaSettingsTile(
+      icon: FluentIcons.arrow_reset_24_regular,
       title: l10n.tourDebugResetTitle,
-      subtitle: l10n.tourDebugResetSubtitle,
+      showDivider: !isLast,
       onTap: () async {
         await getIt<ResetAllTours>()();
         if (!context.mounted) {

@@ -8,7 +8,7 @@ import 'package:tilawa/features/app_review/domain/usecases/open_app_store_listin
 import 'package:tilawa/features/app_review/domain/usecases/request_app_review_use_case.dart';
 import 'package:tilawa/features/app_review/presentation/cubit/app_review_cubit.dart';
 import 'package:tilawa/features/app_review/presentation/cubit/app_review_state.dart';
-import 'package:tilawa/features/settings/presentation/widgets/settings_shared.dart';
+import 'package:tilawa/features/settings/presentation/widgets/settings_widgets.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -95,7 +95,6 @@ void main() {
     await tester.pumpWidget(_buildHarness(cubit: cubit));
 
     expect(find.text('Rate Tilawa'), findsOneWidget);
-    expect(find.text('Share your feedback on the app store.'), findsOneWidget);
   });
 
   testWidgets('tap requests rating from settings flow', (

@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
-import 'package:tilawa/features/settings/domain/usecases/get_app_info.dart';
 import 'package:tilawa_core/entities/app_info.dart';
+import 'package:tilawa_core/services/interfaces/app_info_service.dart';
 
 import '../../../downloads/domain/services/download_queue_service_interface.dart';
 import '../../domain/services/sleep_timer_settings.dart';
@@ -62,7 +62,7 @@ class SettingsCubit extends HydratedCubit<SettingsState>
     implements SleepTimerSettings {
   SettingsCubit(
     this._downloadQueueService,
-    this._getAppInfo,
+    this._appInfoService,
     this._prefetchPolicyService,
   ) : super(const SettingsState()) {
     // Initialize DownloadQueueManager with persisted value
@@ -72,12 +72,12 @@ class SettingsCubit extends HydratedCubit<SettingsState>
   }
 
   final IDownloadQueueService _downloadQueueService;
-  final GetAppInfo _getAppInfo;
+  final AppInfoService _appInfoService;
   final QuranAssetsPrefetchPolicyService _prefetchPolicyService;
 
   Future<void> _fetchAppInfo() async {
     try {
-      final appInfo = await _getAppInfo();
+      final appInfo = await _appInfoService.getAppInfo();
       emit(state.copyWith(appInfo: appInfo));
     } catch (_) {
       // Ignore errors for app info
