@@ -32,11 +32,13 @@ class _TestAppReviewCubit extends AppReviewCubit {
         _NoOpOpenStore(),
       );
 
-  int rateFromSettingsCalls = 0;
+  int _rateFromSettingsCalls = 0;
+
+  int get rateFromSettingsCalls => _rateFromSettingsCalls;
 
   @override
   Future<void> rateFromSettings() async {
-    rateFromSettingsCalls++;
+    _rateFromSettingsCalls++;
     emit(
       state.copyWith(
         isOpeningStore: true,
