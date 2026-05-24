@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../l10n/generated/app_localizations.dart';
+import '../../../app_review/presentation/cubit/app_review_cubit.dart';
+import '../../../app_review/presentation/cubit/app_review_state.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../cubit/settings_cubit.dart';
 
@@ -78,6 +81,43 @@ String settingsLanguageLabel(Locale locale, AppLocalizations l10n) {
     'ar' => 'العربية',
     _ => 'English',
   };
+}
+
+/// Opens the Play/App Store listing so rating always works from settings.
+class SettingsRateAppTile extends StatelessWidget {
+  const SettingsRateAppTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<AppReviewCubit, AppReviewState>(
+      listenWhen: (previous, current) =>
+          previous.failure != current.failure && current.failure != null,
+      listener: (context, state) {
+        final String? message = state.failure?.localizedMessage(context);
+        if (message != null) {
+          ToastUtils.showErrorToast(message);
+        }
+      },
+      builder: (context, state) {
+        final theme = Theme.of(context);
+
+        return TilawaCatalogSettingsLinkRow(
+          title: context.l10n.rateTilawa,
+          subtitle: context.l10n.rateTilawaSubtitle,
+          trailing: state.isBusy
+              ? SizedBox(
+                  width: theme.tokens.iconSizeSmall,
+                  height: theme.tokens.iconSizeSmall,
+                  child: const TilawaLoadingIndicator(centered: false),
+                )
+              : null,
+          onTap: state.isBusy
+              ? null
+              : () => context.read<AppReviewCubit>().rateFromSettings(),
+        );
+      },
+    );
+  }
 }
 
 /// Sign-out row (Pinterest: plain label, no chevron).

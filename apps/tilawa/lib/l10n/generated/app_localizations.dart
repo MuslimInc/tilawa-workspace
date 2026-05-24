@@ -3668,6 +3668,18 @@ abstract class AppLocalizations {
   /// **'Support Tilawa'**
   String get supportTilawa;
 
+  /// Settings row to open the in-app review dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Rate Tilawa'**
+  String get rateTilawa;
+
+  /// Optional subtitle under the rate Tilawa settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Share your feedback on the app store.'**
+  String get rateTilawaSubtitle;
+
   /// Support screen single-line intro under app bar
   ///
   /// In en, this message translates to:

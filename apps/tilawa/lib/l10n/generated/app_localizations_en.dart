@@ -2006,6 +2006,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportTilawa => 'Support Tilawa';
 
   @override
+  String get rateTilawa => 'Rate Tilawa';
+
+  @override
+  String get rateTilawaSubtitle => 'Share your feedback on the app store.';
+
+  @override
   String get supportIntroLine => 'Your contribution helps keep Tilawa going.';
 
   @override

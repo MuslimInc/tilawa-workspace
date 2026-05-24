@@ -2693,6 +2693,14 @@
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
+    "rateTilawa": "Rate Tilawa",
+    "@rateTilawa": {
+        "description": "Settings row to open the in-app review dialog"
+    },
+    "rateTilawaSubtitle": "Share your feedback on the app store.",
+    "@rateTilawaSubtitle": {
+        "description": "Optional subtitle under the rate Tilawa settings row"
+    },
     "supportIntroLine": "Your contribution helps keep Tilawa going.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"

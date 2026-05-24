@@ -45,4 +45,7 @@ Automatic prompts use **native in-app review only** (no store redirect).
 
 ## Manual / settings use
 
-Inject `AppReviewCubit` or use cases directly for explicit “Rate Tilawa” actions.
+Inject `AppReviewCubit` and call [rateFromSettings] for explicit “Rate Tilawa”
+settings actions. That opens the store listing directly — Play/App Store throttle
+the native in-app dialog after dismissals and do not tell the app when nothing
+is shown. Automatic engagement prompts still use native in-app review only.

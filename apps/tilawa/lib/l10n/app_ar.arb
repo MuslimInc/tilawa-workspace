@@ -2666,6 +2666,14 @@
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
+    "rateTilawa": "قيّم تلاوة",
+    "@rateTilawa": {
+        "description": "Settings row to open the in-app review dialog"
+    },
+    "rateTilawaSubtitle": "شاركنا رأيك في متجر التطبيقات.",
+    "@rateTilawaSubtitle": {
+        "description": "Optional subtitle under the rate Tilawa settings row"
+    },
     "supportIntroLine": "مشاركتك تساعدنا على استمرار تلاوة.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"

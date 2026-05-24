@@ -8,6 +8,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/bootstrap/app_launch_config.dart';
 import '../../../../router/app_router_config.dart';
+import '../../../app_review/presentation/cubit/app_review_cubit.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/domain/app_theme_mode.dart';
@@ -20,6 +21,18 @@ import '../widgets/settings_shared.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<AppReviewCubit>(),
+      child: const _SettingsScreenBody(),
+    );
+  }
+}
+
+class _SettingsScreenBody extends StatelessWidget {
+  const _SettingsScreenBody();
 
   @override
   Widget build(BuildContext context) {
@@ -159,16 +172,17 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              if (getIt<AppLaunchConfig>().supportTilawaEnabled)
-                TilawaCatalogSettingsSection(
-                  title: l10n.settingsSupportSection,
-                  children: [
+              TilawaCatalogSettingsSection(
+                title: l10n.settingsSupportSection,
+                children: [
+                  const SettingsRateAppTile(),
+                  if (getIt<AppLaunchConfig>().supportTilawaEnabled)
                     TilawaCatalogSettingsLinkRow(
                       title: l10n.supportTilawa,
                       onTap: () => const SupportRoute().push(context),
                     ),
-                  ],
-                ),
+                ],
+              ),
               SettingsLogoutTile(
                 onTap: () => SettingsSheets.showLogoutConfirmation(context),
               ),

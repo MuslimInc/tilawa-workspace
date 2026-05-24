@@ -1997,6 +1997,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportTilawa => 'ادعم تلاوة';
 
   @override
+  String get rateTilawa => 'قيّم تلاوة';
+
+  @override
+  String get rateTilawaSubtitle => 'شاركنا رأيك في متجر التطبيقات.';
+
+  @override
   String get supportIntroLine => 'مشاركتك تساعدنا على استمرار تلاوة.';
 
   @override

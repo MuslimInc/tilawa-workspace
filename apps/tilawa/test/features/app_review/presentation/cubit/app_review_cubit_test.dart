@@ -158,6 +158,28 @@ void main() {
   );
 
   blocTest<AppReviewCubit, AppReviewState>(
+    'rateFromSettings opens store listing',
+    build: () => AppReviewCubit(
+      _StubIsAvailable(const Right(true)),
+      _StubRequestReview(const Right(null)),
+      _StubOpenStore(const Right(null)),
+    ),
+    act: (AppReviewCubit cubit) => cubit.rateFromSettings(),
+    expect: () => <Matcher>[
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isOpeningStore,
+        'isOpeningStore',
+        true,
+      ),
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isOpeningStore,
+        'isOpeningStore',
+        false,
+      ),
+    ],
+  );
+
+  blocTest<AppReviewCubit, AppReviewState>(
     'openStoreListing emits failure on error',
     build: () => AppReviewCubit(
       _StubIsAvailable(const Right(true)),
