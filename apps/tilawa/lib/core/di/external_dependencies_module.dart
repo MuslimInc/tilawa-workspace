@@ -19,6 +19,9 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/features/audio_player/domain/services/artist_playlist_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/playback_uri_resolver.dart';
+import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/premium/data/services/subscription_plans_service.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
@@ -109,6 +112,9 @@ abstract class ExternalDependenciesModule {
     SharedPreferencesAsync prefs,
     RecitersRepository recitersRepository,
     DownloadsRepository downloadsRepository,
+    ReciterAudioCatalogBuilder catalogBuilder,
+    PlaybackUriResolver playbackUriResolver,
+    ArtistPlaylistBuilder artistPlaylistBuilder,
   ) {
     // Create the handler synchronously so DI doesn't block the first frame.
     // AudioService.init() (the platform notification bridge) is deferred to
@@ -118,7 +124,9 @@ abstract class ExternalDependenciesModule {
       analyticsService,
       prefs,
       recitersRepository,
-      downloadsRepository,
+      catalogBuilder,
+      playbackUriResolver,
+      artistPlaylistBuilder,
     );
   }
 

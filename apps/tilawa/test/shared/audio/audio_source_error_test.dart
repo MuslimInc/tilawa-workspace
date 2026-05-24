@@ -13,6 +13,9 @@ import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
+import 'package:tilawa/features/audio_player/domain/services/artist_playlist_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/playback_uri_resolver.dart';
+import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/shared/audio/audio_player_handler_impl.dart';
@@ -148,7 +151,9 @@ void main() {
       mockAnalytics,
       mockPrefs,
       mockRepo,
-      mockDownloadsRepo,
+      const ReciterAudioCatalogBuilder(),
+      PlaybackUriResolver(mockDownloadsRepo),
+      const ArtistPlaylistBuilder(),
       player: mockPlayer,
       audioSession: mockAudioSession,
     );

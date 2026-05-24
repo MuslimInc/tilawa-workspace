@@ -18,7 +18,10 @@ import 'package:tilawa_core/utils/surah_names.dart';
 import 'package:tilawa_core/utils/url_validator.dart';
 
 import '../../features/audio_player/domain/entities/audio_modes.dart';
-import '../../features/downloads/domain/repositories/downloads_repository.dart';
+import '../../features/audio_player/domain/entities/reciter_audio_catalog.dart';
+import '../../features/audio_player/domain/services/artist_playlist_builder.dart';
+import '../../features/audio_player/domain/services/playback_uri_resolver.dart';
+import '../../features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../models/queue_state.dart';
@@ -32,7 +35,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     this._analyticsService,
     this._prefs,
     this._recitersRepository,
-    this._downloadsRepository, {
+    this._catalogBuilder,
+    this._playbackUriResolver,
+    this._artistPlaylistBuilder, {
     AudioPlayer? player,
     AudioSession? audioSession, // For testing
   }) : _player = player ?? AudioPlayer(),
@@ -47,7 +52,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   final AnalyticsService _analyticsService;
   final SharedPreferencesAsync _prefs;
   RecitersRepository _recitersRepository;
-  final DownloadsRepository _downloadsRepository;
+  final ReciterAudioCatalogBuilder _catalogBuilder;
+  final PlaybackUriResolver _playbackUriResolver;
+  final ArtistPlaylistBuilder _artistPlaylistBuilder;
   final _items = <String, List<audio_service.MediaItem>>{};
   final AudioPlayer _player;
   @override
@@ -308,38 +315,14 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     final String? reciterName = mediaItem.artist;
     final String url = mediaItem.extras?['url'] ?? mediaItem.id;
 
-    // Validate URL before proceeding
-    if (!UrlValidator.isValid(url)) {
-      log('Invalid audio URL for ${mediaItem.title}: $url');
-      throw ArgumentError('Invalid audio URL: $url');
-    }
-
-    // Check if the surah is downloaded locally
-    String? localFilePath;
-    if (reciterName != null) {
-      try {
-        localFilePath = await _downloadsRepository.getDownloadedFilePath(
-          url,
-          reciterName,
-        );
-      } catch (e) {
-        log('Error checking for downloaded file: $e');
-      }
-    }
-
-    // Use local file if available, otherwise use network URL
-    final Uri audioUri;
-    try {
-      audioUri = localFilePath != null
-          ? Uri.file(localFilePath)
-          : Uri.parse(url);
-    } catch (e) {
-      log('Error parsing audio URI for ${mediaItem.title}: $e');
-      throw ArgumentError('Failed to parse audio URI: $url');
-    }
+    final Uri audioUri = await _playbackUriResolver.resolve(
+      url: url,
+      reciterName: reciterName,
+    );
 
     log(
-      'Loading audio: ${mediaItem.title} from ${localFilePath != null ? "local file" : "network"}: $audioUri',
+      'Loading audio: ${mediaItem.title} from '
+      '${audioUri.scheme == "file" ? "local file" : "network"}: $audioUri',
     );
 
     final UriAudioSource audioSource = AudioSource.uri(
@@ -686,23 +669,23 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     );
   }
 
-  List<AudioEntity>? _cachedReciters;
+  ReciterAudioCatalog? _cachedCatalog;
   final Duration _cacheDuration = const Duration(minutes: 5);
   DateTime? _lastCacheTime;
 
   @override
   Future<List<AudioEntity>?> getReciters({String? languageCode}) async {
     // Return cached data if valid
-    if (_cachedReciters != null &&
+    if (_cachedCatalog != null &&
         _lastCacheTime != null &&
         DateTime.now().difference(_lastCacheTime!) < _cacheDuration) {
-      return _cachedReciters;
+      return _cachedCatalog!.tracks;
     }
 
     // Prevent multiple simultaneous requests
     if (_isLoadingReciters) {
       await Future.delayed(const Duration(milliseconds: 200));
-      return _cachedReciters; // Return validation attempt or null
+      return _cachedCatalog?.tracks;
     }
 
     _isLoadingReciters = true;
@@ -717,44 +700,10 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
           return null;
         },
         (reciters) {
-          final audioEntities = <AudioEntity>[];
-          for (final reciter in reciters) {
-            for (final MoshafEntity moshaf in reciter.moshaf) {
-              final List<String> surahList = moshaf.surahList.split(',');
-              for (final surahId in surahList) {
-                final String formattedSurahId = surahId.padLeft(3, '0');
-                final audioId = '${moshaf.server}$formattedSurahId.mp3';
-
-                // Validate the constructed URL
-                if (!UrlValidator.isValid(audioId)) {
-                  log(
-                    'Skipping invalid audio URL: $audioId for surah $surahId',
-                  );
-                  continue; // Skip this entry
-                }
-
-                audioEntities.add(
-                  AudioEntity(
-                    id: audioId,
-                    title:
-                        '${SurahNames.getEnglishSurahName(int.parse(surahId))} $formattedSurahId',
-                    url: audioId,
-                    duration: Duration.zero,
-                    album: moshaf.name,
-                    artist: reciter.name,
-                    extras: {
-                      'reciterId': reciter.id,
-                      'moshafId': moshaf.id,
-                      'surahId': int.parse(surahId),
-                    },
-                  ),
-                );
-              }
-            }
-          }
-          _cachedReciters = audioEntities;
+          final ReciterAudioCatalog catalog = _catalogBuilder.build(reciters);
+          _cachedCatalog = catalog;
           _lastCacheTime = DateTime.now();
-          return audioEntities;
+          return catalog.tracks;
         },
       );
     } finally {
@@ -876,14 +825,12 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
       log('Loading playlist for artist: $artistId');
 
-      // Fetch the reciters list from getReciters method
       final List<AudioEntity>? reciters = await getReciters();
+      final ReciterAudioCatalog? catalog = _cachedCatalog;
 
-      if (reciters != null) {
-        // Filter the reciters list to find the items belonging to the artist
-        final List<AudioEntity> artistAudioEntities = reciters
-            .where((item) => item.artist == artistId)
-            .toList();
+      if (reciters != null && catalog != null) {
+        final List<AudioEntity> artistAudioEntities =
+            _artistPlaylistBuilder.playlistForArtist(catalog, artistId);
 
         if (artistAudioEntities.isNotEmpty) {
           log(
@@ -947,7 +894,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   void setRecitersRepository(RecitersRepository repository) {
     _recitersRepository = repository;
     // Clear cache to force use of new repository
-    _cachedReciters = null;
+    _cachedCatalog = null;
     _lastCacheTime = null;
   }
 }

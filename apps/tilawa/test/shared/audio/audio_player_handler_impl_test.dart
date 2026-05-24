@@ -11,6 +11,9 @@ import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
+import 'package:tilawa/features/audio_player/domain/services/artist_playlist_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/playback_uri_resolver.dart';
+import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/shared/audio/audio_player_handler_impl.dart';
@@ -233,7 +236,9 @@ void main() {
       mockAnalytics,
       mockPrefs,
       mockRepo,
-      mockDownloadsRepo,
+      const ReciterAudioCatalogBuilder(),
+      PlaybackUriResolver(mockDownloadsRepo),
+      const ArtistPlaylistBuilder(),
       player: mockPlayer,
       audioSession: mockAudioSession,
     );
@@ -321,7 +326,9 @@ void main() {
           mockAnalytics,
           mockPrefs,
           mockRepo,
-          mockDownloadsRepo,
+          const ReciterAudioCatalogBuilder(),
+          PlaybackUriResolver(mockDownloadsRepo),
+          const ArtistPlaylistBuilder(),
           player: mockPlayer,
         );
 
@@ -1048,7 +1055,9 @@ void main() {
         mockAnalytics,
         mockPrefs,
         mockRepo,
-        mockDownloadsRepo,
+        const ReciterAudioCatalogBuilder(),
+        PlaybackUriResolver(mockDownloadsRepo),
+        const ArtistPlaylistBuilder(),
         player: mockPlayer,
       );
 
@@ -1112,7 +1121,9 @@ void main() {
         mockAnalytics,
         mockPrefs,
         mockRepo,
-        mockDownloadsRepo,
+        const ReciterAudioCatalogBuilder(),
+        PlaybackUriResolver(mockDownloadsRepo),
+        const ArtistPlaylistBuilder(),
         player: mockPlayer,
         audioSession: mockAudioSession,
       );
@@ -1177,7 +1188,9 @@ void main() {
           mockAnalytics,
           mockPrefs,
           mockRepo,
-          mockDownloadsRepo,
+          const ReciterAudioCatalogBuilder(),
+          PlaybackUriResolver(mockDownloadsRepo),
+          const ArtistPlaylistBuilder(),
         );
       } catch (e) {
         // Line is covered even if it throws
@@ -1232,7 +1245,9 @@ void main() {
         mockAnalytics,
         mockPrefs,
         mockRepo,
-        mockDownloadsRepo,
+        const ReciterAudioCatalogBuilder(),
+        PlaybackUriResolver(mockDownloadsRepo),
+        const ArtistPlaylistBuilder(),
         player: mockPlayer,
       );
 
