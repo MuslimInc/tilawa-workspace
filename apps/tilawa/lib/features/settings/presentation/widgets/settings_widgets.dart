@@ -123,14 +123,16 @@ class SettingsProfileHeader extends StatelessWidget {
         final isGuest = user == null;
         final photoUrl = user?.photoUrl?.trim() ?? '';
 
-        return TilawaSettingsGroupPanel(
-          children: [
-            TilawaCatalogSettingsProfileRow(
-              avatar: _ProfileAvatar(photoUrl: photoUrl),
-              title: title,
-              onTap: isGuest ? () => const LoginRoute().push(context) : null,
-            ),
-          ],
+        return TilawaSettingsGroupHorizontalInset(
+          child: TilawaSettingsGroupPanel(
+            children: [
+              TilawaCatalogSettingsProfileRow(
+                avatar: _ProfileAvatar(photoUrl: photoUrl),
+                title: title,
+                onTap: isGuest ? () => const LoginRoute().push(context) : null,
+              ),
+            ],
+          ),
         );
       },
     );

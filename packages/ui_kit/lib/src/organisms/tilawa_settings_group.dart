@@ -3,6 +3,27 @@ import 'package:flutter/material.dart';
 import '../foundation/component_tokens.dart';
 import '../molecules/tilawa_section_header.dart';
 
+/// Applies the screen-edge horizontal inset shared by settings groups.
+class TilawaSettingsGroupHorizontalInset extends StatelessWidget {
+  const TilawaSettingsGroupHorizontalInset({
+    super.key,
+    required this.child,
+  });
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = Theme.of(context).componentTokens.settingsGroup
+        .groupHorizontalPadding;
+
+    return Padding(
+      padding: EdgeInsetsDirectional.symmetric(horizontal: padding),
+      child: child,
+    );
+  }
+}
+
 /// Rounded panel for settings rows (profile header, grouped tiles).
 class TilawaSettingsGroupPanel extends StatelessWidget {
   const TilawaSettingsGroupPanel({
@@ -56,12 +77,14 @@ class TilawaSettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TilawaSectionHeader.settings(context, title: title),
-        TilawaSettingsGroupPanel(children: children),
-      ],
+    return TilawaSettingsGroupHorizontalInset(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TilawaSectionHeader.settings(context, title: title),
+          TilawaSettingsGroupPanel(children: children),
+        ],
+      ),
     );
   }
 }

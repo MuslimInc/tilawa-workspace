@@ -434,6 +434,7 @@ void main() {
   group('TilawaSettingsGroupTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSettingsGroupTokens.defaults();
+      expect(tokens.groupHorizontalPadding, 16.0);
       expect(tokens.groupBorderRadius, 20.0);
       expect(tokens.groupShadowOpacity, 0.06);
       expect(tokens.tileTitleFontSize, 14.5);
@@ -483,6 +484,7 @@ void main() {
 
     test('lerp interpolates all numeric and EdgeInsets values', () {
       const first = TilawaSettingsGroupTokens(
+        groupHorizontalPadding: 12.0,
         groupHeaderPadding: EdgeInsets.fromLTRB(10, 14, 14, 6),
         groupBorderRadius: 16.0,
         groupShadowOpacity: 0.04,
@@ -519,6 +521,7 @@ void main() {
         switchActiveThumbColor: Color(0xFF006655),
       );
       const second = TilawaSettingsGroupTokens(
+        groupHorizontalPadding: 20.0,
         groupHeaderPadding: EdgeInsets.fromLTRB(14, 18, 18, 10),
         groupBorderRadius: 24.0,
         groupShadowOpacity: 0.08,
