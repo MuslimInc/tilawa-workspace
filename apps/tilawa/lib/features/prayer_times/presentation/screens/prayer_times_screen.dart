@@ -14,7 +14,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/prayer_times_clock.dart';
-import '../../domain/services/prayer_adhan_notification_service_interface.dart';
+import '../../domain/usecases/fire_prayer_test_notification_use_case.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../config/prayer_times_screen_loading_preview.dart';
@@ -1411,7 +1411,7 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
     if (_firing) return;
     setState(() => _firing = true);
     try {
-      await getIt<IPrayerAdhanNotificationService>().fireTestNotification(
+      await getIt<FirePrayerTestNotificationUseCase>()(
         prayer: _selectedPrayer,
         playAdhan: _playAdhan,
       );
