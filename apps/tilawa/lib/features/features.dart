@@ -11,6 +11,8 @@ export 'support/support.dart';
 export 'quran_reader/quran_reader.dart';
 export 'reciters/reciters.dart';
 export 'settings/settings.dart';
-export 'share/share.dart';
+// Share defines a static everyayah.com mapper also named [ReciterAudioCatalog];
+// the audio_player feature exports the playback catalog entity with that name.
+export 'share/share.dart' hide ReciterAudioCatalog;
 export 'surah/surah.dart';
 export 'theme/theme.dart';

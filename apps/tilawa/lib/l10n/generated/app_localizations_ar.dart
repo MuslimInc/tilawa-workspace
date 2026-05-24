@@ -150,6 +150,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get playingFrom => 'قيد التشغيل من';
 
   @override
+  String get playerQueueExpandHint => 'اسحب لأعلى لعرض القائمة';
+
+  @override
+  String get playerQueueHandleSemanticLabel =>
+      'إظهار أو إخفاء قائمة التشغيل. اسحب لأعلى أو انقر للتوسيع.';
+
+  @override
   String get duration => 'المدة';
 
   @override

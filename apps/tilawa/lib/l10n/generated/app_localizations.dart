@@ -344,6 +344,18 @@ abstract class AppLocalizations {
   /// **'Playing from'**
   String get playingFrom;
 
+  /// Hint on the collapsed queue sheet handle in the expanded player
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe up for queue'**
+  String get playerQueueExpandHint;
+
+  /// Screen reader label for the queue sheet drag handle in the expanded player
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide queue. Drag up or tap to expand.'**
+  String get playerQueueHandleSemanticLabel;
+
   /// Duration label
   ///
   /// In en, this message translates to:

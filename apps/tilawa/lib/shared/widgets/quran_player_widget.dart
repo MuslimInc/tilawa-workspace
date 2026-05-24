@@ -624,8 +624,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             expandAnimation: _expandController,
             onCollapse: collapse,
             onDismiss: _dismissWithUndo,
-            onExpandDragUpdate: _onVerticalDragUpdate,
-            onExpandDragEnd: _onVerticalDragEnd,
           ),
         );
 
@@ -1018,8 +1016,6 @@ class _ExpandedPlayerOrganism extends StatefulWidget {
     required this.onCollapse,
     required this.onDismiss,
     required this.expandAnimation,
-    required this.onExpandDragUpdate,
-    required this.onExpandDragEnd,
   });
 
   final AudioPlayerState state;
@@ -1027,8 +1023,6 @@ class _ExpandedPlayerOrganism extends StatefulWidget {
   final VoidCallback onCollapse;
   final VoidCallback onDismiss;
   final Animation<double> expandAnimation;
-  final GestureDragUpdateCallback onExpandDragUpdate;
-  final GestureDragEndCallback onExpandDragEnd;
 
   @override
   State<_ExpandedPlayerOrganism> createState() =>
@@ -1210,12 +1204,29 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                       behavior: HitTestBehavior.opaque,
                                       onVerticalDragUpdate: (details) {
                                         if (_queueAtPeek) {
-                                          widget.onExpandDragUpdate(details);
+                                          _QueueSheetSnap.applyDragDelta(
+                                            controller: _queueController,
+                                            sheetParentHeight:
+                                                constraints.maxHeight,
+                                            snapSizes: const <double>[
+                                              _queuePeekSize,
+                                              _queueMidSize,
+                                              _queueFullSize,
+                                            ],
+                                            deltaDy: details.delta.dy,
+                                          );
                                         }
                                       },
-                                      onVerticalDragEnd: (details) {
+                                      onVerticalDragEnd: (_) {
                                         if (_queueAtPeek) {
-                                          widget.onExpandDragEnd(details);
+                                          _QueueSheetSnap.snapToNearest(
+                                            controller: _queueController,
+                                            snapSizes: const <double>[
+                                              _queuePeekSize,
+                                              _queueMidSize,
+                                              _queueFullSize,
+                                            ],
+                                          );
                                         }
                                       },
                                       child: _YtMusicNowPlayingStage(
@@ -1243,6 +1254,7 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                         queueController: _queueController,
                                         sheetParentHeight:
                                             constraints.maxHeight,
+                                        peekSize: _queuePeekSize,
                                         snapSizes: const <double>[
                                           _queuePeekSize,
                                           _queueMidSize,
@@ -1400,67 +1412,85 @@ class _CompactNowPlayingBar extends StatelessWidget {
 
     return Opacity(
       opacity: opacity,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: tokens.spaceSmall,
-          vertical: tokens.spaceExtraSmall,
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            IconButton(
-              constraints: _iconConstraints,
-              padding: EdgeInsets.zero,
-              icon: Icon(
-                FluentIcons.chevron_down_24_regular,
-                color: palette.foreground,
-                size: tokens.iconSizeLarge,
-              ),
-              onPressed: onCollapse,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          BlocSelector<AudioPlayerBloc, AudioPlayerState, double>(
+            selector: (state) =>
+                _MiniPlayerSnapshot.fromState(state).progress,
+            builder: (context, progress) {
+              return LinearProgressIndicator(
+                value: progress,
+                backgroundColor: palette.seekInactive,
+                valueColor: AlwaysStoppedAnimation<Color>(palette.seekActive),
+                minHeight: tokens.progressHeight,
+              );
+            },
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: tokens.spaceSmall,
+              vertical: tokens.spaceExtraSmall,
             ),
-            _MiniArtwork(artUri: audio.artUri, size: 40),
-            SizedBox(width: tokens.spaceSmall),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    audio.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: titleStyle,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  constraints: _iconConstraints,
+                  padding: EdgeInsets.zero,
+                  icon: Icon(
+                    FluentIcons.chevron_down_24_regular,
+                    color: palette.foreground,
+                    size: tokens.iconSizeLarge,
                   ),
-                  Text(
-                    audio.artist ?? context.l10n.unknownReciter,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: artistStyle,
+                  onPressed: onCollapse,
+                ),
+                _MiniArtwork(artUri: audio.artUri, size: 40),
+                SizedBox(width: tokens.spaceSmall),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        audio.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: titleStyle,
+                      ),
+                      Text(
+                        audio.artist ?? context.l10n.unknownReciter,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: artistStyle,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                IconButton(
+                  constraints: _iconConstraints,
+                  padding: EdgeInsets.zero,
+                  icon: Icon(
+                    state.isPlaying
+                        ? FluentIcons.pause_24_filled
+                        : FluentIcons.play_24_filled,
+                    color: palette.foreground,
+                    size: tokens.iconSizeLarge,
+                  ),
+                  onPressed: () {
+                    context.read<AudioPlayerBloc>().add(
+                      state.isPlaying
+                          ? const AudioPlayerEvent.pauseAudio()
+                          : const AudioPlayerEvent.playAudio(),
+                    );
+                  },
+                ),
+              ],
             ),
-            IconButton(
-              constraints: _iconConstraints,
-              padding: EdgeInsets.zero,
-              icon: Icon(
-                state.isPlaying
-                    ? FluentIcons.pause_24_filled
-                    : FluentIcons.play_24_filled,
-                color: palette.foreground,
-                size: tokens.iconSizeLarge,
-              ),
-              onPressed: () {
-                context.read<AudioPlayerBloc>().add(
-                  state.isPlaying
-                      ? const AudioPlayerEvent.pauseAudio()
-                      : const AudioPlayerEvent.playAudio(),
-                );
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -2374,24 +2404,26 @@ class _MiniArtwork extends StatelessWidget {
   }
 }
 
-/// Drag handle that resizes the queue [DraggableScrollableSheet] between snap
-/// points (peek ↔ full) instead of only scrolling the list.
-class _PlayerQueueSheetHandle extends StatelessWidget {
-  const _PlayerQueueSheetHandle({
-    required this.controller,
-    required this.sheetParentHeight,
-    required this.snapSizes,
-    required this.color,
-  });
+/// Snap and drag helpers for the queue [DraggableScrollableSheet].
+abstract final class _QueueSheetSnap {
+  static const Duration animationDuration = Duration(milliseconds: 280);
+  static const Curve animationCurve = Curves.easeOutCubic;
+  static const double _peekEpsilon = 0.02;
 
-  final DraggableScrollableController controller;
-  final double sheetParentHeight;
-  final List<double> snapSizes;
-  final Color color;
+  static bool isAtPeek({
+    required DraggableScrollableController controller,
+    required double peekSize,
+  }) {
+    if (!controller.isAttached) {
+      return true;
+    }
+    return controller.size <= peekSize + _peekEpsilon;
+  }
 
-  static const Duration _snapAnimationDuration = Duration(milliseconds: 280);
-
-  void _snapToNearest() {
+  static void snapToNearest({
+    required DraggableScrollableController controller,
+    required List<double> snapSizes,
+  }) {
     if (!controller.isAttached || snapSizes.isEmpty) {
       return;
     }
@@ -2407,12 +2439,15 @@ class _PlayerQueueSheetHandle extends StatelessWidget {
     }
     controller.animateTo(
       nearest,
-      duration: _snapAnimationDuration,
-      curve: Curves.easeOutCubic,
+      duration: animationDuration,
+      curve: animationCurve,
     );
   }
 
-  void _toggleMinMax() {
+  static void toggleMinMax({
+    required DraggableScrollableController controller,
+    required List<double> snapSizes,
+  }) {
     if (!controller.isAttached || snapSizes.length < 2) {
       return;
     }
@@ -2426,35 +2461,124 @@ class _PlayerQueueSheetHandle extends StatelessWidget {
     final double target = controller.size >= midpoint ? minSize : maxSize;
     controller.animateTo(
       target,
-      duration: _snapAnimationDuration,
-      curve: Curves.easeOutCubic,
+      duration: animationDuration,
+      curve: animationCurve,
     );
   }
 
+  static void applyDragDelta({
+    required DraggableScrollableController controller,
+    required double sheetParentHeight,
+    required List<double> snapSizes,
+    required double deltaDy,
+  }) {
+    if (!controller.isAttached || sheetParentHeight <= 0 || snapSizes.isEmpty) {
+      return;
+    }
+    final double minSize = snapSizes.reduce(
+      (double a, double b) => a < b ? a : b,
+    );
+    final double maxSize = snapSizes.reduce(
+      (double a, double b) => a > b ? a : b,
+    );
+    final double nextSize = (controller.size - deltaDy / sheetParentHeight)
+        .clamp(minSize, maxSize);
+    controller.jumpTo(nextSize);
+  }
+}
+
+/// Label under the queue handle when the sheet is at peek height.
+class _QueueSheetExpandHint extends StatelessWidget {
+  const _QueueSheetExpandHint({required this.color});
+
+  final Color color;
+
   @override
   Widget build(BuildContext context) {
-    final double minSize = snapSizes.reduce((double a, double b) => a < b ? a : b);
-    final double maxSize = snapSizes.reduce((double a, double b) => a > b ? a : b);
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    return Semantics(
+      identifier: QuranPlayerSemanticsIds.queueSheetExpandHint,
+      label: context.l10n.playerQueueExpandHint,
+      child: ExcludeSemantics(
+        child: Padding(
+          padding: EdgeInsets.only(bottom: tokens.spaceExtraSmall),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                FluentIcons.chevron_up_24_regular,
+                size: tokens.iconSizeSmall,
+                color: color,
+              ),
+              SizedBox(width: tokens.spaceTiny),
+              Text(
+                context.l10n.playerQueueExpandHint,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
+/// Drag handle that resizes the queue [DraggableScrollableSheet] between snap
+/// points (peek ↔ full) instead of only scrolling the list.
+class _PlayerQueueSheetHandle extends StatelessWidget {
+  const _PlayerQueueSheetHandle({
+    required this.controller,
+    required this.sheetParentHeight,
+    required this.snapSizes,
+    required this.color,
+    required this.showExpandHint,
+  });
+
+  final DraggableScrollableController controller;
+  final double sheetParentHeight;
+  final List<double> snapSizes;
+  final Color color;
+  final bool showExpandHint;
+
+  @override
+  Widget build(BuildContext context) {
     return Semantics(
       identifier: QuranPlayerSemanticsIds.queueSheetHandle,
       button: true,
+      label: context.l10n.playerQueueHandleSemanticLabel,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTap: _toggleMinMax,
+        onTap: () => _QueueSheetSnap.toggleMinMax(
+          controller: controller,
+          snapSizes: snapSizes,
+        ),
         onVerticalDragUpdate: (DragUpdateDetails details) {
-          if (!controller.isAttached || sheetParentHeight <= 0) {
-            return;
-          }
-          final double nextSize = (controller.size -
-                  details.delta.dy / sheetParentHeight)
-              .clamp(minSize, maxSize);
-          controller.jumpTo(nextSize);
+          _QueueSheetSnap.applyDragDelta(
+            controller: controller,
+            sheetParentHeight: sheetParentHeight,
+            snapSizes: snapSizes,
+            deltaDy: details.delta.dy,
+          );
         },
-        onVerticalDragEnd: (_) => _snapToNearest(),
-        child: TilawaSheetHandle(
-          color: color,
-          enableDragToDismiss: false,
+        onVerticalDragEnd: (_) => _QueueSheetSnap.snapToNearest(
+          controller: controller,
+          snapSizes: snapSizes,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TilawaSheetHandle(
+              color: color,
+              enableDragToDismiss: false,
+              semanticLabel: context.l10n.playerQueueHandleSemanticLabel,
+            ),
+            if (showExpandHint) _QueueSheetExpandHint(color: color),
+          ],
         ),
       ),
     );
@@ -2466,6 +2590,7 @@ class _PlayerQueueSheet extends StatelessWidget {
     required this.scrollController,
     required this.queueController,
     required this.sheetParentHeight,
+    required this.peekSize,
     required this.snapSizes,
     required this.state,
     required this.currentAudio,
@@ -2474,6 +2599,7 @@ class _PlayerQueueSheet extends StatelessWidget {
   final ScrollController scrollController;
   final DraggableScrollableController queueController;
   final double sheetParentHeight;
+  final double peekSize;
   final List<double> snapSizes;
   final AudioPlayerState state;
   final AudioEntity currentAudio;
@@ -2491,9 +2617,42 @@ class _PlayerQueueSheet extends StatelessWidget {
         currentAudio.artist ??
         context.l10n.unknownReciter;
     final Color queueSheetColor = quranPlayerQueueSheetColor(colorScheme);
+    final bool atPeek = _QueueSheetSnap.isAtPeek(
+      controller: queueController,
+      peekSize: peekSize,
+    );
 
     final BorderRadius sheetRadius = BorderRadius.vertical(
       top: Radius.circular(tokens.radiusExtraLarge),
+    );
+
+    final Widget queueHeader = Padding(
+      padding: EdgeInsets.fromLTRB(
+        tokens.spaceLarge,
+        tokens.spaceSmall,
+        tokens.spaceLarge,
+        tokens.spaceMedium,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            context.l10n.playingFrom,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+            ),
+          ),
+          Text(
+            sourceLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
     );
 
     return Semantics(
@@ -2514,6 +2673,7 @@ class _PlayerQueueSheet extends StatelessWidget {
               controller: queueController,
               sheetParentHeight: sheetParentHeight,
               snapSizes: snapSizes,
+              showExpandHint: atPeek,
               color: colorScheme.onSurfaceVariant.withValues(
                 alpha: tokens.opacityEmphasis,
               ),
@@ -2523,34 +2683,22 @@ class _PlayerQueueSheet extends StatelessWidget {
                 controller: scrollController,
                 slivers: [
             SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  tokens.spaceLarge,
-                  tokens.spaceSmall,
-                  tokens.spaceLarge,
-                  tokens.spaceMedium,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.playingFrom,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+              child: atPeek
+                  ? Semantics(
+                      button: true,
+                      label: context.l10n.playerQueueHandleSemanticLabel,
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () => _QueueSheetSnap.toggleMinMax(
+                            controller: queueController,
+                            snapSizes: snapSizes,
+                          ),
+                          child: queueHeader,
+                        ),
                       ),
-                    ),
-                    Text(
-                      sourceLabel,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : queueHeader,
             ),
             if (queue.length > 1)
               SliverReorderableList(

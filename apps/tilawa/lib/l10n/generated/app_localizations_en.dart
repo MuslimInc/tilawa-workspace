@@ -149,6 +149,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get playingFrom => 'Playing from';
 
   @override
+  String get playerQueueExpandHint => 'Swipe up for queue';
+
+  @override
+  String get playerQueueHandleSemanticLabel =>
+      'Show or hide queue. Drag up or tap to expand.';
+
+  @override
   String get duration => 'Duration';
 
   @override

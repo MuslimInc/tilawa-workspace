@@ -190,6 +190,14 @@
     "@playingFrom": {
         "description": "Label above the queue source in the expanded player"
     },
+    "playerQueueExpandHint": "Swipe up for queue",
+    "@playerQueueExpandHint": {
+        "description": "Hint on the collapsed queue sheet handle in the expanded player"
+    },
+    "playerQueueHandleSemanticLabel": "Show or hide queue. Drag up or tap to expand.",
+    "@playerQueueHandleSemanticLabel": {
+        "description": "Screen reader label for the queue sheet drag handle in the expanded player"
+    },
     "duration": "Duration",
     "@duration": {
         "description": "Duration label"
