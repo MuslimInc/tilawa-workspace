@@ -1489,64 +1489,17 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                             constraints.maxHeight;
                                   final double queueReveal = _queueReveal;
 
+                                  final Widget stage = _YtMusicNowPlayingStage(
+                                    state: widget.state,
+                                    audio: widget.audio,
+                                    queueReveal: queueReveal,
+                                    onCollapse: widget.onCollapse,
+                                  );
+
                                   return Stack(
                                     children: [
-                                      Positioned(
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: sheetHeight,
-                                        child: IgnorePointer(
-                                          ignoring: !_queueAtPeek,
-                                          child: GestureDetector(
-                                            behavior: HitTestBehavior.opaque,
-                                            onVerticalDragStart: (_) {
-                                              _onStageDragStart();
-                                              _PlayerAnimationLog.log(
-                                                'queue.stageDragStart',
-                                                <String, Object?>{
-                                                  'atPeek': _queueAtPeek,
-                                                },
-                                              );
-                                            },
-                                            onVerticalDragUpdate: (details) {
-                                              _onStageDragUpdate(
-                                                details.delta.dy,
-                                              );
-                                              _QueueSheetSnap.applyDragDelta(
-                                                controller: _queueController,
-                                                sheetParentHeight:
-                                                    constraints.maxHeight,
-                                                snapSizes: snapSizes,
-                                                deltaDy: details.delta.dy,
-                                              );
-                                            },
-                                            onVerticalDragEnd: (details) {
-                                              _PlayerAnimationLog.log(
-                                                'queue.stageDragEnd',
-                                                <String, Object?>{
-                                                  'velocity': (details
-                                                          .primaryVelocity ??
-                                                      0)
-                                                      .toStringAsFixed(1),
-                                                  'size': _queueController
-                                                          .isAttached
-                                                      ? _queueController.size
-                                                          .toStringAsFixed(3)
-                                                      : null,
-                                                },
-                                              );
-                                              _onStageDragEnd(details);
-                                            },
-                                            child: _YtMusicNowPlayingStage(
-                                              state: widget.state,
-                                              audio: widget.audio,
-                                              queueReveal: queueReveal,
-                                              onCollapse: widget.onCollapse,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      // Sheet first so the stage (header buttons)
+                                      // stays above it for hit testing.
                                       DraggableScrollableSheet(
                                         controller: _queueController,
                                         initialChildSize: _queuePeekSize,
@@ -1575,9 +1528,68 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                                 _onQueueHandleDragStart,
                                             onHandleDragUpdate:
                                                 _onQueueHandleDragUpdate,
-                                            onHandleDragEnd: _onQueueHandleDragEnd,
+                                            onHandleDragEnd:
+                                                _onQueueHandleDragEnd,
                                           );
                                         },
+                                      ),
+                                      Positioned(
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        bottom: sheetHeight,
+                                        child: _queueAtPeek
+                                            ? GestureDetector(
+                                                behavior:
+                                                    HitTestBehavior.opaque,
+                                                onVerticalDragStart: (_) {
+                                                  _onStageDragStart();
+                                                  _PlayerAnimationLog.log(
+                                                    'queue.stageDragStart',
+                                                    <String, Object?>{
+                                                      'atPeek': _queueAtPeek,
+                                                    },
+                                                  );
+                                                },
+                                                onVerticalDragUpdate: (
+                                                  details,
+                                                ) {
+                                                  _onStageDragUpdate(
+                                                    details.delta.dy,
+                                                  );
+                                                  _QueueSheetSnap
+                                                      .applyDragDelta(
+                                                    controller:
+                                                        _queueController,
+                                                    sheetParentHeight:
+                                                        constraints.maxHeight,
+                                                    snapSizes: snapSizes,
+                                                    deltaDy: details.delta.dy,
+                                                  );
+                                                },
+                                                onVerticalDragEnd: (details) {
+                                                  _PlayerAnimationLog.log(
+                                                    'queue.stageDragEnd',
+                                                    <String, Object?>{
+                                                      'velocity': (details
+                                                              .primaryVelocity ??
+                                                          0)
+                                                          .toStringAsFixed(1),
+                                                      'size': _queueController
+                                                              .isAttached
+                                                          ? _queueController
+                                                                .size
+                                                                .toStringAsFixed(
+                                                                  3,
+                                                                )
+                                                          : null,
+                                                    },
+                                                  );
+                                                  _onStageDragEnd(details);
+                                                },
+                                                child: stage,
+                                              )
+                                            : stage,
                                       ),
                                     ],
                                   );
