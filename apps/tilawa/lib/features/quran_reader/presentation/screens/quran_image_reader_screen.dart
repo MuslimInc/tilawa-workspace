@@ -3,9 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:quran_image/core/di/dependency_injection.dart' as qi_di;
-import 'package:quran_image/data/repositories/asset_verse_marker_repository.dart';
-import 'package:quran_image/domain/repositories/quran_image_cache_repository.dart';
 import 'package:quran_image/preloading_screen.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_event.dart';
@@ -24,6 +21,7 @@ import '../../../../core/extensions.dart';
 import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.dart'
     show AudioPlayerBloc;
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
+import '../../domain/ports/quran_image_preload_status.dart';
 import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 import '../theme/quran_reader_theme.dart';
 
@@ -83,11 +81,7 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
 
   /// Checks whether the quran_image cache is already ready.
   void _checkPreloadStatus() {
-    final markerRepo = qi_di.sl<AssetVerseMarkerRepository>();
-    final imageRepo = qi_di.sl<QuranImageCacheRepository>();
-    final alreadyReady = markerRepo.isInitialized && imageRepo.status.isReady;
-
-    if (alreadyReady) {
+    if (getIt<QuranImagePreloadStatus>().isReady) {
       _initNavigationBloc();
       _isPreloaded = true;
     }
