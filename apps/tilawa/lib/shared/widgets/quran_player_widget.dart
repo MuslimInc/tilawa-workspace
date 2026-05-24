@@ -1143,6 +1143,10 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
   bool _queueHandleDragMoved = false;
   bool _suppressQueueHandleTap = false;
 
+  /// Positive [dy] = finger moved down (sheet shrinks).
+  double _queueHandleDragNetDy = 0;
+  double _stageDragNetDy = 0;
+
   DateTime? _lastQueueSizeLogAt;
   double? _lastLoggedQueueSize;
 
@@ -1212,9 +1216,11 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
 
   void _onQueueHandleDragStart() {
     _queueHandleDragMoved = false;
+    _queueHandleDragNetDy = 0;
   }
 
   void _onQueueHandleDragUpdate(double deltaDy) {
+    _queueHandleDragNetDy += deltaDy;
     if (deltaDy.abs() > 2) {
       _queueHandleDragMoved = true;
     }
@@ -1225,15 +1231,58 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
       _suppressHandleTapBriefly();
     }
     _queueHandleDragMoved = false;
+
+    final double velocity = details.primaryVelocity ?? 0;
     final double dismissVelocity =
         Theme.of(context).tokens.playerDismissVelocityThreshold;
-    final double? velocity = details.primaryVelocity;
-    if (velocity != null &&
-        velocity > dismissVelocity &&
+    final double netDy = _queueHandleDragNetDy;
+    _queueHandleDragNetDy = 0;
+
+    if (velocity > dismissVelocity &&
         _queueReveal >
             _YtMusicNowPlayingStage.queueControlsFocusThreshold) {
       _collapseQueueSheetToPeek();
+      return;
     }
+
+    if (_queueController.isAttached) {
+      _QueueSheetSnap.snapAfterRelease(
+        controller: _queueController,
+        snapSizes: const <double>[
+          _queuePeekSize,
+          _queueMidSize,
+          _queueFullSize,
+        ],
+        releaseVelocity: velocity,
+        netDragDy: netDy,
+      );
+    }
+  }
+
+  void _onStageDragStart() {
+    _stageDragNetDy = 0;
+  }
+
+  void _onStageDragUpdate(double deltaDy) {
+    _stageDragNetDy += deltaDy;
+  }
+
+  void _onStageDragEnd(DragEndDetails details) {
+    if (!_queueController.isAttached) {
+      return;
+    }
+    const List<double> snapSizes = <double>[
+      _queuePeekSize,
+      _queueMidSize,
+      _queueFullSize,
+    ];
+    _QueueSheetSnap.snapAfterRelease(
+      controller: _queueController,
+      snapSizes: snapSizes,
+      releaseVelocity: details.primaryVelocity ?? 0,
+      netDragDy: _stageDragNetDy,
+    );
+    _stageDragNetDy = 0;
   }
 
   void _onQueueHandleTap() {
@@ -1452,6 +1501,7 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                           child: GestureDetector(
                                             behavior: HitTestBehavior.opaque,
                                             onVerticalDragStart: (_) {
+                                              _onStageDragStart();
                                               _PlayerAnimationLog.log(
                                                 'queue.stageDragStart',
                                                 <String, Object?>{
@@ -1460,6 +1510,9 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                               );
                                             },
                                             onVerticalDragUpdate: (details) {
+                                              _onStageDragUpdate(
+                                                details.delta.dy,
+                                              );
                                               _QueueSheetSnap.applyDragDelta(
                                                 controller: _queueController,
                                                 sheetParentHeight:
@@ -1483,10 +1536,7 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                                       : null,
                                                 },
                                               );
-                                              _QueueSheetSnap.snapToNearest(
-                                                controller: _queueController,
-                                                snapSizes: snapSizes,
-                                              );
+                                              _onStageDragEnd(details);
                                             },
                                             child: _YtMusicNowPlayingStage(
                                               state: widget.state,
@@ -2801,39 +2851,100 @@ abstract final class _QueueSheetSnap {
     return controller.size <= peekSize + _peekEpsilon;
   }
 
-  static void snapToNearest({
+  static const double _releaseVelocityBiasThreshold = 150;
+  static const double _netDragBiasThreshold = 20;
+
+  /// Snaps using release velocity and net drag so a downward release does not
+  /// jump back to the nearest higher snap (e.g. 0.79 → 0.9).
+  static void snapAfterRelease({
     required DraggableScrollableController controller,
     required List<double> snapSizes,
+    required double releaseVelocity,
+    required double netDragDy,
   }) {
     if (!controller.isAttached || snapSizes.isEmpty) {
-      _PlayerAnimationLog.log(
-        'queue.snapToNearest.skip',
-        <String, Object?>{'attached': controller.isAttached},
-      );
       return;
     }
+
+    final List<double> sorted = List<double>.from(snapSizes)..sort();
     final double size = controller.size;
-    double nearest = snapSizes.first;
+
+    bool collapseIntent =
+        releaseVelocity > _releaseVelocityBiasThreshold ||
+        netDragDy > _netDragBiasThreshold;
+    bool expandIntent =
+        releaseVelocity < -_releaseVelocityBiasThreshold ||
+        netDragDy < -_netDragBiasThreshold;
+
+    if (collapseIntent && expandIntent) {
+      if (releaseVelocity.abs() > _releaseVelocityBiasThreshold) {
+        collapseIntent = releaseVelocity > 0;
+        expandIntent = releaseVelocity < 0;
+      } else {
+        collapseIntent = netDragDy > 0;
+        expandIntent = netDragDy < 0;
+      }
+    }
+
+    final double target;
+    final String mode;
+    if (collapseIntent && !expandIntent) {
+      double collapseTarget = sorted.first;
+      for (final double snap in sorted) {
+        if (snap <= size - _peekEpsilon) {
+          collapseTarget = snap;
+        }
+      }
+      target = collapseTarget;
+      mode = 'collapseIntent';
+    } else if (expandIntent && !collapseIntent) {
+      double expandTarget = sorted.last;
+      for (final double snap in sorted) {
+        if (snap >= size + _peekEpsilon) {
+          expandTarget = snap;
+          break;
+        }
+      }
+      target = expandTarget;
+      mode = 'expandIntent';
+    } else {
+      target = _nearestSnap(size, sorted);
+      mode = 'nearest';
+    }
+
+    _PlayerAnimationLog.log(
+      'queue.snapAfterRelease',
+      <String, Object?>{
+        'from': size.toStringAsFixed(3),
+        'to': target.toStringAsFixed(3),
+        'mode': mode,
+        'velocity': releaseVelocity.toStringAsFixed(1),
+        'netDragDy': netDragDy.toStringAsFixed(1),
+      },
+    );
+
+    if ((target - size).abs() < _peekEpsilon) {
+      return;
+    }
+
+    controller.animateTo(
+      target,
+      duration: animationDuration,
+      curve: animationCurve,
+    );
+  }
+
+  static double _nearestSnap(double size, List<double> sorted) {
+    double nearest = sorted.first;
     double minDistance = (size - nearest).abs();
-    for (final double snap in snapSizes) {
+    for (final double snap in sorted) {
       final double distance = (size - snap).abs();
       if (distance < minDistance) {
         minDistance = distance;
         nearest = snap;
       }
     }
-    _PlayerAnimationLog.log(
-      'queue.snapToNearest',
-      <String, Object?>{
-        'from': size.toStringAsFixed(3),
-        'to': nearest.toStringAsFixed(3),
-      },
-    );
-    controller.animateTo(
-      nearest,
-      duration: animationDuration,
-      curve: animationCurve,
-    );
+    return nearest;
   }
 
   static void toggleMinMax({
@@ -2992,10 +3103,6 @@ class _PlayerQueueSheetHandle extends StatelessWidget {
                   ? controller.size.toStringAsFixed(3)
                   : null,
             },
-          );
-          _QueueSheetSnap.snapToNearest(
-            controller: controller,
-            snapSizes: snapSizes,
           );
           onHandleDragEnd(details);
         },
