@@ -47,6 +47,9 @@ class ReciterDetailsSearchBar extends StatelessWidget {
                 prefixIcon: FluentIcons.search_24_regular,
                 clearIcon: FluentIcons.dismiss_24_regular,
                 showShadow: false,
+                // Pinned in [SliverAppBar.bottom]; shell already insets for
+                // keyboard — default scrollPadding scrolls the surah list away.
+                scrollPadding: EdgeInsets.zero,
                 onClear: () {
                   controller.clear();
                   context.read<ReciterDetailsBloc>().add(
