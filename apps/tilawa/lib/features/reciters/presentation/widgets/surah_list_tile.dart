@@ -9,6 +9,7 @@ import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../reciter_semantics_ids.dart';
+import 'reciter_catalog_chrome.dart';
 
 class SurahListTile extends StatelessWidget {
   const SurahListTile({
@@ -33,8 +34,9 @@ class SurahListTile extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final double tileRadius = tokens.radiusLarge;
     final double badgeSize = tokens.iconSizeLargePlus;
-    final Color activeColor = colorScheme.primary;
-    final Color activeForeground = colorScheme.onPrimary;
+    final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
+    final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
+    final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
 
     // Combine selectors to reduce overhead and subscription count
     final (bool isPlaying, bool isCurrentItem) = context
@@ -64,21 +66,19 @@ class SurahListTile extends StatelessWidget {
         border: isCurrentItem
             ? BorderDirectional(
                 start: BorderSide(
-                  color: activeColor,
+                  color: activeFill,
                   width: tokens.borderWidthThin * 6,
                 ),
               )
             : Border.all(
-                color: colorScheme.outlineVariant.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
+                color: ReciterCatalogChrome.hairline(colorScheme, tokens),
                 width: tokens.borderWidthThin,
               ),
       ),
       child: Material(
         color: isCurrentItem
-            ? colorScheme.primaryContainer.withValues(alpha: 0.34)
-            : colorScheme.surface,
+            ? ReciterCatalogChrome.activeRowFill(colorScheme)
+            : ReciterCatalogChrome.cardFill(colorScheme),
         borderRadius: BorderRadius.circular(tileRadius),
         child: InkWell(
           borderRadius: BorderRadius.circular(tileRadius),
@@ -112,15 +112,13 @@ class SurahListTile extends StatelessWidget {
                   decoration: BoxDecoration(
                     // §5: no shadow on in-card badges. Active state speaks via
                     // the saturated activeColor fill + icon swap.
-                    color: isCurrentItem
-                        ? activeColor
-                        : colorScheme.primaryContainer,
+                    color: isCurrentItem ? activeFill : idleFill,
                     borderRadius: BorderRadius.circular(tokens.radiusMedium),
                   ),
                   child: isCurrentItem
                       ? Icon(
                           Icons.graphic_eq_rounded,
-                          color: activeForeground,
+                          color: activeOnFill,
                           size: tokens.iconSizeMedium,
                         )
                       : Text(
@@ -128,7 +126,7 @@ class SurahListTile extends StatelessWidget {
                               ? surah.formattedId
                               : '${index + 1}',
                           style: theme.textTheme.labelMedium?.copyWith(
-                            color: colorScheme.onPrimaryContainer,
+                            color: colorScheme.onSurface,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -143,9 +141,7 @@ class SurahListTile extends StatelessWidget {
                         surah.name,
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: isCurrentItem
-                              ? activeColor
-                              : colorScheme.onSurface,
+                          color: colorScheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -172,6 +168,7 @@ class SurahListTile extends StatelessWidget {
                       surahTitle: surah.name,
                       reciterName: reciterName,
                       reciterId: reciterId,
+                      catalogChrome: true,
                       initialIsDownloaded: surah.isDownloaded,
                       initialIsDownloading: surah.isDownloading,
                       initialProgress: surah.downloadProgress,
@@ -188,17 +185,15 @@ class SurahListTile extends StatelessWidget {
                       // §5: play badge stays flat — color alone signals active.
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: isCurrentItem
-                            ? activeColor
-                            : colorScheme.primaryContainer,
+                        color: isCurrentItem ? activeFill : idleFill,
                       ),
                       child: Icon(
                         isCurrentItem && isPlaying
                             ? Icons.pause_rounded
                             : Icons.play_arrow_rounded,
                         color: isCurrentItem
-                            ? activeForeground
-                            : colorScheme.onPrimaryContainer,
+                            ? activeOnFill
+                            : colorScheme.onSurface,
                         size: tokens.iconSizeLarge,
                       ),
                     ),
@@ -243,7 +238,7 @@ class SurahListTile extends StatelessWidget {
               ListTile(
                 leading: Icon(
                   Icons.menu_book_rounded,
-                  color: colorScheme.primary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 title: Text(context.l10n.quranReader),
                 subtitle: Text(context.l10n.continueReading),
@@ -255,7 +250,7 @@ class SurahListTile extends StatelessWidget {
               ListTile(
                 leading: Icon(
                   Icons.bookmark_outline_rounded,
-                  color: colorScheme.primary,
+                  color: colorScheme.onSurfaceVariant,
                 ),
                 title: Text(context.l10n.addBookmark),
                 onTap: () {

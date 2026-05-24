@@ -20,6 +20,37 @@ const double _kFullCircleRadius = 1000.0;
 const double _kLoadingIndicatorStrokeWidth = 2.0;
 const Duration _kPulseAnimationDuration = Duration(milliseconds: 1500);
 
+@immutable
+class _DownloadPalette {
+  const _DownloadPalette({
+    required this.accent,
+    required this.mutedBackground,
+    required this.track,
+  });
+
+  final Color accent;
+  final Color mutedBackground;
+  final Color track;
+
+  factory _DownloadPalette.resolve(
+    ColorScheme scheme, {
+    required bool catalogChrome,
+  }) {
+    if (catalogChrome) {
+      return _DownloadPalette(
+        accent: scheme.onSurfaceVariant,
+        mutedBackground: scheme.onSurface.withValues(alpha: 0.1),
+        track: scheme.surfaceContainerHigh,
+      );
+    }
+    return _DownloadPalette(
+      accent: scheme.primary,
+      mutedBackground: scheme.primary.withValues(alpha: 0.12),
+      track: scheme.primaryContainer,
+    );
+  }
+}
+
 /// Download button with independent state management
 ///
 /// Each button creates its own [DownloadButtonBloc] for optimal performance.
@@ -35,6 +66,7 @@ class DownloadButton extends StatelessWidget {
     this.initialIsDownloading,
     this.initialProgress,
     this.identifier,
+    this.catalogChrome = false,
   });
 
   final String url;
@@ -53,6 +85,9 @@ class DownloadButton extends StatelessWidget {
   /// Keeping it outside the switcher guarantees only one node exists at a
   /// time — no animation-overlap ambiguity for Maestro.
   final String? identifier;
+
+  /// Neutral grey/black download chrome (Reciter details surah rows).
+  final bool catalogChrome;
 
   String? _semanticId(DownloadButtonState state) {
     if (identifier == null) return null;
@@ -107,6 +142,10 @@ class DownloadButton extends StatelessWidget {
         buildWhen: (previous, current) =>
             current.hasSignificantProgressChange(previous),
         builder: (context, state) {
+          final _DownloadPalette palette = _DownloadPalette.resolve(
+            Theme.of(context).colorScheme,
+            catalogChrome: catalogChrome,
+          );
           // Provide an explicit onTap on the Semantics node so that
           // accessibility services (and Maestro) can invoke the primary action
           // directly, without competing with the parent InkWell.
@@ -153,6 +192,7 @@ class DownloadButton extends StatelessWidget {
                 child: state.when(
                   initial: () => const _LoadingDownloadButton(),
                   readyToDownload: () => _DefaultDownloadButton(
+                    palette: palette,
                     onDownload: () {
                       context.read<DownloadButtonBloc>().add(
                         DownloadButtonEvent.startDownload(
@@ -162,6 +202,7 @@ class DownloadButton extends StatelessWidget {
                     },
                   ),
                   pending: () => _PendingDownloadButton(
+                    palette: palette,
                     onCancel: () {
                       context.read<DownloadButtonBloc>().add(
                         const DownloadButtonEvent.cancel(),
@@ -170,6 +211,7 @@ class DownloadButton extends StatelessWidget {
                   ),
                   downloading: (progress, downloadedBytes, totalBytes) =>
                       _DownloadingProgressButton(
+                        palette: palette,
                         progress: progress,
                         onPause: () {
                           context.read<DownloadButtonBloc>().add(
@@ -182,8 +224,9 @@ class DownloadButton extends StatelessWidget {
                           );
                         },
                       ),
-                  completed: () => const _CompletedDownloadButton(),
+                  completed: () => _CompletedDownloadButton(palette: palette),
                   failed: (errorMessage) => _DefaultDownloadButton(
+                    palette: palette,
                     onDownload: () {
                       context.read<DownloadButtonBloc>().add(
                         DownloadButtonEvent.startDownload(
@@ -193,6 +236,7 @@ class DownloadButton extends StatelessWidget {
                     },
                   ),
                   cancelled: () => _DefaultDownloadButton(
+                    palette: palette,
                     onDownload: () {
                       context.read<DownloadButtonBloc>().add(
                         DownloadButtonEvent.startDownload(
@@ -202,6 +246,7 @@ class DownloadButton extends StatelessWidget {
                     },
                   ),
                   paused: () => _PausedDownloadButton(
+                    palette: palette,
                     onResume: () {
                       context.read<DownloadButtonBloc>().add(
                         const DownloadButtonEvent.requestResume(),
@@ -214,6 +259,7 @@ class DownloadButton extends StatelessWidget {
                     },
                   ),
                   networkError: (errorMessage) => _DefaultDownloadButton(
+                    palette: palette,
                     onDownload: () {
                       context.read<DownloadButtonBloc>().add(
                         DownloadButtonEvent.startDownload(
@@ -234,13 +280,13 @@ class DownloadButton extends StatelessWidget {
 
 /// Completed download state widget
 class _CompletedDownloadButton extends StatelessWidget {
-  const _CompletedDownloadButton();
+  const _CompletedDownloadButton({required this.palette});
+
+  final _DownloadPalette palette;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final tokens = theme.tokens;
+    final tokens = Theme.of(context).tokens;
 
     return SizedBox(
       width: context.minInteractiveDimension,
@@ -250,12 +296,12 @@ class _CompletedDownloadButton extends StatelessWidget {
           width: _kCircleSize,
           height: _kCircleSize,
           decoration: BoxDecoration(
-            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            color: palette.mutedBackground,
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.check_circle,
-            color: colorScheme.primary,
+            color: palette.accent,
             size: tokens.iconSizeLarge,
           ),
         ),
@@ -266,8 +312,9 @@ class _CompletedDownloadButton extends StatelessWidget {
 
 /// Pending download state widget
 class _PendingDownloadButton extends StatelessWidget {
-  const _PendingDownloadButton({this.onCancel});
+  const _PendingDownloadButton({required this.palette, this.onCancel});
 
+  final _DownloadPalette palette;
   final VoidCallback? onCancel;
 
   @override
@@ -281,7 +328,7 @@ class _PendingDownloadButton extends StatelessWidget {
         child: InkWell(
           onTap: onCancel,
           borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-          child: const _PulsingPendingIcon(),
+          child: _PulsingPendingIcon(palette: palette),
         ),
       ),
     );
@@ -307,20 +354,20 @@ class _LoadingDownloadButton extends StatelessWidget {
 /// Downloading progress state widget (simplified - no StreamBuilder!)
 class _DownloadingProgressButton extends StatelessWidget {
   const _DownloadingProgressButton({
+    required this.palette,
     required this.progress,
     this.onPause,
     this.onCancel,
   });
 
+  final _DownloadPalette palette;
   final double progress;
   final VoidCallback? onPause;
   final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final tokens = theme.tokens;
+    final tokens = Theme.of(context).tokens;
 
     return SizedBox(
       width: context.minInteractiveDimension,
@@ -329,18 +376,14 @@ class _DownloadingProgressButton extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Background circle for better visibility
             Container(
               width: _kCircleSize,
               height: _kCircleSize,
               decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
+                color: palette.mutedBackground,
                 shape: BoxShape.circle,
               ),
             ),
-            // Circular progress indicator
             SizedBox(
               width: _kInnerRingSize,
               height: _kInnerRingSize,
@@ -348,13 +391,12 @@ class _DownloadingProgressButton extends StatelessWidget {
                 centered: false,
                 value: progress > 0 ? progress : null,
                 strokeWidth: tokens.progressHeight,
-                backgroundColor: colorScheme.primary.withValues(
+                backgroundColor: palette.track.withValues(
                   alpha: tokens.opacityMedium / 2,
                 ),
-                valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                valueColor: AlwaysStoppedAnimation<Color>(palette.accent),
               ),
             ),
-            // Percentage text or icon
             SizedBox(
               width: _kInnerRingSize,
               height: _kInnerRingSize,
@@ -368,7 +410,7 @@ class _DownloadingProgressButton extends StatelessWidget {
                           style: TextStyle(
                             fontSize: _kPercentageFontSize,
                             fontWeight: FontWeight.bold,
-                            color: colorScheme.primary,
+                            color: palette.accent,
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                         ),
@@ -377,7 +419,7 @@ class _DownloadingProgressButton extends StatelessWidget {
                         child: Icon(
                           Icons.pause_rounded,
                           size: tokens.iconSizeSmall,
-                          color: colorScheme.primary,
+                          color: palette.accent,
                         ),
                       ),
               ),
@@ -391,16 +433,19 @@ class _DownloadingProgressButton extends StatelessWidget {
 
 /// Paused download state widget
 class _PausedDownloadButton extends StatelessWidget {
-  const _PausedDownloadButton({required this.onResume, required this.onCancel});
+  const _PausedDownloadButton({
+    required this.palette,
+    required this.onResume,
+    required this.onCancel,
+  });
 
+  final _DownloadPalette palette;
   final VoidCallback onResume;
   final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final tokens = theme.tokens;
+    final tokens = Theme.of(context).tokens;
 
     return SizedBox(
       width: context.minInteractiveDimension,
@@ -409,29 +454,25 @@ class _PausedDownloadButton extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Background circle
             Container(
               width: _kCircleSize,
               height: _kCircleSize,
               decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(
-                  alpha: tokens.opacitySubtle,
-                ),
+                color: palette.mutedBackground,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: colorScheme.primary.withValues(
+                  color: palette.accent.withValues(
                     alpha: tokens.opacityMedium / 1.5,
                   ),
                   width: tokens.borderWidthThin,
                 ),
               ),
             ),
-            // Play icon (Resume)
             IconButton(
               icon: Icon(
                 Icons.play_arrow_rounded,
                 size: tokens.iconSizeMedium,
-                color: colorScheme.primary,
+                color: palette.accent,
               ),
               onPressed: onResume,
             ),
@@ -444,15 +485,17 @@ class _PausedDownloadButton extends StatelessWidget {
 
 /// Default download button state widget
 class _DefaultDownloadButton extends StatelessWidget {
-  const _DefaultDownloadButton({required this.onDownload});
+  const _DefaultDownloadButton({
+    required this.palette,
+    required this.onDownload,
+  });
 
+  final _DownloadPalette palette;
   final VoidCallback onDownload;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final tokens = theme.tokens;
+    final tokens = Theme.of(context).tokens;
 
     return SizedBox(
       width: context.minInteractiveDimension,
@@ -460,7 +503,7 @@ class _DefaultDownloadButton extends StatelessWidget {
       child: IconButton(
         icon: Icon(
           Icons.download_rounded,
-          color: colorScheme.primary,
+          color: palette.accent,
           size: tokens.iconSizeLarge,
         ),
         tooltip: context.l10n.download,
@@ -472,7 +515,9 @@ class _DefaultDownloadButton extends StatelessWidget {
 
 /// Widget for the pulsing pending download icon
 class _PulsingPendingIcon extends StatefulWidget {
-  const _PulsingPendingIcon();
+  const _PulsingPendingIcon({required this.palette});
+
+  final _DownloadPalette palette;
 
   @override
   State<_PulsingPendingIcon> createState() => _PulsingPendingIconState();
@@ -501,9 +546,8 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final tokens = theme.tokens;
+    final tokens = Theme.of(context).tokens;
+    final Color accent = widget.palette.accent;
 
     return RepaintBoundary(
       child: AnimatedBuilder(
@@ -512,7 +556,6 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
           return Stack(
             alignment: Alignment.center,
             children: [
-              // Pulsing circle
               Container(
                 width:
                     (tokens.iconSizeLarge) +
@@ -523,23 +566,19 @@ class _PulsingPendingIconState extends State<_PulsingPendingIcon>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: colorScheme.primary.withValues(
-                      alpha: 1.0 - _animation.value,
-                    ),
+                    color: accent.withValues(alpha: 1.0 - _animation.value),
                     width: _kPulseBorderWidth,
                   ),
                 ),
               ),
-              // Hourglass icon (static)
               child!,
             ],
           );
         },
-        // Pass static child to builder to prevent rebuilding it
         child: Icon(
           Icons.hourglass_empty_rounded,
           size: tokens.iconSizeMedium,
-          color: colorScheme.primary,
+          color: accent,
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/reciter_catalog_chrome.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Inline horizontal carousel of recently listened surahs for
@@ -36,7 +37,7 @@ class ReciterHistorySection extends StatelessWidget {
               Icon(
                 Icons.history_rounded,
                 size: tokens.iconSizeMedium,
-                color: colorScheme.primary,
+                color: colorScheme.onSurfaceVariant,
               ),
               SizedBox(width: tokens.spaceSmall),
               Text(
@@ -96,10 +97,13 @@ class _HistoryChip extends StatelessWidget {
 
     final BorderRadius borderRadius = .circular(chipTokens.pillRadius);
 
+    final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
+    final Color hairline = ReciterCatalogChrome.hairline(colorScheme, tokens);
+
     return Material(
       color: isComplete
-          ? colorScheme.primaryContainer
-          : colorScheme.surfaceContainerLow,
+          ? ReciterCatalogChrome.activeFill(colorScheme)
+          : idleFill,
       borderRadius: borderRadius,
       child: InkWell(
         onTap: onTap,
@@ -112,11 +116,7 @@ class _HistoryChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: borderRadius,
             border: .all(
-              color: isComplete
-                  ? colorScheme.primary.withValues(alpha: 0.34)
-                  : colorScheme.outlineVariant.withValues(
-                      alpha: tokens.opacityMedium,
-                    ),
+              color: hairline,
               width: chipTokens.borderWidth,
             ),
           ),
@@ -128,8 +128,8 @@ class _HistoryChip extends StatelessWidget {
                     ? Icons.check_circle_rounded
                     : Icons.play_circle_fill_rounded,
                 color: isComplete
-                    ? colorScheme.onPrimaryContainer
-                    : colorScheme.primary,
+                    ? ReciterCatalogChrome.activeOnFill(colorScheme)
+                    : colorScheme.onSurface,
                 size: tokens.iconSizeMedium,
               ),
               SizedBox(width: tokens.spaceSmall),
@@ -138,7 +138,7 @@ class _HistoryChip extends StatelessWidget {
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: isComplete
-                      ? colorScheme.onPrimaryContainer
+                      ? ReciterCatalogChrome.activeOnFill(colorScheme)
                       : colorScheme.onSurface,
                 ),
               ),
@@ -148,7 +148,7 @@ class _HistoryChip extends StatelessWidget {
                   '$percent%',
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontWeight: .w600,
-                    color: colorScheme.primary,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

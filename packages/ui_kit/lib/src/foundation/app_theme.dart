@@ -194,8 +194,6 @@ class AppTheme {
     final Color primary = scheme.primary;
     return scheme.copyWith(
       onPrimary: _accessibleOnColor(primary),
-      background: AppColors.lightBackground,
-      onBackground: AppColors.lightInk,
       onSurface: AppColors.lightInk,
       onSurfaceVariant: AppColors.lightMute,
       surface: AppColors.lightSurface,
@@ -401,7 +399,7 @@ class AppTheme {
     final themedSurfaces = _applySurfaceScale(
       theme: theme,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.background,
+      scaffoldBackgroundColor: colorScheme.surface,
     );
 
     return themedSurfaces.copyWith(

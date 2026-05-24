@@ -24,13 +24,13 @@ class TilawaBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color iconColor = color ?? theme.colorScheme.onSurfaceVariant;
-    final VoidCallback pop = () {
+    void pop() {
       if (onPressed != null) {
         onPressed!();
       } else if (context.canPop()) {
         context.pop();
       }
-    };
+    }
 
     if (compact) {
       return TilawaAppBarChrome.framedToolbarIcon(

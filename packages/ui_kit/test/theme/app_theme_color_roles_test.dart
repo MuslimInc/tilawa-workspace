@@ -82,7 +82,7 @@ void main() {
       final scheme = theme.colorScheme;
 
       expect(theme.scaffoldBackgroundColor, AppColors.lightBackground);
-      expect(scheme.background, AppColors.lightBackground);
+      expect(scheme.surface, AppColors.lightBackground);
       expect(scheme.surface, AppColors.lightSurface);
       expect(scheme.onSurface, AppColors.lightInk);
       expect(scheme.surfaceContainerHigh, AppColors.catalogFilterUnselectedLight);
