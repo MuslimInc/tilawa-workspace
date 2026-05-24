@@ -43,6 +43,7 @@ abstract class PlaybackStateEntity with _$PlaybackStateEntity {
     required Duration duration,
     required int currentIndex,
     required List<AudioEntity> queue,
+    @Default(0) int queueGeneration,
   }) = _PlaybackStateEntity;
 
   factory PlaybackStateEntity.fromJson(Map<String, dynamic> json) =>
