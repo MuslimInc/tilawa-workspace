@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
+import '../../features/premium/data/services/subscription_catalog_prefetch_impl.dart';
 import '../../features/premium/data/services/subscription_plans_service.dart';
 import '../../firebase_options.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
@@ -30,7 +31,7 @@ Future<void> main() async {
       firestoreCatalogEnabled: true,
     );
     final initializationService = FirebaseInitializationService(
-      subscriptionPlansService: subscriptionPlansService,
+      SubscriptionCatalogPrefetchImpl(subscriptionPlansService),
     );
 
     // Pre-fetch subscription plans (read-only)

@@ -17,7 +17,7 @@ import 'package:tilawa/features/notifications/domain/repositories/notifications_
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
-import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
+import 'package:tilawa/features/notifications/data/services/fcm_service.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';

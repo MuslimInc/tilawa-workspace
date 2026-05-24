@@ -1,14 +1,18 @@
+import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../di/injection.dart';
-
+@lazySingleton
 class QuranAssetsPrefetchPolicyService {
-  QuranAssetsPrefetchPolicyService({SharedPreferencesAsync? preferences})
-    : _preferences = preferences ?? getIt<SharedPreferencesAsync>();
+  QuranAssetsPrefetchPolicyService(this._preferences);
 
   static const String _wifiOnlyKey = 'quran_assets_prefetch_wifi_only';
 
   final SharedPreferencesAsync _preferences;
+
+  @factoryMethod
+  QuranAssetsPrefetchPolicyService.fromPreferences(
+    SharedPreferencesAsync preferences,
+  ) : _preferences = preferences;
 
   Future<bool> isWifiOnlyEnabled() async {
     return await _preferences.getBool(_wifiOnlyKey) ?? true;

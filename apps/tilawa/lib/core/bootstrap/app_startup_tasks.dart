@@ -32,10 +32,10 @@ import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/core/services/notification_startup_service.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/core/services/quran_assets_prefetch_service.dart';
-import 'package:tilawa/features/downloads/data/services/downloads_initialization_service.dart';
+import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
-import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
+import 'package:tilawa/features/notifications/data/services/fcm_service.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
@@ -376,8 +376,19 @@ class AppStartupTasks {
   }
 
   QuranAssetsPrefetchPolicyService get _assetPrefetchPolicyService {
-    return _quranAssetsPrefetchPolicyService ??=
-        QuranAssetsPrefetchPolicyService();
+    if (_quranAssetsPrefetchPolicyService != null) {
+      return _quranAssetsPrefetchPolicyService!;
+    }
+    if (getIt.isRegistered<QuranAssetsPrefetchPolicyService>()) {
+      _quranAssetsPrefetchPolicyService =
+          getIt<QuranAssetsPrefetchPolicyService>();
+    } else {
+      _quranAssetsPrefetchPolicyService =
+          QuranAssetsPrefetchPolicyService.fromPreferences(
+            getIt<SharedPreferencesAsync>(),
+          );
+    }
+    return _quranAssetsPrefetchPolicyService!;
   }
 
   Future<void> _createNotificationChannelDeferred() async {
@@ -615,8 +626,8 @@ class AppStartupTasks {
       '[AppLaunch] source=AppStartupTasks.initializeDownloads: Start in (${DateTime.now()})',
     );
     try {
-      final DownloadsInitializationService downloadsInitService =
-          getIt<DownloadsInitializationService>();
+      final DownloadsInitializer downloadsInitService =
+          getIt<DownloadsInitializer>();
       await downloadsInitService.initialize();
     } catch (e) {
       logger.d(

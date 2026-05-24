@@ -21,7 +21,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../firebase_options.dart';
 import '../../router/app_router.dart';
 import '../../tilawa_app.dart';
-import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:tilawa_core/network/network_info.dart';
 
 import '../di/injection.dart';
 import '../di/quran_image_dependencies_module.dart';

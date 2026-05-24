@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,7 +5,6 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
-import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -28,17 +25,11 @@ void main() {
   );
 
   late AppStartupReadiness readiness;
-  late RecitersBloc recitersBloc;
   late MockGetRecitersUseCase mockGetReciters;
 
   setUp(() {
     mockGetReciters = MockGetRecitersUseCase();
-    recitersBloc = RecitersBloc(mockGetReciters);
-    readiness = AppStartupReadiness(recitersBloc);
-  });
-
-  tearDown(() async {
-    await recitersBloc.close();
+    readiness = AppStartupReadiness(mockGetReciters);
   });
 
   group('waitUntilReady(prepareShell: false)', () {
@@ -64,45 +55,10 @@ void main() {
       expect(readiness.shellPrepComplete, isTrue);
       expect(readiness.recitersDataReady, isTrue);
       expect(readiness.timedOut, isFalse);
-      expect(recitersBloc.state, isA<RecitersLoaded>());
       verify(mockGetReciters.call()).called(1);
     });
 
-    test('skips fetch when bloc is already RecitersLoaded', () async {
-      when(mockGetReciters.call()).thenAnswer(
-        (_) async => const Right<Failure, List<ReciterEntity>>([
-          sampleReciter,
-        ]),
-      );
-      recitersBloc.add(const LoadReciters());
-      await recitersBloc.stream.firstWhere((s) => s is RecitersLoaded);
-
-      await readiness.waitUntilReady(prepareShell: true);
-
-      expect(readiness.recitersDataReady, isTrue);
-      verify(mockGetReciters.call()).called(1);
-    });
-
-    test('waits for in-flight load without dispatching LoadReciters again', () async {
-      final completer = Completer<Either<Failure, List<ReciterEntity>>>();
-      when(mockGetReciters.call()).thenAnswer((_) => completer.future);
-
-      recitersBloc.add(const LoadReciters());
-      await recitersBloc.stream.firstWhere((s) => s is RecitersLoading);
-
-      final Future<void> prep = readiness.waitUntilReady(prepareShell: true);
-      verify(mockGetReciters.call()).called(1);
-
-      completer.complete(
-        const Right<Failure, List<ReciterEntity>>([sampleReciter]),
-      );
-      await prep;
-
-      expect(readiness.recitersDataReady, isTrue);
-      expect(readiness.shellPrepComplete, isTrue);
-    });
-
-    test('sets recitersDataReady false when fetch ends in error state', () async {
+    test('sets recitersDataReady false when fetch fails', () async {
       when(mockGetReciters.call()).thenAnswer(
         (_) async => Left<Failure, List<ReciterEntity>>(
           UnexpectedFailure('network'),
@@ -113,13 +69,13 @@ void main() {
 
       expect(readiness.shellPrepComplete, isTrue);
       expect(readiness.recitersDataReady, isFalse);
-      expect(recitersBloc.state, isA<RecitersError>());
     });
 
     test('second call is a no-op after success', () async {
       when(mockGetReciters.call()).thenAnswer(
-        (_) async =>
-            const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
+        (_) async => const Right<Failure, List<ReciterEntity>>([
+          sampleReciter,
+        ]),
       );
       await readiness.waitUntilReady(prepareShell: true);
       await readiness.waitUntilReady(prepareShell: true);
@@ -147,7 +103,6 @@ void main() {
         expect(readiness.shellPrepComplete, isTrue);
       });
     });
-
   });
 
   group('resetForTesting', () {

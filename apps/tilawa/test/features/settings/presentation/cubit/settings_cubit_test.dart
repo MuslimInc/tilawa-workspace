@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
+import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/settings/domain/usecases/get_app_info.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
@@ -137,7 +138,13 @@ void main() {
       await dqm.initialize();
       // SettingsCubit calls instance.maxConcurrentDownloads getter/setter.
 
-      cubit = SettingsCubit(getIt<DownloadQueueManager>(), mockGetAppInfo);
+      cubit = SettingsCubit(
+        getIt<DownloadQueueManager>(),
+        mockGetAppInfo,
+        QuranAssetsPrefetchPolicyService.fromPreferences(
+          getIt<SharedPreferencesAsync>(),
+        ),
+      );
     });
 
     tearDown(() {

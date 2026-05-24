@@ -95,7 +95,7 @@ class _BootGateState extends State<_BootGate> {
   void reassemble() {
     super.reassemble();
     // Hot reload rebuilds providers without re-running bootstrap DI.
-    if (!getIt.isRegistered<SettingsCubit>()) {
+    if (!getIt.isRegistered<NetworkInfo>()) {
       _ready = false;
       _awaitCriticalInit();
     }
@@ -121,7 +121,7 @@ class _BootGateState extends State<_BootGate> {
   }
 
   Future<void> _ensureDependenciesRegistered() async {
-    if (getIt.isRegistered<SettingsCubit>()) return;
+    if (getIt.isRegistered<NetworkInfo>()) return;
     // Firebase singletons in DI must not run before initializeApp() completes.
     if (Firebase.apps.isEmpty) return;
     await configureDependencies(launchConfig: appLaunchConfig);

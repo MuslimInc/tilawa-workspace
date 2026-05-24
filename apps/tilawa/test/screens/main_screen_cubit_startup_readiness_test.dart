@@ -5,7 +5,6 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
-import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -18,22 +17,16 @@ void main() {
     const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
   );
 
-  late RecitersBloc recitersBloc;
   late MockGetRecitersUseCase mockGetReciters;
   late AppStartupReadiness readiness;
 
   setUp(() {
     mockGetReciters = MockGetRecitersUseCase();
-    recitersBloc = RecitersBloc(mockGetReciters);
-    readiness = AppStartupReadiness(recitersBloc);
+    readiness = AppStartupReadiness(mockGetReciters);
     when(mockGetReciters.call()).thenAnswer(
       (_) async =>
           const Right<Failure, List<ReciterEntity>>(<ReciterEntity>[]),
     );
-  });
-
-  tearDown(() async {
-    await recitersBloc.close();
   });
 
   group('MainScreenCubit startup readiness', () {

@@ -27,8 +27,6 @@ import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../shared/audio/audio_player_handler.dart';
 import '../../shared/audio/audio_player_handler_impl.dart';
-import '../services/firebase_initialization_service.dart';
-
 @module
 abstract class ExternalDependenciesModule {
   @singleton
@@ -100,12 +98,6 @@ abstract class ExternalDependenciesModule {
     firestoreCatalogEnabled: launchConfig.subscriptionServiceEnabled,
   );
 
-  @singleton
-  FirebaseInitializationService firebaseInitializationService(
-    SubscriptionPlansService subscriptionPlansService,
-  ) => FirebaseInitializationService(
-    subscriptionPlansService: subscriptionPlansService,
-  );
 
   @singleton
   List<MediaItem> mediaItemList() => [];

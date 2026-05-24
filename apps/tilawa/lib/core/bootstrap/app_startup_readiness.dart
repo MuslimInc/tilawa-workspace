@@ -3,19 +3,19 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 
 /// Coordinates splash-held startup: shell/tab prep before first [HomeRoute].
 ///
 /// Critical init (Firebase, DI, Hydrated) is already complete when the splash
 /// route mounts ([_BootGate]). This type covers the work that used to run on
 /// [MainScreen] after navigation (shell activation + initial tab mount) and
-/// preloads the Reciters tab list while the splash is visible.
+/// preloads the reciters catalog while the splash is visible.
 @lazySingleton
 class AppStartupReadiness {
-  AppStartupReadiness(this._recitersBloc);
+  AppStartupReadiness(this._getReciters);
 
-  final RecitersBloc _recitersBloc;
+  final GetRecitersUseCase _getReciters;
 
   /// Mirrors [MainScreenCubit] delays so home opens without placeholder staging.
   static const Duration shellActivationDelay = Duration(milliseconds: 260);
@@ -31,7 +31,7 @@ class AppStartupReadiness {
   /// Whether shell/tab prep finished (on splash or on [MainScreen] fallback).
   bool get shellPrepComplete => _shellPrepComplete;
 
-  /// Whether [RecitersBloc] reached [RecitersLoaded] during splash prep.
+  /// Whether reciters catalog loaded successfully during splash prep.
   bool get recitersDataReady => _recitersDataReady;
 
   /// True when [maxSplashDuration] forced navigation to proceed.
@@ -71,7 +71,7 @@ class AppStartupReadiness {
   Future<void> _runHomeLaunchPrep() async {
     await Future.wait(<Future<void>>[
       _runShellDelays(),
-      _prepareRecitersTab(),
+      _prepareRecitersCatalog(),
     ]);
     _shellPrepComplete = true;
     if (!kReleaseMode) {
@@ -91,33 +91,9 @@ class AppStartupReadiness {
     }
   }
 
-  Future<void> _prepareRecitersTab() async {
-    final RecitersState current = _recitersBloc.state;
-    if (current is RecitersLoaded) {
-      _recitersDataReady = true;
-      return;
-    }
-
-    final Completer<void> settled = Completer<void>();
-    late final StreamSubscription<RecitersState> subscription;
-    subscription = _recitersBloc.stream.listen((RecitersState state) {
-      if (state is RecitersLoaded || state is RecitersError) {
-        if (!settled.isCompleted) {
-          settled.complete();
-        }
-      }
-    });
-
-    if (current is! RecitersLoading) {
-      _recitersBloc.add(const LoadReciters());
-    }
-    try {
-      await settled.future;
-    } finally {
-      await subscription.cancel();
-    }
-
-    _recitersDataReady = _recitersBloc.state is RecitersLoaded;
+  Future<void> _prepareRecitersCatalog() async {
+    final result = await _getReciters();
+    _recitersDataReady = result.fold((_) => false, (_) => true);
   }
 
   /// Clears readiness flags between tests.

@@ -60,8 +60,11 @@ class SettingsState extends Equatable {
 @lazySingleton
 class SettingsCubit extends HydratedCubit<SettingsState>
     implements SleepTimerSettings {
-  SettingsCubit(this._downloadQueueService, this._getAppInfo)
-    : super(const SettingsState()) {
+  SettingsCubit(
+    this._downloadQueueService,
+    this._getAppInfo,
+    this._prefetchPolicyService,
+  ) : super(const SettingsState()) {
     // Initialize DownloadQueueManager with persisted value
     _updateQueueManager();
     _fetchAppInfo();
@@ -70,8 +73,7 @@ class SettingsCubit extends HydratedCubit<SettingsState>
 
   final IDownloadQueueService _downloadQueueService;
   final GetAppInfo _getAppInfo;
-  final QuranAssetsPrefetchPolicyService _prefetchPolicyService =
-      QuranAssetsPrefetchPolicyService();
+  final QuranAssetsPrefetchPolicyService _prefetchPolicyService;
 
   Future<void> _fetchAppInfo() async {
     try {
