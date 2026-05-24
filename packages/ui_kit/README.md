@@ -97,8 +97,12 @@ flutter run lib/previews/preview_main.dart # If available
 
 | Doc | Purpose |
 |-----|---------|
+| [`../../DESIGN.md`](../../DESIGN.md) | Product-wide design snapshot (agents + humans) |
+| [`docs/design_system.md`](docs/design_system.md) | UI kit freeze contract, catalog chrome, testing |
+| [`../../docs/design/colors.md`](../../docs/design/colors.md) | Colour roles and accent-vs-surface policy |
 | [`docs/premium_visual_system.md`](docs/premium_visual_system.md) | Calm, high-quality product chrome (not paid tiers) |
 | [`docs/support_visual_system.md`](docs/support_visual_system.md) | Support Tilawa voluntary contribution surfaces |
+| [`../../specs/017-catalog-theme-freeze/spec.md`](../../specs/017-catalog-theme-freeze/spec.md) | Theme/UI kit freeze acceptance |
 | [`../../specs/016-support-tilawa/spec.md`](../../specs/016-support-tilawa/spec.md) | Monetization ethics, MVP scope, architecture |
 
 ## Implementation Guidelines

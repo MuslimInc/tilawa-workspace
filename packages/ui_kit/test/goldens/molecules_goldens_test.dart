@@ -214,6 +214,28 @@ void main() {
               ),
             ),
           ),
+          GoldenTestScenario(
+            name: 'Catalog selected',
+            child: TilawaPreviewWrapper(
+              child: TilawaSelectionPill(
+                label: 'Favorites',
+                selected: true,
+                style: TilawaSelectionPillStyle.catalog,
+                onTap: () {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Catalog unselected',
+            child: TilawaPreviewWrapper(
+              child: TilawaSelectionPill(
+                label: 'All',
+                selected: false,
+                style: TilawaSelectionPillStyle.catalog,
+                onTap: () {},
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -396,6 +418,16 @@ void main() {
               isDark: true,
               child: TilawaSearchField(
                 hintText: 'Search surahs',
+                onChanged: (_) {},
+              ),
+            ),
+          ),
+          GoldenTestScenario(
+            name: 'Catalog variant',
+            child: TilawaPreviewWrapper(
+              child: TilawaSearchField(
+                hintText: 'Search reciters',
+                variant: TilawaSearchFieldVariant.catalog,
                 onChanged: (_) {},
               ),
             ),

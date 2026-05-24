@@ -232,8 +232,6 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
             child: ListTile(
               minTileHeight: designTokens.minInteractiveDimension,
               contentPadding: listTileContentPadding,
-              visualDensity: VisualDensity.compact,
-              titleAlignment: ListTileTitleAlignment.center,
               shape: resolvedRadius != null
                   ? RoundedRectangleBorder(borderRadius: resolvedRadius)
                   : null,
@@ -254,6 +252,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
                 onChanged: onChanged,
                 activeTrackColor: tokens.switchActiveTrackColor,
                 activeThumbColor: tokens.switchActiveThumbColor,
+                layoutSlotHeight: tokens.tileTrailingSize,
               ),
               onTap: () => onChanged(!value),
             ),

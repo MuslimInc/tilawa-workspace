@@ -29,6 +29,10 @@ The kit follows Atomic Design:
 
 Rule: reusable widgets consume `ThemeData`, `ColorScheme`, `TilawaDesignTokens`, and `TilawaComponentTokens`. UI Kit widgets must not invent hardcoded colors, spacing, radii, shadows, or typography when a token or theme role exists.
 
+### Catalog chrome (frozen 2026-05-23)
+
+List/catalog screens should use **`TilawaCatalogAppBar`** with **`TilawaSearchFieldVariant.catalog`** and **`TilawaSelectionPillStyle.catalog`**. Default primary is coral (`AppColors.defaultPrimary`). See [`packages/ui_kit/docs/design_system.md`](../../packages/ui_kit/docs/design_system.md) and [`specs/017-catalog-theme-freeze/spec.md`](../017-catalog-theme-freeze/spec.md).
+
 ## Public Exports
 
 Public entrypoint:

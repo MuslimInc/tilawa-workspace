@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/bootstrap/app_launch_config.dart';
 import '../../../../router/app_router_config.dart';
-import 'package:tilawa/core/di/injection.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/domain/app_theme_mode.dart';
@@ -49,7 +49,6 @@ class SettingsScreen extends StatelessWidget {
               const SettingsProfileCard(),
               TilawaCatalogSettingsSection(
                 title: l10n.settings,
-                topSpacing: 0,
                 children: [
                   BlocBuilder<ThemeCubit, ThemeState>(
                     builder: (context, state) {

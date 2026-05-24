@@ -37,10 +37,8 @@ class TilawaCatalogSettingsSection extends StatelessWidget {
           ),
           child: Text(
             title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: colorScheme.onSurface,
-              height: 1.2,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -182,6 +180,7 @@ class TilawaCatalogSettingsSwitchRow extends StatelessWidget {
                 onChanged: onChanged,
                 activeTrackColor: switchTokens.switchActiveTrackColor,
                 activeThumbColor: switchTokens.switchActiveThumbColor,
+                layoutSlotHeight: tokens.iconSizeMedium,
               ),
             ],
           ),

@@ -15,6 +15,7 @@ class TilawaSwitch extends StatelessWidget {
     this.activeTrackColor,
     this.activeThumbColor,
     this.visualSlotSize = const Size(48, 30),
+    this.layoutSlotHeight,
   });
 
   final bool value;
@@ -25,45 +26,68 @@ class TilawaSwitch extends StatelessWidget {
   /// Visual bounds for [Switch.adaptive] inside the 48×48 dp hit box.
   final Size visualSlotSize;
 
+  /// When set, the parent row only reserves this height while the 48×48 dp hit
+  /// target overflows without expanding sibling rows (e.g. settings list rows).
+  final double? layoutSlotHeight;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final hitSize = kTilawaMinInteractiveDimension;
 
-    return SizedBox(
-      width: hitSize,
-      height: hitSize,
-      child: Theme(
-        data: theme.copyWith(
-          switchTheme: theme.switchTheme.copyWith(
-            padding: EdgeInsets.zero,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
+    final Widget switchControl = Theme(
+      data: theme.copyWith(
+        switchTheme: theme.switchTheme.copyWith(
+          padding: EdgeInsets.zero,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        child: Center(
-          child: SizedBox(
-            width: visualSlotSize.width,
-            height: visualSlotSize.height,
-            child: FittedBox(
-              fit: BoxFit.contain,
-              alignment: Alignment.center,
-              child: Switch.adaptive(
-                value: value,
-                onChanged: onChanged == null
-                    ? null
-                    : (next) {
-                        TilawaInteractionFeedback.trigger(
-                          TilawaHaptic.selection,
-                        );
-                        onChanged!(next);
-                      },
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                activeTrackColor: activeTrackColor,
-                activeThumbColor: activeThumbColor,
-              ),
+      ),
+      child: Center(
+        child: SizedBox(
+          width: visualSlotSize.width,
+          height: visualSlotSize.height,
+          child: FittedBox(
+            fit: BoxFit.contain,
+            alignment: Alignment.center,
+            child: Switch.adaptive(
+              value: value,
+              onChanged: onChanged == null
+                  ? null
+                  : (next) {
+                      TilawaInteractionFeedback.trigger(
+                        TilawaHaptic.selection,
+                      );
+                      onChanged!(next);
+                    },
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              activeTrackColor: activeTrackColor,
+              activeThumbColor: activeThumbColor,
             ),
           ),
         ),
+      ),
+    );
+
+    final Widget hitTarget = SizedBox(
+      width: hitSize,
+      height: hitSize,
+      child: switchControl,
+    );
+
+    if (layoutSlotHeight == null) {
+      return hitTarget;
+    }
+
+    return SizedBox(
+      width: hitSize,
+      height: layoutSlotHeight,
+      child: OverflowBox(
+        alignment: Alignment.center,
+        minWidth: hitSize,
+        maxWidth: hitSize,
+        minHeight: hitSize,
+        maxHeight: hitSize,
+        child: hitTarget,
       ),
     );
   }
