@@ -37,7 +37,7 @@ void main() {
         expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
         expect(
           theme.appBarTheme.backgroundColor,
-          theme.colorScheme.surfaceContainerHigh,
+          theme.colorScheme.surface,
         );
         expect(theme.appBarTheme.elevation, 0);
         expect(theme.appBarTheme.scrolledUnderElevation, 0);
@@ -67,7 +67,7 @@ void main() {
         expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
         expect(
           theme.appBarTheme.backgroundColor,
-          theme.colorScheme.surfaceContainerHigh,
+          theme.colorScheme.surface,
         );
         expect(theme.appBarTheme.elevation, 0);
         expect(theme.appBarTheme.scrolledUnderElevation, 0);

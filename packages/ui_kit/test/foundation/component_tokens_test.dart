@@ -242,16 +242,16 @@ void main() {
       );
       final tokens = TilawaSearchFieldTokens.fromColorScheme(scheme);
 
+      expect(tokens.backgroundColor, scheme.surface);
       expect(
-        tokens.backgroundColor,
-        Color.lerp(scheme.surface, scheme.surfaceContainer, 0.42),
+        tokens.focusedBorderColor,
+        scheme.onSurface.withValues(alpha: 0.28),
       );
-      expect(tokens.focusedBorderColor, scheme.primary.withValues(alpha: 0.28));
       expect(
         tokens.unfocusedBorderColor,
         scheme.outlineVariant.withValues(alpha: 0.26),
       );
-      expect(tokens.prefixIconFocusedColor, scheme.primary);
+      expect(tokens.prefixIconFocusedColor, scheme.onSurfaceVariant);
     });
 
     test('lerp interpolates all numeric values and EdgeInsets', () {

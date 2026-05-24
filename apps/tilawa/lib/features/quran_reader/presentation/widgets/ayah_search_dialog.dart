@@ -25,7 +25,6 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
 
     return Dialog(
       child: Container(

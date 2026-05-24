@@ -49,11 +49,26 @@ abstract final class AppColors {
   static const Color defaultPrimary = primaryCoral;
 
   // ---------------------------------------------------------------------------
-  // Light neutral ramp — quiet, near-monochrome surfaces.
+  // Light neutral ramp — Pinterest catalog chrome (white / #E5E5E0 / black).
   // ---------------------------------------------------------------------------
 
+  /// Canvas / scaffold (`#FFFFFF`).
   static const Color lightBackground = Color(0xFFFFFFFF);
+
+  /// Cards and sheets on canvas (same as [lightBackground] in light mode).
   static const Color lightSurface = Color(0xFFFFFFFF);
+
+  /// Primary ink (`#000000`).
+  static const Color lightInk = Color(0xFF000000);
+
+  /// Body / secondary labels (`#33332e`).
+  static const Color lightBody = Color(0xFF33332E);
+
+  /// Muted labels (`#62625b`).
+  static const Color lightMute = Color(0xFF62625B);
+
+  /// Ash icons / hints (`#91918c`).
+  static const Color lightAsh = Color(0xFF91918C);
 
   /// Light upper container / idle chip (Pinterest `secondary-bg` `#E5E5E0`).
   ///
@@ -81,8 +96,10 @@ abstract final class AppColors {
   /// Light top container tier (Pinterest `hairline` `#DADAD3`).
   static const Color lightSurfaceContainerHighestBase = Color(0xFFDADAD3);
 
-  /// Light outline/divider color. Calibrated for visibility on real-device
-  /// DPIs (~400 ppi); avoid going lighter than this.
+  /// Hairline dividers (`#dadad3`).
+  static const Color lightHairline = Color(0xFFDADAD3);
+
+  /// Strong outline when hairline is too subtle (~400 ppi calibrated).
   static const Color lightOutline = Color(0xFFC0C0C0);
 
   // ---------------------------------------------------------------------------
@@ -116,11 +133,12 @@ abstract final class AppColors {
   /// selected primary instead; unused at runtime.
   static const Color lightDefaultPrimaryContainer = Color(0xFFD8F0EC);
 
-  static const Color lightSecondaryContainer = Color(0xFFE4EBD5);
-  static const Color lightTertiaryContainer = Color(0xFFF0F4F3);
-  static const Color lightSurfaceContainerMid = Color(0xFFF6F6F6);
-  static const Color lightOutlineVariant = Color(0xFFE8E8E8);
-  static const Color lightShadow = Color(0xFF1F2926);
+  /// Neutral Flex secondary/tertiary containers (no brand green tint).
+  static const Color lightSecondaryContainer = lightSurfaceContainerHighBase;
+  static const Color lightTertiaryContainer = lightSurfaceContainer;
+  static const Color lightSurfaceContainerMid = lightSurfaceContainer;
+  static const Color lightOutlineVariant = lightHairline;
+  static const Color lightShadow = lightInk;
 
   // ---------------------------------------------------------------------------
   // AppTheme — dark Flex scheme refinement.

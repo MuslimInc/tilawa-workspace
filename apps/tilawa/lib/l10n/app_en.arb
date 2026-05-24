@@ -334,6 +334,22 @@
     "@settings": {
         "description": "Settings section title"
     },
+    "settingsYourAccount": "Your account",
+    "@settingsYourAccount": {
+        "description": "Pinterest-style settings screen title"
+    },
+    "settingsViewProfile": "View profile",
+    "@settingsViewProfile": {
+        "description": "Profile row subtitle on settings (catalog style)"
+    },
+    "settingsLoginSection": "Login",
+    "@settingsLoginSection": {
+        "description": "Login section header on settings screen"
+    },
+    "settingsSupportSection": "Support",
+    "@settingsSupportSection": {
+        "description": "Support section header on settings screen"
+    },
     "bottomNavReciters": "Reciters",
     "@bottomNavReciters": {
         "description": "Single-word label for the reciters tab in the phone bottom navigation bar"

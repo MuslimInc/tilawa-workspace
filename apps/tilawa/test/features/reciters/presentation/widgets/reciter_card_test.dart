@@ -110,6 +110,46 @@ void main() {
     await cubit.close();
   });
 
+  testWidgets('hides favorite control in favorites-only context', (
+    WidgetTester tester,
+  ) async {
+    final cubit = await loadedCubit(withFavoriteReciter: true);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: PrimaryColorPreset.defaultPreset.value,
+          useGoogleFontsOverride: false,
+        ),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        locale: const Locale('en'),
+        home: Scaffold(
+          body: Center(
+            child: BlocProvider<FavoritesCubit>.value(
+              value: cubit,
+              child: const ReciterCard(
+                reciter: tReciter,
+                favoritesOnlyContext: true,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Add to Favorites'), findsNothing);
+    expect(find.bySemanticsLabel('Remove from Favorites'), findsNothing);
+    expect(
+      find.bySemanticsIdentifier(
+        ReciterSemanticsIds.reciterFavoriteButton(tReciter.id),
+      ),
+      findsNothing,
+    );
+
+    await cubit.close();
+  });
+
   testWidgets('favorite control semantic bounds meet Tilawa hit-target floor', (
     WidgetTester tester,
   ) async {

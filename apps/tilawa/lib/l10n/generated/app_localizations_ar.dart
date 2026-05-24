@@ -259,6 +259,18 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settings => 'الإعدادات';
 
   @override
+  String get settingsYourAccount => 'حسابك';
+
+  @override
+  String get settingsViewProfile => 'عرض الملف الشخصي';
+
+  @override
+  String get settingsLoginSection => 'تسجيل الدخول';
+
+  @override
+  String get settingsSupportSection => 'الدعم';
+
+  @override
   String get bottomNavReciters => 'القراء';
 
   @override

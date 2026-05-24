@@ -62,9 +62,9 @@ class AppTheme {
     return FlexSchemeColor.from(
       primary: safePrimary,
       primaryContainer: primaryContainer,
-      secondary: AppColors.brandSecondary,
+      secondary: AppColors.lightSurfaceContainerHighBase,
       secondaryContainer: AppColors.lightSecondaryContainer,
-      tertiary: AppColors.brandTertiary,
+      tertiary: AppColors.lightBody,
       tertiaryContainer: AppColors.lightTertiaryContainer,
       appBarColor: AppColors.lightBackground,
       error: AppColors.error,
@@ -194,19 +194,31 @@ class AppTheme {
     final Color primary = scheme.primary;
     return scheme.copyWith(
       onPrimary: _accessibleOnColor(primary),
+      background: AppColors.lightBackground,
+      onBackground: AppColors.lightInk,
+      onSurface: AppColors.lightInk,
+      onSurfaceVariant: AppColors.lightMute,
       surface: AppColors.lightSurface,
-      surfaceContainerLowest: Colors.white,
+      surfaceTint: Colors.transparent,
+      surfaceContainerLowest: AppColors.lightBackground,
       surfaceContainerLow: AppColors.lightBackground,
-      // Warm neutral container ramp (Pinterest catalog chrome). Fixed hexes —
-      // no primary harmonization — so idle chips/search chrome do not pick up
-      // coral/teal tint from the user-selected accent.
+      // Warm neutral container ramp (Pinterest). Fixed hexes — not harmonized
+      // toward [primary] — so chrome stays white / #E5E5E0 / black.
       surfaceContainer: AppColors.lightSurfaceContainer,
       surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
+      secondary: AppColors.lightSurfaceContainerHighBase,
+      onSecondary: AppColors.lightInk,
+      secondaryContainer: AppColors.lightSecondaryContainer,
+      onSecondaryContainer: AppColors.lightInk,
+      tertiary: AppColors.lightBody,
+      onTertiary: AppColors.lightSurface,
+      tertiaryContainer: AppColors.lightTertiaryContainer,
+      onTertiaryContainer: AppColors.lightInk,
       outline: AppColors.lightOutline,
       outlineVariant: AppColors.lightOutlineVariant,
-      shadow: AppColors.lightShadow,
-      scrim: AppColors.lightShadow,
+      shadow: AppColors.lightShadow.withValues(alpha: 0.12),
+      scrim: AppColors.lightShadow.withValues(alpha: 0.24),
     );
   }
 
@@ -309,8 +321,9 @@ class AppTheme {
       cardColor: colorScheme.surface,
       switchTheme: _switchTheme(colorScheme),
       appBarTheme: theme.appBarTheme.copyWith(
-        // Vellum header (docs/tilawa_brand.md §5) — aligns with [TilawaAppBar].
-        backgroundColor: colorScheme.surfaceContainerHigh,
+        // Pinterest-style chrome: white bar, black title (vellum uses grey via
+        // [TilawaAppBarChrome] when needed).
+        backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -388,7 +401,7 @@ class AppTheme {
     final themedSurfaces = _applySurfaceScale(
       theme: theme,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.surfaceContainerLow,
+      scaffoldBackgroundColor: colorScheme.background,
     );
 
     return themedSurfaces.copyWith(

@@ -331,6 +331,10 @@
         "description": "Error message"
     },
     "settings": "الإعدادات",
+    "settingsYourAccount": "حسابك",
+    "settingsViewProfile": "عرض الملف الشخصي",
+    "settingsLoginSection": "تسجيل الدخول",
+    "settingsSupportSection": "الدعم",
     "@settings": {
         "description": "Settings section title"
     },

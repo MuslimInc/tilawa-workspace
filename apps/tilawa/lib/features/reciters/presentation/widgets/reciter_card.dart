@@ -20,7 +20,7 @@ class ReciterCard extends StatelessWidget {
 
   final ReciterEntity reciter;
 
-  /// When true, favorited rows use muted chrome (favorites filter / list).
+  /// When true, hides the per-row favorite control (favorites filter / list).
   final bool favoritesOnlyContext;
 
   void _openReciterDetails(BuildContext context) {
@@ -66,22 +66,23 @@ class ReciterCard extends StatelessWidget {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsetsDirectional.only(
-                              end: tokens.spaceLarge + tokens.spaceSmall,
-                            ),
+                            padding: favoritesOnlyContext
+                                ? EdgeInsets.zero
+                                : EdgeInsetsDirectional.only(
+                                    end:
+                                        tokens.spaceLarge + tokens.spaceSmall,
+                                  ),
                             child: _ReciterInfo(reciter: reciter),
                           ),
                         ),
                       ],
                     ),
-                    PositionedDirectional(
-                      top: 0,
-                      end: 0,
-                      child: _FavoriteButton(
-                        reciter: reciter,
-                        favoritesOnlyContext: favoritesOnlyContext,
+                    if (!favoritesOnlyContext)
+                      PositionedDirectional(
+                        top: 0,
+                        end: 0,
+                        child: _FavoriteButton(reciter: reciter),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -240,13 +241,9 @@ class _ReciterInfo extends StatelessWidget {
 }
 
 class _FavoriteButton extends StatelessWidget {
-  const _FavoriteButton({
-    required this.reciter,
-    required this.favoritesOnlyContext,
-  });
+  const _FavoriteButton({required this.reciter});
 
   final ReciterEntity reciter;
-  final bool favoritesOnlyContext;
 
   @override
   Widget build(BuildContext context) {
@@ -258,24 +255,20 @@ class _FavoriteButton extends StatelessWidget {
       return favoritesState is FavoritesLoaded &&
           favoritesState.favoriteIds.contains(reciter.id);
     });
-    final bool mutedFavoriteChrome = favoritesOnlyContext && isFavorite;
-    final Color activeIconColor = mutedFavoriteChrome
-        ? colorScheme.onSurfaceVariant.withValues(alpha: tokens.opacityMedium)
-        : colorScheme.primary.withValues(alpha: tokens.opacityEmphasis);
 
     return Semantics(
       identifier: ReciterSemanticsIds.reciterFavoriteButton(reciter.id),
       child: TilawaIconToggle(
         icon: Icons.favorite_border_rounded,
-        activeIcon: mutedFavoriteChrome
-            ? Icons.favorite_border_rounded
-            : Icons.favorite_rounded,
+        activeIcon: Icons.favorite_rounded,
         value: isFavorite,
         onChanged: (_) =>
             context.read<FavoritesCubit>().toggleFavorite(reciter),
         iconSize: tokens.iconSizeSmall,
         padding: tokens.spaceExtraSmall,
-        activeIconColor: activeIconColor,
+        activeIconColor: colorScheme.primary.withValues(
+          alpha: tokens.opacityEmphasis,
+        ),
         inactiveIconColor: colorScheme.onSurfaceVariant.withValues(
           alpha: tokens.opacityMedium,
         ),

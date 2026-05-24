@@ -371,11 +371,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 return Scaffold(
                   resizeToAvoidBottomInset: false,
                   backgroundColor: colorScheme.surface,
-                  appBar: PreferredSize(
-                    preferredSize: Size.fromHeight(
-                      _recitersAppBarExtent(context),
-                    ),
-                    child: _RecitersTilawaAppBar(
+                  appBar: _RecitersTilawaAppBar(
+                      bottomHeight: _recitersAppBarBottomHeight(context),
                       state: state,
                       letterIndexAvailable: letterIndexAvailable,
                       showLetterIndex: _showLetterIndex,
@@ -395,7 +392,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       onClearLetterFilter: _clearLetterFilter,
                       onClearAllFilters: _clearAllFilters,
                     ),
-                  ),
                   body: _RecitersSliverScreen(
                     state: state,
                     allowHeavyLoadedResults: _allowHeavyLoadedResults,
@@ -715,8 +711,10 @@ class _RecitersEmptySliver extends StatelessWidget {
 }
 
 /// Reciters list chrome: title, optional filter chips, and search row.
-class _RecitersTilawaAppBar extends StatelessWidget {
+class _RecitersTilawaAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const _RecitersTilawaAppBar({
+    required this.bottomHeight,
     required this.state,
     required this.letterIndexAvailable,
     required this.showLetterIndex,
@@ -731,8 +729,12 @@ class _RecitersTilawaAppBar extends StatelessWidget {
     required this.onClearAllFilters,
   });
 
+  final double bottomHeight;
   final RecitersState state;
   final bool letterIndexAvailable;
+
+  @override
+  Size get preferredSize => Size.fromHeight(bottomHeight);
   final bool showLetterIndex;
   final TextEditingController searchController;
   final FocusNode focusNode;
@@ -748,7 +750,6 @@ class _RecitersTilawaAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
-    final double bottomHeight = _recitersAppBarBottomHeight(theme);
     final RecitersLoaded? loaded =
         state is RecitersLoaded ? state as RecitersLoaded : null;
 
@@ -765,9 +766,9 @@ class _RecitersTilawaAppBar extends StatelessWidget {
           child: TilawaSearchFieldSlot(
             padding: EdgeInsets.fromLTRB(
               tokens.spaceMedium,
+              tokens.spaceSmall,
               tokens.spaceMedium,
-              tokens.spaceMedium,
-              tokens.spaceMedium,
+              tokens.spaceSmall,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -1393,26 +1394,54 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
   }
 }
 
-/// Total height of [Scaffold.appBar] (status bar + title + bottom chrome).
-double _recitersAppBarExtent(BuildContext context) {
+/// Title + catalog search + filter row (must match [_RecitersTilawaAppBar] layout).
+double _recitersAppBarBottomHeight(BuildContext context) {
   final ThemeData theme = Theme.of(context);
-  return MediaQuery.paddingOf(context).top +
-      _recitersAppBarBottomHeight(theme);
-}
+  final TilawaDesignTokens tokens = theme.tokens;
+  final TextScaler textScaler = MediaQuery.textScalerOf(context);
+  final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
+    fontWeight: FontWeight.w700,
+  );
+  final double titleLineHeight = _singleLineTextHeight(
+    context,
+    titleStyle,
+    textScaler,
+  );
+  final double searchHeight = theme.componentTokens.searchField.height;
 
-/// Title + catalog search + [TilawaQuickFilterBar] (Pinterest catalog pattern).
-double _recitersAppBarBottomHeight(ThemeData theme) {
-  final tokens = theme.tokens;
-  final double titleLineHeight =
-      (theme.textTheme.titleLarge?.fontSize ?? 22) *
-      (theme.textTheme.titleLarge?.height ?? 1.25);
-  return tokens.spaceMedium +
+  final double raw =
+      tokens.spaceSmall +
       titleLineHeight +
       tokens.spaceSmall +
-      TilawaAppBarConfig.searchBottomHeight(theme) +
+      searchHeight +
       tokens.spaceSmall +
       kMinInteractiveDimension +
-      tokens.spaceMedium;
+      tokens.spaceSmall;
+
+  return _ceilToDevicePixels(context, raw);
+}
+
+double _singleLineTextHeight(
+  BuildContext context,
+  TextStyle? style,
+  TextScaler textScaler,
+) {
+  if (style == null) {
+    return 27.5;
+  }
+  final TextPainter painter = TextPainter(
+    text: TextSpan(text: 'Hg', style: style),
+    textScaler: textScaler,
+    textDirection: Directionality.of(context),
+    maxLines: 1,
+  )..layout();
+  return painter.height;
+}
+
+/// Rounds [logicalPixels] up to a whole physical pixel to avoid [AppBar] overflows.
+double _ceilToDevicePixels(BuildContext context, double logicalPixels) {
+  final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+  return (logicalPixels * devicePixelRatio).ceil() / devicePixelRatio;
 }
 
 /// Reserved width for the letter-index rail (scrollbar + outer margin).

@@ -560,6 +560,30 @@ abstract class AppLocalizations {
   /// **'Settings'**
   String get settings;
 
+  /// Pinterest-style settings screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Your account'**
+  String get settingsYourAccount;
+
+  /// Profile row subtitle on settings (catalog style)
+  ///
+  /// In en, this message translates to:
+  /// **'View profile'**
+  String get settingsViewProfile;
+
+  /// Login section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get settingsLoginSection;
+
+  /// Support section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get settingsSupportSection;
+
   /// Single-word label for the reciters tab in the phone bottom navigation bar
   ///
   /// In en, this message translates to:

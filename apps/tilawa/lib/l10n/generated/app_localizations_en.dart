@@ -259,6 +259,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings => 'Settings';
 
   @override
+  String get settingsYourAccount => 'Your account';
+
+  @override
+  String get settingsViewProfile => 'View profile';
+
+  @override
+  String get settingsLoginSection => 'Login';
+
+  @override
+  String get settingsSupportSection => 'Support';
+
+  @override
   String get bottomNavReciters => 'Reciters';
 
   @override
