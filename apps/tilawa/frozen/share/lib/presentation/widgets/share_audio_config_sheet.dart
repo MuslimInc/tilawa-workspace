@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
@@ -964,7 +966,7 @@ class _SelectionBadge extends StatelessWidget {
   }
 }
 
-class _VideoReviewPreview extends StatelessWidget {
+class _VideoReviewPreview extends StatefulWidget {
   const _VideoReviewPreview({
     super.key,
     required this.filePath,
@@ -975,9 +977,46 @@ class _VideoReviewPreview extends StatelessWidget {
   final VoidCallback onShare;
 
   @override
+  State<_VideoReviewPreview> createState() => _VideoReviewPreviewState();
+}
+
+class _VideoReviewPreviewState extends State<_VideoReviewPreview> {
+  late VideoPlayerController _videoPlayerController;
+  ChewieController? _chewieController;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializePlayer();
+  }
+
+  Future<void> _initializePlayer() async {
+    _videoPlayerController = VideoPlayerController.file(File(widget.filePath));
+    await _videoPlayerController.initialize();
+
+    _chewieController = ChewieController(
+      videoPlayerController: _videoPlayerController,
+      aspectRatio: 9 / 16,
+      autoPlay: true,
+      looping: false,
+      showControls: true,
+      placeholder: const TilawaLoadingIndicator(),
+    );
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoPlayerController.dispose();
+    _chewieController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final bool exists = File(filePath).existsSync();
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1001,18 +1040,12 @@ class _VideoReviewPreview extends StatelessWidget {
             borderRadius: BorderRadius.circular(24),
             child: AspectRatio(
               aspectRatio: 9 / 16,
-              child: ColoredBox(
-                color: Colors.black12,
-                child: Center(
-                  child: Icon(
-                    exists
-                        ? Icons.movie_creation_outlined
-                        : Icons.error_outline,
-                    size: 40,
-                    color: Colors.white70,
-                  ),
-                ),
-              ),
+              child: _chewieController == null
+                  ? const ColoredBox(
+                      color: Colors.black12,
+                      child: TilawaLoadingIndicator(),
+                    )
+                  : Chewie(controller: _chewieController!),
             ),
           ),
           const SizedBox(height: 14),
@@ -1023,7 +1056,7 @@ class _VideoReviewPreview extends StatelessWidget {
               variant: TilawaButtonVariant.primary,
               isFullWidth: true,
               leadingIcon: const Icon(Icons.share_rounded),
-              onPressed: onShare,
+              onPressed: widget.onShare,
               backgroundColor: AppShareComposerColors.mint,
               foregroundColor: AppShareComposerColors.deepGreen,
               borderRadius: 18,

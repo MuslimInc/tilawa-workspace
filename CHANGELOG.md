@@ -28,6 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Settings**: Cleaner layout and localization for support and app actions.
 - **App review policy**: Prompts stay blocked on Athkar while you remain on the
   Athkar tab after closing a details screen.
+- **App size**: Native FFmpeg frozen (not linked) to reduce download size;
+  full share/reel Dart code preserved under `apps/tilawa/frozen/share/`.
+  Screenshot sharing remains available from the Quran reader.
+
+### Frozen (not shipped in this build)
+
+- **Video reel share**: UI hidden unless `SHARE_FFMPEG_ENABLED=true` after
+  re-adding `ffmpeg_kit_flutter_new`, `video_player`, and `chewie`.
+- **Native dependency**: `ffmpeg_kit_flutter_new` (see `frozen/share/README.md`).
 
 ### Fixed
 

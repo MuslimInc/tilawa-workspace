@@ -3,6 +3,8 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../utils/share_feature_flags.dart';
+
 /// Bottom sheet presenting share options using the Tilawa UI kit.
 class ShareOptionsSheet extends StatefulWidget {
   const ShareOptionsSheet({
@@ -84,13 +86,15 @@ class _ShareOptionsSheetState extends State<ShareOptionsSheet> {
                 description: context.l10n.shareScreenshotDescription,
                 onTap: () => widget.onShareScreenshot(_selectedSurah),
               ),
-              SizedBox(height: tokens.spaceSmall),
-              _ShareOptionCard(
-                icon: Icons.movie_creation_outlined,
-                title: context.l10n.shareModeReel,
-                description: context.l10n.shareAudioClipDescription,
-                onTap: () => widget.onShareVideoReel(_selectedSurah),
-              ),
+              if (kShareVideoReelEnabled) ...[
+                SizedBox(height: tokens.spaceSmall),
+                _ShareOptionCard(
+                  icon: Icons.movie_creation_outlined,
+                  title: context.l10n.shareModeReel,
+                  description: context.l10n.shareAudioClipDescription,
+                  onTap: () => widget.onShareVideoReel(_selectedSurah),
+                ),
+              ],
             ],
           ),
         ),

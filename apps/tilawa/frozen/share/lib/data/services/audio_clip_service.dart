@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 import 'package:tilawa_core/logger.dart';
@@ -9,7 +11,6 @@ import 'package:tilawa_core/logger.dart';
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_limits.dart';
 import '../../domain/entities/share_progress_messages.dart';
-import '../ffmpeg/ffmpeg_runner.dart';
 import 'ayah_timing_service.dart';
 import 'reciter_audio_mapping.dart';
 import 'share_file_manager.dart';
@@ -17,12 +18,11 @@ import 'share_file_manager.dart';
 /// Downloads verse-level audio files and concatenates them into a single MP3 clip.
 @lazySingleton
 class AudioClipService {
-  AudioClipService(this._dio, this._fileManager, this._timingService, this._runner);
+  AudioClipService(this._dio, this._fileManager, this._timingService);
 
   final Dio _dio;
   final ShareFileManager _fileManager;
   final AyahTimingService _timingService;
-  final FFmpegRunner _runner;
 
   /// Maximum number of verses allowed per clip.
   static const maxVerses = ShareLimits.maxVersesPerClip;
@@ -196,15 +196,7 @@ class AudioClipService {
     final outputPath = p.join(shareDir.path, outputFileName);
 
     onProgress?.call(_trimProgress, progressMessages.trimmingAudio);
-    try {
-      await _trimWithFFmpeg(localPath, startTime, endTime, outputPath, config);
-    } catch (_) {
-      return _generateFromOnlineVerses(
-        config: config,
-        progressMessages: progressMessages,
-        onProgress: onProgress,
-      );
-    }
+    await _trimWithFFmpeg(localPath, startTime, endTime, outputPath, config);
     onProgress?.call(_completeProgress, progressMessages.done);
 
     return outputPath;
@@ -221,7 +213,7 @@ class AudioClipService {
     final title = 'Surah $s (${config.fromAyah}-${config.toAyah})';
 
     // FFmpeg command with metadata
-    final result = await _runner.execute(
+    final session = await FFmpegKit.execute(
       '-i "$inputPath" -ss $start -to $end -acodec copy '
       '-metadata title="$title" '
       '-metadata artist="${config.reciterName}" '
@@ -229,9 +221,11 @@ class AudioClipService {
       '-y "$outputPath"',
     );
 
-    if (!result.isSuccess) {
+    final returnCode = await session.getReturnCode();
+    if (!ReturnCode.isSuccess(returnCode)) {
+      final logs = await session.getLogs();
       throw StateError(
-        'FFmpeg trimming failed. Logs: ${result.logs}',
+        'FFmpeg trimming failed with return code $returnCode. Logs: ${logs.map((l) => l.getMessage()).join('\n')}',
       );
     }
   }
@@ -382,11 +376,7 @@ class AudioClipService {
     final outputPath = p.join(shareDir.path, outputFileName);
 
     if (versePaths.length > 1) {
-      try {
-        await _concatenateWithFFmpeg(versePaths, outputPath, config);
-      } catch (_) {
-        await _concatenateRawBytes(versePaths, outputPath);
-      }
+      await _concatenateWithFFmpeg(versePaths, outputPath, config);
     } else if (versePaths.isNotEmpty) {
       await File(versePaths.first).copy(outputPath);
     }
@@ -408,7 +398,7 @@ class AudioClipService {
     final s = config.surahNumber.toString().padLeft(3, '0');
     final title = 'Surah $s (${config.fromAyah}-${config.toAyah})';
 
-    final result = await _runner.execute(
+    final session = await FFmpegKit.execute(
       '-i "$concatString" -acodec copy '
       '-metadata title="$title" '
       '-metadata artist="${config.reciterName}" '
@@ -416,24 +406,13 @@ class AudioClipService {
       '-y "$outputPath"',
     );
 
-    if (!result.isSuccess) {
-      throw StateError(
-        'FFmpeg concatenation failed. Logs: ${result.logs}',
-      );
-    }
-  }
+    final returnCode = await session.getReturnCode();
 
-  Future<void> _concatenateRawBytes(
-    List<String> inputPaths,
-    String outputPath,
-  ) async {
-    final sink = File(outputPath).openWrite();
-    try {
-      for (final path in inputPaths) {
-        await sink.addStream(File(path).openRead());
-      }
-    } finally {
-      await sink.close();
+    if (!ReturnCode.isSuccess(returnCode)) {
+      final logs = await session.getLogs();
+      throw StateError(
+        'FFmpeg concatenation failed with return code $returnCode. Logs: ${logs.map((l) => l.getMessage()).join('\n')}',
+      );
     }
   }
 }

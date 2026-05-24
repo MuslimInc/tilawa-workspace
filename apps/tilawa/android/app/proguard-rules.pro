@@ -191,15 +191,3 @@
 # ============================================
 -keep class androidx.multidex.** { *; }
 -dontwarn androidx.multidex.**
-# ============================================
-# FFmpegKit
-# ============================================
--keep class com.antonkarpenko.ffmpegkit.** { *; }
--keep class com.antonkarpenko.ffmpegkit.FFmpegKitConfig { *; }
--keep class com.antonkarpenko.ffmpegkit.AbiDetect { *; }
--dontwarn com.antonkarpenko.ffmpegkit.**
-
-# Keep native methods
--keepclasseswithmembernames class com.antonkarpenko.ffmpegkit.** {
-    native <methods>;
-}
