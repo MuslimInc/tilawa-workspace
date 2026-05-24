@@ -1,9 +1,22 @@
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 
+import '../atoms/tilawa_switch.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
-import '../atoms/tilawa_switch.dart';
+import 'tilawa_settings_group_row_style.dart';
+
+BorderRadius _resolveSettingsTileBorderRadius(
+  BuildContext context,
+  BorderRadiusGeometry borderRadius,
+) {
+  if (borderRadius != BorderRadius.zero) {
+    return borderRadius.resolve(Directionality.of(context));
+  }
+
+  return TilawaSettingsGroupRowStyle.maybeOf(context)?.borderRadius ??
+      BorderRadius.zero;
+}
 
 class TilawaSettingsTile extends StatelessWidget {
   const TilawaSettingsTile({
@@ -32,9 +45,10 @@ class TilawaSettingsTile extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
     final designTokens = theme.tokens;
     final effectiveIconColor = iconColor ?? colorScheme.primary;
-    final BorderRadius? resolvedRadius = borderRadius is BorderRadius
-        ? borderRadius as BorderRadius
-        : null;
+    final BorderRadius resolvedRadius = _resolveSettingsTileBorderRadius(
+      context,
+      borderRadius,
+    );
     final TextDirection direction = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = tokens.tileContentPadding.resolve(
       direction,
@@ -66,7 +80,7 @@ class TilawaSettingsTile extends StatelessWidget {
       children: [
         Material(
           color: Colors.transparent,
-          borderRadius: borderRadius,
+          borderRadius: resolvedRadius,
           clipBehavior: Clip.antiAlias,
           child: ListTileTheme(
             data: ListTileThemeData(
@@ -80,9 +94,7 @@ class TilawaSettingsTile extends StatelessWidget {
             child: ListTile(
               minTileHeight: designTokens.minInteractiveDimension,
               contentPadding: listTileContentPadding,
-              shape: resolvedRadius != null
-                  ? RoundedRectangleBorder(borderRadius: resolvedRadius)
-                  : null,
+              shape: RoundedRectangleBorder(borderRadius: resolvedRadius),
               leading: _SettingsLeadingIcon(
                 icon: icon,
                 color: effectiveIconColor,
@@ -153,9 +165,10 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
     final designTokens = theme.tokens;
     final effectiveIconColor = iconColor ?? colorScheme.primary;
-    final BorderRadius? resolvedRadius = borderRadius is BorderRadius
-        ? borderRadius as BorderRadius
-        : null;
+    final BorderRadius resolvedRadius = _resolveSettingsTileBorderRadius(
+      context,
+      borderRadius,
+    );
     final TextDirection direction = Directionality.of(context);
     final EdgeInsets resolvedContentPadding = tokens.switchTileContentPadding
         .resolve(direction);
@@ -186,7 +199,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
       children: [
         Material(
           color: Colors.transparent,
-          borderRadius: borderRadius,
+          borderRadius: resolvedRadius,
           clipBehavior: Clip.antiAlias,
           child: ListTileTheme(
             data: ListTileThemeData(
@@ -200,9 +213,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
             child: ListTile(
               minTileHeight: designTokens.minInteractiveDimension,
               contentPadding: listTileContentPadding,
-              shape: resolvedRadius != null
-                  ? RoundedRectangleBorder(borderRadius: resolvedRadius)
-                  : null,
+              shape: RoundedRectangleBorder(borderRadius: resolvedRadius),
               leading: _SettingsLeadingIcon(
                 icon: icon,
                 color: effectiveIconColor,

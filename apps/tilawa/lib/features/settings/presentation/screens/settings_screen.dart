@@ -55,30 +55,29 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     BlocBuilder<ThemeCubit, ThemeState>(
                       builder: (context, state) {
-                        return Column(
-                          children: [
-                            TilawaSettingsSwitchTile(
-                              icon: FluentIcons.weather_moon_24_regular,
-                              title: l10n.darkTheme,
-                              value: state.mode == AppThemeMode.dark,
-                              onChanged:
-                                  context.read<ThemeCubit>().toggleDark,
-                            ),
-                            TilawaSettingsTile(
-                              icon: FluentIcons.color_24_regular,
-                              title: l10n.primaryColor,
-                              trailing: settingsColorTrailing(
-                                context,
-                                state.primaryColor,
-                              ),
-                              onTap: () => SettingsSheets.showPrimaryColorPicker(
-                                context,
-                                currentColor: state.primaryColor,
-                                currentSource: state.primaryColorSource,
-                                currentPresetId: state.primaryPresetId,
-                              ),
-                            ),
-                          ],
+                        return TilawaSettingsSwitchTile(
+                          icon: FluentIcons.weather_moon_24_regular,
+                          title: l10n.darkTheme,
+                          value: state.mode == AppThemeMode.dark,
+                          onChanged: context.read<ThemeCubit>().toggleDark,
+                        );
+                      },
+                    ),
+                    BlocBuilder<ThemeCubit, ThemeState>(
+                      builder: (context, state) {
+                        return TilawaSettingsTile(
+                          icon: FluentIcons.color_24_regular,
+                          title: l10n.primaryColor,
+                          trailing: settingsColorTrailing(
+                            context,
+                            state.primaryColor,
+                          ),
+                          onTap: () => SettingsSheets.showPrimaryColorPicker(
+                            context,
+                            currentColor: state.primaryColor,
+                            currentSource: state.primaryColorSource,
+                            currentPresetId: state.primaryPresetId,
+                          ),
                         );
                       },
                     ),
@@ -106,26 +105,26 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     BlocBuilder<SettingsCubit, SettingsState>(
                       builder: (context, state) {
-                        return Column(
-                          children: [
-                            TilawaSettingsSwitchTile(
-                              icon: FluentIcons.arrow_reset_24_regular,
-                              title: l10n.restorePlaybackState,
-                              value: state.restorePlaybackState,
-                              onChanged: context
-                                  .read<SettingsCubit>()
-                                  .toggleRestorePlaybackState,
-                            ),
-                            TilawaSettingsSwitchTile(
-                              icon: FluentIcons.timer_24_regular,
-                              title: l10n.enableRecitationDuration,
-                              value: state.isSleepTimerEnabled,
-                              onChanged: context
-                                  .read<SettingsCubit>()
-                                  .toggleSleepTimerEnabled,
-                              showDivider: false,
-                            ),
-                          ],
+                        return TilawaSettingsSwitchTile(
+                          icon: FluentIcons.arrow_reset_24_regular,
+                          title: l10n.restorePlaybackState,
+                          value: state.restorePlaybackState,
+                          onChanged: context
+                              .read<SettingsCubit>()
+                              .toggleRestorePlaybackState,
+                        );
+                      },
+                    ),
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return TilawaSettingsSwitchTile(
+                          icon: FluentIcons.timer_24_regular,
+                          title: l10n.enableRecitationDuration,
+                          value: state.isSleepTimerEnabled,
+                          onChanged: context
+                              .read<SettingsCubit>()
+                              .toggleSleepTimerEnabled,
+                          showDivider: false,
                         );
                       },
                     ),

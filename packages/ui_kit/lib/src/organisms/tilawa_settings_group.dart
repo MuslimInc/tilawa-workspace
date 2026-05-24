@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
 import '../molecules/tilawa_section_header.dart';
+import '../molecules/tilawa_settings_group_row_style.dart';
 
 /// Applies the screen-edge horizontal inset shared by settings groups.
 class TilawaSettingsGroupHorizontalInset extends StatelessWidget {
@@ -59,7 +60,19 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(children: children),
+        child: Column(
+          children: [
+            for (var i = 0; i < children.length; i++)
+              TilawaSettingsGroupRowStyle(
+                borderRadius: tilawaSettingsGroupRowBorderRadius(
+                  index: i,
+                  rowCount: children.length,
+                  radius: tokens.groupBorderRadius,
+                ),
+                child: children[i],
+              ),
+          ],
+        ),
       ),
     );
   }

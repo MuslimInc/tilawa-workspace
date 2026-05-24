@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../atoms/tilawa_switch.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import 'tilawa_settings_group_row_style.dart';
 
 /// Pinterest-style settings section: bold title, flat rows (no card).
 class TilawaCatalogSettingsSection extends StatelessWidget {
@@ -194,11 +195,17 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final borderRadius =
+        TilawaSettingsGroupRowStyle.maybeOf(context)?.borderRadius ??
+        BorderRadius.zero;
 
     return Material(
       color: Colors.transparent,
+      borderRadius: borderRadius,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
+        borderRadius: borderRadius,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             tokens.spaceMedium,
