@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/shell/presentation/shell_tab_effect_dispatcher.dart';
+import 'package:tilawa/features/shell/shell.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../features/app_review/domain/services/app_review_flow_guard.dart';
-import '../features/app_review/domain/services/app_review_trigger_manager.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../shared/widgets/quran_player_widget.dart';
 import 'cubit/main_screen_cubit.dart';
@@ -22,9 +22,12 @@ class MainScreen extends StatelessWidget {
     return BlocListener<MainScreenCubit, MainScreenState>(
       listenWhen: (MainScreenState prev, MainScreenState next) =>
           !prev.isShellActivated && next.isShellActivated,
-      listener: (_, MainScreenState state) {
-        getIt<AppReviewFlowGuard>().syncMainShellTab(state.currentIndex);
-        unawaited(getIt<AppReviewTriggerManager>().onSessionStarted());
+      listener: (BuildContext context, MainScreenState state) {
+        dispatchShellTabEffects(
+          context,
+          ShellTabCoordinator().onShellActivated(state.currentIndex),
+          isMounted: () => context.mounted,
+        );
       },
       child: BlocBuilder<MainScreenCubit, MainScreenState>(
         builder: (context, state) {
