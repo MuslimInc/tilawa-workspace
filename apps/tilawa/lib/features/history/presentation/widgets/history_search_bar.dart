@@ -22,9 +22,7 @@ class HistorySearchBar extends StatelessWidget {
       hintText: context.l10n.searchHistory,
       onChanged: onChanged,
       onClear: onClear,
-      borderRadius: BorderRadius.circular(
-        Theme.of(context).tokens.radiusMedium,
-      ),
+      showShadow: false,
     );
   }
 }

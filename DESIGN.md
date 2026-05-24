@@ -11,7 +11,7 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 ## 1. Visual theme and atmosphere
 
 - **Material 3** via **FlexColorScheme**: surfaces, containers, and component themes are assembled in `AppTheme` and refined with Tilawa-specific ramps (`AppColors`).
-- **Calm, content-first:** small palette, quiet neutrals, one **user-selectable primary** accent from **curated presets** (default **Tilawa teal**); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces are near-monochrome in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
+- **Calm, content-first:** small palette, quiet neutrals, one **user-selectable primary** accent from **curated presets** (default **coral** `#E60023`, Pinterest-inspired); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces are near-monochrome in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
 - **Readable for Arabic:** line-height token `textHeightLoose` supports dense script in readers and lists (see `TilawaDesignTokens`).
 - **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` (not compact VisualDensity).
 - **Premium depth:** layered shadows (`opacityShadow` / `opacityShadowStrong`), optional **glass** tokens (`blurGlass`, `opacityGlass`) for overlays and chrome — use consistently, not everywhere.
@@ -22,11 +22,12 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 
 ### User-selectable primary (accent)
 
-Offered in app settings (`PrimaryColorPreset`). Default aligns with native splash **teal** `#1AADC5`. **Custom** hex is the last row in the primary-color sheet; extreme values may be adjusted in light theme for readability.
+Offered in app settings (`PrimaryColorPreset`). Default aligns with native splash **coral** `#E60023`. **Custom** hex is the last row in the primary-color sheet; extreme values may be adjusted in light theme for readability.
 
 | Preset | Hex (reference) | Notes |
 |--------|-----------------|--------|
-| Teal (default) | `#1AADC5` | Brand default |
+| Coral (default) | `#E60023` | App default; accent used sparingly (Pinterest-style) |
+| Teal | `#1AADC5` | Legacy Tilawa brand teal |
 | Sage | `#6F7F58` | Scholarly green |
 | Gold | `#8C681F` | Warm, Mushaf-inspired accent |
 | Brown | `#7B5E3B` | Warm neutral accent |
@@ -42,17 +43,23 @@ Additional constants exist in `AppColors` (e.g. gold) for Flex **secondary/terti
 | Success | `#43A047` | Positive outcomes |
 | Warning | `#FFA000` | Caution |
 
-### Neutral surfaces (light)
+### Neutral surfaces (light) — Pinterest catalog chrome
 
-| Token / role | Hex (base) |
-|--------------|------------|
-| Background / low scaffold | `#FFFFFF` |
-| Surface | `#FFFFFF` |
-| Container mid | `#F6F6F6` |
-| Container (tier) | `#F4F4F4` |
-| High / highest bases | `#EFEFEF`, `#E8E8E8` (then **primary-harmonized** in `AppTheme`) |
-| Outline | `#C0C0C0` |
-| Outline variant | `#E8E8E8` |
+Light surfaces are **not** primary-harmonized: idle controls stay warm neutral
+gray so coral/teal accents do not tint search fields or filter chips.
+
+| Token / role | Hex (base) | Notes |
+|--------------|------------|--------|
+| Background / scaffold | `#FFFFFF` | `lightBackground` |
+| Surface | `#FFFFFF` | Cards on canvas |
+| Ink / onSurface | `#000000` | `lightInk` |
+| Body / mute / ash | `#33332E`, `#62625B`, `#91918C` | Secondary copy |
+| Container | `#F6F6F3` | `lightSurfaceContainer` |
+| High (idle chips, search fill) | `#E5E5E0` | `lightSurfaceContainerHighBase` → `surfaceContainerHigh` |
+| Highest / hairline | `#DADAD3` | Dividers, `outlineVariant` |
+| Outline (strong) | `#C0C0C0` | When hairline is too subtle |
+
+See [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md) and [`specs/017-catalog-theme-freeze/spec.md`](specs/017-catalog-theme-freeze/spec.md).
 
 ### Neutral surfaces (dark, standard)
 
@@ -119,6 +126,19 @@ Component styling is tokenized per family (atoms → organisms). Factories: `Til
 Includes (non-exhaustive): section titles, sheet handle, **card**, icon box, loading indicator, dividers, empty/error states, alphabet scrollbar, feedback strip, **glass panel**, icon action button, **chip**, **segmented control**, seek bar, search field, count progress ring, **player background**, footer bar, **media player bar**, **adaptive shell**, settings group, immersive composer, icon toggle, permission banner, prayer alert row, bottom sheet scaffold.
 
 **Rule:** Prefer **`context.theme.componentTokens.<family>`** (or equivalent project API) over one-off `BoxDecoration` values when building kit-aligned UI.
+
+### Catalog chrome (frozen pattern)
+
+List and catalog screens use **`TilawaCatalogAppBar`** (`packages/ui_kit/lib/src/molecules/tilawa_catalog_app_bar.dart`):
+
+- **Surface:** `TilawaAppBarSurface.parchment` (white light / dark `surface`).
+- **Title:** left-aligned, bold `titleLarge`.
+- **Heights:** `TilawaAppBarConfig.catalogTitleOnlyHeight`, `catalogTitleAndSearchHeight`, `catalogTitleSearchAndFilterRowHeight` — `preferredSize` must match laid-out content (device-pixel ceil).
+- **Search:** `TilawaSearchField` (default **catalog** variant); white `surface` fill and hairline border — not primary-tinted.
+- **Filters:** `TilawaSelectionPillStyle.catalog` — selected `onSurface` / unselected `surfaceContainerHigh`.
+- **Back on pushed routes:** `automaticallyImplyLeading: true` and `onBackPressed: () => context.pop()` with GoRouter; compact leading via `TilawaAppBarChrome.resolveCatalogRowLeading`.
+
+**Accent discipline:** user primary is for CTAs, active nav, favorites, switch ON — **not** catalog search/chip/app-bar backgrounds.
 
 ---
 
@@ -232,6 +252,9 @@ Short prompts that align outputs with this repo:
 | Bottom sheet shell | `packages/ui_kit/lib/src/foundation/tilawa_bottom_sheet_scaffold.dart` |
 | Primary presets | `apps/tilawa/lib/features/theme/domain/primary_color_preset.dart` |
 | Deeper color docs | `docs/design/colors.md` |
+| UI kit design system (freeze contract) | `packages/ui_kit/docs/design_system.md` |
+| Catalog app bar | `packages/ui_kit/lib/src/molecules/tilawa_catalog_app_bar.dart` |
+| Theme freeze spec | `specs/017-catalog-theme-freeze/spec.md` |
 | Support product spec | `specs/016-support-tilawa/spec.md` |
 | Support visual rules | `packages/ui_kit/docs/support_visual_system.md` |
 | Play product IDs | `docs/support_play_products.md` |
@@ -262,17 +285,21 @@ reference hex into feature code unless it becomes a deliberate token in
 
 ---
 
-## 15. Active design initiative (rolling)
+## 15. Theme & UI kit freeze (2026-05-23)
 
-**Status:** Support Tilawa product rules documented — [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md), DESIGN §9, [`support_visual_system.md`](packages/ui_kit/docs/support_visual_system.md).
+**Status:** **Frozen** for long-term stability — see [`specs/017-catalog-theme-freeze/spec.md`](specs/017-catalog-theme-freeze/spec.md) and [`packages/ui_kit/docs/design_system.md`](packages/ui_kit/docs/design_system.md).
 
 | Field | Detail |
 |-------|--------|
-| **Reference moodboard** | [`design-md/apple/DESIGN.md`](design-md/apple/DESIGN.md) — rhythm and restraint only. |
-| **Tilawa implementation** | Support UI in `apps/tilawa/lib/features/support/`; flag `TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED`. No worship-surface entry points. |
-| **Next candidates** | Play Console SKUs + deploy `verifySupportPurchase`; purge legacy Premium user strings. |
+| **Visual reference** | [`design-md/pinterest/DESIGN.md`](design-md/pinterest/DESIGN.md) — catalog calm + accent discipline only. |
+| **Default primary** | Coral `#E60023`; light neutrals white / `#E5E5E0` / black ink. |
+| **Catalog header** | `TilawaCatalogAppBar` + catalog search/pills on major list screens. |
+| **Allowed changes** | New kit components; critical bugs; documented feature palettes (Quran reader, share output). |
+| **Enforcement** | `app_theme_color_roles_test.dart`, `app_theme_spec_compliance_test.dart`, `test/goldens/`. |
 
-Replace or extend this section when the initiative completes or a new one starts.
+**Parallel initiative:** Support Tilawa — [`specs/016-support-tilawa/spec.md`](specs/016-support-tilawa/spec.md), DESIGN §9.
+
+Replace this section when the freeze lifts or a new global visual initiative starts.
 
 ---
 

@@ -158,20 +158,122 @@ void main() {
   );
 
   blocTest<AppReviewCubit, AppReviewState>(
-    'openStoreListing emits failure on error',
+    'rateFromSettings opens store listing',
+    build: () => AppReviewCubit(
+      _StubIsAvailable(const Right(true)),
+      _StubRequestReview(const Right(null)),
+      _StubOpenStore(const Right(null)),
+    ),
+    act: (AppReviewCubit cubit) => cubit.rateFromSettings(),
+    expect: () => <Matcher>[
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isOpeningStore,
+        'isOpeningStore',
+        true,
+      ),
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isOpeningStore,
+        'isOpeningStore',
+        false,
+      ),
+    ],
+  );
+
+  blocTest<AppReviewCubit, AppReviewState>(
+    'rateFromSettings emits failure when store listing fails',
     build: () => AppReviewCubit(
       _StubIsAvailable(const Right(true)),
       _StubRequestReview(const Right(null)),
       _StubOpenStore(const Left(AppReviewFailure.storeListingFailed())),
     ),
-    act: (AppReviewCubit cubit) => cubit.openStoreListing(),
+    act: (AppReviewCubit cubit) => cubit.rateFromSettings(),
     expect: () => <Matcher>[
-      isA<AppReviewState>(),
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isOpeningStore,
+        'isOpeningStore',
+        true,
+      ),
       isA<AppReviewState>().having(
         (AppReviewState s) => s.failure,
         'failure',
         isA<AppReviewFailure>(),
       ),
     ],
+  );
+
+  blocTest<AppReviewCubit, AppReviewState>(
+    'requestReview does not open store for requestFailed',
+    build: () => AppReviewCubit(
+      _StubIsAvailable(const Right(true)),
+      _StubRequestReview(const Left(AppReviewFailure.requestFailed())),
+      _StubOpenStore(const Right(null)),
+    ),
+    act: (AppReviewCubit cubit) => cubit.requestReview(),
+    expect: () => <Matcher>[
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isRequestingReview,
+        'isRequestingReview',
+        true,
+      ),
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.failure,
+        'failure',
+        isA<AppReviewFailure>(),
+      ),
+    ],
+    verify: (AppReviewCubit cubit) {
+      expect(cubit.state.isOpeningStore, isFalse);
+    },
+  );
+
+  blocTest<AppReviewCubit, AppReviewState>(
+    'checkAvailability clears previous failure',
+    build: () => AppReviewCubit(
+      _StubIsAvailable(const Right(true)),
+      _StubRequestReview(const Right(null)),
+      _StubOpenStore(const Right(null)),
+    ),
+    seed: () => const AppReviewState(
+      failure: AppReviewFailure.requestFailed(),
+    ),
+    act: (AppReviewCubit cubit) => cubit.checkAvailability(),
+    expect: () => <Matcher>[
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.failure,
+        'failure',
+        isNull,
+      ),
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isAvailable,
+        'isAvailable',
+        true,
+      ),
+    ],
+  );
+
+  blocTest<AppReviewCubit, AppReviewState>(
+    'openStoreListing clears busy flags on success',
+    build: () => AppReviewCubit(
+      _StubIsAvailable(const Right(true)),
+      _StubRequestReview(const Right(null)),
+      _StubOpenStore(const Right(null)),
+    ),
+    act: (AppReviewCubit cubit) => cubit.openStoreListing(),
+    expect: () => <Matcher>[
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isOpeningStore,
+        'isOpeningStore',
+        true,
+      ),
+      isA<AppReviewState>().having(
+        (AppReviewState s) => s.isOpeningStore,
+        'isOpeningStore',
+        false,
+      ),
+    ],
+    verify: (AppReviewCubit cubit) {
+      expect(cubit.state.isRequestingReview, isFalse);
+      expect(cubit.state.failure, isNull);
+    },
   );
 }

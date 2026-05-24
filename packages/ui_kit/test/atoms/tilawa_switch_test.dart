@@ -21,4 +21,41 @@ void main() {
     expect(size.width, kTilawaMinInteractiveDimension);
     expect(size.height, kTilawaMinInteractiveDimension);
   });
+
+  testWidgets('TilawaSwitch layoutSlotHeight keeps row slot compact', (
+    tester,
+  ) async {
+    const slotHeight = 20.0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(extensions: [TilawaDesignTokens.light()]),
+        home: Scaffold(
+          body: Center(
+            child: TilawaSwitch(
+              value: true,
+              onChanged: (_) {},
+              layoutSlotHeight: slotHeight,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final size = tester.getSize(find.byType(TilawaSwitch));
+    expect(size.width, kTilawaMinInteractiveDimension);
+    expect(size.height, slotHeight);
+
+    final hitTarget = tester.widget<SizedBox>(
+      find.descendant(
+        of: find.byType(OverflowBox),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is SizedBox &&
+              widget.height == kTilawaMinInteractiveDimension,
+        ),
+      ),
+    );
+    expect(hitTarget.height, kTilawaMinInteractiveDimension);
+  });
 }

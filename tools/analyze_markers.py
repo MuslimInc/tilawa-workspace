@@ -14,13 +14,17 @@ import cv2
 import numpy as np
 import json
 import math
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from quran_data_paths import QPC_V4_JSON, QURAN_PAGE_INDEX_JSON
 
 # ─── Paths ────────────────────────────────────────────────────────────────────
 SCREENSHOT  = Path("../../apks_as_zip/ayah_app_page1.png")
 LINE_IMAGES = Path("assets/quran_images/1")   # 1.png … 15.png  (1440×232 RGBA)
-PAGE_INDEX  = Path("assets/data/quran_page_index.json")
-QPC_JSON    = Path("assets/data/qpc-v4.json")
+PAGE_INDEX  = QURAN_PAGE_INDEX_JSON
+QPC_JSON    = QPC_V4_JSON
 OUT_JSON    = Path("ayah_markers_page1.json")
 OUT_DEBUG   = Path("output_debug.png")
 OUT_DEBUG_L = Path("output_debug_lines.png")

@@ -19,10 +19,12 @@ abstract final class AppColors {
   // Brand presets — user-selectable primary tones.
   // ---------------------------------------------------------------------------
 
-  /// Default primary / brand teal-cyan.
+  /// Default primary — Pinterest-inspired brand red (`#E60023`).
   ///
-  /// Matches Android `launch_background` in `apps/tilawa/android/.../colors.xml`
-  /// (`#1AADC5`) so the native splash frame and `defaultPrimary` align.
+  /// Matches Android `launch_background` in `apps/tilawa/android/.../colors.xml`.
+  static const Color primaryCoral = Color(0xFFE60023);
+
+  /// Legacy brand teal-cyan (still available in Settings).
   static const Color primaryTeal = Color(0xFF1AADC5);
 
   /// Teal/cyan compatibility alias retained for saved theme migration.
@@ -44,27 +46,60 @@ abstract final class AppColors {
   static const Color primaryPurple = Color(0xFF7A5C89);
 
   /// Default primary color used throughout the app.
-  static const Color defaultPrimary = primaryTeal;
+  static const Color defaultPrimary = primaryCoral;
 
   // ---------------------------------------------------------------------------
-  // Light neutral ramp — quiet, near-monochrome surfaces.
+  // Light neutral ramp — Pinterest catalog chrome (white / #E5E5E0 / black).
   // ---------------------------------------------------------------------------
 
+  /// Canvas / scaffold (`#FFFFFF`).
   static const Color lightBackground = Color(0xFFFFFFFF);
+
+  /// Cards and sheets on canvas (same as [lightBackground] in light mode).
   static const Color lightSurface = Color(0xFFFFFFFF);
 
-  /// Light elevated/contained surface (near-white neutral).
-  static const Color lightSurfaceContainer = Color(0xFFF4F4F4);
+  /// Primary ink (`#000000`).
+  static const Color lightInk = Color(0xFF000000);
 
-  /// Upper elevation tier (e.g. bottom nav chrome) before light-theme primary
-  /// harmonization in [AppTheme].
-  static const Color lightSurfaceContainerHighBase = Color(0xFFEFEFEF);
+  /// Body / secondary labels (`#33332e`).
+  static const Color lightBody = Color(0xFF33332E);
 
-  /// Top elevation tier before light-theme primary harmonization in [AppTheme].
-  static const Color lightSurfaceContainerHighestBase = Color(0xFFE8E8E8);
+  /// Muted labels (`#62625b`).
+  static const Color lightMute = Color(0xFF62625B);
 
-  /// Light outline/divider color. Calibrated for visibility on real-device
-  /// DPIs (~400 ppi); avoid going lighter than this.
+  /// Ash icons / hints (`#91918c`).
+  static const Color lightAsh = Color(0xFF91918C);
+
+  /// Light upper container / idle chip (Pinterest `secondary-bg` `#E5E5E0`).
+  ///
+  /// Mapped to [ColorScheme.surfaceContainerHigh] in [AppTheme] without
+  /// primary harmonization so unselected controls stay warm neutral gray.
+  static const Color lightSurfaceContainerHighBase = Color(0xFFE5E5E0);
+
+  /// Alias for catalog chips and docs (same as [lightSurfaceContainerHighBase]).
+  static const Color catalogFilterUnselectedLight =
+      lightSurfaceContainerHighBase;
+
+  /// Dark idle chip / upper container (warm neutral, no brand tint).
+  static const Color catalogFilterUnselectedDark = Color(0xFF3A3936);
+
+  /// Idle background for unselected filter chips and secondary controls.
+  static Color catalogFilterUnselectedBackground(Brightness brightness) {
+    return brightness == Brightness.dark
+        ? catalogFilterUnselectedDark
+        : catalogFilterUnselectedLight;
+  }
+
+  /// Light contained surface (Pinterest `surface-card` `#F6F6F3`).
+  static const Color lightSurfaceContainer = Color(0xFFF6F6F3);
+
+  /// Light top container tier (Pinterest `hairline` `#DADAD3`).
+  static const Color lightSurfaceContainerHighestBase = Color(0xFFDADAD3);
+
+  /// Hairline dividers (`#dadad3`).
+  static const Color lightHairline = Color(0xFFDADAD3);
+
+  /// Strong outline when hairline is too subtle (~400 ppi calibrated).
   static const Color lightOutline = Color(0xFFC0C0C0);
 
   // ---------------------------------------------------------------------------
@@ -75,9 +110,8 @@ abstract final class AppColors {
   static const Color darkSurface = Color(0xFF16201D);
   static const Color darkSurfaceContainer = Color(0xFF1C2925);
 
-  /// Dark upper container tier **base** before optional primary harmonization
-  /// in [AppTheme].
-  static const Color darkSurfaceContainerHighBase = Color(0xFF2A3A35);
+  /// Dark upper container tier (neutral; no primary harmonization in [AppTheme]).
+  static const Color darkSurfaceContainerHighBase = catalogFilterUnselectedDark;
 
   /// Dark top container tier **base** before optional primary harmonization
   /// in [AppTheme].
@@ -99,11 +133,12 @@ abstract final class AppColors {
   /// selected primary instead; unused at runtime.
   static const Color lightDefaultPrimaryContainer = Color(0xFFD8F0EC);
 
-  static const Color lightSecondaryContainer = Color(0xFFE4EBD5);
-  static const Color lightTertiaryContainer = Color(0xFFF0F4F3);
-  static const Color lightSurfaceContainerMid = Color(0xFFF6F6F6);
-  static const Color lightOutlineVariant = Color(0xFFE8E8E8);
-  static const Color lightShadow = Color(0xFF1F2926);
+  /// Neutral Flex secondary/tertiary containers (no brand green tint).
+  static const Color lightSecondaryContainer = lightSurfaceContainerHighBase;
+  static const Color lightTertiaryContainer = lightSurfaceContainer;
+  static const Color lightSurfaceContainerMid = lightSurfaceContainer;
+  static const Color lightOutlineVariant = lightHairline;
+  static const Color lightShadow = lightInk;
 
   // ---------------------------------------------------------------------------
   // AppTheme — dark Flex scheme refinement.

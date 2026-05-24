@@ -79,7 +79,10 @@ class _QiblaScreenState extends State<QiblaScreen> {
           },
           child: Scaffold(
             backgroundColor: colorScheme.surface,
-            appBar: TilawaAppBar(title: context.l10n.qiblaDirection),
+            appBar: TilawaCatalogAppBar.titleOnly(
+              context,
+              title: context.l10n.qiblaDirection,
+            ),
             body: SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {

@@ -56,6 +56,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get a11yFavoriteRecitersOnlyFilter => 'Show favorite reciters only';
 
   @override
+  String get recitersShowAllReciters => 'Show all reciters';
+
+  @override
   String get a11yRecitersLetterIndex => 'Letter index';
 
   @override
@@ -73,6 +76,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recitersLetterIndexMenuItem => 'Letter index';
+
+  @override
+  String recitersResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count reciters',
+      one: '1 reciter',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recitersFilterChipFavorites => 'Favorites';
+
+  @override
+  String recitersFilterPillFavoritesCount(int count) {
+    return 'Favorites ($count)';
+  }
+
+  @override
+  String get recitersFilterPillAlphabet => 'A–Z';
+
+  @override
+  String recitersFilterChipLetter(String letter) {
+    return 'Starts with $letter';
+  }
+
+  @override
+  String recitersFilterChipSearch(String query) {
+    return '“$query”';
+  }
 
   @override
   String get a11yClearRecitersSearch => 'Clear search text';
@@ -222,6 +257,33 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get settingsYourAccount => 'Your account';
+
+  @override
+  String get settingsViewProfile => 'View profile';
+
+  @override
+  String get settingsLoginSection => 'Login';
+
+  @override
+  String get settingsSupportSection => 'Support';
+
+  @override
+  String get bottomNavReciters => 'Reciters';
+
+  @override
+  String get bottomNavPrayer => 'Prayer';
+
+  @override
+  String get bottomNavQuran => 'Quran';
+
+  @override
+  String get bottomNavAthkar => 'Athkar';
+
+  @override
+  String get bottomNavSettings => 'Settings';
 
   @override
   String get audioSettings => 'Audio';
@@ -567,6 +629,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get choosePrimaryColor => 'Choose Primary Color';
+
+  @override
+  String get colorCoral => 'Coral';
 
   @override
   String get colorCyan => 'Cyan';
@@ -1939,6 +2004,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportTilawa => 'Support Tilawa';
+
+  @override
+  String get rateTilawa => 'Rate Tilawa';
+
+  @override
+  String get rateTilawaSubtitle => 'Share your feedback on the app store.';
 
   @override
   String get supportIntroLine => 'Your contribution helps keep Tilawa going.';

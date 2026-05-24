@@ -41,10 +41,7 @@ class _PlaylistSearchBarState extends State<PlaylistSearchBar> {
         _controller.clear();
         widget.onClearSearch();
       },
-      margin: const EdgeInsets.all(16),
-      borderRadius: BorderRadius.circular(
-        Theme.of(context).tokens.radiusMedium,
-      ),
+      showShadow: false,
     );
   }
 }

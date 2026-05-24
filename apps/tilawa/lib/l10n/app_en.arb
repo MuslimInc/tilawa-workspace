@@ -66,6 +66,10 @@
     "@a11yFavoriteRecitersOnlyFilter": {
         "description": "Accessibility name for the favorites-only filter toggle"
     },
+    "recitersShowAllReciters": "Show all reciters",
+    "@recitersShowAllReciters": {
+        "description": "Tooltip when the favorites-only filter is active"
+    },
     "a11yRecitersLetterIndex": "Letter index",
     "@a11yRecitersLetterIndex": {
         "description": "Accessibility label for the Arabic letter scrollbar"
@@ -89,6 +93,50 @@
     "recitersLetterIndexMenuItem": "Letter index",
     "@recitersLetterIndexMenuItem": {
         "description": "Overflow menu item to show or hide the A–Z letter index"
+    },
+    "recitersResultCount": "{count, plural, =1{1 reciter} other{{count} reciters}}",
+    "@recitersResultCount": {
+        "description": "Summary line above the reciters list",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "recitersFilterChipFavorites": "Favorites",
+    "@recitersFilterChipFavorites": {
+        "description": "Active filter chip when showing favorite reciters only"
+    },
+    "recitersFilterPillFavoritesCount": "Favorites ({count})",
+    "@recitersFilterPillFavoritesCount": {
+        "description": "Favorites filter pill with saved count",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "recitersFilterPillAlphabet": "A–Z",
+    "@recitersFilterPillAlphabet": {
+        "description": "Toggle pill for the reciters letter index rail"
+    },
+    "recitersFilterChipLetter": "Starts with {letter}",
+    "@recitersFilterChipLetter": {
+        "description": "Active filter chip for the selected alphabet letter",
+        "placeholders": {
+            "letter": {
+                "type": "String"
+            }
+        }
+    },
+    "recitersFilterChipSearch": "“{query}”",
+    "@recitersFilterChipSearch": {
+        "description": "Active filter chip showing the current search query",
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
     },
     "a11yClearRecitersSearch": "Clear search text",
     "@a11yClearRecitersSearch": {
@@ -285,6 +333,42 @@
     "settings": "Settings",
     "@settings": {
         "description": "Settings section title"
+    },
+    "settingsYourAccount": "Your account",
+    "@settingsYourAccount": {
+        "description": "Pinterest-style settings screen title"
+    },
+    "settingsViewProfile": "View profile",
+    "@settingsViewProfile": {
+        "description": "Profile row subtitle on settings (catalog style)"
+    },
+    "settingsLoginSection": "Login",
+    "@settingsLoginSection": {
+        "description": "Login section header on settings screen"
+    },
+    "settingsSupportSection": "Support",
+    "@settingsSupportSection": {
+        "description": "Support section header on settings screen"
+    },
+    "bottomNavReciters": "Reciters",
+    "@bottomNavReciters": {
+        "description": "Single-word label for the reciters tab in the phone bottom navigation bar"
+    },
+    "bottomNavPrayer": "Prayer",
+    "@bottomNavPrayer": {
+        "description": "Single-word label for the prayer times tab in the phone bottom navigation bar"
+    },
+    "bottomNavQuran": "Quran",
+    "@bottomNavQuran": {
+        "description": "Single-word label for the Quran tab in the phone bottom navigation bar"
+    },
+    "bottomNavAthkar": "Athkar",
+    "@bottomNavAthkar": {
+        "description": "Single-word label for the athkar tab in the phone bottom navigation bar"
+    },
+    "bottomNavSettings": "Settings",
+    "@bottomNavSettings": {
+        "description": "Single-word label for the settings tab in the phone bottom navigation bar"
     },
     "audioSettings": "Audio",
     "@audioSettings": {
@@ -783,6 +867,10 @@
     "choosePrimaryColor": "Choose Primary Color",
     "@choosePrimaryColor": {
         "description": "Choose primary color dialog title"
+    },
+    "colorCoral": "Coral",
+    "@colorCoral": {
+        "description": "Primary color preset — Pinterest-inspired brand red"
     },
     "colorCyan": "Cyan",
     "@colorCyan": {
@@ -2604,6 +2692,14 @@
     "supportTilawa": "Support Tilawa",
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
+    },
+    "rateTilawa": "Rate Tilawa",
+    "@rateTilawa": {
+        "description": "Settings row to open the in-app review dialog"
+    },
+    "rateTilawaSubtitle": "Share your feedback on the app store.",
+    "@rateTilawaSubtitle": {
+        "description": "Optional subtitle under the rate Tilawa settings row"
     },
     "supportIntroLine": "Your contribution helps keep Tilawa going.",
     "@supportIntroLine": {

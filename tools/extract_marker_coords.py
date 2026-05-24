@@ -37,13 +37,21 @@ import cv2
 import numpy as np
 import json
 import os
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from quran_data_paths import (
+    QPC_V4_JSON,
+    QURAN_IMAGE_DATA_DIR,
+    QURAN_PAGE_INDEX_JSON,
+)
+
 # ─── Configuration ────────────────────────────────────────────────────────────
-IMG_ROOT   = Path("assets/quran_images")
-PAGE_INDEX = Path("assets/data/quran_page_index.json")
-QPC_JSON   = Path("assets/data/qpc-v4.json")
-OUT_FILE   = Path("assets/data/verse_marker_coordinates.json")
+IMG_ROOT   = QURAN_IMAGE_DATA_DIR.parent / "quran_images"
+PAGE_INDEX = QURAN_PAGE_INDEX_JSON
+QPC_JSON   = QPC_V4_JSON
+OUT_FILE   = QURAN_IMAGE_DATA_DIR / "verse_marker_coordinates.json"
 
 LINE_IMG_W  = 1440
 LINE_COUNT  = 15

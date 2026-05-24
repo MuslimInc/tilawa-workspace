@@ -1,8 +1,14 @@
-# Golden PNG review checklist (`refactor/ui` / accessibility audit)
+# Golden PNG review checklist
 
 Human reviewers should open the updated images under
 `test/goldens/goldens/macos/` (or your CI variant folder) and confirm the
 deltas below are **intentional**—not accidental layout regressions.
+
+## Foundation (catalog theme freeze — 2026-05-23)
+
+- **Light neutral ramp** — four swatches: white surface, `#E5E5E0` container high, hairline, black ink labels.
+- **TilawaCatalogAppBar** — title-only and title+search on white parchment; dark title-only uses dark surface (not coral wash).
+- **`TilawaPreviewWrapper`** now uses **`AppColors.defaultPrimary` (coral)** — many atom/molecule goldens may shift accent tints from legacy teal; confirm only accent controls changed, not neutral chrome.
 
 ## Atoms
 
@@ -25,10 +31,10 @@ deltas below are **intentional**—not accidental layout regressions.
 - **TilawaStatusChip** — chip metrics unchanged unless token-driven.
 - **TilawaChip** / **compact** — semantics merge removed; tap target and label should still read clearly.
 - **TilawaMetadataChip** — same chip family; deprecated typedef name only in code, visuals unchanged.
-- **TilawaSelectionPill** / **compact** — pill selection visuals; deprecated typedef in code only.
+- **TilawaSelectionPill** / **compact** — pill selection visuals; **Catalog selected/unselected** scenarios use black/gray Pinterest chips (not primaryContainer).
 - **TilawaCountProgressRing** — ring and caption spacing.
 - **TilawaIconActionButton** — ≥48dp target and explicit a11y labeling path.
-- **TilawaSearchField** / **compact** — scroll inset / padding from `scrollPadding` token.
+- **TilawaSearchField** / **compact** — scroll inset / padding from `scrollPadding` token; **Catalog variant** scenario shows neutral `#E5E5E0` fill (not coral/teal tint).
 - **TilawaSettingsTile** / **compact** — list row height / dividers on 8dp grid; **rows may be taller (48dp item extent)** where tokens apply.
 - **TilawaFeedbackStrip** / **compact** — optional **variant border** (info/warning/error tint); message has **live region** semantics (no visual text change expected).
 - **TilawaPermissionBanner** / **compact** — **trailing CTA** has standard Material tap padding (≥48dp hit height).

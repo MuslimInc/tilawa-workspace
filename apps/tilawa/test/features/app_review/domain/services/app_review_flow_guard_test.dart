@@ -44,6 +44,23 @@ void main() {
     expect(guard.isSacredFlowActive, isFalse);
   });
 
+  test('syncMainShellTab clears tab flows for settings tab', () {
+    guard
+      ..syncMainShellTab(1)
+      ..syncMainShellTab(3);
+    expect(guard.isSacredFlowActive, isFalse);
+  });
+
+  test('nested enter requires matching exits before flow clears', () {
+    guard
+      ..enter(AppReviewBlockedFlow.quranReading)
+      ..enter(AppReviewBlockedFlow.quranReading);
+    guard.exit(AppReviewBlockedFlow.quranReading);
+    expect(guard.isSacredFlowActive, isTrue);
+    guard.exit(AppReviewBlockedFlow.quranReading);
+    expect(guard.isSacredFlowActive, isFalse);
+  });
+
   test(
     'nested scope exit does not unblock while tab sacred flow is active',
     () {

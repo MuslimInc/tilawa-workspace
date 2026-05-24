@@ -46,7 +46,7 @@ sequenceDiagram
 | [`app_bootstrapper_phases.dart`](../apps/tilawa/lib/core/bootstrap/app_bootstrapper_phases.dart) | `runApp` + post-frame `runCriticalInit` |
 | [`app_startup_widgets.dart`](../apps/tilawa/lib/core/bootstrap/app_startup_widgets.dart) | `_BootGate` / `_LaunchSplash` |
 | [`app_startup_tasks.dart`](../apps/tilawa/lib/core/bootstrap/app_startup_tasks.dart) | Critical vs `nonCriticalStartupDelay` (3.2s) background |
-| [`splash_cubit.dart`](../apps/tilawa/lib/features/splash/presentation/cubit/splash_cubit.dart) | Route only; does not wait for background init |
+| [`splash_bloc.dart`](../apps/tilawa/lib/features/splash/presentation/bloc/splash_bloc.dart) | Route + shell prep via [AppStartupReadiness](../apps/tilawa/lib/core/bootstrap/app_startup_readiness.dart) |
 | [`main_screen_cubit.dart`](../apps/tilawa/lib/screens/cubit/main_screen_cubit.dart) | Deferred shell/tab/audio timers after home visible |
 
 **Gap:** User leaves splash while **MainScreen** is still staging work (up to ~5.2s UI warmup). That feels unlike a “ready” retail app.
@@ -131,7 +131,7 @@ Already parallel: Firebase + Hydrated, notification + SystemChrome.
 ### Phase 1 — Readiness gate (MVP) `P0`
 
 1. Add `AppStartupReadiness` + unit tests (fake slow deps).
-2. `SplashCubit.init` awaits `ready` before `emit` navigation.
+2. `SplashBloc` + `SplashStarted` awaits `AppStartupReadiness` before navigate.
 3. Move shell activation + initial tab mount prep into readiness (extract from `MainScreenCubit`).
 4. Add 10s timeout + analytics event `startup_ready_timeout`.
 5. Profile cold start on mid-range Android (`flutter run --profile`).

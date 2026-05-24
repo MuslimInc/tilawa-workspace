@@ -418,12 +418,13 @@ class TilawaChipTokens {
   }
 
   static Color _backgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.18 : 0.30;
-    return Color.lerp(
-      colorScheme.surface,
-      colorScheme.surfaceContainer,
-      blendAmount,
-    )!;
+    return colorScheme.brightness == Brightness.dark
+        ? Color.lerp(
+            colorScheme.surface,
+            colorScheme.surfaceContainer,
+            0.18,
+          )!
+        : colorScheme.surface;
   }
 
   static Color _defaultBorderColor(ColorScheme colorScheme) {
@@ -440,12 +441,7 @@ class TilawaChipTokens {
   }
 
   static Color _selectionUnselectedBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.22 : 0.38;
-    return Color.lerp(
-      colorScheme.surface,
-      colorScheme.surfaceContainer,
-      blendAmount,
-    )!;
+    return colorScheme.surfaceContainerHigh;
   }
 
   TilawaChipTokens copyWith({
@@ -641,9 +637,14 @@ class TilawaSegmentedControlTokens {
   }
 
   static Color _selectedBackgroundColor(ColorScheme colorScheme) {
-    final a = colorScheme.brightness == Brightness.dark ? 0.16 : 0.12;
+    if (colorScheme.brightness == Brightness.light) {
+      return Color.alphaBlend(
+        colorScheme.onSurface.withValues(alpha: 0.08),
+        colorScheme.surfaceContainerHigh,
+      );
+    }
     return Color.alphaBlend(
-      colorScheme.primary.withValues(alpha: a),
+      colorScheme.primary.withValues(alpha: 0.16),
       colorScheme.surfaceContainerHighest,
     );
   }
@@ -890,27 +891,27 @@ class TilawaSearchFieldTokens {
   }
 
   factory TilawaSearchFieldTokens.fromColorScheme(ColorScheme colorScheme) {
-    final backgroundColor = _backgroundColor(colorScheme);
+    final backgroundColor = colorScheme.surface;
     const focusedBorderOpacity = 0.28;
     const unfocusedBorderOpacity = 0.26;
     const shadowOpacity = 0.04;
     // Slightly higher floor for hint vs surface (readability / WCAG-ish headroom).
     const hintOpacity = 0.62;
     const iconOpacity = 0.72;
-    final focusedBorderColor = colorScheme.primary.withValues(
+    final focusedBorderColor = colorScheme.onSurface.withValues(
       alpha: focusedBorderOpacity,
     );
     final unfocusedBorderColor = colorScheme.outlineVariant.withValues(
       alpha: unfocusedBorderOpacity,
     );
-    final boxShadowColor = colorScheme.primary.withValues(alpha: shadowOpacity);
+    final boxShadowColor = colorScheme.shadow.withValues(alpha: shadowOpacity);
     final hintTextColor = colorScheme.onSurfaceVariant.withValues(
       alpha: hintOpacity,
     );
     final prefixIconMutedColor = colorScheme.onSurfaceVariant.withValues(
       alpha: iconOpacity,
     );
-    final prefixIconFocusedColor = colorScheme.primary;
+    final prefixIconFocusedColor = colorScheme.onSurfaceVariant;
     return TilawaSearchFieldTokens(
       height: kTilawaMinInteractiveDimension,
       backgroundColor: backgroundColor,
@@ -936,14 +937,6 @@ class TilawaSearchFieldTokens {
     );
   }
 
-  static Color _backgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.24 : 0.42;
-    return Color.lerp(
-      colorScheme.surface,
-      colorScheme.surfaceContainer,
-      blendAmount,
-    )!;
-  }
 
   TilawaSearchFieldTokens copyWith({
     double? height,

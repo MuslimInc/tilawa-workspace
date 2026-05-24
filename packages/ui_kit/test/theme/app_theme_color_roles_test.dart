@@ -8,7 +8,7 @@ void main() {
   group('AppTheme color roles', () {
     const customAndroidGreen = Color(0xFF87CC23);
     const paletteCases = <String, Color>{
-      'default teal': AppColors.defaultPrimary,
+      'default coral': AppColors.defaultPrimary,
       'custom android green': customAndroidGreen,
       'muted gold': AppColors.primaryGold,
       'purple': AppColors.primaryPurple,
@@ -21,6 +21,7 @@ void main() {
     };
 
     const presetNoOpCases = <String, Color>{
+      'coral': AppColors.primaryCoral,
       'teal': AppColors.primaryTeal,
       'sage': AppColors.primarySage,
       'gold': AppColors.primaryGold,
@@ -53,8 +54,51 @@ void main() {
       }
     });
 
-    test('light-mode clamp is a no-op for every PrimaryColorPreset value', () {
+    test(
+      'light surfaceContainerHigh is Pinterest neutral for every preset',
+      () {
+        for (final entry in presetNoOpCases.entries) {
+          final theme = AppTheme.getLightTheme(
+            primaryColor: entry.value,
+            useGoogleFontsOverride: false,
+          );
+
+          expect(
+            theme.colorScheme.surfaceContainerHigh,
+            AppColors.catalogFilterUnselectedLight,
+            reason:
+                '${entry.key} preset must not tint idle control surfaces '
+                'toward primary',
+          );
+        }
+      },
+    );
+
+    test('light scaffold and surfaces use Pinterest neutrals not primary', () {
+      final theme = AppTheme.getLightTheme(
+        primaryColor: AppColors.primaryCoral,
+        useGoogleFontsOverride: false,
+      );
+      final scheme = theme.colorScheme;
+
+      expect(theme.scaffoldBackgroundColor, AppColors.lightBackground);
+      expect(scheme.surface, AppColors.lightBackground);
+      expect(scheme.surface, AppColors.lightSurface);
+      expect(scheme.onSurface, AppColors.lightInk);
+      expect(scheme.surfaceContainerHigh, AppColors.catalogFilterUnselectedLight);
+      expect(scheme.surfaceTint, Colors.transparent);
+      expect(scheme.primary, isNot(equals(theme.scaffoldBackgroundColor)));
+      expect(
+        scheme.secondary,
+        AppColors.catalogFilterUnselectedLight,
+      );
+    });
+
+    test('light-mode clamp is a no-op for presets except saturated coral', () {
       for (final entry in presetNoOpCases.entries) {
+        if (entry.key == 'coral') {
+          continue;
+        }
         final theme = AppTheme.getLightTheme(
           primaryColor: entry.value,
           useGoogleFontsOverride: false,
@@ -122,7 +166,7 @@ void main() {
       expect(theme.cardColor, colorScheme.surface);
       expect(
         theme.appBarTheme.backgroundColor,
-        theme.colorScheme.surfaceContainerHigh,
+        theme.colorScheme.surface,
       );
       expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
       expect(theme.dialogTheme.backgroundColor, colorScheme.surface);

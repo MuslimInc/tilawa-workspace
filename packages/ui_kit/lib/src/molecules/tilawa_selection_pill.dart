@@ -4,6 +4,15 @@ import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 import 'tilawa_chip.dart';
 
+/// Visual treatment for [TilawaSelectionPill].
+enum TilawaSelectionPillStyle {
+  /// Theme primary-tinted selection (default).
+  standard,
+
+  /// Dark selected / light gray idle (Pinterest catalog filters).
+  catalog,
+}
+
 /// Pill-shaped filter control built on [TilawaChip].
 class TilawaSelectionPill extends StatelessWidget {
   const TilawaSelectionPill({
@@ -12,33 +21,51 @@ class TilawaSelectionPill extends StatelessWidget {
     required this.selected,
     this.icon,
     this.onTap,
+    this.style = TilawaSelectionPillStyle.standard,
     this.selectedColor,
     this.unselectedColor,
     this.selectedForegroundColor,
     this.unselectedForegroundColor,
+    this.elevatedWhenSelected = true,
   });
 
   final String label;
   final bool selected;
   final IconData? icon;
   final VoidCallback? onTap;
+  final TilawaSelectionPillStyle style;
   final Color? selectedColor;
   final Color? unselectedColor;
   final Color? selectedForegroundColor;
   final Color? unselectedForegroundColor;
+
+  /// When false, selected pills stay flat (Pinterest-style catalog filters).
+  final bool elevatedWhenSelected;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final designTokens = theme.tokens;
     final componentTokens = theme.componentTokens.chip;
-    final background = selected
-        ? (selectedColor ?? componentTokens.selectionSelectedBackgroundColor)
+    final colorScheme = theme.colorScheme;
+    final bool isCatalog = style == TilawaSelectionPillStyle.catalog;
+
+    final Color background = selected
+        ? (selectedColor ??
+              (isCatalog
+                  ? colorScheme.onSurface
+                  : componentTokens.selectionSelectedBackgroundColor))
         : (unselectedColor ??
-              componentTokens.selectionUnselectedBackgroundColor);
-    final foreground = selected
-        ? (selectedForegroundColor ?? theme.colorScheme.onPrimaryContainer)
-        : (unselectedForegroundColor ?? theme.colorScheme.onSurface);
+              (isCatalog
+                  ? colorScheme.surfaceContainerHigh
+                  : componentTokens.selectionUnselectedBackgroundColor));
+    final Color foreground = selected
+        ? (selectedForegroundColor ??
+              (isCatalog ? colorScheme.surface : colorScheme.onPrimaryContainer))
+        : (unselectedForegroundColor ??
+              (isCatalog
+                  ? colorScheme.onSurface
+                  : colorScheme.onSurface));
 
     return TilawaChip(
       label: label,
@@ -49,12 +76,14 @@ class TilawaSelectionPill extends StatelessWidget {
       foregroundColor: foreground,
       borderColor: selected
           ? background
-          : theme.colorScheme.outline.withValues(
-              alpha: designTokens.opacitySubtle,
-            ),
+          : (isCatalog
+                ? Colors.transparent
+                : theme.colorScheme.outline.withValues(
+                    alpha: designTokens.opacitySubtle,
+                  )),
       borderRadius: componentTokens.pillRadius,
       padding: componentTokens.padding,
-      showShadow: selected,
+      showShadow: selected && elevatedWhenSelected && !isCatalog,
       shadowColor: background,
       textStyle: theme.textTheme.labelLarge?.copyWith(
         color: foreground,

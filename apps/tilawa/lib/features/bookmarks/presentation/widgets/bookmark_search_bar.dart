@@ -9,12 +9,10 @@ class BookmarkSearchBar extends StatefulWidget {
     super.key,
     required this.onSearchChanged,
     required this.onClearSearch,
-    this.margin,
   });
 
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
-  final EdgeInsetsGeometry? margin;
 
   @override
   State<BookmarkSearchBar> createState() => _BookmarkSearchBarState();
@@ -44,10 +42,7 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
         _controller.clear();
         widget.onClearSearch();
       },
-      margin: widget.margin,
-      borderRadius: BorderRadius.circular(
-        Theme.of(context).tokens.radiusMedium,
-      ),
+      showShadow: false,
     );
   }
 }

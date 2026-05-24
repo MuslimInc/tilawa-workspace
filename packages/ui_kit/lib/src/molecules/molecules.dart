@@ -1,5 +1,6 @@
 export 'tilawa_app_bar_config.dart';
 export 'tilawa_app_bar.dart';
+export 'tilawa_catalog_app_bar.dart';
 export 'tilawa_alphabet_scrollbar.dart';
 export 'tilawa_language_switcher.dart';
 export 'tilawa_metadata_chip.dart';
@@ -12,7 +13,9 @@ export 'tilawa_glass_panel.dart';
 export 'tilawa_icon_action_button.dart';
 export 'tilawa_permission_banner.dart';
 export 'tilawa_prayer_alert_row.dart';
+export 'tilawa_quick_filter_bar.dart';
 export 'tilawa_search_field.dart';
+export 'tilawa_catalog_settings.dart';
 export 'tilawa_section_header.dart';
 export 'tilawa_segmented_control.dart';
 export 'tilawa_selection_tile.dart';

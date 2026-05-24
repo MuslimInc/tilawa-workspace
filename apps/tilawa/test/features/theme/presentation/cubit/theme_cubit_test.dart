@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:tilawa/features/theme/domain/app_theme_mode.dart';
 import 'package:tilawa/features/theme/domain/entities/app_theme_preset.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
@@ -18,7 +19,8 @@ void main() {
     await clearHydratedStorageForTest();
   });
 
-  setUp(() {
+  setUp(() async {
+    await HydratedBloc.storage.clear();
     cubit = ThemeCubit();
   });
 

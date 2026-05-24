@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Show favorite reciters only'**
   String get a11yFavoriteRecitersOnlyFilter;
 
+  /// Tooltip when the favorites-only filter is active
+  ///
+  /// In en, this message translates to:
+  /// **'Show all reciters'**
+  String get recitersShowAllReciters;
+
   /// Accessibility label for the Arabic letter scrollbar
   ///
   /// In en, this message translates to:
@@ -223,6 +229,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Letter index'**
   String get recitersLetterIndexMenuItem;
+
+  /// Summary line above the reciters list
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reciter} other{{count} reciters}}'**
+  String recitersResultCount(int count);
+
+  /// Active filter chip when showing favorite reciters only
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get recitersFilterChipFavorites;
+
+  /// Favorites filter pill with saved count
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites ({count})'**
+  String recitersFilterPillFavoritesCount(int count);
+
+  /// Toggle pill for the reciters letter index rail
+  ///
+  /// In en, this message translates to:
+  /// **'A–Z'**
+  String get recitersFilterPillAlphabet;
+
+  /// Active filter chip for the selected alphabet letter
+  ///
+  /// In en, this message translates to:
+  /// **'Starts with {letter}'**
+  String recitersFilterChipLetter(String letter);
+
+  /// Active filter chip showing the current search query
+  ///
+  /// In en, this message translates to:
+  /// **'“{query}”'**
+  String recitersFilterChipSearch(String query);
 
   /// Tooltip for clearing the reciters search field
   ///
@@ -517,6 +559,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// Pinterest-style settings screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Your account'**
+  String get settingsYourAccount;
+
+  /// Profile row subtitle on settings (catalog style)
+  ///
+  /// In en, this message translates to:
+  /// **'View profile'**
+  String get settingsViewProfile;
+
+  /// Login section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get settingsLoginSection;
+
+  /// Support section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get settingsSupportSection;
+
+  /// Single-word label for the reciters tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Reciters'**
+  String get bottomNavReciters;
+
+  /// Single-word label for the prayer times tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Prayer'**
+  String get bottomNavPrayer;
+
+  /// Single-word label for the Quran tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Quran'**
+  String get bottomNavQuran;
+
+  /// Single-word label for the athkar tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Athkar'**
+  String get bottomNavAthkar;
+
+  /// Single-word label for the settings tab in the phone bottom navigation bar
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get bottomNavSettings;
 
   /// Audio settings section title
   ///
@@ -1141,6 +1237,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose Primary Color'**
   String get choosePrimaryColor;
+
+  /// Primary color preset — Pinterest-inspired brand red
+  ///
+  /// In en, this message translates to:
+  /// **'Coral'**
+  String get colorCoral;
 
   /// Cyan color name
   ///
@@ -3565,6 +3667,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Support Tilawa'**
   String get supportTilawa;
+
+  /// Settings row to open the in-app review dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Rate Tilawa'**
+  String get rateTilawa;
+
+  /// Optional subtitle under the rate Tilawa settings row
+  ///
+  /// In en, this message translates to:
+  /// **'Share your feedback on the app store.'**
+  String get rateTilawaSubtitle;
 
   /// Support screen single-line intro under app bar
   ///

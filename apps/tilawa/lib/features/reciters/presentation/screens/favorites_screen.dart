@@ -34,7 +34,10 @@ class FavoritesScreen extends StatelessWidget {
         child: Stack(
           children: [
             Scaffold(
-              appBar: TilawaAppBar(title: context.l10n.favorites),
+              appBar: TilawaCatalogAppBar.titleOnly(
+                context,
+                title: context.l10n.favorites,
+              ),
               body: BlocBuilder<FavoritesCubit, FavoritesState>(
                 builder: (context, state) {
                   if (state is FavoritesLoading) {
@@ -85,7 +88,10 @@ class FavoritesScreen extends StatelessWidget {
                               reciter,
                             );
                           },
-                          child: ReciterCard(reciter: reciter),
+                          child: ReciterCard(
+                            reciter: reciter,
+                            favoritesOnlyContext: true,
+                          ),
                         );
                       },
                     );

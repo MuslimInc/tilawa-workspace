@@ -55,6 +55,11 @@ void main() {
       expect(TilawaAppBarConfig.showBottomHairline, isTrue);
       expect(TilawaAppBarConfig.elevation, 1);
     });
+
+    test('catalog screens default to parchment and left title', () {
+      expect(TilawaAppBarConfig.surface, TilawaAppBarSurface.parchment);
+      expect(TilawaAppBarConfig.centerTitle, isFalse);
+    });
   });
 
   group('TilawaAppBarChrome elevation shadow', () {
@@ -97,6 +102,49 @@ void main() {
       );
       expect(TilawaAppBarChrome.elevation(enabled: false), 0);
       expect(TilawaAppBarChrome.scrolledUnderElevation(enabled: false), 0);
+    });
+  });
+
+  group('TilawaAppBarChrome.resolveCatalogRowLeading', () {
+    testWidgets('returns back control on a pushed route', (
+      WidgetTester tester,
+    ) async {
+      late BuildContext pushedContext;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: _lightTheme(),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) {
+                          pushedContext = context;
+                          return const Scaffold(body: Text('child'));
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('push'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+
+      final Widget? leading = TilawaAppBarChrome.resolveCatalogRowLeading(
+        pushedContext,
+        automaticallyImplyLeading: true,
+      );
+
+      expect(leading, isNotNull);
     });
   });
 

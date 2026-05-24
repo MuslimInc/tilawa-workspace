@@ -7,6 +7,7 @@ import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../reciter_semantics_ids.dart';
+import 'reciter_catalog_chrome.dart';
 
 class SurahGridItem extends StatelessWidget {
   const SurahGridItem({
@@ -78,17 +79,13 @@ class SurahGridItem extends StatelessWidget {
             // (primaryContainer fill) and a thicker hairline border.
             decoration: BoxDecoration(
               color: isCurrentItem
-                  ? colorScheme.primaryContainer.withValues(alpha: 0.42)
-                  : colorScheme.surfaceContainerLow,
+                  ? ReciterCatalogChrome.activeRowFill(colorScheme)
+                  : ReciterCatalogChrome.cardFill(colorScheme),
               borderRadius: borderRadius,
               border: Border.all(
                 color: isCurrentItem
-                    ? colorScheme.primary.withValues(
-                        alpha: tokens.opacityMedium,
-                      )
-                    : colorScheme.outlineVariant.withValues(
-                        alpha: tokens.opacityMedium,
-                      ),
+                    ? ReciterCatalogChrome.activeFill(colorScheme)
+                    : ReciterCatalogChrome.hairline(colorScheme, tokens),
                 width: isCurrentItem
                     ? tokens.borderWidthThin * 3
                     : tokens.borderWidthThin * 2,
@@ -128,7 +125,13 @@ class SurahGridItem extends StatelessWidget {
                               vertical: tokens.spaceExtraSmall,
                             ),
                             decoration: BoxDecoration(
-                              color: colorScheme.primaryContainer,
+                              color: isCurrentItem
+                                  ? ReciterCatalogChrome.activeFill(
+                                      colorScheme,
+                                    )
+                                  : ReciterCatalogChrome.idleFill(
+                                      colorScheme,
+                                    ),
                               borderRadius: BorderRadius.circular(
                                 tokens.radiusMedium,
                               ),
@@ -138,7 +141,11 @@ class SurahGridItem extends StatelessWidget {
                                   ? surah.formattedId
                                   : '${index + 1}',
                               style: theme.textTheme.labelMedium?.copyWith(
-                                color: colorScheme.onPrimaryContainer,
+                                color: isCurrentItem
+                                    ? ReciterCatalogChrome.activeOnFill(
+                                        colorScheme,
+                                      )
+                                    : colorScheme.onSurface,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -148,7 +155,9 @@ class SurahGridItem extends StatelessWidget {
                               isPlaying
                                   ? Icons.pause_circle_filled_rounded
                                   : Icons.play_circle_fill_rounded,
-                              color: colorScheme.primary,
+                              color: ReciterCatalogChrome.activeFill(
+                                colorScheme,
+                              ),
                               size: tokens.iconSizeMedium,
                             ),
                         ],
@@ -171,9 +180,7 @@ class SurahGridItem extends StatelessWidget {
                                     surah.name,
                                     style: theme.textTheme.titleSmall?.copyWith(
                                       fontWeight: FontWeight.bold,
-                                      color: isCurrentItem
-                                          ? colorScheme.primary
-                                          : colorScheme.onSurface,
+                                      color: colorScheme.onSurface,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -205,6 +212,7 @@ class SurahGridItem extends StatelessWidget {
                               surahTitle: surah.name,
                               reciterName: reciterName,
                               reciterId: reciterId,
+                              catalogChrome: true,
                               initialIsDownloaded: surah.isDownloaded,
                               initialIsDownloading: surah.isDownloading,
                               initialProgress: surah.downloadProgress,

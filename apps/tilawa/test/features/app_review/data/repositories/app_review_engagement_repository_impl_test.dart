@@ -82,4 +82,34 @@ void main() {
     expect(updated.promptCount, 1);
     expect(updated.lastPromptAtMs, 42);
   });
+
+  test('recordSignal increments distinct active days once per day', () async {
+    final AppReviewEngagement first = await repository.recordSignal(
+      AppReviewSignal.favoriteReciterAdded,
+      dayKey: '2026-05-22',
+    );
+    final AppReviewEngagement sameDay = await repository.recordSignal(
+      AppReviewSignal.bookmarkCreated,
+      dayKey: '2026-05-22',
+    );
+    final AppReviewEngagement nextDay = await repository.recordSignal(
+      AppReviewSignal.listeningSessionCompleted,
+      dayKey: '2026-05-23',
+    );
+
+    expect(first.distinctActiveDays, 1);
+    expect(sameDay.distinctActiveDays, 1);
+    expect(nextDay.distinctActiveDays, 2);
+  });
+
+  test('load returns persisted engagement', () async {
+    local.data = const AppReviewEngagement(
+      sessionCount: 4,
+      favoriteAdds: 2,
+    );
+
+    final AppReviewEngagement loaded = await repository.load();
+    expect(loaded.sessionCount, 4);
+    expect(loaded.favoriteAdds, 2);
+  });
 }

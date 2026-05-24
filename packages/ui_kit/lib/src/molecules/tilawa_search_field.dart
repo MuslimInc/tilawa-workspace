@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
+
+/// Visual treatment for [TilawaSearchField].
+enum TilawaSearchFieldVariant {
+  /// Filled field using component tokens (default).
+  standard,
+
+  /// Outlined neutral pill (Pinterest catalog search).
+  catalog,
+}
 
 class TilawaSearchField extends StatelessWidget {
   const TilawaSearchField({
@@ -17,6 +27,7 @@ class TilawaSearchField extends StatelessWidget {
     this.scrollPadding,
     this.prefixIcon = Icons.search_rounded,
     this.clearIcon = Icons.clear_rounded,
+    this.variant = TilawaSearchFieldVariant.catalog,
     this.backgroundColor,
     this.borderRadius,
     this.showShadow = false,
@@ -42,6 +53,7 @@ class TilawaSearchField extends StatelessWidget {
   final EdgeInsets? scrollPadding;
   final IconData prefixIcon;
   final IconData clearIcon;
+  final TilawaSearchFieldVariant variant;
   final Color? backgroundColor;
   final BorderRadiusGeometry? borderRadius;
   final bool showShadow;
@@ -82,6 +94,7 @@ class TilawaSearchField extends StatelessWidget {
         scrollPadding: scrollPadding,
         prefixIcon: prefixIcon,
         clearIcon: clearIcon,
+        variant: variant,
         backgroundColor: backgroundColor,
         borderRadius: borderRadius,
         showShadow: showShadow,
@@ -123,6 +136,7 @@ class _SearchFieldBody extends StatelessWidget {
     required this.scrollPadding,
     required this.prefixIcon,
     required this.clearIcon,
+    required this.variant,
     required this.backgroundColor,
     required this.borderRadius,
     required this.showShadow,
@@ -150,6 +164,7 @@ class _SearchFieldBody extends StatelessWidget {
   final EdgeInsets? scrollPadding;
   final IconData prefixIcon;
   final IconData clearIcon;
+  final TilawaSearchFieldVariant variant;
   final Color? backgroundColor;
   final BorderRadiusGeometry? borderRadius;
   final bool showShadow;
@@ -167,12 +182,32 @@ class _SearchFieldBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final componentTokens = theme.componentTokens.searchField;
     final colorScheme = theme.colorScheme;
-    final effectiveFillColor =
-        backgroundColor ?? componentTokens.backgroundColor;
-    final effectiveBorderRadius =
-        borderRadius ?? BorderRadius.circular(componentTokens.borderRadius);
+    final bool isCatalog = variant == TilawaSearchFieldVariant.catalog;
+    final effectiveFillColor = backgroundColor ??
+        (isCatalog ? colorScheme.surface : componentTokens.backgroundColor);
+    final effectiveBorderRadius = borderRadius ??
+        BorderRadius.circular(
+          isCatalog ? tokens.radiusExtraLarge : componentTokens.borderRadius,
+        );
+    final Color unfocusedBorder = isCatalog
+        ? colorScheme.outlineVariant.withValues(
+            alpha: tokens.opacityEmphasis,
+          )
+        : componentTokens.unfocusedBorderColor;
+    final Color focusedBorder = isCatalog
+        ? colorScheme.onSurface.withValues(alpha: tokens.opacitySubtle * 3)
+        : componentTokens.focusedBorderColor;
+    final Color prefixMuted = isCatalog
+        ? colorScheme.onSurfaceVariant.withValues(
+            alpha: tokens.opacityEmphasis,
+          )
+        : componentTokens.prefixIconMutedColor;
+    final Color prefixFocused = isCatalog
+        ? colorScheme.onSurfaceVariant
+        : componentTokens.prefixIconFocusedColor;
     final bool hasError = errorText != null && errorText!.trim().isNotEmpty;
     final double? shellHeight = hasError
         ? null
@@ -190,9 +225,7 @@ class _SearchFieldBody extends StatelessWidget {
         border: Border.all(
           color: hasError
               ? colorScheme.error
-              : (isFocused
-                    ? componentTokens.focusedBorderColor
-                    : componentTokens.unfocusedBorderColor),
+              : (isFocused ? focusedBorder : unfocusedBorder),
           width: hasError ? 2 : 1,
         ),
         boxShadow: showShadow
@@ -218,7 +251,9 @@ class _SearchFieldBody extends StatelessWidget {
         textAlignVertical: .center,
         style:
             textStyle ??
-            theme.textTheme.bodyMedium?.copyWith(fontWeight: .w600),
+            theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: isCatalog ? FontWeight.w400 : FontWeight.w600,
+            ),
         decoration: InputDecoration(
           isDense: true,
           filled: false,
@@ -235,15 +270,18 @@ class _SearchFieldBody extends StatelessWidget {
           hintStyle:
               hintStyle ??
               theme.textTheme.bodyMedium?.copyWith(
-                color: componentTokens.hintTextColor,
+                color: isCatalog
+                    ? colorScheme.onSurfaceVariant.withValues(
+                        alpha: tokens.opacityEmphasis,
+                      )
+                    : componentTokens.hintTextColor,
+                fontWeight: isCatalog ? FontWeight.w400 : FontWeight.w600,
               ),
           contentPadding: contentPadding ?? componentTokens.contentPadding,
           prefixIcon: Icon(
             prefixIcon,
             size: componentTokens.iconSize,
-            color: isFocused
-                ? componentTokens.prefixIconFocusedColor
-                : componentTokens.prefixIconMutedColor,
+            color: isFocused ? prefixFocused : prefixMuted,
           ),
           suffixIcon: hasText && onClear != null
               ? IconButton(
@@ -252,6 +290,37 @@ class _SearchFieldBody extends StatelessWidget {
                   onPressed: onClear,
                 )
               : null,
+        ),
+      ),
+    );
+  }
+}
+
+/// Centers [child] within [TilawaDesignTokens.contentMaxWidthMedia].
+///
+/// Use for feature-screen search rows (Reciters, History, Playlists, etc.)
+/// so the field aligns with list content on tablet/desktop.
+class TilawaSearchFieldSlot extends StatelessWidget {
+  const TilawaSearchFieldSlot({
+    super.key,
+    required this.child,
+    this.padding,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: tokens.contentMaxWidthMedia),
+        child: Padding(
+          padding:
+              padding ??
+              EdgeInsetsDirectional.symmetric(horizontal: tokens.spaceMedium),
+          child: child,
         ),
       ),
     );

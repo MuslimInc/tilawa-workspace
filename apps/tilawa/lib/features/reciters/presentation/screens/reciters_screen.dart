@@ -111,6 +111,22 @@ class _RecitersScreenState extends State<RecitersScreen> {
   void initState() {
     super.initState();
     _favoritesCubit = getIt<FavoritesCubit>();
+    final RecitersBloc recitersBloc = context.read<RecitersBloc>();
+    final RecitersState startupState = recitersBloc.state;
+
+    if (startupState is RecitersLoaded) {
+      _isStartupLiteUi = false;
+      _allowHeavyLoadedResults = true;
+      _favoritesCubit.loadFavorites();
+      return;
+    }
+
+    if (startupState is RecitersLoading) {
+      _isStartupLiteUi = false;
+      _favoritesCubit.loadFavorites();
+      return;
+    }
+
     _startupLiteUiTimer = Timer(_startupLiteUiDuration, () {
       if (!mounted) return;
       setState(() {
@@ -127,7 +143,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
       _initialLoadTimer = Timer(_initialRecitersLoadDelay, () {
         if (!mounted) return;
         debugPrint('[AppLaunch] source=RecitersScreen initial-load started');
-        context.read<RecitersBloc>().add(const LoadReciters());
+        recitersBloc.add(const LoadReciters());
       });
     });
   }
@@ -260,11 +276,13 @@ class _RecitersScreenState extends State<RecitersScreen> {
   Widget build(BuildContext context) {
     PerfLogger.markBuild('RecitersScreen');
     if (_isStartupLiteUi) {
+      final ColorScheme colorScheme = Theme.of(context).colorScheme;
       return Scaffold(
         resizeToAvoidBottomInset: false,
-        appBar: TilawaAppBar(
+        backgroundColor: colorScheme.surface,
+        appBar: TilawaCatalogAppBar.titleOnly(
+          context,
           title: context.l10n.reciters,
-          automaticallyImplyLeading: false,
         ),
         body: Stack(
           fit: StackFit.expand,
@@ -346,14 +364,17 @@ class _RecitersScreenState extends State<RecitersScreen> {
                     _allowHeavyLoadedResults &&
                     state.filteredReciters.isNotEmpty &&
                     state.searchQuery.isEmpty;
+                final ColorScheme colorScheme =
+                    Theme.of(context).colorScheme;
 
                 return Scaffold(
                   resizeToAvoidBottomInset: false,
-                  appBar: PreferredSize(
-                    preferredSize: Size.fromHeight(
-                      _recitersAppBarExtent(context),
-                    ),
-                    child: _RecitersTilawaAppBar(
+                  backgroundColor: colorScheme.surface,
+                  appBar: _RecitersTilawaAppBar(
+                      bottomHeight:
+                          TilawaAppBarConfig.catalogTitleSearchAndFilterRowHeight(
+                        context,
+                      ),
                       state: state,
                       letterIndexAvailable: letterIndexAvailable,
                       showLetterIndex: _showLetterIndex,
@@ -364,8 +385,15 @@ class _RecitersScreenState extends State<RecitersScreen> {
                       onToggleFavorites: () =>
                           _toggleFavoritesFilter(innerContext),
                       onToggleLetterIndex: _toggleLetterIndex,
+                      onClearFavoritesFilter: () {
+                        context.read<RecitersBloc>().add(
+                          const ClearFavoritesFilter(),
+                        );
+                        _scrollToTop();
+                      },
+                      onClearLetterFilter: _clearLetterFilter,
+                      onClearAllFilters: _clearAllFilters,
                     ),
-                  ),
                   body: _RecitersSliverScreen(
                     state: state,
                     allowHeavyLoadedResults: _allowHeavyLoadedResults,
@@ -389,7 +417,9 @@ class _RecitersStartupLitePane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: tokens.spaceExtraLarge),
@@ -397,14 +427,20 @@ class _RecitersStartupLitePane extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SizedBox.square(
-              dimension: tokens.iconSizeExtraLarge - tokens.spaceMedium,
+              dimension: tokens.iconSizeExtraLarge,
               child: TilawaLoadingIndicator(
                 centered: false,
                 strokeWidth: tokens.progressHeight,
               ),
             ),
             SizedBox(height: tokens.spaceMedium),
-            Text(context.l10n.loadingReciters),
+            Text(
+              context.l10n.loadingReciters,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
@@ -435,9 +471,7 @@ class _RecitersSliverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     PerfLogger.markBuild('_RecitersSliverScreen');
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
-    final double headerExtent = _recitersAppBarExtent(context);
-    const double scrollbarVerticalMargin = 10;
-    final double scrollbarTopOffset = headerExtent + scrollbarVerticalMargin;
+    const double letterIndexVerticalMargin = 8;
     final bool letterIndexAvailable =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
@@ -471,9 +505,7 @@ class _RecitersSliverScreen extends StatelessWidget {
         if (showLetterIndexRail)
           _RecitersLetterIndexGutter(
             isRtl: isRtl,
-            top: headerExtent,
-            scrollbarTopOffset: scrollbarTopOffset,
-            scrollbarBottomMargin: scrollbarVerticalMargin,
+            verticalMargin: letterIndexVerticalMargin,
             reciters: (state as RecitersLoaded).reciters,
             scrollController: scrollController,
             onLetterSelected: onLetterSelected,
@@ -486,13 +518,14 @@ class _RecitersSliverScreen extends StatelessWidget {
   }
 }
 
-/// Letter-index rail with a tinted gutter and a content-facing border.
+/// Letter-index rail pinned to the trailing screen edge (Pinterest-style).
+///
+/// The list body already sits below [Scaffold.appBar]; do not offset this rail
+/// by app-bar height again or it will overlap reciter rows.
 class _RecitersLetterIndexGutter extends StatelessWidget {
   const _RecitersLetterIndexGutter({
     required this.isRtl,
-    required this.top,
-    required this.scrollbarTopOffset,
-    required this.scrollbarBottomMargin,
+    required this.verticalMargin,
     required this.reciters,
     required this.scrollController,
     required this.onLetterSelected,
@@ -501,9 +534,7 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
   });
 
   final bool isRtl;
-  final double top;
-  final double scrollbarTopOffset;
-  final double scrollbarBottomMargin;
+  final double verticalMargin;
   final List<ReciterEntity> reciters;
   final ScrollController scrollController;
   final ValueChanged<String?> onLetterSelected;
@@ -513,59 +544,35 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final double gutterWidth = _recitersLetterIndexGutterWidth(theme);
-    final BorderSide contentBorder = BorderSide(
-      color: colorScheme.outlineVariant.withValues(
-        alpha: tokens.opacityEmphasis,
-      ),
-      width: tokens.borderWidthThin,
-    );
+    final double scrollbarWidth =
+        theme.componentTokens.alphabetScrollbar.width;
 
     return PositionedDirectional(
-      top: top,
-      bottom: 0,
+      top: verticalMargin,
+      bottom: verticalMargin,
       start: isRtl ? 0 : null,
       end: isRtl ? null : 0,
       width: gutterWidth,
-      child: ExcludeSemantics(
-        child: ColoredBox(
-          color: colorScheme.surfaceContainerHigh.withValues(
-            alpha: tokens.opacitySubtle + tokens.opacityMedium,
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: BorderDirectional(
-                start: isRtl ? BorderSide.none : contentBorder,
-                end: isRtl ? contentBorder : BorderSide.none,
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: tokens.spaceSmall,
-                end: tokens.spaceSmall,
-              ),
-              child: Column(
-                children: [
-                  SizedBox(height: scrollbarTopOffset - top),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: scrollbarBottomMargin,
-                      ),
-                      child: ReciterAlphabetScrollbar(
-                        key: const ValueKey('alphabet_scrollbar'),
-                        allReciters: reciters,
-                        scrollController: scrollController,
-                        onLetterSelected: onLetterSelected,
-                        scrollbarSemanticsLabel: scrollbarSemanticsLabel,
-                        scrollbarSemanticsHint: scrollbarSemanticsHint,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      child: SafeArea(
+        left: isRtl,
+        right: !isRtl,
+        top: false,
+        bottom: false,
+        minimum: EdgeInsets.zero,
+        child: Align(
+          alignment: isRtl
+              ? AlignmentDirectional.centerStart
+              : AlignmentDirectional.centerEnd,
+          child: SizedBox(
+            width: scrollbarWidth,
+            child: ReciterAlphabetScrollbar(
+              key: const ValueKey('alphabet_scrollbar'),
+              allReciters: reciters,
+              scrollController: scrollController,
+              onLetterSelected: onLetterSelected,
+              scrollbarSemanticsLabel: scrollbarSemanticsLabel,
+              scrollbarSemanticsHint: scrollbarSemanticsHint,
             ),
           ),
         ),
@@ -631,7 +638,7 @@ class _RecitersResultSection extends StatelessWidget {
       );
     }
 
-    return const SliverToBoxAdapter(child: SizedBox.shrink());
+    return _RecitersLoadingSection();
   }
 }
 
@@ -679,31 +686,37 @@ class _RecitersEmptySliver extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isSearchState = state.searchQuery.isNotEmpty;
-    final bool isFavoritesState = state.showFavoritesOnly;
+    final bool isFavoritesOnlyEmpty =
+        state.showFavoritesOnly && !isSearchState;
     final bool hasActiveFilters = _hasActiveFilters(state);
 
     return _DryLayoutSafeFillSliver(
       child: _StatePanel(
         key: const ValueKey('empty_state'),
-        icon: isFavoritesState
+        icon: isSearchState
+            ? Icons.search_off_rounded
+            : isFavoritesOnlyEmpty
             ? Icons.favorite_border_rounded
-            : Icons.search_off_rounded,
-        title: isFavoritesState
+            : Icons.person_off_outlined,
+        title: isSearchState
+            ? context.l10n.noRecitersMatchSearch
+            : isFavoritesOnlyEmpty
             ? context.l10n.noFavorites
-            : isSearchState
-            ? context.l10n.noSearchResults
             : context.l10n.noRecitersFound,
         subtitle: isSearchState ? context.l10n.tryDifferentSearch : null,
         actionLabel: hasActiveFilters ? context.l10n.clearAll : null,
         onAction: hasActiveFilters ? onClearAll : null,
+        actionLeadingIcon: Icons.clear_all_rounded,
       ),
     );
   }
 }
 
-/// Reciters list chrome: [TilawaAppBar] with search row in [AppBar.bottom].
-class _RecitersTilawaAppBar extends StatelessWidget {
+/// Reciters list chrome: title, optional filter chips, and search row.
+class _RecitersTilawaAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   const _RecitersTilawaAppBar({
+    required this.bottomHeight,
     required this.state,
     required this.letterIndexAvailable,
     required this.showLetterIndex,
@@ -713,10 +726,17 @@ class _RecitersTilawaAppBar extends StatelessWidget {
     required this.onClearSearch,
     required this.onToggleFavorites,
     required this.onToggleLetterIndex,
+    required this.onClearFavoritesFilter,
+    required this.onClearLetterFilter,
+    required this.onClearAllFilters,
   });
 
+  final double bottomHeight;
   final RecitersState state;
   final bool letterIndexAvailable;
+
+  @override
+  Size get preferredSize => Size.fromHeight(bottomHeight);
   final bool showLetterIndex;
   final TextEditingController searchController;
   final FocusNode focusNode;
@@ -724,52 +744,153 @@ class _RecitersTilawaAppBar extends StatelessWidget {
   final VoidCallback onClearSearch;
   final VoidCallback onToggleFavorites;
   final VoidCallback onToggleLetterIndex;
+  final VoidCallback onClearFavoritesFilter;
+  final VoidCallback onClearLetterFilter;
+  final VoidCallback onClearAllFilters;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
-    final double bottomHeight = TilawaAppBarConfig.searchBottomHeight(theme);
+    final RecitersLoaded? loaded =
+        state is RecitersLoaded ? state as RecitersLoaded : null;
 
-    return TilawaAppBar(
-      automaticallyImplyLeading: false,
-      centerTitle: false,
-      toolbarHeight: 0,
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(bottomHeight),
-        child: Semantics(
-          header: true,
-          label: context.l10n.reciters,
-          explicitChildNodes: true,
-          child: _ConstrainedHeaderContent(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: tokens.spaceMedium,
-                vertical: tokens.spaceMedium,
-              ),
-              child: Row(
-                spacing: tokens.spaceSmall,
-                children: [
-                  Expanded(
-                    child: _SearchField(
-                      controller: searchController,
-                      focusNode: focusNode,
-                      onChanged: onSearchChanged,
-                      onClear: onClearSearch,
-                    ),
-                  ),
-                  _FavoritesToggle(state: state, onTap: onToggleFavorites),
-                  _RecitersHeaderOverflowMenu(
-                    letterIndexAvailable: letterIndexAvailable,
-                    showLetterIndex: showLetterIndex,
-                    onToggleLetterIndex: onToggleLetterIndex,
-                  ),
-                ],
-              ),
-            ),
+    return TilawaCatalogAppBar(
+      preferredHeight: bottomHeight,
+      title: context.l10n.reciters,
+      bottomContent: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _SearchField(
+            controller: searchController,
+            focusNode: focusNode,
+            onChanged: onSearchChanged,
+            onClear: onClearSearch,
           ),
+          SizedBox(height: tokens.spaceSmall),
+          _RecitersQuickFilterBar(
+            state: state,
+            loaded: loaded,
+            letterIndexAvailable: letterIndexAvailable,
+            showLetterIndex: showLetterIndex,
+            onToggleFavorites: onToggleFavorites,
+            onToggleLetterIndex: onToggleLetterIndex,
+            onClearLetterFilter: onClearLetterFilter,
+            onClearAllFilters: onClearAllFilters,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Booking-style quick filters under search (favorites, A–Z, overflow).
+class _RecitersQuickFilterBar extends StatelessWidget {
+  const _RecitersQuickFilterBar({
+    required this.state,
+    required this.loaded,
+    required this.letterIndexAvailable,
+    required this.showLetterIndex,
+    required this.onToggleFavorites,
+    required this.onToggleLetterIndex,
+    required this.onClearLetterFilter,
+    required this.onClearAllFilters,
+  });
+
+  final RecitersState state;
+  final RecitersLoaded? loaded;
+  final bool letterIndexAvailable;
+  final bool showLetterIndex;
+  final VoidCallback onToggleFavorites;
+  final VoidCallback onToggleLetterIndex;
+  final VoidCallback onClearLetterFilter;
+  final VoidCallback onClearAllFilters;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final tokens = Theme.of(context).tokens;
+    final bool favoritesReady = context.select<FavoritesCubit, bool>(
+      (c) => c.state is FavoritesLoaded,
+    );
+    final int favoriteCount = context.select<FavoritesCubit, int>((cubit) {
+      final FavoritesState favoritesState = cubit.state;
+      return favoritesState is FavoritesLoaded
+          ? favoritesState.favoriteIds.length
+          : 0;
+    });
+    final bool favoritesSelected =
+        loaded?.showFavoritesOnly ?? false;
+    final String? selectedLetter = loaded?.selectedLetter;
+    final RecitersLoaded? loadedState = loaded;
+    final bool showClearAll =
+        loadedState != null && _showHeaderClearAll(loadedState);
+
+    final String favoritesLabel = favoritesSelected || favoriteCount == 0
+        ? l10n.recitersFilterChipFavorites
+        : l10n.recitersFilterPillFavoritesCount(favoriteCount);
+
+    TilawaSelectionPill catalogFilterPill({
+      required String label,
+      required bool selected,
+      required VoidCallback? onTap,
+      IconData? icon,
+    }) {
+      return TilawaSelectionPill(
+        label: label,
+        icon: icon,
+        selected: selected,
+        onTap: onTap,
+        style: TilawaSelectionPillStyle.catalog,
+        elevatedWhenSelected: false,
+      );
+    }
+
+    final List<Widget> pills = <Widget>[
+      Semantics(
+        identifier: ReciterSemanticsIds.recitersFavoritesToggle,
+        child: catalogFilterPill(
+          label: favoritesLabel,
+          icon: Icons.favorite_border_rounded,
+          selected: favoritesSelected,
+          onTap: favoritesReady ? onToggleFavorites : null,
         ),
       ),
+      if (letterIndexAvailable)
+        catalogFilterPill(
+          label: l10n.recitersFilterPillAlphabet,
+          icon: Icons.sort_by_alpha_rounded,
+          selected: showLetterIndex,
+          onTap: onToggleLetterIndex,
+        ),
+      if (selectedLetter != null && !showLetterIndex)
+        catalogFilterPill(
+          label: l10n.recitersFilterChipLetter(selectedLetter),
+          selected: true,
+          onTap: onClearLetterFilter,
+        ),
+    ];
+
+    return TilawaQuickFilterBar(
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: tokens.spaceExtraSmall,
+        children: [
+          if (showClearAll)
+            TextButton(
+              onPressed: onClearAllFilters,
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+                minimumSize: Size(0, tokens.minInteractiveDimension),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text(l10n.clearAll),
+            ),
+          const _RecitersHeaderOverflowMenu(),
+        ],
+      ),
+      children: pills,
     );
   }
 }
@@ -803,66 +924,23 @@ class _RecitersAmbientPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final shortest = size.shortestSide;
-    final topCenter = Offset(size.width * 0.08, size.height * 0.08);
-    final lowerCenter = Offset(size.width * 0.88, size.height * 0.58);
-
-    final primaryStroke = Paint()
-      ..color = colorScheme.primary.withValues(
-        alpha: tokens.opacitySubtle * 0.38,
-      )
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = tokens.borderWidthThin;
-    final tertiaryStroke = Paint()
-      ..color = colorScheme.tertiary.withValues(
-        alpha: tokens.opacitySubtle * 0.28,
-      )
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = tokens.borderWidthThin;
-
-    for (final factor in <double>[0.48, 0.72]) {
-      canvas.drawArc(
-        Rect.fromCircle(center: topCenter, radius: shortest * factor),
-        -math.pi * 0.05,
-        math.pi * 0.52,
-        false,
-        primaryStroke,
-      );
-    }
-
-    for (final factor in <double>[0.5, 0.78]) {
-      canvas.drawArc(
-        Rect.fromCircle(center: lowerCenter, radius: shortest * factor),
-        math.pi * 0.9,
-        math.pi * 0.5,
-        false,
-        tertiaryStroke,
-      );
-    }
+    final Rect bounds = Offset.zero & size;
+    final Paint wash = Paint()
+      ..shader = RadialGradient(
+        center: const Alignment(0, -1.2),
+        radius: 1.4,
+        colors: <Color>[
+          colorScheme.primary.withValues(alpha: tokens.opacitySubtle * 0.18),
+          Colors.transparent,
+        ],
+      ).createShader(bounds);
+    canvas.drawRect(bounds, wash);
   }
 
   @override
   bool shouldRepaint(_RecitersAmbientPainter oldDelegate) {
     return oldDelegate.colorScheme != colorScheme ||
         oldDelegate.tokens != tokens;
-  }
-}
-
-class _ConstrainedHeaderContent extends StatelessWidget {
-  const _ConstrainedHeaderContent({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: Theme.of(context).tokens.contentMaxWidthMedia,
-        ),
-        child: child,
-      ),
-    );
   }
 }
 
@@ -892,10 +970,7 @@ class _SearchField extends StatelessWidget {
         onChanged: onChanged,
         onClear: onClear,
         clearButtonTooltip: context.l10n.a11yClearRecitersSearch,
-        borderRadius: BorderRadius.circular(
-          Theme.of(context).tokens.radiusLarge,
-        ),
-        showShadow: true,
+        showShadow: false,
         onTapOutside: (_) => focusNode.unfocus(),
       ),
     );
@@ -903,21 +978,11 @@ class _SearchField extends StatelessWidget {
 }
 
 class _RecitersHeaderOverflowMenu extends StatelessWidget {
-  const _RecitersHeaderOverflowMenu({
-    required this.letterIndexAvailable,
-    required this.showLetterIndex,
-    required this.onToggleLetterIndex,
-  });
-
-  final bool letterIndexAvailable;
-  final bool showLetterIndex;
-  final VoidCallback onToggleLetterIndex;
+  const _RecitersHeaderOverflowMenu();
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
+    final tokens = Theme.of(context).tokens;
 
     return MenuAnchor(
       style: MenuStyle(
@@ -934,7 +999,6 @@ class _RecitersHeaderOverflowMenu extends StatelessWidget {
               identifier: ReciterSemanticsIds.recitersMoreActionsButton,
               child: TilawaIconActionButton(
                 icon: FluentIcons.more_horizontal_24_regular,
-                isActive: showLetterIndex,
                 tooltip: context.l10n.recitersMoreActions,
                 semanticLabel: context.l10n.recitersMoreActions,
                 onTap: () {
@@ -955,23 +1019,6 @@ class _RecitersHeaderOverflowMenu extends StatelessWidget {
             label: context.l10n.viewDownloads,
           ),
         ),
-        if (letterIndexAvailable)
-          MenuItemButton(
-            onPressed: onToggleLetterIndex,
-            child: _RecitersHeaderMenuRow(
-              icon: showLetterIndex
-                  ? Icons.sort_by_alpha_rounded
-                  : Icons.sort_by_alpha_outlined,
-              label: context.l10n.recitersLetterIndexMenuItem,
-              trailing: showLetterIndex
-                  ? Icon(
-                      Icons.check_rounded,
-                      size: tokens.iconSizeSmall,
-                      color: colorScheme.primary,
-                    )
-                  : null,
-            ),
-          ),
       ],
     );
   }
@@ -981,12 +1028,10 @@ class _RecitersHeaderMenuRow extends StatelessWidget {
   const _RecitersHeaderMenuRow({
     required this.icon,
     required this.label,
-    this.trailing,
   });
 
   final IconData icon;
   final String label;
-  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -997,98 +1042,7 @@ class _RecitersHeaderMenuRow extends StatelessWidget {
         Icon(icon, size: tokens.iconSizeMedium),
         SizedBox(width: tokens.spaceSmall + tokens.spaceTiny),
         Expanded(child: Text(label)),
-        ?trailing,
       ],
-    );
-  }
-}
-
-class _FavoritesToggle extends StatelessWidget {
-  const _FavoritesToggle({required this.state, required this.onTap});
-
-  final RecitersState state;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final bool isActive =
-        state is RecitersLoaded && (state as RecitersLoaded).showFavoritesOnly;
-    final bool favoritesReady = context.select<FavoritesCubit, bool>(
-      (c) => c.state is FavoritesLoaded,
-    );
-    final String filterLabel = context.l10n.a11yFavoriteRecitersOnlyFilter;
-
-    return Semantics(
-      identifier: ReciterSemanticsIds.recitersFavoritesToggle,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          TilawaIconActionButton(
-            icon: isActive
-                ? Icons.favorite_rounded
-                : Icons.favorite_border_rounded,
-            isActive: isActive,
-            enabled: favoritesReady,
-            toggled: isActive,
-            tooltip: filterLabel,
-            semanticLabel: filterLabel,
-            onTap: onTap,
-          ),
-          PositionedDirectional(
-            top: -tokens.spaceExtraSmall,
-            end: -tokens.spaceExtraSmall,
-            child: BlocBuilder<FavoritesCubit, FavoritesState>(
-              builder: (context, favoritesState) {
-                final int count = favoritesState is FavoritesLoaded
-                    ? favoritesState.favoriteIds.length
-                    : 0;
-                if (count == 0) {
-                  return const SizedBox.shrink();
-                }
-
-                return Container(
-                  constraints: BoxConstraints(
-                    minWidth: tokens.iconSizeMedium - tokens.spaceTiny,
-                    minHeight: tokens.iconSizeMedium - tokens.spaceTiny,
-                  ),
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tokens.spaceExtraSmall + tokens.spaceTiny,
-                  ),
-                  decoration: BoxDecoration(
-                    // Ring blends into the Vellum header (surfaceContainerHigh)
-                    // when inactive — docs/tilawa_brand.md §3 Vellum role.
-                    color: isActive
-                        ? theme.colorScheme.surfaceContainerHigh
-                        : theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(
-                      tokens.radiusExtraLarge,
-                    ),
-                    border: Border.all(
-                      color: isActive
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.surfaceContainerHigh,
-                      width: tokens.borderWidthThin + tokens.borderWidthThin,
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$count',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: isActive
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -1102,6 +1056,7 @@ class _StatePanel extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.isError = false,
+    this.actionLeadingIcon,
   });
 
   final IconData icon;
@@ -1110,6 +1065,7 @@ class _StatePanel extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
   final bool isError;
+  final IconData? actionLeadingIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -1130,7 +1086,11 @@ class _StatePanel extends StatelessWidget {
               variant: isError
                   ? TilawaButtonVariant.secondary
                   : TilawaButtonVariant.primary,
-              leadingIcon: const Icon(Icons.refresh_rounded),
+              leadingIcon: actionLeadingIcon != null
+                  ? Icon(actionLeadingIcon)
+                  : isError
+                  ? const Icon(Icons.refresh_rounded)
+                  : null,
               onPressed: onAction,
             )
           : null,
@@ -1197,19 +1157,54 @@ class _ReciterListSliver extends StatelessWidget {
 
         return SliverPadding(
           padding: padding,
-          sliver: SliverList.builder(
-            itemCount: itemCount,
-            itemBuilder: (context, index) {
-              if (index.isOdd) {
-                return SizedBox(height: tokens.spaceMedium);
-              }
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              _RecitersResultSummarySliver(count: reciterCount),
+              SliverList.builder(
+                itemCount: itemCount,
+                itemBuilder: (context, index) {
+                  if (index.isOdd) {
+                    return SizedBox(height: tokens.spaceSmall);
+                  }
 
-              final ReciterEntity reciter = state.filteredReciters[index ~/ 2];
-              return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
-            },
+                  final ReciterEntity reciter =
+                      state.filteredReciters[index ~/ 2];
+                  return ReciterCard(
+                    key: ValueKey(reciter.id),
+                    reciter: reciter,
+                    favoritesOnlyContext: state.showFavoritesOnly,
+                  );
+                },
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+}
+
+class _RecitersResultSummarySliver extends StatelessWidget {
+  const _RecitersResultSummarySliver({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: EdgeInsets.only(bottom: tokens.spaceSmall),
+        child: Text(
+          context.l10n.recitersResultCount(count),
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1249,18 +1244,29 @@ class _ReciterGridSliver extends StatelessWidget {
 
         return SliverPadding(
           padding: padding,
-          sliver: SliverGrid.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: targetItemExtent,
-              mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
-              crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
-              childAspectRatio: targetItemExtent / targetItemHeight,
-            ),
-            itemCount: state.filteredReciters.length,
-            itemBuilder: (context, index) {
-              final ReciterEntity reciter = state.filteredReciters[index];
-              return ReciterCard(key: ValueKey(reciter.id), reciter: reciter);
-            },
+          sliver: SliverMainAxisGroup(
+            slivers: [
+              _RecitersResultSummarySliver(
+                count: state.filteredReciters.length,
+              ),
+              SliverGrid.builder(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: targetItemExtent,
+                  mainAxisExtent: targetItemHeight,
+                  mainAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+                  crossAxisSpacing: tokens.spaceSmall + tokens.spaceTiny,
+                ),
+                itemCount: state.filteredReciters.length,
+                itemBuilder: (context, index) {
+                  final ReciterEntity reciter = state.filteredReciters[index];
+                  return ReciterCard(
+                    key: ValueKey(reciter.id),
+                    reciter: reciter,
+                    favoritesOnlyContext: state.showFavoritesOnly,
+                  );
+                },
+              ),
+            ],
           ),
         );
       },
@@ -1366,18 +1372,10 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
   }
 }
 
-/// Total height of [Scaffold.appBar] (status bar + search bottom chrome).
-double _recitersAppBarExtent(BuildContext context) {
-  return MediaQuery.paddingOf(context).top +
-      TilawaAppBarConfig.searchBottomHeight(Theme.of(context));
-}
-
-/// Reserved width for the letter-index gutter (rail + padding + divider lane).
+/// Reserved width for the letter-index rail (scrollbar + outer margin).
 double _recitersLetterIndexGutterWidth(ThemeData theme) {
   final tokens = theme.tokens;
-  return tokens.spaceSmall * 2 +
-      theme.componentTokens.alphabetScrollbar.width +
-      tokens.spaceMedium;
+  return theme.componentTokens.alphabetScrollbar.width + tokens.spaceMedium;
 }
 
 EdgeInsetsGeometry _recitersResultPadding(
@@ -1411,4 +1409,20 @@ bool _hasActiveFilters(RecitersLoaded state) {
   return state.searchQuery.isNotEmpty ||
       state.selectedLetter != null ||
       state.showFavoritesOnly;
+}
+
+int _structuralFilterCount(RecitersLoaded state) {
+  return <bool>[
+    state.showFavoritesOnly,
+    state.selectedLetter != null,
+  ].where((bool active) => active).length;
+}
+
+/// Header [Clear all] when more than one constraint is active.
+bool _showHeaderClearAll(RecitersLoaded state) {
+  final int structural = _structuralFilterCount(state);
+  if (structural > 1) {
+    return true;
+  }
+  return structural >= 1 && state.searchQuery.isNotEmpty;
 }

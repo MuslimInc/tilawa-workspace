@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/app_review/domain/entities/app_review_blocked_flow.dart';
 import 'package:tilawa/features/app_review/presentation/widgets/app_review_sacred_flow_scope.dart';
@@ -52,8 +53,12 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
         child: BlocBuilder<AthkarCubit, AthkarState>(
           builder: (context, state) {
             return Scaffold(
-            appBar: TilawaAppBar(
+            appBar: TilawaCatalogAppBar(
+              preferredHeight:
+                  TilawaAppBarConfig.catalogTitleOnlyHeight(context),
               title: widget.categoryName,
+              automaticallyImplyLeading: true,
+              onBackPressed: () => context.pop(),
               actions: [
                 if (state is AthkarItemsLoaded) ...[
                   Container(

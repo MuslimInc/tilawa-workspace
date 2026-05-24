@@ -37,7 +37,7 @@ void main() {
         expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
         expect(
           theme.appBarTheme.backgroundColor,
-          theme.colorScheme.surfaceContainerHigh,
+          theme.colorScheme.surface,
         );
         expect(theme.appBarTheme.elevation, 0);
         expect(theme.appBarTheme.scrolledUnderElevation, 0);
@@ -67,7 +67,7 @@ void main() {
         expect(theme.appBarTheme.surfaceTintColor, Colors.transparent);
         expect(
           theme.appBarTheme.backgroundColor,
-          theme.colorScheme.surfaceContainerHigh,
+          theme.colorScheme.surface,
         );
         expect(theme.appBarTheme.elevation, 0);
         expect(theme.appBarTheme.scrolledUnderElevation, 0);
@@ -81,6 +81,38 @@ void main() {
       );
       expect(theme.extension<TilawaDesignTokens>(), isNotNull);
       expect(theme.extension<TilawaComponentTokens>(), isNotNull);
+    });
+
+    test(
+      'light Pinterest neutrals: white canvas and #E5E5E0 idle tier',
+      () {
+        final ThemeData theme = AppTheme.getLightTheme(
+          primaryColor: AppColors.defaultPrimary,
+          useGoogleFontsOverride: false,
+        );
+        final ColorScheme scheme = theme.colorScheme;
+
+        expect(theme.scaffoldBackgroundColor, AppColors.lightBackground);
+        expect(scheme.surface, AppColors.lightSurface);
+        expect(scheme.onSurface, AppColors.lightInk);
+        expect(
+          scheme.surfaceContainerHigh,
+          AppColors.catalogFilterUnselectedLight,
+        );
+        expect(scheme.surfaceTint, Colors.transparent);
+      },
+    );
+
+    test('light search field tokens use neutral surface not primary', () {
+      final ThemeData theme = AppTheme.getLightTheme(
+        primaryColor: AppColors.defaultPrimary,
+        useGoogleFontsOverride: false,
+      );
+      final search = theme.componentTokens.searchField;
+
+      expect(search.backgroundColor, theme.colorScheme.surface);
+      expect(search.backgroundColor, isNot(theme.colorScheme.primary));
+      expect(search.backgroundColor, isNot(theme.colorScheme.primaryContainer));
     });
   });
 }

@@ -145,7 +145,10 @@ void main() {
     await getIt.reset();
   });
 
-  Widget buildTestApp() {
+  Widget buildTestApp({
+    MainScreenCubit? mainScreenCubit,
+    RecitersBloc? recitersBloc,
+  }) {
     final mockPlayerBackgroundCubit = _MockPlayerBackgroundCubit();
     when(() => mockPlayerBackgroundCubit.state).thenReturn(
       const PlayerBackgroundInitial(PlayerBackgroundConfiguration()),
@@ -154,6 +157,23 @@ void main() {
     when(() => mockAudioPlayerBloc.state).thenReturn(
       const AudioPlayerState(status: AudioPlayerStatus.initial),
     );
+
+    final mockGetLanguage = _MockGetCurrentLanguageUseCase();
+    when(
+      () => mockGetLanguage(),
+    ).thenAnswer((_) async => const Right<Failure, String>('en'));
+    final mockSetLanguage = _MockSetLanguageUseCase();
+    when(
+      () => mockSetLanguage(any()),
+    ).thenAnswer((_) async => const Right<Failure, void>(null));
+
+    final RecitersBloc effectiveRecitersBloc = recitersBloc ?? () {
+      final mockGetReciters = _MockGetRecitersUseCase();
+      when(() => mockGetReciters.call()).thenAnswer(
+        (_) async => const Right<Failure, List<ReciterEntity>>([]),
+      );
+      return RecitersBloc(mockGetReciters);
+    }();
 
     final router = GoRouter(
       initialLocation: '/',
@@ -167,7 +187,16 @@ void main() {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider<MainScreenCubit>(create: (_) => MainScreenCubit()),
+        BlocProvider<MainScreenCubit>(
+          create: (_) => mainScreenCubit ?? MainScreenCubit(),
+        ),
+        BlocProvider<RecitersBloc>.value(value: effectiveRecitersBloc),
+        BlocProvider<AlphabetScrollbarBloc>(
+          create: (_) => AlphabetScrollbarBloc(),
+        ),
+        BlocProvider<LocalizationBloc>(
+          create: (_) => LocalizationBloc(mockGetLanguage, mockSetLanguage),
+        ),
         BlocProvider<PlayerBackgroundCubit>.value(
           value: mockPlayerBackgroundCubit,
         ),
@@ -218,7 +247,7 @@ void main() {
       ),
     ];
 
-    when(() => mockGetReciters()).thenAnswer(
+    when(() => mockGetReciters.call()).thenAnswer(
       (_) async => const Right<Failure, List<ReciterEntity>>(reciters),
     );
     when(

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Must match AppColors.primaryTeal / defaultPrimary in Flutter (ui_kit). -->
-    <color name="launch_background">#1AADC5</color>
+    <!-- Must match AppColors.primaryCoral / defaultPrimary in Flutter (ui_kit). -->
+    <color name="launch_background">#E60023</color>
 </resources>

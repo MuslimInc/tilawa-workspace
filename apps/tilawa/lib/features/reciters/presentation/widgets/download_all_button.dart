@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/reciter_catalog_chrome.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -28,6 +29,8 @@ class DownloadAllButton extends StatelessWidget {
     final tokens = theme.tokens;
     final chipTokens = theme.componentTokens.chip;
     final borderRadius = BorderRadius.circular(chipTokens.pillRadius);
+    final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
+    final Color hairline = ReciterCatalogChrome.hairline(colorScheme, tokens);
 
     return BlocConsumer<ReciterDownloadBloc, ReciterDownloadState>(
       listenWhen: (previous, current) => current.shouldShowError(previous),
@@ -41,7 +44,6 @@ class DownloadAllButton extends StatelessWidget {
         final double progress = state.progress;
         final bool isAllDownloaded = state.isAllDownloaded;
 
-        // All downloaded — small check badge
         if (isAllDownloaded) {
           return Semantics(
             identifier: ReciterSemanticsIds.reciterDetailsDownloadAllCompleted,
@@ -50,12 +52,10 @@ class DownloadAllButton extends StatelessWidget {
                 EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
               ),
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
+                color: idleFill,
                 borderRadius: borderRadius,
                 border: Border.all(
-                  color: colorScheme.outlineVariant.withValues(
-                    alpha: tokens.opacityMedium,
-                  ),
+                  color: hairline,
                   width: chipTokens.borderWidth,
                 ),
               ),
@@ -64,14 +64,14 @@ class DownloadAllButton extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.check_circle_rounded,
-                    color: colorScheme.onPrimaryContainer,
+                    color: colorScheme.onSurface,
                     size: chipTokens.inlineIconSize,
                   ),
                   SizedBox(width: tokens.spaceExtraSmall),
                   Text(
                     context.l10n.allDownloaded,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onPrimaryContainer,
+                      color: colorScheme.onSurface,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
@@ -81,15 +81,14 @@ class DownloadAllButton extends StatelessWidget {
           );
         }
 
-        // Download / Downloading — inline pill
         return Semantics(
           identifier: isDownloading
               ? ReciterSemanticsIds.reciterDetailsDownloadAllDownloading
               : ReciterSemanticsIds.reciterDetailsDownloadAllIdle,
           child: Material(
             color: isDownloading
-                ? colorScheme.primaryContainer.withValues(alpha: 0.74)
-                : colorScheme.surfaceContainerLow,
+                ? ReciterCatalogChrome.activeRowFill(colorScheme)
+                : colorScheme.surface,
             borderRadius: borderRadius,
             child: InkWell(
               key: const Key('reciter_details_download_all_button'),
@@ -117,11 +116,7 @@ class DownloadAllButton extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: borderRadius,
                   border: Border.all(
-                    color: isDownloading
-                        ? colorScheme.primary.withValues(alpha: 0.5)
-                        : colorScheme.outlineVariant.withValues(
-                            alpha: tokens.opacityMedium,
-                          ),
+                    color: hairline,
                     width: chipTokens.borderWidth,
                   ),
                 ),
@@ -136,22 +131,22 @@ class DownloadAllButton extends StatelessWidget {
                           centered: false,
                           strokeWidth: 2,
                           value: progress,
-                          color: colorScheme.primary,
-                          backgroundColor: colorScheme.primaryContainer,
+                          color: colorScheme.onSurface,
+                          backgroundColor: idleFill,
                         ),
                       ),
                       SizedBox(width: tokens.spaceSmall),
                       Text(
                         '${state.downloadedCount}/${state.totalCount}',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: colorScheme.primary,
+                          color: colorScheme.onSurface,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       SizedBox(width: tokens.spaceExtraSmall),
                       Icon(
                         Icons.pause_rounded,
-                        color: colorScheme.primary,
+                        color: colorScheme.onSurface,
                         size: chipTokens.inlineIconSize,
                       ),
                     ] else ...[
@@ -162,7 +157,7 @@ class DownloadAllButton extends StatelessWidget {
                       ),
                       SizedBox(width: tokens.spaceExtraSmall),
                       Text(
-                        _buildLabel(context, state, isDownloading, progress),
+                        '${state.downloadedCount}/${state.totalCount}',
                         style: theme.textTheme.labelSmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w500,
@@ -177,15 +172,5 @@ class DownloadAllButton extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _buildLabel(
-    BuildContext context,
-    ReciterDownloadState state,
-    bool isDownloading,
-    double progress,
-  ) {
-    // Always use short fraction format for inline display
-    return '${state.downloadedCount}/${state.totalCount}';
   }
 }

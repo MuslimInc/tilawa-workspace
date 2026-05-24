@@ -1,12 +1,21 @@
 import json
+import sys
+from pathlib import Path
 
-with open('assets/data/quran_page_index.json') as f:
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from quran_data_paths import (
+    QPC_V4_JSON,
+    QURAN_PAGE_INDEX_JSON,
+    VERSE_MARKER_COORDS_JSON,
+)
+
+with open(QURAN_PAGE_INDEX_JSON) as f:
     page_index = json.load(f)
 
-with open('assets/data/verse_marker_coordinates.json') as f:
+with open(VERSE_MARKER_COORDS_JSON) as f:
     coords = json.load(f)
 
-with open('assets/data/qpc-v4.json') as f:
+with open(QPC_V4_JSON) as f:
     qpc = json.load(f)
 
 word_count = {}

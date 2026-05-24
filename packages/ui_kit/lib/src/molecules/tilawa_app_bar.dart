@@ -137,6 +137,9 @@ class _TilawaAppBarBody extends StatelessWidget {
       tokens: tokens,
     );
 
+    final double resolvedToolbarHeight = toolbarHeight ?? kToolbarHeight;
+    final bool isBottomOnlyChrome = resolvedToolbarHeight == 0;
+
     return AppBar(
       backgroundColor: backgroundColor,
       foregroundColor: foregroundColor,
@@ -150,7 +153,8 @@ class _TilawaAppBarBody extends StatelessWidget {
       scrolledUnderElevation: TilawaAppBarChrome.scrolledUnderElevation(
         enabled: showElevationShadow,
       ),
-      toolbarHeight: toolbarHeight ?? kToolbarHeight,
+      toolbarHeight: resolvedToolbarHeight,
+      titleSpacing: isBottomOnlyChrome ? 0 : null,
       centerTitle: centerTitle,
       automaticallyImplyLeading: leadingConfig.automaticallyImplyLeading,
       leading: leadingConfig.leading,

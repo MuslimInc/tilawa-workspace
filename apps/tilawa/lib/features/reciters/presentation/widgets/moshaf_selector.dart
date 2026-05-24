@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciter_details_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/reciter_catalog_chrome.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -26,10 +27,10 @@ class MoshafSelector extends StatelessWidget {
       ),
       child: Container(
         decoration: BoxDecoration(
-          color: colorScheme.primaryContainer.withValues(alpha: 0.54),
+          color: ReciterCatalogChrome.idleFill(colorScheme),
           borderRadius: BorderRadius.circular(tokens.radiusLarge),
           border: Border.all(
-            color: colorScheme.primary.withValues(alpha: tokens.opacitySubtle),
+            color: ReciterCatalogChrome.hairline(colorScheme, tokens),
             width: tokens.borderWidthThin,
           ),
         ),
@@ -46,7 +47,7 @@ class MoshafSelector extends StatelessWidget {
               icon: Icon(
                 Icons.keyboard_arrow_down_rounded,
                 size: tokens.iconSizeLarge,
-                color: colorScheme.primary,
+                color: colorScheme.onSurface,
               ),
               value: uniqueMoshaf.contains(selectedMoshaf)
                   ? selectedMoshaf
