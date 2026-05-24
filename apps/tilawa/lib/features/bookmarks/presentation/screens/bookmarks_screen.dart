@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
-import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa/features/bookmarks/presentation/widgets/bookmark_card.dart';
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -23,16 +22,12 @@ class BookmarksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final double searchBottomHeight = TilawaAppBarConfig.searchBottomHeight(
-      theme,
-    );
-
     return Scaffold(
-      appBar: TilawaAppBar(
+      appBar: TilawaCatalogAppBar(
+        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(context),
         title: context.l10n.bookmarks,
-        automaticallyImplyLeading: false,
-        leading: context.canPop() ? const TilawaBackButton() : null,
+        automaticallyImplyLeading: true,
+        onBackPressed: () => context.pop(),
         actions: [
           TilawaIconActionButton(
             icon: Icons.refresh,
@@ -41,20 +36,17 @@ class BookmarksScreen extends StatelessWidget {
             },
           ),
         ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(searchBottomHeight),
-          child: BookmarkSearchBar(
-            onSearchChanged: (query) {
-              context.read<BookmarksBloc>().add(
-                SearchBookmarksEvent(query: query),
-              );
-            },
-            onClearSearch: () {
-              context.read<BookmarksBloc>().add(
-                const ClearBookmarksSearchEvent(),
-              );
-            },
-          ),
+        bottomContent: BookmarkSearchBar(
+          onSearchChanged: (query) {
+            context.read<BookmarksBloc>().add(
+              SearchBookmarksEvent(query: query),
+            );
+          },
+          onClearSearch: () {
+            context.read<BookmarksBloc>().add(
+              const ClearBookmarksSearchEvent(),
+            );
+          },
         ),
       ),
       body: TilawaContentBounds(

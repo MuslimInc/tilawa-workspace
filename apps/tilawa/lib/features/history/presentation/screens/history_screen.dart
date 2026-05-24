@@ -39,42 +39,63 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: TilawaAppBar(
-        title: context.l10n.listeningHistory,
-        actions: [
-          BlocBuilder<HistoryBloc, HistoryState>(
-            builder: (context, state) {
-              if (state.historyList.isNotEmpty) {
-                return PopupMenuButton<String>(
-                  onSelected: (value) {
-                    if (value == 'clear_all') {
-                      _showClearAllDialog(context);
-                    }
-                  },
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: 'clear_all',
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.delete_sweep,
-                            color: AppColors.error,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(context.l10n.clearAll),
-                        ],
+    return BlocBuilder<HistoryBloc, HistoryState>(
+      buildWhen: (previous, current) =>
+          previous.historyList.isEmpty != current.historyList.isEmpty,
+      builder: (context, state) {
+        final bool hasHistory = state.historyList.isNotEmpty;
+        final PreferredSizeWidget appBar = hasHistory
+            ? TilawaCatalogAppBar(
+                preferredHeight:
+                    TilawaAppBarConfig.catalogTitleAndSearchHeight(context),
+                title: context.l10n.listeningHistory,
+                actions: [
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'clear_all') {
+                        _showClearAllDialog(context);
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'clear_all',
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.delete_sweep,
+                              color: AppColors.error,
+                            ),
+                            const SizedBox(width: 12),
+                            Text(context.l10n.clearAll),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-        ],
-      ),
-      body: Stack(
+                    ],
+                  ),
+                ],
+                bottomContent: HistorySearchBar(
+                  controller: _searchController,
+                  onChanged: (query) {
+                    context.read<HistoryBloc>().add(
+                      HistoryEvent.searchHistory(query),
+                    );
+                  },
+                  onClear: () {
+                    _searchController.clear();
+                    context.read<HistoryBloc>().add(
+                      const HistoryEvent.clearSearch(),
+                    );
+                  },
+                ),
+              )
+            : TilawaCatalogAppBar.titleOnly(
+                context,
+                title: context.l10n.listeningHistory,
+              );
+
+        return Scaffold(
+          appBar: appBar,
+          body: Stack(
         children: [
           BlocBuilder<HistoryBloc, HistoryState>(
             builder: (context, state) {
@@ -98,25 +119,6 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
 
-                    // Search bar
-                    if (state.historyList.isNotEmpty)
-                      SliverToBoxAdapter(
-                        child: HistorySearchBar(
-                          controller: _searchController,
-                          onChanged: (query) {
-                            context.read<HistoryBloc>().add(
-                              HistoryEvent.searchHistory(query),
-                            );
-                          },
-                          onClear: () {
-                            _searchController.clear();
-                            context.read<HistoryBloc>().add(
-                              const HistoryEvent.clearSearch(),
-                            );
-                          },
-                        ),
-                      ),
-
                     const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
                     // Content based on state
@@ -132,7 +134,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
             },
           ),
         ],
-      ),
+          ),
+        );
+      },
     );
   }
 

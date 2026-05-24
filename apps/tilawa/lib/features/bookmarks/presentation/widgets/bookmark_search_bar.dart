@@ -31,26 +31,18 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = Theme.of(context).tokens;
-
-    return TilawaSearchFieldSlot(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceMedium,
-      ),
-      child: TilawaSearchField(
-        controller: _controller,
-        focusNode: _focusNode,
-        hintText: context.l10n.searchBookmarks,
-        prefixIcon: FluentIcons.search_24_regular,
-        clearIcon: FluentIcons.dismiss_24_regular,
-        onChanged: widget.onSearchChanged,
-        onClear: () {
-          _controller.clear();
-          widget.onClearSearch();
-        },
-        showShadow: false,
-      ),
+    return TilawaSearchField(
+      controller: _controller,
+      focusNode: _focusNode,
+      hintText: context.l10n.searchBookmarks,
+      prefixIcon: FluentIcons.search_24_regular,
+      clearIcon: FluentIcons.dismiss_24_regular,
+      onChanged: widget.onSearchChanged,
+      onClear: () {
+        _controller.clear();
+        widget.onClearSearch();
+      },
+      showShadow: false,
     );
   }
 }

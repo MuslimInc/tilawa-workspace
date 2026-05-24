@@ -31,8 +31,9 @@ class ReciterDetailsAppBar extends StatelessWidget {
     );
 
     return TilawaSliverAppBar(
+      surface: TilawaAppBarSurface.parchment,
       leading: TilawaBackButton(color: foregroundColor),
-      centerTitle: true,
+      centerTitle: false,
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(searchBottomHeight),
         child: ReciterDetailsSearchBar(controller: searchController),

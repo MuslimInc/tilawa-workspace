@@ -31,7 +31,10 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return Stack(
       children: [
         Scaffold(
-          appBar: TilawaAppBar(title: context.l10n.premium),
+          appBar: TilawaCatalogAppBar.titleOnly(
+            context,
+            title: context.l10n.premium,
+          ),
           body: BlocConsumer<PremiumBloc, PremiumState>(
             listener: (context, state) {
               state.when(

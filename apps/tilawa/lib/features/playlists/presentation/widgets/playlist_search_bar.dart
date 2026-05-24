@@ -32,20 +32,16 @@ class _PlaylistSearchBarState extends State<PlaylistSearchBar> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
-    final tokens = Theme.of(context).tokens;
 
-    return TilawaSearchFieldSlot(
-      padding: EdgeInsets.all(tokens.spaceMedium),
-      child: TilawaSearchField(
-        controller: _controller,
-        hintText: widget.hintText ?? l10n.searchPlaylists,
-        onChanged: widget.onSearchChanged,
-        onClear: () {
-          _controller.clear();
-          widget.onClearSearch();
-        },
-        showShadow: false,
-      ),
+    return TilawaSearchField(
+      controller: _controller,
+      hintText: widget.hintText ?? l10n.searchPlaylists,
+      onChanged: widget.onSearchChanged,
+      onClear: () {
+        _controller.clear();
+        widget.onClearSearch();
+      },
+      showShadow: false,
     );
   }
 }

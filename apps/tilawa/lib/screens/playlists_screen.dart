@@ -30,16 +30,25 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
     final AppLocalizations l10n = context.l10n;
 
     return Scaffold(
-      appBar: TilawaAppBar(
+      appBar: TilawaCatalogAppBar(
+        preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(context),
         title: l10n.playlists,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
+          TilawaIconActionButton(
+            icon: Icons.refresh,
+            onTap: () {
               context.read<PlaylistsBloc>().add(const RefreshPlaylistsEvent());
             },
           ),
         ],
+        bottomContent: PlaylistSearchBar(
+          onSearchChanged: (query) {
+            context.read<PlaylistsBloc>().add(SearchPlaylistsEvent(query));
+          },
+          onClearSearch: () {
+            context.read<PlaylistsBloc>().add(const ClearSearchEvent());
+          },
+        ),
       ),
       body: BlocConsumer<PlaylistsBloc, PlaylistsState>(
         listener: (context, state) {
@@ -69,16 +78,6 @@ class _PlaylistsScreenState extends State<PlaylistsScreen> {
             loading: () => const TilawaLoadingIndicator(),
             loaded: (playlists, searchQuery, filteredPlaylists) => Column(
               children: [
-                PlaylistSearchBar(
-                  onSearchChanged: (query) {
-                    context.read<PlaylistsBloc>().add(
-                      SearchPlaylistsEvent(query),
-                    );
-                  },
-                  onClearSearch: () {
-                    context.read<PlaylistsBloc>().add(const ClearSearchEvent());
-                  },
-                ),
                 Expanded(
                   child: filteredPlaylists.isEmpty
                       ? _buildEmptyState(context, l10n)

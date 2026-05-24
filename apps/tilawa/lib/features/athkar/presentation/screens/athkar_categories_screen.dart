@@ -29,7 +29,10 @@ class AthkarCategoriesScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => getIt<AthkarCubit>()..loadCategories(),
       child: Scaffold(
-        appBar: TilawaAppBar(title: context.l10n.athkar),
+        appBar: TilawaCatalogAppBar.titleOnly(
+          context,
+          title: context.l10n.athkar,
+        ),
         body: Stack(
           children: [
             const Positioned.fill(child: AthkarAmbientBackground()),

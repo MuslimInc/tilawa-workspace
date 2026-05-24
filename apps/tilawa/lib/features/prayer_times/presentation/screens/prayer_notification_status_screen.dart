@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
-import 'package:tilawa/shared/widgets/tilawa_back_button.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -23,10 +22,11 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
           PrayerStatusCubit(getIt<IAdhanAlarmPlayer>())..init(payloadJson),
       child: Scaffold(
         backgroundColor: context.colorScheme.surface,
-        appBar: TilawaAppBar(
+        appBar: TilawaCatalogAppBar(
+          preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
           title: context.l10n.prayerNotificationReceived,
-          automaticallyImplyLeading: false,
-          leading: context.canPop() ? const TilawaBackButton() : null,
+          automaticallyImplyLeading: true,
+          onBackPressed: () => context.pop(),
         ),
         body: const _PrayerNotificationStatusView(),
       ),

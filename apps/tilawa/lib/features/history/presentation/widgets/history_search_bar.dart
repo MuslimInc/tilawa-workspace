@@ -17,14 +17,12 @@ class HistorySearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaSearchFieldSlot(
-      child: TilawaSearchField(
-        controller: controller,
-        hintText: context.l10n.searchHistory,
-        onChanged: onChanged,
-        onClear: onClear,
-        showShadow: false,
-      ),
+    return TilawaSearchField(
+      controller: controller,
+      hintText: context.l10n.searchHistory,
+      onChanged: onChanged,
+      onClear: onClear,
+      showShadow: false,
     );
   }
 }

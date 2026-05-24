@@ -42,7 +42,9 @@ class PrayerTimesAppBar extends StatelessWidget {
     final ColorScheme colorScheme = theme.colorScheme;
 
     return TilawaSliverAppBar(
+      surface: TilawaAppBarSurface.parchment,
       automaticallyImplyLeading: false,
+      centerTitle: false,
       title: context.l10n.prayerTimes,
       actions: [
         Semantics(
@@ -56,10 +58,7 @@ class PrayerTimesAppBar extends StatelessWidget {
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(prayerTimesAppBarBottomExtent(context)),
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: tokens.spaceMedium,
-            vertical: tokens.spaceMedium,
-          ),
+          padding: TilawaAppBarConfig.catalogChromePadding(tokens),
           child: TilawaSegmentedControl<String>(
             segments: [
               TilawaSegment(value: 'today', label: context.l10n.today),

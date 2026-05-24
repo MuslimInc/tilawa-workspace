@@ -38,12 +38,9 @@ class SettingsScreen extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: colorScheme.surface,
-        appBar: TilawaAppBar(
+        appBar: TilawaCatalogAppBar.titleOnly(
+          context,
           title: l10n.settingsYourAccount,
-          automaticallyImplyLeading: false,
-          centerTitle: false,
-          surface: TilawaAppBarSurface.parchment,
-          showBottomHairline: true,
         ),
         body: TilawaCatalogSettingsBody(
           child: ListView(

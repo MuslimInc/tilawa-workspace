@@ -47,7 +47,10 @@ class _SupportTilawaScreenState extends State<SupportTilawaScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: TilawaAppBar(title: context.l10n.supportTilawa),
+      appBar: TilawaCatalogAppBar.titleOnly(
+        context,
+        title: context.l10n.supportTilawa,
+      ),
       body: BlocConsumer<SupportBloc, SupportState>(
         listenWhen: (SupportState prev, SupportState next) =>
             prev.failure != next.failure && next.failure != null,

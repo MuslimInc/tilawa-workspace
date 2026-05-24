@@ -80,14 +80,21 @@ class _TasbeehView extends StatelessWidget {
         }
 
         return Scaffold(
-          appBar: TilawaAppBar(
-            leading: state.viewMode != TasbeehViewMode.options
-                ? TilawaBackButton(onPressed: cubit.showOptionsView)
-                : context.canPop()
-                ? const TilawaBackButton()
-                : null,
-            automaticallyImplyLeading: false,
+          appBar: TilawaCatalogAppBar(
+            preferredHeight:
+                TilawaAppBarConfig.catalogTitleOnlyHeight(context),
             title: context.l10n.tasbeehCategory,
+            leading: state.viewMode != TasbeehViewMode.options
+                ? TilawaBackButton(
+                    compact: true,
+                    onPressed: cubit.showOptionsView,
+                  )
+                : context.canPop()
+                ? TilawaBackButton(
+                    compact: true,
+                    onPressed: () => context.pop(),
+                  )
+                : null,
           ),
           body: Stack(
             children: [

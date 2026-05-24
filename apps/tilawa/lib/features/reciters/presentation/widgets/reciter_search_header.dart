@@ -8,7 +8,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Height of [ReciterDetailsSearchBar] inside [TilawaSliverAppBar.bottom].
 double reciterDetailsSearchHeaderExtent(BuildContext context) {
-  return TilawaAppBarConfig.searchBottomHeight(Theme.of(context));
+  return TilawaAppBarConfig.catalogSearchRowHeight(context);
 }
 
 /// [RefreshIndicator.edgeOffset] below pinned app bar (title + search bottom).
@@ -34,10 +34,7 @@ class ReciterDetailsSearchBar extends StatelessWidget {
     final TilawaDesignTokens tokens = theme.tokens;
 
     return TilawaSearchFieldSlot(
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceMedium,
-      ),
+      padding: TilawaAppBarConfig.catalogChromePadding(tokens),
       child: Row(
         spacing: tokens.spaceSmall,
         children: [

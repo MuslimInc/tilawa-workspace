@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../foundation/component_tokens.dart';
@@ -14,8 +16,11 @@ enum TilawaAppBarSurface {
 
 /// Default constructor values for Tilawa app bars.
 abstract final class TilawaAppBarConfig {
-  static const TilawaAppBarSurface surface = TilawaAppBarSurface.vellum;
-  static const bool centerTitle = true;
+  /// Pinterest-style catalog screens (Reciters, Settings, lists).
+  static const TilawaAppBarSurface surface = TilawaAppBarSurface.parchment;
+
+  /// Left-aligned titles in catalog chrome (matches Reciters header).
+  static const bool centerTitle = false;
   static const bool automaticallyImplyLeading = true;
   static const bool showLeadingControlBackground = false;
   static const bool showActionControlBackground = false;
@@ -41,6 +46,116 @@ abstract final class TilawaAppBarConfig {
   static double searchBottomHeight(ThemeData theme) {
     return theme.componentTokens.searchField.height +
         theme.tokens.spaceMedium * 2;
+  }
+
+  /// Insets for [TilawaCatalogAppBar] and catalog search slots (Reciters).
+  static EdgeInsets catalogChromePadding(TilawaDesignTokens tokens) {
+    return EdgeInsets.fromLTRB(
+      tokens.spaceMedium,
+      tokens.spaceSmall,
+      tokens.spaceMedium,
+      tokens.spaceSmall,
+    );
+  }
+
+  /// Bold [titleLarge] row height (matches catalog app bar title).
+  static double catalogTitleRowHeight(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+    final double titleHeight = _singleLineTextHeight(
+      context,
+      titleStyle,
+      textScaler,
+    );
+    return math.max(titleHeight, kMinInteractiveDimension);
+  }
+
+  /// Title-only catalog header (Settings, Favorites, Athkar).
+  static double catalogTitleOnlyHeight(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final EdgeInsets padding = catalogChromePadding(tokens);
+    final double raw = padding.vertical + catalogTitleRowHeight(context);
+    return _ceilToDevicePixels(context, raw);
+  }
+
+  /// Title + one catalog search field (Bookmarks, History, Playlists).
+  static double catalogTitleAndSearchHeight(BuildContext context) {
+    final double searchHeight =
+        Theme.of(context).componentTokens.searchField.height;
+    return catalogTitleAndContentHeight(
+      context,
+      contentHeight: searchHeight,
+    );
+  }
+
+  /// Title + arbitrary bottom block (filter row, segments, etc.).
+  static double catalogTitleAndContentHeight(
+    BuildContext context, {
+    required double contentHeight,
+  }) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final EdgeInsets padding = catalogChromePadding(tokens);
+    final double raw =
+        padding.vertical +
+        catalogTitleRowHeight(context) +
+        tokens.spaceSmall +
+        contentHeight;
+    return _ceilToDevicePixels(context, raw);
+  }
+
+  /// Title + search + min-height filter row (Reciters catalog header).
+  static double catalogTitleSearchAndFilterRowHeight(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final double searchHeight =
+        Theme.of(context).componentTokens.searchField.height;
+    final double contentHeight =
+        searchHeight + tokens.spaceSmall + kMinInteractiveDimension;
+    return catalogTitleAndContentHeight(
+      context,
+      contentHeight: contentHeight,
+    );
+  }
+
+  /// Search (+ optional trailing control) without a title row.
+  static double catalogSearchRowHeight(
+    BuildContext context, {
+    double trailingMinHeight = kMinInteractiveDimension,
+  }) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final double searchHeight =
+        Theme.of(context).componentTokens.searchField.height;
+    final double rowHeight = math.max(searchHeight, trailingMinHeight);
+    final EdgeInsets padding = catalogChromePadding(tokens);
+    final double raw = padding.vertical + rowHeight;
+    return _ceilToDevicePixels(context, raw);
+  }
+
+  static double _singleLineTextHeight(
+    BuildContext context,
+    TextStyle? style,
+    TextScaler textScaler,
+  ) {
+    if (style == null) {
+      return 27.5;
+    }
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: 'Hg', style: style),
+      textScaler: textScaler,
+      textDirection: Directionality.of(context),
+      maxLines: 1,
+    )..layout();
+    return painter.height;
+  }
+
+  static double _ceilToDevicePixels(
+    BuildContext context,
+    double logicalPixels,
+  ) {
+    final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+    return (logicalPixels * devicePixelRatio).ceil() / devicePixelRatio;
   }
 }
 
@@ -252,6 +367,70 @@ abstract final class TilawaAppBarChrome {
           tooltip: tooltip,
         ),
       ),
+    );
+  }
+
+  /// Back control for [TilawaCatalogAppBar] title rows (no extra start inset).
+  static Widget catalogBackButton({
+    required BuildContext context,
+    VoidCallback? onPressed,
+    Color? iconColor,
+  }) {
+    final ThemeData theme = Theme.of(context);
+    final Color color = iconColor ?? theme.colorScheme.onSurfaceVariant;
+
+    return framedToolbarIcon(
+      context: context,
+      icon: IconTheme(
+        data: IconThemeData(color: color),
+        child: const BackButtonIcon(),
+      ),
+      onPressed: onPressed ?? () => Navigator.maybePop(context),
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+    );
+  }
+
+  /// Leading widget for catalog title rows (drawer menu or back on push).
+  ///
+  /// Prefer [onBackPressed] when the screen uses GoRouter (`context.pop()`).
+  static Widget? resolveCatalogRowLeading(
+    BuildContext context, {
+    Widget? leading,
+    required bool automaticallyImplyLeading,
+    VoidCallback? onBackPressed,
+  }) {
+    if (leading != null) {
+      return leading;
+    }
+    if (!automaticallyImplyLeading) {
+      return null;
+    }
+
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final ({
+      Widget? leading,
+      bool automaticallyImplyLeading,
+      double? leadingWidth,
+    })
+    toolbarLeading = resolveLeading(
+      context: context,
+      leading: null,
+      automaticallyImplyLeading: true,
+      tokens: tokens,
+    );
+
+    if (toolbarLeading.leading == null) {
+      return null;
+    }
+
+    final ScaffoldState? scaffold = Scaffold.maybeOf(context);
+    if (scaffold?.hasDrawer ?? false) {
+      return toolbarLeading.leading;
+    }
+
+    return catalogBackButton(
+      context: context,
+      onPressed: onBackPressed,
     );
   }
 

@@ -280,10 +280,9 @@ class _RecitersScreenState extends State<RecitersScreen> {
       return Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: colorScheme.surface,
-        appBar: TilawaAppBar(
+        appBar: TilawaCatalogAppBar.titleOnly(
+          context,
           title: context.l10n.reciters,
-          automaticallyImplyLeading: false,
-          surface: TilawaAppBarSurface.parchment,
         ),
         body: Stack(
           fit: StackFit.expand,
@@ -372,7 +371,10 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   resizeToAvoidBottomInset: false,
                   backgroundColor: colorScheme.surface,
                   appBar: _RecitersTilawaAppBar(
-                      bottomHeight: _recitersAppBarBottomHeight(context),
+                      bottomHeight:
+                          TilawaAppBarConfig.catalogTitleSearchAndFilterRowHeight(
+                        context,
+                      ),
                       state: state,
                       letterIndexAvailable: letterIndexAvailable,
                       showLetterIndex: _showLetterIndex,
@@ -753,55 +755,31 @@ class _RecitersTilawaAppBar extends StatelessWidget
     final RecitersLoaded? loaded =
         state is RecitersLoaded ? state as RecitersLoaded : null;
 
-    return TilawaAppBar(
-      automaticallyImplyLeading: false,
-      surface: TilawaAppBarSurface.parchment,
-      toolbarHeight: 0,
-      bottom: PreferredSize(
-        preferredSize: Size.fromHeight(bottomHeight),
-        child: Semantics(
-          header: true,
-          label: context.l10n.reciters,
-          explicitChildNodes: true,
-          child: TilawaSearchFieldSlot(
-            padding: EdgeInsets.fromLTRB(
-              tokens.spaceMedium,
-              tokens.spaceSmall,
-              tokens.spaceMedium,
-              tokens.spaceSmall,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  context.l10n.reciters,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                SizedBox(height: tokens.spaceSmall),
-                _SearchField(
-                  controller: searchController,
-                  focusNode: focusNode,
-                  onChanged: onSearchChanged,
-                  onClear: onClearSearch,
-                ),
-                SizedBox(height: tokens.spaceSmall),
-                _RecitersQuickFilterBar(
-                  state: state,
-                  loaded: loaded,
-                  letterIndexAvailable: letterIndexAvailable,
-                  showLetterIndex: showLetterIndex,
-                  onToggleFavorites: onToggleFavorites,
-                  onToggleLetterIndex: onToggleLetterIndex,
-                  onClearLetterFilter: onClearLetterFilter,
-                  onClearAllFilters: onClearAllFilters,
-                ),
-              ],
-            ),
+    return TilawaCatalogAppBar(
+      preferredHeight: bottomHeight,
+      title: context.l10n.reciters,
+      bottomContent: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _SearchField(
+            controller: searchController,
+            focusNode: focusNode,
+            onChanged: onSearchChanged,
+            onClear: onClearSearch,
           ),
-        ),
+          SizedBox(height: tokens.spaceSmall),
+          _RecitersQuickFilterBar(
+            state: state,
+            loaded: loaded,
+            letterIndexAvailable: letterIndexAvailable,
+            showLetterIndex: showLetterIndex,
+            onToggleFavorites: onToggleFavorites,
+            onToggleLetterIndex: onToggleLetterIndex,
+            onClearLetterFilter: onClearLetterFilter,
+            onClearAllFilters: onClearAllFilters,
+          ),
+        ],
       ),
     );
   }
@@ -1392,56 +1370,6 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
       scrollbarSemanticsHint: widget.scrollbarSemanticsHint,
     );
   }
-}
-
-/// Title + catalog search + filter row (must match [_RecitersTilawaAppBar] layout).
-double _recitersAppBarBottomHeight(BuildContext context) {
-  final ThemeData theme = Theme.of(context);
-  final TilawaDesignTokens tokens = theme.tokens;
-  final TextScaler textScaler = MediaQuery.textScalerOf(context);
-  final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
-    fontWeight: FontWeight.w700,
-  );
-  final double titleLineHeight = _singleLineTextHeight(
-    context,
-    titleStyle,
-    textScaler,
-  );
-  final double searchHeight = theme.componentTokens.searchField.height;
-
-  final double raw =
-      tokens.spaceSmall +
-      titleLineHeight +
-      tokens.spaceSmall +
-      searchHeight +
-      tokens.spaceSmall +
-      kMinInteractiveDimension +
-      tokens.spaceSmall;
-
-  return _ceilToDevicePixels(context, raw);
-}
-
-double _singleLineTextHeight(
-  BuildContext context,
-  TextStyle? style,
-  TextScaler textScaler,
-) {
-  if (style == null) {
-    return 27.5;
-  }
-  final TextPainter painter = TextPainter(
-    text: TextSpan(text: 'Hg', style: style),
-    textScaler: textScaler,
-    textDirection: Directionality.of(context),
-    maxLines: 1,
-  )..layout();
-  return painter.height;
-}
-
-/// Rounds [logicalPixels] up to a whole physical pixel to avoid [AppBar] overflows.
-double _ceilToDevicePixels(BuildContext context, double logicalPixels) {
-  final double devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-  return (logicalPixels * devicePixelRatio).ceil() / devicePixelRatio;
 }
 
 /// Reserved width for the letter-index rail (scrollbar + outer margin).
