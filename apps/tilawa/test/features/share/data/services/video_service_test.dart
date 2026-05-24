@@ -7,6 +7,8 @@ import 'package:path/path.dart' as p;
 import 'package:tilawa/features/share/data/ffmpeg/ffmpeg_runner.dart';
 import 'package:tilawa/features/share/data/services/share_file_manager.dart';
 import 'package:tilawa/features/share/data/services/video_service.dart';
+import 'package:tilawa/features/share/data/utils/share_cancel_token_bridge.dart';
+import 'package:tilawa/features/share/domain/entities/share_cancel_token.dart';
 import 'package:tilawa/features/share/domain/entities/share_progress_messages.dart';
 import 'package:tilawa/features/share/domain/entities/share_video_profile.dart';
 import 'package:tilawa_core/errors/failures.dart';
@@ -488,7 +490,7 @@ void main() {
       },
     );
 
-    test('cancelToken.cancel() forwards to FFmpegRunHandle.cancel()', () async {
+    test('share cancel token forwards to FFmpegRunHandle.cancel()', () async {
       final runner = FakeFFmpegRunner();
       runner.asyncPlans.add(
         FakeAsyncPlan(
@@ -500,7 +502,8 @@ void main() {
       runner.mediaInfoResults.add(const FFmpegMediaInfo(durationSeconds: 10.0));
       final service = VideoService(ShareFileManager(), runner);
       final png = await _writeFile(_platformTempDir, 'slide.png', size: 16);
-      final cancelToken = CancelToken();
+      final shareToken = ShareCancelToken();
+      final cancelBridge = ShareCancelTokenBridge.fromDomain(shareToken);
 
       final future = service.generateVideo(
         screenshotPaths: [png.path],
@@ -508,12 +511,12 @@ void main() {
         surahName: 'X',
         reciterName: 'Y',
         progressMessages: _messages,
-        cancelToken: cancelToken,
+        cancelToken: cancelBridge,
       );
 
       // Let the encode start so the handle is in flight.
       await Future<void>.delayed(Duration.zero);
-      cancelToken.cancel();
+      shareToken.cancel();
 
       await expectLater(
         future,

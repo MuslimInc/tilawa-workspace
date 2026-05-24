@@ -1,4 +1,4 @@
-import '../../data/services/reciter_audio_mapping.dart';
+import '../../domain/services/reciter_audio_catalog.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 
@@ -29,7 +29,7 @@ List<ShareReciterOption> buildShareReciterOptions({
           (MoshafEntity moshaf) =>
               moshaf.server.trim().isNotEmpty &&
               _moshafSupportsSurah(moshaf, surahNumber) &&
-              ReciterAudioMapping.isReciterMapped(
+              ReciterAudioCatalog.isReciterMapped(
                 _buildSurahAudioUrl(moshaf.server, formattedSurahNumber),
               ),
         )

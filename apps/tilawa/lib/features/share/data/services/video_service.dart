@@ -11,6 +11,7 @@ import 'package:tilawa_core/logger.dart';
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/entities/share_video_profile.dart';
 import '../ffmpeg/ffmpeg_runner.dart';
+import '../utils/share_cancel_token_bridge.dart';
 import 'share_file_manager.dart';
 
 @lazySingleton
@@ -53,7 +54,7 @@ class VideoService {
     required String reciterName,
     required VideoProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
-    CancelToken? cancelToken,
+    ShareCancelTokenBridge? cancelToken,
   }) async {
     logger.d(
       '[AppLaunch] source=VideoService.generateVideo: Start in (${DateTime.now()})',
@@ -181,7 +182,7 @@ class VideoService {
     required double audioDurationSeconds,
     required VideoProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
-    CancelToken? cancelToken,
+    ShareCancelTokenBridge? cancelToken,
   }) async {
     final double audioDurationMs = audioDurationSeconds * 1000.0;
     double lastReportedFraction = _encodingStartProgress;
@@ -209,7 +210,7 @@ class VideoService {
     );
 
     if (cancelToken != null) {
-      cancelToken.whenCancel
+      cancelToken.dioToken.whenCancel
           .then((_) {
             _videoLog(
               '[VIDEO_SVC] cancel requested — cancelling ffmpeg session.',
