@@ -87,3 +87,11 @@ public class SwiftFlutterCompassPlugin: NSObject, FlutterPlugin, FlutterStreamHa
         }
     }
 }
+
+@objc(FlutterCompassPlugin)
+public class FlutterCompassPlugin: NSObject {
+  @objc(registerWithRegistrar:)
+  public static func register(with registrar: FlutterPluginRegistrar) {
+    SwiftFlutterCompassPlugin.register(with: registrar)
+  }
+}

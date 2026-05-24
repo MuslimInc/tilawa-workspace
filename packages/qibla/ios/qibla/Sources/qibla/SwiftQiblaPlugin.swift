@@ -12,3 +12,11 @@ public class SwiftQiblaPlugin: NSObject, FlutterPlugin {
     result("iOS " + UIDevice.current.systemVersion)
   }
 }
+
+@objc(QiblaPlugin)
+public class QiblaPlugin: NSObject {
+  @objc(registerWithRegistrar:)
+  public static func register(with registrar: FlutterPluginRegistrar) {
+    SwiftQiblaPlugin.register(with: registrar)
+  }
+}
