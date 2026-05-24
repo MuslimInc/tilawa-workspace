@@ -5,11 +5,16 @@ exact x coordinates for verse-ending words.
 """
 import sqlite3
 import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from quran_data_paths import QURAN_PAGE_INDEX_JSON
 
 SURAH_DB = '../surah_app_assets/flutter_assets/database/surah_database_app_v34.db'
 
 # Load quran_page_index.json (page -> line -> [word keys])
-with open('assets/data/quran_page_index.json') as f:
+with open(QURAN_PAGE_INDEX_JSON) as f:
     page_index = json.load(f)
 
 # Get per-line word counts from WordCoordinateS2

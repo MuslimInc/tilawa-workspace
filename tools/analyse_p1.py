@@ -1,5 +1,9 @@
 import cv2, numpy as np, json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from quran_data_paths import QPC_V4_JSON, QURAN_PAGE_INDEX_JSON
 
 LINE_IMAGES = Path("assets/quran_images/1")
 LINE_IMG_W  = 1440
@@ -42,9 +46,9 @@ for li in range(1, LINE_COUNT + 1):
     if d['has_content']:
         print(f"  L{li:2d}: left={d['text_left']:.3f}  right={d['text_right']:.3f}  gaps={d['gap_centers']}")
 
-with open("assets/data/quran_page_index.json") as f:
+with open(QURAN_PAGE_INDEX_JSON) as f:
     pi = json.load(f)
-with open("assets/data/qpc-v4.json") as f:
+with open(QPC_V4_JSON) as f:
     qpc = json.load(f)
 
 wc = {}

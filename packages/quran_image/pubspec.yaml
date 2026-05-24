@@ -49,8 +49,7 @@ flutter:
 
   assets:
     - assets/fonts/
-    - assets/databases/
-    - assets/data/
+    - assets/data/verse_marker_coordinates.json
     - assets/data/quran_marker_debug_coordinates/
 
   fonts:
