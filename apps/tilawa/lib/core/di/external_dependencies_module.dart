@@ -21,10 +21,8 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/audio_player/domain/services/artist_playlist_builder.dart';
 import 'package:tilawa/features/audio_player/domain/services/playback_uri_resolver.dart';
-import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
-import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
+import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
 import 'package:tilawa/features/premium/data/services/subscription_plans_service.dart';
-import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa_core/config/api_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 
@@ -110,9 +108,7 @@ abstract class ExternalDependenciesModule {
     List<MediaItem> mediaItems,
     AnalyticsService analyticsService,
     SharedPreferencesAsync prefs,
-    RecitersRepository recitersRepository,
-    DownloadsRepository downloadsRepository,
-    ReciterAudioCatalogBuilder catalogBuilder,
+    ReciterAudioCatalogCache catalogCache,
     PlaybackUriResolver playbackUriResolver,
     ArtistPlaylistBuilder artistPlaylistBuilder,
   ) {
@@ -123,8 +119,7 @@ abstract class ExternalDependenciesModule {
       mediaItems,
       analyticsService,
       prefs,
-      recitersRepository,
-      catalogBuilder,
+      catalogCache,
       playbackUriResolver,
       artistPlaylistBuilder,
     );

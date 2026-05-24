@@ -7,18 +7,24 @@ import 'package:tilawa_core/utils/url_validator.dart';
 
 import '../entities/reciter_audio_catalog.dart';
 
-/// Builds flat tracks and an artist index in a single O(n) pass.
+/// Builds flat tracks and indexes in a single O(n) pass.
 @lazySingleton
 class ReciterAudioCatalogBuilder {
   const ReciterAudioCatalogBuilder();
 
-  /// Returns playable surah entries and a [ReciterAudioCatalog.byArtist] index.
+  /// Returns playable surah entries with artist and reciter indexes.
   ReciterAudioCatalog build(List<ReciterEntity> reciters) {
     final List<AudioEntity> tracks = <AudioEntity>[];
     final Map<String, List<AudioEntity>> byArtist =
         <String, List<AudioEntity>>{};
+    final Map<String, ReciterEntity> byReciterName = <String, ReciterEntity>{};
 
     for (final ReciterEntity reciter in reciters) {
+      final String reciterKey = reciter.name.trim().toLowerCase();
+      if (reciterKey.isNotEmpty) {
+        byReciterName[reciterKey] = reciter;
+      }
+
       for (final MoshafEntity moshaf in reciter.moshaf) {
         final List<String> surahList = moshaf.surahList.split(',');
         for (final String surahId in surahList) {
@@ -46,13 +52,16 @@ class ReciterAudioCatalogBuilder {
           );
 
           tracks.add(track);
-          byArtist
-              .putIfAbsent(reciter.name, () => <AudioEntity>[])
-              .add(track);
+          byArtist.putIfAbsent(reciter.name, () => <AudioEntity>[]).add(track);
         }
       }
     }
 
-    return ReciterAudioCatalog(tracks: tracks, byArtist: byArtist);
+    return ReciterAudioCatalog(
+      reciters: List<ReciterEntity>.unmodifiable(reciters),
+      tracks: tracks,
+      byArtist: byArtist,
+      byReciterName: byReciterName,
+    );
   }
 }

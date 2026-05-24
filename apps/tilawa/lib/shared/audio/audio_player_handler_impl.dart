@@ -21,7 +21,7 @@ import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/audio_player/domain/entities/reciter_audio_catalog.dart';
 import '../../features/audio_player/domain/services/artist_playlist_builder.dart';
 import '../../features/audio_player/domain/services/playback_uri_resolver.dart';
-import '../../features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
+import '../../features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
 import '../../features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import '../models/queue_state.dart';
@@ -34,8 +34,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     this.newList,
     this._analyticsService,
     this._prefs,
-    this._recitersRepository,
-    this._catalogBuilder,
+    this._catalogCache,
     this._playbackUriResolver,
     this._artistPlaylistBuilder, {
     AudioPlayer? player,
@@ -51,8 +50,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   final List<audio_service.MediaItem> newList;
   final AnalyticsService _analyticsService;
   final SharedPreferencesAsync _prefs;
-  RecitersRepository _recitersRepository;
-  final ReciterAudioCatalogBuilder _catalogBuilder;
+  final ReciterAudioCatalogCache _catalogCache;
   final PlaybackUriResolver _playbackUriResolver;
   final ArtistPlaylistBuilder _artistPlaylistBuilder;
   final _items = <String, List<audio_service.MediaItem>>{};
@@ -66,7 +64,6 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   // Caching and pagination
 
   final Map<String, List<audio_service.MediaItem>> _artistPlaylists = {};
-  bool _isLoadingReciters = false;
 
   // Audio loading management
   bool _isLoadingAudio = false;
@@ -669,56 +666,23 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     );
   }
 
-  ReciterAudioCatalog? _cachedCatalog;
-  final Duration _cacheDuration = const Duration(minutes: 5);
-  DateTime? _lastCacheTime;
-
   @override
   Future<List<AudioEntity>?> getReciters({String? languageCode}) async {
-    // Return cached data if valid
-    if (_cachedCatalog != null &&
-        _lastCacheTime != null &&
-        DateTime.now().difference(_lastCacheTime!) < _cacheDuration) {
-      return _cachedCatalog!.tracks;
-    }
-
-    // Prevent multiple simultaneous requests
-    if (_isLoadingReciters) {
-      await Future.delayed(const Duration(milliseconds: 200));
-      return _cachedCatalog?.tracks;
-    }
-
-    _isLoadingReciters = true;
-
-    try {
-      final Either<Failure, List<ReciterEntity>> recitersData =
-          await _recitersRepository.getReciters();
-
-      return recitersData.fold(
-        (failure) {
-          log('Error fetching reciters: ${failure.message}');
-          return null;
-        },
-        (reciters) {
-          final ReciterAudioCatalog catalog = _catalogBuilder.build(reciters);
-          _cachedCatalog = catalog;
-          _lastCacheTime = DateTime.now();
-          return catalog.tracks;
-        },
-      );
-    } finally {
-      _isLoadingReciters = false;
-    }
+    return _catalogCache.loadTracks();
   }
 
   /// Get raw reciters data for the RecitersScreen
   @override
   Future<List<ReciterEntity>?> getRecitersData({String? languageCode}) async {
-    final Either<Failure, List<ReciterEntity>> result =
-        await _recitersRepository.getReciters();
-    return result.fold((failure) {
-      return null;
-    }, (reciters) => reciters);
+    return _catalogCache.loadReciters();
+  }
+
+  @override
+  Future<ReciterEntity?> findReciterByName(
+    String name, {
+    String? languageCode,
+  }) async {
+    return _catalogCache.reciterNamed(name);
   }
 
   // Helper to removed: _fetchReciters
@@ -825,12 +789,12 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
       log('Loading playlist for artist: $artistId');
 
-      final List<AudioEntity>? reciters = await getReciters();
-      final ReciterAudioCatalog? catalog = _cachedCatalog;
+      final ReciterAudioCatalog? catalog = await _catalogCache.loadCatalog();
 
-      if (reciters != null && catalog != null) {
-        final List<AudioEntity> artistAudioEntities =
-            _artistPlaylistBuilder.playlistForArtist(catalog, artistId);
+      if (catalog != null) {
+        final List<AudioEntity> artistAudioEntities = catalog.tracksForArtist(
+          artistId,
+        );
 
         if (artistAudioEntities.isNotEmpty) {
           log(
@@ -892,10 +856,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
   @override
   void setRecitersRepository(RecitersRepository repository) {
-    _recitersRepository = repository;
-    // Clear cache to force use of new repository
-    _cachedCatalog = null;
-    _lastCacheTime = null;
+    _catalogCache.bindRepository(repository);
   }
 }
 

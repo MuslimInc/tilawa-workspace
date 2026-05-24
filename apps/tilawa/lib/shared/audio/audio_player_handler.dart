@@ -66,6 +66,10 @@ abstract class AudioPlayerHandler implements AudioHandler {
   // Reciter and surah management
   Future<List<AudioEntity>?> getReciters({String? languageCode});
   Future<List<ReciterEntity>?> getRecitersData({String? languageCode});
+  Future<ReciterEntity?> findReciterByName(
+    String name, {
+    String? languageCode,
+  });
   Future<List<AudioEntity>?> getSurahListForMoshaf(
     MoshafEntity moshaf, {
     String? reciterName,
