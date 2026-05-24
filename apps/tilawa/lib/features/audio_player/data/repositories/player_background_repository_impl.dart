@@ -3,7 +3,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import '../../domain/entities/player_background_configuration.dart';
 import '../../domain/repositories/player_background_repository.dart';
+import '../models/player_background_configuration_model.dart';
 
 @LazySingleton(as: PlayerBackgroundRepository)
 class PlayerBackgroundRepositoryImpl implements PlayerBackgroundRepository {
@@ -49,5 +51,19 @@ class PlayerBackgroundRepositoryImpl implements PlayerBackgroundRepository {
     } catch (_) {
       // Ignore deletion errors as per repository policy
     }
+  }
+
+  @override
+  PlayerBackgroundConfiguration decodePersistedConfiguration(
+    Map<String, dynamic> json,
+  ) {
+    return PlayerBackgroundConfigurationModel.fromJson(json);
+  }
+
+  @override
+  Map<String, dynamic> encodeConfiguration(
+    PlayerBackgroundConfiguration config,
+  ) {
+    return PlayerBackgroundConfigurationModel.fromEntity(config).toJson();
   }
 }
