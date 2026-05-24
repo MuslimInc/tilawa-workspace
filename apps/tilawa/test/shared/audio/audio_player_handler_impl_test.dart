@@ -455,6 +455,29 @@ void main() {
       expect(handler.queue.value.last, item1);
     });
 
+    test('moveQueueItem bumps queueGeneration for O(1) UI diffing', () async {
+      const item1 = MediaItem(
+        id: '1',
+        title: 'Test 1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: 'Test 2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
+      await handler.addQueueItem(item1);
+      await captureAndUpdate();
+      await handler.addQueueItem(item2);
+      await captureAndUpdate();
+
+      final int generationBeforeMove = handler.queueGeneration;
+      await handler.moveQueueItem(0, 1);
+      await captureAndUpdate();
+
+      expect(handler.queueGeneration, greaterThan(generationBeforeMove));
+    });
+
     test('updateMediaItem updates item in queue', () async {
       const item = MediaItem(
         id: '1',
