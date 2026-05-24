@@ -56,7 +56,8 @@ class QuranImageReaderScreen extends StatefulWidget {
   State<QuranImageReaderScreen> createState() => _QuranImageReaderScreenState();
 }
 
-class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
+class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
+    with WidgetsBindingObserver {
   bool _isPreloaded = false;
   NavigationBloc? _navigationBloc;
 
@@ -70,13 +71,24 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(AppOrientationService.allowReaderOrientations());
     _checkPreloadStatus();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    unawaited(AppOrientationService.restoreDefaultOrientations());
     _navigationBloc?.close();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(AppOrientationService.allowReaderOrientations());
+    }
   }
 
   /// Checks whether the quran_image cache is already ready.
