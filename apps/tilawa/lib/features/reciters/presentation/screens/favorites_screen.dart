@@ -85,7 +85,10 @@ class FavoritesScreen extends StatelessWidget {
                               reciter,
                             );
                           },
-                          child: ReciterCard(reciter: reciter),
+                          child: ReciterCard(
+                            reciter: reciter,
+                            favoritesOnlyContext: true,
+                          ),
                         );
                       },
                     );

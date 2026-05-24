@@ -188,6 +188,12 @@ abstract class AppLocalizations {
   /// **'Show favorite reciters only'**
   String get a11yFavoriteRecitersOnlyFilter;
 
+  /// Tooltip when the favorites-only filter is active
+  ///
+  /// In en, this message translates to:
+  /// **'Show all reciters'**
+  String get recitersShowAllReciters;
+
   /// Accessibility label for the Arabic letter scrollbar
   ///
   /// In en, this message translates to:
@@ -223,6 +229,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Letter index'**
   String get recitersLetterIndexMenuItem;
+
+  /// Summary line above the reciters list
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 reciter} other{{count} reciters}}'**
+  String recitersResultCount(int count);
+
+  /// Active filter chip when showing favorite reciters only
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get recitersFilterChipFavorites;
+
+  /// Favorites filter pill with saved count
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites ({count})'**
+  String recitersFilterPillFavoritesCount(int count);
+
+  /// Toggle pill for the reciters letter index rail
+  ///
+  /// In en, this message translates to:
+  /// **'A–Z'**
+  String get recitersFilterPillAlphabet;
+
+  /// Active filter chip for the selected alphabet letter
+  ///
+  /// In en, this message translates to:
+  /// **'Starts with {letter}'**
+  String recitersFilterChipLetter(String letter);
+
+  /// Active filter chip showing the current search query
+  ///
+  /// In en, this message translates to:
+  /// **'“{query}”'**
+  String recitersFilterChipSearch(String query);
 
   /// Tooltip for clearing the reciters search field
   ///

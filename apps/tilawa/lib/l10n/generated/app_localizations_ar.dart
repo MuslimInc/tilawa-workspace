@@ -56,6 +56,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get a11yFavoriteRecitersOnlyFilter => 'عرض المفضلين فقط';
 
   @override
+  String get recitersShowAllReciters => 'عرض كل القراء';
+
+  @override
   String get a11yRecitersLetterIndex => 'فهرس الحروف';
 
   @override
@@ -73,6 +76,39 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get recitersLetterIndexMenuItem => 'فهرس الحروف';
+
+  @override
+  String recitersResultCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count قارئ',
+      one: 'قارئ واحد',
+      zero: 'لا يوجد قراء',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recitersFilterChipFavorites => 'المفضلة';
+
+  @override
+  String recitersFilterPillFavoritesCount(int count) {
+    return 'المفضلة ($count)';
+  }
+
+  @override
+  String get recitersFilterPillAlphabet => 'أ–ي';
+
+  @override
+  String recitersFilterChipLetter(String letter) {
+    return 'يبدأ بـ $letter';
+  }
+
+  @override
+  String recitersFilterChipSearch(String query) {
+    return '«$query»';
+  }
 
   @override
   String get a11yClearRecitersSearch => 'مسح نص البحث';

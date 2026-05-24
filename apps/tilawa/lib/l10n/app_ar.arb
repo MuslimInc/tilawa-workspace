@@ -66,6 +66,10 @@
     "@a11yFavoriteRecitersOnlyFilter": {
         "description": "Accessibility name for the favorites-only filter toggle"
     },
+    "recitersShowAllReciters": "عرض كل القراء",
+    "@recitersShowAllReciters": {
+        "description": "Tooltip when the favorites-only filter is active"
+    },
     "a11yRecitersLetterIndex": "فهرس الحروف",
     "@a11yRecitersLetterIndex": {
         "description": "Accessibility label for the Arabic letter scrollbar"
@@ -89,6 +93,50 @@
     "recitersLetterIndexMenuItem": "فهرس الحروف",
     "@recitersLetterIndexMenuItem": {
         "description": "Overflow menu item to show or hide the A–Z letter index"
+    },
+    "recitersResultCount": "{count, plural, =0{لا يوجد قراء} =1{قارئ واحد} other{{count} قارئ}}",
+    "@recitersResultCount": {
+        "description": "Summary line above the reciters list",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "recitersFilterChipFavorites": "المفضلة",
+    "@recitersFilterChipFavorites": {
+        "description": "Active filter chip when showing favorite reciters only"
+    },
+    "recitersFilterPillFavoritesCount": "المفضلة ({count})",
+    "@recitersFilterPillFavoritesCount": {
+        "description": "Favorites filter pill with saved count",
+        "placeholders": {
+            "count": {
+                "type": "int"
+            }
+        }
+    },
+    "recitersFilterPillAlphabet": "أ–ي",
+    "@recitersFilterPillAlphabet": {
+        "description": "Toggle pill for the reciters letter index rail"
+    },
+    "recitersFilterChipLetter": "يبدأ بـ {letter}",
+    "@recitersFilterChipLetter": {
+        "description": "Active filter chip for the selected alphabet letter",
+        "placeholders": {
+            "letter": {
+                "type": "String"
+            }
+        }
+    },
+    "recitersFilterChipSearch": "«{query}»",
+    "@recitersFilterChipSearch": {
+        "description": "Active filter chip showing the current search query",
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
     },
     "a11yClearRecitersSearch": "مسح نص البحث",
     "@a11yClearRecitersSearch": {
