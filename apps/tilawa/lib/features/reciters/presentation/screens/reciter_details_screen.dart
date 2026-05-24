@@ -180,7 +180,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     return Stack(
       children: [
         Scaffold(
-          // Scroll-to-top FAB
+          // Shell [TilawaAdaptiveShell] already shrinks for the keyboard; a
+          // nested resize here double-applies [viewInsets] and collapses the
+          // surah list to zero height (white gap above keyboard).
+          resizeToAvoidBottomInset: false,
           floatingActionButton: AnimatedSlide(
             offset: _showScrollToTop ? Offset.zero : const Offset(0, 2),
             duration: tokens.durationFast,
@@ -429,9 +432,10 @@ class _ReciterDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
+    final bool keyboardOpen = context.isKeyboardVisible;
     final double bottomPadding =
-        bottomPlayerOffset +
-        (showBottomPlayer
+        (keyboardOpen ? 0 : bottomPlayerOffset) +
+        (showBottomPlayer && !keyboardOpen
             ? QuranPlayerWidget.collapsedHeight(context) +
                   tokens.spaceExtraLarge
             : tokens.spaceExtraLarge);
