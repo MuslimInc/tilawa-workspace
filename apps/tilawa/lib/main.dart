@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 
 import 'core/bootstrap/app_startup.dart';
-import 'features/prayer_times/presentation/prayer_notification_watchdog_entrypoint.dart';
+import 'features/prayer_times/application/prayer_notification_watchdog_bootstrap.dart';
 
 Future<void> main() async {
   FlutterError.onError = (FlutterErrorDetails details) {
