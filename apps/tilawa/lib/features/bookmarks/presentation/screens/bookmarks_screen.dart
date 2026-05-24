@@ -24,7 +24,6 @@ class BookmarksScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
     final double searchBottomHeight = TilawaAppBarConfig.searchBottomHeight(
       theme,
     );
@@ -44,23 +43,17 @@ class BookmarksScreen extends StatelessWidget {
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(searchBottomHeight),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceMedium,
-              vertical: tokens.spaceMedium,
-            ),
-            child: BookmarkSearchBar(
-              onSearchChanged: (query) {
-                context.read<BookmarksBloc>().add(
-                  SearchBookmarksEvent(query: query),
-                );
-              },
-              onClearSearch: () {
-                context.read<BookmarksBloc>().add(
-                  const ClearBookmarksSearchEvent(),
-                );
-              },
-            ),
+          child: BookmarkSearchBar(
+            onSearchChanged: (query) {
+              context.read<BookmarksBloc>().add(
+                SearchBookmarksEvent(query: query),
+              );
+            },
+            onClearSearch: () {
+              context.read<BookmarksBloc>().add(
+                const ClearBookmarksSearchEvent(),
+              );
+            },
           ),
         ),
       ),

@@ -299,6 +299,7 @@ class SettingsConcurrentDownloadsSheet extends StatelessWidget {
 String _localizedPresetName(BuildContext context, PrimaryColorPreset preset) {
   final l10n = context.l10n;
   return switch (preset) {
+    PrimaryColorPreset.coral => l10n.colorCoral,
     PrimaryColorPreset.teal => l10n.colorCyan,
     PrimaryColorPreset.sage => l10n.colorGreen,
     PrimaryColorPreset.gold => l10n.colorGold,

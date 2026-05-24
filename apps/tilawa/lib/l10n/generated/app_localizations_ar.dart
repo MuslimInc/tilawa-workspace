@@ -617,6 +617,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get choosePrimaryColor => 'اختر لون التطبيق';
 
   @override
+  String get colorCoral => 'مرجاني';
+
+  @override
   String get colorCyan => 'سماوي';
 
   @override

@@ -17,13 +17,13 @@ class HistorySearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaSearchField(
-      controller: controller,
-      hintText: context.l10n.searchHistory,
-      onChanged: onChanged,
-      onClear: onClear,
-      borderRadius: BorderRadius.circular(
-        Theme.of(context).tokens.radiusMedium,
+    return TilawaSearchFieldSlot(
+      child: TilawaSearchField(
+        controller: controller,
+        hintText: context.l10n.searchHistory,
+        onChanged: onChanged,
+        onClear: onClear,
+        showShadow: false,
       ),
     );
   }

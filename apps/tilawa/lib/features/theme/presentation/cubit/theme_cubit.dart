@@ -9,15 +9,15 @@ import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 /// user-picked custom HEX value.
 enum PrimaryColorSource { preset, custom }
 
-/// ARGB for [PrimaryColorPreset.teal] / [PrimaryColorPreset.defaultPreset].
-const int _kDefaultPrimaryColorArgb = 0xFF1AADC5;
+/// ARGB for [PrimaryColorPreset.coral] / [PrimaryColorPreset.defaultPreset].
+const int _kDefaultPrimaryColorArgb = 0xFFE60023;
 
 class ThemeState extends Equatable {
   const ThemeState({
     required this.mode,
     this.primaryColorArgb = _kDefaultPrimaryColorArgb,
     this.primaryColorSource = PrimaryColorSource.preset,
-    this.primaryPresetId = 'teal',
+    this.primaryPresetId = 'coral',
     this.useSystemTheme = false,
     this.preset = AppThemePreset.defaultMode,
   });

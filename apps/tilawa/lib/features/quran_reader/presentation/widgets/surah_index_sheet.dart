@@ -273,9 +273,9 @@ class _IndexSearchBar extends StatelessWidget {
 
     final double keyboardInset = context.keyboardInset;
 
-    return Padding(
+    return TilawaSearchFieldSlot(
       padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceExtraLarge,
+        horizontal: tokens.spaceMedium,
         vertical: tokens.spaceSmall,
       ),
       child: TilawaSearchField(
@@ -286,10 +286,13 @@ class _IndexSearchBar extends StatelessWidget {
         scrollPadding: EdgeInsets.only(bottom: keyboardInset + 24),
         onChanged: onChanged,
         onClear: onClear,
+        showShadow: false,
         textStyle: theme.textTheme.bodyMedium?.copyWith(
           color: readerTheme.textColor,
         ),
-        borderRadius: BorderRadius.circular(indexTheme.searchBarRadius),
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: readerTheme.textColor.withValues(alpha: tokens.opacityEmphasis),
+        ),
         contentPadding: EdgeInsets.symmetric(
           vertical: indexTheme.searchBarVerticalPadding,
         ),

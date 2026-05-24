@@ -852,6 +852,10 @@
     "@choosePrimaryColor": {
         "description": "Choose primary color dialog title"
     },
+    "colorCoral": "Coral",
+    "@colorCoral": {
+        "description": "Primary color preset — Pinterest-inspired brand red"
+    },
     "colorCyan": "Cyan",
     "@colorCyan": {
         "description": "Cyan color name"

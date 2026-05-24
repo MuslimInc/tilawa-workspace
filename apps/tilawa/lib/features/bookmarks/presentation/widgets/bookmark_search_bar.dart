@@ -9,12 +9,10 @@ class BookmarkSearchBar extends StatefulWidget {
     super.key,
     required this.onSearchChanged,
     required this.onClearSearch,
-    this.margin,
   });
 
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
-  final EdgeInsetsGeometry? margin;
 
   @override
   State<BookmarkSearchBar> createState() => _BookmarkSearchBarState();
@@ -33,20 +31,25 @@ class _BookmarkSearchBarState extends State<BookmarkSearchBar> {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaSearchField(
-      controller: _controller,
-      focusNode: _focusNode,
-      hintText: context.l10n.searchBookmarks,
-      prefixIcon: FluentIcons.search_24_regular,
-      clearIcon: FluentIcons.dismiss_24_regular,
-      onChanged: widget.onSearchChanged,
-      onClear: () {
-        _controller.clear();
-        widget.onClearSearch();
-      },
-      margin: widget.margin,
-      borderRadius: BorderRadius.circular(
-        Theme.of(context).tokens.radiusMedium,
+    final tokens = Theme.of(context).tokens;
+
+    return TilawaSearchFieldSlot(
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceMedium,
+      ),
+      child: TilawaSearchField(
+        controller: _controller,
+        focusNode: _focusNode,
+        hintText: context.l10n.searchBookmarks,
+        prefixIcon: FluentIcons.search_24_regular,
+        clearIcon: FluentIcons.dismiss_24_regular,
+        onChanged: widget.onSearchChanged,
+        onClear: () {
+          _controller.clear();
+          widget.onClearSearch();
+        },
+        showShadow: false,
       ),
     );
   }

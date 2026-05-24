@@ -1214,6 +1214,12 @@ abstract class AppLocalizations {
   /// **'Choose Primary Color'**
   String get choosePrimaryColor;
 
+  /// Primary color preset — Pinterest-inspired brand red
+  ///
+  /// In en, this message translates to:
+  /// **'Coral'**
+  String get colorCoral;
+
   /// Cyan color name
   ///
   /// In en, this message translates to:

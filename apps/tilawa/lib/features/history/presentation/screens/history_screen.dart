@@ -101,22 +101,19 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     // Search bar
                     if (state.historyList.isNotEmpty)
                       SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: HistorySearchBar(
-                            controller: _searchController,
-                            onChanged: (query) {
-                              context.read<HistoryBloc>().add(
-                                HistoryEvent.searchHistory(query),
-                              );
-                            },
-                            onClear: () {
-                              _searchController.clear();
-                              context.read<HistoryBloc>().add(
-                                const HistoryEvent.clearSearch(),
-                              );
-                            },
-                          ),
+                        child: HistorySearchBar(
+                          controller: _searchController,
+                          onChanged: (query) {
+                            context.read<HistoryBloc>().add(
+                              HistoryEvent.searchHistory(query),
+                            );
+                          },
+                          onClear: () {
+                            _searchController.clear();
+                            context.read<HistoryBloc>().add(
+                              const HistoryEvent.clearSearch(),
+                            );
+                          },
                         ),
                       ),
 

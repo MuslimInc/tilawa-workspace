@@ -440,12 +440,7 @@ class TilawaChipTokens {
   }
 
   static Color _selectionUnselectedBackgroundColor(ColorScheme colorScheme) {
-    final blendAmount = colorScheme.brightness == Brightness.dark ? 0.22 : 0.38;
-    return Color.lerp(
-      colorScheme.surface,
-      colorScheme.surfaceContainer,
-      blendAmount,
-    )!;
+    return colorScheme.surfaceContainerHigh;
   }
 
   TilawaChipTokens copyWith({

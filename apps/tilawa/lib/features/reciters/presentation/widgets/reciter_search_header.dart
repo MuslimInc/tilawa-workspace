@@ -33,68 +33,62 @@ class ReciterDetailsSearchBar extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
 
-    return Padding(
+    return TilawaSearchFieldSlot(
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceMedium,
         vertical: tokens.spaceMedium,
       ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: tokens.contentMaxWidthMedia),
-          child: Row(
-            spacing: tokens.spaceSmall,
-            children: [
-              Expanded(
-                child: Semantics(
-                  identifier: ReciterSemanticsIds.reciterDetailsSurahSearch,
-                  child: TilawaSearchField(
-                    controller: controller,
-                    hintText: context.l10n.searchSurah,
-                    prefixIcon: FluentIcons.search_24_regular,
-                    clearIcon: FluentIcons.dismiss_24_regular,
-                    borderRadius: BorderRadius.circular(tokens.radiusLarge),
-                    showShadow: true,
-                    onClear: () {
-                      controller.clear();
-                      context.read<ReciterDetailsBloc>().add(
-                        const FilterSurahs(''),
-                      );
-                    },
-                    onChanged: (String query) {
-                      context.read<ReciterDetailsBloc>().add(
-                        FilterSurahs(query),
-                      );
-                    },
-                    onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                  ),
-                ),
+      child: Row(
+        spacing: tokens.spaceSmall,
+        children: [
+          Expanded(
+            child: Semantics(
+              identifier: ReciterSemanticsIds.reciterDetailsSurahSearch,
+              child: TilawaSearchField(
+                controller: controller,
+                hintText: context.l10n.searchSurah,
+                prefixIcon: FluentIcons.search_24_regular,
+                clearIcon: FluentIcons.dismiss_24_regular,
+                showShadow: false,
+                onClear: () {
+                  controller.clear();
+                  context.read<ReciterDetailsBloc>().add(
+                    const FilterSurahs(''),
+                  );
+                },
+                onChanged: (String query) {
+                  context.read<ReciterDetailsBloc>().add(
+                    FilterSurahs(query),
+                  );
+                },
+                onTapOutside: (_) => FocusScope.of(context).unfocus(),
               ),
-              Semantics(
-                identifier: ReciterSemanticsIds.reciterDetailsViewToggle,
-                child: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
-                  buildWhen: (ReciterDetailsState previous,
-                          ReciterDetailsState current) =>
-                      previous.viewMode != current.viewMode,
-                  builder: (BuildContext context, state) {
-                    final bool isList = state.viewMode == ReciterViewMode.list;
-                    return TilawaIconActionButton(
-                      icon: isList
-                          ? FluentIcons.grid_24_regular
-                          : FluentIcons.list_24_regular,
-                      isActive: !isList,
-                      toggled: !isList,
-                      onTap: () {
-                        context.read<ReciterDetailsBloc>().add(
-                          const ToggleViewMode(),
-                        );
-                      },
+            ),
+          ),
+          Semantics(
+            identifier: ReciterSemanticsIds.reciterDetailsViewToggle,
+            child: BlocBuilder<ReciterDetailsBloc, ReciterDetailsState>(
+              buildWhen: (ReciterDetailsState previous,
+                      ReciterDetailsState current) =>
+                  previous.viewMode != current.viewMode,
+              builder: (BuildContext context, state) {
+                final bool isList = state.viewMode == ReciterViewMode.list;
+                return TilawaIconActionButton(
+                  icon: isList
+                      ? FluentIcons.grid_24_regular
+                      : FluentIcons.list_24_regular,
+                  isActive: !isList,
+                  toggled: !isList,
+                  onTap: () {
+                    context.read<ReciterDetailsBloc>().add(
+                      const ToggleViewMode(),
                     );
                   },
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

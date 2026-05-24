@@ -48,6 +48,7 @@ class _ReciterPickerSheetState extends State<ReciterPickerSheet> {
             TilawaSearchField(
               controller: _searchController,
               hintText: context.l10n.searchReciters,
+              showShadow: false,
               onChanged: (v) => setState(() => _query = v),
               onClear: () {
                 _searchController.clear();

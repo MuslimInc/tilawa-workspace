@@ -7,6 +7,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 /// [defaultPreset]. The static palette in [AppColors] is referenced for
 /// concrete values, but the runtime "what is the default" concept lives here.
 enum PrimaryColorPreset {
+  coral(id: 'coral', value: AppColors.primaryCoral),
   teal(id: 'teal', value: AppColors.primaryTeal),
   sage(id: 'sage', value: AppColors.primarySage),
   gold(id: 'gold', value: AppColors.primaryGold),
@@ -26,7 +27,7 @@ enum PrimaryColorPreset {
   int get valueArgb => value.toARGB32();
 
   /// Default primary preset for fresh installs and corrupt-payload fallback.
-  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.teal;
+  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.coral;
 
   static PrimaryColorPreset? findById(String? id) {
     if (id == null) return null;

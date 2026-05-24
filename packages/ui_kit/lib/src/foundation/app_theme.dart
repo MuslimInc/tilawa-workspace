@@ -197,40 +197,17 @@ class AppTheme {
       surface: AppColors.lightSurface,
       surfaceContainerLowest: Colors.white,
       surfaceContainerLow: AppColors.lightBackground,
-      // Phase 1: deepen the upper container tiers so elevation reads clearly
-      // on real-device DPIs. Lower tiers stay close to scaffold to preserve
-      // existing flat backgrounds.
-      surfaceContainer: _blendSurfaceTowardPrimary(
-        AppColors.lightSurfaceContainerMid,
-        primary,
-        0.045,
-      ),
-      // Nudge upper tiers toward [primary] so chrome (bottom nav, switch OFF
-      // track via surfaceContainerHighest, etc.) reads as one family with the
-      // accent — subtle lerp keeps contrast on neutral bases (AppColors *Base).
-      surfaceContainerHigh: _blendSurfaceTowardPrimary(
-        AppColors.lightSurfaceContainerHighBase,
-        primary,
-        0.14,
-      ),
-      surfaceContainerHighest: _blendSurfaceTowardPrimary(
-        AppColors.lightSurfaceContainerHighestBase,
-        primary,
-        0.20,
-      ),
+      // Warm neutral container ramp (Pinterest catalog chrome). Fixed hexes —
+      // no primary harmonization — so idle chips/search chrome do not pick up
+      // coral/teal tint from the user-selected accent.
+      surfaceContainer: AppColors.lightSurfaceContainer,
+      surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
+      surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
       outline: AppColors.lightOutline,
       outlineVariant: AppColors.lightOutlineVariant,
       shadow: AppColors.lightShadow,
       scrim: AppColors.lightShadow,
     );
-  }
-
-  static Color _blendSurfaceTowardPrimary(
-    Color base,
-    Color primary,
-    double blend,
-  ) {
-    return Color.lerp(base, primary, blend)!;
   }
 
   static ColorScheme _refineDarkColorScheme(
@@ -252,25 +229,13 @@ class AppTheme {
       );
     }
 
-    final Color darkPrimary = scheme.primary;
     return scheme.copyWith(
       surface: AppColors.darkSurface,
       surfaceContainerLowest: AppColors.darkSurfaceContainerLowest,
       surfaceContainerLow: AppColors.darkBackground,
       surfaceContainer: AppColors.darkSurfaceContainer,
-      // Phase 1: lift the upper container tiers so floating elements
-      // (bottom nav, sheets, raised cards) separate from the page on
-      // real-device DPIs.
-      surfaceContainerHigh: _blendSurfaceTowardPrimary(
-        AppColors.darkSurfaceContainerHighBase,
-        darkPrimary,
-        0.10,
-      ),
-      surfaceContainerHighest: _blendSurfaceTowardPrimary(
-        AppColors.darkSurfaceContainerHighestBase,
-        darkPrimary,
-        0.14,
-      ),
+      surfaceContainerHigh: AppColors.darkSurfaceContainerHighBase,
+      surfaceContainerHighest: AppColors.darkSurfaceContainerHighestBase,
       outline: AppColors.darkOutline,
       outlineVariant: AppColors.darkOutlineVariant,
       shadow: Colors.black,

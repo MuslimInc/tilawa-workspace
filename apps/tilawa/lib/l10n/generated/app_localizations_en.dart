@@ -619,6 +619,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get choosePrimaryColor => 'Choose Primary Color';
 
   @override
+  String get colorCoral => 'Coral';
+
+  @override
   String get colorCyan => 'Cyan';
 
   @override

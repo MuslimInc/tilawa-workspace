@@ -21,6 +21,7 @@ void main() {
     };
 
     const presetNoOpCases = <String, Color>{
+      'coral': AppColors.primaryCoral,
       'teal': AppColors.primaryTeal,
       'sage': AppColors.primarySage,
       'gold': AppColors.primaryGold,
@@ -52,6 +53,26 @@ void main() {
         _expectSecondaryTextContrast(theme.colorScheme, label: entry.key);
       }
     });
+
+    test(
+      'light surfaceContainerHigh is Pinterest neutral for every preset',
+      () {
+        for (final entry in presetNoOpCases.entries) {
+          final theme = AppTheme.getLightTheme(
+            primaryColor: entry.value,
+            useGoogleFontsOverride: false,
+          );
+
+          expect(
+            theme.colorScheme.surfaceContainerHigh,
+            AppColors.catalogFilterUnselectedLight,
+            reason:
+                '${entry.key} preset must not tint idle control surfaces '
+                'toward primary',
+          );
+        }
+      },
+    );
 
     test('light-mode clamp is a no-op for every PrimaryColorPreset value', () {
       for (final entry in presetNoOpCases.entries) {

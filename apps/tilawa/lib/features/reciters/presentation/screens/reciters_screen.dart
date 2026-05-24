@@ -473,9 +473,7 @@ class _RecitersSliverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     PerfLogger.markBuild('_RecitersSliverScreen');
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
-    final double headerExtent = _recitersAppBarExtent(context);
-    const double scrollbarVerticalMargin = 10;
-    final double scrollbarTopOffset = headerExtent + scrollbarVerticalMargin;
+    const double letterIndexVerticalMargin = 8;
     final bool letterIndexAvailable =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
@@ -509,9 +507,7 @@ class _RecitersSliverScreen extends StatelessWidget {
         if (showLetterIndexRail)
           _RecitersLetterIndexGutter(
             isRtl: isRtl,
-            top: headerExtent,
-            scrollbarTopOffset: scrollbarTopOffset,
-            scrollbarBottomMargin: scrollbarVerticalMargin,
+            verticalMargin: letterIndexVerticalMargin,
             reciters: (state as RecitersLoaded).reciters,
             scrollController: scrollController,
             onLetterSelected: onLetterSelected,
@@ -524,13 +520,14 @@ class _RecitersSliverScreen extends StatelessWidget {
   }
 }
 
-/// Letter-index rail with a tinted gutter and a content-facing border.
+/// Letter-index rail pinned to the trailing screen edge (Pinterest-style).
+///
+/// The list body already sits below [Scaffold.appBar]; do not offset this rail
+/// by app-bar height again or it will overlap reciter rows.
 class _RecitersLetterIndexGutter extends StatelessWidget {
   const _RecitersLetterIndexGutter({
     required this.isRtl,
-    required this.top,
-    required this.scrollbarTopOffset,
-    required this.scrollbarBottomMargin,
+    required this.verticalMargin,
     required this.reciters,
     required this.scrollController,
     required this.onLetterSelected,
@@ -539,9 +536,7 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
   });
 
   final bool isRtl;
-  final double top;
-  final double scrollbarTopOffset;
-  final double scrollbarBottomMargin;
+  final double verticalMargin;
   final List<ReciterEntity> reciters;
   final ScrollController scrollController;
   final ValueChanged<String?> onLetterSelected;
@@ -551,57 +546,35 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
     final double gutterWidth = _recitersLetterIndexGutterWidth(theme);
-    final BorderSide contentBorder = BorderSide(
-      color: colorScheme.outlineVariant.withValues(
-        alpha: tokens.opacityEmphasis,
-      ),
-      width: tokens.borderWidthThin,
-    );
+    final double scrollbarWidth =
+        theme.componentTokens.alphabetScrollbar.width;
 
     return PositionedDirectional(
-      top: top,
-      bottom: 0,
+      top: verticalMargin,
+      bottom: verticalMargin,
       start: isRtl ? 0 : null,
       end: isRtl ? null : 0,
       width: gutterWidth,
-      child: ExcludeSemantics(
-        child: ColoredBox(
-          color: colorScheme.surface.withValues(alpha: tokens.opacityEmphasis),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              border: BorderDirectional(
-                start: isRtl ? BorderSide.none : contentBorder,
-                end: isRtl ? contentBorder : BorderSide.none,
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsetsDirectional.only(
-                start: tokens.spaceSmall,
-                end: tokens.spaceSmall,
-              ),
-              child: Column(
-                children: [
-                  SizedBox(height: scrollbarTopOffset - top),
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        bottom: scrollbarBottomMargin,
-                      ),
-                      child: ReciterAlphabetScrollbar(
-                        key: const ValueKey('alphabet_scrollbar'),
-                        allReciters: reciters,
-                        scrollController: scrollController,
-                        onLetterSelected: onLetterSelected,
-                        scrollbarSemanticsLabel: scrollbarSemanticsLabel,
-                        scrollbarSemanticsHint: scrollbarSemanticsHint,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      child: SafeArea(
+        left: isRtl,
+        right: !isRtl,
+        top: false,
+        bottom: false,
+        minimum: EdgeInsets.zero,
+        child: Align(
+          alignment: isRtl
+              ? AlignmentDirectional.centerStart
+              : AlignmentDirectional.centerEnd,
+          child: SizedBox(
+            width: scrollbarWidth,
+            child: ReciterAlphabetScrollbar(
+              key: const ValueKey('alphabet_scrollbar'),
+              allReciters: reciters,
+              scrollController: scrollController,
+              onLetterSelected: onLetterSelected,
+              scrollbarSemanticsLabel: scrollbarSemanticsLabel,
+              scrollbarSemanticsHint: scrollbarSemanticsHint,
             ),
           ),
         ),
@@ -780,47 +753,51 @@ class _RecitersTilawaAppBar extends StatelessWidget {
         state is RecitersLoaded ? state as RecitersLoaded : null;
 
     return TilawaAppBar(
-      title: context.l10n.reciters,
       automaticallyImplyLeading: false,
-      centerTitle: false,
       surface: TilawaAppBarSurface.parchment,
+      toolbarHeight: 0,
       bottom: PreferredSize(
         preferredSize: Size.fromHeight(bottomHeight),
         child: Semantics(
           header: true,
           label: context.l10n.reciters,
           explicitChildNodes: true,
-          child: _ConstrainedHeaderContent(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                tokens.spaceMedium,
-                0,
-                tokens.spaceMedium,
-                tokens.spaceMedium,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _SearchField(
-                    controller: searchController,
-                    focusNode: focusNode,
-                    onChanged: onSearchChanged,
-                    onClear: onClearSearch,
+          child: TilawaSearchFieldSlot(
+            padding: EdgeInsets.fromLTRB(
+              tokens.spaceMedium,
+              tokens.spaceMedium,
+              tokens.spaceMedium,
+              tokens.spaceMedium,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  context.l10n.reciters,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
-                  SizedBox(height: tokens.spaceSmall),
-                  _RecitersQuickFilterBar(
-                    state: state,
-                    loaded: loaded,
-                    letterIndexAvailable: letterIndexAvailable,
-                    showLetterIndex: showLetterIndex,
-                    onToggleFavorites: onToggleFavorites,
-                    onToggleLetterIndex: onToggleLetterIndex,
-                    onClearLetterFilter: onClearLetterFilter,
-                    onClearAllFilters: onClearAllFilters,
-                  ),
-                ],
-              ),
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                _SearchField(
+                  controller: searchController,
+                  focusNode: focusNode,
+                  onChanged: onSearchChanged,
+                  onClear: onClearSearch,
+                ),
+                SizedBox(height: tokens.spaceSmall),
+                _RecitersQuickFilterBar(
+                  state: state,
+                  loaded: loaded,
+                  letterIndexAvailable: letterIndexAvailable,
+                  showLetterIndex: showLetterIndex,
+                  onToggleFavorites: onToggleFavorites,
+                  onToggleLetterIndex: onToggleLetterIndex,
+                  onClearLetterFilter: onClearLetterFilter,
+                  onClearAllFilters: onClearAllFilters,
+                ),
+              ],
             ),
           ),
         ),
@@ -875,10 +852,26 @@ class _RecitersQuickFilterBar extends StatelessWidget {
         ? l10n.recitersFilterChipFavorites
         : l10n.recitersFilterPillFavoritesCount(favoriteCount);
 
+    TilawaSelectionPill catalogFilterPill({
+      required String label,
+      required bool selected,
+      required VoidCallback? onTap,
+      IconData? icon,
+    }) {
+      return TilawaSelectionPill(
+        label: label,
+        icon: icon,
+        selected: selected,
+        onTap: onTap,
+        style: TilawaSelectionPillStyle.catalog,
+        elevatedWhenSelected: false,
+      );
+    }
+
     final List<Widget> pills = <Widget>[
       Semantics(
         identifier: ReciterSemanticsIds.recitersFavoritesToggle,
-        child: TilawaSelectionPill(
+        child: catalogFilterPill(
           label: favoritesLabel,
           icon: Icons.favorite_border_rounded,
           selected: favoritesSelected,
@@ -886,14 +879,14 @@ class _RecitersQuickFilterBar extends StatelessWidget {
         ),
       ),
       if (letterIndexAvailable)
-        TilawaSelectionPill(
+        catalogFilterPill(
           label: l10n.recitersFilterPillAlphabet,
           icon: Icons.sort_by_alpha_rounded,
           selected: showLetterIndex,
           onTap: onToggleLetterIndex,
         ),
-      if (selectedLetter != null)
-        TilawaSelectionPill(
+      if (selectedLetter != null && !showLetterIndex)
+        catalogFilterPill(
           label: l10n.recitersFilterChipLetter(selectedLetter),
           selected: true,
           onTap: onClearLetterFilter,
@@ -972,24 +965,6 @@ class _RecitersAmbientPainter extends CustomPainter {
   }
 }
 
-class _ConstrainedHeaderContent extends StatelessWidget {
-  const _ConstrainedHeaderContent({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: Theme.of(context).tokens.contentMaxWidthMedia,
-        ),
-        child: child,
-      ),
-    );
-  }
-}
-
 class _SearchField extends StatelessWidget {
   const _SearchField({
     required this.controller,
@@ -1005,9 +980,6 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final tokens = Theme.of(context).tokens;
-
     return Semantics(
       identifier: ReciterSemanticsIds.recitersSearchField,
       child: TilawaSearchField(
@@ -1019,8 +991,6 @@ class _SearchField extends StatelessWidget {
         onChanged: onChanged,
         onClear: onClear,
         clearButtonTooltip: context.l10n.a11yClearRecitersSearch,
-        backgroundColor: colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
         showShadow: false,
         onTapOutside: (_) => focusNode.unfocus(),
       ),
@@ -1427,24 +1397,28 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
 double _recitersAppBarExtent(BuildContext context) {
   final ThemeData theme = Theme.of(context);
   return MediaQuery.paddingOf(context).top +
-      kToolbarHeight +
       _recitersAppBarBottomHeight(theme);
 }
 
-/// Search row + [TilawaQuickFilterBar] (Noon / Booking catalog pattern).
+/// Title + catalog search + [TilawaQuickFilterBar] (Pinterest catalog pattern).
 double _recitersAppBarBottomHeight(ThemeData theme) {
   final tokens = theme.tokens;
-  return TilawaAppBarConfig.searchBottomHeight(theme) +
+  final double titleLineHeight =
+      (theme.textTheme.titleLarge?.fontSize ?? 22) *
+      (theme.textTheme.titleLarge?.height ?? 1.25);
+  return tokens.spaceMedium +
+      titleLineHeight +
       tokens.spaceSmall +
-      kMinInteractiveDimension;
+      TilawaAppBarConfig.searchBottomHeight(theme) +
+      tokens.spaceSmall +
+      kMinInteractiveDimension +
+      tokens.spaceMedium;
 }
 
-/// Reserved width for the letter-index gutter (rail + padding + divider lane).
+/// Reserved width for the letter-index rail (scrollbar + outer margin).
 double _recitersLetterIndexGutterWidth(ThemeData theme) {
   final tokens = theme.tokens;
-  return tokens.spaceSmall * 2 +
-      theme.componentTokens.alphabetScrollbar.width +
-      tokens.spaceMedium;
+  return theme.componentTokens.alphabetScrollbar.width + tokens.spaceMedium;
 }
 
 EdgeInsetsGeometry _recitersResultPadding(
