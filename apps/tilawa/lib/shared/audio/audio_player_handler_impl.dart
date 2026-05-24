@@ -58,6 +58,15 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   @override
   final BehaviorSubject<double> speed = BehaviorSubject.seeded(1.0);
   final _mediaItemMap = <String, audio_service.MediaItem>{};
+  int _queueGeneration = 0;
+
+  @override
+  int get queueGeneration => _queueGeneration;
+
+  void _publishQueue(List<audio_service.MediaItem> items) {
+    _queueGeneration++;
+    queue.add(items);
+  }
 
   // Caching and pagination
 
@@ -280,7 +289,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
               .whereType<audio_service.MediaItem>()
               .toList(),
         )
-        .listen(queue.add);
+        .listen(_publishQueue);
 
     final List<AudioSource> initialSources = await Future.wait(
       queue.value.map(_itemToSource),
@@ -473,7 +482,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     final List<audio_service.MediaItem> newQueue = currentQueue
         .map((item) => item.id == mediaItem.id ? mediaItem : item)
         .toList();
-    queue.add(newQueue);
+    _publishQueue(newQueue);
   }
 
   @override

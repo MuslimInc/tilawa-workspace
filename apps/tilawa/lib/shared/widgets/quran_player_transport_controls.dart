@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/audio_player/domain/entities/audio_modes.dart';
 import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'quran_player_queue_utils.dart';
 
 /// Repeat/shuffle visuals and toggles for the expanded player transport row.
 abstract final class QuranPlayerTransportControls {
@@ -31,6 +32,12 @@ abstract final class QuranPlayerTransportControls {
   static AudioShuffleMode nextShuffleMode(AudioShuffleMode mode) =>
       shuffleActive(mode) ? AudioShuffleMode.none : AudioShuffleMode.all;
 
+  /// Whether the play queue order or active index changed.
+  static bool playerTreeQueueChanged(
+    AudioPlayerState previous,
+    AudioPlayerState current,
+  ) => QuranPlayerQueueUtils.playerTreeQueueChanged(previous, current);
+
   /// Whether the expanded player tree should rebuild for [current].
   static bool playerTreeBuildWhen(
     AudioPlayerState previous,
@@ -46,7 +53,8 @@ abstract final class QuranPlayerTransportControls {
       previous.speed != current.speed ||
       previous.repeatMode != current.repeatMode ||
       previous.shuffleMode != current.shuffleMode ||
-      previous.dismissedAudioId != current.dismissedAudioId;
-  // [positionData] is excluded so expand/collapse animations are not
-  // interrupted by per-tick progress rebuilds of the expanded sheet.
+      previous.dismissedAudioId != current.dismissedAudioId ||
+      playerTreeQueueChanged(previous, current);
+  // [positionData] and non-queue [playbackState] fields are excluded so
+  // expand/collapse animations are not interrupted by per-tick progress.
 }

@@ -21,6 +21,9 @@ abstract class AudioPlayerHandler implements AudioHandler {
   @override
   ValueStream<List<MediaItem>> get queue;
 
+  /// Increments whenever the play queue order or length changes.
+  int get queueGeneration;
+
   // Queue management methods
   Future<void> moveQueueItem(int currentIndex, int newIndex);
   @override

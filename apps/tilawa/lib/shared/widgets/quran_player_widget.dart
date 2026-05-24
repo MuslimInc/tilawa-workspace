@@ -26,6 +26,7 @@ import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
 import 'quran_player_chrome.dart';
+import 'quran_player_queue_utils.dart';
 import 'quran_player_system_back.dart';
 import 'quran_player_progress_display.dart';
 import 'quran_player_transport_controls.dart';
@@ -3170,6 +3171,8 @@ class _PlayerQueueSheet extends StatelessWidget {
     final tokens = theme.tokens;
     final List<AudioEntity> queue =
         state.playbackState?.queue ?? <AudioEntity>[];
+    final Map<String, int> queueIndexById =
+        QuranPlayerQueueUtils.queueIndexById(queue);
     final int? currentIndex = state.playbackState?.currentIndex;
     final String sourceLabel =
         currentAudio.album ??
@@ -3266,6 +3269,11 @@ class _PlayerQueueSheet extends StatelessWidget {
             ),
             if (queue.length > 1)
               SliverReorderableList(
+                findChildIndexCallback: (Key key) =>
+                    QuranPlayerQueueUtils.findReorderableChildIndex(
+                      indexById: queueIndexById,
+                      key: key,
+                    ),
                 itemBuilder: (context, index) {
                   final AudioEntity item = queue[index];
                   final bool isCurrent = currentIndex == index;
