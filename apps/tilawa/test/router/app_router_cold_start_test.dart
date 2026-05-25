@@ -23,6 +23,11 @@ void main() {
       );
     });
 
+    test('resolveInitialLocation uses boot-selected launch location', () {
+      AppRouter.setInitialLaunchLocation(const LoginRoute().location);
+      expect(AppRouter.resolveInitialLocation(), const LoginRoute().location);
+    });
+
     test('setPendingColdStartRoute marks startup notification launch', () {
       AppRouter.setPendingColdStartRoute(const HomeRoute().location);
       expect(AppRouter.pendingStartupNotificationLaunch, isTrue);
