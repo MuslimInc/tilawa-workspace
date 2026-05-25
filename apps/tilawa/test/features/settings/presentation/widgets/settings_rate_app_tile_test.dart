@@ -94,7 +94,7 @@ void main() {
 
     await tester.pumpWidget(_buildHarness(cubit: cubit));
 
-    expect(find.text('Rate Tilawa'), findsOneWidget);
+    expect(find.text('Rate Rattil'), findsOneWidget);
   });
 
   testWidgets('tap requests rating from settings flow', (
@@ -104,7 +104,7 @@ void main() {
     addTearDown(cubit.close);
 
     await tester.pumpWidget(_buildHarness(cubit: cubit));
-    await tester.tap(find.text('Rate Tilawa'));
+    await tester.tap(find.text('Rate Rattil'));
     await tester.pumpAndSettle();
 
     expect(cubit.rateFromSettingsCalls, 1);
@@ -135,7 +135,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('Rate Tilawa'));
+    await tester.tap(find.text('Rate Rattil'));
     await tester.pump();
 
     expect(cubit.rateFromSettingsCalls, 0);

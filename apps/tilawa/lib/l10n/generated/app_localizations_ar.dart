@@ -27,7 +27,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get west => 'غرب';
 
   @override
-  String get appTitle => 'تلاوة';
+  String get appTitle => 'رَتِّلْ';
 
   @override
   String get reciters => 'القراء';
@@ -515,7 +515,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signIn => 'تسجيل الدخول';
 
   @override
-  String get welcomeToApp => 'مرحباً بك في تلاوة';
+  String get welcomeToApp => 'مرحباً بك في رَتِّلْ';
 
   @override
   String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';
@@ -1650,7 +1650,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sharing => 'جاري المشاركة...';
 
   @override
-  String get sharedViaTilawa => 'تمت المشاركة عبر تلاوة';
+  String get sharedViaTilawa => 'تمت المشاركة عبر رَتِّلْ';
 
   @override
   String get reciterNotAvailable =>
@@ -1907,7 +1907,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get oemAutostartHint =>
-      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق رَتِّلْ من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
 
   @override
   String prayerNotificationBody(String prayerName) {
@@ -2001,16 +2001,16 @@ class AppLocalizationsAr extends AppLocalizations {
   String get moreOptions => 'المزيد';
 
   @override
-  String get supportTilawa => 'ادعم تلاوة';
+  String get supportTilawa => 'ادعم رَتِّلْ';
 
   @override
-  String get rateTilawa => 'قيّم تلاوة';
+  String get rateTilawa => 'قيّم رَتِّلْ';
 
   @override
   String get rateTilawaSubtitle => 'شاركنا رأيك في متجر التطبيقات.';
 
   @override
-  String get shareTilawa => 'شارك تلاوة';
+  String get shareTilawa => 'شارك رَتِّلْ';
 
   @override
   String shareTilawaMessage(String appName, String storeUrl) {
@@ -2021,13 +2021,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareTilawaFailed => 'تعذر فتح نافذة المشاركة. حاول مرة أخرى.';
 
   @override
-  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار رَتِّلْ.';
 
   @override
-  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار رَتِّلْ.';
 
   @override
-  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار رَتِّلْ.';
 
   @override
   String get supportImpactWhyTitle => 'لماذا؟';
@@ -2067,7 +2067,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get supportConfirmationBody =>
-      'الدفع بـ Google Play. تلاوة لا يحفظ بيانات البطاقة.';
+      'يتم الدفع عبر Google Play. رَتِّلْ لا يحتفظ ببيانات بطاقتك.';
 
   @override
   String get supportConfirm => 'متابعة';
@@ -2093,7 +2093,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get supportTrustLinePrefix =>
-      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (';
 
   @override
   String get supportCharitiesLinkLabel => 'رابط الجمعيات الخيرية';
@@ -2112,15 +2112,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get supportTrustLine =>
-      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
 
   @override
   String get supportPlayFooter =>
-      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
 
   @override
   String get supportDisclaimer =>
-      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
 
   @override
   String get supportOfflineMessage => 'يلزم اتصال بالإنترنت.';
@@ -2149,7 +2149,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportSelectTier => 'اختر المبلغ';
 
   @override
-  String get supportSettingsGroupTitle => 'ادعم تلاوة';
+  String get supportSettingsGroupTitle => 'ادعم رَتِّلْ';
 
   @override
   String get supportHelpKeepFree => 'اختياري';

@@ -183,6 +183,8 @@ class _PlayerApp extends StatelessWidget {
               PerfLogger.markBuild('ThemeBlocBuilder');
               return MaterialApp.router(
                 title: AppStrings.appName,
+                onGenerateTitle: (context) =>
+                    AppLocalizations.of(context)!.appTitle,
                 showPerformanceOverlay: false,
                 debugShowCheckedModeBanner: false,
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
@@ -275,7 +277,8 @@ class _DefaultRouteSystemUiOverlayState
     // primary-harmonised `colorScheme.surface` underneath the white nav.
     final overlayStyle = AppSystemChromeStyle.buildDefaultAppStyle(
       theme,
-      navigationBarColor: playerNavOverride ??
+      navigationBarColor:
+          playerNavOverride ??
           theme.componentTokens.adaptiveShell.bottomNavBackgroundColor,
     );
     if (_lastAppliedStyle == overlayStyle) {

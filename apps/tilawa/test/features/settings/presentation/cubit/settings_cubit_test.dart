@@ -18,7 +18,7 @@ import '../../../downloads/helpers/mock_helper.mocks.dart';
 const AppInfo testAppInfo = AppInfo(
   version: '1.0.0',
   buildNumber: '1',
-  appName: 'Tilawa',
+  appName: 'Rattil',
   packageName: 'com.tilawa.app',
 );
 
@@ -67,7 +67,9 @@ void main() {
       mockDownloadNotificationService = MockDownloadNotificationService();
       mockAppInfoService = MockAppInfoService();
 
-      when(mockAppInfoService.getAppInfo()).thenAnswer((_) async => testAppInfo);
+      when(
+        mockAppInfoService.getAppInfo(),
+      ).thenAnswer((_) async => testAppInfo);
 
       when(
         mockDownloadService.getActiveDownloadIds(),

@@ -11,7 +11,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 const AppInfo _testAppInfo = AppInfo(
   version: '1.0.0',
   buildNumber: '1',
-  appName: 'Tilawa',
+  appName: 'Rattil',
   packageName: 'com.tilawa.app',
 );
 
@@ -42,7 +42,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Share Tilawa'), findsOneWidget);
+    expect(find.text('Share Rattil'), findsOneWidget);
   });
 
   testWidgets('tap shares the Play Store link', (WidgetTester tester) async {
@@ -61,12 +61,12 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Share Tilawa'));
+    await tester.tap(find.text('Share Rattil'));
     await tester.pumpAndSettle();
 
     expect(
       sharedText,
-      'Check out Tilawa:\n'
+      'Check out Rattil:\n'
       'https://play.google.com/store/apps/details?id=com.tilawa.app',
     );
   });
@@ -83,7 +83,7 @@ void main() {
 
     expect(
       shareText,
-      'Check out Tilawa:\nhttps://apps.apple.com/app/id123456789',
+      'Check out Rattil:\nhttps://apps.apple.com/app/id123456789',
     );
   });
 
@@ -102,12 +102,12 @@ void main() {
       ),
     );
 
-    await tester.tap(find.text('Share Tilawa'));
+    await tester.tap(find.text('Share Rattil'));
     await tester.pump();
 
     expect(find.byType(TilawaLoadingIndicator), findsOneWidget);
 
-    await tester.tap(find.text('Share Tilawa'));
+    await tester.tap(find.text('Share Rattil'));
     await tester.pump();
 
     expect(shareCalls, 1);
