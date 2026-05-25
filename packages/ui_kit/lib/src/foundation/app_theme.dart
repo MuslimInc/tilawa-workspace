@@ -22,7 +22,13 @@ class AppTheme {
   static const int _lightBlendLevel = 0;
   static const FlexAppBarStyle _lightAppBarStyle = FlexAppBarStyle.surface;
   static const double _lightAppBarOpacity = 1;
-  static const double _lightAppBarElevation = 1;
+  // Flat chrome. The brand rule (tilawa_brand.md §5) is that only the Mushaf
+  // page gets a shadow; app bars are flat. `_applySurfaceScale` re-asserts
+  // this at the end of theme assembly — keeping it consistent here avoids a
+  // transient elevated bar before the override takes effect (visible in
+  // hot-reload, Flex sub-theme inspection, and any consumer that reads the
+  // intermediate ThemeData before `_applySurfaceScale`).
+  static const double _lightAppBarElevation = 0;
   static const FlexTabBarStyle _lightTabBarStyle = FlexTabBarStyle.forAppBar;
 
   // Dark theme configuration constants
@@ -31,7 +37,7 @@ class AppTheme {
   static const int _darkBlendLevel = 0;
   static const FlexAppBarStyle _darkAppBarStyle = FlexAppBarStyle.surface;
   static const double _darkAppBarOpacity = 1;
-  static const double _darkAppBarElevation = 2;
+  static const double _darkAppBarElevation = 0;
   static const FlexTabBarStyle _darkTabBarStyle = FlexTabBarStyle.forAppBar;
 
   // Shared configuration constants
