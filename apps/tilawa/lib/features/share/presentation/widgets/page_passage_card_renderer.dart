@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'reader_page_content_renderer.dart';
@@ -89,9 +90,9 @@ class PagePassageCardRenderer extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const _PosterPill(
+                        _PosterPill(
                           icon: Icons.auto_stories_rounded,
-                          label: 'Tilawa',
+                          label: context.l10n.appTitle,
                         ),
                         const Spacer(),
                         _PosterPill(

@@ -437,7 +437,7 @@ class _ConfigHeader extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Tilawa',
+                      context.l10n.appTitle,
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: AppShareComposerColors.cream,
                         fontWeight: FontWeight.w700,
@@ -487,7 +487,9 @@ class _ConfigHeader extends StatelessWidget {
               _MetadataPill(icon: Icons.person_rounded, label: reciterName),
               _MetadataPill(
                 icon: Icons.done_all_rounded,
-                label: context.l10n.shareVerseLimit(ShareLimits.maxVersesPerClip),
+                label: context.l10n.shareVerseLimit(
+                  ShareLimits.maxVersesPerClip,
+                ),
               ),
             ],
           ),
@@ -585,8 +587,12 @@ class _RangeSelectionCard extends StatelessWidget {
               _SelectionBadge(
                 icon: exceedsLimit ? Icons.warning_amber_rounded : Icons.check,
                 label: exceedsLimit
-                    ? context.l10n.maxVersesExceeded(ShareLimits.maxVersesPerClip)
-                    : context.l10n.shareVerseLimit(ShareLimits.maxVersesPerClip),
+                    ? context.l10n.maxVersesExceeded(
+                        ShareLimits.maxVersesPerClip,
+                      )
+                    : context.l10n.shareVerseLimit(
+                        ShareLimits.maxVersesPerClip,
+                      ),
                 isError: exceedsLimit,
               ),
             ],

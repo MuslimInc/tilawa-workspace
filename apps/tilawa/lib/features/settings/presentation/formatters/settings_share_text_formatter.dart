@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/entities/app_info.dart';
 
-const String _fallbackShareAppName = 'Tilawa';
 const String _fallbackSharePackageName = 'com.tilawa.app';
 const String _defaultAppStoreId = String.fromEnvironment('TILAWA_APP_STORE_ID');
 
@@ -14,7 +14,7 @@ String buildSettingsShareAppText(
 }) {
   final trimmedAppName = appInfo?.appName.trim();
   final resolvedAppName = trimmedAppName == null || trimmedAppName.isEmpty
-      ? _fallbackShareAppName
+      ? AppStrings.appName
       : trimmedAppName;
   final resolvedPlatform = platform ?? defaultTargetPlatform;
   final storeUrl = _resolveShareStoreUrl(

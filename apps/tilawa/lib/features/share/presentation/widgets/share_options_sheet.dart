@@ -127,9 +127,9 @@ class _ShareHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            const TilawaMetadataChip(
+            TilawaMetadataChip(
               icon: Icons.auto_stories_rounded,
-              label: 'Tilawa',
+              label: context.l10n.appTitle,
             ),
             const Spacer(),
             TilawaMetadataChip(

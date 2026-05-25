@@ -406,6 +406,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
 
     final cubit = context.read<ShareCubit>();
     final messages = context.shareProgressMessages;
+    final appTitle = context.l10n.appTitle;
     final viaLabel = context.l10n.sharedViaTilawa;
 
     final Set<int> capturePages = <int>{
@@ -437,7 +438,7 @@ class _VideoReelComposerScreenState extends State<VideoReelComposerScreen> {
       await cubit.generateVideo(
         surahName: getSurahNameArabic(widget.surahNumber),
         progressMessages: messages,
-        appName: 'Tilawa',
+        appName: appTitle,
         sharedViaLabel: viaLabel,
         handles: _videoBoundaryKeys.values
             .map((key) => WidgetCaptureHandle(key))

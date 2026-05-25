@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
+import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../domain/entities/audio_clip_config.dart';
@@ -18,7 +19,12 @@ import 'share_file_manager.dart';
 /// Downloads verse-level audio files and concatenates them into a single MP3 clip.
 @lazySingleton
 class AudioClipService {
-  AudioClipService(this._dio, this._fileManager, this._timingService, this._runner);
+  AudioClipService(
+    this._dio,
+    this._fileManager,
+    this._timingService,
+    this._runner,
+  );
 
   final Dio _dio;
   final ShareFileManager _fileManager;
@@ -226,7 +232,7 @@ class AudioClipService {
       '-i "$inputPath" -ss $start -to $end -acodec copy '
       '-metadata title="$title" '
       '-metadata artist="${config.reciterName}" '
-      '-metadata album="Tilawa" '
+      '-metadata album="${AppStrings.appName}" '
       '-y "$outputPath"',
     );
 
@@ -413,7 +419,7 @@ class AudioClipService {
       '-i "$concatString" -acodec copy '
       '-metadata title="$title" '
       '-metadata artist="${config.reciterName}" '
-      '-metadata album="Tilawa" '
+      '-metadata album="${AppStrings.appName}" '
       '-y "$outputPath"',
     );
 

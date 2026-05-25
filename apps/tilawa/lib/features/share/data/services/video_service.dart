@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
+import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/logger.dart';
 
@@ -286,7 +287,7 @@ class VideoService {
         '-metadata',
         'artist="$reciterName"',
         '-metadata',
-        'album="Tilawa"',
+        'album="${AppStrings.appName}"',
         '-y',
         '"$outputPath"',
       ].join(' ');
@@ -348,7 +349,7 @@ class VideoService {
       '-metadata',
       'artist="$reciterName"',
       '-metadata',
-      'album="Tilawa"',
+      'album="${AppStrings.appName}"',
       '-y',
       '"$outputPath"',
     ].join(' ');
@@ -459,7 +460,7 @@ class VideoService {
       '-metadata',
       'artist="$reciterName"',
       '-metadata',
-      'album="Tilawa"',
+      'album="${AppStrings.appName}"',
       '-y',
       '"$outputPath"',
     ]);
