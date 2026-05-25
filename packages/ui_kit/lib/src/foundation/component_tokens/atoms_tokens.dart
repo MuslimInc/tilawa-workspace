@@ -96,9 +96,9 @@ class TilawaSheetHandleTokens {
 
 /// Component tokens for [TilawaCard].
 ///
-/// Defaults match the existing behavior where the card reads
-/// `radiusLarge`, `borderWidthThin`, and `spaceMedium` from
-/// [TilawaDesignTokens].
+/// Defaults align with the brand-doc rule that body cards live in the
+/// `card` radius family (`radiusExtraLarge` = 24), with the hairline
+/// border width and `spaceMedium` inner padding from [TilawaDesignTokens].
 @immutable
 class TilawaCardTokens {
   const TilawaCardTokens({
@@ -118,7 +118,7 @@ class TilawaCardTokens {
 
   factory TilawaCardTokens.defaults() {
     return const TilawaCardTokens(
-      borderRadius: 16.0,
+      borderRadius: 24.0,
       borderWidth: 0.5,
       padding: EdgeInsets.all(12.0),
     );
@@ -551,8 +551,8 @@ class TilawaErrorStateTokens {
       iconSize: 80.0,
       iconOpacity: 0.8,
       titleSpacing: 24.0,
-      titleFontSize: 24.0,
-      titleFontWeight: FontWeight.bold,
+      titleFontSize: 22.0,
+      titleFontWeight: FontWeight.w700,
       subtitleSpacing: 12.0,
       subtitleFontSize: 16.0,
       subtitleOpacity: 0.7,
@@ -562,7 +562,7 @@ class TilawaErrorStateTokens {
         horizontal: 32.0,
         vertical: 12.0,
       ),
-      retryButtonBorderRadius: 30.0,
+      retryButtonBorderRadius: 24.0,
     );
   }
 

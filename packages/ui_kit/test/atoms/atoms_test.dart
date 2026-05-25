@@ -224,8 +224,8 @@ void main() {
   group('TilawaCardTokens', () {
     test('defaults match existing TilawaCard behavior', () {
       final tokens = TilawaCardTokens.defaults();
-      // radiusLarge = 16.0, borderWidthThin = 0.5, spaceMedium = 12.0
-      expect(tokens.borderRadius, 16.0);
+      // radiusExtraLarge = 24.0, borderWidthThin = 0.5, spaceMedium = 12.0
+      expect(tokens.borderRadius, 24.0);
       expect(tokens.borderWidth, 0.5);
       expect(tokens.padding, const EdgeInsets.all(12.0));
     });
