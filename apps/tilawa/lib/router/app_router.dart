@@ -48,6 +48,9 @@ class AppRouter {
   /// Optional route extra for [pendingColdStartLocation] (e.g. [ReciterEntity]).
   static Object? pendingColdStartExtra;
 
+  /// Non-notification startup destination selected before the router is built.
+  static String? _initialLaunchLocation;
+
   /// The ID of the last local notification that was processed (cold-start or
   /// resume). Used to prevent the resume handler from re-processing the same
   /// launch notification that the splash screen already handled.
@@ -213,11 +216,21 @@ class AppRouter {
     if (coldStart != null && coldStart.isNotEmpty) {
       return const HomeRoute().location;
     }
+    final String? initialLaunchLocation = _initialLaunchLocation;
+    if (initialLaunchLocation != null && initialLaunchLocation.isNotEmpty) {
+      return initialLaunchLocation;
+    }
     return AppLinksConfig.defaultColdStartLocation;
+  }
+
+  /// Sets the first route used when startup can skip `/splash`.
+  static void setInitialLaunchLocation(String location) {
+    _initialLaunchLocation = location;
   }
 
   /// Records a notification cold-start target resolved during bootstrap.
   static void setPendingColdStartRoute(String location, {Object? extra}) {
+    _initialLaunchLocation = null;
     pendingColdStartLocation = location;
     pendingColdStartExtra = extra;
     disableStateRestoration = true;
@@ -228,6 +241,10 @@ class AppRouter {
   static void clearPendingColdStartRoute() {
     pendingColdStartLocation = null;
     pendingColdStartExtra = null;
+  }
+
+  static void clearInitialLaunchLocation() {
+    _initialLaunchLocation = null;
   }
 
   /// Clears notification launch flags after cold-start routing is consumed.
@@ -250,6 +267,7 @@ class AppRouter {
   static void resetForTesting() {
     _router = null;
     disableStateRestoration = false;
+    _initialLaunchLocation = null;
     pendingFcmMessage = null;
     pendingLocalNotificationResponse = null;
     pendingStartupNotificationLaunch = false;

@@ -83,6 +83,7 @@ class _BootGateState extends State<_BootGate> {
 
   bool _ready = false;
   bool _handoffToAppStarted = false;
+  bool _showHandoffOverlay = true;
 
   @override
   void initState() {
@@ -106,18 +107,26 @@ class _BootGateState extends State<_BootGate> {
     // here we just await the resulting future so we can swap in the real app
     // when it completes. Calling startCriticalInit() is a no-op if bootstrap
     // already kicked it off, which it will have in production.
-    widget.startCriticalInit().then((_) async {
-      await _ensureDependenciesRegistered();
-      if (!mounted || _handoffToAppStarted) return;
-      _handoffToAppStarted = true;
-      setState(() => _ready = true);
-    }).catchError((Object error, StackTrace stackTrace) {
-      logger.e(
-        'Critical init failed; staying on launch splash',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    });
+    widget
+        .startCriticalInit()
+        .then((_) async {
+          await _ensureDependenciesRegistered();
+          final StartupLaunchPlan plan = await _resolveStartupLaunchPlan();
+          _applyStartupLaunchPlan(plan);
+          if (!mounted || _handoffToAppStarted) return;
+          _handoffToAppStarted = true;
+          setState(() {
+            _ready = true;
+            _showHandoffOverlay = false;
+          });
+        })
+        .catchError((Object error, StackTrace stackTrace) {
+          logger.e(
+            'Critical init failed; staying on launch splash',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        });
   }
 
   Future<void> _ensureDependenciesRegistered() async {
@@ -127,9 +136,42 @@ class _BootGateState extends State<_BootGate> {
     await configureDependencies(launchConfig: appLaunchConfig);
   }
 
+  Future<StartupLaunchPlan> _resolveStartupLaunchPlan() async {
+    try {
+      if (!getIt.isRegistered<StartupLaunchCoordinator>()) {
+        return const StartupLaunchPlan.home();
+      }
+      return await getIt<StartupLaunchCoordinator>().resolve();
+    } catch (error, stackTrace) {
+      logger.e(
+        'Startup launch resolution failed; falling back to home',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return const StartupLaunchPlan.home();
+    }
+  }
+
+  void _applyStartupLaunchPlan(StartupLaunchPlan plan) {
+    switch (plan.target) {
+      case StartupLaunchTarget.notification:
+        AppRouter.setPendingColdStartRoute(plan.location, extra: plan.extra);
+      case StartupLaunchTarget.home:
+      case StartupLaunchTarget.login:
+      case StartupLaunchTarget.onboarding:
+        AppRouter.clearPendingColdStartRoute();
+        AppRouter.pendingStartupNotificationLaunch = false;
+        AppRouter.disableStateRestoration = false;
+        AppRouter.setInitialLaunchLocation(plan.location);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_ready) {
+      if (!_showHandoffOverlay) {
+        return widget.child;
+      }
       return ValueListenableBuilder<bool>(
         valueListenable: SplashLaunchHandoff.splashRouteHasPainted,
         builder: (BuildContext context, bool painted, Widget? _) {

@@ -12,6 +12,7 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/bootstrap/app_bootstrapper.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
+import 'package:tilawa/core/bootstrap/startup_launch_coordinator.dart';
 import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/bootstrap/critical_init_coordinator.dart';
@@ -32,8 +33,7 @@ part 'app_startup_phases.dart';
 part 'app_startup_widgets.dart';
 
 typedef AppRunner = void Function(Widget widget);
-typedef DiConfigurator =
-    Future<void> Function({AppLaunchConfig? launchConfig});
+typedef DiConfigurator = Future<void> Function({AppLaunchConfig? launchConfig});
 
 AppLaunchConfig _appLaunchConfig = AppLaunchConfig.fromEnvironment();
 AppStartupTasks _startupTasks = AppStartupTasks(launchConfig: _appLaunchConfig);
