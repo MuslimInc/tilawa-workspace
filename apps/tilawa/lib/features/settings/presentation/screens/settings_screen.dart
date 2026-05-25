@@ -8,6 +8,7 @@ import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/bootstrap/app_launch_config.dart';
+import '../../../../core/env.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../app_review/presentation/cubit/app_review_cubit.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -63,24 +64,29 @@ class SettingsScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    BlocBuilder<ThemeCubit, ThemeState>(
-                      builder: (context, state) {
-                        return TilawaSettingsTile(
-                          icon: FluentIcons.color_24_regular,
-                          title: l10n.primaryColor,
-                          trailing: settingsColorTrailing(
-                            context,
-                            state.primaryColor,
-                          ),
-                          onTap: () => SettingsSheets.showPrimaryColorPicker(
-                            context,
-                            currentColor: state.primaryColor,
-                            currentSource: state.primaryColorSource,
-                            currentPresetId: state.primaryPresetId,
-                          ),
-                        );
-                      },
-                    ),
+                    // Brand-locked: the primary color picker is hidden in
+                    // production. Pass --dart-define=TILAWA_SHOW_COLOR_PICKER=true
+                    // for dev/QA palette work. See `lib/core/env.dart` and
+                    // `docs/tilawa_brand.md` §3.
+                    if (Env.kShowColorPicker)
+                      BlocBuilder<ThemeCubit, ThemeState>(
+                        builder: (context, state) {
+                          return TilawaSettingsTile(
+                            icon: FluentIcons.color_24_regular,
+                            title: l10n.primaryColor,
+                            trailing: settingsColorTrailing(
+                              context,
+                              state.primaryColor,
+                            ),
+                            onTap: () => SettingsSheets.showPrimaryColorPicker(
+                              context,
+                              currentColor: state.primaryColor,
+                              currentSource: state.primaryColorSource,
+                              currentPresetId: state.primaryPresetId,
+                            ),
+                          );
+                        },
+                      ),
                     BlocBuilder<LocalizationBloc, LocalizationState>(
                       builder: (context, state) {
                         return TilawaSettingsTile(

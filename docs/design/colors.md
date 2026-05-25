@@ -1,17 +1,29 @@
 # Tilawa colour system (design policy)
 
-Tilawa's visual identity is **calm, modern, and premium**. The palette is intentionally small: one user-selectable brand accent, a quiet neutral surface ramp, and three semantic colours. Decorative parallel palettes are *not* part of the system.
+Tilawa's visual identity is **calm, modern, and premium**. The palette is intentionally small: one **brand-locked** accent, a quiet neutral surface ramp anchored on `#E5E5E0`, and three semantic colours. Decorative parallel palettes are *not* part of the system.
 
 > Spec references: [`specs/012-visual-simplification/`](../../specs/012-visual-simplification/spec.md),
 > [`specs/017-catalog-theme-freeze/`](../../specs/017-catalog-theme-freeze/spec.md).
 > Implementation contract: [`packages/ui_kit/docs/design_system.md`](../../packages/ui_kit/docs/design_system.md).
 
-## Default accent and light neutrals (frozen 2026-05-23)
+## Brand lock (frozen 2026-05-25)
 
-- **Default primary:** coral `#E60023` (`AppColors.defaultPrimary`).
-- **Light scaffold / surface:** `#FFFFFF` — not tinted by user primary.
-- **Idle control / search fill:** `#E5E5E0` (`AppColors.lightSurfaceContainerHighBase` → `ColorScheme.surfaceContainerHigh`) for **every** primary preset.
-- **Ink:** `#000000` on white; body/mute/ash tiers in `AppColors` for secondary copy.
+The brand colour is **fixed**. Users do not pick a primary. Production builds
+always render Sage on the `#E5E5E0` neutral; the in-Settings colour picker is
+retained behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` for dev/QA only.
+
+- **Primary (Ink):** Sage `#5E6D49` (`AppColors.primarySage` /
+  `AppColors.defaultPrimary` / `PrimaryColorPreset.brandLocked`). Deepened
+  from `#6F7F58` so white-on-primary clears the 4.5:1 WCAG AA bar.
+- **Brand neutral:** `#E5E5E0` (`AppColors.lightSurfaceContainerHighBase` →
+  `ColorScheme.surfaceContainerHigh`). The Vellum tier for chips, search
+  fills, settings rows, and idle controls.
+- **Light scaffold / surface:** `#FFFFFF` — not tinted by primary.
+- **Ink (text):** `#000000` on white; body/mute/ash tiers in `AppColors`
+  for secondary copy.
+- **Runtime override:** `apps/tilawa/lib/features/theme/presentation/theme_state_material.dart`
+  resolves `state.primaryColor` to the brand-locked value when
+  `Env.kShowColorPicker` is `false`.
 
 `AppTheme` does **not** primary-harmonize `surfaceContainerHigh` in light mode so
 catalog search and filter chips stay Pinterest-neutral.

@@ -3,10 +3,20 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// one brand accent (user-selectable), a quiet neutral surface ramp,
-/// and a handful of semantic colors. Decorative tones, parallel "category
-/// hues", and gradient stops have been removed so the UI feels premium
-/// without competing with content.
+/// one **brand-locked** accent ([primarySage] `#6F7F58`), a quiet neutral
+/// surface ramp anchored on the brand neutral [lightSurfaceContainerHighBase]
+/// `#E5E5E0`, and a handful of semantic colors. Decorative tones, parallel
+/// "category hues", and gradient stops have been removed so the UI feels
+/// premium without competing with content.
+///
+/// **Brand lock.** As of the Islamic-brand initiative, the runtime primary
+/// is fixed to Sage (`#6F7F58`) for production builds. The other preset
+/// hexes (`primaryCoral`, `primaryTeal`, `primaryGold`, `primaryBrown`,
+/// `primaryPurple`) are retained for two reasons: (1) the in-Settings color
+/// picker remains available behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true`
+/// for dev/QA palette work, and (2) legacy persisted user choices still need
+/// to deserialize without throwing. The runtime override lives in
+/// `apps/tilawa/lib/features/theme/presentation/theme_state_material.dart`.
 ///
 /// All hex values used by `AppTheme` to assemble `ColorScheme` live here
 /// so there is exactly one source of truth. Product widgets should read
@@ -19,9 +29,12 @@ abstract final class AppColors {
   // Brand presets — user-selectable primary tones.
   // ---------------------------------------------------------------------------
 
-  /// Default primary — Pinterest-inspired brand red (`#E60023`).
+  /// Legacy Pinterest-inspired brand red (`#E60023`).
   ///
-  /// Matches Android `launch_background` in `apps/tilawa/android/.../colors.xml`.
+  /// Retained so previously-stored user theme choices still deserialize and
+  /// so dev/QA builds with `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` can
+  /// still preview it. Not used by production runtime; see the class-level
+  /// docstring for the brand lock.
   static const Color primaryCoral = Color(0xFFE60023);
 
   /// Legacy brand teal-cyan (still available in Settings).
@@ -30,8 +43,11 @@ abstract final class AppColors {
   /// Teal/cyan compatibility alias retained for saved theme migration.
   static const Color primaryCyan = primaryTeal;
 
-  /// Sage theme option — calm, scholarly green.
-  static const Color primarySage = Color(0xFF6F7F58);
+  /// Sage — the brand-locked Islamic accent ("scholar's cloth"). Deepened
+  /// from the legacy `#6F7F58` so white-on-primary hits the 4.5:1 WCAG AA
+  /// contrast bar natively (5.59:1 measured) without relying on
+  /// `_safePrimaryForLight` to clamp it.
+  static const Color primarySage = Color(0xFF5E6D49);
 
   /// Muted gold theme option — Mushaf-inspired warm accent.
   static const Color primaryGold = Color(0xFF8C681F);
@@ -46,7 +62,11 @@ abstract final class AppColors {
   static const Color primaryPurple = Color(0xFF7A5C89);
 
   /// Default primary color used throughout the app.
-  static const Color defaultPrimary = primaryCoral;
+  ///
+  /// Brand-locked to [primarySage] per the Islamic-brand initiative. See the
+  /// class-level docstring for how the legacy presets are still wired for
+  /// dev/QA and persistence-compatibility purposes.
+  static const Color defaultPrimary = primarySage;
 
   // ---------------------------------------------------------------------------
   // Light neutral ramp — Pinterest catalog chrome (white / #E5E5E0 / black).
