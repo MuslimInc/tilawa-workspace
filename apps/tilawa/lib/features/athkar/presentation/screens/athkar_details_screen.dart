@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/app_review/domain/entities/app_review_blocked_flow.dart';
 import 'package:tilawa/features/app_review/presentation/widgets/app_review_sacred_flow_scope.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -49,96 +49,99 @@ class _AthkarDetailsScreenState extends State<AthkarDetailsScreen> {
     return AppReviewSacredFlowScope(
       flow: AppReviewBlockedFlow.athkar,
       child: BlocProvider(
-        create: (context) => getIt<AthkarCubit>()..loadAthkar(widget.categoryId),
+        create: (context) =>
+            getIt<AthkarCubit>()..loadAthkar(widget.categoryId),
         child: BlocBuilder<AthkarCubit, AthkarState>(
           builder: (context, state) {
             return Scaffold(
-            appBar: TilawaCatalogAppBar(
-              preferredHeight:
-                  TilawaAppBarConfig.catalogTitleOnlyHeight(context),
-              title: widget.categoryName,
-              automaticallyImplyLeading: true,
-              onBackPressed: () => context.pop(),
-              actions: [
-                if (state is AthkarItemsLoaded) ...[
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceSmall,
-                      vertical: tokens.spaceExtraSmall,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer.withValues(
-                        alpha: tokens.opacityGlass,
+              appBar: TilawaCatalogAppBar(
+                preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(
+                  context,
+                ),
+                title: widget.categoryName,
+                automaticallyImplyLeading: true,
+                onBackPressed: () => context.pop(),
+                actions: [
+                  if (state is AthkarItemsLoaded) ...[
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: tokens.spaceSmall,
+                        vertical: tokens.spaceExtraSmall,
                       ),
-                      borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                      border: Border.all(
-                        color: theme.colorScheme.primary.withValues(
-                          alpha: tokens.opacitySubtle,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer.withValues(
+                          alpha: tokens.opacityGlass,
                         ),
-                        width: tokens.borderWidthThin,
-                      ),
-                    ),
-                    child: Text(
-                      '${_currentIndex + 1} / ${state.items.length}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: tokens.spaceLarge),
-                ],
-              ],
-            ),
-            body: Builder(
-              builder: (context) {
-                return Stack(
-                  children: [
-                    const Positioned.fill(child: AthkarAmbientBackground()),
-                    Positioned.fill(
-                      child: switch (state) {
-                        AthkarLoading() => const TilawaLoadingIndicator(),
-                        AthkarError(:final failure) => TilawaIllustratedState(
-                          visual: const TilawaStateVisual(
-                            icon: Icons.menu_book_rounded,
-                            tone: TilawaStateVisualTone.error,
-                          ),
-                          title:
-                              failure.message ?? context.l10n.unexpectedError,
-                          semanticLabel:
-                              failure.message ?? context.l10n.unexpectedError,
-                          primaryAction: TilawaButton(
-                            text: context.l10n.retry,
-                            variant: TilawaButtonVariant.secondary,
-                            leadingIcon: const Icon(Icons.refresh_rounded),
-                            onPressed: () {
-                              context.read<AthkarCubit>().loadAthkar(
-                                widget.categoryId,
-                              );
-                            },
-                          ),
+                        borderRadius: BorderRadius.circular(
+                          tokens.radiusMedium,
                         ),
-                        AthkarItemsLoaded(
-                          :final items,
-                          :final currentCounts,
-                        ) =>
-                          AthkarDetailsBody(
-                            items: items,
-                            currentCounts: currentCounts,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _currentIndex = index;
-                              });
-                            },
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: tokens.opacitySubtle,
                           ),
-                        _ => const SizedBox.shrink(),
-                      },
+                          width: tokens.borderWidthThin,
+                        ),
+                      ),
+                      child: Text(
+                        '${_currentIndex + 1} / ${state.items.length}',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onPrimaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
-                );
-              },
-            ),
-          );
+                ],
+              ),
+              body: Builder(
+                builder: (context) {
+                  return Stack(
+                    children: [
+                      const Positioned.fill(child: AthkarAmbientBackground()),
+                      Positioned.fill(
+                        child: switch (state) {
+                          AthkarLoading() => const TilawaLoadingIndicator(),
+                          AthkarError(:final failure) => TilawaIllustratedState(
+                            visual: const TilawaStateVisual(
+                              icon: Icons.menu_book_rounded,
+                              tone: TilawaStateVisualTone.error,
+                            ),
+                            title:
+                                failure.message ?? context.l10n.unexpectedError,
+                            semanticLabel:
+                                failure.message ?? context.l10n.unexpectedError,
+                            primaryAction: TilawaButton(
+                              text: context.l10n.retry,
+                              variant: TilawaButtonVariant.secondary,
+                              leadingIcon: const Icon(Icons.refresh_rounded),
+                              onPressed: () {
+                                context.read<AthkarCubit>().loadAthkar(
+                                  widget.categoryId,
+                                );
+                              },
+                            ),
+                          ),
+                          AthkarItemsLoaded(
+                            :final items,
+                            :final currentCounts,
+                          ) =>
+                            AthkarDetailsBody(
+                              items: items,
+                              currentCounts: currentCounts,
+                              onPageChanged: (index) {
+                                setState(() {
+                                  _currentIndex = index;
+                                });
+                              },
+                            ),
+                          _ => const SizedBox.shrink(),
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            );
           },
         ),
       ),
