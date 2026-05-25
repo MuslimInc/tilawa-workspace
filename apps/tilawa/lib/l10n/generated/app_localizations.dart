@@ -3692,6 +3692,24 @@ abstract class AppLocalizations {
   /// **'Share your feedback on the app store.'**
   String get rateTilawaSubtitle;
 
+  /// Settings row to share the app with others
+  ///
+  /// In en, this message translates to:
+  /// **'Share Tilawa'**
+  String get shareTilawa;
+
+  /// Text shared from settings to recommend Tilawa to others
+  ///
+  /// In en, this message translates to:
+  /// **'Check out {appName}:\n{storeUrl}'**
+  String shareTilawaMessage(String appName, String storeUrl);
+
+  /// Error shown when sharing Tilawa from settings fails
+  ///
+  /// In en, this message translates to:
+  /// **'We could not open the share sheet. Please try again.'**
+  String get shareTilawaFailed;
+
   /// Support screen single-line intro under app bar
   ///
   /// In en, this message translates to:

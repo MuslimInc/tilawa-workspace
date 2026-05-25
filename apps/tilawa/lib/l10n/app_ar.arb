@@ -2682,6 +2682,26 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
+    "shareTilawa": "شارك تلاوة",
+    "@shareTilawa": {
+        "description": "Settings row to share the app with others"
+    },
+    "shareTilawaMessage": "جرّب {appName}:\n{storeUrl}",
+    "@shareTilawaMessage": {
+        "description": "Text shared from settings to recommend Tilawa to others",
+        "placeholders": {
+            "appName": {
+                "type": "String"
+            },
+            "storeUrl": {
+                "type": "String"
+            }
+        }
+    },
+    "shareTilawaFailed": "تعذر فتح نافذة المشاركة. حاول مرة أخرى.",
+    "@shareTilawaFailed": {
+        "description": "Error shown when sharing Tilawa from settings fails"
+    },
     "supportIntroLine": "مشاركتك تساعدنا على استمرار تلاوة.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"

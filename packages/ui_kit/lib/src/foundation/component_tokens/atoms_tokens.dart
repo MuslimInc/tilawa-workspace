@@ -241,7 +241,7 @@ class TilawaLoadingIndicatorTokens {
   final double defaultStrokeWidth;
 
   factory TilawaLoadingIndicatorTokens.defaults() {
-    return const TilawaLoadingIndicatorTokens(defaultStrokeWidth: 4.0);
+    return const TilawaLoadingIndicatorTokens(defaultStrokeWidth: 3.0);
   }
 
   TilawaLoadingIndicatorTokens copyWith({double? defaultStrokeWidth}) {

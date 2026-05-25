@@ -2010,6 +2010,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get rateTilawaSubtitle => 'شاركنا رأيك في متجر التطبيقات.';
 
   @override
+  String get shareTilawa => 'شارك تلاوة';
+
+  @override
+  String shareTilawaMessage(String appName, String storeUrl) {
+    return 'جرّب $appName:\n$storeUrl';
+  }
+
+  @override
+  String get shareTilawaFailed => 'تعذر فتح نافذة المشاركة. حاول مرة أخرى.';
+
+  @override
   String get supportIntroLine => 'مشاركتك تساعدنا على استمرار تلاوة.';
 
   @override

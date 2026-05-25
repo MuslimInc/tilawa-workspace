@@ -13,11 +13,14 @@ import '../../../../router/app_router_config.dart';
 import '../../../app_review/presentation/cubit/app_review_cubit.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
+import '../../../share/domain/entities/share_content.dart';
+import '../../../share/domain/usecases/share_content_use_case.dart';
 import '../../../theme/domain/app_theme_mode.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../../../theme/presentation/theme_state_material.dart';
 import '../../../tour_guide/presentation/widgets/tour_guide_debug_reset_tile.dart';
 import '../cubit/settings_cubit.dart';
+import '../formatters/settings_share_text_formatter.dart';
 import '../widgets/settings_picker_sheets.dart';
 import '../widgets/settings_widgets.dart';
 
@@ -29,6 +32,7 @@ class SettingsScreen extends StatelessWidget {
     final l10n = context.l10n;
     final tokens = context.tokens;
     final supportEnabled = getIt<AppLaunchConfig>().supportTilawaEnabled;
+    final shareContent = getIt<ShareContentUseCase>();
 
     return BlocProvider(
       create: (_) => getIt<AppReviewCubit>(),
@@ -188,7 +192,23 @@ class SettingsScreen extends StatelessWidget {
                 TilawaSettingsGroup(
                   title: l10n.settingsSupportSection,
                   children: [
-                    SettingsRateAppTile(isLast: !supportEnabled),
+                    const SettingsRateAppTile(),
+                    BlocBuilder<SettingsCubit, SettingsState>(
+                      builder: (context, state) {
+                        return SettingsShareAppTile(
+                          isLast: !supportEnabled,
+                          onShareRequested: () {
+                            final shareText = buildSettingsShareAppText(
+                              l10n,
+                              appInfo: state.appInfo,
+                            );
+                            return shareContent(
+                              ShareContent.text(text: shareText),
+                            );
+                          },
+                        );
+                      },
+                    ),
                     if (supportEnabled)
                       TilawaSettingsTile(
                         icon: FluentIcons.heart_24_regular,

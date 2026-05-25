@@ -209,6 +209,66 @@ class SettingsRateAppTile extends StatelessWidget {
   }
 }
 
+class SettingsShareAppTile extends StatefulWidget {
+  const SettingsShareAppTile({
+    super.key,
+    this.isLast = false,
+    required this.onShareRequested,
+  });
+
+  final bool isLast;
+  final Future<void> Function() onShareRequested;
+
+  @override
+  State<SettingsShareAppTile> createState() => _SettingsShareAppTileState();
+}
+
+class _SettingsShareAppTileState extends State<SettingsShareAppTile> {
+  bool _isSharing = false;
+
+  Future<void> _shareApp() async {
+    if (_isSharing) {
+      return;
+    }
+
+    setState(() => _isSharing = true);
+
+    try {
+      await widget.onShareRequested();
+    } catch (_) {
+      if (mounted) {
+        ToastUtils.showErrorToast(context.l10n.shareTilawaFailed);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSharing = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+
+    return TilawaSettingsTile(
+      icon: Icons.share_outlined,
+      title: context.l10n.shareTilawa,
+      showDivider: !widget.isLast,
+      trailing: _isSharing
+          ? SizedBox(
+              width: tokens.iconSizeSmall,
+              height: tokens.iconSizeSmall,
+              child: const TilawaLoadingIndicator(
+                centered: false,
+                strokeWidth: 2.0,
+              ),
+            )
+          : _settingsChevronIcon(context),
+      onTap: _shareApp,
+    );
+  }
+}
+
 class SettingsLogoutSection extends StatelessWidget {
   const SettingsLogoutSection({super.key, required this.onLogout});
 

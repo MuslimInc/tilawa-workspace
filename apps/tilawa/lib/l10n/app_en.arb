@@ -2709,6 +2709,26 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
+    "shareTilawa": "Share Tilawa",
+    "@shareTilawa": {
+        "description": "Settings row to share the app with others"
+    },
+    "shareTilawaMessage": "Check out {appName}:\n{storeUrl}",
+    "@shareTilawaMessage": {
+        "description": "Text shared from settings to recommend Tilawa to others",
+        "placeholders": {
+            "appName": {
+                "type": "String"
+            },
+            "storeUrl": {
+                "type": "String"
+            }
+        }
+    },
+    "shareTilawaFailed": "We could not open the share sheet. Please try again.",
+    "@shareTilawaFailed": {
+        "description": "Error shown when sharing Tilawa from settings fails"
+    },
     "supportIntroLine": "Your contribution helps keep Tilawa going.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"

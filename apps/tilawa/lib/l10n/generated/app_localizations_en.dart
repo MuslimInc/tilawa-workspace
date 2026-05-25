@@ -2019,6 +2019,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rateTilawaSubtitle => 'Share your feedback on the app store.';
 
   @override
+  String get shareTilawa => 'Share Tilawa';
+
+  @override
+  String shareTilawaMessage(String appName, String storeUrl) {
+    return 'Check out $appName:\n$storeUrl';
+  }
+
+  @override
+  String get shareTilawaFailed =>
+      'We could not open the share sheet. Please try again.';
+
+  @override
   String get supportIntroLine => 'Your contribution helps keep Tilawa going.';
 
   @override

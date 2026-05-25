@@ -90,8 +90,8 @@ void main() {
       final cpi = tester.widget<CircularProgressIndicator>(
         find.byType(CircularProgressIndicator),
       );
-      // Default token is 4.0
-      expect(cpi.strokeWidth, 4.0);
+      // Default token is 3.0
+      expect(cpi.strokeWidth, 3.0);
     });
   });
 
@@ -299,7 +299,7 @@ void main() {
   group('TilawaLoadingIndicatorTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaLoadingIndicatorTokens.defaults();
-      expect(tokens.defaultStrokeWidth, 4.0);
+      expect(tokens.defaultStrokeWidth, 3.0);
     });
 
     test('copyWith preserves unchanged values', () {
