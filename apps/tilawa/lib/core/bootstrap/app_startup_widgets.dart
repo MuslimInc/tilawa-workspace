@@ -194,7 +194,7 @@ class _LaunchSplash extends StatelessWidget {
                 child: Image.asset(
                   wordmarkAsset,
                   filterQuality: FilterQuality.high,
-                  fit: BoxFit.fill,
+                  fit: BoxFit.contain,
                 ),
               ),
             ),

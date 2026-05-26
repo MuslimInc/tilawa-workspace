@@ -2904,5 +2904,13 @@
     "appReviewPlatformUnsupported": "Store reviews are not supported on this platform.",
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
+    },
+    "a11ySplashLoading": "Tilawa, loading",
+    "@a11ySplashLoading": {
+        "description": "Screen-reader label announced while the splash loading screen is visible"
+    },
+    "splashSlowLoadingNotice": "Some content may take a moment to load",
+    "@splashSlowLoadingNotice": {
+        "description": "Toast shown when startup times out and the app navigates to home in a degraded state"
     }
 }

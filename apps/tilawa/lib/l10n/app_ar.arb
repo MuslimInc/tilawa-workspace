@@ -2877,5 +2877,13 @@
     "appReviewPlatformUnsupported": "تقييمات المتجر غير مدعومة على هذه المنصة.",
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
+    },
+    "a11ySplashLoading": "تلاوة، جارٍ التحميل",
+    "@a11ySplashLoading": {
+        "description": "Screen-reader label announced while the splash loading screen is visible"
+    },
+    "splashSlowLoadingNotice": "قد يستغرق بعض المحتوى لحظة للتحميل",
+    "@splashSlowLoadingNotice": {
+        "description": "Toast shown when startup times out and the app navigates to home in a degraded state"
     }
 }

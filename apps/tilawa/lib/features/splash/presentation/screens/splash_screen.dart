@@ -6,6 +6,7 @@ import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
@@ -25,7 +26,7 @@ class _SplashScreenState extends State<SplashScreen> {
   static const Color _launchBackgroundColor = AppColors.defaultPrimary;
   static const String _launchWordmarkAsset =
       'assets/images/launch_wordmark.png';
-  static const double _androidSplashWordmarkBoxSize = 288;
+  static const double _wordmarkBoxSize = 288;
   static const SystemUiOverlayStyle _launchOverlayStyle = SystemUiOverlayStyle(
     statusBarColor: _launchBackgroundColor,
     statusBarIconBrightness: Brightness.light,
@@ -60,20 +61,37 @@ class _SplashScreenState extends State<SplashScreen> {
     AppRouter.router.go(location);
   }
 
+  Future<void> _showAuthErrorDialog(BuildContext context, String message) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.l10n.error),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(ctx.l10n.close),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _splashBloc,
       child: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
+        listener: (context, state) async {
           state.when(
             initial: () {},
             loading: () {},
             authenticated: (_) {},
             unauthenticated: () {},
-            error: (message) {
-              ToastUtils.showErrorToast(message);
-              _goAndReset(const LoginRoute().location);
+            error: (message) async {
+              await _showAuthErrorDialog(context, message);
+              if (context.mounted) _goAndReset(const LoginRoute().location);
             },
           );
         },
@@ -82,6 +100,9 @@ class _SplashScreenState extends State<SplashScreen> {
             switch (state) {
               case SplashLoading():
                 break;
+              case SplashNavigateToHome(:final timedOut) when timedOut:
+                ToastUtils.showToast(msg: context.l10n.splashSlowLoadingNotice);
+                _goAndReset(const HomeRoute().location);
               case SplashNavigateToHome():
                 _goAndReset(const HomeRoute().location);
               case SplashNavigateToLogin():
@@ -96,14 +117,28 @@ class _SplashScreenState extends State<SplashScreen> {
           },
           child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: _launchOverlayStyle,
-            child: ColoredBox(
-              color: _launchBackgroundColor,
-              child: Center(
-                child: SizedBox.square(
-                  dimension: _androidSplashWordmarkBoxSize,
-                  child: Image.asset(
-                    _launchWordmarkAsset,
-                    fit: BoxFit.contain,
+            child: Semantics(
+              label: context.l10n.a11ySplashLoading,
+              liveRegion: true,
+              child: ColoredBox(
+                color: _launchBackgroundColor,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox.square(
+                        dimension: _wordmarkBoxSize,
+                        child: Image.asset(
+                          _launchWordmarkAsset,
+                          filterQuality: FilterQuality.high,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      const CircularProgressIndicator.adaptive(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    ],
                   ),
                 ),
               ),
