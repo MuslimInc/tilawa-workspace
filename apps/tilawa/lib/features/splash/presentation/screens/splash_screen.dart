@@ -54,6 +54,12 @@ class _SplashScreenState extends State<SplashScreen> {
     super.dispose();
   }
 
+  void _goAndReset(String location) {
+    AppRouter.disableStateRestoration = false;
+    AppRouter.pendingStartupNotificationLaunch = false;
+    AppRouter.router.go(location);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -67,9 +73,7 @@ class _SplashScreenState extends State<SplashScreen> {
             unauthenticated: () {},
             error: (message) {
               ToastUtils.showErrorToast(message);
-              AppRouter.disableStateRestoration = false;
-              AppRouter.pendingStartupNotificationLaunch = false;
-              AppRouter.router.go(const LoginRoute().location);
+              _goAndReset(const LoginRoute().location);
             },
           );
         },
@@ -79,23 +83,15 @@ class _SplashScreenState extends State<SplashScreen> {
               case SplashLoading():
                 break;
               case SplashNavigateToHome():
-                AppRouter.disableStateRestoration = false;
-                AppRouter.pendingStartupNotificationLaunch = false;
-                AppRouter.router.go(const HomeRoute().location);
+                _goAndReset(const HomeRoute().location);
               case SplashNavigateToLogin():
-                AppRouter.disableStateRestoration = false;
-                AppRouter.pendingStartupNotificationLaunch = false;
-                AppRouter.router.go(const LoginRoute().location);
+                _goAndReset(const LoginRoute().location);
               case SplashNavigateToOnboarding():
-                AppRouter.disableStateRestoration = false;
-                AppRouter.pendingStartupNotificationLaunch = false;
-                AppRouter.router.go(const OnboardingRoute().location);
+                _goAndReset(const OnboardingRoute().location);
               case SplashNavigateToNotification(:final location, :final extra):
                 AppRouter.navigateFromColdStart(location, extra: extra);
               case SplashFailure():
-                AppRouter.disableStateRestoration = false;
-                AppRouter.pendingStartupNotificationLaunch = false;
-                AppRouter.router.go(const HomeRoute().location);
+                _goAndReset(const HomeRoute().location);
             }
           },
           child: AnnotatedRegion<SystemUiOverlayStyle>(
