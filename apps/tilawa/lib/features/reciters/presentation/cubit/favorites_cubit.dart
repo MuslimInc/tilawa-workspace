@@ -16,13 +16,32 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     this._getFavorites,
     this._toggleFavorite,
     this._clearFavoriteReciters,
-  ) : super(FavoritesInitial());
+  ) : super(_initialState(_getFavorites)) {
+    final FavoritesState current = state;
+    if (current is FavoritesLoaded) {
+      _currentFavoriteIds = Set<int>.from(current.favoriteIds);
+    }
+  }
   final GetFavoriteRecitersUseCase _getFavorites;
   final ToggleFavoriteReciterUseCase _toggleFavorite;
   final ClearFavoriteRecitersUseCase _clearFavoriteReciters;
 
   Set<int> _currentFavoriteIds = {};
   final Set<int> _pendingReciterIds = {};
+
+  /// Seeds the cubit from the splash-prefetched favorites so the reciters
+  /// screen lands on [FavoritesLoaded] without a flash of loading state.
+  static FavoritesState _initialState(GetFavoriteRecitersUseCase getFavorites) {
+    final List<ReciterEntity>? cached = getFavorites
+        .takeCachedSuccessForStartup();
+    if (cached == null) {
+      return FavoritesInitial();
+    }
+    return FavoritesLoaded(
+      favorites: cached,
+      favoriteIds: cached.map((r) => r.id).toSet(),
+    );
+  }
 
   Future<void> loadFavorites() async {
     if (isClosed) return;

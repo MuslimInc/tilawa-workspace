@@ -1,8 +1,13 @@
 import 'dart:async';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/features/reciters/domain/usecases/get_favorite_reciters_use_case.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 
 /// Coordinates splash-held startup: shell/tab prep before first [HomeRoute].
@@ -10,18 +15,24 @@ import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.d
 /// Critical init (Firebase, DI, Hydrated) is already complete when the splash
 /// route mounts ([_BootGate]). This type covers the work that used to run on
 /// [MainScreen] after navigation (shell activation + initial tab mount) and
-/// preloads the reciters catalog while the splash is visible.
+/// prefetches the reciters catalog + favorites list while the splash is
+/// visible so downstream blocs can hydrate without a loading flash.
 @lazySingleton
 class AppStartupReadiness {
-  AppStartupReadiness(this._getReciters);
+  AppStartupReadiness(this._getReciters, this._getFavorites);
 
   final GetRecitersUseCase _getReciters;
+  final GetFavoriteRecitersUseCase _getFavorites;
 
   /// Mirrors [MainScreenCubit] delays so home opens without placeholder staging.
   static const Duration shellActivationDelay = Duration(milliseconds: 260);
   static const Duration initialTabRouteSettleDelay = Duration(
     milliseconds: 1200,
   );
+
+  /// Per-prefetch cap so a single hung endpoint cannot extend splash to the
+  /// full [maxSplashDuration] safety net.
+  static const Duration prefetchTimeout = Duration(seconds: 4);
   static const Duration maxSplashDuration = Duration(seconds: 10);
 
   bool _shellPrepComplete = false;
@@ -71,7 +82,16 @@ class AppStartupReadiness {
   Future<void> _runHomeLaunchPrep() async {
     await Future.wait(<Future<void>>[
       _runShellDelays(),
-      _prepareRecitersCatalog(),
+      _prefetch(
+        label: 'reciters',
+        fetch: () => _getReciters(),
+        onSuccess: () => _recitersDataReady = true,
+      ),
+      // Favorites readiness is encoded in FavoritesCubit.state — no flag needed.
+      _prefetch(
+        label: 'favorites',
+        fetch: () => _getFavorites(const NoParams()),
+      ),
     ]);
     _shellPrepComplete = true;
     if (!kReleaseMode) {
@@ -91,9 +111,36 @@ class AppStartupReadiness {
     }
   }
 
-  Future<void> _prepareRecitersCatalog() async {
-    final result = await _getReciters();
-    _recitersDataReady = result.fold((_) => false, (_) => true);
+  /// Runs [fetch] with a per-call timeout, swallows failures, and invokes
+  /// [onSuccess] only when the underlying repository returned [Right].
+  ///
+  /// Uses [Future.any] (not [Future.timeout]) because `dartz_plus.Either`
+  /// callers return `Right<...>`/`Left<...>` subtypes whose reified generics
+  /// reject the `Left` fallback that `onTimeout` would need.
+  Future<void> _prefetch({
+    required String label,
+    required Future<Either<Failure, List<ReciterEntity>>> Function() fetch,
+    VoidCallback? onSuccess,
+  }) async {
+    try {
+      final Either<Failure, List<ReciterEntity>> result =
+          await Future.any(<Future<Either<Failure, List<ReciterEntity>>>>[
+            fetch(),
+            Future<Either<Failure, List<ReciterEntity>>>.delayed(
+              prefetchTimeout,
+              () => Left<Failure, List<ReciterEntity>>(
+                UnexpectedFailure('$label prefetch timeout'),
+              ),
+            ),
+          ]);
+      result.fold((_) {}, (_) => onSuccess?.call());
+    } catch (e, st) {
+      logger.w(
+        'AppStartupReadiness: $label prefetch failed; falling back to lazy load',
+        error: e,
+        stackTrace: st,
+      );
+    }
   }
 
   /// Clears readiness flags between tests.

@@ -173,10 +173,10 @@ class AppTheme {
         .toColor();
   }
 
-  /// Picks white or near-black label color on [background] for ≥ 4.5:1 contrast.
+  /// Picks white or black label color on [background] for ≥ 4.5:1 contrast.
   static Color _accessibleOnColor(Color background) {
     const Color white = Colors.white;
-    const Color black = Color(0xFF1A1A1A);
+    const Color black = Colors.black;
     final double whiteRatio = _contrastRatio(white, background);
     final double blackRatio = _contrastRatio(black, background);
     if (whiteRatio >= blackRatio && whiteRatio >= 4.5) {

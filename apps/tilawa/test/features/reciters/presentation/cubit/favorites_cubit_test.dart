@@ -30,6 +30,7 @@ void main() {
     mockGetFavorites = MockGetFavoriteRecitersUseCase();
     mockToggleFavorite = MockToggleFavoriteReciterUseCase();
     mockClearFavorites = MockClearFavoriteRecitersUseCase();
+    when(mockGetFavorites.takeCachedSuccessForStartup()).thenReturn(null);
     cubit = FavoritesCubit(
       mockGetFavorites,
       mockToggleFavorite,
@@ -52,6 +53,27 @@ void main() {
   test('initial state is FavoritesInitial', () {
     expect(cubit.state, FavoritesInitial());
   });
+
+  test(
+    'starts in FavoritesLoaded when splash prefetched favorites are present',
+    () {
+      when(
+        mockGetFavorites.takeCachedSuccessForStartup(),
+      ).thenReturn(const [tReciter]);
+
+      final FavoritesCubit seeded = FavoritesCubit(
+        mockGetFavorites,
+        mockToggleFavorite,
+        mockClearFavorites,
+      );
+      addTearDown(seeded.close);
+
+      expect(
+        seeded.state,
+        const FavoritesLoaded(favorites: [tReciter], favoriteIds: {1}),
+      );
+    },
+  );
 
   group('loadFavorites', () {
     blocTest<FavoritesCubit, FavoritesState>(

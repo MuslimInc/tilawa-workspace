@@ -14,6 +14,7 @@ import '../../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 import '../../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
 import '../../features/quran_reader/presentation/cubit/quran_settings_cubit.dart';
+import '../../features/reciters/domain/usecases/get_reciters_use_case.dart';
 import '../../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../../features/reciters/presentation/bloc/reciters_bloc.dart';
@@ -45,7 +46,7 @@ class AppProviders {
     ),
 
     // Feature providers
-    BlocProvider<RecitersBloc>(create: (context) => getIt<RecitersBloc>()),
+    BlocProvider<RecitersBloc>(create: (context) => _createRecitersBloc()),
     BlocProvider<ReciterDetailsBloc>(
       create: (context) => getIt<ReciterDetailsBloc>(),
     ),
@@ -91,6 +92,14 @@ class AppProviders {
     // Share provider — ephemeral cubit for screenshot & audio clip sharing
     BlocProvider<ShareCubit>(create: (context) => getIt<ShareCubit>()),
   ];
+
+  static RecitersBloc _createRecitersBloc() {
+    final getReciters = getIt<GetRecitersUseCase>();
+    return RecitersBloc(
+      getReciters,
+      initialReciters: getReciters.takeCachedSuccessForStartup(),
+    );
+  }
 
   static List<RepositoryProvider> get repositories => [
     RepositoryProvider<DownloadsRepository>(

@@ -4,7 +4,7 @@ Islamic-brand identity layer for **Tilawa**. Sits **on top of** `DESIGN.md` and 
 
 **Read order:** `AGENTS.md` (how to build) → `DESIGN.md` (what tokens exist) → **this file** (how to make it feel like Tilawa) → [`specs/016-support-tilawa/spec.md`](../specs/016-support-tilawa/spec.md) (voluntary support ethics). When this file conflicts with `DESIGN.md`, `DESIGN.md` wins on implementation; this file wins on intent.
 
-**Reference moodboard:** [`design-md/apple/DESIGN.md`](design-md/apple/DESIGN.md) — for **rhythm, restraint, and reverence** only. We borrow Apple's discipline (the artifact speaks, the chrome recedes, exactly one shadow on the artifact, surface-color change as the divider). We do **not** borrow Apple's palette, type, or pill grammar. Tilawa's accent is teal; the artifact is the Mushaf page, not a phone.
+**Reference moodboard:** [`design-md/apple/DESIGN.md`](design-md/apple/DESIGN.md) — for **rhythm, restraint, and reverence** only. We borrow Apple's discipline (the artifact speaks, the chrome recedes, exactly one shadow on the artifact, surface-color change as the divider). We do **not** borrow Apple's palette, type, or pill grammar. Tilawa's accent is sage green; the artifact is the Mushaf page, not a phone.
 
 ---
 
@@ -30,7 +30,7 @@ We resist the temptation to bolt on stereotype motifs (arches, lanterns, crescen
 
 - **Mushaf as the artifact.** The Quran reader page receives the *single* shadow in the app (`TilawaDesignTokens.opacityShadowStrong` band, layered per the existing reader theme). Cards, sheets, buttons get **flat or hairline** treatment — no elevation arms-race around the page.
 - **Arabic-first typography care.** UI is **Alexandria** (per DESIGN §3); Arabic content uses the QCF/Mushaf families already wired in `packages/quran` (DESIGN §13 file map). Line-height token `textHeightLoose` (2.0) is the default for any surface that renders Arabic prose (surah lists, ayah meta, du'a strips).
-- **Manuscript-derived palette.** The presets in DESIGN §2 already carry this lineage — **Teal** (calligrapher's ink shimmer), **Gold** `#8C681F` (Mushaf gilding), **Sage** `#6F7F58` (scholar's cloth), **Brown** `#7B5E3B` (parchment age). This file makes them **named roles**, see §3.
+- **Manuscript-derived palette.** The presets in DESIGN §2 already carry this lineage — **Teal** (calligrapher's ink shimmer), **Gold** `#8C681F` (Mushaf gilding), **Sage** `#528345` (scholar's cloth), **Brown** `#7B5E3B` (parchment age). This file makes them **named roles**, see §3.
 - **Geometric ornament as accent, never frame.** Existing ambient line work (e.g. `_RecitersAmbientPainter` arcs) is fine — thin, primary-tinted at ≤ `opacitySubtle × 0.4`, never closed shapes, never replacing whitespace.
 - **No imagery of people, no flags, no national symbols.** Photography, when it appears (reciter portraits, share composer), is silhouette/initial-based or content-only.
 

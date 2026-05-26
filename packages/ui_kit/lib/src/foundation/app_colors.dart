@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// one **brand-locked** accent ([primarySage] `#6F7F58`), a quiet neutral
+/// one **brand-locked** accent ([primarySage] `#528345`), a quiet neutral
 /// surface ramp anchored on the brand neutral [lightSurfaceContainerHighBase]
 /// `#E5E5E0`, and a handful of semantic colors. Decorative tones, parallel
-/// "category hues", and gradient stops have been removed so the UI feels
-/// premium without competing with content.
+/// "category hues", and most decorative gradients have been removed so the UI
+/// feels premium without competing with content. The launch flow keeps a
+/// dedicated brand gradient via [brandGradientTop] → [brandGradientBottom].
 ///
 /// **Brand lock.** As of the Islamic-brand initiative, the runtime primary
 /// is fixed to Sage (`#6F7F58`) for production builds. The other preset
@@ -43,11 +44,11 @@ abstract final class AppColors {
   /// Teal/cyan compatibility alias retained for saved theme migration.
   static const Color primaryCyan = primaryTeal;
 
-  /// Sage — the brand-locked Islamic accent ("scholar's cloth"). Deepened
-  /// from the legacy `#6F7F58` so white-on-primary hits the 4.5:1 WCAG AA
-  /// contrast bar natively (5.59:1 measured) without relying on
-  /// `_safePrimaryForLight` to clamp it.
-  static const Color primarySage = Color(0xFF5E6D49);
+  /// Sage — the brand-locked Islamic accent ("scholar's cloth").
+  ///
+  /// This is the default runtime primary and the bottom stop of the launch
+  /// gradient.
+  static const Color primarySage = Color(0xFF528345);
 
   /// Muted gold theme option — Mushaf-inspired warm accent.
   static const Color primaryGold = Color(0xFF8C681F);
@@ -67,6 +68,12 @@ abstract final class AppColors {
   /// class-level docstring for how the legacy presets are still wired for
   /// dev/QA and persistence-compatibility purposes.
   static const Color defaultPrimary = primarySage;
+
+  /// Top stop for the brand launch gradient.
+  static const Color brandGradientTop = Color(0xFF447339);
+
+  /// Bottom stop for the brand launch gradient.
+  static const Color brandGradientBottom = defaultPrimary;
 
   // ---------------------------------------------------------------------------
   // Light neutral ramp — Pinterest catalog chrome (white / #E5E5E0 / black).
@@ -164,8 +171,8 @@ abstract final class AppColors {
   // AppTheme — dark Flex scheme refinement.
   // ---------------------------------------------------------------------------
 
-  /// Lighter screen of [primaryTeal] for contrast on dark surfaces.
-  static const Color darkDefaultPrimary = Color(0xFF5DD3EB);
+  /// Lifted companion of [defaultPrimary] for contrast on dark surfaces.
+  static const Color darkDefaultPrimary = Color(0xFFABC8A3);
 
   /// Historical reference: dark primary container paired with
   /// [darkDefaultPrimary]. [AppTheme] derives it from selected primary instead.
@@ -214,7 +221,7 @@ abstract final class AppColors {
   /// Static accent for system notification icons. Notifications render in the
   /// OS shade and cannot resolve runtime theme; this constant locks the brand
   /// tone so notification chrome stays recognisable.
-  static const Color notificationAccent = primaryTeal;
+  static const Color notificationAccent = defaultPrimary;
 
   /// Brand secondary used by FlexColorScheme assembly only.
   static const Color brandSecondary = Color(0xFF65734F);

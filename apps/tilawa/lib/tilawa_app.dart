@@ -16,6 +16,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/di/injection.dart';
 import 'core/providers/app_providers.dart';
+import 'core/bootstrap/splash_launch_handoff.dart';
 import 'core/services/notification_startup_service.dart';
 import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
@@ -260,6 +261,8 @@ class _DefaultRouteSystemUiOverlay extends StatefulWidget {
 class _DefaultRouteSystemUiOverlayState
     extends State<_DefaultRouteSystemUiOverlay> {
   SystemUiOverlayStyle? _lastAppliedStyle;
+  bool _launchHandoffScheduled = false;
+  bool _loggedFirstBuild = false;
 
   @override
   void didChangeDependencies() {
@@ -289,10 +292,53 @@ class _DefaultRouteSystemUiOverlayState
     SystemChrome.setSystemUIOverlayStyle(overlayStyle);
   }
 
+  void _scheduleLaunchHandoffMark() {
+    if (_launchHandoffScheduled ||
+        widget.child == null ||
+        SplashLaunchHandoff.splashRouteHasPainted.value) {
+      return;
+    }
+    _launchHandoffScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _launchHandoffScheduled = false;
+      if (!mounted ||
+          widget.child == null ||
+          SplashLaunchHandoff.splashRouteHasPainted.value) {
+        return;
+      }
+      // #region agent log
+      fixBlackFrameLog(
+        runId: 'post-fix',
+        hypothesisId: 'H5',
+        location:
+            'tilawa_app.dart:_DefaultRouteSystemUiOverlayState._scheduleLaunchHandoffMark',
+        message: 'Routed app first frame callback',
+        data: const <String, Object?>{},
+      );
+      // #endregion
+      SplashLaunchHandoff.markSplashRoutePainted();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     context.watch<QuranPlayerChromeNotifier>();
     _syncSystemUiOverlay();
+    _scheduleLaunchHandoffMark();
+    if (!_loggedFirstBuild) {
+      _loggedFirstBuild = true;
+      // #region agent log
+      fixBlackFrameLog(
+        runId: 'flutter-handoff-baseline',
+        hypothesisId: 'H4',
+        location: 'tilawa_app.dart:_DefaultRouteSystemUiOverlayState.build',
+        message: 'DefaultRouteSystemUiOverlay first build',
+        data: <String, Object?>{
+          'hasChild': widget.child != null,
+        },
+      );
+      // #endregion
+    }
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _lastAppliedStyle!,
       child: widget.child ?? const SizedBox.shrink(),

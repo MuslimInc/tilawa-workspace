@@ -38,6 +38,7 @@ void main() {
     mockGetFavorites = MockGetFavoriteRecitersUseCase();
     mockToggleFavorite = MockToggleFavoriteReciterUseCase();
     mockClearFavorites = MockClearFavoriteRecitersUseCase();
+    when(mockGetFavorites.takeCachedSuccessForStartup()).thenReturn(null);
   });
 
   tearDown(() async {

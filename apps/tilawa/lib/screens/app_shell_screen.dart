@@ -10,10 +10,10 @@ import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
-import 'package:tilawa/features/shell/application/shell_tab_coordinator.dart';
-import 'package:tilawa/features/shell/presentation/shell_tab_effect_dispatcher.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
+import 'package:tilawa/features/shell/application/shell_tab_coordinator.dart';
+import 'package:tilawa/features/shell/presentation/shell_tab_effect_dispatcher.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -79,7 +79,6 @@ class _AppShellScreenState extends State<AppShellScreen> {
 
   List<_NavDestination> _buildDestinations(
     BuildContext context,
-    MainScreenState state,
   ) {
     return [
       _NavDestination(
@@ -105,7 +104,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
         index: 2,
         icon: FluentIcons.book_open_24_regular,
         activeIcon: FluentIcons.book_open_24_filled,
-        svgPath: state.isStartupUiWarm ? 'assets/icons/athkar_icon.svg' : null,
+        svgPath: 'assets/icons/athkar_icon.svg',
         label: context.l10n.bottomNavAthkar,
       ),
       _NavDestination(
@@ -208,7 +207,6 @@ class _AppShellScreenState extends State<AppShellScreen> {
 
               final List<_NavDestination> navDestinations = _buildDestinations(
                 context,
-                state,
               );
               final List<TilawaNavDestination> adaptiveDestinations =
                   navDestinations
