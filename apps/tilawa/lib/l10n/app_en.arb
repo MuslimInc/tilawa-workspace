@@ -2905,7 +2905,7 @@
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
     },
-    "a11ySplashLoading": "Tilawa, loading",
+    "a11ySplashLoading": "Rattil, loading",
     "@a11ySplashLoading": {
         "description": "Screen-reader label announced while the splash loading screen is visible"
     },
