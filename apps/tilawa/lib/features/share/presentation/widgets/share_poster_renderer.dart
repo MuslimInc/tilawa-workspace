@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 
@@ -180,7 +179,7 @@ class SharePosterRenderer extends StatelessWidget {
           _shareBismillahText,
           textDirection: TextDirection.rtl,
           textAlign: TextAlign.center,
-          style: GoogleFonts.amiri(
+          style: TextStyle(
             fontSize: fontSize * 1.15,
             fontWeight: FontWeight.w700,
             color: color,

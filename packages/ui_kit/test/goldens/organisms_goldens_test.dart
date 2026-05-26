@@ -1,14 +1,12 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
 import 'golden_constraints.dart';
 
 void main() {
-  GoogleFonts.config.allowRuntimeFetching = false;
 
   group('Organisms Golden Tests', () {
     goldenTest(

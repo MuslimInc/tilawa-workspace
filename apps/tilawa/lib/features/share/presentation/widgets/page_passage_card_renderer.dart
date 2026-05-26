@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'reader_page_content_renderer.dart';
@@ -106,7 +105,7 @@ class PagePassageCardRenderer extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.amiri(
+                      style: TextStyle(
                         fontSize: _PagePosterLayout.arabicTitleSize,
                         height: _PagePosterLayout.arabicTitleHeight,
                         fontWeight: FontWeight.w700,

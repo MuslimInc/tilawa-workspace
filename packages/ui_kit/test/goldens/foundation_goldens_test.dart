@@ -1,7 +1,6 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
 import 'package:tilawa_ui_kit/src/molecules/molecules.dart';
 
@@ -52,7 +51,6 @@ class _LightNeutralSwatchRow extends StatelessWidget {
 }
 
 void main() {
-  GoogleFonts.config.allowRuntimeFetching = false;
 
   group('Foundation Golden Tests', () {
     goldenTest(

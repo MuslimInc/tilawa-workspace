@@ -91,7 +91,7 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
                             ayah.text,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontFamily: 'Amiri'),
+                            style: null,
                           ),
                         ),
                         subtitle: Text(

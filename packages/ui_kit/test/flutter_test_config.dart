@@ -2,11 +2,7 @@ import 'dart:async';
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  // Ensure Google Fonts doesn't try to fetch anything during tests
-  GoogleFonts.config.allowRuntimeFetching = false;
-
   // Stable metrics for [GoldenTestScenario] titles (Alchemist) — avoids ±1–2px
   // total golden height drift across Flutter / font versions vs committed PNGs.
   final GoldenTestTheme standard = GoldenTestTheme.standard();

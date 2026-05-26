@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -456,7 +455,7 @@ class _ConfigHeader extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             arabicSurahName,
-            style: GoogleFonts.amiri(
+            style: const TextStyle(
               fontSize: 30,
               height: 1.2,
               fontWeight: FontWeight.w700,
