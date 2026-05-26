@@ -14,7 +14,6 @@ void main() {
       () {
         final ThemeData theme = AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
-          useGoogleFontsOverride: false,
         );
 
         expect(theme.useMaterial3, isTrue);
@@ -50,7 +49,6 @@ void main() {
         final ThemeData theme = AppTheme.getDarkTheme(
           primaryColor: AppColors.defaultPrimary,
           isDefaultPreset: true,
-          useGoogleFontsOverride: false,
           darkIsTrueBlack: false,
         );
 
@@ -77,7 +75,6 @@ void main() {
     test('light theme registers design and component token extensions', () {
       final ThemeData theme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
-        useGoogleFontsOverride: false,
       );
       expect(theme.extension<TilawaDesignTokens>(), isNotNull);
       expect(theme.extension<TilawaComponentTokens>(), isNotNull);
@@ -88,7 +85,6 @@ void main() {
       () {
         final ThemeData theme = AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
-          useGoogleFontsOverride: false,
         );
         final ColorScheme scheme = theme.colorScheme;
 
@@ -106,7 +102,6 @@ void main() {
     test('light search field tokens use neutral surface not primary', () {
       final ThemeData theme = AppTheme.getLightTheme(
         primaryColor: AppColors.defaultPrimary,
-        useGoogleFontsOverride: false,
       );
       final search = theme.componentTokens.searchField;
 

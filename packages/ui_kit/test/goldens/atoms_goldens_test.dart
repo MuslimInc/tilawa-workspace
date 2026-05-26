@@ -17,7 +17,6 @@ const StrutStyle _kGoldenCardCaptionStrut = StrutStyle(
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
-  AppTheme.useGoogleFonts = false;
 
   group('Atoms Golden Tests', () {
     goldenTest(

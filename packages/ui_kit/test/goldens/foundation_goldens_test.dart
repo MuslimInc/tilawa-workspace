@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
-import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
 import 'package:tilawa_ui_kit/src/molecules/molecules.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
@@ -54,7 +53,6 @@ class _LightNeutralSwatchRow extends StatelessWidget {
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
-  AppTheme.useGoogleFonts = false;
 
   group('Foundation Golden Tests', () {
     goldenTest(

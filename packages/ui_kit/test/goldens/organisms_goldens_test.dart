@@ -9,7 +9,6 @@ import 'golden_constraints.dart';
 
 void main() {
   GoogleFonts.config.allowRuntimeFetching = false;
-  AppTheme.useGoogleFonts = false;
 
   group('Organisms Golden Tests', () {
     goldenTest(
