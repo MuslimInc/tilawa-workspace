@@ -83,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return BlocProvider.value(
       value: _splashBloc,
       child: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) async {
+        listener: (context, state) {
           state.when(
             initial: () {},
             loading: () {},
@@ -135,9 +135,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         ),
                       ),
                       const SizedBox(height: 40),
-                      const CircularProgressIndicator.adaptive(
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
+                      const CircularProgressIndicator(color: Colors.white),
                     ],
                   ),
                 ),

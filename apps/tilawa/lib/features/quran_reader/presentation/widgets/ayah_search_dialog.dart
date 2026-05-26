@@ -91,7 +91,6 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
                             ayah.text,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: null,
                           ),
                         ),
                         subtitle: Text(
