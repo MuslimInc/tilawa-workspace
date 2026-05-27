@@ -5,7 +5,6 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
-import '../../domain/constants/tasbeeh_constants.dart';
 import '../../domain/entities/athkar_category.dart';
 import '../cubit/athkar_cubit.dart';
 import '../cubit/athkar_state.dart';
@@ -33,6 +32,12 @@ class AthkarCategoriesScreen extends StatelessWidget {
           context,
           title: context.l10n.athkar,
         ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => const TasbeehRoute().push(context),
+          icon: const Icon(Icons.auto_awesome_rounded),
+          label: Text(context.l10n.tasbeehCategory),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: Stack(
           children: [
             const Positioned.fill(child: AthkarAmbientBackground()),
@@ -61,39 +66,25 @@ class AthkarCategoriesScreen extends StatelessWidget {
                   );
                 } else if (state is AthkarCategoriesLoaded) {
                   final tokens = Theme.of(context).tokens;
-                  final categories = [
-                    AthkarCategory(
-                      id: TasbeehConstants.categoryId,
-                      nameAr: context.l10n.tasbeehCategory,
-                      nameEn: context.l10n.tasbeehCategory,
-                      icon: TasbeehConstants.categoryIconName,
-                    ),
-                    ...state.categories,
-                  ];
 
                   return TilawaContentGrid(
                     padding: EdgeInsets.fromLTRB(
                       tokens.spaceLarge,
                       tokens.spaceLarge,
                       tokens.spaceLarge,
-                      tokens.spaceLarge,
+                      tokens.spaceLarge + 88,
                     ),
                     targetItemExtent: 180,
                     crossAxisSpacing: tokens.spaceLarge,
                     mainAxisSpacing: tokens.spaceLarge,
                     childAspectRatio: 1.0,
-                    itemCount: categories.length,
+                    itemCount: state.categories.length,
                     itemBuilder: (context, index) {
-                      final AthkarCategory category = categories[index];
+                      final AthkarCategory category = state.categories[index];
                       return AthkarCategoryCard(
                         name: _localizedAthkarCategoryTitle(context, category),
                         icon: category.icon,
                         onTap: () {
-                          if (category.id == TasbeehConstants.categoryId) {
-                            const TasbeehRoute().push(context);
-                            return;
-                          }
-
                           AthkarDetailsRoute(
                             categoryId: category.id,
                             categoryName: _localizedAthkarCategoryTitle(
