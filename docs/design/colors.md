@@ -66,6 +66,23 @@ A fifth role — **outline** (`outlineVariant`) — is the hairline that separat
 | Search | `TilawaSearchFieldVariant.catalog` (white `surface` + hairline border) |
 | Filters | `TilawaSelectionPillStyle.catalog` |
 | Feature rows (e.g. reciter details) | `ColorScheme` neutral roles or `*CatalogChrome` helper — no new hex |
+- **User-selected primary** drives the **accent / interactive** role only (CTA,
+  active nav, favorites, switch ON, progress fill) — **not** search fields,
+  unselected filter chips, or catalog app bar backgrounds.
+- **Stable neutral surfaces** (scaffold, fixed bottom nav chrome, cards, sheets,
+  catalog headers) use **fixed primitives** or tiers derived from **neutral bases**
+  in `AppColors`, not ad-hoc widget literals.
+- **Semantic colours** are defined in `AppColors` and must not be derived from
+  user primary.
+
+### Catalog chrome (product pattern)
+
+| UI | Source |
+|----|--------|
+| List app bar | `TilawaCatalogAppBar` + `TilawaAppBarSurface.parchment` |
+| Search | `TilawaSearchFieldVariant.catalog` (white `surface` + hairline border) |
+| Filters | `TilawaSelectionPillStyle.catalog` |
+| Feature rows (e.g. reciter details) | `ColorScheme` neutral roles or `*CatalogChrome` helper — no new hex |
 
 ## Gradients
 
@@ -106,6 +123,15 @@ These map directly to `TilawaCardSurface { raised, flat, outline }` on `TilawaCa
 
 ## Related tests
 
+- `packages/ui_kit/test/theme/app_theme_color_roles_test.dart` — contrast, Pinterest neutrals, preset surface no-op.
+- `packages/ui_kit/test/theme/app_theme_spec_compliance_test.dart` — M3 extensions, transparent `surfaceTint`, app bar = `surface`.
+- `packages/ui_kit/test/goldens/` — atoms, molecules, organisms, and foundation catalog chrome goldens.
+
+Regenerate after intentional visual changes:
+
+```bash
+cd packages/ui_kit && flutter test test/goldens/ --update-goldens
+```
 - `packages/ui_kit/test/theme/app_theme_color_roles_test.dart` — contrast, Pinterest neutrals, preset surface no-op.
 - `packages/ui_kit/test/theme/app_theme_spec_compliance_test.dart` — M3 extensions, transparent `surfaceTint`, app bar = `surface`.
 - `packages/ui_kit/test/goldens/` — atoms, molecules, organisms, and foundation catalog chrome goldens.
