@@ -45,6 +45,7 @@ Shared app wiring: `lib/core/di/injection.dart` (`get_it`), `go_router` in
 - [ ] Unit tests for domain/data; bloc tests where behavior is critical
 
 For pre-release review of Tilawa code, use `tilawa-strict-code-review`.
+For UI/theming work, use `flutter-apply-tilawa-theming`.
 
 ---
 

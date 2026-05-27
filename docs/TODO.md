@@ -113,3 +113,8 @@ _Move completed items here with date._
 ---
 
 *Last touched: 2026-05-23 (P0 startup splash plan)*
+
+
+Some issues need to be solved:
+
+1. Make the app route only portrait except Quran Image Screen (should be portrait up and oriantation).

@@ -272,7 +272,7 @@ class _ScreenshotComposerScreenState extends State<ScreenshotComposerScreen> {
       handle: handle,
       surahName: getSurahNameArabic(widget.surahNumber),
       pageNumber: widget.currentPage,
-      appName: 'Tilawa',
+      appName: context.l10n.appTitle,
       sharedViaLabel: context.l10n.sharedViaTilawa,
       preparingImageLabel: context.l10n.preparingScreenshot,
       footerBackgroundColor: mediaPalette.frameSurfaceColor,

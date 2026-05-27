@@ -84,6 +84,25 @@ void main() {
     });
 
     test(
+      'returns notification launch for pending native adhan cold start',
+      () async {
+        const String payload =
+            '{"type":"prayer","prayer_key":"fajr","is_adhan_playing":true}';
+        AppRouter.setPendingColdStartRoute(
+          const PrayerNotificationStatusRoute().location,
+          extra: payload,
+        );
+
+        final result = await useCase();
+
+        expect(result.destination, SplashDestination.notificationLaunch);
+        expect(result.notificationData?['prayer_key'], 'fajr');
+        verifyNever(() => mockCheckOnboardingStatus.call());
+        verifyNever(() => mockGetCurrentUserUseCase.call());
+      },
+    );
+
+    test(
       'local notification takes priority over signed-in home routing',
       () async {
         when(

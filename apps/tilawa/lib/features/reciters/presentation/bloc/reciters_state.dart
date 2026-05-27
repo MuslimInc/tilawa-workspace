@@ -22,14 +22,14 @@ class RecitersLoaded extends RecitersState {
     this.searchQuery = '',
     this.selectedLetter,
     this.showFavoritesOnly = false,
-    this.favoriteIds = const [],
+    this.favoriteIds = const <int>{},
   });
   final List<entity.ReciterEntity> reciters;
   final List<entity.ReciterEntity> filteredReciters;
   final String searchQuery;
   final String? selectedLetter;
   final bool showFavoritesOnly;
-  final List<int> favoriteIds;
+  final Set<int> favoriteIds;
 
   @override
   List<Object?> get props => [
@@ -47,7 +47,7 @@ class RecitersLoaded extends RecitersState {
     String? searchQuery,
     String? selectedLetter,
     bool? showFavoritesOnly,
-    List<int>? favoriteIds,
+    Set<int>? favoriteIds,
     bool clearSelectedLetter = false,
   }) {
     return RecitersLoaded(

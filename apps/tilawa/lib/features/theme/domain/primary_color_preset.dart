@@ -27,7 +27,18 @@ enum PrimaryColorPreset {
   int get valueArgb => value.toARGB32();
 
   /// Default primary preset for fresh installs and corrupt-payload fallback.
-  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.coral;
+  ///
+  /// Brand-locked to Sage so the user-visible accent stays consistent with
+  /// the Islamic-brand direction (see `docs/tilawa_brand.md` §3 and
+  /// `Env.kShowColorPicker`). Legacy installs with a different stored preset
+  /// continue to deserialize their stored value; the production runtime
+  /// override lives in [ThemeStateMaterial.primaryColor].
+  static const PrimaryColorPreset defaultPreset = PrimaryColorPreset.sage;
+
+  /// Alias for [defaultPreset]. Use this name at call sites whose intent is
+  /// "I want the immutable brand color," so readers don't have to know that
+  /// the default preset *is* the brand-locked preset.
+  static const PrimaryColorPreset brandLocked = PrimaryColorPreset.sage;
 
   static PrimaryColorPreset? findById(String? id) {
     if (id == null) return null;

@@ -15,9 +15,27 @@ void main() {
   late MockAudioPlayerHandler mockAudioHandler;
   late GetIt getIt;
 
+  void stubFindReciterByName({ReciterEntity? result}) {
+    when(
+      mockAudioHandler.findReciterByName(
+        any,
+        languageCode: anyNamed('languageCode'),
+      ),
+    ).thenAnswer((_) async => result);
+  }
+
+  void stubGetRecitersData(List<ReciterEntity>? reciters) {
+    when(
+      mockAudioHandler.getRecitersData(
+        languageCode: anyNamed('languageCode'),
+      ),
+    ).thenAnswer((_) async => reciters);
+  }
+
   setUp(() {
     mockAudioHandler = MockAudioPlayerHandler();
     getIt = GetIt.instance;
+    stubFindReciterByName();
   });
 
   tearDown(() async {
@@ -54,10 +72,11 @@ void main() {
       );
 
       when(
-        mockAudioHandler.getRecitersData(
+        mockAudioHandler.findReciterByName(
+          'Abdul Basit',
           languageCode: anyNamed('languageCode'),
         ),
-      ).thenAnswer((_) async => [testReciter]);
+      ).thenAnswer((_) async => testReciter);
 
       // Act
       final ReciterEntity? result =
@@ -65,7 +84,17 @@ void main() {
 
       // Assert
       expect(result, equals(testReciter));
-      verify(mockAudioHandler.getRecitersData()).called(1);
+      verify(
+        mockAudioHandler.findReciterByName(
+          'Abdul Basit',
+          languageCode: anyNamed('languageCode'),
+        ),
+      ).called(1);
+      verifyNever(
+        mockAudioHandler.getRecitersData(
+          languageCode: anyNamed('languageCode'),
+        ),
+      );
     });
 
     test('returns reciter when found by server URL fallback', () async {
@@ -79,11 +108,7 @@ void main() {
         duration: Duration.zero,
       );
 
-      when(
-        mockAudioHandler.getRecitersData(
-          languageCode: anyNamed('languageCode'),
-        ),
-      ).thenAnswer((_) async => [testReciter]);
+      stubGetRecitersData(<ReciterEntity>[testReciter]);
 
       // Act
       final ReciterEntity? result =
@@ -91,6 +116,12 @@ void main() {
 
       // Assert
       expect(result, equals(testReciter));
+      verifyNever(
+        mockAudioHandler.findReciterByName(
+          any,
+          languageCode: anyNamed('languageCode'),
+        ),
+      );
     });
 
     test(
@@ -126,10 +157,12 @@ void main() {
       );
 
       when(
-        mockAudioHandler.getRecitersData(
+        mockAudioHandler.findReciterByName(
+          'Abdul Basit',
           languageCode: anyNamed('languageCode'),
         ),
       ).thenAnswer((_) async => null);
+      stubGetRecitersData(null);
 
       // Act
       final ReciterEntity? result =
@@ -151,11 +184,7 @@ void main() {
           duration: Duration.zero,
         );
 
-        when(
-          mockAudioHandler.getRecitersData(
-            languageCode: anyNamed('languageCode'),
-          ),
-        ).thenAnswer((_) async => [testReciter]);
+        stubGetRecitersData(<ReciterEntity>[testReciter]);
 
         // Act
         final ReciterEntity? result =
@@ -178,10 +207,12 @@ void main() {
       );
 
       when(
-        mockAudioHandler.getRecitersData(
+        mockAudioHandler.findReciterByName(
+          'Unknown Reciter',
           languageCode: anyNamed('languageCode'),
         ),
-      ).thenAnswer((_) async => [testReciter]);
+      ).thenAnswer((_) async => null);
+      stubGetRecitersData(<ReciterEntity>[testReciter]);
 
       // Act
       final ReciterEntity? result =
@@ -202,11 +233,7 @@ void main() {
         duration: Duration.zero,
       );
 
-      when(
-        mockAudioHandler.getRecitersData(
-          languageCode: anyNamed('languageCode'),
-        ),
-      ).thenAnswer((_) async => [testReciter]);
+      stubGetRecitersData(<ReciterEntity>[testReciter]);
 
       // Act
       final ReciterEntity? result =
@@ -227,6 +254,12 @@ void main() {
         duration: Duration.zero,
       );
 
+      when(
+        mockAudioHandler.findReciterByName(
+          'Abdul Basit',
+          languageCode: anyNamed('languageCode'),
+        ),
+      ).thenAnswer((_) async => null);
       when(
         mockAudioHandler.getRecitersData(
           languageCode: anyNamed('languageCode'),
@@ -253,8 +286,11 @@ void main() {
       );
 
       when(
-        mockAudioHandler.getRecitersData(languageCode: 'ar'),
-      ).thenAnswer((_) async => [testReciter]);
+        mockAudioHandler.findReciterByName(
+          'Abdul Basit',
+          languageCode: 'ar',
+        ),
+      ).thenAnswer((_) async => testReciter);
 
       // Act
       final ReciterEntity? result =
@@ -265,7 +301,12 @@ void main() {
 
       // Assert
       expect(result, equals(testReciter));
-      verify(mockAudioHandler.getRecitersData(languageCode: 'ar')).called(1);
+      verify(
+        mockAudioHandler.findReciterByName(
+          'Abdul Basit',
+          languageCode: 'ar',
+        ),
+      ).called(1);
     });
 
     test('matches reciter by server URL when multiple moshaf exist', () async {
@@ -306,11 +347,7 @@ void main() {
         duration: Duration.zero,
       );
 
-      when(
-        mockAudioHandler.getRecitersData(
-          languageCode: anyNamed('languageCode'),
-        ),
-      ).thenAnswer((_) async => [reciterWithMultipleMoshaf]);
+      stubGetRecitersData(<ReciterEntity>[reciterWithMultipleMoshaf]);
 
       // Act
       final ReciterEntity? result =

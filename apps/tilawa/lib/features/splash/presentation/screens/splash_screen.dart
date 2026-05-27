@@ -3,13 +3,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../router/app_router_config.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/splash_bloc.dart';
 import '../bloc/splash_event.dart';
@@ -23,15 +23,21 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const Color _launchBackgroundColor = AppColors.defaultPrimary;
+  static const Color _launchGradientTop = AppColors.brandGradientTop;
+  static const Color _launchGradientBottom = AppColors.brandGradientBottom;
+  static const LinearGradient _launchBackgroundGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[_launchGradientTop, _launchGradientBottom],
+  );
   static const String _launchWordmarkAsset =
       'assets/images/launch_wordmark.png';
   static const double _wordmarkBoxSize = 288;
   static const SystemUiOverlayStyle _launchOverlayStyle = SystemUiOverlayStyle(
-    statusBarColor: _launchBackgroundColor,
+    statusBarColor: _launchGradientTop,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
-    systemNavigationBarColor: _launchBackgroundColor,
+    systemNavigationBarColor: _launchGradientBottom,
     systemNavigationBarIconBrightness: Brightness.light,
     systemNavigationBarDividerColor: Colors.transparent,
     systemStatusBarContrastEnforced: false,
@@ -43,8 +49,26 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // #region agent log
+    fixBlackFrameLog(
+      runId: 'flutter-handoff-baseline',
+      hypothesisId: 'H2',
+      location: 'splash_screen.dart:_SplashScreenState.initState',
+      message: 'SplashScreen initState',
+      data: const <String, Object?>{},
+    );
+    // #endregion
     _splashBloc = getIt<SplashBloc>()..add(const SplashStarted());
     SchedulerBinding.instance.addPostFrameCallback((_) {
+      // #region agent log
+      fixBlackFrameLog(
+        runId: 'flutter-handoff-baseline',
+        hypothesisId: 'H2',
+        location: 'splash_screen.dart:_SplashScreenState.postFrame',
+        message: 'SplashScreen first post-frame callback',
+        data: const <String, Object?>{},
+      );
+      // #endregion
       SplashLaunchHandoff.markSplashRoutePainted();
     });
   }

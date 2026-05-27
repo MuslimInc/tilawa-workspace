@@ -6,8 +6,8 @@ import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../data/services/audio_clip_service.dart';
 import '../../domain/entities/share_content.dart';
+import '../../domain/entities/share_limits.dart';
 import '../../domain/entities/widget_capture_handle.dart';
 import '../cubit/share_cubit.dart';
 import '../cubit/share_state.dart';
@@ -107,7 +107,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
       _fromAyah >= 1 &&
       _toAyah >= _fromAyah &&
       _toAyah <= _maxAyah &&
-      _verseCount <= AudioClipService.maxVerses;
+      _verseCount <= ShareLimits.maxVersesPerClip;
 
   void _syncVideoContentKeys() {
     final int requiredCount = _videoPageSpecs.length;
@@ -436,7 +436,7 @@ class _ConfigHeader extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'Tilawa',
+                      context.l10n.appTitle,
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: AppShareComposerColors.cream,
                         fontWeight: FontWeight.w700,
@@ -486,7 +486,9 @@ class _ConfigHeader extends StatelessWidget {
               _MetadataPill(icon: Icons.person_rounded, label: reciterName),
               _MetadataPill(
                 icon: Icons.done_all_rounded,
-                label: context.l10n.shareVerseLimit(AudioClipService.maxVerses),
+                label: context.l10n.shareVerseLimit(
+                  ShareLimits.maxVersesPerClip,
+                ),
               ),
             ],
           ),
@@ -520,7 +522,7 @@ class _RangeSelectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final exceedsLimit = verseCount > AudioClipService.maxVerses;
+    final exceedsLimit = verseCount > ShareLimits.maxVersesPerClip;
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -584,8 +586,12 @@ class _RangeSelectionCard extends StatelessWidget {
               _SelectionBadge(
                 icon: exceedsLimit ? Icons.warning_amber_rounded : Icons.check,
                 label: exceedsLimit
-                    ? context.l10n.maxVersesExceeded(AudioClipService.maxVerses)
-                    : context.l10n.shareVerseLimit(AudioClipService.maxVerses),
+                    ? context.l10n.maxVersesExceeded(
+                        ShareLimits.maxVersesPerClip,
+                      )
+                    : context.l10n.shareVerseLimit(
+                        ShareLimits.maxVersesPerClip,
+                      ),
                 isError: exceedsLimit,
               ),
             ],

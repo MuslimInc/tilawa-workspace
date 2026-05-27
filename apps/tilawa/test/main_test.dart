@@ -12,12 +12,12 @@ import 'package:tilawa/core/services/analytics_initialization_service.dart';
 import 'package:tilawa/core/services/crashlytics_service.dart';
 import 'package:tilawa/core/services/firebase_initialization_service.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
-import 'package:tilawa/features/downloads/data/services/downloads_initialization_service.dart';
+import 'package:tilawa/features/downloads/domain/services/downloads_initializer.dart';
 import 'package:tilawa/features/notifications/domain/repositories/notifications_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
 import 'package:tilawa_core/logger.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
-import 'package:tilawa/features/notifications/presentation/services/fcm_service.dart';
+import 'package:tilawa/features/notifications/data/services/fcm_service.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa/features/downloads/domain/services/download_notification_service_interface.dart';
@@ -35,8 +35,7 @@ class MockNotificationPermissionService extends Mock
 class MockNotificationsRepository extends Mock
     implements NotificationsRepository {}
 
-class MockDownloadsInitService extends Mock
-    implements DownloadsInitializationService {}
+class MockDownloadsInitializer extends Mock implements DownloadsInitializer {}
 
 class MockCredentialManager extends Mock implements CredentialManager {}
 
@@ -71,7 +70,7 @@ void main() {
   late MockAnalyticsInitService mockAnalytics;
   late MockNotificationPermissionService mockNotificationPermission;
   late MockNotificationsRepository mockNotificationsRepo;
-  late MockDownloadsInitService mockDownloads;
+  late MockDownloadsInitializer mockDownloads;
   late MockCredentialManager mockCredentialManager;
   late MockFirebaseInitializationService mockFirebaseInit;
   late MockAthkarNotificationService mockAthkarService;
@@ -133,7 +132,7 @@ void main() {
     mockAnalytics = MockAnalyticsInitService();
     mockNotificationPermission = MockNotificationPermissionService();
     mockNotificationsRepo = MockNotificationsRepository();
-    mockDownloads = MockDownloadsInitService();
+    mockDownloads = MockDownloadsInitializer();
     mockCredentialManager = MockCredentialManager();
     mockFirebaseInit = MockFirebaseInitializationService();
     mockAthkarService = MockAthkarNotificationService();
@@ -154,7 +153,7 @@ void main() {
       mockNotificationPermission,
     );
     getIt.registerSingleton<NotificationsRepository>(mockNotificationsRepo);
-    getIt.registerSingleton<DownloadsInitializationService>(mockDownloads);
+    getIt.registerSingleton<DownloadsInitializer>(mockDownloads);
     getIt.registerSingleton<CredentialManager>(mockCredentialManager);
     getIt.registerSingleton<FirebaseInitializationService>(mockFirebaseInit);
     getIt.registerSingleton<IAthkarNotificationService>(mockAthkarService);

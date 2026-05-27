@@ -24,7 +24,7 @@
     "@west": {
         "description": "West direction label"
     },
-    "appTitle": "Tilawa",
+    "appTitle": "Rattil",
     "@appTitle": {
         "description": "The title of the application"
     },
@@ -189,6 +189,14 @@
     "playingFrom": "Playing from",
     "@playingFrom": {
         "description": "Label above the queue source in the expanded player"
+    },
+    "playerQueueExpandHint": "Swipe up for queue",
+    "@playerQueueExpandHint": {
+        "description": "Hint on the collapsed queue sheet handle in the expanded player"
+    },
+    "playerQueueHandleSemanticLabel": "Show or hide queue. Drag up or tap to expand.",
+    "@playerQueueHandleSemanticLabel": {
+        "description": "Screen reader label for the queue sheet drag handle in the expanded player"
     },
     "duration": "Duration",
     "@duration": {
@@ -676,7 +684,7 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToApp": "Welcome to Tilawa",
+    "welcomeToApp": "Welcome to Rattil",
     "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
@@ -2244,7 +2252,7 @@
     "@sharing": {
         "description": "Status message while sharing"
     },
-    "sharedViaTilawa": "Shared via Tilawa",
+    "sharedViaTilawa": "Shared via Rattil",
     "@sharedViaTilawa": {
         "description": "Branding text on shared content"
     },
@@ -2566,7 +2574,7 @@
     "@batteryOptimizationExemptionRequired": {
         "description": "Banner shown when the app is not whitelisted from Doze / battery optimization"
     },
-    "oemAutostartHint": "On this device, also enable Autostart for Tilawa in your phone's settings so reminders are not stopped in the background.",
+    "oemAutostartHint": "On this device, also enable Autostart for Rattil in your phone's settings so reminders are not stopped in the background.",
     "@oemAutostartHint": {
         "description": "Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually"
     },
@@ -2693,11 +2701,11 @@
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "supportTilawa": "Support Tilawa",
+    "supportTilawa": "Support Rattil",
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
-    "rateTilawa": "Rate Tilawa",
+    "rateTilawa": "Rate Rattil",
     "@rateTilawa": {
         "description": "Settings row to open the in-app review dialog"
     },
@@ -2705,15 +2713,35 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
-    "supportIntroLine": "Your contribution helps keep Tilawa going.",
+    "shareTilawa": "Share Rattil",
+    "@shareTilawa": {
+        "description": "Settings row to share the app with others"
+    },
+    "shareTilawaMessage": "Check out {appName}:\n{storeUrl}",
+    "@shareTilawaMessage": {
+        "description": "Text shared from settings to recommend Tilawa to others",
+        "placeholders": {
+            "appName": {
+                "type": "String"
+            },
+            "storeUrl": {
+                "type": "String"
+            }
+        }
+    },
+    "shareTilawaFailed": "We could not open the share sheet. Please try again.",
+    "@shareTilawaFailed": {
+        "description": "Error shown when sharing Tilawa from settings fails"
+    },
+    "supportIntroLine": "Your contribution helps keep Rattil going.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"
     },
-    "supportTilawaSubtitle": "Your contribution helps keep Tilawa going.",
+    "supportTilawaSubtitle": "Your contribution helps keep Rattil going.",
     "@supportTilawaSubtitle": {
         "description": "Legacy alias; prefer supportIntroLine"
     },
-    "supportMissionBody": "Your contribution helps keep Tilawa going.",
+    "supportMissionBody": "Your contribution helps keep Rattil going.",
     "@supportMissionBody": {
         "description": "Legacy alias; unused on support screen"
     },
@@ -2765,7 +2793,7 @@
     "@supportConfirmationTitle": {
         "description": "Support purchase confirmation sheet title"
     },
-    "supportConfirmationBody": "Payment via Google Play. Tilawa does not store your card details.",
+    "supportConfirmationBody": "Payment via Google Play. Rattil does not store your card details.",
     "@supportConfirmationBody": {
         "description": "Support purchase confirmation sheet body"
     },
@@ -2797,7 +2825,7 @@
     "@supportRestoreHint": {
         "description": "Legacy restore helper; unused on support screen"
     },
-    "supportTrustLinePrefix": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (",
+    "supportTrustLinePrefix": "Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (",
     "@supportTrustLinePrefix": {
         "description": "Support trust line before charities link label"
     },
@@ -2821,15 +2849,15 @@
     "@supportTrustLineSuffix": {
         "description": "Support trust line after charities link label"
     },
-    "supportTrustLine": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
+    "supportTrustLine": "Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)",
     "@supportTrustLine": {
         "description": "Full trust line for legacy use; UI uses prefix/link/suffix"
     },
-    "supportPlayFooter": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
+    "supportPlayFooter": "Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)",
     "@supportPlayFooter": {
         "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
     },
-    "supportDisclaimer": "Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)",
+    "supportDisclaimer": "Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)",
     "@supportDisclaimer": {
         "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
     },
@@ -2865,7 +2893,7 @@
     "@supportSelectTier": {
         "description": "Prompt when no tier selected"
     },
-    "supportSettingsGroupTitle": "Support Tilawa",
+    "supportSettingsGroupTitle": "Support Rattil",
     "@supportSettingsGroupTitle": {
         "description": "Settings group title for support entry"
     },

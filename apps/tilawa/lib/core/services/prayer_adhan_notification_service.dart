@@ -22,6 +22,7 @@ import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart'
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
 import '../../features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import '../../features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
+import '../../router/app_router.dart';
 import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
 import 'notification_permission_service.dart';
@@ -891,6 +892,17 @@ class PrayerAdhanNotificationService
 
   void _navigateToPrayerStatus(String payload) {
     try {
+      if (_shouldDeferPrayerStatusNavigation()) {
+        AppRouter.setPendingColdStartRoute(
+          const PrayerNotificationStatusRoute().location,
+          extra: payload,
+        );
+        logger.d(
+          '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_DEFERRED',
+        );
+        return;
+      }
+
       logger.d(
         '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_REQUESTED route=${const PrayerNotificationStatusRoute().location}',
       );
@@ -906,6 +918,20 @@ class PrayerAdhanNotificationService
         '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_FAILED: $e',
       );
     }
+  }
+
+  bool _shouldDeferPrayerStatusNavigation() {
+    if (AppRouter.pendingColdStartLocation != null) {
+      return true;
+    }
+    if (AppRouter.pendingStartupNotificationLaunch) {
+      return true;
+    }
+    final String? location = _navigationService.getCurrentLocation();
+    if (location == const SplashRoute().location) {
+      return true;
+    }
+    return false;
   }
 
   // -- helpers ----------------------------------------------------------------

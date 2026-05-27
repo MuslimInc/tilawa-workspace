@@ -1,7 +1,7 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 import '../entities/audio_clip_config.dart';
+import '../entities/share_cancel_token.dart';
 import '../entities/share_content.dart';
 import '../entities/share_progress_messages.dart';
 import '../entities/widget_capture_handle.dart';
@@ -22,7 +22,7 @@ class GenerateVideoUseCase {
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     void Function(int index)? onFrameCaptureStarted,
-    CancelToken? cancelToken,
+    ShareCancelToken? cancelToken,
   }) {
     return _repository.generateVideo(
       handles: handles,

@@ -27,7 +27,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get west => 'غرب';
 
   @override
-  String get appTitle => 'تلاوة';
+  String get appTitle => 'رَتِّلْ';
 
   @override
   String get reciters => 'القراء';
@@ -148,6 +148,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get playingFrom => 'قيد التشغيل من';
+
+  @override
+  String get playerQueueExpandHint => 'اسحب لأعلى لعرض القائمة';
+
+  @override
+  String get playerQueueHandleSemanticLabel =>
+      'إظهار أو إخفاء قائمة التشغيل. اسحب لأعلى أو انقر للتوسيع.';
 
   @override
   String get duration => 'المدة';
@@ -508,7 +515,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get signIn => 'تسجيل الدخول';
 
   @override
-  String get welcomeToApp => 'مرحباً بك في تلاوة';
+  String get welcomeToApp => 'مرحباً بك في رَتِّلْ';
 
   @override
   String get signInWithGoogleDescription => 'سجل الدخول بحساب جوجل للمتابعة';
@@ -1643,7 +1650,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get sharing => 'جاري المشاركة...';
 
   @override
-  String get sharedViaTilawa => 'تمت المشاركة عبر تلاوة';
+  String get sharedViaTilawa => 'تمت المشاركة عبر رَتِّلْ';
 
   @override
   String get reciterNotAvailable =>
@@ -1900,7 +1907,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get oemAutostartHint =>
-      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+      'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق رَتِّلْ من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
 
   @override
   String prayerNotificationBody(String prayerName) {
@@ -1997,22 +2004,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get moreOptions => 'المزيد';
 
   @override
-  String get supportTilawa => 'ادعم تلاوة';
+  String get supportTilawa => 'ادعم رَتِّلْ';
 
   @override
-  String get rateTilawa => 'قيّم تلاوة';
+  String get rateTilawa => 'قيّم رَتِّلْ';
 
   @override
   String get rateTilawaSubtitle => 'شاركنا رأيك في متجر التطبيقات.';
 
   @override
-  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get shareTilawa => 'شارك رَتِّلْ';
 
   @override
-  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String shareTilawaMessage(String appName, String storeUrl) {
+    return 'جرّب $appName:\n$storeUrl';
+  }
 
   @override
-  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار تلاوة.';
+  String get shareTilawaFailed => 'تعذر فتح نافذة المشاركة. حاول مرة أخرى.';
+
+  @override
+  String get supportIntroLine => 'مشاركتك تساعدنا على استمرار رَتِّلْ.';
+
+  @override
+  String get supportTilawaSubtitle => 'مشاركتك تساعدنا على استمرار رَتِّلْ.';
+
+  @override
+  String get supportMissionBody => 'مشاركتك تساعدنا على استمرار رَتِّلْ.';
 
   @override
   String get supportImpactWhyTitle => 'لماذا؟';
@@ -2052,7 +2070,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get supportConfirmationBody =>
-      'الدفع بـ Google Play. تلاوة لا يحفظ بيانات البطاقة.';
+      'يتم الدفع عبر Google Play. رَتِّلْ لا يحتفظ ببيانات بطاقتك.';
 
   @override
   String get supportConfirm => 'متابعة';
@@ -2078,7 +2096,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get supportTrustLinePrefix =>
-      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (';
 
   @override
   String get supportCharitiesLinkLabel => 'رابط الجمعيات الخيرية';
@@ -2097,15 +2115,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get supportTrustLine =>
-      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
 
   @override
   String get supportPlayFooter =>
-      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
 
   @override
   String get supportDisclaimer =>
-      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة تلاوة التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
+      'الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)';
 
   @override
   String get supportOfflineMessage => 'يلزم اتصال بالإنترنت.';
@@ -2134,7 +2152,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get supportSelectTier => 'اختر المبلغ';
 
   @override
-  String get supportSettingsGroupTitle => 'ادعم تلاوة';
+  String get supportSettingsGroupTitle => 'ادعم رَتِّلْ';
 
   @override
   String get supportHelpKeepFree => 'اختياري';
@@ -2169,4 +2187,63 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String get appReviewPlatformUnsupported =>
       'تقييمات المتجر غير مدعومة على هذه المنصة.';
+
+  @override
+  String get tourActionNext => 'التالي';
+
+  @override
+  String get tourActionFinish => 'فهمت';
+
+  @override
+  String get tourActionSkip => 'تخطّي';
+
+  @override
+  String tourStepSemantics(int current, int total) {
+    return 'خطوة $current من $total في الجولة';
+  }
+
+  @override
+  String get tourDebugResetTitle => 'إعادة ضبط جولات التطبيق';
+
+  @override
+  String get tourDebugResetSubtitle =>
+      'إظهار الجولات السياقية مجدداً عند التفعيل التالي';
+
+  @override
+  String get tourDebugResetDone => 'تمت إعادة ضبط جولات التطبيق';
+
+  @override
+  String get tourRecitersSearchTitle => 'ابحث عن قارئ';
+
+  @override
+  String get tourRecitersSearchDescription =>
+      'ابحث بالاسم للوصول مباشرة إلى الصوت الذي تريده.';
+
+  @override
+  String get tourRecitersFavoritesTitle => 'احفظ المفضّلة';
+
+  @override
+  String get tourRecitersFavoritesDescription =>
+      'اضغط على القلب لتصفية قرّائك المحفوظين في أي وقت.';
+
+  @override
+  String get tourRecitersOpenReciterTitle => 'افتح قارئاً';
+
+  @override
+  String get tourRecitersOpenReciterDescription =>
+      'اختر قارئاً لتصفّح السور والاستماع.';
+
+  @override
+  String get tourReciterPlaybackPlayingTitle => 'قيد التشغيل';
+
+  @override
+  String get tourReciterPlaybackPlayingDescription =>
+      'تبقى السورة التي ضغطت عليها مميّزة أثناء التشغيل.';
+
+  @override
+  String get tourReciterPlaybackMiniPlayerTitle => 'تحكّم بالتشغيل';
+
+  @override
+  String get tourReciterPlaybackMiniPlayerDescription =>
+      'استخدم المشغّل المصغّر للإيقاف أو التخطّي أو التوسيع لمزيد من التحكم.';
 }

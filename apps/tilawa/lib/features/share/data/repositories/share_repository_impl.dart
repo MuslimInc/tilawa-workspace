@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 import 'package:share_plus/share_plus.dart';
@@ -8,10 +8,13 @@ import 'package:tilawa_core/logger.dart';
 import '../../../../features/downloads/domain/entities/download_item.dart';
 import '../../../../features/downloads/domain/repositories/download_query_repository.dart';
 import '../../domain/entities/audio_clip_config.dart';
+import '../../domain/entities/share_cancel_token.dart';
 import '../../domain/entities/share_content.dart';
+import '../../domain/entities/share_footer_colors.dart';
 import '../../domain/entities/share_progress_messages.dart';
 import '../../domain/repositories/share_repository.dart';
 import '../services/audio_clip_service.dart';
+import '../utils/share_cancel_token_bridge.dart';
 import '../services/screenshot_service.dart';
 import '../services/share_file_manager.dart';
 import '../services/video_service.dart';
@@ -46,8 +49,7 @@ class ShareRepositoryImpl implements ShareRepository {
     required String appName,
     required String sharedViaLabel,
     bool brandCapture = true,
-    Color? footerBackgroundColor,
-    Color? footerForegroundColor,
+    ShareFooterColors? footerColors,
   }) async {
     logger.d(
       '[AppLaunch] source=ShareRepositoryImpl.captureScreenshot: Start in (${DateTime.now()})',
@@ -61,8 +63,8 @@ class ShareRepositoryImpl implements ShareRepository {
             pageNumber: pageNumber,
             appName: appName,
             sharedViaLabel: sharedViaLabel,
-            footerBackgroundColor: footerBackgroundColor,
-            footerForegroundColor: footerForegroundColor,
+            footerBackgroundColor: _colorFromArgb(footerColors?.backgroundArgb),
+            footerForegroundColor: _colorFromArgb(footerColors?.foregroundArgb),
           )
         : await _screenshotService.captureRaw(
             boundaryKey: boundaryKey,
@@ -82,11 +84,13 @@ class ShareRepositoryImpl implements ShareRepository {
     required AudioClipProgressMessages progressMessages,
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
-    CancelToken? cancelToken,
+    ShareCancelToken? cancelToken,
   }) async {
     logger.d(
       '[AppLaunch] source=ShareRepositoryImpl.generateAudioClip: Start in (${DateTime.now()})',
     );
+    final ShareCancelTokenBridge? cancelBridge =
+        ShareCancelTokenBridge.fromDomain(cancelToken);
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
       maxDurationSeconds: maxDurationSeconds,
@@ -105,7 +109,7 @@ class ShareRepositoryImpl implements ShareRepository {
       localSurahPath: localDownload?.filePath,
       progressMessages: progressMessages,
       onProgress: onProgress,
-      cancelToken: cancelToken,
+      cancelToken: cancelBridge,
     );
     return ShareContent.audioClip(
       filePath: filePath,
@@ -126,11 +130,13 @@ class ShareRepositoryImpl implements ShareRepository {
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     void Function(int index)? onFrameCaptureStarted,
-    CancelToken? cancelToken,
+    ShareCancelToken? cancelToken,
   }) async {
     logger.d(
       '[AppLaunch] source=ShareRepositoryImpl.generateVideo: Start in (${DateTime.now()})',
     );
+    final ShareCancelTokenBridge? cancelBridge =
+        ShareCancelTokenBridge.fromDomain(cancelToken);
     final effectiveConfig = await _audioClipService.resolveConfigForDuration(
       config: config,
       maxDurationSeconds: maxDurationSeconds,
@@ -187,7 +193,7 @@ class ShareRepositoryImpl implements ShareRepository {
 
     try {
       for (int i = 0; i < handles.length; i++) {
-        if (cancelToken?.isCancelled ?? false) break;
+        if (cancelBridge?.isCancelled ?? false) break;
 
         // Notify the UI to render the current frame before we capture it.
         onFrameCaptureStarted?.call(i);
@@ -236,7 +242,7 @@ class ShareRepositoryImpl implements ShareRepository {
           _videoEncodeStartProgress + p * _videoEncodeProgressShare,
           msg,
         ),
-        cancelToken: cancelToken,
+        cancelToken: cancelBridge,
       );
 
       return ShareContent.video(
@@ -342,4 +348,6 @@ class ShareRepositoryImpl implements ShareRepository {
     );
     return _fileManager.cleanup();
   }
+
+  Color? _colorFromArgb(int? argb) => argb == null ? null : Color(argb);
 }

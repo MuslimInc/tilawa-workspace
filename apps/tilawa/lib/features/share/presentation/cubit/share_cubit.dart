@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:ui' show Color;
 
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/share/domain/entities/audio_clip_config.dart';
+import 'package:tilawa/features/share/domain/entities/share_cancel_token.dart';
 import 'package:tilawa/features/share/domain/entities/share_content.dart';
 import 'package:tilawa/features/share/domain/entities/share_progress_messages.dart';
+import 'package:tilawa/features/share/domain/services/reciter_audio_catalog.dart';
 import 'package:tilawa/features/share/domain/entities/widget_capture_handle.dart';
 import 'package:tilawa/features/share/domain/usecases/capture_screenshot_use_case.dart';
 import 'package:tilawa/features/share/domain/usecases/generate_audio_clip_use_case.dart';
@@ -20,7 +21,7 @@ import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../../reciters/domain/usecases/get_reciters_use_case.dart';
-import '../../data/services/reciter_audio_mapping.dart';
+import '../utils/share_footer_colors_mapper.dart';
 import '../utils/share_reciter_options.dart';
 import 'share_state.dart';
 
@@ -48,7 +49,7 @@ class ShareCubit extends Cubit<ShareState> {
   final ShareContentUseCase _shareContent;
   final GetRecitersUseCase _getReciters;
 
-  CancelToken? _cancelToken;
+  ShareCancelToken? _cancelToken;
 
   void configureAudioClip({
     required int surahNumber,
@@ -205,7 +206,7 @@ class ShareCubit extends Cubit<ShareState> {
       return null;
     }
 
-    final folder = ReciterAudioMapping.resolveFolder(serverUrl);
+    final folder = ReciterAudioCatalog.resolveFolder(serverUrl);
     return AudioClipConfig(
       surahNumber: surahNumber,
       fromAyah: fromAyah,
@@ -322,8 +323,10 @@ class ShareCubit extends Cubit<ShareState> {
         appName: appName,
         sharedViaLabel: sharedViaLabel,
         brandCapture: brandCapture,
-        footerBackgroundColor: footerBackgroundColor,
-        footerForegroundColor: footerForegroundColor,
+        footerColors: shareFooterColorsFromTheme(
+          background: footerBackgroundColor,
+          foreground: footerForegroundColor,
+        ),
       );
       emit(state.copyWith(status: ShareStatus.reviewing, content: content));
     } catch (e, st) {
@@ -365,8 +368,10 @@ class ShareCubit extends Cubit<ShareState> {
         pageNumber: pageNumber,
         appName: appName,
         sharedViaLabel: sharedViaLabel,
-        footerBackgroundColor: footerBackgroundColor,
-        footerForegroundColor: footerForegroundColor,
+        footerColors: shareFooterColorsFromTheme(
+          background: footerBackgroundColor,
+          foreground: footerForegroundColor,
+        ),
       );
       await _shareContent(content);
       await _shareContent.cleanup();
@@ -404,7 +409,7 @@ class ShareCubit extends Cubit<ShareState> {
     );
 
     _cancelToken?.cancel();
-    _cancelToken = CancelToken();
+    _cancelToken = ShareCancelToken();
     emit(
       state.copyWith(
         status: ShareStatus.generating,
@@ -443,15 +448,15 @@ class ShareCubit extends Cubit<ShareState> {
         error: e,
         stackTrace: st,
       );
-      if (e is! DioException || e.type != DioExceptionType.cancel) {
+      if (_cancelToken?.isCancelled == true) {
+        emit(state.copyWith(status: ShareStatus.idle));
+      } else {
         emit(
           state.copyWith(
             status: ShareStatus.error,
             errorMessage: _userFacingError(e),
           ),
         );
-      } else {
-        emit(state.copyWith(status: ShareStatus.idle));
       }
     }
   }
@@ -504,7 +509,7 @@ class ShareCubit extends Cubit<ShareState> {
     );
 
     _cancelToken?.cancel();
-    _cancelToken = CancelToken();
+    _cancelToken = ShareCancelToken();
     emit(
       state.copyWith(
         status: ShareStatus.generating,
@@ -551,7 +556,9 @@ class ShareCubit extends Cubit<ShareState> {
         error: e,
         stackTrace: st,
       );
-      if (e is! DioException || e.type != DioExceptionType.cancel) {
+      if (_cancelToken?.isCancelled == true) {
+        emit(state.copyWith(status: ShareStatus.idle, capturingIndex: null));
+      } else {
         emit(
           state.copyWith(
             status: ShareStatus.error,
@@ -562,8 +569,6 @@ class ShareCubit extends Cubit<ShareState> {
             ),
           ),
         );
-      } else {
-        emit(state.copyWith(status: ShareStatus.idle, capturingIndex: null));
       }
     }
   }

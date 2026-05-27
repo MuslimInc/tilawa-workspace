@@ -4,20 +4,27 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:path/path.dart' as p;
+import 'package:tilawa_core/constants/app_strings.dart';
 import 'package:tilawa_core/logger.dart';
 
 import '../../domain/entities/audio_clip_config.dart';
 import '../../domain/entities/share_limits.dart';
 import '../../domain/entities/share_progress_messages.dart';
+import '../../domain/services/reciter_audio_catalog.dart';
 import '../ffmpeg/ffmpeg_runner.dart';
+import '../utils/share_cancel_token_bridge.dart';
 import 'ayah_timing_service.dart';
-import 'reciter_audio_mapping.dart';
 import 'share_file_manager.dart';
 
 /// Downloads verse-level audio files and concatenates them into a single MP3 clip.
 @lazySingleton
 class AudioClipService {
-  AudioClipService(this._dio, this._fileManager, this._timingService, this._runner);
+  AudioClipService(
+    this._dio,
+    this._fileManager,
+    this._timingService,
+    this._runner,
+  );
 
   final Dio _dio;
   final ShareFileManager _fileManager;
@@ -52,7 +59,7 @@ class AudioClipService {
       return config;
     }
 
-    final recitationId = ReciterAudioMapping.resolveRecitationId(
+    final recitationId = ReciterAudioCatalog.resolveRecitationId(
       config.serverUrl,
     );
     if (recitationId == null) return config;
@@ -101,7 +108,7 @@ class AudioClipService {
     String? localSurahPath,
     required AudioClipProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
-    CancelToken? cancelToken,
+    ShareCancelTokenBridge? cancelToken,
   }) async {
     logger.d(
       '[AppLaunch] source=AudioClipService.generateAudioClip: Start in (${DateTime.now()})',
@@ -133,7 +140,7 @@ class AudioClipService {
       progressMessages.preparingToTrimLocalAudio,
     );
 
-    final recitationId = ReciterAudioMapping.resolveRecitationId(
+    final recitationId = ReciterAudioCatalog.resolveRecitationId(
       config.serverUrl,
     );
     if (recitationId == null) {
@@ -225,7 +232,7 @@ class AudioClipService {
       '-i "$inputPath" -ss $start -to $end -acodec copy '
       '-metadata title="$title" '
       '-metadata artist="${config.reciterName}" '
-      '-metadata album="Tilawa" '
+      '-metadata album="${AppStrings.appName}" '
       '-y "$outputPath"',
     );
 
@@ -248,7 +255,7 @@ class AudioClipService {
     required AudioClipConfig config,
     required AudioClipProgressMessages progressMessages,
     void Function(double progress, String message)? onProgress,
-    CancelToken? cancelToken,
+    ShareCancelTokenBridge? cancelToken,
   }) async {
     if (config.verseCount > maxVerses) {
       throw ArgumentError('Verse range exceeds maximum of $maxVerses verses.');
@@ -316,7 +323,7 @@ class AudioClipService {
     required String reciterFolder,
     required int surahNumber,
     required int ayahNumber,
-    CancelToken? cancelToken,
+    ShareCancelTokenBridge? cancelToken,
   }) async {
     // Check cache first.
     final cached = await _fileManager.getCachedVersePath(
@@ -326,7 +333,7 @@ class AudioClipService {
     );
     if (cached != null) return cached;
 
-    final url = ReciterAudioMapping.buildVerseAudioUrl(
+    final url = ReciterAudioCatalog.buildVerseAudioUrl(
       reciterFolder: reciterFolder,
       surahNumber: surahNumber,
       ayahNumber: ayahNumber,
@@ -340,7 +347,7 @@ class AudioClipService {
             responseType: ResponseType.bytes,
             receiveTimeout: _downloadTimeout,
           ),
-          cancelToken: cancelToken,
+          cancelToken: cancelToken?.dioToken,
         );
 
         if (response.data == null || response.data!.isEmpty) {
@@ -412,7 +419,7 @@ class AudioClipService {
       '-i "$concatString" -acodec copy '
       '-metadata title="$title" '
       '-metadata artist="${config.reciterName}" '
-      '-metadata album="Tilawa" '
+      '-metadata album="${AppStrings.appName}" '
       '-y "$outputPath"',
     );
 

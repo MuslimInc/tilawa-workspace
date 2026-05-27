@@ -14,6 +14,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../shared/widgets/quran_player_widget.dart';
 import '../../../audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../../surah/domain/entities/surah_entity.dart';
+import '../../../tour_guide/presentation/widgets/tour_target.dart';
 import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
 import '../widgets/download_all_button.dart';
@@ -23,6 +24,8 @@ import '../widgets/reciter_history_section.dart';
 import '../widgets/reciter_search_header.dart';
 import '../widgets/surah_grid_item.dart';
 import '../widgets/surah_list_tile.dart';
+import '../tour/reciters_tour_launcher.dart';
+import '../tour/reciters_tour_targets.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
   const ReciterDetailsScreen({super.key, required this.reciter});
@@ -38,6 +41,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   final GlobalKey _playingSurahKey = GlobalKey();
   bool _showScrollToTop = false;
   bool _hasScrolledToPlaying = false;
+  bool _playbackTourAttempted = false;
   ReciterViewMode _lastViewMode = ReciterViewMode.list;
 
   @override
@@ -167,6 +171,29 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     );
   }
 
+  void _schedulePlaybackTour() {
+    if (_playbackTourAttempted) {
+      return;
+    }
+    _playbackTourAttempted = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) {
+          return;
+        }
+        final bool showPlayer = context.read<AudioPlayerBloc>().state
+            .shouldShowBottomPlayer;
+        if (!showPlayer) {
+          _playbackTourAttempted = false;
+          return;
+        }
+        unawaited(
+          getIt<RecitersTourLauncher>().maybeShowPlaybackTour(context),
+        );
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -180,7 +207,10 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     return Stack(
       children: [
         Scaffold(
-          // Scroll-to-top FAB
+          // Shell [TilawaAdaptiveShell] already shrinks for the keyboard; a
+          // nested resize here double-applies [viewInsets] and collapses the
+          // surah list to zero height (white gap above keyboard).
+          resizeToAvoidBottomInset: false,
           floatingActionButton: AnimatedSlide(
             offset: _showScrollToTop ? Offset.zero : const Offset(0, 2),
             duration: tokens.durationFast,
@@ -245,6 +275,7 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                       command.initialIndex,
                     ),
                   );
+                  _schedulePlaybackTour();
                 }
 
                 if (state.status == ReciterDetailsStatus.loaded) {
@@ -429,9 +460,10 @@ class _ReciterDetailsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
+    final bool keyboardOpen = context.isKeyboardVisible;
     final double bottomPadding =
-        bottomPlayerOffset +
-        (showBottomPlayer
+        (keyboardOpen ? 0 : bottomPlayerOffset) +
+        (showBottomPlayer && !keyboardOpen
             ? QuranPlayerWidget.collapsedHeight(context) +
                   tokens.spaceExtraLarge
             : tokens.spaceExtraLarge);
@@ -549,7 +581,7 @@ class _ReciterDetailsContent extends StatelessWidget {
                     (currentAudio != null &&
                         currentAudio.url == surah.audio.url);
                 final key = isPlaying ? playingSurahKey : null;
-                return SurahGridItem(
+                final Widget item = SurahGridItem(
                   key: key,
                   surah: surah,
                   index: index,
@@ -557,6 +589,13 @@ class _ReciterDetailsContent extends StatelessWidget {
                   reciterId: reciter.id,
                   onTap: () => onPlaySurah(surah),
                 );
+                if (isPlaying) {
+                  return TourTarget(
+                    targetId: RecitersTourTargets.playingSurah,
+                    child: item,
+                  );
+                }
+                return item;
               }, childCount: filteredSurahs.length),
             ),
           );
@@ -576,7 +615,7 @@ class _ReciterDetailsContent extends StatelessWidget {
                   currentAudio?.id == surah.id ||
                   (currentAudio != null && currentAudio.url == surah.audio.url);
               final key = isPlaying ? playingSurahKey : null;
-              return Padding(
+              final Widget tile = Padding(
                 padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
                 child: SurahListTile(
                   key: key,
@@ -587,6 +626,13 @@ class _ReciterDetailsContent extends StatelessWidget {
                   onTap: () => onPlaySurah(surah),
                 ),
               );
+              if (isPlaying) {
+                return TourTarget(
+                  targetId: RecitersTourTargets.playingSurah,
+                  child: tile,
+                );
+              }
+              return tile;
             }, childCount: filteredSurahs.length),
           ),
         );

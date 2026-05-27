@@ -28,9 +28,18 @@ class _BootGateHandoffFixture extends StatelessWidget {
             children: <Widget>[
               appChild,
               if (showOverlay)
-                ColoredBox(
+                DecoratedBox(
                   key: overlayKey,
-                  color: AppColors.defaultPrimary,
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[
+                        AppColors.brandGradientTop,
+                        AppColors.brandGradientBottom,
+                      ],
+                    ),
+                  ),
                   child: const SizedBox.expand(),
                 ),
             ],
@@ -62,6 +71,38 @@ class _SplashRoutePaintProbeState extends State<_SplashRoutePaintProbe> {
   @override
   Widget build(BuildContext context) {
     return const SizedBox(key: Key('splash_route'));
+  }
+}
+
+class _MountCountingApp extends StatefulWidget {
+  const _MountCountingApp({
+    required this.onInit,
+    required this.onDispose,
+  });
+
+  final VoidCallback onInit;
+  final VoidCallback onDispose;
+
+  @override
+  State<_MountCountingApp> createState() => _MountCountingAppState();
+}
+
+class _MountCountingAppState extends State<_MountCountingApp> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onInit();
+  }
+
+  @override
+  void dispose() {
+    widget.onDispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(key: Key('mounted_app'));
   }
 }
 
@@ -111,6 +152,40 @@ void main() {
       expect(find.byKey(overlayKey), findsNothing);
       expect(find.byKey(const Key('splash_route')), findsOneWidget);
       expect(SplashLaunchHandoff.splashRouteHasPainted.value, isTrue);
+    });
+
+    testWidgets('keeps app underlay mounted when overlay is removed', (
+      WidgetTester tester,
+    ) async {
+      SplashLaunchHandoff.resetForNewLaunch();
+      const overlayKey = Key('launch_overlay');
+      var initCount = 0;
+      var disposeCount = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: _BootGateHandoffFixture(
+            overlayKey: overlayKey,
+            appChild: _MountCountingApp(
+              onInit: () => initCount++,
+              onDispose: () => disposeCount++,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byKey(overlayKey), findsOneWidget);
+      expect(find.byKey(const Key('mounted_app')), findsOneWidget);
+      expect(initCount, 1);
+      expect(disposeCount, 0);
+
+      SplashLaunchHandoff.markSplashRoutePainted();
+      await tester.pump();
+
+      expect(find.byKey(overlayKey), findsNothing);
+      expect(find.byKey(const Key('mounted_app')), findsOneWidget);
+      expect(initCount, 1);
+      expect(disposeCount, 0);
     });
   });
 }

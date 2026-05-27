@@ -1,11 +1,12 @@
-import '../../features/premium/data/services/subscription_plans_service.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/features/premium/domain/services/subscription_catalog_prefetch.dart';
 
+@lazySingleton
 class FirebaseInitializationService {
-  FirebaseInitializationService({
-    required this._subscriptionPlansService,
-  });
-  final SubscriptionPlansService _subscriptionPlansService;
+  FirebaseInitializationService(this._subscriptionCatalogPrefetch);
+
+  final SubscriptionCatalogPrefetch _subscriptionCatalogPrefetch;
 
   /// Initialize read-only Firebase data (e.g. cache subscription plans).
   ///
@@ -19,7 +20,7 @@ class FirebaseInitializationService {
       logger.d('Initializing Firebase data (read-only)...');
 
       // Pre-fetch subscription plans so they are cached for offline use.
-      await _subscriptionPlansService.getSubscriptionPlans();
+      await _subscriptionCatalogPrefetch.prefetch();
 
       logger.d('Firebase data initialization completed');
     } catch (e) {

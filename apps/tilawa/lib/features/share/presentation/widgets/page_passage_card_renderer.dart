@@ -88,9 +88,9 @@ class PagePassageCardRenderer extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const _PosterPill(
+                        _PosterPill(
                           icon: Icons.auto_stories_rounded,
-                          label: 'Tilawa',
+                          label: context.l10n.appTitle,
                         ),
                         const Spacer(),
                         _PosterPill(

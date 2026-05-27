@@ -1,4 +1,5 @@
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 
@@ -8,6 +9,7 @@ import '../../domain/repositories/tasbeeh_repository.dart';
 import '../datasources/tasbeeh_local_datasource.dart';
 import '../models/tasbeeh_dhikr_model.dart';
 
+@LazySingleton(as: TasbeehRepository)
 class TasbeehRepositoryImpl implements TasbeehRepository {
   TasbeehRepositoryImpl(this._localDataSource);
 

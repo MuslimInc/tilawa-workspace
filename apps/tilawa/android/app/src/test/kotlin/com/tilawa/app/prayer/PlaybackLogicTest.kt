@@ -78,8 +78,8 @@ class PlaybackLogicTest {
 
     @Test
     fun `getNotificationTitle for empty prayer returns app name`() {
-        every { mockStrings.getString("app_name") } returns "Tilawa"
-        assertEquals("Tilawa", logic.getNotificationTitle(""))
+        every { mockStrings.getString("app_name") } returns "Rattil"
+        assertEquals("Rattil", logic.getNotificationTitle(""))
     }
 
     @Test

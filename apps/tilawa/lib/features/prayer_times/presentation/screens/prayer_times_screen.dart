@@ -14,7 +14,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/prayer_times_clock.dart';
-import '../../domain/services/prayer_adhan_notification_service_interface.dart';
+import '../../domain/usecases/fire_prayer_test_notification_use_case.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../config/prayer_times_screen_loading_preview.dart';
@@ -904,13 +904,13 @@ class _UtilityActionRow extends StatelessWidget {
         vertical: tokens.spaceExtraSmall,
       ),
       child: Row(
+        spacing: tokens.spaceSmall,
         children: [
           Icon(
             icon,
             size: tokens.iconSizeSmall,
             color: colorScheme.onSurfaceVariant,
           ),
-          SizedBox(width: tokens.spaceSmall),
           Expanded(
             child: Text(
               label,
@@ -923,7 +923,6 @@ class _UtilityActionRow extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: tokens.spaceSmall),
           trailing,
         ],
       ),
@@ -1236,6 +1235,7 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 Text(
                   row.prayerName,
@@ -1243,7 +1243,6 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: tokens.spaceExtraSmall),
                 Text(
                   '${row.prayerTime} · ${context.l10n.prayerNotifications}',
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -1411,7 +1410,7 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
     if (_firing) return;
     setState(() => _firing = true);
     try {
-      await getIt<IPrayerAdhanNotificationService>().fireTestNotification(
+      await getIt<FirePrayerTestNotificationUseCase>()(
         prayer: _selectedPrayer,
         playAdhan: _playAdhan,
       );
