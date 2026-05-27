@@ -389,74 +389,87 @@ class _TasbeehHistoryView extends StatelessWidget {
                           SizedBox(height: tokens.spaceSmall),
                       itemBuilder: (context, index) {
                         final item = state.savedDhikr[index];
-                        return TilawaCard(
-                          onTap: () =>
-                              cubit.selectDhikrAndStartCounting(item.id),
-                          borderRadius: tokens.radiusLarge,
-                          borderColor: theme.colorScheme.primary.withValues(
-                            alpha: tokens.opacitySubtle,
-                          ),
-                          backgroundColor: theme.colorScheme.surface.withValues(
-                            alpha: tokens.opacityGlass,
-                          ),
-                          child: Row(
-                            children: [
-                              TilawaIconBox(
-                                icon: Icons.radio_button_checked_rounded,
-                                iconColor: theme.colorScheme.primary,
-                                backgroundColor: theme.colorScheme.primary
-                                    .withValues(alpha: tokens.opacitySubtle),
+                        // The delete button must live OUTSIDE the TilawaCard.
+                        // TilawaCard's onTap is a Positioned.fill InkWell
+                        // overlay (last in the Stack = on top), so any
+                        // interactive widget placed inside the card content is
+                        // never reached by hit-testing.
+                        return Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: TilawaCard(
+                                onTap: () =>
+                                    cubit.selectDhikrAndStartCounting(item.id),
                                 borderRadius: tokens.radiusLarge,
-                              ),
-                              SizedBox(width: tokens.spaceMedium),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                borderColor: theme.colorScheme.primary.withValues(
+                                  alpha: tokens.opacitySubtle,
+                                ),
+                                backgroundColor: theme.colorScheme.surface.withValues(
+                                  alpha: tokens.opacityGlass,
+                                ),
+                                child: Row(
                                   children: [
-                                    Text(
-                                      item.text,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w800,
-                                          ),
+                                    TilawaIconBox(
+                                      icon: Icons.radio_button_checked_rounded,
+                                      iconColor: theme.colorScheme.primary,
+                                      backgroundColor: theme.colorScheme.primary
+                                          .withValues(alpha: tokens.opacitySubtle),
+                                      borderRadius: tokens.radiusLarge,
                                     ),
-                                    SizedBox(height: tokens.spaceExtraSmall),
-                                    Text(
-                                      context.l10n.tasbeehCurrentTarget(
-                                        item.targetCount,
-                                      ),
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: theme
-                                                .colorScheme
-                                                .onSurfaceVariant,
+                                    SizedBox(width: tokens.spaceMedium),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.text,
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: theme.textTheme.titleMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w800,
+                                                ),
                                           ),
+                                          SizedBox(height: tokens.spaceExtraSmall),
+                                          Text(
+                                            context.l10n.tasbeehCurrentTarget(
+                                              item.targetCount,
+                                            ),
+                                            style: theme.textTheme.bodySmall
+                                                ?.copyWith(
+                                                  color: theme
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(width: tokens.spaceSmall),
-                              TilawaIconActionButton(
-                                icon: Icons.delete_outline_rounded,
-                                backgroundColor:
-                                    theme.colorScheme.surfaceContainerHigh,
-                                onTap: () async {
-                                  final shouldDelete = await showDialog<bool>(
-                                    context: context,
-                                    builder: (dialogContext) =>
-                                        _TasbeehDeleteConfirmationDialog(
-                                          tasbeehText: item.text,
-                                        ),
-                                  );
-                                  if (shouldDelete == true) {
-                                    await cubit.removeDhikr(item.id);
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(width: tokens.spaceSmall),
+                            TilawaIconActionButton(
+                              icon: Icons.delete_outline_rounded,
+                              backgroundColor:
+                                  theme.colorScheme.surfaceContainerHigh,
+                              onTap: () async {
+                                final shouldDelete = await showDialog<bool>(
+                                  context: context,
+                                  builder: (dialogContext) =>
+                                      _TasbeehDeleteConfirmationDialog(
+                                        tasbeehText: item.text,
+                                      ),
+                                );
+                                if (shouldDelete == true) {
+                                  await cubit.removeDhikr(item.id);
+                                }
+                              },
+                            ),
+                          ],
                         );
                       },
                     ),
