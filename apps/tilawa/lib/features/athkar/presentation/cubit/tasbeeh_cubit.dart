@@ -76,6 +76,14 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     );
   }
 
+  void incrementFreeCount() {
+    emit(state.copyWith(freeCount: state.freeCount + 1));
+  }
+
+  void resetFreeCount() {
+    emit(state.copyWith(freeCount: 0));
+  }
+
   Future<void> loadSavedDhikr() async {
     emit(
       state.copyWith(

@@ -14,7 +14,6 @@ class _MockPrayerTimesBloc extends Mock implements PrayerTimesBloc {}
 
 void main() {
   setUpAll(() {
-    AppTheme.useGoogleFonts = false;
     registerFallbackValue(const PrayerTimesEvent.loadPrayerTimes());
   });
 
@@ -41,7 +40,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: PrimaryColorPreset.defaultPreset.value,
-          useGoogleFontsOverride: false,
         ),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

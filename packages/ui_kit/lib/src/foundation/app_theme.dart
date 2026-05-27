@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 import 'component_tokens.dart';
@@ -14,7 +13,6 @@ class AppTheme {
   AppTheme._();
 
   /// Toggle for using Google Fonts, can be disabled in tests
-  static bool useGoogleFonts = true;
 
   // Light theme configuration constants
   static const FlexSurfaceMode _lightSurfaceMode =
@@ -44,7 +42,7 @@ class AppTheme {
   static const bool _tooltipsMatchBackground = true;
   static const bool _useMaterial3ErrorColors = true;
 
-  // Shared text theme: M3 typography base, optionally Alexandria.
+  // Shared text theme: M3 typography base.
   static TextTheme _material3TypographyBase(Brightness brightness) {
     final typography = Typography.material2021(
       platform: defaultTargetPlatform,
@@ -52,11 +50,8 @@ class AppTheme {
     return brightness == Brightness.dark ? typography.white : typography.black;
   }
 
-  static TextTheme _getTextTheme(bool useFonts, Brightness brightness) {
-    final base = _material3TypographyBase(brightness);
-    if (!useFonts) return base;
-    return GoogleFonts.alexandriaTextTheme(base);
-  }
+  static TextTheme _getTextTheme(Brightness brightness) =>
+      _material3TypographyBase(brightness);
 
   static FlexSchemeColor _lightScheme(Color primaryColor) {
     final safePrimary = _safePrimaryForLight(primaryColor);
@@ -376,15 +371,10 @@ class AppTheme {
 
   /// Get the light theme for the given primary color.
   ///
-  /// [useGoogleFontsOverride] is a foundation API extension for
-  /// preview/golden stability. It allows disabling font loading in headless
-  /// test environments without modifying the production [useGoogleFonts] default.
   static ThemeData getLightTheme({
     required Color primaryColor,
-    bool? useGoogleFontsOverride,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
-    final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
     final scheme = _lightScheme(primaryColor);
 
     final theme = FlexThemeData.light(
@@ -398,8 +388,7 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
-      fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
-      textTheme: _getTextTheme(useFonts, Brightness.light),
+      textTheme: _getTextTheme(Brightness.light),
     );
     final colorScheme = _refineLightColorScheme(theme.colorScheme);
     final themedSurfaces = _applySurfaceScale(
@@ -419,17 +408,12 @@ class AppTheme {
 
   /// Get the dark theme for the given primary color.
   ///
-  /// [useGoogleFontsOverride] is a foundation API extension for
-  /// preview/golden stability. It allows disabling font loading in headless
-  /// test environments without modifying the production [useGoogleFonts] default.
   static ThemeData getDarkTheme({
     required Color primaryColor,
     bool isDefaultPreset = false,
-    bool? useGoogleFontsOverride,
     bool darkIsTrueBlack = false,
     List<ThemeExtension<dynamic>> extensions = const [],
   }) {
-    final useFonts = useGoogleFontsOverride ?? useGoogleFonts;
     final scheme = _darkScheme(primaryColor, isDefaultPreset: isDefaultPreset);
 
     final theme = FlexThemeData.dark(
@@ -443,8 +427,7 @@ class AppTheme {
       tooltipsMatchBackground: _tooltipsMatchBackground,
       visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3ErrorColors: _useMaterial3ErrorColors,
-      fontFamily: useFonts ? GoogleFonts.alexandria().fontFamily : null,
-      textTheme: _getTextTheme(useFonts, Brightness.dark),
+      textTheme: _getTextTheme(Brightness.dark),
     );
     final colorScheme = _refineDarkColorScheme(
       theme.colorScheme,

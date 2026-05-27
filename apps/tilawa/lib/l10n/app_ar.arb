@@ -2593,6 +2593,10 @@
     "@stopAdhan": {
         "description": "Button label to stop Adhan playback"
     },
+    "adhanStillPlayingMessage": "هل تريد إيقاف الأذان قبل المغادرة؟",
+    "@adhanStillPlayingMessage": {
+        "description": "Dialog body shown when the user tries to leave the prayer notification screen while the adhan is still playing"
+    },
     "prayerNotificationReceived": "تنبيه الصلاة",
     "@prayerNotificationReceived": {
         "description": "Status text when a prayer notification is opened"
@@ -2906,80 +2910,12 @@
     "@appReviewPlatformUnsupported": {
         "description": "In-app review not supported (e.g. web)"
     },
-    "tourActionNext": "التالي",
-    "@tourActionNext": {
-        "description": "Primary action to advance an in-app product tour step"
+    "a11ySplashLoading": "رتل، جارٍ التحميل",
+    "@a11ySplashLoading": {
+        "description": "Screen-reader label announced while the splash loading screen is visible"
     },
-    "tourActionFinish": "فهمت",
-    "@tourActionFinish": {
-        "description": "Primary action on the last step of a product tour"
-    },
-    "tourActionSkip": "تخطّي",
-    "@tourActionSkip": {
-        "description": "Dismiss the entire product tour without finishing every step"
-    },
-    "tourStepSemantics": "خطوة {current} من {total} في الجولة",
-    "@tourStepSemantics": {
-        "description": "Screen reader label for a product tour tooltip",
-        "placeholders": {
-            "current": {
-                "type": "int"
-            },
-            "total": {
-                "type": "int"
-            }
-        }
-    },
-    "tourDebugResetTitle": "إعادة ضبط جولات التطبيق",
-    "@tourDebugResetTitle": {
-        "description": "Developer settings row to clear tour completion flags"
-    },
-    "tourDebugResetSubtitle": "إظهار الجولات السياقية مجدداً عند التفعيل التالي",
-    "@tourDebugResetSubtitle": {
-        "description": "Subtitle for developer tour reset row"
-    },
-    "tourDebugResetDone": "تمت إعادة ضبط جولات التطبيق",
-    "@tourDebugResetDone": {
-        "description": "Snackbar after clearing tour completion state"
-    },
-    "tourRecitersSearchTitle": "ابحث عن قارئ",
-    "@tourRecitersSearchTitle": {
-        "description": "Reciters intro tour — search step title"
-    },
-    "tourRecitersSearchDescription": "ابحث بالاسم للوصول مباشرة إلى الصوت الذي تريده.",
-    "@tourRecitersSearchDescription": {
-        "description": "Reciters intro tour — search step body"
-    },
-    "tourRecitersFavoritesTitle": "احفظ المفضّلة",
-    "@tourRecitersFavoritesTitle": {
-        "description": "Reciters intro tour — favourites step title"
-    },
-    "tourRecitersFavoritesDescription": "اضغط على القلب لتصفية قرّائك المحفوظين في أي وقت.",
-    "@tourRecitersFavoritesDescription": {
-        "description": "Reciters intro tour — favourites step body"
-    },
-    "tourRecitersOpenReciterTitle": "افتح قارئاً",
-    "@tourRecitersOpenReciterTitle": {
-        "description": "Reciters intro tour — open reciter step title"
-    },
-    "tourRecitersOpenReciterDescription": "اختر قارئاً لتصفّح السور والاستماع.",
-    "@tourRecitersOpenReciterDescription": {
-        "description": "Reciters intro tour — open reciter step body"
-    },
-    "tourReciterPlaybackPlayingTitle": "قيد التشغيل",
-    "@tourReciterPlaybackPlayingTitle": {
-        "description": "Reciter details playback tour — active surah step title"
-    },
-    "tourReciterPlaybackPlayingDescription": "تبقى السورة التي ضغطت عليها مميّزة أثناء التشغيل.",
-    "@tourReciterPlaybackPlayingDescription": {
-        "description": "Reciter details playback tour — active surah step body"
-    },
-    "tourReciterPlaybackMiniPlayerTitle": "تحكّم بالتشغيل",
-    "@tourReciterPlaybackMiniPlayerTitle": {
-        "description": "Reciter details playback tour — mini player step title"
-    },
-    "tourReciterPlaybackMiniPlayerDescription": "استخدم المشغّل المصغّر للإيقاف أو التخطّي أو التوسيع لمزيد من التحكم.",
-    "@tourReciterPlaybackMiniPlayerDescription": {
-        "description": "Reciter details playback tour — mini player step body"
+    "splashSlowLoadingNotice": "قد يستغرق بعض المحتوى لحظة للتحميل",
+    "@splashSlowLoadingNotice": {
+        "description": "Toast shown when startup times out and the app navigates to home in a degraded state"
     }
 }

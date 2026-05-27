@@ -8,8 +8,7 @@ void main() {
       expect(AppTheme, isNotNull);
     });
 
-    // Note: getLightTheme and getDarkTheme tests are skipped because they
-    // use google_fonts which requires network access in tests. These methods
-    // are covered in integration tests and actual app usage.
+    // Note: getLightTheme and getDarkTheme tests are covered in integration
+    // tests and actual app usage.
   });
 }

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import 'package:tilawa/features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 part 'prayer_status_cubit.freezed.dart';
@@ -20,17 +21,19 @@ class PrayerStatusState with _$PrayerStatusState {
     required bool adhanEnabled,
     String? soundName,
     int? notificationId,
+    String? locationName,
   }) = _Loaded;
   const factory PrayerStatusState.error(Failure failure) = _Error;
 }
 
 class PrayerStatusCubit extends Cubit<PrayerStatusState> {
   final IAdhanAlarmPlayer _adhanPlayer;
+  final LoadPrayerSettingsUseCase _loadSettings;
   Timer? _statusPollTimer;
   bool _isRefreshingPlayingStatus = false;
 
-  PrayerStatusCubit(this._adhanPlayer)
-    : super(const PrayerStatusState.initial());
+  PrayerStatusCubit(this._adhanPlayer, this._loadSettings)
+      : super(const PrayerStatusState.initial());
 
   Future<void> init(String? payloadJson) async {
     if (payloadJson == null || payloadJson.isEmpty) {
@@ -88,8 +91,8 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
       );
 
       unawaited(_refreshPlayingStatus());
+      unawaited(_loadLocationName());
 
-      // Start polling status if Adhan is expected to be playing.
       if (adhanEnabled) {
         _startPolling();
       }
@@ -105,6 +108,30 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
     }
   }
 
+  Future<void> _loadLocationName() async {
+    try {
+      final result = await _loadSettings();
+      if (isClosed) return;
+      result.fold(
+        (_) {},
+        (settings) {
+          state.maybeWhen(
+            loaded: (name, time, playing, enabled, sound, id, _) {
+              emit(
+                (state as _Loaded).copyWith(
+                  locationName: settings.effectiveSchedulingLocationName,
+                ),
+              );
+            },
+            orElse: () {},
+          );
+        },
+      );
+    } catch (e) {
+      logger.w('[PrayerTimes] Failed to load location for status screen: $e');
+    }
+  }
+
   Future<void> _refreshPlayingStatus() async {
     if (_isRefreshingPlayingStatus) return;
     _isRefreshingPlayingStatus = true;
@@ -112,7 +139,7 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
       final isPlaying = await _adhanPlayer.isAdhanPlaying();
       if (isClosed) return;
       state.maybeWhen(
-        loaded: (name, time, currentPlaying, enabled, sound, id) {
+        loaded: (name, time, currentPlaying, enabled, sound, id, locationName) {
           if (currentPlaying != isPlaying) {
             emit((state as _Loaded).copyWith(isAdhanPlaying: isPlaying));
           }
@@ -144,7 +171,7 @@ class PrayerStatusCubit extends Cubit<PrayerStatusState> {
     await _adhanPlayer.stopCurrentAdhan();
     final isPlaying = await _adhanPlayer.isAdhanPlaying();
     state.maybeWhen(
-      loaded: (name, time, currentPlaying, enabled, sound, id) {
+      loaded: (name, time, currentPlaying, enabled, sound, id, locationName) {
         emit((state as _Loaded).copyWith(isAdhanPlaying: isPlaying));
       },
       orElse: () {},

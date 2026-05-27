@@ -150,7 +150,7 @@ class BasmalaWidget extends StatelessWidget {
       child: Center(
         child: Text(
           BasmalaEntity.text,
-          style: theme.textTheme.headlineSmall?.copyWith(fontFamily: 'Amiri'),
+          style: theme.textTheme.headlineSmall,
           textAlign: TextAlign.center,
         ),
       ),

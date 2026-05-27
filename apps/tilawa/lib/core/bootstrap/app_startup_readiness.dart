@@ -27,7 +27,7 @@ class AppStartupReadiness {
   /// Mirrors [MainScreenCubit] delays so home opens without placeholder staging.
   static const Duration shellActivationDelay = Duration(milliseconds: 260);
   static const Duration initialTabRouteSettleDelay = Duration(
-    milliseconds: 1200,
+    milliseconds: 400,
   );
 
   /// Per-prefetch cap so a single hung endpoint cannot extend splash to the

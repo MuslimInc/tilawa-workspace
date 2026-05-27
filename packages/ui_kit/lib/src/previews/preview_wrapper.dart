@@ -16,7 +16,6 @@ class TilawaPreviewWrapper extends StatelessWidget {
     this.isRTL = false,
     this.textScale = 1.0,
     this.padding = const EdgeInsets.all(16.0),
-    this.useGoogleFonts = false, // Default to false for test/preview stability
   });
 
   final Widget child;
@@ -24,7 +23,6 @@ class TilawaPreviewWrapper extends StatelessWidget {
   final bool isRTL;
   final double textScale;
   final EdgeInsets padding;
-  final bool useGoogleFonts;
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +30,9 @@ class TilawaPreviewWrapper extends StatelessWidget {
         ? AppTheme.getDarkTheme(
             primaryColor: AppColors.defaultPrimary,
             isDefaultPreset: true,
-            useGoogleFontsOverride: useGoogleFonts,
           )
         : AppTheme.getLightTheme(
             primaryColor: AppColors.defaultPrimary,
-            useGoogleFontsOverride: useGoogleFonts,
           );
 
     final mediaQuery = MediaQuery.maybeOf(context);

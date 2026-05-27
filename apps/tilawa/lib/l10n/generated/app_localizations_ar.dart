@@ -1943,6 +1943,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get stopAdhan => 'إيقاف الأذان';
 
   @override
+  String get adhanStillPlayingMessage => 'هل تريد إيقاف الأذان قبل المغادرة؟';
+
+  @override
   String get prayerNotificationReceived => 'تنبيه الصلاة';
 
   @override

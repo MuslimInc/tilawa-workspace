@@ -1951,6 +1951,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stopAdhan => 'Stop Adhan';
 
   @override
+  String get adhanStillPlayingMessage =>
+      'Would you like to stop the adhan before leaving?';
+
+  @override
   String get prayerNotificationReceived => 'Prayer notification received';
 
   @override

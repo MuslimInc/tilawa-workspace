@@ -31,20 +31,28 @@ enum TilawaCardSurface {
 }
 
 /// A foundational card component with standardized styling.
-
 ///
-
 /// Reads default values from [TilawaCardTokens] for consistent
-
 /// radius, border width, and padding across the application.
-
 ///
-
 /// Cards are intentionally flat: a solid surface tone, a hairline outline,
-
 /// and an optional soft shadow. The legacy [gradient] property is kept for
-
 /// migration only — pass [surface] instead.
+///
+/// ## Interactive children
+///
+/// When [onTap] is provided the card renders a ripple InkWell in the
+/// background of a [Stack]. Content sits on top (z=1) so nested interactive
+/// widgets (buttons, menus, icon-buttons) are hit-tested before the card's
+/// own tap handler and receive taps correctly. The card's [onTap] fires only
+/// when the user taps empty space inside the card — it is NOT called when a
+/// child widget claims the event.
+///
+/// If an interactive control needs a *different* action from the card's
+/// [onTap] (e.g. a delete button alongside a navigation card), place it as
+/// a sibling of [TilawaCard] in an outer [Row] rather than inside [child].
+/// This is the pattern used by `BookmarkCard`, `HistoryCard`,
+/// `PlaylistCard`, and `TasbeehScreen`'s history list.
 
 class TilawaCard extends StatelessWidget {
   const TilawaCard({
@@ -188,15 +196,22 @@ class TilawaCard extends StatelessWidget {
         highlightColor ??
         colorScheme.onSurface.withValues(alpha: designTokens.opacitySubtle / 2);
 
-    // A non-positioned child defines stack size (finite height in e.g. vertical
-    // [ListView]s where max height is infinite). [SizedBox] width forces the
-    // painted card and ink to span the cross axis; [Positioned.fill] ink
-    // matches that footprint.
+    // Stack layout (z-order matters for hit-testing):
+    //
+    //   z=0  Positioned.fill Material/InkWell  — background ripple.
+    //        Flutter hit-tests this LAST because it is inserted first.
+    //        It fires only when no child in z=1 claimed the tap.
+    //
+    //   z=1  SizedBox(content)  — tested FIRST by Flutter's hit-test walk.
+    //        Interactive children inside content therefore win over the card's
+    //        own onTap, which is the desired semantics.
+    //
+    // A non-positioned child (SizedBox) defines stack size so the card has a
+    // finite height inside vertical ListViews. [Positioned.fill] matches that
+    // footprint for the ripple layer.
 
     return Stack(
       children: [
-        SizedBox(width: double.infinity, child: content),
-
         Positioned.fill(
           child: Material(
             type: MaterialType.transparency,
@@ -216,6 +231,8 @@ class TilawaCard extends StatelessWidget {
             ),
           ),
         ),
+
+        SizedBox(width: double.infinity, child: content),
       ],
     );
   }
