@@ -68,26 +68,29 @@ class _TasbeehView extends StatelessWidget {
 
         switch (state.viewMode) {
           case TasbeehViewMode.options:
-            content = _TasbeehOptionsView(cubit: cubit);
+          case TasbeehViewMode.counting:
+            content = _TasbeehCountingView(cubit: cubit, state: state);
+            bottomActions = _TasbeehCountingActions(cubit: cubit, state: state);
           case TasbeehViewMode.create:
             content = _TasbeehCreateView(cubit: cubit, state: state);
             bottomActions = _TasbeehCreateActions(cubit: cubit, state: state);
           case TasbeehViewMode.history:
             content = _TasbeehHistoryView(cubit: cubit, state: state);
-          case TasbeehViewMode.counting:
-            content = _TasbeehCountingView(cubit: cubit, state: state);
-            bottomActions = _TasbeehCountingActions(cubit: cubit, state: state);
         }
+
+        final bool isSubView =
+            state.viewMode == TasbeehViewMode.create ||
+            state.viewMode == TasbeehViewMode.history;
 
         return Scaffold(
           appBar: TilawaCatalogAppBar(
             preferredHeight:
                 TilawaAppBarConfig.catalogTitleOnlyHeight(context),
             title: context.l10n.tasbeehCategory,
-            leading: state.viewMode != TasbeehViewMode.options
+            leading: isSubView
                 ? TilawaBackButton(
                     compact: true,
-                    onPressed: cubit.showOptionsView,
+                    onPressed: cubit.startCounting,
                   )
                 : context.canPop()
                 ? TilawaBackButton(
@@ -123,15 +126,24 @@ class _TasbeehView extends StatelessWidget {
   }
 }
 
-class _TasbeehOptionsView extends StatelessWidget {
-  const _TasbeehOptionsView({required this.cubit});
+// ── Counting view ────────────────────────────────────────────────────────────
+
+class _TasbeehCountingView extends StatelessWidget {
+  const _TasbeehCountingView({required this.cubit, required this.state});
 
   final TasbeehCubit cubit;
+  final TasbeehState state;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final selected = state.selectedDhikr;
+    final displayCount = selected != null ? state.selectedCount : state.freeCount;
+    final progress = selected == null || selected.targetCount <= 0
+        ? 0.0
+        : (state.selectedCount / selected.targetCount).clamp(0.0, 1.0);
 
     return _TasbeehContentBounds(
       child: Padding(
@@ -139,18 +151,132 @@ class _TasbeehOptionsView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _TasbeehOptionCard(
-              icon: Icons.add_circle_outline_rounded,
-              title: context.l10n.tasbeehAddNewOptionTitle,
-              subtitle: context.l10n.tasbeehAddNewOptionSubtitle,
-              onTap: cubit.showCreateView,
+            // Action row
+            Row(
+              children: [
+                Expanded(
+                  child: TilawaButton(
+                    text: context.l10n.tasbeehAddNewOptionTitle,
+                    leadingIcon: const Icon(Icons.add_rounded),
+                    variant: TilawaButtonVariant.outline,
+                    isFullWidth: true,
+                    onPressed: cubit.showCreateView,
+                  ),
+                ),
+                SizedBox(width: tokens.spaceSmall),
+                Expanded(
+                  child: TilawaButton(
+                    text: context.l10n.tasbeehViewHistoryOptionTitle,
+                    leadingIcon: const Icon(Icons.history_rounded),
+                    variant: TilawaButtonVariant.outline,
+                    isFullWidth: true,
+                    onPressed: cubit.showHistoryView,
+                  ),
+                ),
+              ],
             ),
+
             SizedBox(height: tokens.spaceMedium),
-            _TasbeehOptionCard(
-              icon: Icons.history_rounded,
-              title: context.l10n.tasbeehViewHistoryOptionTitle,
-              subtitle: context.l10n.tasbeehViewHistoryOptionSubtitle,
-              onTap: cubit.showHistoryView,
+
+            // Target chip — only when a saved dhikr is active
+            if (selected != null) ...[
+              TilawaStatusChip(
+                padding: EdgeInsets.symmetric(
+                  horizontal: tokens.spaceMedium,
+                  vertical: tokens.spaceSmall,
+                ),
+                icon: Icons.flag_rounded,
+                label: context.l10n.tasbeehCurrentTarget(selected.targetCount),
+              ),
+              SizedBox(height: tokens.spaceMedium),
+            ],
+
+            // Counter card (tappable area)
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: selected != null
+                    ? cubit.incrementSelected
+                    : cubit.incrementFreeCount,
+                child: _ShakeOnTrigger(
+                  trigger: state.vibrationEventCount,
+                  child: TilawaCard(
+                    borderRadius: tokens.radiusExtraLarge,
+                    surface: TilawaCardSurface.raised,
+                    backgroundColor: colorScheme.surface,
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Count circle
+                          Container(
+                            padding: EdgeInsets.all(tokens.spaceExtraLarge),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colorScheme.primary.withValues(
+                                alpha: tokens.opacitySubtle,
+                              ),
+                              border: Border.all(
+                                color: colorScheme.primary.withValues(
+                                  alpha: tokens.opacityMedium,
+                                ),
+                                width: tokens.borderWidthThin,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: colorScheme.primary.withValues(
+                                    alpha: tokens.opacityShadow * 0.35,
+                                  ),
+                                  blurRadius: tokens.blurShadow,
+                                  offset: tokens.shadowOffsetSmall,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              '$displayCount',
+                              style: theme.textTheme.displayMedium?.copyWith(
+                                color: colorScheme.primary,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: tokens.spaceLarge),
+
+                          // Progress bar — only when target is active
+                          if (selected != null) ...[
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                tokens.radiusExtraLarge,
+                              ),
+                              child: LinearProgressIndicator(
+                                value: progress,
+                                minHeight: tokens.progressHeight,
+                                backgroundColor:
+                                    colorScheme.outlineVariant.withValues(
+                                      alpha: tokens.opacitySubtle,
+                                    ),
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: tokens.spaceMedium),
+                          ],
+
+                          Text(
+                            context.l10n.tasbeehTapToCount,
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -159,72 +285,7 @@ class _TasbeehOptionsView extends StatelessWidget {
   }
 }
 
-class _TasbeehOptionCard extends StatelessWidget {
-  const _TasbeehOptionCard({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-
-    return TilawaCard(
-      onTap: onTap,
-      borderRadius: tokens.radiusExtraLarge,
-      surface: TilawaCardSurface.raised,
-      backgroundColor: colorScheme.surface,
-      child: Row(
-        children: [
-          TilawaIconBox(
-            icon: icon,
-            iconColor: colorScheme.primary,
-            backgroundColor: colorScheme.primary.withValues(
-              alpha: tokens.opacitySubtle,
-            ),
-            borderRadius: tokens.radiusLarge,
-          ),
-          SizedBox(width: tokens.spaceMedium),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                SizedBox(height: tokens.spaceExtraSmall),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: tokens.spaceSmall),
-          Icon(
-            Icons.chevron_right_rounded,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ],
-      ),
-    );
-  }
-}
+// ── Create view ──────────────────────────────────────────────────────────────
 
 class _TasbeehCreateView extends StatelessWidget {
   const _TasbeehCreateView({required this.cubit, required this.state});
@@ -283,6 +344,8 @@ class _TasbeehCreateView extends StatelessWidget {
     );
   }
 }
+
+// ── History view ─────────────────────────────────────────────────────────────
 
 class _TasbeehHistoryView extends StatelessWidget {
   const _TasbeehHistoryView({required this.cubit, required this.state});
@@ -405,135 +468,7 @@ class _TasbeehHistoryView extends StatelessWidget {
   }
 }
 
-class _TasbeehCountingView extends StatelessWidget {
-  const _TasbeehCountingView({required this.cubit, required this.state});
-
-  final TasbeehCubit cubit;
-  final TasbeehState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-    final colorScheme = theme.colorScheme;
-    final selected = state.selectedDhikr;
-    final progress = selected == null || selected.targetCount <= 0
-        ? 0.0
-        : (state.selectedCount / selected.targetCount).clamp(0.0, 1.0);
-
-    return _TasbeehContentBounds(
-      child: Padding(
-        padding: EdgeInsets.all(tokens.spaceLarge),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            selected == null
-                ? const SizedBox.shrink()
-                : TilawaStatusChip(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: tokens.spaceMedium,
-                      vertical: tokens.spaceSmall,
-                    ),
-                    icon: Icons.flag_rounded,
-                    label: context.l10n.tasbeehCurrentTarget(
-                      selected.targetCount,
-                    ),
-                  ),
-            SizedBox(height: tokens.spaceLarge),
-            Expanded(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: cubit.incrementSelected,
-                child: _ShakeOnTrigger(
-                  trigger: state.vibrationEventCount,
-                  child: TilawaCard(
-                    borderRadius: tokens.radiusExtraLarge,
-                    surface: TilawaCardSurface.raised,
-                    backgroundColor: colorScheme.surface,
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            selected?.text ??
-                                context.l10n.tasbeehSelectOrCreatePrompt,
-                            textAlign: TextAlign.center,
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: colorScheme.onSurface,
-                              fontWeight: FontWeight.w800,
-                              height: 1.35,
-                            ),
-                          ),
-                          SizedBox(height: tokens.spaceExtraLarge),
-                          Container(
-                            padding: EdgeInsets.all(tokens.spaceExtraLarge),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: colorScheme.primary.withValues(
-                                alpha: tokens.opacitySubtle,
-                              ),
-                              border: Border.all(
-                                color: colorScheme.primary.withValues(
-                                  alpha: tokens.opacityMedium,
-                                ),
-                                width: tokens.borderWidthThin,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: colorScheme.primary.withValues(
-                                    alpha: tokens.opacityShadow * 0.35,
-                                  ),
-                                  blurRadius: tokens.blurShadow,
-                                  offset: tokens.shadowOffsetSmall,
-                                ),
-                              ],
-                            ),
-                            child: Text(
-                              '${state.selectedCount}',
-                              style: theme.textTheme.displayMedium?.copyWith(
-                                color: colorScheme.primary,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: tokens.spaceLarge),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              tokens.radiusExtraLarge,
-                            ),
-                            child: LinearProgressIndicator(
-                              value: progress,
-                              minHeight: tokens.progressHeight,
-                              backgroundColor: colorScheme.outlineVariant
-                                  .withValues(alpha: tokens.opacitySubtle),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                colorScheme.primary,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: tokens.spaceMedium),
-                          Text(
-                            context.l10n.tasbeehTapToCount,
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+// ── Shared structural widgets ─────────────────────────────────────────────────
 
 class _TasbeehContentBounds extends StatelessWidget {
   const _TasbeehContentBounds({required this.child});
@@ -573,6 +508,8 @@ class _TasbeehBottomActionArea extends StatelessWidget {
     );
   }
 }
+
+// ── Bottom action bars ────────────────────────────────────────────────────────
 
 class _TasbeehCreateActions extends StatelessWidget {
   const _TasbeehCreateActions({required this.cubit, required this.state});
@@ -624,6 +561,12 @@ class _TasbeehCountingActions extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final errorText = _resolveTasbeehErrorText(context, state);
+    final selected = state.selectedDhikr;
+    final canReset =
+        selected != null ? true : state.freeCount > 0;
+    final onReset = selected != null
+        ? cubit.resetSelected
+        : cubit.resetFreeCount;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -642,12 +585,14 @@ class _TasbeehCountingActions extends StatelessWidget {
           text: context.l10n.reset,
           variant: TilawaButtonVariant.outline,
           isFullWidth: true,
-          onPressed: state.selectedDhikr == null ? null : cubit.resetSelected,
+          onPressed: canReset ? onReset : null,
         ),
       ],
     );
   }
 }
+
+// ── Dialogs ───────────────────────────────────────────────────────────────────
 
 class _TasbeehDeleteConfirmationDialog extends StatelessWidget {
   const _TasbeehDeleteConfirmationDialog({required this.tasbeehText});
@@ -675,6 +620,8 @@ class _TasbeehDeleteConfirmationDialog extends StatelessWidget {
   }
 }
 
+// ── Shake animation ───────────────────────────────────────────────────────────
+
 class _ShakeOnTrigger extends StatelessWidget {
   const _ShakeOnTrigger({required this.trigger, required this.child});
 
@@ -700,6 +647,8 @@ class _ShakeOnTrigger extends StatelessWidget {
     );
   }
 }
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 String? _resolveTasbeehErrorText(BuildContext context, TasbeehState state) {
   final failure = state.failure;
