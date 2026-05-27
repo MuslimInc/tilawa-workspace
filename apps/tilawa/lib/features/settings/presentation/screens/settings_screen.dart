@@ -51,7 +51,7 @@ class SettingsScreen extends StatelessWidget {
           appBar: TilawaCatalogAppBar.titleOnly(context, title: l10n.settings),
           body: TilawaCatalogSettingsBody(
             child: ListView(
-              padding: EdgeInsets.only(bottom: tokens.spaceMedium),
+              padding: EdgeInsets.symmetric(vertical: tokens.spaceMedium),
               children: [
                 const SettingsProfileHeader(),
                 SizedBox(height: tokens.spaceMedium),
