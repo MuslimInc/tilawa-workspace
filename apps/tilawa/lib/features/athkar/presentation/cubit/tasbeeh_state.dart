@@ -2,10 +2,18 @@ import 'package:equatable/equatable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/tasbeeh_dhikr.dart';
+import '../models/tasbeeh_counting_session.dart';
 
 enum TasbeehStatus { initial, loading, loaded, error }
 
-enum TasbeehViewMode { options, create, history, counting }
+enum TasbeehViewMode {
+  create,
+  history,
+  /// Generic tap-to-count (no saved dhikr, no target feedback).
+  counting,
+  /// Counting a saved dhikr from history or after create.
+  selectedCounting,
+}
 
 class TasbeehState extends Equatable {
   const TasbeehState({
@@ -14,9 +22,9 @@ class TasbeehState extends Equatable {
     this.savedDhikr = const [],
     this.draftText = '',
     this.draftTargetText = '',
-    this.vibrationEventCount = 0,
-    this.freeCount = 0,
-    this.selectedDhikrId,
+    this.ephemeralCount = 0,
+    this.activeSavedDhikrId,
+    this.savedTargetFeedbackPulse = 0,
     this.failure,
     this.errorMessage,
   });
@@ -26,24 +34,42 @@ class TasbeehState extends Equatable {
   final List<TasbeehDhikr> savedDhikr;
   final String draftText;
   final String draftTargetText;
-  final int vibrationEventCount;
-  final int freeCount;
-  final String? selectedDhikrId;
+
+  /// In-memory counter for [TasbeehViewMode.counting] only.
+  final int ephemeralCount;
+
+  /// Saved dhikr being counted in [TasbeehViewMode.selectedCounting].
+  final String? activeSavedDhikrId;
+
+  /// Bumps on target-reached feedback for saved-dhikr counting only.
+  final int savedTargetFeedbackPulse;
+
   final Failure? failure;
   final String? errorMessage;
 
-  TasbeehDhikr? get selectedDhikr {
-    if (selectedDhikrId == null) return null;
-
+  TasbeehDhikr? get activeSavedDhikr {
+    final id = activeSavedDhikrId;
+    if (id == null) return null;
     for (final item in savedDhikr) {
-      if (item.id == selectedDhikrId) {
-        return item;
-      }
+      if (item.id == id) return item;
     }
     return null;
   }
 
-  int get selectedCount => selectedDhikr?.count ?? 0;
+  TasbeehCountingSession? get countingSession => switch (viewMode) {
+    TasbeehViewMode.counting => TasbeehEphemeralCountingSession(
+      count: ephemeralCount,
+    ),
+    TasbeehViewMode.selectedCounting => () {
+      final dhikr = activeSavedDhikr;
+      if (dhikr == null) return null;
+      return TasbeehSavedDhikrCountingSession(
+        dhikr: dhikr,
+        targetFeedbackPulse: savedTargetFeedbackPulse,
+      );
+    }(),
+    _ => null,
+  };
 
   TasbeehState copyWith({
     TasbeehStatus? status,
@@ -51,9 +77,9 @@ class TasbeehState extends Equatable {
     List<TasbeehDhikr>? savedDhikr,
     String? draftText,
     String? draftTargetText,
-    int? vibrationEventCount,
-    int? freeCount,
-    Object? selectedDhikrId = _sentinel,
+    int? ephemeralCount,
+    int? savedTargetFeedbackPulse,
+    Object? activeSavedDhikrId = _sentinel,
     Object? failure = _sentinel,
     Object? errorMessage = _sentinel,
   }) {
@@ -63,11 +89,12 @@ class TasbeehState extends Equatable {
       savedDhikr: savedDhikr ?? this.savedDhikr,
       draftText: draftText ?? this.draftText,
       draftTargetText: draftTargetText ?? this.draftTargetText,
-      vibrationEventCount: vibrationEventCount ?? this.vibrationEventCount,
-      freeCount: freeCount ?? this.freeCount,
-      selectedDhikrId: selectedDhikrId == _sentinel
-          ? this.selectedDhikrId
-          : selectedDhikrId as String?,
+      ephemeralCount: ephemeralCount ?? this.ephemeralCount,
+      activeSavedDhikrId: activeSavedDhikrId == _sentinel
+          ? this.activeSavedDhikrId
+          : activeSavedDhikrId as String?,
+      savedTargetFeedbackPulse:
+          savedTargetFeedbackPulse ?? this.savedTargetFeedbackPulse,
       failure: failure == _sentinel ? this.failure : failure as Failure?,
       errorMessage: errorMessage == _sentinel
           ? this.errorMessage
@@ -82,9 +109,9 @@ class TasbeehState extends Equatable {
     savedDhikr,
     draftText,
     draftTargetText,
-    vibrationEventCount,
-    freeCount,
-    selectedDhikrId,
+    ephemeralCount,
+    activeSavedDhikrId,
+    savedTargetFeedbackPulse,
     failure,
     errorMessage,
   ];

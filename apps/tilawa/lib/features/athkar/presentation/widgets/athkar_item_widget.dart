@@ -168,7 +168,7 @@ class _AthkarDhikrTapCard extends StatelessWidget {
                         highlightColor: highlightColor,
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                            horizontal: tokens.spaceExtraSmall,
+                            horizontal: tokens.spaceLarge,
                             vertical: tokens.spaceExtraLarge,
                           ),
                           child: SizedBox.expand(child: child),

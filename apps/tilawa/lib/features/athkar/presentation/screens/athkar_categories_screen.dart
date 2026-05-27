@@ -37,7 +37,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
           icon: const Icon(Icons.auto_awesome_rounded),
           label: Text(context.l10n.tasbeehCategory),
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         body: Stack(
           children: [
             const Positioned.fill(child: AthkarAmbientBackground()),
@@ -72,7 +72,7 @@ class AthkarCategoriesScreen extends StatelessWidget {
                       tokens.spaceLarge,
                       tokens.spaceLarge,
                       tokens.spaceLarge,
-                      tokens.spaceLarge + 88,
+                      tokens.spaceLarge,
                     ),
                     targetItemExtent: 180,
                     crossAxisSpacing: tokens.spaceLarge,

@@ -37,13 +37,13 @@ class _SilentFeedbackService implements TasbeehTargetFeedbackService {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 TasbeehCubit _buildCubit(FakeTasbeehRepository repo) => TasbeehCubit(
-  getSavedTasbeeh: GetSavedTasbeehUseCase(repo),
-  saveCustomTasbeeh: SaveCustomTasbeehUseCase(repo),
-  incrementTasbeehCount: IncrementTasbeehCountUseCase(repo),
-  resetTasbeehCount: ResetTasbeehCountUseCase(repo),
-  setTasbeehTargetCount: SetTasbeehTargetCountUseCase(repo),
-  deleteTasbeehDhikr: DeleteTasbeehDhikrUseCase(repo),
-  feedbackService: _SilentFeedbackService(),
+  GetSavedTasbeehUseCase(repo),
+  SaveCustomTasbeehUseCase(repo),
+  IncrementTasbeehCountUseCase(repo),
+  ResetTasbeehCountUseCase(repo),
+  SetTasbeehTargetCountUseCase(repo),
+  DeleteTasbeehDhikrUseCase(repo),
+  _SilentFeedbackService(),
 );
 
 Widget _buildTestApp(TasbeehCubit cubit) => MaterialApp(
@@ -55,12 +55,31 @@ Widget _buildTestApp(TasbeehCubit cubit) => MaterialApp(
   home: TasbeehScreen(cubit: cubit),
 );
 
-/// Pumps the TasbeehScreen, waits for the cubit to load, then opens history.
+/// Pumps the TasbeehScreen on the history list with seeded data loaded.
 Future<void> _pumpHistory(WidgetTester tester, TasbeehCubit cubit) async {
-  await tester.pumpWidget(_buildTestApp(cubit));
-  // Let the BlocProvider trigger loadSavedDhikr() and the state to settle.
-  await tester.pump();
+  tester.view.physicalSize = const Size(800, 1200);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+
+  await cubit.loadSavedDhikr();
   cubit.showHistoryView();
+
+  await tester.pumpWidget(_buildTestApp(cubit));
+  await tester.pump();
+
+  expect(cubit.state.viewMode, TasbeehViewMode.history);
+  expect(cubit.state.savedDhikr, hasLength(1));
+  expect(find.text('Subhan Allah'), findsOneWidget);
+}
+
+/// Taps the history delete control without [WidgetTester.tap]'s
+/// `pumpAndSettle` in [Scrollable.ensureVisible], which never completes while
+/// kit press animations are running.
+Future<void> _tapDeleteIcon(WidgetTester tester) async {
+  final Finder deleteButton = find.byType(TilawaIconActionButton);
+  expect(deleteButton, findsOneWidget);
+  await tester.tapAt(tester.getCenter(deleteButton));
   await tester.pump();
 }
 
@@ -77,7 +96,9 @@ void main() {
       cubit = _buildCubit(repo);
     });
 
-    tearDown(() => cubit.close());
+    tearDown(() async {
+      await cubit.close();
+    });
 
     // ── Bug confirmation (RED before fix) ─────────────────────────────────
 
@@ -86,8 +107,7 @@ void main() {
       (tester) async {
         await _pumpHistory(tester, cubit);
 
-        await tester.tap(find.byIcon(Icons.delete_outline_rounded));
-        await tester.pump();
+        await _tapDeleteIcon(tester);
 
         // Before fix: the card's overlay InkWell fires selectDhikrAndStartCounting
         // instead, the viewMode switches to counting, and no dialog appears.
@@ -105,8 +125,7 @@ void main() {
       (tester) async {
         await _pumpHistory(tester, cubit);
 
-        await tester.tap(find.byIcon(Icons.delete_outline_rounded));
-        await tester.pump();
+        await _tapDeleteIcon(tester);
 
         // Before fix: the card's onTap fires, switching to counting mode.
         expect(
@@ -125,15 +144,14 @@ void main() {
       (tester) async {
         await _pumpHistory(tester, cubit);
 
-        await tester.tap(find.byIcon(Icons.delete_outline_rounded));
-        await tester.pump();
+        await _tapDeleteIcon(tester);
 
         // Tap the "Delete" action inside the AlertDialog.
         final deleteButtons = find.descendant(
           of: find.byType(AlertDialog),
           matching: find.byType(TilawaButton),
         );
-        await tester.tap(deleteButtons.last); // last = danger "Delete" button
+        await tester.tapAt(tester.getCenter(deleteButtons.last));
         await tester.pump();
 
         expect(
@@ -149,15 +167,14 @@ void main() {
       (tester) async {
         await _pumpHistory(tester, cubit);
 
-        await tester.tap(find.byIcon(Icons.delete_outline_rounded));
-        await tester.pump();
+        await _tapDeleteIcon(tester);
 
         // Tap the "Cancel" button inside the AlertDialog.
         final cancelButton = find.descendant(
           of: find.byType(AlertDialog),
           matching: find.byType(TilawaButton),
         );
-        await tester.tap(cancelButton.first); // first = ghost "Cancel" button
+        await tester.tapAt(tester.getCenter(cancelButton.first));
         await tester.pump();
 
         expect(
