@@ -2789,6 +2789,9 @@ class _YtMusicMiniPlayerBody extends StatelessWidget {
             isSleepTimerEnabled: sleepTimerEnabled,
             onTap: onTap,
             onClose: onClose,
+            playPauseSemanticIdentifier:
+                QuranPlayerSemanticsIds.miniPlayerPlayPause,
+            closeSemanticIdentifier: QuranPlayerSemanticsIds.miniPlayerClose,
             onPlayPause: () {
               context.read<AudioPlayerBloc>().add(
                 snapshot.isPlaying

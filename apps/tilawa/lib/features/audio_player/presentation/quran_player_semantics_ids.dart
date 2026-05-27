@@ -1,7 +1,7 @@
 /// Stable Semantics identifiers for the Quran Player feature.
 ///
-/// These values are referenced by Maestro E2E flows
-/// (`.maestro/quran_player.yaml`). They must never change without updating
+/// These values are referenced by Maestro E2E flows under `.maestro/quran_player/`
+/// and `.maestro/quran_player.yaml`. They must never change without updating
 /// the corresponding flow files, because Maestro targets them by exact string
 /// match via the Flutter Semantics tree.
 ///
