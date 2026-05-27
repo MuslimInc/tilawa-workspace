@@ -24,22 +24,97 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
         getIt<IAdhanAlarmPlayer>(),
         getIt<LoadPrayerSettingsUseCase>(),
       )..init(payloadJson),
-      child: Scaffold(
-        backgroundColor: context.colorScheme.surface,
-        appBar: TilawaCatalogAppBar(
-          preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
-          title: context.l10n.prayerNotificationReceived,
-          automaticallyImplyLeading: true,
-          onBackPressed: () => context.pop(),
+      // Builder gives us a context that has PrayerStatusCubit for the guards.
+      child: Builder(
+        builder: (innerContext) => PopScope(
+          // Always intercept — _handleBack decides whether to actually pop.
+          canPop: false,
+          onPopInvokedWithResult: (didPop, _) async {
+            if (didPop) return;
+            await _handleBack(innerContext);
+          },
+          child: Scaffold(
+            backgroundColor: innerContext.colorScheme.surface,
+            appBar: TilawaCatalogAppBar(
+              preferredHeight:
+                  TilawaAppBarConfig.catalogTitleOnlyHeight(innerContext),
+              title: innerContext.l10n.prayerNotificationReceived,
+              automaticallyImplyLeading: true,
+              onBackPressed: () => _handleBack(innerContext),
+            ),
+            body: _PrayerNotificationStatusView(
+              onClose: () => _handleClose(innerContext),
+            ),
+          ),
         ),
-        body: const _PrayerNotificationStatusView(),
       ),
     );
+  }
+
+  /// Pops the route, but first asks the user to stop the adhan if it is
+  /// still playing.
+  Future<void> _handleBack(BuildContext context) async {
+    final bool playing = context.read<PrayerStatusCubit>().state.maybeWhen(
+      loaded: (_, __, isAdhanPlaying, ___, ____, _____, ______) =>
+          isAdhanPlaying,
+      orElse: () => false,
+    );
+
+    if (!playing) {
+      if (context.mounted) context.pop();
+      return;
+    }
+
+    final choice = await showDialog<_ExitChoice>(
+      context: context,
+      builder: (_) => const _AdhanExitDialog(),
+    );
+
+    if (!context.mounted) return;
+    switch (choice) {
+      case _ExitChoice.stop:
+        await context.read<PrayerStatusCubit>().stopAdhan();
+        if (context.mounted) context.pop();
+      case null:
+        // Dialog dismissed — stay on screen.
+        break;
+    }
+  }
+
+  /// Navigates to the home screen, but first asks the user to stop the adhan
+  /// if it is still playing.
+  Future<void> _handleClose(BuildContext context) async {
+    final bool playing = context.read<PrayerStatusCubit>().state.maybeWhen(
+      loaded: (_, __, isAdhanPlaying, ___, ____, _____, ______) =>
+          isAdhanPlaying,
+      orElse: () => false,
+    );
+
+    if (!playing) {
+      if (context.mounted) const HomeRoute().go(context);
+      return;
+    }
+
+    final choice = await showDialog<_ExitChoice>(
+      context: context,
+      builder: (_) => const _AdhanExitDialog(),
+    );
+
+    if (!context.mounted) return;
+    switch (choice) {
+      case _ExitChoice.stop:
+        await context.read<PrayerStatusCubit>().stopAdhan();
+        if (context.mounted) const HomeRoute().go(context);
+      case null:
+        break;
+    }
   }
 }
 
 class _PrayerNotificationStatusView extends StatelessWidget {
-  const _PrayerNotificationStatusView();
+  const _PrayerNotificationStatusView({required this.onClose});
+
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +140,7 @@ class _PrayerNotificationStatusView extends StatelessWidget {
               adhanEnabled: adhanEnabled,
               soundName: soundName,
               locationName: locationName,
+              onClose: onClose,
             );
           },
         );
@@ -81,6 +157,7 @@ class _StatusContent extends StatelessWidget {
     required this.scheduledTime,
     required this.isAdhanPlaying,
     required this.adhanEnabled,
+    required this.onClose,
     this.soundName,
     this.locationName,
   });
@@ -89,6 +166,7 @@ class _StatusContent extends StatelessWidget {
   final DateTime scheduledTime;
   final bool isAdhanPlaying;
   final bool adhanEnabled;
+  final VoidCallback onClose;
   final String? soundName;
   final String? locationName;
 
@@ -228,7 +306,7 @@ class _StatusContent extends StatelessWidget {
               child: TilawaButton(
                 text: l10n.close,
                 variant: TilawaButtonVariant.ghost,
-                onPressed: () => const HomeRoute().go(context),
+                onPressed: onClose,
               ),
             ),
             SizedBox(height: tokens.spaceLarge),
@@ -470,6 +548,38 @@ class _ErrorView extends StatelessWidget {
           onPressed: () => const HomeRoute().go(context),
         ),
       ),
+    );
+  }
+}
+
+// ── Exit guard ────────────────────────────────────────────────────────────────
+
+enum _ExitChoice { stop }
+
+class _AdhanExitDialog extends StatelessWidget {
+  const _AdhanExitDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return AlertDialog(
+      title: Text(l10n.adhanIsPlaying),
+      content: Text(l10n.adhanStillPlayingMessage),
+      actions: [
+        // Stay on this screen — adhan keeps playing.
+        TilawaButton(
+          text: l10n.continueListening,
+          variant: TilawaButtonVariant.ghost,
+          onPressed: () => Navigator.of(context).pop(null),
+        ),
+        // Stop the adhan and navigate away.
+        TilawaButton(
+          text: l10n.stopAdhan,
+          variant: TilawaButtonVariant.danger,
+          onPressed: () => Navigator.of(context).pop(_ExitChoice.stop),
+        ),
+      ],
     );
   }
 }

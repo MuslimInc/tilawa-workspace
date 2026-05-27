@@ -2612,6 +2612,10 @@
     "@stopAdhan": {
         "description": "Button label to stop Adhan playback"
     },
+    "adhanStillPlayingMessage": "Would you like to stop the adhan before leaving?",
+    "@adhanStillPlayingMessage": {
+        "description": "Dialog body shown when the user tries to leave the prayer notification screen while the adhan is still playing"
+    },
     "prayerNotificationReceived": "Prayer notification received",
     "@prayerNotificationReceived": {
         "description": "Status text when a prayer notification is opened"

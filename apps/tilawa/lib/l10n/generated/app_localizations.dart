@@ -3554,6 +3554,12 @@ abstract class AppLocalizations {
   /// **'Stop Adhan'**
   String get stopAdhan;
 
+  /// Dialog body shown when the user tries to leave the prayer notification screen while the adhan is still playing
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to stop the adhan before leaving?'**
+  String get adhanStillPlayingMessage;
+
   /// Status text when a prayer notification is opened
   ///
   /// In en, this message translates to:
