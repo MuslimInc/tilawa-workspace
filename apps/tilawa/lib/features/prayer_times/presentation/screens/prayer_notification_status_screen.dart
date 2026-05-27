@@ -55,7 +55,7 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
   /// still playing.
   Future<void> _handleBack(BuildContext context) async {
     final bool playing = context.read<PrayerStatusCubit>().state.maybeWhen(
-      loaded: (_, __, isAdhanPlaying, ___, ____, _____, ______) =>
+      loaded: (_, _, isAdhanPlaying, _, _, _, _) =>
           isAdhanPlaying,
       orElse: () => false,
     );
@@ -85,7 +85,7 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
   /// if it is still playing.
   Future<void> _handleClose(BuildContext context) async {
     final bool playing = context.read<PrayerStatusCubit>().state.maybeWhen(
-      loaded: (_, __, isAdhanPlaying, ___, ____, _____, ______) =>
+      loaded: (_, _, isAdhanPlaying, _, _, _, _) =>
           isAdhanPlaying,
       orElse: () => false,
     );
