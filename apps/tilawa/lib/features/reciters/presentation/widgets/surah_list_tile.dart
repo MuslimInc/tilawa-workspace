@@ -136,6 +136,7 @@ class SurahListTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
+                    spacing: tokens.spaceExtraSmall,
                     children: [
                       Text(
                         surah.name,
@@ -146,7 +147,6 @@ class SurahListTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: tokens.spaceExtraSmall),
                       Text(
                         surah.reciterName,
                         style: theme.textTheme.bodySmall?.copyWith(

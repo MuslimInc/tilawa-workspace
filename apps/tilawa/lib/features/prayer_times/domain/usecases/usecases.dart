@@ -1,6 +1,7 @@
 export 'cancel_prayer_notifications_use_case.dart';
 export 'check_prayer_alarm_capability_use_case.dart';
 export 'ensure_prayer_notifications_scheduled_use_case.dart';
+export 'fire_prayer_test_notification_use_case.dart';
 export 'get_country_code_use_case.dart';
 export 'get_current_location_use_case.dart';
 export 'get_monthly_prayer_times_use_case.dart';

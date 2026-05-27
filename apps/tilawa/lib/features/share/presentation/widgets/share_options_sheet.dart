@@ -127,9 +127,9 @@ class _ShareHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            const TilawaMetadataChip(
+            TilawaMetadataChip(
               icon: Icons.auto_stories_rounded,
-              label: 'Tilawa',
+              label: context.l10n.appTitle,
             ),
             const Spacer(),
             TilawaMetadataChip(
@@ -255,6 +255,7 @@ class _ShareOptionCard extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: tokens.spaceExtraSmall,
                     children: [
                       Text(
                         title,
@@ -263,7 +264,6 @@ class _ShareOptionCard extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(height: tokens.spaceExtraSmall),
                       Text(
                         description,
                         maxLines: 2,

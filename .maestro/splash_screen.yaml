@@ -1,0 +1,45 @@
+# splash_screen.yaml
+# Smoke test for the Rattil (رتل) splash / startup flow.
+#
+# What this flow proves
+# ─────────────────────
+#   1. App launches without a crash.
+#   2. The native launch splash transitions into the Flutter splash screen.
+#   3. A loading indicator is visible during startup.
+#   4. The splash screen navigates to either Home (logged-in) or
+#      Onboarding (first-run / logged-out) within 10 seconds.
+#
+# Semantics identifiers used
+# ──────────────────────────
+#   a11ySplashLoading – live-region label set in SplashScreen build()
+#
+# Prerequisites
+# ─────────────
+#   • App installed as com.tilawa.app
+
+appId: com.tilawa.app
+---
+- launchApp:
+    clearState: false
+
+# The native launch splash (app_startup_widgets.dart _LaunchSplash) appears
+# first; we just wait for it to hand off to Flutter.
+- waitForAnimationToEnd:
+    timeout: 3000
+
+# Flutter SplashScreen should now be visible. The Semantics live-region
+# label is rendered even before navigation completes.
+- assertVisible:
+    enabled: true
+    label: "Rattil, loading"
+    timeout: 5000
+
+# Wait for navigation to settle — SplashBloc resolves auth + onboarding
+# before emitting SplashNavigateToHome / SplashNavigateToOnboarding.
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# After navigation the splash screen is gone; verify we landed somewhere.
+# Either the home bottom-nav bar OR the onboarding start button must appear.
+- assertTrue:
+    condition: ${visible('Home') || visible('Get started') || visible('ابدأ')}

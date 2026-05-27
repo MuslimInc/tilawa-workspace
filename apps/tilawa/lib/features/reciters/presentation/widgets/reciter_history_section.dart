@@ -33,13 +33,13 @@ class ReciterHistorySection extends StatelessWidget {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
           child: Row(
+            spacing: tokens.spaceSmall,
             children: [
               Icon(
                 Icons.history_rounded,
                 size: tokens.iconSizeMedium,
                 color: colorScheme.onSurfaceVariant,
               ),
-              SizedBox(width: tokens.spaceSmall),
               Text(
                 context.l10n.continueListening,
                 style: theme.textTheme.labelLarge?.copyWith(

@@ -11,7 +11,7 @@ import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
-import '../../../auth/data/auth_service.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/repositories/reciters_repository.dart';
 import '../datasources/reciters_favorites_datasource.dart';
 import '../datasources/reciters_local_datasource.dart';
@@ -24,7 +24,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
     this._remoteDataSource,
     this._localDataSource,
     this._favoritesDataSource,
-    this._authService,
+    this._authRepository,
     this._prefs,
     this._appReviewTriggerManager,
   );
@@ -32,7 +32,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
   final RecitersRemoteDataSource _remoteDataSource;
   final RecitersLocalDataSource _localDataSource;
   final RecitersFavoritesDataSource _favoritesDataSource;
-  final AuthService _authService;
+  final AuthRepository _authRepository;
   final SharedPreferencesAsync _prefs;
   final AppReviewTriggerManager _appReviewTriggerManager;
 
@@ -200,7 +200,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
     required int id,
     required bool wasFavorite,
   }) async {
-    final String userId = _authService.currentUser!.uid;
+    final String userId = _authRepository.currentUser!.id;
     if (wasFavorite) {
       await _favoritesDataSource.removeFavoriteReciter(
         userId: userId,
@@ -234,7 +234,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
         await _localDataSource.saveFavoriteReciterId(id);
       }
 
-      if (_authService.currentUser != null) {
+      if (_authRepository.currentUser != null) {
         try {
           await _syncFavoriteToggleToRemote(id: id, wasFavorite: wasFavorite);
         } catch (_) {
@@ -264,11 +264,11 @@ class RecitersRepositoryImpl implements RecitersRepository {
   @override
   ResultFuture<void> clearFavoriteReciters() async {
     try {
-      final bool isAuth = _authService.currentUser != null;
+      final bool isAuth = _authRepository.currentUser != null;
 
       if (isAuth) {
         await _favoritesDataSource.clearFavoriteReciters(
-          userId: _authService.currentUser!.uid,
+          userId: _authRepository.currentUser!.id,
         );
       }
 
@@ -282,9 +282,9 @@ class RecitersRepositoryImpl implements RecitersRepository {
   @override
   ResultFuture<List<String>> getFavoriteReciterIds() async {
     try {
-      final isAuth = _authService.currentUser != null;
+      final isAuth = _authRepository.currentUser != null;
       if (isAuth) {
-        final String userId = _authService.currentUser!.uid;
+        final String userId = _authRepository.currentUser!.id;
         try {
           final List<String> ids = await _getMergedFavoriteIds(userId);
           return Right(ids);

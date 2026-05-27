@@ -1,8 +1,10 @@
 import 'package:flutter/services.dart';
+import 'package:injectable/injectable.dart';
 import 'package:vibration/vibration.dart';
 
 import '../../domain/services/tasbeeh_target_feedback_service.dart';
 
+@LazySingleton(as: TasbeehTargetFeedbackService)
 class HapticTasbeehTargetFeedbackService
     implements TasbeehTargetFeedbackService {
   @override

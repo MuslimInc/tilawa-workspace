@@ -157,6 +157,7 @@ void main() {
     when(mockGetAudioStreams.volume).thenAnswer((_) => volumeSubject);
     when(mockGetAudioStreams.speed).thenAnswer((_) => speedSubject);
     when(mockGetAudioStreams.position).thenAnswer((_) => positionSubject);
+    when(mockMoveQueueItem.call(any, any)).thenAnswer((_) async => const Right(null));
 
     // Setup Mock Analytics
     when(
@@ -257,6 +258,85 @@ void main() {
   // ... (previous tests) ...
   // Re-adding previous tests here would be verbose, assume they are there in real file.
   // I will append the History Saving tests.
+
+  group('AudioPlayerBloc - Move queue item', () {
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'delegates moveQueueItem to MoveQueueItemUseCase with UI indices',
+      build: () {
+        when(
+          mockMoveQueueItem.call(any, any),
+        ).thenAnswer((_) async => const Right(null));
+        return buildBloc();
+      },
+      act: (bloc) async {
+        bloc.add(const AudioPlayerEvent.moveQueueItem(0, 2));
+        await Future.delayed(Duration.zero);
+      },
+      verify: (_) {
+        verify(mockMoveQueueItem.call(0, 2)).called(1);
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'emits playbackState when handler queue order changes',
+      build: () => buildBloc(),
+      act: (bloc) async {
+        const AudioEntity first = AudioEntity(
+          id: '1',
+          title: 'Al-Fatiha',
+          url: 'https://example.com/1.mp3',
+          duration: Duration(minutes: 3),
+        );
+        const AudioEntity second = AudioEntity(
+          id: '2',
+          title: 'Al-Baqarah',
+          url: 'https://example.com/2.mp3',
+          duration: Duration(minutes: 3),
+        );
+        playbackStateSubject.add(
+          PlaybackStateEntity(
+            isPlaying: true,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            bufferedPosition: Duration.zero,
+            duration: Duration(minutes: 3),
+            currentIndex: 0,
+            queue: const [first, second],
+            queueGeneration: 1,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+        playbackStateSubject.add(
+          PlaybackStateEntity(
+            isPlaying: true,
+            processingState: AudioProcessingStateStatus.ready,
+            position: Duration.zero,
+            bufferedPosition: Duration.zero,
+            duration: Duration(minutes: 3),
+            currentIndex: 0,
+            queue: const [second, first],
+            queueGeneration: 2,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+      },
+      skip: 1,
+      expect: () => [
+        isA<AudioPlayerState>().having(
+          (AudioPlayerState s) =>
+              s.playbackState?.queue.map((AudioEntity e) => e.id).toList(),
+          'queueIds',
+          <String>['1', '2'],
+        ),
+        isA<AudioPlayerState>().having(
+          (AudioPlayerState s) =>
+              s.playbackState?.queue.map((AudioEntity e) => e.id).toList(),
+          'queueIds',
+          <String>['2', '1'],
+        ),
+      ],
+    );
+  });
 
   group('AudioPlayerBloc - History Saving', () {
     blocTest<AudioPlayerBloc, AudioPlayerState>(

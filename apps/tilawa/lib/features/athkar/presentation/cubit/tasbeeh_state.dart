@@ -10,11 +10,12 @@ enum TasbeehViewMode { options, create, history, counting }
 class TasbeehState extends Equatable {
   const TasbeehState({
     this.status = TasbeehStatus.initial,
-    this.viewMode = TasbeehViewMode.options,
+    this.viewMode = TasbeehViewMode.counting,
     this.savedDhikr = const [],
     this.draftText = '',
     this.draftTargetText = '',
     this.vibrationEventCount = 0,
+    this.freeCount = 0,
     this.selectedDhikrId,
     this.failure,
     this.errorMessage,
@@ -26,6 +27,7 @@ class TasbeehState extends Equatable {
   final String draftText;
   final String draftTargetText;
   final int vibrationEventCount;
+  final int freeCount;
   final String? selectedDhikrId;
   final Failure? failure;
   final String? errorMessage;
@@ -50,6 +52,7 @@ class TasbeehState extends Equatable {
     String? draftText,
     String? draftTargetText,
     int? vibrationEventCount,
+    int? freeCount,
     Object? selectedDhikrId = _sentinel,
     Object? failure = _sentinel,
     Object? errorMessage = _sentinel,
@@ -61,6 +64,7 @@ class TasbeehState extends Equatable {
       draftText: draftText ?? this.draftText,
       draftTargetText: draftTargetText ?? this.draftTargetText,
       vibrationEventCount: vibrationEventCount ?? this.vibrationEventCount,
+      freeCount: freeCount ?? this.freeCount,
       selectedDhikrId: selectedDhikrId == _sentinel
           ? this.selectedDhikrId
           : selectedDhikrId as String?,
@@ -79,6 +83,7 @@ class TasbeehState extends Equatable {
     draftText,
     draftTargetText,
     vibrationEventCount,
+    freeCount,
     selectedDhikrId,
     failure,
     errorMessage,

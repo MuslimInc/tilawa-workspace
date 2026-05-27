@@ -21,6 +21,9 @@ abstract class AudioPlayerHandler implements AudioHandler {
   @override
   ValueStream<List<MediaItem>> get queue;
 
+  /// Increments whenever the play queue order or length changes.
+  int get queueGeneration;
+
   // Queue management methods
   Future<void> moveQueueItem(int currentIndex, int newIndex);
   @override
@@ -66,6 +69,10 @@ abstract class AudioPlayerHandler implements AudioHandler {
   // Reciter and surah management
   Future<List<AudioEntity>?> getReciters({String? languageCode});
   Future<List<ReciterEntity>?> getRecitersData({String? languageCode});
+  Future<ReciterEntity?> findReciterByName(
+    String name, {
+    String? languageCode,
+  });
   Future<List<AudioEntity>?> getSurahListForMoshaf(
     MoshafEntity moshaf, {
     String? reciterName,

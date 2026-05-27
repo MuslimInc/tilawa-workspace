@@ -1,8 +1,7 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
-
 import '../entities/audio_clip_config.dart';
+import '../entities/share_cancel_token.dart';
 import '../entities/share_content.dart';
+import '../entities/share_footer_colors.dart';
 import '../entities/share_progress_messages.dart';
 import '../entities/widget_capture_handle.dart';
 
@@ -16,8 +15,7 @@ abstract class ShareRepository {
     required String appName,
     required String sharedViaLabel,
     bool brandCapture = true,
-    Color? footerBackgroundColor,
-    Color? footerForegroundColor,
+    ShareFooterColors? footerColors,
   });
 
   /// Generates an audio clip for the given verse range and reciter.
@@ -26,7 +24,7 @@ abstract class ShareRepository {
     required AudioClipProgressMessages progressMessages,
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
-    CancelToken? cancelToken,
+    ShareCancelToken? cancelToken,
   });
 
   /// Captures screenshots AND generates an audio clip, then merges them into a video (vertical format).
@@ -39,7 +37,7 @@ abstract class ShareRepository {
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     void Function(int index)? onFrameCaptureStarted,
-    CancelToken? cancelToken,
+    ShareCancelToken? cancelToken,
   });
 
   /// Shares the given content via the native share sheet.

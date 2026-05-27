@@ -69,8 +69,7 @@ class ReciterCard extends StatelessWidget {
                             padding: favoritesOnlyContext
                                 ? EdgeInsets.zero
                                 : EdgeInsetsDirectional.only(
-                                    end:
-                                        tokens.spaceLarge + tokens.spaceSmall,
+                                    end: tokens.spaceLarge + tokens.spaceSmall,
                                   ),
                             child: _ReciterInfo(reciter: reciter),
                           ),
@@ -199,6 +198,7 @@ class _ReciterInfo extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: tokens.spaceExtraSmall,
       children: [
         Text(
           reciter.name,
@@ -210,8 +210,7 @@ class _ReciterInfo extends StatelessWidget {
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        if (moshafLabel != null) ...[
-          SizedBox(height: tokens.spaceExtraSmall),
+        if (moshafLabel != null)
           Text(
             moshafLabel,
             style: theme.textTheme.bodySmall?.copyWith(
@@ -221,9 +220,8 @@ class _ReciterInfo extends StatelessWidget {
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-          ),
-        ] else if (moshafCount == 0) ...[
-          SizedBox(height: tokens.spaceExtraSmall),
+          )
+        else if (moshafCount == 0)
           Text(
             context.l10n.recitationsAvailable(moshafCount),
             style: theme.textTheme.bodySmall?.copyWith(
@@ -234,7 +232,6 @@ class _ReciterInfo extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-        ],
       ],
     );
   }

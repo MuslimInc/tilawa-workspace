@@ -18,7 +18,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
-          useGoogleFontsOverride: false,
         ),
         home: Scaffold(
           body: TilawaBottomSheetScaffold(
@@ -40,7 +39,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
-          useGoogleFontsOverride: false,
         ),
         home: Scaffold(
           body: SizedBox(
@@ -84,7 +82,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
-          useGoogleFontsOverride: false,
         ),
         home: Scaffold(
           body: Builder(
@@ -130,7 +127,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
-          useGoogleFontsOverride: false,
         ),
         home: Builder(
           builder: (context) {
@@ -153,7 +149,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
-          useGoogleFontsOverride: false,
         ),
         home: Builder(
           builder: (context) {

@@ -95,6 +95,22 @@ void main() {
       },
     );
 
+    test(
+      'does not route when already on prayer notification status screen',
+      () async {
+        AppRouter.isOnPrayerNotificationStatusRouteOverride = () => true;
+        when(mockPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
+        when(
+          mockPlayer.getActiveAdhanPayload(),
+        ).thenAnswer((_) async => '{"prayer_name":"asr"}');
+
+        final service = makeService();
+        await service.handleAppResume();
+
+        expect(navCalls, isEmpty);
+      },
+    );
+
     test('does not route when adhan is not playing', () async {
       when(mockPlayer.isAdhanPlaying()).thenAnswer((_) async => false);
 

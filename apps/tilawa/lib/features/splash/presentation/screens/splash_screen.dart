@@ -3,12 +3,13 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../router/app_router_config.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../bloc/splash_bloc.dart';
 import '../bloc/splash_event.dart';
@@ -22,15 +23,21 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const Color _launchBackgroundColor = AppColors.defaultPrimary;
+  static const Color _launchGradientTop = AppColors.brandGradientTop;
+  static const Color _launchGradientBottom = AppColors.brandGradientBottom;
+  static const LinearGradient _launchBackgroundGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[_launchGradientTop, _launchGradientBottom],
+  );
   static const String _launchWordmarkAsset =
       'assets/images/launch_wordmark.png';
-  static const double _androidSplashWordmarkBoxSize = 288;
+  static const double _wordmarkBoxSize = 288;
   static const SystemUiOverlayStyle _launchOverlayStyle = SystemUiOverlayStyle(
-    statusBarColor: _launchBackgroundColor,
+    statusBarColor: _launchGradientTop,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
-    systemNavigationBarColor: _launchBackgroundColor,
+    systemNavigationBarColor: _launchGradientBottom,
     systemNavigationBarIconBrightness: Brightness.light,
     systemNavigationBarDividerColor: Colors.transparent,
     systemStatusBarContrastEnforced: false,
@@ -42,8 +49,26 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    // #region agent log
+    fixBlackFrameLog(
+      runId: 'flutter-handoff-baseline',
+      hypothesisId: 'H2',
+      location: 'splash_screen.dart:_SplashScreenState.initState',
+      message: 'SplashScreen initState',
+      data: const <String, Object?>{},
+    );
+    // #endregion
     _splashBloc = getIt<SplashBloc>()..add(const SplashStarted());
     SchedulerBinding.instance.addPostFrameCallback((_) {
+      // #region agent log
+      fixBlackFrameLog(
+        runId: 'flutter-handoff-baseline',
+        hypothesisId: 'H2',
+        location: 'splash_screen.dart:_SplashScreenState.postFrame',
+        message: 'SplashScreen first post-frame callback',
+        data: const <String, Object?>{},
+      );
+      // #endregion
       SplashLaunchHandoff.markSplashRoutePainted();
     });
   }
@@ -52,6 +77,29 @@ class _SplashScreenState extends State<SplashScreen> {
   void dispose() {
     _splashBloc.close();
     super.dispose();
+  }
+
+  void _goAndReset(String location) {
+    AppRouter.disableStateRestoration = false;
+    AppRouter.pendingStartupNotificationLaunch = false;
+    AppRouter.router.go(location);
+  }
+
+  Future<void> _showAuthErrorDialog(BuildContext context, String message) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.l10n.error),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(ctx.l10n.close),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -65,11 +113,9 @@ class _SplashScreenState extends State<SplashScreen> {
             loading: () {},
             authenticated: (_) {},
             unauthenticated: () {},
-            error: (message) {
-              ToastUtils.showErrorToast(message);
-              AppRouter.disableStateRestoration = false;
-              AppRouter.pendingStartupNotificationLaunch = false;
-              AppRouter.router.go(const LoginRoute().location);
+            error: (message) async {
+              await _showAuthErrorDialog(context, message);
+              if (context.mounted) _goAndReset(const LoginRoute().location);
             },
           );
         },
@@ -78,36 +124,43 @@ class _SplashScreenState extends State<SplashScreen> {
             switch (state) {
               case SplashLoading():
                 break;
+              case SplashNavigateToHome(:final timedOut) when timedOut:
+                ToastUtils.showToast(msg: context.l10n.splashSlowLoadingNotice);
+                _goAndReset(const HomeRoute().location);
               case SplashNavigateToHome():
-                AppRouter.disableStateRestoration = false;
-                AppRouter.pendingStartupNotificationLaunch = false;
-                AppRouter.router.go(const HomeRoute().location);
+                _goAndReset(const HomeRoute().location);
               case SplashNavigateToLogin():
-                AppRouter.disableStateRestoration = false;
-                AppRouter.pendingStartupNotificationLaunch = false;
-                AppRouter.router.go(const LoginRoute().location);
+                _goAndReset(const LoginRoute().location);
               case SplashNavigateToOnboarding():
-                AppRouter.disableStateRestoration = false;
-                AppRouter.pendingStartupNotificationLaunch = false;
-                AppRouter.router.go(const OnboardingRoute().location);
+                _goAndReset(const OnboardingRoute().location);
               case SplashNavigateToNotification(:final location, :final extra):
                 AppRouter.navigateFromColdStart(location, extra: extra);
               case SplashFailure():
-                AppRouter.disableStateRestoration = false;
-                AppRouter.pendingStartupNotificationLaunch = false;
-                AppRouter.router.go(const HomeRoute().location);
+                _goAndReset(const HomeRoute().location);
             }
           },
           child: AnnotatedRegion<SystemUiOverlayStyle>(
             value: _launchOverlayStyle,
-            child: ColoredBox(
-              color: _launchBackgroundColor,
-              child: Center(
-                child: SizedBox.square(
-                  dimension: _androidSplashWordmarkBoxSize,
-                  child: Image.asset(
-                    _launchWordmarkAsset,
-                    fit: BoxFit.contain,
+            child: Semantics(
+              label: context.l10n.a11ySplashLoading,
+              liveRegion: true,
+              child: ColoredBox(
+                color: _launchBackgroundColor,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox.square(
+                        dimension: _wordmarkBoxSize,
+                        child: Image.asset(
+                          _launchWordmarkAsset,
+                          filterQuality: FilterQuality.high,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      const CircularProgressIndicator(color: Colors.white),
+                    ],
                   ),
                 ),
               ),

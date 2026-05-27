@@ -66,15 +66,21 @@ class _BootGate extends StatefulWidget {
 class _BootGateState extends State<_BootGate> {
   bool _loggedBootGateSplash = false;
 
-  static const Color _launchBackgroundColor = AppColors.defaultPrimary;
+  static const Color _launchGradientTop = AppColors.brandGradientTop;
+  static const Color _launchGradientBottom = AppColors.brandGradientBottom;
+  static const LinearGradient _launchBackgroundGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: <Color>[_launchGradientTop, _launchGradientBottom],
+  );
   static const String _launchWordmarkAsset =
       'assets/images/launch_wordmark.png';
-  static const double _wordmarkBoxSize = 288;
+  static const double _wordmarkBoxSize = 200;
   static const SystemUiOverlayStyle _launchOverlayStyle = SystemUiOverlayStyle(
-    statusBarColor: _launchBackgroundColor,
+    statusBarColor: _launchGradientTop,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
-    systemNavigationBarColor: _launchBackgroundColor,
+    systemNavigationBarColor: _launchGradientBottom,
     systemNavigationBarIconBrightness: Brightness.light,
     systemNavigationBarDividerColor: Colors.transparent,
     systemStatusBarContrastEnforced: false,
@@ -83,10 +89,21 @@ class _BootGateState extends State<_BootGate> {
 
   bool _ready = false;
   bool _handoffToAppStarted = false;
+  Future<void>? _criticalInitFuture;
+  bool? _lastLoggedPainted;
 
   @override
   void initState() {
     super.initState();
+    // #region agent log
+    fixBlackFrameLog(
+      runId: 'flutter-handoff-baseline',
+      hypothesisId: 'H1',
+      location: 'app_startup_widgets.dart:_BootGateState.initState',
+      message: 'BootGate initState',
+      data: const <String, Object?>{'ready': false},
+    );
+    // #endregion
     SplashLaunchHandoff.resetForNewLaunch();
     _awaitCriticalInit();
   }
@@ -95,36 +112,103 @@ class _BootGateState extends State<_BootGate> {
   void reassemble() {
     super.reassemble();
     // Hot reload rebuilds providers without re-running bootstrap DI.
-    if (!getIt.isRegistered<SettingsCubit>()) {
+    if (!getIt.isRegistered<NetworkInfo>()) {
       _ready = false;
       _awaitCriticalInit();
     }
   }
 
   void _awaitCriticalInit() {
+    if (_ready || _criticalInitFuture != null) {
+      return;
+    }
+    // #region agent log
+    fixBlackFrameLog(
+      runId: 'flutter-handoff-baseline',
+      hypothesisId: 'H3',
+      location: 'app_startup_widgets.dart:_BootGateState._awaitCriticalInit',
+      message: 'BootGate critical init begin',
+      data: const <String, Object?>{},
+    );
+    // #endregion
     // Bootstrap() schedules critical init from its own post-frame callback;
     // here we just await the resulting future so we can swap in the real app
     // when it completes. Calling startCriticalInit() is a no-op if bootstrap
     // already kicked it off, which it will have in production.
-    widget.startCriticalInit().then((_) async {
-      await _ensureDependenciesRegistered();
-      if (!mounted || _handoffToAppStarted) return;
-      _handoffToAppStarted = true;
-      setState(() => _ready = true);
-    }).catchError((Object error, StackTrace stackTrace) {
-      logger.e(
-        'Critical init failed; staying on launch splash',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    });
+    _criticalInitFuture = widget
+        .startCriticalInit()
+        .then((_) async {
+          await _ensureDependenciesRegistered();
+          final StartupLaunchPlan plan = await _resolveStartupLaunchPlan();
+          _applyStartupLaunchPlan(plan);
+          if (!mounted || _handoffToAppStarted) return;
+          _handoffToAppStarted = true;
+          // #region agent log
+          fixBlackFrameLog(
+            runId: 'flutter-handoff-baseline',
+            hypothesisId: 'H3',
+            location:
+                'app_startup_widgets.dart:_BootGateState._awaitCriticalInit.then',
+            message: 'BootGate critical init completed',
+            data: <String, Object?>{
+              'target': plan.target.name,
+              'location': plan.location,
+            },
+          );
+          // #endregion
+          setState(() {
+            _ready = true;
+          });
+        })
+        .catchError((Object error, StackTrace stackTrace) {
+          _criticalInitFuture = null;
+          logger.e(
+            'Critical init failed; staying on launch splash',
+            error: error,
+            stackTrace: stackTrace,
+          );
+        });
   }
 
   Future<void> _ensureDependenciesRegistered() async {
-    if (getIt.isRegistered<SettingsCubit>()) return;
+    if (getIt.isRegistered<NetworkInfo>()) {
+      return;
+    }
     // Firebase singletons in DI must not run before initializeApp() completes.
-    if (Firebase.apps.isEmpty) return;
+    if (Firebase.apps.isEmpty) {
+      return;
+    }
     await configureDependencies(launchConfig: appLaunchConfig);
+  }
+
+  Future<StartupLaunchPlan> _resolveStartupLaunchPlan() async {
+    try {
+      if (!getIt.isRegistered<StartupLaunchCoordinator>()) {
+        return const StartupLaunchPlan.home();
+      }
+      return await getIt<StartupLaunchCoordinator>().resolve();
+    } catch (error, stackTrace) {
+      logger.e(
+        'Startup launch resolution failed; falling back to home',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return const StartupLaunchPlan.home();
+    }
+  }
+
+  void _applyStartupLaunchPlan(StartupLaunchPlan plan) {
+    switch (plan.target) {
+      case StartupLaunchTarget.notification:
+        AppRouter.setPendingColdStartRoute(plan.location, extra: plan.extra);
+      case StartupLaunchTarget.home:
+      case StartupLaunchTarget.login:
+      case StartupLaunchTarget.onboarding:
+        AppRouter.clearPendingColdStartRoute();
+        AppRouter.pendingStartupNotificationLaunch = false;
+        AppRouter.disableStateRestoration = false;
+        AppRouter.setInitialLaunchLocation(plan.location);
+    }
   }
 
   @override
@@ -133,16 +217,30 @@ class _BootGateState extends State<_BootGate> {
       return ValueListenableBuilder<bool>(
         valueListenable: SplashLaunchHandoff.splashRouteHasPainted,
         builder: (BuildContext context, bool painted, Widget? _) {
-          final bool showOverlay = !painted;
+          if (_lastLoggedPainted != painted) {
+            _lastLoggedPainted = painted;
+            // #region agent log
+            fixBlackFrameLog(
+              runId: 'flutter-handoff-baseline',
+              hypothesisId: 'H1',
+              location: 'app_startup_widgets.dart:_BootGateState.build',
+              message: 'BootGate handoff state changed',
+              data: <String, Object?>{
+                'ready': _ready,
+                'painted': painted,
+              },
+            );
+            // #endregion
+          }
           return Directionality(
             textDirection: TextDirection.ltr,
             child: Stack(
               fit: StackFit.expand,
               children: <Widget>[
                 widget.child,
-                if (showOverlay)
+                if (!painted)
                   const _LaunchSplash(
-                    backgroundColor: _launchBackgroundColor,
+                    backgroundGradient: _launchBackgroundGradient,
                     overlayStyle: _launchOverlayStyle,
                     wordmarkAsset: _launchWordmarkAsset,
                     wordmarkBoxSize: _wordmarkBoxSize,
@@ -158,7 +256,7 @@ class _BootGateState extends State<_BootGate> {
       ColdStartNavigationMetrics.recordBootGateSplash();
     }
     return const _LaunchSplash(
-      backgroundColor: _launchBackgroundColor,
+      backgroundGradient: _launchBackgroundGradient,
       overlayStyle: _launchOverlayStyle,
       wordmarkAsset: _launchWordmarkAsset,
       wordmarkBoxSize: _wordmarkBoxSize,
@@ -168,13 +266,13 @@ class _BootGateState extends State<_BootGate> {
 
 class _LaunchSplash extends StatelessWidget {
   const _LaunchSplash({
-    required this.backgroundColor,
+    required this.backgroundGradient,
     required this.overlayStyle,
     required this.wordmarkAsset,
     required this.wordmarkBoxSize,
   });
 
-  final Color backgroundColor;
+  final Gradient backgroundGradient;
   final SystemUiOverlayStyle overlayStyle;
   final String wordmarkAsset;
   final double wordmarkBoxSize;
@@ -185,8 +283,8 @@ class _LaunchSplash extends StatelessWidget {
       value: overlayStyle,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: ColoredBox(
-          color: backgroundColor,
+        child: DecoratedBox(
+          decoration: BoxDecoration(gradient: backgroundGradient),
           child: SizedBox.expand(
             child: Center(
               child: SizedBox.square(

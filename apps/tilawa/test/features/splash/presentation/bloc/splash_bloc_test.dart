@@ -8,6 +8,8 @@ import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use
 import 'package:tilawa/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:tilawa/features/splash/presentation/bloc/splash_event.dart';
 import 'package:tilawa/features/splash/presentation/bloc/splash_state.dart';
+import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/app_router_config.dart';
 
 import 'splash_bloc_test.mocks.dart';
 
@@ -23,6 +25,7 @@ void main() {
   late MockAppStartupReadiness mockReadiness;
 
   setUp(() {
+    AppRouter.resetForTesting();
     mockGetSplashNextRouteUseCase = MockGetSplashNextRouteUseCase();
     mockPrepareGoogleSignIn = MockPrepareGoogleSignInUseCase();
     mockReadiness = MockAppStartupReadiness();
@@ -41,12 +44,42 @@ void main() {
 
   tearDown(() {
     bloc.close();
+    AppRouter.resetForTesting();
   });
 
   group('SplashBloc', () {
     test('initial state is SplashLoading', () {
       expect(bloc.state, const SplashLoading());
     });
+
+    blocTest<SplashBloc, SplashState>(
+      'emits notification route when pending cold start is set during splash',
+      build: () {
+        when(
+          mockGetSplashNextRouteUseCase.call(),
+        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        return bloc;
+      },
+      act: (bloc) {
+        AppRouter.setPendingColdStartRoute(
+          const PrayerNotificationStatusRoute().location,
+          extra: '{"prayer_key":"fajr"}',
+        );
+        bloc.add(const SplashStarted());
+      },
+      expect: () => [
+        isA<SplashNavigateToNotification>().having(
+          (state) => state.location,
+          'location',
+          const PrayerNotificationStatusRoute().location,
+        ),
+      ],
+      verify: (_) {
+        verify(
+          mockReadiness.waitUntilReady(prepareShell: true),
+        ).called(1);
+      },
+    );
 
     blocTest<SplashBloc, SplashState>(
       'emits home and waits for shell prep',

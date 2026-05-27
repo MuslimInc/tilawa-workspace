@@ -6,6 +6,7 @@ import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../../../../core/debug/deep_link_debug_log.dart';
+import '../../../../router/app_router.dart';
 import '../../../../router/notification_navigation_resolver.dart';
 import '../../../auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import '../../domain/usecases/get_splash_next_route_use_case.dart';
@@ -67,6 +68,18 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
       }
 
       if (isClosed) {
+        return;
+      }
+
+      final String? pendingColdStartLocation =
+          AppRouter.pendingColdStartLocation;
+      if (pendingColdStartLocation != null) {
+        emit(
+          SplashNavigateToNotification(
+            pendingColdStartLocation,
+            extra: AppRouter.pendingColdStartExtra,
+          ),
+        );
         return;
       }
 

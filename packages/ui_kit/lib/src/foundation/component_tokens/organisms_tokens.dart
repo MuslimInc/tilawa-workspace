@@ -504,8 +504,9 @@ class TilawaAdaptiveShellTokens {
   /// Height of the phone bottom nav row for [textScaler] (icon column + one
   /// label line), floored at [navButtonMinHeight].
   ///
-  /// Matches the phone bottom nav column (icon + gap + label line + pill
-  /// padding) so [TilawaShellPadding] can clear the painted bar.
+  /// This is the **content** height only. [BottomNavigationBar] also consumes
+  /// [MediaQuery.viewPadding] bottom inside its layout; use
+  /// [phoneBottomNavPaintedHeight] for the outer [SizedBox] and host reserves.
   double phoneBottomNavLayoutHeight(TextScaler textScaler) =>
       TilawaAdaptiveShellTokens._phoneBottomNavLayoutHeight(
         navButtonMinHeight: navButtonMinHeight,
@@ -518,6 +519,14 @@ class TilawaAdaptiveShellTokens {
             navButtonSelectionContainerVerticalPadding,
         textScaler: textScaler,
       );
+
+  /// Total painted height of the phone bottom nav, including the system
+  /// navigation inset that Material subtracts inside [BottomNavigationBar].
+  double phoneBottomNavPaintedHeight(
+    TextScaler textScaler,
+    double systemBottomViewPadding,
+  ) =>
+      phoneBottomNavLayoutHeight(textScaler) + systemBottomViewPadding;
 
   /// Height of the phone bottom nav row in **icon-only** mode.
   ///
@@ -590,7 +599,7 @@ class TilawaAdaptiveShellTokens {
     final bottomNavBackgroundColor = _bottomNavBackgroundColor(colorScheme);
     final shellChromeOutline = _shellChromeOutlineColor(colorScheme);
     final bool lightChrome = colorScheme.brightness == Brightness.light;
-    const double navButtonMinHeight = 90;
+    const double navButtonMinHeight = 80;
     const double navButtonVerticalPadding = 6;
     const double navButtonIconSize = 22;
     const double navButtonSelectedCenterScale = 1.1;
@@ -1034,6 +1043,7 @@ class TilawaAdaptiveShellTokens {
 @immutable
 class TilawaSettingsGroupTokens {
   const TilawaSettingsGroupTokens({
+    required this.groupHorizontalPadding,
     required this.groupHeaderPadding,
     required this.groupBorderRadius,
     required this.groupShadowOpacity,
@@ -1066,6 +1076,9 @@ class TilawaSettingsGroupTokens {
     required this.switchActiveTrackColor,
     required this.switchActiveThumbColor,
   });
+
+  /// Horizontal inset from the screen edge for grouped settings panels.
+  final double groupHorizontalPadding;
 
   final EdgeInsetsGeometry groupHeaderPadding;
   final double groupBorderRadius;
@@ -1142,10 +1155,11 @@ class TilawaSettingsGroupTokens {
     final switchActiveThumbColor = colorScheme.primary;
 
     return TilawaSettingsGroupTokens(
+      groupHorizontalPadding: 16,
       groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
-        12,
+        0,
         16,
-        16,
+        0,
         8,
       ),
       groupBorderRadius: 20,
@@ -1199,6 +1213,7 @@ class TilawaSettingsGroupTokens {
   }
 
   TilawaSettingsGroupTokens copyWith({
+    double? groupHorizontalPadding,
     EdgeInsetsGeometry? groupHeaderPadding,
     double? groupBorderRadius,
     double? groupShadowOpacity,
@@ -1232,6 +1247,8 @@ class TilawaSettingsGroupTokens {
     Color? switchActiveThumbColor,
   }) {
     return TilawaSettingsGroupTokens(
+      groupHorizontalPadding:
+          groupHorizontalPadding ?? this.groupHorizontalPadding,
       groupHeaderPadding: groupHeaderPadding ?? this.groupHeaderPadding,
       groupBorderRadius: groupBorderRadius ?? this.groupBorderRadius,
       groupShadowOpacity: groupShadowOpacity ?? this.groupShadowOpacity,
@@ -1282,6 +1299,11 @@ class TilawaSettingsGroupTokens {
     double t,
   ) {
     return TilawaSettingsGroupTokens(
+      groupHorizontalPadding: lerpTokenDouble(
+        a.groupHorizontalPadding,
+        b.groupHorizontalPadding,
+        t,
+      ),
       groupHeaderPadding: EdgeInsetsGeometry.lerp(
         a.groupHeaderPadding,
         b.groupHeaderPadding,

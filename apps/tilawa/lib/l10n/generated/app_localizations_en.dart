@@ -27,7 +27,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get west => 'W';
 
   @override
-  String get appTitle => 'Tilawa';
+  String get appTitle => 'Rattil';
 
   @override
   String get reciters => 'Reciters';
@@ -147,6 +147,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playingFrom => 'Playing from';
+
+  @override
+  String get playerQueueExpandHint => 'Swipe up for queue';
+
+  @override
+  String get playerQueueHandleSemanticLabel =>
+      'Show or hide queue. Drag up or tap to expand.';
 
   @override
   String get duration => 'Duration';
@@ -508,7 +515,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signIn => 'Sign in';
 
   @override
-  String get welcomeToApp => 'Welcome to Tilawa';
+  String get welcomeToApp => 'Welcome to Rattil';
 
   @override
   String get signInWithGoogleDescription =>
@@ -1652,7 +1659,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sharing => 'Sharing...';
 
   @override
-  String get sharedViaTilawa => 'Shared via Tilawa';
+  String get sharedViaTilawa => 'Shared via Rattil';
 
   @override
   String get reciterNotAvailable =>
@@ -1908,7 +1915,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get oemAutostartHint =>
-      'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.';
+      'On this device, also enable Autostart for Rattil in your phone\'s settings so reminders are not stopped in the background.';
 
   @override
   String prayerNotificationBody(String prayerName) {
@@ -1942,6 +1949,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get stopAdhan => 'Stop Adhan';
+
+  @override
+  String get adhanStillPlayingMessage =>
+      'Would you like to stop the adhan before leaving?';
 
   @override
   String get prayerNotificationReceived => 'Prayer notification received';
@@ -2003,23 +2014,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get moreOptions => 'More options';
 
   @override
-  String get supportTilawa => 'Support Tilawa';
+  String get supportTilawa => 'Support Rattil';
 
   @override
-  String get rateTilawa => 'Rate Tilawa';
+  String get rateTilawa => 'Rate Rattil';
 
   @override
   String get rateTilawaSubtitle => 'Share your feedback on the app store.';
 
   @override
-  String get supportIntroLine => 'Your contribution helps keep Tilawa going.';
+  String get shareTilawa => 'Share Rattil';
+
+  @override
+  String shareTilawaMessage(String appName, String storeUrl) {
+    return 'Check out $appName:\n$storeUrl';
+  }
+
+  @override
+  String get shareTilawaFailed =>
+      'We could not open the share sheet. Please try again.';
+
+  @override
+  String get supportIntroLine => 'Your contribution helps keep Rattil going.';
 
   @override
   String get supportTilawaSubtitle =>
-      'Your contribution helps keep Tilawa going.';
+      'Your contribution helps keep Rattil going.';
 
   @override
-  String get supportMissionBody => 'Your contribution helps keep Tilawa going.';
+  String get supportMissionBody => 'Your contribution helps keep Rattil going.';
 
   @override
   String get supportImpactWhyTitle => 'Why?';
@@ -2059,7 +2082,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportConfirmationBody =>
-      'Payment via Google Play. Tilawa does not store your card details.';
+      'Payment via Google Play. Rattil does not store your card details.';
 
   @override
   String get supportConfirm => 'Continue';
@@ -2085,7 +2108,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportTrustLinePrefix =>
-      'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (';
+      'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (';
 
   @override
   String get supportCharitiesLinkLabel => 'partner charities list';
@@ -2104,15 +2127,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get supportTrustLine =>
-      'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)';
+      'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)';
 
   @override
   String get supportPlayFooter =>
-      'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)';
+      'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)';
 
   @override
   String get supportDisclaimer =>
-      'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)';
+      'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)';
 
   @override
   String get supportOfflineMessage => 'An internet connection is required.';
@@ -2143,7 +2166,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get supportSelectTier => 'Choose an amount';
 
   @override
-  String get supportSettingsGroupTitle => 'Support Tilawa';
+  String get supportSettingsGroupTitle => 'Support Rattil';
 
   @override
   String get supportHelpKeepFree => 'Optional';
@@ -2180,4 +2203,63 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get appReviewPlatformUnsupported =>
       'Store reviews are not supported on this platform.';
+
+  @override
+  String get tourActionNext => 'Next';
+
+  @override
+  String get tourActionFinish => 'Got it';
+
+  @override
+  String get tourActionSkip => 'Skip';
+
+  @override
+  String tourStepSemantics(int current, int total) {
+    return 'Tour step $current of $total';
+  }
+
+  @override
+  String get tourDebugResetTitle => 'Reset product tours';
+
+  @override
+  String get tourDebugResetSubtitle =>
+      'Show contextual tours again on the next trigger';
+
+  @override
+  String get tourDebugResetDone => 'Product tours reset';
+
+  @override
+  String get tourRecitersSearchTitle => 'Find a reciter';
+
+  @override
+  String get tourRecitersSearchDescription =>
+      'Search by name to jump straight to the voice you want.';
+
+  @override
+  String get tourRecitersFavoritesTitle => 'Save favourites';
+
+  @override
+  String get tourRecitersFavoritesDescription =>
+      'Tap the heart to filter your saved reciters anytime.';
+
+  @override
+  String get tourRecitersOpenReciterTitle => 'Open a reciter';
+
+  @override
+  String get tourRecitersOpenReciterDescription =>
+      'Choose a reciter to browse surahs and start listening.';
+
+  @override
+  String get tourReciterPlaybackPlayingTitle => 'Now playing';
+
+  @override
+  String get tourReciterPlaybackPlayingDescription =>
+      'The surah you tapped stays highlighted while it plays.';
+
+  @override
+  String get tourReciterPlaybackMiniPlayerTitle => 'Control playback';
+
+  @override
+  String get tourReciterPlaybackMiniPlayerDescription =>
+      'Use the mini player to pause, skip, or expand for more controls.';
 }

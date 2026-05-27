@@ -11,6 +11,12 @@ import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
+import 'package:tilawa/features/audio_player/domain/services/artist_media_playlist_cache.dart';
+import 'package:tilawa/features/audio_player/domain/services/audio_entity_media_item_mapper.dart';
+import 'package:tilawa/features/audio_player/domain/services/moshaf_surah_audio_list_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/playback_uri_resolver.dart';
+import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/shared/audio/audio_player_handler_impl.dart';
@@ -231,9 +237,14 @@ void main() {
     handler = AudioPlayerHandlerImpl(
       [],
       mockAnalytics,
-      mockPrefs,
-      mockRepo,
-      mockDownloadsRepo,
+      ReciterAudioCatalogCache(
+        mockRepo,
+        const ReciterAudioCatalogBuilder(),
+      ),
+      PlaybackUriResolver(mockDownloadsRepo),
+      MoshafSurahAudioListBuilder(mockPrefs),
+      ArtistMediaPlaylistCache(),
+      const AudioEntityMediaItemMapper(),
       player: mockPlayer,
       audioSession: mockAudioSession,
     );
@@ -319,9 +330,14 @@ void main() {
         final freshHandler = AudioPlayerHandlerImpl(
           [],
           mockAnalytics,
-          mockPrefs,
-          mockRepo,
-          mockDownloadsRepo,
+          ReciterAudioCatalogCache(
+            mockRepo,
+            const ReciterAudioCatalogBuilder(),
+          ),
+          PlaybackUriResolver(mockDownloadsRepo),
+          MoshafSurahAudioListBuilder(mockPrefs),
+          ArtistMediaPlaylistCache(),
+          const AudioEntityMediaItemMapper(),
           player: mockPlayer,
         );
 
@@ -437,6 +453,29 @@ void main() {
 
       expect(handler.queue.value.first, item2);
       expect(handler.queue.value.last, item1);
+    });
+
+    test('moveQueueItem bumps queueGeneration for O(1) UI diffing', () async {
+      const item1 = MediaItem(
+        id: '1',
+        title: 'Test 1',
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      const item2 = MediaItem(
+        id: '2',
+        title: 'Test 2',
+        extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+      );
+      await handler.addQueueItem(item1);
+      await captureAndUpdate();
+      await handler.addQueueItem(item2);
+      await captureAndUpdate();
+
+      final int generationBeforeMove = handler.queueGeneration;
+      await handler.moveQueueItem(0, 1);
+      await captureAndUpdate();
+
+      expect(handler.queueGeneration, greaterThan(generationBeforeMove));
     });
 
     test('updateMediaItem updates item in queue', () async {
@@ -1046,9 +1085,14 @@ void main() {
       final localHandler = AudioPlayerHandlerImpl(
         items,
         mockAnalytics,
-        mockPrefs,
-        mockRepo,
-        mockDownloadsRepo,
+        ReciterAudioCatalogCache(
+          mockRepo,
+          const ReciterAudioCatalogBuilder(),
+        ),
+        PlaybackUriResolver(mockDownloadsRepo),
+        MoshafSurahAudioListBuilder(mockPrefs),
+        ArtistMediaPlaylistCache(),
+        const AudioEntityMediaItemMapper(),
         player: mockPlayer,
       );
 
@@ -1110,9 +1154,14 @@ void main() {
       AudioPlayerHandlerImpl(
         items,
         mockAnalytics,
-        mockPrefs,
-        mockRepo,
-        mockDownloadsRepo,
+        ReciterAudioCatalogCache(
+          mockRepo,
+          const ReciterAudioCatalogBuilder(),
+        ),
+        PlaybackUriResolver(mockDownloadsRepo),
+        MoshafSurahAudioListBuilder(mockPrefs),
+        ArtistMediaPlaylistCache(),
+        const AudioEntityMediaItemMapper(),
         player: mockPlayer,
         audioSession: mockAudioSession,
       );
@@ -1175,9 +1224,14 @@ void main() {
         AudioPlayerHandlerImpl(
           [],
           mockAnalytics,
-          mockPrefs,
-          mockRepo,
-          mockDownloadsRepo,
+          ReciterAudioCatalogCache(
+            mockRepo,
+            const ReciterAudioCatalogBuilder(),
+          ),
+          PlaybackUriResolver(mockDownloadsRepo),
+          MoshafSurahAudioListBuilder(mockPrefs),
+          ArtistMediaPlaylistCache(),
+          const AudioEntityMediaItemMapper(),
         );
       } catch (e) {
         // Line is covered even if it throws
@@ -1230,9 +1284,14 @@ void main() {
       final localHandler = AudioPlayerHandlerImpl(
         [],
         mockAnalytics,
-        mockPrefs,
-        mockRepo,
-        mockDownloadsRepo,
+        ReciterAudioCatalogCache(
+          mockRepo,
+          const ReciterAudioCatalogBuilder(),
+        ),
+        PlaybackUriResolver(mockDownloadsRepo),
+        MoshafSurahAudioListBuilder(mockPrefs),
+        ArtistMediaPlaylistCache(),
+        const AudioEntityMediaItemMapper(),
         player: mockPlayer,
       );
 

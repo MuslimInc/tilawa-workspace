@@ -60,6 +60,14 @@ class AthkarCategoryCard extends StatelessWidget {
         return Icons.wb_sunny_rounded;
       case 'nights_stay_rounded':
         return Icons.nights_stay_rounded;
+      case 'bedtime_rounded':
+        return Icons.bedtime_rounded;
+      case 'alarm_rounded':
+        return Icons.alarm_rounded;
+      case 'mosque_rounded':
+        return Icons.mosque_rounded;
+      case 'auto_stories_rounded':
+        return Icons.auto_stories_rounded;
       case 'prayer_times_rounded':
         return Icons.auto_awesome_rounded;
       case 'tasbeeh':

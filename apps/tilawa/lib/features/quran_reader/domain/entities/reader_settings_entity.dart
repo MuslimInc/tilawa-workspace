@@ -32,15 +32,15 @@ abstract class ReaderSettingsEntity with _$ReaderSettingsEntity {
   factory ReaderSettingsEntity.fromJson(Map<String, dynamic> json) =>
       _$ReaderSettingsEntityFromJson(json);
 
-  /// Get font family based on font type
-  String get fontFamily {
+  /// Get font family based on font type, or null to use the theme default.
+  String? get fontFamily {
     switch (fontType) {
       case QuranFontType.uthmani:
         return 'KFGQPC Uthmanic Script HAFS';
       case QuranFontType.indopak:
         return 'Noto Nastaliq Urdu';
       case QuranFontType.simple:
-        return 'Amiri';
+        return null;
     }
   }
 }

@@ -13,11 +13,16 @@ class TilawaQuickFilterBar extends StatelessWidget {
     required this.children,
     this.trailing,
     this.padding,
+    this.scrollPadding,
   });
 
   final List<Widget> children;
   final Widget? trailing;
   final EdgeInsetsGeometry? padding;
+
+  /// Inset around the horizontally scrollable pill row (e.g. trailing edge
+  /// breathing room when chips overflow).
+  final EdgeInsetsGeometry? scrollPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +36,8 @@ class TilawaQuickFilterBar extends StatelessWidget {
           Expanded(
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
+              padding: scrollPadding ??
+                  EdgeInsetsDirectional.only(end: tokens.spaceSmall),
               child: Row(
                 spacing: tokens.spaceSmall,
                 children: children,

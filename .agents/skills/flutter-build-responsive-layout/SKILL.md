@@ -8,12 +8,20 @@ metadata:
 # Implementing Adaptive Layouts
 
 ## Contents
+- [Tilawa theming (monorepo)](#tilawa-theming-monorepo)
 - [Space Measurement Guidelines](#space-measurement-guidelines)
+- [Inter-child spacing in Flex widgets](#inter-child-spacing-in-flex-widgets)
 - [Widget Sizing and Constraints](#widget-sizing-and-constraints)
 - [Device and Orientation Behaviors](#device-and-orientation-behaviors)
 - [Workflow: Constructing an Adaptive Layout](#workflow-constructing-an-adaptive-layout)
 - [Workflow: Optimizing for Large Screens](#workflow-optimizing-for-large-screens)
 - [Examples](#examples)
+
+## Tilawa theming (monorepo)
+
+In **Tilawa** (`apps/tilawa`, `packages/ui_kit`), follow
+`flutter-apply-tilawa-theming` for tokens, `ColorScheme`, and spacing scale.
+Use `Theme.of(context).tokens` for padding and gaps — not raw pixel literals.
 
 ## Space Measurement Guidelines
 Determine the available space accurately to ensure layouts adapt to the app window, not just the physical device.
@@ -22,6 +30,17 @@ Determine the available space accurately to ensure layouts adapt to the app wind
 *   **Use `LayoutBuilder`** to make layout decisions based on the parent widget's allocated space. Evaluate `constraints.maxWidth` to determine the appropriate widget tree to return.
 *   **Do not use `MediaQuery.orientationOf` or `OrientationBuilder`** near the top of the widget tree to switch layouts. Device orientation does not accurately reflect the available app window space.
 *   **Do not check for hardware types** (e.g., "phone" vs. "tablet"). Flutter apps run in resizable windows, multi-window modes, and picture-in-picture. Base all layout decisions strictly on available window space.
+
+## Inter-child spacing in Flex widgets
+
+When all gaps between adjacent `Row` / `Column` / `Flex` children use the **same
+fixed token**, prefer the `spacing` property over interleaved `SizedBox`
+widgets. In Tilawa, pass `Theme.of(context).tokens.space*` values.
+
+**Use `SizedBox` instead when** gaps differ, only pad the first/last child,
+values are computed, or the widget sets explicit width/height (not just gap).
+
+See `flutter-apply-tilawa-theming` for the full decision table.
 
 ## Widget Sizing and Constraints
 Understand and apply Flutter's core layout rule: **Constraints go down. Sizes go up. Parent sets position.**

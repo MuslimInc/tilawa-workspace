@@ -8,7 +8,7 @@ import 'package:tilawa/features/app_review/domain/usecases/open_app_store_listin
 import 'package:tilawa/features/app_review/domain/usecases/request_app_review_use_case.dart';
 import 'package:tilawa/features/app_review/presentation/cubit/app_review_cubit.dart';
 import 'package:tilawa/features/app_review/presentation/cubit/app_review_state.dart';
-import 'package:tilawa/features/settings/presentation/widgets/settings_shared.dart';
+import 'package:tilawa/features/settings/presentation/widgets/settings_widgets.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -94,8 +94,7 @@ void main() {
 
     await tester.pumpWidget(_buildHarness(cubit: cubit));
 
-    expect(find.text('Rate Tilawa'), findsOneWidget);
-    expect(find.text('Share your feedback on the app store.'), findsOneWidget);
+    expect(find.text('Rate Rattil'), findsOneWidget);
   });
 
   testWidgets('tap requests rating from settings flow', (
@@ -105,7 +104,7 @@ void main() {
     addTearDown(cubit.close);
 
     await tester.pumpWidget(_buildHarness(cubit: cubit));
-    await tester.tap(find.text('Rate Tilawa'));
+    await tester.tap(find.text('Rate Rattil'));
     await tester.pumpAndSettle();
 
     expect(cubit.rateFromSettingsCalls, 1);
@@ -136,7 +135,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('Rate Tilawa'));
+    await tester.tap(find.text('Rate Rattil'));
     await tester.pump();
 
     expect(cubit.rateFromSettingsCalls, 0);

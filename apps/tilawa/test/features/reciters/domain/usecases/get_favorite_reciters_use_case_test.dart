@@ -91,5 +91,43 @@ void main() {
       verify(mockRepository.getFavoriteReciters()).called(1);
       verifyNoMoreInteractions(mockRepository);
     });
+
+    test('takeCachedSuccessForStartup consumes cached favorites', () async {
+      when(
+        mockRepository.getFavoriteReciters(),
+      ).thenAnswer((_) async => Right(tFavoriteReciters));
+
+      await useCase(const NoParams());
+
+      expect(useCase.takeCachedSuccessForStartup(), tFavoriteReciters);
+      expect(useCase.takeCachedSuccessForStartup(), isNull);
+      verify(mockRepository.getFavoriteReciters()).called(1);
+    });
+
+    test('returns one-shot cached success after first load', () async {
+      when(
+        mockRepository.getFavoriteReciters(),
+      ).thenAnswer((_) async => Right(tFavoriteReciters));
+
+      final first = await useCase(const NoParams());
+      final second = await useCase(const NoParams());
+
+      expect(first, Right<Failure, List<ReciterEntity>>(tFavoriteReciters));
+      expect(second, Right<Failure, List<ReciterEntity>>(tFavoriteReciters));
+      verify(mockRepository.getFavoriteReciters()).called(1);
+    });
+
+    test('does not cache failures', () async {
+      const tFailure = CacheFailure('Failed');
+      when(mockRepository.getFavoriteReciters()).thenAnswer(
+        (_) async => const Left<Failure, List<ReciterEntity>>(tFailure),
+      );
+
+      await useCase(const NoParams());
+      await useCase(const NoParams());
+
+      expect(useCase.takeCachedSuccessForStartup(), isNull);
+      verify(mockRepository.getFavoriteReciters()).called(2);
+    });
   });
 }

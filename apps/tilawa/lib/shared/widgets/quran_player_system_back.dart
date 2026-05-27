@@ -2,17 +2,23 @@ import 'package:flutter/foundation.dart';
 
 /// System-back handling for the shell-hosted [QuranPlayerWidget].
 ///
-/// [RecitersRootBackScope] reads [interceptsSystemBack] without touching the
-/// player widget tree. The player sets the flag only while the now-playing
-/// sheet is expanded; mini-player dismiss stays on swipe or the overflow menu.
+/// [RecitersRootBackScope] reads [interceptsSystemBackListenable] without
+/// touching the player widget tree. The player sets the flag only while the
+/// now-playing sheet is expanded; mini-player dismiss stays on swipe or the
+/// overflow menu.
 abstract final class QuranPlayerSystemBackCoordinator {
-  static bool _intercepts = false;
+  static final ValueNotifier<bool> _intercepts = ValueNotifier<bool>(false);
   static void Function()? _handle;
 
-  static bool get interceptsSystemBack => _intercepts;
+  static bool get interceptsSystemBack => _intercepts.value;
+
+  /// Listenable so [RecitersRootBackScope]'s [PopScope] rebuilds when the
+  /// expanded-sheet intercept flag flips. Without this, [PopScope.canPop]
+  /// stays stuck on the value computed when the cubit last fired.
+  static ValueListenable<bool> get interceptsSystemBackListenable => _intercepts;
 
   static void setIntercepts(bool value) {
-    _intercepts = value;
+    _intercepts.value = value;
   }
 
   static void handleSystemBack() => _handle?.call();
@@ -26,12 +32,12 @@ abstract final class QuranPlayerSystemBackCoordinator {
       return;
     }
     _handle = null;
-    _intercepts = false;
+    _intercepts.value = false;
   }
 
   @visibleForTesting
   static void debugReset() {
-    _intercepts = false;
+    _intercepts.value = false;
     _handle = null;
   }
 }

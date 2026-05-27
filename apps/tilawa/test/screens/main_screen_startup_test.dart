@@ -25,6 +25,8 @@ import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/al
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
+import 'package:tilawa/features/reciters/presentation/tour/reciters_tour_launcher.dart';
+import 'package:tilawa/features/tour_guide/domain/services/tour_target_registry.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 import 'package:tilawa/screens/main_screen.dart';
@@ -63,6 +65,14 @@ class _MockSetLanguageUseCase extends Mock implements SetLanguageUseCase {}
 
 class _MockAppReviewTriggerManager extends Mock
     implements AppReviewTriggerManager {}
+
+class _NoopRecitersTourLauncher implements RecitersTourLauncher {
+  @override
+  Future<bool> maybeShowRecitersIntro(BuildContext context) async => false;
+
+  @override
+  Future<bool> maybeShowPlaybackTour(BuildContext context) async => false;
+}
 
 class _FakeStorage extends Fake implements Storage {
   @override
@@ -136,6 +146,9 @@ void main() {
     getIt.registerSingleton<AppReviewTriggerManager>(
       mockAppReviewTriggerManager,
     );
+
+    getIt.registerSingleton<TourTargetRegistry>(TourTargetRegistry());
+    getIt.registerSingleton<RecitersTourLauncher>(_NoopRecitersTourLauncher());
   });
 
   tearDown(() async {
@@ -339,6 +352,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 900));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.pump();
 
       expect(find.byType(RecitersScreen), findsOneWidget);

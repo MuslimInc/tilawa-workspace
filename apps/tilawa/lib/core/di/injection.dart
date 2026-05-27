@@ -1,8 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
-import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
-import 'package:tilawa/features/theme/presentation/cubit/theme_cubit.dart';
 import 'package:tilawa_core/di/injection.module.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
@@ -18,7 +16,7 @@ final GetIt getIt = GetIt.instance;
   externalPackageModulesBefore: [ExternalModule(TilawaCorePackageModule)],
 )
 Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
-  if (getIt.isRegistered<SettingsCubit>()) {
+  if (getIt.isRegistered<NetworkInfo>()) {
     return;
   }
 
@@ -27,9 +25,8 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
       (getIt.isRegistered<AppLaunchConfig>() ? getIt<AppLaunchConfig>() : null) ??
       AppLaunchConfig.fromEnvironment();
 
-  // Failed or partial init left registrations behind without SettingsCubit.
-  if (getIt.isRegistered<NetworkInfo>() ||
-      getIt.isRegistered<ThemeCubit>()) {
+  // Failed or partial init left registrations behind without a full graph.
+  if (getIt.isRegistered<AppLaunchConfig>() && !getIt.isRegistered<NetworkInfo>()) {
     await getIt.reset();
   }
 
@@ -40,9 +37,9 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
 
   await getIt.init();
 
-  if (!getIt.isRegistered<SettingsCubit>()) {
+  if (!getIt.isRegistered<NetworkInfo>()) {
     throw StateError(
-      'SettingsCubit was not registered after getIt.init(). '
+      'NetworkInfo was not registered after getIt.init(). '
       'Run: dart run build_runner build',
     );
   }
