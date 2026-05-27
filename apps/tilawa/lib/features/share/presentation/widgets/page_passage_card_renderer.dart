@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'reader_page_content_renderer.dart';
