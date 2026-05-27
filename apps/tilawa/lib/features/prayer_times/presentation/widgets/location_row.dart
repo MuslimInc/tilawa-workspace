@@ -28,8 +28,10 @@ class LocationRow extends StatelessWidget {
       builder: (context, constraints) {
         final bool narrowWidth = constraints.maxWidth < 420;
 
+        // onTap is always null so _LocationActionButton (and _QiblaActionRow)
+        // are never blocked by TilawaCard's Positioned.fill InkWell overlay.
         return TilawaCard(
-          onTap: hasQiblaAction || isLoading ? null : onUpdateLocation,
+          onTap: null,
           backgroundColor: colorScheme.surfaceContainerLow,
           borderRadius: tokens.radiusExtraLarge,
           borderColor: colorScheme.outlineVariant.withValues(

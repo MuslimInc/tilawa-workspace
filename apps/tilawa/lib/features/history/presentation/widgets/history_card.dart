@@ -23,6 +23,9 @@ class HistoryCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
     final double progressPercent = history.progressPercentage;
 
+    // The play IconButton must be a sibling of TilawaCard, not a child.
+    // TilawaCard's onTap overlay (Positioned.fill InkWell rendered last in
+    // the Stack) intercepts all taps before they reach any nested widget.
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: tokens.spaceLarge,
@@ -30,177 +33,187 @@ class HistoryCard extends StatelessWidget {
       ),
       child: GestureDetector(
         onLongPress: onLongPress,
-        child: TilawaCard(
-          onTap: onTap,
-          surface: TilawaCardSurface.flat,
-          backgroundColor: colorScheme.surfaceContainerLow,
-          borderColor: colorScheme.outlineVariant.withValues(
-            alpha: tokens.opacityMedium,
-          ),
-          borderWidth: tokens.borderWidthThin,
-          borderRadius: tokens.radiusLarge,
-          padding: EdgeInsets.all(tokens.spaceMedium),
-          child: Row(
-            children: [
-              // Surah artwork or icon
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                  color: colorScheme.primaryContainer,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: TilawaCard(
+                onTap: onTap,
+                surface: TilawaCardSurface.flat,
+                backgroundColor: colorScheme.surfaceContainerLow,
+                borderColor: colorScheme.outlineVariant.withValues(
+                  alpha: tokens.opacityMedium,
                 ),
-                child: history.artworkUrl != null
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(
-                          tokens.radiusSmall,
-                        ),
-                        child: Image.network(
-                          history.artworkUrl!,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, _, _) => _buildDefaultIcon(theme),
-                        ),
-                      )
-                    : _buildDefaultIcon(theme),
-              ),
-
-              SizedBox(width: tokens.spaceMedium),
-
-              // Surah info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                borderWidth: tokens.borderWidthThin,
+                borderRadius: tokens.radiusLarge,
+                padding: EdgeInsets.all(tokens.spaceMedium),
+                child: Row(
                   children: [
-                    // Surah name
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            history.surahName,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (history.completed)
-                          Icon(
-                            Icons.check_circle,
-                            size: 16,
-                            color: colorScheme.primary,
-                          ),
-                      ],
-                    ),
-
-                    SizedBox(height: tokens.spaceTiny),
-
-                    // Reciter name
-                    Text(
-                      history.reciterName,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
+                    // Surah artwork or icon
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(tokens.radiusSmall),
+                        color: colorScheme.primaryContainer,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      child: history.artworkUrl != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                tokens.radiusSmall,
+                              ),
+                              child: Image.network(
+                                history.artworkUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (_, _, _) =>
+                                    _buildDefaultIcon(theme),
+                              ),
+                            )
+                          : _buildDefaultIcon(theme),
                     ),
 
-                    SizedBox(height: tokens.spaceExtraSmall),
+                    SizedBox(width: tokens.spaceMedium),
 
-                    // Progress and time info
-                    Row(
-                      children: [
-                        // Play count
-                        if (history.playCount > 1) ...[
-                          Icon(
-                            Icons.replay,
-                            size: 12,
-                            color: colorScheme.secondary,
+                    // Surah info
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Surah name
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  history.surahName,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (history.completed)
+                                Icon(
+                                  Icons.check_circle,
+                                  size: 16,
+                                  color: colorScheme.primary,
+                                ),
+                            ],
                           ),
-                          SizedBox(width: tokens.spaceTiny),
+
+                          SizedBox(height: tokens.spaceTiny),
+
+                          // Reciter name
                           Text(
-                            '${history.playCount}',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colorScheme.secondary,
+                            history.reciterName,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+
+                          SizedBox(height: tokens.spaceExtraSmall),
+
+                          // Progress and time info
+                          Row(
+                            children: [
+                              // Play count
+                              if (history.playCount > 1) ...[
+                                Icon(
+                                  Icons.replay,
+                                  size: 12,
+                                  color: colorScheme.secondary,
+                                ),
+                                SizedBox(width: tokens.spaceTiny),
+                                Text(
+                                  '${history.playCount}',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: colorScheme.secondary,
+                                  ),
+                                ),
+                                SizedBox(width: tokens.spaceSmall),
+                              ],
+
+                              // Duration info
+                              Icon(
+                                Icons.access_time,
+                                size: 12,
+                                color: colorScheme.onSurfaceVariant,
+                              ),
+                              SizedBox(width: tokens.spaceTiny),
+                              Expanded(
+                                child: Text(
+                                  '${history.formattedLastPosition} / '
+                                  '${history.formattedDuration}',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+
+                              SizedBox(width: tokens.spaceSmall),
+
+                              // Played time ago
+                              Flexible(
+                                child: Text(
+                                  history.formattedPlayedAt,
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.end,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: tokens.spaceSmall),
+
+                          // Progress bar
+                          ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(tokens.radiusSmall),
+                            child: LinearProgressIndicator(
+                              value:
+                                  history.completed ? 1.0 : progressPercent / 100,
+                              minHeight: tokens.progressHeight,
+                              backgroundColor:
+                                  colorScheme.surfaceContainerHighest,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                history.completed
+                                    ? colorScheme.primary
+                                    : colorScheme.secondary,
+                              ),
                             ),
                           ),
-                          SizedBox(width: tokens.spaceSmall),
                         ],
-
-                        // Duration info
-                        Icon(
-                          Icons.access_time,
-                          size: 12,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        SizedBox(width: tokens.spaceTiny),
-                        Expanded(
-                          child: Text(
-                            '${history.formattedLastPosition} / '
-                            '${history.formattedDuration}',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-
-                        SizedBox(width: tokens.spaceSmall),
-
-                        // Played time ago
-                        Flexible(
-                          child: Text(
-                            history.formattedPlayedAt,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.end,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: tokens.spaceSmall),
-
-                    // Progress bar
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(tokens.radiusSmall),
-                      child: LinearProgressIndicator(
-                        value: history.completed ? 1.0 : progressPercent / 100,
-                        minHeight: tokens.progressHeight,
-                        backgroundColor: colorScheme.surfaceContainerHighest,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          history.completed
-                              ? colorScheme.primary
-                              : colorScheme.secondary,
-                        ),
                       ),
                     ),
                   ],
                 ),
               ),
+            ),
 
-              SizedBox(width: tokens.spaceSmall),
+            SizedBox(width: tokens.spaceSmall),
 
-              // Play button
-              IconButton(
-                onPressed: onTap,
-                icon: Icon(
-                  history.completed ? Icons.replay : Icons.play_arrow,
-                  color: colorScheme.primary,
-                ),
-                style: IconButton.styleFrom(
-                  backgroundColor: colorScheme.primaryContainer,
-                ),
-                tooltip: history.completed
-                    ? context.l10n.play
-                    : context.l10n.resume,
+            // Play button lives outside the card so it is not blocked by the
+            // card's Positioned.fill InkWell overlay.
+            IconButton(
+              onPressed: onTap,
+              icon: Icon(
+                history.completed ? Icons.replay : Icons.play_arrow,
+                color: colorScheme.primary,
               ),
-            ],
-          ),
+              style: IconButton.styleFrom(
+                backgroundColor: colorScheme.primaryContainer,
+              ),
+              tooltip: history.completed ? context.l10n.play : context.l10n.resume,
+            ),
+          ],
         ),
       ),
     );
