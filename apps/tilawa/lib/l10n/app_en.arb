@@ -2944,5 +2944,77 @@
     "splashSlowLoadingNotice": "Some content may take a moment to load",
     "@splashSlowLoadingNotice": {
         "description": "Toast shown when startup times out and the app navigates to home in a degraded state"
+    },
+    "tourActionNext": "Next",
+    "@tourActionNext": {
+        "description": "Button that advances to the next step in a product tour"
+    },
+    "tourActionFinish": "Done",
+    "@tourActionFinish": {
+        "description": "Button that closes the last step of a product tour"
+    },
+    "tourActionSkip": "Skip",
+    "@tourActionSkip": {
+        "description": "Button that dismisses a product tour without finishing it"
+    },
+    "tourStepSemantics": "Step {current} of {total}",
+    "@tourStepSemantics": {
+        "description": "Screen-reader label announcing tour progress",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "tourRecitersSearchTitle": "Find a reciter",
+    "@tourRecitersSearchTitle": {
+        "description": "Title for the tour step highlighting the reciter search field"
+    },
+    "tourRecitersSearchDescription": "Search by name to quickly jump to any reciter.",
+    "@tourRecitersSearchDescription": {
+        "description": "Body text for the tour step highlighting the reciter search field"
+    },
+    "tourRecitersFavoritesTitle": "Save your favorites",
+    "@tourRecitersFavoritesTitle": {
+        "description": "Title for the tour step highlighting the favorites filter"
+    },
+    "tourRecitersFavoritesDescription": "Tap the heart to keep the reciters you love within reach.",
+    "@tourRecitersFavoritesDescription": {
+        "description": "Body text for the tour step highlighting the favorites filter"
+    },
+    "tourRecitersOpenReciterTitle": "Open a reciter",
+    "@tourRecitersOpenReciterTitle": {
+        "description": "Title for the tour step that prompts opening a reciter from the list"
+    },
+    "tourRecitersOpenReciterDescription": "Tap a reciter to browse their recitations and start listening.",
+    "@tourRecitersOpenReciterDescription": {
+        "description": "Body text for the tour step that prompts opening a reciter from the list"
+    },
+    "tourReciterPlaybackPlayingTitle": "Now playing",
+    "@tourReciterPlaybackPlayingTitle": {
+        "description": "Title for the tour step highlighting the currently playing surah row"
+    },
+    "tourReciterPlaybackPlayingDescription": "The highlighted surah is playing now. Tap any surah to switch.",
+    "@tourReciterPlaybackPlayingDescription": {
+        "description": "Body text for the tour step highlighting the currently playing surah row"
+    },
+    "tourReciterPlaybackMiniPlayerTitle": "Mini player",
+    "@tourReciterPlaybackMiniPlayerTitle": {
+        "description": "Title for the tour step highlighting the mini player bar"
+    },
+    "tourReciterPlaybackMiniPlayerDescription": "Control playback from here while you keep browsing.",
+    "@tourReciterPlaybackMiniPlayerDescription": {
+        "description": "Body text for the tour step highlighting the mini player bar"
+    },
+    "tourDebugResetTitle": "Reset product tours",
+    "@tourDebugResetTitle": {
+        "description": "Debug-only settings tile that clears completed product tours"
+    },
+    "tourDebugResetDone": "Product tours reset",
+    "@tourDebugResetDone": {
+        "description": "Confirmation shown after the debug reset clears tour progress"
     }
 }

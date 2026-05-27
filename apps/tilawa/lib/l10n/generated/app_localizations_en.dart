@@ -2205,61 +2205,64 @@ class AppLocalizationsEn extends AppLocalizations {
       'Store reviews are not supported on this platform.';
 
   @override
+  String get a11ySplashLoading => 'Rattil, loading';
+
+  @override
+  String get splashSlowLoadingNotice =>
+      'Some content may take a moment to load';
+
+  @override
   String get tourActionNext => 'Next';
 
   @override
-  String get tourActionFinish => 'Got it';
+  String get tourActionFinish => 'Done';
 
   @override
   String get tourActionSkip => 'Skip';
 
   @override
   String tourStepSemantics(int current, int total) {
-    return 'Tour step $current of $total';
+    return 'Step $current of $total';
   }
-
-  @override
-  String get tourDebugResetTitle => 'Reset product tours';
-
-  @override
-  String get tourDebugResetSubtitle =>
-      'Show contextual tours again on the next trigger';
-
-  @override
-  String get tourDebugResetDone => 'Product tours reset';
 
   @override
   String get tourRecitersSearchTitle => 'Find a reciter';
 
   @override
   String get tourRecitersSearchDescription =>
-      'Search by name to jump straight to the voice you want.';
+      'Search by name to quickly jump to any reciter.';
 
   @override
-  String get tourRecitersFavoritesTitle => 'Save favourites';
+  String get tourRecitersFavoritesTitle => 'Save your favorites';
 
   @override
   String get tourRecitersFavoritesDescription =>
-      'Tap the heart to filter your saved reciters anytime.';
+      'Tap the heart to keep the reciters you love within reach.';
 
   @override
   String get tourRecitersOpenReciterTitle => 'Open a reciter';
 
   @override
   String get tourRecitersOpenReciterDescription =>
-      'Choose a reciter to browse surahs and start listening.';
+      'Tap a reciter to browse their recitations and start listening.';
 
   @override
   String get tourReciterPlaybackPlayingTitle => 'Now playing';
 
   @override
   String get tourReciterPlaybackPlayingDescription =>
-      'The surah you tapped stays highlighted while it plays.';
+      'The highlighted surah is playing now. Tap any surah to switch.';
 
   @override
-  String get tourReciterPlaybackMiniPlayerTitle => 'Control playback';
+  String get tourReciterPlaybackMiniPlayerTitle => 'Mini player';
 
   @override
   String get tourReciterPlaybackMiniPlayerDescription =>
-      'Use the mini player to pause, skip, or expand for more controls.';
+      'Control playback from here while you keep browsing.';
+
+  @override
+  String get tourDebugResetTitle => 'Reset product tours';
+
+  @override
+  String get tourDebugResetDone => 'Product tours reset';
 }

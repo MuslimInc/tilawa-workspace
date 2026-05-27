@@ -24,7 +24,7 @@
     "@west": {
         "description": "West direction label"
     },
-    "appTitle": "رَتِّلْ",
+    "appTitle": "رتل",
     "@appTitle": {
         "description": "The title of the application"
     },
@@ -657,7 +657,7 @@
     "@signIn": {
         "description": "Sign in button text"
     },
-    "welcomeToApp": "مرحباً بك في رَتِّلْ",
+    "welcomeToApp": "مرحباً بك في رتل",
     "@welcomeToApp": {
         "description": "Welcome message on login screen"
     },
@@ -2225,7 +2225,7 @@
     "@sharing": {
         "description": "Status message while sharing"
     },
-    "sharedViaTilawa": "تمت المشاركة عبر رَتِّلْ",
+    "sharedViaTilawa": "تمت المشاركة عبر رتل",
     "@sharedViaTilawa": {
         "description": "Branding text on shared content"
     },
@@ -2547,7 +2547,7 @@
     "@batteryOptimizationExemptionRequired": {
         "description": "Banner shown when the app is not whitelisted from Doze / battery optimization"
     },
-    "oemAutostartHint": "في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق رَتِّلْ من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
+    "oemAutostartHint": "في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق رتل من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
     "@oemAutostartHint": {
         "description": "Informational banner shown on aggressive OEM ROMs"
     },
@@ -2674,11 +2674,11 @@
     "@moreOptions": {
         "description": "Label for the more-options overflow menu button"
     },
-    "supportTilawa": "ادعم رَتِّلْ",
+    "supportTilawa": "ادعم رتل",
     "@supportTilawa": {
         "description": "Support Tilawa screen and settings entry title"
     },
-    "rateTilawa": "قيّم رَتِّلْ",
+    "rateTilawa": "قيّم رتل",
     "@rateTilawa": {
         "description": "Settings row to open the in-app review dialog"
     },
@@ -2686,7 +2686,7 @@
     "@rateTilawaSubtitle": {
         "description": "Optional subtitle under the rate Tilawa settings row"
     },
-    "shareTilawa": "شارك رَتِّلْ",
+    "shareTilawa": "شارك رتل",
     "@shareTilawa": {
         "description": "Settings row to share the app with others"
     },
@@ -2706,15 +2706,15 @@
     "@shareTilawaFailed": {
         "description": "Error shown when sharing Tilawa from settings fails"
     },
-    "supportIntroLine": "مشاركتك تساعدنا على استمرار رَتِّلْ.",
+    "supportIntroLine": "مشاركتك تساعدنا على استمرار رتل.",
     "@supportIntroLine": {
         "description": "Support screen single-line intro under app bar"
     },
-    "supportTilawaSubtitle": "مشاركتك تساعدنا على استمرار رَتِّلْ.",
+    "supportTilawaSubtitle": "مشاركتك تساعدنا على استمرار رتل.",
     "@supportTilawaSubtitle": {
         "description": "Legacy alias; prefer supportIntroLine"
     },
-    "supportMissionBody": "مشاركتك تساعدنا على استمرار رَتِّلْ.",
+    "supportMissionBody": "مشاركتك تساعدنا على استمرار رتل.",
     "@supportMissionBody": {
         "description": "Legacy alias; unused on support screen"
     },
@@ -2766,7 +2766,7 @@
     "@supportConfirmationTitle": {
         "description": "Support purchase confirmation sheet title"
     },
-    "supportConfirmationBody": "يتم الدفع عبر Google Play. رَتِّلْ لا يحتفظ ببيانات بطاقتك.",
+    "supportConfirmationBody": "يتم الدفع عبر Google Play. رتل لا يحتفظ ببيانات بطاقتك.",
     "@supportConfirmationBody": {
         "description": "Support purchase confirmation sheet body"
     },
@@ -2798,7 +2798,7 @@
     "@supportRestoreHint": {
         "description": "Legacy restore helper; unused on support screen"
     },
-    "supportTrustLinePrefix": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (",
+    "supportTrustLinePrefix": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رتل التقنية وجمعيات خيرية (",
     "@supportTrustLinePrefix": {
         "description": "Support trust line before charities link label"
     },
@@ -2822,15 +2822,15 @@
     "@supportTrustLineSuffix": {
         "description": "Support trust line after charities link label"
     },
-    "supportTrustLine": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
+    "supportTrustLine": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رتل التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
     "@supportTrustLine": {
         "description": "Full trust line for legacy use; UI uses prefix/link/suffix"
     },
-    "supportPlayFooter": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
+    "supportPlayFooter": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رتل التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
     "@supportPlayFooter": {
         "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
     },
-    "supportDisclaimer": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رَتِّلْ التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
+    "supportDisclaimer": "الدفع عبر Google Play · يُوجَّه جزء من المبلغ إلى منظمة رتل التقنية وجمعيات خيرية (رابط الجمعيات الخيرية)",
     "@supportDisclaimer": {
         "description": "Legacy alias; prefer supportTrustLinePrefix + link + suffix"
     },
@@ -2866,7 +2866,7 @@
     "@supportSelectTier": {
         "description": "Prompt when no tier selected"
     },
-    "supportSettingsGroupTitle": "ادعم رَتِّلْ",
+    "supportSettingsGroupTitle": "ادعم رتل",
     "@supportSettingsGroupTitle": {
         "description": "Settings group title for support entry"
     },
@@ -2917,5 +2917,77 @@
     "splashSlowLoadingNotice": "قد يستغرق بعض المحتوى لحظة للتحميل",
     "@splashSlowLoadingNotice": {
         "description": "Toast shown when startup times out and the app navigates to home in a degraded state"
+    },
+    "tourActionNext": "التالي",
+    "@tourActionNext": {
+        "description": "Button that advances to the next step in a product tour"
+    },
+    "tourActionFinish": "تم",
+    "@tourActionFinish": {
+        "description": "Button that closes the last step of a product tour"
+    },
+    "tourActionSkip": "تخطٍّ",
+    "@tourActionSkip": {
+        "description": "Button that dismisses a product tour without finishing it"
+    },
+    "tourStepSemantics": "الخطوة {current} من {total}",
+    "@tourStepSemantics": {
+        "description": "Screen-reader label announcing tour progress",
+        "placeholders": {
+            "current": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
+    },
+    "tourRecitersSearchTitle": "ابحث عن قارئ",
+    "@tourRecitersSearchTitle": {
+        "description": "Title for the tour step highlighting the reciter search field"
+    },
+    "tourRecitersSearchDescription": "ابحث بالاسم للوصول السريع إلى أي قارئ.",
+    "@tourRecitersSearchDescription": {
+        "description": "Body text for the tour step highlighting the reciter search field"
+    },
+    "tourRecitersFavoritesTitle": "احفظ المفضّلين",
+    "@tourRecitersFavoritesTitle": {
+        "description": "Title for the tour step highlighting the favorites filter"
+    },
+    "tourRecitersFavoritesDescription": "اضغط على القلب لإبقاء القرّاء المفضّلين لديك في متناول يدك.",
+    "@tourRecitersFavoritesDescription": {
+        "description": "Body text for the tour step highlighting the favorites filter"
+    },
+    "tourRecitersOpenReciterTitle": "افتح قارئًا",
+    "@tourRecitersOpenReciterTitle": {
+        "description": "Title for the tour step that prompts opening a reciter from the list"
+    },
+    "tourRecitersOpenReciterDescription": "اضغط على قارئ لتصفّح تلاواته وبدء الاستماع.",
+    "@tourRecitersOpenReciterDescription": {
+        "description": "Body text for the tour step that prompts opening a reciter from the list"
+    },
+    "tourReciterPlaybackPlayingTitle": "قيد التشغيل الآن",
+    "@tourReciterPlaybackPlayingTitle": {
+        "description": "Title for the tour step highlighting the currently playing surah row"
+    },
+    "tourReciterPlaybackPlayingDescription": "السورة المميّزة تُشغَّل الآن. اضغط على أي سورة للتبديل.",
+    "@tourReciterPlaybackPlayingDescription": {
+        "description": "Body text for the tour step highlighting the currently playing surah row"
+    },
+    "tourReciterPlaybackMiniPlayerTitle": "المشغّل المصغّر",
+    "@tourReciterPlaybackMiniPlayerTitle": {
+        "description": "Title for the tour step highlighting the mini player bar"
+    },
+    "tourReciterPlaybackMiniPlayerDescription": "تحكّم في التشغيل من هنا أثناء متابعة التصفّح.",
+    "@tourReciterPlaybackMiniPlayerDescription": {
+        "description": "Body text for the tour step highlighting the mini player bar"
+    },
+    "tourDebugResetTitle": "إعادة تعيين الجولات التعريفية",
+    "@tourDebugResetTitle": {
+        "description": "Debug-only settings tile that clears completed product tours"
+    },
+    "tourDebugResetDone": "تمت إعادة تعيين الجولات التعريفية",
+    "@tourDebugResetDone": {
+        "description": "Confirmation shown after the debug reset clears tour progress"
     }
 }

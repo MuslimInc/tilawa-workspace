@@ -4022,107 +4022,113 @@ abstract class AppLocalizations {
   /// **'Store reviews are not supported on this platform.'**
   String get appReviewPlatformUnsupported;
 
-  /// Primary action to advance an in-app product tour step
+  /// Screen-reader label announced while the splash loading screen is visible
+  ///
+  /// In en, this message translates to:
+  /// **'Rattil, loading'**
+  String get a11ySplashLoading;
+
+  /// Toast shown when startup times out and the app navigates to home in a degraded state
+  ///
+  /// In en, this message translates to:
+  /// **'Some content may take a moment to load'**
+  String get splashSlowLoadingNotice;
+
+  /// Button that advances to the next step in a product tour
   ///
   /// In en, this message translates to:
   /// **'Next'**
   String get tourActionNext;
 
-  /// Primary action on the last step of a product tour
+  /// Button that closes the last step of a product tour
   ///
   /// In en, this message translates to:
-  /// **'Got it'**
+  /// **'Done'**
   String get tourActionFinish;
 
-  /// Dismiss the entire product tour without finishing every step
+  /// Button that dismisses a product tour without finishing it
   ///
   /// In en, this message translates to:
   /// **'Skip'**
   String get tourActionSkip;
 
-  /// Screen reader label for a product tour tooltip
+  /// Screen-reader label announcing tour progress
   ///
   /// In en, this message translates to:
-  /// **'Tour step {current} of {total}'**
+  /// **'Step {current} of {total}'**
   String tourStepSemantics(int current, int total);
 
-  /// Developer settings row to clear tour completion flags
-  ///
-  /// In en, this message translates to:
-  /// **'Reset product tours'**
-  String get tourDebugResetTitle;
-
-  /// Subtitle for developer tour reset row
-  ///
-  /// In en, this message translates to:
-  /// **'Show contextual tours again on the next trigger'**
-  String get tourDebugResetSubtitle;
-
-  /// Snackbar after clearing tour completion state
-  ///
-  /// In en, this message translates to:
-  /// **'Product tours reset'**
-  String get tourDebugResetDone;
-
-  /// Reciters intro tour — search step title
+  /// Title for the tour step highlighting the reciter search field
   ///
   /// In en, this message translates to:
   /// **'Find a reciter'**
   String get tourRecitersSearchTitle;
 
-  /// Reciters intro tour — search step body
+  /// Body text for the tour step highlighting the reciter search field
   ///
   /// In en, this message translates to:
-  /// **'Search by name to jump straight to the voice you want.'**
+  /// **'Search by name to quickly jump to any reciter.'**
   String get tourRecitersSearchDescription;
 
-  /// Reciters intro tour — favourites step title
+  /// Title for the tour step highlighting the favorites filter
   ///
   /// In en, this message translates to:
-  /// **'Save favourites'**
+  /// **'Save your favorites'**
   String get tourRecitersFavoritesTitle;
 
-  /// Reciters intro tour — favourites step body
+  /// Body text for the tour step highlighting the favorites filter
   ///
   /// In en, this message translates to:
-  /// **'Tap the heart to filter your saved reciters anytime.'**
+  /// **'Tap the heart to keep the reciters you love within reach.'**
   String get tourRecitersFavoritesDescription;
 
-  /// Reciters intro tour — open reciter step title
+  /// Title for the tour step that prompts opening a reciter from the list
   ///
   /// In en, this message translates to:
   /// **'Open a reciter'**
   String get tourRecitersOpenReciterTitle;
 
-  /// Reciters intro tour — open reciter step body
+  /// Body text for the tour step that prompts opening a reciter from the list
   ///
   /// In en, this message translates to:
-  /// **'Choose a reciter to browse surahs and start listening.'**
+  /// **'Tap a reciter to browse their recitations and start listening.'**
   String get tourRecitersOpenReciterDescription;
 
-  /// Reciter details playback tour — active surah step title
+  /// Title for the tour step highlighting the currently playing surah row
   ///
   /// In en, this message translates to:
   /// **'Now playing'**
   String get tourReciterPlaybackPlayingTitle;
 
-  /// Reciter details playback tour — active surah step body
+  /// Body text for the tour step highlighting the currently playing surah row
   ///
   /// In en, this message translates to:
-  /// **'The surah you tapped stays highlighted while it plays.'**
+  /// **'The highlighted surah is playing now. Tap any surah to switch.'**
   String get tourReciterPlaybackPlayingDescription;
 
-  /// Reciter details playback tour — mini player step title
+  /// Title for the tour step highlighting the mini player bar
   ///
   /// In en, this message translates to:
-  /// **'Control playback'**
+  /// **'Mini player'**
   String get tourReciterPlaybackMiniPlayerTitle;
 
-  /// Reciter details playback tour — mini player step body
+  /// Body text for the tour step highlighting the mini player bar
   ///
   /// In en, this message translates to:
-  /// **'Use the mini player to pause, skip, or expand for more controls.'**
+  /// **'Control playback from here while you keep browsing.'**
   String get tourReciterPlaybackMiniPlayerDescription;
+
+  /// Debug-only settings tile that clears completed product tours
+  ///
+  /// In en, this message translates to:
+  /// **'Reset product tours'**
+  String get tourDebugResetTitle;
+
+  /// Confirmation shown after the debug reset clears tour progress
+  ///
+  /// In en, this message translates to:
+  /// **'Product tours reset'**
+  String get tourDebugResetDone;
 }
 
 class _AppLocalizationsDelegate
