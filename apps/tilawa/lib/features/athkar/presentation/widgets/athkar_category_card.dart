@@ -26,30 +26,37 @@ class AthkarCategoryCard extends StatelessWidget {
       surface: TilawaCardSurface.raised,
       backgroundColor: colorScheme.surface,
       padding: EdgeInsets.all(tokens.spaceLarge),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        spacing: tokens.spaceMedium,
-        children: [
-          TilawaIconBox(
-            icon: iconData,
-            size: tokens.iconSizeLarge,
-            backgroundColor: colorScheme.primary.withValues(
-              alpha: tokens.opacitySubtle,
+      // Whole card is one navigation target; let [TilawaCard.onTap] receive taps
+      // from decorative children (icon box, label).
+      child: IgnorePointer(
+        child: Column(
+          spacing: tokens.spaceMedium,
+          crossAxisAlignment: .stretch,
+          mainAxisAlignment: .center,
+          children: [
+            Expanded(
+              child: TilawaIconBox(
+                icon: iconData,
+                size: tokens.iconSizeLarge,
+                backgroundColor: colorScheme.primary.withValues(
+                  alpha: tokens.opacitySubtle,
+                ),
+                iconColor: colorScheme.primary,
+                borderRadius: tokens.radiusLarge,
+              ),
             ),
-            iconColor: colorScheme.primary,
-            borderRadius: tokens.radiusLarge,
-          ),
-          Text(
-            name,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
+            Text(
+              name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
