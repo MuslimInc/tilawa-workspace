@@ -62,13 +62,13 @@ class AthkarCategoriesScreen extends StatelessWidget {
                 } else if (state is AthkarCategoriesLoaded) {
                   final tokens = Theme.of(context).tokens;
                   final categories = [
-                    ...state.categories,
                     AthkarCategory(
                       id: TasbeehConstants.categoryId,
                       nameAr: context.l10n.tasbeehCategory,
                       nameEn: context.l10n.tasbeehCategory,
                       icon: TasbeehConstants.categoryIconName,
                     ),
+                    ...state.categories,
                   ];
 
                   return TilawaContentGrid(
