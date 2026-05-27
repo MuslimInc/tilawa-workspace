@@ -24,7 +24,6 @@ Widget _buildHarness({
     supportedLocales: AppLocalizations.supportedLocales,
     theme: AppTheme.getLightTheme(
       primaryColor: AppColors.primaryCoral,
-      useGoogleFontsOverride: false,
     ),
     home: Scaffold(
       body: SettingsShareAppTile(

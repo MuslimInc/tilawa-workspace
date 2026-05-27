@@ -8,6 +8,7 @@ import 'package:get_it/get_it.dart';
 import 'package:provider/provider.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/features/app_review/domain/services/app_review_flow_guard.dart';
 import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa/features/audio_player/domain/entities/player_background_configuration.dart';
@@ -303,7 +304,10 @@ void main() {
 
     expect(find.byType(RecitersScreen), findsNothing);
 
-    await tester.pump(const Duration(milliseconds: 1100));
+    await tester.pump(
+      AppStartupReadiness.initialTabRouteSettleDelay -
+          const Duration(milliseconds: 50),
+    );
     expect(find.byType(RecitersScreen), findsNothing);
   });
 
@@ -312,7 +316,10 @@ void main() {
   ) async {
     await tester.pumpWidget(buildTestApp());
 
-    await tester.pump(const Duration(milliseconds: 1300));
+    await tester.pump(
+      AppStartupReadiness.initialTabRouteSettleDelay +
+          const Duration(milliseconds: 100),
+    );
     await tester.pump();
 
     expect(find.byType(RecitersScreen), findsOneWidget);
@@ -323,7 +330,10 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(buildTestApp());
 
-      await tester.pump(const Duration(milliseconds: 1300));
+      await tester.pump(
+        AppStartupReadiness.initialTabRouteSettleDelay +
+            const Duration(milliseconds: 100),
+      );
       await tester.pump();
       expect(find.byType(RecitersScreen), findsOneWidget);
 

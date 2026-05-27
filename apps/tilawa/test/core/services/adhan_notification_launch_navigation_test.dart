@@ -15,6 +15,7 @@ import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.d
 import 'package:tilawa/features/auth/domain/usecases/prepare_google_sign_in_use_case.dart';
 import 'package:tilawa/features/onboarding/domain/usecases/check_onboarding_status.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import 'package:tilawa/features/splash/domain/repositories/startup_notification_repository.dart';
 import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use_case.dart';
 import 'package:tilawa/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:tilawa/features/splash/presentation/bloc/splash_event.dart';
@@ -48,6 +49,7 @@ import 'adhan_notification_launch_navigation_test.mocks.dart';
   AppStartupReadiness,
   GetCurrentUserUseCase,
   CheckOnboardingStatus,
+  StartupNotificationRepository,
 ])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -255,6 +257,7 @@ void main() {
 
         final mockGetCurrentUser = MockGetCurrentUserUseCase();
         final mockCheckOnboarding = MockCheckOnboardingStatus();
+        final mockNotificationRepository = MockStartupNotificationRepository();
         when(mockCheckOnboarding.call()).thenAnswer((_) async => true);
         when(mockGetCurrentUser.call()).thenReturn(
           UserEntity(
@@ -264,10 +267,14 @@ void main() {
             createdAt: DateTime(2026),
           ),
         );
+        when(mockNotificationRepository.consumePendingNotification()).thenReturn(
+          Map<String, dynamic>.from(jsonDecode(nativeAdhanPayload) as Map),
+        );
 
         final useCase = GetSplashNextRouteUseCase(
           mockGetCurrentUser,
           mockCheckOnboarding,
+          mockNotificationRepository,
         );
 
         final result = await useCase();

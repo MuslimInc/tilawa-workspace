@@ -86,12 +86,13 @@ void main() {
     test(
       'returns notification launch for pending native adhan cold start',
       () async {
-        const String payload =
-            '{"type":"prayer","prayer_key":"fajr","is_adhan_playing":true}';
-        AppRouter.setPendingColdStartRoute(
-          const PrayerNotificationStatusRoute().location,
-          extra: payload,
-        );
+        when(
+          () => mockNotificationRepository.consumePendingNotification(),
+        ).thenReturn({
+          'type': 'prayer',
+          'prayer_key': 'fajr',
+          'is_adhan_playing': true,
+        });
 
         final result = await useCase();
 
