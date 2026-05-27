@@ -83,9 +83,9 @@ class _AppShellScreenState extends State<AppShellScreen> {
     return [
       _NavDestination(
         index: 0,
-        icon: FluentIcons.person_24_regular,
-        activeIcon: FluentIcons.person_24_filled,
-        label: context.l10n.bottomNavReciters,
+        icon: FluentIcons.search_24_regular,
+        activeIcon: FluentIcons.search_24_filled,
+        label: context.l10n.bottomNavSearch,
         identifier: 'reciters_tab',
       ),
       _NavDestination(
@@ -129,19 +129,36 @@ class _AppShellScreenState extends State<AppShellScreen> {
     return destinations.indexWhere((d) => d.index == state.currentIndex);
   }
 
-  void _navigateToShellTab(BuildContext context, int tabIndex) {
-    final String location = QuranPlayerRoutePolicy.currentMatchedLocation();
-    final bool onMainShell = QuranPlayerRoutePolicy.isMainShell(location);
+  bool _isOnMainShell() {
+    return QuranPlayerRoutePolicy.isMainShell(
+      QuranPlayerRoutePolicy.currentMatchedLocation(),
+    );
+  }
 
-    if (!onMainShell) {
-      try {
-        const HomeRoute().go(context);
-      } catch (_) {
-        AppRouter.router.go(const HomeRoute().location);
-      }
+  void _ensureMainShellRoute(BuildContext context) {
+    if (_isOnMainShell()) {
+      return;
     }
+    try {
+      const HomeRoute().go(context);
+    } catch (_) {
+      AppRouter.router.go(const HomeRoute().location);
+    }
+  }
 
+  void _navigateToShellTab(BuildContext context, int tabIndex) {
+    final bool onMainShell = _isOnMainShell();
+    if (!onMainShell) {
+      _ensureMainShellRoute(context);
+    }
     _mainScreenCubit.selectTab(tabIndex, force: !onMainShell);
+  }
+
+  void _openRecitersSearch(BuildContext context) {
+    if (!_isOnMainShell()) {
+      _ensureMainShellRoute(context);
+    }
+    _mainScreenCubit.openRecitersSearch();
   }
 
   void _onDestinationSelected(
@@ -152,6 +169,11 @@ class _AppShellScreenState extends State<AppShellScreen> {
     final _NavDestination destination = destinations[index];
     if (destination.index == null) {
       const QuranLastReadRoute().push(context);
+      return;
+    }
+
+    if (destination.index == 0) {
+      _openRecitersSearch(context);
       return;
     }
 

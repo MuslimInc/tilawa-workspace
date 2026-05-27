@@ -347,6 +347,9 @@
         "description": "Settings section title"
     },
     "bottomNavReciters": "القراء",
+    "bottomNavSearch": "بحث",
+    "recitersSearchSuggestedTitle": "قراء مقترحون",
+    "recitersSearchResultsFor": "نتائج «{query}»",
     "bottomNavPrayer": "الصلاة",
     "bottomNavQuran": "القرآن",
     "bottomNavAthkar": "الأذكار",

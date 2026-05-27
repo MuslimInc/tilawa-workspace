@@ -596,11 +596,29 @@ abstract class AppLocalizations {
   /// **'Support'**
   String get settingsSupportSection;
 
-  /// Single-word label for the reciters tab in the phone bottom navigation bar
+  /// Legacy key; prefer bottomNavSearch for shell navigation
   ///
   /// In en, this message translates to:
   /// **'Reciters'**
   String get bottomNavReciters;
+
+  /// Single-word label for the reciter search entry in bottom navigation
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get bottomNavSearch;
+
+  /// Section title for suggested reciters while search is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested reciters'**
+  String get recitersSearchSuggestedTitle;
+
+  /// Summary line when showing filtered reciter search results
+  ///
+  /// In en, this message translates to:
+  /// **'Results for “{query}”'**
+  String recitersSearchResultsFor(String query);
 
   /// Single-word label for the prayer times tab in the phone bottom navigation bar
   ///

@@ -149,6 +149,17 @@ class MainScreenCubit extends Cubit<MainScreenState> {
     );
   }
 
+  /// Selects the reciters tab and signals [RecitersScreen] to focus search.
+  void openRecitersSearch() {
+    emit(
+      state.copyWith(
+        currentIndex: 0,
+        builtTabIndexes: {...state.builtTabIndexes, 0},
+        recitersSearchFocusTick: state.recitersSearchFocusTick + 1,
+      ),
+    );
+  }
+
   @override
   Future<void> close() {
     _shellActivationTimer?.cancel();

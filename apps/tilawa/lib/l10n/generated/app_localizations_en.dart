@@ -281,6 +281,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bottomNavReciters => 'Reciters';
 
   @override
+  String get bottomNavSearch => 'Search';
+
+  @override
+  String get recitersSearchSuggestedTitle => 'Suggested reciters';
+
+  @override
+  String recitersSearchResultsFor(String query) {
+    return 'Results for “$query”';
+  }
+
+  @override
   String get bottomNavPrayer => 'Prayer';
 
   @override

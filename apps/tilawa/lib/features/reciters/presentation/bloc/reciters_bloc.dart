@@ -6,6 +6,7 @@ import 'package:tilawa_core/entities/reciter_entity.dart' as entity;
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/usecases/get_reciters_use_case.dart';
+import '../utils/reciter_search_query_normalizer.dart';
 
 part 'reciters_event.dart';
 part 'reciters_state.dart';
@@ -291,17 +292,23 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     bool showFavoritesOnly,
     Set<int> favoriteIds,
   ) {
-    final String normalizedQuery = searchQuery.trim().toLowerCase();
+    final String normalizedQuery = ReciterSearchQueryNormalizer.normalize(
+      searchQuery,
+    );
     final Set<int> favoriteIdsLookup = favoriteIds;
     var filtered = reciters;
 
     // Filter by search query
     if (normalizedQuery.isNotEmpty) {
-      filtered = filtered.where((reciter) {
-        final String reciterName = reciter.name.toLowerCase();
-        final String reciterLetter = reciter.letter.toLowerCase();
-        return reciterName.contains(normalizedQuery) ||
-            reciterLetter.contains(normalizedQuery);
+      filtered = filtered.where((entity.ReciterEntity reciter) {
+        final String name = ReciterSearchQueryNormalizer.normalize(
+          reciter.name,
+        );
+        final String letter = ReciterSearchQueryNormalizer.normalize(
+          reciter.letter,
+        );
+        return name.contains(normalizedQuery) ||
+            letter.contains(normalizedQuery);
       }).toList();
     }
 

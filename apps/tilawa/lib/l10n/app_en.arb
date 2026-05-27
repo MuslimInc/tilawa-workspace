@@ -360,7 +360,24 @@
     },
     "bottomNavReciters": "Reciters",
     "@bottomNavReciters": {
-        "description": "Single-word label for the reciters tab in the phone bottom navigation bar"
+        "description": "Legacy key; prefer bottomNavSearch for shell navigation"
+    },
+    "bottomNavSearch": "Search",
+    "@bottomNavSearch": {
+        "description": "Single-word label for the reciter search entry in bottom navigation"
+    },
+    "recitersSearchSuggestedTitle": "Suggested reciters",
+    "@recitersSearchSuggestedTitle": {
+        "description": "Section title for suggested reciters while search is empty"
+    },
+    "recitersSearchResultsFor": "Results for “{query}”",
+    "@recitersSearchResultsFor": {
+        "description": "Summary line when showing filtered reciter search results",
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
     },
     "bottomNavPrayer": "Prayer",
     "@bottomNavPrayer": {

@@ -281,6 +281,17 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bottomNavReciters => 'القراء';
 
   @override
+  String get bottomNavSearch => 'بحث';
+
+  @override
+  String get recitersSearchSuggestedTitle => 'قراء مقترحون';
+
+  @override
+  String recitersSearchResultsFor(String query) {
+    return 'نتائج «$query»';
+  }
+
+  @override
   String get bottomNavPrayer => 'الصلاة';
 
   @override
