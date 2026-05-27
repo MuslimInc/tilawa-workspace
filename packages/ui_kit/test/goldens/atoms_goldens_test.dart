@@ -2,7 +2,6 @@ import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa_ui_kit/src/atoms/atoms.dart';
-import 'package:tilawa_ui_kit/src/foundation/foundation.dart';
 
 import '../../lib/src/previews/preview_wrapper.dart';
 import 'golden_constraints.dart';

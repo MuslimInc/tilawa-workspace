@@ -178,14 +178,23 @@ class TilawaCard extends StatelessWidget {
           : null,
     );
 
-    final Widget content = Container(
-      decoration: decoration,
+    final Widget decoratedSurface = Container(decoration: decoration);
 
-      child: Padding(padding: padding ?? tokens.padding, child: child),
+    final Widget paddedChild = Padding(
+      padding: padding ?? tokens.padding,
+      child: child,
     );
 
     if (onTap == null) {
-      return content;
+      return SizedBox(
+        width: double.infinity,
+        child: Stack(
+          children: [
+            Positioned.fill(child: decoratedSurface),
+            paddedChild,
+          ],
+        ),
+      );
     }
 
     final effectiveSplashColor =
@@ -198,42 +207,37 @@ class TilawaCard extends StatelessWidget {
 
     // Stack layout (z-order matters for hit-testing):
     //
-    //   z=0  Positioned.fill Material/InkWell  — background ripple.
-    //        Flutter hit-tests this LAST because it is inserted first.
-    //        It fires only when no child in z=1 claimed the tap.
+    //   z=0  Positioned.fill decoration  — visual only ([IgnorePointer]).
+    //   z=1  Positioned.fill InkWell     — card tap; hit-tested after content.
+    //   z=2  paddedChild                 — tested first; interactive children win.
     //
-    //   z=1  SizedBox(content)  — tested FIRST by Flutter's hit-test walk.
-    //        Interactive children inside content therefore win over the card's
-    //        own onTap, which is the desired semantics.
-    //
-    // A non-positioned child (SizedBox) defines stack size so the card has a
-    // finite height inside vertical ListViews. [Positioned.fill] matches that
-    // footprint for the ripple layer.
+    // A solid [BoxDecoration] on the same layer as content would absorb every tap
+    // inside the card bounds and block [onTap]. Decoration is therefore isolated
+    // on an [IgnorePointer] layer. [SizedBox] width infinity keeps grid tiles full-bleed.
 
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Material(
-            type: MaterialType.transparency,
-
-            borderRadius: borderRadiusValue,
-
-            clipBehavior: Clip.antiAlias,
-
-            child: InkWell(
-              onTap: onTap,
-
+    return SizedBox(
+      width: double.infinity,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(child: decoratedSurface),
+          ),
+          Positioned.fill(
+            child: Material(
+              type: MaterialType.transparency,
               borderRadius: borderRadiusValue,
-
-              splashColor: effectiveSplashColor,
-
-              highlightColor: effectiveHighlightColor,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: borderRadiusValue,
+                splashColor: effectiveSplashColor,
+                highlightColor: effectiveHighlightColor,
+              ),
             ),
           ),
-        ),
-
-        SizedBox(width: double.infinity, child: content),
-      ],
+          paddedChild,
+        ],
+      ),
     );
   }
 }
