@@ -6,7 +6,7 @@ import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
-import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -144,8 +144,10 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Semantics(
               label: context.l10n.a11ySplashLoading,
               liveRegion: true,
-              child: ColoredBox(
-                color: _launchBackgroundColor,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: _launchBackgroundGradient,
+                ),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
