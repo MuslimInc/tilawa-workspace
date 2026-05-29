@@ -4,15 +4,13 @@ import 'package:dartz_plus/dartz_plus.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
-import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
-import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
 import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/repositories/reciters_repository.dart';
+import '../../domain/services/reciter_engagement_reporter.dart';
 import '../datasources/reciters_favorites_datasource.dart';
 import '../datasources/reciters_local_datasource.dart';
 import '../datasources/reciters_remote_datasource.dart';
@@ -26,7 +24,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
     this._favoritesDataSource,
     this._authRepository,
     this._prefs,
-    this._appReviewTriggerManager,
+    this._engagementReporter,
   );
 
   final RecitersRemoteDataSource _remoteDataSource;
@@ -34,7 +32,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
   final RecitersFavoritesDataSource _favoritesDataSource;
   final AuthRepository _authRepository;
   final SharedPreferencesAsync _prefs;
-  final AppReviewTriggerManager _appReviewTriggerManager;
+  final ReciterEngagementReporter _engagementReporter;
 
   Future<void> _saveFavoriteIdsLocally(Iterable<String> ids) async {
     final List<String> localIds = await _localDataSource
@@ -243,16 +241,7 @@ class RecitersRepositoryImpl implements RecitersRepository {
       }
 
       if (!wasFavorite) {
-        unawaited(
-          _appReviewTriggerManager.recordSignal(
-            AppReviewSignal.favoriteReciterAdded,
-          ),
-        );
-        unawaited(
-          _appReviewTriggerManager.tryPromptIfEligible(
-            AppReviewPromptMoment.favoriteReciterAdded,
-          ),
-        );
+        _engagementReporter.reportFavoriteReciterAdded();
       }
 
       return const Right(null);

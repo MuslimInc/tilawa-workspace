@@ -40,7 +40,7 @@ Automatic prompts use **native in-app review only** (no store redirect).
 | Listening completed | `AudioPlayerBloc` |
 | Prayer tab visit | Leaving Prayer tab in `AppShellScreen` |
 | Return to Reciters | Tab change in `AppShellScreen` |
-| Favorite added | `RecitersRepositoryImpl` |
+| Favorite added | `AppReviewReciterEngagementReporter` (via `ReciterEngagementReporter`) |
 | Bookmark created | `CreateBookmarkUseCase` |
 
 ## Manual / settings use
