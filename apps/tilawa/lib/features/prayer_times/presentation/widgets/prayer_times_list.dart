@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 import 'prayer_time_card.dart';
@@ -19,6 +20,7 @@ class PrayerTimesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     final List<PrayerTimeItem> prayers = showSunrise
         ? prayerTimes.allPrayers
         : prayerTimes.allPrayers
@@ -26,14 +28,17 @@ class PrayerTimesList extends StatelessWidget {
               .toList();
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceLarge,
+        vertical: tokens.spaceSmall,
+      ),
       child: Column(
         children: prayers.map((prayer) {
           final isNext = currentPrayer?.type == prayer.type;
           final bool hasPassed = prayerTimes.hasPrayerPassed(prayer.type);
 
           return Padding(
-            padding: EdgeInsets.only(bottom: 8),
+            padding: EdgeInsets.only(bottom: tokens.spaceSmall),
             child: PrayerTimeCard(
               prayer: prayer,
               isNext: isNext,
