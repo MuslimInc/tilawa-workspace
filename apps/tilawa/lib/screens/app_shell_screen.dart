@@ -11,7 +11,6 @@ import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
-import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
 import 'package:tilawa/features/shell/application/shell_tab_coordinator.dart';
 import 'package:tilawa/features/shell/presentation/shell_tab_effect_dispatcher.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
@@ -19,7 +18,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
-import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/reciters/presentation/tour/reciters_tour_targets.dart';
 import '../features/tour_guide/presentation/widgets/tour_target.dart';
 import '../router/app_router.dart';
@@ -209,13 +207,6 @@ class _AppShellScreenState extends State<AppShellScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<MainScreenCubit>.value(value: _mainScreenCubit),
-        BlocProvider<PrayerPermissionsCubit>(
-          create: (_) => getIt<PrayerPermissionsCubit>()..checkCapability(),
-        ),
-        BlocProvider<PrayerTimesBloc>(
-          lazy: true,
-          create: (_) => getIt<PrayerTimesBloc>(),
-        ),
         BlocProvider<InternetStatusBloc>(
           lazy: true,
           create: (_) => getIt<InternetStatusBloc>(),
