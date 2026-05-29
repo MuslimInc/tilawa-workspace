@@ -6,22 +6,15 @@ import 'download_button_bloc.dart';
 /// Composes [DownloadButtonBloc] instances with injected use cases.
 class DownloadButtonBlocFactory {
   const DownloadButtonBlocFactory({
-    required CheckSurahDownloadedUseCase checkSurahDownloaded,
-    required DownloadSurahUseCase downloadSurah,
-    required CancelDownloadUseCase cancelDownload,
-    required PauseDownloadUseCase pauseDownload,
-    required ResumeDownloadUseCase resumeDownload,
-    required ObserveDownloadProgressUseCase observeDownloadProgress,
-    required GetDownloadItemUseCase getDownloadItem,
-    required NetworkInfo networkInfo,
-  }) : _checkSurahDownloaded = checkSurahDownloaded,
-       _downloadSurah = downloadSurah,
-       _cancelDownload = cancelDownload,
-       _pauseDownload = pauseDownload,
-       _resumeDownload = resumeDownload,
-       _observeDownloadProgress = observeDownloadProgress,
-       _getDownloadItem = getDownloadItem,
-       _networkInfo = networkInfo;
+    required this._checkSurahDownloaded,
+    required this._downloadSurah,
+    required this._cancelDownload,
+    required this._pauseDownload,
+    required this._resumeDownload,
+    required this._observeDownloadProgress,
+    required this._getDownloadItem,
+    required this._networkInfo,
+  });
 
   final CheckSurahDownloadedUseCase _checkSurahDownloaded;
   final DownloadSurahUseCase _downloadSurah;
