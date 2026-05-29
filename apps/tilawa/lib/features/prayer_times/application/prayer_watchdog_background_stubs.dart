@@ -1,3 +1,4 @@
+import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/features/prayer_times/data/datasources/location_datasource.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
@@ -36,6 +37,9 @@ class PrayerWatchdogNavigationService implements NavigationService {
 
   @override
   void navigateToNotification(String location, {Object? extra}) {}
+
+  @override
+  void routeToDestination(NotificationDestination destination) {}
 
   @override
   Future<void> push(String location, {Object? extra}) async {}

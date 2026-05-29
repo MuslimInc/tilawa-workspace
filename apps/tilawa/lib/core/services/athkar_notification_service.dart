@@ -6,8 +6,10 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
+import 'package:tilawa/router/deep_link_resolver.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/athkar_notification_service_interface.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
@@ -17,7 +19,6 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart';
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
-import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
 import '../di/injection.dart';
 
@@ -883,18 +884,18 @@ class AthkarNotificationService implements IAthkarNotificationService {
       );
     }
 
+    const DeepLinkResolver resolver = DeepLinkResolver();
     if (_isMorningAthkarNotification(id: response.id, payload: payload)) {
       logger.d(
         '[AthkarNotificationService] Morning athkar notification tapped - navigating',
       );
-      _analytics.logAthkarNotificationOpen(1, 'أذكار الصباح');
-      // Use go to ensure clean navigation from any state
-      _navigateToRoute(
-        const AthkarDetailsRoute(
-          categoryId: 1,
-          categoryName: 'أذكار الصباح',
-        ).location,
+      _analytics.logAthkarNotificationOpen(
+        DeepLinkResolver.athkarMorningCategoryId,
+        DeepLinkResolver.athkarMorningCategoryName,
       );
+      // Resolve through the single resolver so the read is attributed to the
+      // notification (previously defaulted to source='manual').
+      _navigateToDestination(resolver.athkarMorning());
     } else if (_isEveningAthkarNotification(
       id: response.id,
       payload: payload,
@@ -902,21 +903,18 @@ class AthkarNotificationService implements IAthkarNotificationService {
       logger.d(
         '[AthkarNotificationService] Evening athkar notification tapped - navigating',
       );
-      _analytics.logAthkarNotificationOpen(2, 'أذكار المساء');
-      // Use go to ensure clean navigation from any state
-      _navigateToRoute(
-        const AthkarDetailsRoute(
-          categoryId: 2,
-          categoryName: 'أذكار المساء',
-        ).location,
+      _analytics.logAthkarNotificationOpen(
+        DeepLinkResolver.athkarEveningCategoryId,
+        DeepLinkResolver.athkarEveningCategoryName,
       );
+      _navigateToDestination(resolver.athkarEvening());
     }
   }
 
-  /// Navigate to a route, catching errors in test environments
-  void _navigateToRoute(String location) {
+  /// Navigate to a resolved destination, catching errors in test environments.
+  void _navigateToDestination(NotificationDestination destination) {
     try {
-      _navigationService.navigateToNotification(location);
+      _navigationService.routeToDestination(destination);
     } catch (e) {
       logger.w('[AthkarNotificationService] Navigation failed: $e');
     }

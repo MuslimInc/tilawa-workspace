@@ -37,7 +37,6 @@ import '../features/settings/presentation/screens/settings_screen.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
-import '../core/debug/deep_link_debug_screen.dart';
 import '../screens/app_shell_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
@@ -59,7 +58,6 @@ part 'app_router_config.g.dart';
     TypedGoRoute<HistoryRoute>(path: '/history'),
     TypedGoRoute<QiblaRoute>(path: '/qibla'),
     TypedGoRoute<RouteListRoute>(path: '/routes'),
-    TypedGoRoute<DeepLinkDebugRoute>(path: '/debug/deep-link'),
     TypedGoRoute<PrayerNotificationStatusRoute>(
       path: '/prayer-notification-status',
     ),
@@ -252,15 +250,6 @@ class RouteListRoute extends GoRouteData with $RouteListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const RouteListScreen();
-  }
-}
-
-class DeepLinkDebugRoute extends GoRouteData with $DeepLinkDebugRoute {
-  const DeepLinkDebugRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const DeepLinkDebugScreen();
   }
 }
 

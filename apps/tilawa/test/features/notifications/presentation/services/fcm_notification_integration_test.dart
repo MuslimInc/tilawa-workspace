@@ -44,11 +44,14 @@ void main() {
         'categoryName': 'Morning Athkar',
       });
 
+      // Notification-opened Athkar is attributed to the notification (the old
+      // behavior dropped `source`, mis-attributing reads as `manual`).
       expect(
         location,
         const AthkarDetailsRoute(
           categoryId: 1,
           categoryName: 'Morning Athkar',
+          source: 'notification',
         ).location,
       );
     });

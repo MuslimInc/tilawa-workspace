@@ -5,7 +5,6 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 
-import '../../../../core/debug/deep_link_debug_log.dart';
 import '../../../../router/app_router.dart';
 import '../../../../router/notification_navigation_resolver.dart';
 import '../../../auth/domain/usecases/prepare_google_sign_in_use_case.dart';
@@ -34,12 +33,6 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     SplashStarted event,
     Emitter<SplashState> emit,
   ) async {
-    DeepLinkDebugLog.log(
-      'SplashBloc.started',
-      scenario: 'splash',
-      hypothesisId: 'H1',
-    );
-
     try {
       final SplashRouteResult result = await _getSplashNextRoute();
 
@@ -82,20 +75,6 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
         );
         return;
       }
-
-      DeepLinkDebugLog.log(
-        'SplashBloc.route resolved',
-        scenario: 'splash',
-        hypothesisId: 'H1',
-        data: <String, Object?>{
-          'destination': result.destination.name,
-          'location': location,
-          'hasExtra': extra != null,
-          'shellPrepOnSplash': prepareShell,
-          'recitersReady': _readiness.recitersDataReady,
-          'timedOut': _readiness.timedOut,
-        },
-      );
 
       switch (result.destination) {
         case SplashDestination.home:

@@ -1326,7 +1326,7 @@ void main() {
 
         // Navigation service should throw to trigger the catch block
         when(
-          mockNavigationService.navigateToNotification(any),
+          mockNavigationService.routeToDestination(any),
         ).thenThrow(Exception('Navigation failed'));
 
         await service.handleNotificationResponse(response);

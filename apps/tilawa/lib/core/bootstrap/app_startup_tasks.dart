@@ -44,7 +44,6 @@ import 'package:tilawa/features/prayer_times/domain/services/prayer_notification
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
 import 'package:tilawa/firebase_options.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:tilawa/core/debug/deep_link_debug_log.dart';
 import 'package:tilawa/core/services/prayer_notification_payload_classifier.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
@@ -652,13 +651,6 @@ class AppStartupTasks {
     logger.d(
       '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: Start in (${DateTime.now()})',
     );
-    // #region agent log
-    DeepLinkDebugLog.log(
-      'prepareNotificationLaunchState START',
-      scenario: 'bootstrap',
-      hypothesisId: 'H3',
-    );
-    // #endregion
     try {
       final Future<RemoteMessage?> fcmFuture = FirebaseMessaging.instance
           .getInitialMessage()
@@ -695,18 +687,6 @@ class AppStartupTasks {
         await _applyNativeAdhanColdStartIfNeeded();
       }
 
-      // #region agent log
-      DeepLinkDebugLog.log(
-        'prepareNotificationLaunchState END',
-        scenario: 'bootstrap',
-        hypothesisId: 'H3',
-        data: <String, Object?>{
-          'fcm': fcmInitialMessage != null,
-          'local': localLaunchResponse != null,
-          'coldStartRoute': AppRouter.pendingColdStartLocation,
-        },
-      );
-      // #endregion
 
       logger.d(
         '[AppLaunch] source=AppStartupTasks.prepareNotificationLaunchState: '
@@ -742,16 +722,6 @@ class AppStartupTasks {
           details.notificationResponse != null) {
         final NotificationResponse response = details.notificationResponse!;
         if (await _isStaleLocalLaunchOnHotRestart(response.id)) {
-          // #region agent log
-          DeepLinkDebugLog.log(
-            'suppressed stale local launch (hot restart)',
-            scenario: 'bootstrap',
-            hypothesisId: 'H7',
-            data: <String, Object?>{
-              'notificationId': response.id,
-            },
-          );
-          // #endregion
           return null;
         }
         return response;

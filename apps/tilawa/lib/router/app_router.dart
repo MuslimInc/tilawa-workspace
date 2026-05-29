@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
-import 'package:tilawa/core/debug/deep_link_debug_log.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/router/app_links_config.dart';
@@ -65,34 +64,12 @@ class AppRouter {
   /// Goes to home first, then pushes the target so back returns to home
   /// (same stack shape as [navigateToNotification]).
   static void navigateFromColdStart(String location, {Object? extra}) {
-    // #region agent log
-    DeepLinkDebugLog.log(
-      'navigateFromColdStart',
-      scenario: 'cold_nav',
-      hypothesisId: 'H2',
-      data: <String, Object?>{
-        'location': location,
-        'hasExtra': extra != null,
-      },
-    );
-    // #endregion
     _navigateToNotificationLocation(location, extra: extra, coldStart: true);
   }
 
   /// Navigate to a notification destination while the app is already running
   /// (foreground or background tap). Goes to home first, then pushes the target.
   static void navigateToNotification(String location, {Object? extra}) {
-    // #region agent log
-    DeepLinkDebugLog.log(
-      'navigateToNotification',
-      scenario: 'warm_nav',
-      hypothesisId: 'H2',
-      data: <String, Object?>{
-        'location': location,
-        'hasExtra': extra != null,
-      },
-    );
-    // #endregion
     _navigateToNotificationLocation(location, extra: extra, coldStart: false);
   }
 
@@ -152,20 +129,6 @@ class AppRouter {
         }
       }
       ColdStartNavigationMetrics.logMatchedLocation(_currentLocation());
-      // #region agent log
-      DeepLinkDebugLog.log(
-        'navigation_done',
-        scenario: coldStart ? 'cold_nav' : 'warm_nav',
-        hypothesisId: 'H2',
-        data: <String, Object?>{
-          'matchedLocation': _currentLocation(),
-          'coldStart': coldStart,
-          'isPrayerStatus': isPrayerStatus,
-          'stackDepth':
-              router.routerDelegate.currentConfiguration.matches.length,
-        },
-      );
-      // #endregion
       if (isPrayerStatus) {
         logger.d('[AppRouter] NAVIGATION_TO_PRAYER_STATUS_SUCCESS');
       }
@@ -202,17 +165,6 @@ class AppRouter {
   @visibleForTesting
   static String resolveInitialLocation() {
     final String? coldStart = pendingColdStartLocation;
-    // #region agent log
-    DeepLinkDebugLog.log(
-      'resolveInitialLocation',
-      scenario: 'bootstrap',
-      hypothesisId: 'H1',
-      data: <String, Object?>{
-        'coldStart': coldStart,
-        'fallback': AppLinksConfig.defaultColdStartLocation,
-      },
-    );
-    // #endregion
     if (coldStart != null && coldStart.isNotEmpty) {
       return const HomeRoute().location;
     }
@@ -254,13 +206,6 @@ class AppRouter {
     pendingStartupNotificationLaunch = false;
     disableStateRestoration = false;
     clearPendingColdStartRoute();
-    // #region agent log
-    DeepLinkDebugLog.log(
-      'consumePendingNotificationLaunchState',
-      scenario: 'bootstrap',
-      hypothesisId: 'H5',
-    );
-    // #endregion
   }
 
   @visibleForTesting

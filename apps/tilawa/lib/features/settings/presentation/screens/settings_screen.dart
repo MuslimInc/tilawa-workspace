@@ -231,11 +231,6 @@ class SettingsScreen extends StatelessWidget {
                         title: 'Route list',
                         onTap: () => const RouteListRoute().push(context),
                       ),
-                      TilawaSettingsTile(
-                        icon: FluentIcons.link_24_regular,
-                        title: 'Deep link debug',
-                        onTap: () => const DeepLinkDebugRoute().push(context),
-                      ),
                       const TourGuideDebugResetTile(isLast: true),
                     ],
                   ),
