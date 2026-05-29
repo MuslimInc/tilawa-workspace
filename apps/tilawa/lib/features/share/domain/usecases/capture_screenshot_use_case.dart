@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 
 import '../entities/share_content.dart';
+import '../entities/share_footer_colors.dart';
 import '../entities/widget_capture_handle.dart';
 import '../repositories/share_repository.dart';
 
@@ -17,8 +17,7 @@ class CaptureScreenshotUseCase {
     required String appName,
     required String sharedViaLabel,
     bool brandCapture = true,
-    Color? footerBackgroundColor,
-    Color? footerForegroundColor,
+    ShareFooterColors? footerColors,
   }) {
     return _repository.captureScreenshot(
       handle: handle,
@@ -27,8 +26,7 @@ class CaptureScreenshotUseCase {
       appName: appName,
       sharedViaLabel: sharedViaLabel,
       brandCapture: brandCapture,
-      footerBackgroundColor: footerBackgroundColor,
-      footerForegroundColor: footerForegroundColor,
+      footerColors: footerColors,
     );
   }
 }

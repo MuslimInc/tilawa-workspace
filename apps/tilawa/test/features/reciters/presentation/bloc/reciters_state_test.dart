@@ -211,12 +211,12 @@ void main() {
       final state1 = RecitersLoaded(
         reciters: testReciters,
         filteredReciters: testReciters,
-        favoriteIds: const [1, 2],
+        favoriteIds: const {1, 2},
       );
       final state2 = RecitersLoaded(
         reciters: testReciters,
         filteredReciters: testReciters,
-        favoriteIds: const [1],
+        favoriteIds: const {1},
       );
       expect(state1, isNot(equals(state2)));
     });
@@ -281,9 +281,9 @@ void main() {
           filteredReciters: testReciters,
         );
         final RecitersLoaded newState = state.copyWith(
-          favoriteIds: const [1, 3],
+          favoriteIds: const {1, 3},
         );
-        expect(newState.favoriteIds, const [1, 3]);
+        expect(newState.favoriteIds, const {1, 3});
       });
 
       test('should clear selectedLetter when clearSelectedLetter is true', () {
@@ -321,7 +321,7 @@ void main() {
           searchQuery: 'test',
           selectedLetter: 'A',
           showFavoritesOnly: true,
-          favoriteIds: const [1, 3],
+          favoriteIds: const {1, 3},
         );
         final RecitersLoaded newState = state.copyWith();
         expect(newState.reciters, testReciters);
@@ -329,7 +329,7 @@ void main() {
         expect(newState.searchQuery, 'test');
         expect(newState.selectedLetter, 'A');
         expect(newState.showFavoritesOnly, isTrue);
-        expect(newState.favoriteIds, const [1, 3]);
+        expect(newState.favoriteIds, const {1, 3});
       });
 
       test('should update multiple properties at once', () {
@@ -342,14 +342,14 @@ void main() {
           searchQuery: 'Abdul',
           selectedLetter: 'A',
           showFavoritesOnly: true,
-          favoriteIds: const [1],
+          favoriteIds: const {1},
         );
         expect(newState.reciters, testReciters);
         expect(newState.filteredReciters, [testReciter1]);
         expect(newState.searchQuery, 'Abdul');
         expect(newState.selectedLetter, 'A');
         expect(newState.showFavoritesOnly, isTrue);
-        expect(newState.favoriteIds, const [1]);
+        expect(newState.favoriteIds, const {1});
       });
     });
   });

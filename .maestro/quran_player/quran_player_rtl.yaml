@@ -1,0 +1,43 @@
+# RTL E2E — Quran player chrome with Arabic system locale.
+#
+# Identifiers are locale-independent (Semantics.identifier). Run with:
+#   adb shell settings put system system_locales ar-SA
+#   maestro test .maestro/quran_player/quran_player_rtl.yaml
+#
+# Covers the same end-user paths as quran_player.yaml in RTL layout.
+
+appId: com.tilawa.app
+---
+
+- launchApp
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+
+- assertVisible:
+    id: "quran_player_mini"
+
+- runFlow:
+    file: subflows/expand_player.yaml
+
+- assertVisible:
+    id: "quran_player_track_title"
+- assertVisible:
+    id: "quran_player_track_artist"
+- assertVisible:
+    id: "quran_player_shuffle"
+- assertVisible:
+    id: "quran_player_previous"
+- assertVisible:
+    id: "quran_player_play_pause"
+- assertVisible:
+    id: "quran_player_next"
+- assertVisible:
+    id: "quran_player_repeat"
+
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_mini"

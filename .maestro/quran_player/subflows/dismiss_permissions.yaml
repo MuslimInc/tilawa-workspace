@@ -1,0 +1,12 @@
+# Dismiss Android runtime permission dialogs (EN / AR).
+---
+- runFlow:
+    when:
+      visible: "Allow"
+    commands:
+      - tapOn: "Allow"
+- runFlow:
+    when:
+      visible: "السماح"
+    commands:
+      - tapOn: "السماح"

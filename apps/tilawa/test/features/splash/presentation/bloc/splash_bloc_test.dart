@@ -8,6 +8,8 @@ import 'package:tilawa/features/splash/domain/usecases/get_splash_next_route_use
 import 'package:tilawa/features/splash/presentation/bloc/splash_bloc.dart';
 import 'package:tilawa/features/splash/presentation/bloc/splash_event.dart';
 import 'package:tilawa/features/splash/presentation/bloc/splash_state.dart';
+import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/app_router_config.dart';
 
 import 'splash_bloc_test.mocks.dart';
 
@@ -23,6 +25,7 @@ void main() {
   late MockAppStartupReadiness mockReadiness;
 
   setUp(() {
+    AppRouter.resetForTesting();
     mockGetSplashNextRouteUseCase = MockGetSplashNextRouteUseCase();
     mockPrepareGoogleSignIn = MockPrepareGoogleSignInUseCase();
     mockReadiness = MockAppStartupReadiness();
@@ -41,6 +44,7 @@ void main() {
 
   tearDown(() {
     bloc.close();
+    AppRouter.resetForTesting();
   });
 
   group('SplashBloc', () {

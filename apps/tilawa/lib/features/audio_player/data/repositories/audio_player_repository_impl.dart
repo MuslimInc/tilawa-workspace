@@ -10,6 +10,7 @@ import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../../shared/services/audio_position_service.dart';
 import '../../domain/entities/audio_modes.dart';
 import '../../domain/repositories/audio_player_repository.dart';
+import 'mapped_playback_queue_cache.dart';
 
 @LazySingleton(as: AudioPlayerRepository)
 class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
@@ -17,6 +18,7 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
 
   final AudioPlayerHandler _audioHandler;
   final AudioPositionService _positionService;
+  final MappedPlaybackQueueCache _mappedQueueCache = MappedPlaybackQueueCache();
   static const String _loadingInterruptedMessage = 'Loading interrupted';
   static const String _abortMessage = 'abort';
 
@@ -62,7 +64,12 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
               duration:
                   _audioHandler.mediaItem.value?.duration ?? Duration.zero,
               currentIndex: state.queueIndex ?? 0,
-              queue: queue.map(_mapMediaItemToEntity).toList(),
+              queue: _mappedQueueCache.entitiesFor(
+                mediaQueue: queue,
+                queueGeneration: _audioHandler.queueGeneration,
+                map: _mapMediaItemToEntity,
+              ),
+              queueGeneration: _audioHandler.queueGeneration,
             ),
           )
           .distinct();
@@ -92,7 +99,12 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
       bufferedPosition: state.bufferedPosition,
       duration: _audioHandler.mediaItem.value?.duration ?? Duration.zero,
       currentIndex: state.queueIndex ?? 0,
-      queue: queue.map(_mapMediaItemToEntity).toList(),
+      queue: _mappedQueueCache.entitiesFor(
+        mediaQueue: queue,
+        queueGeneration: _audioHandler.queueGeneration,
+        map: _mapMediaItemToEntity,
+      ),
+      queueGeneration: _audioHandler.queueGeneration,
     );
   }
 

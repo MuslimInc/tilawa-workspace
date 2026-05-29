@@ -1,0 +1,59 @@
+# Mini-player E2E — collapsed bar controls and expand gesture.
+#
+# Covers [QuranPlayerWidget] collapsed UX:
+#   • Mini-player appears after playback starts
+#   • Play/pause on the mini bar
+#   • Close dismisses the player
+#   • Tap expands to the full sheet
+#   • Swipe-up expands without tapping the bar body
+#
+# Semantics: quran_player_semantics_ids.dart
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_mini.yaml
+
+appId: com.tilawa.app
+---
+
+- launchApp
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+
+- assertVisible:
+    id: "quran_player_mini"
+- assertVisible:
+    id: "quran_player_mini_play_pause"
+- assertVisible:
+    id: "quran_player_mini_close"
+
+- tapOn:
+    id: "quran_player_mini_play_pause"
+- waitForAnimationToEnd
+- tapOn:
+    id: "quran_player_mini_play_pause"
+- waitForAnimationToEnd
+
+# Swipe up on the mini-player to expand (YouTube Music-style drag).
+- swipe:
+    start: "50%, 88%"
+    end: "50%, 40%"
+    duration: 400
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 5000
+
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_mini"
+
+- tapOn:
+    id: "quran_player_mini_close"
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "quran_player_mini"

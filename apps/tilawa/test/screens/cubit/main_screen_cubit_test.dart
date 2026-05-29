@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
 import 'package:tilawa/screens/cubit/main_screen_state.dart';
 
@@ -66,10 +67,10 @@ void main() {
     });
 
     testWidgets('emits isInitialTabMounted=true and adds currentIndex to '
-        'builtTabIndexes after the 1200 ms delay', (tester) async {
+        'builtTabIndexes after initialTabRouteSettleDelay', (tester) async {
       final cubit = MainScreenCubit();
 
-      await tester.pump(const Duration(milliseconds: 1200));
+      await tester.pump(AppStartupReadiness.initialTabRouteSettleDelay);
       await tester.pump();
 
       expect(cubit.state.isInitialTabMounted, isTrue);
@@ -78,12 +79,14 @@ void main() {
       await cubit.close();
     });
 
-    testWidgets('does not emit isInitialTabMounted=true before 1200 ms', (
-      tester,
-    ) async {
+    testWidgets('does not emit isInitialTabMounted=true before '
+        'initialTabRouteSettleDelay', (tester) async {
       final cubit = MainScreenCubit();
 
-      await tester.pump(const Duration(milliseconds: 1199));
+      await tester.pump(
+        AppStartupReadiness.initialTabRouteSettleDelay -
+            const Duration(milliseconds: 1),
+      );
       await tester.pump();
 
       expect(cubit.state.isInitialTabMounted, isFalse);
@@ -91,12 +94,12 @@ void main() {
       await cubit.close();
     });
 
-    testWidgets('emits isOfflineIndicatorReady=true after the 3000 ms delay', (
+    testWidgets('emits isOfflineIndicatorReady=true after the 600 ms delay', (
       tester,
     ) async {
       final cubit = MainScreenCubit();
 
-      await tester.pump(const Duration(milliseconds: 3000));
+      await tester.pump(const Duration(milliseconds: 600));
       await tester.pump();
 
       expect(cubit.state.isOfflineIndicatorReady, isTrue);
@@ -104,12 +107,12 @@ void main() {
       await cubit.close();
     });
 
-    testWidgets('emits isAudioBindingDeferred=false after the 3800 ms delay', (
+    testWidgets('emits isAudioBindingDeferred=false after the 800 ms delay', (
       tester,
     ) async {
       final cubit = MainScreenCubit();
 
-      await tester.pump(const Duration(milliseconds: 3800));
+      await tester.pump(const Duration(milliseconds: 800));
       await tester.pump();
 
       expect(cubit.state.isAudioBindingDeferred, isFalse);

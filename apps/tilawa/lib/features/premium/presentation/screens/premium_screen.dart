@@ -149,13 +149,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              spacing: tokens.spaceSmall,
               children: [
                 Icon(
                   canDownload ? Icons.star_rounded : Icons.star_border_rounded,
                   color: accent,
                   size: tokens.iconSizeLarge,
                 ),
-                SizedBox(width: tokens.spaceSmall),
                 Expanded(
                   child: Text(
                     status.statusText,
@@ -281,13 +281,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              spacing: tokens.spaceSmall,
               children: [
                 Icon(
                   Icons.free_breakfast_rounded,
                   color: colorScheme.primary,
                   size: tokens.iconSizeMedium,
                 ),
-                SizedBox(width: tokens.spaceSmall),
                 Expanded(
                   child: Text(
                     context.l10n.freeTrialTitle,

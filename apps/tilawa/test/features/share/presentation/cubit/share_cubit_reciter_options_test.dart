@@ -1,13 +1,13 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/quran_reader/domain/entities/entities.dart';
 import 'package:tilawa/features/quran_reader/domain/repositories/quran_reader_repository.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:tilawa/features/share/domain/entities/audio_clip_config.dart';
+import 'package:tilawa/features/share/domain/entities/share_cancel_token.dart';
 import 'package:tilawa/features/share/domain/entities/share_content.dart';
+import 'package:tilawa/features/share/domain/entities/share_footer_colors.dart';
 import 'package:tilawa/features/share/domain/entities/share_progress_messages.dart';
 import 'package:tilawa/features/share/domain/entities/widget_capture_handle.dart';
 import 'package:tilawa/features/share/domain/repositories/share_repository.dart';
@@ -266,8 +266,7 @@ class _FakeShareRepository implements ShareRepository {
     required String appName,
     required String sharedViaLabel,
     bool brandCapture = true,
-    Color? footerBackgroundColor,
-    Color? footerForegroundColor,
+    ShareFooterColors? footerColors,
   }) {
     throw UnimplementedError();
   }
@@ -283,7 +282,7 @@ class _FakeShareRepository implements ShareRepository {
     required AudioClipProgressMessages progressMessages,
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
-    CancelToken? cancelToken,
+    ShareCancelToken? cancelToken,
   }) {
     throw UnimplementedError();
   }
@@ -298,7 +297,7 @@ class _FakeShareRepository implements ShareRepository {
     int? maxDurationSeconds,
     void Function(double progress, String message)? onProgress,
     void Function(int index)? onFrameCaptureStarted,
-    CancelToken? cancelToken,
+    ShareCancelToken? cancelToken,
   }) {
     throw UnimplementedError();
   }

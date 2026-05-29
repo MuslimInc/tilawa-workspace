@@ -346,7 +346,11 @@ class _BottomNavBar extends StatelessWidget {
       context,
     ).scale(1.0).clamp(0.01, 1.0);
     final TextScaler barTextScaler = TextScaler.linear(bottomBarTextScale);
-    final double barHeight = tokens.phoneBottomNavLayoutHeight(barTextScaler);
+    final double systemBottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final double barHeight = tokens.phoneBottomNavPaintedHeight(
+      barTextScaler,
+      systemBottomInset,
+    );
 
     final SystemUiOverlayStyle bottomNavOverlayStyle = SystemUiOverlayStyle(
       systemNavigationBarColor: navColor.withValues(alpha: 1),

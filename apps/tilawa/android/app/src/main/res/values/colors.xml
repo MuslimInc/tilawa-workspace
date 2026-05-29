@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Must match AppColors.primaryCoral / defaultPrimary in Flutter (ui_kit). -->
-    <color name="launch_background">#E60023</color>
+    <!-- Android 12 SplashScreen only supports a flat color background here. -->
+    <!-- Must match AppColors.primarySage / defaultPrimary in Flutter (ui_kit). -->
+    <color name="launch_background">#528345</color>
 </resources>

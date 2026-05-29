@@ -1,9 +1,9 @@
 import 'package:dartz_plus/dartz_plus.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tilawa/features/auth/data/auth_service.dart';
+import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/repositories/auth_repository.dart';
 import 'package:tilawa/features/reciters/data/datasources/reciters_favorites_datasource.dart';
 import 'package:tilawa/features/reciters/data/datasources/reciters_local_datasource.dart';
 import 'package:tilawa/features/reciters/data/datasources/reciters_remote_datasource.dart';
@@ -23,7 +23,7 @@ class MockRecitersLocalDataSource extends Mock
 class MockRecitersFavoritesDataSource extends Mock
     implements RecitersFavoritesDataSource {}
 
-class MockAuthService extends Mock implements AuthService {}
+class MockAuthRepository extends Mock implements AuthRepository {}
 
 class MockSharedPreferencesAsync extends Mock
     implements SharedPreferencesAsync {}
@@ -31,19 +31,19 @@ class MockSharedPreferencesAsync extends Mock
 class MockAppReviewTriggerManager extends Mock
     implements AppReviewTriggerManager {}
 
-class _TestUser extends Fake implements User {
-  _TestUser(this.uid);
-
-  @override
-  final String uid;
-}
+UserEntity _testUser(String id) => UserEntity(
+  id: id,
+  email: 'test@tilawa.app',
+  displayName: 'Test User',
+  createdAt: DateTime(2024),
+);
 
 void main() {
   late RecitersRepositoryImpl repository;
   late MockRecitersRemoteDataSource mockRemote;
   late MockRecitersLocalDataSource mockLocal;
   late MockRecitersFavoritesDataSource mockFavorites;
-  late MockAuthService mockAuth;
+  late MockAuthRepository mockAuth;
   late MockSharedPreferencesAsync mockPrefs;
   late MockAppReviewTriggerManager mockAppReviewTriggerManager;
 
@@ -67,7 +67,7 @@ void main() {
     mockRemote = MockRecitersRemoteDataSource();
     mockLocal = MockRecitersLocalDataSource();
     mockFavorites = MockRecitersFavoritesDataSource();
-    mockAuth = MockAuthService();
+    mockAuth = MockAuthRepository();
     mockPrefs = MockSharedPreferencesAsync();
     mockAppReviewTriggerManager = MockAppReviewTriggerManager();
     when(() => mockAppReviewTriggerManager.onSessionStarted())
@@ -119,7 +119,7 @@ void main() {
     test(
       'signed-in user persists locally when remote favorites are unavailable',
       () async {
-        when(() => mockAuth.currentUser).thenReturn(_TestUser(tUserId));
+        when(() => mockAuth.currentUser).thenReturn(_testUser(tUserId));
         when(
           () => mockLocal.getFavoriteReciterIds(),
         ).thenAnswer((_) async => []);
@@ -148,7 +148,7 @@ void main() {
     test(
       'signed-in user syncs add to remote after local save when online',
       () async {
-        when(() => mockAuth.currentUser).thenReturn(_TestUser(tUserId));
+        when(() => mockAuth.currentUser).thenReturn(_testUser(tUserId));
         when(
           () => mockLocal.getFavoriteReciterIds(),
         ).thenAnswer((_) async => []);
@@ -184,7 +184,7 @@ void main() {
     test(
       'signed-in user removes locally and from remote when unfavoriting',
       () async {
-        when(() => mockAuth.currentUser).thenReturn(_TestUser(tUserId));
+        when(() => mockAuth.currentUser).thenReturn(_testUser(tUserId));
         when(
           () => mockLocal.getFavoriteReciterIds(),
         ).thenAnswer((_) async => [tReciterId.toString()]);
@@ -233,7 +233,7 @@ void main() {
     test(
       'signed-in user falls back to local ids when remote merge fails',
       () async {
-        when(() => mockAuth.currentUser).thenReturn(_TestUser(tUserId));
+        when(() => mockAuth.currentUser).thenReturn(_testUser(tUserId));
         when(
           () => mockFavorites.getFavoriteReciterIds(userId: tUserId),
         ).thenThrow(Exception('offline'));

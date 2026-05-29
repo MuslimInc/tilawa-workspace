@@ -13,6 +13,12 @@ import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
+import 'package:tilawa/features/audio_player/domain/services/artist_media_playlist_cache.dart';
+import 'package:tilawa/features/audio_player/domain/services/audio_entity_media_item_mapper.dart';
+import 'package:tilawa/features/audio_player/domain/services/moshaf_surah_audio_list_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/playback_uri_resolver.dart';
+import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_builder.dart';
+import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
 import 'package:tilawa/shared/audio/audio_player_handler_impl.dart';
@@ -146,9 +152,14 @@ void main() {
     handler = AudioPlayerHandlerImpl(
       [],
       mockAnalytics,
-      mockPrefs,
-      mockRepo,
-      mockDownloadsRepo,
+      ReciterAudioCatalogCache(
+        mockRepo,
+        const ReciterAudioCatalogBuilder(),
+      ),
+      PlaybackUriResolver(mockDownloadsRepo),
+      MoshafSurahAudioListBuilder(mockPrefs),
+      ArtistMediaPlaylistCache(),
+      const AudioEntityMediaItemMapper(),
       player: mockPlayer,
       audioSession: mockAudioSession,
     );

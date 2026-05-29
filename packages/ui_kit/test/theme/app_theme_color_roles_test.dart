@@ -33,7 +33,6 @@ void main() {
       for (final entry in paletteCases.entries) {
         final theme = AppTheme.getLightTheme(
           primaryColor: entry.value,
-          useGoogleFontsOverride: false,
         );
 
         _expectCoreContrast(theme.colorScheme, label: entry.key);
@@ -46,7 +45,6 @@ void main() {
         final theme = AppTheme.getDarkTheme(
           primaryColor: entry.value,
           isDefaultPreset: entry.value == AppColors.defaultPrimary,
-          useGoogleFontsOverride: false,
         );
 
         _expectCoreContrast(theme.colorScheme, label: entry.key);
@@ -60,7 +58,6 @@ void main() {
         for (final entry in presetNoOpCases.entries) {
           final theme = AppTheme.getLightTheme(
             primaryColor: entry.value,
-            useGoogleFontsOverride: false,
           );
 
           expect(
@@ -77,7 +74,6 @@ void main() {
     test('light scaffold and surfaces use Pinterest neutrals not primary', () {
       final theme = AppTheme.getLightTheme(
         primaryColor: AppColors.primaryCoral,
-        useGoogleFontsOverride: false,
       );
       final scheme = theme.colorScheme;
 
@@ -101,7 +97,6 @@ void main() {
         }
         final theme = AppTheme.getLightTheme(
           primaryColor: entry.value,
-          useGoogleFontsOverride: false,
         );
 
         expect(
@@ -117,7 +112,6 @@ void main() {
     test('custom primary colors derive matching primary containers', () {
       final greenTheme = AppTheme.getLightTheme(
         primaryColor: customAndroidGreen,
-        useGoogleFontsOverride: false,
       );
       final colorScheme = greenTheme.colorScheme;
 
@@ -138,7 +132,6 @@ void main() {
     test('component tokens receive the finalized theme color scheme', () {
       final theme = AppTheme.getLightTheme(
         primaryColor: customAndroidGreen,
-        useGoogleFontsOverride: false,
       );
       final tokens = theme.extension<TilawaComponentTokens>();
 
@@ -154,7 +147,6 @@ void main() {
         primaryColor: AppColors.defaultPrimary,
         isDefaultPreset: true,
         darkIsTrueBlack: true,
-        useGoogleFontsOverride: false,
       );
       final colorScheme = theme.colorScheme;
 

@@ -1,0 +1,67 @@
+# Queue sheet E2E — peek handle, expand hint, and track selection.
+#
+# Covers [QuranPlayerWidget] queue [DraggableScrollableSheet]:
+#   • Queue sheet and handle visible when expanded
+#   • Expand hint at peek height
+#   • Tapping queue items switches tracks
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_queue_sheet.yaml
+
+appId: com.tilawa.app
+---
+
+- launchApp
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+- runFlow:
+    file: subflows/expand_player.yaml
+
+- assertVisible:
+    id: "quran_player_queue_sheet"
+- assertVisible:
+    id: "quran_player_queue_handle"
+
+- scrollUntilVisible:
+    element:
+      id: "quran_player_queue_expand_hint"
+    direction: UP
+    timeout: 5000
+    optional: true
+
+# Expand queue via handle tap (peek → full).
+- tapOn:
+    id: "quran_player_queue_handle"
+- waitForAnimationToEnd
+
+- runFlow:
+    when:
+      visible:
+        id: "quran_player_queue_item_002"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "quran_player_queue_item_002"
+          direction: DOWN
+          timeout: 8000
+      - tapOn:
+          id: "quran_player_queue_item_002"
+      - waitForAnimationToEnd
+      - assertVisible:
+          id: "quran_player_track_title"
+      - scrollUntilVisible:
+          element:
+            id: "quran_player_queue_item_001"
+          direction: UP
+          timeout: 8000
+      - tapOn:
+          id: "quran_player_queue_item_001"
+      - waitForAnimationToEnd
+
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_mini"

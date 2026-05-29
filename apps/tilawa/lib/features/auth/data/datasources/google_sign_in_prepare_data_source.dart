@@ -85,6 +85,7 @@ class GoogleSignInPrepareDataSourceImpl implements GoogleSignInPrepareDataSource
       }
       if (_shouldUseGoogleSignIn) {
         await _googleSignIn.initialize(
+          clientId: Platform.isIOS ? AppStrings.googleIosClientId : null,
           serverClientId: AppStrings.googleClientId,
         );
         await _googleSignIn.attemptLightweightAuthentication();

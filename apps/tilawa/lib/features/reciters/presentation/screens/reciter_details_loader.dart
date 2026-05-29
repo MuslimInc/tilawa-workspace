@@ -20,6 +20,7 @@ class ReciterDetailsLoader extends StatelessWidget {
     return BlocProvider(
       create: (_) => getIt<ReciterDetailsLoaderCubit>()..loadReciter(reciterId),
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         body: BlocBuilder<ReciterDetailsLoaderCubit, ReciterDetailsLoaderState>(
           builder: (context, state) {
             if (state is ReciterDetailsLoaderLoading) {

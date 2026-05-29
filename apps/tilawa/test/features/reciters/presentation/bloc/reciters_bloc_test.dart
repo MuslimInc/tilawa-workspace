@@ -34,6 +34,19 @@ void main() {
   });
 
   group('RecitersBloc Filtering', () {
+    test('starts loaded when splash provided initial reciters', () {
+      final startupBloc = RecitersBloc(
+        mockGetReciters,
+        initialReciters: tReciters,
+      );
+      addTearDown(startupBloc.close);
+
+      expect(startupBloc.state, isA<RecitersLoaded>());
+      final loaded = startupBloc.state as RecitersLoaded;
+      expect(loaded.reciters, tReciters);
+      expect(loaded.filteredReciters, tReciters);
+    });
+
     blocTest<RecitersBloc, RecitersState>(
       'should NOT lose favoriteIds when ClearFavoritesFilter is dispatched',
       build: () {
@@ -43,13 +56,13 @@ void main() {
         reciters: tReciters,
         filteredReciters: [tReciter2],
         showFavoritesOnly: true,
-        favoriteIds: [2],
+        favoriteIds: {2},
       ),
       act: (bloc) => bloc.add(const ClearFavoritesFilter()),
       expect: () => [
         isA<RecitersLoaded>()
             .having((s) => s.showFavoritesOnly, 'showFavoritesOnly', false)
-            .having((s) => s.favoriteIds, 'favoriteIds', [2])
+            .having((s) => s.favoriteIds, 'favoriteIds', {2})
             .having(
               (s) => s.filteredReciters.length,
               'filteredReciters count',
@@ -67,7 +80,7 @@ void main() {
         reciters: tReciters,
         filteredReciters: [tReciter2],
         showFavoritesOnly: true,
-        favoriteIds: [2],
+        favoriteIds: {2},
       ),
       act: (bloc) => bloc.add(const ClearFavoritesFilter()),
       expect: () => [

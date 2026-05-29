@@ -1,4 +1,5 @@
 import 'package:dartz_plus/dartz_plus.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
@@ -15,6 +16,7 @@ class SetTasbeehTargetCountParams {
   final int targetCount;
 }
 
+@lazySingleton
 class SetTasbeehTargetCountUseCase
     implements UseCase<TasbeehDhikr, SetTasbeehTargetCountParams> {
   SetTasbeehTargetCountUseCase(this._repository);

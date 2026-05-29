@@ -28,8 +28,10 @@ class LocationRow extends StatelessWidget {
       builder: (context, constraints) {
         final bool narrowWidth = constraints.maxWidth < 420;
 
+        // onTap is always null so _LocationActionButton (and _QiblaActionRow)
+        // are never blocked by TilawaCard's Positioned.fill InkWell overlay.
         return TilawaCard(
-          onTap: hasQiblaAction || isLoading ? null : onUpdateLocation,
+          onTap: null,
           backgroundColor: colorScheme.surfaceContainerLow,
           borderRadius: tokens.radiusExtraLarge,
           borderColor: colorScheme.outlineVariant.withValues(
@@ -114,6 +116,7 @@ class _LocationInfo extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: tokens.spaceExtraSmall,
         children: [
           Text(
             context.l10n.currentLocation,
@@ -122,7 +125,6 @@ class _LocationInfo extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(height: tokens.spaceExtraSmall),
           Text(
             (locationName != null && locationName!.isNotEmpty)
                 ? locationName!
@@ -237,13 +239,13 @@ class _QiblaActionRow extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
               child: Row(
+                spacing: tokens.spaceSmall,
                 children: [
                   Icon(
                     Icons.explore_outlined,
                     size: tokens.iconSizeMedium,
                     color: colorScheme.primary,
                   ),
-                  SizedBox(width: tokens.spaceSmall),
                   Expanded(
                     child: Text(
                       context.l10n.qiblaDirection,
@@ -254,7 +256,6 @@ class _QiblaActionRow extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  SizedBox(width: tokens.spaceSmall),
                   Icon(
                     Icons.chevron_right,
                     size: tokens.iconSizeMedium,

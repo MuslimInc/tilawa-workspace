@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Keep the native launch background identical in dark mode. -->
+    <color name="launch_background">#528345</color>
+</resources>

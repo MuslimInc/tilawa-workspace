@@ -154,17 +154,28 @@ class _AthkarDhikrTapCard extends StatelessWidget {
             children: [
               Positioned.fill(
                 child: TilawaCard(
-                  onTap: onTap,
                   borderRadius: borderRadius,
                   surface: TilawaCardSurface.raised,
                   backgroundColor: backgroundColor,
-                  splashColor: splashColor,
-                  highlightColor: highlightColor,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: tokens.spaceExtraLarge,
-                    vertical: tokens.spaceExtraLarge,
+                  padding: EdgeInsets.zero,
+                  child: SizedBox.expand(
+                    child: Material(
+                      type: MaterialType.transparency,
+                      child: InkWell(
+                        onTap: onTap,
+                        borderRadius: radius,
+                        splashColor: splashColor,
+                        highlightColor: highlightColor,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: tokens.spaceLarge,
+                            vertical: tokens.spaceExtraLarge,
+                          ),
+                          child: SizedBox.expand(child: child),
+                        ),
+                      ),
+                    ),
                   ),
-                  child: SizedBox.expand(child: child),
                 ),
               ),
               Positioned.fill(

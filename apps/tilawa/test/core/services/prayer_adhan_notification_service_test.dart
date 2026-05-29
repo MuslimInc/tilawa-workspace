@@ -13,6 +13,7 @@ import 'package:tilawa/core/services/prayer_adhan_notification_service.dart';
 import 'package:tilawa/core/services/prayer_notification_config.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
@@ -132,7 +133,11 @@ void main() {
     when(
       mockAdhanPlayer.onNotificationTapped,
     ).thenAnswer((_) => const Stream.empty());
+    when(
+      mockAdhanPlayer.pullPendingNotificationTapPayload(),
+    ).thenAnswer((_) async => null);
     when(mockAdhanPlayer.isSupported).thenReturn(false);
+    when(mockNav.getCurrentLocation()).thenReturn(null);
     when(mockAdhanPlayer.cancelAllAdhans()).thenAnswer((_) async {});
     when(
       mockNotificationPermissions.isPermissionGranted(),
@@ -294,6 +299,7 @@ void main() {
         test(
           'navigates native Adhan tap payload to prayer status route',
           () async {
+            AppRouter.resetForTesting();
             await initialize();
 
             final payload = jsonEncode({

@@ -29,7 +29,6 @@ class _DownloadsScreenState extends State<DownloadsScreen>
     super.initState();
     _scrollController.addListener(_onScroll);
 
-    // Load downloads when the screen is first displayed
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadDownloads();
     });
@@ -41,13 +40,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
     super.dispose();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
   void _loadDownloads() {
-    // Always load downloads - no conditions
     logger.d('DownloadsScreen: Loading downloads...');
     context.read<DownloadsBloc>().add(const LoadDownloads());
   }
@@ -58,7 +51,11 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    super.build(context);
+    final int totalBytes = context.select<DownloadsBloc, int>(
+      (DownloadsBloc bloc) => bloc.state.totalDownloadsSize,
+    );
+
     return BlocListener<DownloadsBloc, DownloadsState>(
       listenWhen: (DownloadsState previous, DownloadsState current) =>
           current.uiNotificationSeq != previous.uiNotificationSeq &&
@@ -67,28 +64,10 @@ class _DownloadsScreenState extends State<DownloadsScreen>
         context.read<DownloadsBloc>().add(const ClearDownloadsUiNotification());
       },
       child: Scaffold(
-        appBar: TilawaCatalogAppBar(
-          preferredHeight: TilawaAppBarConfig.catalogTitleOnlyHeight(context),
-          title: context.l10n.downloads,
-          titleWidget: BlocBuilder<DownloadsBloc, DownloadsState>(
-            buildWhen: (previous, current) =>
-                previous.totalDownloadsSize != current.totalDownloadsSize,
-            builder: (context, state) {
-              return _DownloadsAppBarTitle(
-                totalBytes: state.totalDownloadsSize,
-              );
-            },
-          ),
-          actions: [
-            TilawaIconActionButton(
-              icon: Icons.refresh_rounded,
-              onTap: _loadDownloads,
-            ),
-            TilawaIconActionButton(
-              icon: Icons.delete_sweep_rounded,
-              onTap: () => _showClearAllDialog(context),
-            ),
-          ],
+        appBar: _DownloadsScreenAppBar.fromContext(
+          context,
+          totalBytes: totalBytes,
+          onRefresh: _loadDownloads,
         ),
         body: BlocBuilder<DownloadsBloc, DownloadsState>(
           builder: (context, state) {
@@ -98,29 +77,134 @@ class _DownloadsScreenState extends State<DownloadsScreen>
       ),
     );
   }
+}
 
-  void _showClearAllDialog(BuildContext context) {
-    showDialog(
+class _DownloadsScreenAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  const _DownloadsScreenAppBar({
+    required this.preferredHeight,
+    required this.totalBytes,
+    required this.onRefresh,
+  });
+
+  factory _DownloadsScreenAppBar.fromContext(
+    BuildContext context, {
+    required int totalBytes,
+    required VoidCallback onRefresh,
+  }) {
+    return _DownloadsScreenAppBar(
+      preferredHeight: _resolvePreferredHeight(context, totalBytes),
+      totalBytes: totalBytes,
+      onRefresh: onRefresh,
+    );
+  }
+
+  final double preferredHeight;
+  final int totalBytes;
+  final VoidCallback onRefresh;
+
+  static double _resolvePreferredHeight(
+    BuildContext context,
+    int totalBytes,
+  ) {
+    if (totalBytes <= 0) {
+      return TilawaAppBarConfig.catalogTitleOnlyHeight(context);
+    }
+
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final TextScaler textScaler = MediaQuery.textScalerOf(context);
+    final TextStyle? subtitleStyle = theme.textTheme.bodySmall?.copyWith(
+      fontWeight: FontWeight.w500,
+    );
+    final TextPainter painter = TextPainter(
+      text: TextSpan(text: 'Hg', style: subtitleStyle),
+      textScaler: textScaler,
+      textDirection: Directionality.of(context),
+      maxLines: 1,
+    )..layout();
+
+    return TilawaAppBarConfig.catalogTitleAndContentHeight(
+      context,
+      contentHeight: painter.height + tokens.spaceTiny,
+    );
+  }
+
+  @override
+  Size get preferredSize => Size.fromHeight(preferredHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaCatalogAppBar(
+      preferredHeight: preferredHeight,
+      title: context.l10n.downloads,
+      titleWidget: totalBytes > 0
+          ? _DownloadsAppBarTitle(totalBytes: totalBytes)
+          : null,
+      actions: <Widget>[
+        _DownloadsRefreshButton(onPressed: onRefresh),
+        const _DownloadsClearAllButton(),
+      ],
+    );
+  }
+}
+
+class _DownloadsRefreshButton extends StatelessWidget {
+  const _DownloadsRefreshButton({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaIconActionButton(
+      icon: Icons.refresh_rounded,
+      onTap: onPressed,
+    );
+  }
+}
+
+class _DownloadsClearAllButton extends StatelessWidget {
+  const _DownloadsClearAllButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return TilawaIconActionButton(
+      icon: Icons.delete_sweep_rounded,
+      onTap: () => _ClearAllDownloadsDialog.show(context),
+    );
+  }
+}
+
+class _ClearAllDownloadsDialog extends StatelessWidget {
+  const _ClearAllDownloadsDialog();
+
+  static Future<void> show(BuildContext context) {
+    return showDialog<void>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(context.l10n.clearAllDownloads),
-        content: Text(context.l10n.clearAllDownloadsMessage),
-        actions: [
-          TilawaButton(
-            text: context.l10n.cancel,
-            variant: TilawaButtonVariant.ghost,
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          TilawaButton(
-            text: context.l10n.deleteAll,
-            variant: TilawaButtonVariant.danger,
-            onPressed: () {
-              Navigator.of(context).pop();
-              context.read<DownloadsBloc>().add(const ClearAllDownloads());
-            },
-          ),
-        ],
-      ),
+      builder: (BuildContext context) => const _ClearAllDownloadsDialog(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(context.l10n.clearAllDownloads),
+      content: Text(context.l10n.clearAllDownloadsMessage),
+      actions: [
+        TilawaButton(
+          text: context.l10n.cancel,
+          variant: TilawaButtonVariant.ghost,
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        TilawaButton(
+          text: context.l10n.deleteAll,
+          variant: TilawaButtonVariant.danger,
+          onPressed: () {
+            Navigator.of(context).pop();
+            context.read<DownloadsBloc>().add(const ClearAllDownloads());
+          },
+        ),
+      ],
     );
   }
 }
@@ -216,17 +300,22 @@ class _DownloadsAppBarTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final tokens = theme.tokens;
     final String title = context.l10n.downloads;
+    final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
 
     if (totalBytes <= 0) {
-      return Text(title);
+      return Text(title, style: titleStyle);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
+      spacing: tokens.spaceTiny,
       children: [
-        Text(title),
+        Text(title, style: titleStyle),
         Text(
           context.l10n.storageUsed(
             FileSizeFormatter.formatBytes(context, totalBytes),
@@ -262,4 +351,3 @@ class _EmptyDownloadsView extends StatelessWidget {
     );
   }
 }
-

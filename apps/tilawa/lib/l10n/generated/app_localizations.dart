@@ -137,7 +137,7 @@ abstract class AppLocalizations {
   /// The title of the application
   ///
   /// In en, this message translates to:
-  /// **'Tilawa'**
+  /// **'Rattil'**
   String get appTitle;
 
   /// Reciters section title
@@ -343,6 +343,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Playing from'**
   String get playingFrom;
+
+  /// Hint on the collapsed queue sheet handle in the expanded player
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe up for queue'**
+  String get playerQueueExpandHint;
+
+  /// Screen reader label for the queue sheet drag handle in the expanded player
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide queue. Drag up or tap to expand.'**
+  String get playerQueueHandleSemanticLabel;
 
   /// Duration label
   ///
@@ -1043,7 +1055,7 @@ abstract class AppLocalizations {
   /// Welcome message on login screen
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Tilawa'**
+  /// **'Welcome to Rattil'**
   String get welcomeToApp;
 
   /// Description text for Google sign in
@@ -3041,7 +3053,7 @@ abstract class AppLocalizations {
   /// Branding text on shared content
   ///
   /// In en, this message translates to:
-  /// **'Shared via Tilawa'**
+  /// **'Shared via Rattil'**
   String get sharedViaTilawa;
 
   /// Fallback message when reciter is not mapped
@@ -3497,7 +3509,7 @@ abstract class AppLocalizations {
   /// Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually
   ///
   /// In en, this message translates to:
-  /// **'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.'**
+  /// **'On this device, also enable Autostart for Rattil in your phone\'s settings so reminders are not stopped in the background.'**
   String get oemAutostartHint;
 
   /// Body text for prayer time notifications
@@ -3553,6 +3565,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stop Adhan'**
   String get stopAdhan;
+
+  /// Dialog body shown when the user tries to leave the prayer notification screen while the adhan is still playing
+  ///
+  /// In en, this message translates to:
+  /// **'Would you like to stop the adhan before leaving?'**
+  String get adhanStillPlayingMessage;
 
   /// Status text when a prayer notification is opened
   ///
@@ -3665,13 +3683,13 @@ abstract class AppLocalizations {
   /// Support Tilawa screen and settings entry title
   ///
   /// In en, this message translates to:
-  /// **'Support Tilawa'**
+  /// **'Support Rattil'**
   String get supportTilawa;
 
   /// Settings row to open the in-app review dialog
   ///
   /// In en, this message translates to:
-  /// **'Rate Tilawa'**
+  /// **'Rate Rattil'**
   String get rateTilawa;
 
   /// Optional subtitle under the rate Tilawa settings row
@@ -3680,22 +3698,40 @@ abstract class AppLocalizations {
   /// **'Share your feedback on the app store.'**
   String get rateTilawaSubtitle;
 
+  /// Settings row to share the app with others
+  ///
+  /// In en, this message translates to:
+  /// **'Share Rattil'**
+  String get shareTilawa;
+
+  /// Text shared from settings to recommend Tilawa to others
+  ///
+  /// In en, this message translates to:
+  /// **'Check out {appName}:\n{storeUrl}'**
+  String shareTilawaMessage(String appName, String storeUrl);
+
+  /// Error shown when sharing Tilawa from settings fails
+  ///
+  /// In en, this message translates to:
+  /// **'We could not open the share sheet. Please try again.'**
+  String get shareTilawaFailed;
+
   /// Support screen single-line intro under app bar
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep Rattil going.'**
   String get supportIntroLine;
 
   /// Legacy alias; prefer supportIntroLine
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep Rattil going.'**
   String get supportTilawaSubtitle;
 
   /// Legacy alias; unused on support screen
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Tilawa going.'**
+  /// **'Your contribution helps keep Rattil going.'**
   String get supportMissionBody;
 
   /// Collapsible impact section title on support screen
@@ -3773,7 +3809,7 @@ abstract class AppLocalizations {
   /// Support purchase confirmation sheet body
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play. Tilawa does not store your card details.'**
+  /// **'Payment via Google Play. Rattil does not store your card details.'**
   String get supportConfirmationBody;
 
   /// Support confirmation sheet confirm button
@@ -3821,7 +3857,7 @@ abstract class AppLocalizations {
   /// Support trust line before charities link label
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities ('**
+  /// **'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities ('**
   String get supportTrustLinePrefix;
 
   /// Tappable label for partner charities list URL
@@ -3857,19 +3893,19 @@ abstract class AppLocalizations {
   /// Full trust line for legacy use; UI uses prefix/link/suffix
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
+  /// **'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)'**
   String get supportTrustLine;
 
   /// Legacy alias; prefer supportTrustLinePrefix + link + suffix
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
+  /// **'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)'**
   String get supportPlayFooter;
 
   /// Legacy alias; prefer supportTrustLinePrefix + link + suffix
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
+  /// **'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)'**
   String get supportDisclaimer;
 
   /// Offline message on support screen
@@ -3923,7 +3959,7 @@ abstract class AppLocalizations {
   /// Settings group title for support entry
   ///
   /// In en, this message translates to:
-  /// **'Support Tilawa'**
+  /// **'Support Rattil'**
   String get supportSettingsGroupTitle;
 
   /// Settings support tile subtitle
@@ -3985,6 +4021,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Store reviews are not supported on this platform.'**
   String get appReviewPlatformUnsupported;
+
+  /// Screen-reader label announced while the splash loading screen is visible
+  ///
+  /// In en, this message translates to:
+  /// **'Rattil, loading'**
+  String get a11ySplashLoading;
+
+  /// Toast shown when startup times out and the app navigates to home in a degraded state
+  ///
+  /// In en, this message translates to:
+  /// **'Some content may take a moment to load'**
+  String get splashSlowLoadingNotice;
+
+  /// Button that advances to the next step in a product tour
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get tourActionNext;
+
+  /// Button that closes the last step of a product tour
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tourActionFinish;
+
+  /// Button that dismisses a product tour without finishing it
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get tourActionSkip;
+
+  /// Screen-reader label announcing tour progress
+  ///
+  /// In en, this message translates to:
+  /// **'Step {current} of {total}'**
+  String tourStepSemantics(int current, int total);
+
+  /// Title for the tour step highlighting the reciter search field
+  ///
+  /// In en, this message translates to:
+  /// **'Find a reciter'**
+  String get tourRecitersSearchTitle;
+
+  /// Body text for the tour step highlighting the reciter search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name to quickly jump to any reciter.'**
+  String get tourRecitersSearchDescription;
+
+  /// Title for the tour step highlighting the favorites filter
+  ///
+  /// In en, this message translates to:
+  /// **'Save your favorites'**
+  String get tourRecitersFavoritesTitle;
+
+  /// Body text for the tour step highlighting the favorites filter
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the heart to keep the reciters you love within reach.'**
+  String get tourRecitersFavoritesDescription;
+
+  /// Title for the tour step that prompts opening a reciter from the list
+  ///
+  /// In en, this message translates to:
+  /// **'Open a reciter'**
+  String get tourRecitersOpenReciterTitle;
+
+  /// Body text for the tour step that prompts opening a reciter from the list
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a reciter to browse their recitations and start listening.'**
+  String get tourRecitersOpenReciterDescription;
+
+  /// Title for the tour step highlighting the currently playing surah row
+  ///
+  /// In en, this message translates to:
+  /// **'Now playing'**
+  String get tourReciterPlaybackPlayingTitle;
+
+  /// Body text for the tour step highlighting the currently playing surah row
+  ///
+  /// In en, this message translates to:
+  /// **'The highlighted surah is playing now. Tap any surah to switch.'**
+  String get tourReciterPlaybackPlayingDescription;
+
+  /// Title for the tour step highlighting the mini player bar
+  ///
+  /// In en, this message translates to:
+  /// **'Mini player'**
+  String get tourReciterPlaybackMiniPlayerTitle;
+
+  /// Body text for the tour step highlighting the mini player bar
+  ///
+  /// In en, this message translates to:
+  /// **'Control playback from here while you keep browsing.'**
+  String get tourReciterPlaybackMiniPlayerDescription;
+
+  /// Debug-only settings tile that clears completed product tours
+  ///
+  /// In en, this message translates to:
+  /// **'Reset product tours'**
+  String get tourDebugResetTitle;
+
+  /// Confirmation shown after the debug reset clears tour progress
+  ///
+  /// In en, this message translates to:
+  /// **'Product tours reset'**
+  String get tourDebugResetDone;
 }
 
 class _AppLocalizationsDelegate
