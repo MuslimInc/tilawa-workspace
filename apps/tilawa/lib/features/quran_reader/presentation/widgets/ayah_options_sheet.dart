@@ -27,9 +27,10 @@ class AyahOptionsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(tokens.spaceLarge),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,14 +45,14 @@ class AyahOptionsSheet extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 8),
+          SizedBox(height: tokens.spaceSmall),
 
           // Ayah text preview
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(tokens.spaceMedium),
             decoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(tokens.radiusSmall),
             ),
             child: Directionality(
               textDirection: TextDirection.rtl,
@@ -64,7 +65,7 @@ class AyahOptionsSheet extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: tokens.spaceLarge),
 
           // Options
           ListTile(
@@ -80,7 +81,7 @@ class AyahOptionsSheet extends StatelessWidget {
           ExpansionTile(
             leading: const Icon(Icons.share),
             title: Text(context.l10n.shareAyah),
-            tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+            tilePadding: EdgeInsets.symmetric(horizontal: tokens.spaceLarge),
             childrenPadding: const EdgeInsets.only(left: 24),
             children: [
               ListTile(
@@ -108,7 +109,7 @@ class AyahOptionsSheet extends StatelessWidget {
             onTap: onBookmark,
           ),
 
-          const SizedBox(height: 16),
+          SizedBox(height: tokens.spaceLarge),
         ],
       ),
     );
