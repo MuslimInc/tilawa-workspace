@@ -1320,12 +1320,11 @@ class _StatePanel extends StatelessWidget {
     super.key,
     required this.icon,
     required this.title,
-    this.subtitle,
     this.actionLabel,
     this.onAction,
     this.isError = false,
-    this.actionLeadingIcon,
-  });
+  }) : subtitle = null,
+       actionLeadingIcon = null;
 
   final IconData icon;
   final String title;
