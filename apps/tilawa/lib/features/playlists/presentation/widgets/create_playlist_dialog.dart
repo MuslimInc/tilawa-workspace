@@ -30,6 +30,7 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations l10n = context.l10n;
+    final tokens = Theme.of(context).tokens;
 
     return BlocListener<PlaylistsBloc, PlaylistsState>(
       listener: (context, state) {
@@ -65,7 +66,7 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
                 },
                 textInputAction: TextInputAction.next,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: tokens.spaceLarge),
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
@@ -82,7 +83,7 @@ class _CreatePlaylistDialogState extends State<CreatePlaylistDialog> {
                 maxLines: 3,
                 textInputAction: TextInputAction.done,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: tokens.spaceLarge),
               SwitchListTile(
                 title: Text(l10n.public),
                 subtitle: Text(l10n.private),
