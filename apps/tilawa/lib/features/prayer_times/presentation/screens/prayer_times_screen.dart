@@ -70,8 +70,27 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       return;
     }
 
-    _dispatchRefreshIfStale();
+    _onAppResumed();
     _scheduleMidnightRefreshTimer();
+  }
+
+  /// After the system location dialog closes, retry a stuck load instead of
+  /// [refreshIfStale], which is ignored while [PrayerTimesStatus.loading].
+  void _onAppResumed() {
+    if (!mounted) {
+      return;
+    }
+
+    final PrayerTimesBloc bloc = context.read<PrayerTimesBloc>();
+    final PrayerTimesStatus status = bloc.state.status;
+
+    if (status == PrayerTimesStatus.loading ||
+        status == PrayerTimesStatus.locationRequired) {
+      bloc.add(const PrayerTimesEvent.loadPrayerTimes(forceReschedule: true));
+      return;
+    }
+
+    _dispatchRefreshIfStale();
   }
 
   void _onSegmentChanged(String value) {

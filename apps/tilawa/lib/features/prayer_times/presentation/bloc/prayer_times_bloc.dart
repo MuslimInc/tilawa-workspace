@@ -92,6 +92,10 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     _LoadPrayerTimes event,
     Emitter<PrayerTimesState> emit,
   ) async {
+    if (state.status == PrayerTimesStatus.loading && !event.forceReschedule) {
+      return;
+    }
+
     emit(state.copyWith(status: PrayerTimesStatus.loading));
 
     // Load settings first
@@ -119,11 +123,8 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       final Either<Failure, LocationResult> locationResult =
           await _getCurrentLocationUseCase.call();
 
-      var locationFound = false;
-      String? detectedCountryCode;
-
-      await locationResult.fold(
-        (failure) async {
+      final LocationResult? resolvedLocation = locationResult.fold<LocationResult?>(
+        (failure) {
           emit(
             state.copyWith(
               status: PrayerTimesStatus.locationRequired,
@@ -131,21 +132,22 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
               errorMessage: failure.message ?? 'Unknown error',
             ),
           );
+          return null;
         },
-        (location) async {
-          latitude = location.latitude;
-          longitude = location.longitude;
-          locationName = location.locationName;
-          detectedCountryCode = location.countryCode;
-          locationFound = true;
+        (location) {
+          emit(state.copyWith(isLoadingLocation: false));
+          return location;
         },
       );
 
-      emit(state.copyWith(isLoadingLocation: false));
-
-      if (!locationFound) {
+      if (resolvedLocation == null) {
         return;
       }
+
+      latitude = resolvedLocation.latitude;
+      longitude = resolvedLocation.longitude;
+      locationName = resolvedLocation.locationName;
+      final String? detectedCountryCode = resolvedLocation.countryCode;
 
       // Auto-detect calculation method if using default
       if (detectedCountryCode != null &&
@@ -166,8 +168,8 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
 
       effectiveSettings = await _persistLastResolvedLocationIfNeeded(
         settings: effectiveSettings,
-        latitude: latitude!,
-        longitude: longitude!,
+        latitude: latitude,
+        longitude: longitude,
         locationName: locationName,
       );
       emit(state.copyWith(settings: effectiveSettings));
@@ -195,21 +197,14 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
       }
     }
 
-    if (latitude == null || longitude == null) {
-      emit(
-        state.copyWith(
-          status: PrayerTimesStatus.locationRequired,
-          errorMessage: 'Location required to calculate prayer times',
-        ),
-      );
-      return;
-    }
+    final double resolvedLatitude = latitude;
+    final double resolvedLongitude = longitude;
 
     // Calculate prayer times
     final Either<Failure, PrayerTimeEntity> result =
         await _getPrayerTimesUseCase.call(
-          latitude: latitude!,
-          longitude: longitude!,
+          latitude: resolvedLatitude,
+          longitude: resolvedLongitude,
           date: PrayerTimesClock.now(),
           settings: effectiveSettings,
         );
@@ -226,8 +221,8 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
           state.copyWith(
             status: PrayerTimesStatus.loaded,
             todayPrayerTimes: prayerTimes,
-            latitude: latitude,
-            longitude: longitude,
+            latitude: resolvedLatitude,
+            longitude: resolvedLongitude,
             locationName: locationName,
           ),
         );
@@ -235,8 +230,8 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
         unawaited(
           _schedulePrayerNotificationsUseCase.call(
             settings: effectiveSettings,
-            latitude: latitude!,
-            longitude: longitude!,
+            latitude: resolvedLatitude,
+            longitude: resolvedLongitude,
             forceReschedule: event.forceReschedule,
           ),
         );

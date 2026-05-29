@@ -24,6 +24,7 @@ class LocationDataSourceImpl implements LocationDataSource {
   static const LocationSettings _locationSettings = LocationSettings(
     accuracy: LocationAccuracy.high,
     distanceFilter: 10,
+    timeLimit: Duration(seconds: 15),
   );
 
   @override

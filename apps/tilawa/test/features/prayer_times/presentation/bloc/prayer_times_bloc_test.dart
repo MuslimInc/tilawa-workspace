@@ -137,6 +137,38 @@ void main() {
     });
 
     blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'ignores duplicate loadPrayerTimes while already loading',
+      build: () {
+        when(
+          mockLoadPrayerSettingsUseCase.call(),
+        ).thenAnswer((_) async => const Right(tSettings));
+        when(mockGetCurrentLocationUseCase.call()).thenAnswer(
+          (_) => Future<Either<Failure, LocationResult>>.delayed(
+            const Duration(milliseconds: 100),
+            () => Right(tLocationResult),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      act: (bloc) async {
+        bloc.add(const PrayerTimesEvent.loadPrayerTimes());
+        bloc.add(const PrayerTimesEvent.loadPrayerTimes());
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+      },
+      verify: (_) {
+        verify(mockGetCurrentLocationUseCase.call()).called(1);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
       'emits [locationRequired] when no saved location and location fetch fails',
       build: () {
         when(
