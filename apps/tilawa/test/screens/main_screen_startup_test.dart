@@ -271,11 +271,20 @@ void main() {
       () => mockSetLanguage(any()),
     ).thenAnswer((_) async => const Right<Failure, void>(null));
 
+    final recitersBloc = RecitersBloc(mockGetReciters)
+      ..emit(
+        const RecitersLoaded(
+          reciters: reciters,
+          filteredReciters: reciters,
+        ),
+      );
+
     return MultiBlocProvider(
       providers: [
-        BlocProvider<RecitersBloc>(
-          create: (_) => RecitersBloc(mockGetReciters),
+        BlocProvider<MainScreenCubit>(
+          create: (_) => MainScreenCubit(),
         ),
+        BlocProvider<RecitersBloc>.value(value: recitersBloc),
         BlocProvider<AlphabetScrollbarBloc>(
           create: (_) => AlphabetScrollbarBloc(),
         ),
@@ -357,13 +366,8 @@ void main() {
       });
 
       await tester.pumpWidget(buildRecitersScreenTestApp());
-      await tester.pump(const Duration(milliseconds: 700));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 900));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 600));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 500));
       await tester.pump();
 
       expect(find.byType(RecitersScreen), findsOneWidget);
