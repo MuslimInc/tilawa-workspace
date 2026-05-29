@@ -9,7 +9,6 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/fire_prayer_test_notification_use_case.dart';
 import 'package:tilawa/router/app_router_config.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../settings/presentation/cubit/settings_cubit.dart';
@@ -32,7 +31,14 @@ import '../widgets/widgets.dart';
 /// NOTE: This screen expects a [PrayerTimesBloc] to be provided in the widget tree.
 /// The bloc is provided by [PrayerTimesRoute] in the router configuration.
 class PrayerTimesScreen extends StatefulWidget {
-  const PrayerTimesScreen({super.key});
+  const PrayerTimesScreen({
+    super.key,
+    required this.adhanPlayer,
+    required this.fireTestNotification,
+  });
+
+  final IAdhanAlarmPlayer adhanPlayer;
+  final FirePrayerTestNotificationUseCase fireTestNotification;
 
   @override
   State<PrayerTimesScreen> createState() => _PrayerTimesScreenState();
@@ -307,7 +313,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                 ),
                 sliver: SliverList.list(
                   children: [
-                    const _AdhanPlayingBanner(),
+                    _AdhanPlayingBanner(adhanPlayer: widget.adhanPlayer),
                     _LocationUtilityCard(
                       locationName: state.locationName,
                       onUpdateLocation: () {
@@ -1387,7 +1393,9 @@ class _AlertModeTile extends StatelessWidget {
 }
 
 class _AdhanPlayingBanner extends StatefulWidget {
-  const _AdhanPlayingBanner();
+  const _AdhanPlayingBanner({required this.adhanPlayer});
+
+  final IAdhanAlarmPlayer adhanPlayer;
 
   @override
   State<_AdhanPlayingBanner> createState() => _AdhanPlayingBannerState();
@@ -1417,7 +1425,7 @@ class _AdhanPlayingBannerState extends State<_AdhanPlayingBanner>
 
   Future<void> _poll() async {
     try {
-      final playing = await getIt<IAdhanAlarmPlayer>().isAdhanPlaying();
+      final playing = await widget.adhanPlayer.isAdhanPlaying();
       if (!mounted || playing == _isPlaying) return;
       setState(() => _isPlaying = playing);
       if (playing) {
@@ -1432,7 +1440,7 @@ class _AdhanPlayingBannerState extends State<_AdhanPlayingBanner>
     if (_isStopping) return;
     setState(() => _isStopping = true);
     try {
-      await getIt<IAdhanAlarmPlayer>().stopCurrentAdhan();
+      await widget.adhanPlayer.stopCurrentAdhan();
     } finally {
       if (mounted) {
         setState(() {
@@ -1527,7 +1535,9 @@ class _AdhanPlayingBannerState extends State<_AdhanPlayingBanner>
 /// Debug-only FAB that fires an immediate test prayer notification.
 /// Shown only in [kDebugMode] — stripped from release builds.
 class _DebugNotificationFab extends StatefulWidget {
-  const _DebugNotificationFab();
+  const _DebugNotificationFab({required this.fireTestNotification});
+
+  final FirePrayerTestNotificationUseCase fireTestNotification;
 
   @override
   State<_DebugNotificationFab> createState() => _DebugNotificationFabState();
@@ -1550,7 +1560,7 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
     if (_firing) return;
     setState(() => _firing = true);
     try {
-      await getIt<FirePrayerTestNotificationUseCase>()(
+      await widget.fireTestNotification(
         prayer: _selectedPrayer,
         playAdhan: _playAdhan,
       );

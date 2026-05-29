@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/athkar/presentation/screens/athkar_categories_screen.dart';
-import '../../features/prayer_times/presentation/screens/prayer_times_screen.dart';
+import '../../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
 import '../../features/reciters/presentation/screens/reciters_screen.dart';
 import '../../features/settings/presentation/widgets/settings_screen_scope.dart';
 
@@ -42,7 +42,7 @@ class _MainTabViewportState extends State<MainTabViewport> {
     return _screenCache.putIfAbsent(index, () {
       return switch (index) {
         0 => RecitersScreen(),
-        1 => PrayerTimesScreen(),
+        1 => const PrayerTimesScreenScope(),
         2 => const AthkarCategoriesScreen(),
         3 => const SettingsScreenScope(),
         _ => const SizedBox.shrink(),

@@ -22,10 +22,8 @@ import '../features/downloads/presentation/screens/downloads_screen.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
-import '../features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
-import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
-import '../features/prayer_times/presentation/screens/prayer_times_screen.dart';
+import '../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
 import '../features/support/presentation/screens/support_tilawa_screen.dart';
 import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
@@ -308,20 +306,7 @@ class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) =>
-              getIt<PrayerTimesBloc>()
-                ..add(const PrayerTimesEvent.loadPrayerTimes()),
-        ),
-        BlocProvider(
-          create: (context) =>
-              getIt<PrayerPermissionsCubit>()..checkCapability(),
-        ),
-      ],
-      child: const PrayerTimesScreen(),
-    );
+    return const PrayerTimesScreenScope();
   }
 }
 
