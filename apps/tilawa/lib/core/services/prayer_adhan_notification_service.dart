@@ -9,7 +9,9 @@ import 'package:injectable/injectable.dart';
 import 'package:meta/meta.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
+import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
+import 'package:tilawa/router/deep_link_resolver.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -22,7 +24,6 @@ import '../../features/prayer_times/domain/entities/prayer_settings_entity.dart'
 import '../../features/prayer_times/domain/entities/prayer_time_entity.dart';
 import '../../features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
 import '../../features/prayer_times/domain/services/prayer_adhan_notification_service_interface.dart';
-import '../../router/app_router_config.dart';
 import '../config/notification_config.dart';
 import 'notification_permission_service.dart';
 import 'prayer_notification_config.dart';
@@ -891,12 +892,14 @@ class PrayerAdhanNotificationService
 
   void _navigateToPrayerStatus(String payload) {
     try {
+      final NotificationDestination destination = const DeepLinkResolver()
+          .prayerStatus(payload);
       logger.d(
-        '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_REQUESTED route=${const PrayerNotificationStatusRoute().location}',
+        '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_REQUESTED route=${destination.location}',
       );
       _navigationService.navigateToNotification(
-        const PrayerNotificationStatusRoute().location,
-        extra: payload,
+        destination.location,
+        extra: destination.extra,
       );
       logger.d(
         '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_SUCCESS',

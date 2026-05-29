@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/services/android_adhan_alarm_player.dart';
+import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/core/services/notification_dispatcher.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
@@ -138,6 +139,9 @@ class _NoopNavigationService implements NavigationService {
 
   @override
   void navigateToNotification(String location, {Object? extra}) {}
+
+  @override
+  void routeToDestination(NotificationDestination destination) {}
 
   @override
   Future<void> push(String location, {Object? extra}) async {}

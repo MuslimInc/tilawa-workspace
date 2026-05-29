@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/config/notification_config.dart';
-import 'package:tilawa/core/debug/deep_link_debug_log.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/services/interfaces/notification_dispatcher_interface.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -327,14 +326,6 @@ class DownloadNotificationService implements IDownloadNotificationService {
   @override
   @visibleForTesting
   Future<void> handleNotificationTap(String? payload) async {
-    // #region agent log
-    DeepLinkDebugLog.log(
-      'download_handleNotificationTap',
-      scenario: 'download_tap',
-      hypothesisId: 'H6',
-      data: <String, Object?>{'hasPayload': payload != null},
-    );
-    // #endregion
     if (!NotificationConfig.enableLocalNotifications) {
       return;
     }
@@ -354,30 +345,11 @@ class DownloadNotificationService implements IDownloadNotificationService {
 
       if (reciterId != null ||
           (reciterName != null && reciterName.isNotEmpty)) {
-        // #region agent log
-        DeepLinkDebugLog.log(
-          'download_navigateToReciter',
-          scenario: 'download_tap',
-          hypothesisId: 'H6',
-          data: <String, Object?>{
-            'reciterId': reciterId,
-            'reciterName': reciterName,
-          },
-        );
-        // #endregion
         await _notificationNavigator.navigateToReciter(
           reciterId: reciterId,
           reciterName: reciterName,
         );
       } else {
-        // #region agent log
-        DeepLinkDebugLog.log(
-          'download_tap_no_reciter_in_payload',
-          scenario: 'download_tap',
-          hypothesisId: 'H6',
-          data: <String, Object?>{'payload': payload},
-        );
-        // #endregion
       }
     } on FormatException catch (e) {
       // Not a JSON payload - not a download notification, ignore it

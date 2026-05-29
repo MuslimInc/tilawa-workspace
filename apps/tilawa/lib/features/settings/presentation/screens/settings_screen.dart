@@ -194,10 +194,6 @@ class _SettingsScreenBody extends StatelessWidget {
                       title: 'Route list',
                       onTap: () => const RouteListRoute().push(context),
                     ),
-                    TilawaCatalogSettingsLinkRow(
-                      title: 'Deep link debug',
-                      onTap: () => const DeepLinkDebugRoute().push(context),
-                    ),
                   ],
                 ),
               const SettingsAppVersionFooter(),
