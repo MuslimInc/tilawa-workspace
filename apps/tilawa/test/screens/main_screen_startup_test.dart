@@ -161,7 +161,6 @@ void main() {
 
   Widget buildTestApp({
     MainScreenCubit? mainScreenCubit,
-    RecitersBloc? recitersBloc,
   }) {
     final mockPlayerBackgroundCubit = _MockPlayerBackgroundCubit();
     when(() => mockPlayerBackgroundCubit.state).thenReturn(
@@ -181,13 +180,13 @@ void main() {
       () => mockSetLanguage(any()),
     ).thenAnswer((_) async => const Right<Failure, void>(null));
 
-    final RecitersBloc effectiveRecitersBloc = recitersBloc ?? () {
-      final mockGetReciters = _MockGetRecitersUseCase();
-      when(() => mockGetReciters.call()).thenAnswer(
-        (_) async => const Right<Failure, List<ReciterEntity>>([]),
-      );
-      return RecitersBloc(mockGetReciters);
-    }();
+    final mockGetReciters = _MockGetRecitersUseCase();
+    when(() => mockGetReciters.call()).thenAnswer(
+      (_) async => const Right<Failure, List<ReciterEntity>>([]),
+    );
+
+    getIt.registerSingleton<GetRecitersUseCase>(mockGetReciters);
+    getIt.registerFactory<AlphabetScrollbarBloc>(AlphabetScrollbarBloc.new);
 
     final router = GoRouter(
       initialLocation: '/',
@@ -203,10 +202,6 @@ void main() {
       providers: [
         BlocProvider<MainScreenCubit>(
           create: (_) => mainScreenCubit ?? MainScreenCubit(),
-        ),
-        BlocProvider<RecitersBloc>.value(value: effectiveRecitersBloc),
-        BlocProvider<AlphabetScrollbarBloc>(
-          create: (_) => AlphabetScrollbarBloc(),
         ),
         BlocProvider<LocalizationBloc>(
           create: (_) => LocalizationBloc(mockGetLanguage, mockSetLanguage),

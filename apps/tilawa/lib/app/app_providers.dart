@@ -13,10 +13,7 @@ import '../features/playlists/presentation/bloc/playlists_bloc.dart';
 import '../features/quran_reader/presentation/bloc/quran_font_loader_bloc.dart';
 import '../features/quran_reader/presentation/bloc/quran_reader_bloc.dart';
 import '../features/quran_reader/presentation/cubit/quran_settings_cubit.dart';
-import '../features/reciters/domain/usecases/get_reciters_use_case.dart';
-import '../features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
-import '../features/reciters/presentation/bloc/reciters_bloc.dart';
 import '../features/settings/presentation/cubit/settings_cubit.dart';
 import '../features/share/presentation/cubit/share_cubit.dart';
 import '../features/theme/presentation/cubit/theme_cubit.dart';
@@ -36,12 +33,8 @@ class AppProviders {
       create: (context) => getIt<SettingsCubit>(),
       lazy: false,
     ),
-    BlocProvider<RecitersBloc>(create: (context) => _createRecitersBloc()),
     BlocProvider<ReciterDetailsBloc>(
       create: (context) => getIt<ReciterDetailsBloc>(),
-    ),
-    BlocProvider<AlphabetScrollbarBloc>(
-      create: (context) => getIt<AlphabetScrollbarBloc>(),
     ),
     BlocProvider<AudioPlayerBloc>(
       create: (context) => getIt<AudioPlayerBloc>(),
@@ -69,14 +62,6 @@ class AppProviders {
     ),
     BlocProvider<ShareCubit>(create: (context) => getIt<ShareCubit>()),
   ];
-
-  static RecitersBloc _createRecitersBloc() {
-    final getReciters = getIt<GetRecitersUseCase>();
-    return RecitersBloc(
-      getReciters,
-      initialReciters: getReciters.takeCachedSuccessForStartup(),
-    );
-  }
 
   static List<RepositoryProvider> get repositories => [
     RepositoryProvider<DownloadsRepository>(

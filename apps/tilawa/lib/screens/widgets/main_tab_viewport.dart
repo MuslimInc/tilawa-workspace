@@ -3,7 +3,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
 import '../../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
-import '../../features/reciters/presentation/screens/reciters_screen.dart';
+import '../../features/reciters/presentation/screens/reciters_screen.dart'
+    show RecitersRootBackScope;
+import '../../features/reciters/presentation/widgets/reciters_screen_scope.dart';
 import '../../features/settings/presentation/widgets/settings_screen_scope.dart';
 
 /// Lazily constructs and caches all main-tab screens, then manages the
@@ -41,7 +43,7 @@ class _MainTabViewportState extends State<MainTabViewport> {
   Widget _buildScreenForIndex(int index) {
     return _screenCache.putIfAbsent(index, () {
       return switch (index) {
-        0 => RecitersScreen(),
+        0 => const RecitersScreenScope(),
         1 => const PrayerTimesScreenScope(),
         2 => const AthkarCategoriesScreenScope(),
         3 => const SettingsScreenScope(),
