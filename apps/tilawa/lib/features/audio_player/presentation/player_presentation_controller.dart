@@ -7,7 +7,7 @@ import 'package:tilawa/shared/widgets/quran_player_expand_physics.dart';
 import 'package:tilawa/shared/widgets/quran_player_system_back.dart';
 
 import 'player_presentation_phase.dart';
-import 'quran_player_navigation.dart';
+import 'package:tilawa/core/navigation/quran_player_navigation.dart';
 import 'quran_player_presentation_entry.dart';
 
 /// Presentation authority for the Quran player (not playback, not chrome publish).

@@ -1,24 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/navigation/quran_player_navigation.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/shell_route_location.dart';
 
-/// Navigation contract for the expanded Quran player overlay route.
-///
-/// Prefer [QuranPlayerPresentationEntry.openExpanded] at call sites; this
-/// interface is for the controller and tests.
-abstract interface class QuranPlayerNavigation {
-  /// Whether `/player` is currently on the root navigation stack.
-  bool get isExpandedRouteOnStack;
-
-  /// Pushes the typed overlay route. Completes when the route is popped.
-  Future<void> pushExpanded();
-
-  /// Pops the overlay route when present.
-  void popExpanded();
-}
+export 'package:tilawa/core/navigation/quran_player_navigation.dart';
 
 @LazySingleton(as: QuranPlayerNavigation)
 class GoRouterQuranPlayerNavigation implements QuranPlayerNavigation {
