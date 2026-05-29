@@ -34,60 +34,40 @@ class ReciterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final borderRadius = BorderRadius.circular(tokens.radiusLarge);
 
     return RepaintBoundary(
-      child: TilawaCard(
-        surface: TilawaCardSurface.flat,
-        padding: EdgeInsets.zero,
-        borderRadius: tokens.radiusLarge,
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: borderRadius,
-          child: InkWell(
-            borderRadius: borderRadius,
-            onTap: () => _openReciterDetails(context),
-            child: Semantics(
-              button: true,
-              identifier: ReciterSemanticsIds.reciterCard(reciter.id),
-              label: context.l10n.a11yOpenReciterDetails(reciter.name),
-              child: Padding(
-                padding: EdgeInsets.all(tokens.spaceMedium),
-                child: Stack(
-                  clipBehavior: Clip.none,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: TilawaCard(
+              surface: TilawaCardSurface.flat,
+              borderRadius: tokens.radiusLarge,
+              padding: EdgeInsets.all(tokens.spaceMedium),
+              onTap: () => _openReciterDetails(context),
+              child: Semantics(
+                button: true,
+                identifier: ReciterSemanticsIds.reciterCard(reciter.id),
+                label: context.l10n.a11yOpenReciterDetails(reciter.name),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: tokens.spaceMedium,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: tokens.spaceMedium,
-                      children: [
-                        _ReciterAvatar(
-                          reciterId: reciter.id,
-                          name: reciter.name,
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: favoritesOnlyContext
-                                ? EdgeInsets.zero
-                                : EdgeInsetsDirectional.only(
-                                    end: tokens.spaceLarge + tokens.spaceSmall,
-                                  ),
-                            child: _ReciterInfo(reciter: reciter),
-                          ),
-                        ),
-                      ],
+                    _ReciterAvatar(
+                      reciterId: reciter.id,
+                      name: reciter.name,
                     ),
-                    if (!favoritesOnlyContext)
-                      PositionedDirectional(
-                        top: 0,
-                        end: 0,
-                        child: _FavoriteButton(reciter: reciter),
-                      ),
+                    Expanded(child: _ReciterInfo(reciter: reciter)),
                   ],
                 ),
               ),
             ),
           ),
-        ),
+          if (!favoritesOnlyContext) ...[
+            SizedBox(width: tokens.spaceExtraSmall),
+            _FavoriteButton(reciter: reciter),
+          ],
+        ],
       ),
     );
   }
