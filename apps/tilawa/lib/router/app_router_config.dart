@@ -33,7 +33,7 @@ import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/reciters/presentation/screens/reciter_details_loader.dart';
 import '../features/reciters/presentation/screens/reciter_details_screen.dart';
-import '../features/settings/presentation/screens/settings_screen.dart';
+import '../features/settings/presentation/widgets/settings_screen_scope.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
@@ -146,7 +146,7 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const SettingsScreen();
+    return const SettingsScreenScope();
   }
 }
 

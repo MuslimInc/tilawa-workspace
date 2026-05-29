@@ -4,7 +4,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../features/athkar/presentation/screens/athkar_categories_screen.dart';
 import '../../features/prayer_times/presentation/screens/prayer_times_screen.dart';
 import '../../features/reciters/presentation/screens/reciters_screen.dart';
-import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/settings/presentation/widgets/settings_screen_scope.dart';
 
 /// Lazily constructs and caches all main-tab screens, then manages the
 /// [Offstage] / [TickerMode] stack so only the active tab renders.
@@ -44,7 +44,7 @@ class _MainTabViewportState extends State<MainTabViewport> {
         0 => RecitersScreen(),
         1 => PrayerTimesScreen(),
         2 => const AthkarCategoriesScreen(),
-        3 => const SettingsScreen(),
+        3 => const SettingsScreenScope(),
         _ => const SizedBox.shrink(),
       };
     });
