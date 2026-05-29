@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:tilawa/core/di/injection.dart';
-import 'package:tilawa/features/qibla/presentation/bloc/qibla_bloc.dart';
-
 import '../core/presentation/cubit/ui_visibility_cubit.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/audio_player/presentation/cubit/player_background_cubit.dart';
@@ -53,7 +51,6 @@ class AppProviders {
     ),
     BlocProvider<DownloadsBloc>(create: (context) => getIt<DownloadsBloc>()),
     BlocProvider<PlaylistsBloc>(create: (context) => getIt<PlaylistsBloc>()),
-    BlocProvider<QiblaBloc>(create: (context) => getIt<QiblaBloc>()),
     BlocProvider<AuthBloc>(
       create: (_) => getIt<AuthBloc>()..add(const CheckAuthStatusEvent()),
     ),

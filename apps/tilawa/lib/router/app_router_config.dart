@@ -13,6 +13,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../features/app_review/domain/entities/app_review_blocked_flow.dart';
 import '../features/app_review/presentation/widgets/app_review_sacred_flow_scope.dart';
 import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
+import '../features/qibla/presentation/widgets/qibla_screen_scope.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
 import '../features/athkar/presentation/screens/tasbeeh_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
@@ -25,7 +26,6 @@ import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import '../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
 import '../features/support/presentation/screens/support_tilawa_screen.dart';
-import '../features/qibla/presentation/screens/qibla_screen.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
@@ -240,7 +240,7 @@ class QiblaRoute extends GoRouteData with $QiblaRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const QiblaScreen();
+    return const QiblaScreenScope();
   }
 }
 
