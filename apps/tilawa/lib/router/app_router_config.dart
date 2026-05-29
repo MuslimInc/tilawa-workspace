@@ -19,7 +19,7 @@ import '../features/athkar/presentation/screens/tasbeeh_screen.dart';
 import '../features/auth/presentation/screens/login_screen.dart';
 import '../features/bookmarks/presentation/bloc/bookmarks_bloc.dart';
 import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
-import '../features/downloads/presentation/screens/downloads_screen.dart';
+import '../features/downloads/presentation/widgets/downloads_screen_scope.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
@@ -32,6 +32,7 @@ import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/reciters/presentation/screens/reciter_details_loader.dart';
 import '../features/reciters/presentation/screens/reciter_details_screen.dart';
 import '../features/settings/presentation/widgets/settings_screen_scope.dart';
+import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
 import '../features/share/presentation/screens/video_reel_composer_screen.dart';
 import '../features/splash/presentation/screens/splash_screen.dart';
@@ -163,7 +164,7 @@ class DownloadsRoute extends GoRouteData with $DownloadsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const DownloadsScreen();
+    return const DownloadsScreenScope();
   }
 }
 
@@ -352,14 +353,16 @@ class ScreenshotComposerRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     final ScreenshotComposerNavExtra extra = $extra!;
-    return ScreenshotComposerScreen(
-      surahNumber: extra.surahNumber,
-      currentPage: extra.currentPage,
-      initialFromAyah: extra.initialFromAyah,
-      initialToAyah: extra.initialToAyah,
-      reciterName: extra.reciterName,
-      readerBoundaryKey: extra.readerBoundaryKey,
-      readerPreviewBytesNotifier: extra.readerPreviewBytesNotifier,
+    return ShareComposerScreenScope(
+      child: ScreenshotComposerScreen(
+        surahNumber: extra.surahNumber,
+        currentPage: extra.currentPage,
+        initialFromAyah: extra.initialFromAyah,
+        initialToAyah: extra.initialToAyah,
+        reciterName: extra.reciterName,
+        readerBoundaryKey: extra.readerBoundaryKey,
+        readerPreviewBytesNotifier: extra.readerPreviewBytesNotifier,
+      ),
     );
   }
 }
@@ -403,12 +406,14 @@ class VideoReelComposerRoute extends GoRouteData with $VideoReelComposerRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     final VideoReelComposerNavExtra extra = $extra!;
-    return VideoReelComposerScreen(
-      surahNumber: extra.surahNumber,
-      initialFromAyah: extra.initialFromAyah,
-      initialToAyah: extra.initialToAyah,
-      reciterName: extra.reciterName,
-      reciterServerUrl: extra.reciterServerUrl,
+    return ShareComposerScreenScope(
+      child: VideoReelComposerScreen(
+        surahNumber: extra.surahNumber,
+        initialFromAyah: extra.initialFromAyah,
+        initialToAyah: extra.initialToAyah,
+        reciterName: extra.reciterName,
+        reciterServerUrl: extra.reciterServerUrl,
+      ),
     );
   }
 }
