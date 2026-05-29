@@ -26,32 +26,21 @@ Widget previewTilawaCard() {
 }
 
 @Preview(
-  name: 'TilawaCard (tappable + gradient)',
+  name: 'TilawaCard (tappable)',
   group: 'Atoms',
   theme: atomsPreviewTheme,
 )
-Widget previewTilawaCardGradient() {
-  return Builder(
-    builder: (context) {
-      final scheme = Theme.of(context).colorScheme;
-      return Scaffold(
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Center(
-            child: TilawaCard(
-              onTap: () {},
-              gradient: LinearGradient(
-                colors: [scheme.primary, scheme.tertiary],
-              ),
-              child: const Text(
-                'Tap me',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ),
+Widget previewTilawaCardTappable() {
+  return Scaffold(
+    body: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Center(
+        child: TilawaCard(
+          onTap: () {},
+          child: const Text('Tap me'),
         ),
-      );
-    },
+      ),
+    ),
   );
 }
 

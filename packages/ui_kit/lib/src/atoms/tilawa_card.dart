@@ -4,28 +4,22 @@ import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
 
 /// Surface treatment applied to a [TilawaCard].
-
 ///
-
 /// The Tilawa visual system uses a small set of *calm* card surfaces.
-
 /// Cards do not stack borders + gradients + shadows — pick one treatment.
-
 enum TilawaCardSurface {
   /// Solid `surface` colour with a hairline outline and a soft drop shadow.
-
+  ///
   /// Default top-level card on a scaffold background.
   raised,
 
   /// Solid `surface` colour with a hairline outline and **no** shadow.
-
+  ///
   /// Use when the card is nested inside another elevated container
-
   /// (e.g. rows inside a settings group) so depth doesn't double up.
   flat,
 
   /// Hairline outline only, transparent fill. Use sparingly when the card
-
   /// needs to recede into its parent background.
   outline,
 }
@@ -36,208 +30,214 @@ enum TilawaCardSurface {
 /// radius, border width, and padding across the application.
 ///
 /// Cards are intentionally flat: a solid surface tone, a hairline outline,
-/// and an optional soft shadow. The legacy [gradient] property is kept for
-/// migration only — pass [surface] instead.
+/// and an optional soft shadow via [TilawaCardSurface].
 ///
 /// ## Interactive children
 ///
-/// When [onTap] is provided the card renders a ripple InkWell in the
-/// background of a [Stack]. Content sits on top (z=1) so nested interactive
-/// widgets (buttons, menus, icon-buttons) are hit-tested before the card's
-/// own tap handler and receive taps correctly. The card's [onTap] fires only
-/// when the user taps empty space inside the card — it is NOT called when a
-/// child widget claims the event.
+/// When [onTap] is provided the card uses a [Material] + [InkWell] pair so
+/// ripples render on the card surface. Nested interactive widgets (buttons,
+/// menus, icon-buttons) receive taps before the card's [onTap] because they
+/// sit in the [InkWell] child subtree.
 ///
 /// If an interactive control needs a *different* action from the card's
 /// [onTap] (e.g. a delete button alongside a navigation card), place it as
 /// a sibling of [TilawaCard] in an outer [Row] rather than inside [child].
 /// This is the pattern used by `BookmarkCard`, `HistoryCard`,
 /// `PlaylistCard`, and `TasbeehScreen`'s history list.
-
 class TilawaCard extends StatelessWidget {
   const TilawaCard({
     super.key,
-
     required this.child,
-
     this.padding,
-
     this.backgroundColor,
-
     this.borderColor,
-
     this.borderWidth,
-
     this.borderRadius,
-
     this.surface = TilawaCardSurface.raised,
-
     this.onTap,
-
     this.splashColor,
-
     this.highlightColor,
-
-    @Deprecated(
-      'Cards in the Tilawa visual system are flat. Use [surface] and '
-      '[backgroundColor] instead. Gradients are reserved for the color '
-      'picker tool and share/reel composer artwork.',
-    )
-    this.gradient,
-
-    @Deprecated('Use `surface: TilawaCardSurface.flat` instead.')
-    this.flat = false,
   });
 
   final Widget child;
-
   final EdgeInsetsGeometry? padding;
-
   final Color? backgroundColor;
-
   final Color? borderColor;
-
   final double? borderWidth;
-
   final double? borderRadius;
 
   /// Surface treatment for this card. See [TilawaCardSurface].
-
   final TilawaCardSurface surface;
-
   final VoidCallback? onTap;
-
   final Color? splashColor;
-
   final Color? highlightColor;
-
-  /// Legacy gradient fill. Prefer flat surfaces; this is retained only so
-
-  /// in-flight migrations don't break.
-
-  final Gradient? gradient;
-
-  /// Legacy flag. Prefer `surface: TilawaCardSurface.flat`.
-
-  final bool flat;
-
-  TilawaCardSurface get _effectiveSurface =>
-      flat ? TilawaCardSurface.flat : surface;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final tokens = theme.componentTokens.card;
-
-    final designTokens = theme.tokens;
-
-    final colorScheme = theme.colorScheme;
+    final ThemeData theme = Theme.of(context);
+    final TilawaCardTokens tokens = theme.componentTokens.card;
+    final TilawaDesignTokens designTokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
 
     final double effectiveRadius = borderRadius ?? tokens.borderRadius;
-
     final BorderRadius borderRadiusValue = BorderRadius.circular(
       effectiveRadius,
     );
 
-    final TilawaCardSurface s = _effectiveSurface;
-
-    final bool isOutline = s == TilawaCardSurface.outline;
-
-    final bool hasShadow = s == TilawaCardSurface.raised && gradient == null;
+    final bool isOutline = surface == TilawaCardSurface.outline;
+    final bool hasShadow = surface == TilawaCardSurface.raised;
 
     final Color resolvedFill = isOutline
         ? Colors.transparent
         : (backgroundColor ?? colorScheme.surface);
 
-    final BoxDecoration decoration = BoxDecoration(
-      color: gradient == null ? resolvedFill : null,
+    final BorderSide borderSide = BorderSide(
+      color: borderColor ?? colorScheme.outlineVariant,
+      width: borderWidth ?? tokens.borderWidth,
+    );
 
-      gradient: gradient,
-
+    final ShapeBorder shape = RoundedRectangleBorder(
       borderRadius: borderRadiusValue,
+      side: borderSide,
+    );
 
-      border: Border.all(
-        color: borderColor ?? colorScheme.outlineVariant,
-
-        width: borderWidth ?? tokens.borderWidth,
+    final Widget surfaceWidget = _TilawaCardSolidSurface(
+      fillColor: resolvedFill,
+      shape: shape,
+      borderRadius: borderRadiusValue,
+      onTap: onTap,
+      splashColor: splashColor,
+      highlightColor: highlightColor,
+      child: Padding(
+        padding: padding ?? tokens.padding,
+        child: child,
       ),
-
-      boxShadow: hasShadow
-          ? [
-              BoxShadow(
-                color: colorScheme.shadow.withValues(
-                  alpha: designTokens.opacityShadow,
-                ),
-
-                blurRadius: designTokens.blurShadow,
-
-                offset: designTokens.shadowOffsetSmall,
-              ),
-            ]
-          : null,
     );
-
-    final Widget decoratedSurface = Container(decoration: decoration);
-
-    final Widget paddedChild = Padding(
-      padding: padding ?? tokens.padding,
-      child: child,
-    );
-
-    if (onTap == null) {
-      return SizedBox(
-        width: double.infinity,
-        child: Stack(
-          children: [
-            Positioned.fill(child: decoratedSurface),
-            paddedChild,
-          ],
-        ),
-      );
-    }
-
-    final effectiveSplashColor =
-        splashColor ??
-        colorScheme.primary.withValues(alpha: designTokens.opacitySubtle);
-
-    final effectiveHighlightColor =
-        highlightColor ??
-        colorScheme.onSurface.withValues(alpha: designTokens.opacitySubtle / 2);
-
-    // Stack layout (z-order matters for hit-testing):
-    //
-    //   z=0  Positioned.fill decoration  — visual only ([IgnorePointer]).
-    //   z=1  Positioned.fill InkWell     — card tap; hit-tested after content.
-    //   z=2  paddedChild                 — tested first; interactive children win.
-    //
-    // A solid [BoxDecoration] on the same layer as content would absorb every tap
-    // inside the card bounds and block [onTap]. Decoration is therefore isolated
-    // on an [IgnorePointer] layer. [SizedBox] width infinity keeps grid tiles full-bleed.
 
     return SizedBox(
       width: double.infinity,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: IgnorePointer(child: decoratedSurface),
-          ),
-          Positioned.fill(
-            child: Material(
-              type: MaterialType.transparency,
+      child: hasShadow
+          ? _TilawaCardShadow(
               borderRadius: borderRadiusValue,
-              clipBehavior: Clip.antiAlias,
-              child: InkWell(
-                onTap: onTap,
-                borderRadius: borderRadiusValue,
-                splashColor: effectiveSplashColor,
-                highlightColor: effectiveHighlightColor,
-              ),
+              designTokens: designTokens,
+              colorScheme: colorScheme,
+              child: surfaceWidget,
+            )
+          : surfaceWidget,
+    );
+  }
+}
+
+class _TilawaCardShadow extends StatelessWidget {
+  const _TilawaCardShadow({
+    required this.borderRadius,
+    required this.designTokens,
+    required this.colorScheme,
+    required this.child,
+  });
+
+  final BorderRadius borderRadius;
+  final TilawaDesignTokens designTokens;
+  final ColorScheme colorScheme;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: borderRadius,
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withValues(
+              alpha: designTokens.opacityShadow,
             ),
+            blurRadius: designTokens.blurShadow,
+            offset: designTokens.shadowOffsetSmall,
           ),
-          paddedChild,
         ],
       ),
+      child: child,
+    );
+  }
+}
+
+class _TilawaCardSolidSurface extends StatelessWidget {
+  const _TilawaCardSolidSurface({
+    required this.fillColor,
+    required this.shape,
+    required this.borderRadius,
+    required this.onTap,
+    required this.splashColor,
+    required this.highlightColor,
+    required this.child,
+  });
+
+  final Color fillColor;
+  final ShapeBorder shape;
+  final BorderRadius borderRadius;
+  final VoidCallback? onTap;
+  final Color? splashColor;
+  final Color? highlightColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: fillColor,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      shape: shape,
+      clipBehavior: Clip.antiAlias,
+      child: _TilawaCardInkWell(
+        onTap: onTap,
+        borderRadius: borderRadius,
+        splashColor: splashColor,
+        highlightColor: highlightColor,
+        child: child,
+      ),
+    );
+  }
+}
+
+class _TilawaCardInkWell extends StatelessWidget {
+  const _TilawaCardInkWell({
+    required this.onTap,
+    required this.borderRadius,
+    required this.splashColor,
+    required this.highlightColor,
+    required this.child,
+  });
+
+  final VoidCallback? onTap;
+  final BorderRadius borderRadius;
+  final Color? splashColor;
+  final Color? highlightColor;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (onTap == null) {
+      return child;
+    }
+
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final TilawaDesignTokens designTokens = Theme.of(context).tokens;
+
+    final Color effectiveSplashColor =
+        splashColor ??
+        colorScheme.primary.withValues(alpha: designTokens.opacitySubtle);
+    final Color effectiveHighlightColor =
+        highlightColor ??
+        colorScheme.onSurface.withValues(
+          alpha: designTokens.opacitySubtle / 2,
+        );
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: borderRadius,
+      splashColor: effectiveSplashColor,
+      highlightColor: effectiveHighlightColor,
+      child: child,
     );
   }
 }
