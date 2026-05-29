@@ -150,6 +150,7 @@ class SharePosterRenderer extends StatelessWidget {
                             enableSnapshots: false,
                             bismillahBuilder: (context, page, fontSize) =>
                                 _buildShareBismillah(
+                                  context: context,
                                   fontSize: fontSize,
                                   color: readerTheme.textColor,
                                 ),
@@ -168,11 +169,13 @@ class SharePosterRenderer extends StatelessWidget {
   }
 
   Widget _buildShareBismillah({
+    required BuildContext context,
     required double fontSize,
     required Color color,
   }) {
+    final tokens = context.tokens;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(horizontal: tokens.spaceMedium),
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Text(

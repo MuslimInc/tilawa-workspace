@@ -134,6 +134,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
         }
       },
       builder: (context, state) {
+        final tokens = context.tokens;
         final List<VideoPageSpec> videoPageSpecs = _videoPageSpecs;
         final isGenerating = state.status == ShareStatus.generating;
         final isSharing = state.status == ShareStatus.sharing;
@@ -168,14 +169,14 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
               top: false,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
-                  12,
-                  8,
-                  12,
-                  12 + context.keyboardInset,
+                  tokens.spaceMedium,
+                  tokens.spaceSmall,
+                  tokens.spaceMedium,
+                  tokens.spaceMedium + context.keyboardInset,
                 ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(32),
+                    borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
                     border: Border.all(
                       color: AppShareComposerColors.gold.withValues(
                         alpha: 0.22,
@@ -198,11 +199,16 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(32),
+                    borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
                     child: Stack(
                       children: [
                         SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                          padding: EdgeInsets.fromLTRB(
+                            tokens.spaceExtraLarge,
+                            tokens.spaceMedium,
+                            tokens.spaceExtraLarge,
+                            tokens.spaceExtraLarge,
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
@@ -213,7 +219,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                                 reciterName: reciterName,
                                 verseCount: _verseCount,
                               ),
-                              const SizedBox(height: 18),
+                              SizedBox(height: tokens.spaceLarge),
                               AnimatedSwitcher(
                                 duration: Theme.of(
                                   context,
