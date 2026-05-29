@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
 
@@ -21,17 +22,16 @@ class AyahListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = context.tokens;
+
     return CustomScrollView(
       controller: scrollController,
       slivers: [
-        // Surah header
         SliverToBoxAdapter(child: SurahHeaderWidget(surah: surah)),
 
-        // Basmala (if not Al-Fatiha or At-Tawba)
         if (surah.number != 1 && surah.number != 9)
           const SliverToBoxAdapter(child: BasmalaWidget()),
 
-        // Ayahs
         SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             final AyahEntity ayah = surah.ayahs[index];
@@ -44,8 +44,11 @@ class AyahListView extends StatelessWidget {
           }, childCount: surah.ayahs.length),
         ),
 
-        // Bottom padding
-        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: tokens.playerCollapsedHeight + tokens.spaceExtraLarge,
+          ),
+        ),
       ],
     );
   }
@@ -59,25 +62,24 @@ class SurahHeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = context.tokens;
 
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.all(tokens.spaceLarge),
+      padding: EdgeInsets.all(tokens.spaceExtraLarge),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(tokens.radiusLarge),
       ),
       child: Column(
         children: [
-          // Surah name in Arabic
           Text(
             surah.name,
             style: theme.textTheme.headlineLarge?.copyWith(
               color: theme.colorScheme.onPrimary,
             ),
           ),
-          const SizedBox(height: 8),
-          // English name and translation
+          SizedBox(height: tokens.spaceSmall),
           Text(
             surah.nameEnglish,
             style: theme.textTheme.titleMedium?.copyWith(
@@ -90,8 +92,7 @@ class SurahHeaderWidget extends StatelessWidget {
               color: theme.colorScheme.onPrimary.withValues(alpha: 0.8),
             ),
           ),
-          const SizedBox(height: 12),
-          // Surah info
+          SizedBox(height: tokens.spaceMedium),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -101,7 +102,7 @@ class SurahHeaderWidget extends StatelessWidget {
                     : context.l10n.medinan,
                 theme: theme,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: tokens.spaceMedium),
               _InfoChip(
                 label: context.l10n.ayahCount(surah.numberOfAyahs),
                 theme: theme,
@@ -122,11 +123,16 @@ class _InfoChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = context.tokens;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: EdgeInsets.symmetric(
+        horizontal: tokens.spaceMedium,
+        vertical: tokens.spaceExtraSmall,
+      ),
       decoration: BoxDecoration(
         color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
       ),
       child: Text(
         label,
@@ -144,9 +150,10 @@ class BasmalaWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = context.tokens;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
+      padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraLarge),
       child: Center(
         child: Text(
           BasmalaEntity.text,
@@ -175,12 +182,16 @@ class AyahWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = context.tokens;
 
     return InkWell(
       onTap: onTap,
       onLongPress: onLongPress,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceLarge,
+          vertical: tokens.spaceMedium,
+        ),
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
@@ -192,9 +203,6 @@ class AyahWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Ayah number badge removed as it is handled by the font
-
-            // Arabic text
             Directionality(
               textDirection: TextDirection.rtl,
               child: Text(
@@ -208,10 +216,8 @@ class AyahWidget extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
-
-            // Translation
             if (settings.showTranslation && ayah.translation != null) ...[
-              const SizedBox(height: 12),
+              SizedBox(height: tokens.spaceMedium),
               Text(
                 ayah.translation!,
                 style: TextStyle(
@@ -222,20 +228,18 @@ class AyahWidget extends StatelessWidget {
                 textAlign: TextAlign.left,
               ),
             ],
-
-            // Sajda indicator
             if (ayah.sajda ?? false)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
+                padding: EdgeInsets.only(top: tokens.spaceSmall),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       Icons.keyboard_arrow_down,
-                      size: 16,
+                      size: tokens.iconSizeSmall,
                       color: theme.colorScheme.primary,
                     ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: tokens.spaceExtraSmall),
                     Text(
                       context.l10n.sajda,
                       style: theme.textTheme.labelSmall?.copyWith(
