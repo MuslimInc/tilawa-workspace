@@ -6,7 +6,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/tour_definition.dart';
 import '../../domain/entities/tour_step.dart';
-import '../../domain/presenters/tour_overlay_presenter.dart';
+import '../overlay/tour_overlay_presenter.dart';
 import '../../domain/repositories/tour_repository.dart';
 import '../../domain/services/tour_catalog.dart';
 import '../../domain/services/tour_flow_guard.dart';
@@ -14,8 +14,7 @@ import '../../domain/services/tour_target_registry.dart';
 import '../../domain/usecases/complete_tour.dart';
 import 'tour_guide_labels.dart';
 
-export '../../domain/presenters/tour_overlay_presenter.dart'
-    show TourOverlayStyle;
+export '../overlay/tour_overlay_presenter.dart' show TourOverlayStyle;
 
 /// Orchestrates when and how in-app tours are shown.
 ///

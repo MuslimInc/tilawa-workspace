@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 
-import '../entities/tour_content_align.dart';
-import '../entities/tour_target_shape.dart';
+import '../../domain/entities/tour_content_align.dart';
+import '../../domain/entities/tour_target_shape.dart';
 
-/// Platform-agnostic description of one overlay step (no coach-mark types).
+/// Description of one coach-mark overlay step (presentation layer).
 class TourOverlayStep {
   const TourOverlayStep({
     required this.identify,

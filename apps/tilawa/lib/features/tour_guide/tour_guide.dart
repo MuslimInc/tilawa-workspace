@@ -5,7 +5,7 @@ export 'domain/entities/tour_definition.dart';
 export 'domain/entities/tour_step.dart';
 export 'domain/entities/tour_content_align.dart';
 export 'domain/entities/tour_target_shape.dart';
-export 'domain/presenters/tour_overlay_presenter.dart';
+export 'presentation/overlay/tour_overlay_presenter.dart';
 export 'domain/repositories/tour_repository.dart';
 export 'domain/services/tour_catalog.dart';
 export 'domain/services/tour_flow_guard.dart';

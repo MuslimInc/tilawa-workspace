@@ -6,7 +6,7 @@ import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 import '../../domain/entities/tour_content_align.dart';
 import '../../domain/entities/tour_target_shape.dart';
-import '../../domain/presenters/tour_overlay_presenter.dart';
+import 'tour_overlay_presenter.dart';
 import '../widgets/tour_tooltip_card.dart';
 
 /// [TourOverlayPresenter] backed by `tutorial_coach_mark`.
