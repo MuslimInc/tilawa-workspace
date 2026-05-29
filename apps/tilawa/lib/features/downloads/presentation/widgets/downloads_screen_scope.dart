@@ -8,13 +8,16 @@ import '../screens/downloads_screen.dart';
 /// Composition root for [DownloadsScreen]; bloc lives only while `/downloads`
 /// is mounted.
 class DownloadsScreenScope extends StatelessWidget {
-  const DownloadsScreenScope({super.key});
+  const DownloadsScreenScope({super.key, this.child});
+
+  /// When set (e.g. in widget tests), replaces [DownloadsScreen].
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<DownloadsBloc>(),
-      child: const DownloadsScreen(),
+      child: child ?? const DownloadsScreen(),
     );
   }
 }

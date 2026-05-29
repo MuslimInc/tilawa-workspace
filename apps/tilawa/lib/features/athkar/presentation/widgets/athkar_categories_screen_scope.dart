@@ -7,13 +7,16 @@ import '../screens/athkar_categories_screen.dart';
 
 /// Composition root for [AthkarCategoriesScreen] (main tab and `/athkar` route).
 class AthkarCategoriesScreenScope extends StatelessWidget {
-  const AthkarCategoriesScreenScope({super.key});
+  const AthkarCategoriesScreenScope({super.key, this.child});
+
+  /// When set (e.g. in widget tests), replaces [AthkarCategoriesScreen].
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<AthkarCubit>()..loadCategories(),
-      child: const AthkarCategoriesScreen(),
+      child: child ?? const AthkarCategoriesScreen(),
     );
   }
 }

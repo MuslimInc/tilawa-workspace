@@ -10,7 +10,10 @@ import '../screens/prayer_times_screen.dart';
 
 /// Composition root for [PrayerTimesScreen] (main tab and `/prayer-times` route).
 class PrayerTimesScreenScope extends StatelessWidget {
-  const PrayerTimesScreenScope({super.key});
+  const PrayerTimesScreenScope({super.key, this.child});
+
+  /// When set (e.g. in widget tests), replaces [PrayerTimesScreen].
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
@@ -25,10 +28,12 @@ class PrayerTimesScreenScope extends StatelessWidget {
           create: (context) => getIt<PrayerPermissionsCubit>(),
         ),
       ],
-      child: PrayerTimesScreen(
-        adhanPlayer: getIt<IAdhanAlarmPlayer>(),
-        fireTestNotification: getIt<FirePrayerTestNotificationUseCase>(),
-      ),
+      child:
+          child ??
+          PrayerTimesScreen(
+            adhanPlayer: getIt<IAdhanAlarmPlayer>(),
+            fireTestNotification: getIt<FirePrayerTestNotificationUseCase>(),
+          ),
     );
   }
 }

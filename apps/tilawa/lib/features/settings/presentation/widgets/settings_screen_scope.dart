@@ -9,16 +9,21 @@ import '../screens/settings_screen.dart';
 
 /// Composition root for [SettingsScreen] (main tab and `/settings` route).
 class SettingsScreenScope extends StatelessWidget {
-  const SettingsScreenScope({super.key});
+  const SettingsScreenScope({super.key, this.child});
+
+  /// When set (e.g. in widget tests), replaces [SettingsScreen].
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<AppReviewCubit>(),
-      child: SettingsScreen(
-        supportTilawaEnabled: getIt<AppLaunchConfig>().supportTilawaEnabled,
-        shareContent: getIt<ShareContentUseCase>(),
-      ),
+      child:
+          child ??
+          SettingsScreen(
+            supportTilawaEnabled: getIt<AppLaunchConfig>().supportTilawaEnabled,
+            shareContent: getIt<ShareContentUseCase>(),
+          ),
     );
   }
 }

@@ -9,7 +9,10 @@ import '../screens/reciters_screen.dart';
 
 /// Composition root for [RecitersScreen] (main tab 0).
 class RecitersScreenScope extends StatelessWidget {
-  const RecitersScreenScope({super.key});
+  const RecitersScreenScope({super.key, this.child});
+
+  /// When set (e.g. in widget tests), replaces [RecitersScreen].
+  final Widget? child;
 
   static RecitersBloc _createRecitersBloc() {
     final getReciters = getIt<GetRecitersUseCase>();
@@ -26,7 +29,7 @@ class RecitersScreenScope extends StatelessWidget {
         BlocProvider(create: (_) => _createRecitersBloc()),
         BlocProvider(create: (_) => getIt<AlphabetScrollbarBloc>()),
       ],
-      child: const RecitersScreen(),
+      child: child ?? const RecitersScreen(),
     );
   }
 }

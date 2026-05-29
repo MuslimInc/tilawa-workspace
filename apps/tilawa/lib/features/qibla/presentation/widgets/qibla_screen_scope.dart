@@ -7,13 +7,16 @@ import '../screens/qibla_screen.dart';
 
 /// Composition root for [QiblaScreen]; bloc lives only while `/qibla` is mounted.
 class QiblaScreenScope extends StatelessWidget {
-  const QiblaScreenScope({super.key});
+  const QiblaScreenScope({super.key, this.child});
+
+  /// When set (e.g. in widget tests), replaces [QiblaScreen].
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<QiblaBloc>(),
-      child: const QiblaScreen(),
+      child: child ?? const QiblaScreen(),
     );
   }
 }
