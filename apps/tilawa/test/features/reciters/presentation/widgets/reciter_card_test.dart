@@ -29,7 +29,6 @@ void main() {
   );
 
   setUpAll(() {
-    AppTheme.useGoogleFonts = false;
   });
 
   setUp(() {
@@ -38,6 +37,7 @@ void main() {
     mockGetFavorites = MockGetFavoriteRecitersUseCase();
     mockToggleFavorite = MockToggleFavoriteReciterUseCase();
     mockClearFavorites = MockClearFavoriteRecitersUseCase();
+    when(mockGetFavorites.takeCachedSuccessForStartup()).thenReturn(null);
   });
 
   tearDown(() async {
@@ -73,7 +73,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: PrimaryColorPreset.defaultPreset.value,
-          useGoogleFontsOverride: false,
         ),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -118,7 +117,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: PrimaryColorPreset.defaultPreset.value,
-          useGoogleFontsOverride: false,
         ),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -311,7 +309,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: PrimaryColorPreset.defaultPreset.value,
-          useGoogleFontsOverride: false,
         ),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

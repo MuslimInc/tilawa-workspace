@@ -45,6 +45,7 @@ _PlaybackStateEntity _$PlaybackStateEntityFromJson(Map<String, dynamic> json) =>
       queue: (json['queue'] as List<dynamic>)
           .map((e) => AudioEntity.fromJson(e as Map<String, dynamic>))
           .toList(),
+      queueGeneration: (json['queue_generation'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$PlaybackStateEntityToJson(
@@ -58,6 +59,7 @@ Map<String, dynamic> _$PlaybackStateEntityToJson(
   'duration': instance.duration.inMicroseconds,
   'current_index': instance.currentIndex,
   'queue': instance.queue.map((e) => e.toJson()).toList(),
+  'queue_generation': instance.queueGeneration,
 };
 
 const _$AudioProcessingStateStatusEnumMap = {

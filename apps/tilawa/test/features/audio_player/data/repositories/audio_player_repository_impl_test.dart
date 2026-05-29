@@ -52,6 +52,7 @@ void main() {
       mockAudioHandler.playbackState,
     ).thenAnswer((_) => playbackStateSubject);
     when(mockAudioHandler.queue).thenAnswer((_) => queueSubject);
+    when(mockAudioHandler.queueGeneration).thenReturn(0);
     when(mockAudioHandler.volume).thenAnswer((_) => volumeSubject);
     when(mockAudioHandler.speed).thenAnswer((_) => speedSubject);
     when(mockPositionService.position).thenAnswer((_) => positionSubject);

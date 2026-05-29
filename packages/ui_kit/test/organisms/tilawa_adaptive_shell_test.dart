@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../lib/src/foundation/component_tokens.dart';
 import '../../lib/src/foundation/design_tokens.dart';
 import '../../lib/src/organisms/tilawa_adaptive_shell.dart';
 import '../rtl_test_matrix.dart';
@@ -397,6 +398,67 @@ void main() {
           tester.getSemantics(find.byIcon(Icons.person_outline)).label,
           startsWith('القراء'),
         );
+      },
+    );
+
+    testWidgets(
+      'bottom nav outer height includes system navigation view padding',
+      (tester) async {
+        const destinations = <TilawaNavDestination>[
+          TilawaNavDestination(label: 'القراء', icon: Icons.person_outline),
+          TilawaNavDestination(label: 'الصلاة', icon: Icons.schedule),
+        ];
+        const systemInset = 48.0;
+
+        await tester.binding.setSurfaceSize(const Size(360, 800));
+        tester.view.physicalSize = const Size(360, 800);
+        tester.view.devicePixelRatio = 1.0;
+        tester.view.viewPadding = const FakeViewPadding(bottom: systemInset);
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        addTearDown(tester.view.resetViewPadding);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.rtl,
+            child: TilawaAdaptiveShell(
+              destinations: destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
+
+        final BuildContext barContext = tester.element(
+          find.byType(BottomNavigationBar),
+        );
+        final tokens = Theme.of(barContext).componentTokens.adaptiveShell;
+        final double bottomBarTextScale = MediaQuery.textScalerOf(
+          barContext,
+        ).scale(1.0).clamp(0.01, 1.0);
+        final double expectedHeight = tokens.phoneBottomNavPaintedHeight(
+          TextScaler.linear(bottomBarTextScale),
+          systemInset,
+        );
+
+        final SizedBox barSizedBox = tester.widget(
+          find.ancestor(
+            of: find.byType(BottomNavigationBar),
+            matching: find.byWidgetPredicate(
+              (widget) => widget is SizedBox && widget.height != null,
+            ),
+          ),
+        );
+        expect(barSizedBox.height, closeTo(expectedHeight, 0.05));
+
+        final Rect labelRect = tester.getRect(find.text('القراء').first);
+        expect(labelRect.height, greaterThan(8));
       },
     );
   });

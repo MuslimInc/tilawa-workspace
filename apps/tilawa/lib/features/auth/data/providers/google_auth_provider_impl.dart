@@ -25,29 +25,39 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   @override
   Future<AuthResult> signIn() async {
     try {
-      // Trigger the authentication flow
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
-      // Obtain the auth details from the request
       final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       if (googleAuth.idToken == null) {
         return const AuthResult.cancelled();
       }
 
-      // Create a new credential
       final OAuthCredential credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
-        // accessToken: googleAuth.accessToken, // Not available in newer google_sign_in?
       );
 
-      // Once signed in, return the UserCredential
       final UserCredential userCredential = await _firebaseAuth
           .signInWithCredential(credential);
 
       final UserEntity user = _mapFirebaseUserToUser(userCredential.user!);
 
       return AuthResult.success(user: user);
+    } on GoogleSignInException catch (e) {
+      switch (e.code) {
+        case GoogleSignInExceptionCode.canceled:
+        case GoogleSignInExceptionCode.interrupted:
+        case GoogleSignInExceptionCode.uiUnavailable:
+          return const AuthResult.cancelled();
+        case GoogleSignInExceptionCode.unknownError:
+        case GoogleSignInExceptionCode.clientConfigurationError:
+        case GoogleSignInExceptionCode.providerConfigurationError:
+        case GoogleSignInExceptionCode.userMismatch:
+          return AuthResult.failure(
+            message: e.description ?? 'Authentication failed',
+            code: e.code.name,
+          );
+      }
     } on FirebaseAuthException catch (e) {
       return AuthResult.failure(
         message: e.message ?? 'Authentication failed',

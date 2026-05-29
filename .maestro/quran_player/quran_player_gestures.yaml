@@ -1,0 +1,30 @@
+# Gesture E2E — swipe-to-dismiss mini-player (no close button).
+#
+# Covers [QuranPlayerWidget] vertical drag dismiss on the collapsed bar.
+# Uses swipe instead of quran_player_mini_close so this flow stays valid
+# even if the close affordance is hidden on narrow layouts.
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_gestures.yaml
+
+appId: com.tilawa.app
+---
+
+- launchApp
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+
+- assertVisible:
+    id: "quran_player_mini"
+
+# Swipe down to dismiss (threshold / velocity handled in widget).
+- swipe:
+    start: "50%, 88%"
+    end: "50%, 100%"
+    duration: 350
+- waitForAnimationToEnd
+
+- assertNotVisible:
+    id: "quran_player_mini"

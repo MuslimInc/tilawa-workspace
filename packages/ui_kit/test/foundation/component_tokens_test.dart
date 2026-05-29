@@ -434,6 +434,7 @@ void main() {
   group('TilawaSettingsGroupTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaSettingsGroupTokens.defaults();
+      expect(tokens.groupHorizontalPadding, 16.0);
       expect(tokens.groupBorderRadius, 20.0);
       expect(tokens.groupShadowOpacity, 0.06);
       expect(tokens.tileTitleFontSize, 14.5);
@@ -483,6 +484,7 @@ void main() {
 
     test('lerp interpolates all numeric and EdgeInsets values', () {
       const first = TilawaSettingsGroupTokens(
+        groupHorizontalPadding: 12.0,
         groupHeaderPadding: EdgeInsets.fromLTRB(10, 14, 14, 6),
         groupBorderRadius: 16.0,
         groupShadowOpacity: 0.04,
@@ -519,6 +521,7 @@ void main() {
         switchActiveThumbColor: Color(0xFF006655),
       );
       const second = TilawaSettingsGroupTokens(
+        groupHorizontalPadding: 20.0,
         groupHeaderPadding: EdgeInsets.fromLTRB(14, 18, 18, 10),
         groupBorderRadius: 24.0,
         groupShadowOpacity: 0.08,
@@ -644,7 +647,7 @@ void main() {
   group('TilawaAdaptiveShellTokens', () {
     test('defaults creates expected values', () {
       final tokens = TilawaAdaptiveShellTokens.defaults();
-      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(90.0, 0.05));
+      expect(tokens.phoneBottomNavBarBaseHeight, closeTo(80.0, 0.05));
       expect(tokens.navButtonSelectionContainerVerticalPadding, 6.0);
       expect(tokens.navButtonIconOnlyMinHeight, 40.0);
       expect(tokens.navButtonIconOnlyVerticalPadding, 1.0);
@@ -658,7 +661,7 @@ void main() {
         closeTo(40.0, 0.05),
       );
       expect(tokens.bottomNavHorizontalMargin, 0.0);
-      expect(tokens.navButtonMinHeight, 90.0);
+      expect(tokens.navButtonMinHeight, 80.0);
       expect(tokens.bottomNavBackgroundColor, isA<Color>());
       expect(tokens.navButtonSelectedBackgroundColor, isA<Color>());
     });
@@ -669,8 +672,21 @@ void main() {
       final scaled = tokens.phoneBottomNavLayoutHeight(
         TextScaler.linear(2),
       );
-      expect(unit, closeTo(90.0, 0.05));
+      expect(unit, closeTo(80.0, 0.05));
       expect(scaled, greaterThan(unit));
+    });
+
+    test('phoneBottomNavPaintedHeight adds system bottom view padding', () {
+      final tokens = TilawaAdaptiveShellTokens.defaults();
+      const textScaler = TextScaler.linear(1);
+      const systemInset = 48.0;
+      expect(
+        tokens.phoneBottomNavPaintedHeight(textScaler, systemInset),
+        closeTo(
+          tokens.phoneBottomNavLayoutHeight(textScaler) + systemInset,
+          0.05,
+        ),
+      );
     });
 
     test('phoneBottomNavIconOnlyLayoutHeight grows with text scale', () {

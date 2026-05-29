@@ -1,0 +1,30 @@
+# Stop playback E2E — overflow menu stop row removes the player.
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_stop.yaml
+
+appId: com.tilawa.app
+---
+
+- launchApp
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+- runFlow:
+    file: subflows/expand_player.yaml
+
+- tapOn:
+    id: "quran_player_more_menu"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_menu_stop"
+
+- tapOn:
+    id: "quran_player_menu_stop"
+- waitForAnimationToEnd
+
+- assertNotVisible:
+    id: "quran_player_mini"
+- assertNotVisible:
+    id: "quran_player_track_title"

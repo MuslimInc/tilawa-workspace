@@ -11,12 +11,17 @@ metadata:
 
 ## Tilawa conventions
 
-- Wrap widgets in `MaterialApp` (and theme extensions from `ui_kit` if needed).
+- Wrap widgets in `MaterialApp` with **`AppTheme.getLightTheme`** (and dark if
+  testing both) — not bare `ThemeData.light()`. Set `AppTheme.useGoogleFonts =
+  false` in `setUpAll` for CI stability.
+- Include `TilawaDesignTokens` via `AppTheme`; use `context.tokens` in widgets
+  under test.
 - Provide `BlocProvider` / `RepositoryProvider` with **fakes**, not production
   `get_it` unless testing integration.
 - Prefer **`package:checks`** where the package already depends on it.
 - Run: `flutter test test/<file>_test.dart` from the app package root
   (`apps/tilawa`).
+- Full theming rules: **`flutter-apply-tilawa-theming`**.
 
 ## Contents
 - [Setup & Configuration](#setup--configuration)

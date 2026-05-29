@@ -7,7 +7,6 @@ import 'package:tilawa_ui_kit/src/molecules/tilawa_app_bar_config.dart';
 
 ThemeData _lightTheme() => AppTheme.getLightTheme(
   primaryColor: AppColors.defaultPrimary,
-  useGoogleFontsOverride: false,
 );
 
 void main() {

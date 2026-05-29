@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tilawa</string>
+    <string name="app_name">Rattil</string>
     <string name="adhan_is_playing">Adhan is playing…</string>
     <string name="stop_adhan">Stop Adhan</string>
     <string name="prayer_fajr">Fajr</string>

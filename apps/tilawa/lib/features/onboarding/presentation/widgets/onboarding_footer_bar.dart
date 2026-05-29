@@ -59,36 +59,32 @@ class OnboardingFooterBar extends StatelessWidget {
                 currentIndex: currentPage,
               ),
             ),
-            if (_canGoBack)
-              Row(
+            // Keep Back (left) and the primary action (right) in every locale.
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  TilawaButton(
-                    text: backLabel,
-                    variant: TilawaButtonVariant.ghost,
-                    size: TilawaButtonSize.large,
-                    semanticLabel: backLabel,
-                    onPressed: onBack,
-                  ),
+                  if (_canGoBack)
+                    TilawaButton(
+                      text: backLabel,
+                      variant: TilawaButtonVariant.ghost,
+                      size: TilawaButtonSize.large,
+                      semanticLabel: backLabel,
+                      onPressed: onBack,
+                    ),
                   const Spacer(),
                   TilawaButton(
                     text: _primaryLabel,
                     variant: TilawaButtonVariant.primary,
                     size: TilawaButtonSize.large,
+                    semanticLabel: _primaryLabel,
                     foregroundColor: colorScheme.onPrimary,
                     onPressed: _onPrimary,
                   ),
                 ],
-              )
-            else
-              TilawaButton(
-                text: _primaryLabel,
-                variant: TilawaButtonVariant.primary,
-                size: TilawaButtonSize.large,
-                isFullWidth: true,
-                foregroundColor: colorScheme.onPrimary,
-                onPressed: _onPrimary,
               ),
+            ),
           ],
         ),
       ),

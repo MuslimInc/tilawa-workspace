@@ -58,6 +58,12 @@ Use this workflow to resolve outdated API usages, apply quick fixes, and migrate
 - [ ] 5. Format the modified code using the `dart_format` MCP tool or CLI command `dart format .`.
 - [ ] 6. Run the static analysis workflow to verify all diagnostics are resolved.
 
+### Tilawa monorepo
+
+After UI changes in `apps/tilawa` or `packages/ui_kit`, also verify theming
+compliance per **`flutter-apply-tilawa-theming`** (tokens, no raw hex, flex
+`spacing` where applicable).
+
 ## Examples
 
 ### Comprehensive `analysis_options.yaml`

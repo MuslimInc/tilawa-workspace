@@ -12,7 +12,10 @@ part 'reciters_state.dart';
 
 @lazySingleton
 class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
-  RecitersBloc(this._getRecitersUseCase) : super(const RecitersInitial()) {
+  RecitersBloc(
+    this._getRecitersUseCase, {
+    List<entity.ReciterEntity>? initialReciters,
+  }) : super(_initialState(initialReciters)) {
     on<LoadReciters>(_onLoadReciters);
     on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
@@ -24,6 +27,18 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     on<LanguageChanged>(_onLanguageChanged);
   }
   final GetRecitersUseCase _getRecitersUseCase;
+
+  static RecitersState _initialState(
+    List<entity.ReciterEntity>? initialReciters,
+  ) {
+    if (initialReciters == null) {
+      return const RecitersInitial();
+    }
+    return RecitersLoaded(
+      reciters: initialReciters,
+      filteredReciters: initialReciters,
+    );
+  }
 
   Future<void> _onLoadReciters(
     LoadReciters event,
@@ -38,9 +53,9 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     final bool showFavoritesOnly = state is RecitersLoaded
         ? (state as RecitersLoaded).showFavoritesOnly
         : false;
-    final List<int> favoriteIds = state is RecitersLoaded
+    final Set<int> favoriteIds = state is RecitersLoaded
         ? (state as RecitersLoaded).favoriteIds
-        : const [];
+        : const <int>{};
 
     emit(const RecitersLoading());
 
@@ -274,10 +289,10 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     String searchQuery,
     String? selectedLetter,
     bool showFavoritesOnly,
-    List<int> favoriteIds,
+    Set<int> favoriteIds,
   ) {
     final String normalizedQuery = searchQuery.trim().toLowerCase();
-    final Set<int> favoriteIdsLookup = favoriteIds.toSet();
+    final Set<int> favoriteIdsLookup = favoriteIds;
     var filtered = reciters;
 
     // Filter by search query

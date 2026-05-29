@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa/features/prayer_times/domain/usecases/fire_prayer_test_notification_use_case.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -14,7 +15,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/prayer_times_clock.dart';
-import '../../domain/services/prayer_adhan_notification_service_interface.dart';
+import '../../domain/services/adhan_alarm_player_interface.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
 import '../config/prayer_times_screen_loading_preview.dart';
@@ -306,6 +307,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                 ),
                 sliver: SliverList.list(
                   children: [
+                    const _AdhanPlayingBanner(),
                     _LocationUtilityCard(
                       locationName: state.locationName,
                       onUpdateLocation: () {
@@ -904,13 +906,13 @@ class _UtilityActionRow extends StatelessWidget {
         vertical: tokens.spaceExtraSmall,
       ),
       child: Row(
+        spacing: tokens.spaceSmall,
         children: [
           Icon(
             icon,
             size: tokens.iconSizeSmall,
             color: colorScheme.onSurfaceVariant,
           ),
-          SizedBox(width: tokens.spaceSmall),
           Expanded(
             child: Text(
               label,
@@ -923,7 +925,6 @@ class _UtilityActionRow extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(width: tokens.spaceSmall),
           trailing,
         ],
       ),
@@ -1236,6 +1237,7 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: tokens.spaceExtraSmall,
               children: [
                 Text(
                   row.prayerName,
@@ -1243,7 +1245,6 @@ class _PrayerAlertQuickSheet extends StatelessWidget {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: tokens.spaceExtraSmall),
                 Text(
                   '${row.prayerTime} · ${context.l10n.prayerNotifications}',
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -1385,6 +1386,144 @@ class _AlertModeTile extends StatelessWidget {
   }
 }
 
+class _AdhanPlayingBanner extends StatefulWidget {
+  const _AdhanPlayingBanner();
+
+  @override
+  State<_AdhanPlayingBanner> createState() => _AdhanPlayingBannerState();
+}
+
+class _AdhanPlayingBannerState extends State<_AdhanPlayingBanner>
+    with SingleTickerProviderStateMixin {
+  bool _isPlaying = false;
+  bool _isStopping = false;
+  Timer? _pollTimer;
+  late final AnimationController _pulseController;
+  late final Animation<double> _pulseAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
+    _poll();
+    _pollTimer = Timer.periodic(const Duration(seconds: 2), (_) => _poll());
+  }
+
+  Future<void> _poll() async {
+    try {
+      final playing = await getIt<IAdhanAlarmPlayer>().isAdhanPlaying();
+      if (!mounted || playing == _isPlaying) return;
+      setState(() => _isPlaying = playing);
+      if (playing) {
+        _pulseController.repeat(reverse: true);
+      } else {
+        _pulseController.animateTo(0.0);
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _stop() async {
+    if (_isStopping) return;
+    setState(() => _isStopping = true);
+    try {
+      await getIt<IAdhanAlarmPlayer>().stopCurrentAdhan();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isStopping = false;
+          _isPlaying = false;
+        });
+        _pulseController.animateTo(0.0);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      child: _isPlaying ? _buildBanner(context) : const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildBanner(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        tokens.spaceLarge,
+        0,
+        tokens.spaceLarge,
+        tokens.spaceSmall,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: colorScheme.errorContainer,
+          borderRadius: BorderRadius.circular(
+            tokens.resolveRadius(family: TilawaRadiusFamily.card),
+          ),
+          border: Border.all(
+            color: colorScheme.error.withValues(alpha: tokens.opacityMedium),
+            width: tokens.borderWidthThin,
+          ),
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceMedium,
+          vertical: tokens.spaceSmall,
+        ),
+        child: Row(
+          children: [
+            AnimatedBuilder(
+              animation: _pulseAnimation,
+              builder: (_, child) =>
+                  Transform.scale(scale: _pulseAnimation.value, child: child),
+              child: Icon(
+                Icons.notifications_active_rounded,
+                size: tokens.iconSizeMedium,
+                color: colorScheme.error,
+              ),
+            ),
+            SizedBox(width: tokens.spaceSmall),
+            Expanded(
+              child: Text(
+                context.l10n.adhanIsPlaying,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onErrorContainer,
+                ),
+              ),
+            ),
+            SizedBox(width: tokens.spaceSmall),
+            TilawaButton(
+              text: context.l10n.stopAdhan,
+              variant: TilawaButtonVariant.danger,
+              size: TilawaButtonSize.small,
+              isLoading: _isStopping,
+              onPressed: _isStopping ? null : _stop,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Debug-only FAB that fires an immediate test prayer notification.
 /// Shown only in [kDebugMode] — stripped from release builds.
 class _DebugNotificationFab extends StatefulWidget {
@@ -1411,7 +1550,7 @@ class _DebugNotificationFabState extends State<_DebugNotificationFab> {
     if (_firing) return;
     setState(() => _firing = true);
     try {
-      await getIt<IPrayerAdhanNotificationService>().fireTestNotification(
+      await getIt<FirePrayerTestNotificationUseCase>()(
         prayer: _selectedPrayer,
         playAdhan: _playAdhan,
       );

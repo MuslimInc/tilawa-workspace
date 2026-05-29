@@ -37,6 +37,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     this.onSleepTimerTap,
     this.onTap,
     this.onClose,
+    this.playPauseSemanticIdentifier,
+    this.closeSemanticIdentifier,
     this.openPlayerSemanticLabel,
     this.previousTooltip,
     this.playTooltip,
@@ -68,6 +70,13 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   final VoidCallback? onSleepTimerTap;
   final VoidCallback? onTap;
   final VoidCallback? onClose;
+
+  /// Optional [Semantics.identifier] for Maestro / accessibility on play-pause.
+  final String? playPauseSemanticIdentifier;
+
+  /// Optional [Semantics.identifier] for Maestro / accessibility on dismiss.
+  final String? closeSemanticIdentifier;
+
   final String? openPlayerSemanticLabel;
   final String? previousTooltip;
   final String? playTooltip;
@@ -219,12 +228,29 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                     onPrevious: onPrevious,
                     onNext: onNext,
                     onSleepTimerTap: onSleepTimerTap,
+                    playPauseSemanticIdentifier: playPauseSemanticIdentifier,
                     previousTooltip: previousTooltip,
                     playTooltip: playTooltip,
                     pauseTooltip: pauseTooltip,
                     nextTooltip: nextTooltip,
                     sleepTimerTooltip: sleepTimerTooltip,
                   ),
+                  if (onClose != null) ...[
+                    SizedBox(width: componentTokens.controlsGap),
+                    Semantics(
+                      identifier: closeSemanticIdentifier,
+                      button: true,
+                      child: _TransportIconButton(
+                        size: componentTokens.controlButtonSize,
+                        tooltip: 'Close player',
+                        icon: FluentIcons.dismiss_24_regular,
+                        iconSize: designTokens.iconSizeMedium,
+                        enabled: true,
+                        color: colorScheme.onSurfaceVariant,
+                        onPressed: onClose,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -376,6 +402,7 @@ class _TransportControls extends StatelessWidget {
     required this.onPrevious,
     required this.onNext,
     required this.onSleepTimerTap,
+    this.playPauseSemanticIdentifier,
     required this.previousTooltip,
     required this.playTooltip,
     required this.pauseTooltip,
@@ -397,6 +424,7 @@ class _TransportControls extends StatelessWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
   final VoidCallback? onSleepTimerTap;
+  final String? playPauseSemanticIdentifier;
   final String? previousTooltip;
   final String? playTooltip;
   final String? pauseTooltip;
@@ -415,6 +443,7 @@ class _TransportControls extends StatelessWidget {
             size: componentTokens.playPauseButtonSize,
             iconSize: componentTokens.playPauseIconSize,
             isPlaying: isPlaying,
+            semanticIdentifier: playPauseSemanticIdentifier,
             playTooltip: playTooltip,
             pauseTooltip: pauseTooltip,
             onPressed: onPlayPause,
@@ -478,6 +507,7 @@ class _PlayPauseButton extends StatelessWidget {
     required this.size,
     required this.iconSize,
     required this.isPlaying,
+    this.semanticIdentifier,
     required this.playTooltip,
     required this.pauseTooltip,
     required this.onPressed,
@@ -486,6 +516,7 @@ class _PlayPauseButton extends StatelessWidget {
   final double size;
   final double iconSize;
   final bool isPlaying;
+  final String? semanticIdentifier;
   final String? playTooltip;
   final String? pauseTooltip;
   final VoidCallback? onPressed;
@@ -493,7 +524,7 @@ class _PlayPauseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return Container(
+    final Widget button = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
@@ -512,6 +543,14 @@ class _PlayPauseButton extends StatelessWidget {
         ),
         onPressed: onPressed,
       ),
+    );
+    if (semanticIdentifier == null) {
+      return button;
+    }
+    return Semantics(
+      identifier: semanticIdentifier,
+      button: true,
+      child: button,
     );
   }
 }

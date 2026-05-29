@@ -19,7 +19,7 @@ Use the Flutter Widget Previewer to render widgets in real-time, isolated from t
 
 - **Target Elements:** Apply the `@Preview` annotation to top-level functions, static methods within a class, or public widget constructors/factories that have no required arguments and return a `Widget` or `WidgetBuilder`.
 - **Imports:** Always import `package:flutter/widget_previews.dart` to access the preview annotations.
-- **Custom Annotations:** Extend the `Preview` class to create custom annotations that inject common properties (e.g., themes, wrappers) across multiple widgets.
+- **Custom Annotations:** Extend the `Preview` class to create custom annotations that inject common properties (e.g., **`AppTheme`** / `TilawaDesignTokens`, wrappers) across multiple widgets.
 - **Multiple Configurations:** Apply multiple `@Preview` annotations to a single target to generate multiple preview instances. Alternatively, extend `MultiPreview` to encapsulate common multi-preview configurations.
 - **Runtime Transformations:** Override the `transform()` method in custom `Preview` or `MultiPreview` classes to modify preview configurations dynamically at runtime (e.g., generating names based on dynamic values, which is impossible in a `const` context).
 
@@ -40,7 +40,7 @@ Copy and track this checklist when implementing a new widget preview:
 - [ ] Import `package:flutter/widget_previews.dart`.
 - [ ] Identify a valid target (top-level function, static method, or parameter-less public constructor).
 - [ ] Apply the `@Preview` annotation to the target.
-- [ ] Configure preview parameters (`name`, `group`, `size`, `theme`, `brightness`, etc.) as needed.
+- [ ] Configure preview parameters (`name`, `group`, `size`, `theme`, `brightness`, etc.) as needed. In Tilawa, wire **`AppTheme.getLightTheme` / `getDarkTheme`** — see `flutter-apply-tilawa-theming`.
 - [ ] If applying the same configuration to multiple widgets, extract the configuration into a custom class extending `Preview`.
 
 ### Interacting with Previews

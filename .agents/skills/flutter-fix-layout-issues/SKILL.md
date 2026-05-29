@@ -8,9 +8,16 @@ metadata:
 # Resolving Flutter Layout Errors
 
 ## Contents
+- [Tilawa theming (monorepo)](#tilawa-theming-monorepo)
 - [Constraint Violation Diagnostics](#constraint-violation-diagnostics)
 - [Layout Error Resolution Workflow](#layout-error-resolution-workflow)
 - [Examples](#examples)
+
+## Tilawa theming (monorepo)
+
+Use `Theme.of(context).tokens` for spacing when fixing layouts in Tilawa. For
+uniform flex gaps, prefer `Column`/`Row` `spacing:` over fixed `SizedBox`
+children — see `flutter-apply-tilawa-theming`.
 
 ## Constraint Violation Diagnostics
 

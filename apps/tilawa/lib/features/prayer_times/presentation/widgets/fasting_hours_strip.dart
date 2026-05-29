@@ -59,9 +59,9 @@ class FastingHoursStrip extends StatelessWidget {
             Flexible(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                spacing: tokens.spaceSmall,
                 children: [
                   Icon(Icons.restaurant_outlined, color: activeColor, size: 20),
-                  SizedBox(width: tokens.spaceSmall),
                   Flexible(
                     child: Text(
                       label,

@@ -7,11 +7,12 @@ import 'package:tilawa_core/config/language_config.dart';
 
 import '../../domain/repositories/downloads_repository.dart';
 import '../../domain/services/download_notification_service_interface.dart';
+import '../../domain/services/downloads_initializer.dart';
 import 'batch_download_manager.dart';
 import 'download_queue_manager.dart';
 
-@singleton
-class DownloadsInitializationService {
+@Singleton(as: DownloadsInitializer)
+class DownloadsInitializationService implements DownloadsInitializer {
   DownloadsInitializationService(
     this._downloadsRepository,
     this._downloadNotificationService,
@@ -28,6 +29,7 @@ class DownloadsInitializationService {
 
   /// Initialize downloads feature
   /// This checks for any pending or stuck downloads and resumes them
+  @override
   Future<void> initialize() async {
     try {
       // Set locale from user's persisted preference before any notifications

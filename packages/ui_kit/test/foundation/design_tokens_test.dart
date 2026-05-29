@@ -54,6 +54,10 @@ void main() {
       playerProgressThreshold: 0.5,
       playerIgnorePointerThreshold: 0.4,
       playerAlphaScalingFactor: 2.5,
+      stateLayerHover: 0.08,
+      stateLayerPressed: 0.12,
+      stateLayerFocused: 0.12,
+      focusRingWidth: 2.0,
     );
 
     group('factory constructors', () {
@@ -237,6 +241,10 @@ void main() {
           playerProgressThreshold: 0.5,
           playerIgnorePointerThreshold: 0.4,
           playerAlphaScalingFactor: 2.5,
+          stateLayerHover: 0.08,
+          stateLayerPressed: 0.12,
+          stateLayerFocused: 0.12,
+          focusRingWidth: 2.0,
         );
         const second = TilawaDesignTokens(
           spaceTiny: 4.0,
@@ -288,6 +296,10 @@ void main() {
           playerProgressThreshold: 0.6,
           playerIgnorePointerThreshold: 0.5,
           playerAlphaScalingFactor: 3.0,
+          stateLayerHover: 0.16,
+          stateLayerPressed: 0.20,
+          stateLayerFocused: 0.20,
+          focusRingWidth: 3.0,
         );
 
         final lerped = first.lerp(second, 0);
@@ -348,6 +360,10 @@ void main() {
           playerProgressThreshold: 0.6,
           playerIgnorePointerThreshold: 0.5,
           playerAlphaScalingFactor: 3.0,
+          stateLayerHover: 0.16,
+          stateLayerPressed: 0.20,
+          stateLayerFocused: 0.20,
+          focusRingWidth: 3.0,
         );
 
         final lerped = first.lerp(second, 1);
@@ -406,6 +422,10 @@ void main() {
           playerProgressThreshold: 0.5,
           playerIgnorePointerThreshold: 0.4,
           playerAlphaScalingFactor: 2.5,
+          stateLayerHover: 0.08,
+          stateLayerPressed: 0.12,
+          stateLayerFocused: 0.12,
+          focusRingWidth: 2.0,
         );
         const second = TilawaDesignTokens(
           spaceTiny: 4.0,
@@ -457,6 +477,10 @@ void main() {
           playerProgressThreshold: 0.6,
           playerIgnorePointerThreshold: 0.5,
           playerAlphaScalingFactor: 3.0,
+          stateLayerHover: 0.16,
+          stateLayerPressed: 0.20,
+          stateLayerFocused: 0.20,
+          focusRingWidth: 3.0,
         );
 
         final lerped = first.lerp(second, 0.5);
@@ -521,6 +545,10 @@ void main() {
           playerProgressThreshold: 0.5,
           playerIgnorePointerThreshold: 0.4,
           playerAlphaScalingFactor: 2.5,
+          stateLayerHover: 0.08,
+          stateLayerPressed: 0.12,
+          stateLayerFocused: 0.12,
+          focusRingWidth: 2.0,
         );
 
         final lerped = first.lerp(second, 0.5);
@@ -580,6 +608,10 @@ void main() {
             playerProgressThreshold: 0.5,
             playerIgnorePointerThreshold: 0.4,
             playerAlphaScalingFactor: 2.5,
+            stateLayerHover: 0.08,
+            stateLayerPressed: 0.12,
+            stateLayerFocused: 0.12,
+            focusRingWidth: 2.0,
           );
           const second = TilawaDesignTokens(
             spaceTiny: 4.0,
@@ -631,6 +663,10 @@ void main() {
             playerProgressThreshold: 0.6,
             playerIgnorePointerThreshold: 0.5,
             playerAlphaScalingFactor: 3.0,
+            stateLayerHover: 0.16,
+            stateLayerPressed: 0.20,
+            stateLayerFocused: 0.20,
+            focusRingWidth: 3.0,
           );
 
           final lerped = first.lerp(second, 0.3);

@@ -85,6 +85,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.playerProgressThreshold,
     required this.playerIgnorePointerThreshold,
     required this.playerAlphaScalingFactor,
+    required this.stateLayerHover,
+    required this.stateLayerPressed,
+    required this.stateLayerFocused,
+    required this.focusRingWidth,
   });
 
   /// 2.0
@@ -256,6 +260,23 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
   /// 2.5
   final double playerAlphaScalingFactor;
 
+  /// 0.08 — alpha for the Material state layer on hover. Reach for this
+  /// (over Flutter's `hoverColor` default) so calibrated hover wash on
+  /// neutral surfaces stays visible without becoming a lavender tint.
+  final double stateLayerHover;
+
+  /// 0.12 — alpha for the Material state layer on press/splash. Pairs
+  /// with [stateLayerHover] and [stateLayerFocused] so light and dark
+  /// surfaces share a tuned interaction language.
+  final double stateLayerPressed;
+
+  /// 0.12 — alpha for the Material state layer on keyboard focus.
+  final double stateLayerFocused;
+
+  /// 2.0 — width of the focus indicator ring (Material 3 default). Centralised
+  /// here so component-level focus styling is consistent.
+  final double focusRingWidth;
+
   /// Default values for light/dark theme.
   factory TilawaDesignTokens.light() => TilawaDesignTokens._create();
 
@@ -312,6 +333,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       playerProgressThreshold: 0.5,
       playerIgnorePointerThreshold: 0.4,
       playerAlphaScalingFactor: 2.5,
+      stateLayerHover: 0.08,
+      stateLayerPressed: 0.12,
+      stateLayerFocused: 0.12,
+      focusRingWidth: 2.0,
     );
   }
 
@@ -366,6 +391,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? playerProgressThreshold,
     double? playerIgnorePointerThreshold,
     double? playerAlphaScalingFactor,
+    double? stateLayerHover,
+    double? stateLayerPressed,
+    double? stateLayerFocused,
+    double? focusRingWidth,
   }) {
     return TilawaDesignTokens(
       spaceTiny: spaceTiny ?? this.spaceTiny,
@@ -432,6 +461,10 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
           playerIgnorePointerThreshold ?? this.playerIgnorePointerThreshold,
       playerAlphaScalingFactor:
           playerAlphaScalingFactor ?? this.playerAlphaScalingFactor,
+      stateLayerHover: stateLayerHover ?? this.stateLayerHover,
+      stateLayerPressed: stateLayerPressed ?? this.stateLayerPressed,
+      stateLayerFocused: stateLayerFocused ?? this.stateLayerFocused,
+      focusRingWidth: focusRingWidth ?? this.focusRingWidth,
     );
   }
 
@@ -584,6 +617,18 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
         other.playerAlphaScalingFactor,
         t,
       )!,
+      stateLayerHover: lerpDouble(stateLayerHover, other.stateLayerHover, t)!,
+      stateLayerPressed: lerpDouble(
+        stateLayerPressed,
+        other.stateLayerPressed,
+        t,
+      )!,
+      stateLayerFocused: lerpDouble(
+        stateLayerFocused,
+        other.stateLayerFocused,
+        t,
+      )!,
+      focusRingWidth: lerpDouble(focusRingWidth, other.focusRingWidth, t)!,
     );
   }
 

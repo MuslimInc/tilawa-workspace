@@ -129,13 +129,13 @@ void main() {
     repository = _InMemoryTasbeehRepository();
     feedbackService = _FakeTasbeehTargetFeedbackService();
     cubit = TasbeehCubit(
-      getSavedTasbeeh: GetSavedTasbeehUseCase(repository),
-      saveCustomTasbeeh: SaveCustomTasbeehUseCase(repository),
-      incrementTasbeehCount: IncrementTasbeehCountUseCase(repository),
-      resetTasbeehCount: ResetTasbeehCountUseCase(repository),
-      setTasbeehTargetCount: SetTasbeehTargetCountUseCase(repository),
-      deleteTasbeehDhikr: DeleteTasbeehDhikrUseCase(repository),
-      feedbackService: feedbackService,
+      GetSavedTasbeehUseCase(repository),
+      SaveCustomTasbeehUseCase(repository),
+      IncrementTasbeehCountUseCase(repository),
+      ResetTasbeehCountUseCase(repository),
+      SetTasbeehTargetCountUseCase(repository),
+      DeleteTasbeehDhikrUseCase(repository),
+      feedbackService,
     );
   });
 
@@ -168,9 +168,70 @@ void main() {
     expect: () => [
       isA<TasbeehState>()
           .having((s) => s.status, 'status', TasbeehStatus.loaded)
+          .having(
+            (s) => s.viewMode,
+            'viewMode',
+            TasbeehViewMode.selectedCounting,
+          )
           .having((s) => s.savedDhikr.length, 'saved count', 1)
-          .having((s) => s.selectedDhikrId, 'selected', '1')
+          .having((s) => s.activeSavedDhikrId, 'selected', '1')
           .having((s) => s.draftText, 'draft', ''),
+    ],
+  );
+
+  blocTest<TasbeehCubit, TasbeehState>(
+    'startCounting clears selected dhikr and uses free counting mode',
+    build: () => cubit,
+    seed: () {
+      final item = TasbeehDhikr(
+        id: '1',
+        text: 'Subhan Allah',
+        count: 2,
+        targetCount: 33,
+        targetReachedNotified: false,
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+      );
+      return TasbeehState(
+        status: TasbeehStatus.loaded,
+        viewMode: TasbeehViewMode.selectedCounting,
+        savedDhikr: [item],
+        activeSavedDhikrId: '1',
+      );
+    },
+    act: (cubit) => cubit.startCounting(),
+    expect: () => [
+      isA<TasbeehState>()
+          .having((s) => s.viewMode, 'viewMode', TasbeehViewMode.counting)
+          .having((s) => s.activeSavedDhikrId, 'selected', isNull),
+    ],
+  );
+
+  blocTest<TasbeehCubit, TasbeehState>(
+    'selectDhikrAndStartCounting opens selected counting mode',
+    build: () => cubit,
+    seed: () {
+      final item = TasbeehDhikr(
+        id: '1',
+        text: 'Subhan Allah',
+        count: 0,
+        targetCount: 33,
+        targetReachedNotified: false,
+        createdAt: DateTime(2026),
+        updatedAt: DateTime(2026),
+      );
+      return TasbeehState(
+        status: TasbeehStatus.loaded,
+        viewMode: TasbeehViewMode.history,
+        savedDhikr: [item],
+      );
+    },
+    act: (cubit) => cubit.selectDhikrAndStartCounting('1'),
+    expect: () => [
+      isA<TasbeehState>()
+          .having((s) => s.viewMode, 'viewMode', TasbeehViewMode.selectedCounting)
+          .having((s) => s.activeSavedDhikrId, 'selected', '1')
+          .having((s) => s.activeSavedDhikr?.text, 'text', 'Subhan Allah'),
     ],
   );
 
@@ -179,7 +240,7 @@ void main() {
     build: () => cubit,
     seed: () => const TasbeehState(
       status: TasbeehStatus.loaded,
-      viewMode: TasbeehViewMode.options,
+      viewMode: TasbeehViewMode.counting,
       draftText: 'Subhan Allah',
       draftTargetText: '10',
     ),
@@ -192,6 +253,23 @@ void main() {
         draftTargetText: '',
       ),
     ],
+  );
+
+  blocTest<TasbeehCubit, TasbeehState>(
+    'incrementEphemeralCount never triggers target feedback',
+    build: () => cubit,
+    seed: () => const TasbeehState(
+      status: TasbeehStatus.loaded,
+      viewMode: TasbeehViewMode.counting,
+      ephemeralCount: 10,
+    ),
+    act: (cubit) {
+      cubit.incrementEphemeralCount();
+      cubit.incrementEphemeralCount();
+    },
+    verify: (_) {
+      expect(feedbackService.callCount, 0);
+    },
   );
 
   blocTest<TasbeehCubit, TasbeehState>(
@@ -210,14 +288,15 @@ void main() {
       repository._store['1'] = item;
       return TasbeehState(
         status: TasbeehStatus.loaded,
+        viewMode: TasbeehViewMode.selectedCounting,
         savedDhikr: [item],
-        selectedDhikrId: '1',
+        activeSavedDhikrId: '1',
       );
     },
     act: (cubit) => cubit.incrementSelected(),
     expect: () => [
-      isA<TasbeehState>().having((s) => s.selectedCount, 'count', 3),
-      isA<TasbeehState>().having((s) => s.selectedCount, 'count', 3),
+      isA<TasbeehState>().having((s) => s.activeSavedDhikr!.count, 'count', 3),
+      isA<TasbeehState>().having((s) => s.activeSavedDhikr!.count, 'count', 3),
     ],
     verify: (_) {
       expect(feedbackService.callCount, 1);
@@ -240,14 +319,15 @@ void main() {
       repository._store['1'] = item;
       return TasbeehState(
         status: TasbeehStatus.loaded,
+        viewMode: TasbeehViewMode.selectedCounting,
         savedDhikr: [item],
-        selectedDhikrId: '1',
+        activeSavedDhikrId: '1',
       );
     },
     act: (cubit) => cubit.resetSelected(),
     expect: () => [
-      isA<TasbeehState>().having((s) => s.selectedCount, 'count', 0),
-      isA<TasbeehState>().having((s) => s.selectedCount, 'count', 0),
+      isA<TasbeehState>().having((s) => s.activeSavedDhikr!.count, 'count', 0),
+      isA<TasbeehState>().having((s) => s.activeSavedDhikr!.count, 'count', 0),
     ],
   );
 
@@ -268,14 +348,14 @@ void main() {
       return TasbeehState(
         status: TasbeehStatus.loaded,
         savedDhikr: [item],
-        selectedDhikrId: '1',
+        activeSavedDhikrId: '1',
         draftTargetText: '7',
       );
     },
     act: (cubit) => cubit.setTargetForSelected(),
     expect: () => [
       isA<TasbeehState>().having(
-        (s) => s.selectedDhikr?.targetCount,
+        (s) => s.activeSavedDhikr?.targetCount,
         'target',
         7,
       ),
@@ -299,7 +379,8 @@ void main() {
       return TasbeehState(
         status: TasbeehStatus.loaded,
         savedDhikr: [item],
-        selectedDhikrId: '1',
+        viewMode: TasbeehViewMode.selectedCounting,
+        activeSavedDhikrId: '1',
       );
     },
     act: (cubit) => cubit.incrementSelected(),
@@ -325,7 +406,8 @@ void main() {
       return TasbeehState(
         status: TasbeehStatus.loaded,
         savedDhikr: [item],
-        selectedDhikrId: '1',
+        viewMode: TasbeehViewMode.selectedCounting,
+        activeSavedDhikrId: '1',
       );
     },
     act: (cubit) => cubit.incrementSelected(),
@@ -361,8 +443,9 @@ void main() {
       repository.incrementDelay = const Duration(milliseconds: 20);
       return TasbeehState(
         status: TasbeehStatus.loaded,
+        viewMode: TasbeehViewMode.selectedCounting,
         savedDhikr: [first, second],
-        selectedDhikrId: '1',
+        activeSavedDhikrId: '1',
       );
     },
     act: (cubit) async {
@@ -402,15 +485,14 @@ void main() {
       return TasbeehState(
         status: TasbeehStatus.loaded,
         savedDhikr: [item1, item2],
-        selectedDhikrId: '1',
+        activeSavedDhikrId: '1',
       );
     },
     act: (cubit) => cubit.removeSelected(),
     expect: () => [
       isA<TasbeehState>()
           .having((s) => s.savedDhikr.length, 'length', 1)
-          .having((s) => s.selectedDhikrId, 'selected', '2')
-          .having((s) => s.draftTargetText, 'target text', '10'),
+          .having((s) => s.activeSavedDhikrId, 'selected', isNull),
     ],
   );
 
@@ -441,7 +523,7 @@ void main() {
       return TasbeehState(
         status: TasbeehStatus.loaded,
         savedDhikr: [item1, item2],
-        selectedDhikrId: '2',
+        activeSavedDhikrId: '2',
       );
     },
     act: (cubit) => cubit.removeDhikr('1'),

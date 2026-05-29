@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tilawa/features/prayer_times/domain/entities/prayer_settings_entity.dart';
 import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import 'package:tilawa/features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
 import 'package:tilawa/features/prayer_times/presentation/cubit/prayer_status_cubit.dart';
+import 'package:tilawa_core/core.dart';
 
 void main() {
   String payload({
@@ -29,7 +33,7 @@ void main() {
       final player = _FakeAdhanAlarmPlayer(
         onIsAdhanPlaying: () => playbackStatus.future,
       );
-      final cubit = PrayerStatusCubit(player);
+      final cubit = PrayerStatusCubit(player, _FakeLoadPrayerSettings());
       final states = <PrayerStatusState>[];
       final subscription = cubit.stream.listen(states.add);
 
@@ -68,7 +72,7 @@ void main() {
     final player = _FakeAdhanAlarmPlayer(
       onIsAdhanPlaying: () => Future<bool>.error(Exception('native failed')),
     );
-    final cubit = PrayerStatusCubit(player);
+    final cubit = PrayerStatusCubit(player, _FakeLoadPrayerSettings());
 
     await cubit.init(payload(adhanEnabled: true));
     await Future<void>.delayed(Duration.zero);
@@ -88,7 +92,7 @@ void main() {
   test('does not start polling when payload says adhan is disabled', () {
     fakeAsync((async) {
       final player = _FakeAdhanAlarmPlayer(onIsAdhanPlaying: () async => false);
-      final cubit = PrayerStatusCubit(player);
+      final cubit = PrayerStatusCubit(player, _FakeLoadPrayerSettings());
 
       unawaited(cubit.init(payload(adhanEnabled: false)));
       async.flushMicrotasks();
@@ -109,7 +113,7 @@ void main() {
       final player = _FakeAdhanAlarmPlayer(
         onIsAdhanPlaying: () => playbackStatus.future,
       );
-      final cubit = PrayerStatusCubit(player);
+      final cubit = PrayerStatusCubit(player, _FakeLoadPrayerSettings());
 
       unawaited(cubit.init(payload(adhanEnabled: true)));
       async.flushMicrotasks();
@@ -146,6 +150,7 @@ Matcher _loadedState({
             actualAdhanEnabled,
             soundName,
             notificationId,
+            locationName,
           ) {
             return actualPrayerName == prayerName &&
                 actualAdhanEnabled == adhanEnabled &&
@@ -154,6 +159,12 @@ Matcher _loadedState({
       orElse: () => false,
     );
   });
+}
+
+class _FakeLoadPrayerSettings implements LoadPrayerSettingsUseCase {
+  @override
+  Future<Either<Failure, PrayerSettingsEntity>> call() async =>
+      Left(Failure.unexpectedError('no settings'));
 }
 
 class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
@@ -170,6 +181,9 @@ class _FakeAdhanAlarmPlayer implements IAdhanAlarmPlayer {
 
   @override
   Future<void> flushPendingNotificationTap() async {}
+
+  @override
+  Future<String?> pullPendingNotificationTapPayload() async => null;
 
   @override
   Future<bool> isAdhanPlaying() {

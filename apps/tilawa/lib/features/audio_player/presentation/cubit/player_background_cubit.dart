@@ -2,9 +2,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
-import '../../data/models/player_background_configuration_model.dart';
 import '../../domain/entities/player_background_configuration.dart';
+import '../../domain/usecases/decode_persisted_player_background_use_case.dart';
 import '../../domain/usecases/delete_player_background_use_case.dart';
+import '../../domain/usecases/encode_player_background_configuration_use_case.dart';
 import '../../domain/usecases/pick_player_background_use_case.dart';
 import '../../domain/usecases/reset_player_background_use_case.dart';
 import 'player_background_state.dart';
@@ -12,11 +13,15 @@ import 'player_background_state.dart';
 @injectable
 class PlayerBackgroundCubit extends HydratedCubit<PlayerBackgroundState> {
   PlayerBackgroundCubit(
+    this._decodePersistedConfiguration,
+    this._encodeConfiguration,
     this._pickUseCase,
     this._resetUseCase,
     this._deleteUseCase,
   ) : super(const PlayerBackgroundInitial(PlayerBackgroundConfiguration()));
 
+  final DecodePersistedPlayerBackgroundUseCase _decodePersistedConfiguration;
+  final EncodePlayerBackgroundConfigurationUseCase _encodeConfiguration;
   final PickPlayerBackgroundUseCase _pickUseCase;
   final ResetPlayerBackgroundUseCase _resetUseCase;
   final DeletePlayerBackgroundUseCase _deleteUseCase;
@@ -24,7 +29,7 @@ class PlayerBackgroundCubit extends HydratedCubit<PlayerBackgroundState> {
   @override
   PlayerBackgroundState? fromJson(Map<String, dynamic> json) {
     try {
-      final config = PlayerBackgroundConfigurationModel.fromJson(json);
+      final config = _decodePersistedConfiguration(json);
       return PlayerBackgroundInitial(config);
     } catch (_) {
       return null;
@@ -33,7 +38,7 @@ class PlayerBackgroundCubit extends HydratedCubit<PlayerBackgroundState> {
 
   @override
   Map<String, dynamic>? toJson(PlayerBackgroundState state) {
-    return PlayerBackgroundConfigurationModel.fromEntity(state.config).toJson();
+    return _encodeConfiguration(state.config);
   }
 
   Future<void> pickImage(ImageSource source) async {

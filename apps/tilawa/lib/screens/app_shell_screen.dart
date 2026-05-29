@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
@@ -10,20 +9,19 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/app_review/domain/entities/app_review_prompt_moment.dart';
-import 'package:tilawa/features/app_review/domain/entities/app_review_signal.dart';
-import 'package:tilawa/features/app_review/domain/services/app_review_flow_guard.dart';
-import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_cubit.dart';
 import 'package:tilawa/features/audio_player/presentation/cubit/player_background_state.dart';
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_permissions_cubit.dart';
+import 'package:tilawa/features/shell/application/shell_tab_coordinator.dart';
+import 'package:tilawa/features/shell/presentation/shell_tab_effect_dispatcher.dart';
 import 'package:tilawa_core/presentation/bloc/internet_status/internet_status_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../core/utils/toast_utils.dart';
 import '../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
-import '../features/qibla/presentation/bloc/qibla_bloc.dart';
+import '../features/reciters/presentation/tour/reciters_tour_targets.dart';
+import '../features/tour_guide/presentation/widgets/tour_target.dart';
 import '../router/app_router.dart';
 import '../router/app_router_config.dart';
 import '../shared/widgets/quran_player_chrome.dart';
@@ -45,19 +43,16 @@ class AppShellScreen extends StatefulWidget {
 }
 
 class _AppShellScreenState extends State<AppShellScreen> {
-  static const Duration _deferredPrayerTimesLoadDelay = Duration(
-    milliseconds: 600,
-  );
-
   final ValueNotifier<bool> _phoneBottomNavVisible = ValueNotifier<bool>(true);
 
-  bool _prayerTimesLoadScheduled = false;
+  late final ShellTabCoordinator _shellTabCoordinator;
   int _lastHandledIndex = 0;
   late final MainScreenCubit _mainScreenCubit;
 
   @override
   void initState() {
     super.initState();
+    _shellTabCoordinator = ShellTabCoordinator();
     _mainScreenCubit = MainScreenCubit();
   }
 
@@ -72,56 +67,18 @@ class _AppShellScreenState extends State<AppShellScreen> {
   }
 
   void _handleTabSideEffects(BuildContext context, int previous, int next) {
-    final PrayerTimesBloc prayerTimesBloc = context.read<PrayerTimesBloc>();
-    final QiblaBloc qiblaBloc = context.read<QiblaBloc>();
-    final AppReviewFlowGuard flowGuard = getIt<AppReviewFlowGuard>();
-    final AppReviewTriggerManager reviewTrigger =
-        getIt<AppReviewTriggerManager>();
-
-    _syncSacredTabFlow(flowGuard, next);
-
-    if (previous == 1 && next != 1) {
-      qiblaBloc.add(const StopQiblaStream());
-      unawaited(
-        reviewTrigger.recordSignal(AppReviewSignal.prayerTimesTabVisited),
-      );
-      if (next == 0) {
-        unawaited(
-          reviewTrigger.tryPromptIfEligible(
-            AppReviewPromptMoment.leftPrayerTimesTab,
-          ),
-        );
-      }
-    }
-
-    if (previous == 2 && next == 0) {
-      unawaited(
-        reviewTrigger.tryPromptIfEligible(
-          AppReviewPromptMoment.returnedToRecitersTab,
-        ),
-      );
-    }
-
-    if (next != 1) {
-      return;
-    }
-
-    if (!_prayerTimesLoadScheduled) {
-      _prayerTimesLoadScheduled = true;
-      Future<void>.delayed(_deferredPrayerTimesLoadDelay, () {
-        if (!mounted || prayerTimesBloc.isClosed) return;
-        prayerTimesBloc.add(const PrayerTimesEvent.loadPrayerTimes());
-      });
-    }
-  }
-
-  void _syncSacredTabFlow(AppReviewFlowGuard guard, int tabIndex) {
-    guard.syncMainShellTab(tabIndex);
+    dispatchShellTabEffects(
+      context,
+      _shellTabCoordinator.onTabChanged(
+        previousIndex: previous,
+        nextIndex: next,
+      ),
+      isMounted: () => mounted,
+    );
   }
 
   List<_NavDestination> _buildDestinations(
     BuildContext context,
-    MainScreenState state,
   ) {
     return [
       _NavDestination(
@@ -147,7 +104,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
         index: 2,
         icon: FluentIcons.book_open_24_regular,
         activeIcon: FluentIcons.book_open_24_filled,
-        svgPath: state.isStartupUiWarm ? 'assets/icons/athkar_icon.svg' : null,
+        svgPath: 'assets/icons/athkar_icon.svg',
         label: context.l10n.bottomNavAthkar,
       ),
       _NavDestination(
@@ -250,7 +207,6 @@ class _AppShellScreenState extends State<AppShellScreen> {
 
               final List<_NavDestination> navDestinations = _buildDestinations(
                 context,
-                state,
               );
               final List<TilawaNavDestination> adaptiveDestinations =
                   navDestinations
@@ -438,16 +394,20 @@ class _AppShellChrome extends StatelessWidget {
               policyShowsNav && !isAthkar && phoneBottomNavVisible.value;
 
           final bool narrow = context.isNarrow;
+          final Widget player = QuranPlayerWidget(
+            key: const ValueKey<String>('app_shell_quran_player'),
+            embeddedInShellFooter: true,
+            isKeyboardOpen: isKeyboardOpen,
+            phoneBottomNavBarVisible: phoneBottomNavVisible,
+            hostAbsorbsBottomSafeArea: true,
+          );
           final Widget? shellFooterPlayer =
               showPlayer && playerHeight > 0 && narrow
               ? SizedBox(
                   height: playerHeight + overlayBleedBuffer,
-                  child: QuranPlayerWidget(
-                    key: const ValueKey<String>('app_shell_quran_player'),
-                    embeddedInShellFooter: true,
-                    isKeyboardOpen: isKeyboardOpen,
-                    phoneBottomNavBarVisible: phoneBottomNavVisible,
-                    hostAbsorbsBottomSafeArea: true,
+                  child: TourTarget(
+                    targetId: RecitersTourTargets.miniPlayer,
+                    child: player,
                   ),
                 )
               : null;
@@ -468,12 +428,15 @@ class _AppShellChrome extends StatelessWidget {
               ),
               if (showPlayer && !narrow)
                 Positioned.fill(
-                  child: QuranPlayerWidget(
-                    key: const ValueKey<String>('app_shell_quran_player'),
-                    bottomNavBarHeight: bottomNavBarHeight,
-                    isKeyboardOpen: isKeyboardOpen,
-                    phoneBottomNavBarVisible: phoneBottomNavVisible,
-                    hostAbsorbsBottomSafeArea: false,
+                  child: TourTarget(
+                    targetId: RecitersTourTargets.miniPlayer,
+                    child: QuranPlayerWidget(
+                      key: const ValueKey<String>('app_shell_quran_player'),
+                      bottomNavBarHeight: bottomNavBarHeight,
+                      isKeyboardOpen: isKeyboardOpen,
+                      phoneBottomNavBarVisible: phoneBottomNavVisible,
+                      hostAbsorbsBottomSafeArea: false,
+                    ),
                   ),
                 ),
             ],

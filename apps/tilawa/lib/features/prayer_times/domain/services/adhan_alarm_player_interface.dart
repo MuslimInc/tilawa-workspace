@@ -21,6 +21,10 @@ abstract interface class IAdhanAlarmPlayer {
   /// into [onNotificationTapped].
   Future<void> flushPendingNotificationTap();
 
+  /// Consumes a buffered native tap from cold start without emitting
+  /// [onNotificationTapped]. Returns the JSON payload, or null if none.
+  Future<String?> pullPendingNotificationTapPayload();
+
   /// Schedule adhan audio playback for [scheduledTime]. The [id] is the same
   /// notification ID used for the corresponding visual notification so the
   /// audio and notification can be cancelled together.

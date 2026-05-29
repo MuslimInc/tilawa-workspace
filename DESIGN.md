@@ -11,7 +11,7 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 ## 1. Visual theme and atmosphere
 
 - **Material 3** via **FlexColorScheme**: surfaces, containers, and component themes are assembled in `AppTheme` and refined with Tilawa-specific ramps (`AppColors`).
-- **Calm, content-first:** small palette, quiet neutrals, one **user-selectable primary** accent from **curated presets** (default **coral** `#E60023`, Pinterest-inspired); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces are near-monochrome in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
+- **Calm, content-first:** small palette, quiet neutrals, one **user-selectable primary** accent from **curated presets** (default **sage** `#528345`); optional **custom** primary appears **in the same primary-color list** in Settings and may be **soft-clamped in light mode** for contrast (see `AppTheme._safePrimaryForLight`). Surfaces are near-monochrome in light mode; dark mode uses a deep green-tinted neutral stack (with an optional **true-black / OLED** preset).
 - **Readable for Arabic:** line-height token `textHeightLoose` supports dense script in readers and lists (see `TilawaDesignTokens`).
 - **Comfortable density:** `FlexColorScheme.comfortablePlatformDensity` (not compact VisualDensity).
 - **Premium depth:** layered shadows (`opacityShadow` / `opacityShadowStrong`), optional **glass** tokens (`blurGlass`, `opacityGlass`) for overlays and chrome — use consistently, not everywhere.
@@ -22,13 +22,13 @@ Design system snapshot for **Tilawa UI Kit** (`packages/ui_kit`) and the **Tilaw
 
 ### User-selectable primary (accent)
 
-Offered in app settings (`PrimaryColorPreset`). Default aligns with native splash **coral** `#E60023`. **Custom** hex is the last row in the primary-color sheet; extreme values may be adjusted in light theme for readability.
+Offered in app settings (`PrimaryColorPreset`). Default aligns with the brand launch gradient and bottom-stop primary **sage** `#528345`. **Custom** hex is the last row in the primary-color sheet; extreme values may be adjusted in light theme for readability.
 
 | Preset | Hex (reference) | Notes |
 |--------|-----------------|--------|
-| Coral (default) | `#E60023` | App default; accent used sparingly (Pinterest-style) |
+| Coral | `#E60023` | Accent option; use sparingly |
 | Teal | `#1AADC5` | Legacy Tilawa brand teal |
-| Sage | `#6F7F58` | Scholarly green |
+| Sage (default) | `#528345` | Scholarly green; default app primary |
 | Gold | `#8C681F` | Warm, Mushaf-inspired accent |
 | Brown | `#7B5E3B` | Warm neutral accent |
 | Purple | `#7A5C89` | Muted purple |
@@ -195,7 +195,31 @@ detail in
 
 ---
 
-## 10. Do’s and don’ts
+## 11. Product tours (contextual coach marks)
+
+In-app **product tours** highlight existing controls with a dark scrim and
+token-backed tooltip cards. They are separate from first-run **onboarding**
+(full-screen carousel).
+
+### UX placement (allowed vs forbidden)
+
+| Allowed | Forbidden |
+|---------|-----------|
+| Feature discovery after calm entry (e.g. Reciters tab mounted) | Quran reader, prayer times, athkar during active worship |
+| Settings-triggered debug replay (developer builds) | Cold-start popups, launch overlays |
+
+### Visual rules
+
+- Scrim: ~72% opacity neutral shadow (adaptive light/dark).
+- Tooltip: `surfaceContainerHigh`, `radiusLarge`, primary **Next** / **Got it**
+  CTA; secondary **Skip** text button.
+- Focus ring padding: 8 dp; respect safe areas and text-scale clamp (§3).
+
+Implementation: `apps/tilawa/lib/features/tour_guide/` — see feature README.
+
+---
+
+## 12. Do’s and don’ts
 
 **Do**
 
@@ -292,7 +316,7 @@ reference hex into feature code unless it becomes a deliberate token in
 | Field | Detail |
 |-------|--------|
 | **Visual reference** | [`design-md/pinterest/DESIGN.md`](design-md/pinterest/DESIGN.md) — catalog calm + accent discipline only. |
-| **Default primary** | Coral `#E60023`; light neutrals white / `#E5E5E0` / black ink. |
+| **Default primary** | Sage `#528345`; light neutrals white / `#E5E5E0` / black ink. |
 | **Catalog header** | `TilawaCatalogAppBar` + catalog search/pills on major list screens. |
 | **Allowed changes** | New kit components; critical bugs; documented feature palettes (Quran reader, share output). |
 | **Enforcement** | `app_theme_color_roles_test.dart`, `app_theme_spec_compliance_test.dart`, `test/goldens/`. |

@@ -27,12 +27,14 @@ class TilawaSelectionPill extends StatelessWidget {
     this.selectedForegroundColor,
     this.unselectedForegroundColor,
     this.elevatedWhenSelected = true,
+    this.showLabel = true,
   });
 
   final String label;
   final bool selected;
   final IconData? icon;
   final VoidCallback? onTap;
+  final bool showLabel;
   final TilawaSelectionPillStyle style;
   final Color? selectedColor;
   final Color? unselectedColor;
@@ -71,6 +73,7 @@ class TilawaSelectionPill extends StatelessWidget {
       label: label,
       icon: icon,
       onTap: onTap,
+      showLabel: showLabel,
       semanticsSelected: selected,
       backgroundColor: background,
       foregroundColor: foreground,

@@ -9,7 +9,6 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 void main() {
   setUpAll(() {
-    AppTheme.useGoogleFonts = false;
   });
 
   testWidgets('narrow width lays out without exceptions', (tester) async {
@@ -28,7 +27,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: PrimaryColorPreset.defaultPreset.value,
-          useGoogleFontsOverride: false,
         ),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -60,7 +58,6 @@ void main() {
       MaterialApp(
         theme: AppTheme.getLightTheme(
           primaryColor: PrimaryColorPreset.defaultPreset.value,
-          useGoogleFontsOverride: false,
         ),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,

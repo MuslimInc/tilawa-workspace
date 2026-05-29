@@ -6,35 +6,29 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/features/downloads/data/services/download_notification_service.dart';
 import 'package:tilawa/features/downloads/data/services/download_queue_manager.dart';
 import 'package:tilawa/features/downloads/data/services/download_service_interface.dart';
+import 'package:tilawa/core/services/quran_assets_prefetch_policy_service.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
-import 'package:tilawa/features/settings/domain/usecases/get_app_info.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa_core/entities/app_info.dart';
+import 'package:tilawa_core/services/interfaces/app_info_service.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import '../../../downloads/helpers/mock_helper.mocks.dart';
 
-class MockGetAppInfo extends Mock implements GetAppInfo {
-  @override
-  Future<AppInfo> call() => super.noSuchMethod(
-    Invocation.method(#call, []),
-    returnValue: Future.value(
-      const AppInfo(
-        version: '1.0.0',
-        buildNumber: '1',
-        appName: 'Tilawa',
-        packageName: 'com.tilawa.app',
-      ),
-    ),
-  );
-}
-
 const AppInfo testAppInfo = AppInfo(
   version: '1.0.0',
   buildNumber: '1',
-  appName: 'Tilawa',
+  appName: 'Rattil',
   packageName: 'com.tilawa.app',
 );
+
+class MockAppInfoService extends Mock implements AppInfoService {
+  @override
+  Future<AppInfo> getAppInfo() => super.noSuchMethod(
+    Invocation.method(#getAppInfo, []),
+    returnValue: Future.value(testAppInfo),
+  );
+}
 
 final GetIt getIt = GetIt.instance;
 
@@ -48,7 +42,7 @@ void main() {
     late MockDownloadServiceInterface mockDownloadService;
     late MockDownloadsRepository mockDownloadsRepository;
     late MockDownloadNotificationService mockDownloadNotificationService;
-    late MockGetAppInfo mockGetAppInfo;
+    late MockAppInfoService mockAppInfoService;
 
     setUp(() async {
       // Clean up GetIt manually
@@ -71,16 +65,11 @@ void main() {
       mockDownloadService = MockDownloadServiceInterface();
       mockDownloadsRepository = MockDownloadsRepository();
       mockDownloadNotificationService = MockDownloadNotificationService();
-      mockGetAppInfo = MockGetAppInfo();
+      mockAppInfoService = MockAppInfoService();
 
-      when(mockGetAppInfo()).thenAnswer(
-        (_) async => const AppInfo(
-          version: '1.0.0',
-          buildNumber: '1',
-          appName: 'Tilawa',
-          packageName: 'com.tilawa.app',
-        ),
-      );
+      when(
+        mockAppInfoService.getAppInfo(),
+      ).thenAnswer((_) async => testAppInfo);
 
       when(
         mockDownloadService.getActiveDownloadIds(),
@@ -137,7 +126,13 @@ void main() {
       await dqm.initialize();
       // SettingsCubit calls instance.maxConcurrentDownloads getter/setter.
 
-      cubit = SettingsCubit(getIt<DownloadQueueManager>(), mockGetAppInfo);
+      cubit = SettingsCubit(
+        getIt<DownloadQueueManager>(),
+        mockAppInfoService,
+        QuranAssetsPrefetchPolicyService.fromPreferences(
+          getIt<SharedPreferencesAsync>(),
+        ),
+      );
     });
 
     tearDown(() {

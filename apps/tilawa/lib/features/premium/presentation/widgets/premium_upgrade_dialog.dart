@@ -31,13 +31,13 @@ class PremiumUpgradeDialog extends StatelessWidget {
             borderRadius: BorderRadius.circular(tokens.radiusLarge),
           ),
           title: Row(
+            spacing: tokens.spaceSmall,
             children: [
               Icon(
                 Icons.star_rounded,
                 color: colorScheme.tertiary,
                 size: tokens.iconSizeLarge,
               ),
-              SizedBox(width: tokens.spaceSmall),
               Expanded(
                 child: Text(
                   title,
@@ -115,13 +115,13 @@ class _PremiumFeatureItem extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: tokens.spaceExtraSmall),
       child: Row(
+        spacing: tokens.spaceSmall,
         children: [
           Icon(
             icon,
             size: tokens.iconSizeMedium,
             color: theme.colorScheme.primary,
           ),
-          SizedBox(width: tokens.spaceSmall),
           Expanded(child: Text(text, style: theme.textTheme.bodyMedium)),
         ],
       ),

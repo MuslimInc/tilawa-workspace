@@ -1,27 +1,38 @@
 import 'dart:async';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/entities/reciter_entity.dart';
+import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_core/usecases/usecase.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
-import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:tilawa/features/reciters/domain/usecases/get_favorite_reciters_use_case.dart';
+import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 
 /// Coordinates splash-held startup: shell/tab prep before first [HomeRoute].
 ///
 /// Critical init (Firebase, DI, Hydrated) is already complete when the splash
 /// route mounts ([_BootGate]). This type covers the work that used to run on
 /// [MainScreen] after navigation (shell activation + initial tab mount) and
-/// preloads the Reciters tab list while the splash is visible.
+/// prefetches the reciters catalog + favorites list while the splash is
+/// visible so downstream blocs can hydrate without a loading flash.
 @lazySingleton
 class AppStartupReadiness {
-  AppStartupReadiness(this._recitersBloc);
+  AppStartupReadiness(this._getReciters, this._getFavorites);
 
-  final RecitersBloc _recitersBloc;
+  final GetRecitersUseCase _getReciters;
+  final GetFavoriteRecitersUseCase _getFavorites;
 
   /// Mirrors [MainScreenCubit] delays so home opens without placeholder staging.
   static const Duration shellActivationDelay = Duration(milliseconds: 260);
   static const Duration initialTabRouteSettleDelay = Duration(
-    milliseconds: 1200,
+    milliseconds: 400,
   );
+
+  /// Per-prefetch cap so a single hung endpoint cannot extend splash to the
+  /// full [maxSplashDuration] safety net.
+  static const Duration prefetchTimeout = Duration(seconds: 4);
   static const Duration maxSplashDuration = Duration(seconds: 10);
 
   bool _shellPrepComplete = false;
@@ -31,7 +42,7 @@ class AppStartupReadiness {
   /// Whether shell/tab prep finished (on splash or on [MainScreen] fallback).
   bool get shellPrepComplete => _shellPrepComplete;
 
-  /// Whether [RecitersBloc] reached [RecitersLoaded] during splash prep.
+  /// Whether reciters catalog loaded successfully during splash prep.
   bool get recitersDataReady => _recitersDataReady;
 
   /// True when [maxSplashDuration] forced navigation to proceed.
@@ -71,7 +82,16 @@ class AppStartupReadiness {
   Future<void> _runHomeLaunchPrep() async {
     await Future.wait(<Future<void>>[
       _runShellDelays(),
-      _prepareRecitersTab(),
+      _prefetch(
+        label: 'reciters',
+        fetch: () => _getReciters(),
+        onSuccess: () => _recitersDataReady = true,
+      ),
+      // Favorites readiness is encoded in FavoritesCubit.state — no flag needed.
+      _prefetch(
+        label: 'favorites',
+        fetch: () => _getFavorites(const NoParams()),
+      ),
     ]);
     _shellPrepComplete = true;
     if (!kReleaseMode) {
@@ -91,33 +111,36 @@ class AppStartupReadiness {
     }
   }
 
-  Future<void> _prepareRecitersTab() async {
-    final RecitersState current = _recitersBloc.state;
-    if (current is RecitersLoaded) {
-      _recitersDataReady = true;
-      return;
-    }
-
-    final Completer<void> settled = Completer<void>();
-    late final StreamSubscription<RecitersState> subscription;
-    subscription = _recitersBloc.stream.listen((RecitersState state) {
-      if (state is RecitersLoaded || state is RecitersError) {
-        if (!settled.isCompleted) {
-          settled.complete();
-        }
-      }
-    });
-
-    if (current is! RecitersLoading) {
-      _recitersBloc.add(const LoadReciters());
-    }
+  /// Runs [fetch] with a per-call timeout, swallows failures, and invokes
+  /// [onSuccess] only when the underlying repository returned [Right].
+  ///
+  /// Uses [Future.any] (not [Future.timeout]) because `dartz_plus.Either`
+  /// callers return `Right<...>`/`Left<...>` subtypes whose reified generics
+  /// reject the `Left` fallback that `onTimeout` would need.
+  Future<void> _prefetch({
+    required String label,
+    required Future<Either<Failure, List<ReciterEntity>>> Function() fetch,
+    VoidCallback? onSuccess,
+  }) async {
     try {
-      await settled.future;
-    } finally {
-      await subscription.cancel();
+      final Either<Failure, List<ReciterEntity>> result =
+          await Future.any(<Future<Either<Failure, List<ReciterEntity>>>>[
+            fetch(),
+            Future<Either<Failure, List<ReciterEntity>>>.delayed(
+              prefetchTimeout,
+              () => Left<Failure, List<ReciterEntity>>(
+                UnexpectedFailure('$label prefetch timeout'),
+              ),
+            ),
+          ]);
+      result.fold((_) {}, (_) => onSuccess?.call());
+    } catch (e, st) {
+      logger.w(
+        'AppStartupReadiness: $label prefetch failed; falling back to lazy load',
+        error: e,
+        stackTrace: st,
+      );
     }
-
-    _recitersDataReady = _recitersBloc.state is RecitersLoaded;
   }
 
   /// Clears readiness flags between tests.

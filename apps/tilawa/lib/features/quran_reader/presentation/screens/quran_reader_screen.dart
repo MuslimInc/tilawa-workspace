@@ -137,7 +137,6 @@ class _ReaderScaffoldState extends State<_ReaderScaffold>
     super.initState();
     _screenshotBoundaryKey = GlobalKey();
     WidgetsBinding.instance.addObserver(this);
-    unawaited(AppOrientationService.allowReaderOrientations());
 
     _uiVisibilityCubit = context.read<UiVisibilityCubit>();
     _uiVisibilityCubit.show();

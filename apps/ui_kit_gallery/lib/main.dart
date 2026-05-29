@@ -35,11 +35,9 @@ class _UiKitGalleryAppState extends State<UiKitGalleryApp> {
             ? AppTheme.getDarkTheme(
                 primaryColor: AppColors.primaryCyan,
                 isDefaultPreset: true,
-                useGoogleFontsOverride: false,
               )
             : AppTheme.getLightTheme(
                 primaryColor: AppColors.primaryCyan,
-                useGoogleFontsOverride: false,
               );
 
         return GallerySettingsScope(
@@ -49,8 +47,9 @@ class _UiKitGalleryAppState extends State<UiKitGalleryApp> {
             theme: theme,
             builder: (context, child) {
               return Directionality(
-                textDirection:
-                    _settings.isRtl ? TextDirection.rtl : TextDirection.ltr,
+                textDirection: _settings.isRtl
+                    ? TextDirection.rtl
+                    : TextDirection.ltr,
                 child: child ?? const SizedBox.shrink(),
               );
             },

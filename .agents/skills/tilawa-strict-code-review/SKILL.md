@@ -38,7 +38,7 @@ Prioritize issues that could affect real users in production:
 ## Tilawa context (read before reviewing)
 
 - Workspace rules: `AGENTS.md`
-- Visual/UX: `DESIGN.md`, `docs/tilawa_brand.md`
+- Visual/UX: `DESIGN.md`, `docs/tilawa_brand.md`, skill **`flutter-apply-tilawa-theming`**
 - App architecture: feature folders under `apps/tilawa/lib/features/`,
   clean layers, **Bloc/Cubit** (not ad-hoc `setState` for app state), `get_it`
   DI (`apps/tilawa/lib/core/di/`), `go_router` for navigation
@@ -62,7 +62,7 @@ Prioritize issues that could affect real users in production:
 - [ ] Background work: downloads, notifications, audio — survive process death
 - [ ] Offline and flaky network: queue, retry, stale cache, duplicate work
 - [ ] Bloc/Cubit: no stuck states after errors; events handled on all paths
-- [ ] Accessibility: semantics, contrast (`DESIGN.md`), text scaling
+- [ ] Accessibility: semantics, contrast (`DESIGN.md`), text scaling, token touch targets (44 dp)
 - [ ] Support/monetization entry points follow `specs/016-support-tilawa/spec.md`
 
 ## Output format
@@ -87,5 +87,6 @@ If no issues: state that explicitly and note residual risks or untested areas.
 ## Companion skills
 
 - Use `dart-run-static-analysis` for analyzer passes on touched packages.
+- Use `flutter-apply-tilawa-theming` when reviewing UI/token compliance.
 - Do **not** use implementation skills (`speckit-implement`,
   `flutter-add-widget-test`) unless the user asks to fix or add tests.

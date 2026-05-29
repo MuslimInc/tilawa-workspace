@@ -216,10 +216,11 @@ abstract final class QuranPlayerLayoutInsets {
       context,
     ).componentTokens.adaptiveShell;
     final TextScaler textScaler = MediaQuery.textScalerOf(context);
-    final double rowHeight = shellTokens.phoneBottomNavLayoutHeight(textScaler);
-    return rowHeight +
-        context.systemBottomSafeArea +
-        shellTokens.bottomNavVerticalMargin;
+    final double rowHeight = shellTokens.phoneBottomNavPaintedHeight(
+      textScaler,
+      context.systemBottomSafeArea,
+    );
+    return rowHeight + shellTokens.bottomNavVerticalMargin;
   }
 
   /// Bottom inset on routes without the shell nav (e.g. `/reciter/:id`).

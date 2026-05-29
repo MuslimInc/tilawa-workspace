@@ -1,0 +1,77 @@
+import 'package:flutter/widgets.dart';
+import 'package:tilawa_core/entities/audio.dart';
+
+import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
+
+/// Keeps the expanded player queue list aligned with [AudioPlayerBloc] state.
+abstract final class QuranPlayerQueueUtils {
+  /// Whether queue length, item order, or active index changed between snapshots.
+  ///
+  /// When [previousQueueGeneration] and [currentQueueGeneration] are provided,
+  /// unchanged generation and [currentIndex] imply no queue UI update (O(1)).
+  static bool queueSnapshotChanged({
+    required List<AudioEntity>? previousQueue,
+    required List<AudioEntity>? currentQueue,
+    required int? previousIndex,
+    required int? currentIndex,
+    int? previousQueueGeneration,
+    int? currentQueueGeneration,
+  }) {
+    if (previousQueueGeneration != null && currentQueueGeneration != null) {
+      if (previousQueueGeneration != currentQueueGeneration) {
+        return true;
+      }
+      return previousIndex != currentIndex;
+    }
+
+    final List<AudioEntity> previous = previousQueue ?? const <AudioEntity>[];
+    final List<AudioEntity> current = currentQueue ?? const <AudioEntity>[];
+    if (identical(previous, current)) {
+      return previousIndex != currentIndex;
+    }
+    if (previous.length != current.length) {
+      return true;
+    }
+    if (previousIndex != currentIndex) {
+      return true;
+    }
+    for (var i = 0; i < previous.length; i++) {
+      if (previous[i].id != current[i].id) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Whether the expanded player tree must refresh its queue list UI.
+  static bool playerTreeQueueChanged(
+    AudioPlayerState previous,
+    AudioPlayerState current,
+  ) =>
+      queueSnapshotChanged(
+        previousQueue: previous.playbackState?.queue,
+        currentQueue: current.playbackState?.queue,
+        previousIndex: previous.playbackState?.currentIndex,
+        currentIndex: current.playbackState?.currentIndex,
+        previousQueueGeneration: previous.playbackState?.queueGeneration,
+        currentQueueGeneration: current.playbackState?.queueGeneration,
+      );
+
+  /// Builds a stable id → index map for [SliverReorderableList] (O(n) once).
+  static Map<String, int> queueIndexById(List<AudioEntity> queue) {
+    return <String, int>{
+      for (var i = 0; i < queue.length; i++) queue[i].id: i,
+    };
+  }
+
+  /// O(1) lookup when [indexById] comes from [queueIndexById].
+  static int? findReorderableChildIndex({
+    required Map<String, int> indexById,
+    required Key key,
+  }) {
+    if (key is ValueKey<String>) {
+      return indexById[key.value];
+    }
+    return null;
+  }
+}

@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa_core/usecases/usecase.dart';
 
 import '../../domain/constants/tasbeeh_constants.dart';
 import '../../domain/entities/tasbeeh_dhikr.dart';
+import '../../domain/policies/tasbeeh_target_reached_policy.dart';
 import '../../domain/services/tasbeeh_target_feedback_service.dart';
 import '../../domain/usecases/delete_tasbeeh_dhikr_use_case.dart';
 import '../../domain/usecases/get_saved_tasbeeh_use_case.dart';
@@ -13,16 +15,20 @@ import '../../domain/usecases/save_custom_tasbeeh_use_case.dart';
 import '../../domain/usecases/set_tasbeeh_target_count_use_case.dart';
 import 'tasbeeh_state.dart';
 
+@injectable
 class TasbeehCubit extends Cubit<TasbeehState> {
-  TasbeehCubit({
-    required this._getSavedTasbeeh,
-    required this._saveCustomTasbeeh,
-    required this._incrementTasbeehCount,
-    required this._resetTasbeehCount,
-    required this._setTasbeehTargetCount,
-    required this._deleteTasbeehDhikr,
-    required this._feedbackService,
-  }) : super(const TasbeehState());
+  TasbeehCubit(
+    this._getSavedTasbeeh,
+    this._saveCustomTasbeeh,
+    this._incrementTasbeehCount,
+    this._resetTasbeehCount,
+    this._setTasbeehTargetCount,
+    this._deleteTasbeehDhikr,
+    this._feedbackService, {
+    TasbeehTargetReachedPolicy? targetReachedPolicy,
+  }) : _targetReachedPolicy =
+           targetReachedPolicy ?? const TasbeehTargetReachedPolicy(),
+       super(const TasbeehState());
 
   final GetSavedTasbeehUseCase _getSavedTasbeeh;
   final SaveCustomTasbeehUseCase _saveCustomTasbeeh;
@@ -31,16 +37,9 @@ class TasbeehCubit extends Cubit<TasbeehState> {
   final SetTasbeehTargetCountUseCase _setTasbeehTargetCount;
   final DeleteTasbeehDhikrUseCase _deleteTasbeehDhikr;
   final TasbeehTargetFeedbackService _feedbackService;
+  final TasbeehTargetReachedPolicy _targetReachedPolicy;
 
-  void showOptionsView() {
-    emit(
-      state.copyWith(
-        viewMode: TasbeehViewMode.options,
-        failure: null,
-        errorMessage: null,
-      ),
-    );
-  }
+  // ── Navigation ───────────────────────────────────────────────────────────
 
   void showCreateView() {
     emit(
@@ -64,15 +63,53 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     );
   }
 
-  void startCounting() {
+  void startEphemeralCounting() {
     emit(
       state.copyWith(
         viewMode: TasbeehViewMode.counting,
+        activeSavedDhikrId: null,
+        savedTargetFeedbackPulse: 0,
         failure: null,
         errorMessage: null,
       ),
     );
   }
+
+  void startSavedDhikrCounting(String dhikrId) {
+    final TasbeehDhikr? dhikr = _findDhikr(dhikrId);
+    if (dhikr == null) return;
+
+    emit(
+      state.copyWith(
+        viewMode: TasbeehViewMode.selectedCounting,
+        activeSavedDhikrId: dhikrId,
+        savedTargetFeedbackPulse: 0,
+        draftTargetText: dhikr.targetCount.toString(),
+        failure: null,
+        errorMessage: null,
+      ),
+    );
+  }
+
+  /// Back from create/history sub-views.
+  void startCounting() => startEphemeralCounting();
+
+  void selectDhikrAndStartCounting(String dhikrId) =>
+      startSavedDhikrCounting(dhikrId);
+
+  // ── Ephemeral counting ─────────────────────────────────────────────────────
+
+  void incrementEphemeralCount() {
+    if (state.viewMode != TasbeehViewMode.counting) return;
+    emit(state.copyWith(ephemeralCount: state.ephemeralCount + 1));
+  }
+
+  void resetEphemeralCount() {
+    if (state.viewMode != TasbeehViewMode.counting) return;
+    emit(state.copyWith(ephemeralCount: 0));
+  }
+
+  // ── Saved dhikr catalog ────────────────────────────────────────────────────
 
   Future<void> loadSavedDhikr() async {
     emit(
@@ -93,25 +130,19 @@ class TasbeehCubit extends Cubit<TasbeehState> {
         ),
       ),
       (items) {
-        final String? selectedId = items.isEmpty
-            ? null
-            : state.selectedDhikrId ?? items.first.id;
-        TasbeehDhikr? selected;
-        if (selectedId != null) {
-          for (final item in items) {
-            if (item.id == selectedId) {
-              selected = item;
-              break;
-            }
-          }
+        String? activeId = state.activeSavedDhikrId;
+        TasbeehDhikr? active;
+        if (activeId != null) {
+          active = _findDhikr(activeId, items);
+          if (active == null) activeId = null;
         }
         emit(
           state.copyWith(
             status: TasbeehStatus.loaded,
             savedDhikr: items,
-            selectedDhikrId: selectedId,
+            activeSavedDhikrId: activeId,
             draftTargetText:
-                selected?.targetCount.toString() ??
+                active?.targetCount.toString() ??
                 TasbeehConstants.defaultTargetCount.toString(),
             failure: null,
             errorMessage: null,
@@ -131,35 +162,9 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     );
   }
 
-  void selectDhikr(String dhikrId) {
-    TasbeehDhikr? selected;
-    for (final item in state.savedDhikr) {
-      if (item.id == dhikrId) {
-        selected = item;
-        break;
-      }
-    }
-    emit(
-      state.copyWith(
-        selectedDhikrId: dhikrId,
-        draftTargetText:
-            selected?.targetCount.toString() ?? state.draftTargetText,
-        failure: null,
-        errorMessage: null,
-      ),
-    );
-  }
-
-  void selectDhikrAndStartCounting(String dhikrId) {
-    selectDhikr(dhikrId);
-    startCounting();
-  }
-
   Future<void> saveDraftDhikr() async {
     final String draft = state.draftText.trim();
-    if (draft.isEmpty) {
-      return;
-    }
+    if (draft.isEmpty) return;
 
     final int? target = _parseRequiredTargetCount(state.draftTargetText);
     if (target == null) {
@@ -201,9 +206,10 @@ class TasbeehCubit extends Cubit<TasbeehState> {
         emit(
           state.copyWith(
             status: TasbeehStatus.loaded,
-            viewMode: TasbeehViewMode.counting,
+            viewMode: TasbeehViewMode.selectedCounting,
             savedDhikr: updated,
-            selectedDhikrId: saved.id,
+            activeSavedDhikrId: saved.id,
+            savedTargetFeedbackPulse: 0,
             draftText: '',
             draftTargetText: saved.targetCount.toString(),
             failure: null,
@@ -214,11 +220,9 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     );
   }
 
-  Future<void> setTargetForSelected() async {
-    final selected = state.selectedDhikr;
-    if (selected == null) {
-      return;
-    }
+  Future<void> setTargetForActiveSavedDhikr() async {
+    final TasbeehDhikr? active = state.activeSavedDhikr;
+    if (active == null) return;
 
     final int? target = _parseRequiredTargetCount(state.draftTargetText);
     if (target == null) {
@@ -233,7 +237,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     }
 
     final result = await _setTasbeehTargetCount(
-      SetTasbeehTargetCountParams(dhikrId: selected.id, targetCount: target),
+      SetTasbeehTargetCountParams(dhikrId: active.id, targetCount: target),
     );
     result.fold(
       (failure) => emit(
@@ -243,22 +247,24 @@ class TasbeehCubit extends Cubit<TasbeehState> {
           errorMessage: failure.message,
         ),
       ),
-      (updated) => _replaceInState(updated),
+      (updated) => _upsertSavedDhikr(updated),
     );
   }
 
-  Future<void> incrementSelected() async {
-    final selected = state.selectedDhikr;
-    if (selected == null) return;
-    final selectedId = selected.id;
+  // ── Saved dhikr counting ─────────────────────────────────────────────────────
 
-    final TasbeehDhikr optimistic = selected.copyWith(
-      count: selected.count + 1,
-      updatedAt: DateTime.now(),
+  Future<void> incrementActiveSavedDhikr() async {
+    if (state.viewMode != TasbeehViewMode.selectedCounting) return;
+
+    final TasbeehDhikr? active = state.activeSavedDhikr;
+    if (active == null) return;
+    final String activeId = active.id;
+
+    _upsertSavedDhikr(
+      active.copyWith(count: active.count + 1, updatedAt: DateTime.now()),
     );
-    _replaceInState(optimistic);
 
-    final result = await _incrementTasbeehCount(selected.id);
+    final result = await _incrementTasbeehCount(activeId);
     result.fold(
       (failure) => emit(
         state.copyWith(
@@ -268,32 +274,33 @@ class TasbeehCubit extends Cubit<TasbeehState> {
         ),
       ),
       (updated) async {
-        final bool stillSelected = state.selectedDhikrId == selectedId;
-        final bool shouldVibrate =
-            stillSelected && updated.count >= updated.targetCount;
-        _replaceInState(
+        if (state.activeSavedDhikrId != activeId) return;
+
+        final bool shouldNotify = _targetReachedPolicy.shouldNotify(updated);
+        _upsertSavedDhikr(
           updated,
-          selectItem: stillSelected,
-          triggerShake: shouldVibrate,
+          feedbackPulse: shouldNotify
+              ? state.savedTargetFeedbackPulse + 1
+              : state.savedTargetFeedbackPulse,
         );
-        if (shouldVibrate) {
+        if (shouldNotify) {
           await _feedbackService.onTargetReached();
         }
       },
     );
   }
 
-  Future<void> resetSelected() async {
-    final selected = state.selectedDhikr;
-    if (selected == null) return;
+  Future<void> resetActiveSavedDhikr() async {
+    if (state.viewMode != TasbeehViewMode.selectedCounting) return;
 
-    final TasbeehDhikr optimistic = selected.copyWith(
-      count: 0,
-      updatedAt: DateTime.now(),
+    final TasbeehDhikr? active = state.activeSavedDhikr;
+    if (active == null) return;
+
+    _upsertSavedDhikr(
+      active.copyWith(count: 0, updatedAt: DateTime.now()),
     );
-    _replaceInState(optimistic);
 
-    final result = await _resetTasbeehCount(selected.id);
+    final result = await _resetTasbeehCount(active.id);
     result.fold(
       (failure) => emit(
         state.copyWith(
@@ -302,7 +309,7 @@ class TasbeehCubit extends Cubit<TasbeehState> {
           errorMessage: failure.message,
         ),
       ),
-      _replaceInState,
+      _upsertSavedDhikr,
     );
   }
 
@@ -320,15 +327,15 @@ class TasbeehCubit extends Cubit<TasbeehState> {
         final updated = state.savedDhikr
             .where((item) => item.id != dhikrId)
             .toList();
-        final selectedId = updated.isEmpty ? null : updated.first.id;
+        final bool removedActive = state.activeSavedDhikrId == dhikrId;
         emit(
           state.copyWith(
             status: TasbeehStatus.loaded,
             savedDhikr: updated,
-            selectedDhikrId: selectedId,
+            activeSavedDhikrId: removedActive ? null : state.activeSavedDhikrId,
             draftTargetText: updated.isEmpty
                 ? TasbeehConstants.defaultTargetCount.toString()
-                : updated.first.targetCount.toString(),
+                : state.draftTargetText,
             failure: null,
             errorMessage: null,
           ),
@@ -337,17 +344,50 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     );
   }
 
-  Future<void> removeSelected() async {
-    final selected = state.selectedDhikr;
-    if (selected == null) return;
-    await removeDhikr(selected.id);
+  Future<void> removeActiveSavedDhikr() async {
+    final String? id = state.activeSavedDhikrId;
+    if (id == null) return;
+    await removeDhikr(id);
   }
 
-  void _replaceInState(
-    TasbeehDhikr item, {
-    bool selectItem = true,
-    bool triggerShake = false,
-  }) {
+  // ── Legacy aliases (tests / gradual migration) ─────────────────────────────
+
+  void incrementFreeCount() => incrementEphemeralCount();
+
+  void resetFreeCount() => resetEphemeralCount();
+
+  Future<void> incrementSelected() => incrementActiveSavedDhikr();
+
+  Future<void> resetSelected() => resetActiveSavedDhikr();
+
+  Future<void> setTargetForSelected() => setTargetForActiveSavedDhikr();
+
+  Future<void> removeSelected() => removeActiveSavedDhikr();
+
+  void selectDhikr(String dhikrId) {
+    final TasbeehDhikr? dhikr = _findDhikr(dhikrId);
+    if (dhikr == null) return;
+    emit(
+      state.copyWith(
+        activeSavedDhikrId: dhikrId,
+        draftTargetText: dhikr.targetCount.toString(),
+        failure: null,
+        errorMessage: null,
+      ),
+    );
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  TasbeehDhikr? _findDhikr(String id, [List<TasbeehDhikr>? source]) {
+    final list = source ?? state.savedDhikr;
+    for (final item in list) {
+      if (item.id == id) return item;
+    }
+    return null;
+  }
+
+  void _upsertSavedDhikr(TasbeehDhikr item, {int? feedbackPulse}) {
     final List<TasbeehDhikr> updated = List<TasbeehDhikr>.from(
       state.savedDhikr,
     );
@@ -359,35 +399,18 @@ class TasbeehCubit extends Cubit<TasbeehState> {
     }
     updated.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
 
-    String? nextSelectedId = state.selectedDhikrId;
-    if (selectItem) {
-      nextSelectedId = item.id;
-    } else if (nextSelectedId != null &&
-        !updated.any((element) => element.id == nextSelectedId)) {
-      nextSelectedId = updated.isEmpty ? null : updated.first.id;
-    }
-
-    TasbeehDhikr? selected;
-    if (nextSelectedId != null) {
-      for (final entry in updated) {
-        if (entry.id == nextSelectedId) {
-          selected = entry;
-          break;
-        }
-      }
-    }
-
     emit(
       state.copyWith(
         status: TasbeehStatus.loaded,
         savedDhikr: updated,
-        selectedDhikrId: nextSelectedId,
-        draftTargetText:
-            selected?.targetCount.toString() ??
-            TasbeehConstants.defaultTargetCount.toString(),
-        vibrationEventCount: triggerShake
-            ? state.vibrationEventCount + 1
-            : state.vibrationEventCount,
+        activeSavedDhikrId: state.activeSavedDhikrId == item.id
+            ? item.id
+            : state.activeSavedDhikrId,
+        savedTargetFeedbackPulse:
+            feedbackPulse ?? state.savedTargetFeedbackPulse,
+        draftTargetText: state.activeSavedDhikrId == item.id
+            ? item.targetCount.toString()
+            : state.draftTargetText,
         failure: null,
         errorMessage: null,
       ),

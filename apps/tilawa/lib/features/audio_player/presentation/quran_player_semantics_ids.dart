@@ -1,7 +1,7 @@
 /// Stable Semantics identifiers for the Quran Player feature.
 ///
-/// These values are referenced by Maestro E2E flows
-/// (`.maestro/quran_player.yaml`). They must never change without updating
+/// These values are referenced by Maestro E2E flows under `.maestro/quran_player/`
+/// and `.maestro/quran_player.yaml`. They must never change without updating
 /// the corresponding flow files, because Maestro targets them by exact string
 /// match via the Flutter Semantics tree.
 ///
@@ -168,6 +168,9 @@ abstract final class QuranPlayerSemanticsIds {
 
   /// Drag handle that resizes the queue sheet between peek and full height.
   static const String queueSheetHandle = 'quran_player_queue_handle';
+
+  /// Hint shown when the queue sheet is collapsed (peek height).
+  static const String queueSheetExpandHint = 'quran_player_queue_expand_hint';
 
   /// Tappable queue track tile.
   /// [audioId] is [AudioEntity.id] (typically a stable surah id).

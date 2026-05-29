@@ -1,0 +1,30 @@
+# Navigate to reciter 10 and start Al-Fatihah (surah 001).
+# Leaves the mini-player visible (quran_player_mini).
+---
+- tapOn:
+    id: "reciters_tab"
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_field"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element:
+      id: "reciter_card_10"
+    direction: DOWN
+    timeout: 8000
+- tapOn:
+    id: "reciter_card_10"
+
+- extendedWaitUntil:
+    visible:
+      id: "reciter_details_surah_search"
+    timeout: 10000
+
+- tapOn:
+    id: "surah_row_001"
+
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_mini"
+    timeout: 15000

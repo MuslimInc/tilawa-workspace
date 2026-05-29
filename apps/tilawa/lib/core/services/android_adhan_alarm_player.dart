@@ -67,22 +67,28 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     _onNotificationTappedController.add(payload);
   }
 
-  Future<void> _drainPendingNotificationTap() async {
-    if (!isSupported) return;
+  @override
+  Future<String?> pullPendingNotificationTapPayload() async {
+    if (!isSupported) return null;
     try {
       final pending = await _channel.invokeMethod<Object?>(
         'consumePendingNotificationTap',
       );
-      if (pending is! Map) return;
-      final payload = pending['payload'] as String?;
-      if (payload == null) return;
-      logger.d('[AndroidAdhanAlarmPlayer] METHOD_CHANNEL_TAP_FLUSHED');
-      _emitNotificationTap(payload);
+      if (pending is! Map) return null;
+      return pending['payload'] as String?;
     } on PlatformException catch (e) {
       logger.e(
         '[AndroidAdhanAlarmPlayer] consumePendingNotificationTap failed: ${e.message}',
       );
+      return null;
     }
+  }
+
+  Future<void> _drainPendingNotificationTap() async {
+    final payload = await pullPendingNotificationTapPayload();
+    if (payload == null) return;
+    logger.d('[AndroidAdhanAlarmPlayer] METHOD_CHANNEL_TAP_FLUSHED');
+    _emitNotificationTap(payload);
   }
 
   Future<void> _ackNotificationTap(String payload) async {

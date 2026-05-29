@@ -1,17 +1,27 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mockito/mockito.dart';
-import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
-import 'package:tilawa/features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import 'package:tilawa/core/di/injection.dart';
-import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
+import 'package:tilawa/features/prayer_times/domain/entities/prayer_settings_entity.dart';
+import 'package:tilawa/features/prayer_times/domain/services/adhan_alarm_player_interface.dart';
+import 'package:tilawa/features/prayer_times/domain/usecases/load_prayer_settings_use_case.dart';
+import 'package:tilawa/features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
+import 'package:tilawa_core/errors/failures.dart';
+import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../core/services/prayer_adhan_notification_service_test.mocks.dart';
+
+class _FakeLoadPrayerSettings implements LoadPrayerSettingsUseCase {
+  @override
+  Future<Either<Failure, PrayerSettingsEntity>> call() async =>
+      Left(Failure.unexpectedError('no settings'));
+}
 
 void main() {
   late MockIAdhanAlarmPlayer mockAdhanPlayer;
@@ -20,6 +30,9 @@ void main() {
     mockAdhanPlayer = MockIAdhanAlarmPlayer();
     await getIt.reset();
     getIt.registerSingleton<IAdhanAlarmPlayer>(mockAdhanPlayer);
+    getIt.registerSingleton<LoadPrayerSettingsUseCase>(
+      _FakeLoadPrayerSettings(),
+    );
 
     // Stub default methods
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => false);
@@ -46,12 +59,33 @@ void main() {
     );
   }
 
-  final String validPayload = jsonEncode({
-    'prayer_name': 'Fajr',
-    'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
-    'adhan_enabled': true,
-    'sound_name': 'adhan_makkah',
-  });
+  String encodePayload({
+    String prayerName = 'Fajr',
+    bool adhanEnabled = true,
+    String? soundName,
+  }) {
+    return jsonEncode({
+      'prayer_name': prayerName,
+      'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
+      'adhan_enabled': adhanEnabled,
+      if (soundName != null) 'sound_name': soundName,
+    });
+  }
+
+  /// Avoids [WidgetTester.pumpAndSettle], which never completes while adhan
+  /// playback polling is active (`adhan_enabled: true` in the payload).
+  Future<void> pumpStatusScreenReady(WidgetTester tester) async {
+    await tester.pump();
+    await tester.pump();
+  }
+
+  final String validPayload = encodePayload(soundName: 'adhan_makkah');
+
+  /// Disables periodic polling so playback-probe tests can settle frames.
+  final String playbackProbePayload = encodePayload(
+    adhanEnabled: false,
+    soundName: 'adhan_makkah',
+  );
 
   testWidgets(
     'renders payload content before playback status check completes',
@@ -69,7 +103,7 @@ void main() {
       expect(find.text('Stop Adhan'), findsOneWidget);
 
       playbackStatus.complete(false);
-      await tester.pumpAndSettle();
+      await pumpStatusScreenReady(tester);
       expect(find.text('Stop Adhan'), findsNothing);
     },
   );
@@ -80,7 +114,7 @@ void main() {
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => false);
 
     await tester.pumpWidget(createWidget(payloadJson: validPayload));
-    await tester.pumpAndSettle();
+    await pumpStatusScreenReady(tester);
 
     expect(find.text('Fajr'), findsOneWidget);
     expect(find.text('Adhan'), findsOneWidget);
@@ -101,7 +135,7 @@ void main() {
     });
 
     await tester.pumpWidget(createWidget(payloadJson: localPayload));
-    await tester.pumpAndSettle();
+    await pumpStatusScreenReady(tester);
 
     expect(find.text('Isha'), findsOneWidget);
     expect(find.text('Disabled'), findsOneWidget);
@@ -110,8 +144,10 @@ void main() {
   testWidgets('shows Stop button only when Adhan is playing', (tester) async {
     // State 1: Not playing
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => false);
-    await tester.pumpWidget(createWidget(payloadJson: validPayload));
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      createWidget(payloadJson: playbackProbePayload),
+    );
+    await pumpStatusScreenReady(tester);
     expect(find.text('Stop Adhan'), findsNothing);
 
     // State 2: Playing - use a different key to force BlocProvider re-creation
@@ -119,10 +155,10 @@ void main() {
     await tester.pumpWidget(
       Container(
         key: const Key('state_playing'),
-        child: createWidget(payloadJson: validPayload),
+        child: createWidget(payloadJson: playbackProbePayload),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpStatusScreenReady(tester);
 
     expect(find.text('Stop Adhan'), findsOneWidget);
   });
@@ -136,14 +172,16 @@ void main() {
     addTearDown(() => tester.view.resetPhysicalSize());
 
     when(mockAdhanPlayer.isAdhanPlaying()).thenAnswer((_) async => true);
-    await tester.pumpWidget(createWidget(payloadJson: validPayload));
-    await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      createWidget(payloadJson: playbackProbePayload),
+    );
+    await pumpStatusScreenReady(tester);
 
     final stopBtn = find.text('Stop Adhan');
     expect(stopBtn, findsOneWidget);
 
     await tester.tap(stopBtn);
-    await tester.pumpAndSettle();
+    await pumpStatusScreenReady(tester);
 
     verify(mockAdhanPlayer.stopCurrentAdhan()).called(1);
   });

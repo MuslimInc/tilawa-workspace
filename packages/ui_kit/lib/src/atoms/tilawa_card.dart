@@ -31,20 +31,28 @@ enum TilawaCardSurface {
 }
 
 /// A foundational card component with standardized styling.
-
 ///
-
 /// Reads default values from [TilawaCardTokens] for consistent
-
 /// radius, border width, and padding across the application.
-
 ///
-
 /// Cards are intentionally flat: a solid surface tone, a hairline outline,
-
 /// and an optional soft shadow. The legacy [gradient] property is kept for
-
 /// migration only — pass [surface] instead.
+///
+/// ## Interactive children
+///
+/// When [onTap] is provided the card renders a ripple InkWell in the
+/// background of a [Stack]. Content sits on top (z=1) so nested interactive
+/// widgets (buttons, menus, icon-buttons) are hit-tested before the card's
+/// own tap handler and receive taps correctly. The card's [onTap] fires only
+/// when the user taps empty space inside the card — it is NOT called when a
+/// child widget claims the event.
+///
+/// If an interactive control needs a *different* action from the card's
+/// [onTap] (e.g. a delete button alongside a navigation card), place it as
+/// a sibling of [TilawaCard] in an outer [Row] rather than inside [child].
+/// This is the pattern used by `BookmarkCard`, `HistoryCard`,
+/// `PlaylistCard`, and `TasbeehScreen`'s history list.
 
 class TilawaCard extends StatelessWidget {
   const TilawaCard({
@@ -170,14 +178,23 @@ class TilawaCard extends StatelessWidget {
           : null,
     );
 
-    final Widget content = Container(
-      decoration: decoration,
+    final Widget decoratedSurface = Container(decoration: decoration);
 
-      child: Padding(padding: padding ?? tokens.padding, child: child),
+    final Widget paddedChild = Padding(
+      padding: padding ?? tokens.padding,
+      child: child,
     );
 
     if (onTap == null) {
-      return content;
+      return SizedBox(
+        width: double.infinity,
+        child: Stack(
+          children: [
+            Positioned.fill(child: decoratedSurface),
+            paddedChild,
+          ],
+        ),
+      );
     }
 
     final effectiveSplashColor =
@@ -188,35 +205,39 @@ class TilawaCard extends StatelessWidget {
         highlightColor ??
         colorScheme.onSurface.withValues(alpha: designTokens.opacitySubtle / 2);
 
-    // A non-positioned child defines stack size (finite height in e.g. vertical
-    // [ListView]s where max height is infinite). [SizedBox] width forces the
-    // painted card and ink to span the cross axis; [Positioned.fill] ink
-    // matches that footprint.
+    // Stack layout (z-order matters for hit-testing):
+    //
+    //   z=0  Positioned.fill decoration  — visual only ([IgnorePointer]).
+    //   z=1  Positioned.fill InkWell     — card tap; hit-tested after content.
+    //   z=2  paddedChild                 — tested first; interactive children win.
+    //
+    // A solid [BoxDecoration] on the same layer as content would absorb every tap
+    // inside the card bounds and block [onTap]. Decoration is therefore isolated
+    // on an [IgnorePointer] layer. [SizedBox] width infinity keeps grid tiles full-bleed.
 
-    return Stack(
-      children: [
-        SizedBox(width: double.infinity, child: content),
-
-        Positioned.fill(
-          child: Material(
-            type: MaterialType.transparency,
-
-            borderRadius: borderRadiusValue,
-
-            clipBehavior: Clip.antiAlias,
-
-            child: InkWell(
-              onTap: onTap,
-
+    return SizedBox(
+      width: double.infinity,
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: IgnorePointer(child: decoratedSurface),
+          ),
+          Positioned.fill(
+            child: Material(
+              type: MaterialType.transparency,
               borderRadius: borderRadiusValue,
-
-              splashColor: effectiveSplashColor,
-
-              highlightColor: effectiveHighlightColor,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                onTap: onTap,
+                borderRadius: borderRadiusValue,
+                splashColor: effectiveSplashColor,
+                highlightColor: effectiveHighlightColor,
+              ),
             ),
           ),
-        ),
-      ],
+          paddedChild,
+        ],
+      ),
     );
   }
 }

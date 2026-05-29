@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../atoms/tilawa_switch.dart';
 import '../foundation/component_tokens.dart';
 import '../foundation/design_tokens.dart';
+import 'tilawa_settings_group_row_style.dart';
 
 /// Pinterest-style settings section: bold title, flat rows (no card).
 class TilawaCatalogSettingsSection extends StatelessWidget {
@@ -53,7 +54,6 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
   const TilawaCatalogSettingsLinkRow({
     super.key,
     required this.title,
-    this.subtitle,
     this.trailing,
     this.onTap,
     this.showChevron = true,
@@ -61,7 +61,6 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
   });
 
   final String title;
-  final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
   final bool showChevron;
@@ -93,23 +92,11 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: titleStyle),
-                    if (subtitle != null) ...[
-                      SizedBox(height: tokens.spaceTiny),
-                      Text(
-                        subtitle!,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant.withValues(
-                            alpha: tokens.opacityEmphasis,
-                          ),
-                          height: 1.3,
-                        ),
-                      ),
-                    ],
-                  ],
+                child: Text(
+                  title,
+                  style: titleStyle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (trailing != null) ...[
@@ -190,19 +177,17 @@ class TilawaCatalogSettingsSwitchRow extends StatelessWidget {
   }
 }
 
-/// Profile header row for catalog settings (avatar + title + subtitle).
+/// Profile header row for catalog settings (avatar + title).
 class TilawaCatalogSettingsProfileRow extends StatelessWidget {
   const TilawaCatalogSettingsProfileRow({
     super.key,
     required this.avatar,
     required this.title,
-    required this.subtitle,
     this.onTap,
   });
 
   final Widget avatar;
   final String title;
-  final String subtitle;
   final VoidCallback? onTap;
 
   @override
@@ -210,11 +195,17 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
+    final borderRadius =
+        TilawaSettingsGroupRowStyle.maybeOf(context)?.borderRadius ??
+        BorderRadius.zero;
 
     return Material(
       color: Colors.transparent,
+      borderRadius: borderRadius,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
+        borderRadius: borderRadius,
         child: Padding(
           padding: EdgeInsets.fromLTRB(
             tokens.spaceMedium,
@@ -227,30 +218,14 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
               avatar,
               SizedBox(width: tokens.spaceMedium),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                    SizedBox(height: tokens.spaceTiny),
-                    Text(
-                      subtitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(
-                          alpha: tokens.opacityEmphasis,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
               ),
               if (onTap != null)

@@ -307,7 +307,7 @@ as Map<String, dynamic>?,
 /// @nodoc
 mixin _$PlaybackStateEntity {
 
- bool get isPlaying; AudioProcessingStateStatus get processingState; Duration get position; Duration get bufferedPosition; Duration get duration; int get currentIndex; List<AudioEntity> get queue;
+ bool get isPlaying; AudioProcessingStateStatus get processingState; Duration get position; Duration get bufferedPosition; Duration get duration; int get currentIndex; List<AudioEntity> get queue; int get queueGeneration;
 /// Create a copy of PlaybackStateEntity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -320,16 +320,16 @@ $PlaybackStateEntityCopyWith<PlaybackStateEntity> get copyWith => _$PlaybackStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlaybackStateEntity&&(identical(other.isPlaying, isPlaying) || other.isPlaying == isPlaying)&&(identical(other.processingState, processingState) || other.processingState == processingState)&&(identical(other.position, position) || other.position == position)&&(identical(other.bufferedPosition, bufferedPosition) || other.bufferedPosition == bufferedPosition)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex)&&const DeepCollectionEquality().equals(other.queue, queue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlaybackStateEntity&&(identical(other.isPlaying, isPlaying) || other.isPlaying == isPlaying)&&(identical(other.processingState, processingState) || other.processingState == processingState)&&(identical(other.position, position) || other.position == position)&&(identical(other.bufferedPosition, bufferedPosition) || other.bufferedPosition == bufferedPosition)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex)&&const DeepCollectionEquality().equals(other.queue, queue)&&(identical(other.queueGeneration, queueGeneration) || other.queueGeneration == queueGeneration));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,isPlaying,processingState,position,bufferedPosition,duration,currentIndex,const DeepCollectionEquality().hash(queue));
+int get hashCode => Object.hash(runtimeType,isPlaying,processingState,position,bufferedPosition,duration,currentIndex,const DeepCollectionEquality().hash(queue),queueGeneration);
 
 @override
 String toString() {
-  return 'PlaybackStateEntity(isPlaying: $isPlaying, processingState: $processingState, position: $position, bufferedPosition: $bufferedPosition, duration: $duration, currentIndex: $currentIndex, queue: $queue)';
+  return 'PlaybackStateEntity(isPlaying: $isPlaying, processingState: $processingState, position: $position, bufferedPosition: $bufferedPosition, duration: $duration, currentIndex: $currentIndex, queue: $queue, queueGeneration: $queueGeneration)';
 }
 
 
@@ -340,7 +340,7 @@ abstract mixin class $PlaybackStateEntityCopyWith<$Res>  {
   factory $PlaybackStateEntityCopyWith(PlaybackStateEntity value, $Res Function(PlaybackStateEntity) _then) = _$PlaybackStateEntityCopyWithImpl;
 @useResult
 $Res call({
- bool isPlaying, AudioProcessingStateStatus processingState, Duration position, Duration bufferedPosition, Duration duration, int currentIndex, List<AudioEntity> queue
+ bool isPlaying, AudioProcessingStateStatus processingState, Duration position, Duration bufferedPosition, Duration duration, int currentIndex, List<AudioEntity> queue, int queueGeneration
 });
 
 
@@ -357,7 +357,7 @@ class _$PlaybackStateEntityCopyWithImpl<$Res>
 
 /// Create a copy of PlaybackStateEntity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isPlaying = null,Object? processingState = null,Object? position = null,Object? bufferedPosition = null,Object? duration = null,Object? currentIndex = null,Object? queue = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isPlaying = null,Object? processingState = null,Object? position = null,Object? bufferedPosition = null,Object? duration = null,Object? currentIndex = null,Object? queue = null,Object? queueGeneration = null,}) {
   return _then(_self.copyWith(
 isPlaying: null == isPlaying ? _self.isPlaying : isPlaying // ignore: cast_nullable_to_non_nullable
 as bool,processingState: null == processingState ? _self.processingState : processingState // ignore: cast_nullable_to_non_nullable
@@ -366,7 +366,8 @@ as Duration,bufferedPosition: null == bufferedPosition ? _self.bufferedPosition 
 as Duration,duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
 as Duration,currentIndex: null == currentIndex ? _self.currentIndex : currentIndex // ignore: cast_nullable_to_non_nullable
 as int,queue: null == queue ? _self.queue : queue // ignore: cast_nullable_to_non_nullable
-as List<AudioEntity>,
+as List<AudioEntity>,queueGeneration: null == queueGeneration ? _self.queueGeneration : queueGeneration // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -451,10 +452,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isPlaying,  AudioProcessingStateStatus processingState,  Duration position,  Duration bufferedPosition,  Duration duration,  int currentIndex,  List<AudioEntity> queue)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isPlaying,  AudioProcessingStateStatus processingState,  Duration position,  Duration bufferedPosition,  Duration duration,  int currentIndex,  List<AudioEntity> queue,  int queueGeneration)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PlaybackStateEntity() when $default != null:
-return $default(_that.isPlaying,_that.processingState,_that.position,_that.bufferedPosition,_that.duration,_that.currentIndex,_that.queue);case _:
+return $default(_that.isPlaying,_that.processingState,_that.position,_that.bufferedPosition,_that.duration,_that.currentIndex,_that.queue,_that.queueGeneration);case _:
   return orElse();
 
 }
@@ -472,10 +473,10 @@ return $default(_that.isPlaying,_that.processingState,_that.position,_that.buffe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isPlaying,  AudioProcessingStateStatus processingState,  Duration position,  Duration bufferedPosition,  Duration duration,  int currentIndex,  List<AudioEntity> queue)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isPlaying,  AudioProcessingStateStatus processingState,  Duration position,  Duration bufferedPosition,  Duration duration,  int currentIndex,  List<AudioEntity> queue,  int queueGeneration)  $default,) {final _that = this;
 switch (_that) {
 case _PlaybackStateEntity():
-return $default(_that.isPlaying,_that.processingState,_that.position,_that.bufferedPosition,_that.duration,_that.currentIndex,_that.queue);case _:
+return $default(_that.isPlaying,_that.processingState,_that.position,_that.bufferedPosition,_that.duration,_that.currentIndex,_that.queue,_that.queueGeneration);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -492,10 +493,10 @@ return $default(_that.isPlaying,_that.processingState,_that.position,_that.buffe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isPlaying,  AudioProcessingStateStatus processingState,  Duration position,  Duration bufferedPosition,  Duration duration,  int currentIndex,  List<AudioEntity> queue)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isPlaying,  AudioProcessingStateStatus processingState,  Duration position,  Duration bufferedPosition,  Duration duration,  int currentIndex,  List<AudioEntity> queue,  int queueGeneration)?  $default,) {final _that = this;
 switch (_that) {
 case _PlaybackStateEntity() when $default != null:
-return $default(_that.isPlaying,_that.processingState,_that.position,_that.bufferedPosition,_that.duration,_that.currentIndex,_that.queue);case _:
+return $default(_that.isPlaying,_that.processingState,_that.position,_that.bufferedPosition,_that.duration,_that.currentIndex,_that.queue,_that.queueGeneration);case _:
   return null;
 
 }
@@ -507,7 +508,7 @@ return $default(_that.isPlaying,_that.processingState,_that.position,_that.buffe
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _PlaybackStateEntity implements PlaybackStateEntity {
-  const _PlaybackStateEntity({required this.isPlaying, required this.processingState, required this.position, required this.bufferedPosition, required this.duration, required this.currentIndex, required final  List<AudioEntity> queue}): _queue = queue;
+  const _PlaybackStateEntity({required this.isPlaying, required this.processingState, required this.position, required this.bufferedPosition, required this.duration, required this.currentIndex, required final  List<AudioEntity> queue, this.queueGeneration = 0}): _queue = queue;
   factory _PlaybackStateEntity.fromJson(Map<String, dynamic> json) => _$PlaybackStateEntityFromJson(json);
 
 @override final  bool isPlaying;
@@ -523,6 +524,7 @@ class _PlaybackStateEntity implements PlaybackStateEntity {
   return EqualUnmodifiableListView(_queue);
 }
 
+@override@JsonKey() final  int queueGeneration;
 
 /// Create a copy of PlaybackStateEntity
 /// with the given fields replaced by the non-null parameter values.
@@ -537,16 +539,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlaybackStateEntity&&(identical(other.isPlaying, isPlaying) || other.isPlaying == isPlaying)&&(identical(other.processingState, processingState) || other.processingState == processingState)&&(identical(other.position, position) || other.position == position)&&(identical(other.bufferedPosition, bufferedPosition) || other.bufferedPosition == bufferedPosition)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex)&&const DeepCollectionEquality().equals(other._queue, _queue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlaybackStateEntity&&(identical(other.isPlaying, isPlaying) || other.isPlaying == isPlaying)&&(identical(other.processingState, processingState) || other.processingState == processingState)&&(identical(other.position, position) || other.position == position)&&(identical(other.bufferedPosition, bufferedPosition) || other.bufferedPosition == bufferedPosition)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.currentIndex, currentIndex) || other.currentIndex == currentIndex)&&const DeepCollectionEquality().equals(other._queue, _queue)&&(identical(other.queueGeneration, queueGeneration) || other.queueGeneration == queueGeneration));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,isPlaying,processingState,position,bufferedPosition,duration,currentIndex,const DeepCollectionEquality().hash(_queue));
+int get hashCode => Object.hash(runtimeType,isPlaying,processingState,position,bufferedPosition,duration,currentIndex,const DeepCollectionEquality().hash(_queue),queueGeneration);
 
 @override
 String toString() {
-  return 'PlaybackStateEntity(isPlaying: $isPlaying, processingState: $processingState, position: $position, bufferedPosition: $bufferedPosition, duration: $duration, currentIndex: $currentIndex, queue: $queue)';
+  return 'PlaybackStateEntity(isPlaying: $isPlaying, processingState: $processingState, position: $position, bufferedPosition: $bufferedPosition, duration: $duration, currentIndex: $currentIndex, queue: $queue, queueGeneration: $queueGeneration)';
 }
 
 
@@ -557,7 +559,7 @@ abstract mixin class _$PlaybackStateEntityCopyWith<$Res> implements $PlaybackSta
   factory _$PlaybackStateEntityCopyWith(_PlaybackStateEntity value, $Res Function(_PlaybackStateEntity) _then) = __$PlaybackStateEntityCopyWithImpl;
 @override @useResult
 $Res call({
- bool isPlaying, AudioProcessingStateStatus processingState, Duration position, Duration bufferedPosition, Duration duration, int currentIndex, List<AudioEntity> queue
+ bool isPlaying, AudioProcessingStateStatus processingState, Duration position, Duration bufferedPosition, Duration duration, int currentIndex, List<AudioEntity> queue, int queueGeneration
 });
 
 
@@ -574,7 +576,7 @@ class __$PlaybackStateEntityCopyWithImpl<$Res>
 
 /// Create a copy of PlaybackStateEntity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isPlaying = null,Object? processingState = null,Object? position = null,Object? bufferedPosition = null,Object? duration = null,Object? currentIndex = null,Object? queue = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isPlaying = null,Object? processingState = null,Object? position = null,Object? bufferedPosition = null,Object? duration = null,Object? currentIndex = null,Object? queue = null,Object? queueGeneration = null,}) {
   return _then(_PlaybackStateEntity(
 isPlaying: null == isPlaying ? _self.isPlaying : isPlaying // ignore: cast_nullable_to_non_nullable
 as bool,processingState: null == processingState ? _self.processingState : processingState // ignore: cast_nullable_to_non_nullable
@@ -583,7 +585,8 @@ as Duration,bufferedPosition: null == bufferedPosition ? _self.bufferedPosition 
 as Duration,duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
 as Duration,currentIndex: null == currentIndex ? _self.currentIndex : currentIndex // ignore: cast_nullable_to_non_nullable
 as int,queue: null == queue ? _self._queue : queue // ignore: cast_nullable_to_non_nullable
-as List<AudioEntity>,
+as List<AudioEntity>,queueGeneration: null == queueGeneration ? _self.queueGeneration : queueGeneration // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
