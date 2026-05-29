@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 
-/// Resolves localized strings for tour chrome (keeps widgets free of l10n).
+/// Resolves localized strings for tour chrome (presentation layer only).
 @lazySingleton
 class TourGuideLabels {
   String next(BuildContext context) => context.l10n.tourActionNext;

@@ -9,8 +9,8 @@ import 'package:tilawa/features/tour_guide/domain/presenters/tour_overlay_presen
 import 'package:tilawa/features/tour_guide/domain/repositories/tour_repository.dart';
 import 'package:tilawa/features/tour_guide/domain/services/tour_catalog.dart';
 import 'package:tilawa/features/tour_guide/domain/services/tour_flow_guard.dart';
-import 'package:tilawa/features/tour_guide/domain/services/tour_guide_labels.dart';
-import 'package:tilawa/features/tour_guide/domain/services/tour_guide_service.dart';
+import 'package:tilawa/features/tour_guide/presentation/services/tour_guide_service.dart';
+import 'package:tilawa/features/tour_guide/presentation/services/tour_guide_labels.dart';
 import 'package:tilawa/features/tour_guide/domain/services/tour_target_registry.dart';
 import 'package:tilawa/features/tour_guide/domain/usecases/complete_tour.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';

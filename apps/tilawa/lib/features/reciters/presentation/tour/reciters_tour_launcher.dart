@@ -4,7 +4,7 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/tour_guide/domain/entities/tour_content_align.dart';
 import 'package:tilawa/features/tour_guide/domain/entities/tour_definition.dart';
 import 'package:tilawa/features/tour_guide/domain/entities/tour_step.dart';
-import 'package:tilawa/features/tour_guide/domain/services/tour_guide_service.dart';
+import 'package:tilawa/features/tour_guide/presentation/services/tour_guide_service.dart';
 
 import 'reciters_tour_targets.dart';
 

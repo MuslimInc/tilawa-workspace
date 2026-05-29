@@ -4,17 +4,18 @@ import 'dart:developer' as developer;
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
 
-import '../entities/tour_definition.dart';
-import '../entities/tour_step.dart';
-import '../presenters/tour_overlay_presenter.dart';
-import '../repositories/tour_repository.dart';
-import '../usecases/complete_tour.dart';
-import 'tour_catalog.dart';
-import 'tour_flow_guard.dart';
+import '../../domain/entities/tour_definition.dart';
+import '../../domain/entities/tour_step.dart';
+import '../../domain/presenters/tour_overlay_presenter.dart';
+import '../../domain/repositories/tour_repository.dart';
+import '../../domain/services/tour_catalog.dart';
+import '../../domain/services/tour_flow_guard.dart';
+import '../../domain/services/tour_target_registry.dart';
+import '../../domain/usecases/complete_tour.dart';
 import 'tour_guide_labels.dart';
-import 'tour_target_registry.dart';
 
-export '../presenters/tour_overlay_presenter.dart' show TourOverlayStyle;
+export '../../domain/presenters/tour_overlay_presenter.dart'
+    show TourOverlayStyle;
 
 /// Orchestrates when and how in-app tours are shown.
 ///
