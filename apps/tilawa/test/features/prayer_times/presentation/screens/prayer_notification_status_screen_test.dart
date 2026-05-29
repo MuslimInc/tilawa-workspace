@@ -68,7 +68,7 @@ void main() {
       'prayer_name': prayerName,
       'scheduled_time_ms': DateTime.now().millisecondsSinceEpoch,
       'adhan_enabled': adhanEnabled,
-      if (soundName != null) 'sound_name': soundName,
+      'sound_name': ?soundName,
     });
   }
 
