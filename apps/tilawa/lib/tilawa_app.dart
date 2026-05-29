@@ -15,7 +15,7 @@ import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'core/di/injection.dart';
-import 'core/providers/app_providers.dart';
+import 'app/app_providers.dart';
 import 'core/bootstrap/splash_launch_handoff.dart';
 import 'core/services/notification_startup_service.dart';
 import 'core/services/update_service.dart';
