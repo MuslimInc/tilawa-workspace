@@ -12,7 +12,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../features/app_review/domain/entities/app_review_blocked_flow.dart';
 import '../features/app_review/presentation/widgets/app_review_sacred_flow_scope.dart';
-import '../features/athkar/presentation/screens/athkar_categories_screen.dart';
+import '../features/athkar/presentation/widgets/athkar_categories_screen_scope.dart';
 import '../features/qibla/presentation/widgets/qibla_screen_scope.dart';
 import '../features/athkar/presentation/screens/athkar_details_screen.dart';
 import '../features/athkar/presentation/screens/tasbeeh_screen.dart';
@@ -200,7 +200,7 @@ class AthkarCategoriesRoute extends GoRouteData with $AthkarCategoriesRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const AthkarCategoriesScreen();
+    return const AthkarCategoriesScreenScope();
   }
 }
 

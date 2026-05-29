@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -25,24 +24,22 @@ class AthkarCategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<AthkarCubit>()..loadCategories(),
-      child: Scaffold(
-        appBar: TilawaCatalogAppBar.titleOnly(
-          context,
-          title: context.l10n.athkar,
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => const TasbeehRoute().push(context),
-          icon: const Icon(Icons.auto_awesome_rounded),
-          label: Text(context.l10n.tasbeehCategory),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        body: Stack(
-          children: [
-            const Positioned.fill(child: AthkarAmbientBackground()),
-            BlocBuilder<AthkarCubit, AthkarState>(
-              builder: (context, state) {
+    return Scaffold(
+      appBar: TilawaCatalogAppBar.titleOnly(
+        context,
+        title: context.l10n.athkar,
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => const TasbeehRoute().push(context),
+        icon: const Icon(Icons.auto_awesome_rounded),
+        label: Text(context.l10n.tasbeehCategory),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      body: Stack(
+        children: [
+          const Positioned.fill(child: AthkarAmbientBackground()),
+          BlocBuilder<AthkarCubit, AthkarState>(
+            builder: (context, state) {
                 if (state is AthkarLoading || state is AthkarInitial) {
                   return const TilawaLoadingIndicator();
                 } else if (state is AthkarError) {
@@ -102,7 +99,6 @@ class AthkarCategoriesScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }
