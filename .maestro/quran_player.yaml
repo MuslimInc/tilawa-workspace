@@ -3,9 +3,12 @@
 #
 # Modular flows (run individually for faster feedback):
 #   .maestro/quran_player/quran_player_mini.yaml
+#   .maestro/quran_player/quran_player_mini_open.yaml
+#   .maestro/quran_player/quran_player_mini_dismiss.yaml
 #   .maestro/quran_player/quran_player_queue_sheet.yaml
 #   .maestro/quran_player/quran_player_gestures.yaml
 #   .maestro/quran_player/quran_player_stop.yaml
+#   .maestro/quran_player/quran_player_pop_scenarios.yaml
 #   .maestro/quran_player/quran_player_rtl.yaml
 #
 # What this flow proves
@@ -43,7 +46,10 @@
 appId: com.tilawa.app
 ---
 
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_main_shell.yaml
 - runFlow:
     file: quran_player/subflows/dismiss_permissions.yaml
 - runFlow:

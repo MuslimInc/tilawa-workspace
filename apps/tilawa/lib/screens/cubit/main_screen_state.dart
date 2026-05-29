@@ -15,6 +15,7 @@ class MainScreenState extends Equatable {
     this.isOfflineIndicatorReady = false,
     this.currentIndex = 0,
     this.builtTabIndexes = const <int>{},
+    this.recitersSearchFocusTick = 0,
   });
 
   /// True once the short post-first-frame shell-activation delay has elapsed.
@@ -43,6 +44,12 @@ class MainScreenState extends Equatable {
   /// have a live widget subtree (even if currently [Offstage]).
   final Set<int> builtTabIndexes;
 
+  /// Increments when the user re-taps the reciters tab to focus search.
+  ///
+  /// [RecitersScreen] scrolls to top and focuses the field; the first tap on
+  /// the tab only navigates and does not increment this counter.
+  final int recitersSearchFocusTick;
+
   MainScreenState copyWith({
     bool? isShellActivated,
     bool? isInitialTabMounted,
@@ -51,6 +58,7 @@ class MainScreenState extends Equatable {
     bool? isOfflineIndicatorReady,
     int? currentIndex,
     Set<int>? builtTabIndexes,
+    int? recitersSearchFocusTick,
   }) {
     return MainScreenState(
       isShellActivated: isShellActivated ?? this.isShellActivated,
@@ -62,6 +70,8 @@ class MainScreenState extends Equatable {
           isOfflineIndicatorReady ?? this.isOfflineIndicatorReady,
       currentIndex: currentIndex ?? this.currentIndex,
       builtTabIndexes: builtTabIndexes ?? this.builtTabIndexes,
+      recitersSearchFocusTick:
+          recitersSearchFocusTick ?? this.recitersSearchFocusTick,
     );
   }
 
@@ -74,5 +84,6 @@ class MainScreenState extends Equatable {
     isOfflineIndicatorReady,
     currentIndex,
     builtTabIndexes,
+    recitersSearchFocusTick,
   ];
 }

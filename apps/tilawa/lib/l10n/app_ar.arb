@@ -198,6 +198,10 @@
     "@playerQueueHandleSemanticLabel": {
         "description": "Screen reader label for the queue sheet drag handle in the expanded player"
     },
+    "playerExpandedSheetSemanticLabel": "التشغيل الآن. اسحب للأسفل للتصغير.",
+    "@playerExpandedSheetSemanticLabel": {
+        "description": "Screen reader hint for the expanded now-playing sheet drag-to-minimize gesture"
+    },
     "duration": "المدة",
     "@duration": {
         "description": "Duration label"
@@ -347,6 +351,12 @@
         "description": "Settings section title"
     },
     "bottomNavReciters": "القراء",
+    "bottomNavSearch": "بحث",
+    "a11yBottomNavRecitersTab": "الانتقال إلى القراء",
+    "a11yBottomNavRecitersSearch": "البحث عن قارئ",
+    "recitersSearchResultsFor": "نتائج «{query}»",
+    "noRecitersForQuery": "لا يوجد نتائج لـ «{query}»",
+    "recitersClearSearch": "مسح البحث",
     "bottomNavPrayer": "الصلاة",
     "bottomNavQuran": "القرآن",
     "bottomNavAthkar": "الأذكار",

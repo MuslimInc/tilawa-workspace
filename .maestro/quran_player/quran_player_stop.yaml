@@ -6,7 +6,10 @@
 appId: com.tilawa.app
 ---
 
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
 - runFlow:
     file: subflows/dismiss_permissions.yaml
 - runFlow:
@@ -23,7 +26,10 @@ appId: com.tilawa.app
 - tapOn:
     id: "quran_player_menu_stop"
 - waitForAnimationToEnd
-
+- extendedWaitUntil:
+    notVisible:
+      id: "quran_player_track_title"
+    timeout: 8000
 - assertNotVisible:
     id: "quran_player_mini"
 - assertNotVisible:

@@ -149,6 +149,20 @@ class MainScreenCubit extends Cubit<MainScreenState> {
     );
   }
 
+  /// Focuses reciter search when the user re-taps the already-selected tab.
+  ///
+  /// Does not run on the first navigation to the reciters tab; use [selectTab]
+  /// for a calm landing without opening the keyboard.
+  void requestRecitersSearchFocus() {
+    emit(
+      state.copyWith(
+        currentIndex: 0,
+        builtTabIndexes: {...state.builtTabIndexes, 0},
+        recitersSearchFocusTick: state.recitersSearchFocusTick + 1,
+      ),
+    );
+  }
+
   @override
   Future<void> close() {
     _shellActivationTimer?.cancel();

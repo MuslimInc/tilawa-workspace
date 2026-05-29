@@ -198,6 +198,10 @@
     "@playerQueueHandleSemanticLabel": {
         "description": "Screen reader label for the queue sheet drag handle in the expanded player"
     },
+    "playerExpandedSheetSemanticLabel": "Now playing. Swipe down to minimize.",
+    "@playerExpandedSheetSemanticLabel": {
+        "description": "Screen reader hint for the expanded now-playing sheet drag-to-minimize gesture"
+    },
     "duration": "Duration",
     "@duration": {
         "description": "Duration label"
@@ -360,7 +364,41 @@
     },
     "bottomNavReciters": "Reciters",
     "@bottomNavReciters": {
-        "description": "Single-word label for the reciters tab in the phone bottom navigation bar"
+        "description": "Legacy key; prefer bottomNavSearch for shell navigation"
+    },
+    "bottomNavSearch": "Search",
+    "@bottomNavSearch": {
+        "description": "Single-word label for the reciter search entry in bottom navigation"
+    },
+    "a11yBottomNavRecitersTab": "Go to reciters",
+    "@a11yBottomNavRecitersTab": {
+        "description": "Screen reader label for the reciters bottom-nav item when another tab is selected"
+    },
+    "a11yBottomNavRecitersSearch": "Search reciters",
+    "@a11yBottomNavRecitersSearch": {
+        "description": "Screen reader label for the reciters bottom-nav item when the reciters tab is already active (re-tap focuses search)"
+    },
+    "recitersSearchResultsFor": "Results for “{query}”",
+    "@recitersSearchResultsFor": {
+        "description": "Summary line when showing filtered reciter search results",
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "noRecitersForQuery": "No results for “{query}”",
+    "@noRecitersForQuery": {
+        "description": "Empty state title when a reciter search returns no matches",
+        "placeholders": {
+            "query": {
+                "type": "String"
+            }
+        }
+    },
+    "recitersClearSearch": "Clear search",
+    "@recitersClearSearch": {
+        "description": "Button to reset the reciter search field and show the full catalog"
     },
     "bottomNavPrayer": "Prayer",
     "@bottomNavPrayer": {

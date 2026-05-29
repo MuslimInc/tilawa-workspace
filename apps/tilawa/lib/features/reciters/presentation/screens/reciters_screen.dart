@@ -7,8 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
-import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/features/reciters/presentation/utils/reciter_list_moshaf_label.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa/features/tour_guide/presentation/widgets/tour_target.dart';
@@ -71,26 +71,24 @@ class RecitersRootBackScope extends StatelessWidget {
             return ValueListenableBuilder<bool>(
               valueListenable: QuranPlayerSystemBackCoordinator
                   .interceptsSystemBackListenable,
-              builder:
-                  (BuildContext context, bool _, Widget? popChild) {
-                    return PopScope(
-                      canPop: canPop(tabIndex),
-                      onPopInvokedWithResult: (bool didPop, Object? result) {
-                        if (didPop) {
-                          return;
-                        }
-                        if (QuranPlayerSystemBackCoordinator
-                            .interceptsSystemBack) {
-                          QuranPlayerSystemBackCoordinator.handleSystemBack();
-                          return;
-                        }
-                        if (tabIndex != 0) {
-                          context.read<MainScreenCubit>().selectTab(0);
-                        }
-                      },
-                      child: popChild!,
-                    );
+              builder: (BuildContext context, bool _, Widget? popChild) {
+                return PopScope(
+                  canPop: canPop(tabIndex),
+                  onPopInvokedWithResult: (bool didPop, Object? result) {
+                    if (didPop) {
+                      return;
+                    }
+                    if (QuranPlayerSystemBackCoordinator.interceptsSystemBack) {
+                      QuranPlayerSystemBackCoordinator.handleSystemBack();
+                      return;
+                    }
+                    if (tabIndex != 0) {
+                      context.read<MainScreenCubit>().selectTab(0);
+                    }
                   },
+                  child: popChild!,
+                );
+              },
               child: child,
             );
           },
@@ -135,6 +133,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
   void initState() {
     super.initState();
     _favoritesCubit = getIt<FavoritesCubit>();
+    _scrollController.addListener(_dismissSearchKeyboardOnUserScroll);
     final RecitersBloc recitersBloc = context.read<RecitersBloc>();
     final RecitersState startupState = recitersBloc.state;
 
@@ -244,8 +243,48 @@ class _RecitersScreenState extends State<RecitersScreen> {
     });
   }
 
+  void _dismissSearchKeyboardOnUserScroll() {
+    if (!_focusNode.hasFocus || !_scrollController.hasClients) {
+      return;
+    }
+    final ScrollDirection direction =
+        _scrollController.position.userScrollDirection;
+    if (direction == ScrollDirection.idle) {
+      return;
+    }
+    _focusNode.unfocus();
+  }
+
+  /// Re-tap on the reciters tab: scroll up, then focus search with keyboard.
+  Future<void> _activateSearchFromShell() async {
+    final Duration scrollDuration = context.tokens.durationFast;
+    if (_scrollController.hasClients && _scrollController.offset > 0) {
+      await _scrollController.animateTo(
+        0,
+        duration: scrollDuration,
+        curve: Curves.easeOutCubic,
+      );
+    }
+    if (!mounted) {
+      return;
+    }
+    _requestSearchFocus();
+  }
+
+  void _requestSearchFocus() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_focusNode.canRequestFocus) {
+        return;
+      }
+      _focusNode.requestFocus();
+      final int offset = _searchController.text.length;
+      _searchController.selection = TextSelection.collapsed(offset: offset);
+    });
+  }
+
   @override
   void dispose() {
+    _scrollController.removeListener(_dismissSearchKeyboardOnUserScroll);
     _startupLiteUiTimer?.cancel();
     _loadedResultsActivationTimer?.cancel();
     _initialLoadTimer?.cancel();
@@ -327,6 +366,15 @@ class _RecitersScreenState extends State<RecitersScreen> {
     });
   }
 
+  void _onSearchSubmitted(String value) {
+    _searchDebounceTimer?.cancel();
+    if (value.trim().isEmpty) {
+      return;
+    }
+    context.read<RecitersBloc>().add(SearchRecitersEvent(value));
+    _scrollToTop();
+  }
+
   void _clearSearch() {
     _searchDebounceTimer?.cancel();
     _searchController.clear();
@@ -392,6 +440,21 @@ class _RecitersScreenState extends State<RecitersScreen> {
       child: Builder(
         builder: (innerContext) => MultiBlocListener(
           listeners: [
+            BlocListener<MainScreenCubit, MainScreenState>(
+              listenWhen: (previous, current) =>
+                  previous.currentIndex == 0 && current.currentIndex != 0,
+              listener: (context, state) {
+                _focusNode.unfocus();
+              },
+            ),
+            BlocListener<MainScreenCubit, MainScreenState>(
+              listenWhen: (previous, current) =>
+                  previous.recitersSearchFocusTick !=
+                  current.recitersSearchFocusTick,
+              listener: (context, state) {
+                unawaited(_activateSearchFromShell());
+              },
+            ),
             BlocListener<LocalizationBloc, LocalizationState>(
               listener: (context, state) {
                 _searchController.clear();
@@ -453,21 +516,27 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   state.filteredReciters.isNotEmpty &&
                   state.searchQuery.isEmpty;
               final ColorScheme colorScheme = Theme.of(context).colorScheme;
+              final bool hideQuickFilters =
+                  state is RecitersLoaded && (state).searchQuery.isNotEmpty;
+              final double appBarHeight = hideQuickFilters
+                  ? TilawaAppBarConfig.catalogTitleAndSearchHeight(context)
+                  : TilawaAppBarConfig.catalogTitleSearchAndFilterRowHeight(
+                      context,
+                    );
 
               return Scaffold(
                 resizeToAvoidBottomInset: false,
                 backgroundColor: colorScheme.surface,
                 appBar: _RecitersTilawaAppBar(
-                  bottomHeight:
-                      TilawaAppBarConfig.catalogTitleSearchAndFilterRowHeight(
-                        context,
-                      ),
+                  bottomHeight: appBarHeight,
+                  hideQuickFilters: hideQuickFilters,
                   state: state,
                   letterIndexAvailable: letterIndexAvailable,
                   showLetterIndex: _showLetterIndex,
                   searchController: _searchController,
                   focusNode: _focusNode,
                   onSearchChanged: _onSearchChanged,
+                  onSearchSubmitted: _onSearchSubmitted,
                   onClearSearch: _clearSearch,
                   onToggleFavorites: () => _toggleFavoritesFilter(innerContext),
                   onToggleLetterIndex: _toggleLetterIndex,
@@ -485,6 +554,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   allowHeavyLoadedResults: _allowHeavyLoadedResults,
                   showLetterIndex: _showLetterIndex,
                   scrollController: _scrollController,
+                  onClearSearch: _clearSearch,
                   onClearAll: _clearAllFilters,
                   onLetterSelected: _onLetterSelected,
                   onRetry: _refreshReciters,
@@ -540,6 +610,7 @@ class _RecitersSliverScreen extends StatelessWidget {
     required this.allowHeavyLoadedResults,
     required this.showLetterIndex,
     required this.scrollController,
+    required this.onClearSearch,
     required this.onClearAll,
     required this.onLetterSelected,
     required this.onRetry,
@@ -549,6 +620,7 @@ class _RecitersSliverScreen extends StatelessWidget {
   final bool allowHeavyLoadedResults;
   final bool showLetterIndex;
   final ScrollController scrollController;
+  final VoidCallback onClearSearch;
   final VoidCallback onClearAll;
   final ValueChanged<String?> onLetterSelected;
   final Future<void> Function() onRetry;
@@ -582,6 +654,7 @@ class _RecitersSliverScreen extends StatelessWidget {
                 allowHeavyLoadedResults: allowHeavyLoadedResults,
                 reserveScrollbarSpace: showLetterIndexRail,
                 reserveScrollbarOnLeading: isRtl,
+                onClearSearch: onClearSearch,
                 onClearAll: onClearAll,
                 onRetry: onRetry,
               ),
@@ -672,6 +745,7 @@ class _RecitersResultSection extends StatelessWidget {
     required this.allowHeavyLoadedResults,
     required this.reserveScrollbarSpace,
     required this.reserveScrollbarOnLeading,
+    required this.onClearSearch,
     required this.onClearAll,
     required this.onRetry,
   });
@@ -680,6 +754,7 @@ class _RecitersResultSection extends StatelessWidget {
   final bool allowHeavyLoadedResults;
   final bool reserveScrollbarSpace;
   final bool reserveScrollbarOnLeading;
+  final VoidCallback onClearSearch;
   final VoidCallback onClearAll;
   final Future<void> Function() onRetry;
 
@@ -706,7 +781,11 @@ class _RecitersResultSection extends StatelessWidget {
       }
 
       if (loadedState.filteredReciters.isEmpty) {
-        return _RecitersEmptySliver(state: loadedState, onClearAll: onClearAll);
+        return _RecitersEmptySliver(
+          state: loadedState,
+          onClearSearch: onClearSearch,
+          onClearAll: onClearAll,
+        );
       }
 
       if (context.isNarrow) {
@@ -763,37 +842,111 @@ class _RecitersErrorSliver extends StatelessWidget {
 }
 
 class _RecitersEmptySliver extends StatelessWidget {
-  const _RecitersEmptySliver({required this.state, required this.onClearAll});
+  const _RecitersEmptySliver({
+    required this.state,
+    required this.onClearSearch,
+    required this.onClearAll,
+  });
 
   final RecitersLoaded state;
+  final VoidCallback onClearSearch;
   final VoidCallback onClearAll;
 
   @override
   Widget build(BuildContext context) {
-    final bool isSearchState = state.searchQuery.isNotEmpty;
-    final bool isFavoritesOnlyEmpty = state.showFavoritesOnly && !isSearchState;
-    final bool hasActiveFilters = _hasActiveFilters(state);
-
     return _DryLayoutSafeFillSliver(
-      child: _StatePanel(
+      contentAlignment: _recitersEmptyContentAlignment(context),
+      child: _RecitersEmptyStateContent(
         key: const ValueKey('empty_state'),
-        icon: isSearchState
-            ? Icons.search_off_rounded
-            : isFavoritesOnlyEmpty
-            ? Icons.favorite_border_rounded
-            : Icons.person_off_outlined,
-        title: isSearchState
-            ? context.l10n.noRecitersMatchSearch
-            : isFavoritesOnlyEmpty
-            ? context.l10n.noFavorites
-            : context.l10n.noRecitersFound,
-        subtitle: isSearchState ? context.l10n.tryDifferentSearch : null,
-        actionLabel: hasActiveFilters ? context.l10n.clearAll : null,
-        onAction: hasActiveFilters ? onClearAll : null,
-        actionLeadingIcon: Icons.clear_all_rounded,
+        state: state,
+        onClearSearch: onClearSearch,
+        onClearAll: onClearAll,
       ),
     );
   }
+}
+
+/// Empty catalog / filter / search messaging with calm, contextual actions.
+class _RecitersEmptyStateContent extends StatelessWidget {
+  const _RecitersEmptyStateContent({
+    super.key,
+    required this.state,
+    required this.onClearSearch,
+    required this.onClearAll,
+  });
+
+  final RecitersLoaded state;
+  final VoidCallback onClearSearch;
+  final VoidCallback onClearAll;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final String query = state.searchQuery.trim();
+    final bool hasSearchQuery = query.isNotEmpty;
+    final bool isSearchOnly =
+        hasSearchQuery &&
+        state.selectedLetter == null &&
+        !state.showFavoritesOnly;
+    final bool isFavoritesOnlyEmpty =
+        state.showFavoritesOnly && !hasSearchQuery;
+    final bool showClearAll = _hasActiveFilters(state) && !isSearchOnly;
+
+    final String title = hasSearchQuery
+        ? context.l10n.noRecitersForQuery(query)
+        : isFavoritesOnlyEmpty
+        ? context.l10n.noFavorites
+        : context.l10n.noRecitersFound;
+    final String? subtitle = hasSearchQuery
+        ? context.l10n.tryDifferentSearch
+        : null;
+
+    final IconData icon = hasSearchQuery
+        ? Icons.search_off_rounded
+        : isFavoritesOnlyEmpty
+        ? Icons.favorite_border_rounded
+        : Icons.person_off_outlined;
+
+    final Widget? primaryAction = isSearchOnly
+        ? TilawaButton(
+            text: context.l10n.recitersClearSearch,
+            variant: TilawaButtonVariant.outline,
+            leadingIcon: Icon(
+              Icons.close_rounded,
+              size: tokens.iconSizeSmall,
+            ),
+            onPressed: onClearSearch,
+          )
+        : showClearAll
+        ? TilawaButton(
+            text: context.l10n.clearAll,
+            variant: TilawaButtonVariant.outline,
+            leadingIcon: Icon(
+              Icons.clear_all_rounded,
+              size: tokens.iconSizeSmall,
+            ),
+            onPressed: onClearAll,
+          )
+        : null;
+
+    return TilawaIllustratedState(
+      icon: icon,
+      title: title,
+      subtitle: subtitle,
+      semanticLabel: title,
+      maxWidth: tokens.contentMaxWidthForm * 0.6,
+      primaryAction: primaryAction,
+    );
+  }
+}
+
+Alignment _recitersEmptyContentAlignment(BuildContext context) {
+  final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
+  if (keyboardInset > 0) {
+    return const Alignment(0, -0.45);
+  }
+  return const Alignment(0, -0.2);
 }
 
 /// Reciters list chrome: title, optional filter chips, and search row.
@@ -801,12 +954,14 @@ class _RecitersTilawaAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const _RecitersTilawaAppBar({
     required this.bottomHeight,
+    required this.hideQuickFilters,
     required this.state,
     required this.letterIndexAvailable,
     required this.showLetterIndex,
     required this.searchController,
     required this.focusNode,
     required this.onSearchChanged,
+    required this.onSearchSubmitted,
     required this.onClearSearch,
     required this.onToggleFavorites,
     required this.onToggleLetterIndex,
@@ -816,6 +971,7 @@ class _RecitersTilawaAppBar extends StatelessWidget
   });
 
   final double bottomHeight;
+  final bool hideQuickFilters;
   final RecitersState state;
   final bool letterIndexAvailable;
 
@@ -825,6 +981,7 @@ class _RecitersTilawaAppBar extends StatelessWidget
   final TextEditingController searchController;
   final FocusNode focusNode;
   final ValueChanged<String> onSearchChanged;
+  final ValueChanged<String> onSearchSubmitted;
   final VoidCallback onClearSearch;
   final VoidCallback onToggleFavorites;
   final VoidCallback onToggleLetterIndex;
@@ -851,19 +1008,22 @@ class _RecitersTilawaAppBar extends StatelessWidget
             controller: searchController,
             focusNode: focusNode,
             onChanged: onSearchChanged,
+            onSubmitted: onSearchSubmitted,
             onClear: onClearSearch,
           ),
-          SizedBox(height: tokens.spaceSmall),
-          _RecitersQuickFilterBar(
-            state: state,
-            loaded: loaded,
-            letterIndexAvailable: letterIndexAvailable,
-            showLetterIndex: showLetterIndex,
-            onToggleFavorites: onToggleFavorites,
-            onToggleLetterIndex: onToggleLetterIndex,
-            onClearLetterFilter: onClearLetterFilter,
-            onClearAllFilters: onClearAllFilters,
-          ),
+          if (!hideQuickFilters) ...[
+            SizedBox(height: tokens.spaceSmall),
+            _RecitersQuickFilterBar(
+              state: state,
+              loaded: loaded,
+              letterIndexAvailable: letterIndexAvailable,
+              showLetterIndex: showLetterIndex,
+              onToggleFavorites: onToggleFavorites,
+              onToggleLetterIndex: onToggleLetterIndex,
+              onClearLetterFilter: onClearLetterFilter,
+              onClearAllFilters: onClearAllFilters,
+            ),
+          ],
         ],
       ),
     );
@@ -1076,36 +1236,79 @@ class _RecitersAmbientPainter extends CustomPainter {
   }
 }
 
-class _SearchField extends StatelessWidget {
+class _SearchField extends StatefulWidget {
   const _SearchField({
     required this.controller,
     required this.focusNode,
     required this.onChanged,
+    required this.onSubmitted,
     required this.onClear,
   });
 
   final TextEditingController controller;
   final FocusNode focusNode;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmitted;
   final VoidCallback onClear;
 
   @override
+  State<_SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<_SearchField> {
+  @override
+  void initState() {
+    super.initState();
+    widget.focusNode.addListener(_onFocusChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _SearchField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.focusNode != widget.focusNode) {
+      oldWidget.focusNode.removeListener(_onFocusChanged);
+      widget.focusNode.addListener(_onFocusChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.focusNode.removeListener(_onFocusChanged);
+    super.dispose();
+  }
+
+  void _onFocusChanged() {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final TilawaDesignTokens tokens = Theme.of(context).tokens;
+    final bool isFocused = widget.focusNode.hasFocus;
+
     return TourTarget(
       targetId: RecitersTourTargets.searchField,
       child: Semantics(
         identifier: ReciterSemanticsIds.recitersSearchField,
-        child: TilawaSearchField(
-          controller: controller,
-          focusNode: focusNode,
-          hintText: context.l10n.searchReciters,
-          prefixIcon: FluentIcons.search_24_regular,
-          clearIcon: FluentIcons.dismiss_24_regular,
-          onChanged: onChanged,
-          onClear: onClear,
-          clearButtonTooltip: context.l10n.a11yClearRecitersSearch,
-          showShadow: false,
-          onTapOutside: (_) => focusNode.unfocus(),
+        child: AnimatedScale(
+          scale: isFocused ? 1 : 0.985,
+          duration: tokens.durationFast,
+          curve: Curves.easeOutCubic,
+          alignment: Alignment.center,
+          child: TilawaSearchField(
+            controller: widget.controller,
+            focusNode: widget.focusNode,
+            hintText: context.l10n.searchReciters,
+            textInputAction: TextInputAction.search,
+            prefixIcon: FluentIcons.search_24_regular,
+            clearIcon: FluentIcons.dismiss_24_regular,
+            onChanged: widget.onChanged,
+            onSubmitted: widget.onSubmitted,
+            onClear: widget.onClear,
+            clearButtonTooltip: context.l10n.a11yClearRecitersSearch,
+            showShadow: false,
+            onTapOutside: (_) => widget.focusNode.unfocus(),
+          ),
         ),
       ),
     );
@@ -1164,9 +1367,13 @@ class _StatePanel extends StatelessWidget {
 }
 
 class _DryLayoutSafeFillSliver extends StatelessWidget {
-  const _DryLayoutSafeFillSliver({required this.child});
+  const _DryLayoutSafeFillSliver({
+    required this.child,
+    this.contentAlignment = Alignment.center,
+  });
 
   final Widget child;
+  final Alignment contentAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -1183,7 +1390,10 @@ class _DryLayoutSafeFillSliver extends StatelessWidget {
               width: constraints.crossAxisExtent,
               height: height,
             ),
-            child: child,
+            child: Align(
+              alignment: contentAlignment,
+              child: child,
+            ),
           ),
         );
       },
@@ -1207,7 +1417,7 @@ class _ReciterListSliver extends StatelessWidget {
     PerfLogger.markBuild('_ReciterListSliver');
     final tokens = Theme.of(context).tokens;
     final int reciterCount = state.filteredReciters.length;
-    final int itemCount = reciterCount + reciterCount - 1;
+    final bool showResultSummary = _shouldShowRecitersResultSummary(state);
 
     return SliverLayoutBuilder(
       builder: (context, constraints) {
@@ -1220,11 +1430,17 @@ class _ReciterListSliver extends StatelessWidget {
           reserveScrollbarOnLeading: reserveScrollbarOnLeading,
         );
 
+        final int itemCount = reciterCount + reciterCount - 1;
+
         return SliverPadding(
           padding: padding,
           sliver: SliverMainAxisGroup(
             slivers: [
-              _RecitersResultSummarySliver(count: reciterCount),
+              if (showResultSummary)
+                _RecitersResultSummarySliver(
+                  count: reciterCount,
+                  searchQuery: state.searchQuery,
+                ),
               SliverList.builder(
                 itemCount: itemCount,
                 itemBuilder: (context, index) {
@@ -1256,24 +1472,43 @@ class _ReciterListSliver extends StatelessWidget {
   }
 }
 
+bool _shouldShowRecitersResultSummary(RecitersLoaded state) {
+  return state.searchQuery.trim().isNotEmpty ||
+      state.showFavoritesOnly ||
+      state.selectedLetter != null;
+}
+
 class _RecitersResultSummarySliver extends StatelessWidget {
-  const _RecitersResultSummarySliver({required this.count});
+  const _RecitersResultSummarySliver({
+    required this.count,
+    this.searchQuery = '',
+  });
 
   final int count;
+  final String searchQuery;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
+    final String summary = searchQuery.trim().isNotEmpty
+        ? context.l10n.recitersSearchResultsFor(searchQuery.trim())
+        : context.l10n.recitersResultCount(count);
 
     return SliverToBoxAdapter(
       child: Padding(
         padding: EdgeInsets.only(bottom: tokens.spaceSmall),
-        child: Text(
-          context.l10n.recitersResultCount(count),
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
+        child: Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: Text(
+            summary,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.start,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),
@@ -1314,13 +1549,17 @@ class _ReciterGridSliver extends StatelessWidget {
           reserveScrollbarOnLeading: reserveScrollbarOnLeading,
         );
 
+        final bool showResultSummary = _shouldShowRecitersResultSummary(state);
+
         return SliverPadding(
           padding: padding,
           sliver: SliverMainAxisGroup(
             slivers: [
-              _RecitersResultSummarySliver(
-                count: state.filteredReciters.length,
-              ),
+              if (showResultSummary)
+                _RecitersResultSummarySliver(
+                  count: state.filteredReciters.length,
+                  searchQuery: state.searchQuery,
+                ),
               SliverGrid.builder(
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: targetItemExtent,

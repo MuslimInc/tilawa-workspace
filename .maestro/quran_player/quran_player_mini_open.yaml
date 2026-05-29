@@ -1,0 +1,61 @@
+appId: com.tilawa.app
+---
+# Mini-player open E2E — playback starts the footer mini; tap opens expanded.
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_mini_open.yaml
+
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+
+# Mini appears after starting playback.
+- runFlow:
+    file: subflows/start_playback.yaml
+- assertVisible:
+    id: "quran_player_mini"
+- assertVisible:
+    id: "quran_player_mini_play_pause"
+
+# Open expanded player from mini tap.
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 10000
+- assertVisible:
+    id: "quran_player_track_artist"
+- assertVisible:
+    id: "quran_player_collapse"
+
+# Collapse returns to mini (shell preserved).
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_mini"
+    timeout: 10000
+- assertNotVisible:
+    id: "quran_player_track_title"
+
+# Re-expand after collapse (regression: stale collapsing phase).
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 10000
+- assertVisible:
+    id: "quran_player_collapse"
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_mini"

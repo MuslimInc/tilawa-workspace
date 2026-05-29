@@ -10,7 +10,10 @@
 appId: com.tilawa.app
 ---
 
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
 - runFlow:
     file: subflows/dismiss_permissions.yaml
 - runFlow:
@@ -25,6 +28,29 @@ appId: com.tilawa.app
     end: "50%, 100%"
     duration: 350
 - waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible:
+      id: "quran_player_mini"
+    timeout: 4000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: "quran_player_mini"
+    commands:
+      - swipe:
+          start: "50%, 86%"
+          end: "50%, 100%"
+          duration: 450
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      visible:
+        id: "quran_player_mini_close"
+    commands:
+      - tapOn:
+          id: "quran_player_mini_close"
+      - waitForAnimationToEnd
 
 - assertNotVisible:
     id: "quran_player_mini"

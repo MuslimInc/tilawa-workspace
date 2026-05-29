@@ -185,6 +185,30 @@ void main() {
       expect(find.text('Try again'), findsOneWidget);
     });
 
+    testWidgets('does not overflow in a tight viewport', (tester) async {
+      await tester.pumpWidget(
+        _wrap(
+          SizedBox(
+            width: 345,
+            height: 238,
+            child: TilawaIllustratedState(
+              icon: Icons.search_off_rounded,
+              title: 'لا يوجد قراء يطابقون البحث',
+              subtitle: 'جرب كلمة بحث مختلفة',
+              primaryAction: TilawaButton(
+                text: 'مسح الكل',
+                leadingIcon: const Icon(Icons.clear_all_rounded),
+                onPressed: () {},
+              ),
+            ),
+          ),
+          textDirection: TextDirection.rtl,
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('supports RTL and larger text on narrow phones', (
       tester,
     ) async {

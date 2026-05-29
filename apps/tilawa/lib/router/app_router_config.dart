@@ -40,6 +40,8 @@ import '../features/splash/presentation/screens/splash_screen.dart';
 import '../screens/app_shell_screen.dart';
 import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
+import '../shared/widgets/quran_player_expanded_page.dart';
+import '../shared/widgets/quran_player_expanded_route_transition.dart';
 import 'share_composer_extra.dart';
 
 part 'app_router_config.g.dart';
@@ -373,6 +375,36 @@ class ScreenshotComposerRoute extends GoRouteData
       reciterName: extra.reciterName,
       readerBoundaryKey: extra.readerBoundaryKey,
       readerPreviewBytesNotifier: extra.readerPreviewBytesNotifier,
+    );
+  }
+}
+
+@TypedGoRoute<QuranPlayerExpandedRoute>(path: '/player')
+class QuranPlayerExpandedRoute extends GoRouteData
+    with $QuranPlayerExpandedRoute {
+  const QuranPlayerExpandedRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      opaque: false,
+      maintainState: true,
+      transitionDuration: QuranPlayerExpandedRouteTransition.transitionDuration,
+      reverseTransitionDuration:
+          QuranPlayerExpandedRouteTransition.reverseTransitionDuration,
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        Widget child,
+      ) {
+        return QuranPlayerExpandedRouteTransition(
+          animation: animation,
+          child: child,
+        );
+      },
+      child: const QuranPlayerExpandedPage(),
     );
   }
 }

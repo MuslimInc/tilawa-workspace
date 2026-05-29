@@ -1,26 +1,51 @@
-# Navigate to reciter 10 and start Al-Fatihah (surah 001).
-# Leaves the mini-player visible (quran_player_mini).
+appId: com.tilawa.app
 ---
-- tapOn:
-    id: "reciters_tab"
+# Navigate to reciter 1 and start Al-Fatihah (surah 001).
+# Leaves the mini-player visible (quran_player_mini).
+- runFlow:
+    when:
+      notVisible:
+        id: "reciters_search_field"
+    commands:
+      - tapOn:
+          id: "reciters_tab"
 - extendedWaitUntil:
     visible:
       id: "reciters_search_field"
     timeout: 10000
 
-- scrollUntilVisible:
-    element:
-      id: "reciter_card_10"
-    direction: DOWN
-    timeout: 8000
-- tapOn:
-    id: "reciter_card_10"
+- runFlow:
+    when:
+      notVisible:
+        id: "reciter_details_surah_search"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "reciter_card_1"
+          direction: DOWN
+          timeout: 12000
+      - tapOn:
+          id: "reciter_card_1"
+      - waitForAnimationToEnd
+      - runFlow:
+          when:
+            notVisible:
+              id: "reciter_details_surah_search"
+          commands:
+            - tapOn:
+                id: "reciter_card_1"
+            - waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible:
       id: "reciter_details_surah_search"
-    timeout: 10000
+    timeout: 20000
 
+- scrollUntilVisible:
+    element:
+      id: "surah_row_001"
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: "surah_row_001"
 

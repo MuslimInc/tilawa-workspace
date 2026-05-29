@@ -1,0 +1,25 @@
+appId: com.tilawa.app
+---
+# Skips when the main shell is already visible. Otherwise walks through
+# onboarding (if shown). Requires a signed-in session — complete Google sign-in
+# once on the emulator, then use `launchApp: clearState: false` in flows.
+- runFlow:
+    when:
+      notVisible:
+        id: "reciters_tab"
+    commands:
+      - tapOn:
+          text: "Next"
+          optional: true
+      - tapOn:
+          text: "Next"
+          optional: true
+      - tapOn:
+          text: "Get started"
+          optional: true
+      - waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "reciters_tab"
+    timeout: 20000

@@ -323,10 +323,14 @@ class _SheetHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          context.l10n.prayerNotifications,
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
+        Semantics(
+          identifier: PrayerNotificationSemanticsIds.notificationsSection,
+          header: true,
+          child: Text(
+            context.l10n.prayerNotifications,
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
         const Spacer(),

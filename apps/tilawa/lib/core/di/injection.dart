@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/bootstrap/app_launch_config.dart';
+import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
+import 'package:tilawa/features/audio_player/presentation/quran_player_navigation.dart';
 import 'package:tilawa_core/di/injection.module.dart';
 import 'package:tilawa_core/network/network_info.dart';
 
@@ -36,11 +38,25 @@ Future<void> configureDependencies({AppLaunchConfig? launchConfig}) async {
   getIt.registerSingleton<AppLaunchConfig>(config);
 
   await getIt.init();
+  _registerPlayerPresentation();
 
   if (!getIt.isRegistered<NetworkInfo>()) {
     throw StateError(
       'NetworkInfo was not registered after getIt.init(). '
       'Run: dart run build_runner build',
+    );
+  }
+}
+
+void _registerPlayerPresentation() {
+  if (!getIt.isRegistered<QuranPlayerNavigation>()) {
+    getIt.registerLazySingleton<QuranPlayerNavigation>(
+      GoRouterQuranPlayerNavigation.new,
+    );
+  }
+  if (!getIt.isRegistered<PlayerPresentationController>()) {
+    getIt.registerLazySingleton<PlayerPresentationController>(
+      () => PlayerPresentationController(getIt<QuranPlayerNavigation>()),
     );
   }
 }

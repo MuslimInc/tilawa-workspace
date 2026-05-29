@@ -82,57 +82,72 @@ class TilawaIllustratedState extends StatelessWidget {
       );
     }
 
+    final Widget content = Padding(
+      padding: stateTokens.padding,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: maxWidth ?? designTokens.contentMaxWidthForm,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            stateVisual,
+            SizedBox(height: stateTokens.titleSpacing),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (subtitle != null) ...[
+              SizedBox(height: stateTokens.subtitleSpacing),
+              Text(
+                subtitle!,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+            if (primaryAction != null || secondaryAction != null) ...[
+              SizedBox(height: stateTokens.actionSpacing),
+              Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: designTokens.spaceSmall,
+                runSpacing: designTokens.spaceSmall,
+                children: [
+                  if (secondaryAction != null)
+                    constrainAction(secondaryAction!),
+                  if (primaryAction != null) constrainAction(primaryAction!),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+
     return Center(
       child: Semantics(
         container: true,
         label: semanticLabel,
-        child: Padding(
-          padding: stateTokens.padding,
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth ?? designTokens.contentMaxWidthForm,
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                stateVisual,
-                SizedBox(height: stateTokens.titleSpacing),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  SizedBox(height: stateTokens.subtitleSpacing),
-                  Text(
-                    subtitle!,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-                if (primaryAction != null || secondaryAction != null) ...[
-                  SizedBox(height: stateTokens.actionSpacing),
-                  Wrap(
-                    alignment: WrapAlignment.center,
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: designTokens.spaceSmall,
-                    runSpacing: designTokens.spaceSmall,
-                    children: [
-                      if (secondaryAction != null)
-                        constrainAction(secondaryAction!),
-                      if (primaryAction != null)
-                        constrainAction(primaryAction!),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            if (!constraints.hasBoundedHeight) {
+              return content;
+            }
+
+            return SingleChildScrollView(
+              physics: const ClampingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Center(child: content),
+              ),
+            );
+          },
         ),
       ),
     );

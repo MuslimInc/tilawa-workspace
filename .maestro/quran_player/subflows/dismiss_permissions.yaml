@@ -1,5 +1,6 @@
-# Dismiss Android runtime permission dialogs (EN / AR).
+appId: com.tilawa.app
 ---
+# Dismiss Android runtime permission dialogs (EN / AR).
 - runFlow:
     when:
       visible: "Allow"

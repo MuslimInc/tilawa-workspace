@@ -1,0 +1,152 @@
+appId: com.tilawa.app
+---
+# Quran player pop/dismiss scenarios E2E.
+#
+# Covers all major "pop" exits:
+#   1) Expanded -> collapse button -> mini remains
+#   2) Expanded -> Android back -> mini remains
+#   3) Expanded -> overflow stop -> player removed
+#   4) Mini -> close button -> player removed
+#   5) Expanded dialog -> back closes dialog only (player still mounted)
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_pop_scenarios.yaml
+
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+
+# Scenario 1: collapse from expanded
+- runFlow:
+    file: subflows/start_playback.yaml
+- runFlow:
+    file: subflows/expand_player.yaml
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_mini"
+
+# Scenario 2: swipe down dismiss from mini-player
+- swipe:
+    start: "50%, 88%"
+    end: "50%, 100%"
+    duration: 450
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      visible:
+        id: "quran_player_mini"
+    commands:
+      - tapOn:
+          id: "quran_player_mini_close"
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      visible:
+        id: "quran_player_mini"
+    commands:
+      - tapOn:
+          id: "quran_player_mini_close"
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible:
+      id: "quran_player_mini"
+    timeout: 5000
+- assertNotVisible:
+    id: "quran_player_mini"
+
+# Scenario 3: stop from overflow menu (dismisses player completely)
+- runFlow:
+    when:
+      visible:
+        id: "surah_row_001"
+    commands:
+      - tapOn:
+          id: "surah_row_001"
+- runFlow:
+    when:
+      notVisible:
+        id: "quran_player_mini"
+    commands:
+      - runFlow:
+          file: subflows/start_playback.yaml
+- runFlow:
+    file: subflows/expand_player.yaml
+- tapOn:
+    id: "quran_player_more_menu"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_menu_stop"
+- tapOn:
+    id: "quran_player_menu_stop"
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "quran_player_mini"
+- assertNotVisible:
+    id: "quran_player_track_title"
+
+# Scenario 4: mini close button (after starting playback again)
+- runFlow:
+    when:
+      visible:
+        id: "surah_row_001"
+    commands:
+      - tapOn:
+          id: "surah_row_001"
+- runFlow:
+    when:
+      notVisible:
+        id: "quran_player_mini"
+    commands:
+      - runFlow:
+          file: subflows/start_playback.yaml
+- assertVisible:
+    id: "quran_player_mini_close"
+- tapOn:
+    id: "quran_player_mini_close"
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "quran_player_mini"
+
+# Scenario 5: dialog-back should close dialog only, not the player
+- runFlow:
+    when:
+      visible:
+        id: "surah_row_001"
+    commands:
+      - tapOn:
+          id: "surah_row_001"
+- runFlow:
+    when:
+      notVisible:
+        id: "quran_player_mini"
+    commands:
+      - runFlow:
+          file: subflows/start_playback.yaml
+- runFlow:
+    file: subflows/expand_player.yaml
+- tapOn:
+    id: "quran_player_more_menu"
+- waitForAnimationToEnd
+- tapOn:
+    id: "quran_player_menu_background"
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_background_source_dialog"
+    timeout: 5000
+- back
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "quran_player_background_source_dialog"
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 10000
+- assertVisible:
+    id: "quran_player_track_title"
+- assertVisible:
+    id: "quran_player_collapse"

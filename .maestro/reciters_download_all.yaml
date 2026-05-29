@@ -17,6 +17,12 @@ appId: com.tilawa.app
 #   7. Tap again → cancel → idle state restored
 #   8. Assert idle state is restored
 
+# ── 0. Launch (preserve signed-in session) ────────────────────────────────────
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_main_shell.yaml
+
 # ── 1. Navigate to Reciters tab ───────────────────────────────────────────────
 - extendedWaitUntil:
     visible:
