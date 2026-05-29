@@ -33,15 +33,3 @@ final class TryAppReviewPromptEffect extends ShellTabEffect {
 final class StartAppReviewSessionEffect extends ShellTabEffect {
   const StartAppReviewSessionEffect();
 }
-
-/// Stops the qibla compass stream when leaving the prayer tab.
-final class StopQiblaStreamEffect extends ShellTabEffect {
-  const StopQiblaStreamEffect();
-}
-
-/// Defers loading prayer times until the user opens the prayer tab once.
-final class SchedulePrayerTimesLoadEffect extends ShellTabEffect {
-  const SchedulePrayerTimesLoadEffect({required this.delay});
-
-  final Duration delay;
-}

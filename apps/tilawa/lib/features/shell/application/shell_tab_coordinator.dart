@@ -10,10 +10,6 @@ import '../domain/shell_tab_effect.dart';
 class ShellTabCoordinator {
   ShellTabCoordinator();
 
-  static const Duration prayerTimesLoadDelay = Duration(milliseconds: 600);
-
-  bool _prayerTimesLoadScheduled = false;
-
   /// Effects to run when the home shell becomes visible for the first time.
   List<ShellTabEffect> onShellActivated(int tabIndex) {
     return <ShellTabEffect>[
@@ -32,7 +28,6 @@ class ShellTabCoordinator {
     ];
 
     if (previousIndex == 1 && nextIndex != 1) {
-      effects.add(const StopQiblaStreamEffect());
       effects.add(
         const RecordAppReviewSignalEffect(
           AppReviewSignal.prayerTimesTabVisited,
@@ -52,13 +47,6 @@ class ShellTabCoordinator {
         const TryAppReviewPromptEffect(
           AppReviewPromptMoment.returnedToRecitersTab,
         ),
-      );
-    }
-
-    if (nextIndex == 1 && !_prayerTimesLoadScheduled) {
-      _prayerTimesLoadScheduled = true;
-      effects.add(
-        SchedulePrayerTimesLoadEffect(delay: prayerTimesLoadDelay),
       );
     }
 

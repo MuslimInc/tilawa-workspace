@@ -33,13 +33,12 @@ void main() {
       expect((effects.first as SyncMainShellTabEffect).tabIndex, 2);
     });
 
-    test('leaving prayer tab stops qibla and records signal', () {
+    test('leaving prayer tab records signal', () {
       final List<ShellTabEffect> effects = coordinator.onTabChanged(
         previousIndex: 1,
         nextIndex: 2,
       );
 
-      expect(effects, contains(const StopQiblaStreamEffect()));
       expect(
         effects,
         contains(
@@ -92,18 +91,14 @@ void main() {
       );
     });
 
-    test('schedules prayer load only once when opening prayer tab', () {
-      final List<ShellTabEffect> first = coordinator.onTabChanged(
+    test('opening prayer tab does not schedule a deferred prayer load', () {
+      final List<ShellTabEffect> effects = coordinator.onTabChanged(
         previousIndex: 0,
         nextIndex: 1,
       );
-      final List<ShellTabEffect> second = coordinator.onTabChanged(
-        previousIndex: 2,
-        nextIndex: 1,
-      );
 
-      expect(first, contains(isA<SchedulePrayerTimesLoadEffect>()));
-      expect(second, isNot(contains(isA<SchedulePrayerTimesLoadEffect>())));
+      expect(effects, contains(isA<SyncMainShellTabEffect>()));
+      expect(effects, hasLength(1));
     });
   });
 }
