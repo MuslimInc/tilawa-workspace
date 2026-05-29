@@ -17,7 +17,10 @@ appId: com.tilawa.app
 ---
 
 # ── Launch ───────────────────────────────────────────────────────────────────
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_main_shell.yaml
 
 # Android: dismiss any runtime-permission dialogs (notifications / overlay)
 - runFlow:

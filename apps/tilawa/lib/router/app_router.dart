@@ -4,6 +4,8 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
@@ -182,7 +184,13 @@ class AppRouter {
   }
 
   static String? redirect(BuildContext context, GoRouterState state) {
-    // For now, we'll handle auth redirects in the UI
+    // Presentation entry without active media is invalid (playback ≠ URL).
+    if (state.uri.path == '/player') {
+      final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+      if (!bloc.state.hasAudio) {
+        return const HomeRoute().location;
+      }
+    }
     return null;
   }
 

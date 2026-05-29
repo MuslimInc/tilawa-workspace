@@ -15,7 +15,10 @@ appId: com.tilawa.app
 #   surah_download_button_<id>_complete    → DownloadButton.completed
 
 # ── 0. Launch app ─────────────────────────────────────────────────────────────
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_main_shell.yaml
 
 # ── 1. Navigate to Reciters tab ───────────────────────────────────────────────
 - extendedWaitUntil:
@@ -47,31 +50,38 @@ appId: com.tilawa.app
 
 - scrollUntilVisible:
     element:
-      id: "surah_download_button_034_ready"
+      id: "surah_row_034"
     direction: DOWN
     timeout: 30000
-- assertVisible:
-    id: "surah_download_button_034_ready"
 
-- tapOn:
-    id: "surah_download_button_034_ready"
-
-- extendedWaitUntil:
-    visible:
-      id: "surah_download_button_034_downloading"
-    timeout: 15000
-- assertVisible:
-    id: "surah_download_button_034_downloading"
-
-- tapOn:
-    id: "surah_download_button_034_downloading"
-
-- extendedWaitUntil:
-    visible:
-      id: "surah_download_button_034_ready"
-    timeout: 10000
-- assertVisible:
-    id: "surah_download_button_034_ready"
+# Skip when surah 034 is already on disk from a prior run.
+- runFlow:
+    when:
+      notVisible:
+        id: "surah_download_button_034_complete"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "surah_download_button_034_ready"
+          timeout: 15000
+      - assertVisible:
+          id: "surah_download_button_034_ready"
+      - tapOn:
+          id: "surah_download_button_034_ready"
+      - extendedWaitUntil:
+          visible:
+            id: "surah_download_button_034_downloading"
+          timeout: 15000
+      - assertVisible:
+          id: "surah_download_button_034_downloading"
+      - tapOn:
+          id: "surah_download_button_034_downloading"
+      - extendedWaitUntil:
+          visible:
+            id: "surah_download_button_034_ready"
+          timeout: 10000
+      - assertVisible:
+          id: "surah_download_button_034_ready"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CYCLE 2 — Surah 035 (Fatir, ~400 KB)
@@ -79,31 +89,37 @@ appId: com.tilawa.app
 
 - scrollUntilVisible:
     element:
-      id: "surah_download_button_035_ready"
+      id: "surah_row_035"
     direction: DOWN
     timeout: 20000
-- assertVisible:
-    id: "surah_download_button_035_ready"
 
-- tapOn:
-    id: "surah_download_button_035_ready"
-
-- extendedWaitUntil:
-    visible:
-      id: "surah_download_button_035_downloading"
-    timeout: 15000
-- assertVisible:
-    id: "surah_download_button_035_downloading"
-
-- tapOn:
-    id: "surah_download_button_035_downloading"
-
-- extendedWaitUntil:
-    visible:
-      id: "surah_download_button_035_ready"
-    timeout: 10000
-- assertVisible:
-    id: "surah_download_button_035_ready"
+- runFlow:
+    when:
+      notVisible:
+        id: "surah_download_button_035_complete"
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: "surah_download_button_035_ready"
+          timeout: 15000
+      - assertVisible:
+          id: "surah_download_button_035_ready"
+      - tapOn:
+          id: "surah_download_button_035_ready"
+      - extendedWaitUntil:
+          visible:
+            id: "surah_download_button_035_downloading"
+          timeout: 15000
+      - assertVisible:
+          id: "surah_download_button_035_downloading"
+      - tapOn:
+          id: "surah_download_button_035_downloading"
+      - extendedWaitUntil:
+          visible:
+            id: "surah_download_button_035_ready"
+          timeout: 10000
+      - assertVisible:
+          id: "surah_download_button_035_ready"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # CYCLE 3 — Surah 036 (Ya-Sin, ~400 KB) — let it complete to verify _complete

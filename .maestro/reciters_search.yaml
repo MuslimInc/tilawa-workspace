@@ -8,7 +8,9 @@
 # test path (field accepts input → filters → erase → full list restored).
 #
 # Semantics identifiers used (see reciter_semantics_ids.dart):
-#   reciters_tab           – bottom-nav destination
+#   reciters_tab           – bottom-nav destination (person icon off-tab;
+#                            search icon when already on reciters; re-tap
+#                            focuses search — this flow taps the field directly)
 #   reciters_search_field  – search text field in reciters header
 #
 # Prerequisites:
@@ -19,7 +21,10 @@ appId: com.tilawa.app
 ---
 
 # ── Launch ───────────────────────────────────────────────────────────────────
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_main_shell.yaml
 
 - runFlow:
     when:

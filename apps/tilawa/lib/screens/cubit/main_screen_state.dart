@@ -44,10 +44,10 @@ class MainScreenState extends Equatable {
   /// have a live widget subtree (even if currently [Offstage]).
   final Set<int> builtTabIndexes;
 
-  /// Increments when the user opens reciter search from the shell (bottom nav).
+  /// Increments when the user re-taps the reciters tab to focus search.
   ///
-  /// [RecitersScreen] listens so it can focus the search field even when tab 0
-  /// is already selected.
+  /// [RecitersScreen] scrolls to top and focuses the field; the first tap on
+  /// the tab only navigates and does not increment this counter.
   final int recitersSearchFocusTick;
 
   MainScreenState copyWith({

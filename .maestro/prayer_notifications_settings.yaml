@@ -2,15 +2,11 @@
 #
 # Covers:
 #   - Navigate to Prayer Times tab
-#   - Open Prayer Settings sheet
+#   - Open Prayer Notifications sheet (Manage alerts)
 #   - Assert Prayer Notifications section is visible
 #   - Toggle the global "All Prayer Notifications" switch
 #   - Toggle the Fajr per-prayer switch
 #   - Assert no crash or blocking UI
-#
-# Prerequisites:
-#   - App is freshly installed or data is in a known state
-#   - Notifications are NOT already all-on (so first tap enables them)
 #
 # Run:
 #   maestro test .maestro/prayer_notifications_settings.yaml
@@ -23,7 +19,10 @@ appId: com.tilawa.app
 ---
 
 # ── 1. Launch ─────────────────────────────────────────────────────────────────
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_main_shell.yaml
 
 # ── 2. Handle Android POST_NOTIFICATIONS permission dialog (if shown) ─────────
 - runFlow:
@@ -36,24 +35,21 @@ appId: com.tilawa.app
 - tapOn:
     id: "prayer_times_tab"
 
-# Give the Prayer Times screen time to load.
 - waitForAnimationToEnd
 
-# ── 4. Open Prayer Settings sheet ────────────────────────────────────────────
-- tapOn:
-    id: "prayer_settings_button"
-
-- waitForAnimationToEnd
-
-# ── 5. Assert Prayer Notifications section is visible ─────────────────────────
-# Scroll down the sheet until the notifications section header is visible,
-# then assert it exists.
+# ── 4. Open Prayer Notifications sheet (not general Prayer Settings) ─────────
 - scrollUntilVisible:
     element:
-      id: "prayer_notifications_section"
+      id: "prayer_notifications_entry_point"
     direction: DOWN
-    timeout: 5000
+    timeout: 10000
 
+- tapOn:
+    id: "prayer_notifications_entry_point"
+
+- waitForAnimationToEnd
+
+# ── 5. Assert Prayer Notifications section header ─────────────────────────────
 - assertVisible:
     id: "prayer_notifications_section"
 
@@ -96,7 +92,7 @@ appId: com.tilawa.app
 - assertVisible:
     id: "prayer_notifications_global_toggle"
 
-# ── 9. Dismiss the sheet without saving ──────────────────────────────────────
+# ── 9. Dismiss the sheet ─────────────────────────────────────────────────────
 - swipe:
     direction: DOWN
     duration: 400

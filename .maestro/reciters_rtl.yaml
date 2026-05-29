@@ -27,7 +27,10 @@ appId: com.tilawa.app
 ---
 
 # ── Launch ───────────────────────────────────────────────────────────────────
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_main_shell.yaml
 
 # Arabic: "السماح" is "Allow" – guard handles both Arabic and English prompts.
 - runFlow:

@@ -157,6 +157,10 @@ class AppLocalizationsAr extends AppLocalizations {
       'إظهار أو إخفاء قائمة التشغيل. اسحب لأعلى أو انقر للتوسيع.';
 
   @override
+  String get playerExpandedSheetSemanticLabel =>
+      'التشغيل الآن. اسحب للأسفل للتصغير.';
+
+  @override
   String get duration => 'المدة';
 
   @override
@@ -284,12 +288,23 @@ class AppLocalizationsAr extends AppLocalizations {
   String get bottomNavSearch => 'بحث';
 
   @override
-  String get recitersSearchSuggestedTitle => 'قراء مقترحون';
+  String get a11yBottomNavRecitersTab => 'الانتقال إلى القراء';
+
+  @override
+  String get a11yBottomNavRecitersSearch => 'البحث عن قارئ';
 
   @override
   String recitersSearchResultsFor(String query) {
     return 'نتائج «$query»';
   }
+
+  @override
+  String noRecitersForQuery(String query) {
+    return 'لا يوجد نتائج لـ «$query»';
+  }
+
+  @override
+  String get recitersClearSearch => 'مسح البحث';
 
   @override
   String get bottomNavPrayer => 'الصلاة';

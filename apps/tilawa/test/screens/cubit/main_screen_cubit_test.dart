@@ -224,6 +224,42 @@ void main() {
     });
   });
 
+  // ── Reciters tab / search focus ─────────────────────────────────────────
+
+  group('requestRecitersSearchFocus', () {
+    test('increments recitersSearchFocusTick', () {
+      final cubit = MainScreenCubit();
+      addTearDown(cubit.close);
+
+      cubit.requestRecitersSearchFocus();
+
+      expect(cubit.state.recitersSearchFocusTick, 1);
+    });
+
+    test('selecting reciters tab does not increment focus tick', () {
+      final cubit = MainScreenCubit();
+      addTearDown(cubit.close);
+
+      cubit.selectTab(1);
+      cubit.selectTab(0, force: true);
+
+      expect(cubit.state.currentIndex, 0);
+      expect(cubit.state.recitersSearchFocusTick, 0);
+    });
+
+    test('moves to tab 0 from another tab when requesting search focus', () {
+      final cubit = MainScreenCubit();
+      addTearDown(cubit.close);
+
+      cubit.selectTab(2);
+      cubit.requestRecitersSearchFocus();
+
+      expect(cubit.state.currentIndex, 0);
+      expect(cubit.state.builtTabIndexes, contains(0));
+      expect(cubit.state.recitersSearchFocusTick, 1);
+    });
+  });
+
   // ── close (timer cancellation) ───────────────────────────────────────────
 
   group('close', () {

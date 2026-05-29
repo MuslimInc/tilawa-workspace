@@ -46,9 +46,9 @@ mobile platforms.
   management solution for app state to handle the separation of concerns.
 - **Widgets are for UI:** Everything in Flutter's UI is a widget. Compose
   complex UIs from smaller, reusable widgets.
-- **Navigation:** Use a modern routing package like `auto_route` or `go_router`.
-  See the [navigation guide](./navigation.md) for a detailed example using
-  `go_router`.
+- **Navigation:** Use **GoRouter** with typed routes in
+  `apps/tilawa/lib/router/app_router_config.dart`. See
+  [`docs/architecture/navigation.md`](../../docs/architecture/navigation.md).
 
 ## Package Management
 

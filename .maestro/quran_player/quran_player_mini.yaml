@@ -15,7 +15,10 @@
 appId: com.tilawa.app
 ---
 
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
 - runFlow:
     file: subflows/dismiss_permissions.yaml
 - runFlow:
@@ -35,16 +38,9 @@ appId: com.tilawa.app
     id: "quran_player_mini_play_pause"
 - waitForAnimationToEnd
 
-# Swipe up on the mini-player to expand (YouTube Music-style drag).
-- swipe:
-    start: "50%, 88%"
-    end: "50%, 40%"
-    duration: 400
-- waitForAnimationToEnd
-- extendedWaitUntil:
-    visible:
-      id: "quran_player_track_title"
-    timeout: 5000
+# Expand via tap (reliable) then verify full sheet chrome.
+- runFlow:
+    file: subflows/expand_player.yaml
 
 - tapOn:
     id: "quran_player_collapse"

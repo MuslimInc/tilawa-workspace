@@ -40,6 +40,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
     this.playPauseSemanticIdentifier,
     this.closeSemanticIdentifier,
     this.openPlayerSemanticLabel,
+    this.titleSubtitle,
+    this.identityChromeOpacity = 1,
     this.previousTooltip,
     this.playTooltip,
     this.pauseTooltip,
@@ -78,6 +80,14 @@ class TilawaMediaPlayerBar extends StatelessWidget {
   final String? closeSemanticIdentifier;
 
   final String? openPlayerSemanticLabel;
+
+  /// Optional title/subtitle widget (e.g. Hero metadata). When null, [title] and
+  /// [subtitle] strings are rendered.
+  final Widget? titleSubtitle;
+
+  /// Fades artwork + title during expand/collapse handoff (controls unchanged).
+  final double identityChromeOpacity;
+
   final String? previousTooltip;
   final String? playTooltip;
   final String? pauseTooltip;
@@ -173,42 +183,47 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                       semanticLabel: onTap != null
                           ? resolvedOpenPlayerLabel
                           : null,
-                      child: Row(
-                        children: [
-                          _ArtworkTile(
-                            size: artworkSize,
-                            radius: componentTokens.artworkRadius,
-                            placeholderColor:
-                                componentTokens.artworkPlaceholderColor,
-                            artwork: artwork,
-                            defaultIconSize: componentTokens.defaultIconSize,
-                          ),
-                          SizedBox(width: componentTokens.artworkInfoGap),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: .start,
-                              mainAxisAlignment: .center,
-                              spacing: componentTokens.infoGap,
-                              children: [
-                                Text(
-                                  title,
-                                  style: titleStyle,
-                                  maxLines: 1,
-                                  overflow: .ellipsis,
-                                  textAlign: TextAlign.start,
-                                ),
-                                if (subtitle != null && subtitle!.isNotEmpty)
-                                  Text(
-                                    subtitle!,
-                                    style: subtitleStyle,
-                                    maxLines: 1,
-                                    overflow: .ellipsis,
-                                    textAlign: TextAlign.start,
-                                  ),
-                              ],
+                      child: Opacity(
+                        opacity: identityChromeOpacity.clamp(0.0, 1.0),
+                        child: Row(
+                          children: [
+                            _ArtworkTile(
+                              size: artworkSize,
+                              radius: componentTokens.artworkRadius,
+                              placeholderColor:
+                                  componentTokens.artworkPlaceholderColor,
+                              artwork: artwork,
+                              defaultIconSize: componentTokens.defaultIconSize,
                             ),
-                          ),
-                        ],
+                            SizedBox(width: componentTokens.artworkInfoGap),
+                            Expanded(
+                              child: titleSubtitle ??
+                                  Column(
+                                    crossAxisAlignment: .start,
+                                    mainAxisAlignment: .center,
+                                    spacing: componentTokens.infoGap,
+                                    children: [
+                                      Text(
+                                        title,
+                                        style: titleStyle,
+                                        maxLines: 1,
+                                        overflow: .ellipsis,
+                                        textAlign: TextAlign.start,
+                                      ),
+                                      if (subtitle != null &&
+                                          subtitle!.isNotEmpty)
+                                        Text(
+                                          subtitle!,
+                                          style: subtitleStyle,
+                                          maxLines: 1,
+                                          overflow: .ellipsis,
+                                          textAlign: TextAlign.start,
+                                        ),
+                                    ],
+                                  ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

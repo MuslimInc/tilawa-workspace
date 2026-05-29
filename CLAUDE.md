@@ -19,8 +19,13 @@ Feature code lives under `apps/tilawa/lib/features/<feature>/` with
 
 - State management: **flutter_bloc** (`Cubit` preferred over `Bloc`)
 - DI: **get_it** — register in `core/di/` modules, inject via constructor
-- Routing: **auto_route** — add routes to `app_router.dart`, access via
-  `SomeRoute().push(context)` or `SomeRoute().go(context)`
+- Routing: **GoRouter** + **go_router_builder** — routes in
+  `lib/router/app_router_config.dart`; use `SomeRoute().push(context)` or
+  `.go(context)`. Root overlay modals (e.g. expanded Quran player `/player`)
+  live **outside** `TypedShellRoute` with `$parentNavigatorKey =
+  AppRouter.navigatorKey`. See
+  [`docs/architecture/navigation.md`](docs/architecture/navigation.md) and
+  [ADR-001](docs/adr/001-quran-player-root-overlay-route.md).
 - Result type: `Either<Failure, T>` from **dartz_plus** — never throw across
   layer boundaries
 - No `BuildContext` below the presentation layer

@@ -1,0 +1,55 @@
+appId: com.tilawa.app
+---
+# Re-expand E2E — expand → collapse → expand again (regression for stale phase).
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_reexpand.yaml
+
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+
+- assertVisible:
+    id: "quran_player_mini"
+
+# 1) Expand
+- runFlow:
+    file: subflows/expand_player.yaml
+- assertVisible:
+    id: "quran_player_track_title"
+
+# 2) Collapse
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_mini"
+    timeout: 10000
+- assertNotVisible:
+    id: "quran_player_track_title"
+
+# 3) Re-expand (must push /player again)
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 10000
+- assertVisible:
+    id: "quran_player_collapse"
+
+# 4) Collapse again — shell + mini recover
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_mini"
+    timeout: 10000

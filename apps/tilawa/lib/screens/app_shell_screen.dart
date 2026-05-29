@@ -77,16 +77,31 @@ class _AppShellScreenState extends State<AppShellScreen> {
     );
   }
 
+  bool _isRecitersTabActive(MainScreenState state) {
+    return state.currentIndex == 0 && _isOnMainShell();
+  }
+
   List<_NavDestination> _buildDestinations(
-    BuildContext context,
-  ) {
+    BuildContext context, {
+    required bool recitersNavSearchMode,
+  }) {
     return [
       _NavDestination(
         index: 0,
-        icon: FluentIcons.search_24_regular,
-        activeIcon: FluentIcons.search_24_filled,
-        label: context.l10n.bottomNavSearch,
+        icon: recitersNavSearchMode
+            ? FluentIcons.search_24_regular
+            : FluentIcons.person_24_regular,
+        activeIcon: recitersNavSearchMode
+            ? FluentIcons.search_24_filled
+            : FluentIcons.person_24_filled,
+        label: recitersNavSearchMode
+            ? context.l10n.bottomNavSearch
+            : context.l10n.bottomNavReciters,
         identifier: 'reciters_tab',
+        semanticsLabel: recitersNavSearchMode
+            ? context.l10n.a11yBottomNavRecitersSearch
+            : context.l10n.a11yBottomNavRecitersTab,
+        recitersNavSearchMode: recitersNavSearchMode,
       ),
       _NavDestination(
         index: 1,
@@ -154,16 +169,24 @@ class _AppShellScreenState extends State<AppShellScreen> {
     _mainScreenCubit.selectTab(tabIndex, force: !onMainShell);
   }
 
-  void _openRecitersSearch(BuildContext context) {
-    if (!_isOnMainShell()) {
-      _ensureMainShellRoute(context);
+  void _onRecitersNavTap(BuildContext context, MainScreenState state) {
+    final bool inRecitersExperience = _isRecitersTabActive(state);
+
+    if (!inRecitersExperience) {
+      if (!_isOnMainShell()) {
+        _ensureMainShellRoute(context);
+      }
+      _mainScreenCubit.selectTab(0, force: true);
+      return;
     }
-    _mainScreenCubit.openRecitersSearch();
+
+    _mainScreenCubit.requestRecitersSearchFocus();
   }
 
   void _onDestinationSelected(
     BuildContext context,
     int index,
+    MainScreenState state,
     List<_NavDestination> destinations,
   ) {
     final _NavDestination destination = destinations[index];
@@ -173,7 +196,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
     }
 
     if (destination.index == 0) {
-      _openRecitersSearch(context);
+      _onRecitersNavTap(context, state);
       return;
     }
 
@@ -227,8 +250,10 @@ class _AppShellScreenState extends State<AppShellScreen> {
                   ? QuranPlayerLayoutInsets.phoneShellBottomReserve(context)
                   : context.floatingBottomPadding;
 
+              final bool recitersNavSearchMode = _isRecitersTabActive(state);
               final List<_NavDestination> navDestinations = _buildDestinations(
                 context,
+                recitersNavSearchMode: recitersNavSearchMode,
               );
               final List<TilawaNavDestination> adaptiveDestinations =
                   navDestinations
@@ -238,7 +263,23 @@ class _AppShellScreenState extends State<AppShellScreen> {
                           icon: d.icon,
                           activeIcon: d.activeIcon,
                           identifier: d.identifier,
-                          iconBuilder: d.svgPath == null
+                          iconBuilder: d.recitersNavSearchMode != null
+                              ? (
+                                  context, {
+                                  required isSelected,
+                                  required color,
+                                }) {
+                                  return Semantics(
+                                    label: d.semanticsLabel,
+                                    button: true,
+                                    child: _RecitersNavIcon(
+                                      searchMode: d.recitersNavSearchMode!,
+                                      isSelected: isSelected,
+                                      color: color,
+                                    ),
+                                  );
+                                }
+                              : d.svgPath == null
                               ? null
                               : (
                                   context, {
@@ -275,8 +316,12 @@ class _AppShellScreenState extends State<AppShellScreen> {
                 isKeyboardOpen: isKeyboardOpen,
                 phoneBottomNavVisible: _phoneBottomNavVisible,
                 selectedIndex: selectedIndex,
-                onDestinationSelected: (index) =>
-                    _onDestinationSelected(context, index, navDestinations),
+                onDestinationSelected: (index) => _onDestinationSelected(
+                  context,
+                  index,
+                  state,
+                  navDestinations,
+                ),
                 child: widget.child,
               );
             },
@@ -492,6 +537,55 @@ class _BoolListenable implements ValueListenable<bool> {
   void removeListener(VoidCallback listener) {}
 }
 
+/// Animated reciters/search glyph for the dual-mode bottom-nav item.
+class _RecitersNavIcon extends StatelessWidget {
+  const _RecitersNavIcon({
+    required this.searchMode,
+    required this.isSelected,
+    required this.color,
+  });
+
+  final bool searchMode;
+  final bool isSelected;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final double iconSize =
+        theme.componentTokens.adaptiveShell.navButtonIconSize;
+    final IconData glyph = searchMode
+        ? (isSelected
+              ? FluentIcons.search_24_filled
+              : FluentIcons.search_24_regular)
+        : (isSelected
+              ? FluentIcons.person_24_filled
+              : FluentIcons.person_24_regular);
+
+    return AnimatedSwitcher(
+      duration: tokens.durationFast,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (Widget child, Animation<double> animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween<double>(begin: 0.88, end: 1).animate(animation),
+            child: child,
+          ),
+        );
+      },
+      child: Icon(
+        glyph,
+        key: ValueKey<bool>(searchMode),
+        size: iconSize,
+        color: color,
+      ),
+    );
+  }
+}
+
 @immutable
 class _NavDestination extends Equatable {
   const _NavDestination({
@@ -501,6 +595,8 @@ class _NavDestination extends Equatable {
     this.svgPath,
     this.index,
     this.identifier,
+    this.semanticsLabel,
+    this.recitersNavSearchMode,
   });
   final String label;
   final IconData icon;
@@ -508,6 +604,10 @@ class _NavDestination extends Equatable {
   final String? svgPath;
   final int? index;
   final String? identifier;
+  final String? semanticsLabel;
+
+  /// When non-null, the shell renders [_RecitersNavIcon] for this destination.
+  final bool? recitersNavSearchMode;
 
   @override
   List<Object?> get props => [
@@ -517,5 +617,7 @@ class _NavDestination extends Equatable {
     svgPath,
     index,
     identifier,
+    semanticsLabel,
+    recitersNavSearchMode,
   ];
 }

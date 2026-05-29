@@ -1,0 +1,50 @@
+appId: com.tilawa.app
+---
+# Mini-player dismiss E2E — close button and swipe-down remove the footer bar.
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_mini_dismiss.yaml
+
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+
+- assertVisible:
+    id: "quran_player_mini"
+- assertVisible:
+    id: "quran_player_mini_close"
+
+# Dismiss via close button.
+- tapOn:
+    id: "quran_player_mini_close"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible:
+      id: "quran_player_mini"
+    timeout: 8000
+- assertNotVisible:
+    id: "quran_player_mini"
+
+# Mini reappears after starting playback again.
+- runFlow:
+    file: subflows/start_playback.yaml
+- assertVisible:
+    id: "quran_player_mini"
+
+# Dismiss via swipe-down on mini bar.
+- swipe:
+    start: "50%, 88%"
+    end: "50%, 100%"
+    duration: 450
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    notVisible:
+      id: "quran_player_mini"
+    timeout: 8000
+- assertNotVisible:
+    id: "quran_player_mini"

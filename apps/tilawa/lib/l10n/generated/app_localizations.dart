@@ -356,6 +356,12 @@ abstract class AppLocalizations {
   /// **'Show or hide queue. Drag up or tap to expand.'**
   String get playerQueueHandleSemanticLabel;
 
+  /// Screen reader hint for the expanded now-playing sheet drag-to-minimize gesture
+  ///
+  /// In en, this message translates to:
+  /// **'Now playing. Swipe down to minimize.'**
+  String get playerExpandedSheetSemanticLabel;
+
   /// Duration label
   ///
   /// In en, this message translates to:
@@ -608,17 +614,35 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get bottomNavSearch;
 
-  /// Section title for suggested reciters while search is empty
+  /// Screen reader label for the reciters bottom-nav item when another tab is selected
   ///
   /// In en, this message translates to:
-  /// **'Suggested reciters'**
-  String get recitersSearchSuggestedTitle;
+  /// **'Go to reciters'**
+  String get a11yBottomNavRecitersTab;
+
+  /// Screen reader label for the reciters bottom-nav item when the reciters tab is already active (re-tap focuses search)
+  ///
+  /// In en, this message translates to:
+  /// **'Search reciters'**
+  String get a11yBottomNavRecitersSearch;
 
   /// Summary line when showing filtered reciter search results
   ///
   /// In en, this message translates to:
   /// **'Results for “{query}”'**
   String recitersSearchResultsFor(String query);
+
+  /// Empty state title when a reciter search returns no matches
+  ///
+  /// In en, this message translates to:
+  /// **'No results for “{query}”'**
+  String noRecitersForQuery(String query);
+
+  /// Button to reset the reciter search field and show the full catalog
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get recitersClearSearch;
 
   /// Single-word label for the prayer times tab in the phone bottom navigation bar
   ///

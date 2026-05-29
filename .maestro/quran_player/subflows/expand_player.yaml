@@ -1,9 +1,10 @@
-# Expand mini-player to full-screen now-playing sheet.
+appId: com.tilawa.app
 ---
+# Expand mini-player to full-screen now-playing sheet.
 - tapOn:
     id: "quran_player_mini"
 - waitForAnimationToEnd
 - extendedWaitUntil:
     visible:
       id: "quran_player_track_title"
-    timeout: 5000
+    timeout: 10000

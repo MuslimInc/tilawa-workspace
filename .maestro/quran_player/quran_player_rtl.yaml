@@ -9,7 +9,10 @@
 appId: com.tilawa.app
 ---
 
-- launchApp
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
 - runFlow:
     file: subflows/dismiss_permissions.yaml
 - runFlow:

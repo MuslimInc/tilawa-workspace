@@ -156,6 +156,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Show or hide queue. Drag up or tap to expand.';
 
   @override
+  String get playerExpandedSheetSemanticLabel =>
+      'Now playing. Swipe down to minimize.';
+
+  @override
   String get duration => 'Duration';
 
   @override
@@ -284,12 +288,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bottomNavSearch => 'Search';
 
   @override
-  String get recitersSearchSuggestedTitle => 'Suggested reciters';
+  String get a11yBottomNavRecitersTab => 'Go to reciters';
+
+  @override
+  String get a11yBottomNavRecitersSearch => 'Search reciters';
 
   @override
   String recitersSearchResultsFor(String query) {
     return 'Results for “$query”';
   }
+
+  @override
+  String noRecitersForQuery(String query) {
+    return 'No results for “$query”';
+  }
+
+  @override
+  String get recitersClearSearch => 'Clear search';
 
   @override
   String get bottomNavPrayer => 'Prayer';
