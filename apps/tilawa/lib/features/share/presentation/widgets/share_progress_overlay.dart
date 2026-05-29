@@ -9,17 +9,18 @@ class ShareProgressOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
     return ColoredBox(
       color: Colors.black54,
       child: Center(
         child: Card(
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(tokens.spaceExtraLarge),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const TilawaLoadingIndicator(),
-                const SizedBox(height: 16),
+                SizedBox(height: tokens.spaceLarge),
                 Text(message),
               ],
             ),
