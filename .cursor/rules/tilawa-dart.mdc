@@ -1,0 +1,45 @@
+---
+description: Tilawa/Rattil Dart goals and verification. Apply Karpathy principles when editing app or package code.
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# Tilawa Dart — goal-driven verification
+
+Follow [karpathy-guidelines.mdc](karpathy-guidelines.mdc) for all Dart work.
+
+## Before coding
+
+- Read surrounding code in the same feature (`presentation/`, `domain/`,
+  `data/`).
+- State assumptions (screen, platform, breaking vs additive change).
+- Prefer the smallest change; no drive-by refactors.
+
+## Success criteria (run from `apps/tilawa/` unless noted)
+
+| Change type | Verify |
+|-------------|--------|
+| Logic / cubit / repository | `flutter test test/features/<feature>/` |
+| UI widget | Widget test in mirrored `test/` path |
+| Router / DI registration | `dart analyze` + affected feature tests |
+| `packages/ui_kit` or `packages/core` | `dart analyze` in that package + app tests that use it |
+
+```sh
+dart analyze
+flutter test test/features/<feature>
+```
+
+## Tilawa constraints (surgical)
+
+- **Bloc/Cubit**, **get_it**, **GoRouter**, **`Either<Failure, T>`** — no new
+  patterns without request.
+- **Tokens**: `theme.tokens`, `theme.componentTokens`, `theme.colorScheme` —
+  no hard-coded sizes/colors.
+- **Strings**: `context.l10n` in presentation only.
+- **TilawaCard**: conflicting actions → sibling `Row`, not nested controls
+  (see `CLAUDE.md`).
+
+## Done when
+
+Analyzer clean, targeted tests pass, and every changed line traces to the
+request.
