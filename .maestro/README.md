@@ -1,4 +1,4 @@
-# Maestro E2E flows (Rattil / Tilawa)
+# Maestro E2E flows (Tilawa)
 
 ## Prerequisites
 

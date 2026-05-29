@@ -7,7 +7,7 @@
 
 ## Context
 
-The Quran player is a **first-class product surface** for Rattil (brand) / Tilawa (code):
+The Quran player is a **first-class product surface** for Tilawa:
 
 - Persistent footer mini player inside `AppShellScreen`
 - Full-screen expanded now-playing with Hero transitions

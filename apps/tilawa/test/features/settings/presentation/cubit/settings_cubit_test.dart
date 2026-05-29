@@ -18,7 +18,7 @@ import '../../../downloads/helpers/mock_helper.mocks.dart';
 const AppInfo testAppInfo = AppInfo(
   version: '1.0.0',
   buildNumber: '1',
-  appName: 'Rattil',
+  appName: 'Tilawa',
   packageName: 'com.tilawa.app',
 );
 

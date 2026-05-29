@@ -1,5 +1,5 @@
 # splash_screen.yaml
-# Smoke test for the Rattil (رتل) splash / startup flow.
+# Smoke test for the Tilawa (تلاوة) splash / startup flow.
 #
 # Prerequisites: App installed as com.tilawa.app
 
@@ -13,7 +13,7 @@ appId: com.tilawa.app
 # Splash loading live-region (English; Arabic devices use the same test path
 # via reciters_tab once the shell is shown).
 - extendedWaitUntil:
-    visible: "Rattil, loading"
+    visible: "Tilawa, loading"
     timeout: 8000
     optional: true
 

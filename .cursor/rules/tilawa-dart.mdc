@@ -1,5 +1,5 @@
 ---
-description: Tilawa/Rattil Dart goals and verification. Apply Karpathy principles when editing app or package code.
+description: Tilawa Dart goals and verification. Apply Karpathy principles when editing app or package code.
 globs: "**/*.dart"
 alwaysApply: false
 ---

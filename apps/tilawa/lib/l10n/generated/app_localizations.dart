@@ -137,7 +137,7 @@ abstract class AppLocalizations {
   /// The title of the application
   ///
   /// In en, this message translates to:
-  /// **'Rattil'**
+  /// **'Tilawa'**
   String get appTitle;
 
   /// Reciters section title
@@ -1097,7 +1097,7 @@ abstract class AppLocalizations {
   /// Welcome message on login screen
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Rattil'**
+  /// **'Welcome to Tilawa'**
   String get welcomeToApp;
 
   /// Description text for Google sign in
@@ -3095,7 +3095,7 @@ abstract class AppLocalizations {
   /// Branding text on shared content
   ///
   /// In en, this message translates to:
-  /// **'Shared via Rattil'**
+  /// **'Shared via Tilawa'**
   String get sharedViaTilawa;
 
   /// Fallback message when reciter is not mapped
@@ -3551,7 +3551,7 @@ abstract class AppLocalizations {
   /// Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually
   ///
   /// In en, this message translates to:
-  /// **'On this device, also enable Autostart for Rattil in your phone\'s settings so reminders are not stopped in the background.'**
+  /// **'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.'**
   String get oemAutostartHint;
 
   /// Body text for prayer time notifications
@@ -3725,13 +3725,13 @@ abstract class AppLocalizations {
   /// Support Tilawa screen and settings entry title
   ///
   /// In en, this message translates to:
-  /// **'Support Rattil'**
+  /// **'Support Tilawa'**
   String get supportTilawa;
 
   /// Settings row to open the in-app review dialog
   ///
   /// In en, this message translates to:
-  /// **'Rate Rattil'**
+  /// **'Rate Tilawa'**
   String get rateTilawa;
 
   /// Optional subtitle under the rate Tilawa settings row
@@ -3743,7 +3743,7 @@ abstract class AppLocalizations {
   /// Settings row to share the app with others
   ///
   /// In en, this message translates to:
-  /// **'Share Rattil'**
+  /// **'Share Tilawa'**
   String get shareTilawa;
 
   /// Text shared from settings to recommend Tilawa to others
@@ -3761,19 +3761,19 @@ abstract class AppLocalizations {
   /// Support screen single-line intro under app bar
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Rattil going.'**
+  /// **'Your contribution helps keep Tilawa going.'**
   String get supportIntroLine;
 
   /// Legacy alias; prefer supportIntroLine
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Rattil going.'**
+  /// **'Your contribution helps keep Tilawa going.'**
   String get supportTilawaSubtitle;
 
   /// Legacy alias; unused on support screen
   ///
   /// In en, this message translates to:
-  /// **'Your contribution helps keep Rattil going.'**
+  /// **'Your contribution helps keep Tilawa going.'**
   String get supportMissionBody;
 
   /// Collapsible impact section title on support screen
@@ -3851,7 +3851,7 @@ abstract class AppLocalizations {
   /// Support purchase confirmation sheet body
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play. Rattil does not store your card details.'**
+  /// **'Payment via Google Play. Tilawa does not store your card details.'**
   String get supportConfirmationBody;
 
   /// Support confirmation sheet confirm button
@@ -3899,7 +3899,7 @@ abstract class AppLocalizations {
   /// Support trust line before charities link label
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities ('**
+  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities ('**
   String get supportTrustLinePrefix;
 
   /// Tappable label for partner charities list URL
@@ -3935,19 +3935,19 @@ abstract class AppLocalizations {
   /// Full trust line for legacy use; UI uses prefix/link/suffix
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)'**
+  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
   String get supportTrustLine;
 
   /// Legacy alias; prefer supportTrustLinePrefix + link + suffix
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)'**
+  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
   String get supportPlayFooter;
 
   /// Legacy alias; prefer supportTrustLinePrefix + link + suffix
   ///
   /// In en, this message translates to:
-  /// **'Payment via Google Play · Part of your contribution goes to Rattil Tech Organization and charities (partner charities list)'**
+  /// **'Payment via Google Play · Part of your contribution goes to Tilawa Tech Organization and charities (partner charities list)'**
   String get supportDisclaimer;
 
   /// Offline message on support screen
@@ -4001,7 +4001,7 @@ abstract class AppLocalizations {
   /// Settings group title for support entry
   ///
   /// In en, this message translates to:
-  /// **'Support Rattil'**
+  /// **'Support Tilawa'**
   String get supportSettingsGroupTitle;
 
   /// Settings support tile subtitle
@@ -4067,7 +4067,7 @@ abstract class AppLocalizations {
   /// Screen-reader label announced while the splash loading screen is visible
   ///
   /// In en, this message translates to:
-  /// **'Rattil, loading'**
+  /// **'Tilawa, loading'**
   String get a11ySplashLoading;
 
   /// Toast shown when startup times out and the app navigates to home in a degraded state

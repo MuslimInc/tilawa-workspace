@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">رتل</string>
+    <string name="app_name">تلاوة</string>
     <string name="adhan_is_playing">الأذان يعمل الآن…</string>
     <string name="stop_adhan">إيقاف الأذان</string>
     <string name="prayer_fajr">الفجر</string>

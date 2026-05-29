@@ -1,4 +1,4 @@
-# Tilawa / Rattil — Claude Code guide
+# Tilawa — Claude Code guide
 
 ## Agent behavior
 
@@ -16,8 +16,8 @@ pass. Every changed line should trace to the user's request.
 
 ---
 
-App brand name: **Rattil / رتل**. Internal codename and package names use
-`tilawa`. Do not rename packages; use "Rattil" only in user-visible strings.
+App brand name: **Tilawa / تلاوة**. Internal codename and package names use
+`tilawa`. Do not rename packages; use "Tilawa" only in user-visible strings.
 
 ## Repo layout
 

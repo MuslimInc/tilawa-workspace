@@ -1,6 +1,6 @@
 # Tilawa architecture docs
 
-Living architecture documentation for the Rattil (`tilawa`) app. ADRs record
+Living architecture documentation for the Tilawa app. ADRs record
 **decisions**; these guides record **patterns and ownership**.
 
 | Document | Topic |
