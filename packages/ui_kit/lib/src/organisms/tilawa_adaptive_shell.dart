@@ -64,11 +64,13 @@ class TilawaNavDestination {
 
 /// A shell that adapts its navigation based on the window size.
 ///
-/// - Phone (narrow): [BottomNavigationBar] is laid out in a [Column] under an
-///   [Expanded] body region (not [Scaffold.bottomNavigationBar]) so nested
-///   tab [Scaffold]s receive bounded constraints. Destination **labels are always
-///   shown** (icons + text). Optional [phoneBottomNavigationBarVisible] can hide
-///   the bar (e.g. full-screen player). [Scaffold.extendBody] is false.
+/// - Phone (narrow): one [Scaffold] hosts tab [child] and a shared
+///   [Scaffold.bottomNavigationBar] (not a nested bar per tab). Destination
+///   **labels are always shown** (icons + text). Optional
+///   [phoneBottomNavigationBarVisible] can hide the bar (e.g. full-screen
+///   player). Uses default [Scaffold.resizeToAvoidBottomInset] so the body
+///   and bar reflow cleanly when the IME opens (no dead inset band).
+///   [Scaffold.extendBody] is false.
 /// - Medium/Expanded: Shows a side navigation rail.
 ///
 /// This shell also respects [DisplayFeature]s (hinges/folds) on foldable
@@ -121,15 +123,10 @@ class TilawaAdaptiveShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final windowSize = context.windowSize;
     final displayIndex = (selectedIndex == -1) ? null : selectedIndex;
-    final bool isKeyboardOpen = context.isKeyboardVisible;
 
     if (windowSize == TilawaWindowSize.narrow) {
       final ValueListenable<bool> phoneNavListenable =
           phoneBottomNavigationBarVisible ?? _kAlwaysShowPhoneBottomNav;
-
-      final Color shellChromeColor = Theme.of(
-        context,
-      ).componentTokens.adaptiveShell.bottomNavBackgroundColor;
 
       return ValueListenableBuilder<bool>(
         valueListenable: phoneNavListenable,
@@ -141,49 +138,50 @@ class TilawaAdaptiveShell extends StatelessWidget {
           // Stripping view padding here made labels sit flush on newer
           // Android gesture nav. Only the scrolling body should ignore the
           // bottom inset so content can extend behind the bar.
-          return Scaffold(
-            backgroundColor: shellChromeColor,
-            extendBody: false,
-            body: Column(
+          final Color bodyColor = Theme.of(context).colorScheme.surface;
+
+          Widget? bottomNavigationBar;
+          if (bottomNavVisible) {
+            bottomNavigationBar = Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: MediaQuery.removeViewPadding(
-                    context: context,
-                    removeBottom: true,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Positioned.fill(
-                          child: MediaQuery.removePadding(
-                            context: context,
-                            removeBottom: true,
-                            child: child,
-                          ),
-                        ),
-                        Positioned.fill(child: bottomPlayer),
-                      ],
-                    ),
-                  ),
-                ),
-                if (isKeyboardOpen || !bottomNavVisible)
-                  const SizedBox.shrink()
-                else if (phoneFooterAboveNav != null) ...[
+                if (phoneFooterAboveNav != null) ...[
                   phoneFooterAboveNav!,
                   SizedBox(height: Theme.of(context).tokens.spaceSmall),
                 ],
-                if (isKeyboardOpen || !bottomNavVisible)
-                  const SizedBox.shrink()
-                else
-                  _BottomNavBar(
-                    destinations: destinations,
-                    selectedIndex: displayIndex,
-                    onDestinationSelected: onDestinationSelected,
-                    padding: bottomBarPadding,
-                    decoration: bottomBarDecoration,
-                  ),
+                _BottomNavBar(
+                  destinations: destinations,
+                  selectedIndex: displayIndex,
+                  onDestinationSelected: onDestinationSelected,
+                  padding: bottomBarPadding,
+                  decoration: bottomBarDecoration,
+                ),
               ],
+            );
+          }
+
+          return Scaffold(
+            backgroundColor: bodyColor,
+            extendBody: false,
+            body: MediaQuery.removeViewPadding(
+              context: context,
+              removeBottom: true,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Positioned.fill(
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeBottom: true,
+                      child: child,
+                    ),
+                  ),
+                  Positioned.fill(child: bottomPlayer),
+                ],
+              ),
             ),
+            bottomNavigationBar: bottomNavigationBar,
           );
         },
       );

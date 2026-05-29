@@ -166,7 +166,7 @@ void main() {
       expect(capturedPadding.bottom, 0.0);
     });
 
-    testWidgets('narrow hides bottom nav while keyboard is open', (
+    testWidgets('narrow keeps bottom nav visible while keyboard is open', (
       tester,
     ) async {
       await tester.binding.setSurfaceSize(const Size(400, 800));
@@ -178,6 +178,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetViewInsets);
 
+      late double bodyBottom;
       await tester.pumpWidget(
         _wrap(
           direction: TextDirection.ltr,
@@ -186,14 +187,20 @@ void main() {
             selectedIndex: 0,
             onDestinationSelected: (_) {},
             bottomPlayer: const SizedBox.shrink(),
-            child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            child: Builder(
+              builder: (context) {
+                bodyBottom = MediaQuery.paddingOf(context).bottom;
+                return const ColoredBox(color: Color(0xFFEEEEEE));
+              },
+            ),
           ),
         ),
       );
       await tester.pump();
 
+      expect(bodyBottom, 0.0);
       expect(find.byType(NavigationRail), findsNothing);
-      expect(find.byType(InkWell), findsNothing);
+      expect(find.byType(BottomNavigationBar), findsOneWidget);
     });
 
     testInBothDirections('medium uses side rail (collapsed)', (
