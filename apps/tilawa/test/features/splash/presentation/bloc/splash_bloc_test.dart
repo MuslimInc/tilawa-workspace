@@ -53,6 +53,35 @@ void main() {
     });
 
     blocTest<SplashBloc, SplashState>(
+      'emits notification route when pending cold start is set during splash',
+      build: () {
+        when(
+          mockGetSplashNextRouteUseCase.call(),
+        ).thenAnswer((_) async => SplashRouteResult(SplashDestination.home));
+        return bloc;
+      },
+      act: (bloc) {
+        AppRouter.setPendingColdStartRoute(
+          const PrayerNotificationStatusRoute().location,
+          extra: '{"prayer_key":"fajr"}',
+        );
+        bloc.add(const SplashStarted());
+      },
+      expect: () => [
+        isA<SplashNavigateToNotification>().having(
+          (state) => state.location,
+          'location',
+          const PrayerNotificationStatusRoute().location,
+        ),
+      ],
+      verify: (_) {
+        verify(
+          mockReadiness.waitUntilReady(prepareShell: true),
+        ).called(1);
+      },
+    );
+
+    blocTest<SplashBloc, SplashState>(
       'emits home and waits for shell prep',
       build: () {
         when(

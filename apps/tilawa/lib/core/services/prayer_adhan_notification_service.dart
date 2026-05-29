@@ -11,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
+import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/router/deep_link_resolver.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_core/config/language_config.dart';
@@ -894,6 +896,16 @@ class PrayerAdhanNotificationService
     try {
       final NotificationDestination destination = const DeepLinkResolver()
           .prayerStatus(payload);
+      if (_shouldDeferPrayerStatusNavigation()) {
+        AppRouter.setPendingColdStartRoute(
+          destination.location,
+          extra: destination.extra ?? payload,
+        );
+        logger.d(
+          '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_DEFERRED',
+        );
+        return;
+      }
       logger.d(
         '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_REQUESTED route=${destination.location}',
       );
@@ -906,6 +918,20 @@ class PrayerAdhanNotificationService
         '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_FAILED: $e',
       );
     }
+  }
+
+  bool _shouldDeferPrayerStatusNavigation() {
+    if (AppRouter.pendingColdStartLocation != null) {
+      return true;
+    }
+    if (AppRouter.pendingStartupNotificationLaunch) {
+      return true;
+    }
+    final String? location = _navigationService.getCurrentLocation();
+    if (location == const SplashRoute().location) {
+      return true;
+    }
+    return false;
   }
 
   // -- helpers ----------------------------------------------------------------

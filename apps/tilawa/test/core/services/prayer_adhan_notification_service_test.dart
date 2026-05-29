@@ -297,6 +297,43 @@ void main() {
 
       group('notification tap routing', () {
         test(
+          'defers navigation while splash is active',
+          () async {
+            AppRouter.resetForTesting();
+            when(
+              mockNav.getCurrentLocation(),
+            ).thenReturn(const SplashRoute().location);
+
+            await initialize();
+
+            final payload = jsonEncode({
+              PrayerNotificationConfig.payloadTypeKey:
+                  PrayerNotificationConfig.payloadTypeValue,
+              PrayerNotificationConfig.payloadPrayerKey: 'fajr',
+              'prayer_key': 'fajr',
+              'is_adhan_playing': true,
+            });
+
+            await service.handleNotificationResponse(
+              NotificationResponse(
+                notificationResponseType:
+                    NotificationResponseType.selectedNotification,
+                payload: payload,
+              ),
+            );
+
+            verifyNever(
+              mockNav.routeToDestination(any),
+            );
+            expect(
+              AppRouter.pendingColdStartLocation,
+              const PrayerNotificationStatusRoute().location,
+            );
+            expect(AppRouter.pendingColdStartExtra, payload);
+          },
+        );
+
+        test(
           'navigates native Adhan tap payload to prayer status route',
           () async {
             AppRouter.resetForTesting();
