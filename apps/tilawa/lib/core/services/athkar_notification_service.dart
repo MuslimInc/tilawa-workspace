@@ -914,10 +914,7 @@ class AthkarNotificationService implements IAthkarNotificationService {
   /// Navigate to a resolved destination, catching errors in test environments.
   void _navigateToDestination(NotificationDestination destination) {
     try {
-      _navigationService.navigateToNotification(
-        destination.location,
-        extra: destination.extra,
-      );
+      _navigationService.routeToDestination(destination);
     } catch (e) {
       logger.w('[AthkarNotificationService] Navigation failed: $e');
     }

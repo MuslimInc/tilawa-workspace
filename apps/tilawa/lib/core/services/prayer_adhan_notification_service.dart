@@ -897,10 +897,7 @@ class PrayerAdhanNotificationService
       logger.d(
         '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_REQUESTED route=${destination.location}',
       );
-      _navigationService.navigateToNotification(
-        destination.location,
-        extra: destination.extra,
-      );
+      _navigationService.routeToDestination(destination);
       logger.d(
         '${PrayerNotificationConfig.logTag} NAVIGATION_TO_PRAYER_STATUS_SUCCESS',
       );

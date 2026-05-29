@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tilawa/core/navigation/notification_destination.dart';
 import 'package:tilawa/core/services/navigation_service.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
 import 'package:tilawa/core/services/prayer_adhan_notification_service.dart';
@@ -315,9 +316,11 @@ void main() {
             );
 
             verify(
-              mockNav.navigateToNotification(
-                const PrayerNotificationStatusRoute().location,
-                extra: payload,
+              mockNav.routeToDestination(
+                NotificationDestination(
+                  location: const PrayerNotificationStatusRoute().location,
+                  extra: payload,
+                ),
               ),
             ).called(1);
           },
@@ -337,9 +340,11 @@ void main() {
           );
 
           verifyNever(
-            mockNav.navigateToNotification(
-              const PrayerNotificationStatusRoute().location,
-              extra: payload,
+            mockNav.routeToDestination(
+              NotificationDestination(
+                location: const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
             ),
           );
         });
@@ -370,9 +375,11 @@ void main() {
             );
 
             verify(
-              mockNav.navigateToNotification(
-                const PrayerNotificationStatusRoute().location,
-                extra: payload,
+              mockNav.routeToDestination(
+                NotificationDestination(
+                  location: const PrayerNotificationStatusRoute().location,
+                  extra: payload,
+                ),
               ),
             ).called(1);
           },
@@ -408,9 +415,11 @@ void main() {
               .timeout(const Duration(milliseconds: 100));
 
           verify(
-            mockNav.navigateToNotification(
-              const PrayerNotificationStatusRoute().location,
-              extra: payload,
+            mockNav.routeToDestination(
+              NotificationDestination(
+                location: const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
             ),
           ).called(1);
 
@@ -446,9 +455,11 @@ void main() {
           );
 
           verify(
-            mockNav.navigateToNotification(
-              const PrayerNotificationStatusRoute().location,
-              extra: payload,
+            mockNav.routeToDestination(
+              NotificationDestination(
+                location: const PrayerNotificationStatusRoute().location,
+                extra: payload,
+              ),
             ),
           ).called(1);
         });
@@ -469,7 +480,7 @@ void main() {
             await Future<void>.delayed(Duration.zero);
 
             verifyNever(
-              mockNav.navigateToNotification(any, extra: anyNamed('extra')),
+              mockNav.routeToDestination(any),
             );
             verifyNever(
               mockAnalytics.logEvent(any, parameters: anyNamed('parameters')),
@@ -548,9 +559,11 @@ void main() {
             await Future<void>.delayed(Duration.zero);
 
             verify(
-              mockNav.navigateToNotification(
-                const PrayerNotificationStatusRoute().location,
-                extra: payload,
+              mockNav.routeToDestination(
+                NotificationDestination(
+                  location: const PrayerNotificationStatusRoute().location,
+                  extra: payload,
+                ),
               ),
             ).called(1);
           },
