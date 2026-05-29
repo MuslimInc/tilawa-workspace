@@ -3,11 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/core/di/injection.dart';
-import 'package:tilawa_core/network/network_info.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../domain/usecases/usecases.dart';
 import '../bloc/download_button/download_button_bloc.dart';
+import '../bloc/download_button/download_button_bloc_factory.dart';
 
 // --- Download-button-specific layout constants ---
 // These are component-local dimensions that do not map to a global token.
@@ -109,23 +108,14 @@ class DownloadButton extends StatelessWidget {
     return BlocProvider(
       key: ValueKey(url),
       create: (context) {
-        final bloc = DownloadButtonBloc(
+        final bloc = getIt<DownloadButtonBlocFactory>().create(
           url: url,
           reciterName: reciterName,
           reciterId: reciterId,
-          checkSurahDownloaded: getIt<CheckSurahDownloadedUseCase>(),
-          downloadSurah: getIt<DownloadSurahUseCase>(),
-          cancelDownload: getIt<CancelDownloadUseCase>(),
-          pauseDownload: getIt<PauseDownloadUseCase>(),
-          resumeDownload: getIt<ResumeDownloadUseCase>(),
-          observeDownloadProgress: getIt<ObserveDownloadProgressUseCase>(),
-          getDownloadItem: getIt<GetDownloadItemUseCase>(),
-          networkInfo: getIt<NetworkInfo>(),
           initialIsDownloaded: initialIsDownloaded,
           initialIsDownloading: initialIsDownloading,
           initialProgress: initialProgress,
         );
-        // Explicitly initialize after creation
         bloc.add(const DownloadButtonEvent.initialize());
         return bloc;
       },
