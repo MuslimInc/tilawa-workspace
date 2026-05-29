@@ -99,6 +99,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         children: [
           BlocBuilder<HistoryBloc, HistoryState>(
             builder: (context, state) {
+              final tokens = Theme.of(context).tokens;
               return RefreshIndicator(
                 onRefresh: () async {
                   context.read<HistoryBloc>().add(
@@ -111,7 +112,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     if (state.historyList.isNotEmpty)
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(tokens.spaceLarge),
                           child: HistoryStatsCard(
                             totalItems: state.historyList.length,
                             totalListeningTimeMs: state.totalListeningTimeMs,
@@ -119,7 +120,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
 
-                    const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: tokens.spaceLarge),
+                    ),
 
                     // Content based on state
                     _buildContent(context, state),
@@ -188,6 +191,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildHistoryList(BuildContext context, List<HistoryEntity> history) {
+    final tokens = Theme.of(context).tokens;
     // Group history by date
     final Map<String, List<HistoryEntity>> groupedHistory = {};
 
@@ -209,9 +213,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
           children: [
             // Date header
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
+              padding: EdgeInsets.symmetric(
+                horizontal: tokens.spaceLarge,
+                vertical: tokens.spaceSmall,
               ),
               child: Text(
                 dateKey,
