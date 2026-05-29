@@ -1,8 +1,6 @@
 import 'dart:ui';
 
-import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 /// Geometry inputs for [QuranPlayerMorphLayout.compute] (theme-derived).

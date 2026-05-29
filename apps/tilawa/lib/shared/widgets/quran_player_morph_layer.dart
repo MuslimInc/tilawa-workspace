@@ -120,7 +120,6 @@ class _MorphArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Semantics(
       identifier: QuranPlayerSemanticsIds.expandedArtwork,
       image: true,

@@ -1,8 +1,6 @@
 // Snapshot + spike helpers remain for tests. Route progress bridge types are
 // legacy — [PlayerPresentationController] owns ticks in production.
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:tilawa/shared/widgets/quran_player_debug_log.dart';
 import 'package:tilawa/shared/widgets/quran_player_expand_physics.dart';
 

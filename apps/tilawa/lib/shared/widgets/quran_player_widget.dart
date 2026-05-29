@@ -266,8 +266,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     final double progress = _visualExpandProgress;
     final int now = DateTime.now().millisecondsSinceEpoch;
     final double? last = _lastLoggedExpandProgress;
-    final bool progressMoved =
-        last == null || (progress - last).abs() >= 0.025;
+    final bool progressMoved = last == null || (progress - last).abs() >= 0.025;
     final bool throttled = now - _lastDragLogMs < 100;
     if (!progressMoved && throttled) {
       return;
@@ -289,8 +288,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         ..._coreStateFields(),
         'miniOpacity': metrics.miniOpacity.toStringAsFixed(3),
         'expandedOpacity': metrics.expandedOpacity.toStringAsFixed(3),
-        'sheetPresentationOpacity':
-            metrics.sheetPresentationOpacity.toStringAsFixed(3),
+        'sheetPresentationOpacity': metrics.sheetPresentationOpacity
+            .toStringAsFixed(3),
         'sheetMotionT': metrics.sheetMotionT.toStringAsFixed(3),
         'queueChromeT': metrics.queueChromeT.toStringAsFixed(3),
         'showMini': metrics.showMiniPlayer,
@@ -342,8 +341,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         'bottomInset': bottomInset.toStringAsFixed(1),
         'miniOpacity': metrics.miniOpacity.toStringAsFixed(3),
         'expandedOpacity': metrics.expandedOpacity.toStringAsFixed(3),
-        'sheetPresentationOpacity':
-            metrics.sheetPresentationOpacity.toStringAsFixed(3),
+        'sheetPresentationOpacity': metrics.sheetPresentationOpacity
+            .toStringAsFixed(3),
         'scrimOpacity': metrics.scrimOpacity.toStringAsFixed(3),
         'sheetMotionT': metrics.sheetMotionT.toStringAsFixed(3),
         'queueChromeT': metrics.queueChromeT.toStringAsFixed(3),
@@ -528,7 +527,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     final bool overlayActive = _usesHeroExpansion
         ? _presentation.overlayChromeActive
         : _expandController.value > 0.01 &&
-            (!widget.embeddedInShellFooter || _portalController.isShowing);
+              (!widget.embeddedInShellFooter || _portalController.isShowing);
     if (overlayActive) {
       notifier.setSystemNavigationBarColorOverride(
         quranPlayerQueueSheetColor(Theme.of(context).colorScheme),
@@ -694,8 +693,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     if (_isCollapsing) {
       return true;
     }
-    if (_isUserDraggingExpand &&
-        progress < _expandDragStartProgress - 0.001) {
+    if (_isUserDraggingExpand && progress < _expandDragStartProgress - 0.001) {
       return true;
     }
     return false;
@@ -1070,8 +1068,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       final double netDragDy = _expandDragNetDy;
       _expandDragNetDy = 0;
       final bool expandIntent =
-          primaryVelocity < -tokens.playerVelocityThreshold ||
-          netDragDy < -28;
+          primaryVelocity < -tokens.playerVelocityThreshold || netDragDy < -28;
       QuranPlayerDebugLog.drag(
         expandIntent ? 'mini.end.expand' : 'mini.end.noExpandHandler',
         <String, Object?>{
@@ -1296,7 +1293,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         );
 
         return AnimatedBuilder(
-          animation:             Listenable.merge(
+          animation: Listenable.merge(
             <Listenable>[
               _expandController,
               if (_usesHeroExpansion) _presentation,
@@ -1307,8 +1304,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             final double progress = _usesHeroExpansion
                 ? _visualExpandProgress
                 : _expandController.value;
-            final PlayerExpandTransitionMetrics metrics = _usesHeroExpansion &&
-                    miniAnchoredInFooter
+            final PlayerExpandTransitionMetrics metrics =
+                _usesHeroExpansion && miniAnchoredInFooter
                 ? _presentation.metricsForFooter(
                     miniPlayerHeight: _miniPlayerHeight,
                   )
@@ -1366,10 +1363,10 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                   'progress': progress.toStringAsFixed(3),
                   'morphVisible': morphLayer != null,
                   'handoffT': metrics.handoffT.toStringAsFixed(3),
-                  'miniIdentityOpacity':
-                      metrics.miniIdentityOpacity.toStringAsFixed(3),
-                  'stageChromeOpacity':
-                      metrics.stageChromeOpacity.toStringAsFixed(3),
+                  'miniIdentityOpacity': metrics.miniIdentityOpacity
+                      .toStringAsFixed(3),
+                  'stageChromeOpacity': metrics.stageChromeOpacity
+                      .toStringAsFixed(3),
                   'routeOpen': _presentation.routeOpen,
                   'phase': _presentation.phase.name,
                 },
@@ -1411,8 +1408,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                           child: ColoredBox(
                             color: Theme.of(context).colorScheme.surface
                                 .withValues(
-                              alpha: metrics.backdropOpacity,
-                            ),
+                                  alpha: metrics.backdropOpacity,
+                                ),
                           ),
                         ),
                       ),
@@ -1433,9 +1430,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                           screenHeight: screenHeight,
                           sheetOpacity: metrics.sheetPresentationOpacity,
                           collapseAnchorY: hostRect.top,
-                          semanticLabel: context
-                              .l10n
-                              .playerExpandedSheetSemanticLabel,
+                          semanticLabel:
+                              context.l10n.playerExpandedSheetSemanticLabel,
                           child: expandedChild,
                         ),
                       ),
@@ -1447,8 +1443,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                         height: _miniPlayerHeight,
                         child: miniPlayer,
                       ),
-                    if (morphLayer != null)
-                      Positioned.fill(child: morphLayer),
+                    if (morphLayer != null) Positioned.fill(child: morphLayer),
                   ],
                 ),
               );
@@ -1483,8 +1478,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                             child: ColoredBox(
                               color: Theme.of(context).colorScheme.surface
                                   .withValues(
-                                alpha: metrics.backdropOpacity,
-                              ),
+                                    alpha: metrics.backdropOpacity,
+                                  ),
                             ),
                           ),
                         ),
@@ -1505,9 +1500,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                             screenHeight: screenHeight,
                             sheetOpacity: metrics.sheetPresentationOpacity,
                             collapseAnchorY: hostRect.top,
-                            semanticLabel: context
-                                .l10n
-                                .playerExpandedSheetSemanticLabel,
+                            semanticLabel:
+                                context.l10n.playerExpandedSheetSemanticLabel,
                             child: expandedChild,
                           ),
                         ),
@@ -1567,9 +1561,7 @@ class _ExpandedPlayerMotion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double t = sheetMotionT.clamp(0.0, 1.0);
-    final double travel = collapseAnchorY > 0
-        ? collapseAnchorY
-        : screenHeight;
+    final double travel = collapseAnchorY > 0 ? collapseAnchorY : screenHeight;
     final double offsetY = travel * (1 - t);
     return RepaintBoundary(
       child: Semantics(
@@ -2286,8 +2278,7 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                                       queueController:
                                                           _queueController,
                                                       sheetParentHeight:
-                                                          constraints
-                                                              .maxHeight,
+                                                          constraints.maxHeight,
                                                       peekSize: _queuePeekSize,
                                                       snapSizes: snapSizes,
                                                       state: widget.state,
@@ -2378,8 +2369,7 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                                   if (_queueAtPeek &&
                                                       _stageDragNetDy.abs() >
                                                           0.5) {
-                                                    widget
-                                                        .onPlayerExpandDragEnd
+                                                    widget.onPlayerExpandDragEnd
                                                         ?.call(details);
                                                     _stageDragNetDy = 0;
                                                     return;
@@ -2788,99 +2778,100 @@ class _ExpandedPlayerLandscape extends StatelessWidget {
         onVerticalDragEnd: onPlayerExpandDragEnd,
         child: SafeArea(
           child: Stack(
-          children: [
-            // Header: Metadata and Navigation
-            Positioned(
-              top: tokens.spaceSmall,
-              left: isRtl ? null : tokens.spaceMedium,
-              right: isRtl ? tokens.spaceMedium : null,
-              child: Row(
-                spacing: tokens.spaceSmall,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      FluentIcons.chevron_down_24_regular,
-                      color: palette.foreground,
-                      size: tokens.iconSizeLarge,
-                    ),
-                    onPressed: onCollapse,
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: tokens.spaceExtraSmall,
-                    children: [
-                      Text(
-                        audio.title,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: palette.foreground,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        audio.artist ?? context.l10n.unknownReciter,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.secondary,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            Positioned(
-              top: tokens.spaceSmall,
-              left: isRtl ? tokens.spaceMedium : null,
-              right: isRtl ? null : tokens.spaceMedium,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      FluentIcons.image_24_regular,
-                      color: palette.foreground,
-                    ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => BackgroundSourceDialog(
-                          onSourceSelected: (source) {
-                            context.read<PlayerBackgroundCubit>().pickImage(
-                              source,
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                  Semantics(
-                    identifier: QuranPlayerSemanticsIds.expandedMoreMenu,
-                    button: true,
-                    child: IconButton(
+            children: [
+              // Header: Metadata and Navigation
+              Positioned(
+                top: tokens.spaceSmall,
+                left: isRtl ? null : tokens.spaceMedium,
+                right: isRtl ? tokens.spaceMedium : null,
+                child: Row(
+                  spacing: tokens.spaceSmall,
+                  children: [
+                    IconButton(
                       icon: Icon(
-                        FluentIcons.more_vertical_24_regular,
+                        FluentIcons.chevron_down_24_regular,
+                        color: palette.foreground,
+                        size: tokens.iconSizeLarge,
+                      ),
+                      onPressed: onCollapse,
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: tokens.spaceExtraSmall,
+                      children: [
+                        Text(
+                          audio.title,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: palette.foreground,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        Text(
+                          audio.artist ?? context.l10n.unknownReciter,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: palette.secondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              Positioned(
+                top: tokens.spaceSmall,
+                left: isRtl ? tokens.spaceMedium : null,
+                right: isRtl ? null : tokens.spaceMedium,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        FluentIcons.image_24_regular,
                         color: palette.foreground,
                       ),
-                      onPressed: () => _showExpandedPlayerMenu(context, state),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => BackgroundSourceDialog(
+                            onSourceSelected: (source) {
+                              context.read<PlayerBackgroundCubit>().pickImage(
+                                source,
+                              );
+                            },
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                ],
+                    Semantics(
+                      identifier: QuranPlayerSemanticsIds.expandedMoreMenu,
+                      button: true,
+                      child: IconButton(
+                        icon: Icon(
+                          FluentIcons.more_vertical_24_regular,
+                          color: palette.foreground,
+                        ),
+                        onPressed: () =>
+                            _showExpandedPlayerMenu(context, state),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
 
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: tokens.spaceSmall + tokens.spaceExtraLarge,
-              child: _PlayerPlaybackCluster(state: state),
-            ),
-          ],
-        ),
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: tokens.spaceSmall + tokens.spaceExtraLarge,
+                child: _PlayerPlaybackCluster(state: state),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -3411,9 +3402,8 @@ class _PlayerArtAtom extends StatelessWidget {
   const _PlayerArtAtom({
     this.audioId,
     this.artUri,
-    this.maxHeight,
     this.useHeroArtwork = false,
-  });
+  }) : maxHeight = null;
 
   final String? audioId;
   final String? artUri;
@@ -3428,10 +3418,8 @@ class _PlayerArtAtom extends StatelessWidget {
             builder: (context, constraints) {
               final double width = constraints.maxWidth.isFinite
                   ? constraints.maxWidth
-                  : MediaQuery.sizeOf(context).width -
-                      tokens.spaceLarge * 2;
-              final double height = maxHeight ??
-                  width * 9 / 16;
+                  : MediaQuery.sizeOf(context).width - tokens.spaceLarge * 2;
+              final double height = maxHeight ?? width * 9 / 16;
               return QuranPlayerHeroArtwork(
                 audioId: audioId!,
                 artUri: artUri,
@@ -4440,6 +4428,7 @@ class _ExpandedProgressBar extends StatelessWidget {
 /// Full-screen expanded player presented via [QuranPlayerExpandedRoute].
 class QuranPlayerExpandedPageContent extends StatelessWidget {
   const QuranPlayerExpandedPageContent({
+    super.key,
     required this.expandAnimation,
     required this.onCollapse,
     required this.onDismiss,
@@ -4458,8 +4447,7 @@ class QuranPlayerExpandedPageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AudioPlayerBloc, AudioPlayerState>(
-      listenWhen: (previous, current) =>
-          previous.failure != current.failure,
+      listenWhen: (previous, current) => previous.failure != current.failure,
       listener: (context, state) {
         final String? message = state.failure?.localizedMessage(context);
         if (message != null) {
