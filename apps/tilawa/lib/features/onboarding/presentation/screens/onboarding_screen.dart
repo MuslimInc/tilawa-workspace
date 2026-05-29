@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -43,15 +42,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
-    final Brightness statusBarBrightness =
-        ThemeData.estimateBrightnessForColor(colorScheme.surface);
-    final Brightness statusBarIconBrightness =
-        statusBarBrightness == Brightness.dark
-        ? Brightness.light
-        : Brightness.dark;
-
     final List<OnboardingContent> pages = <OnboardingContent>[
       OnboardingContent(
         imagePath: 'assets/images/listener.png',
@@ -85,53 +75,44 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           }
         },
         builder: (BuildContext context, OnboardingState state) {
-          return AnnotatedRegion<SystemUiOverlayStyle>(
-            value: SystemUiOverlayStyle(
-              statusBarColor: colorScheme.surface,
-              statusBarIconBrightness: statusBarIconBrightness,
-              statusBarBrightness: statusBarBrightness,
-            ),
-            child: Scaffold(
-              backgroundColor: colorScheme.surface,
-              body: SafeArea(
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: PageView.builder(
-                        controller: _pageController,
-                        itemCount: pageCount,
-                        onPageChanged: (int index) {
-                          setState(() => _currentPage = index);
-                          context.read<OnboardingCubit>().pageChanged(index);
-                          if (index == pageCount - 1) {
-                            unawaited(getIt<PrepareGoogleSignInUseCase>()());
-                          }
-                        },
-                        itemBuilder: (BuildContext context, int index) {
-                          return OnboardingPage(
-                            content: pages[index],
-                            semanticsLabel: context.l10n.onboardingPageSemantics(
-                              index + 1,
-                              pageCount,
-                            ),
-                          );
-                        },
-                      ),
+          return Scaffold(
+            body: SafeArea(
+              child: Column(
+                children: [
+                  Expanded(
+                    child: PageView.builder(
+                      controller: _pageController,
+                      itemCount: pageCount,
+                      onPageChanged: (int index) {
+                        setState(() => _currentPage = index);
+                        context.read<OnboardingCubit>().pageChanged(index);
+                        if (index == pageCount - 1) {
+                          unawaited(getIt<PrepareGoogleSignInUseCase>()());
+                        }
+                      },
+                      itemBuilder: (BuildContext context, int index) {
+                        return OnboardingPage(
+                          content: pages[index],
+                          semanticsLabel: context.l10n.onboardingPageSemantics(
+                            index + 1,
+                            pageCount,
+                          ),
+                        );
+                      },
                     ),
-                    OnboardingFooterBar(
-                      pageCount: pageCount,
-                      currentPage: _currentPage,
-                      backLabel: context.l10n.previous,
-                      nextLabel: context.l10n.next,
-                      completeLabel: context.l10n.startJourney,
-                      onBack: () => _goToPage(_currentPage - 1),
-                      onNext: () => _goToPage(_currentPage + 1),
-                      onComplete: () => context
-                          .read<OnboardingCubit>()
-                          .completeOnboarding(),
-                    ),
-                  ],
-                ),
+                  ),
+                  OnboardingFooterBar(
+                    pageCount: pageCount,
+                    currentPage: _currentPage,
+                    backLabel: context.l10n.previous,
+                    nextLabel: context.l10n.next,
+                    completeLabel: context.l10n.startJourney,
+                    onBack: () => _goToPage(_currentPage - 1),
+                    onNext: () => _goToPage(_currentPage + 1),
+                    onComplete: () =>
+                        context.read<OnboardingCubit>().completeOnboarding(),
+                  ),
+                ],
               ),
             ),
           );
