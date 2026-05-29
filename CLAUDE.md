@@ -1,5 +1,21 @@
 # Tilawa / Rattil — Claude Code guide
 
+## Agent behavior
+
+Follow the **Karpathy behavioral guidelines** on every task (think first,
+simplicity, surgical diffs, verifiable goals). Canonical copy:
+
+- Cursor: [`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc)
+  (`alwaysApply`) + [`.cursor/rules/tilawa-dart.mdc`](.cursor/rules/tilawa-dart.mdc)
+  for Dart under `apps/tilawa/` and `packages/`
+- Claude Code / other: this section + [`.agent/rules/karpathy-guidelines.md`](.agent/rules/karpathy-guidelines.md)
+
+Before implementing: state assumptions, define success criteria (e.g.
+`dart analyze`, `flutter test test/features/<feature>/`), then loop until they
+pass. Every changed line should trace to the user's request.
+
+---
+
 App brand name: **Rattil / رتل**. Internal codename and package names use
 `tilawa`. Do not rename packages; use "Rattil" only in user-visible strings.
 

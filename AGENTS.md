@@ -4,6 +4,22 @@ shell commands, and other important information, read the current plan:
 [specs/001-custom-player-background/plan.md](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/specs/001-custom-player-background/plan.md)
 <!-- SPECKIT END -->
 
+## Agent behavior (required)
+
+On every task, follow the **Karpathy guidelines** in
+[`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc):
+
+think before coding, simplicity first, surgical changes, goal-driven execution
+with verifiable checks.
+
+When editing Dart (`apps/tilawa/`, `packages/`), also apply
+[`.cursor/rules/tilawa-dart.mdc`](.cursor/rules/tilawa-dart.mdc) — run
+`dart analyze` and targeted `flutter test` from `apps/tilawa/` before finishing.
+
+See [`.cursor/README.md`](.cursor/README.md) for the rules index.
+
+---
+
 For **visual and UX rules** (colors, tokens, layout, components), read the
 project design spec:
 [`DESIGN.md`](file:///Users/mohammadkamel/flutter_projects/tilawa_workspace/DESIGN.md).
