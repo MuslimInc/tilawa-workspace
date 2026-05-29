@@ -25,18 +25,19 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Dialog(
       child: Container(
         constraints: const BoxConstraints(maxWidth: 400, maxHeight: 500),
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(tokens.spaceLarge),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Text(context.l10n.searchAyahs, style: theme.textTheme.titleLarge),
 
-            const SizedBox(height: 16),
+            SizedBox(height: tokens.spaceLarge),
 
             // Search field
             TilawaSearchField(
@@ -57,7 +58,7 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
               },
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: tokens.spaceLarge),
 
             // Search results
             Expanded(
@@ -115,7 +116,7 @@ class _AyahSearchDialogState extends State<AyahSearchDialog> {
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: tokens.spaceLarge),
 
             // Close button
             TilawaButton(
