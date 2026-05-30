@@ -14,6 +14,10 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup_tasks.dart';
 import 'package:tilawa/core/bootstrap/startup_launch_coordinator.dart';
 import 'package:tilawa/core/bootstrap/cold_start_navigation_metrics.dart';
+import 'package:tilawa/core/bootstrap/first_frame_log.dart';
+import 'package:tilawa/core/bootstrap/launch_splash_canvas.dart';
+import 'package:tilawa/core/bootstrap/logo_height_log.dart';
+import 'package:tilawa/core/bootstrap/launch_first_frame_gate.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/bootstrap/critical_init_coordinator.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
@@ -23,6 +27,7 @@ import '../../firebase_options.dart';
 import '../../router/app_router.dart';
 import '../../tilawa_app.dart';
 import 'package:tilawa_core/network/network_info.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 
 import '../di/injection.dart';
 import '../di/quran_image_dependencies_module.dart';

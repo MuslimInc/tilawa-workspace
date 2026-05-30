@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/bootstrap/first_frame_log.dart';
+import 'package:tilawa/core/bootstrap/launch_splash_canvas.dart';
+import 'package:tilawa/core/bootstrap/logo_height_log.dart';
 import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/router/app_router.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -23,32 +27,21 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const Color _launchGradientTop = AppColors.brandGradientTop;
-  static const Color _launchGradientBottom = AppColors.brandGradientBottom;
-  static const LinearGradient _launchBackgroundGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: <Color>[_launchGradientTop, _launchGradientBottom],
-  );
-  static const String _launchWordmarkAsset =
-      'assets/images/launch_wordmark.png';
-  static const double _wordmarkBoxSize = 288;
-  static const SystemUiOverlayStyle _launchOverlayStyle = SystemUiOverlayStyle(
-    statusBarColor: _launchGradientTop,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
-    systemNavigationBarColor: _launchGradientBottom,
-    systemNavigationBarIconBrightness: Brightness.light,
-    systemNavigationBarDividerColor: Colors.transparent,
-    systemStatusBarContrastEnforced: false,
-    systemNavigationBarContrastEnforced: false,
-  );
+  static const Color _launchBackground = AppColors.launchSplashBackground;
+  static const Color _logoForeground = AppColors.launchSplashForeground;
+  static const String _appLogoAsset = 'assets/images/app_logo.png';
+  static const double _wordmarkBoxSize = AppColors.launchSplashLogoSize;
+  static final SystemUiOverlayStyle _launchOverlayStyle =
+      AppSystemChromeStyle.buildColoredScreenStyle(
+        backgroundColor: _launchBackground,
+      );
 
   late final SplashBloc _splashBloc;
 
   @override
   void initState() {
     super.initState();
+    firstFrameLog('SplashScreen initState (/splash route)');
     // #region agent log
     fixBlackFrameLog(
       runId: 'flutter-handoff-baseline',
@@ -60,6 +53,7 @@ class _SplashScreenState extends State<SplashScreen> {
     // #endregion
     _splashBloc = getIt<SplashBloc>()..add(const SplashStarted());
     SchedulerBinding.instance.addPostFrameCallback((_) {
+      firstFrameLog('SplashScreen first post-frame → mark handoff');
       // #region agent log
       fixBlackFrameLog(
         runId: 'flutter-handoff-baseline',
@@ -71,6 +65,12 @@ class _SplashScreenState extends State<SplashScreen> {
       // #endregion
       SplashLaunchHandoff.markSplashRoutePainted();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    firstFrameLog('SplashScreen didChangeDependencies');
   }
 
   @override
@@ -139,32 +139,31 @@ class _SplashScreenState extends State<SplashScreen> {
                 _goAndReset(const HomeRoute().location);
             }
           },
-          child: AnnotatedRegion<SystemUiOverlayStyle>(
-            value: _launchOverlayStyle,
-            child: Semantics(
-              label: context.l10n.a11ySplashLoading,
-              liveRegion: true,
-              child: DecoratedBox(
-                decoration: const BoxDecoration(
-                  gradient: _launchBackgroundGradient,
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox.square(
-                        dimension: _wordmarkBoxSize,
-                        child: Image.asset(
-                          _launchWordmarkAsset,
-                          filterQuality: FilterQuality.high,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      const SizedBox(height: 40),
-                      const CircularProgressIndicator(color: Colors.white),
-                    ],
+          child: Semantics(
+            label: context.l10n.a11ySplashLoading,
+            liveRegion: true,
+            child: LaunchSplashCanvas(
+              backgroundColor: _launchBackground,
+              overlayStyle: _launchOverlayStyle,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LogoHeightProbe(
+                    source: 'SplashScreen',
+                    boxSize: _wordmarkBoxSize,
+                    asset: _appLogoAsset,
+                    child: Image.asset(
+                      _appLogoAsset,
+                      filterQuality: FilterQuality.high,
+                      fit: BoxFit.contain,
+                      gaplessPlayback: true,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 40),
+                  const CircularProgressIndicator(
+                    color: _logoForeground,
+                  ),
+                ],
               ),
             ),
           ),

@@ -41,6 +41,7 @@ import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
 import '../shared/widgets/quran_player_expanded_page.dart';
 import '../shared/widgets/quran_player_expanded_route_transition.dart';
+import 'launch_route_page.dart';
 import 'share_composer_extra.dart';
 
 part 'app_router_config.g.dart';
@@ -79,6 +80,14 @@ class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute();
 
   @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
+
+  @override
   Widget build(BuildContext context, GoRouterState state) {
     return const MainScreen();
   }
@@ -87,6 +96,14 @@ class HomeRoute extends GoRouteData with $HomeRoute {
 @TypedGoRoute<OnboardingRoute>(path: '/onboarding')
 class OnboardingRoute extends GoRouteData with $OnboardingRoute {
   const OnboardingRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -152,6 +169,14 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
 @TypedGoRoute<LoginRoute>(path: '/login')
 class LoginRoute extends GoRouteData with $LoginRoute {
   const LoginRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -257,6 +282,14 @@ class RouteListRoute extends GoRouteData with $RouteListRoute {
 @TypedGoRoute<SplashRoute>(path: '/splash')
 class SplashRoute extends GoRouteData with $SplashRoute {
   const SplashRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

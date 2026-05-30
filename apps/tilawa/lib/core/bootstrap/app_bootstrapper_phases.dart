@@ -34,7 +34,10 @@ extension AppBootstrapperPhases on AppBootstrapper {
     scheduleCriticalInit(coordinator);
 
     timeline.logTotal('=== TOTAL before runApp');
+    LaunchFirstFrameGate.defer();
+    firstFrameLog('runApp(BootGate) starting');
     run(_startupTasks.buildBootGate(coordinator.initAction));
+    firstFrameLog('runApp(BootGate) returned');
     timeline.logTotal('runApp called at');
 
     await ensureCriticalInitCompletes(coordinator);
