@@ -1,5 +1,8 @@
 # Tilawa Google Play Release Checklist
 
+For policy gaps, phased remediation, and Console-only verification, see
+[google_play_compliance_plan.md](google_play_compliance_plan.md).
+
 ## 1. Version and Branch
 
 - [ ] Confirm release branch is stable and merged to master.
