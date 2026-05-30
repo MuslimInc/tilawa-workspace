@@ -30,7 +30,7 @@ We resist the temptation to bolt on stereotype motifs (arches, lanterns, crescen
 
 - **Mushaf as the artifact.** The Quran reader page receives the *single* shadow in the app (`TilawaDesignTokens.opacityShadowStrong` band, layered per the existing reader theme). Cards, sheets, buttons get **flat or hairline** treatment — no elevation arms-race around the page.
 - **Arabic-first typography care.** UI is **Alexandria** (per DESIGN §3); Arabic content uses the QCF/Mushaf families already wired in `packages/quran` (DESIGN §13 file map). Line-height token `textHeightLoose` (2.0) is the default for any surface that renders Arabic prose (surah lists, ayah meta, du'a strips).
-- **Manuscript-derived palette.** The presets in DESIGN §2 already carry this lineage — **Teal** (calligrapher's ink shimmer), **Gold** `#8C681F` (Mushaf gilding), **Sage** `#528345` (scholar's cloth), **Brown** `#7B5E3B` (parchment age). This file makes them **named roles**, see §3.
+- **Manuscript-derived palette.** The presets in DESIGN §2 already carry this lineage — **Teal** (calligrapher's ink shimmer), **Gold** `#8C681F` (Mushaf gilding), **Sage** `#219653` (scholar's cloth), **Brown** `#7B5E3B` (parchment age). This file makes them **named roles**, see §3.
 - **Geometric ornament as accent, never frame.** Existing ambient line work (e.g. `_RecitersAmbientPainter` arcs) is fine — thin, primary-tinted at ≤ `opacitySubtle × 0.4`, never closed shapes, never replacing whitespace.
 - **No imagery of people, no flags, no national symbols.** Photography, when it appears (reciter portraits, share composer), is silhouette/initial-based or content-only.
 
