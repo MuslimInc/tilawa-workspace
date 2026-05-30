@@ -21,8 +21,7 @@ class OnboardingPage extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
-    final TilawaEmptyStateTokens stateTokens =
-        theme.componentTokens.emptyState;
+    final TilawaEmptyStateTokens stateTokens = theme.componentTokens.emptyState;
 
     return Semantics(
       label: semanticsLabel,

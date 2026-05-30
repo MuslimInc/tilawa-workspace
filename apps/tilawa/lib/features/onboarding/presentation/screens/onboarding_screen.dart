@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
@@ -27,9 +29,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _applyPageSystemChrome(),
+    );
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  void _applyPageSystemChrome() {
+    if (!mounted) {
+      return;
+    }
+    final ThemeData theme = Theme.of(context);
+    SystemChrome.setSystemUIOverlayStyle(_systemUiOverlayStyle(theme));
+  }
+
+  SystemUiOverlayStyle _systemUiOverlayStyle(ThemeData theme) {
+    final Color pageBackground = theme.scaffoldBackgroundColor;
+    return AppSystemChromeStyle.buildDefaultAppStyle(
+      theme,
+      statusBarBackgroundColor: pageBackground,
+      navigationBarColor: pageBackground,
+    );
   }
 
   void _goToPage(int index) {
@@ -64,27 +91,33 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     ];
     final int pageCount = pages.length;
+    final ThemeData theme = Theme.of(context);
+    final Color pageBackground = theme.scaffoldBackgroundColor;
+    final SystemUiOverlayStyle overlayStyle = _systemUiOverlayStyle(theme);
 
-    return BlocProvider(
-      create: (_) => getIt<OnboardingCubit>(),
-      child: BlocConsumer<OnboardingCubit, OnboardingState>(
-        listener: (BuildContext context, OnboardingState state) {
-          if (state is OnboardingCompleted) {
-            unawaited(getIt<PrepareGoogleSignInUseCase>()());
-            const LoginRoute().go(context);
-          }
-        },
-        builder: (BuildContext context, OnboardingState state) {
-          return Scaffold(
-            body: SafeArea(
-              child: Column(
-                children: [
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: BlocProvider(
+        create: (_) => getIt<OnboardingCubit>(),
+        child: BlocConsumer<OnboardingCubit, OnboardingState>(
+          listener: (BuildContext context, OnboardingState state) {
+            if (state is OnboardingCompleted) {
+              unawaited(getIt<PrepareGoogleSignInUseCase>()());
+              const LoginRoute().go(context);
+            }
+          },
+          builder: (BuildContext context, OnboardingState state) {
+            return Scaffold(
+              backgroundColor: pageBackground,
+              body: Column(
+                children: <Widget>[
                   Expanded(
                     child: PageView.builder(
                       controller: _pageController,
                       itemCount: pageCount,
                       onPageChanged: (int index) {
                         setState(() => _currentPage = index);
+                        _applyPageSystemChrome();
                         context.read<OnboardingCubit>().pageChanged(index);
                         if (index == pageCount - 1) {
                           unawaited(getIt<PrepareGoogleSignInUseCase>()());
@@ -114,9 +147,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ],
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
