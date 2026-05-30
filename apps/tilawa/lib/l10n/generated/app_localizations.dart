@@ -1412,6 +1412,42 @@ abstract class AppLocalizations {
   /// **'Logout'**
   String get logout;
 
+  /// Delete account action in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// Confirmation message before deleting the app account
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.'**
+  String get deleteAccountConfirmation;
+
+  /// Generic error when account deletion fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to delete your account. Please try again.'**
+  String get deleteAccountFailed;
+
+  /// Privacy policy link label
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy policy'**
+  String get privacyPolicy;
+
+  /// Link to the web account-deletion page required by Google Play
+  ///
+  /// In en, this message translates to:
+  /// **'Request account deletion on the web'**
+  String get requestAccountDeletionWeb;
+
+  /// Legal links section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Legal'**
+  String get settingsLegalSection;
+
   /// Storage used label
   ///
   /// In en, this message translates to:
@@ -2798,10 +2834,10 @@ abstract class AppLocalizations {
   /// **'Features'**
   String get features;
 
-  /// Quran reader feature title
+  /// Mushaf feature title
   ///
   /// In en, this message translates to:
-  /// **'Quran Reader'**
+  /// **'Mushaf'**
   String get quranReader;
 
   /// Message shown when text is copied

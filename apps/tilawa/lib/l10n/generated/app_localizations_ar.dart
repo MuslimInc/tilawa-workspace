@@ -724,6 +724,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get logout => 'تسجيل خروج';
 
   @override
+  String get deleteAccount => 'حذف الحساب';
+
+  @override
+  String get deleteAccountConfirmation =>
+      'سيؤدي هذا إلى حذف حسابك في تلاوة وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.';
+
+  @override
+  String get deleteAccountFailed => 'تعذّر حذف حسابك. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get privacyPolicy => 'سياسة الخصوصية';
+
+  @override
+  String get requestAccountDeletionWeb => 'طلب حذف الحساب عبر الويب';
+
+  @override
+  String get settingsLegalSection => 'قانوني';
+
+  @override
   String storageUsed(String size) {
     return 'المساحة المستخدمة: $size';
   }
@@ -1504,7 +1523,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get features => 'المميزات';
 
   @override
-  String get quranReader => 'قارئ القرآن';
+  String get quranReader => 'المصحف الشريف';
 
   @override
   String get copiedToClipboard => 'تم النسخ';
