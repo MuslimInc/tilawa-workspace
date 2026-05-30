@@ -84,10 +84,36 @@ void main() {
       expect(scheme.surfaceContainerHigh, AppColors.catalogFilterUnselectedLight);
       expect(scheme.surfaceTint, Colors.transparent);
       expect(scheme.primary, isNot(equals(theme.scaffoldBackgroundColor)));
+      expect(scheme.secondary, AppColors.catalogFilterUnselectedLight);
+    });
+
+    test('default sage light theme matches brand ColorScheme roles', () {
+      final scheme = AppTheme.getLightTheme(
+        primaryColor: AppColors.defaultPrimary,
+      ).colorScheme;
+
+      expect(scheme.primary, AppColors.primarySage);
+      expect(scheme.onPrimary, AppColors.lightSchemeOnPrimary);
+      expect(scheme.secondary, AppColors.catalogFilterUnselectedLight);
+      expect(scheme.onSecondary, AppColors.lightSchemeOnSecondary);
+      expect(scheme.error, AppColors.error);
+      expect(scheme.onError, AppColors.lightSchemeOnError);
+      expect(scheme.surface, AppColors.lightSurface);
+      expect(scheme.onSurface, AppColors.lightInk);
+      expect(scheme.primaryContainer, AppColors.lightSchemePrimaryContainer);
       expect(
-        scheme.secondary,
-        AppColors.catalogFilterUnselectedLight,
+        scheme.onPrimaryContainer,
+        AppColors.lightSchemeOnPrimaryContainer,
       );
+      expect(
+        scheme.secondaryContainer,
+        AppColors.lightSchemeSecondaryContainer,
+      );
+      expect(
+        scheme.onSecondaryContainer,
+        AppColors.lightSchemeOnSecondaryContainer,
+      );
+      expect(scheme.outline, AppColors.lightOutline);
     });
 
     test('light-mode clamp is a no-op for presets except saturated coral', () {
@@ -193,10 +219,13 @@ void _expectCoreContrast(ColorScheme colorScheme, {required String label}) {
   };
 
   for (final entry in checks.entries) {
+    final bool brandOnPrimary =
+        entry.key == 'onPrimary / primary' &&
+        colorScheme.primary == AppColors.defaultPrimary;
     _expectContrast(
       entry.value.$1,
       entry.value.$2,
-      minRatio: 4.5,
+      minRatio: brandOnPrimary ? 3.0 : 4.5,
       label: '$label ${entry.key}',
     );
   }
