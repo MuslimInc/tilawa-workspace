@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/delete_account.dart';
 import '../../domain/usecases/get_current_user_use_case.dart';
 import '../../domain/usecases/sign_in_with_google_use_case.dart';
 import '../../domain/usecases/sign_out.dart';
@@ -20,15 +22,18 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   AuthBloc(
     this._signInWithGoogle,
     this._signOut,
+    this._deleteAccount,
     this._getCurrentUser,
     this._syncDeviceToken,
   ) : super(const AuthState.initial()) {
     on<SignInWithGoogleEvent>(_onSignInWithGoogle);
     on<SignOutEvent>(_onSignOut);
+    on<DeleteAccountEvent>(_onDeleteAccount);
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
   }
   final SignInWithGoogleUseCase _signInWithGoogle;
   final SignOut _signOut;
+  final DeleteAccount _deleteAccount;
   final GetCurrentUserUseCase _getCurrentUser;
   final SyncDeviceTokenUseCase _syncDeviceToken;
 
@@ -57,6 +62,43 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {
     await _signOut();
     emit(const AuthState.unauthenticated());
+  }
+
+  Future<void> _onDeleteAccount(
+    DeleteAccountEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    final UserEntity? userBeforeDelete = _getCurrentUser();
+    emit(const AuthState.loading());
+
+    final result = await _deleteAccount();
+
+    await result.fold(
+      (failure) async {
+        if (failure is UserCancelledFailure) {
+          if (userBeforeDelete != null) {
+            emit(AuthState.authenticated(user: userBeforeDelete));
+          } else {
+            emit(const AuthState.unauthenticated());
+          }
+          return;
+        }
+
+        final String message =
+            failure.message ?? 'Unable to delete account';
+        emit(AuthState.error(message: message));
+
+        final UserEntity? currentUser = _getCurrentUser();
+        if (currentUser != null) {
+          emit(AuthState.authenticated(user: currentUser));
+        } else {
+          emit(const AuthState.unauthenticated());
+        }
+      },
+      (_) async {
+        emit(const AuthState.unauthenticated());
+      },
+    );
   }
 
   Future<void> _onCheckAuthStatus(

@@ -220,7 +220,10 @@ class SettingsScreen extends StatelessWidget {
               ),
               SettingsLogoutSection(
                 onLogout: () => SettingsSheets.showLogoutConfirmation(context),
+                onDeleteAccount: () =>
+                    SettingsSheets.showDeleteAccountConfirmation(context),
               ),
+              // SettingsLegalSection(),
               if (kDebugMode)
                 TilawaSettingsGroup(
                   title: 'Developer',

@@ -52,4 +52,21 @@ class UserRepositoryImpl implements UserRepository {
         .doc(token)
         .delete();
   }
+
+  @override
+  Future<void> deleteUserData(String userId) async {
+    final DocumentReference<Map<String, dynamic>> userRef = _firestore
+        .collection('users')
+        .doc(userId);
+
+    final QuerySnapshot<Map<String, dynamic>> tokensSnapshot = await userRef
+        .collection('fcm_tokens')
+        .get();
+    for (final QueryDocumentSnapshot<Map<String, dynamic>> doc
+        in tokensSnapshot.docs) {
+      await doc.reference.delete();
+    }
+
+    await userRef.delete();
+  }
 }

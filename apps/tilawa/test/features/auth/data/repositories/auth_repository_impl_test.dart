@@ -89,6 +89,15 @@ void main() {
       verify(mockAuthProvider.signOut()).called(1);
     });
 
+    test('deleteAccount should delete via provider and clear prepare cache', () async {
+      when(mockAuthProvider.deleteAccount()).thenAnswer((_) async {});
+
+      await authRepository.deleteAccount();
+
+      verify(mockAuthProvider.deleteAccount()).called(1);
+      verify(mockPrepare.clear()).called(1);
+    });
+
     test('prepareGoogleSignIn should delegate to data source', () async {
       await authRepository.prepareGoogleSignIn();
 

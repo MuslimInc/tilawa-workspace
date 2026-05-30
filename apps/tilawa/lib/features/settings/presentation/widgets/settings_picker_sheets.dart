@@ -119,6 +119,21 @@ abstract final class SettingsSheets {
       onClose: () => Navigator.pop(context, false),
     );
   }
+
+  static Future<void> showDeleteAccountConfirmation(BuildContext context) {
+    return showTilawaConfirmSheet(
+      context: context,
+      title: context.l10n.deleteAccount,
+      message: context.l10n.deleteAccountConfirmation,
+      confirmLabel: context.l10n.deleteAccount,
+      cancelLabel: context.l10n.cancel,
+      onConfirm: () {
+        Navigator.pop(context, true);
+        context.read<AuthBloc>().add(const DeleteAccountEvent());
+      },
+      onClose: () => Navigator.pop(context, false),
+    );
+  }
 }
 
 class SettingsPrimaryColorSheet extends StatelessWidget {

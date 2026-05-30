@@ -37,5 +37,11 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<void> deleteAccount() async {
+    await _authProvider.deleteAccount();
+    await _googleSignInPrepare.clear();
+  }
+
+  @override
   UserEntity? get currentUser => _authProvider.currentUser;
 }

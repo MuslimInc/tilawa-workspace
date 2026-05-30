@@ -1,14 +1,18 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
 import 'package:tilawa/features/auth/domain/entities/user_entity.dart';
+import 'package:tilawa/features/auth/domain/usecases/delete_account.dart';
 import 'package:tilawa/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_in_with_google_use_case.dart';
 import 'package:tilawa/features/auth/domain/usecases/sign_out.dart';
 import 'package:tilawa/features/auth/domain/usecases/sync_device_token_use_case.dart';
 import 'package:tilawa/features/auth/presentation/bloc/auth_bloc.dart';
+
+import 'package:tilawa_core/errors/failures.dart';
 
 import '../../../../helpers/hydrated_bloc_test_helper.dart';
 import 'auth_bloc_test.mocks.dart';
@@ -16,6 +20,7 @@ import 'auth_bloc_test.mocks.dart';
 @GenerateMocks([
   SignInWithGoogleUseCase,
   SignOut,
+  DeleteAccount,
   GetCurrentUserUseCase,
   SyncDeviceTokenUseCase,
 ])
@@ -23,11 +28,13 @@ void main() {
   late AuthBloc authBloc;
   late MockSignInWithGoogleUseCase mockSignInWithGoogleUseCase;
   late MockSignOut mockSignOut;
+  late MockDeleteAccount mockDeleteAccount;
   late MockGetCurrentUserUseCase mockGetCurrentUserUseCase;
   late MockSyncDeviceTokenUseCase mockSyncDeviceTokenUseCase;
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
+    provideDummy<Either<Failure, void>>(const Right(null));
     await initializeHydratedStorageForTest();
   });
 
@@ -45,12 +52,14 @@ void main() {
   setUp(() {
     mockSignInWithGoogleUseCase = MockSignInWithGoogleUseCase();
     mockSignOut = MockSignOut();
+    mockDeleteAccount = MockDeleteAccount();
     mockGetCurrentUserUseCase = MockGetCurrentUserUseCase();
     mockSyncDeviceTokenUseCase = MockSyncDeviceTokenUseCase();
 
     authBloc = AuthBloc(
       mockSignInWithGoogleUseCase,
       mockSignOut,
+      mockDeleteAccount,
       mockGetCurrentUserUseCase,
       mockSyncDeviceTokenUseCase,
     );
@@ -166,6 +175,41 @@ void main() {
         verify: (_) {
           verify(mockSignOut()).called(1);
         },
+      );
+    });
+
+    group('DeleteAccountEvent', () {
+      blocTest<AuthBloc, AuthState>(
+        'emits [loading, unauthenticated] when delete succeeds',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+          when(
+            mockDeleteAccount(),
+          ).thenAnswer((_) async => const Right(null));
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const DeleteAccountEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.unauthenticated(),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
+        'returns to authenticated when delete is cancelled',
+        build: () {
+          when(mockGetCurrentUserUseCase()).thenReturn(tUser);
+          when(mockDeleteAccount()).thenAnswer(
+            (_) async => const Left(UserCancelledFailure()),
+          );
+          return authBloc;
+        },
+        seed: () => AuthState.authenticated(user: tUser),
+        act: (bloc) => bloc.add(const DeleteAccountEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          AuthState.authenticated(user: tUser),
+        ],
       );
     });
 

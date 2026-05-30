@@ -11,6 +11,9 @@ abstract class AuthProviderInterface {
   /// Sign out from the provider
   Future<void> signOut();
 
+  /// Deletes the signed-in Firebase user, re-authenticating when required.
+  Future<void> deleteAccount();
+
   /// Get the current user from the provider
   UserEntity? get currentUser;
 

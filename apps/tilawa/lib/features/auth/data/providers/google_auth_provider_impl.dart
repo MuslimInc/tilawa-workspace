@@ -75,6 +75,38 @@ class GoogleAuthProviderImpl implements AuthProviderInterface {
   }
 
   @override
+  Future<void> deleteAccount() async {
+    final User? user = _firebaseAuth.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    try {
+      await user.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code != 'requires-recent-login') {
+        rethrow;
+      }
+      final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+      if (idToken == null) {
+        throw FirebaseAuthException(
+          code: 'requires-recent-login',
+          message: 'Google re-authentication was cancelled',
+        );
+      }
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        idToken: idToken,
+      );
+      await user.reauthenticateWithCredential(credential);
+      await user.delete();
+    }
+
+    await _googleSignIn.signOut();
+  }
+
+  @override
   UserEntity? get currentUser {
     final User? firebaseUser = _firebaseAuth.currentUser;
     if (firebaseUser == null) {

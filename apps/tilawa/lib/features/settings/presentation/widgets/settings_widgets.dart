@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
@@ -270,9 +272,14 @@ class _SettingsShareAppTileState extends State<SettingsShareAppTile> {
 }
 
 class SettingsLogoutSection extends StatelessWidget {
-  const SettingsLogoutSection({super.key, required this.onLogout});
+  const SettingsLogoutSection({
+    super.key,
+    required this.onLogout,
+    required this.onDeleteAccount,
+  });
 
   final VoidCallback onLogout;
+  final VoidCallback onDeleteAccount;
 
   @override
   Widget build(BuildContext context) {
@@ -286,15 +293,42 @@ class SettingsLogoutSection extends StatelessWidget {
           title: context.l10n.settingsYourAccount,
           children: [
             TilawaSettingsTile(
+              icon: FluentIcons.delete_24_regular,
+              title: context.l10n.deleteAccount,
+              iconColor: Theme.of(context).colorScheme.error,
+              onTap: onDeleteAccount,
+              showDivider: false,
+            ),
+            TilawaSettingsTile(
               icon: FluentIcons.sign_out_24_regular,
               title: context.l10n.logout,
               iconColor: Theme.of(context).colorScheme.error,
               onTap: onLogout,
-              showDivider: false,
             ),
           ],
         );
       },
+    );
+  }
+}
+
+class SettingsLegalSection extends StatelessWidget {
+  const SettingsLegalSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return TilawaSettingsGroup(
+      title: l10n.settingsLegalSection,
+      children: [
+        TilawaSettingsTile(
+          icon: FluentIcons.shield_24_regular,
+          title: l10n.privacyPolicy,
+          onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
+          showDivider: false,
+        ),
+      ],
     );
   }
 }

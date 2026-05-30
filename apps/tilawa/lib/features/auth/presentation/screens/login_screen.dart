@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
+import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../features/localization/presentation/bloc/localization_bloc.dart';
@@ -117,6 +119,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SignInWithGoogleEvent(),
                         ),
                       ),
+                      Gap(16),
+                      _LoginLegalFooter(),
                       const Gap(48),
                     ],
                   ),
@@ -155,7 +159,7 @@ class _GoogleSignInButton extends StatelessWidget {
           backgroundColor: Colors.white,
           foregroundColor: Theme.of(context).colorScheme.primary,
           elevation: 0,
-          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 24),
+          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 24),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -178,11 +182,31 @@ class _GoogleSignInButton extends StatelessWidget {
                 width: 24,
                 height: 24,
               ),
-              Gap(12),
+              const Gap(12),
               Text(context.l10n.continueWithGoogle),
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LoginLegalFooter extends StatelessWidget {
+  const _LoginLegalFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => openLegalUrl(AppLegalUrls.privacyPolicy),
+      child: Text(
+        context.l10n.privacyPolicy,
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: Colors.white.withValues(alpha: 0.92),
+          decoration: TextDecoration.underline,
+          decorationColor: Colors.white.withValues(alpha: 0.92),
+        ),
+        textAlign: TextAlign.center,
       ),
     );
   }

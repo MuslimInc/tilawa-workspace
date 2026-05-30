@@ -87,6 +87,40 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
   }
 
   @override
+  Future<void> deleteAccount() async {
+    final User? user = _firebaseAuth.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    try {
+      await user.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code != 'requires-recent-login') {
+        rethrow;
+      }
+      final GoogleIdTokenCredential? credential = await _credentialManager
+          .saveGoogleCredential();
+      if (credential?.idToken == null) {
+        throw FirebaseAuthException(
+          code: 'requires-recent-login',
+          message: 'Google re-authentication was cancelled',
+        );
+      }
+      final OAuthCredential firebaseCredential =
+          GoogleAuthProvider.credential(idToken: credential!.idToken);
+      await user.reauthenticateWithCredential(firebaseCredential);
+      await user.delete();
+    }
+
+    try {
+      await _credentialManager.logout();
+    } catch (_) {
+      // Best-effort cleanup after account deletion.
+    }
+  }
+
+  @override
   UserEntity? get currentUser {
     final User? firebaseUser = _firebaseAuth.currentUser;
     if (firebaseUser == null) {
