@@ -12,6 +12,35 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **1.0.6** (build **38**) |
+| Git tag | `v1.0.6+38` (pending) |
+| Date | 2026-05-31 |
+| Track | Internal testing → Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Delete your account from Settings when you no longer need Tilawa
+• Privacy policy link on sign-in and in Settings
+• Smoother launch splash and updated Tilawa branding from recent builds
+• Prayer location permission recovery and stability improvements
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• احذف حسابك من الإعدادات عندما لا تحتاج تلاوة
+• رابط سياسة الخصوصية في تسجيل الدخول وفي الإعدادات
+• شاشة بدء أنعم وتحديث هوية تلاوة من الإصدارات الأخيرة
+• تحسينات استقرار أوقات الصلاة وإذن الموقع
+```
+
+---
+
+## Previous current release (1.0.5+32)
+
+| Field | Value |
+|-------|--------|
 | Version | **1.0.5** (build **32**) |
 | Git tag | [`v1.0.5+32`](https://github.com/muhammadkamel/tilawa-workspace/releases/tag/v1.0.5%2B32) |
 | Date | 2026-05-24 |
