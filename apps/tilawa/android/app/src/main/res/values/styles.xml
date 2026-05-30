@@ -6,6 +6,7 @@
              launch drawable/background used before Android 12 and during the
              Flutter handoff window. -->
         <item name="windowSplashScreenBackground">@color/launch_background</item>
+        <!-- Logo is drawn in Flutter at splash_logo_size; avoid a second OS-scaled icon. -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/transparent_splash_icon</item>
         <item name="postSplashScreenTheme">@style/NormalTheme</item>
     </style>
@@ -18,10 +19,13 @@
     <style name="NormalTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowBackground">@drawable/launch_window_background</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:statusBarColor">@color/launch_background</item>
-        <item name="android:navigationBarColor">@color/launch_background</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
+        <!-- Transparent bars: Flutter edge-to-edge + [SystemChrome] own icon brightness. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Dark status/nav icons on light scaffold (onboarding, home). Launch splash
+             uses green + light icons via Flutter until handoff. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
         <item name="android:windowOptOutEdgeToEdgeEnforcement">false</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
