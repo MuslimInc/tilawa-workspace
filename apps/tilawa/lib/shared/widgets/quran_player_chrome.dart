@@ -131,8 +131,7 @@ abstract final class QuranPlayerRoutePolicy {
 
   /// Whether [location] is under the app navigation shell (bottom nav).
   static bool isInAppShell(String location) =>
-      AppShellRoutePolicy.showsBottomNavigation(location) ||
-      isMainShell(location);
+      AppShellRoutePolicy.isInsideAppShell(location);
 
   /// Top-of-stack route (e.g. `/history`), including shell pushes.
   ///
@@ -144,18 +143,26 @@ abstract final class QuranPlayerRoutePolicy {
 
 /// Bottom navigation visibility for [AppShellScreen].
 abstract final class AppShellRoutePolicy {
-  static const List<String> _noBottomNavPrefixes = <String>[
+  /// Routes declared outside [TypedShellRoute] (full-screen, no shell chrome).
+  static const List<String> _outsideAppShellPrefixes = <String>[
     '/quran-reader',
     '/quran-last-read',
-    '/athkar',
     '/splash',
     '/onboarding',
     '/login',
     '/share/',
+    '/athkar',
+    '/player',
   ];
 
+  /// Bottom navigation is only shown on the main tab shell (`/`).
   static bool showsBottomNavigation(String location) {
-    for (final String prefix in _noBottomNavPrefixes) {
+    return QuranPlayerRoutePolicy.isMainShell(location);
+  }
+
+  /// Whether [location] is rendered inside [AppShellScreen] (with or without nav).
+  static bool isInsideAppShell(String location) {
+    for (final String prefix in _outsideAppShellPrefixes) {
       if (location.startsWith(prefix)) {
         return false;
       }

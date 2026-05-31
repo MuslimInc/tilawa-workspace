@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:equatable/equatable.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
@@ -46,6 +44,9 @@ class _AppShellScreenState extends State<AppShellScreen> {
   late final ShellTabCoordinator _shellTabCoordinator;
   int _lastHandledIndex = 0;
   late final MainScreenCubit _mainScreenCubit;
+  DateTime? _lastRecitersNavTap;
+
+  static const Duration _recitersNavDoubleTapWindow = Duration(milliseconds: 400);
 
   @override
   void initState() {
@@ -79,27 +80,14 @@ class _AppShellScreenState extends State<AppShellScreen> {
     return state.currentIndex == 0 && _isOnMainShell();
   }
 
-  List<_NavDestination> _buildDestinations(
-    BuildContext context, {
-    required bool recitersNavSearchMode,
-  }) {
+  List<_NavDestination> _buildDestinations(BuildContext context) {
     return [
       _NavDestination(
         index: 0,
-        icon: recitersNavSearchMode
-            ? FluentIcons.search_24_regular
-            : FluentIcons.person_24_regular,
-        activeIcon: recitersNavSearchMode
-            ? FluentIcons.search_24_filled
-            : FluentIcons.person_24_filled,
-        label: recitersNavSearchMode
-            ? context.l10n.bottomNavSearch
-            : context.l10n.bottomNavReciters,
+        icon: FluentIcons.person_24_regular,
+        activeIcon: FluentIcons.person_24_filled,
+        label: context.l10n.bottomNavReciters,
         identifier: 'reciters_tab',
-        semanticsLabel: recitersNavSearchMode
-            ? context.l10n.a11yBottomNavRecitersSearch
-            : context.l10n.a11yBottomNavRecitersTab,
-        recitersNavSearchMode: recitersNavSearchMode,
       ),
       _NavDestination(
         index: 1,
@@ -171,6 +159,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
     final bool inRecitersExperience = _isRecitersTabActive(state);
 
     if (!inRecitersExperience) {
+      _lastRecitersNavTap = null;
       if (!_isOnMainShell()) {
         _ensureMainShellRoute(context);
       }
@@ -178,7 +167,15 @@ class _AppShellScreenState extends State<AppShellScreen> {
       return;
     }
 
-    _mainScreenCubit.requestRecitersSearchFocus();
+    final DateTime now = DateTime.now();
+    final DateTime? previousTap = _lastRecitersNavTap;
+    _lastRecitersNavTap = now;
+
+    if (previousTap != null &&
+        now.difference(previousTap) <= _recitersNavDoubleTapWindow) {
+      _lastRecitersNavTap = null;
+      _mainScreenCubit.requestRecitersSearchFocus();
+    }
   }
 
   void _onDestinationSelected(
@@ -198,6 +195,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
       return;
     }
 
+    _lastRecitersNavTap = null;
     _navigateToShellTab(context, destination.index!);
   }
 
@@ -241,10 +239,8 @@ class _AppShellScreenState extends State<AppShellScreen> {
                   ? QuranPlayerLayoutInsets.phoneShellBottomReserve(context)
                   : context.floatingBottomPadding;
 
-              final bool recitersNavSearchMode = _isRecitersTabActive(state);
               final List<_NavDestination> navDestinations = _buildDestinations(
                 context,
-                recitersNavSearchMode: recitersNavSearchMode,
               );
               final List<TilawaNavDestination> adaptiveDestinations =
                   navDestinations
@@ -254,23 +250,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
                           icon: d.icon,
                           activeIcon: d.activeIcon,
                           identifier: d.identifier,
-                          iconBuilder: d.recitersNavSearchMode != null
-                              ? (
-                                  context, {
-                                  required isSelected,
-                                  required color,
-                                }) {
-                                  return Semantics(
-                                    label: d.semanticsLabel,
-                                    button: true,
-                                    child: _RecitersNavIcon(
-                                      searchMode: d.recitersNavSearchMode!,
-                                      isSelected: isSelected,
-                                      color: color,
-                                    ),
-                                  );
-                                }
-                              : d.svgPath == null
+                          iconBuilder: d.svgPath == null
                               ? null
                               : (
                                   context, {
@@ -324,8 +304,6 @@ class _AppShellScreenState extends State<AppShellScreen> {
 }
 
 class _AppShellChrome extends StatelessWidget {
-  static String? _shellPlayerDebugSignature;
-
   const _AppShellChrome({
     required this.state,
     required this.adaptiveDestinations,
@@ -354,7 +332,9 @@ class _AppShellChrome extends StatelessWidget {
 
     context.read<QuranPlayerChromeNotifier>().updateShellChrome(
       QuranPlayerShellChrome(
-        bottomNavBarHeight: bottomNavBarHeight,
+        bottomNavBarHeight: AppShellRoutePolicy.showsBottomNavigation(location)
+            ? bottomNavBarHeight
+            : 0,
         isKeyboardOpen: isKeyboardOpen,
         isAudioBindingDeferred: state.isAudioBindingDeferred,
         hostAbsorbsBottomSafeArea: context.isNarrow,
@@ -382,49 +362,6 @@ class _AppShellChrome extends StatelessWidget {
         (playerShouldShow && !isKeyboardOpen && !context.isNarrow)
         ? context.tokens.spaceSmall
         : 0;
-
-    final AudioPlayerState audioSnapshot = context
-        .read<AudioPlayerBloc>()
-        .state;
-    if (showPlayer && context.isNarrow) {
-      final String shellSig = <String>[
-        'route=$location',
-        'playerHeight=$playerHeight',
-        'playerShouldShow=$playerShouldShow',
-        'bindingDeferred=${state.isAudioBindingDeferred}',
-        'kb=$isKeyboardOpen',
-        'status=${audioSnapshot.status}',
-        'audio=${audioSnapshot.currentAudio?.id ?? 'null'}',
-        'dismissed=${audioSnapshot.dismissedAudioId}',
-        'shouldShowBottom=${audioSnapshot.shouldShowBottomPlayer}',
-      ].join('|');
-      if (_shellPlayerDebugSignature != shellSig) {
-        _shellPlayerDebugSignature = shellSig;
-        final String line = jsonEncode(<String, dynamic>{
-          'sessionId': 'd8f2b1',
-          'runId': 'pre-fix-2',
-          'hypothesisId': 'H8',
-          'location': 'app_shell_screen.dart:_AppShellChrome.build',
-          'message': playerHeight > 0
-              ? 'Shell reserves mini-player slot'
-              : 'Shell mini-player slot height zero',
-          'data': <String, dynamic>{
-            'route': location,
-            'narrow': true,
-            'playerHeight': playerHeight,
-            'playerShouldShow': playerShouldShow,
-            'isAudioBindingDeferred': state.isAudioBindingDeferred,
-            'isKeyboardOpen': isKeyboardOpen,
-            'status': audioSnapshot.status.toString(),
-            'currentAudioId': audioSnapshot.currentAudio?.id,
-            'dismissedAudioId': audioSnapshot.dismissedAudioId,
-            'shouldShowBottomPlayer': audioSnapshot.shouldShowBottomPlayer,
-          },
-          'timestamp': DateTime.now().millisecondsSinceEpoch,
-        });
-        debugPrint('DBG_D8F2B1 $line');
-      }
-    }
 
     final Widget shellChild = state.isShellActivated
         ? child
@@ -528,55 +465,6 @@ class _BoolListenable implements ValueListenable<bool> {
   void removeListener(VoidCallback listener) {}
 }
 
-/// Animated reciters/search glyph for the dual-mode bottom-nav item.
-class _RecitersNavIcon extends StatelessWidget {
-  const _RecitersNavIcon({
-    required this.searchMode,
-    required this.isSelected,
-    required this.color,
-  });
-
-  final bool searchMode;
-  final bool isSelected;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TilawaDesignTokens tokens = theme.tokens;
-    final double iconSize =
-        theme.componentTokens.adaptiveShell.navButtonIconSize;
-    final IconData glyph = searchMode
-        ? (isSelected
-              ? FluentIcons.search_24_filled
-              : FluentIcons.search_24_regular)
-        : (isSelected
-              ? FluentIcons.person_24_filled
-              : FluentIcons.person_24_regular);
-
-    return AnimatedSwitcher(
-      duration: tokens.durationFast,
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
-      transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.88, end: 1).animate(animation),
-            child: child,
-          ),
-        );
-      },
-      child: Icon(
-        glyph,
-        key: ValueKey<bool>(searchMode),
-        size: iconSize,
-        color: color,
-      ),
-    );
-  }
-}
-
 @immutable
 class _NavDestination extends Equatable {
   const _NavDestination({
@@ -586,8 +474,6 @@ class _NavDestination extends Equatable {
     this.svgPath,
     this.index,
     this.identifier,
-    this.semanticsLabel,
-    this.recitersNavSearchMode,
   });
   final String label;
   final IconData icon;
@@ -595,10 +481,6 @@ class _NavDestination extends Equatable {
   final String? svgPath;
   final int? index;
   final String? identifier;
-  final String? semanticsLabel;
-
-  /// When non-null, the shell renders [_RecitersNavIcon] for this destination.
-  final bool? recitersNavSearchMode;
 
   @override
   List<Object?> get props => [
@@ -608,7 +490,5 @@ class _NavDestination extends Equatable {
     svgPath,
     index,
     identifier,
-    semanticsLabel,
-    recitersNavSearchMode,
   ];
 }
