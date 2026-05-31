@@ -162,7 +162,7 @@ void main() {
       expect(unselectedContainer, findsNothing);
     });
 
-    testWidgets('long press shows overlay with selected letter', (
+    testWidgets('press shows overlay with selected letter immediately', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -178,16 +178,71 @@ void main() {
         ),
       );
 
-      // Long press on a letter
-      final letterFinder = find.text('ج');
-      await tester.longPress(letterFinder);
-      await tester.pump(const Duration(milliseconds: 300));
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('ج')),
+      );
+      await tester.pump();
 
-      // Overlay should appear with the letter
-      expect(find.text('ج'), findsWidgets); // At least 2 (list + overlay)
+      expect(find.text('ج'), findsWidgets);
+      expect(
+        find.byKey(const Key('alphabet_scrollbar_overlay')),
+        findsOneWidget,
+      );
+
+      await gesture.up();
+      await tester.pump();
     });
 
-    testWidgets('long press move updates selected letter', (tester) async {
+    testWidgets('overlay is centered on screen', (tester) async {
+      const screenWidth = 400.0;
+      const screenHeight = 600.0;
+
+      await tester.pumpWidget(
+        SizedBox(
+          width: screenWidth,
+          height: screenHeight,
+          child: _wrap(
+            TilawaAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: (_) {},
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('ج')),
+      );
+      await tester.pump();
+
+      final overlayElement = tester.element(
+        find.byKey(const Key('alphabet_scrollbar_overlay')),
+      );
+      final overlaySize = Theme.of(
+        overlayElement,
+      ).componentTokens.alphabetScrollbar.overlaySize;
+      final screenSize = MediaQuery.sizeOf(overlayElement);
+      final expectedLeft = (screenSize.width - overlaySize) / 2;
+      final expectedTop = (screenSize.height - overlaySize) / 2;
+
+      final positioned = tester.widget<Positioned>(
+        find.ancestor(
+          of: find.byKey(const Key('alphabet_scrollbar_overlay')),
+          matching: find.byType(Positioned),
+        ),
+      );
+      expect(positioned.left, expectedLeft);
+      expect(positioned.top, expectedTop);
+
+      await gesture.up();
+      await tester.pump();
+    });
+
+    testWidgets('press move updates selected letter', (tester) async {
       final selections = <String?>[];
 
       await tester.pumpWidget(
@@ -207,20 +262,16 @@ void main() {
         ),
       );
 
-      // Start long press on first letter
       final gesture = await tester.startGesture(
         tester.getCenter(find.text('ا')),
       );
-      await tester.pump(const Duration(milliseconds: 500));
-
-      // Drag down to another letter
+      await tester.pump();
       await gesture.moveBy(const Offset(0, 100));
       await tester.pump();
 
       await gesture.up();
       await tester.pump();
 
-      // Should have selected the first letter at minimum
       expect(selections.isNotEmpty, true);
     });
 
@@ -229,7 +280,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         SizedBox(
-          height: 100, // Constrain height to force scrolling
+          height: 100,
           child: _wrap(
             TilawaAlphabetScrollbar(
               letters: letters,
@@ -243,11 +294,9 @@ void main() {
         ),
       );
 
-      // Initial render
       await tester.pump();
 
-      // Verify scrollbar renders
-      expect(find.byType(ListView), findsOneWidget);
+      expect(find.byType(TilawaAlphabetScrollbar), findsOneWidget);
     });
 
     testWidgets('empty letters list renders without error', (tester) async {
@@ -264,10 +313,10 @@ void main() {
         ),
       );
 
-      expect(find.byType(ListView), findsOneWidget);
+      expect(find.byType(TilawaAlphabetScrollbar), findsOneWidget);
     });
 
-    testWidgets('tap callbacks work with GestureDetector', (tester) async {
+    testWidgets('press callbacks select letter on release', (tester) async {
       final selections = <String?>[];
 
       await tester.pumpWidget(
@@ -312,6 +361,92 @@ void main() {
 
       expect(selected, isNull);
     });
+
+    testWidgets(
+      'tap on selected letter removes highlight immediately',
+      (tester) async {
+        String? selected = 'ب';
+
+        Finder circleFor(String letter) => find.ancestor(
+          of: find.text(letter),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Container &&
+                w.decoration is BoxDecoration &&
+                (w.decoration as BoxDecoration).shape == BoxShape.circle,
+          ),
+        );
+
+        await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (context, setState) {
+              return _wrap(
+                TilawaAlphabetScrollbar(
+                  letters: letters,
+                  selectedLetter: selected,
+                  onLetterSelected: (letter) =>
+                      setState(() => selected = letter),
+                  onPanUpdate: (_) {},
+                  onPanStart: (_) {},
+                  onPanEnd: (_) {},
+                ),
+              );
+            },
+          ),
+        );
+
+        expect(circleFor('ب'), findsOneWidget);
+
+        await tester.tap(find.text('ب'));
+        await tester.pump();
+
+        expect(selected, isNull);
+        expect(circleFor('ب'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'external clear of selectedLetter removes highlight immediately',
+      (tester) async {
+        String? currentLetter = 'ب';
+        late StateSetter outerSetState;
+
+        Finder circleFor(String letter) => find.ancestor(
+          of: find.text(letter),
+          matching: find.byWidgetPredicate(
+            (w) =>
+                w is Container &&
+                w.decoration is BoxDecoration &&
+                (w.decoration as BoxDecoration).shape == BoxShape.circle,
+          ),
+        );
+
+        await tester.pumpWidget(
+          StatefulBuilder(
+            builder: (context, setState) {
+              outerSetState = setState;
+              return _wrap(
+                TilawaAlphabetScrollbar(
+                  letters: letters,
+                  selectedLetter: currentLetter,
+                  onLetterSelected: (_) {},
+                  onPanUpdate: (_) {},
+                  onPanStart: (_) {},
+                  onPanEnd: (_) {},
+                ),
+              );
+            },
+          ),
+        );
+
+        expect(circleFor('ب'), findsOneWidget);
+
+        outerSetState(() => currentLetter = null);
+        await tester.pump();
+
+        expect(circleFor('ب'), findsNothing);
+      },
+    );
     testWidgets(
       'didUpdateWidget updates selected state when selectedLetter changes externally',
       (tester) async {
@@ -392,9 +527,11 @@ void main() {
       expect(panEndCount, 1);
     });
 
-    testWidgets('tap on whitespace below last letter does not show overlay', (
+    testWidgets('tap on whitespace below last letter selects last letter', (
       tester,
     ) async {
+      String? selected;
+
       await tester.pumpWidget(
         SizedBox(
           width: 400,
@@ -403,7 +540,7 @@ void main() {
             TilawaAlphabetScrollbar(
               letters: letters,
               selectedLetter: null,
-              onLetterSelected: (_) {},
+              onLetterSelected: (letter) => selected = letter,
               onPanUpdate: (_) {},
               onPanStart: (_) {},
               onPanEnd: (_) {},
@@ -415,27 +552,23 @@ void main() {
       final scrollbarRect = tester.getRect(
         find.byType(TilawaAlphabetScrollbar),
       );
-      final theme = Theme.of(
-        tester.element(find.byType(TilawaAlphabetScrollbar)),
-      );
-      final tokens = theme.componentTokens.alphabetScrollbar;
-      final letterHeight = tokens.itemExtent;
-      final totalLettersHeight = letters.length * letterHeight;
 
-      // Tap well below the last letter row
-      await tester.tapAt(
-        Offset(
-          scrollbarRect.center.dx,
-          scrollbarRect.top + totalLettersHeight + 50,
-        ),
+      final gesture = await tester.startGesture(
+        Offset(scrollbarRect.center.dx, scrollbarRect.bottom - 8),
       );
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
+      expect(
+        find.byKey(const Key('alphabet_scrollbar_overlay')),
+        findsOneWidget,
+      );
 
-      expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
+      await gesture.up();
+      await tester.pump();
+
+      expect(selected, letters.last);
     });
 
-    testWidgets('pan into whitespace below last letter does not select it', (
+    testWidgets('scrub into bottom of track selects last letter', (
       tester,
     ) async {
       final selections = <String?>[];
@@ -460,37 +593,24 @@ void main() {
       final scrollbarRect = tester.getRect(
         find.byType(TilawaAlphabetScrollbar),
       );
-      final theme = Theme.of(
-        tester.element(find.byType(TilawaAlphabetScrollbar)),
-      );
-      final tokens = theme.componentTokens.alphabetScrollbar;
-      final letterHeight = tokens.itemExtent;
-      final totalLettersHeight = letters.length * letterHeight;
 
-      // Start pan on the first letter
       final gesture = await tester.startGesture(
         Offset(scrollbarRect.center.dx, scrollbarRect.top + 10),
       );
       await tester.pump();
 
-      // Move into whitespace below all letters
       await gesture.moveTo(
-        Offset(
-          scrollbarRect.center.dx,
-          scrollbarRect.top + totalLettersHeight + 50,
-        ),
+        Offset(scrollbarRect.center.dx, scrollbarRect.bottom - 8),
       );
       await tester.pump();
 
       await gesture.up();
       await tester.pump();
 
-      // The last letter should never have been selected because the pointer
-      // was in whitespace, not on an actual letter row.
-      expect(selections.contains('ر'), isFalse);
+      expect(selections.contains(letters.last), isTrue);
     });
 
-    testWidgets('pan into whitespace above first letter does not select it', (
+    testWidgets('scrub into top of track selects first letter', (
       tester,
     ) async {
       final selections = <String?>[];
@@ -516,23 +636,62 @@ void main() {
         find.byType(TilawaAlphabetScrollbar),
       );
 
-      // Start pan on the last letter
       final gesture = await tester.startGesture(
         Offset(scrollbarRect.center.dx, scrollbarRect.bottom - 10),
       );
       await tester.pump();
 
-      // Move into whitespace above all letters
       await gesture.moveTo(
-        Offset(scrollbarRect.center.dx, scrollbarRect.top - 50),
+        Offset(scrollbarRect.center.dx, scrollbarRect.top + 8),
       );
       await tester.pump();
 
       await gesture.up();
       await tester.pump();
 
-      // The first letter should never have been selected
-      expect(selections.contains('ا'), isFalse);
+      expect(selections.contains(letters.first), isTrue);
+    });
+
+    testWidgets('scrub continues when finger drifts horizontally off rail', (
+      tester,
+    ) async {
+      final selections = <String?>[];
+
+      await tester.pumpWidget(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: _wrap(
+            TilawaAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: selections.add,
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final scrollbarRect = tester.getRect(
+        find.byType(TilawaAlphabetScrollbar),
+      );
+
+      final gesture = await tester.startGesture(
+        Offset(scrollbarRect.center.dx, scrollbarRect.top + 10),
+      );
+      await tester.pump();
+
+      await gesture.moveTo(
+        Offset(scrollbarRect.left - 40, scrollbarRect.bottom - 8),
+      );
+      await tester.pump();
+
+      await gesture.up();
+      await tester.pump();
+
+      expect(selections.contains(letters.last), isTrue);
     });
 
     testWidgets('overlay is dismissed after tap completes', (tester) async {
@@ -552,15 +711,12 @@ void main() {
       final gesture = await tester.press(find.text('ج'));
       await tester.pump();
       await gesture.up();
-      // Advance past the 600ms Future.delayed in onTapUp.
-      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump();
 
-      // _draggedLetter is null after tap, so overlayChildBuilder returns
-      // SizedBox.shrink() — the keyed overlay container is not in the tree.
       expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
     });
 
-    testWidgets('onTapCancel dismisses overlay immediately', (tester) async {
+    testWidgets('pointer cancel dismisses overlay immediately', (tester) async {
       await tester.pumpWidget(
         _wrap(
           TilawaAlphabetScrollbar(
@@ -574,15 +730,17 @@ void main() {
         ),
       );
 
-      final gesture = await tester.press(find.text('د'));
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('د')),
+      );
       await tester.pump();
       await gesture.cancel();
+      await tester.pump();
+
       expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
     });
 
-    testWidgets('long-press overlay stays visible until onLongPressEnd', (
-      tester,
-    ) async {
+    testWidgets('overlay stays visible until pointer up', (tester) async {
       await tester.pumpWidget(
         SizedBox(
           width: 400,
@@ -603,11 +761,7 @@ void main() {
       final gesture = await tester.startGesture(
         tester.getCenter(find.text('ث')),
       );
-      await tester.pump(const Duration(milliseconds: 700));
-      // onLongPressStart schedules _overlayController.show() in a
-      // post-frame callback; pump once more so the overlay renders.
       await tester.pump();
-      // Overlay visible during long-press
       expect(
         find.byKey(const Key('alphabet_scrollbar_overlay')),
         findsOneWidget,
@@ -615,7 +769,6 @@ void main() {
 
       await gesture.up();
       await tester.pump();
-      // Overlay hidden after long-press ends
       expect(find.byKey(const Key('alphabet_scrollbar_overlay')), findsNothing);
     });
 
@@ -638,16 +791,13 @@ void main() {
       await tester.press(find.text('ت'));
       await tester.pump();
 
-      // Replace with empty widget while overlay is active
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pump();
 
-      // Pump past the 600ms timer to ensure dispose handled it safely
-      await tester.pump(const Duration(milliseconds: 700));
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('didUpdateWidget scrolls to newly selected letter', (
+    testWidgets('didUpdateWidget keeps letters evenly distributed', (
       tester,
     ) async {
       final manyLetters = List.generate(
@@ -663,7 +813,7 @@ void main() {
             outerSetState = setState;
             return _wrap(
               SizedBox(
-                height: 120, // force scrollbar to scroll
+                height: 320,
                 child: TilawaAlphabetScrollbar(
                   letters: manyLetters,
                   selectedLetter: currentLetter,
@@ -679,17 +829,10 @@ void main() {
       );
       await tester.pump();
 
-      final scrollbar = tester.widget<ListView>(find.byType(ListView));
-      final controller = scrollbar.controller;
-      expect(controller, isNotNull);
-      final initialOffset = controller!.offset;
-
-      // Select the last letter, which should be off-screen and trigger a scroll
       outerSetState(() => currentLetter = manyLetters.last);
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 100));
 
-      expect(controller.offset, greaterThan(initialOffset));
+      expect(find.text(manyLetters.last), findsOneWidget);
     });
   });
 }
