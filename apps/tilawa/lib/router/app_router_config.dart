@@ -31,6 +31,8 @@ import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/reciters/presentation/screens/reciter_details_loader.dart';
 import '../features/reciters/presentation/screens/reciter_details_screen.dart';
+import '../features/reciters/presentation/widgets/reciters_search_route_transition.dart';
+import '../features/reciters/presentation/widgets/reciters_search_screen_scope.dart';
 import '../features/settings/presentation/widgets/settings_screen_scope.dart';
 import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
@@ -49,6 +51,7 @@ part 'app_router_config.g.dart';
 @TypedShellRoute<AppShellRoute>(
   routes: <TypedRoute<RouteData>>[
     TypedGoRoute<HomeRoute>(path: '/'),
+    TypedGoRoute<RecitersSearchRoute>(path: '/reciters/search'),
     TypedGoRoute<ReciterDetailsRoute>(path: '/reciter/:reciterId'),
     TypedGoRoute<SupportRoute>(path: '/support'),
     TypedGoRoute<PremiumRoute>(path: '/premium'),
@@ -90,6 +93,37 @@ class HomeRoute extends GoRouteData with $HomeRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const MainScreen();
+  }
+}
+
+class RecitersSearchRoute extends GoRouteData with $RecitersSearchRoute {
+  const RecitersSearchRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      transitionDuration: RecitersSearchRouteTransition.transitionDuration,
+      reverseTransitionDuration:
+          RecitersSearchRouteTransition.reverseTransitionDuration,
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        Widget child,
+      ) {
+        return RecitersSearchRouteTransition(
+          animation: animation,
+          child: child,
+        );
+      },
+      child: build(context, state),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const RecitersSearchScreenScope();
   }
 }
 

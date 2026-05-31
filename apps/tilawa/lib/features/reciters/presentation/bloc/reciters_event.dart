@@ -11,14 +11,6 @@ class LoadReciters extends RecitersEvent {
   const LoadReciters();
 }
 
-class SearchRecitersEvent extends RecitersEvent {
-  const SearchRecitersEvent(this.query);
-  final String query;
-
-  @override
-  List<Object?> get props => [query];
-}
-
 class FilterByLetter extends RecitersEvent {
   const FilterByLetter(this.letter);
   final String letter;
@@ -29,10 +21,6 @@ class FilterByLetter extends RecitersEvent {
 
 class ClearLetterFilter extends RecitersEvent {
   const ClearLetterFilter();
-}
-
-class ClearSearch extends RecitersEvent {
-  const ClearSearch();
 }
 
 class ToggleFavoritesFilter extends RecitersEvent {

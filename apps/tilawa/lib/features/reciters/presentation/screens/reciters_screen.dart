@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/reciters/presentation/utils/reciter_list_moshaf_label.dart';
+import 'package:tilawa/features/reciters/presentation/utils/reciters_letter_index_preference.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/reciters_catalog_search_field.dart';
 import 'package:tilawa/features/tour_guide/presentation/widgets/tour_target.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -106,7 +107,6 @@ class RecitersScreen extends StatefulWidget {
 }
 
 class _RecitersScreenState extends State<RecitersScreen> {
-  static const Duration _searchDebounceDuration = Duration(milliseconds: 200);
   static const Duration _initialRecitersLoadDelay = Duration(
     milliseconds: 1500,
   );
@@ -115,10 +115,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
     milliseconds: 500,
   );
 
-  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final FocusNode _focusNode = FocusNode();
-  Timer? _searchDebounceTimer;
   Timer? _initialLoadTimer;
   Timer? _loadedResultsActivationTimer;
   Timer? _startupLiteUiTimer;
@@ -126,6 +123,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
   bool _allowHeavyLoadedResults = false;
   bool _showLetterIndex = false;
   bool _letterIndexDefaultResolved = false;
+  bool _letterIndexRestorePending = true;
   bool _introTourAttempted = false;
   late final FavoritesCubit _favoritesCubit;
 
@@ -133,7 +131,7 @@ class _RecitersScreenState extends State<RecitersScreen> {
   void initState() {
     super.initState();
     _favoritesCubit = getIt<FavoritesCubit>();
-    _scrollController.addListener(_dismissSearchKeyboardOnUserScroll);
+    unawaited(_restoreLetterIndexVisibility());
     final RecitersBloc recitersBloc = context.read<RecitersBloc>();
     final RecitersState startupState = recitersBloc.state;
 
@@ -159,10 +157,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
         if (!mounted || recitersBloc.state is! RecitersInitial) {
           return;
         }
-        debugPrint(
-          '[AppLaunch] source=RecitersScreen initial-load started '
-          'from splash readiness',
-        );
         recitersBloc.add(const LoadReciters());
       });
       return;
@@ -177,13 +171,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      debugPrint(
-        '[AppLaunch] source=RecitersScreen initial-load scheduled '
-        'delayMs=${_initialRecitersLoadDelay.inMilliseconds}',
-      );
       _initialLoadTimer = Timer(_initialRecitersLoadDelay, () {
         if (!mounted) return;
-        debugPrint('[AppLaunch] source=RecitersScreen initial-load started');
         recitersBloc.add(const LoadReciters());
       });
     });
@@ -243,55 +232,12 @@ class _RecitersScreenState extends State<RecitersScreen> {
     });
   }
 
-  void _dismissSearchKeyboardOnUserScroll() {
-    if (!_focusNode.hasFocus || !_scrollController.hasClients) {
-      return;
-    }
-    final ScrollDirection direction =
-        _scrollController.position.userScrollDirection;
-    if (direction == ScrollDirection.idle) {
-      return;
-    }
-    _focusNode.unfocus();
-  }
-
-  /// Re-tap on the reciters tab: scroll up, then focus search with keyboard.
-  Future<void> _activateSearchFromShell() async {
-    final Duration scrollDuration = context.tokens.durationFast;
-    if (_scrollController.hasClients && _scrollController.offset > 0) {
-      await _scrollController.animateTo(
-        0,
-        duration: scrollDuration,
-        curve: Curves.easeOutCubic,
-      );
-    }
-    if (!mounted) {
-      return;
-    }
-    _requestSearchFocus();
-  }
-
-  void _requestSearchFocus() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_focusNode.canRequestFocus) {
-        return;
-      }
-      _focusNode.requestFocus();
-      final int offset = _searchController.text.length;
-      _searchController.selection = TextSelection.collapsed(offset: offset);
-    });
-  }
-
   @override
   void dispose() {
-    _scrollController.removeListener(_dismissSearchKeyboardOnUserScroll);
     _startupLiteUiTimer?.cancel();
     _loadedResultsActivationTimer?.cancel();
     _initialLoadTimer?.cancel();
-    _searchDebounceTimer?.cancel();
-    _searchController.dispose();
     _scrollController.dispose();
-    _focusNode.dispose();
     _favoritesCubit.close();
     super.dispose();
   }
@@ -314,9 +260,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
       return;
     }
 
-    _focusNode.unfocus();
-    _searchDebounceTimer?.cancel();
-    _searchController.clear();
     context.read<RecitersBloc>().add(FilterByLetter(letter));
     _scrollToTop();
   }
@@ -326,59 +269,75 @@ class _RecitersScreenState extends State<RecitersScreen> {
     context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
   }
 
+  Future<void> _restoreLetterIndexVisibility() async {
+    try {
+      final store = RecitersLetterIndexPreference(
+        getIt<SharedPreferencesAsync>(),
+      );
+      final saved = await store.loadSavedVisibility();
+      if (!mounted) {
+        return;
+      }
+
+      if (saved != null) {
+        setState(() {
+          _showLetterIndex = saved;
+          _letterIndexDefaultResolved = true;
+          _letterIndexRestorePending = false;
+        });
+        return;
+      }
+
+      _letterIndexRestorePending = false;
+      _applyLetterIndexWidthDefault();
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      _letterIndexRestorePending = false;
+      _applyLetterIndexWidthDefault();
+    }
+  }
+
+  Future<void> _persistLetterIndexVisibility(bool show) async {
+    try {
+      await RecitersLetterIndexPreference(
+        getIt<SharedPreferencesAsync>(),
+      ).saveVisibility(show);
+    } catch (_) {
+      // Preference write is best-effort; UI state is already updated.
+    }
+  }
+
+  void _applyLetterIndexWidthDefault() {
+    if (_letterIndexDefaultResolved || !mounted) {
+      return;
+    }
+    final width = MediaQuery.sizeOf(context).width;
+    final show = letterIndexDefaultVisibleForWidth(width);
+    _letterIndexDefaultResolved = true;
+    setState(() => _showLetterIndex = show);
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_letterIndexDefaultResolved) {
       return;
     }
-    _letterIndexDefaultResolved = true;
-    _showLetterIndex =
-        MediaQuery.sizeOf(context).width >=
-        kRecitersAlphabetDefaultVisibleBreakpoint;
+    if (_letterIndexRestorePending) {
+      return;
+    }
+    _applyLetterIndexWidthDefault();
   }
 
   void _toggleLetterIndex() {
+    final nextValue = !_showLetterIndex;
     setState(() {
-      _showLetterIndex = !_showLetterIndex;
+      _showLetterIndex = nextValue;
+      _letterIndexDefaultResolved = true;
     });
-    if (!_showLetterIndex) {
-      _clearLetterFilter();
-    }
-  }
-
-  void _onSearchChanged(String value) {
-    _searchDebounceTimer?.cancel();
-    context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
-
-    if (value.isEmpty) {
-      context.read<RecitersBloc>().add(const ClearSearch());
-      return;
-    }
-
-    _searchDebounceTimer = Timer(_searchDebounceDuration, () {
-      if (!mounted) {
-        return;
-      }
-
-      context.read<RecitersBloc>().add(SearchRecitersEvent(value));
-      _scrollToTop();
-    });
-  }
-
-  void _onSearchSubmitted(String value) {
-    _searchDebounceTimer?.cancel();
-    if (value.trim().isEmpty) {
-      return;
-    }
-    context.read<RecitersBloc>().add(SearchRecitersEvent(value));
-    _scrollToTop();
-  }
-
-  void _clearSearch() {
-    _searchDebounceTimer?.cancel();
-    _searchController.clear();
-    context.read<RecitersBloc>().add(const ClearSearch());
+    unawaited(_persistLetterIndexVisibility(nextValue));
   }
 
   void _toggleFavoritesFilter(BuildContext context) {
@@ -392,10 +351,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
   }
 
   void _clearAllFilters() {
-    _focusNode.unfocus();
-    _searchDebounceTimer?.cancel();
-    _searchController.clear();
-    context.read<RecitersBloc>().add(const ClearSearch());
     context.read<RecitersBloc>().add(const ClearLetterFilter());
     context.read<RecitersBloc>().add(const ClearFavoritesFilter());
     context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
@@ -442,22 +397,14 @@ class _RecitersScreenState extends State<RecitersScreen> {
           listeners: [
             BlocListener<MainScreenCubit, MainScreenState>(
               listenWhen: (previous, current) =>
-                  previous.currentIndex == 0 && current.currentIndex != 0,
-              listener: (context, state) {
-                _focusNode.unfocus();
-              },
-            ),
-            BlocListener<MainScreenCubit, MainScreenState>(
-              listenWhen: (previous, current) =>
                   previous.recitersSearchFocusTick !=
                   current.recitersSearchFocusTick,
               listener: (context, state) {
-                unawaited(_activateSearchFromShell());
+                const RecitersSearchRoute().push(context);
               },
             ),
             BlocListener<LocalizationBloc, LocalizationState>(
               listener: (context, state) {
-                _searchController.clear();
                 context.read<AlphabetScrollbarBloc>().add(
                   const ClearSelection(),
                 );
@@ -494,7 +441,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 // re-sorted by _filterReciters but we don't need to rebuild)
                 final onlyFavoritesChanged =
                     previous.favoriteIds != current.favoriteIds &&
-                    previous.searchQuery == current.searchQuery &&
                     previous.selectedLetter == current.selectedLetter &&
                     previous.showFavoritesOnly == current.showFavoritesOnly;
 
@@ -503,7 +449,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                 }
 
                 return previous.filteredReciters != current.filteredReciters ||
-                    previous.searchQuery != current.searchQuery ||
                     previous.selectedLetter != current.selectedLetter ||
                     previous.showFavoritesOnly != current.showFavoritesOnly;
               }
@@ -513,31 +458,22 @@ class _RecitersScreenState extends State<RecitersScreen> {
               final bool letterIndexAvailable =
                   state is RecitersLoaded &&
                   _allowHeavyLoadedResults &&
-                  state.filteredReciters.isNotEmpty &&
-                  state.searchQuery.isEmpty;
+                  state.filteredReciters.isNotEmpty;
               final ColorScheme colorScheme = Theme.of(context).colorScheme;
-              final bool hideQuickFilters =
-                  state is RecitersLoaded && (state).searchQuery.isNotEmpty;
-              final double appBarHeight = hideQuickFilters
-                  ? TilawaAppBarConfig.catalogTitleAndSearchHeight(context)
-                  : TilawaAppBarConfig.catalogTitleSearchAndFilterRowHeight(
-                      context,
-                    );
+              final double appBarHeight =
+                  TilawaAppBarConfig.catalogTitleSearchAndFilterRowHeight(
+                    context,
+                  );
 
               return Scaffold(
                 resizeToAvoidBottomInset: false,
                 backgroundColor: colorScheme.surface,
                 appBar: _RecitersTilawaAppBar(
                   bottomHeight: appBarHeight,
-                  hideQuickFilters: hideQuickFilters,
                   state: state,
                   letterIndexAvailable: letterIndexAvailable,
                   showLetterIndex: _showLetterIndex,
-                  searchController: _searchController,
-                  focusNode: _focusNode,
-                  onSearchChanged: _onSearchChanged,
-                  onSearchSubmitted: _onSearchSubmitted,
-                  onClearSearch: _clearSearch,
+                  onOpenSearch: () => const RecitersSearchRoute().push(context),
                   onToggleFavorites: () => _toggleFavoritesFilter(innerContext),
                   onToggleLetterIndex: _toggleLetterIndex,
                   onClearFavoritesFilter: () {
@@ -554,7 +490,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   allowHeavyLoadedResults: _allowHeavyLoadedResults,
                   showLetterIndex: _showLetterIndex,
                   scrollController: _scrollController,
-                  onClearSearch: _clearSearch,
                   onClearAll: _clearAllFilters,
                   onLetterSelected: _onLetterSelected,
                   onRetry: _refreshReciters,
@@ -610,7 +545,6 @@ class _RecitersSliverScreen extends StatelessWidget {
     required this.allowHeavyLoadedResults,
     required this.showLetterIndex,
     required this.scrollController,
-    required this.onClearSearch,
     required this.onClearAll,
     required this.onLetterSelected,
     required this.onRetry,
@@ -620,7 +554,6 @@ class _RecitersSliverScreen extends StatelessWidget {
   final bool allowHeavyLoadedResults;
   final bool showLetterIndex;
   final ScrollController scrollController;
-  final VoidCallback onClearSearch;
   final VoidCallback onClearAll;
   final ValueChanged<String?> onLetterSelected;
   final Future<void> Function() onRetry;
@@ -633,46 +566,47 @@ class _RecitersSliverScreen extends StatelessWidget {
     final bool letterIndexAvailable =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
-        (state as RecitersLoaded).filteredReciters.isNotEmpty &&
-        (state as RecitersLoaded).searchQuery.isEmpty;
+        (state as RecitersLoaded).filteredReciters.isNotEmpty;
     final bool showLetterIndexRail = letterIndexAvailable && showLetterIndex;
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        const Positioned.fill(child: _RecitersAmbientBackground()),
-        RefreshIndicator.adaptive(
-          onRefresh: onRetry,
-          child: CustomScrollView(
-            controller: scrollController,
-            physics: const AlwaysScrollableScrollPhysics(
-              parent: BouncingScrollPhysics(),
-            ),
-            slivers: [
-              _RecitersResultSection(
-                state: state,
-                allowHeavyLoadedResults: allowHeavyLoadedResults,
-                reserveScrollbarSpace: showLetterIndexRail,
-                reserveScrollbarOnLeading: isRtl,
-                onClearSearch: onClearSearch,
-                onClearAll: onClearAll,
-                onRetry: onRetry,
+    return MediaQuery(
+      data: MediaQuery.of(context).removeViewInsets(removeBottom: true),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          const Positioned.fill(child: _RecitersAmbientBackground()),
+          RefreshIndicator.adaptive(
+            onRefresh: onRetry,
+            child: CustomScrollView(
+              controller: scrollController,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-            ],
+              slivers: [
+                _RecitersResultSection(
+                  state: state,
+                  allowHeavyLoadedResults: allowHeavyLoadedResults,
+                  reserveScrollbarSpace: showLetterIndexRail,
+                  reserveScrollbarOnLeading: isRtl,
+                  onClearAll: onClearAll,
+                  onRetry: onRetry,
+                ),
+              ],
+            ),
           ),
-        ),
-        if (showLetterIndexRail)
-          _RecitersLetterIndexGutter(
-            isRtl: isRtl,
-            verticalMargin: letterIndexVerticalMargin,
-            reciters: (state as RecitersLoaded).reciters,
-            scrollController: scrollController,
-            onLetterSelected: onLetterSelected,
-            scrollbarSemanticsLabel: context.l10n.a11yRecitersLetterIndex,
-            scrollbarSemanticsHint:
-                context.l10n.a11yRecitersAlphabetScrollbarHint,
-          ),
-      ],
+          if (showLetterIndexRail)
+            _RecitersLetterIndexGutter(
+              isRtl: isRtl,
+              verticalMargin: letterIndexVerticalMargin,
+              reciters: (state as RecitersLoaded).reciters,
+              scrollController: scrollController,
+              onLetterSelected: onLetterSelected,
+              scrollbarSemanticsLabel: context.l10n.a11yRecitersLetterIndex,
+              scrollbarSemanticsHint:
+                  context.l10n.a11yRecitersAlphabetScrollbarHint,
+            ),
+        ],
+      ),
     );
   }
 }
@@ -745,7 +679,6 @@ class _RecitersResultSection extends StatelessWidget {
     required this.allowHeavyLoadedResults,
     required this.reserveScrollbarSpace,
     required this.reserveScrollbarOnLeading,
-    required this.onClearSearch,
     required this.onClearAll,
     required this.onRetry,
   });
@@ -754,7 +687,6 @@ class _RecitersResultSection extends StatelessWidget {
   final bool allowHeavyLoadedResults;
   final bool reserveScrollbarSpace;
   final bool reserveScrollbarOnLeading;
-  final VoidCallback onClearSearch;
   final VoidCallback onClearAll;
   final Future<void> Function() onRetry;
 
@@ -783,7 +715,6 @@ class _RecitersResultSection extends StatelessWidget {
       if (loadedState.filteredReciters.isEmpty) {
         return _RecitersEmptySliver(
           state: loadedState,
-          onClearSearch: onClearSearch,
           onClearAll: onClearAll,
         );
       }
@@ -844,12 +775,10 @@ class _RecitersErrorSliver extends StatelessWidget {
 class _RecitersEmptySliver extends StatelessWidget {
   const _RecitersEmptySliver({
     required this.state,
-    required this.onClearSearch,
     required this.onClearAll,
   });
 
   final RecitersLoaded state;
-  final VoidCallback onClearSearch;
   final VoidCallback onClearAll;
 
   @override
@@ -859,66 +788,39 @@ class _RecitersEmptySliver extends StatelessWidget {
       child: _RecitersEmptyStateContent(
         key: const ValueKey('empty_state'),
         state: state,
-        onClearSearch: onClearSearch,
         onClearAll: onClearAll,
       ),
     );
   }
 }
 
-/// Empty catalog / filter / search messaging with calm, contextual actions.
+/// Empty catalog / filter messaging with calm, contextual actions.
 class _RecitersEmptyStateContent extends StatelessWidget {
   const _RecitersEmptyStateContent({
     super.key,
     required this.state,
-    required this.onClearSearch,
     required this.onClearAll,
   });
 
   final RecitersLoaded state;
-  final VoidCallback onClearSearch;
   final VoidCallback onClearAll;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
-    final String query = state.searchQuery.trim();
-    final bool hasSearchQuery = query.isNotEmpty;
-    final bool isSearchOnly =
-        hasSearchQuery &&
-        state.selectedLetter == null &&
-        !state.showFavoritesOnly;
-    final bool isFavoritesOnlyEmpty =
-        state.showFavoritesOnly && !hasSearchQuery;
-    final bool showClearAll = _hasActiveFilters(state) && !isSearchOnly;
+    final bool isFavoritesOnlyEmpty = state.showFavoritesOnly;
+    final bool showClearAll = _hasActiveFilters(state);
 
-    final String title = hasSearchQuery
-        ? context.l10n.noRecitersForQuery(query)
-        : isFavoritesOnlyEmpty
+    final String title = isFavoritesOnlyEmpty
         ? context.l10n.noFavorites
         : context.l10n.noRecitersFound;
-    final String? subtitle = hasSearchQuery
-        ? context.l10n.tryDifferentSearch
-        : null;
 
-    final IconData icon = hasSearchQuery
-        ? Icons.search_off_rounded
-        : isFavoritesOnlyEmpty
+    final IconData icon = isFavoritesOnlyEmpty
         ? Icons.favorite_border_rounded
         : Icons.person_off_outlined;
 
-    final Widget? primaryAction = isSearchOnly
-        ? TilawaButton(
-            text: context.l10n.recitersClearSearch,
-            variant: TilawaButtonVariant.outline,
-            leadingIcon: Icon(
-              Icons.close_rounded,
-              size: tokens.iconSizeSmall,
-            ),
-            onPressed: onClearSearch,
-          )
-        : showClearAll
+    final Widget? primaryAction = showClearAll
         ? TilawaButton(
             text: context.l10n.clearAll,
             variant: TilawaButtonVariant.outline,
@@ -933,7 +835,6 @@ class _RecitersEmptyStateContent extends StatelessWidget {
     return TilawaIllustratedState(
       icon: icon,
       title: title,
-      subtitle: subtitle,
       semanticLabel: title,
       maxWidth: tokens.contentMaxWidthForm * 0.6,
       primaryAction: primaryAction,
@@ -942,27 +843,18 @@ class _RecitersEmptyStateContent extends StatelessWidget {
 }
 
 Alignment _recitersEmptyContentAlignment(BuildContext context) {
-  final double keyboardInset = MediaQuery.viewInsetsOf(context).bottom;
-  if (keyboardInset > 0) {
-    return const Alignment(0, -0.45);
-  }
   return const Alignment(0, -0.2);
 }
 
-/// Reciters list chrome: title, optional filter chips, and search row.
+/// Reciters list chrome: title, search launcher, and filter chips.
 class _RecitersTilawaAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const _RecitersTilawaAppBar({
     required this.bottomHeight,
-    required this.hideQuickFilters,
     required this.state,
     required this.letterIndexAvailable,
     required this.showLetterIndex,
-    required this.searchController,
-    required this.focusNode,
-    required this.onSearchChanged,
-    required this.onSearchSubmitted,
-    required this.onClearSearch,
+    required this.onOpenSearch,
     required this.onToggleFavorites,
     required this.onToggleLetterIndex,
     required this.onClearFavoritesFilter,
@@ -971,18 +863,13 @@ class _RecitersTilawaAppBar extends StatelessWidget
   });
 
   final double bottomHeight;
-  final bool hideQuickFilters;
   final RecitersState state;
   final bool letterIndexAvailable;
 
   @override
   Size get preferredSize => Size.fromHeight(bottomHeight);
   final bool showLetterIndex;
-  final TextEditingController searchController;
-  final FocusNode focusNode;
-  final ValueChanged<String> onSearchChanged;
-  final ValueChanged<String> onSearchSubmitted;
-  final VoidCallback onClearSearch;
+  final VoidCallback onOpenSearch;
   final VoidCallback onToggleFavorites;
   final VoidCallback onToggleLetterIndex;
   final VoidCallback onClearFavoritesFilter;
@@ -1004,26 +891,24 @@ class _RecitersTilawaAppBar extends StatelessWidget
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          _SearchField(
-            controller: searchController,
-            focusNode: focusNode,
-            onChanged: onSearchChanged,
-            onSubmitted: onSearchSubmitted,
-            onClear: onClearSearch,
-          ),
-          if (!hideQuickFilters) ...[
-            SizedBox(height: tokens.spaceSmall),
-            _RecitersQuickFilterBar(
-              state: state,
-              loaded: loaded,
-              letterIndexAvailable: letterIndexAvailable,
-              showLetterIndex: showLetterIndex,
-              onToggleFavorites: onToggleFavorites,
-              onToggleLetterIndex: onToggleLetterIndex,
-              onClearLetterFilter: onClearLetterFilter,
-              onClearAllFilters: onClearAllFilters,
+          TourTarget(
+            targetId: RecitersTourTargets.searchField,
+            child: RecitersCatalogSearchField.launcher(
+              semanticsIdentifier: ReciterSemanticsIds.recitersSearchLauncher,
+              onTap: onOpenSearch,
             ),
-          ],
+          ),
+          SizedBox(height: tokens.spaceSmall),
+          _RecitersQuickFilterBar(
+            state: state,
+            loaded: loaded,
+            letterIndexAvailable: letterIndexAvailable,
+            showLetterIndex: showLetterIndex,
+            onToggleFavorites: onToggleFavorites,
+            onToggleLetterIndex: onToggleLetterIndex,
+            onClearLetterFilter: onClearLetterFilter,
+            onClearAllFilters: onClearAllFilters,
+          ),
         ],
       ),
     );
@@ -1124,10 +1009,14 @@ class _RecitersQuickFilterBar extends StatelessWidget {
           ),
         ),
       if (selectedLetter != null && !showLetterIndex)
-        catalogFilterPill(
+        Semantics(
+          identifier: ReciterSemanticsIds.recitersLetterFilterChip,
           label: l10n.recitersFilterChipLetter(selectedLetter),
-          selected: true,
-          onTap: onClearLetterFilter,
+          child: catalogFilterPill(
+            label: l10n.recitersFilterChipLetter(selectedLetter),
+            selected: true,
+            onTap: onClearLetterFilter,
+          ),
         ),
       const _RecitersFilterNavigationDivider(),
       Semantics(
@@ -1149,14 +1038,19 @@ class _RecitersQuickFilterBar extends StatelessWidget {
 
     return TilawaQuickFilterBar(
       trailing: showClearAll
-          ? TextButton(
-              onPressed: onClearAllFilters,
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-                minimumSize: Size(0, tokens.minInteractiveDimension),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ? Semantics(
+              identifier: ReciterSemanticsIds.recitersClearAllFilters,
+              button: true,
+              label: l10n.clearAll,
+              child: TextButton(
+                onPressed: onClearAllFilters,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+                  minimumSize: Size(0, tokens.minInteractiveDimension),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(l10n.clearAll),
               ),
-              child: Text(l10n.clearAll),
             )
           : null,
       children: pills,
@@ -1233,85 +1127,6 @@ class _RecitersAmbientPainter extends CustomPainter {
   bool shouldRepaint(_RecitersAmbientPainter oldDelegate) {
     return oldDelegate.colorScheme != colorScheme ||
         oldDelegate.tokens != tokens;
-  }
-}
-
-class _SearchField extends StatefulWidget {
-  const _SearchField({
-    required this.controller,
-    required this.focusNode,
-    required this.onChanged,
-    required this.onSubmitted,
-    required this.onClear,
-  });
-
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  final ValueChanged<String> onSubmitted;
-  final VoidCallback onClear;
-
-  @override
-  State<_SearchField> createState() => _SearchFieldState();
-}
-
-class _SearchFieldState extends State<_SearchField> {
-  @override
-  void initState() {
-    super.initState();
-    widget.focusNode.addListener(_onFocusChanged);
-  }
-
-  @override
-  void didUpdateWidget(covariant _SearchField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.focusNode != widget.focusNode) {
-      oldWidget.focusNode.removeListener(_onFocusChanged);
-      widget.focusNode.addListener(_onFocusChanged);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.focusNode.removeListener(_onFocusChanged);
-    super.dispose();
-  }
-
-  void _onFocusChanged() {
-    setState(() {});
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final TilawaDesignTokens tokens = Theme.of(context).tokens;
-    final bool isFocused = widget.focusNode.hasFocus;
-
-    return TourTarget(
-      targetId: RecitersTourTargets.searchField,
-      child: Semantics(
-        identifier: ReciterSemanticsIds.recitersSearchField,
-        child: AnimatedScale(
-          scale: isFocused ? 1 : 0.985,
-          duration: tokens.durationFast,
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.center,
-          child: TilawaSearchField(
-            controller: widget.controller,
-            focusNode: widget.focusNode,
-            hintText: context.l10n.searchReciters,
-            textInputAction: TextInputAction.search,
-            prefixIcon: FluentIcons.search_24_regular,
-            clearIcon: FluentIcons.dismiss_24_regular,
-            onChanged: widget.onChanged,
-            onSubmitted: widget.onSubmitted,
-            onClear: widget.onClear,
-            clearButtonTooltip: context.l10n.a11yClearRecitersSearch,
-            showShadow: false,
-            onTapOutside: (_) => widget.focusNode.unfocus(),
-          ),
-        ),
-      ),
-    );
   }
 }
 
@@ -1436,10 +1251,7 @@ class _ReciterListSliver extends StatelessWidget {
           sliver: SliverMainAxisGroup(
             slivers: [
               if (showResultSummary)
-                _RecitersResultSummarySliver(
-                  count: reciterCount,
-                  searchQuery: state.searchQuery,
-                ),
+                _RecitersResultSummarySliver(count: reciterCount),
               SliverList.builder(
                 itemCount: itemCount,
                 itemBuilder: (context, index) {
@@ -1472,27 +1284,19 @@ class _ReciterListSliver extends StatelessWidget {
 }
 
 bool _shouldShowRecitersResultSummary(RecitersLoaded state) {
-  return state.searchQuery.trim().isNotEmpty ||
-      state.showFavoritesOnly ||
-      state.selectedLetter != null;
+  return state.showFavoritesOnly || state.selectedLetter != null;
 }
 
 class _RecitersResultSummarySliver extends StatelessWidget {
-  const _RecitersResultSummarySliver({
-    required this.count,
-    this.searchQuery = '',
-  });
+  const _RecitersResultSummarySliver({required this.count});
 
   final int count;
-  final String searchQuery;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final String summary = searchQuery.trim().isNotEmpty
-        ? context.l10n.recitersSearchResultsFor(searchQuery.trim())
-        : context.l10n.recitersResultCount(count);
+    final String summary = context.l10n.recitersResultCount(count);
 
     return SliverToBoxAdapter(
       child: Padding(
@@ -1557,7 +1361,6 @@ class _ReciterGridSliver extends StatelessWidget {
               if (showResultSummary)
                 _RecitersResultSummarySliver(
                   count: state.filteredReciters.length,
-                  searchQuery: state.searchQuery,
                 ),
               SliverGrid.builder(
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
@@ -1633,17 +1436,14 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
 
   void _handleLetterSelection(String? letter) {
     if (letter == null) {
-      context.read<AlphabetScrollbarBloc>().add(const ClearSelection());
       widget.onLetterSelected(null);
       return;
     }
 
-    context.read<AlphabetScrollbarBloc>().add(SelectLetter(letter));
-
     final int index = widget.allReciters.indexWhere(
       (item) => item.letter == letter,
     );
-    if (index != -1) {
+    if (index != -1 && widget.scrollController.hasClients) {
       widget.scrollController.jumpTo(0.0);
     }
 
@@ -1656,13 +1456,12 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
       return const SizedBox.shrink();
     }
 
-    final selectedLetter = context
-        .watch<AlphabetScrollbarBloc>()
-        .state
-        .selectedLetter;
+    final selectedLetter = switch (context.watch<RecitersBloc>().state) {
+      RecitersLoaded(:final selectedLetter) => selectedLetter,
+      _ => null,
+    };
 
     return TilawaAlphabetScrollbar(
-      key: const ValueKey('alphabet_scrollbar'),
       letters: _letters,
       selectedLetter: selectedLetter,
       onLetterSelected: _handleLetterSelection,
@@ -1678,6 +1477,12 @@ class _ReciterAlphabetScrollbarState extends State<ReciterAlphabetScrollbar> {
           context.read<AlphabetScrollbarBloc>().add(const EndDragging()),
       scrollbarSemanticsLabel: widget.scrollbarSemanticsLabel,
       scrollbarSemanticsHint: widget.scrollbarSemanticsHint,
+      scrollbarSemanticsIdentifier:
+          ReciterSemanticsIds.recitersAlphabetScrollbar,
+      overlaySemanticsIdentifier: ReciterSemanticsIds.alphabetScrollbarOverlay,
+      selectedLetterStableSemanticsId:
+          ReciterSemanticsIds.recitersAlphabetLetterSelected,
+      selectedLetterSemanticsId: ReciterSemanticsIds.alphabetLetterSelected,
     );
   }
 }
@@ -1716,9 +1521,7 @@ EdgeInsetsGeometry _recitersResultPadding(
 }
 
 bool _hasActiveFilters(RecitersLoaded state) {
-  return state.searchQuery.isNotEmpty ||
-      state.selectedLetter != null ||
-      state.showFavoritesOnly;
+  return state.selectedLetter != null || state.showFavoritesOnly;
 }
 
 int _structuralFilterCount(RecitersLoaded state) {
@@ -1728,11 +1531,7 @@ int _structuralFilterCount(RecitersLoaded state) {
   ].where((bool active) => active).length;
 }
 
-/// Header [Clear all] when more than one constraint is active.
+/// Header [Clear all] when more than one structural filter is active.
 bool _showHeaderClearAll(RecitersLoaded state) {
-  final int structural = _structuralFilterCount(state);
-  if (structural > 1) {
-    return true;
-  }
-  return structural >= 1 && state.searchQuery.isNotEmpty;
+  return _structuralFilterCount(state) > 1;
 }

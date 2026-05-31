@@ -5,8 +5,8 @@ import 'package:injectable/injectable.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart' as entity;
 import 'package:tilawa_core/errors/failures.dart';
 
+import '../../domain/services/reciter_catalog_index.dart';
 import '../../domain/usecases/get_reciters_use_case.dart';
-import '../utils/reciter_search_query_normalizer.dart';
 
 part 'reciters_event.dart';
 part 'reciters_state.dart';
@@ -18,16 +18,15 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     List<entity.ReciterEntity>? initialReciters,
   }) : super(_initialState(initialReciters)) {
     on<LoadReciters>(_onLoadReciters);
-    on<SearchRecitersEvent>(_onSearchReciters);
     on<FilterByLetter>(_onFilterByLetter);
     on<ClearLetterFilter>(_onClearLetterFilter);
-    on<ClearSearch>(_onClearSearch);
     on<ToggleFavoritesFilter>(_onToggleFavoritesFilter);
     on<SyncFavoriteIds>(_onSyncFavoriteIds);
     on<ClearFavoritesFilter>(_onClearFavoritesFilter);
     on<LanguageChanged>(_onLanguageChanged);
   }
   final GetRecitersUseCase _getRecitersUseCase;
+  ReciterCatalogIndex? _catalogIndex;
 
   static RecitersState _initialState(
     List<entity.ReciterEntity>? initialReciters,
@@ -41,13 +40,17 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     );
   }
 
+  ReciterCatalogIndex _indexFor(List<entity.ReciterEntity> reciters) {
+    if (_catalogIndex == null || _catalogIndex!.reciters.length != reciters.length) {
+      _catalogIndex = ReciterCatalogIndex.from(reciters);
+    }
+    return _catalogIndex!;
+  }
+
   Future<void> _onLoadReciters(
     LoadReciters event,
     Emitter<RecitersState> emit,
   ) async {
-    final String searchQuery = state is RecitersLoaded
-        ? (state as RecitersLoaded).searchQuery
-        : '';
     final String? selectedLetter = state is RecitersLoaded
         ? (state as RecitersLoaded).selectedLetter
         : null;
@@ -61,17 +64,16 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(const RecitersLoading());
 
     try {
-      // Prefer domain use case to fetch once and share data
       final Either<Failure, List<entity.ReciterEntity>> result =
           await _getRecitersUseCase();
 
       await result.fold((failure) async => emit(RecitersError(failure)), (
         recitersData,
       ) async {
+        _catalogIndex = ReciterCatalogIndex.from(recitersData);
         final List<entity.ReciterEntity> filteredReciters = await Future(
           () => _filterReciters(
             recitersData,
-            searchQuery,
             selectedLetter,
             showFavoritesOnly,
             favoriteIds,
@@ -82,7 +84,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
           RecitersLoaded(
             reciters: recitersData,
             filteredReciters: filteredReciters,
-            searchQuery: searchQuery,
             selectedLetter: selectedLetter,
             showFavoritesOnly: showFavoritesOnly,
             favoriteIds: favoriteIds,
@@ -92,36 +93,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     } catch (e) {
       emit(RecitersError(UnexpectedFailure(e.toString())));
     }
-  }
-
-  Future<void> _onSearchReciters(
-    SearchRecitersEvent event,
-    Emitter<RecitersState> emit,
-  ) async {
-    if (state is! RecitersLoaded) {
-      return;
-    }
-
-    final currentState = state as RecitersLoaded;
-
-    // Offload filtering to prevent UI jank
-    final List<entity.ReciterEntity> filteredReciters = await Future(
-      () => _filterReciters(
-        currentState.reciters,
-        event.query,
-        null, // Clear letter filter when searching
-        currentState.showFavoritesOnly,
-        currentState.favoriteIds,
-      ),
-    );
-
-    emit(
-      currentState.copyWith(
-        searchQuery: event.query,
-        clearSelectedLetter: true,
-        filteredReciters: filteredReciters,
-      ),
-    );
   }
 
   Future<void> _onFilterByLetter(
@@ -134,11 +105,9 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
 
     final currentState = state as RecitersLoaded;
 
-    // Offload filtering to next event loop to prevent UI jank
     final List<entity.ReciterEntity> filteredReciters = await Future(
       () => _filterReciters(
         currentState.reciters,
-        '', // Clear search when filtering by letter
         event.letter,
         currentState.showFavoritesOnly,
         currentState.favoriteIds,
@@ -147,7 +116,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
 
     emit(
       currentState.copyWith(
-        searchQuery: '',
         selectedLetter: event.letter,
         filteredReciters: filteredReciters,
       ),
@@ -164,11 +132,9 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
 
     final currentState = state as RecitersLoaded;
 
-    // Offload filtering to prevent UI jank
     final List<entity.ReciterEntity> filteredReciters = await Future(
       () => _filterReciters(
         currentState.reciters,
-        currentState.searchQuery,
         null,
         currentState.showFavoritesOnly,
         currentState.favoriteIds,
@@ -178,28 +144,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(
       currentState.copyWith(
         clearSelectedLetter: true,
-        filteredReciters: filteredReciters,
-      ),
-    );
-  }
-
-  void _onClearSearch(ClearSearch event, Emitter<RecitersState> emit) {
-    if (state is! RecitersLoaded) {
-      return;
-    }
-
-    final currentState = state as RecitersLoaded;
-    final List<entity.ReciterEntity> filteredReciters = _filterReciters(
-      currentState.reciters,
-      '',
-      currentState.selectedLetter,
-      currentState.showFavoritesOnly,
-      currentState.favoriteIds,
-    );
-
-    emit(
-      currentState.copyWith(
-        searchQuery: '',
         filteredReciters: filteredReciters,
       ),
     );
@@ -218,7 +162,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
 
     final List<entity.ReciterEntity> filteredReciters = _filterReciters(
       currentState.reciters,
-      currentState.searchQuery,
       currentState.selectedLetter,
       newShowFavoritesOnly,
       event.favoriteIds,
@@ -245,7 +188,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     final List<entity.ReciterEntity> filteredReciters = await Future(
       () => _filterReciters(
         currentState.reciters,
-        currentState.searchQuery,
         currentState.selectedLetter,
         currentState.showFavoritesOnly,
         event.favoriteIds,
@@ -271,7 +213,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     final currentState = state as RecitersLoaded;
     final List<entity.ReciterEntity> filteredReciters = _filterReciters(
       currentState.reciters,
-      currentState.searchQuery,
       currentState.selectedLetter,
       false,
       currentState.favoriteIds,
@@ -287,51 +228,30 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
 
   List<entity.ReciterEntity> _filterReciters(
     List<entity.ReciterEntity> reciters,
-    String searchQuery,
     String? selectedLetter,
     bool showFavoritesOnly,
     Set<int> favoriteIds,
   ) {
-    final String normalizedQuery = ReciterSearchQueryNormalizer.normalize(
-      searchQuery,
-    );
+    final ReciterCatalogIndex index = _indexFor(reciters);
     final Set<int> favoriteIdsLookup = favoriteIds;
-    var filtered = reciters;
+    List<entity.ReciterEntity> filtered = selectedLetter == null
+        ? reciters
+        : index.recitersForLetter(selectedLetter);
 
-    // Filter by search query
-    if (normalizedQuery.isNotEmpty) {
-      filtered = filtered.where((entity.ReciterEntity reciter) {
-        final String name = ReciterSearchQueryNormalizer.normalize(
-          reciter.name,
-        );
-        final String letter = ReciterSearchQueryNormalizer.normalize(
-          reciter.letter,
-        );
-        return name.contains(normalizedQuery) ||
-            letter.contains(normalizedQuery);
-      }).toList();
-    }
-
-    // Filter by selected letter
-    if (selectedLetter != null) {
-      filtered = filtered.where((reciter) {
-        return reciter.letter == selectedLetter;
-      }).toList();
-    }
-
-    // Filter by favorites
     if (showFavoritesOnly) {
-      filtered = filtered.where((reciter) {
-        return favoriteIdsLookup.contains(reciter.id);
-      }).toList();
+      filtered = filtered
+          .where((entity.ReciterEntity reciter) {
+            return favoriteIdsLookup.contains(reciter.id);
+          })
+          .toList();
     }
 
     if (favoriteIdsLookup.isEmpty) {
       return filtered;
     }
 
-    final List<entity.ReciterEntity> favorites = [];
-    final List<entity.ReciterEntity> others = [];
+    final List<entity.ReciterEntity> favorites = <entity.ReciterEntity>[];
+    final List<entity.ReciterEntity> others = <entity.ReciterEntity>[];
 
     for (final entity.ReciterEntity reciter in filtered) {
       if (favoriteIdsLookup.contains(reciter.id)) {
@@ -341,7 +261,7 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
       }
     }
 
-    return [...favorites, ...others];
+    return <entity.ReciterEntity>[...favorites, ...others];
   }
 
   Future<void> _onLanguageChanged(
@@ -349,8 +269,9 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     Emitter<RecitersState> emit,
   ) async {
     if (state is RecitersLoaded) {
+      _catalogIndex = null;
       final currentState = state as RecitersLoaded;
-      emit(currentState.copyWith(searchQuery: '', clearSelectedLetter: true));
+      emit(currentState.copyWith(clearSelectedLetter: true));
       await _onLoadReciters(const LoadReciters(), emit);
     }
   }

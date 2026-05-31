@@ -19,14 +19,12 @@ class RecitersLoaded extends RecitersState {
   const RecitersLoaded({
     required this.reciters,
     required this.filteredReciters,
-    this.searchQuery = '',
     this.selectedLetter,
     this.showFavoritesOnly = false,
     this.favoriteIds = const <int>{},
   });
   final List<entity.ReciterEntity> reciters;
   final List<entity.ReciterEntity> filteredReciters;
-  final String searchQuery;
   final String? selectedLetter;
   final bool showFavoritesOnly;
   final Set<int> favoriteIds;
@@ -35,7 +33,6 @@ class RecitersLoaded extends RecitersState {
   List<Object?> get props => [
     reciters,
     filteredReciters,
-    searchQuery,
     selectedLetter,
     showFavoritesOnly,
     favoriteIds,
@@ -44,7 +41,6 @@ class RecitersLoaded extends RecitersState {
   RecitersLoaded copyWith({
     List<entity.ReciterEntity>? reciters,
     List<entity.ReciterEntity>? filteredReciters,
-    String? searchQuery,
     String? selectedLetter,
     bool? showFavoritesOnly,
     Set<int>? favoriteIds,
@@ -53,7 +49,6 @@ class RecitersLoaded extends RecitersState {
     return RecitersLoaded(
       reciters: reciters ?? this.reciters,
       filteredReciters: filteredReciters ?? this.filteredReciters,
-      searchQuery: searchQuery ?? this.searchQuery,
       selectedLetter: clearSelectedLetter
           ? null
           : (selectedLetter ?? this.selectedLetter),

@@ -26,7 +26,10 @@ abstract final class ReciterSemanticsIds {
 
   // ── Reciters list screen ─────────────────────────────────────────────────────
 
-  /// Search text field in the Reciters screen header bar.
+  /// Tappable search affordance on the Reciters catalog screen.
+  static const String recitersSearchLauncher = 'reciters_search_launcher';
+
+  /// Active search field on [RecitersSearchScreen].
   static const String recitersSearchField = 'reciters_search_field';
 
   /// Heart / favourites filter toggle button in the Reciters screen header.
@@ -35,6 +38,29 @@ abstract final class ReciterSemanticsIds {
   /// Letter-index toggle in the Reciters screen header bar.
   static const String recitersLetterIndexToggle =
       'reciters_letter_index_toggle';
+
+  /// Vertical A–Z scrubber rail on the Reciters list (when letter index is on).
+  static const String recitersAlphabetScrollbar =
+      'reciters_alphabet_scrollbar';
+
+  /// Center-screen letter bubble shown while scrubbing the alphabet rail.
+  static const String alphabetScrollbarOverlay = 'alphabet_scrollbar_overlay';
+
+  /// Selected letter on the scrubber rail (locale-independent).
+  static const String recitersAlphabetLetterSelected =
+      'reciters_alphabet_letter_selected';
+
+  /// Per-letter rail marker (dynamic suffix, e.g. `_أ`); prefer
+  /// [recitersAlphabetLetterSelected] in Maestro flows.
+  static String alphabetLetterSelected(String letter) =>
+      'reciters_alphabet_letter_${letter.toLowerCase()}';
+
+  /// Active letter filter chip when the rail is hidden but a letter is selected.
+  static const String recitersLetterFilterChip =
+      'reciters_letter_filter_chip';
+
+  /// Clears all active Reciters list filters (search, favorites, letter, …).
+  static const String recitersClearAllFilters = 'reciters_clear_all_filters';
 
   /// Opens the Downloads screen from the Reciters quick-filter bar.
   static const String recitersViewDownloads = 'reciters_view_downloads';
