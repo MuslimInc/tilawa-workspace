@@ -3,7 +3,7 @@
 #
 # Semantics identifiers used (see reciter_semantics_ids.dart):
 #   reciters_tab                  – bottom-nav destination
-#   reciters_search_field         – search text field
+#   reciters_search_launcher      – tap-to-open search on catalog screen
 #   reciters_favorites_toggle     – heart / favourites filter button
 #   reciter_card_1                – card for the reciter whose API id == 1
 #   reciter_details_surah_search  – surah-filter field in ReciterDetails
@@ -38,13 +38,13 @@ appId: com.tilawa.app
 
 # ── Wait for list to load ────────────────────────────────────────────────────
 # The RecitersScreen delays the API call by ~1.5 s after the startup-lite UI.
-# Poll until the search field is visible (means list has been populated).
+# Poll until the search launcher is visible (means list has been populated).
 - extendedWaitUntil:
     visible:
-      id: "reciters_search_field"
+      id: "reciters_search_launcher"
     timeout: 10000
 - assertVisible:
-    id: "reciters_search_field"
+    id: "reciters_search_launcher"
 
 - assertVisible:
     id: "reciters_favorites_toggle"
@@ -88,7 +88,7 @@ appId: com.tilawa.app
 # ── Assert we are back on the Reciters list ──────────────────────────────────
 - extendedWaitUntil:
     visible:
-      id: "reciters_search_field"
+      id: "reciters_search_launcher"
     timeout: 5000
 - assertVisible:
-    id: "reciters_search_field"
+    id: "reciters_search_launcher"

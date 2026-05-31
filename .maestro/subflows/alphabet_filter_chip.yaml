@@ -1,0 +1,52 @@
+appId: com.tilawa.app
+---
+# Select a letter, hide the rail → filter chip; clear via chip; switch letters.
+
+# Bottom of rail → last letter in index.
+- tapOn:
+    id: "reciters_alphabet_scrollbar"
+    point: "50%, 92%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+
+# Hide rail — letter filter persists as chip (Pinterest-style).
+- tapOn:
+    id: "reciters_letter_index_toggle"
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "reciters_alphabet_scrollbar"
+- assertVisible:
+    id: "reciters_letter_filter_chip"
+
+# Re-show rail — chip hides, selection stays on rail.
+- tapOn:
+    id: "reciters_letter_index_toggle"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_scrollbar"
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+- assertNotVisible:
+    id: "reciters_letter_filter_chip"
+
+# Switch letter via middle of rail.
+- tapOn:
+    id: "reciters_alphabet_scrollbar"
+    point: "50%, 50%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+
+# Hide rail again and clear letter filter via chip.
+- tapOn:
+    id: "reciters_letter_index_toggle"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_letter_filter_chip"
+
+- tapOn:
+    id: "reciters_letter_filter_chip"
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "reciters_letter_filter_chip"

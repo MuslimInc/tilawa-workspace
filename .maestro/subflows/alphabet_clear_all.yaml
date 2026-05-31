@@ -1,0 +1,85 @@
+appId: com.tilawa.app
+---
+# Multiple filters (favorites + letter) → header Clear all.
+# Search hides the letter rail (see letterIndexAvailable in reciters_screen.dart).
+
+- tapOn:
+    id: "reciters_letter_index_toggle"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_scrollbar"
+
+# Ensure reciter 1 is favourited, then enable the favourites filter.
+- scrollUntilVisible:
+    element:
+      id: "reciter_card_1"
+    direction: DOWN
+    timeout: 8000
+- tapOn:
+    id: "reciter_favorite_button_1"
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "reciters_favorites_toggle"
+- waitForAnimationToEnd
+
+# Empty favourites list hides the letter rail — recover if the heart tap removed a star.
+- runFlow:
+    when:
+      notVisible:
+        id: "reciters_alphabet_scrollbar"
+    commands:
+      - tapOn:
+          id: "reciters_favorites_toggle"
+      - waitForAnimationToEnd
+      - scrollUntilVisible:
+          element:
+            id: "reciter_card_1"
+          direction: DOWN
+          timeout: 8000
+      - tapOn:
+          id: "reciter_favorite_button_1"
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "reciters_favorites_toggle"
+      - waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "reciter_card_1"
+    timeout: 5000
+- assertVisible:
+    id: "reciters_alphabet_scrollbar"
+
+# Tap top of rail so the letter matches the first visible favourite reciter.
+- tapOn:
+    id: "reciters_alphabet_scrollbar"
+    point: "50%, 8%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+
+- extendedWaitUntil:
+    visible:
+      id: "reciters_clear_all_filters"
+    timeout: 5000
+- assertVisible:
+    id: "reciters_clear_all_filters"
+
+- tapOn:
+    id: "reciters_clear_all_filters"
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "reciters_clear_all_filters"
+- assertNotVisible:
+    id: "reciters_letter_filter_chip"
+
+# Restore — remove favourite so later runs start clean.
+- scrollUntilVisible:
+    element:
+      id: "reciter_card_1"
+    direction: DOWN
+    timeout: 8000
+- tapOn:
+    id: "reciter_favorite_button_1"
+- waitForAnimationToEnd

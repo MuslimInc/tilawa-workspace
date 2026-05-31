@@ -1,0 +1,44 @@
+appId: com.tilawa.app
+---
+# Press/scrub the rail: tap top, scrub down/up.
+# Element-relative swipes work in both LTR and RTL layouts.
+# Requires subflow ensure_reciters_alphabet to have run first.
+
+# Tap top → first letter in index (Arabic API letters, not A–Z).
+- tapOn:
+    id: "reciters_alphabet_scrollbar"
+    point: "50%, 8%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+
+# Scrub down → last letter in index.
+- swipe:
+    from:
+      id: "reciters_alphabet_scrollbar"
+    direction: DOWN
+    duration: 900
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+
+# Scrub up → first letter again.
+- swipe:
+    from:
+      id: "reciters_alphabet_scrollbar"
+    direction: UP
+    duration: 900
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+
+# Long scrub through full track (press-drag release).
+- swipe:
+    from:
+      id: "reciters_alphabet_scrollbar"
+      point: "50%, 10%"
+    direction: DOWN
+    duration: 1200
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"

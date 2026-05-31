@@ -1,0 +1,34 @@
+appId: com.tilawa.app
+---
+# Waits for reciters to load, then ensures the A–Z scrubber rail is visible.
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_launcher"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible:
+      id: "reciter_card_1"
+    timeout: 15000
+
+- extendedWaitUntil:
+    visible:
+      id: "reciters_alphabet_scrollbar"
+    timeout: 5000
+    optional: true
+
+- runFlow:
+    when:
+      notVisible:
+        id: "reciters_alphabet_scrollbar"
+    commands:
+      - tapOn:
+          id: "reciters_letter_index_toggle"
+      - waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "reciters_alphabet_scrollbar"
+    timeout: 10000
+- assertVisible:
+    id: "reciters_alphabet_scrollbar"

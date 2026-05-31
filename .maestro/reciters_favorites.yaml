@@ -3,7 +3,7 @@
 #
 # Semantics identifiers used (see reciter_semantics_ids.dart):
 #   reciters_tab                   – bottom-nav destination
-#   reciters_search_field          – used as a load-completion sentinel
+#   reciters_search_launcher       – used as a load-completion sentinel
 #   reciters_favorites_toggle      – heart / favourites filter button
 #   reciter_card_1                 – card for reciter id=1
 #   reciter_favorite_button_1      – heart button on that specific card
@@ -35,10 +35,10 @@ appId: com.tilawa.app
 # Wait for the reciters list to load
 - extendedWaitUntil:
     visible:
-      id: "reciters_search_field"
+      id: "reciters_search_launcher"
     timeout: 10000
 - assertVisible:
-    id: "reciters_search_field"
+    id: "reciters_search_launcher"
 
 # ── Add reciter #1 to favourites ─────────────────────────────────────────────
 # Scroll until reciter_card_1 is on screen, then tap its heart button.
