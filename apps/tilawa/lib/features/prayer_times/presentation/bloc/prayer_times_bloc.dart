@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz_plus/dartz_plus.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -69,11 +70,14 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     this._shouldRefreshPrayerTimesUseCase =
         const ShouldRefreshPrayerTimesUseCase(),
   ]) : super(const PrayerTimesState()) {
-    on<_LoadPrayerTimes>(_onLoadPrayerTimes);
-    on<_LoadMonthlyPrayerTimes>(_onLoadMonthlyPrayerTimes);
-    on<_UpdateLocation>(_onUpdateLocation);
+    on<_LoadPrayerTimes>(_onLoadPrayerTimes, transformer: restartable());
+    on<_LoadMonthlyPrayerTimes>(
+      _onLoadMonthlyPrayerTimes,
+      transformer: restartable(),
+    );
+    on<_UpdateLocation>(_onUpdateLocation, transformer: restartable());
     on<_UpdateSettings>(_onUpdateSettings);
-    on<_RefreshIfStale>(_onRefreshIfStale);
+    on<_RefreshIfStale>(_onRefreshIfStale, transformer: droppable());
     on<_SetManualLocation>(_onSetManualLocation);
   }
 
@@ -92,10 +96,6 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
     _LoadPrayerTimes event,
     Emitter<PrayerTimesState> emit,
   ) async {
-    if (state.status == PrayerTimesStatus.loading && !event.forceReschedule) {
-      return;
-    }
-
     emit(state.copyWith(status: PrayerTimesStatus.loading));
 
     // Load settings first
