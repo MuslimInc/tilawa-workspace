@@ -37,16 +37,16 @@ class TilawaFeedbackStrip extends StatelessWidget {
   /// Optional intent for semantics and default border treatment.
   final TilawaFeedbackVariant? variant;
 
-  static Color? _borderForVariant(
+  static Color? _accentForVariant(
     BuildContext context,
     TilawaFeedbackVariant? v,
   ) {
     if (v == null) return null;
     final ColorScheme cs = Theme.of(context).colorScheme;
     return switch (v) {
-      TilawaFeedbackVariant.info => cs.outline.withValues(alpha: 0.35),
-      TilawaFeedbackVariant.warning => cs.error.withValues(alpha: 0.45),
-      TilawaFeedbackVariant.error => cs.error.withValues(alpha: 0.72),
+      TilawaFeedbackVariant.info => cs.outline,
+      TilawaFeedbackVariant.warning => cs.error.withValues(alpha: 0.72),
+      TilawaFeedbackVariant.error => cs.error,
     };
   }
 
@@ -54,20 +54,34 @@ class TilawaFeedbackStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final componentTokens = theme.componentTokens.feedbackStrip;
-    final Color? resolvedBorder =
-        borderColor ?? _borderForVariant(context, variant);
+    final double radius = borderRadius ?? componentTokens.borderRadius;
+    final Color? accentColor =
+        borderColor ?? _accentForVariant(context, variant);
+
+    // Left-accent border pattern: thick left bar signals intent at a glance;
+    // a faint uniform border maintains shape without competing with it.
+    final BoxDecoration decoration;
+    if (accentColor != null) {
+      decoration = BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border(
+          left: BorderSide(color: accentColor, width: 3.5),
+          top: BorderSide(color: accentColor.withValues(alpha: 0.25)),
+          right: BorderSide(color: accentColor.withValues(alpha: 0.25)),
+          bottom: BorderSide(color: accentColor.withValues(alpha: 0.25)),
+        ),
+      );
+    } else {
+      decoration = BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(radius),
+      );
+    }
 
     return Container(
       padding: padding ?? componentTokens.padding,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(
-          borderRadius ?? componentTokens.borderRadius,
-        ),
-        border: resolvedBorder == null
-            ? null
-            : Border.all(color: resolvedBorder),
-      ),
+      decoration: decoration,
       child: Row(
         spacing: componentTokens.contentGap,
         children: [
