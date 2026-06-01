@@ -42,29 +42,36 @@ class PrayerTimeCard extends StatelessWidget {
         final Color accentColor = colorScheme.primary;
         final Color emphasisColor = colorScheme.onSurface;
 
+        final Color surfaceColor = isNext
+            ? colorScheme.primaryContainer.withValues(alpha: tokens.opacityMedium)
+            : colorScheme.surfaceContainerLow;
+        final Color borderColor = isNext
+            ? colorScheme.primary.withValues(alpha: tokens.opacitySubtle * 1.5)
+            : colorScheme.outlineVariant.withValues(alpha: tokens.opacitySubtle);
+        final double cardPadH = tokens.spaceMedium;
+        final double cardPadV = tightHeight ? tokens.spaceSmall : tokens.spaceMedium;
+
         return Container(
           decoration: BoxDecoration(
-            color: isNext
-                ? colorScheme.primaryContainer.withValues(
-                    alpha: tokens.opacityMedium,
-                  )
-                : colorScheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
-            border: Border.all(
-              color: isNext
-                  ? colorScheme.primary.withValues(
-                      alpha: tokens.opacitySubtle * 1.5,
-                    )
-                  : colorScheme.outlineVariant.withValues(
-                      alpha: tokens.opacityMedium,
+            color: surfaceColor,
+            borderRadius: BorderRadius.circular(tokens.radiusLarge),
+            border: Border.all(color: borderColor, width: tokens.borderWidthThin),
+            boxShadow: isNext
+                ? [
+                    BoxShadow(
+                      color: colorScheme.primary.withValues(
+                        alpha: tokens.opacityShadow * 0.5,
+                      ),
+                      blurRadius: tokens.blurShadow,
+                      offset: tokens.shadowOffsetSmall,
                     ),
-              width: tokens.borderWidthThin * 2,
-            ),
+                  ]
+                : null,
           ),
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceMedium,
-              vertical: tightHeight ? tokens.spaceSmall : tokens.spaceMedium,
+              horizontal: cardPadH,
+              vertical: cardPadV,
             ),
             child: _MainColumn(
               constraints: constraints,
@@ -165,7 +172,7 @@ class _HeaderRow extends StatelessWidget {
       children: [
         TilawaIconBox(
           icon: prayer.type.icon,
-          size: narrowTile ? 16 : 24,
+          size: narrowTile ? tokens.iconSizeSmall : tokens.iconSizeLarge,
           padding: tightHeight ? tokens.spaceExtraSmall : tokens.spaceSmall,
           backgroundColor: colorScheme.surfaceContainerHighest.withValues(
             alpha: tokens.opacityMedium,

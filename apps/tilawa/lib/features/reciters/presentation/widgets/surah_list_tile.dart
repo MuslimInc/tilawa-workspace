@@ -33,10 +33,26 @@ class SurahListTile extends StatelessWidget {
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
     final double tileRadius = tokens.radiusLarge;
-    final double badgeSize = tokens.iconSizeLargePlus;
+    // Leading badge size matches the reciter avatar (iconSizeLarge + spaceExtraLarge = 48dp).
+    final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
     final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
     final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
-    final Color idleFill = ReciterCatalogChrome.idleFill(colorScheme);
+    // Badge bg cycles through the same M3 container palette as the reciter avatar,
+    // keyed by surah index so adjacent rows are visually distinct.
+    final List<Color> badgePalette = [
+      colorScheme.primaryContainer,
+      colorScheme.secondaryContainer,
+      colorScheme.tertiaryContainer,
+      colorScheme.surfaceContainerHighest,
+    ];
+    final List<Color> badgeFgPalette = [
+      colorScheme.onPrimaryContainer,
+      colorScheme.onSecondaryContainer,
+      colorScheme.onTertiaryContainer,
+      colorScheme.onSurfaceVariant,
+    ];
+    final Color idleFill = badgePalette[index % badgePalette.length];
+    final Color idleFg = badgeFgPalette[index % badgeFgPalette.length];
 
     // Combine selectors to reduce overhead and subscription count
     final (bool isPlaying, bool isCurrentItem) = context
@@ -55,155 +71,134 @@ class SurahListTile extends StatelessWidget {
           return (playing, isCurrent);
         });
 
+    void handleTap() {
+      if (isCurrentItem) {
+        if (isPlaying) {
+          context
+              .read<AudioPlayerBloc>()
+              .add(const AudioPlayerEvent.pauseAudio());
+        } else {
+          context
+              .read<AudioPlayerBloc>()
+              .add(const AudioPlayerEvent.playAudio());
+        }
+      } else {
+        onTap();
+      }
+    }
+
     return Semantics(
       identifier: ReciterSemanticsIds.surahRow(
         surah.formattedId.isNotEmpty ? surah.formattedId : '${index + 1}',
       ),
       button: true,
-      child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(tileRadius),
-        border: isCurrentItem
-            ? BorderDirectional(
-                start: BorderSide(
-                  color: activeFill,
-                  width: tokens.borderWidthThin * 6,
-                ),
-              )
-            : Border.all(
-                color: ReciterCatalogChrome.hairline(colorScheme, tokens),
-                width: tokens.borderWidthThin,
-              ),
-      ),
-      child: Material(
-        color: isCurrentItem
-            ? ReciterCatalogChrome.activeRowFill(colorScheme)
-            : ReciterCatalogChrome.cardFill(colorScheme),
-        borderRadius: BorderRadius.circular(tileRadius),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(tileRadius),
-          onLongPress: () => showSurahOptionsSheet(context, surah),
-          onTap: () {
-            if (isCurrentItem) {
-              if (isPlaying) {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.pauseAudio(),
-                );
-              } else {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.playAudio(),
-                );
-              }
-            } else {
-              onTap();
-            }
-          },
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: tokens.spaceLarge,
-              vertical: tokens.spaceMedium + tokens.spaceTiny,
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: badgeSize,
-                  height: badgeSize,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    // §5: no shadow on in-card badges. Active state speaks via
-                    // the saturated activeColor fill + icon swap.
-                    color: isCurrentItem ? activeFill : idleFill,
-                    borderRadius: BorderRadius.circular(tokens.radiusMedium),
-                  ),
-                  child: isCurrentItem
-                      ? Icon(
-                          Icons.graphic_eq_rounded,
-                          color: activeOnFill,
-                          size: tokens.iconSizeMedium,
-                        )
-                      : Text(
-                          surah.formattedId.isNotEmpty
-                              ? surah.formattedId
-                              : '${index + 1}',
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: colorScheme.onSurface,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                ),
-                SizedBox(width: tokens.spaceMedium),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: tokens.spaceExtraSmall,
-                    children: [
-                      Text(
-                        surah.name,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        surah.reciterName,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w500,
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: tokens.spaceSmall,
-                  children: [
-                    DownloadButton(
-                      url: surah.id,
-                      surahTitle: surah.name,
-                      reciterName: reciterName,
-                      reciterId: reciterId,
-                      catalogChrome: true,
-                      initialIsDownloaded: surah.isDownloaded,
-                      initialIsDownloading: surah.isDownloading,
-                      initialProgress: surah.downloadProgress,
-                      identifier: ReciterSemanticsIds.surahDownloadButton(
-                        surah.formattedId.isNotEmpty
-                            ? surah.formattedId
-                            : '${index + 1}',
-                      ),
-                    ),
-                    AnimatedContainer(
-                      duration: tokens.durationFast,
-                      width: badgeSize,
-                      height: badgeSize,
-                      // §5: play badge stays flat — color alone signals active.
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCurrentItem ? activeFill : idleFill,
-                      ),
-                      child: Icon(
-                        isCurrentItem && isPlaying
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        color: isCurrentItem
-                            ? activeOnFill
-                            : colorScheme.onSurface,
-                        size: tokens.iconSizeLarge,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+      child: TilawaCard(
+        surface: TilawaCardSurface.flat,
+        backgroundColor: isCurrentItem
+            ? colorScheme.primaryContainer.withValues(alpha: tokens.opacitySubtle * 2)
+            : colorScheme.surface,
+        borderColor: isCurrentItem
+            ? activeFill
+            : colorScheme.outlineVariant,
+        borderWidth: isCurrentItem
+            ? tokens.borderWidthThin * 4
+            : tokens.borderWidthThin,
+        borderRadius: tileRadius,
+        padding: EdgeInsets.symmetric(
+          horizontal: tokens.spaceLarge,
+          vertical: tokens.spaceLarge,
         ),
-      ),
+        onTap: handleTap,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Leading: rounded-rect badge — same size & radius family as ReciterCard avatar.
+            AnimatedContainer(
+              duration: tokens.durationFast,
+              width: badgeSize,
+              height: badgeSize,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                // Apply same opacityEmphasis (0.7) dampening as the reciter avatar —
+                // keeps container colors soft across all four palette slots.
+                color: isCurrentItem
+                    ? activeFill
+                    : idleFill.withValues(alpha: tokens.opacityEmphasis),
+                borderRadius: BorderRadius.circular(tokens.radiusLarge),
+                border: Border.all(
+                  color: isCurrentItem
+                      ? activeFill
+                      : idleFg.withValues(alpha: tokens.opacityShadow),
+                  width: tokens.borderWidthThin * 2,
+                ),
+              ),
+              child: isCurrentItem
+                  ? Icon(
+                      isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      color: activeOnFill,
+                      size: tokens.iconSizeMedium,
+                    )
+                  : Text(
+                      surah.formattedId.isNotEmpty
+                          ? surah.formattedId
+                          : '${index + 1}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: idleFg,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0,
+                      ),
+                    ),
+            ),
+            SizedBox(width: tokens.spaceMedium),
+            // Content block — mirrors ReciterCard's title+subtitle column.
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                spacing: tokens.spaceExtraSmall,
+                children: [
+                  Text(
+                    surah.name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: colorScheme.onSurface,
+                      height: 1.2,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    surah.reciterName,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            // Trailing: download only — play state is shown on the leading badge.
+            DownloadButton(
+              url: surah.id,
+              surahTitle: surah.name,
+              reciterName: reciterName,
+              reciterId: reciterId,
+              catalogChrome: true,
+              initialIsDownloaded: surah.isDownloaded,
+              initialIsDownloading: surah.isDownloading,
+              initialProgress: surah.downloadProgress,
+              identifier: ReciterSemanticsIds.surahDownloadButton(
+                surah.formattedId.isNotEmpty
+                    ? surah.formattedId
+                    : '${index + 1}',
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

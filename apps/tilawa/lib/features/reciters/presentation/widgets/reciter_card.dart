@@ -34,58 +34,47 @@ class ReciterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final borderRadius = BorderRadius.circular(tokens.radiusLarge);
 
     return RepaintBoundary(
-      child: TilawaCard(
-        surface: TilawaCardSurface.flat,
-        padding: EdgeInsets.zero,
-        borderRadius: tokens.radiusLarge,
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: borderRadius,
-          child: InkWell(
-            borderRadius: borderRadius,
-            onTap: () => _openReciterDetails(context),
-            child: Semantics(
-              button: true,
-              identifier: ReciterSemanticsIds.reciterCard(reciter.id),
-              label: context.l10n.a11yOpenReciterDetails(reciter.name),
-              child: Padding(
-                padding: EdgeInsets.all(tokens.spaceMedium),
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: tokens.spaceMedium,
-                      children: [
-                        _ReciterAvatar(
-                          reciterId: reciter.id,
-                          name: reciter.name,
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: favoritesOnlyContext
-                                ? EdgeInsets.zero
-                                : EdgeInsetsDirectional.only(
-                                    end: tokens.spaceLarge + tokens.spaceSmall,
-                                  ),
-                            child: _ReciterInfo(reciter: reciter),
-                          ),
-                        ),
-                      ],
+      child: Semantics(
+        button: true,
+        identifier: ReciterSemanticsIds.reciterCard(reciter.id),
+        label: context.l10n.a11yOpenReciterDetails(reciter.name),
+        child: TilawaCard(
+          surface: TilawaCardSurface.flat,
+          padding: EdgeInsets.all(tokens.spaceLarge),
+          borderRadius: tokens.radiusLarge,
+          onTap: () => _openReciterDetails(context),
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: tokens.spaceMedium,
+                children: [
+                  _ReciterAvatar(
+                    reciterId: reciter.id,
+                    name: reciter.name,
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: favoritesOnlyContext
+                          ? EdgeInsets.zero
+                          : EdgeInsetsDirectional.only(
+                              end: tokens.spaceExtraLarge,
+                            ),
+                      child: _ReciterInfo(reciter: reciter),
                     ),
-                    if (!favoritesOnlyContext)
-                      PositionedDirectional(
-                        top: 0,
-                        end: 0,
-                        child: _FavoriteButton(reciter: reciter),
-                      ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
+              if (!favoritesOnlyContext)
+                PositionedDirectional(
+                  top: 0,
+                  end: 0,
+                  child: _FavoriteButton(reciter: reciter),
+                ),
+            ],
           ),
         ),
       ),
@@ -104,7 +93,7 @@ class _ReciterAvatar extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
     final colorScheme = theme.colorScheme;
-    const double size = 56;
+    final double size = tokens.iconSizeLarge + tokens.spaceExtraLarge;
     final Color backgroundColor = _reciterAvatarBackground(
       reciterId,
       colorScheme,
@@ -113,7 +102,7 @@ class _ReciterAvatar extends StatelessWidget {
       reciterId,
       colorScheme,
     );
-    final BorderRadius radius = BorderRadius.circular(tokens.radiusMedium);
+    final BorderRadius radius = BorderRadius.circular(tokens.radiusLarge);
 
     return Semantics(
       image: true,
@@ -127,15 +116,13 @@ class _ReciterAvatar extends StatelessWidget {
             color: backgroundColor,
             borderRadius: radius,
             border: Border.all(
-              color: foregroundColor.withValues(
-                alpha: tokens.opacitySubtle * 1.5,
-              ),
-              width: tokens.borderWidthThin,
+              color: foregroundColor.withValues(alpha: tokens.opacityShadow),
+              width: tokens.borderWidthThin * 2,
             ),
           ),
           child: Text(
             _reciterInitial(name),
-            style: theme.textTheme.titleMedium?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
               color: foregroundColor,
               height: 1,
@@ -203,7 +190,7 @@ class _ReciterInfo extends StatelessWidget {
         Text(
           reciter.name,
           style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: colorScheme.onSurface,
             height: 1.2,
           ),
