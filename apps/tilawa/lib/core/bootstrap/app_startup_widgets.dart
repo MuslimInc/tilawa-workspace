@@ -93,6 +93,7 @@ class _BootGateState extends State<_BootGate> {
     );
     // #endregion
     firstFrameLog('BootGate initState');
+    unawaited(StartupTelemetry.phase('boot_gate_start'));
     firstFrameLog('BootGate critical init scheduling');
     SplashLaunchHandoff.resetForNewLaunch();
     LaunchFirstFrameGate.scheduleReleaseAfterFirstFrame();
@@ -122,6 +123,7 @@ class _BootGateState extends State<_BootGate> {
       data: const <String, Object?>{},
     );
     // #endregion
+    unawaited(StartupTelemetry.phase('boot_gate_init_await'));
     // Bootstrap() schedules critical init from its own post-frame callback;
     // here we just await the resulting future so we can swap in the real app
     // when it completes. Calling startCriticalInit() is a no-op if bootstrap
@@ -151,6 +153,15 @@ class _BootGateState extends State<_BootGate> {
             'BootGate critical init done → TilawaApp mounts under splash '
             '(target=${plan.target.name} location=${plan.location})',
           );
+          unawaited(
+            StartupTelemetry.phase(
+              'boot_gate_ready',
+              data: <String, Object?>{
+                'target': plan.target.name,
+                'location': plan.location,
+              },
+            ),
+          );
           setState(() {
             _ready = true;
           });
@@ -161,6 +172,14 @@ class _BootGateState extends State<_BootGate> {
             'Critical init failed; staying on launch splash',
             error: error,
             stackTrace: stackTrace,
+          );
+          unawaited(
+            StartupTelemetry.failure(
+              'boot_gate_critical_init_failed',
+              error,
+              stackTrace,
+              phase: 'boot_gate',
+            ),
           );
         });
   }

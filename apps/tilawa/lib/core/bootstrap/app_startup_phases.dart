@@ -27,6 +27,14 @@ extension AppStartupCriticalPhases on AppStartupTasks {
                   'Firebase initialization failed: $e',
                   stackTrace: stackTrace,
                 );
+                unawaited(
+                  StartupTelemetry.failure(
+                    'firebase_init_failed',
+                    e,
+                    stackTrace,
+                    phase: 'firebase_init',
+                  ),
+                );
               })
         : Future<void>.value();
 

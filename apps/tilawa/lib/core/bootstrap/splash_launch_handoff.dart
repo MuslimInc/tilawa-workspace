@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+
+import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 
 import 'first_frame_log.dart';
 
@@ -43,6 +46,8 @@ abstract final class SplashLaunchHandoff {
     }
     splashRouteHasPainted.value = true;
     firstFrameLog('handoff complete (splashRouteHasPainted=true)');
+    unawaited(StartupTelemetry.phase('first_route_painted'));
+    unawaited(StartupTelemetry.completed());
   }
 }
 

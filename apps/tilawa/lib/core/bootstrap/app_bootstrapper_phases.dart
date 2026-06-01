@@ -64,6 +64,14 @@ extension AppBootstrapperPhases on AppBootstrapper {
           .runCriticalInit(configureDI: configureDI, timeline: timeline)
           .catchError((Object e, StackTrace stackTrace) {
             logger.e('Critical init failed: $e', stackTrace: stackTrace);
+            unawaited(
+              StartupTelemetry.failure(
+                'critical_init_pipeline_failed',
+                e,
+                stackTrace,
+                phase: 'critical_init',
+              ),
+            );
           });
       completer.complete(f);
     }
