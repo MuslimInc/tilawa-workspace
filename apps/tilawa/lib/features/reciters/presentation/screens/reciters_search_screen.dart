@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../cubit/reciters_search_cubit.dart';
@@ -110,6 +111,16 @@ class _RecitersSearchScreenState extends State<RecitersSearchScreen> {
       ),
       body: BlocBuilder<RecitersSearchCubit, RecitersSearchState>(
         builder: (context, state) {
+          final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
+            final AudioPlayerState audioState = bloc.state;
+            return audioState.shouldShowBottomPlayer &&
+                audioState.currentAudio != null;
+          });
+          final double listBottomInset = keyboardInset +
+              (showBottomPlayer
+                  ? tokens.spaceSmall
+                  : context.floatingBottomPadding);
+
           return switch (state) {
             RecitersSearchInitial() => const SizedBox.shrink(),
             RecitersSearchLoading() => const _RecitersSearchLoading(),
@@ -131,7 +142,7 @@ class _RecitersSearchScreenState extends State<RecitersSearchScreen> {
                 tokens.spaceMedium,
                 tokens.spaceMedium,
                 tokens.spaceMedium,
-                tokens.spaceMedium + keyboardInset,
+                tokens.spaceMedium + listBottomInset,
               ),
               itemCount: results.length,
               separatorBuilder: (_, _) =>

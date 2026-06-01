@@ -198,7 +198,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double bottomPlayerOffset = context.floatingBottomPadding;
     final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
       final AudioPlayerState state = bloc.state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;
@@ -358,7 +357,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                       _ReciterDetailsContent(
                         reciter: widget.reciter,
                         state: state,
-                        bottomPlayerOffset: bottomPlayerOffset,
                         showBottomPlayer: showBottomPlayer,
                         playingSurahKey: _playingSurahKey,
                         onPlaySurah: (surah) {
@@ -444,14 +442,12 @@ class _ReciterDetailsContent extends StatelessWidget {
   const _ReciterDetailsContent({
     required this.reciter,
     required this.state,
-    required this.bottomPlayerOffset,
     required this.showBottomPlayer,
     required this.onPlaySurah,
     required this.playingSurahKey,
   });
   final ReciterEntity reciter;
   final ReciterDetailsState state;
-  final double bottomPlayerOffset;
   final bool showBottomPlayer;
   final Function(SurahEntity) onPlaySurah;
   final GlobalKey playingSurahKey;
@@ -461,12 +457,13 @@ class _ReciterDetailsContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
     final bool keyboardOpen = context.isKeyboardVisible;
-    final double bottomPadding =
-        (keyboardOpen ? 0 : bottomPlayerOffset) +
-        (showBottomPlayer && !keyboardOpen
-            ? QuranPlayerWidget.collapsedHeight(context) +
-                  tokens.spaceExtraLarge
-            : tokens.spaceExtraLarge);
+    // [TilawaAdaptiveShell] lays out the mini player in [Scaffold.bottomNavigationBar],
+    // so the scroll body already ends above the player — only add a small gap.
+    final double bottomPadding = keyboardOpen
+        ? 0
+        : showBottomPlayer
+        ? tokens.spaceSmall
+        : context.floatingBottomPadding;
     final double emptyStateIconSize =
         tokens.iconSizeExtraLarge + tokens.iconSizeSmall;
     final currentAudio = context.select(
