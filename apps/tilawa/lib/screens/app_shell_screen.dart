@@ -387,6 +387,8 @@ class _AppShellChrome extends StatelessWidget {
           final bool isAthkar = AppShellRoutePolicy.isAthkarContext(location);
           final bool navVisible =
               policyShowsNav && !isAthkar && phoneBottomNavVisible.value;
+          final bool showPhoneMiniPlayer =
+              showPlayer && playerShouldShow && !isKeyboardOpen;
 
           final bool narrow = context.isNarrow;
           final Widget player = QuranPlayerWidget(
@@ -394,12 +396,18 @@ class _AppShellChrome extends StatelessWidget {
             embeddedInShellFooter: true,
             isKeyboardOpen: isKeyboardOpen,
             phoneBottomNavBarVisible: phoneBottomNavVisible,
-            hostAbsorbsBottomSafeArea: true,
+            hostAbsorbsBottomSafeArea: navVisible,
           );
-          final Widget? shellFooterPlayer =
-              showPlayer && playerHeight > 0 && narrow
+          final double footerBottomSpacing = navVisible
+              ? 0
+              : QuranPlayerLayoutInsets.phoneFooterBottomSpacing(
+                  context,
+                  hostAbsorbsBottomSafeArea: navVisible,
+                );
+          final Widget? shellFooterPlayer = showPhoneMiniPlayer && narrow
               ? SizedBox(
-                  height: playerHeight + overlayBleedBuffer,
+                  height:
+                      playerHeight + overlayBleedBuffer + footerBottomSpacing,
                   child: TourTarget(
                     targetId: RecitersTourTargets.miniPlayer,
                     child: player,

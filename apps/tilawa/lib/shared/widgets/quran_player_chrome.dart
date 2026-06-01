@@ -231,13 +231,37 @@ abstract final class QuranPlayerLayoutInsets {
   }
 
   /// Bottom inset on routes without the shell nav (e.g. `/reciter/:id`).
+  ///
+  /// Matches [TilawaSafeAreaX.floatingBottomPadding] so FABs, lists, and the
+  /// mini player share the same lift above the home indicator.
   static double offShellBottomInset(BuildContext context) {
-    final BuildContext mq = mediaQueryContext(context);
-    final double safe = mq.systemBottomSafeArea;
-    if (safe > 0) {
-      return safe + Theme.of(mq).tokens.spaceTiny;
+    return mediaQueryContext(context).floatingBottomPadding;
+  }
+
+  /// Space reserved below the mini player inside [TilawaAdaptiveShell]'s
+  /// [TilawaAdaptiveShell.phoneFooterAboveNav] slot when the bottom bar is
+  /// hidden.
+  static double phoneFooterBottomSpacing(
+    BuildContext context, {
+    required bool hostAbsorbsBottomSafeArea,
+  }) {
+    if (hostAbsorbsBottomSafeArea) {
+      return 0;
     }
-    return Theme.of(mq).tokens.spaceSmall;
+    return offShellBottomInset(context);
+  }
+
+  /// Total height of the phone shell footer player slot (bar + bottom gap).
+  static double phoneFooterSlotHeight(
+    BuildContext context, {
+    required double playerHeight,
+    required bool hostAbsorbsBottomSafeArea,
+  }) {
+    return playerHeight +
+        phoneFooterBottomSpacing(
+          context,
+          hostAbsorbsBottomSafeArea: hostAbsorbsBottomSafeArea,
+        );
   }
 
   /// Bottom offset for the collapsed mini player.
