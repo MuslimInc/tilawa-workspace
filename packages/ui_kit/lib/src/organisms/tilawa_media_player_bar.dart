@@ -176,6 +176,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                 Directionality.of(context),
               ),
               child: Row(
+                spacing: componentTokens.infoControlsGap,
                 children: [
                   Expanded(
                     child: _OpenPlayerTapTarget(
@@ -197,7 +198,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                             ),
                             SizedBox(width: componentTokens.artworkInfoGap),
                             Expanded(
-                              child: titleSubtitle ??
+                              child:
+                                  titleSubtitle ??
                                   Column(
                                     crossAxisAlignment: .start,
                                     mainAxisAlignment: .center,
@@ -227,7 +229,6 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: componentTokens.infoControlsGap),
                   _TransportControls(
                     designTokens: designTokens,
                     componentTokens: componentTokens,
@@ -250,22 +251,6 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                     nextTooltip: nextTooltip,
                     sleepTimerTooltip: sleepTimerTooltip,
                   ),
-                  if (onClose != null) ...[
-                    SizedBox(width: componentTokens.controlsGap),
-                    Semantics(
-                      identifier: closeSemanticIdentifier,
-                      button: true,
-                      child: _TransportIconButton(
-                        size: componentTokens.controlButtonSize,
-                        tooltip: 'Close player',
-                        icon: FluentIcons.dismiss_24_regular,
-                        iconSize: designTokens.iconSizeMedium,
-                        enabled: true,
-                        color: colorScheme.onSurfaceVariant,
-                        onPressed: onClose,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
