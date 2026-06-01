@@ -11,7 +11,7 @@ topics:
   - materialdesign
 
 environment:
-  sdk: ^3.12.1
+  sdk: ^3.12.0
 
 dependencies:
   # FlexSeedScheme package, by Mike Rydstrom, rydmike.com (@rydmike).
