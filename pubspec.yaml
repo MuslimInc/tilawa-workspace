@@ -2,7 +2,7 @@ name: tilawa_workspace
 description: Mono-repo workspace for Tilawa.
 publish_to: none
 environment:
-  sdk: ^3.12.0
+  sdk: ^3.12.1
 
 workspace:
   - apps/tilawa
