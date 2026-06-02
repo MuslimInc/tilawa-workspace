@@ -44,9 +44,9 @@ class TilawaFeedbackStrip extends StatelessWidget {
     if (v == null) return null;
     final ColorScheme cs = Theme.of(context).colorScheme;
     return switch (v) {
-      TilawaFeedbackVariant.info => cs.outline,
-      TilawaFeedbackVariant.warning => cs.error.withValues(alpha: 0.72),
-      TilawaFeedbackVariant.error => cs.error,
+      TilawaFeedbackVariant.info => cs.outline.withValues(alpha: 0.35),
+      TilawaFeedbackVariant.warning => cs.error.withValues(alpha: 0.45),
+      TilawaFeedbackVariant.error => cs.error.withValues(alpha: 0.72),
     };
   }
 
@@ -58,19 +58,12 @@ class TilawaFeedbackStrip extends StatelessWidget {
     final Color? accentColor =
         borderColor ?? _accentForVariant(context, variant);
 
-    // Left-accent border pattern: thick left bar signals intent at a glance;
-    // a faint uniform border maintains shape without competing with it.
     final BoxDecoration decoration;
     if (accentColor != null) {
       decoration = BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(radius),
-        border: Border(
-          left: BorderSide(color: accentColor, width: 3.5),
-          top: BorderSide(color: accentColor.withValues(alpha: 0.25)),
-          right: BorderSide(color: accentColor.withValues(alpha: 0.25)),
-          bottom: BorderSide(color: accentColor.withValues(alpha: 0.25)),
-        ),
+        border: Border.all(color: accentColor),
       );
     } else {
       decoration = BoxDecoration(
