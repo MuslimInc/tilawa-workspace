@@ -138,6 +138,10 @@ class _DownloadsScreenAppBar extends StatelessWidget
     return TilawaCatalogAppBar(
       preferredHeight: preferredHeight,
       title: context.l10n.downloads,
+      leading: TilawaAppBarChrome.catalogBackButton(
+        context: context,
+        onPressed: () => Navigator.maybePop(context),
+      ),
       titleWidget: totalBytes > 0
           ? _DownloadsAppBarTitle(totalBytes: totalBytes)
           : null,

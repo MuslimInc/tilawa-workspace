@@ -50,7 +50,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
     required String title,
     Widget? leading,
     List<Widget>? actions,
-    bool automaticallyImplyLeading = false,
+    bool automaticallyImplyLeading = true,
     VoidCallback? onBackPressed,
     bool showBottomHairline = TilawaAppBarConfig.showBottomHairline,
   }) {

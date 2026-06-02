@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,8 +37,27 @@ class AppShellScreen extends StatefulWidget {
   State<AppShellScreen> createState() => _AppShellScreenState();
 }
 
+/// Route-owned bottom-nav visibility for [TilawaAdaptiveShell].
+///
+/// Only [AppShellRoutePolicy] updates this value so child widgets (including
+/// the Quran player) cannot leave the bar hidden after leaving `/`.
+final class _RouteBoundBottomNavVisibility extends ValueNotifier<bool> {
+  _RouteBoundBottomNavVisibility() : super(true);
+
+  void syncForLocation(String location) {
+    final bool next = AppShellRoutePolicy.isPhoneBottomNavigationVisible(
+      location,
+    );
+    if (value == next) {
+      return;
+    }
+    value = next;
+  }
+}
+
 class _AppShellScreenState extends State<AppShellScreen> {
-  final ValueNotifier<bool> _phoneBottomNavVisible = ValueNotifier<bool>(true);
+  final _RouteBoundBottomNavVisibility _bottomNavVisibility =
+      _RouteBoundBottomNavVisibility();
 
   late final ShellTabCoordinator _shellTabCoordinator;
   int _lastHandledIndex = 0;
@@ -61,7 +79,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
       context.read<QuranPlayerChromeNotifier>().clearShellChrome();
     } catch (_) {}
     _mainScreenCubit.close();
-    _phoneBottomNavVisible.dispose();
+    _bottomNavVisibility.dispose();
     super.dispose();
   }
 
@@ -285,7 +303,7 @@ class _AppShellScreenState extends State<AppShellScreen> {
                 navDestinations: navDestinations,
                 bottomNavBarHeight: bottomNavBarHeight,
                 isKeyboardOpen: isKeyboardOpen,
-                phoneBottomNavVisible: _phoneBottomNavVisible,
+                bottomNavVisibility: _bottomNavVisibility,
                 selectedIndex: selectedIndex,
                 onDestinationSelected: (index) => _onDestinationSelected(
                   context,
@@ -310,7 +328,7 @@ class _AppShellChrome extends StatelessWidget {
     required this.navDestinations,
     required this.bottomNavBarHeight,
     required this.isKeyboardOpen,
-    required this.phoneBottomNavVisible,
+    required this.bottomNavVisibility,
     required this.selectedIndex,
     required this.onDestinationSelected,
     required this.child,
@@ -321,7 +339,7 @@ class _AppShellChrome extends StatelessWidget {
   final List<_NavDestination> navDestinations;
   final double bottomNavBarHeight;
   final bool isKeyboardOpen;
-  final ValueNotifier<bool> phoneBottomNavVisible;
+  final _RouteBoundBottomNavVisibility bottomNavVisibility;
   final int selectedIndex;
   final ValueChanged<int> onDestinationSelected;
   final Widget child;
@@ -329,16 +347,16 @@ class _AppShellChrome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String location = QuranPlayerRoutePolicy.currentMatchedLocation();
+    bottomNavVisibility.syncForLocation(location);
+    final bool navVisible =
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible(location);
 
     context.read<QuranPlayerChromeNotifier>().updateShellChrome(
       QuranPlayerShellChrome(
-        bottomNavBarHeight: AppShellRoutePolicy.showsBottomNavigation(location)
-            ? bottomNavBarHeight
-            : 0,
+        bottomNavBarHeight: navVisible ? bottomNavBarHeight : 0,
         isKeyboardOpen: isKeyboardOpen,
         isAudioBindingDeferred: state.isAudioBindingDeferred,
-        hostAbsorbsBottomSafeArea: context.isNarrow,
-        phoneBottomNavBarVisible: phoneBottomNavVisible,
+        hostAbsorbsBottomSafeArea: context.isNarrow && navVisible,
       ),
     );
     final bool showPlayer =
@@ -378,21 +396,8 @@ class _AppShellChrome extends StatelessWidget {
           return;
         }
       },
-      child: ListenableBuilder(
-        listenable: phoneBottomNavVisible,
-        builder: (context, _) {
-          final bool policyShowsNav = AppShellRoutePolicy.showsBottomNavigation(
-            location,
-          );
-          final bool isAthkar = AppShellRoutePolicy.isAthkarContext(location);
-          final bool navVisible =
-              policyShowsNav && !isAthkar && phoneBottomNavVisible.value;
-          // Keep the notifier in sync so TilawaAdaptiveShell's internal
-          // ValueListenableBuilder receives change events, not just the
-          // initial value from a one-shot wrapper.
-          if (phoneBottomNavVisible.value != navVisible) {
-            phoneBottomNavVisible.value = navVisible;
-          }
+      child: Builder(
+        builder: (context) {
           final bool showPhoneMiniPlayer =
               showPlayer && playerShouldShow && !isKeyboardOpen;
 
@@ -401,7 +406,6 @@ class _AppShellChrome extends StatelessWidget {
             key: const ValueKey<String>('app_shell_quran_player'),
             embeddedInShellFooter: true,
             isKeyboardOpen: isKeyboardOpen,
-            phoneBottomNavBarVisible: phoneBottomNavVisible,
             hostAbsorbsBottomSafeArea: navVisible,
           );
           final double footerBottomSpacing = navVisible
@@ -428,7 +432,7 @@ class _AppShellChrome extends StatelessWidget {
                 destinations: adaptiveDestinations,
                 selectedIndex: selectedIndex,
                 onDestinationSelected: onDestinationSelected,
-                phoneBottomNavigationBarVisible: phoneBottomNavVisible,
+                phoneBottomNavigationBarVisible: bottomNavVisibility,
                 phoneFooterAboveNav: shellFooterPlayer,
                 bottomPlayer: MainBottomOverlay(
                   isOfflineIndicatorReady: state.isOfflineIndicatorReady,
@@ -443,7 +447,6 @@ class _AppShellChrome extends StatelessWidget {
                       key: const ValueKey<String>('app_shell_quran_player'),
                       bottomNavBarHeight: bottomNavBarHeight,
                       isKeyboardOpen: isKeyboardOpen,
-                      phoneBottomNavBarVisible: phoneBottomNavVisible,
                       hostAbsorbsBottomSafeArea: false,
                     ),
                   ),

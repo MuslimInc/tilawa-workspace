@@ -13,15 +13,13 @@ class QuranPlayerShellChrome {
     required this.bottomNavBarHeight,
     required this.isKeyboardOpen,
     required this.isAudioBindingDeferred,
-    required this.hostAbsorbsBottomSafeArea,
-    this.phoneBottomNavBarVisible,
+    required     this.hostAbsorbsBottomSafeArea,
   });
 
   final double bottomNavBarHeight;
   final bool isKeyboardOpen;
   final bool isAudioBindingDeferred;
   final bool hostAbsorbsBottomSafeArea;
-  final ValueNotifier<bool>? phoneBottomNavBarVisible;
 
   @override
   bool operator ==(Object other) {
@@ -30,8 +28,7 @@ class QuranPlayerShellChrome {
             bottomNavBarHeight == other.bottomNavBarHeight &&
             isKeyboardOpen == other.isKeyboardOpen &&
             isAudioBindingDeferred == other.isAudioBindingDeferred &&
-            hostAbsorbsBottomSafeArea == other.hostAbsorbsBottomSafeArea &&
-            phoneBottomNavBarVisible == other.phoneBottomNavBarVisible;
+            hostAbsorbsBottomSafeArea == other.hostAbsorbsBottomSafeArea;
   }
 
   @override
@@ -40,7 +37,6 @@ class QuranPlayerShellChrome {
     isKeyboardOpen,
     isAudioBindingDeferred,
     hostAbsorbsBottomSafeArea,
-    phoneBottomNavBarVisible,
   );
 }
 
@@ -180,11 +176,13 @@ abstract final class AppShellRoutePolicy {
     return location.startsWith('/athkar/') && location != '/athkar';
   }
 
-  /// Whether the expanded player may hide the phone bottom bar.
+  /// Whether the phone bottom bar should be visible for [location].
   ///
-  /// Always false: bottom nav stays visible on every shell screen while the
-  /// player is expanded.
-  static bool shouldHideBottomNavWhenPlayerExpanded(String location) => false;
+  /// Only the main tab shell (`/`) shows bottom navigation. Immersive Athkar
+  /// sub-routes are excluded even when they are shell children.
+  static bool isPhoneBottomNavigationVisible(String location) {
+    return showsBottomNavigation(location) && !isAthkarContext(location);
+  }
 
   /// Highlights a main-shell tab for pushed routes inside the shell.
   static int? navIndexForLocation(String location) {

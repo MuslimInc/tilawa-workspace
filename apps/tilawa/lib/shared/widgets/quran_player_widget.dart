@@ -52,7 +52,6 @@ class QuranPlayerWidget extends StatefulWidget {
     super.key,
     this.bottomNavBarHeight = 0,
     this.isKeyboardOpen = false,
-    this.phoneBottomNavBarVisible,
     this.hostAbsorbsBottomSafeArea = false,
     this.embeddedInShellFooter = false,
   });
@@ -136,13 +135,6 @@ class QuranPlayerWidget extends StatefulWidget {
 
   /// Whether the keyboard is currently open.
   final bool isKeyboardOpen;
-
-  /// When non-null, set to `false` while expand progress is at or above
-  /// [TilawaDesignTokens.playerProgressThreshold] so a host
-  /// [TilawaAdaptiveShell] can hide its phone bottom bar for a true
-  /// full-screen expanded player. Stays `true` while collapsed so dismiss
-  /// gestures never hide the bar.
-  final ValueNotifier<bool>? phoneBottomNavBarVisible;
 
   /// When true with [bottomNavBarHeight] == 0, the mini player anchors flush
   /// to the layout bottom (no [floatingBottomPadding]) because the host already
@@ -378,7 +370,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
 
     _presentation = getIt<PlayerPresentationController>();
-    _expandController.addListener(_syncPhoneBottomNavBarVisible);
     _expandController.addListener(_syncExpandedPlayerSystemChrome);
     _expandController.addListener(_syncSystemBackIntercepts);
     _expandController.addStatusListener(_onExpandAnimationStatus);
@@ -392,7 +383,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         QuranPlayerDebugLog.lifecycle('firstFrame', _coreStateFields());
-        _syncPhoneBottomNavBarVisible();
         _syncExpandedPlayerSystemChrome();
         if (widget.embeddedInShellFooter && !_usesHeroExpansion) {
           _schedulePortalVisibilitySync();
@@ -418,7 +408,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         },
       );
       _lastSyncedRoutePath = path;
-      _syncPhoneBottomNavBarVisible();
       if (_usesHeroExpansion) {
         _reconcileHeroRouteWithNavigation();
       } else {
@@ -430,24 +419,17 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   @override
   void didUpdateWidget(covariant QuranPlayerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.phoneBottomNavBarVisible != widget.phoneBottomNavBarVisible ||
-        oldWidget.embeddedInShellFooter != widget.embeddedInShellFooter ||
+    if (oldWidget.embeddedInShellFooter != widget.embeddedInShellFooter ||
         oldWidget.bottomNavBarHeight != widget.bottomNavBarHeight ||
         oldWidget.isKeyboardOpen != widget.isKeyboardOpen) {
       QuranPlayerDebugLog.lifecycle(
         'didUpdateWidget',
         <String, Object?>{
           ..._coreStateFields(),
-          'navNotifierChanged':
-              oldWidget.phoneBottomNavBarVisible !=
-              widget.phoneBottomNavBarVisible,
           'keyboardOpen': widget.isKeyboardOpen,
           'bottomNavBarHeight': widget.bottomNavBarHeight,
         },
       );
-    }
-    if (oldWidget.phoneBottomNavBarVisible != widget.phoneBottomNavBarVisible) {
-      _syncPhoneBottomNavBarVisible();
     }
   }
 
@@ -470,7 +452,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     _presentation.removeListener(_onPresentationChanged);
     QuranPlayerSystemBackCoordinator.unbind(handle: _systemBackHandle);
     _expandController.removeStatusListener(_onExpandAnimationStatus);
-    _expandController.removeListener(_syncPhoneBottomNavBarVisible);
     _expandController.removeListener(_syncExpandedPlayerSystemChrome);
     _expandController.removeListener(_syncSystemBackIntercepts);
     _expandController.dispose();
@@ -513,7 +494,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           _presentation.phase == PlayerPresentationPhase.mini) {
         _isCollapsing = false;
       }
-      _syncPhoneBottomNavBarVisible();
       _syncExpandedPlayerSystemChrome();
       _syncSystemBackIntercepts();
     });
@@ -651,45 +631,13 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         }
       }
       _isUserDraggingExpand = false;
-      _syncPhoneBottomNavBarVisible();
     }
   }
 
-  void _syncPhoneBottomNavBarVisible() {
-    final ValueNotifier<bool>? n = widget.phoneBottomNavBarVisible;
-    if (n == null || !mounted) return;
-    final String location = _currentRoutePath();
-    final bool hideNavWhenExpanded =
-        AppShellRoutePolicy.shouldHideBottomNavWhenPlayerExpanded(location);
-    if (!hideNavWhenExpanded) {
-      if (!n.value) {
-        n.value = true;
-      }
-      return;
-    }
-
-    // Hold nav hidden for the whole programmatic collapse. animateTo(0) may
-    // report AnimationStatus.forward, not reverse, on some runtimes.
-    if (_isCollapsing && _expandController.isAnimating) {
-      if (n.value) {
-        n.value = false;
-      }
-      return;
-    }
-
-    final double threshold = context.tokens.playerProgressThreshold;
-    final bool showBar = _visualExpandProgress < threshold;
-    if (n.value != showBar) {
-      QuranPlayerDebugLog.layout(
-        'phoneBottomNav',
-        <String, Object?>{
-          'showBar': showBar,
-          'progress': _visualExpandProgress.toStringAsFixed(3),
-          'route': location,
-        },
-      );
-      n.value = showBar;
-    }
+  bool _phoneBottomNavVisibleForLayout() {
+    return AppShellRoutePolicy.isPhoneBottomNavigationVisible(
+      _currentRoutePath(),
+    );
   }
 
   bool _collapseBiasedMetrics(double progress) {
@@ -961,23 +909,13 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     double progress,
   ) {
     final String location = _currentRoutePath();
-    final bool hideNavWhenExpanded =
-        AppShellRoutePolicy.shouldHideBottomNavWhenPlayerExpanded(location);
-    final double threshold = context.tokens.playerProgressThreshold;
-    final bool phoneNavVisible = !hideNavWhenExpanded || progress < threshold;
     return QuranPlayerLayoutInsets.miniPlayerBottomInset(
       context: context,
       hostBottomNavBarHeight: widget.bottomNavBarHeight,
       hostAbsorbsBottomSafeArea: widget.hostAbsorbsBottomSafeArea,
-      phoneNavVisible: phoneNavVisible,
+      phoneNavVisible: _phoneBottomNavVisibleForLayout(),
       routePath: location,
     );
-  }
-
-  void _ensurePhoneBottomNavBarShown() {
-    final ValueNotifier<bool>? n = widget.phoneBottomNavBarVisible;
-    if (n == null || n.value) return;
-    n.value = true;
   }
 
   /// Current route path without [GoRouterState.of] (overlay is above the router).
@@ -986,12 +924,11 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 
   /// Bottom offset for the mini player above nav chrome and the home indicator.
   double _resolveBottomInset(BuildContext context) {
-    final bool navVisible = widget.phoneBottomNavBarVisible?.value ?? true;
     return QuranPlayerLayoutInsets.miniPlayerBottomInset(
       context: context,
       hostBottomNavBarHeight: widget.bottomNavBarHeight,
       hostAbsorbsBottomSafeArea: widget.hostAbsorbsBottomSafeArea,
-      phoneNavVisible: navVisible,
+      phoneNavVisible: _phoneBottomNavVisibleForLayout(),
       routePath: _currentRoutePath(),
     );
   }
@@ -1289,9 +1226,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
               ..._coreStateFields(),
             },
           );
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) _ensurePhoneBottomNavBarShown();
-          });
           return const SizedBox.shrink();
         }
 

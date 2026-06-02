@@ -92,6 +92,28 @@ void main() {
   }
 
   testWidgets(
+    'support app bar shows a back button icon',
+    (tester) async {
+      final SupportBloc bloc = SupportBloc(
+        mockPrepare,
+        mockGetProducts,
+        mockPurchase,
+        mockRestore,
+        mockAbort,
+        mockConnectivity,
+        mockAnalytics,
+      );
+
+      await tester.pumpWidget(
+        buildSubject(locale: const Locale('en'), bloc: bloc),
+      );
+
+      expect(find.byType(BackButtonIcon), findsOneWidget);
+      addTearDown(bloc.close);
+    },
+  );
+
+  testWidgets(
     'error state shows Arabic verification message when locale is ar',
     (tester) async {
       final SupportBloc bloc = SupportBloc(

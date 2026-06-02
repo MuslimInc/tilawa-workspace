@@ -20,6 +20,33 @@ void main() {
       expect(AppShellRoutePolicy.isInsideAppShell('/athkar'), isFalse);
       expect(AppShellRoutePolicy.isInsideAppShell('/quran-reader/1'), isFalse);
     });
+
+    test('shows phone bottom navigation only on main shell', () {
+      expect(
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible('/'),
+        isTrue,
+      );
+      expect(
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible(''),
+        isTrue,
+      );
+      expect(
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible('/reciters/search'),
+        isFalse,
+      );
+      expect(
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible('/reciter/1'),
+        isFalse,
+      );
+      expect(
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible('/settings'),
+        isFalse,
+      );
+      expect(
+        AppShellRoutePolicy.isPhoneBottomNavigationVisible('/athkar/details'),
+        isFalse,
+      );
+    });
   });
 
   group('QuranPlayerChromeNotifier system nav override', () {
