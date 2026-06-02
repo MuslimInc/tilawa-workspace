@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/shared/widgets/quran_player_widget.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
@@ -24,6 +25,8 @@ class AthkarCategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final double fabBottomOffset = QuranPlayerWidget.fabBottomOffset(context);
     return Scaffold(
       appBar: TilawaCatalogAppBar.titleOnly(
         context,
@@ -34,71 +37,94 @@ class AthkarCategoriesScreen extends StatelessWidget {
         icon: const Icon(Icons.auto_awesome_rounded),
         label: Text(context.l10n.tasbeehCategory),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+      floatingActionButtonLocation: _StartFloatingActionButtonLocation(
+        offset: fabBottomOffset,
+      ),
       body: Stack(
         children: [
           const Positioned.fill(child: AthkarAmbientBackground()),
           BlocBuilder<AthkarCubit, AthkarState>(
             builder: (context, state) {
-                if (state is AthkarLoading || state is AthkarInitial) {
-                  return const TilawaLoadingIndicator();
-                } else if (state is AthkarError) {
-                  final message =
-                      state.failure.message ?? context.l10n.unexpectedError;
-                  return TilawaIllustratedState(
-                    visual: const TilawaStateVisual(
-                      icon: Icons.menu_book_rounded,
-                      tone: TilawaStateVisualTone.error,
-                    ),
-                    title: message,
-                    semanticLabel: message,
-                    primaryAction: TilawaButton(
-                      text: context.l10n.retry,
-                      variant: TilawaButtonVariant.secondary,
-                      leadingIcon: const Icon(Icons.refresh_rounded),
-                      onPressed: () {
-                        context.read<AthkarCubit>().loadCategories();
-                      },
-                    ),
-                  );
-                } else if (state is AthkarCategoriesLoaded) {
-                  final tokens = Theme.of(context).tokens;
-
-                  return TilawaContentGrid(
-                    padding: EdgeInsets.fromLTRB(
-                      tokens.spaceLarge,
-                      tokens.spaceLarge,
-                      tokens.spaceLarge,
-                      tokens.spaceLarge,
-                    ),
-                    targetItemExtent: 180,
-                    crossAxisSpacing: tokens.spaceLarge,
-                    mainAxisSpacing: tokens.spaceLarge,
-                    childAspectRatio: 1.0,
-                    itemCount: state.categories.length,
-                    itemBuilder: (context, index) {
-                      final AthkarCategory category = state.categories[index];
-                      return AthkarCategoryCard(
-                        name: _localizedAthkarCategoryTitle(context, category),
-                        icon: category.icon,
-                        onTap: () {
-                          AthkarDetailsRoute(
-                            categoryId: category.id,
-                            categoryName: _localizedAthkarCategoryTitle(
-                              context,
-                              category,
-                            ),
-                          ).push(context);
-                        },
-                      );
-                    },
-                  );
-                }
+              if (state is AthkarLoading || state is AthkarInitial) {
                 return const TilawaLoadingIndicator();
-              },
-            ),
-          ],
-        ),
-      );
+              } else if (state is AthkarError) {
+                final message =
+                    state.failure.message ?? context.l10n.unexpectedError;
+                return TilawaIllustratedState(
+                  visual: const TilawaStateVisual(
+                    icon: Icons.menu_book_rounded,
+                    tone: TilawaStateVisualTone.error,
+                  ),
+                  title: message,
+                  semanticLabel: message,
+                  primaryAction: TilawaButton(
+                    text: context.l10n.retry,
+                    variant: TilawaButtonVariant.secondary,
+                    leadingIcon: const Icon(Icons.refresh_rounded),
+                    onPressed: () {
+                      context.read<AthkarCubit>().loadCategories();
+                    },
+                  ),
+                );
+              } else if (state is AthkarCategoriesLoaded) {
+                final double fabClearance =
+                    fabBottomOffset +
+                    kMinInteractiveDimension +
+                    (tokens.spaceLarge * 2);
+
+                return TilawaContentGrid(
+                  padding: EdgeInsets.fromLTRB(
+                    tokens.spaceLarge,
+                    tokens.spaceLarge,
+                    tokens.spaceLarge,
+                    fabClearance,
+                  ),
+                  targetItemExtent: 180,
+                  crossAxisSpacing: tokens.spaceLarge,
+                  mainAxisSpacing: tokens.spaceLarge,
+                  childAspectRatio: 1.0,
+                  itemCount: state.categories.length,
+                  itemBuilder: (context, index) {
+                    final AthkarCategory category = state.categories[index];
+                    return AthkarCategoryCard(
+                      name: _localizedAthkarCategoryTitle(context, category),
+                      icon: category.icon,
+                      onTap: () {
+                        AthkarDetailsRoute(
+                          categoryId: category.id,
+                          categoryName: _localizedAthkarCategoryTitle(
+                            context,
+                            category,
+                          ),
+                        ).push(context);
+                      },
+                    );
+                  },
+                );
+              }
+              return const TilawaLoadingIndicator();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StartFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StartFloatingActionButtonLocation({required this.offset});
+
+  final double offset;
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    final Offset base = FloatingActionButtonLocation.startFloat.getOffset(
+      scaffoldGeometry,
+    );
+    final double y =
+        scaffoldGeometry.scaffoldSize.height -
+        scaffoldGeometry.floatingActionButtonSize.height -
+        offset;
+    return Offset(base.dx, y);
   }
 }

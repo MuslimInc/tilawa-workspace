@@ -32,7 +32,7 @@ class AthkarCategoryCard extends StatelessWidget {
         child: Column(
           spacing: tokens.spaceMedium,
           crossAxisAlignment: .stretch,
-          mainAxisAlignment: .center,
+          mainAxisSize: .min,
           children: [
             Expanded(
               child: TilawaIconBox(
@@ -45,14 +45,19 @@ class AthkarCategoryCard extends StatelessWidget {
                 borderRadius: tokens.radiusLarge,
               ),
             ),
-            Text(
-              name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: colorScheme.onSurface,
-                fontWeight: FontWeight.w700,
+            Flexible(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: colorScheme.onSurface,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ],
