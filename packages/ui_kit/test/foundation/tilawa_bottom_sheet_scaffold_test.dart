@@ -143,6 +143,85 @@ void main() {
     expect(r, 28.0);
   });
 
+  testWidgets('confirm-style layout does not overflow at max height', (
+    tester,
+  ) async {
+    const sheetHeight = 400.0;
+    const longMessage =
+        'This permanently deletes your Tilawa account and synced profile '
+        'data. Purchases verified with Google Play may be kept in anonymized '
+        'records for fraud prevention. This cannot be undone.';
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: AppColors.defaultPrimary,
+        ),
+        home: Scaffold(
+          body: Builder(
+            builder: (context) {
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: sheetHeight),
+                  child: TilawaBottomSheetScaffold(
+                    topBar: const TilawaBottomSheetTitleRow(
+                      title: 'Delete account',
+                    ),
+                    footer: TilawaBottomSheetActions(
+                      primaryLabel: 'Delete account',
+                      onPrimary: () {},
+                      secondaryLabel: 'Cancel',
+                      onSecondary: () {},
+                      primaryVariant: TilawaButtonVariant.danger,
+                    ),
+                    children: [
+                      Flexible(
+                        fit: FlexFit.loose,
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: TilawaBottomSheetScaffold
+                                .resolvedBodyPadding(context),
+                            child: const Text(longMessage),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('footer uses top border instead of layout divider', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.getLightTheme(
+          primaryColor: AppColors.defaultPrimary,
+        ),
+        home: Scaffold(
+          body: TilawaBottomSheetScaffold(
+            footer: TilawaBottomSheetActions(
+              primaryLabel: 'Save',
+              onPrimary: () {},
+            ),
+            children: const [Text('Body')],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(Divider), findsNothing);
+    expect(find.byType(DecoratedBox), findsWidgets);
+  });
+
   testWidgets('resolvedBodyPadding matches token defaults', (tester) async {
     late BuildContext ctx;
     await tester.pumpWidget(
