@@ -19,7 +19,11 @@ abstract final class StartupTelemetry {
   static final String _sessionId =
       'startup_${_processStartedAt.microsecondsSinceEpoch}';
 
-  static StartupHealthLogSink _healthLogSink = FirestoreStartupHealthLogSink();
+  // Lazy: constructed on first write so FirebaseFirestore.instance is never
+  // called before Firebase.initializeApp() completes.
+  static StartupHealthLogSink? _healthLogSinkInstance;
+  static StartupHealthLogSink get _healthLogSink =>
+      _healthLogSinkInstance ??= FirestoreStartupHealthLogSink();
   static bool _crashlyticsPrimed = false;
   static String? _lastPhase;
   static String? _appVersion;
@@ -48,7 +52,7 @@ abstract final class StartupTelemetry {
   }) {
     resetForTesting();
     if (healthLogSink != null) {
-      _healthLogSink = healthLogSink;
+      _healthLogSinkInstance = healthLogSink;
     }
     if (firestoreLogging != null) {
       firestoreLoggingEnabled = firestoreLogging;
@@ -71,7 +75,7 @@ abstract final class StartupTelemetry {
     _buildNumber = null;
     _shorebirdPatchNumber = null;
     _contextLoaded = false;
-    _healthLogSink = const NoopStartupHealthLogSink();
+    _healthLogSinkInstance = const NoopStartupHealthLogSink();
     firestoreLoggingEnabled = true;
     analyticsLoggingEnabled = true;
     crashlyticsLoggingEnabled = true;

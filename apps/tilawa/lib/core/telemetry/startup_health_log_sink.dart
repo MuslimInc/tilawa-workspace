@@ -13,12 +13,16 @@ abstract class StartupHealthLogSink {
 
 /// Production sink: one document per startup milestone or failure.
 class FirestoreStartupHealthLogSink implements StartupHealthLogSink {
+  // _firestore is injected in tests; null means "resolve lazily at write-time"
+  // so FirebaseFirestore.instance is never called before Firebase.initializeApp.
   FirestoreStartupHealthLogSink({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _injectedFirestore = firestore;
 
   static const String collectionName = 'app_startup_logs';
 
-  final FirebaseFirestore _firestore;
+  final FirebaseFirestore? _injectedFirestore;
+  FirebaseFirestore get _firestore =>
+      _injectedFirestore ?? FirebaseFirestore.instance;
 
   @override
   Future<void> write(Map<String, Object?> entry) async {
