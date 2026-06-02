@@ -87,41 +87,13 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
 
   @override
   Future<bool> purchaseSubscription(String planId) async {
-    try {
-      final User? user = _auth.currentUser;
-      if (user == null) {
-        return false;
-      }
-
-      // Create purchase record in Firebase
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .collection('purchases')
-          .add({
-            'planId': planId,
-            'timestamp': FieldValue.serverTimestamp(),
-            'status': 'completed',
-          });
-
-      // Update premium status
-      final now = DateTime.now();
-      final status = PremiumStatus(
-        isPremium: true,
-        subscriptionStartDate: now,
-        subscriptionEndDate: _calculateEndDate(planId, now),
-        subscriptionType: planId,
-        isTrialUsed: false,
-        trialStartDate: null,
-        trialEndDate: null,
-      );
-
-      await updatePremiumStatus(status);
-      return true;
-    } catch (e) {
-      logger.d('Error purchasing subscription: $e');
-      return false;
-    }
+    // Subscriptions must go through Google Play Billing (handled by the
+    // support feature's PlayBillingDataSource). Writing a purchase record
+    // here without a verified Play receipt would create fraudulent entitlements.
+    throw UnsupportedError(
+      'purchaseSubscription must be initiated through Google Play Billing. '
+      'Use the support feature PlayBillingDataSource instead.',
+    );
   }
 
   @override
@@ -161,61 +133,13 @@ class PremiumRemoteDataSourceImpl implements PremiumRemoteDataSource {
 
   @override
   Future<bool> restoreSubscription() async {
-    try {
-      final User? user = _auth.currentUser;
-      if (user == null) {
-        return false;
-      }
-
-      // Check for recent purchases
-      final QuerySnapshot<Map<String, dynamic>> purchasesQuery =
-          await _firestore
-              .collection('users')
-              .doc(user.uid)
-              .collection('purchases')
-              .orderBy('timestamp', descending: true)
-              .limit(1)
-              .get();
-
-      if (purchasesQuery.docs.isNotEmpty) {
-        final Map<String, dynamic> purchase = purchasesQuery.docs.first.data();
-        final planId = purchase['planId'] as String;
-
-        // Restore the subscription
-        final now = DateTime.now();
-        final status = PremiumStatus(
-          isPremium: true,
-          subscriptionStartDate: now,
-          subscriptionEndDate: _calculateEndDate(planId, now),
-          subscriptionType: planId,
-          isTrialUsed: false,
-          trialStartDate: null,
-          trialEndDate: null,
-        );
-
-        await updatePremiumStatus(status);
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      logger.d('Error restoring subscription: $e');
-      return false;
-    }
-  }
-
-  // Helper method to calculate subscription end date
-  DateTime _calculateEndDate(String planId, DateTime startDate) {
-    switch (planId) {
-      case 'monthly':
-        return startDate.add(const Duration(days: 30));
-      case 'yearly':
-        return startDate.add(const Duration(days: 365));
-      case 'lifetime':
-        return startDate.add(const Duration(days: 36500)); // ~100 years
-      default:
-        return startDate.add(const Duration(days: 30));
-    }
+    // Restore must be initiated through Google Play Billing's restorePurchases()
+    // so that Play validates the token server-side. Restoring from a Firestore
+    // record alone bypasses Play's entitlement check.
+    throw UnsupportedError(
+      'restoreSubscription must be initiated through Google Play Billing. '
+      'Use the support feature PlayBillingDataSource instead.',
+    );
   }
 
   // Default plans fallback

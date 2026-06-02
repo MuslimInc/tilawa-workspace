@@ -1,7 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/config/currency_config.dart';
-import 'package:tilawa_core/services/analytics_service.dart';
 
 import '../../domain/entities/premium_status.dart';
 import '../../domain/entities/subscription_plan.dart';
@@ -14,11 +13,9 @@ class PremiumRepositoryImpl implements PremiumRepository {
   PremiumRepositoryImpl(
     this._localDataSource,
     this._remoteDataSource,
-    this._analyticsService,
   );
   final PremiumLocalDataSource _localDataSource;
   final PremiumRemoteDataSource _remoteDataSource;
-  final AnalyticsService _analyticsService;
 
   @override
   Future<PremiumStatus> getPremiumStatus() async {
@@ -70,36 +67,8 @@ class PremiumRepositoryImpl implements PremiumRepository {
 
   @override
   Future<bool> purchaseSubscription(String planId) async {
-    try {
-      final bool result = await _remoteDataSource.purchaseSubscription(planId);
-      if (result) {
-        // Update local status
-        final PremiumStatus currentStatus = await getPremiumStatus();
-        final PremiumStatus updatedStatus = currentStatus.copyWith(
-          isPremium: true,
-          subscriptionStartDate: DateTime.now(),
-          subscriptionType: planId,
-        );
-        await updatePremiumStatus(updatedStatus);
-
-        // [MODIFIED] Log analytics purchase event
-        try {
-          final SubscriptionPlan plan = await getPlanById(planId);
-          await _analyticsService.logPurchase(
-            'tx_${DateTime.now().millisecondsSinceEpoch}', // Temporary ID as remote lacks one
-            value: plan.price,
-            currency: plan.currency,
-            itemId: planId,
-          );
-        } catch (e) {
-          logger.w('Failed to log purchase analytics: $e');
-        }
-      }
-      return result;
-    } catch (e) {
-      logger.d('Purchase failed: $e');
-      return false;
-    }
+    // Delegates to the datasource which enforces Play Billing routing.
+    return _remoteDataSource.purchaseSubscription(planId);
   }
 
   @override
@@ -124,18 +93,8 @@ class PremiumRepositoryImpl implements PremiumRepository {
 
   @override
   Future<bool> restoreSubscription() async {
-    try {
-      final bool result = await _remoteDataSource.restoreSubscription();
-      if (result) {
-        // Refresh premium status
-        final PremiumStatus status = await getPremiumStatus();
-        return status.isSubscriptionActive;
-      }
-      return false;
-    } catch (e) {
-      logger.d('Restore subscription failed: $e');
-      return false;
-    }
+    // Delegates to the datasource which enforces Play Billing routing.
+    return _remoteDataSource.restoreSubscription();
   }
 
   @override
