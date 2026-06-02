@@ -110,25 +110,18 @@ class AppRouter {
       clearPendingColdStartRoute();
       final String homeLocation = const HomeRoute().location;
 
-      if (isPrayerStatus) {
-        ColdStartNavigationMetrics.logNavigation(
-          phase: 'prayer_direct',
-          location: location,
-          coldStart: coldStart,
-          extra: extra,
-        );
-        router.go(location, extra: extra);
-      } else {
-        ColdStartNavigationMetrics.logNavigation(
-          phase: coldStart ? 'cold_start_home_push' : 'warm_home_push',
-          location: location,
-          coldStart: coldStart,
-          extra: extra,
-        );
-        router.go(homeLocation);
-        if (location != homeLocation) {
-          router.push(location, extra: extra);
-        }
+      ColdStartNavigationMetrics.logNavigation(
+        phase: coldStart ? 'cold_start_home_push' : 'warm_home_push',
+        location: location,
+        coldStart: coldStart,
+        extra: extra,
+      );
+      // Always go to home first so Back from any notification target
+      // returns to home rather than exiting the app (previously prayer
+      // status used a bare go() which replaced the entire back stack).
+      router.go(homeLocation);
+      if (location != homeLocation) {
+        router.push(location, extra: extra);
       }
       ColdStartNavigationMetrics.logMatchedLocation(_currentLocation());
       if (isPrayerStatus) {
@@ -148,9 +141,16 @@ class AppRouter {
 
   static String? redirect(BuildContext context, GoRouterState state) {
     // Presentation entry without active media is invalid (playback ≠ URL).
+    // Guard with try-catch: during state restoration the BlocProvider ancestor
+    // may not yet be mounted when GoRouter evaluates the first redirect.
     if (state.uri.path == '/player') {
-      final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
-      if (!bloc.state.hasAudio) {
+      try {
+        final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
+        if (!bloc.state.hasAudio) {
+          return const HomeRoute().location;
+        }
+      } catch (_) {
+        // BlocProvider not yet in tree — treat as no audio and redirect home.
         return const HomeRoute().location;
       }
     }
