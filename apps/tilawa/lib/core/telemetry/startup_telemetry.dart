@@ -240,6 +240,11 @@ abstract final class StartupTelemetry {
     if (enabledInTests) {
       return false;
     }
+    // Platform.environment is unsupported on web; kIsWeb is always false on
+    // Android/iOS so this short-circuit is zero-cost on mobile.
+    if (kIsWeb) {
+      return false;
+    }
     return Platform.environment.containsKey('FLUTTER_TEST');
   }
 

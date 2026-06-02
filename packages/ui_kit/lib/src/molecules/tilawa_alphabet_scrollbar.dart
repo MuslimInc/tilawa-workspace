@@ -252,6 +252,12 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
   }
 
   void _handlePointerDown(PointerDownEvent event) {
+    // Ignore concurrent touches — only the first pointer drives the scrub.
+    // Without this guard a second touch would overwrite _activePointer and
+    // leak the first pointer's route in GestureBinding.pointerRouter forever.
+    if (_activePointer != null) {
+      return;
+    }
     _pointerMoved = false;
     _pointerDownSelectedLetter = widget.selectedLetter;
     _pointerDownPosition = event.position;
