@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -308,9 +309,14 @@ class RouteListRoute extends GoRouteData with $RouteListRoute {
   const RouteListRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const RouteListScreen();
+  String? redirect(BuildContext context, GoRouterState state) {
+    if (kReleaseMode) return const HomeRoute().location;
+    return null;
   }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RouteListScreen();
 }
 
 @TypedGoRoute<SplashRoute>(path: '/splash')
@@ -419,7 +425,13 @@ class ScreenshotComposerRoute extends GoRouteData
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final ScreenshotComposerNavExtra extra = $extra!;
+    final ScreenshotComposerNavExtra? extra = $extra;
+    if (extra == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => const HomeRoute().go(context),
+      );
+      return const SizedBox.shrink();
+    }
     return ShareComposerScreenScope(
       child: ScreenshotComposerScreen(
         surahNumber: extra.surahNumber,
@@ -472,7 +484,13 @@ class VideoReelComposerRoute extends GoRouteData with $VideoReelComposerRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final VideoReelComposerNavExtra extra = $extra!;
+    final VideoReelComposerNavExtra? extra = $extra;
+    if (extra == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => const HomeRoute().go(context),
+      );
+      return const SizedBox.shrink();
+    }
     return ShareComposerScreenScope(
       child: VideoReelComposerScreen(
         surahNumber: extra.surahNumber,
@@ -489,7 +507,12 @@ class QuranRenderDemoRoute extends GoRouteData with $QuranRenderDemoRoute {
   const QuranRenderDemoRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const QuranRenderDemoScreen();
+  String? redirect(BuildContext context, GoRouterState state) {
+    if (kReleaseMode) return const HomeRoute().location;
+    return null;
   }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const QuranRenderDemoScreen();
 }
