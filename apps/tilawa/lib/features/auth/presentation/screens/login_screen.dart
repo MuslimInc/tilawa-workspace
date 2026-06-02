@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
@@ -9,6 +10,7 @@ import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../../features/localization/presentation/bloc/localization_bloc.dart';
 
+import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
 import '../bloc/auth_bloc.dart';
 
@@ -51,16 +53,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
           SafeArea(
             child: BlocConsumer<AuthBloc, AuthState>(
+              listenWhen: (AuthState previous, AuthState current) {
+                if (current is AuthAuthenticated &&
+                    previous is! AuthAuthenticated) {
+                  return true;
+                }
+                return current is AuthError && previous is! AuthError;
+              },
               listener: (context, state) {
                 state.when(
                   initial: () {},
                   loading: () {},
-                  authenticated: (user) {
-                    // Navigate to home screen on successful login
-                    const HomeRoute().go(context);
-                  },
+                  authenticated: (_) => _navigateToHome(context),
                   unauthenticated: () {},
-                  error: (message) {
+                  error: (_) {
                     ToastUtils.showToast(
                       msg: context.l10n.unableToSignInWithThirdPartyAccount,
                     );
@@ -131,6 +137,16 @@ class _LoginScreenState extends State<LoginScreen> {
         ],
       ),
     );
+  }
+
+  void _navigateToHome(BuildContext context) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!context.mounted) {
+        return;
+      }
+      AppRouter.disableStateRestoration = false;
+      AppRouter.router.go(const HomeRoute().location);
+    });
   }
 }
 

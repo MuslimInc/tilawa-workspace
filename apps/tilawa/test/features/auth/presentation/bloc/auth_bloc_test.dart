@@ -144,6 +144,21 @@ void main() {
       );
 
       blocTest<AuthBloc, AuthState>(
+        'emits [loading, error] when sign in throws',
+        build: () {
+          when(
+            mockSignInWithGoogleUseCase(),
+          ).thenThrow(Exception('network'));
+          return authBloc;
+        },
+        act: (bloc) => bloc.add(const SignInWithGoogleEvent()),
+        expect: () => [
+          const AuthState.loading(),
+          const AuthState.error(message: 'Authentication failed'),
+        ],
+      );
+
+      blocTest<AuthBloc, AuthState>(
         'emits [loading, unauthenticated] when sign in is cancelled',
         build: () {
           when(

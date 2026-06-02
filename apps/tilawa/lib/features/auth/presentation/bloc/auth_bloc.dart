@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
 import '../../domain/entities/auth_result.dart';
@@ -43,20 +44,29 @@ class AuthBloc extends HydratedBloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthState.loading());
 
-    final AuthResult result = await _signInWithGoogle();
+    try {
+      final AuthResult result = await _signInWithGoogle();
 
-    result.when(
-      success: (user) {
-        unawaited(_syncDeviceToken(user.id).catchError((_) {}));
-        emit(AuthState.authenticated(user: user));
-      },
-      failure: (message, code) {
-        emit(AuthState.error(message: message));
-      },
-      cancelled: () {
-        emit(const AuthState.unauthenticated());
-      },
-    );
+      result.when(
+        success: (user) {
+          unawaited(_syncDeviceToken(user.id).catchError((_) {}));
+          emit(AuthState.authenticated(user: user));
+        },
+        failure: (message, code) {
+          emit(AuthState.error(message: message));
+        },
+        cancelled: () {
+          emit(const AuthState.unauthenticated());
+        },
+      );
+    } catch (error, stackTrace) {
+      logger.e(
+        'Google sign-in failed',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      emit(const AuthState.error(message: 'Authentication failed'));
+    }
   }
 
   Future<void> _onSignOut(SignOutEvent event, Emitter<AuthState> emit) async {

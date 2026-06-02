@@ -6,12 +6,18 @@ import 'package:injectable/injectable.dart';
 import '../../domain/entities/auth_result.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/providers/auth_provider_interface.dart';
+import '../services/credential_manager_initializer.dart';
 
 @LazySingleton()
 class CredentialManagerAuthProvider implements AuthProviderInterface {
-  CredentialManagerAuthProvider(this._firebaseAuth, this._credentialManager);
+  CredentialManagerAuthProvider(
+    this._firebaseAuth,
+    this._credentialManager,
+    this._credentialManagerInitializer,
+  );
   final FirebaseAuth _firebaseAuth;
   final CredentialManager _credentialManager;
+  final CredentialManagerInitializer _credentialManagerInitializer;
 
   @override
   Stream<UserEntity?> get authStateChanges {
@@ -26,6 +32,7 @@ class CredentialManagerAuthProvider implements AuthProviderInterface {
   @override
   Future<AuthResult> signIn() async {
     try {
+      await _credentialManagerInitializer.ensureReady();
       final GoogleIdTokenCredential? credential = await _credentialManager
           .saveGoogleCredential();
 

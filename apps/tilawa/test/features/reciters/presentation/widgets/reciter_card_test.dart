@@ -244,9 +244,11 @@ void main() {
         findsNWidgets(2),
       );
 
+      // Row tap target: InkWell wrapping the card content [Stack], not the favorite.
       final Finder openInkWell = find.ancestor(
-        of: find.bySemanticsIdentifier(
-          ReciterSemanticsIds.reciterCard(tReciter.id),
+        of: find.descendant(
+          of: find.byType(ReciterCard),
+          matching: find.byType(Stack),
         ),
         matching: find.byType(InkWell),
       );

@@ -3,17 +3,25 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:tilawa/features/auth/data/datasources/google_sign_in_prepare_data_source.dart';
+import 'package:tilawa/features/auth/data/services/credential_manager_initializer.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 
 class MockGoogleSignIn extends Mock implements GoogleSignIn {}
+
+class MockCredentialManagerInitializer extends Mock
+    implements CredentialManagerInitializer {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockGoogleSignIn mockGoogleSignIn;
+  late MockCredentialManagerInitializer mockCredentialManagerInitializer;
 
   setUp(() {
     mockGoogleSignIn = MockGoogleSignIn();
+    mockCredentialManagerInitializer = MockCredentialManagerInitializer();
+    when(() => mockCredentialManagerInitializer.ensureReady())
+        .thenAnswer((_) async {});
     GoogleSignInPrepareDataSourceImpl.resetPrepareStateForTesting();
   });
 
@@ -44,11 +52,13 @@ void main() {
       final GoogleSignInPrepareDataSourceImpl dataSource =
           GoogleSignInPrepareDataSourceImpl.withOptions(
         mockGoogleSignIn,
+        mockCredentialManagerInitializer,
         useAndroidCredentialManager: true,
       );
 
       await dataSource.prepare();
 
+      verify(() => mockCredentialManagerInitializer.ensureReady()).called(1);
       expect(invokedMethod, 'prepare');
       expect(
         invokedArgs,
@@ -71,6 +81,7 @@ void main() {
       final GoogleSignInPrepareDataSourceImpl dataSource =
           GoogleSignInPrepareDataSourceImpl.withOptions(
         mockGoogleSignIn,
+        mockCredentialManagerInitializer,
         useAndroidCredentialManager: false,
         useGoogleSignInPath: true,
       );
@@ -97,6 +108,7 @@ void main() {
       final GoogleSignInPrepareDataSourceImpl dataSource =
           GoogleSignInPrepareDataSourceImpl.withOptions(
         mockGoogleSignIn,
+        mockCredentialManagerInitializer,
         useAndroidCredentialManager: true,
       );
 
@@ -118,6 +130,7 @@ void main() {
       final GoogleSignInPrepareDataSourceImpl dataSource =
           GoogleSignInPrepareDataSourceImpl.withOptions(
         mockGoogleSignIn,
+        mockCredentialManagerInitializer,
         useAndroidCredentialManager: true,
       );
 
@@ -143,6 +156,7 @@ void main() {
       final GoogleSignInPrepareDataSourceImpl dataSource =
           GoogleSignInPrepareDataSourceImpl.withOptions(
         mockGoogleSignIn,
+        mockCredentialManagerInitializer,
         useAndroidCredentialManager: true,
       );
 
@@ -164,6 +178,7 @@ void main() {
       final GoogleSignInPrepareDataSourceImpl dataSource =
           GoogleSignInPrepareDataSourceImpl.withOptions(
         mockGoogleSignIn,
+        mockCredentialManagerInitializer,
         useAndroidCredentialManager: true,
       );
 

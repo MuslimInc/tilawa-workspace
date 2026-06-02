@@ -129,11 +129,9 @@ abstract final class StartupTelemetry {
         <String, Object>{
           AnalyticsParams.phase: name,
           AnalyticsParams.elapsedMs: elapsedMs,
-          if (_appVersion != null) AnalyticsParams.appVersion: _appVersion!,
-          if (_buildNumber != null)
-            AnalyticsParams.buildNumber: _buildNumber!,
-          if (_shorebirdPatchNumber != null)
-            AnalyticsParams.patchNumber: _shorebirdPatchNumber!,
+          AnalyticsParams.appVersion: ?_appVersion,
+          AnalyticsParams.buildNumber: ?_buildNumber,
+          AnalyticsParams.patchNumber: ?_shorebirdPatchNumber,
           AnalyticsParams.sessionId: _sessionId,
         },
       ),
@@ -193,11 +191,9 @@ abstract final class StartupTelemetry {
           AnalyticsParams.phase: effectivePhase,
           AnalyticsParams.elapsedMs: elapsedMs,
           AnalyticsParams.error: _truncate(errorMessage, 100),
-          if (_appVersion != null) AnalyticsParams.appVersion: _appVersion!,
-          if (_buildNumber != null)
-            AnalyticsParams.buildNumber: _buildNumber!,
-          if (_shorebirdPatchNumber != null)
-            AnalyticsParams.patchNumber: _shorebirdPatchNumber!,
+          AnalyticsParams.appVersion: ?_appVersion,
+          AnalyticsParams.buildNumber: ?_buildNumber,
+          AnalyticsParams.patchNumber: ?_shorebirdPatchNumber,
           AnalyticsParams.sessionId: _sessionId,
         },
       ),
@@ -230,11 +226,9 @@ abstract final class StartupTelemetry {
         AnalyticsEvents.startupCompleted,
         <String, Object>{
           AnalyticsParams.elapsedMs: elapsedMs,
-          if (_appVersion != null) AnalyticsParams.appVersion: _appVersion!,
-          if (_buildNumber != null)
-            AnalyticsParams.buildNumber: _buildNumber!,
-          if (_shorebirdPatchNumber != null)
-            AnalyticsParams.patchNumber: _shorebirdPatchNumber!,
+          AnalyticsParams.appVersion: ?_appVersion,
+          AnalyticsParams.buildNumber: ?_buildNumber,
+          AnalyticsParams.patchNumber: ?_shorebirdPatchNumber,
           AnalyticsParams.sessionId: _sessionId,
         },
       ),

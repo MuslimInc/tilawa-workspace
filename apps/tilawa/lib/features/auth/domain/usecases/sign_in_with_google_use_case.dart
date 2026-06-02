@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:tilawa/core/logging/app_logger.dart';
 
 import '../entities/auth_result.dart';
 import '../repositories/auth_repository.dart';
@@ -18,10 +19,14 @@ class SignInWithGoogleUseCase {
       success: (user) async {
         try {
           await _userRepository.saveUserData(user);
-          return AuthResult.success(user: user);
-        } catch (e) {
-          rethrow;
+        } catch (error, stackTrace) {
+          logger.w(
+            'Signed in but failed to persist user profile',
+            error: error,
+            stackTrace: stackTrace,
+          );
         }
+        return AuthResult.success(user: user);
       },
       orElse: () => result,
     );

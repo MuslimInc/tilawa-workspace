@@ -288,15 +288,23 @@ class _RecitersScreenState extends State<RecitersScreen> {
         return;
       }
 
-      _letterIndexRestorePending = false;
-      _applyLetterIndexWidthDefault();
+      _scheduleLetterIndexWidthDefault();
     } catch (error) {
       if (!mounted) {
         return;
       }
-      _letterIndexRestorePending = false;
-      _applyLetterIndexWidthDefault();
+      _scheduleLetterIndexWidthDefault();
     }
+  }
+
+  void _scheduleLetterIndexWidthDefault() {
+    _letterIndexRestorePending = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _applyLetterIndexWidthDefault();
+    });
   }
 
   Future<void> _persistLetterIndexVisibility(bool show) async {
