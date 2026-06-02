@@ -271,34 +271,7 @@ class _PrayerNotificationSettingsSheetState
                       PrayerNotificationSemanticsIds.ishaToggle,
                 ),
 
-                /// TODO: Remove this code block when releasing the app
-                // if (kDebugMode || kProfileMode) ...[
-                //   SizedBox(height: tokens.spaceLarge),
-                //   const Divider(),
-                //   SizedBox(height: tokens.spaceMedium),
-                //   Center(
-                //     child: TextButton.icon(
-                //       onPressed: () {
-                //         getIt<IPrayerAdhanNotificationService>()
-                //             .debugScheduleTestAdhan();
-                //         ScaffoldMessenger.of(context).showSnackBar(
-                //           const SnackBar(
-                //             content: Text(
-                //               'Adhan test scheduled for +10s. Close the app now!',
-                //             ),
-                //             duration: Duration(seconds: 5),
-                //           ),
-                //         );
-                //       },
-                //       icon: const Icon(Icons.bug_report_outlined),
-                //       label: const Text('Test Adhan After 10 Seconds'),
-                //       style: TextButton.styleFrom(
-                //         foregroundColor: theme.colorScheme.error,
-                //       ),
-                //     ),
-                //   ),
-                //   SizedBox(height: tokens.spaceMedium),
-                // ],
+
               ],
             ),
           ),
