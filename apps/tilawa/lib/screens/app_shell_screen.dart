@@ -387,6 +387,12 @@ class _AppShellChrome extends StatelessWidget {
           final bool isAthkar = AppShellRoutePolicy.isAthkarContext(location);
           final bool navVisible =
               policyShowsNav && !isAthkar && phoneBottomNavVisible.value;
+          // Keep the notifier in sync so TilawaAdaptiveShell's internal
+          // ValueListenableBuilder receives change events, not just the
+          // initial value from a one-shot wrapper.
+          if (phoneBottomNavVisible.value != navVisible) {
+            phoneBottomNavVisible.value = navVisible;
+          }
           final bool showPhoneMiniPlayer =
               showPlayer && playerShouldShow && !isKeyboardOpen;
 
@@ -422,7 +428,7 @@ class _AppShellChrome extends StatelessWidget {
                 destinations: adaptiveDestinations,
                 selectedIndex: selectedIndex,
                 onDestinationSelected: onDestinationSelected,
-                phoneBottomNavigationBarVisible: _BoolListenable(navVisible),
+                phoneBottomNavigationBarVisible: phoneBottomNavVisible,
                 phoneFooterAboveNav: shellFooterPlayer,
                 bottomPlayer: MainBottomOverlay(
                   isOfflineIndicatorReady: state.isOfflineIndicatorReady,
@@ -457,20 +463,6 @@ class _AppShellChrome extends StatelessWidget {
   ) {
     return false;
   }
-}
-
-/// [ValueListenable] wrapper for a single bool recomputed on parent rebuilds.
-class _BoolListenable implements ValueListenable<bool> {
-  _BoolListenable(this.value);
-
-  @override
-  final bool value;
-
-  @override
-  void addListener(VoidCallback listener) {}
-
-  @override
-  void removeListener(VoidCallback listener) {}
 }
 
 @immutable
