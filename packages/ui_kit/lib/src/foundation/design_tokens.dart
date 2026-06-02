@@ -42,6 +42,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     required this.spaceMedium,
     required this.spaceLarge,
     required this.spaceExtraLarge,
+    required this.spaceXXL,
+    required this.spaceHuge,
     required this.radiusSmall,
     required this.radiusMedium,
     required this.radiusLarge,
@@ -108,6 +110,12 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 
   /// 24.0
   final double spaceExtraLarge;
+
+  /// 32.0 — inter-section gap (Noon/Amazon card-to-section breathing room).
+  final double spaceXXL;
+
+  /// 48.0 — hero section separator (top-of-screen hero to first content group).
+  final double spaceHuge;
 
   /// 8.0
   final double radiusSmall;
@@ -290,6 +298,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceMedium: 12.0,
       spaceLarge: 16.0,
       spaceExtraLarge: 24.0,
+      spaceXXL: 32.0,
+      spaceHuge: 48.0,
       radiusSmall: 8.0,
       radiusMedium: 12.0,
       radiusLarge: 16.0,
@@ -324,8 +334,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       narrowCardWidthThreshold: 180.0,
       narrowCardHeightThreshold: 155.0,
       cardTightHeightThreshold: 145.0,
-      playerCollapsedHeight: 72.0,
-      playerDismissThreshold: 72.0,
+      playerCollapsedHeight: 76.0,
+      playerDismissThreshold: 76.0,
       playerMaxDismissOffset: 200.0,
       playerVelocityThreshold: 500.0,
       playerDismissVelocityThreshold: 300.0,
@@ -348,6 +358,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
     double? spaceMedium,
     double? spaceLarge,
     double? spaceExtraLarge,
+    double? spaceXXL,
+    double? spaceHuge,
     double? radiusSmall,
     double? radiusMedium,
     double? radiusLarge,
@@ -403,6 +415,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceMedium: spaceMedium ?? this.spaceMedium,
       spaceLarge: spaceLarge ?? this.spaceLarge,
       spaceExtraLarge: spaceExtraLarge ?? this.spaceExtraLarge,
+      spaceXXL: spaceXXL ?? this.spaceXXL,
+      spaceHuge: spaceHuge ?? this.spaceHuge,
       radiusSmall: radiusSmall ?? this.radiusSmall,
       radiusMedium: radiusMedium ?? this.radiusMedium,
       radiusLarge: radiusLarge ?? this.radiusLarge,
@@ -478,6 +492,8 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       spaceMedium: lerpDouble(spaceMedium, other.spaceMedium, t)!,
       spaceLarge: lerpDouble(spaceLarge, other.spaceLarge, t)!,
       spaceExtraLarge: lerpDouble(spaceExtraLarge, other.spaceExtraLarge, t)!,
+      spaceXXL: lerpDouble(spaceXXL, other.spaceXXL, t)!,
+      spaceHuge: lerpDouble(spaceHuge, other.spaceHuge, t)!,
       radiusSmall: lerpDouble(radiusSmall, other.radiusSmall, t)!,
       radiusMedium: lerpDouble(radiusMedium, other.radiusMedium, t)!,
       radiusLarge: lerpDouble(radiusLarge, other.radiusLarge, t)!,
@@ -642,6 +658,11 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
 extension TilawaDesignTokensX on ThemeData {
   TilawaDesignTokens get tokens =>
       extension<TilawaDesignTokens>() ?? TilawaDesignTokens.light();
+}
+
+extension TilawaSpaceX on BuildContext {
+  double get spaceXXL => Theme.of(this).tokens.spaceXXL;
+  double get spaceHuge => Theme.of(this).tokens.spaceHuge;
 }
 
 extension TilawaIconSizeX on BuildContext {

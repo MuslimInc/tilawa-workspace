@@ -224,10 +224,10 @@ void main() {
   group('TilawaCardTokens', () {
     test('defaults match existing TilawaCard behavior', () {
       final tokens = TilawaCardTokens.defaults();
-      // radiusExtraLarge = 24.0, borderWidthThin = 0.5, spaceMedium = 12.0
-      expect(tokens.borderRadius, 24.0);
+      // Compact card family: 20dp radius, hairline border, 16dp padding.
+      expect(tokens.borderRadius, 20.0);
       expect(tokens.borderWidth, 0.5);
-      expect(tokens.padding, const EdgeInsets.all(12.0));
+      expect(tokens.padding, const EdgeInsets.all(16.0));
     });
 
     test('copyWith preserves unchanged values', () {
@@ -353,8 +353,8 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaEmptyStateTokens.defaults();
       expect(tokens.iconSize, 48.0);
-      expect(tokens.iconOpacity, 0.4);
-      expect(tokens.titleSpacing, 16.0);
+      expect(tokens.iconOpacity, 0.56);
+      expect(tokens.titleSpacing, 24.0);
       expect(tokens.subtitleSpacing, 8.0);
       expect(tokens.actionSpacing, 24.0);
       expect(tokens.padding, const EdgeInsets.all(24.0));

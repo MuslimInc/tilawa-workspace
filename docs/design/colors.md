@@ -12,15 +12,21 @@ The brand colour is **fixed**. Users do not pick a primary. Production builds
 always render Sage on the `#E5E5E0` neutral; the in-Settings colour picker is
 retained behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true` for dev/QA only.
 
-- **Primary (Ink):** Sage `#5E6D49` (`AppColors.primarySage` /
-  `AppColors.defaultPrimary` / `PrimaryColorPreset.brandLocked`). Deepened
-  from `#6F7F58` so white-on-primary clears the 4.5:1 WCAG AA bar.
+- **Primary (Ink):** Sage `#219653` (`AppColors.primarySage` /
+  `AppColors.defaultPrimary` / `PrimaryColorPreset.brandLocked`). Matches
+  launch surfaces; splash canvas uses the same green, wordmark `#FFFFFF`.
+  **Splash logo box:** `288dp` on Flutter (`AppColors.launchSplashLogoSize`)
+  and Android (`@dimen/splash_logo_size` / `splash_icon` drawable) — change
+  both together if resizing.
 - **Brand neutral:** `#E5E5E0` (`AppColors.lightSurfaceContainerHighBase` →
   `ColorScheme.surfaceContainerHigh`). The Vellum tier for chips, search
   fills, settings rows, and idle controls.
 - **Light scaffold / surface:** `#FFFFFF` — not tinted by primary.
-- **Ink (text):** `#000000` on white; body/mute/ash tiers in `AppColors`
-  for secondary copy.
+- **Ink (text):** `#0F172A` on white (`ColorScheme.onSurface`); body/mute/ash
+  tiers in `AppColors` for secondary copy.
+- **On primary:** `#FFFFFF` on brand green `#219653` (filled CTAs, FABs).
+- **Secondary:** neutral `#E5E5E0` / `#F6F6F3` — no gold or yellow accents.
+- **Light error:** `#DC2626` on white labels.
 - **Runtime override:** `apps/tilawa/lib/features/theme/presentation/theme_state_material.dart`
   resolves `state.primaryColor` to the brand-locked value when
   `Env.kShowColorPicker` is `false`.

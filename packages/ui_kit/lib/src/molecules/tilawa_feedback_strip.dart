@@ -37,7 +37,7 @@ class TilawaFeedbackStrip extends StatelessWidget {
   /// Optional intent for semantics and default border treatment.
   final TilawaFeedbackVariant? variant;
 
-  static Color? _borderForVariant(
+  static Color? _accentForVariant(
     BuildContext context,
     TilawaFeedbackVariant? v,
   ) {
@@ -54,20 +54,27 @@ class TilawaFeedbackStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final componentTokens = theme.componentTokens.feedbackStrip;
-    final Color? resolvedBorder =
-        borderColor ?? _borderForVariant(context, variant);
+    final double radius = borderRadius ?? componentTokens.borderRadius;
+    final Color? accentColor =
+        borderColor ?? _accentForVariant(context, variant);
+
+    final BoxDecoration decoration;
+    if (accentColor != null) {
+      decoration = BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: accentColor),
+      );
+    } else {
+      decoration = BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(radius),
+      );
+    }
 
     return Container(
       padding: padding ?? componentTokens.padding,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(
-          borderRadius ?? componentTokens.borderRadius,
-        ),
-        border: resolvedBorder == null
-            ? null
-            : Border.all(color: resolvedBorder),
-      ),
+      decoration: decoration,
       child: Row(
         spacing: componentTokens.contentGap,
         children: [

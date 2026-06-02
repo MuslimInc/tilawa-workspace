@@ -37,15 +37,15 @@ class BookmarkCard extends StatelessWidget {
             ),
             borderWidth: tokens.borderWidthThin,
             borderRadius: tokens.radiusLarge,
-            padding: EdgeInsets.all(tokens.spaceMedium),
+            padding: EdgeInsets.all(tokens.spaceLarge),
             child: Row(
               children: [
                 // Artwork
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(tokens.radiusMedium),
+                  borderRadius: BorderRadius.circular(tokens.radiusLarge),
                   child: SizedBox(
-                    width: 56,
-                    height: 56,
+                    width: tokens.iconSizeLarge + tokens.spaceExtraLarge,
+                    height: tokens.iconSizeLarge + tokens.spaceExtraLarge,
                     child: bookmark.artworkUrl != null
                         ? CachedNetworkImage(
                             imageUrl: bookmark.artworkUrl!,
@@ -68,8 +68,9 @@ class BookmarkCard extends StatelessWidget {
                       Text(
                         bookmark.surahName,
                         style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: colorScheme.onSurface,
+                          height: 1.2,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -79,6 +80,7 @@ class BookmarkCard extends StatelessWidget {
                       Text(
                         bookmark.reciterName,
                         style: theme.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
                           color: colorScheme.onSurfaceVariant,
                         ),
                         maxLines: 1,
@@ -90,7 +92,7 @@ class BookmarkCard extends StatelessWidget {
                         children: [
                           Icon(
                             FluentIcons.play_circle_24_regular,
-                            size: 14,
+                            size: tokens.iconSizeSmall,
                             color: colorScheme.primary,
                           ),
                           SizedBox(width: tokens.spaceExtraSmall),

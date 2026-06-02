@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Centralized app color constants.
 ///
 /// The Tilawa palette is intentionally **small and calm**:
-/// one **brand-locked** accent ([primarySage] `#528345`), a quiet neutral
+/// one **brand-locked** accent ([primarySage] `#219653`), a quiet neutral
 /// surface ramp anchored on the brand neutral [lightSurfaceContainerHighBase]
 /// `#E5E5E0`, and a handful of semantic colors. Decorative tones, parallel
 /// "category hues", and most decorative gradients have been removed so the UI
@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 /// dedicated brand gradient via [brandGradientTop] → [brandGradientBottom].
 ///
 /// **Brand lock.** As of the Islamic-brand initiative, the runtime primary
-/// is fixed to Sage (`#6F7F58`) for production builds. The other preset
+/// is fixed to Sage (`#219653`) for production builds. The other preset
 /// hexes (`primaryCoral`, `primaryTeal`, `primaryGold`, `primaryBrown`,
 /// `primaryPurple`) are retained for two reasons: (1) the in-Settings color
 /// picker remains available behind `--dart-define=TILAWA_SHOW_COLOR_PICKER=true`
@@ -48,10 +48,10 @@ abstract final class AppColors {
   ///
   /// This is the default runtime primary and the bottom stop of the launch
   /// gradient.
-  static const Color primarySage = Color(0xFF528345);
+  static const Color primarySage = Color(0xFF219653);
 
-  /// Muted gold theme option — Mushaf-inspired warm accent.
-  static const Color primaryGold = Color(0xFF8C681F);
+  /// Forest green theme option (dev/QA picker; not gold).
+  static const Color primaryGold = Color(0xFF2D6B47);
 
   /// Warm brown theme option.
   static const Color primaryBrown = Color(0xFF7B5E3B);
@@ -75,6 +75,16 @@ abstract final class AppColors {
   /// Bottom stop for the brand launch gradient.
   static const Color brandGradientBottom = defaultPrimary;
 
+  /// Launch / splash canvas — matches adaptive icon background (`#219653`).
+  static const Color launchSplashBackground = primarySage;
+
+  /// Wordmark and progress on launch surfaces (`#FFFFFF`).
+  static const Color launchSplashForeground = Color(0xFFFFFFFF);
+
+  /// Logo box on Flutter launch surfaces — must match Android
+  /// `@dimen/splash_logo_size` (288dp) and `splash_icon` drawable.
+  static const double launchSplashLogoSize = 288;
+
   // ---------------------------------------------------------------------------
   // Light neutral ramp — Pinterest catalog chrome (white / #E5E5E0 / black).
   // ---------------------------------------------------------------------------
@@ -85,8 +95,8 @@ abstract final class AppColors {
   /// Cards and sheets on canvas (same as [lightBackground] in light mode).
   static const Color lightSurface = Color(0xFFFFFFFF);
 
-  /// Primary ink (`#000000`).
-  static const Color lightInk = Color(0xFF000000);
+  /// Primary ink on surfaces (`#0F172A`).
+  static const Color lightInk = Color(0xFF0F172A);
 
   /// Body / secondary labels (`#33332e`).
   static const Color lightBody = Color(0xFF33332E);
@@ -126,8 +136,8 @@ abstract final class AppColors {
   /// Hairline dividers (`#dadad3`).
   static const Color lightHairline = Color(0xFFDADAD3);
 
-  /// Strong outline when hairline is too subtle (~400 ppi calibrated).
-  static const Color lightOutline = Color(0xFFC0C0C0);
+  /// Default outline for fields and dividers (`#D0D7DE`).
+  static const Color lightOutline = Color(0xFFD0D7DE);
 
   // ---------------------------------------------------------------------------
   // Dark neutral ramp.
@@ -152,36 +162,57 @@ abstract final class AppColors {
   static const Color darkOutline = Color(0xFF4B5B55);
 
   // ---------------------------------------------------------------------------
-  // AppTheme — light Flex scheme refinement.
+  // AppTheme — light ColorScheme roles (brand-locked M3 palette).
   // ---------------------------------------------------------------------------
 
-  /// Historical reference: hand-tuned light primary container for the default
-  /// teal preset. [AppTheme] derives `ColorScheme.primaryContainer` from the
-  /// selected primary instead; unused at runtime.
-  static const Color lightDefaultPrimaryContainer = Color(0xFFD8F0EC);
+  /// Light [ColorScheme.onPrimary] on brand green (`#FFFFFF`).
+  static const Color lightSchemeOnPrimary = Color(0xFFFFFFFF);
 
-  /// Neutral Flex secondary/tertiary containers (no brand green tint).
-  static const Color lightSecondaryContainer = lightSurfaceContainerHighBase;
+  /// Light [ColorScheme.secondary] — neutral chrome (`#E5E5E0`).
+  static const Color lightSchemeSecondary = lightSurfaceContainerHighBase;
+
+  /// Light [ColorScheme.onSecondary].
+  static const Color lightSchemeOnSecondary = lightInk;
+
+  /// Light [ColorScheme.primaryContainer] for the default sage primary.
+  static const Color lightSchemePrimaryContainer = Color(0xFFDCEFE4);
+
+  /// Light [ColorScheme.onPrimaryContainer] for the default sage primary.
+  static const Color lightSchemeOnPrimaryContainer = Color(0xFF0D3522);
+
+  /// Light [ColorScheme.secondaryContainer].
+  static const Color lightSchemeSecondaryContainer = lightSurfaceContainer;
+
+  /// Light [ColorScheme.onSecondaryContainer].
+  static const Color lightSchemeOnSecondaryContainer = lightInk;
+
+  /// Light [ColorScheme.onError].
+  static const Color lightSchemeOnError = Color(0xFFFFFFFF);
+
+  /// Neutral Flex tertiary containers (body tone on neutral fills).
   static const Color lightTertiaryContainer = lightSurfaceContainer;
   static const Color lightSurfaceContainerMid = lightSurfaceContainer;
   static const Color lightOutlineVariant = lightHairline;
   static const Color lightShadow = lightInk;
+
+  /// Legacy alias — use [lightSchemeSecondaryContainer] for scheme assembly.
+  static const Color lightSecondaryContainer = lightSchemeSecondaryContainer;
 
   // ---------------------------------------------------------------------------
   // AppTheme — dark Flex scheme refinement.
   // ---------------------------------------------------------------------------
 
   /// Lifted companion of [defaultPrimary] for contrast on dark surfaces.
-  static const Color darkDefaultPrimary = Color(0xFFABC8A3);
+  static const Color darkDefaultPrimary = Color(0xFF8AD4A8);
 
   /// Historical reference: dark primary container paired with
   /// [darkDefaultPrimary]. [AppTheme] derives it from selected primary instead.
   static const Color darkDefaultPrimaryContainer = Color(0xFF143E39);
 
-  static const Color darkSecondary = Color(0xFFB8C69A);
-  static const Color darkSecondaryContainer = Color(0xFF2E3A28);
-  static const Color darkTertiary = Color(0xFFD8B76C);
-  static const Color darkTertiaryContainer = Color(0xFF4B3B18);
+  static const Color darkSecondary = Color(0xFF9DB5A8);
+  static const Color darkSecondaryContainer = Color(0xFF2A3530);
+  static const Color darkTertiary = Color(0xFFB0B8B4);
+  static const Color darkTertiaryContainer = Color(0xFF3A3F3C);
 
   // ---------------------------------------------------------------------------
   // True-black mode (OLED-friendly dark refinement).
@@ -204,14 +235,14 @@ abstract final class AppColors {
   // Semantic colors — meaning, not decoration.
   // ---------------------------------------------------------------------------
 
-  /// Error / failure.
-  static const Color error = Color(0xFFE53935);
+  /// Error / failure — maps to light [ColorScheme.error] (`#DC2626`).
+  static const Color error = Color(0xFFDC2626);
 
   /// Success.
   static const Color success = Color(0xFF43A047);
 
-  /// Warning.
-  static const Color warning = Color(0xFFFFA000);
+  /// Warning (deep orange — not gold/amber).
+  static const Color warning = Color(0xFFC2410C);
 
   // ---------------------------------------------------------------------------
   // Platform-fixed accents — used outside Flutter's `ColorScheme`
@@ -224,10 +255,10 @@ abstract final class AppColors {
   static const Color notificationAccent = defaultPrimary;
 
   /// Brand secondary used by FlexColorScheme assembly only.
-  static const Color brandSecondary = Color(0xFF65734F);
+  static const Color brandSecondary = lightSchemeSecondary;
 
   /// Brand tertiary used by FlexColorScheme assembly only.
-  static const Color brandTertiary = primaryGold;
+  static const Color brandTertiary = lightBody;
 }
 
 /// Fixed “studio” palette for the **share audio / reel composer** (dark

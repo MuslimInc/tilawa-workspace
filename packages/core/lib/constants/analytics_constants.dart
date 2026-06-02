@@ -10,6 +10,9 @@ class AnalyticsEvents {
 
   // App Lifecycle
   static const String appStart = 'app_start';
+  static const String startupPhase = 'startup_phase';
+  static const String startupFailed = 'startup_failed';
+  static const String startupCompleted = 'startup_completed';
 
   // Audio Player
   static const String audioPlay = 'audio_play';
@@ -57,6 +60,13 @@ class AnalyticsParams {
   static const String reason = 'reason';
   static const String action = 'action';
   static const String source = 'source';
+  static const String phase = 'phase';
+  static const String elapsedMs = 'elapsed_ms';
+  static const String appVersion = 'app_version';
+  static const String buildNumber = 'build_number';
+  static const String patchNumber = 'patch_number';
+  static const String platform = 'platform';
+  static const String sessionId = 'session_id';
 
   // Navigation
   static const String screenName = 'screen_name';

@@ -1,26 +1,12 @@
 # reciters_search.yaml
-# Smoke test: activate the search field, type, erase, and verify no crash.
+# Opens dedicated search screen and exercises query input.
 #
-# NOTE: Maestro does not support Unicode (Arabic) inputText — see
-#   https://github.com/mobile-dev-inc/maestro/issues/146
-# The query "al" is used as an ASCII stand-in. Reciter names are Arabic, so
-# the search will produce an empty-results state, which is itself a valid
-# test path (field accepts input → filters → erase → full list restored).
-#
-# Semantics identifiers used (see reciter_semantics_ids.dart):
-#   reciters_tab           – bottom-nav destination (person icon off-tab;
-#                            search icon when already on reciters; re-tap
-#                            focuses search — this flow taps the field directly)
-#   reciters_search_field  – search text field in reciters header
-#
-# Prerequisites:
-#   • App is installed as com.tilawa.app
-#   • Device/emulator has internet access
+# Run:
+#   maestro test .maestro/reciters_search.yaml --udid emulator-5554
 
 appId: com.tilawa.app
 ---
 
-# ── Launch ───────────────────────────────────────────────────────────────────
 - launchApp:
     clearState: false
 - runFlow:
@@ -32,33 +18,37 @@ appId: com.tilawa.app
     commands:
       - tapOn: "Allow"
 
-# ── Navigate to Reciters tab ─────────────────────────────────────────────────
 - tapOn:
     id: "reciters_tab"
 - waitForAnimationToEnd
 
-# Wait for the list to finish loading
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_launcher"
+    timeout: 10000
+
+- tapOn:
+    id: "reciters_search_launcher"
+- waitForAnimationToEnd
+
 - extendedWaitUntil:
     visible:
       id: "reciters_search_field"
-    timeout: 10000
-- assertVisible:
-    id: "reciters_search_field"
+    timeout: 5000
 
-# ── Activate search and type an ASCII query ──────────────────────────────────
 - tapOn:
     id: "reciters_search_field"
 - inputText: "al"
 - waitForAnimationToEnd
 
-# Search field is still on screen (no crash, UI responded to input)
 - assertVisible:
     id: "reciters_search_field"
 
-# ── Erase the query (restore full list) ─────────────────────────────────────
 - eraseText: 10
 - waitForAnimationToEnd
 
-# Full list is restored – search field is still present
+- tapOn:
+    point: "5%, 8%"
+- waitForAnimationToEnd
 - assertVisible:
-    id: "reciters_search_field"
+    id: "reciters_search_launcher"

@@ -6,7 +6,6 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/prayer_times/domain/entities/entities.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_times_repository.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/usecases.dart';
-
 import 'package:tilawa/features/prayer_times/presentation/bloc/prayer_times_bloc.dart';
 import 'package:tilawa_core/errors/failures.dart';
 
@@ -104,6 +103,9 @@ void main() {
       ),
     ),
   );
+  provideDummy<Either<Failure, List<PrayerTimeEntity>>>(
+    Right(<PrayerTimeEntity>[]),
+  );
   // End of provideDummy block
 
   tearDown(() {
@@ -137,7 +139,7 @@ void main() {
     });
 
     blocTest<PrayerTimesBloc, PrayerTimesState>(
-      'ignores duplicate loadPrayerTimes while already loading',
+      'restarts in-flight loadPrayerTimes when a newer event arrives',
       build: () {
         when(
           mockLoadPrayerSettingsUseCase.call(),
@@ -164,8 +166,68 @@ void main() {
         await Future<void>.delayed(const Duration(milliseconds: 150));
       },
       verify: (_) {
-        verify(mockGetCurrentLocationUseCase.call()).called(1);
+        verify(mockLoadPrayerSettingsUseCase.call()).called(2);
+        verify(mockGetCurrentLocationUseCase.call()).called(2);
       },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'keeps latest monthly prayer times when month changes quickly',
+      build: () {
+        final PrayerTimeEntity januaryDay = tPrayerTimes.copyWith(
+          date: DateTime(2030, 1, 15),
+        );
+        final PrayerTimeEntity februaryDay = tPrayerTimes.copyWith(
+          date: DateTime(2030, 2, 15),
+        );
+
+        when(
+          mockGetMonthlyPrayerTimesUseCase.call(
+            latitude: 10.0,
+            longitude: 10.0,
+            year: 2030,
+            month: 1,
+            settings: tSettings,
+          ),
+        ).thenAnswer((_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          return Right(<PrayerTimeEntity>[januaryDay]);
+        });
+        when(
+          mockGetMonthlyPrayerTimesUseCase.call(
+            latitude: 10.0,
+            longitude: 10.0,
+            year: 2030,
+            month: 2,
+            settings: tSettings,
+          ),
+        ).thenAnswer((_) async => Right(<PrayerTimeEntity>[februaryDay]));
+
+        return bloc;
+      },
+      seed: () => const PrayerTimesState(
+        status: PrayerTimesStatus.loaded,
+        latitude: 10.0,
+        longitude: 10.0,
+        settings: tSettings,
+      ),
+      act: (bloc) async {
+        bloc.add(
+          const PrayerTimesEvent.loadMonthlyPrayerTimes(year: 2030, month: 1),
+        );
+        bloc.add(
+          const PrayerTimesEvent.loadMonthlyPrayerTimes(year: 2030, month: 2),
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+      },
+      expect: () => <Matcher>[
+        isA<PrayerTimesState>().having(
+          (PrayerTimesState state) =>
+              state.monthlyPrayerTimes.single.date.month,
+          'monthly month',
+          2,
+        ),
+      ],
     );
 
     blocTest<PrayerTimesBloc, PrayerTimesState>(
@@ -674,6 +736,358 @@ void main() {
       seed: () => const PrayerTimesState(status: PrayerTimesStatus.loading),
       act: (bloc) => bloc.add(const PrayerTimesEvent.refreshIfStale()),
       expect: () => <PrayerTimesState>[],
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'loadPrayerTimes uses default settings when loadPrayerSettings fails',
+      build: () {
+        when(
+          mockLoadPrayerSettingsUseCase.call(),
+        ).thenAnswer(
+          (_) async => Left(Failure.unexpectedError('Settings fail')),
+        );
+        when(
+          mockGetCurrentLocationUseCase.call(),
+        ).thenAnswer((_) async => Right(tLocationResult));
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      verify: (bloc) {
+        expect(bloc.state.status, PrayerTimesStatus.loaded);
+        expect(bloc.state.settings.savedLatitude, isNull);
+        expect(bloc.state.settings.lastResolvedLatitude, 10.0);
+        expect(bloc.state.settings.lastResolvedLocationName, 'City');
+        expect(bloc.state.todayPrayerTimes, tPrayerTimes);
+        verify(mockLoadPrayerSettingsUseCase.call()).called(1);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'loadPrayerTimes emits error when prayer time calculation fails',
+      build: () {
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(savedLatitude: 10.0, savedLongitude: 10.0),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer(
+          (_) async => Left(Failure.unexpectedError('Calc failed')),
+        );
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      expect: () => [
+        const PrayerTimesState(status: PrayerTimesStatus.loading),
+        const PrayerTimesState(
+          status: PrayerTimesStatus.loading,
+          settings: PrayerSettingsEntity(
+            savedLatitude: 10.0,
+            savedLongitude: 10.0,
+          ),
+        ),
+        const PrayerTimesState(
+          status: PrayerTimesStatus.error,
+          settings: PrayerSettingsEntity(
+            savedLatitude: 10.0,
+            savedLongitude: 10.0,
+          ),
+          errorMessage: 'Calc failed',
+        ),
+      ],
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'loadMonthlyPrayerTimes is a no-op without coordinates',
+      build: () => bloc,
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.loadMonthlyPrayerTimes(year: 2030, month: 3),
+      ),
+      expect: () => <PrayerTimesState>[],
+      verify: (_) {
+        verifyNever(
+          mockGetMonthlyPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            year: anyNamed('year'),
+            month: anyNamed('month'),
+            settings: anyNamed('settings'),
+          ),
+        );
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'loadMonthlyPrayerTimes emits errorMessage when monthly fetch fails',
+      build: () {
+        when(
+          mockGetMonthlyPrayerTimesUseCase.call(
+            latitude: 10.0,
+            longitude: 10.0,
+            year: 2030,
+            month: 3,
+            settings: tSettings,
+          ),
+        ).thenAnswer(
+          (_) async => Left(Failure.unexpectedError('Monthly failed')),
+        );
+        return bloc;
+      },
+      seed: () => const PrayerTimesState(
+        status: PrayerTimesStatus.loaded,
+        latitude: 10.0,
+        longitude: 10.0,
+        settings: tSettings,
+      ),
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.loadMonthlyPrayerTimes(year: 2030, month: 3),
+      ),
+      expect: () => [
+        const PrayerTimesState(
+          status: PrayerTimesStatus.loaded,
+          latitude: 10.0,
+          longitude: 10.0,
+          settings: tSettings,
+          errorMessage: 'Monthly failed',
+        ),
+      ],
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'updateLocation emits error when location fetch fails',
+      build: () {
+        when(
+          mockGetCurrentLocationUseCase.call(
+            forceRefresh: anyNamed('forceRefresh'),
+          ),
+        ).thenAnswer(
+          (_) async => Left(Failure.unexpectedError('Location denied')),
+        );
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.updateLocation()),
+      expect: () => [
+        const PrayerTimesState(isLoadingLocation: true),
+        const PrayerTimesState(
+          isLoadingLocation: false,
+          errorMessage: 'Location denied',
+        ),
+      ],
+      verify: (_) {
+        verifyNever(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        );
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'updateSettings with recalculation triggers loadPrayerTimes',
+      build: () {
+        when(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        ).thenAnswer((_) async => const Right(null));
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(savedLatitude: 10.0, savedLongitude: 10.0),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      seed: () => const PrayerTimesState(
+        status: PrayerTimesStatus.loaded,
+        latitude: 10.0,
+        longitude: 10.0,
+        settings: PrayerSettingsEntity(
+          calculationMethod: CalculationMethod.muslimWorldLeague,
+        ),
+      ),
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.updateSettings(
+          PrayerSettingsEntity(
+            calculationMethod: CalculationMethod.egyptian,
+          ),
+        ),
+      ),
+      verify: (_) {
+        verify(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'updateSettings without recalculation only reschedules notifications',
+      build: () {
+        when(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        ).thenAnswer((_) async => const Right(null));
+        return bloc;
+      },
+      seed: () => const PrayerTimesState(
+        status: PrayerTimesStatus.loaded,
+        latitude: 10.0,
+        longitude: 10.0,
+        settings: PrayerSettingsEntity(
+          fajrNotification: PrayerNotificationSettings(
+            mode: PrayerAlertMode.none,
+          ),
+        ),
+      ),
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.updateSettings(
+          PrayerSettingsEntity(
+            fajrNotification: PrayerNotificationSettings(
+              mode: PrayerAlertMode.notification,
+            ),
+          ),
+        ),
+      ),
+      verify: (_) {
+        verify(
+          mockSchedulePrayerNotificationsUseCase.call(
+            settings: anyNamed('settings'),
+            latitude: 10.0,
+            longitude: 10.0,
+            forceReschedule: true,
+          ),
+        ).called(1);
+        verifyNever(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        );
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'setManualLocation saves coordinates and reloads prayer times',
+      build: () {
+        when(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        ).thenAnswer((_) async => const Right(null));
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(
+              savedLatitude: 12.0,
+              savedLongitude: 13.0,
+              savedLocationName: 'Manual',
+            ),
+          ),
+        );
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(
+        const PrayerTimesEvent.setManualLocation(
+          latitude: 12,
+          longitude: 13,
+          locationName: 'Manual',
+        ),
+      ),
+      verify: (bloc) {
+        expect(bloc.state.status, PrayerTimesStatus.loaded);
+        expect(bloc.state.latitude, 12);
+        expect(bloc.state.longitude, 13);
+        expect(bloc.state.locationName, 'Manual');
+        expect(bloc.state.settings.savedLatitude, 12);
+        expect(bloc.state.settings.savedLongitude, 13);
+        expect(bloc.state.settings.savedLocationName, 'Manual');
+
+        final PrayerSettingsEntity savedSettings =
+            verify(
+                  mockSavePrayerSettingsUseCase.call(
+                    settings: captureAnyNamed('settings'),
+                  ),
+                ).captured.first
+                as PrayerSettingsEntity;
+        expect(savedSettings.lastResolvedLatitude, 12);
+        expect(savedSettings.lastResolvedLongitude, 13);
+
+        verify(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<PrayerTimesBloc, PrayerTimesState>(
+      'skips persisting last resolved location when coordinates are unchanged',
+      build: () {
+        when(mockLoadPrayerSettingsUseCase.call()).thenAnswer(
+          (_) async => const Right(
+            PrayerSettingsEntity(
+              calculationMethod: CalculationMethod.muslimWorldLeague,
+              lastResolvedLatitude: 10.0,
+              lastResolvedLongitude: 10.0,
+              lastResolvedLocationName: 'City',
+            ),
+          ),
+        );
+        when(
+          mockGetCurrentLocationUseCase.call(),
+        ).thenAnswer((_) async => Right(tLocationResult));
+        when(
+          mockGetPrayerTimesUseCase.call(
+            latitude: anyNamed('latitude'),
+            longitude: anyNamed('longitude'),
+            date: anyNamed('date'),
+            settings: anyNamed('settings'),
+          ),
+        ).thenAnswer((_) async => Right(tPrayerTimes));
+        return bloc;
+      },
+      act: (bloc) => bloc.add(const PrayerTimesEvent.loadPrayerTimes()),
+      verify: (_) {
+        verifyNever(
+          mockSavePrayerSettingsUseCase.call(settings: anyNamed('settings')),
+        );
+      },
     );
   });
 }

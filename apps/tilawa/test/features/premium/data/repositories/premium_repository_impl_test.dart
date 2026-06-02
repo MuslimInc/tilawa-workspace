@@ -7,7 +7,6 @@ import 'package:tilawa/features/premium/data/repositories/premium_repository_imp
 import 'package:tilawa/features/premium/domain/entities/premium_status.dart';
 import 'package:tilawa/features/premium/domain/entities/subscription_plan.dart';
 
-import '../../../../core/services/athkar_notification_service_test.mocks.dart';
 import 'premium_repository_impl_test.mocks.dart';
 
 @GenerateMocks([PremiumLocalDataSource, PremiumRemoteDataSource])
@@ -15,16 +14,13 @@ void main() {
   late PremiumRepositoryImpl repository;
   late MockPremiumLocalDataSource mockLocalDataSource;
   late MockPremiumRemoteDataSource mockRemoteDataSource;
-  late MockAnalyticsService mockAnalyticsService;
 
   setUp(() {
     mockLocalDataSource = MockPremiumLocalDataSource();
     mockRemoteDataSource = MockPremiumRemoteDataSource();
-    mockAnalyticsService = MockAnalyticsService();
     repository = PremiumRepositoryImpl(
       mockLocalDataSource,
       mockRemoteDataSource,
-      mockAnalyticsService,
     );
   });
 
@@ -102,8 +98,7 @@ void main() {
       ).thenAnswer((_) async => tPlans);
 
       // Act
-      final List<SubscriptionPlan> result = await repository
-          .getAvailablePlans();
+      final List<SubscriptionPlan> result = await repository.getAvailablePlans();
 
       // Assert
       expect(result, tPlans);
@@ -117,8 +112,7 @@ void main() {
       ).thenThrow(Exception('Remote failure'));
 
       // Act
-      final List<SubscriptionPlan> result = await repository
-          .getAvailablePlans();
+      final List<SubscriptionPlan> result = await repository.getAvailablePlans();
 
       // Assert
       expect(result.length, 3); // 3 default plans
@@ -128,82 +122,35 @@ void main() {
 
   group('purchaseSubscription', () {
     const tPlanId = 'monthly';
-    const tPremiumStatus = PremiumStatus(
-      isPremium: false,
-      subscriptionStartDate: null,
-      subscriptionEndDate: null,
-      subscriptionType: null,
-      isTrialUsed: false,
-      trialStartDate: null,
-      trialEndDate: null,
-    );
 
-    test(
-      'should return true and update local status when purchase is successful',
-      () async {
-        // Arrange
-        when(
-          mockRemoteDataSource.purchaseSubscription(tPlanId),
-        ).thenAnswer((_) async => true);
-        when(
-          mockRemoteDataSource.getPremiumStatus(),
-        ).thenAnswer((_) async => tPremiumStatus);
-        when(
-          mockLocalDataSource.getPremiumStatus(),
-        ).thenAnswer((_) async => tPremiumStatus);
-        when(
-          mockRemoteDataSource.getAvailablePlans(),
-        ).thenAnswer((_) async => tPlans);
-        when(
-          mockLocalDataSource.savePremiumStatus(any),
-        ).thenAnswer((_) async => {});
-
-        // Act
-        final bool result = await repository.purchaseSubscription(tPlanId);
-
-        // Assert
-        expect(result, true);
-        verify(mockRemoteDataSource.purchaseSubscription(tPlanId)).called(1);
-        // Called once in getPremiumStatus and once in updatePremiumStatus
-        verify(mockLocalDataSource.savePremiumStatus(any)).called(2);
-        // Verify analytics purchase event was logged
-        verify(
-          mockAnalyticsService.logPurchase(
-            any,
-            value: anyNamed('value'),
-            currency: anyNamed('currency'),
-            itemId: tPlanId,
-          ),
-        ).called(1);
-      },
-    );
-
-    test('should return false when purchase fails', () async {
-      // Arrange
+    test('should propagate UnsupportedError from datasource', () async {
+      // purchaseSubscription in the remote datasource throws UnsupportedError
+      // to enforce that all purchases must go through Play Billing. The repo
+      // delegates directly so the error surfaces to the caller.
       when(
         mockRemoteDataSource.purchaseSubscription(tPlanId),
-      ).thenAnswer((_) async => false);
+      ).thenThrow(UnsupportedError('Must use Play Billing'));
 
-      // Act
-      final bool result = await repository.purchaseSubscription(tPlanId);
-
-      // Assert
-      expect(result, false);
+      expect(
+        () => repository.purchaseSubscription(tPlanId),
+        throwsUnsupportedError,
+      );
       verify(mockRemoteDataSource.purchaseSubscription(tPlanId)).called(1);
     });
+  });
 
-    test('should return false when exception occurs', () async {
-      // Arrange
+  group('restoreSubscription', () {
+    test('should propagate UnsupportedError from datasource', () async {
+      // restoreSubscription must go through Play Billing's restorePurchases().
       when(
-        mockRemoteDataSource.purchaseSubscription(tPlanId),
-      ).thenThrow(Exception('Purchase failed'));
+        mockRemoteDataSource.restoreSubscription(),
+      ).thenThrow(UnsupportedError('Must use Play Billing'));
 
-      // Act
-      final bool result = await repository.purchaseSubscription(tPlanId);
-
-      // Assert
-      expect(result, false);
-      verify(mockRemoteDataSource.purchaseSubscription(tPlanId)).called(1);
+      expect(
+        () => repository.restoreSubscription(),
+        throwsUnsupportedError,
+      );
+      verify(mockRemoteDataSource.restoreSubscription()).called(1);
     });
   });
 
@@ -277,11 +224,9 @@ void main() {
 
     test('should return false when exception occurs', () async {
       // Arrange
-      // Remote fails or returns null
       when(
         mockRemoteDataSource.getPremiumStatus(),
       ).thenThrow(Exception('Remote failure'));
-      // Local also fails, causing getPremiumStatus to throw
       when(
         mockLocalDataSource.getPremiumStatus(),
       ).thenThrow(Exception('Local failure'));
@@ -428,99 +373,6 @@ void main() {
     });
   });
 
-  group('restoreSubscription', () {
-    final tActiveStatus = PremiumStatus(
-      isPremium: true,
-      subscriptionStartDate: DateTime.now(),
-      subscriptionEndDate: DateTime.now().add(const Duration(days: 30)),
-      subscriptionType: 'monthly',
-      isTrialUsed: false,
-      trialStartDate: null,
-      trialEndDate: null,
-    );
-
-    const tInactiveStatus = PremiumStatus(
-      isPremium: false,
-      subscriptionStartDate: null,
-      subscriptionEndDate: null,
-      subscriptionType: null,
-      isTrialUsed: false,
-      trialStartDate: null,
-      trialEndDate: null,
-    );
-
-    test(
-      'should return true when restored and subscription is active',
-      () async {
-        // Arrange
-        when(
-          mockRemoteDataSource.restoreSubscription(),
-        ).thenAnswer((_) async => true);
-        when(
-          mockRemoteDataSource.getPremiumStatus(),
-        ).thenAnswer((_) async => tActiveStatus);
-        when(
-          mockLocalDataSource.savePremiumStatus(any),
-        ).thenAnswer((_) async => {});
-
-        // Act
-        final bool result = await repository.restoreSubscription();
-
-        // Assert
-        expect(result, true);
-        verify(mockRemoteDataSource.restoreSubscription()).called(1);
-      },
-    );
-
-    test(
-      'should return false when restored but subscription is inactive',
-      () async {
-        // Arrange
-        when(
-          mockRemoteDataSource.restoreSubscription(),
-        ).thenAnswer((_) async => true);
-        when(
-          mockRemoteDataSource.getPremiumStatus(),
-        ).thenAnswer((_) async => tInactiveStatus);
-        when(
-          mockLocalDataSource.savePremiumStatus(any),
-        ).thenAnswer((_) async => {});
-
-        // Act
-        final bool result = await repository.restoreSubscription();
-
-        // Assert
-        expect(result, false);
-      },
-    );
-
-    test('should return false when remote returns false', () async {
-      // Arrange
-      when(
-        mockRemoteDataSource.restoreSubscription(),
-      ).thenAnswer((_) async => false);
-
-      // Act
-      final bool result = await repository.restoreSubscription();
-
-      // Assert
-      expect(result, false);
-    });
-
-    test('should return false when exception occurs', () async {
-      // Arrange
-      when(
-        mockRemoteDataSource.restoreSubscription(),
-      ).thenThrow(Exception('Restore failed'));
-
-      // Act
-      final bool result = await repository.restoreSubscription();
-
-      // Assert
-      expect(result, false);
-    });
-  });
-
   group('isTrialEligible', () {
     test('should return true when trial not used and no active sub', () async {
       // Arrange
@@ -599,79 +451,23 @@ void main() {
   });
 
   group('canAccessFeature', () {
-    const tPremiumStatus = PremiumStatus(
-      isPremium: true,
-      subscriptionStartDate: null,
-      subscriptionEndDate: null,
-      subscriptionType: 'monthly',
-      isTrialUsed: false,
-      trialStartDate: null,
-      trialEndDate: null,
-    );
-
-    const tFreeStatus = PremiumStatus(
-      isPremium: false,
-      subscriptionStartDate: null,
-      subscriptionEndDate: null,
-      subscriptionType: null,
-      isTrialUsed: false,
-      trialStartDate: null,
-      trialEndDate: null,
-    );
-
     test('should return true for non-premium feature', () async {
-      // Arrange
-      when(
-        mockRemoteDataSource.getPremiumStatus(),
-      ).thenAnswer((_) async => null);
-      when(
-        mockLocalDataSource.getPremiumStatus(),
-      ).thenAnswer((_) async => tFreeStatus);
-
       // Act
       final bool result = await repository.canAccessFeature('basic_feature');
 
       // Assert
       expect(result, true);
+      verifyNever(mockRemoteDataSource.getPremiumStatus());
     });
 
-    test(
-      'should return true for worship utility feature regardless of premium',
-      () async {
-        // Arrange
-        when(
-          mockRemoteDataSource.getPremiumStatus(),
-        ).thenAnswer((_) async => null);
-        when(
-          mockLocalDataSource.getPremiumStatus(),
-        ).thenAnswer((_) async => tPremiumStatus);
+    test('should return true for worship utility feature regardless of status',
+        () async {
+      // Act
+      final bool result = await repository.canAccessFeature('download');
 
-        // Act
-        final bool result = await repository.canAccessFeature('download');
-
-        // Assert
-        expect(result, true);
-      },
-    );
-
-    test(
-      'should return true for worship utility when user is not premium',
-      () async {
-        // Arrange
-        when(
-          mockRemoteDataSource.getPremiumStatus(),
-        ).thenAnswer((_) async => null);
-        when(
-          mockLocalDataSource.getPremiumStatus(),
-        ).thenAnswer((_) async => tFreeStatus);
-
-        // Act
-        final bool result = await repository.canAccessFeature('download');
-
-        // Assert
-        expect(result, true);
-      },
-    );
+      // Assert
+      expect(result, true);
+    });
   });
 
   group('canDownload', () {

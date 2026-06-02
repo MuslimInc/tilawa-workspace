@@ -1,0 +1,32 @@
+appId: com.tilawa.app
+---
+# Tap the same letter twice without moving → deselect (no filter chip).
+
+- tapOn:
+    id: "reciters_alphabet_scrollbar"
+    point: "50%, 8%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+
+- tapOn:
+    id: "reciters_alphabet_scrollbar"
+    point: "50%, 8%"
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "reciters_alphabet_letter_selected"
+
+# Hide rail — no letter filter chip when nothing is selected.
+- tapOn:
+    id: "reciters_letter_index_toggle"
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: "reciters_alphabet_scrollbar"
+- assertNotVisible:
+    id: "reciters_letter_filter_chip"
+
+- tapOn:
+    id: "reciters_letter_index_toggle"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_scrollbar"

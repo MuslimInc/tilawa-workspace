@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/features/auth/core/auth_config.dart';
+import 'package:tilawa/features/auth/data/services/credential_manager_initializer.dart';
 import 'package:tilawa_core/constants/app_strings.dart';
 
 /// Prepares the platform Google sign-in UI before the login screen is shown.
@@ -18,14 +19,17 @@ abstract class GoogleSignInPrepareDataSource {
 @LazySingleton(as: GoogleSignInPrepareDataSource)
 class GoogleSignInPrepareDataSourceImpl implements GoogleSignInPrepareDataSource {
   /// Production constructor — only [googleSignIn] is resolved by injectable.
-  GoogleSignInPrepareDataSourceImpl(this._googleSignIn)
-      : _useAndroidCredentialManager = null,
-        _useGoogleSignInPath = null;
+  GoogleSignInPrepareDataSourceImpl(
+    this._googleSignIn,
+    this._credentialManagerInitializer,
+  ) : _useAndroidCredentialManager = null,
+      _useGoogleSignInPath = null;
 
   /// Test-only overrides for platform branches (not registered in GetIt).
   @visibleForTesting
   GoogleSignInPrepareDataSourceImpl.withOptions(
-    this._googleSignIn, {
+    this._googleSignIn,
+    this._credentialManagerInitializer, {
     this._useAndroidCredentialManager,
     this._useGoogleSignInPath,
   });
@@ -44,6 +48,7 @@ class GoogleSignInPrepareDataSourceImpl implements GoogleSignInPrepareDataSource
   static Future<void>? _prepareInFlight;
 
   final GoogleSignIn _googleSignIn;
+  final CredentialManagerInitializer _credentialManagerInitializer;
   final bool? _useAndroidCredentialManager;
   final bool? _useGoogleSignInPath;
 
@@ -77,6 +82,7 @@ class GoogleSignInPrepareDataSourceImpl implements GoogleSignInPrepareDataSource
   Future<void> _runPrepare() async {
     try {
       if (_shouldUseAndroidCredentialManager) {
+        await _credentialManagerInitializer.ensureReady();
         await _channel.invokeMethod<bool>(
           'prepare',
           <String, String>{'google_client_id': AppStrings.googleClientId},

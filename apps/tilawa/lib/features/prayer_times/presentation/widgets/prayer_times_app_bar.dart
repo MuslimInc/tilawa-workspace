@@ -26,12 +26,12 @@ double prayerTimesRefreshIndicatorEdgeOffset(BuildContext context) {
 class PrayerTimesAppBar extends StatelessWidget {
   const PrayerTimesAppBar({
     super.key,
-    required this.selectedIndex,
+    required this.tabController,
     required this.onSegmentChanged,
     required this.onSettingsTap,
   });
 
-  final int selectedIndex;
+  final TabController tabController;
   final ValueChanged<String> onSegmentChanged;
   final VoidCallback onSettingsTap;
 
@@ -59,22 +59,41 @@ class PrayerTimesAppBar extends StatelessWidget {
         preferredSize: Size.fromHeight(prayerTimesAppBarBottomExtent(context)),
         child: Padding(
           padding: TilawaAppBarConfig.catalogChromePadding(tokens),
-          child: TilawaSegmentedControl<String>(
-            segments: [
-              TilawaSegment(value: 'today', label: context.l10n.today),
-              TilawaSegment(value: 'monthly', label: context.l10n.monthly),
-            ],
-            selectedValue: selectedIndex == 0 ? 'today' : 'monthly',
-            backgroundColor: colorScheme.surfaceContainer,
-            selectedColor: colorScheme.surface,
-            selectedTextColor: colorScheme.primary,
-            containerRadius: tokens.resolveRadius(
-              family: TilawaRadiusFamily.card,
-            ),
-            onValueChanged: onSegmentChanged,
+          child: AnimatedBuilder(
+            animation: tabController.animation ?? tabController,
+            builder: (BuildContext context, Widget? child) {
+              final int selectedIndex = segmentIndexForTabPage(
+                tabController.animation?.value ??
+                    tabController.index.toDouble(),
+                tabController.length,
+              );
+              return TilawaSegmentedControl<String>(
+                segments: [
+                  TilawaSegment(value: 'today', label: context.l10n.today),
+                  TilawaSegment(
+                    value: 'monthly',
+                    label: context.l10n.monthly,
+                  ),
+                ],
+                selectedValue: selectedIndex == 0 ? 'today' : 'monthly',
+                backgroundColor: colorScheme.surfaceContainer,
+                selectedColor: colorScheme.surface,
+                selectedTextColor: colorScheme.primary,
+                containerRadius: tokens.resolveRadius(
+                  family: TilawaRadiusFamily.card,
+                ),
+                onValueChanged: onSegmentChanged,
+              );
+            },
           ),
         ),
       ),
     );
   }
+}
+
+/// Maps swipe progress to the nearest segment so the control updates mid-gesture.
+@visibleForTesting
+int segmentIndexForTabPage(double page, int length) {
+  return page.round().clamp(0, length - 1);
 }

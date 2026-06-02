@@ -118,9 +118,9 @@ class TilawaCardTokens {
 
   factory TilawaCardTokens.defaults() {
     return const TilawaCardTokens(
-      borderRadius: 24.0,
+      borderRadius: 20.0,
       borderWidth: 0.5,
-      padding: EdgeInsets.all(12.0),
+      padding: EdgeInsets.all(16.0),
     );
   }
 
@@ -442,8 +442,8 @@ class TilawaEmptyStateTokens {
   factory TilawaEmptyStateTokens.defaults() {
     return const TilawaEmptyStateTokens(
       iconSize: kTilawaMinInteractiveDimension,
-      iconOpacity: 0.4,
-      titleSpacing: 16.0,
+      iconOpacity: 0.56,
+      titleSpacing: 24.0,
       subtitleSpacing: 8.0,
       actionSpacing: 24.0,
       padding: EdgeInsets.all(24.0),
@@ -491,10 +491,8 @@ class TilawaErrorStateTokens {
     required this.iconSize,
     required this.iconOpacity,
     required this.titleSpacing,
-    required this.titleFontSize,
     required this.titleFontWeight,
     required this.subtitleSpacing,
-    required this.subtitleFontSize,
     required this.subtitleOpacity,
     required this.actionSpacing,
     required this.padding,
@@ -513,17 +511,11 @@ class TilawaErrorStateTokens {
   /// Spacing between the icon and the title.
   final double titleSpacing;
 
-  /// Font size of the title text.
-  final double titleFontSize;
-
   /// Font weight of the title text.
   final FontWeight titleFontWeight;
 
   /// Spacing between the title and the subtitle.
   final double subtitleSpacing;
-
-  /// Font size of the subtitle text.
-  final double subtitleFontSize;
 
   /// Opacity applied to the subtitle color.
   final double subtitleOpacity;
@@ -551,10 +543,8 @@ class TilawaErrorStateTokens {
       iconSize: 80.0,
       iconOpacity: 0.8,
       titleSpacing: 24.0,
-      titleFontSize: 22.0,
       titleFontWeight: FontWeight.w700,
       subtitleSpacing: 12.0,
-      subtitleFontSize: 16.0,
       subtitleOpacity: 0.7,
       actionSpacing: 32.0,
       padding: EdgeInsets.symmetric(horizontal: 40.0),
@@ -570,10 +560,8 @@ class TilawaErrorStateTokens {
     double? iconSize,
     double? iconOpacity,
     double? titleSpacing,
-    double? titleFontSize,
     FontWeight? titleFontWeight,
     double? subtitleSpacing,
-    double? subtitleFontSize,
     double? subtitleOpacity,
     double? actionSpacing,
     EdgeInsets? padding,
@@ -586,10 +574,8 @@ class TilawaErrorStateTokens {
       iconSize: iconSize ?? this.iconSize,
       iconOpacity: iconOpacity ?? this.iconOpacity,
       titleSpacing: titleSpacing ?? this.titleSpacing,
-      titleFontSize: titleFontSize ?? this.titleFontSize,
       titleFontWeight: titleFontWeight ?? this.titleFontWeight,
       subtitleSpacing: subtitleSpacing ?? this.subtitleSpacing,
-      subtitleFontSize: subtitleFontSize ?? this.subtitleFontSize,
       subtitleOpacity: subtitleOpacity ?? this.subtitleOpacity,
       actionSpacing: actionSpacing ?? this.actionSpacing,
       padding: padding ?? this.padding,
@@ -612,16 +598,10 @@ class TilawaErrorStateTokens {
       iconSize: lerpTokenDouble(a.iconSize, b.iconSize, t),
       iconOpacity: lerpTokenDouble(a.iconOpacity, b.iconOpacity, t),
       titleSpacing: lerpTokenDouble(a.titleSpacing, b.titleSpacing, t),
-      titleFontSize: lerpTokenDouble(a.titleFontSize, b.titleFontSize, t),
       titleFontWeight:
           FontWeight.lerp(a.titleFontWeight, b.titleFontWeight, t) ??
           a.titleFontWeight,
       subtitleSpacing: lerpTokenDouble(a.subtitleSpacing, b.subtitleSpacing, t),
-      subtitleFontSize: lerpTokenDouble(
-        a.subtitleFontSize,
-        b.subtitleFontSize,
-        t,
-      ),
       subtitleOpacity: lerpTokenDouble(a.subtitleOpacity, b.subtitleOpacity, t),
       actionSpacing: lerpTokenDouble(a.actionSpacing, b.actionSpacing, t),
       padding: EdgeInsets.lerp(a.padding, b.padding, t)!,

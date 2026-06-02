@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// WARNING: This file contains ONLY the app_startup_logs collection rule and
+// is NOT a complete Firestore ruleset. Deploying this file alone will deny
+// all access to every other collection (users/*, subscription_plans, premium,
+// etc.) because Firestore's default for unmatched paths is deny.
+//
+// Merge these rules into the project's full firestore.rules before any deploy.
+// See docs/observability/startup_health_logs.md for context on this collection.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Client startup telemetry (see docs/observability/startup_health_logs.md).
+    match /app_startup_logs/{logId} {
+      allow create: if request.resource.data.keys().hasAll([
+          'level',
+          'event',
+          'session_id',
+          'client_timestamp_ms',
+        ])
+        && request.resource.data.level in ['info', 'error']
+        && request.resource.data.event in [
+          'startup_phase',
+          'startup_failed',
+          'startup_completed',
+        ];
+      allow read, update, delete: if false;
+    }
+  }
+}

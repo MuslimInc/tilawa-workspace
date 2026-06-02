@@ -90,25 +90,15 @@ void main() {
       final state = RecitersLoaded(
         reciters: testReciters,
         filteredReciters: testReciters,
-        searchQuery: 'test',
         selectedLetter: 'A',
       );
       expect(state.props, [
         testReciters,
         testReciters,
-        'test',
         'A',
         false,
         const <int>[],
       ]);
-    });
-
-    test('default searchQuery should be empty string', () {
-      final state = RecitersLoaded(
-        reciters: testReciters,
-        filteredReciters: testReciters,
-      );
-      expect(state.searchQuery, '');
     });
 
     test('default selectedLetter should be null', () {
@@ -139,13 +129,11 @@ void main() {
       final state1 = RecitersLoaded(
         reciters: testReciters,
         filteredReciters: testReciters,
-        searchQuery: 'test',
         selectedLetter: 'A',
       );
       final state2 = RecitersLoaded(
         reciters: testReciters,
         filteredReciters: testReciters,
-        searchQuery: 'test',
         selectedLetter: 'A',
       );
       expect(state1, equals(state2));
@@ -159,20 +147,6 @@ void main() {
       const state2 = RecitersLoaded(
         reciters: [testReciter1],
         filteredReciters: [testReciter1],
-      );
-      expect(state1, isNot(equals(state2)));
-    });
-
-    test('two instances with different searchQuery should not be equal', () {
-      final state1 = RecitersLoaded(
-        reciters: testReciters,
-        filteredReciters: testReciters,
-        searchQuery: 'test1',
-      );
-      final state2 = RecitersLoaded(
-        reciters: testReciters,
-        filteredReciters: testReciters,
-        searchQuery: 'test2',
       );
       expect(state1, isNot(equals(state2)));
     });
@@ -246,16 +220,6 @@ void main() {
         expect(newState.filteredReciters, [testReciter2]);
       });
 
-      test('should return new instance with updated searchQuery', () {
-        final state = RecitersLoaded(
-          reciters: testReciters,
-          filteredReciters: testReciters,
-          searchQuery: 'old',
-        );
-        final RecitersLoaded newState = state.copyWith(searchQuery: 'new');
-        expect(newState.searchQuery, 'new');
-      });
-
       test('should return new instance with updated selectedLetter', () {
         final state = RecitersLoaded(
           reciters: testReciters,
@@ -318,7 +282,6 @@ void main() {
         final state = RecitersLoaded(
           reciters: testReciters,
           filteredReciters: testReciters,
-          searchQuery: 'test',
           selectedLetter: 'A',
           showFavoritesOnly: true,
           favoriteIds: const {1, 3},
@@ -326,7 +289,6 @@ void main() {
         final RecitersLoaded newState = state.copyWith();
         expect(newState.reciters, testReciters);
         expect(newState.filteredReciters, testReciters);
-        expect(newState.searchQuery, 'test');
         expect(newState.selectedLetter, 'A');
         expect(newState.showFavoritesOnly, isTrue);
         expect(newState.favoriteIds, const {1, 3});
@@ -339,14 +301,12 @@ void main() {
         );
         final RecitersLoaded newState = state.copyWith(
           filteredReciters: [testReciter1],
-          searchQuery: 'Abdul',
           selectedLetter: 'A',
           showFavoritesOnly: true,
           favoriteIds: const {1},
         );
         expect(newState.reciters, testReciters);
         expect(newState.filteredReciters, [testReciter1]);
-        expect(newState.searchQuery, 'Abdul');
         expect(newState.selectedLetter, 'A');
         expect(newState.showFavoritesOnly, isTrue);
         expect(newState.favoriteIds, const {1});

@@ -1000,6 +1000,30 @@
     "@logout": {
         "description": "Logout button text"
     },
+    "deleteAccount": "Delete account",
+    "@deleteAccount": {
+        "description": "Delete account action in settings"
+    },
+    "deleteAccountConfirmation": "This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.",
+    "@deleteAccountConfirmation": {
+        "description": "Confirmation message before deleting the app account"
+    },
+    "deleteAccountFailed": "Unable to delete your account. Please try again.",
+    "@deleteAccountFailed": {
+        "description": "Generic error when account deletion fails"
+    },
+    "privacyPolicy": "Privacy policy",
+    "@privacyPolicy": {
+        "description": "Privacy policy link label"
+    },
+    "requestAccountDeletionWeb": "Request account deletion on the web",
+    "@requestAccountDeletionWeb": {
+        "description": "Link to the web account-deletion page required by Google Play"
+    },
+    "settingsLegalSection": "Legal",
+    "@settingsLegalSection": {
+        "description": "Legal links section header on settings screen"
+    },
     "storageUsed": "Storage Used: {size}",
     "@storageUsed": {
         "description": "Storage used label",
@@ -2039,9 +2063,9 @@
     "@features": {
         "description": "Features section title in settings"
     },
-    "quranReader": "Quran Reader",
+    "quranReader": "Mushaf",
     "@quranReader": {
-        "description": "Quran reader feature title"
+        "description": "Mushaf feature title"
     },
     "copiedToClipboard": "Copied to clipboard",
     "@copiedToClipboard": {

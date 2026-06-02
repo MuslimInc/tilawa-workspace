@@ -2,7 +2,6 @@ package com.tilawa.app
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.SystemClock
 import android.util.Log
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.ryanheise.audioservice.AudioServiceActivity
@@ -17,14 +16,19 @@ import org.json.JSONObject
 
 class MainActivity : AudioServiceActivity() {
     companion object {
-        // Temporary preview delay for checking the native Android splash.
-        // Set to 0L to disable.
-        private const val nativeSplashPreviewDelayMs = 0L
-
         private const val WATCHDOG_CHANNEL = "com.tilawa.app/prayer_watchdog"
+        private const val LAUNCH_SPLASH_CHANNEL = "com.tilawa.app/launch_splash"
         const val ACTION_OPEN_PRAYER_STATUS =
             "com.tilawa.app.prayer.ACTION_OPEN_PRAYER_STATUS"
         private const val TAG = "MainActivity"
+        private const val FIRST_FRAME_TAG = "FirstFrame"
+
+        @Volatile
+        var keepLaunchSplashOnScreen: Boolean = true
+    }
+
+    private fun firstFrameLog(message: String) {
+        Log.d(FIRST_FRAME_TAG, message)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,14 +36,15 @@ class MainActivity : AudioServiceActivity() {
             TAG,
             "MAIN_ACTIVITY_ON_CREATE_INTENT action=${intent?.action} extras=${intent?.extras?.keySet()}"
         )
+        firstFrameLog("MainActivity.onCreate installSplashScreen")
         val splashScreen = installSplashScreen()
-        if (nativeSplashPreviewDelayMs > 0L) {
-            val splashStartedAt = SystemClock.uptimeMillis()
-            splashScreen.setKeepOnScreenCondition {
-                SystemClock.uptimeMillis() - splashStartedAt < nativeSplashPreviewDelayMs
-            }
+        splashScreen.setKeepOnScreenCondition { keepLaunchSplashOnScreen }
+        splashScreen.setOnExitAnimationListener { splashScreenView ->
+            firstFrameLog("splash exit animation → remove() (no fade)")
+            splashScreenView.remove()
         }
         super.onCreate(savedInstanceState)
+        firstFrameLog("MainActivity.onCreate complete")
         handleIntent(intent)
     }
 
@@ -113,6 +118,18 @@ class MainActivity : AudioServiceActivity() {
             flutterEngine.dartExecutor.binaryMessenger,
             this,
         )
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, LAUNCH_SPLASH_CHANNEL)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "ready" -> {
+                        firstFrameLog("MethodChannel ready → keepLaunchSplashOnScreen=false")
+                        keepLaunchSplashOnScreen = false
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
     }
 
     override fun getRenderMode(): RenderMode {

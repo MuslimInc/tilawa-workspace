@@ -30,7 +30,6 @@ class SurahGridItem extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final tokens = theme.tokens;
-    final borderRadius = BorderRadius.circular(tokens.radiusLarge);
 
     // Combine selectors to reduce overhead and subscription count
     final (bool isPlaying, bool isCurrentItem) = context
@@ -49,189 +48,151 @@ class SurahGridItem extends StatelessWidget {
           return (playing, isCurrent);
         });
 
+    void handleTap() {
+      if (isCurrentItem) {
+        if (isPlaying) {
+          context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.pauseAudio(),
+          );
+        } else {
+          context.read<AudioPlayerBloc>().add(
+            const AudioPlayerEvent.playAudio(),
+          );
+        }
+      } else {
+        onTap();
+      }
+    }
+
+    // Shared palette — same as SurahListTile and ReciterCard avatar.
+    final List<Color> bgPalette = [
+      colorScheme.primaryContainer,
+      colorScheme.secondaryContainer,
+      colorScheme.tertiaryContainer,
+      colorScheme.surfaceContainerHighest,
+    ];
+    final List<Color> fgPalette = [
+      colorScheme.onPrimaryContainer,
+      colorScheme.onSecondaryContainer,
+      colorScheme.onTertiaryContainer,
+      colorScheme.onSurfaceVariant,
+    ];
+    final Color idleBg =
+        bgPalette[index % bgPalette.length].withValues(alpha: tokens.opacityEmphasis);
+    final Color idleFg = fgPalette[index % fgPalette.length];
+    final Color activeFill = ReciterCatalogChrome.activeFill(colorScheme);
+    final Color activeOnFill = ReciterCatalogChrome.activeOnFill(colorScheme);
+    // Badge fills the full card width so the number reads as a strong hero element.
+    // Height is square with the badge width to keep the visual centred.
+    final double badgeSize = tokens.iconSizeLarge + tokens.spaceExtraLarge;
+
     return Semantics(
       identifier: ReciterSemanticsIds.surahRow(
         surah.formattedId.isNotEmpty ? surah.formattedId : '${index + 1}',
       ),
       button: true,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: borderRadius,
-          onTap: () {
-            if (isCurrentItem) {
-              if (isPlaying) {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.pauseAudio(),
-                );
-              } else {
-                context.read<AudioPlayerBloc>().add(
-                  const AudioPlayerEvent.playAudio(),
-                );
-              }
-            } else {
-              onTap();
-            }
-          },
-          child: Container(
-            // docs/tilawa_brand.md §5: list-item cards are flat fill + hairline. No
-            // box shadow. Active state earns differentiation via tier change
-            // (primaryContainer fill) and a thicker hairline border.
-            decoration: BoxDecoration(
-              color: isCurrentItem
-                  ? ReciterCatalogChrome.activeRowFill(colorScheme)
-                  : ReciterCatalogChrome.cardFill(colorScheme),
-              borderRadius: borderRadius,
-              border: Border.all(
-                color: isCurrentItem
-                    ? ReciterCatalogChrome.activeFill(colorScheme)
-                    : ReciterCatalogChrome.hairline(colorScheme, tokens),
-                width: isCurrentItem
-                    ? tokens.borderWidthThin * 3
-                    : tokens.borderWidthThin * 2,
-              ),
-            ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final bool isTight =
-                    constraints.maxHeight < tokens.cardTightHeightThreshold;
-                final EdgeInsetsGeometry padding = EdgeInsets.all(
-                  isTight ? tokens.spaceSmall : tokens.spaceMedium,
-                );
-                final EdgeInsets resolvedPadding = padding.resolve(
-                  Directionality.of(context),
-                );
-                final double contentWidth =
-                    constraints.maxWidth - resolvedPadding.horizontal;
-                final double gap = isTight
-                    ? tokens.spaceExtraSmall
-                    : tokens.spaceSmall;
-                final double downloadButtonSize =
-                    tokens.iconSizeLarge + tokens.spaceSmall;
-
-                return Padding(
-                  padding: padding,
-                  child: Column(
-                    crossAxisAlignment: .start,
-                    mainAxisAlignment: .spaceBetween,
-                    mainAxisSize: .min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: tokens.spaceSmall,
-                              vertical: tokens.spaceExtraSmall,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isCurrentItem
-                                  ? ReciterCatalogChrome.activeFill(
-                                      colorScheme,
-                                    )
-                                  : ReciterCatalogChrome.idleFill(
-                                      colorScheme,
-                                    ),
-                              borderRadius: BorderRadius.circular(
-                                tokens.radiusMedium,
-                              ),
-                            ),
-                            child: Text(
-                              surah.formattedId.isNotEmpty
-                                  ? surah.formattedId
-                                  : '${index + 1}',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: isCurrentItem
-                                    ? ReciterCatalogChrome.activeOnFill(
-                                        colorScheme,
-                                      )
-                                    : colorScheme.onSurface,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          if (isCurrentItem)
-                            Icon(
-                              isPlaying
-                                  ? Icons.pause_circle_filled_rounded
-                                  : Icons.play_circle_fill_rounded,
-                              color: ReciterCatalogChrome.activeFill(
-                                colorScheme,
-                              ),
-                              size: tokens.iconSizeMedium,
-                            ),
-                        ],
-                      ),
-                      SizedBox(height: gap),
-                      Flexible(
-                        child: Align(
-                          alignment: .centerStart,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            alignment: .centerStart,
-                            child: SizedBox(
-                              width: contentWidth > 0 ? contentWidth : 0,
-                              child: Column(
-                                crossAxisAlignment: .start,
-                                mainAxisSize: .min,
-                                spacing: tokens.spaceExtraSmall,
-                                children: [
-                                  Text(
-                                    surah.name,
-                                    style: theme.textTheme.titleSmall?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.onSurface,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(
-                                    surah.nameAr,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w400,
-                                      color: colorScheme.onSurfaceVariant,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: gap),
-                      Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: SizedBox(
-                          width: downloadButtonSize,
-                          height: downloadButtonSize,
-                          child: FittedBox(
-                            child: DownloadButton(
-                              url: surah.id,
-                              surahTitle: surah.name,
-                              reciterName: reciterName,
-                              reciterId: reciterId,
-                              catalogChrome: true,
-                              initialIsDownloaded: surah.isDownloaded,
-                              initialIsDownloading: surah.isDownloading,
-                              initialProgress: surah.downloadProgress,
-                              identifier:
-                                  ReciterSemanticsIds.surahDownloadButton(
-                                    surah.formattedId.isNotEmpty
-                                        ? surah.formattedId
-                                        : '${index + 1}',
-                                  ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+      child: TilawaCard(
+        surface: TilawaCardSurface.flat,
+        backgroundColor: isCurrentItem
+            ? colorScheme.primaryContainer.withValues(alpha: tokens.opacitySubtle * 2)
+            : colorScheme.surface,
+        borderColor: isCurrentItem
+            ? activeFill
+            : colorScheme.outlineVariant,
+        borderWidth: isCurrentItem
+            ? tokens.borderWidthThin * 4
+            : tokens.borderWidthThin,
+        borderRadius: tokens.radiusLarge,
+        padding: EdgeInsets.all(tokens.spaceMedium),
+        onTap: handleTap,
+        // Vertical layout: badge (top) → name+subtitle (middle) → download (bottom-end).
+        // Matches the list tile's token language while fitting the narrow grid column.
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Top row: coloured number badge (left) + play/pause state (right when active).
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnimatedContainer(
+                  duration: tokens.durationFast,
+                  width: badgeSize,
+                  height: badgeSize,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isCurrentItem ? activeFill : idleBg,
+                    borderRadius: BorderRadius.circular(tokens.radiusLarge),
+                    border: Border.all(
+                      color: isCurrentItem
+                          ? activeFill
+                          : idleFg.withValues(alpha: tokens.opacityShadow),
+                      width: tokens.borderWidthThin * 2,
+                    ),
                   ),
-                );
-              },
+                  child: isCurrentItem
+                      ? Icon(
+                          isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          color: activeOnFill,
+                          size: tokens.iconSizeMedium,
+                        )
+                      : Text(
+                          surah.formattedId.isNotEmpty
+                              ? surah.formattedId
+                              : '${index + 1}',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: idleFg,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                ),
+                DownloadButton(
+                  url: surah.id,
+                  surahTitle: surah.name,
+                  reciterName: reciterName,
+                  reciterId: reciterId,
+                  catalogChrome: true,
+                  initialIsDownloaded: surah.isDownloaded,
+                  initialIsDownloading: surah.isDownloading,
+                  initialProgress: surah.downloadProgress,
+                  identifier: ReciterSemanticsIds.surahDownloadButton(
+                    surah.formattedId.isNotEmpty
+                        ? surah.formattedId
+                        : '${index + 1}',
+                  ),
+                ),
+              ],
             ),
-          ),
+            // Bottom: name + reciter — same type styles as list tile.
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              spacing: tokens.spaceExtraSmall,
+              children: [
+                Text(
+                  surah.name,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colorScheme.onSurface,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  surah.reciterName,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

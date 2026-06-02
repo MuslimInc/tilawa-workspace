@@ -34,7 +34,10 @@ extension AppBootstrapperPhases on AppBootstrapper {
     scheduleCriticalInit(coordinator);
 
     timeline.logTotal('=== TOTAL before runApp');
+    LaunchFirstFrameGate.defer();
+    firstFrameLog('runApp(BootGate) starting');
     run(_startupTasks.buildBootGate(coordinator.initAction));
+    firstFrameLog('runApp(BootGate) returned');
     timeline.logTotal('runApp called at');
 
     await ensureCriticalInitCompletes(coordinator);
@@ -61,6 +64,14 @@ extension AppBootstrapperPhases on AppBootstrapper {
           .runCriticalInit(configureDI: configureDI, timeline: timeline)
           .catchError((Object e, StackTrace stackTrace) {
             logger.e('Critical init failed: $e', stackTrace: stackTrace);
+            unawaited(
+              StartupTelemetry.failure(
+                'critical_init_pipeline_failed',
+                e,
+                stackTrace,
+                phase: 'critical_init',
+              ),
+            );
           });
       completer.complete(f);
     }

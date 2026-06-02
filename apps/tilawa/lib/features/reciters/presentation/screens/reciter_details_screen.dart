@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
-import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa_core/entities/moshaf_entity.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
@@ -17,6 +17,8 @@ import '../../../surah/domain/entities/surah_entity.dart';
 import '../../../tour_guide/presentation/widgets/tour_target.dart';
 import '../bloc/reciter_details_bloc.dart';
 import '../bloc/reciter_download_bloc.dart';
+import '../tour/reciters_tour_launcher.dart';
+import '../tour/reciters_tour_targets.dart';
 import '../widgets/download_all_button.dart';
 import '../widgets/moshaf_selector.dart';
 import '../widgets/reciter_details_app_bar.dart';
@@ -24,8 +26,6 @@ import '../widgets/reciter_history_section.dart';
 import '../widgets/reciter_search_header.dart';
 import '../widgets/surah_grid_item.dart';
 import '../widgets/surah_list_tile.dart';
-import '../tour/reciters_tour_launcher.dart';
-import '../tour/reciters_tour_targets.dart';
 
 class ReciterDetailsScreen extends StatefulWidget {
   const ReciterDetailsScreen({super.key, required this.reciter});
@@ -135,15 +135,21 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
     // Step 1: Jump approximately so the lazy builder creates the item.
     final double approxHeaderHeight = 300.0;
     double itemOffset = 0.0;
+    final tokens = context.tokens;
     if (isGrid) {
+      final double itemHeight =
+          tokens.iconSizeLarge +
+          tokens.spaceExtraLarge +
+          tokens.spaceSmall +
+          tokens.spaceExtraLarge * 2 +
+          tokens.spaceLarge +
+          tokens.spaceMedium * 2;
       final int row = playingIndex ~/ 2;
-      final double contentWidth = context.resolveContentWidth(
-        TilawaContentKind.media,
-      );
-      final double itemHeight = ((contentWidth - 32.0 - 12.0) / 2.0) / 0.99;
-      itemOffset = row * (itemHeight + 12.0);
+      itemOffset = row * (itemHeight + tokens.spaceSmall);
     } else {
-      itemOffset = playingIndex * 88.0;
+      final double tileHeight =
+          tokens.iconSizeLarge + tokens.spaceExtraLarge + tokens.spaceLarge * 2;
+      itemOffset = playingIndex * (tileHeight + tokens.spaceExtraSmall);
     }
 
     final double approxOffset = approxHeaderHeight + itemOffset;
@@ -181,7 +187,9 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
         if (!mounted) {
           return;
         }
-        final bool showPlayer = context.read<AudioPlayerBloc>().state
+        final bool showPlayer = context
+            .read<AudioPlayerBloc>()
+            .state
             .shouldShowBottomPlayer;
         if (!showPlayer) {
           _playbackTourAttempted = false;
@@ -198,7 +206,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.tokens;
-    final double bottomPlayerOffset = context.floatingBottomPadding;
     final bool showBottomPlayer = context.select((AudioPlayerBloc bloc) {
       final AudioPlayerState state = bloc.state;
       return state.shouldShowBottomPlayer && state.currentAudio != null;
@@ -358,7 +365,6 @@ class _ReciterDetailsScreenState extends State<ReciterDetailsScreen> {
                       _ReciterDetailsContent(
                         reciter: widget.reciter,
                         state: state,
-                        bottomPlayerOffset: bottomPlayerOffset,
                         showBottomPlayer: showBottomPlayer,
                         playingSurahKey: _playingSurahKey,
                         onPlaySurah: (surah) {
@@ -444,14 +450,12 @@ class _ReciterDetailsContent extends StatelessWidget {
   const _ReciterDetailsContent({
     required this.reciter,
     required this.state,
-    required this.bottomPlayerOffset,
     required this.showBottomPlayer,
     required this.onPlaySurah,
     required this.playingSurahKey,
   });
   final ReciterEntity reciter;
   final ReciterDetailsState state;
-  final double bottomPlayerOffset;
   final bool showBottomPlayer;
   final Function(SurahEntity) onPlaySurah;
   final GlobalKey playingSurahKey;
@@ -461,12 +465,13 @@ class _ReciterDetailsContent extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     final tokens = theme.tokens;
     final bool keyboardOpen = context.isKeyboardVisible;
-    final double bottomPadding =
-        (keyboardOpen ? 0 : bottomPlayerOffset) +
-        (showBottomPlayer && !keyboardOpen
-            ? QuranPlayerWidget.collapsedHeight(context) +
-                  tokens.spaceExtraLarge
-            : tokens.spaceExtraLarge);
+    // [TilawaAdaptiveShell] lays out the mini player in [Scaffold.bottomNavigationBar],
+    // so the scroll body already ends above the player — only add a small gap.
+    final double bottomPadding = keyboardOpen
+        ? 0
+        : showBottomPlayer
+        ? tokens.spaceSmall
+        : context.floatingBottomPadding;
     final double emptyStateIconSize =
         tokens.iconSizeExtraLarge + tokens.iconSizeSmall;
     final currentAudio = context.select(
@@ -568,11 +573,18 @@ class _ReciterDetailsContent extends StatelessWidget {
               bottom: bottomPadding,
             ),
             sliver: SliverGrid(
-              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: tokens.narrowCardWidthThreshold,
-                mainAxisSpacing: tokens.spaceMedium,
-                crossAxisSpacing: tokens.spaceMedium,
-                mainAxisExtent: tokens.narrowCardHeightThreshold,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: tokens.spaceSmall,
+                crossAxisSpacing: tokens.spaceSmall,
+                // badge(48) + gap(8) + name(2 lines≈40) + subtitle(16) + spacing(4) + padding(12×2)
+                mainAxisExtent:
+                    tokens.iconSizeLarge +
+                    tokens.spaceExtraLarge +
+                    tokens.spaceSmall +
+                    tokens.spaceExtraLarge * 2 +
+                    tokens.spaceLarge +
+                    tokens.spaceMedium * 2,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final SurahEntity surah = filteredSurahs[index];

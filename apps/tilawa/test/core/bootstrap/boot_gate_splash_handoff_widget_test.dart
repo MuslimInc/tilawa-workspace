@@ -31,14 +31,7 @@ class _BootGateHandoffFixture extends StatelessWidget {
                 DecoratedBox(
                   key: overlayKey,
                   decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: <Color>[
-                        AppColors.brandGradientTop,
-                        AppColors.brandGradientBottom,
-                      ],
-                    ),
+                    color: AppColors.launchSplashBackground,
                   ),
                   child: const SizedBox.expand(),
                 ),

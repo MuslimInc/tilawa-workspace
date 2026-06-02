@@ -143,6 +143,16 @@ class TilawaMediaPlayerBar extends StatelessWidget {
         color: componentTokens.shellBackgroundColor,
         borderRadius: borderRadius,
         boxShadow: [
+          // Ambient layer: crisp close shadow — gives the floating bar a
+          // distinct "above content" edge (Noon bottom player pattern).
+          BoxShadow(
+            color: colorScheme.shadow.withValues(
+              alpha: componentTokens.shadowOpacity * 0.55,
+            ),
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+          // Directional layer: larger blur for depth.
           BoxShadow(
             color: colorScheme.shadow.withValues(
               alpha: componentTokens.shadowOpacity,
@@ -176,6 +186,7 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                 Directionality.of(context),
               ),
               child: Row(
+                spacing: componentTokens.infoControlsGap,
                 children: [
                   Expanded(
                     child: _OpenPlayerTapTarget(
@@ -197,7 +208,8 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                             ),
                             SizedBox(width: componentTokens.artworkInfoGap),
                             Expanded(
-                              child: titleSubtitle ??
+                              child:
+                                  titleSubtitle ??
                                   Column(
                                     crossAxisAlignment: .start,
                                     mainAxisAlignment: .center,
@@ -227,7 +239,6 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(width: componentTokens.infoControlsGap),
                   _TransportControls(
                     designTokens: designTokens,
                     componentTokens: componentTokens,
@@ -250,22 +261,6 @@ class TilawaMediaPlayerBar extends StatelessWidget {
                     nextTooltip: nextTooltip,
                     sleepTimerTooltip: sleepTimerTooltip,
                   ),
-                  if (onClose != null) ...[
-                    SizedBox(width: componentTokens.controlsGap),
-                    Semantics(
-                      identifier: closeSemanticIdentifier,
-                      button: true,
-                      child: _TransportIconButton(
-                        size: componentTokens.controlButtonSize,
-                        tooltip: 'Close player',
-                        icon: FluentIcons.dismiss_24_regular,
-                        iconSize: designTokens.iconSizeMedium,
-                        enabled: true,
-                        color: colorScheme.onSurfaceVariant,
-                        onPressed: onClose,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),

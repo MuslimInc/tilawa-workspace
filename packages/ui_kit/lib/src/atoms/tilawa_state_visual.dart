@@ -80,9 +80,17 @@ class TilawaStateVisual extends StatelessWidget {
             borderRadius: BorderRadius.circular(tokens.radiusLarge),
             border: Border.all(
               color: accent.withValues(alpha: tokens.opacityMedium),
-              width: tokens.borderWidthThin,
+              width: 1.0,
             ),
             boxShadow: [
+              // Ambient layer — lifts the icon container off the background.
+              BoxShadow(
+                color: accent.withValues(alpha: tokens.opacitySubtle * 0.6),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+              // Coloured glow — ties the shadow hue to the accent so the
+              // visual feels intentional rather than generic dark grey.
               BoxShadow(
                 color: accent.withValues(alpha: tokens.opacitySubtle),
                 blurRadius: tokens.blurShadow,

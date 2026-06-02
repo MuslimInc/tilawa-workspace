@@ -46,6 +46,21 @@ void main() {
     },
   );
 
+  test(
+    'should return success when auth succeeds but profile save fails',
+    () async {
+      when(
+        mockAuthRepository.signInWithGoogle(),
+      ).thenAnswer((_) async => AuthResult.success(user: tUser));
+      when(mockUserRepository.saveUserData(any)).thenThrow(Exception('offline'));
+
+      final AuthResult result = await useCase();
+
+      expect(result, AuthResult.success(user: tUser));
+      verify(mockUserRepository.saveUserData(tUser)).called(1);
+    },
+  );
+
   test('should return failure when auth fails', () async {
     // Arrange
     const tMessage = 'Sign in failed';

@@ -11,5 +11,8 @@ abstract class AuthRepository {
 
   Future<void> signOut();
 
+  /// Deletes the Firebase Auth account (re-auth when required).
+  Future<void> deleteAccount();
+
   UserEntity? get currentUser;
 }

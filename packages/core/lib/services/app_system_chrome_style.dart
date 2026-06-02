@@ -42,33 +42,73 @@ final class AppSystemChromeStyle {
 
   /// Builds the default system UI style for standard app routes.
   ///
-  /// The status bar stays transparent so screens can paint behind it. The
-  /// navigation bar takes [navigationBarColor] — pass the Tilawa bottom-nav
-  /// fill (e.g. `theme.componentTokens.adaptiveShell.bottomNavBackgroundColor`)
-  /// so the OS gesture strip blends seamlessly with the app's floating nav.
-  /// Falls back to `theme.colorScheme.surface` when the override is null.
+  /// Status-bar icon brightness follows [statusBarBackgroundColor] (defaults
+  /// to [ThemeData.scaffoldBackgroundColor]) so icons stay readable on the page
+  /// behind the bar — not from the bottom-nav fill.
+  ///
+  /// The navigation bar uses [navigationBarColor] (Tilawa bottom-nav fill) so
+  /// the OS gesture strip blends with the floating nav.
   static SystemUiOverlayStyle buildDefaultAppStyle(
     ThemeData theme, {
     Color? navigationBarColor,
+    Color? statusBarBackgroundColor,
   }) {
+    final Color statusBackground =
+        statusBarBackgroundColor ?? theme.scaffoldBackgroundColor;
     final Color resolvedNavColor =
         navigationBarColor ?? theme.colorScheme.surface;
-    final Brightness barBrightness = ThemeData.estimateBrightnessForColor(
+
+    final Brightness statusBarBrightness =
+        ThemeData.estimateBrightnessForColor(statusBackground);
+    final Brightness statusIconBrightness =
+        statusBarBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    final Brightness navBarBrightness = ThemeData.estimateBrightnessForColor(
       resolvedNavColor,
+    );
+    final Brightness navIconBrightness = navBarBrightness == Brightness.dark
+        ? Brightness.light
+        : Brightness.dark;
+
+    final Color opaqueStatusColor = statusBackground.withValues(alpha: 1);
+    final Color opaqueNavColor = resolvedNavColor.withValues(alpha: 1);
+
+    return SystemUiOverlayStyle(
+      statusBarColor: opaqueStatusColor,
+      statusBarIconBrightness: statusIconBrightness,
+      statusBarBrightness: statusBarBrightness,
+      systemNavigationBarColor: opaqueNavColor,
+      systemNavigationBarDividerColor: Colors.transparent,
+      systemNavigationBarIconBrightness: navIconBrightness,
+      systemStatusBarContrastEnforced: false,
+      systemNavigationBarContrastEnforced: false,
+    );
+  }
+
+  /// Launch / full-bleed screens with one background (e.g. green splash).
+  static SystemUiOverlayStyle buildColoredScreenStyle({
+    required Color backgroundColor,
+    Color? navigationBarColor,
+  }) {
+    final Brightness barBrightness = ThemeData.estimateBrightnessForColor(
+      backgroundColor,
     );
     final Brightness iconBrightness = barBrightness == Brightness.dark
         ? Brightness.light
         : Brightness.dark;
-
-    final Color opaqueNavColor = resolvedNavColor.withValues(alpha: 1);
+    final Color opaqueBackground = backgroundColor.withValues(alpha: 1);
+    final Color opaqueNavColor = (navigationBarColor ?? backgroundColor)
+        .withValues(alpha: 1);
 
     return SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
+      statusBarColor: opaqueBackground,
       statusBarIconBrightness: iconBrightness,
       statusBarBrightness: barBrightness,
       systemNavigationBarColor: opaqueNavColor,
-      systemNavigationBarDividerColor: Colors.transparent,
       systemNavigationBarIconBrightness: iconBrightness,
+      systemNavigationBarDividerColor: Colors.transparent,
       systemStatusBarContrastEnforced: false,
       systemNavigationBarContrastEnforced: false,
     );

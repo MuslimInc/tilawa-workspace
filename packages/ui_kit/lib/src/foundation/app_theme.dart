@@ -54,17 +54,22 @@ class AppTheme {
       _material3TypographyBase(brightness);
 
   static FlexSchemeColor _lightScheme(Color primaryColor) {
-    final safePrimary = _safePrimaryForLight(primaryColor);
-    final primaryContainer = _containerForPrimary(
-      safePrimary,
-      brightness: Brightness.light,
-    );
+    final safePrimary = primaryColor == AppColors.defaultPrimary
+        ? primaryColor
+        : _safePrimaryForLight(primaryColor);
+    final isBrandPrimary = safePrimary == AppColors.defaultPrimary;
+    final primaryContainer = isBrandPrimary
+        ? AppColors.lightSchemePrimaryContainer
+        : _containerForPrimary(
+            safePrimary,
+            brightness: Brightness.light,
+          );
 
     return FlexSchemeColor.from(
       primary: safePrimary,
       primaryContainer: primaryContainer,
-      secondary: AppColors.lightSurfaceContainerHighBase,
-      secondaryContainer: AppColors.lightSecondaryContainer,
+      secondary: AppColors.lightSchemeSecondary,
+      secondaryContainer: AppColors.lightSchemeSecondaryContainer,
       tertiary: AppColors.lightBody,
       tertiaryContainer: AppColors.lightTertiaryContainer,
       appBarColor: AppColors.lightBackground,
@@ -193,23 +198,36 @@ class AppTheme {
 
   static ColorScheme _refineLightColorScheme(ColorScheme scheme) {
     final Color primary = scheme.primary;
+    final isBrandPrimary = primary == AppColors.defaultPrimary;
+    final Color primaryContainer = isBrandPrimary
+        ? AppColors.lightSchemePrimaryContainer
+        : scheme.primaryContainer;
     return scheme.copyWith(
-      onPrimary: _accessibleOnColor(primary),
+      primary: primary,
+      onPrimary: isBrandPrimary
+          ? AppColors.lightSchemeOnPrimary
+          : _accessibleOnColor(primary),
+      primaryContainer: primaryContainer,
+      onPrimaryContainer: isBrandPrimary
+          ? AppColors.lightSchemeOnPrimaryContainer
+          : _accessibleOnColor(primaryContainer),
+      secondary: AppColors.lightSchemeSecondary,
+      onSecondary: AppColors.lightSchemeOnSecondary,
+      secondaryContainer: AppColors.lightSchemeSecondaryContainer,
+      onSecondaryContainer: AppColors.lightSchemeOnSecondaryContainer,
+      error: AppColors.error,
+      onError: AppColors.lightSchemeOnError,
+      surface: AppColors.lightSurface,
       onSurface: AppColors.lightInk,
       onSurfaceVariant: AppColors.lightMute,
-      surface: AppColors.lightSurface,
       surfaceTint: Colors.transparent,
       surfaceContainerLowest: AppColors.lightBackground,
       surfaceContainerLow: AppColors.lightBackground,
       // Warm neutral container ramp (Pinterest). Fixed hexes — not harmonized
-      // toward [primary] — so chrome stays white / #E5E5E0 / black.
+      // toward [primary] — so chrome stays white / #E5E5E0 / slate ink.
       surfaceContainer: AppColors.lightSurfaceContainer,
       surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
-      secondary: AppColors.lightSurfaceContainerHighBase,
-      onSecondary: AppColors.lightInk,
-      secondaryContainer: AppColors.lightSecondaryContainer,
-      onSecondaryContainer: AppColors.lightInk,
       tertiary: AppColors.lightBody,
       onTertiary: AppColors.lightSurface,
       tertiaryContainer: AppColors.lightTertiaryContainer,

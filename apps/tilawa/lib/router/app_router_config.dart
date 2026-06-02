@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -31,6 +32,8 @@ import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
 import '../features/reciters/presentation/screens/favorites_screen.dart';
 import '../features/reciters/presentation/screens/reciter_details_loader.dart';
 import '../features/reciters/presentation/screens/reciter_details_screen.dart';
+import '../features/reciters/presentation/widgets/reciters_search_route_transition.dart';
+import '../features/reciters/presentation/widgets/reciters_search_screen_scope.dart';
 import '../features/settings/presentation/widgets/settings_screen_scope.dart';
 import '../features/share/presentation/widgets/share_composer_screen_scope.dart';
 import '../features/share/presentation/screens/screenshot_composer_screen.dart';
@@ -41,6 +44,7 @@ import '../screens/main_screen.dart';
 import '../screens/route_list_screen.dart';
 import '../shared/widgets/quran_player_expanded_page.dart';
 import '../shared/widgets/quran_player_expanded_route_transition.dart';
+import 'launch_route_page.dart';
 import 'share_composer_extra.dart';
 
 part 'app_router_config.g.dart';
@@ -48,6 +52,7 @@ part 'app_router_config.g.dart';
 @TypedShellRoute<AppShellRoute>(
   routes: <TypedRoute<RouteData>>[
     TypedGoRoute<HomeRoute>(path: '/'),
+    TypedGoRoute<RecitersSearchRoute>(path: '/reciters/search'),
     TypedGoRoute<ReciterDetailsRoute>(path: '/reciter/:reciterId'),
     TypedGoRoute<SupportRoute>(path: '/support'),
     TypedGoRoute<PremiumRoute>(path: '/premium'),
@@ -79,14 +84,61 @@ class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute();
 
   @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
+
+  @override
   Widget build(BuildContext context, GoRouterState state) {
     return const MainScreen();
+  }
+}
+
+class RecitersSearchRoute extends GoRouteData with $RecitersSearchRoute {
+  const RecitersSearchRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return CustomTransitionPage<void>(
+      key: state.pageKey,
+      transitionDuration: RecitersSearchRouteTransition.transitionDuration,
+      reverseTransitionDuration:
+          RecitersSearchRouteTransition.reverseTransitionDuration,
+      transitionsBuilder: (
+        BuildContext context,
+        Animation<double> animation,
+        Animation<double> secondaryAnimation,
+        Widget child,
+      ) {
+        return RecitersSearchRouteTransition(
+          animation: animation,
+          child: child,
+        );
+      },
+      child: build(context, state),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const RecitersSearchScreenScope();
   }
 }
 
 @TypedGoRoute<OnboardingRoute>(path: '/onboarding')
 class OnboardingRoute extends GoRouteData with $OnboardingRoute {
   const OnboardingRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -152,6 +204,14 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
 @TypedGoRoute<LoginRoute>(path: '/login')
 class LoginRoute extends GoRouteData with $LoginRoute {
   const LoginRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -249,14 +309,27 @@ class RouteListRoute extends GoRouteData with $RouteListRoute {
   const RouteListRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const RouteListScreen();
+  String? redirect(BuildContext context, GoRouterState state) {
+    if (kReleaseMode) return const HomeRoute().location;
+    return null;
   }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RouteListScreen();
 }
 
 @TypedGoRoute<SplashRoute>(path: '/splash')
 class SplashRoute extends GoRouteData with $SplashRoute {
   const SplashRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -352,7 +425,13 @@ class ScreenshotComposerRoute extends GoRouteData
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final ScreenshotComposerNavExtra extra = $extra!;
+    final ScreenshotComposerNavExtra? extra = $extra;
+    if (extra == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => const HomeRoute().go(context),
+      );
+      return const SizedBox.shrink();
+    }
     return ShareComposerScreenScope(
       child: ScreenshotComposerScreen(
         surahNumber: extra.surahNumber,
@@ -405,7 +484,13 @@ class VideoReelComposerRoute extends GoRouteData with $VideoReelComposerRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    final VideoReelComposerNavExtra extra = $extra!;
+    final VideoReelComposerNavExtra? extra = $extra;
+    if (extra == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => const HomeRoute().go(context),
+      );
+      return const SizedBox.shrink();
+    }
     return ShareComposerScreenScope(
       child: VideoReelComposerScreen(
         surahNumber: extra.surahNumber,
@@ -422,7 +507,12 @@ class QuranRenderDemoRoute extends GoRouteData with $QuranRenderDemoRoute {
   const QuranRenderDemoRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const QuranRenderDemoScreen();
+  String? redirect(BuildContext context, GoRouterState state) {
+    if (kReleaseMode) return const HomeRoute().location;
+    return null;
   }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const QuranRenderDemoScreen();
 }

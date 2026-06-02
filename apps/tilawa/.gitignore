@@ -41,6 +41,11 @@ android/app/debug
 android/app/profile
 android/app/release
 
+# Android signing — never commit credentials
+android/key.properties
+android/app/*.jks
+android/app/*.keystore
+
 # generated files
 *.g.dart
 *.mocks.dart

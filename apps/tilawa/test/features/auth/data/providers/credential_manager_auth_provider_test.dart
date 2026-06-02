@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:tilawa/features/auth/data/providers/credential_manager_auth_provider.dart';
+import 'package:tilawa/features/auth/data/services/credential_manager_initializer.dart';
 import 'package:tilawa/features/auth/domain/entities/auth_result.dart';
+import 'package:tilawa_core/constants/app_strings.dart';
 
 import 'credential_manager_auth_provider_test.mocks.dart';
 
@@ -22,6 +24,7 @@ void main() {
   late MockGoogleIdTokenCredential mockCredential;
   late MockUserCredential mockUserCredential;
   late MockUser mockFirebaseUser;
+  late CredentialManagerInitializer credentialManagerInitializer;
 
   setUp(() {
     mockFirebaseAuth = MockFirebaseAuth();
@@ -29,10 +32,22 @@ void main() {
     mockCredential = MockGoogleIdTokenCredential();
     mockUserCredential = MockUserCredential();
     mockFirebaseUser = MockUser();
+    credentialManagerInitializer = CredentialManagerInitializer(
+      mockCredentialManager,
+    );
+    when(
+      mockCredentialManager.init(
+        preferImmediatelyAvailableCredentials: anyNamed(
+          'preferImmediatelyAvailableCredentials',
+        ),
+        googleClientId: anyNamed('googleClientId'),
+      ),
+    ).thenAnswer((_) async {});
 
     authProvider = CredentialManagerAuthProvider(
       mockFirebaseAuth,
       mockCredentialManager,
+      credentialManagerInitializer,
     );
   });
 
@@ -59,6 +74,12 @@ void main() {
         final AuthResult result = await authProvider.signIn();
 
         // Assert
+        verify(
+          mockCredentialManager.init(
+            preferImmediatelyAvailableCredentials: true,
+            googleClientId: AppStrings.googleClientId,
+          ),
+        ).called(1);
         expect(result, isA<AuthResult>());
         result.maybeWhen(
           success: (user) {

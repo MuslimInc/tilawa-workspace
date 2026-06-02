@@ -67,7 +67,6 @@ class TilawaErrorState extends StatelessWidget {
             Text(
               title,
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontSize: tokens.titleFontSize,
                 fontWeight: tokens.titleFontWeight,
                 color: colorScheme.onSurface,
               ),
@@ -77,8 +76,7 @@ class TilawaErrorState extends StatelessWidget {
               SizedBox(height: tokens.subtitleSpacing),
               Text(
                 subtitle!,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: tokens.subtitleFontSize,
+                style: theme.textTheme.bodyLarge?.copyWith(
                   color: colorScheme.onSurface.withValues(
                     alpha: tokens.subtitleOpacity,
                   ),

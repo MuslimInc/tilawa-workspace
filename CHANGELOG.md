@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6+38] - 2026-05-31 [Google Play Release]
+
+### Added
+
+- **Account deletion**: Delete account in Settings (with confirmation and Google
+  re-authentication when required); Firestore profile and FCM tokens removed.
+- **Legal links**: Privacy policy on login and in Settings; web account-deletion
+  page at `hosting/public/delete-account/` for Play Console Data deletion URL.
+- **Firebase Hosting**: Static privacy and account-deletion pages under
+  `hosting/public/`.
+
+### Changed
+
+- **Version**: Production track bumped to **1.0.6** (build **38**) for clearer
+  Play Vitals separation from prior 1.0.5 builds.
+
+### Fixed
+
+- **Permissions**: Removed unused `ACCESS_MEDIA_LOCATION` from Android manifest.
+
 ## [1.0.5+32] - 2026-05-24 [Google Play Release]
 
 ### Added

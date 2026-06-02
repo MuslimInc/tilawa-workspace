@@ -159,6 +159,11 @@ class TilawaAdaptiveShell extends StatelessWidget {
                 ),
               ],
             );
+          } else if (phoneFooterAboveNav != null) {
+            // Mini-player chrome (e.g. QuranPlayerWidget) must stay visible on
+            // shell routes that hide the bottom bar (/reciter/:id, search, …).
+            // Bottom safe-area spacing is owned by the footer slot height.
+            bottomNavigationBar = phoneFooterAboveNav!;
           }
 
           return Scaffold(

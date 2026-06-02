@@ -45,13 +45,16 @@ class PrayerTimesScreen extends StatefulWidget {
 }
 
 class _PrayerTimesScreenState extends State<PrayerTimesScreen>
-    with WidgetsBindingObserver {
-  int _selectedIndex = 0;
+    with WidgetsBindingObserver, TickerProviderStateMixin {
+  static const int _tabCount = 2;
+
+  late final TabController _tabController;
   Timer? _midnightRefreshTimer;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: _tabCount, vsync: this);
     WidgetsBinding.instance.addObserver(this);
     _scheduleMidnightRefreshTimer();
   }
@@ -59,6 +62,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
   @override
   void dispose() {
     _midnightRefreshTimer?.cancel();
+    _tabController.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -94,9 +98,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
   }
 
   void _onSegmentChanged(String value) {
-    setState(() {
-      _selectedIndex = value == 'today' ? 0 : 1;
-    });
+    final int index = value == 'today' ? 0 : 1;
+    if (_tabController.index == index && !_tabController.indexIsChanging) {
+      return;
+    }
+    _tabController.animateTo(index);
   }
 
   void _scheduleMidnightRefreshTimer() {
@@ -166,7 +172,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
                         context,
                       ),
                       sliver: PrayerTimesAppBar(
-                        selectedIndex: _selectedIndex,
+                        tabController: _tabController,
                         onSegmentChanged: _onSegmentChanged,
                         onSettingsTap: () => _showSettingsDialog(context),
                       ),
@@ -218,8 +224,11 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
         return _nonScrollableBody(_buildLocationRequiredView(context, state));
 
       case PrayerTimesStatus.loaded:
-        return IndexedStack(
-          index: _selectedIndex,
+        return TabBarView(
+          controller: _tabController,
+          physics: const BouncingScrollPhysics(
+            parent: PageScrollPhysics(),
+          ),
           children: [
             _buildTodayView(context, state),
             _buildMonthlyView(context, state),

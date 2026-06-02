@@ -99,7 +99,10 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
 
   bool _hasProcessedStartup = false;
   bool _hasPrimedDispatcher = false;
-  bool _isChecking = false;
+  // Separate flags so the one-shot cold-start probe and the repeating resume
+  // handler never mask each other when they race (e.g. slow device startup).
+  bool _isColdStartChecking = false;
+  bool _isResumeChecking = false;
   Timer? _localLaunchProbeTimer;
 
   // -------------------------------------------------------------------------
@@ -144,13 +147,13 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
 
   @override
   Future<void> handleAppResume() async {
-    if (_isChecking) {
+    if (_isResumeChecking) {
       logger.d(
         '[NotificationStartupService] handleAppResume: skipped – already checking',
       );
       return;
     }
-    _isChecking = true;
+    _isResumeChecking = true;
     logger.d(
       '[NotificationStartupService] handleAppResume: started, lastProcessedId=${AppRouter.lastProcessedNotificationId}',
     );
@@ -193,7 +196,7 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
     } catch (e) {
       logger.d('[NotificationStartupService] Error on resume: $e');
     } finally {
-      _isChecking = false;
+      _isResumeChecking = false;
     }
   }
 
@@ -249,13 +252,13 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
   }
 
   Future<void> _checkForDeferredColdStart() async {
-    if (_isChecking) {
+    if (_isColdStartChecking) {
       logger.d(
         '[NotificationStartupService] _checkForDeferredColdStart: skipped – already checking',
       );
       return;
     }
-    _isChecking = true;
+    _isColdStartChecking = true;
     logger.d(
       '[NotificationStartupService] _checkForDeferredColdStart: started, lastProcessedId=${AppRouter.lastProcessedNotificationId}',
     );
@@ -323,7 +326,7 @@ class NotificationStartupServiceImpl implements NotificationStartupService {
         '[NotificationStartupService] Error processing deferred cold-start notification: $e',
       );
     } finally {
-      _isChecking = false;
+      _isColdStartChecking = false;
     }
   }
 }

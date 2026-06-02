@@ -131,6 +131,45 @@ void main() {
       },
     );
 
+    testWidgets(
+      'narrow keeps phoneFooterAboveNav when bottom nav is hidden',
+      (tester) async {
+        const Key footerKey = Key('shell_footer_above_nav');
+        final visible = ValueNotifier<bool>(false);
+        addTearDown(visible.dispose);
+
+        await tester.binding.setSurfaceSize(const Size(400, 800));
+        tester.view.physicalSize = const Size(400, 800);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          _wrap(
+            direction: TextDirection.ltr,
+            child: TilawaAdaptiveShell(
+              destinations: _destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              phoneBottomNavigationBarVisible: visible,
+              phoneFooterAboveNav: const SizedBox(
+                key: footerKey,
+                height: 72,
+                child: ColoredBox(color: Color(0xFF336699)),
+              ),
+              bottomPlayer: const SizedBox.shrink(),
+              child: const ColoredBox(color: Color(0xFFEEEEEE)),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        expect(find.byType(BottomNavigationBar), findsNothing);
+        expect(find.byKey(footerKey), findsOneWidget);
+      },
+    );
+
     testWidgets('narrow body has zero bottom MediaQuery padding', (
       tester,
     ) async {

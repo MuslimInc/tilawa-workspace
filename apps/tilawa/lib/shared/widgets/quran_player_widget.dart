@@ -92,11 +92,12 @@ class QuranPlayerWidget extends StatefulWidget {
         if (context.isNarrow && shell.bottomNavBarHeight > 0) {
           return collapsedHeight(context);
         }
-        return collapsedHeight(context) +
-            shell.bottomNavBarHeight +
-            (shell.hostAbsorbsBottomSafeArea
-                ? 0
-                : context.floatingBottomPadding);
+        return QuranPlayerLayoutInsets.phoneFooterSlotHeight(
+          context,
+          playerHeight: collapsedHeight(context),
+          hostAbsorbsBottomSafeArea: shell.hostAbsorbsBottomSafeArea,
+        ) +
+            shell.bottomNavBarHeight;
       }
     }
 
@@ -120,7 +121,9 @@ class QuranPlayerWidget extends StatefulWidget {
       final QuranPlayerShellChrome? shell = context
           .read<QuranPlayerChromeNotifier>()
           .shellChrome;
-      if (shell != null && context.isNarrow && shell.bottomNavBarHeight > 0) {
+      // Phone shell: mini player lives in [Scaffold.bottomNavigationBar] below
+      // this route's scaffold, so only a standard FAB margin is needed.
+      if (shell != null && context.isNarrow) {
         return context.tokens.spaceSmall;
       }
     }
@@ -1163,19 +1166,36 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
   }
 
+  double _shellFooterBottomSpacing(BuildContext context) {
+    return QuranPlayerLayoutInsets.phoneFooterBottomSpacing(
+      context,
+      hostAbsorbsBottomSafeArea: widget.hostAbsorbsBottomSafeArea,
+    );
+  }
+
   /// Mini player anchored in the shell footer column (YouTube Music style).
   Widget _buildShellFooterMini(BuildContext context) {
+    final double bottomSpacing = _shellFooterBottomSpacing(context);
     return SizedBox(
-      height: _miniPlayerHeight,
+      height: _miniPlayerHeight + bottomSpacing,
       width: double.infinity,
-      child: _buildPlayerTree(
-        context,
-        hostRect:
-            Offset.zero &
-            Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
-        overlaySize: MediaQuery.sizeOf(context),
-        showMiniInTree: true,
-        miniAnchoredInFooter: true,
+      child: Column(
+        children: [
+          SizedBox(
+            height: _miniPlayerHeight,
+            width: double.infinity,
+            child: _buildPlayerTree(
+              context,
+              hostRect:
+                  Offset.zero &
+                  Size(MediaQuery.sizeOf(context).width, _miniPlayerHeight),
+              overlaySize: MediaQuery.sizeOf(context),
+              showMiniInTree: true,
+              miniAnchoredInFooter: true,
+            ),
+          ),
+          SizedBox(height: bottomSpacing),
+        ],
       ),
     );
   }

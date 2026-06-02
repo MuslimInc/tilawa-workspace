@@ -8,7 +8,7 @@
 #
 # Semantics identifiers used (see reciter_semantics_ids.dart):
 #   reciters_tab              – bottom-nav destination
-#   reciters_search_field     – used as a load-completion sentinel
+#   reciters_search_launcher  – used as a load-completion sentinel
 #   reciters_favorites_toggle – heart / favourites filter button
 #   reciter_card_1            – card for reciter id=1
 #   reciter_details_surah_search  – surah-filter field in ReciterDetails
@@ -53,10 +53,10 @@ appId: com.tilawa.app
 # Wait for list to load (identifier is locale-independent)
 - extendedWaitUntil:
     visible:
-      id: "reciters_search_field"
+      id: "reciters_search_launcher"
     timeout: 10000
 - assertVisible:
-    id: "reciters_search_field"
+    id: "reciters_search_launcher"
 
 # Assert structural elements are all visible in RTL layout
 - assertVisible:
@@ -90,7 +90,7 @@ appId: com.tilawa.app
 
 - extendedWaitUntil:
     visible:
-      id: "reciters_search_field"
+      id: "reciters_search_launcher"
     timeout: 5000
 - assertVisible:
-    id: "reciters_search_field"
+    id: "reciters_search_launcher"

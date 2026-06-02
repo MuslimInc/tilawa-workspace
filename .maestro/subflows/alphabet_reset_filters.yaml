@@ -1,0 +1,30 @@
+appId: com.tilawa.app
+---
+# Reset stale filters from a prior run before alphabet scenarios.
+
+- runFlow:
+    when:
+      visible:
+        id: "reciters_clear_all_filters"
+    commands:
+      - tapOn:
+          id: "reciters_clear_all_filters"
+      - waitForAnimationToEnd
+
+- runFlow:
+    when:
+      visible:
+        id: "reciters_letter_filter_chip"
+    commands:
+      - tapOn:
+          id: "reciters_letter_filter_chip"
+      - waitForAnimationToEnd
+
+- runFlow:
+    when:
+      notVisible:
+        id: "reciters_alphabet_scrollbar"
+    commands:
+      - tapOn:
+          id: "reciters_letter_index_toggle"
+      - waitForAnimationToEnd

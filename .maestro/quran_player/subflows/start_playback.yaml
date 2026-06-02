@@ -5,13 +5,13 @@ appId: com.tilawa.app
 - runFlow:
     when:
       notVisible:
-        id: "reciters_search_field"
+        id: "reciters_search_launcher"
     commands:
       - tapOn:
           id: "reciters_tab"
 - extendedWaitUntil:
     visible:
-      id: "reciters_search_field"
+      id: "reciters_search_launcher"
     timeout: 10000
 
 - runFlow:

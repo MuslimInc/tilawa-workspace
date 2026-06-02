@@ -945,6 +945,30 @@
     "@logout": {
         "description": "Logout button text"
     },
+    "deleteAccount": "حذف الحساب",
+    "@deleteAccount": {
+        "description": "Delete account action in settings"
+    },
+    "deleteAccountConfirmation": "سيؤدي هذا إلى حذف حسابك في تلاوة وبيانات ملفك المتزامنة نهائياً. قد نحتفظ بسجلات مشتريات مجهولة للوقاية من الاحتيال. لا يمكن التراجع عن هذا الإجراء.",
+    "@deleteAccountConfirmation": {
+        "description": "Confirmation message before deleting the app account"
+    },
+    "deleteAccountFailed": "تعذّر حذف حسابك. يرجى المحاولة مرة أخرى.",
+    "@deleteAccountFailed": {
+        "description": "Generic error when account deletion fails"
+    },
+    "privacyPolicy": "سياسة الخصوصية",
+    "@privacyPolicy": {
+        "description": "Privacy policy link label"
+    },
+    "requestAccountDeletionWeb": "طلب حذف الحساب عبر الويب",
+    "@requestAccountDeletionWeb": {
+        "description": "Link to the web account-deletion page required by Google Play"
+    },
+    "settingsLegalSection": "قانوني",
+    "@settingsLegalSection": {
+        "description": "Legal links section header on settings screen"
+    },
     "storageUsed": "المساحة المستخدمة: {size}",
     "@storageUsed": {
         "description": "Storage used label",
@@ -1984,9 +2008,9 @@
     "@features": {
         "description": "Features section title in settings"
     },
-    "quranReader": "قارئ القرآن",
+    "quranReader": "المصحف الشريف",
     "@quranReader": {
-        "description": "Quran reader feature title"
+        "description": "Mushaf feature title"
     },
     "copiedToClipboard": "تم النسخ",
     "@copiedToClipboard": {

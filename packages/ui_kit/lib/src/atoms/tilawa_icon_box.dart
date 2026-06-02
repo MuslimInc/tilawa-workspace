@@ -34,6 +34,8 @@ class TilawaIconBox extends StatelessWidget {
     final double effectiveSize = size ?? tokens.iconSize;
     final double effectivePadding = padding ?? tokens.padding;
 
+    final Color resolvedIconColor = iconColor ?? theme.colorScheme.onSurface;
+
     return Container(
       padding: EdgeInsets.all(effectivePadding),
       decoration: BoxDecoration(
@@ -41,13 +43,17 @@ class TilawaIconBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(
           borderRadius ?? tokens.borderRadius,
         ),
+        border: Border.all(
+          color: resolvedIconColor.withValues(alpha: 0.15),
+          width: 1.0,
+        ),
       ),
       child:
           child ??
           Icon(
             icon,
             size: effectiveSize,
-            color: iconColor ?? theme.colorScheme.onSurface,
+            color: resolvedIconColor,
           ),
     );
   }

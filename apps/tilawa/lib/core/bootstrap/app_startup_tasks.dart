@@ -26,6 +26,7 @@ import 'package:tilawa/core/observers/composite_bloc_observer.dart';
 import 'package:tilawa/core/observers/crashlytics_bloc_observer.dart';
 import 'package:tilawa/core/services/analytics_initialization_service.dart';
 import 'package:tilawa/core/services/crashlytics_service.dart';
+import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 import 'package:tilawa/core/services/firebase_initialization_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/services/notification_permission_service.dart';
@@ -121,6 +122,7 @@ class AppStartupTasks {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    unawaited(StartupTelemetry.onFirebaseReady());
     await _activateAppCheck();
   }
 
@@ -199,6 +201,7 @@ class AppStartupTasks {
     logger.d(
       '[AppLaunch] source=AppStartupTasks.runCriticalInit: Start in (${DateTime.now()})',
     );
+    unawaited(StartupTelemetry.phase('critical_init_start'));
     final bool firebaseOk = await initializeFirebaseAndHydratedStorage(
       timeline,
     );
@@ -209,6 +212,7 @@ class AppStartupTasks {
     await runDependencyInjection(configureDI: configureDI, timeline: timeline);
     await configurePreRenderServices(timeline: timeline);
     timeline.logTotal('=== Critical init done');
+    unawaited(StartupTelemetry.phase('critical_init_done'));
   }
 
   void initializeNonCriticalServices() {

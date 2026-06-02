@@ -66,45 +66,28 @@ class _BootGate extends StatefulWidget {
 class _BootGateState extends State<_BootGate> {
   bool _loggedBootGateSplash = false;
 
-  static const Color _launchGradientTop = AppColors.brandGradientTop;
-  static const Color _launchGradientBottom = AppColors.brandGradientBottom;
-  static const LinearGradient _launchBackgroundGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: <Color>[_launchGradientTop, _launchGradientBottom],
-  );
-  static const String _launchWordmarkAsset =
-      'assets/images/launch_wordmark.png';
-  static const double _wordmarkBoxSize = 200;
-  static const SystemUiOverlayStyle _launchOverlayStyle = SystemUiOverlayStyle(
-    statusBarColor: _launchGradientTop,
-    statusBarIconBrightness: Brightness.light,
-    statusBarBrightness: Brightness.dark,
-    systemNavigationBarColor: _launchGradientBottom,
-    systemNavigationBarIconBrightness: Brightness.light,
-    systemNavigationBarDividerColor: Colors.transparent,
-    systemStatusBarContrastEnforced: false,
-    systemNavigationBarContrastEnforced: false,
-  );
+  static const Color _launchBackground = AppColors.launchSplashBackground;
+  static const String _appLogoAsset = 'assets/images/app_logo.png';
+  static const double _wordmarkBoxSize = AppColors.launchSplashLogoSize;
+  static final SystemUiOverlayStyle _launchOverlayStyle =
+      AppSystemChromeStyle.buildColoredScreenStyle(
+        backgroundColor: _launchBackground,
+      );
 
   bool _ready = false;
   bool _handoffToAppStarted = false;
   Future<void>? _criticalInitFuture;
   bool? _lastLoggedPainted;
+  bool? _lastLoggedShowSplash;
 
   @override
   void initState() {
     super.initState();
-    // #region agent log
-    fixBlackFrameLog(
-      runId: 'flutter-handoff-baseline',
-      hypothesisId: 'H1',
-      location: 'app_startup_widgets.dart:_BootGateState.initState',
-      message: 'BootGate initState',
-      data: const <String, Object?>{'ready': false},
-    );
-    // #endregion
+    firstFrameLog('BootGate initState');
+    unawaited(StartupTelemetry.phase('boot_gate_start'));
+    firstFrameLog('BootGate critical init scheduling');
     SplashLaunchHandoff.resetForNewLaunch();
+    LaunchFirstFrameGate.scheduleReleaseAfterFirstFrame();
     _awaitCriticalInit();
   }
 
@@ -122,15 +105,7 @@ class _BootGateState extends State<_BootGate> {
     if (_ready || _criticalInitFuture != null) {
       return;
     }
-    // #region agent log
-    fixBlackFrameLog(
-      runId: 'flutter-handoff-baseline',
-      hypothesisId: 'H3',
-      location: 'app_startup_widgets.dart:_BootGateState._awaitCriticalInit',
-      message: 'BootGate critical init begin',
-      data: const <String, Object?>{},
-    );
-    // #endregion
+    unawaited(StartupTelemetry.phase('boot_gate_init_await'));
     // Bootstrap() schedules critical init from its own post-frame callback;
     // here we just await the resulting future so we can swap in the real app
     // when it completes. Calling startCriticalInit() is a no-op if bootstrap
@@ -143,19 +118,19 @@ class _BootGateState extends State<_BootGate> {
           _applyStartupLaunchPlan(plan);
           if (!mounted || _handoffToAppStarted) return;
           _handoffToAppStarted = true;
-          // #region agent log
-          fixBlackFrameLog(
-            runId: 'flutter-handoff-baseline',
-            hypothesisId: 'H3',
-            location:
-                'app_startup_widgets.dart:_BootGateState._awaitCriticalInit.then',
-            message: 'BootGate critical init completed',
-            data: <String, Object?>{
-              'target': plan.target.name,
-              'location': plan.location,
-            },
+          firstFrameLog(
+            'BootGate critical init done → TilawaApp mounts under splash '
+            '(target=${plan.target.name} location=${plan.location})',
           );
-          // #endregion
+          unawaited(
+            StartupTelemetry.phase(
+              'boot_gate_ready',
+              data: <String, Object?>{
+                'target': plan.target.name,
+                'location': plan.location,
+              },
+            ),
+          );
           setState(() {
             _ready = true;
           });
@@ -166,6 +141,14 @@ class _BootGateState extends State<_BootGate> {
             'Critical init failed; staying on launch splash',
             error: error,
             stackTrace: stackTrace,
+          );
+          unawaited(
+            StartupTelemetry.failure(
+              'boot_gate_critical_init_failed',
+              error,
+              stackTrace,
+              phase: 'boot_gate',
+            ),
           );
         });
   }
@@ -213,90 +196,83 @@ class _BootGateState extends State<_BootGate> {
 
   @override
   Widget build(BuildContext context) {
-    if (_ready) {
-      return ValueListenableBuilder<bool>(
-        valueListenable: SplashLaunchHandoff.splashRouteHasPainted,
-        builder: (BuildContext context, bool painted, Widget? _) {
-          if (_lastLoggedPainted != painted) {
-            _lastLoggedPainted = painted;
-            // #region agent log
-            fixBlackFrameLog(
-              runId: 'flutter-handoff-baseline',
-              hypothesisId: 'H1',
-              location: 'app_startup_widgets.dart:_BootGateState.build',
-              message: 'BootGate handoff state changed',
-              data: <String, Object?>{
-                'ready': _ready,
-                'painted': painted,
-              },
-            );
-            // #endregion
-          }
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                widget.child,
-                if (!painted)
-                  const _LaunchSplash(
-                    backgroundGradient: _launchBackgroundGradient,
-                    overlayStyle: _launchOverlayStyle,
-                    wordmarkAsset: _launchWordmarkAsset,
-                    wordmarkBoxSize: _wordmarkBoxSize,
-                  ),
-              ],
-            ),
-          );
-        },
-      );
-    }
     if (!_loggedBootGateSplash) {
       _loggedBootGateSplash = true;
       ColdStartNavigationMetrics.recordBootGateSplash();
     }
-    return const _LaunchSplash(
-      backgroundGradient: _launchBackgroundGradient,
-      overlayStyle: _launchOverlayStyle,
-      wordmarkAsset: _launchWordmarkAsset,
-      wordmarkBoxSize: _wordmarkBoxSize,
+    return ValueListenableBuilder<bool>(
+      valueListenable: SplashLaunchHandoff.splashRouteHasPainted,
+      builder: (BuildContext context, bool painted, Widget? _) {
+        if (_lastLoggedPainted != painted) {
+          _lastLoggedPainted = painted;
+        }
+        final bool showSplash = !_ready || !painted;
+        if (_lastLoggedShowSplash != showSplash) {
+          _lastLoggedShowSplash = showSplash;
+          firstFrameLog(
+            'BootGate stack: ready=$_ready painted=$painted '
+            'showSplash=$showSplash (splash overlay '
+            '${showSplash ? "visible" : "removed"})',
+          );
+        }
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Stack(
+            fit: StackFit.expand,
+            children: <Widget>[
+              if (_ready) widget.child else const SizedBox.shrink(),
+              if (showSplash)
+                _LaunchSplash(
+                  backgroundColor: _launchBackground,
+                  overlayStyle: _launchOverlayStyle,
+                  wordmarkAsset: _appLogoAsset,
+                  wordmarkBoxSize: _wordmarkBoxSize,
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
 
 class _LaunchSplash extends StatelessWidget {
   const _LaunchSplash({
-    required this.backgroundGradient,
+    required this.backgroundColor,
     required this.overlayStyle,
     required this.wordmarkAsset,
     required this.wordmarkBoxSize,
   });
 
-  final Gradient backgroundGradient;
+  static int _paintLogCount = 0;
+
+  final Color backgroundColor;
   final SystemUiOverlayStyle overlayStyle;
   final String wordmarkAsset;
   final double wordmarkBoxSize;
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: overlayStyle,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: DecoratedBox(
-          decoration: BoxDecoration(gradient: backgroundGradient),
-          child: SizedBox.expand(
-            child: Center(
-              child: SizedBox.square(
-                dimension: wordmarkBoxSize,
-                child: Image.asset(
-                  wordmarkAsset,
-                  filterQuality: FilterQuality.high,
-                  fit: BoxFit.fill,
-                ),
-              ),
-            ),
-          ),
+    _paintLogCount++;
+    final String paintLabel = _paintLogCount == 1
+        ? 'first paint'
+        : 'repaint #$_paintLogCount (often allowFirstFrame; same 288dp box)';
+    firstFrameLog(
+      '_LaunchSplash $paintLabel logoBox=${wordmarkBoxSize}dp '
+      'asset=$wordmarkAsset',
+    );
+    return LaunchSplashCanvas(
+      backgroundColor: backgroundColor,
+      overlayStyle: overlayStyle,
+      child: LogoHeightProbe(
+        source: 'BootGate_LaunchSplash',
+        boxSize: wordmarkBoxSize,
+        asset: wordmarkAsset,
+        child: Image.asset(
+          wordmarkAsset,
+          filterQuality: FilterQuality.high,
+          fit: BoxFit.contain,
+          gaplessPlayback: true,
         ),
       ),
     );

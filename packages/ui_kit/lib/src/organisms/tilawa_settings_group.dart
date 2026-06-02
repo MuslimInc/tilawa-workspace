@@ -51,6 +51,15 @@ class TilawaSettingsGroupPanel extends StatelessWidget {
             width: tokens.tileDividerThickness,
           ),
           boxShadow: [
+            // Ambient layer — gives the panel a crisp "lifted card" edge.
+            BoxShadow(
+              color: colorScheme.shadow.withValues(
+                alpha: tokens.groupShadowOpacity * 0.5,
+              ),
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+            // Directional layer — main depth cue from overhead light.
             BoxShadow(
               color: colorScheme.shadow.withValues(
                 alpha: tokens.groupShadowOpacity,

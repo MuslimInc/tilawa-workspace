@@ -5,6 +5,7 @@ import 'package:mockito/mockito.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/errors/failures.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
+import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.dart';
 import 'package:tilawa/features/reciters/domain/usecases/search_reciters_use_case.dart';
 
 import 'search_reciters_use_case_test.mocks.dart';
@@ -14,78 +15,75 @@ void main() {
   provideDummy<Either<Failure, List<ReciterEntity>>>(const Right([]));
 
   late SearchRecitersUseCase useCase;
+  late GetRecitersUseCase getReciters;
   late MockRecitersRepository mockRepository;
+
+  final tReciters = [
+    const ReciterEntity(
+      id: 1,
+      name: 'Abdul Rahman Al-Sudais',
+      letter: 'ع',
+      date: '2020-01-01',
+      moshaf: [],
+    ),
+    const ReciterEntity(
+      id: 2,
+      name: 'Mishary Rashid Alafasy',
+      letter: 'م',
+      date: '2020-01-02',
+      moshaf: [],
+    ),
+  ];
 
   setUp(() {
     mockRepository = MockRecitersRepository();
-    useCase = SearchRecitersUseCase(mockRepository);
+    getReciters = GetRecitersUseCase(mockRepository);
+    useCase = SearchRecitersUseCase(getReciters);
   });
 
   group('SearchRecitersUseCase', () {
-    const tQuery = 'Sudais';
-    final tReciters = [
-      const ReciterEntity(
-        id: 1,
-        name: 'Abdul Rahman Al-Sudais',
-        letter: 'ع',
-        date: '2020-01-01',
-        moshaf: [],
-      ),
-    ];
-
     test('should return empty list when query is empty', () async {
-      // Act
       final Either<Failure, List<ReciterEntity>> result = await useCase('');
 
-      // Assert
       expect(result, const Right<Failure, List<ReciterEntity>>([]));
       verifyZeroInteractions(mockRepository);
     });
 
-    test('should search reciters with query from repository', () async {
-      // Arrange
+    test('should search reciters by normalized name substring', () async {
       when(
-        mockRepository.searchReciters(any),
+        mockRepository.getReciters(),
       ).thenAnswer((_) async => Right(tReciters));
 
-      // Act
-      final Either<Failure, List<ReciterEntity>> result = await useCase(tQuery);
+      final Either<Failure, List<ReciterEntity>> result =
+          await useCase('Sudais');
 
-      // Assert
-      expect(result, Right<Failure, List<ReciterEntity>>(tReciters));
-      verify(mockRepository.searchReciters(tQuery)).called(1);
-      verifyNoMoreInteractions(mockRepository);
+      expect(result, Right<Failure, List<ReciterEntity>>([tReciters.first]));
+      verify(mockRepository.getReciters()).called(1);
     });
 
     test('should return empty list when no reciters match', () async {
-      // Arrange
       when(
-        mockRepository.searchReciters(any),
-      ).thenAnswer((_) async => const Right([]));
+        mockRepository.getReciters(),
+      ).thenAnswer((_) async => Right(tReciters));
 
-      // Act
-      final Either<Failure, List<ReciterEntity>> result = await useCase(tQuery);
+      final Either<Failure, List<ReciterEntity>> result =
+          await useCase('zzznomatch');
 
-      // Assert
       expect(result, const Right<Failure, List<ReciterEntity>>([]));
-      verify(mockRepository.searchReciters(tQuery)).called(1);
-      verifyNoMoreInteractions(mockRepository);
+      verify(mockRepository.getReciters()).called(1);
     });
 
-    test('should return failure when repository fails', () async {
-      // Arrange
-      const tFailure = ServerFailure('Failed to search reciters');
+    test('should return failure when getReciters fails', () async {
+      const tFailure = ServerFailure('Failed to load reciters');
       when(
-        mockRepository.searchReciters(any),
+        mockRepository.getReciters(),
       ).thenAnswer((_) async => const Left(tFailure));
 
-      // Act
-      final Either<Failure, List<ReciterEntity>> result = await useCase(tQuery);
+      final Either<Failure, List<ReciterEntity>> result =
+          await useCase('Sudais');
 
-      // Assert
       expect(result, const Left<Failure, List<ReciterEntity>>(tFailure));
-      verify(mockRepository.searchReciters(tQuery)).called(1);
-      verifyNoMoreInteractions(mockRepository);
+      verify(mockRepository.getReciters()).called(1);
     });
   });
 }

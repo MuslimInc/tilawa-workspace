@@ -57,7 +57,9 @@ class TilawaEmptyState extends StatelessWidget {
             SizedBox(height: tokens.titleSpacing),
             Text(
               title,
-              style: theme.textTheme.titleMedium,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[

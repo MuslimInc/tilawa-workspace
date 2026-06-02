@@ -4,6 +4,24 @@ import 'package:provider/provider.dart';
 import 'package:tilawa/shared/widgets/quran_player_chrome.dart';
 
 void main() {
+  group('AppShellRoutePolicy', () {
+    test('shows bottom navigation only on main shell', () {
+      expect(AppShellRoutePolicy.showsBottomNavigation('/'), isTrue);
+      expect(AppShellRoutePolicy.showsBottomNavigation(''), isTrue);
+      expect(AppShellRoutePolicy.showsBottomNavigation('/reciters/search'), isFalse);
+      expect(AppShellRoutePolicy.showsBottomNavigation('/reciter/1'), isFalse);
+      expect(AppShellRoutePolicy.showsBottomNavigation('/settings'), isFalse);
+      expect(AppShellRoutePolicy.showsBottomNavigation('/history'), isFalse);
+    });
+
+    test('detects shell child routes without bottom navigation', () {
+      expect(AppShellRoutePolicy.isInsideAppShell('/reciters/search'), isTrue);
+      expect(AppShellRoutePolicy.isInsideAppShell('/settings'), isTrue);
+      expect(AppShellRoutePolicy.isInsideAppShell('/athkar'), isFalse);
+      expect(AppShellRoutePolicy.isInsideAppShell('/quran-reader/1'), isFalse);
+    });
+  });
+
   group('QuranPlayerChromeNotifier system nav override', () {
     test('does not notify listeners synchronously', () {
       TestWidgetsFlutterBinding.ensureInitialized();

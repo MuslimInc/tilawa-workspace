@@ -726,6 +726,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logout => 'Logout';
 
   @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountConfirmation =>
+      'This permanently deletes your Tilawa account and synced profile data. Purchases verified with Google Play may be kept in anonymized records for fraud prevention. This cannot be undone.';
+
+  @override
+  String get deleteAccountFailed =>
+      'Unable to delete your account. Please try again.';
+
+  @override
+  String get privacyPolicy => 'Privacy policy';
+
+  @override
+  String get requestAccountDeletionWeb => 'Request account deletion on the web';
+
+  @override
+  String get settingsLegalSection => 'Legal';
+
+  @override
   String storageUsed(String size) {
     return 'Storage Used: $size';
   }
@@ -1513,7 +1533,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get features => 'Features';
 
   @override
-  String get quranReader => 'Quran Reader';
+  String get quranReader => 'Mushaf';
 
   @override
   String get copiedToClipboard => 'Copied to clipboard';

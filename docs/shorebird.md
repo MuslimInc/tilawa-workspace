@@ -92,6 +92,18 @@ If any "No" row applies to your change, cut a full release instead.
 
 **Fix**: Always commit + tag before `shorebird release` (see the release flow above).
 
+## Observability after a patch
+
+Cold-start milestones and failures are logged to:
+
+- **Firestore** `app_startup_logs` (backend-style query in console)
+- **Crashlytics** breadcrumbs + non-fatals (includes `shorebird_patch_number`)
+- **Analytics** `startup_phase` / `startup_failed` / `startup_completed`
+
+See [startup_health_logs.md](observability/startup_health_logs.md). **Patch checklist (Option A, no new Play release):**
+[patch_startup_telemetry.md](observability/patch_startup_telemetry.md). Deploy
+`firestore.rules` before relying on backend logs.
+
 ## Useful commands
 
 ```bash

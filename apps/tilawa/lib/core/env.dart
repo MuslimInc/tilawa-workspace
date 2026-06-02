@@ -8,7 +8,7 @@ abstract final class Env {
 
   /// Whether the user-facing primary color picker is shown in Settings.
   ///
-  /// Production: **false**. Tilawa's brand color is fixed (Sage `#6F7F58`
+  /// Production: **false**. Tilawa's brand color is fixed (Sage `#219653`
   /// accent on `#E5E5E0` neutral, per `docs/tilawa_brand.md` §3); users do
   /// not pick a brand color. The picker is retained behind this flag for
   /// internal dev/QA palette work — pass

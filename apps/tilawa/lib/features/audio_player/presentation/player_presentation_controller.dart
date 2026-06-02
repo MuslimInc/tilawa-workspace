@@ -218,6 +218,15 @@ class PlayerPresentationController extends ChangeNotifier {
     _isDragging = false;
     _notifyAndLog('collapse.start');
     _navigation.popExpanded();
+    // If the router could not pop (context unmounted, e.g. backgrounded
+    // mid-animation), the route animation callback never fires and _routeOpen
+    // stays true. Reconcile after the current frame so the controller does not
+    // stay stuck in a permanently-open state.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (_collapseRequested && !_navigation.isExpandedRouteOnStack) {
+        _onRouteClosed();
+      }
+    });
   }
 
   /// Called from the expanded page when the route animation ticks.
