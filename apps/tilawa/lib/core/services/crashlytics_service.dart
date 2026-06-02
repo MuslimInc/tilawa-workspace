@@ -61,6 +61,20 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
         message.contains(_abortMessage);
   }
 
+  /// Returns true for network errors thrown by Flutter's image pipeline
+  /// (e.g. NetworkImage failing to load a profile photo offline).
+  /// These are not app crashes — they are expected when the device has no
+  /// connectivity and should be recorded as non-fatal at most.
+  bool _isNetworkImageError(Object exception) {
+    final String message = exception.toString();
+    return message.contains('SocketException') ||
+        message.contains('Failed host lookup') ||
+        message.contains('ClientException') ||
+        message.contains('HttpException') ||
+        message.contains('Connection refused') ||
+        message.contains('Connection reset');
+  }
+
   @override
   Future<void> initialize() async {
     try {
@@ -78,6 +92,12 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
             reason: 'just_audio interruption',
             fatal: false,
           );
+          return;
+        }
+        // Network errors from image loading (e.g. profile photos offline) are
+        // non-fatal and expected — don't pollute the fatal crash dashboard.
+        if (_isNetworkImageError(exception)) {
+          recordFlutterError(details, fatal: false);
           return;
         }
         recordFlutterError(details, fatal: true);
