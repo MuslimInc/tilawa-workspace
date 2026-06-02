@@ -87,7 +87,7 @@ abstract final class StartupTelemetry {
     if (!_crashlyticsPrimed && crashlyticsLoggingEnabled) {
       try {
         await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
-          !kDebugMode,
+          kReleaseMode,
         );
         await _applyCrashlyticsContext();
         _crashlyticsPrimed = true;

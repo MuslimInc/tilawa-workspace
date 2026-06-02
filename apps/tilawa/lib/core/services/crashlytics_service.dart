@@ -64,8 +64,8 @@ class FirebaseCrashlyticsServiceImpl implements CrashlyticsService {
   @override
   Future<void> initialize() async {
     try {
-      // Disable collection in debug mode for development
-      await _crashlytics.setCrashlyticsCollectionEnabled(!kDebugMode);
+      // Only collect crashes in release builds; disable in debug and profile.
+      await _crashlytics.setCrashlyticsCollectionEnabled(kReleaseMode);
 
       // Set up Flutter error handling
       FlutterError.onError = (FlutterErrorDetails details) {

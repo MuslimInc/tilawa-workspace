@@ -13,10 +13,13 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- For Android 13+ (API 33+) notification permission -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <!-- Android 12+ (API 31+) exact alarms. USE_EXACT_ALARM is auto-granted
-         for apps whose primary purpose is alarms/reminders (Play Store policy).
-         This ensures prayer times are never missed due to permission revocation. -->
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <!-- Android 12+ (API 31+) exact alarms. SCHEDULE_EXACT_ALARM requires the
+         user to grant "Alarms & Reminders" permission on first use; the prayer
+         scheduler checks canScheduleExactAlarms() and falls back gracefully to
+         inexact alarms when denied, so prayer notifications still fire (±a few
+         minutes). USE_EXACT_ALARM was replaced to comply with Play Store policy
+         for apps not categorised as alarm/clock apps. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.VIBRATE" />
 
@@ -138,9 +141,11 @@
 
 
         <!-- Firebase Crashlytics Configuration -->
+        <!-- Enabled by default; CrashlyticsService disables it at runtime for
+             non-release builds so debug crashes don't pollute dashboards. -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
-            android:value="false" />
+            android:value="true" />
         <meta-data
             android:name="com.google.firebase.crashlytics.RequireBuildId"
             android:value="false" />
