@@ -83,15 +83,6 @@ class _BootGateState extends State<_BootGate> {
   @override
   void initState() {
     super.initState();
-    // #region agent log
-    fixBlackFrameLog(
-      runId: 'flutter-handoff-baseline',
-      hypothesisId: 'H1',
-      location: 'app_startup_widgets.dart:_BootGateState.initState',
-      message: 'BootGate initState',
-      data: const <String, Object?>{'ready': false},
-    );
-    // #endregion
     firstFrameLog('BootGate initState');
     unawaited(StartupTelemetry.phase('boot_gate_start'));
     firstFrameLog('BootGate critical init scheduling');
@@ -114,15 +105,6 @@ class _BootGateState extends State<_BootGate> {
     if (_ready || _criticalInitFuture != null) {
       return;
     }
-    // #region agent log
-    fixBlackFrameLog(
-      runId: 'flutter-handoff-baseline',
-      hypothesisId: 'H3',
-      location: 'app_startup_widgets.dart:_BootGateState._awaitCriticalInit',
-      message: 'BootGate critical init begin',
-      data: const <String, Object?>{},
-    );
-    // #endregion
     unawaited(StartupTelemetry.phase('boot_gate_init_await'));
     // Bootstrap() schedules critical init from its own post-frame callback;
     // here we just await the resulting future so we can swap in the real app
@@ -136,19 +118,6 @@ class _BootGateState extends State<_BootGate> {
           _applyStartupLaunchPlan(plan);
           if (!mounted || _handoffToAppStarted) return;
           _handoffToAppStarted = true;
-          // #region agent log
-          fixBlackFrameLog(
-            runId: 'flutter-handoff-baseline',
-            hypothesisId: 'H3',
-            location:
-                'app_startup_widgets.dart:_BootGateState._awaitCriticalInit.then',
-            message: 'BootGate critical init completed',
-            data: <String, Object?>{
-              'target': plan.target.name,
-              'location': plan.location,
-            },
-          );
-          // #endregion
           firstFrameLog(
             'BootGate critical init done → TilawaApp mounts under splash '
             '(target=${plan.target.name} location=${plan.location})',
@@ -236,18 +205,6 @@ class _BootGateState extends State<_BootGate> {
       builder: (BuildContext context, bool painted, Widget? _) {
         if (_lastLoggedPainted != painted) {
           _lastLoggedPainted = painted;
-          // #region agent log
-          fixBlackFrameLog(
-            runId: 'flutter-handoff-baseline',
-            hypothesisId: 'H1',
-            location: 'app_startup_widgets.dart:_BootGateState.build',
-            message: 'BootGate handoff state changed',
-            data: <String, Object?>{
-              'ready': _ready,
-              'painted': painted,
-            },
-          );
-          // #endregion
         }
         final bool showSplash = !_ready || !painted;
         if (_lastLoggedShowSplash != showSplash) {

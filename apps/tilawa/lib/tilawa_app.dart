@@ -366,16 +366,6 @@ class _DefaultRouteSystemUiOverlayState
         return;
       }
       firstFrameLog('TilawaApp routed first post-frame → mark handoff');
-      // #region agent log
-      fixBlackFrameLog(
-        runId: 'post-fix',
-        hypothesisId: 'H5',
-        location:
-            'tilawa_app.dart:_DefaultRouteSystemUiOverlayState._scheduleLaunchHandoffMark',
-        message: 'Routed app first frame callback',
-        data: const <String, Object?>{},
-      );
-      // #endregion
       SplashLaunchHandoff.markSplashRoutePainted();
       // Apply immediately so Android drops launch-theme light icons before the
       // next frame (NormalTheme no longer forces windowLightStatusBar=false).
@@ -393,17 +383,6 @@ class _DefaultRouteSystemUiOverlayState
     if (!_loggedFirstBuild) {
       _loggedFirstBuild = true;
       firstFrameLog('TilawaApp DefaultRouteSystemUiOverlay first build');
-      // #region agent log
-      fixBlackFrameLog(
-        runId: 'flutter-handoff-baseline',
-        hypothesisId: 'H4',
-        location: 'tilawa_app.dart:_DefaultRouteSystemUiOverlayState.build',
-        message: 'DefaultRouteSystemUiOverlay first build',
-        data: <String, Object?>{
-          'hasChild': widget.child != null,
-        },
-      );
-      // #endregion
     }
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _overlayStyleForBuild(context),

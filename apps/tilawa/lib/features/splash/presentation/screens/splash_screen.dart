@@ -42,27 +42,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     firstFrameLog('SplashScreen initState (/splash route)');
-    // #region agent log
-    fixBlackFrameLog(
-      runId: 'flutter-handoff-baseline',
-      hypothesisId: 'H2',
-      location: 'splash_screen.dart:_SplashScreenState.initState',
-      message: 'SplashScreen initState',
-      data: const <String, Object?>{},
-    );
-    // #endregion
     _splashBloc = getIt<SplashBloc>()..add(const SplashStarted());
     SchedulerBinding.instance.addPostFrameCallback((_) {
       firstFrameLog('SplashScreen first post-frame → mark handoff');
-      // #region agent log
-      fixBlackFrameLog(
-        runId: 'flutter-handoff-baseline',
-        hypothesisId: 'H2',
-        location: 'splash_screen.dart:_SplashScreenState.postFrame',
-        message: 'SplashScreen first post-frame callback',
-        data: const <String, Object?>{},
-      );
-      // #endregion
       SplashLaunchHandoff.markSplashRoutePainted();
     });
   }
