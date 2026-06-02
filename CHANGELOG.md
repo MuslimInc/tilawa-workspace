@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7+39] - 2026-06-02 [Google Play Release]
+
+### Added
+
+- **Reciters search**: Dedicated search screen; double-tap Reciters tab to open search
+  from the catalog.
+- **Reciters alphabet index**: Android-style A–Z scrubber with filter chip and Maestro
+  coverage.
+- **Startup telemetry**: Cold-start phases logged to Crashlytics, Analytics, and
+  Firestore `app_startup_logs` (rules snippet in repo; merge before deploy).
+- **Launch branding**: Green splash handoff, updated launcher icons, and stable
+  cold-start frame gate.
+
+### Changed
+
+- **Version**: Production track bumped to **1.0.7** (build **39**) after pre-release
+  audit on 1.0.6+38.
+- **Prayer times**: Swipe between today and monthly tabs; bloc concurrency for
+  overlapping loads.
+- **Shell**: Bottom nav only on main shell route; mini player kept on pushed routes.
+
+### Fixed
+
+- **Security**: Removed debug localhost telemetry; HTTPS-only network config; blocked
+  fake Firestore premium purchases (Play Billing only); untracked `key.properties`.
+- **Crashlytics**: Collection enabled by default; profile builds excluded; network
+  image load errors downgraded to non-fatal.
+- **Navigation**: Root `/player` push via GoRouter; prayer notification cold-start
+  race; redirect hardening when `AudioPlayerBloc` is not mounted.
+- **Android**: `SCHEDULE_EXACT_ALARM` for Play policy; debug routes gated in release.
+- **Auth**: Sign-in stability (Credential Manager); delete-account runs auth deletion
+  before data wipe.
+- **Telemetry**: Firestore startup sink no longer touches Firebase before
+  `initializeApp()`.
+
 ## [1.0.6+38] - 2026-05-31 [Google Play Release]
 
 ### Added

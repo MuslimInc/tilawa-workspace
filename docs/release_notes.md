@@ -12,6 +12,39 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **1.0.7** (build **39**) |
+| Git tag | `v1.0.7+39` (pending) |
+| Date | 2026-06-02 |
+| Track | Internal testing → Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Smoother green launch splash and updated app icon
+• Dedicated reciters search — double-tap Reciters to find a qari quickly
+• A–Z index on the reciters list for faster browsing
+• Swipe between today and monthly prayer times
+• More reliable sign-in, notifications, and Quran player navigation
+• Security and stability fixes for a safer release
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• شاشة بدء خضراء أنعم وأيقونة تطبيق محدّثة
+• بحث مخصّص للقرّاء — انقر مرتين على تبويب القرّاء للوصول السريع
+• فهرس أ–ي في قائمة القرّاء لتصفح أسرع
+• اسحب بين صلاة اليوم والشهر في أوقات الصلاة
+• تسجيل دخول وإشعارات وتنقل مشغّل القرآن أكثر موثوقية
+• إصلاحات أمان واستقرار لإصدار أكثر أماناً
+```
+
+---
+
+## Previous current release (1.0.6+38)
+
+| Field | Value |
+|-------|--------|
 | Version | **1.0.6** (build **38**) |
 | Git tag | `v1.0.6+38` (pending) |
 | Date | 2026-05-31 |
@@ -37,7 +70,7 @@ the changelog for full engineering detail.
 
 ---
 
-## Previous current release (1.0.5+32)
+## Previous release (1.0.5+32)
 
 | Field | Value |
 |-------|--------|
@@ -94,7 +127,7 @@ from the post-release section when shipped._
    500 characters if needed).
 2. Record the same version in [`CHANGELOG.md`](../CHANGELOG.md).
 3. Tag: `git tag -a v1.0.5+32 -m "Release 1.0.5+32"` and `git push origin v1.0.5+32`.
-4. Build: `cd apps/tilawa && shorebird release android --flutter-version=3.44.0`
-   (new native changes) or `shorebird patch android --release-version 1.0.5+32`
+4. Build: `cd apps/tilawa && shorebird release android --flutter-version=3.44.1`
+   (new native changes) or `shorebird patch android --release-version 1.0.7+39`
    (Dart-only).
 5. Checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)
