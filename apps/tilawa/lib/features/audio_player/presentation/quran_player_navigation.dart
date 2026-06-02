@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/core/navigation/quran_player_navigation.dart';
@@ -23,21 +22,23 @@ class GoRouterQuranPlayerNavigation implements QuranPlayerNavigation {
 
   @override
   Future<void> pushExpanded() async {
-    final BuildContext? context = AppRouter.navigatorKey.currentContext;
-    if (context == null || !context.mounted) {
+    // Push via the GoRouter instance (root navigator) so /player always lands
+    // on the root stack regardless of which navigator owns the current context.
+    final GoRouter? router = _router;
+    if (router == null) {
       return;
     }
-    await const QuranPlayerExpandedRoute().push<void>(context);
+    await router.push<void>(const QuranPlayerExpandedRoute().location);
   }
 
   @override
   void popExpanded() {
-    final BuildContext? context = AppRouter.navigatorKey.currentContext;
-    if (context == null || !context.mounted) {
+    final GoRouter? router = _router;
+    if (router == null) {
       return;
     }
-    if (context.canPop()) {
-      context.pop();
+    if (router.canPop()) {
+      router.pop();
     }
   }
 
