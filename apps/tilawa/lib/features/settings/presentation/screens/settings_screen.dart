@@ -147,7 +147,6 @@ class SettingsScreen extends StatelessWidget {
                     icon: FluentIcons.book_open_24_regular,
                     title: l10n.quranReader,
                     onTap: () => const QuranLastReadRoute().push(context),
-                    showDivider: false,
                   ),
                   TilawaSettingsTile(
                     icon: FluentIcons.bookmark_24_regular,
@@ -158,6 +157,7 @@ class SettingsScreen extends StatelessWidget {
                     icon: FluentIcons.history_24_regular,
                     title: l10n.listeningHistory,
                     onTap: () => const HistoryRoute().push(context),
+                    showDivider: false,
                   ),
                 ],
               ),
