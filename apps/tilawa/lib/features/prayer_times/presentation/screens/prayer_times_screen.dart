@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa/features/prayer_times/domain/usecases/fire_prayer_test_notification_use_case.dart';
 import 'package:tilawa/router/app_router_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -23,6 +21,7 @@ import '../layout/prayer_times_layout.dart';
 import '../mappers/prayer_row_view_data_mapper.dart';
 import '../models/prayer_row_view_data.dart';
 import '../prayer_notification_semantics_ids.dart';
+import '../prayer_alerts_permission_navigation.dart';
 import '../widgets/prayer_notification_settings_sheet.dart';
 import '../widgets/widgets.dart';
 
@@ -146,7 +145,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       // deep links). In the main tab the shell still paints behind us, but an
       // opaque surface avoids the black void from a transparent scaffold.
       backgroundColor: theme.colorScheme.surface,
-      // floatingActionButton: kDebugMode ? const _DebugNotificationFab() : null,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -411,10 +409,15 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     );
   }
 
-  void _showNotificationDialog(BuildContext context) {
+  Future<void> _showNotificationDialog(BuildContext context) async {
     final PrayerTimesBloc bloc = context.read<PrayerTimesBloc>();
     final PrayerPermissionsCubit permissionsCubit = context
         .read<PrayerPermissionsCubit>();
+
+    await PrayerAlertsPermissionNavigation.showIfNeeded(context);
+    if (!context.mounted) {
+      return;
+    }
 
     showTilawaModalBottomSheet<void>(
       context: context,
@@ -1560,121 +1563,3 @@ class _AdhanPlayingBannerState extends State<_AdhanPlayingBanner>
   }
 }
 
-/// Debug-only FAB that fires an immediate test prayer notification.
-/// Shown only in [kDebugMode] — stripped from release builds.
-class _DebugNotificationFab extends StatefulWidget {
-  const _DebugNotificationFab({required this.fireTestNotification});
-
-  final FirePrayerTestNotificationUseCase fireTestNotification;
-
-  @override
-  State<_DebugNotificationFab> createState() => _DebugNotificationFabState();
-}
-
-class _DebugNotificationFabState extends State<_DebugNotificationFab> {
-  PrayerType _selectedPrayer = PrayerType.isha;
-  bool _playAdhan = true;
-  bool _firing = false;
-
-  static const List<PrayerType> _prayers = [
-    PrayerType.fajr,
-    PrayerType.dhuhr,
-    PrayerType.asr,
-    PrayerType.maghrib,
-    PrayerType.isha,
-  ];
-
-  Future<void> _fire() async {
-    if (_firing) return;
-    setState(() => _firing = true);
-    try {
-      await widget.fireTestNotification(
-        prayer: _selectedPrayer,
-        playAdhan: _playAdhan,
-      );
-      if (mounted) {
-        ToastUtils.showToast(
-          msg: '🔔 Test fired: ${_selectedPrayer.name} (adhan=$_playAdhan)',
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _firing = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // Options card
-        Card(
-          margin: const EdgeInsets.only(bottom: 8, right: 4),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Debug: Test Notification',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                DropdownButton<PrayerType>(
-                  value: _selectedPrayer,
-                  isDense: true,
-                  underline: const SizedBox.shrink(),
-                  items: _prayers
-                      .map(
-                        (p) => DropdownMenuItem(
-                          value: p,
-                          child: Text(p.name, style: theme.textTheme.bodySmall),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (v) {
-                    if (v != null) setState(() => _selectedPrayer = v);
-                  },
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Adhan', style: theme.textTheme.bodySmall),
-                    Switch(
-                      value: _playAdhan,
-                      onChanged: (v) => setState(() => _playAdhan = v),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-        FloatingActionButton.extended(
-          onPressed: _firing ? null : _fire,
-          label: _firing
-              ? SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: TilawaLoadingIndicator(
-                    centered: false,
-                    strokeWidth: 2,
-                    color: theme.colorScheme.onErrorContainer,
-                  ),
-                )
-              : const Text('Fire'),
-          icon: const Icon(Icons.notifications_active_outlined),
-          backgroundColor: theme.colorScheme.errorContainer,
-          foregroundColor: theme.colorScheme.onErrorContainer,
-        ),
-      ],
-    );
-  }
-}

@@ -10,6 +10,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../../../router/app_router_config.dart';
 import '../../../auth/domain/usecases/prepare_google_sign_in_use_case.dart';
+import '../../../prayer_times/presentation/prayer_alerts_permission_navigation.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../widgets/onboarding_content.dart';
 import '../widgets/onboarding_footer_bar.dart';
@@ -59,6 +60,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
+  Future<void> _navigateAfterOnboarding(BuildContext context) async {
+    unawaited(getIt<PrepareGoogleSignInUseCase>()());
+    await PrayerAlertsPermissionNavigation.showAfterOnboarding(context);
+    if (!context.mounted) {
+      return;
+    }
+    const LoginRoute().go(context);
+  }
+
   void _goToPage(int index) {
     _pageController.animateToPage(
       index,
@@ -102,8 +112,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: BlocConsumer<OnboardingCubit, OnboardingState>(
           listener: (BuildContext context, OnboardingState state) {
             if (state is OnboardingCompleted) {
-              unawaited(getIt<PrepareGoogleSignInUseCase>()());
-              const LoginRoute().go(context);
+              unawaited(_navigateAfterOnboarding(context));
             }
           },
           builder: (BuildContext context, OnboardingState state) {

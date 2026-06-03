@@ -6,6 +6,8 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../domain/entities/entities.dart';
 import '../bloc/prayer_permissions_cubit.dart';
 import '../bloc/prayer_times_bloc.dart';
+import '../prayer_alerts_permission_navigation.dart';
+import '../prayer_alerts_setup_pending_steps.dart';
 import '../prayer_notification_semantics_ids.dart';
 
 /// A dedicated bottom sheet for managing prayer notification alerts.
@@ -65,82 +67,25 @@ class _PrayerNotificationSettingsSheetState
               crossAxisAlignment: .start,
               mainAxisSize: .min,
               children: [
-                // Permission Banners
                 BlocBuilder<PrayerPermissionsCubit, PrayerPermissionsState>(
                   buildWhen: (p, c) => p.capability != c.capability,
                   builder: (context, state) {
-                    final capability = state.capability;
-                    if (capability == null) return const SizedBox.shrink();
+                    final bool hasPendingSetup = prayerAlertsSetupPendingSteps(
+                      hasLocationPermission: state.hasLocationPermission,
+                      capability: state.capability,
+                    ).isNotEmpty;
+                    if (!hasPendingSetup) {
+                      return const SizedBox.shrink();
+                    }
 
-                    return Column(
-                      children: [
-                        if (!capability.hasNotificationPermission)
-                          _PermissionBanner(
-                            message:
-                                context.l10n.notificationPermissionRequired,
-                            onTap: () async {
-                              await context
-                                  .read<PrayerPermissionsCubit>()
-                                  .requestNotificationPermission();
-                              if (context.mounted) {
-                                context.read<PrayerTimesBloc>().add(
-                                  const PrayerTimesEvent.loadPrayerTimes(
-                                    forceReschedule: true,
-                                  ),
-                                );
-                              }
-                            },
-                            tokens: tokens,
-                            theme: theme,
-                          ),
-                        if (capability.hasNotificationPermission &&
-                            !capability.canScheduleExact)
-                          _PermissionBanner(
-                            message: context.l10n.exactAlarmPermissionRequired,
-                            onTap: () async {
-                              await context
-                                  .read<PrayerPermissionsCubit>()
-                                  .requestExactAlarmPermission();
-                              if (context.mounted) {
-                                context.read<PrayerTimesBloc>().add(
-                                  const PrayerTimesEvent.loadPrayerTimes(
-                                    forceReschedule: true,
-                                  ),
-                                );
-                              }
-                            },
-                            tokens: tokens,
-                            theme: theme,
-                          ),
-                        if (capability.hasNotificationPermission &&
-                            !capability.isIgnoringBatteryOptimizations)
-                          _PermissionBanner(
-                            message: context
-                                .l10n
-                                .batteryOptimizationExemptionRequired,
-                            onTap: () async {
-                              await context
-                                  .read<PrayerPermissionsCubit>()
-                                  .requestIgnoreBatteryOptimizations();
-                              if (context.mounted) {
-                                context.read<PrayerTimesBloc>().add(
-                                  const PrayerTimesEvent.loadPrayerTimes(
-                                    forceReschedule: true,
-                                  ),
-                                );
-                              }
-                            },
-                            tokens: tokens,
-                            theme: theme,
-                          ),
-                        if (capability.hasNotificationPermission &&
-                            capability.oemRequiresAutostart)
-                          _InfoBanner(
-                            message: context.l10n.oemAutostartHint,
-                            tokens: tokens,
-                            theme: theme,
-                          ),
-                      ],
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: tokens.spaceMedium),
+                      child: _PermissionSetupCard(
+                        onSetUp: () =>
+                            PrayerAlertsPermissionNavigation.show(context),
+                        tokens: tokens,
+                        theme: theme,
+                      ),
                     );
                   },
                 ),
@@ -415,100 +360,51 @@ class _PrayerAlertTile extends StatelessWidget {
   }
 }
 
-class _PermissionBanner extends StatelessWidget {
-  const _PermissionBanner({
-    required this.message,
-    required this.onTap,
+class _PermissionSetupCard extends StatelessWidget {
+  const _PermissionSetupCard({
+    required this.onSetUp,
     required this.tokens,
     required this.theme,
   });
-  final String message;
-  final VoidCallback onTap;
+
+  final VoidCallback onSetUp;
   final TilawaDesignTokens tokens;
   final ThemeData theme;
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = theme.colorScheme;
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return Container(
-      margin: EdgeInsets.only(bottom: tokens.spaceSmall),
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceSmall,
-      ),
+      padding: EdgeInsets.all(tokens.spaceMedium),
       decoration: BoxDecoration(
         color: colorScheme.tertiaryContainer,
         borderRadius: BorderRadius.circular(tokens.radiusMedium),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: tokens.spaceSmall,
-        children: [
-          Icon(
-            Icons.info_outline,
-            size: 16,
-            color: colorScheme.onTertiaryContainer,
-          ),
-          Expanded(
-            child: Text(
-              message,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onTertiaryContainer,
-              ),
-            ),
-          ),
-          TilawaButton(
-            text: context.l10n.openSettings,
-            variant: TilawaButtonVariant.ghost,
-            size: TilawaButtonSize.small,
-            shrinkWrapTapTarget: true,
-            onPressed: onTap,
-            foregroundColor: colorScheme.onTertiaryContainer,
-            padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
-            textStyle: theme.textTheme.labelSmall?.copyWith(
+        children: <Widget>[
+          Text(
+            context.l10n.prayerAlertsPermissionSetupRequired,
+            style: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onTertiaryContainer,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _InfoBanner extends StatelessWidget {
-  const _InfoBanner({
-    required this.message,
-    required this.tokens,
-    required this.theme,
-  });
-  final String message;
-  final TilawaDesignTokens tokens;
-  final ThemeData theme;
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = theme.colorScheme;
-    return Container(
-      margin: EdgeInsets.only(bottom: tokens.spaceSmall),
-      padding: EdgeInsets.symmetric(
-        horizontal: tokens.spaceMedium,
-        vertical: tokens.spaceSmall,
-      ),
-      decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(tokens.radiusMedium),
-      ),
-      child: Row(
-        spacing: tokens.spaceSmall,
-        children: [
-          Icon(
-            Icons.info_outline,
-            size: 16,
-            color: colorScheme.onSecondaryContainer,
-          ),
-          Expanded(
-            child: Text(
-              message,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSecondaryContainer,
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: TilawaButton(
+              text: context.l10n.prayerAlertsPermissionSetupAction,
+              variant: TilawaButtonVariant.ghost,
+              size: TilawaButtonSize.small,
+              shrinkWrapTapTarget: true,
+              onPressed: onSetUp,
+              foregroundColor: colorScheme.onTertiaryContainer,
+              padding: EdgeInsets.symmetric(horizontal: tokens.spaceSmall),
+              textStyle: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.onTertiaryContainer,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),

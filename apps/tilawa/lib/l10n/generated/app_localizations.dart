@@ -3590,6 +3590,96 @@ abstract class AppLocalizations {
   /// **'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.'**
   String get oemAutostartHint;
 
+  /// Title for location permission setup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get prayerAlertsPermissionLocationTitle;
+
+  /// Body for location permission setup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access so prayer times are calculated for where you are. Times update automatically when you travel.'**
+  String get prayerAlertsPermissionLocationBody;
+
+  /// Title for prayer alerts notification permission setup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Allow notifications'**
+  String get prayerAlertsPermissionNotificationsTitle;
+
+  /// Body for prayer alerts notification permission setup screen
+  ///
+  /// In en, this message translates to:
+  /// **'To make sure you never miss a prayer time, allow notifications. You will be reminded when each prayer begins.'**
+  String get prayerAlertsPermissionNotificationsBody;
+
+  /// Title for exact alarm permission setup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Alarms & reminders'**
+  String get prayerAlertsPermissionExactAlarmTitle;
+
+  /// Body for exact alarm permission setup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Alarms & reminders so Adhan and prayer alerts play on time, even when the phone is idle or the screen is off.'**
+  String get prayerAlertsPermissionExactAlarmBody;
+
+  /// Title for battery optimization exemption setup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Battery optimization'**
+  String get prayerAlertsPermissionBatteryTitle;
+
+  /// Body for battery optimization setup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.'**
+  String get prayerAlertsPermissionBatteryBody;
+
+  /// Title for OEM autostart guidance step
+  ///
+  /// In en, this message translates to:
+  /// **'Background access'**
+  String get prayerAlertsPermissionOemAutostartTitle;
+
+  /// Body for OEM autostart guidance step
+  ///
+  /// In en, this message translates to:
+  /// **'On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.'**
+  String get prayerAlertsPermissionOemAutostartBody;
+
+  /// Primary action on prayer alerts permission setup screens
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get prayerAlertsPermissionAllow;
+
+  /// Skip action on prayer alerts permission setup screens
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get prayerAlertsPermissionSkip;
+
+  /// Continue action on informational permission setup step
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get prayerAlertsPermissionContinue;
+
+  /// Summary in prayer notification settings when permissions are missing
+  ///
+  /// In en, this message translates to:
+  /// **'Some permissions are needed for reliable prayer alerts and Adhan.'**
+  String get prayerAlertsPermissionSetupRequired;
+
+  /// Opens full-screen prayer alerts permission flow from settings sheet
+  ///
+  /// In en, this message translates to:
+  /// **'Set up permissions'**
+  String get prayerAlertsPermissionSetupAction;
+
   /// Body text for prayer time notifications
   ///
   /// In en, this message translates to:
