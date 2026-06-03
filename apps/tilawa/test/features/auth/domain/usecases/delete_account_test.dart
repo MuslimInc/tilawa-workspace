@@ -68,15 +68,15 @@ void main() {
     verifyNever(mockUserRepository.deleteUserData(any));
   });
 
-  test('deletes remote data then auth account when signed in', () async {
+  test('deletes auth account then app data when signed in', () async {
     final Either<Failure, void> result = await useCase();
 
     expect(result.isRight, isTrue);
     verifyInOrder([
+      mockAuthRepository.deleteAccount(),
       mockSyncDeviceTokenUseCase.removeCurrentTokenForUser('user-1'),
       mockUserRepository.deleteUserData('user-1'),
       mockPremiumRepository.clearPremiumStatus(),
-      mockAuthRepository.deleteAccount(),
     ]);
   });
 
