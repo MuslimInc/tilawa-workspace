@@ -1,0 +1,73 @@
+appId: com.google.android.apps.youtube.music
+---
+# Ensures YouTube Music is playing so the bottom mini player is available.
+#
+# Prerequisites (one-time on the emulator):
+#   - Install YouTube Music from Play Store (or sideload APK).
+#   - Sign in and dismiss onboarding if shown.
+#   - Optional: start any track manually before running parity flows.
+#
+# This subflow is best-effort: YTM UI varies by version/locale. If it fails,
+# start playback manually, then re-run the parity flow with clearState: false.
+
+- waitForAnimationToEnd
+
+# Permission / account dialogs (locale-dependent).
+- tapOn:
+    text: "Allow"
+    optional: true
+- tapOn:
+    text: "While using the app"
+    optional: true
+- tapOn:
+    text: "OK"
+    optional: true
+- waitForAnimationToEnd
+
+# Already playing — mini transport often exposes Pause.
+- runFlow:
+    when:
+      visible:
+        text: "Pause"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/YTM] playback: already playing (Pause visible)")}'
+
+# Try Home → Samples → first item (English UI).
+- runFlow:
+    when:
+      notVisible:
+        text: "Pause"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/YTM] playback: attempting to start from Home/Samples")}'
+      - tapOn:
+          text: "Home"
+          optional: true
+      - waitForAnimationToEnd
+      - tapOn:
+          text: "Samples"
+          optional: true
+      - waitForAnimationToEnd
+      - tapOn:
+          point: "50%, 42%"
+      - waitForAnimationToEnd
+
+# Fallback: Library tab + first row tap.
+- runFlow:
+    when:
+      notVisible:
+        text: "Pause"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/YTM] playback: fallback Library tap")}'
+      - tapOn:
+          text: "Library"
+          optional: true
+      - waitForAnimationToEnd
+      - swipe:
+          start: "50%, 70%"
+          end: "50%, 35%"
+          duration: 400
+      - tapOn:
+          point: "50%, 35%"
+      - waitForAnimationToEnd
+
+- evalScript: '${console.log("[PlayerParity/YTM] playback: ensure step complete — verify mini bar visually if assertions fail")}'

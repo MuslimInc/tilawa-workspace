@@ -50,6 +50,10 @@ class _SupportTilawaScreenState extends State<SupportTilawaScreen>
       appBar: TilawaCatalogAppBar.titleOnly(
         context,
         title: context.l10n.supportTilawa,
+        leading: TilawaAppBarChrome.catalogBackButton(
+          context: context,
+          onPressed: () => Navigator.maybePop(context),
+        ),
       ),
       body: BlocConsumer<SupportBloc, SupportState>(
         listenWhen: (SupportState prev, SupportState next) =>

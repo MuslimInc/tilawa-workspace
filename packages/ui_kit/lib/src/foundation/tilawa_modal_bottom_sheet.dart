@@ -188,7 +188,13 @@ Future<T?> _showTilawaPresetSheet<T>({
             primaryVariant: primaryVariant,
           ),
           children: [
-            if (shrinkWrapBody) body else Expanded(child: body),
+            if (shrinkWrapBody)
+              Flexible(
+                fit: FlexFit.loose,
+                child: SingleChildScrollView(child: body),
+              )
+            else
+              Expanded(child: body),
           ],
         ),
       );

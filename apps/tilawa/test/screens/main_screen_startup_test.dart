@@ -25,6 +25,7 @@ import 'package:tilawa/features/reciters/domain/usecases/toggle_favorite_reciter
 import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
+import 'package:tilawa/features/prayer_times/domain/repositories/prayer_alerts_permission_onboarding_repository.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:tilawa/features/reciters/presentation/tour/reciters_tour_launcher.dart';
 import 'package:tilawa/features/tour_guide/domain/services/tour_target_registry.dart';
@@ -73,6 +74,16 @@ class _NoopRecitersTourLauncher implements RecitersTourLauncher {
 
   @override
   Future<bool> maybeShowPlaybackTour(BuildContext context) async => false;
+}
+
+/// Skips [PrayerAlertsPermissionNavigation] during [MainScreen] startup tests.
+class _CompletedPrayerAlertsPermissionOnboardingRepository
+    implements PrayerAlertsPermissionOnboardingRepository {
+  @override
+  Future<bool> wasFlowCompleted() async => true;
+
+  @override
+  Future<void> markFlowCompleted() async {}
 }
 
 class _FakeStorage extends Fake implements Storage {
@@ -150,6 +161,9 @@ void main() {
 
     getIt.registerSingleton<TourTargetRegistry>(TourTargetRegistry());
     getIt.registerSingleton<RecitersTourLauncher>(_NoopRecitersTourLauncher());
+    getIt.registerSingleton<PrayerAlertsPermissionOnboardingRepository>(
+      _CompletedPrayerAlertsPermissionOnboardingRepository(),
+    );
   });
 
   tearDown(() async {

@@ -34,7 +34,7 @@ final class PrayerNotificationConfig {
   /// is deleted and recreated on existing installs (Android channel sound lock).
   static const String adhanChannelVersionKey =
       'prayer_notifications_adhan_channel_version';
-  static const int adhanChannelVersion = 2;
+  static const int adhanChannelVersion = 3;
 
   // --- Notification IDs ---
   /// Static IDs (test / debug): fajr=2001, sunrise=2002, dhuhr=2003,

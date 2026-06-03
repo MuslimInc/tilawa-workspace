@@ -5,11 +5,11 @@ import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa_core/config/language_config.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../color_picker/color_picker.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
 import '../../../theme/domain/primary_color_preset.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../cubit/settings_cubit.dart';
 
 /// Opens settings-related picker and confirmation sheets.
@@ -163,52 +163,42 @@ class SettingsPrimaryColorSheet extends StatelessWidget {
         ),
       ),
       children: [
-        Flexible(
-          child: ListView(
-            shrinkWrap: true,
-            padding: TilawaBottomSheetScaffold.resolvedBodyPadding(context),
-            children: [
-              ...PrimaryColorPreset.values.map((preset) {
-                final isSelected =
-                    !isCustom && currentPresetId == preset.id;
-                return TilawaSelectionTile(
-                  leading: CircleAvatar(
-                    backgroundColor: preset.value,
-                    radius: TilawaSettingsScreenTokens
-                        .primaryPickerPresetSwatchRadius,
+        ...PrimaryColorPreset.values.map((preset) {
+          final isSelected = !isCustom && currentPresetId == preset.id;
+          return TilawaSelectionTile(
+            leading: CircleAvatar(
+              backgroundColor: preset.value,
+              radius:
+                  TilawaSettingsScreenTokens.primaryPickerPresetSwatchRadius,
+            ),
+            title: _localizedPresetName(context, preset),
+            isSelected: isSelected,
+            onTap: () {
+              context.read<ThemeCubit>().setPrimaryPreset(preset);
+              Navigator.pop(context);
+            },
+          );
+        }),
+        TilawaSelectionTile(
+          leading: CircleAvatar(
+            radius: TilawaSettingsScreenTokens.primaryPickerPresetSwatchRadius,
+            backgroundColor: isCustom
+                ? currentColor
+                : theme.colorScheme.surfaceContainerHigh,
+            child: isCustom
+                ? null
+                : Icon(
+                    FluentIcons.color_24_regular,
+                    size:
+                        TilawaSettingsScreenTokens
+                            .primaryPickerCustomSwatchSize *
+                        0.5,
+                    color: theme.colorScheme.primary,
                   ),
-                  title: _localizedPresetName(context, preset),
-                  isSelected: isSelected,
-                  onTap: () {
-                    context.read<ThemeCubit>().setPrimaryPreset(preset);
-                    Navigator.pop(context);
-                  },
-                );
-              }),
-              TilawaSelectionTile(
-                leading: CircleAvatar(
-                  radius: TilawaSettingsScreenTokens
-                      .primaryPickerPresetSwatchRadius,
-                  backgroundColor: isCustom
-                      ? currentColor
-                      : theme.colorScheme.surfaceContainerHigh,
-                  child: isCustom
-                      ? null
-                      : Icon(
-                          FluentIcons.color_24_regular,
-                          size:
-                              TilawaSettingsScreenTokens
-                                  .primaryPickerCustomSwatchSize *
-                              0.5,
-                          color: theme.colorScheme.primary,
-                        ),
-                ),
-                title: context.l10n.custom,
-                isSelected: isCustom,
-                onTap: onCustomColorTap,
-              ),
-            ],
           ),
+          title: context.l10n.custom,
+          isSelected: isCustom,
+          onTap: onCustomColorTap,
         ),
       ],
     );
@@ -230,35 +220,25 @@ class SettingsLanguageSheet extends StatelessWidget {
         ),
       ),
       children: [
-        Flexible(
-          child: ListView(
-            shrinkWrap: true,
-            padding: TilawaBottomSheetScaffold.resolvedBodyPadding(context),
-            children: [
-              TilawaSelectionTile(
-                title: 'العربية',
-                isSelected:
-                    currentLocale.languageCode == arabicLanguageCode,
-                onTap: () {
-                  context.read<LocalizationBloc>().add(
-                    const ChangeLanguage(Locale(arabicLanguageCode)),
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-              TilawaSelectionTile(
-                title: 'English',
-                isSelected:
-                    currentLocale.languageCode == englishLanguageCode,
-                onTap: () {
-                  context.read<LocalizationBloc>().add(
-                    const ChangeLanguage(Locale(englishLanguageCode)),
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
+        TilawaSelectionTile(
+          title: 'العربية',
+          isSelected: currentLocale.languageCode == arabicLanguageCode,
+          onTap: () {
+            context.read<LocalizationBloc>().add(
+              const ChangeLanguage(Locale(arabicLanguageCode)),
+            );
+            Navigator.pop(context);
+          },
+        ),
+        TilawaSelectionTile(
+          title: 'English',
+          isSelected: currentLocale.languageCode == englishLanguageCode,
+          onTap: () {
+            context.read<LocalizationBloc>().add(
+              const ChangeLanguage(Locale(englishLanguageCode)),
+            );
+            Navigator.pop(context);
+          },
         ),
       ],
     );
@@ -283,29 +263,19 @@ class SettingsConcurrentDownloadsSheet extends StatelessWidget {
         ),
       ),
       children: [
-        Flexible(
-          child: ListView(
-            shrinkWrap: true,
-            padding: TilawaBottomSheetScaffold.resolvedBodyPadding(context),
-            children: [
-              for (
-                int i = 1;
-                i <=
-                    TilawaSettingsScreenTokens
-                        .maxConcurrentDownloadsPickerCount;
-                i++
-              )
-                TilawaSelectionTile(
-                  title: '$i',
-                  isSelected: currentValue == i,
-                  onTap: () {
-                    context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
-                    Navigator.pop(context);
-                  },
-                ),
-            ],
+        for (
+          int i = 1;
+          i <= TilawaSettingsScreenTokens.maxConcurrentDownloadsPickerCount;
+          i++
+        )
+          TilawaSelectionTile(
+            title: '$i',
+            isSelected: currentValue == i,
+            onTap: () {
+              context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
+              Navigator.pop(context);
+            },
           ),
-        ),
       ],
     );
   }

@@ -61,25 +61,29 @@ class TilawaBottomSheetScaffold extends StatelessWidget {
           ),
         ...betweenTopBarAndBody,
         ...children,
-        if (footer != null) ...[
-          Divider(
-            height: tokens.footerTopBorderWidth,
-            thickness: tokens.footerTopBorderWidth,
-            color: theme.colorScheme.outlineVariant,
-          ),
+        if (footer != null)
           Material(
             color: theme.colorScheme.surface,
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: tokens.footerPadding
-                    .resolve(direction)
-                    .add(EdgeInsets.only(bottom: bottomInset)),
-                child: footer,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(
+                    color: theme.colorScheme.outlineVariant,
+                    width: tokens.footerTopBorderWidth,
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: Padding(
+                  padding: tokens.footerPadding
+                      .resolve(direction)
+                      .add(EdgeInsets.only(bottom: bottomInset)),
+                  child: footer,
+                ),
               ),
             ),
           ),
-        ],
       ],
     );
   }

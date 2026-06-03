@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/features/prayer_times/presentation/prayer_alerts_permission_navigation.dart';
 import 'package:tilawa/features/shell/presentation/shell_tab_effect_dispatcher.dart';
 import 'package:tilawa/features/shell/shell.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -25,6 +28,11 @@ class MainScreen extends StatelessWidget {
           ShellTabCoordinator().onShellActivated(state.currentIndex),
           isMounted: () => context.mounted,
         );
+        if (state.isShellActivated) {
+          unawaited(
+            PrayerAlertsPermissionNavigation.showIfNeededAfterLaunch(context),
+          );
+        }
       },
       child: BlocBuilder<MainScreenCubit, MainScreenState>(
         builder: (context, state) {

@@ -1,0 +1,160 @@
+appId: com.tilawa.app
+---
+# Tilawa Quran player — collapse/expand parity vs YouTube Music reference.
+#
+# Pair with:
+#   `.maestro/reference/youtube_music_collapse_expand_parity.yaml`
+#
+# Same scenario IDs and swipe coordinates. Tilawa adds strict Semantics
+# Run:
+#   maestro test .maestro/quran_player/quran_player_collapse_expand_parity.yaml
+#
+# Device note (1080x2400, Android gesture nav):
+#   Footer-up drags start at y≈92% on reciter screen (mini above nav bar).
+
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_01 baseline mini on reciter screen")}'
+- assertVisible:
+    id: "quran_player_mini"
+- assertVisible:
+    id: "reciter_details_surah_search"
+- takeScreenshot: parity_01_mini_baseline
+
+# ── PARITY_02: Slow drag-up from mini bar (finger-tracking) ───────────────────
+# Regression target: drag must not stop after ~1px; expandProgress should climb
+# continuously when debugging with QURAN_PLAYER_DEBUG_LOG=true.
+
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_02 slow_drag_expand_start")}'
+# Coordinate swipe: reliable travel on 1080x2400 (mini ~y 92%). Element-only
+# swipes can stall at ~0.2% expandProgress (see QuranPlayer drag.update).
+- swipe:
+    start: "50%, 92%"
+    end: "50%, 8%"
+    duration: 1500
+- runFlow:
+    when:
+      visible:
+        id: "quran_player_mini"
+    commands:
+      - swipe:
+          from:
+            id: "quran_player_mini"
+          direction: UP
+          duration: 1200
+- takeScreenshot: parity_02_slow_drag_end
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 15000
+- assertVisible:
+    id: "quran_player_collapse"
+- assertNotVisible:
+    id: "quran_player_mini"
+- takeScreenshot: parity_03_expanded_settled
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_02 expanded")}'
+
+# ── PARITY_04: Partial drag-down then release (snap physics) ─────────────────
+
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_04 partial_drag_down_mid")}'
+- swipe:
+    start: "50%, 22%"
+    end: "50%, 58%"
+    duration: 500
+- takeScreenshot: parity_04_partial_drag_release
+- waitForAnimationToEnd
+- takeScreenshot: parity_05_after_partial_snap
+# Either expanded or mini is valid; must not stay frozen mid-transition.
+- runFlow:
+    when:
+      visible:
+        id: "quran_player_track_title"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_04 snap: still expanded")}'
+- runFlow:
+    when:
+      visible:
+        id: "quran_player_mini"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_04 snap: returned to mini")}'
+
+# ── PARITY_05: Swipe-down collapse from expanded sheet ───────────────────────
+
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_05 swipe_down_collapse")}'
+- runFlow:
+    when:
+      notVisible:
+        id: "quran_player_track_title"
+    commands:
+      - tapOn:
+          id: "quran_player_mini"
+      - waitForAnimationToEnd
+      - extendedWaitUntil:
+          visible:
+            id: "quran_player_track_title"
+          timeout: 10000
+- swipe:
+    start: "50%, 20%"
+    end: "50%, 92%"
+    duration: 400
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_mini"
+    timeout: 10000
+- assertNotVisible:
+    id: "quran_player_track_title"
+- takeScreenshot: parity_06_collapsed_after_swipe
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_05 collapsed to mini")}'
+
+# ── PARITY_06: Tap mini bar to expand ─────────────────────────────────────────
+
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_06 tap_mini_expand")}'
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 10000
+- assertVisible:
+    id: "quran_player_collapse"
+- takeScreenshot: parity_07_tap_expanded
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_06 expanded after tap")}'
+
+# ── PARITY_07: Quick expand → collapse cycle (flicker / stale overlay) ────────
+
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_07 quick_cycle_start")}'
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_mini"
+    timeout: 10000
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 10000
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_mini"
+- assertNotVisible:
+    id: "quran_player_track_title"
+- takeScreenshot: parity_08_quick_cycle_end
+- evalScript: '${console.log("[PlayerParity/Tilawa] PARITY_07 quick cycle passed")}'
+
+- evalScript: '${console.log("[PlayerParity/Tilawa] END parity flow — compare screenshots + logs with YTM reference run")}'

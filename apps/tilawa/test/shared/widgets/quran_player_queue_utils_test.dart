@@ -235,6 +235,87 @@ void main() {
     });
   });
 
+  group('QuranPlayerQueueIndexCache', () {
+    test('reuses map in O(1) when generation and queue are stable', () {
+      final QuranPlayerQueueIndexCache cache = QuranPlayerQueueIndexCache();
+      const List<AudioEntity> queue = <AudioEntity>[_trackA, _trackB];
+
+      final Map<String, int> first = cache.indexByIdFor(
+        queue: queue,
+        queueGeneration: 3,
+      );
+      final Map<String, int> second = cache.indexByIdFor(
+        queue: queue,
+        queueGeneration: 3,
+      );
+
+      expect(identical(first, second), isTrue);
+      expect(first, <String, int>{'a': 0, 'b': 1});
+    });
+
+    test('rebuilds map when queueGeneration changes', () {
+      final QuranPlayerQueueIndexCache cache = QuranPlayerQueueIndexCache();
+      const List<AudioEntity> queue = <AudioEntity>[_trackA, _trackB];
+
+      final Map<String, int> first = cache.indexByIdFor(
+        queue: queue,
+        queueGeneration: 1,
+      );
+      final Map<String, int> second = cache.indexByIdFor(
+        queue: const <AudioEntity>[_trackB, _trackA],
+        queueGeneration: 2,
+      );
+
+      expect(identical(first, second), isFalse);
+      expect(second, <String, int>{'b': 0, 'a': 1});
+    });
+
+    test('clear drops cached map', () {
+      final QuranPlayerQueueIndexCache cache = QuranPlayerQueueIndexCache();
+      const List<AudioEntity> queue = <AudioEntity>[_trackA];
+
+      final Map<String, int> first = cache.indexByIdFor(
+        queue: queue,
+        queueGeneration: 1,
+      );
+      cache.clear();
+      final Map<String, int> second = cache.indexByIdFor(
+        queue: queue,
+        queueGeneration: 1,
+      );
+
+      expect(identical(first, second), isFalse);
+    });
+
+    test('indexBySurahIdFor provides O(1) surah lookup', () {
+      final QuranPlayerQueueIndexCache cache = QuranPlayerQueueIndexCache();
+      final List<AudioEntity> queue = <AudioEntity>[
+        const AudioEntity(
+          id: 'a',
+          title: 'A',
+          url: 'u',
+          duration: Duration.zero,
+          extras: <String, dynamic>{'surahId': 1},
+        ),
+        const AudioEntity(
+          id: 'b',
+          title: 'B',
+          url: 'u',
+          duration: Duration.zero,
+          extras: <String, dynamic>{'surahId': 2},
+        ),
+      ];
+
+      final Map<String, int> bySurah = cache.indexBySurahIdFor(
+        queue: queue,
+        queueGeneration: 3,
+      );
+
+      expect(bySurah['1'], 0);
+      expect(bySurah['2'], 1);
+    });
+  });
+
   group('QuranPlayerQueueUtils.findReorderableChildIndex', () {
     late Map<String, int> indexById;
 

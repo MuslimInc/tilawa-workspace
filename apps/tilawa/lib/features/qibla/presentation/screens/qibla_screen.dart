@@ -123,68 +123,81 @@ class _PortraitContent extends StatelessWidget {
 
     return Column(
       children: [
-        const Spacer(),
-        BlocBuilder<QiblaBloc, QiblaState>(
-          buildWhen: (previous, current) => previous.status != current.status,
-          builder: (context, state) {
-            switch (state.status) {
-              case QiblaStatus.loading:
-                return TilawaLoadingIndicator(color: colorScheme.onSurface);
-              case QiblaStatus.serviceDisabled:
-                return _QiblaUnavailableState(
-                  icon: Icons.location_off_rounded,
-                  tone: TilawaStateVisualTone.neutral,
-                  title: context.l10n.locationServiceDisabled,
-                  subtitle: context.l10n.enableLocationServiceMessage,
-                  retryLabel: context.l10n.tryAgain,
-                  onRetry: () => context.read<QiblaBloc>().add(
-                    const CheckLocationService(),
-                  ),
-                );
-              case QiblaStatus.permissionDenied:
-                return _QiblaUnavailableState(
-                  icon: Icons.explore_off_rounded,
-                  tone: TilawaStateVisualTone.tertiary,
-                  title: context.l10n.permissionDenied,
-                  subtitle: context.l10n.locationPermissionRequiredMessage,
-                  retryLabel: context.l10n.tryAgain,
-                  onRetry: () => context.read<QiblaBloc>().add(
-                    const RequestLocationPermission(),
-                  ),
-                );
-              case QiblaStatus.error:
-                return _QiblaUnavailableState(
-                  icon: Icons.error_outline_rounded,
-                  tone: TilawaStateVisualTone.error,
-                  title: context.l10n.error,
-                  subtitle: state.errorMessage ?? context.l10n.anErrorOccurred,
-                  retryLabel: context.l10n.tryAgain,
-                  onRetry: () => context.read<QiblaBloc>().add(
-                    const CheckLocationService(),
-                  ),
-                );
-              case QiblaStatus.success:
-                return BlocSelector<
-                  QiblaBloc,
-                  QiblaState,
-                  QiblaDirectionEntity?
-                >(
-                  selector: (s) => s.direction,
-                  builder: (context, direction) {
-                    if (direction == null) {
+        Expanded(
+          child: Align(
+            alignment: Alignment.center,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: BlocBuilder<QiblaBloc, QiblaState>(
+                buildWhen: (previous, current) =>
+                    previous.status != current.status,
+                builder: (context, state) {
+                  switch (state.status) {
+                    case QiblaStatus.loading:
                       return TilawaLoadingIndicator(
                         color: colorScheme.onSurface,
                       );
-                    }
-                    return _QiblaCompassPanel(direction: direction);
-                  },
-                );
-              case QiblaStatus.initial:
-                return TilawaLoadingIndicator(color: colorScheme.onSurface);
-            }
-          },
+                    case QiblaStatus.serviceDisabled:
+                      return _QiblaUnavailableState(
+                        icon: Icons.location_off_rounded,
+                        tone: TilawaStateVisualTone.neutral,
+                        title: context.l10n.locationServiceDisabled,
+                        subtitle: context.l10n.enableLocationServiceMessage,
+                        retryLabel: context.l10n.tryAgain,
+                        onRetry: () => context.read<QiblaBloc>().add(
+                          const CheckLocationService(),
+                        ),
+                      );
+                    case QiblaStatus.permissionDenied:
+                      return _QiblaUnavailableState(
+                        icon: Icons.explore_off_rounded,
+                        tone: TilawaStateVisualTone.tertiary,
+                        title: context.l10n.permissionDenied,
+                        subtitle:
+                            context.l10n.locationPermissionRequiredMessage,
+                        retryLabel: context.l10n.tryAgain,
+                        onRetry: () => context.read<QiblaBloc>().add(
+                          const RequestLocationPermission(),
+                        ),
+                      );
+                    case QiblaStatus.error:
+                      return _QiblaUnavailableState(
+                        icon: Icons.error_outline_rounded,
+                        tone: TilawaStateVisualTone.error,
+                        title: context.l10n.error,
+                        subtitle:
+                            state.errorMessage ?? context.l10n.anErrorOccurred,
+                        retryLabel: context.l10n.tryAgain,
+                        onRetry: () => context.read<QiblaBloc>().add(
+                          const CheckLocationService(),
+                        ),
+                      );
+                    case QiblaStatus.success:
+                      return BlocSelector<
+                        QiblaBloc,
+                        QiblaState,
+                        QiblaDirectionEntity?
+                      >(
+                        selector: (s) => s.direction,
+                        builder: (context, direction) {
+                          if (direction == null) {
+                            return TilawaLoadingIndicator(
+                              color: colorScheme.onSurface,
+                            );
+                          }
+                          return _QiblaCompassPanel(direction: direction);
+                        },
+                      );
+                    case QiblaStatus.initial:
+                      return TilawaLoadingIndicator(
+                        color: colorScheme.onSurface,
+                      );
+                  }
+                },
+              ),
+            ),
+          ),
         ),
-        const Spacer(),
         const _TipText(bottomPadding: kPortraitTipBottomPadding),
       ],
     );

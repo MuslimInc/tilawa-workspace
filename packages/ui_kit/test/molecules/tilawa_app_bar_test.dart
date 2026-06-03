@@ -4,6 +4,7 @@ import 'package:tilawa_ui_kit/src/foundation/app_colors.dart';
 import 'package:tilawa_ui_kit/src/foundation/app_theme.dart';
 import 'package:tilawa_ui_kit/src/foundation/design_tokens.dart';
 import 'package:tilawa_ui_kit/src/molecules/tilawa_app_bar_config.dart';
+import 'package:tilawa_ui_kit/src/molecules/tilawa_catalog_app_bar.dart';
 
 ThemeData _lightTheme() => AppTheme.getLightTheme(
   primaryColor: AppColors.defaultPrimary,
@@ -144,6 +145,47 @@ void main() {
       );
 
       expect(leading, isNotNull);
+    });
+  });
+
+  group('TilawaCatalogAppBar.titleOnly defaults', () {
+    testWidgets('shows back control on a pushed route by default', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: _lightTheme(),
+          home: Scaffold(
+            body: Builder(
+              builder: (context) {
+                return ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (context) {
+                          return Scaffold(
+                            appBar: TilawaCatalogAppBar.titleOnly(
+                              context,
+                              title: 'Title',
+                            ),
+                            body: const SizedBox.shrink(),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                  child: const Text('push'),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('push'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BackButtonIcon), findsAtLeastNWidgets(1));
     });
   });
 

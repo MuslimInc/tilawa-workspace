@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/router/app_router.dart';
 

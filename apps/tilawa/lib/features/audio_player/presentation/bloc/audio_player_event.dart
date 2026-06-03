@@ -6,6 +6,11 @@ sealed class AudioPlayerEvent with _$AudioPlayerEvent {
   const factory AudioPlayerEvent.loadAudioPlayerData({
     @Default(true) bool restorePlayback,
   }) = LoadAudioPlayerData;
+  const factory AudioPlayerEvent.syncActivePlayback() = SyncActivePlayback;
+  const factory AudioPlayerEvent.syncActivePlaybackTrailing() =
+      SyncActivePlaybackTrailing;
+  const factory AudioPlayerEvent.requestPlaybackReconciliation() =
+      RequestPlaybackReconciliation;
   const factory AudioPlayerEvent.updateAudio(AudioEntity? audio) = UpdateAudio;
   const factory AudioPlayerEvent.updatePlaybackStateEntity(
     PlaybackStateEntity playbackState,

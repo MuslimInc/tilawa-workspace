@@ -3,6 +3,7 @@ import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.da
 import 'package:tilawa/shared/widgets/quran_player_system_back.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   tearDown(QuranPlayerSystemBackCoordinator.debugReset);
 
   group('QuranPlayerSystemBackCoordinator', () {

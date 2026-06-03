@@ -1964,6 +1964,57 @@ class AppLocalizationsEn extends AppLocalizations {
       'On this device, also enable Autostart for Tilawa in your phone\'s settings so reminders are not stopped in the background.';
 
   @override
+  String get prayerAlertsPermissionLocationTitle => 'Location';
+
+  @override
+  String get prayerAlertsPermissionLocationBody =>
+      'Allow location access so prayer times are calculated for where you are. Times update automatically when you travel.';
+
+  @override
+  String get prayerAlertsPermissionNotificationsTitle => 'Allow notifications';
+
+  @override
+  String get prayerAlertsPermissionNotificationsBody =>
+      'To make sure you never miss a prayer time, allow notifications. You will be reminded when each prayer begins.';
+
+  @override
+  String get prayerAlertsPermissionExactAlarmTitle => 'Alarms & reminders';
+
+  @override
+  String get prayerAlertsPermissionExactAlarmBody =>
+      'Allow Alarms & reminders so Adhan and prayer alerts play on time, even when the phone is idle or the screen is off.';
+
+  @override
+  String get prayerAlertsPermissionBatteryTitle => 'Battery optimization';
+
+  @override
+  String get prayerAlertsPermissionBatteryBody =>
+      'Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.';
+
+  @override
+  String get prayerAlertsPermissionOemAutostartTitle => 'Background access';
+
+  @override
+  String get prayerAlertsPermissionOemAutostartBody =>
+      'On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.';
+
+  @override
+  String get prayerAlertsPermissionAllow => 'Allow';
+
+  @override
+  String get prayerAlertsPermissionSkip => 'Skip';
+
+  @override
+  String get prayerAlertsPermissionContinue => 'Continue';
+
+  @override
+  String get prayerAlertsPermissionSetupRequired =>
+      'Some permissions are needed for reliable prayer alerts and Adhan.';
+
+  @override
+  String get prayerAlertsPermissionSetupAction => 'Set up permissions';
+
+  @override
   String prayerNotificationBody(String prayerName) {
     return 'It is time for $prayerName';
   }

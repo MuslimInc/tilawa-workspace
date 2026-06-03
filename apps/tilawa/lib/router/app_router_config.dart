@@ -24,8 +24,10 @@ import '../features/downloads/presentation/widgets/downloads_screen_scope.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
+import '../features/prayer_times/presentation/screens/prayer_alerts_permission_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
 import '../features/prayer_times/presentation/widgets/prayer_times_screen_scope.dart';
+import 'prayer_alerts_permission_nav_extra.dart';
 import '../features/support/presentation/screens/support_tilawa_screen.dart';
 import '../features/reciters/presentation/bloc/reciter_details_bloc.dart';
 import '../features/reciters/presentation/bloc/reciter_download_bloc.dart';
@@ -68,6 +70,9 @@ part 'app_router_config.g.dart';
       path: '/prayer-notification-status',
     ),
     TypedGoRoute<PrayerTimesRoute>(path: '/prayer-times'),
+    TypedGoRoute<PrayerAlertsPermissionRoute>(
+      path: '/prayer-alerts-permissions',
+    ),
     TypedGoRoute<QuranRenderDemoRoute>(path: '/render-demo'),
   ],
 )
@@ -381,6 +386,18 @@ class PrayerTimesRoute extends GoRouteData with $PrayerTimesRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const PrayerTimesScreenScope();
+  }
+}
+
+class PrayerAlertsPermissionRoute extends GoRouteData
+    with $PrayerAlertsPermissionRoute {
+  const PrayerAlertsPermissionRoute({this.$extra});
+
+  final PrayerAlertsPermissionNavExtra? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PrayerAlertsPermissionScreenScope(navExtra: $extra);
   }
 }
 

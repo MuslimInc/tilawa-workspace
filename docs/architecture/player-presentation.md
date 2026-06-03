@@ -37,11 +37,15 @@ Explicit phases (no implicit “mode from three booleans”):
 
 **Rules:**
 
-- `transitionProgress` is owned **only** by the route page animation (via
-  controller `onRouteAnimationTick`).
-- No legacy `_expandController` in shell-footer Hero mode after Phase B.
-- Footer mini cross-fade reads `controller.visualProgress` and
-  `controller.metrics(heroHandoff: true)` during expand.
+- **Shell overlay expand (shipped):** On `embeddedInShellFooter: true`, mini→expanded
+  uses `OverlayPortal` + widget `_expandController` driven by drag/snap;
+  `PlayerPresentationController` syncs phase/progress via `PlayerShellOverlayHost`
+  without pushing `/player` on shell routes. See
+  [specs/019-quran-player-shell-expand/plan.md](../../specs/019-quran-player-shell-expand/plan.md).
+- **Route expand:** When `/player` is on the stack, `transitionProgress` is owned by
+  the route page animation (`onRouteAnimationTick`).
+- Footer mini cross-fade reads `controller.visualProgress` and footer metrics during
+  expand; during drag the footer mini stays mounted (opacity 0) so gestures continue.
 
 ## PlayerPresentationController
 
@@ -56,7 +60,7 @@ changes; must not be tied to a single `BuildContext`.
 | Concern | API surface |
 |---------|-------------|
 | Phase + progress | `phase`, `transitionProgress`, `visualProgress` |
-| Expand / collapse | `expand()`, `collapse()` → delegates to navigation |
+| Expand / collapse | `expand()`, `collapse()` → shell host (overlay) or navigation (`/player`) |
 | Route sync | `onRouteAnimationTick`, `onRouteOpened`, `onRouteClosed` |
 | Gesture arbitration | `onExpandDragStart/Update/End` (hero expanded) |
 | Footer metrics | `metricsForFooter()` → `PlayerExpandTransitionMetrics` |
@@ -121,7 +125,7 @@ Priority on expanded stage (unchanged product behavior):
 
 1. Queue sheet drag when not at peek (consumes vertical drag)
 2. Player collapse drag when queue at peek (feeds controller → pop on snap)
-3. Mini swipe-up when `phase == mini` (footer widget → `expand()`)
+3. Mini swipe-up when `phase == mini` (footer widget → shell overlay expand)
 
 Controller records `isDragging` and `collapseBiased` for metrics during
 collapse drags.
@@ -177,5 +181,6 @@ See full audit and Phase C plan in [player-migration-roadmap.md](player-migratio
 
 ## Related
 
+- [specs/019-quran-player-shell-expand](../../specs/019-quran-player-shell-expand/spec.md) — release spec (shell expand MVP)
 - [ADR-001](../adr/001-quran-player-root-overlay-route.md)
 - [navigation.md](navigation.md)

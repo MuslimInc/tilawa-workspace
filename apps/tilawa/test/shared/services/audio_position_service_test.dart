@@ -89,5 +89,35 @@ void main() {
       ]);
       await subscription.cancel();
     });
+
+    test('emits position when paused but ready with active media', () async {
+      final AudioPositionService service = AudioPositionServiceImpl(
+        audioHandler,
+      );
+
+      final emittedPositions = <Duration>[];
+      final subscription = service.position.listen(emittedPositions.add);
+
+      await Future<void>.delayed(Duration.zero);
+
+      mediaItemSubject.add(
+        const audio_service.MediaItem(
+          id: '1',
+          title: 'Test',
+          duration: Duration(minutes: 5),
+        ),
+      );
+      playbackStateSubject.add(
+        audio_service.PlaybackState(
+          updatePosition: const Duration(minutes: 3),
+          playing: false,
+          processingState: audio_service.AudioProcessingState.ready,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(emittedPositions, contains(const Duration(minutes: 3)));
+      await subscription.cancel();
+    });
   });
 }

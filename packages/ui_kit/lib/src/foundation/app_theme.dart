@@ -1,8 +1,10 @@
 import 'dart:math' as math;
+import 'dart:io';
 
 import 'package:flex_color_scheme/flex_color_scheme.dart';
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 import 'component_tokens.dart';
@@ -50,8 +52,18 @@ class AppTheme {
     return brightness == Brightness.dark ? typography.white : typography.black;
   }
 
-  static TextTheme _getTextTheme(Brightness brightness) =>
-      _material3TypographyBase(brightness);
+  static TextTheme _getTextTheme(Brightness brightness) {
+    final TextTheme base = _material3TypographyBase(brightness);
+    if (_isFlutterTestEnvironment()) {
+      return base;
+    }
+    return GoogleFonts.ibmPlexSansArabicTextTheme(base);
+  }
+
+  static bool _isFlutterTestEnvironment() {
+    if (kIsWeb) return false;
+    return Platform.environment.containsKey('FLUTTER_TEST');
+  }
 
   static FlexSchemeColor _lightScheme(Color primaryColor) {
     final safePrimary = primaryColor == AppColors.defaultPrimary

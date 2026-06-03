@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 /// System-back handling for the shell-hosted [QuranPlayerWidget].
 ///
@@ -18,7 +19,7 @@ abstract final class QuranPlayerSystemBackCoordinator {
   static ValueListenable<bool> get interceptsSystemBackListenable => _intercepts;
 
   static void setIntercepts(bool value) {
-    _intercepts.value = value;
+    _setInterceptsSafely(value);
   }
 
   static void handleSystemBack() => _handle?.call();
@@ -32,12 +33,28 @@ abstract final class QuranPlayerSystemBackCoordinator {
       return;
     }
     _handle = null;
-    _intercepts.value = false;
+    _setInterceptsSafely(false);
   }
 
   @visibleForTesting
   static void debugReset() {
-    _intercepts.value = false;
+    _setInterceptsSafely(false);
     _handle = null;
+  }
+
+  static void _setInterceptsSafely(bool value) {
+    if (_intercepts.value == value) {
+      return;
+    }
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (_intercepts.value != value) {
+          _intercepts.value = value;
+        }
+      });
+      return;
+    }
+    _intercepts.value = value;
   }
 }

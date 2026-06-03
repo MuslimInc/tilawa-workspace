@@ -1,7 +1,9 @@
 package com.tilawa.app.prayer
 import android.content.ComponentName
 import android.content.Intent
+import android.os.Build
 import android.util.Log
+import androidx.core.content.ContextCompat
 
 interface MethodResultProxy {
     fun success(result: Any?)
@@ -167,6 +169,47 @@ internal class MethodChannelLogic(
             "clearQALogs" -> {
                 AdhanQALogger.clearLogs(scheduler.getContext())
                 result.success(null)
+            }
+            "playAdhanNow" -> {
+                val id = (arguments?.get("id") as? Number)?.toInt()
+                val name = (arguments?.get("prayerName") as? String) ?: ""
+                val key = (arguments?.get("prayerKey") as? String) ?: name.lowercase()
+                val sound = (arguments?.get("sound") as? String)
+                    ?: (if (key == "fajr") "adhan_fajr" else "adhan")
+                if (id == null) {
+                    result.error("BAD_ARGS", "id required", null)
+                } else {
+                    val context = scheduler.getContext()
+                    val triggerMs = System.currentTimeMillis()
+                    val serviceIntent = Intent(context, AdhanPlaybackService::class.java).apply {
+                        action = AdhanPlaybackService.ACTION_PLAY
+                        putExtra(AdhanScheduler.EXTRA_NOTIFICATION_ID, id)
+                        putExtra(AdhanScheduler.EXTRA_PRAYER_NAME, name)
+                        putExtra(AdhanScheduler.EXTRA_PRAYER_KEY, key)
+                        putExtra(AdhanScheduler.EXTRA_SCHEDULED_MS, triggerMs)
+                        putExtra(AdhanScheduler.EXTRA_SOUND, sound)
+                        putExtra("receiver_time", triggerMs)
+                    }
+                    try {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            ContextCompat.startForegroundService(context, serviceIntent)
+                        } else {
+                            context.startService(serviceIntent)
+                        }
+                        analytics?.logEvent(
+                            "adhan_play_now_started",
+                            commonProps + mapOf(
+                                "prayer_name" to name,
+                                "prayer_key" to key,
+                                "alarm_id" to id,
+                            ),
+                        )
+                        result.success(true)
+                    } catch (t: Throwable) {
+                        Log.e("MethodChannelLogic", "playAdhanNow failed", t)
+                        result.error("PLAY_ADHAN_NOW_FAILED", t.message, null)
+                    }
+                }
             }
             "stopAdhan" -> {
                 val context = scheduler.getContext()

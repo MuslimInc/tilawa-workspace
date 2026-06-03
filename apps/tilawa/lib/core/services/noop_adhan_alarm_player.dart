@@ -28,6 +28,15 @@ class NoOpAdhanAlarmPlayer implements IAdhanAlarmPlayer {
   }) async => false;
 
   @override
+  Future<bool> playAdhanNow({
+    required int id,
+    required String prayerName,
+    required String prayerKey,
+    String? sound,
+  }) async =>
+      false;
+
+  @override
   Future<void> cancelAdhan(int id, {String? prayerName}) async {}
 
   @override

@@ -69,6 +69,7 @@ void main() {
   late BehaviorSubject<bool> shuffleModeEnabledSubject;
   late BehaviorSubject<List<int>> shuffleIndicesSubject;
   late BehaviorSubject<PlaybackEvent> playbackEventSubject;
+  late BehaviorSubject<Duration> positionStreamSubject;
   late BehaviorSubject<List<IndexedAudioSource>> sequenceSubject;
 
   setUp(() async {
@@ -94,6 +95,7 @@ void main() {
     playbackEventSubject = BehaviorSubject<PlaybackEvent>.seeded(
       PlaybackEvent(updateTime: DateTime.now()),
     );
+    positionStreamSubject = BehaviorSubject<Duration>.seeded(Duration.zero);
     sequenceSubject = BehaviorSubject<List<IndexedAudioSource>>.seeded([]);
 
     // Setup mock player streams
@@ -113,6 +115,9 @@ void main() {
     when(
       mockPlayer.playbackEventStream,
     ).thenAnswer((_) => playbackEventSubject.stream);
+    when(
+      mockPlayer.positionStream,
+    ).thenAnswer((_) => positionStreamSubject.stream);
     when(mockPlayer.playerStateStream).thenAnswer(
       (_) => BehaviorSubject<PlayerState>.seeded(
         PlayerState(false, ProcessingState.idle),
@@ -176,6 +181,7 @@ void main() {
     await shuffleModeEnabledSubject.close();
     await shuffleIndicesSubject.close();
     await playbackEventSubject.close();
+    await positionStreamSubject.close();
     await sequenceSubject.close();
   });
 

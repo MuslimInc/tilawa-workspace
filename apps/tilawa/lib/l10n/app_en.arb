@@ -2640,6 +2640,66 @@
     "@oemAutostartHint": {
         "description": "Informational banner shown on aggressive OEM ROMs (Xiaomi/Oppo/Huawei/Vivo/etc.) where the autostart whitelist must be set manually"
     },
+    "prayerAlertsPermissionLocationTitle": "Location",
+    "@prayerAlertsPermissionLocationTitle": {
+        "description": "Title for location permission setup screen"
+    },
+    "prayerAlertsPermissionLocationBody": "Allow location access so prayer times are calculated for where you are. Times update automatically when you travel.",
+    "@prayerAlertsPermissionLocationBody": {
+        "description": "Body for location permission setup screen"
+    },
+    "prayerAlertsPermissionNotificationsTitle": "Allow notifications",
+    "@prayerAlertsPermissionNotificationsTitle": {
+        "description": "Title for prayer alerts notification permission setup screen"
+    },
+    "prayerAlertsPermissionNotificationsBody": "To make sure you never miss a prayer time, allow notifications. You will be reminded when each prayer begins.",
+    "@prayerAlertsPermissionNotificationsBody": {
+        "description": "Body for prayer alerts notification permission setup screen"
+    },
+    "prayerAlertsPermissionExactAlarmTitle": "Alarms & reminders",
+    "@prayerAlertsPermissionExactAlarmTitle": {
+        "description": "Title for exact alarm permission setup screen"
+    },
+    "prayerAlertsPermissionExactAlarmBody": "Allow Alarms & reminders so Adhan and prayer alerts play on time, even when the phone is idle or the screen is off.",
+    "@prayerAlertsPermissionExactAlarmBody": {
+        "description": "Body for exact alarm permission setup screen"
+    },
+    "prayerAlertsPermissionBatteryTitle": "Battery optimization",
+    "@prayerAlertsPermissionBatteryTitle": {
+        "description": "Title for battery optimization exemption setup screen"
+    },
+    "prayerAlertsPermissionBatteryBody": "Exclude Tilawa from battery optimization so prayer reminders are not delayed overnight.",
+    "@prayerAlertsPermissionBatteryBody": {
+        "description": "Body for battery optimization setup screen"
+    },
+    "prayerAlertsPermissionOemAutostartTitle": "Background access",
+    "@prayerAlertsPermissionOemAutostartTitle": {
+        "description": "Title for OEM autostart guidance step"
+    },
+    "prayerAlertsPermissionOemAutostartBody": "On this device, enable Autostart for Tilawa in your phone settings so reminders are not stopped in the background.",
+    "@prayerAlertsPermissionOemAutostartBody": {
+        "description": "Body for OEM autostart guidance step"
+    },
+    "prayerAlertsPermissionAllow": "Allow",
+    "@prayerAlertsPermissionAllow": {
+        "description": "Primary action on prayer alerts permission setup screens"
+    },
+    "prayerAlertsPermissionSkip": "Skip",
+    "@prayerAlertsPermissionSkip": {
+        "description": "Skip action on prayer alerts permission setup screens"
+    },
+    "prayerAlertsPermissionContinue": "Continue",
+    "@prayerAlertsPermissionContinue": {
+        "description": "Continue action on informational permission setup step"
+    },
+    "prayerAlertsPermissionSetupRequired": "Some permissions are needed for reliable prayer alerts and Adhan.",
+    "@prayerAlertsPermissionSetupRequired": {
+        "description": "Summary in prayer notification settings when permissions are missing"
+    },
+    "prayerAlertsPermissionSetupAction": "Set up permissions",
+    "@prayerAlertsPermissionSetupAction": {
+        "description": "Opens full-screen prayer alerts permission flow from settings sheet"
+    },
     "prayerNotificationBody": "It is time for {prayerName}",
     "@prayerNotificationBody": {
         "description": "Body text for prayer time notifications",

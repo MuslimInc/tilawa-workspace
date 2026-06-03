@@ -1,0 +1,92 @@
+appId: com.tilawa.app
+---
+# Collapse/expand diagnostic flow for Quran player.
+# Focus:
+#  - Expanded -> collapse is smooth and returns to mini quickly.
+#  - Mini -> expand is smooth and returns to full sheet.
+#  - Repeated cycles do not leave stale full-height white overlays.
+#
+# Run:
+#   maestro test .maestro/quran_player/quran_player_collapse_expand_behavior.yaml
+#
+# Capture in-app audit logs (debug build):
+#   adb logcat | rg "CollapseExpandQuranPlayer"
+# Flutter run console also prints the same tag during expand/collapse.
+
+- launchApp:
+    clearState: false
+- runFlow:
+    file: ../subflows/ensure_main_shell.yaml
+- runFlow:
+    file: subflows/dismiss_permissions.yaml
+- runFlow:
+    file: subflows/start_playback.yaml
+
+- evalScript: '${console.log("[CollapseExpandQuranPlayer] START: mini player should be visible")}'
+- assertVisible:
+    id: "quran_player_mini"
+
+# Cycle 1: tap to expand, then collapse with explicit button.
+- evalScript: '${console.log("[CollapseExpandQuranPlayer] CYCLE_1: expand from mini via tap")}'
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 10000
+- assertVisible:
+    id: "quran_player_collapse"
+
+- evalScript: '${console.log("[CollapseExpandQuranPlayer] CYCLE_1: collapse via collapse button")}'
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_mini"
+    timeout: 10000
+- assertNotVisible:
+    id: "quran_player_track_title"
+
+# Cycle 2: expand, then collapse with swipe-down gesture.
+- evalScript: '${console.log("[CollapseExpandQuranPlayer] CYCLE_2: expand from mini via tap")}'
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_track_title"
+    timeout: 10000
+
+- evalScript: '${console.log("[CollapseExpandQuranPlayer] CYCLE_2: collapse via swipe-down gesture")}'
+- swipe:
+    start: "50%, 34%"
+    end: "50%, 92%"
+    duration: 320
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: "quran_player_mini"
+    timeout: 10000
+- assertNotVisible:
+    id: "quran_player_track_title"
+
+# Cycle 3: quick re-expand and collapse to catch flicker/regression.
+- evalScript: '${console.log("[CollapseExpandQuranPlayer] CYCLE_3: quick expand")}'
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_track_title"
+
+- evalScript: '${console.log("[CollapseExpandQuranPlayer] CYCLE_3: quick collapse")}'
+- tapOn:
+    id: "quran_player_collapse"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "quran_player_mini"
+- assertNotVisible:
+    id: "quran_player_track_title"
+
+- evalScript: '${console.log("[CollapseExpandQuranPlayer] END: collapse/expand assertions passed")}'

@@ -1955,6 +1955,57 @@ class AppLocalizationsAr extends AppLocalizations {
       'في هذا الجهاز، فعّل أيضاً التشغيل التلقائي لتطبيق تلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
 
   @override
+  String get prayerAlertsPermissionLocationTitle => 'الموقع';
+
+  @override
+  String get prayerAlertsPermissionLocationBody =>
+      'اسمح بالوصول إلى الموقع لحساب أوقات الصلاة حسب مكانك. تُحدَّث الأوقات تلقائياً عند السفر.';
+
+  @override
+  String get prayerAlertsPermissionNotificationsTitle => 'السماح بالإشعارات';
+
+  @override
+  String get prayerAlertsPermissionNotificationsBody =>
+      'للتأكد من عدم تفويت أي وقت للصلاة، يُرجى السماح بالإشعارات. ستُذكّرك الإشعارات عند حلول وقت كل صلاة.';
+
+  @override
+  String get prayerAlertsPermissionExactAlarmTitle => 'التنبيهات والتذكيرات';
+
+  @override
+  String get prayerAlertsPermissionExactAlarmBody =>
+      'اسمح بإذن التنبيهات والتذكيرات حتى يعمل الأذان وتنبيهات الصلاة في وقتها، حتى عندما يكون الهاتف في وضع السكون أو الشاشة مغلقة.';
+
+  @override
+  String get prayerAlertsPermissionBatteryTitle => 'تحسين البطارية';
+
+  @override
+  String get prayerAlertsPermissionBatteryBody =>
+      'استثنِ تلاوة من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.';
+
+  @override
+  String get prayerAlertsPermissionOemAutostartTitle => 'العمل في الخلفية';
+
+  @override
+  String get prayerAlertsPermissionOemAutostartBody =>
+      'في هذا الجهاز، فعّل التشغيل التلقائي لتلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.';
+
+  @override
+  String get prayerAlertsPermissionAllow => 'السماح';
+
+  @override
+  String get prayerAlertsPermissionSkip => 'تخطي';
+
+  @override
+  String get prayerAlertsPermissionContinue => 'متابعة';
+
+  @override
+  String get prayerAlertsPermissionSetupRequired =>
+      'بعض الأذونات مطلوبة لتذكيرات الصلاة والأذان بشكل موثوق.';
+
+  @override
+  String get prayerAlertsPermissionSetupAction => 'إعداد الأذونات';
+
+  @override
   String prayerNotificationBody(String prayerName) {
     return 'حان وقت $prayerName';
   }

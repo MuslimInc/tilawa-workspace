@@ -304,6 +304,7 @@ class SettingsLogoutSection extends StatelessWidget {
               title: context.l10n.logout,
               iconColor: Theme.of(context).colorScheme.error,
               onTap: onLogout,
+              showDivider: false,
             ),
           ],
         );

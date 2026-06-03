@@ -2585,6 +2585,21 @@
     "@oemAutostartHint": {
         "description": "Informational banner shown on aggressive OEM ROMs"
     },
+    "prayerAlertsPermissionLocationTitle": "الموقع",
+    "prayerAlertsPermissionLocationBody": "اسمح بالوصول إلى الموقع لحساب أوقات الصلاة حسب مكانك. تُحدَّث الأوقات تلقائياً عند السفر.",
+    "prayerAlertsPermissionNotificationsTitle": "السماح بالإشعارات",
+    "prayerAlertsPermissionNotificationsBody": "للتأكد من عدم تفويت أي وقت للصلاة، يُرجى السماح بالإشعارات. ستُذكّرك الإشعارات عند حلول وقت كل صلاة.",
+    "prayerAlertsPermissionExactAlarmTitle": "التنبيهات والتذكيرات",
+    "prayerAlertsPermissionExactAlarmBody": "اسمح بإذن التنبيهات والتذكيرات حتى يعمل الأذان وتنبيهات الصلاة في وقتها، حتى عندما يكون الهاتف في وضع السكون أو الشاشة مغلقة.",
+    "prayerAlertsPermissionBatteryTitle": "تحسين البطارية",
+    "prayerAlertsPermissionBatteryBody": "استثنِ تلاوة من تحسين البطارية حتى لا تتأخر تذكيرات الصلاة ليلاً.",
+    "prayerAlertsPermissionOemAutostartTitle": "العمل في الخلفية",
+    "prayerAlertsPermissionOemAutostartBody": "في هذا الجهاز، فعّل التشغيل التلقائي لتلاوة من إعدادات الهاتف حتى لا تتوقف التذكيرات في الخلفية.",
+    "prayerAlertsPermissionAllow": "السماح",
+    "prayerAlertsPermissionSkip": "تخطي",
+    "prayerAlertsPermissionContinue": "متابعة",
+    "prayerAlertsPermissionSetupRequired": "بعض الأذونات مطلوبة لتذكيرات الصلاة والأذان بشكل موثوق.",
+    "prayerAlertsPermissionSetupAction": "إعداد الأذونات",
     "prayerNotificationBody": "حان وقت {prayerName}",
     "@prayerNotificationBody": {
         "description": "Body text for prayer time notifications",

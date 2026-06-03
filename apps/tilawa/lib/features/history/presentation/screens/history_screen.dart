@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
 import 'package:tilawa_core/entities/audio.dart';
@@ -46,9 +47,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
         final bool hasHistory = state.historyList.isNotEmpty;
         final PreferredSizeWidget appBar = hasHistory
             ? TilawaCatalogAppBar(
-                preferredHeight:
-                    TilawaAppBarConfig.catalogTitleAndSearchHeight(context),
+                preferredHeight: TilawaAppBarConfig.catalogTitleAndSearchHeight(
+                  context,
+                ),
                 title: context.l10n.listeningHistory,
+                leading: TilawaAppBarChrome.catalogBackButton(
+                  context: context,
+                  onPressed: () => context.pop(),
+                ),
                 actions: [
                   PopupMenuButton<String>(
                     onSelected: (value) {
@@ -96,47 +102,50 @@ class _HistoryScreenState extends State<HistoryScreen> {
         return Scaffold(
           appBar: appBar,
           body: Stack(
-        children: [
-          BlocBuilder<HistoryBloc, HistoryState>(
-            builder: (context, state) {
-              final tokens = Theme.of(context).tokens;
-              return RefreshIndicator(
-                onRefresh: () async {
-                  context.read<HistoryBloc>().add(
-                    const HistoryEvent.refreshHistory(),
-                  );
-                },
-                child: CustomScrollView(
-                  slivers: [
-                    // Stats card
-                    if (state.historyList.isNotEmpty)
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: EdgeInsets.all(tokens.spaceLarge),
-                          child: HistoryStatsCard(
-                            totalItems: state.historyList.length,
-                            totalListeningTimeMs: state.totalListeningTimeMs,
+            children: [
+              BlocBuilder<HistoryBloc, HistoryState>(
+                builder: (context, state) {
+                  final tokens = Theme.of(context).tokens;
+                  return RefreshIndicator(
+                    onRefresh: () async {
+                      context.read<HistoryBloc>().add(
+                        const HistoryEvent.refreshHistory(),
+                      );
+                    },
+                    child: CustomScrollView(
+                      slivers: [
+                        // Stats card
+                        if (state.historyList.isNotEmpty)
+                          SliverToBoxAdapter(
+                            child: Padding(
+                              padding: EdgeInsets.all(tokens.spaceLarge),
+                              child: HistoryStatsCard(
+                                totalItems: state.historyList.length,
+                                totalListeningTimeMs:
+                                    state.totalListeningTimeMs,
+                              ),
+                            ),
+                          ),
+
+                        SliverToBoxAdapter(
+                          child: SizedBox(height: tokens.spaceLarge),
+                        ),
+
+                        // Content based on state
+                        _buildContent(context, state),
+
+                        // Dynamic bottom padding based on player visibility
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: _calculateBottomPadding(context),
                           ),
                         ),
-                      ),
-
-                    SliverToBoxAdapter(
-                      child: SizedBox(height: tokens.spaceLarge),
+                      ],
                     ),
-
-                    // Content based on state
-                    _buildContent(context, state),
-
-                    // Dynamic bottom padding based on player visibility
-                    SliverToBoxAdapter(
-                      child: SizedBox(height: _calculateBottomPadding(context)),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ],
+                  );
+                },
+              ),
+            ],
           ),
         );
       },

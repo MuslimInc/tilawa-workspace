@@ -56,7 +56,14 @@ class QuranPlayerMorphLayout {
     required this.titleScale,
     required this.titleAlign,
     required this.titleMaxLines,
+    required this.titleScaleAlignment,
+    required this.horizontalIdentity,
+    required this.textDirection,
+    required this.showMorphSubtitle,
   });
+
+  /// Layout progress after easing (0 collapsed → 1 expanded).
+  static const double horizontalIdentityEndT = 0.48;
 
   final Rect artRect;
   final double artBorderRadius;
@@ -64,6 +71,31 @@ class QuranPlayerMorphLayout {
   final double titleScale;
   final TextAlign titleAlign;
   final int titleMaxLines;
+
+  /// Scale origin for morph metadata during mini-anchored phase.
+  final Alignment titleScaleAlignment;
+
+  /// Mini-bar style row (art beside metadata), not art stacked above text.
+  final bool horizontalIdentity;
+
+  final TextDirection textDirection;
+
+  /// Subtitle shown in morph metadata (horizontal band matches mini bar).
+  final bool showMorphSubtitle;
+
+  /// Union of [artRect] and [titleRect] for the horizontal identity band.
+  Rect get identityBandRect {
+    return Rect.fromLTRB(
+      artRect.left < titleRect.left ? artRect.left : titleRect.left,
+      artRect.top,
+      artRect.right > titleRect.right ? artRect.right : titleRect.right,
+      artRect.bottom > titleRect.bottom ? artRect.bottom : titleRect.bottom,
+    );
+  }
+
+  /// True when metadata sits under artwork (expanded-style stack).
+  bool get metadataIsVerticallyStacked =>
+      titleRect.top >= artRect.bottom - 4;
 
   /// Computes morph geometry in overlay coordinates.
   ///
@@ -75,6 +107,7 @@ class QuranPlayerMorphLayout {
     required Rect miniBarRect,
     required double sheetOffsetY,
     required QuranPlayerMorphThemeGeometry geometry,
+    TextDirection textDirection = TextDirection.ltr,
     double expandedArtWidthFactor = 0.62,
     double expandedArtCenterYFactor = 0.38,
   }) {
@@ -84,6 +117,7 @@ class QuranPlayerMorphLayout {
     final Rect miniArt = _miniArtRect(
       miniBarRect: miniBarRect,
       geometry: geometry,
+      textDirection: textDirection,
     );
     final Rect expandedArt = _expandedArtRect(
       viewport: viewport,
@@ -94,31 +128,56 @@ class QuranPlayerMorphLayout {
     );
     final Rect artRect = Rect.lerp(miniArt, expandedArt, layoutT)!;
 
-    final _TitleLayout miniTitle = _miniTitleLayout(
-      miniBarRect: miniBarRect,
-      miniArt: miniArt,
-      geometry: geometry,
-    );
     final _TitleLayout expandedTitle = _expandedTitleLayout(
       viewport: viewport,
       expandedArt: expandedArt,
       geometry: geometry,
     );
 
-    final Rect titleRect = Rect.lerp(
-      miniTitle.bounds,
-      expandedTitle.bounds,
-      layoutT,
-    )!;
-    final double titleScale = lerpDouble(
-      miniTitle.scale,
-      expandedTitle.scale,
-      layoutT,
-    )!;
-    final TextAlign titleAlign = layoutT < 0.5
+    final bool horizontalIdentity = layoutT < horizontalIdentityEndT;
+    final Rect titleRect = horizontalIdentity
+        ? _titleRectBesideArt(
+            artRect: artRect,
+            miniBarRect: miniBarRect,
+            geometry: geometry,
+            textDirection: textDirection,
+          )
+        : Rect.lerp(
+            _titleRectBesideArt(
+              artRect: Rect.lerp(
+                miniArt,
+                expandedArt,
+                horizontalIdentityEndT,
+              )!,
+              miniBarRect: miniBarRect,
+              geometry: geometry,
+              textDirection: textDirection,
+            ),
+            expandedTitle.bounds,
+            ((layoutT - horizontalIdentityEndT) /
+                    (1 - horizontalIdentityEndT))
+                .clamp(0.0, 1.0),
+          )!;
+    final double titleScale = horizontalIdentity
+        ? 1.0
+        : lerpDouble(
+            1.0,
+            expandedTitle.scale,
+            ((layoutT - horizontalIdentityEndT) /
+                    (1 - horizontalIdentityEndT))
+                .clamp(0.0, 1.0),
+          )!;
+    final TextAlign titleAlign = horizontalIdentity
         ? TextAlign.start
         : TextAlign.center;
-    final int titleMaxLines = layoutT < 0.55 ? 1 : 2;
+    final int titleMaxLines = horizontalIdentity ? 1 : 2;
+    final Alignment titleScaleAlignment = horizontalIdentity
+        ? switch (textDirection) {
+            TextDirection.rtl => Alignment.topRight,
+            TextDirection.ltr => Alignment.topLeft,
+          }
+        : Alignment.topCenter;
+    final bool showMorphSubtitle = true;
 
     return QuranPlayerMorphLayout(
       artRect: artRect,
@@ -131,26 +190,32 @@ class QuranPlayerMorphLayout {
       titleScale: titleScale,
       titleAlign: titleAlign,
       titleMaxLines: titleMaxLines,
+      titleScaleAlignment: titleScaleAlignment,
+      horizontalIdentity: horizontalIdentity,
+      textDirection: textDirection,
+      showMorphSubtitle: showMorphSubtitle,
     );
   }
 
   static Rect _miniArtRect({
     required Rect miniBarRect,
     required QuranPlayerMorphThemeGeometry geometry,
+    required TextDirection textDirection,
   }) {
-    final EdgeInsets pad = geometry.barContentPadding.resolve(
-      TextDirection.ltr,
-    );
-    final double left =
-        miniBarRect.left +
-        geometry.shellHorizontalInset +
-        pad.left;
+    final EdgeInsets pad = geometry.barContentPadding.resolve(textDirection);
     final double top =
-        miniBarRect.top +
-        geometry.progressHeight +
-        pad.top;
+        miniBarRect.top + geometry.progressHeight + pad.top;
     final double size = geometry.barArtworkSize;
-    return Rect.fromLTWH(left, top, size, size);
+    switch (textDirection) {
+      case TextDirection.ltr:
+        final double left =
+            miniBarRect.left + geometry.shellHorizontalInset + pad.left;
+        return Rect.fromLTWH(left, top, size, size);
+      case TextDirection.rtl:
+        final double right =
+            miniBarRect.right - geometry.shellHorizontalInset - pad.right;
+        return Rect.fromLTWH(right - size, top, size, size);
+    }
   }
 
   static Rect _expandedArtRect({
@@ -173,20 +238,32 @@ class QuranPlayerMorphLayout {
     );
   }
 
-  static _TitleLayout _miniTitleLayout({
+  /// Metadata slot beside [artRect] (matches [TilawaMediaPlayerBar] row).
+  static Rect _titleRectBesideArt({
+    required Rect artRect,
     required Rect miniBarRect,
-    required Rect miniArt,
     required QuranPlayerMorphThemeGeometry geometry,
+    required TextDirection textDirection,
   }) {
-    final double left = miniArt.right + geometry.barArtworkInfoGap;
-    final double right =
-        miniBarRect.right - geometry.shellHorizontalInset - 120;
-    final double top = miniArt.top;
-    final double height = miniArt.height;
-    return _TitleLayout(
-      bounds: Rect.fromLTRB(left, top, right, top + height),
-      scale: 1.0,
-    );
+    const double transportReserve = 120;
+    final double top = artRect.top;
+    final double height = artRect.height;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        final double left = artRect.right + geometry.barArtworkInfoGap;
+        final double right =
+            miniBarRect.right -
+            geometry.shellHorizontalInset -
+            transportReserve;
+        return Rect.fromLTRB(left, top, right, top + height);
+      case TextDirection.rtl:
+        final double right = artRect.left - geometry.barArtworkInfoGap;
+        final double left =
+            miniBarRect.left +
+            geometry.shellHorizontalInset +
+            transportReserve;
+        return Rect.fromLTRB(left, top, right, top + height);
+    }
   }
 
   static _TitleLayout _expandedTitleLayout({

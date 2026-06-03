@@ -42,5 +42,26 @@ void main() {
 
       expect(resolved, Duration.zero);
     });
+
+    test('falls back to cached position when stream and state are zero', () {
+      final Duration resolved = resolvePlaybackDisplayPosition(
+        playbackState: _playback(),
+        streamPosition: Duration.zero,
+        cachedPosition: const Duration(seconds: 42),
+      );
+
+      expect(resolved, const Duration(seconds: 42));
+    });
+
+    test('ignores stale handler position after track change', () {
+      final Duration resolved = resolvePlaybackDisplayPosition(
+        playbackState: _playback(position: const Duration(minutes: 47)),
+        streamPosition: Duration.zero,
+        cachedPosition: Duration.zero,
+        trackDuration: const Duration(seconds: 53),
+      );
+
+      expect(resolved, Duration.zero);
+    });
   });
 }

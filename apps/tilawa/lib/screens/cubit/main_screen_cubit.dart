@@ -43,6 +43,9 @@ class MainScreenCubit extends Cubit<MainScreenState> {
         isShellActivated: true,
         isInitialTabMounted: true,
         builtTabIndexes: <int>{0},
+        // Hot restart / return from splash: shell is already visible; bind the
+        // mini player to the surviving native session immediately.
+        isAudioBindingDeferred: false,
       );
     }
     return const MainScreenState();

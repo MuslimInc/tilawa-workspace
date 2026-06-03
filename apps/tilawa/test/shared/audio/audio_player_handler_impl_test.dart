@@ -19,6 +19,7 @@ import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catal
 import 'package:tilawa/features/audio_player/domain/services/reciter_audio_catalog_cache.dart';
 import 'package:tilawa/features/downloads/domain/repositories/downloads_repository.dart';
 import 'package:tilawa/features/reciters/domain/repositories/reciters_repository.dart';
+import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
 import 'package:tilawa/shared/audio/audio_player_handler_impl.dart';
 import 'package:tilawa/shared/models/queue_state.dart';
 import 'package:tilawa_core/config/language_config.dart';
@@ -81,6 +82,7 @@ void main() {
   late BehaviorSubject<bool> shuffleModeEnabledSubject;
   late BehaviorSubject<List<int>> shuffleIndicesSubject;
   late BehaviorSubject<PlaybackEvent> playbackEventSubject;
+  late BehaviorSubject<Duration> positionStreamSubject;
   late BehaviorSubject<List<IndexedAudioSource>> sequenceSubject;
   late List<AudioSource> capturedPlaylist;
 
@@ -124,6 +126,7 @@ void main() {
     playbackEventSubject = BehaviorSubject<PlaybackEvent>.seeded(
       PlaybackEvent(updateTime: DateTime.now()),
     );
+    positionStreamSubject = BehaviorSubject<Duration>.seeded(Duration.zero);
     sequenceSubject = BehaviorSubject<List<IndexedAudioSource>>.seeded([]);
 
     // Setup mock player streams
@@ -143,6 +146,9 @@ void main() {
     when(
       mockPlayer.playbackEventStream,
     ).thenAnswer((_) => playbackEventSubject.stream);
+    when(
+      mockPlayer.positionStream,
+    ).thenAnswer((_) => positionStreamSubject.stream);
     when(mockPlayer.playerStateStream).thenAnswer(
       (_) => BehaviorSubject<PlayerState>.seeded(
         PlayerState(false, ProcessingState.idle),
@@ -539,6 +545,16 @@ void main() {
       verify(mockAnalytics.logAudioPause('1')).called(1);
     });
 
+    test('click media button notifies playback notification bridge', () async {
+      var tapped = false;
+      PlaybackNotificationBridge.onContentTap = () => tapped = true;
+      addTearDown(() => PlaybackNotificationBridge.onContentTap = null);
+
+      await handler.click(MediaButton.media);
+
+      expect(tapped, isTrue);
+    });
+
     test('stop calls player.stop and logs analytics', () async {
       const item = MediaItem(id: '1', title: 'Test', artist: 'Artist');
       handler.mediaItem.add(item);
@@ -551,6 +567,7 @@ void main() {
 
       verify(mockPlayer.stop()).called(1);
       verify(mockAnalytics.logAudioStop('1')).called(1);
+      expect(handler.mediaItem.valueOrNull, isNull);
     });
 
     test('seek calls player.seek and logs analytics', () async {
@@ -1529,6 +1546,183 @@ void main() {
       when(
         mockDownloadsRepo.getDownloadedFilePath(any, any),
       ).thenAnswer((_) async => null);
+    });
+
+    test('play rebroadcasts engine position to playbackState', () async {
+      const item = MediaItem(
+        id: '1',
+        title: 'Test',
+        duration: Duration(minutes: 10),
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      await handler.addQueueItem(item);
+      currentIndexSubject.add(0);
+      processingStateSubject.add(ProcessingState.ready);
+      durationSubject.add(const Duration(minutes: 10));
+      await captureAndUpdate();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      const Duration enginePosition = Duration(minutes: 5);
+      when(mockPlayer.position).thenReturn(enginePosition);
+      when(mockPlayer.playing).thenReturn(true);
+      await handler.play();
+
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(
+        handler.playbackState.value.updatePosition,
+        enginePosition,
+      );
+      when(mockPlayer.playing).thenReturn(false);
+    });
+
+    test('pause rebroadcasts engine position to playbackState', () async {
+      const item = MediaItem(
+        id: '1',
+        title: 'Test',
+        duration: Duration(minutes: 10),
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      await handler.addQueueItem(item);
+      currentIndexSubject.add(0);
+      processingStateSubject.add(ProcessingState.ready);
+      durationSubject.add(const Duration(minutes: 10));
+      await captureAndUpdate();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      handler.playbackState.add(
+        PlaybackState(
+          updatePosition: const Duration(minutes: 8),
+          playing: true,
+          processingState: AudioProcessingState.ready,
+        ),
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+
+      const Duration enginePosition = Duration(minutes: 8);
+      when(mockPlayer.position).thenReturn(enginePosition);
+      when(mockPlayer.playing).thenReturn(false);
+      await handler.pause();
+
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(
+        handler.playbackState.value.updatePosition,
+        enginePosition,
+      );
+    });
+
+    test(
+      'track change does not carry previous surah updatePosition',
+      () async {
+        const itemA = MediaItem(
+          id: 'surah-2',
+          title: 'Al-Baqarah',
+          duration: Duration(hours: 2),
+          extras: <String, dynamic>{'url': 'https://example.com/2.mp3'},
+        );
+        const itemB = MediaItem(
+          id: 'surah-1',
+          title: 'Al-Fatiha',
+          duration: Duration(seconds: 53),
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        );
+        await handler.addQueueItems([itemA, itemB]);
+        currentIndexSubject.add(0);
+        processingStateSubject.add(ProcessingState.ready);
+        durationSubject.add(const Duration(hours: 2));
+        await captureAndUpdate();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        handler.playbackState.add(
+          PlaybackState(
+            updatePosition: const Duration(minutes: 47),
+            playing: false,
+            processingState: AudioProcessingState.ready,
+          ),
+        );
+
+        when(mockPlayer.position).thenReturn(Duration.zero);
+        when(mockPlayer.currentIndex).thenReturn(1);
+        currentIndexSubject.add(1);
+        processingStateSubject.add(ProcessingState.ready);
+        durationSubject.add(const Duration(seconds: 53));
+        playbackEventSubject.add(PlaybackEvent(updateTime: DateTime.now()));
+
+        await Future<void>.delayed(const Duration(milliseconds: 150));
+
+        expect(handler.mediaItem.value?.id, 'surah-1');
+        expect(
+          handler.playbackState.value.updatePosition,
+          Duration.zero,
+        );
+      },
+    );
+
+    test(
+      'resume play keeps prior updatePosition when engine briefly reports zero',
+      () async {
+        const item = MediaItem(
+          id: '1',
+          title: 'Test',
+          duration: Duration(hours: 2),
+          extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+        );
+        await handler.addQueueItem(item);
+        currentIndexSubject.add(0);
+        processingStateSubject.add(ProcessingState.ready);
+        durationSubject.add(const Duration(hours: 2));
+        await captureAndUpdate();
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        handler.playbackState.add(
+          PlaybackState(
+            updatePosition: const Duration(minutes: 47),
+            playing: false,
+            processingState: AudioProcessingState.ready,
+          ),
+        );
+
+        when(mockPlayer.position).thenReturn(Duration.zero);
+        when(mockPlayer.playing).thenReturn(true);
+        when(mockPlayer.processingState).thenReturn(ProcessingState.ready);
+        playbackEventSubject.add(PlaybackEvent(updateTime: DateTime.now()));
+
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+
+        expect(
+          handler.playbackState.value.updatePosition,
+          const Duration(minutes: 47),
+        );
+        when(mockPlayer.playing).thenReturn(false);
+      },
+    );
+
+    test('positionStream rebroadcasts updatePosition to playbackState', () async {
+      const item = MediaItem(
+        id: '1',
+        title: 'Test',
+        duration: Duration(minutes: 10),
+        extras: <String, dynamic>{'url': 'https://example.com/1.mp3'},
+      );
+      await handler.addQueueItem(item);
+      currentIndexSubject.add(0);
+      processingStateSubject.add(ProcessingState.ready);
+      durationSubject.add(const Duration(minutes: 10));
+      await captureAndUpdate();
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      expect(handler.mediaItem.value, isNotNull);
+
+      const Duration enginePosition = Duration(seconds: 90);
+      when(mockPlayer.position).thenReturn(enginePosition);
+      positionStreamSubject.add(enginePosition);
+
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(
+        handler.playbackState.value.updatePosition,
+        enginePosition,
+      );
     });
 
     test('_broadcastState includes pause control when playing', () async {

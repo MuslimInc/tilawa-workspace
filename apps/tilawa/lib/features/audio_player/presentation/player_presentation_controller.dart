@@ -3,11 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/shared/widgets/quran_player_debug_log.dart';
+import 'package:tilawa/shared/widgets/quran_player_visual_mode.dart';
 import 'package:tilawa/shared/widgets/quran_player_expand_physics.dart';
 import 'package:tilawa/shared/widgets/quran_player_system_back.dart';
+import 'package:tilawa/shared/widgets/quran_player_route_progress_guard.dart';
+
+import 'package:tilawa/core/navigation/quran_player_navigation.dart';
 
 import 'player_presentation_phase.dart';
-import 'package:tilawa/core/navigation/quran_player_navigation.dart';
+import 'player_shell_overlay_host.dart';
 import 'quran_player_presentation_entry.dart';
 
 /// Presentation authority for the Quran player (not playback, not chrome publish).
@@ -28,6 +32,8 @@ class PlayerPresentationController extends ChangeNotifier {
   PlayerPresentationController(this._navigation);
 
   final QuranPlayerNavigation _navigation;
+
+  PlayerShellOverlayHost? _shellHost;
 
   PlayerPresentationPhase _phase = PlayerPresentationPhase.mini;
   double _transitionProgress = 0;
@@ -55,7 +61,95 @@ class PlayerPresentationController extends ChangeNotifier {
 
   bool get isDragging => _isDragging;
 
-  bool get usesHeroShellFooter => true;
+  bool get hasShellOverlayHost => _shellHost != null;
+
+  void bindShellOverlay(PlayerShellOverlayHost host) {
+    _shellHost = host;
+    if (!_routeOpen) {
+      if (_transitionProgress > 0.01 && _transitionProgress < 0.99) {
+        _resetShellOverlayToMini(silent: true);
+      } else if (_transitionProgress <= 0.01 &&
+          _phase != PlayerPresentationPhase.mini) {
+        _resetShellOverlayToMini(silent: true);
+      }
+    }
+  }
+
+  void unbindShellOverlay(PlayerShellOverlayHost host) {
+    if (identical(_shellHost, host)) {
+      _shellHost = null;
+      if (!_routeOpen) {
+        _resetShellOverlayToMini(silent: true);
+        _scheduleNotifyListeners();
+        _syncSystemBackIntercepts();
+      }
+    }
+  }
+
+  void _resetShellOverlayToMini({bool silent = false}) {
+    _transitionProgress = 0;
+    _phase = PlayerPresentationPhase.mini;
+    _collapseBiased = false;
+    _collapseRequested = false;
+    _isDragging = false;
+    _seenForwardAnimation = false;
+    _seenReverseAnimation = false;
+    if (silent) {
+      _scheduleNotifyListeners();
+    } else {
+      _notifyAndLog('shell.reset.mini');
+    }
+  }
+
+  /// Footer [AnimationController] tick — in-shell expand/collapse (no `/player`).
+  void syncShellOverlayProgress({
+    required double progress,
+    required AnimationStatus status,
+    required bool isCollapsing,
+    required bool isUserDragging,
+  }) {
+    if (_shellHost == null || _routeOpen) {
+      return;
+    }
+    _transitionProgress = progress.clamp(0.0, 1.0);
+    _isDragging = isUserDragging;
+    if (isCollapsing) {
+      _collapseBiased = true;
+    }
+    _phase = _phaseForShellOverlay(status, _transitionProgress, isCollapsing);
+    if (_transitionProgress <= 0.001) {
+      _phase = PlayerPresentationPhase.mini;
+      _collapseBiased = false;
+      _collapseRequested = false;
+      if (!isUserDragging) {
+        _isDragging = false;
+      }
+    } else if (_transitionProgress >= 0.99 &&
+        status != AnimationStatus.reverse &&
+        !isCollapsing) {
+      _phase = PlayerPresentationPhase.expanded;
+    }
+    _scheduleNotifyListeners();
+  }
+
+  PlayerPresentationPhase _phaseForShellOverlay(
+    AnimationStatus status,
+    double progress,
+    bool isCollapsing,
+  ) {
+    if (progress <= 0.001) {
+      return PlayerPresentationPhase.mini;
+    }
+    if (progress >= 0.99 &&
+        status != AnimationStatus.reverse &&
+        !isCollapsing) {
+      return PlayerPresentationPhase.expanded;
+    }
+    if (status == AnimationStatus.reverse || isCollapsing) {
+      return PlayerPresentationPhase.collapsing;
+    }
+    return PlayerPresentationPhase.expanding;
+  }
 
   /// Progress that drives footer cross-fades and debug snapshots.
   ///
@@ -69,40 +163,80 @@ class PlayerPresentationController extends ChangeNotifier {
     return _transitionProgress;
   }
 
-  bool get isExpandedSettled =>
-      _routeOpen && _transitionProgress >= 0.99 && _phase == PlayerPresentationPhase.expanded;
+  bool get isExpandedSettled {
+    if (_shellHost != null && !_routeOpen) {
+      return _transitionProgress >= 0.99 &&
+          _phase == PlayerPresentationPhase.expanded;
+    }
+    return _routeOpen &&
+        _transitionProgress >= 0.99 &&
+        _phase == PlayerPresentationPhase.expanded;
+  }
 
   bool get isMiniSettled => !_routeOpen && _transitionProgress <= 0.01;
 
   bool get overlayChromeActive =>
       _routeOpen || _transitionProgress > 0.01;
 
+  /// True when transition metrics should favor collapse behavior.
+  ///
+  /// Covers explicit collapse, reverse route animation, and the footer
+  /// handoff after `/player` leaves the stack while progress is still > 0.
+  bool get collapseBiasedForMetrics {
+    if (_shellHost != null && !_routeOpen) {
+      return _collapseBiased ||
+          _collapseRequested ||
+          _phase == PlayerPresentationPhase.collapsing ||
+          (_seenReverseAnimation && _transitionProgress > 0.001);
+    }
+    return _collapseBiased ||
+        _collapseRequested ||
+        _phase == PlayerPresentationPhase.collapsing ||
+        _seenReverseAnimation && _transitionProgress > 0.001 ||
+        (!_routeOpen && _transitionProgress > 0.001);
+  }
+
   String get transitionOwner {
-    if (!_routeOpen && _transitionProgress <= 0.001) {
-      return 'footerMini';
-    }
-    if (_routeOpen && _transitionProgress < 0.99) {
-      return 'heroRoute';
-    }
     if (_routeOpen) {
-      return 'heroRouteSettled';
+      if (_transitionProgress < 0.99) {
+        return 'route';
+      }
+      return 'routeSettled';
+    }
+    if (_shellHost != null) {
+      if (_transitionProgress <= 0.001) {
+        return 'footerMini';
+      }
+      if (_transitionProgress >= 0.99) {
+        return 'shellExpanded';
+      }
+      return 'shellOverlay';
     }
     if (_transitionProgress > 0.001) {
-      return 'heroRouteClosing';
+      return 'footer';
     }
     return 'footerMini';
   }
 
   String get renderTree {
-    if (!_routeOpen) {
-      return _transitionProgress > 0.001
-          ? 'footerMiniTransition'
-          : 'footerMini';
+    if (_routeOpen) {
+      return isExpandedSettled ? 'routeExpanded' : 'routeTransition';
     }
-    return isExpandedSettled ? 'heroExpandedPage' : 'heroTransition';
+    if (_shellHost != null) {
+      if (_transitionProgress <= 0.001) {
+        return 'footerMini';
+      }
+      if (_transitionProgress >= 0.99) {
+        return 'shellExpanded';
+      }
+      return 'shellTransition';
+    }
+    return _transitionProgress > 0.001
+        ? 'footerTransition'
+        : 'footerMini';
   }
 
-  String get visualMode => QuranPlayerDebugLog.playerMode(
+  String get visualMode => quranPlayerVisualMode(
     expandProgress: visualProgress,
     isCollapsing: _phase == PlayerPresentationPhase.collapsing,
     isUserDragging: _isDragging,
@@ -143,25 +277,27 @@ class PlayerPresentationController extends ChangeNotifier {
     _syncSystemBackIntercepts();
   }
 
-  /// Opens the typed `/player` overlay route.
+  /// Opens expanded UI: in-shell overlay when [bindShellOverlay] is active,
+  /// otherwise the typed `/player` route.
   Future<void> expand() async {
     if (_expandInFlight != null) {
       await _expandInFlight!;
-      // #region agent log
-      QuranPlayerDebugLog.agent(
-        hypothesisId: 'IF',
-        location: 'player_presentation_controller.dart:expand',
-        message: 'expand resumed after in-flight session',
-        data: <String, Object?>{
-          'onStack': _navigation.isExpandedRouteOnStack,
-          'phase': _phase.name,
-          'routeOpen': _routeOpen,
-          'transitionProgress': _transitionProgress.toStringAsFixed(3),
-          'collapseRequested': _collapseRequested,
-        },
-      );
-      // #endregion
       // Coalesced callers joined an existing session; never start another.
+      return;
+    }
+
+    if (_shellHost != null) {
+      // Do not short-circuit on [_transitionProgress] alone — the footer
+      // [AnimationController] can be at ~0.8 while presentation still reads 1.0.
+      final Future<void> session = _expandViaShellOverlay();
+      _expandInFlight = session;
+      try {
+        await session;
+      } finally {
+        if (identical(_expandInFlight, session)) {
+          _expandInFlight = null;
+        }
+      }
       return;
     }
 
@@ -188,6 +324,22 @@ class PlayerPresentationController extends ChangeNotifier {
     }
   }
 
+  Future<void> _expandViaShellOverlay() async {
+    _collapseBiased = false;
+    _collapseRequested = false;
+    _seenForwardAnimation = false;
+    _seenReverseAnimation = false;
+    if (_transitionProgress <= 0.001) {
+      _phase = PlayerPresentationPhase.expanding;
+      _transitionProgress = 0;
+    } else {
+      _phase = PlayerPresentationPhase.expanding;
+    }
+    _notifyAndLog('shell.expand.start');
+    _syncSystemBackIntercepts();
+    await _shellHost!.expand();
+  }
+
   Future<void> _expandAndAwaitPop() async {
     _collapseBiased = false;
     _phase = PlayerPresentationPhase.expanding;
@@ -195,9 +347,6 @@ class PlayerPresentationController extends ChangeNotifier {
     _transitionProgress = 0;
     _seenForwardAnimation = false;
     _seenReverseAnimation = false;
-    // #region agent log
-    QuranPlayerDebugLog.agentResetThrottle();
-    // #endregion
     _notifyAndLog('expand.start');
     _syncSystemBackIntercepts();
     await _navigation.pushExpanded();
@@ -206,8 +355,21 @@ class PlayerPresentationController extends ChangeNotifier {
     }
   }
 
-  /// Pops the overlay route when open.
+  /// Collapses expanded UI: shell overlay animation or `/player` pop.
   void collapse() {
+    if (_shellHost != null && !_routeOpen) {
+      if (_transitionProgress <= 0.001) {
+        return;
+      }
+      _collapseBiased = true;
+      _collapseRequested = true;
+      _phase = PlayerPresentationPhase.collapsing;
+      _isDragging = false;
+      _notifyAndLog('shell.collapse.start');
+      _shellHost!.collapse();
+      return;
+    }
+
     if (!_routeOpen && !_navigation.isExpandedRouteOnStack) {
       return;
     }
@@ -236,6 +398,10 @@ class PlayerPresentationController extends ChangeNotifier {
     }
     if (status == AnimationStatus.reverse) {
       _seenReverseAnimation = true;
+      if (!_collapseBiased) {
+        _collapseBiased = true;
+        _phase = PlayerPresentationPhase.collapsing;
+      }
     }
 
     if (_shouldIgnoreSpuriousCompletedFrame(value, status)) {
@@ -246,64 +412,11 @@ class PlayerPresentationController extends ChangeNotifier {
           'status': status.name,
         },
       );
-      // #region agent log
-      QuranPlayerDebugLog.agent(
-        hypothesisId: 'E',
-        location:
-            'player_presentation_controller.dart:onRouteAnimationTick',
-        message: 'spurious completed frame ignored',
-        data: <String, Object?>{
-          'value': value.toStringAsFixed(3),
-          'status': status.name,
-          'transitionProgress': _transitionProgress.toStringAsFixed(3),
-        },
-      );
-      // #endregion
       return;
     }
 
     _transitionProgress = value.clamp(0.0, 1.0);
     _phase = _phaseForAnimationStatus(status, value);
-
-    // #region agent log
-    final double curved = QuranPlayerDebugLog.curvedRouteProgress(
-      _transitionProgress,
-      status,
-    );
-    final PlayerExpandTransitionMetrics metrics =
-        PlayerExpandTransitionMetrics.compute(
-      progress: _transitionProgress,
-      miniPlayerHeight: 72,
-      collapseBiased: _collapseBiased,
-      heroHandoff:
-          routeOpen && _phase != PlayerPresentationPhase.mini,
-    );
-    QuranPlayerDebugLog.agent(
-      hypothesisId: 'C',
-      location: 'player_presentation_controller.dart:onRouteAnimationTick',
-      message: 'route progress tick',
-      throttleProgress: true,
-      progress: _transitionProgress,
-      data: <String, Object?>{
-        'raw': _transitionProgress.toStringAsFixed(3),
-        'curved': curved.toStringAsFixed(3),
-        'rawCurvedDelta': (curved - _transitionProgress).toStringAsFixed(3),
-        'status': status.name,
-        'phase': _phase.name,
-        'handoffT': metrics.handoffT.toStringAsFixed(3),
-        'showMorphLayer': metrics.showMorphLayer,
-        'miniOpacity': metrics.miniOpacity.toStringAsFixed(3),
-        'expandedOpacity': metrics.expandedOpacity.toStringAsFixed(3),
-        'stageChromeOpacity': metrics.stageChromeOpacity.toStringAsFixed(3),
-      },
-    );
-    QuranPlayerDebugLog.maybeWarnTransitionGap(
-      progress: _transitionProgress,
-      miniOpacity: metrics.miniOpacity,
-      expandedOpacity: metrics.expandedOpacity,
-      source: 'controller.tick',
-    );
-    // #endregion
 
     if (_transitionProgress <= 0.01 &&
         (status == AnimationStatus.completed ||
@@ -317,6 +430,13 @@ class PlayerPresentationController extends ChangeNotifier {
 
   /// Called when the expanded page mounts.
   void onRouteOpened() {
+    if (_shellHost != null && _transitionProgress > 0.01) {
+      _shellHost!.collapse();
+      _transitionProgress = 0;
+      _isDragging = false;
+      _collapseBiased = false;
+      _collapseRequested = false;
+    }
     if (_phase == PlayerPresentationPhase.mini) {
       _phase = PlayerPresentationPhase.expanding;
     }
@@ -342,6 +462,7 @@ class PlayerPresentationController extends ChangeNotifier {
 
   /// True when `/player` was lost without a user collapse (e.g. hot reload).
   bool get shouldRestoreExpandedRoute =>
+      _shellHost == null &&
       !_collapseRequested &&
       !_navigation.isExpandedRouteOnStack &&
       (_phase == PlayerPresentationPhase.expanded ||
@@ -391,7 +512,7 @@ class PlayerPresentationController extends ChangeNotifier {
     return PlayerExpandTransitionMetrics.compute(
       progress: visualProgress,
       miniPlayerHeight: miniPlayerHeight,
-      collapseBiased: _collapseBiased,
+      collapseBiased: collapseBiasedForMetrics,
       heroHandoff:
           routeOpen && _phase != PlayerPresentationPhase.mini,
     );
@@ -408,7 +529,7 @@ class PlayerPresentationController extends ChangeNotifier {
       'routeOpen': _routeOpen,
       'isDragging': _isDragging,
       'isCollapsing': _phase == PlayerPresentationPhase.collapsing,
-      'collapseBiased': _collapseBiased,
+      'collapseBiased': collapseBiasedForMetrics,
     };
   }
 
@@ -452,15 +573,20 @@ class PlayerPresentationController extends ChangeNotifier {
     double value,
     AnimationStatus status,
   ) {
-    return !_seenForwardAnimation &&
-        !_seenReverseAnimation &&
-        status == AnimationStatus.completed &&
-        value >= 0.99 &&
-        _transitionProgress <= 0.05;
+    return isSpuriousRouteProgressSpike(
+      seenForward: _seenForwardAnimation,
+      seenReverse: _seenReverseAnimation,
+      status: status,
+      value: value,
+      currentProgress: _transitionProgress,
+    );
   }
 
   void _syncSystemBackIntercepts() {
-    final bool intercepts = _routeOpen && _systemBackHandle != null;
+    final bool intercepts =
+        _systemBackHandle != null &&
+        (_routeOpen ||
+            (_shellHost != null && _transitionProgress > 0.01));
     QuranPlayerSystemBackCoordinator.setIntercepts(intercepts);
   }
 
@@ -484,6 +610,7 @@ class PlayerPresentationController extends ChangeNotifier {
 
   @visibleForTesting
   void debugReset() {
+    _shellHost = null;
     _phase = PlayerPresentationPhase.mini;
     _transitionProgress = 0;
     _routeOpen = false;

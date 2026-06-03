@@ -67,22 +67,19 @@ void main() {
       expect(resolved, const Duration(minutes: 40));
     });
 
-    test('uses queue item duration when not current playback', () {
-      final AudioEntity current = _audio(id: 'current');
+    test('uses cached duration when not current playback', () {
       final AudioEntity queued = _audio(
         id: 'queued',
         duration: const Duration(minutes: 12),
       );
-      final PlaybackStateEntity playback = _playback(
-        duration: const Duration(minutes: 33),
-        queue: <AudioEntity>[current, queued],
-      );
 
       final Duration resolved = resolvePlaybackDisplayDuration(
         audio: queued,
-        playbackState: playback,
+        playbackState: _playback(duration: const Duration(minutes: 33)),
         isCurrentPlayback: false,
-        cachedDurations: const <String, Duration>{},
+        cachedDurations: const <String, Duration>{
+          'queued': Duration(minutes: 12),
+        },
       );
 
       expect(resolved, const Duration(minutes: 12));

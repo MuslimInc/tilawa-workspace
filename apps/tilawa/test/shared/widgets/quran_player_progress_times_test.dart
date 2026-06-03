@@ -30,6 +30,18 @@ void main() {
       expect(times.remainingLabel, '−00:00');
     });
 
+    test('never shows negative remaining label', () {
+      const PositionData data = PositionData(
+        position: Duration(seconds: 50),
+        bufferedPosition: Duration.zero,
+        duration: Duration(seconds: 9),
+      );
+
+      final PlayerProgressTimes times = resolvePlayerProgressTimes(data);
+
+      expect(times.remainingLabel, '−00:00');
+    });
+
     test('handles overshoot when position exceeds duration', () {
       const PositionData data = PositionData(
         position: Duration(hours: 1),

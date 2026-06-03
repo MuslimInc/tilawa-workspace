@@ -87,9 +87,7 @@ class QuranPlayerMorphLayer extends StatelessWidget {
                 rect: layout.titleRect,
                 child: Transform.scale(
                   scale: layout.titleScale,
-                  alignment: layout.titleAlign == TextAlign.center
-                      ? Alignment.topCenter
-                      : Alignment.topLeft,
+                  alignment: layout.titleScaleAlignment,
                   child: _MorphMetadata(
                     title: audio.title,
                     artist: audio.artist,
@@ -98,6 +96,8 @@ class QuranPlayerMorphLayer extends StatelessWidget {
                     textAlign: layout.titleAlign,
                     maxLines: layout.titleMaxLines,
                     spacing: tokens.spaceExtraSmall,
+                    showSubtitle: layout.showMorphSubtitle,
+                    barTokens: barTokens,
                   ),
                 ),
               ),
@@ -162,6 +162,8 @@ class _MorphMetadata extends StatelessWidget {
     required this.textAlign,
     required this.maxLines,
     required this.spacing,
+    required this.showSubtitle,
+    required this.barTokens,
   });
 
   final String title;
@@ -171,11 +173,12 @@ class _MorphMetadata extends StatelessWidget {
   final TextAlign textAlign;
   final int maxLines;
   final double spacing;
+  final bool showSubtitle;
+  final TilawaMediaPlayerBarTokens barTokens;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final barTokens = theme.componentTokens.mediaPlayerBar;
     final TextStyle titleStyle =
         (theme.textTheme.titleSmall ?? const TextStyle()).copyWith(
           fontWeight: barTokens.titleFontWeight,
@@ -186,10 +189,12 @@ class _MorphMetadata extends StatelessWidget {
           color: subtitleColor,
         );
 
+    final CrossAxisAlignment crossAlign = textAlign == TextAlign.center
+        ? CrossAxisAlignment.center
+        : CrossAxisAlignment.start;
+
     return Column(
-      crossAxisAlignment: textAlign == TextAlign.center
-          ? CrossAxisAlignment.center
-          : CrossAxisAlignment.start,
+      crossAxisAlignment: crossAlign,
       mainAxisSize: MainAxisSize.min,
       spacing: spacing,
       children: [
@@ -203,16 +208,17 @@ class _MorphMetadata extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        Semantics(
-          identifier: QuranPlayerSemanticsIds.expandedTrackArtist,
-          child: Text(
-            artist ?? context.l10n.unknownReciter,
-            style: subtitleStyle,
-            textAlign: textAlign,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+        if (showSubtitle)
+          Semantics(
+            identifier: QuranPlayerSemanticsIds.expandedTrackArtist,
+            child: Text(
+              artist ?? context.l10n.unknownReciter,
+              style: subtitleStyle,
+              textAlign: textAlign,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
-        ),
       ],
     );
   }
