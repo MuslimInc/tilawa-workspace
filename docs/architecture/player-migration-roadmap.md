@@ -7,7 +7,7 @@ QA passes** (see checklist below).
 
 | Mode | Trigger | Presentation authority | Status |
 |------|---------|------------------------|--------|
-| **Shell footer (canonical)** | `embeddedInShellFooter: true` | `PlayerPresentationController` + `/player` | **Target** |
+| **Shell footer (canonical)** | `embeddedInShellFooter: true` | `PlayerPresentationController` + **shell overlay** (`PlayerShellOverlayHost`); `/player` for deep links | **Shipped (019)** |
 | **Legacy overlay** | `embeddedInShellFooter: false` | `_expandController` + `OverlayPortal` | **Remove** |
 
 Production shell uses `embeddedInShellFooter: true` (`AppShellScreen`). Legacy
@@ -49,16 +49,18 @@ Execute in order after QA sign-off:
 
 ## Device QA checklist (before Phase C deletes)
 
-- [ ] Expand/collapse on `/reciter/:id` — no white flash, Hero continuous
-- [ ] Rapid expand/collapse spam (10×) — phase recovers to `mini`
-- [ ] Android system back — pops `/player` before shell
+Release **019** sign-off (emulator Maestro + logcat): drag expand, tap expand, collapse swipe, quick cycle — see `specs/019-quran-player-shell-expand/checklists/requirements.md`.
+
+- [x] Expand/collapse on `/reciter/:id` — shell preserved; continuous `drag.update` (019 Maestro/logcat)
+- [ ] Rapid expand/collapse spam (10×) — phase recovers to `mini` (post-release soak)
+- [ ] Android system back — pops `/player` before shell (when route open)
 - [ ] iOS interactive pop / edge back — same
 - [ ] Interrupt expand mid-animation (back during `expanding`) — footer + shell OK
 - [ ] Background app during expanded → foreground — phase matches stack
 - [ ] Incoming call / audio focus duck — playback OK; presentation unchanged
 - [ ] Deep link `/player` without audio — redirect home
 - [ ] Tab switch with mini visible — shell preserved; no duplicate `/player`
-- [ ] Controller debug log: no spurious `visualProgress=1.0` at expand start
+- [x] Controller debug log: no spurious `visualProgress=1.0` at expand start (guarded)
 
 ## B2 — external entry (after Phase C)
 
