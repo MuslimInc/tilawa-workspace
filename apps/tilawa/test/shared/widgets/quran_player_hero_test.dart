@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/animation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/shared/widgets/quran_player_expand_physics.dart';
-import 'package:tilawa/shared/widgets/quran_player_hero.dart';
-import 'package:tilawa/shared/widgets/quran_player_hero_expansion.dart';
+import 'package:tilawa/shared/widgets/quran_player_hero_tags.dart';
+import 'package:tilawa/shared/widgets/quran_player_transition_test_utils.dart';
 
 void main() {
   group('QuranPlayerHeroTags', () {
@@ -21,36 +21,37 @@ void main() {
     });
   });
 
-  group('QuranPlayerHeroExpansionSnapshot', () {
-    test('visual progress follows route animation in hero mode', () {
-      const QuranPlayerHeroExpansionSnapshot snap =
-          QuranPlayerHeroExpansionSnapshot(
+  group('QuranPlayerExpansionSnapshot', () {
+    test('visual progress follows route animation in route mode', () {
+      const QuranPlayerExpansionSnapshot snap =
+          QuranPlayerExpansionSnapshot(
         routeOpen: true,
         routeProgress: 0.35,
         controllerProgress: 0,
         isCollapsing: false,
         isDragging: false,
-        usesHeroExpansion: true,
+        usesRouteExpansion: true,
       );
 
       expect(snap.visualProgress, 0.35);
-      expect(snap.transitionOwner, 'heroRoute');
-      expect(snap.renderTree, 'heroTransition');
+      expect(snap.transitionOwner, 'route');
+      expect(snap.renderTree, 'routeTransition');
     });
 
     test('footer mini metrics fade as route progresses', () {
-      const QuranPlayerHeroExpansionSnapshot mid =
-          QuranPlayerHeroExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot mid =
+          QuranPlayerExpansionSnapshot(
         routeOpen: true,
-        routeProgress: 0.25,
+        routeProgress: 0.45,
         controllerProgress: 0,
         isCollapsing: false,
         isDragging: false,
-        usesHeroExpansion: true,
+        usesRouteExpansion: true,
       );
       final PlayerExpandTransitionMetrics metrics = mid.metrics(
         miniPlayerHeight: 96,
         collapseBiased: false,
+        heroHandoff: true,
       );
 
       expect(metrics.miniOpacity, greaterThan(0));
@@ -59,14 +60,14 @@ void main() {
     });
 
     test('settled expanded hides footer mini chrome', () {
-      const QuranPlayerHeroExpansionSnapshot settled =
-          QuranPlayerHeroExpansionSnapshot(
+      const QuranPlayerExpansionSnapshot settled =
+          QuranPlayerExpansionSnapshot(
         routeOpen: true,
         routeProgress: 1,
         controllerProgress: 0,
         isCollapsing: false,
         isDragging: false,
-        usesHeroExpansion: true,
+        usesRouteExpansion: true,
       );
       final PlayerExpandTransitionMetrics metrics = settled.metrics(
         miniPlayerHeight: 96,
@@ -75,37 +76,85 @@ void main() {
 
       expect(metrics.miniOpacity, 0);
       expect(metrics.showMiniPlayer, isFalse);
-      expect(settled.transitionOwner, 'heroRouteSettled');
+      expect(settled.transitionOwner, 'routeSettled');
     });
 
-    test('hero handoff keeps mini visible longer during expand', () {
-      const QuranPlayerHeroExpansionSnapshot mid =
-          QuranPlayerHeroExpansionSnapshot(
+    test('route handoff keeps mini visible longer during expand', () {
+      const QuranPlayerExpansionSnapshot mid =
+          QuranPlayerExpansionSnapshot(
         routeOpen: true,
         routeProgress: 0.45,
         controllerProgress: 0,
         isCollapsing: false,
         isDragging: false,
-        usesHeroExpansion: true,
+        usesRouteExpansion: true,
       );
       final PlayerExpandTransitionMetrics defaultMetrics = mid.metrics(
         miniPlayerHeight: 96,
         collapseBiased: false,
       );
-      final PlayerExpandTransitionMetrics heroMetrics = mid.metrics(
+      final PlayerExpandTransitionMetrics handoffMetrics = mid.metrics(
         miniPlayerHeight: 96,
         collapseBiased: false,
         heroHandoff: true,
       );
 
-      expect(heroMetrics.miniOpacity, greaterThan(defaultMetrics.miniOpacity));
+      expect(
+        handoffMetrics.miniOpacity,
+        greaterThan(defaultMetrics.miniOpacity),
+      );
+    });
+
+    test('isTransitioning is true only during open mid-progress route', () {
+      const QuranPlayerExpansionSnapshot mid =
+          QuranPlayerExpansionSnapshot(
+        routeOpen: true,
+        routeProgress: 0.5,
+        controllerProgress: 0,
+        isCollapsing: false,
+        isDragging: false,
+        usesRouteExpansion: true,
+      );
+      expect(mid.isTransitioning, isTrue);
+      expect(mid.isExpandedSettled, isFalse);
+      expect(mid.isMiniSettled, isFalse);
+    });
+
+    test('routeClosing transitionOwner when route animates out', () {
+      const QuranPlayerExpansionSnapshot closing =
+          QuranPlayerExpansionSnapshot(
+        routeOpen: false,
+        routeProgress: 0.2,
+        controllerProgress: 0,
+        isCollapsing: true,
+        isDragging: false,
+        usesRouteExpansion: true,
+      );
+      expect(closing.transitionOwner, 'routeClosing');
+      expect(closing.renderTree, 'footerMini');
+      expect(closing.isTransitioning, isFalse);
+    });
+
+    test('shell overlay uses controller progress when route is closed', () {
+      const QuranPlayerExpansionSnapshot snap =
+          QuranPlayerExpansionSnapshot(
+        routeOpen: false,
+        routeProgress: 0,
+        controllerProgress: 0.6,
+        isCollapsing: false,
+        isDragging: true,
+        usesRouteExpansion: false,
+      );
+
+      expect(snap.visualProgress, 0.6);
+      expect(snap.transitionOwner, 'expandController');
     });
   });
 
-  group('isSpuriousHeroRouteProgressSpike', () {
+  group('isSpuriousRouteProgressSpike', () {
     test('ignores completed@1.0 before forward is seen', () {
       expect(
-        isSpuriousHeroRouteProgressSpike(
+        isSpuriousRouteProgressSpike(
           seenForward: false,
           seenReverse: false,
           status: AnimationStatus.completed,
@@ -118,7 +167,7 @@ void main() {
 
     test('accepts forward progress after animation starts', () {
       expect(
-        isSpuriousHeroRouteProgressSpike(
+        isSpuriousRouteProgressSpike(
           seenForward: true,
           seenReverse: false,
           status: AnimationStatus.forward,
@@ -127,37 +176,6 @@ void main() {
         ),
         isFalse,
       );
-    });
-  });
-
-  group('QuranPlayerHeroRouteProgress', () {
-    test('tick notifies listeners and updates snapshot', () {
-      final QuranPlayerHeroRouteProgress progress =
-          QuranPlayerHeroRouteProgress();
-      addTearDown(progress.dispose);
-
-      var notifications = 0;
-      progress.addListener(() => notifications++);
-
-      progress.beginRoute();
-      expect(progress.routeOpen, isTrue);
-      expect(progress.value, 0);
-
-      progress.tick(0.4);
-      expect(progress.value, 0.4);
-      expect(notifications, greaterThan(0));
-
-      final QuranPlayerHeroExpansionSnapshot snap = progress.snapshot(
-        controllerProgress: 0,
-        isCollapsing: false,
-        isDragging: false,
-        usesHeroExpansion: true,
-      );
-      expect(snap.visualProgress, 0.4);
-
-      progress.endRoute();
-      expect(progress.routeOpen, isFalse);
-      expect(progress.value, 0);
     });
   });
 }

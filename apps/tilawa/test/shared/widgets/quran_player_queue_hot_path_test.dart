@@ -256,6 +256,35 @@ void main() {
     });
   });
 
+  group('O(1) hot path: QuranPlayerQueueIndexCache', () {
+    test('repeated indexByIdFor does not rescan queue', () {
+      final CountingAudioEntityList queue = CountingAudioEntityList(
+        _orderedLargeQueue(),
+      );
+      final QuranPlayerQueueIndexCache cache = QuranPlayerQueueIndexCache();
+
+      cache.indexByIdFor(queue: queue, queueGeneration: 5);
+      expect(queue.indexAccessCount, _largeQueueSize);
+      queue.resetCounts();
+
+      for (var i = 0; i < 500; i++) {
+        final Map<String, int> map = cache.indexByIdFor(
+          queue: queue,
+          queueGeneration: 5,
+        );
+        expect(
+          QuranPlayerQueueUtils.findReorderableChildIndex(
+            indexById: map,
+            key: ValueKey<String>('surah-${i % _largeQueueSize}'),
+          ),
+          isNotNull,
+        );
+      }
+
+      expect(queue.indexAccessCount, 0);
+    });
+  });
+
   group('O(1) hot path: findReorderableChildIndex uses prebuilt map', () {
     test('map build is O(n) once; lookups are O(1) with zero queue access', () {
       final CountingAudioEntityList queue = CountingAudioEntityList(
