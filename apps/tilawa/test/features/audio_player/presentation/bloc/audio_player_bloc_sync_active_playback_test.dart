@@ -50,6 +50,9 @@ import 'audio_player_bloc_sync_active_playback_test.mocks.dart';
 void main() {
   setUpAll(() async {
     AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = false;
+    AudioPlayerBloc.playbackReconciliationDebounce = const Duration(
+      milliseconds: 30,
+    );
     provideDummy<Either<Failure, void>>(const Right(null));
     provideDummy<Either<Failure, ActivePlaybackSnapshot?>>(
       const Right(null),
@@ -77,6 +80,9 @@ void main() {
 
   tearDownAll(() async {
     AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = true;
+    AudioPlayerBloc.playbackReconciliationDebounce = const Duration(
+      milliseconds: 150,
+    );
     await clearHydratedStorageForTest();
   });
 
@@ -107,6 +113,7 @@ void main() {
   );
 
   late MockGetAudioStreamsUseCase mockGetAudioStreams;
+  late MockSeekToUseCase mockSeekTo;
   late MockSyncActivePlaybackFromHandlerUseCase mockSyncActivePlayback;
   late MockSettingsCubit mockSettingsCubit;
   late MockAppReviewTriggerManager mockAppReviewTriggerManager;
@@ -124,7 +131,7 @@ void main() {
       MockPlayAudioUseCase(),
       MockPauseAudioUseCase(),
       MockStopAudioUseCase(),
-      MockSeekToUseCase(),
+      mockSeekTo,
       MockSkipToNextUseCase(),
       MockSkipToPreviousUseCase(),
       MockSetVolumeUseCase(),
@@ -149,7 +156,9 @@ void main() {
 
   setUp(() {
     mockGetAudioStreams = MockGetAudioStreamsUseCase();
+    mockSeekTo = MockSeekToUseCase();
     mockSyncActivePlayback = MockSyncActivePlaybackFromHandlerUseCase();
+    when(mockSeekTo.call(any)).thenAnswer((_) async => const Right(null));
     mockSettingsCubit = MockSettingsCubit();
     mockAppReviewTriggerManager = MockAppReviewTriggerManager();
     mockAddOrUpdateHistory = MockAddOrUpdateHistoryUseCase();
@@ -264,7 +273,7 @@ void main() {
       },
     );
 
-    test('null snapshot sync is a no-op', () async {
+    test('null snapshot sync demotes chrome but keeps currentAudio', () async {
       when(mockSyncActivePlayback.call()).thenAnswer(
         (_) async => const Right(null),
       );
@@ -276,8 +285,11 @@ void main() {
         ),
       );
       bloc.add(const AudioPlayerEvent.syncActivePlayback());
-      await Future<void>.delayed(const Duration(milliseconds: 50));
+      await bloc.stream.firstWhere(
+        (s) => s.status == AudioPlayerStatus.initial,
+      );
       expect(bloc.state.currentAudio, hydratedSurah);
+      expect(bloc.state.shouldShowBottomPlayer, isFalse);
       verify(mockSyncActivePlayback.call()).called(1);
       await bloc.close();
     });
@@ -339,7 +351,41 @@ void main() {
       },
     );
 
-    test('scheduleActivePlaybackSyncOnCreate dispatches sync events', () async {
+    test('already dismissed idle stream does not save history again', () async {
+      final AudioPlayerBloc bloc = buildBloc();
+      bloc.emit(
+        AudioPlayerState(
+          status: AudioPlayerStatus.initial,
+          currentAudio: hydratedSurah,
+          dismissedAudioId: hydratedSurah.id,
+        ),
+      );
+      clearInteractions(mockAddOrUpdateHistory);
+      playbackStateSubject.add(idlePlayback);
+      await bloc.stream.firstWhere(
+        (s) => s.playbackState?.processingState ==
+            AudioProcessingStateStatus.idle,
+      );
+      verifyNever(
+        mockAddOrUpdateHistory.call(
+          surahId: anyNamed('surahId'),
+          surahName: anyNamed('surahName'),
+          surahNameEn: anyNamed('surahNameEn'),
+          reciterId: anyNamed('reciterId'),
+          reciterName: anyNamed('reciterName'),
+          moshafId: anyNamed('moshafId'),
+          moshafName: anyNamed('moshafName'),
+          lastPositionMs: anyNamed('lastPositionMs'),
+          durationMs: anyNamed('durationMs'),
+          audioUrl: anyNamed('audioUrl'),
+          artworkUrl: anyNamed('artworkUrl'),
+          completed: anyNamed('completed'),
+        ),
+      );
+      await bloc.close();
+    });
+
+    test('scheduleActivePlaybackSyncOnCreate dispatches leading sync', () async {
       AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = true;
       addTearDown(() {
         AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = false;
@@ -350,10 +396,200 @@ void main() {
       );
 
       buildBloc();
-      await Future<void>.delayed(const Duration(milliseconds: 250));
-
-      verify(mockSyncActivePlayback.call()).called(greaterThan(0));
+      await Future<void>.delayed(Duration.zero);
+      verify(mockSyncActivePlayback.call()).called(1);
     });
+
+    test('active reconcile seeks handler to reported position', () async {
+      const Duration reportedPosition = Duration(seconds: 90);
+      when(mockSyncActivePlayback.call()).thenAnswer(
+        (_) async => Right(
+          ActivePlaybackSnapshot(
+            currentAudio: handlerSurah,
+            playbackState: handlerPlayback.copyWith(
+              position: reportedPosition,
+            ),
+          ),
+        ),
+      );
+      final AudioPlayerBloc bloc = buildBloc();
+      bloc.add(const AudioPlayerEvent.syncActivePlayback());
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      verify(mockSeekTo.call(reportedPosition)).called(1);
+      await bloc.close();
+    });
+
+    test('syncActivePlaybackTrailing dispatches sync handler', () async {
+      when(mockSyncActivePlayback.call()).thenAnswer(
+        (_) async => const Right(null),
+      );
+      final AudioPlayerBloc bloc = buildBloc();
+      bloc.add(const AudioPlayerEvent.syncActivePlaybackTrailing());
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      verify(mockSyncActivePlayback.call()).called(1);
+      await bloc.close();
+    });
+
+  });
+
+  group('hot restart mini player visibility', () {
+    final PlaybackStateEntity pausedHandlerPlayback = PlaybackStateEntity(
+      isPlaying: false,
+      processingState: AudioProcessingStateStatus.ready,
+      position: const Duration(seconds: 30),
+      bufferedPosition: const Duration(minutes: 2),
+      duration: const Duration(minutes: 1),
+      currentIndex: 0,
+      queue: <AudioEntity>[hydratedSurah],
+      queueGeneration: 1,
+    );
+
+    ActivePlaybackSnapshot activeHandlerSnapshot() =>
+        ActivePlaybackSnapshot(
+          currentAudio: hydratedSurah,
+          playbackState: pausedHandlerPlayback,
+        );
+
+    test(
+      'documents pre-stream hydrated mismatch before handler events arrive',
+      () {
+        const AudioPlayerState hydratedAfterRestart = AudioPlayerState(
+          status: AudioPlayerStatus.initial,
+          currentAudio: hydratedSurah,
+          dismissedAudioId: '1',
+        );
+        final ActivePlaybackSnapshot handlerSnapshot =
+            activeHandlerSnapshot();
+
+        expect(handlerSnapshot.currentAudio.id, hydratedSurah.id);
+        expect(hydratedAfterRestart.shouldShowBottomPlayer, isFalse);
+      },
+    );
+
+    test(
+      'paused active handler stream restores mini player after hot restart',
+      () async {
+        final AudioPlayerBloc bloc = buildBloc();
+        bloc.emit(
+          const AudioPlayerState(
+            status: AudioPlayerStatus.initial,
+            currentAudio: hydratedSurah,
+            dismissedAudioId: '1',
+          ),
+        );
+
+        currentAudioSubject.add(hydratedSurah);
+        playbackStateSubject.add(pausedHandlerPlayback);
+
+        await bloc.stream.firstWhere((s) => s.shouldShowBottomPlayer);
+
+        expect(bloc.state.dismissedAudioId, isNull);
+        expect(bloc.state.status, AudioPlayerStatus.success);
+        expect(bloc.state.currentAudio, hydratedSurah);
+        await bloc.close();
+      },
+    );
+
+    test(
+      'playing stream update clears dismiss and shows mini player without sync',
+      () async {
+        final AudioPlayerBloc bloc = buildBloc();
+        bloc.emit(
+          const AudioPlayerState(
+            status: AudioPlayerStatus.success,
+            currentAudio: hydratedSurah,
+            dismissedAudioId: '1',
+          ),
+        );
+
+        playbackStateSubject.add(
+          pausedHandlerPlayback.copyWith(isPlaying: true),
+        );
+
+        await bloc.stream.firstWhere((s) => s.shouldShowBottomPlayer);
+
+        expect(bloc.state.dismissedAudioId, isNull);
+        expect(bloc.state.currentAudio, hydratedSurah);
+        await bloc.close();
+      },
+    );
+
+    test(
+      'leading reconcile on create restores mini player for active handler snapshot',
+      () async {
+        AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = true;
+        addTearDown(() {
+          AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = false;
+        });
+
+        when(mockSyncActivePlayback.call()).thenAnswer(
+          (_) async => Right(activeHandlerSnapshot()),
+        );
+
+        final AudioPlayerBloc bloc = buildBloc();
+        await bloc.stream.firstWhere((s) => s.shouldShowBottomPlayer);
+
+        expect(bloc.state.currentAudio, hydratedSurah);
+        expect(bloc.state.dismissedAudioId, isNull);
+        await bloc.close();
+      },
+    );
+
+    test(
+      'trailing reconcile after null leading restores mini player on startup burst',
+      () async {
+        var syncCalls = 0;
+        when(mockSyncActivePlayback.call()).thenAnswer((_) async {
+          syncCalls++;
+          if (syncCalls == 1) {
+            return const Right(null);
+          }
+          return Right(activeHandlerSnapshot());
+        });
+
+        AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = true;
+        addTearDown(() {
+          AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = false;
+        });
+
+        final AudioPlayerBloc bloc = buildBloc();
+        expect(bloc.state.shouldShowBottomPlayer, isFalse);
+
+        bloc.add(const AudioPlayerEvent.requestPlaybackReconciliation());
+        await Future<void>.delayed(const Duration(milliseconds: 80));
+
+        expect(syncCalls, greaterThanOrEqualTo(2));
+        expect(bloc.state.shouldShowBottomPlayer, isTrue);
+        expect(bloc.state.dismissedAudioId, isNull);
+        await bloc.close();
+      },
+    );
+
+    test(
+      'requestPlaybackReconciliation restores mini player when streams stay silent',
+      () async {
+        when(mockSyncActivePlayback.call()).thenAnswer(
+          (_) async => Right(activeHandlerSnapshot()),
+        );
+
+        final AudioPlayerBloc bloc = buildBloc();
+        bloc.emit(
+          const AudioPlayerState(
+            status: AudioPlayerStatus.success,
+            currentAudio: hydratedSurah,
+            dismissedAudioId: '1',
+          ),
+        );
+        expect(bloc.state.shouldShowBottomPlayer, isFalse);
+
+        bloc.add(const AudioPlayerEvent.requestPlaybackReconciliation());
+        await bloc.stream.firstWhere((s) => s.shouldShowBottomPlayer);
+
+        expect(bloc.state.dismissedAudioId, isNull);
+        verify(mockSyncActivePlayback.call()).called(greaterThanOrEqualTo(1));
+        await bloc.close();
+      },
+    );
   });
 
   group('isSessionDismissed presentation status', () {
