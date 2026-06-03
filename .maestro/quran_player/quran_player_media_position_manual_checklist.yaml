@@ -1,0 +1,16 @@
+# Manual QA: Android notification progress vs in-app Quran player
+#
+# Maestro cannot read system notification scrubber position. Run on a device
+# (e.g. emulator-5554) and compare shade vs expanded player after each step.
+#
+# appId: com.tilawa.app
+---
+- launchApp
+- runFlow: subflows/start_playback.yaml
+- tapOn:
+    id: "quran_player_mini"
+- waitForAnimationToEnd
+# 1. Play 30s — notification scrubber should advance with in-app slider.
+# 2. Pause — both should freeze at the same ratio (~same % of track).
+# 3. Hot restart app (IDE) — both should restore to the same ratio within 2s.
+# 4. Resume play — scrubber must NOT jump to 0% while audio continues mid-surah.
