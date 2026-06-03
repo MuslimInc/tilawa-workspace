@@ -1045,6 +1045,9 @@ class _PlayerReciterHistorySection extends StatefulWidget {
 
 class _PlayerReciterHistorySectionState
     extends State<_PlayerReciterHistorySection> {
+  final QuranPlayerQueueIndexCache _queueIndexCache =
+      QuranPlayerQueueIndexCache();
+
   Future<List<HistoryEntity>>? _historyFuture;
 
   @override
@@ -1081,12 +1084,14 @@ class _PlayerReciterHistorySectionState
     HapticFeedback.lightImpact();
     final List<AudioEntity> queue =
         widget.state.playbackState?.queue ?? const <AudioEntity>[];
-    final int index = queue.indexWhere((AudioEntity track) {
-      final Object? surahId = track.extras?['surahId'];
-      return surahId != null &&
-          surahId.toString() == history.surahId.toString();
-    });
-    if (index < 0) {
+    final int queueGeneration =
+        widget.state.playbackState?.queueGeneration ?? 0;
+    final Map<String, int> indexBySurahId = _queueIndexCache.indexBySurahIdFor(
+      queue: queue,
+      queueGeneration: queueGeneration,
+    );
+    final int? index = indexBySurahId[history.surahId.toString()];
+    if (index == null) {
       return;
     }
     final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();

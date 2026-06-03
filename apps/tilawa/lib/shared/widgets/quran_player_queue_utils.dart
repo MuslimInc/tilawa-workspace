@@ -98,9 +98,40 @@ final class QuranPlayerQueueIndexCache {
     return _cachedIndexById!;
   }
 
+  int _cachedSurahGeneration = -1;
+  List<AudioEntity>? _cachedSurahQueue;
+  Map<String, int>? _cachedIndexBySurahId;
+
+  /// O(1) surah id → queue index; rebuilt only when [queueGeneration] changes.
+  Map<String, int> indexBySurahIdFor({
+    required List<AudioEntity> queue,
+    required int queueGeneration,
+  }) {
+    if (_cachedSurahGeneration == queueGeneration &&
+        identical(_cachedSurahQueue, queue) &&
+        _cachedIndexBySurahId != null) {
+      return _cachedIndexBySurahId!;
+    }
+    final Map<String, int> map = <String, int>{};
+    for (var i = 0; i < queue.length; i++) {
+      final Object? surahId = queue[i].extras?['surahId'];
+      if (surahId == null) {
+        continue;
+      }
+      map.putIfAbsent(surahId.toString(), () => i);
+    }
+    _cachedSurahGeneration = queueGeneration;
+    _cachedSurahQueue = queue;
+    _cachedIndexBySurahId = map;
+    return map;
+  }
+
   void clear() {
     _cachedGeneration = -1;
     _cachedQueue = null;
     _cachedIndexById = null;
+    _cachedSurahGeneration = -1;
+    _cachedSurahQueue = null;
+    _cachedIndexBySurahId = null;
   }
 }

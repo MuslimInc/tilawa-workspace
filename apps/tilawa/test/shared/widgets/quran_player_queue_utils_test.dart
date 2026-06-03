@@ -286,6 +286,34 @@ void main() {
 
       expect(identical(first, second), isFalse);
     });
+
+    test('indexBySurahIdFor provides O(1) surah lookup', () {
+      final QuranPlayerQueueIndexCache cache = QuranPlayerQueueIndexCache();
+      final List<AudioEntity> queue = <AudioEntity>[
+        const AudioEntity(
+          id: 'a',
+          title: 'A',
+          url: 'u',
+          duration: Duration.zero,
+          extras: <String, dynamic>{'surahId': 1},
+        ),
+        const AudioEntity(
+          id: 'b',
+          title: 'B',
+          url: 'u',
+          duration: Duration.zero,
+          extras: <String, dynamic>{'surahId': 2},
+        ),
+      ];
+
+      final Map<String, int> bySurah = cache.indexBySurahIdFor(
+        queue: queue,
+        queueGeneration: 3,
+      );
+
+      expect(bySurah['1'], 0);
+      expect(bySurah['2'], 1);
+    });
   });
 
   group('QuranPlayerQueueUtils.findReorderableChildIndex', () {

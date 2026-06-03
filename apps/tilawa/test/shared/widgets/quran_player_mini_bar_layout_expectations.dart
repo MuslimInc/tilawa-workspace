@@ -1,4 +1,3 @@
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:tilawa/shared/widgets/quran_player_morph_layout.dart';
