@@ -1,0 +1,125 @@
+appId: com.google.android.apps.youtube.music
+---
+# YouTube Music reference flow — collapse/expand parity baseline for Tilawa.
+#
+# Mirrors `.maestro/quran_player/quran_player_collapse_expand_parity.yaml`
+# scenario-by-scenario (same swipe coordinates and console tags).
+#
+# Compare:
+#   - Maestro screenshots under the test output directory (parity_*)
+#   - Screen recordings: `maestro record` on both flows
+#   - Tilawa debug logs: `adb logcat | rg "CollapseExpandQuranPlayer"`
+#
+# Run:
+#   maestro test .maestro/reference/youtube_music_collapse_expand_parity.yaml
+#
+# Device note (1080x2400, Android gesture nav):
+#   Swipes use percentage coordinates. Footer-up drags start at y≈88–92%
+#   to avoid the system back/home gesture band on some OEM skins.
+
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_youtube_music_playback.yaml
+
+- evalScript: '${console.log("[PlayerParity/YTM] PARITY_01 baseline mini player")}'
+- takeScreenshot: parity_01_mini_baseline
+
+# ── PARITY_02: Slow drag-up from mini bar (finger-tracking reference) ─────────
+# Expected (YouTube Music): sheet top follows finger 1:1; feed visible behind;
+# no frozen mini at ~0% progress after first pixel.
+
+- evalScript: '${console.log("[PlayerParity/YTM] PARITY_02 slow_drag_expand_start")}'
+- swipe:
+    start: "50%, 92%"
+    end: "50%, 18%"
+    duration: 900
+- takeScreenshot: parity_02_slow_drag_end
+- waitForAnimationToEnd
+
+# Expanded now playing hides bottom nav on most builds.
+- runFlow:
+    when:
+      notVisible:
+        text: "Home"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/YTM] PARITY_02 expanded (Home tab hidden)")}'
+- takeScreenshot: parity_03_expanded_settled
+
+# ── PARITY_04: Partial drag-down then release (snap physics) ─────────────────
+
+- evalScript: '${console.log("[PlayerParity/YTM] PARITY_04 partial_drag_down_mid")}'
+- swipe:
+    start: "50%, 22%"
+    end: "50%, 58%"
+    duration: 500
+- takeScreenshot: parity_04_partial_drag_release
+- waitForAnimationToEnd
+- takeScreenshot: parity_05_after_partial_snap
+
+# ── PARITY_05: Swipe-down collapse from expanded sheet ───────────────────────
+
+- evalScript: '${console.log("[PlayerParity/YTM] PARITY_05 swipe_down_collapse")}'
+# Re-expand if partial snap returned to mini.
+- runFlow:
+    when:
+      visible:
+        text: "Home"
+    commands:
+      - swipe:
+          start: "50%, 92%"
+          end: "50%, 18%"
+          duration: 700
+      - waitForAnimationToEnd
+- swipe:
+    start: "50%, 20%"
+    end: "50%, 92%"
+    duration: 400
+- waitForAnimationToEnd
+- takeScreenshot: parity_06_collapsed_after_swipe
+- runFlow:
+    when:
+      visible:
+        text: "Home"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/YTM] PARITY_05 collapsed (Home tab visible)")}'
+
+# ── PARITY_06: Tap mini bar to expand ─────────────────────────────────────────
+
+- evalScript: '${console.log("[PlayerParity/YTM] PARITY_06 tap_mini_expand")}'
+- tapOn:
+    point: "50%, 94%"
+- waitForAnimationToEnd
+- takeScreenshot: parity_07_tap_expanded
+- runFlow:
+    when:
+      notVisible:
+        text: "Home"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/YTM] PARITY_06 expanded after tap")}'
+
+# ── PARITY_07: Quick expand → collapse cycle (flicker / stale overlay) ────────
+
+- evalScript: '${console.log("[PlayerParity/YTM] PARITY_07 quick_cycle_start")}'
+- swipe:
+    start: "50%, 20%"
+    end: "50%, 92%"
+    duration: 320
+- waitForAnimationToEnd
+- tapOn:
+    point: "50%, 94%"
+- waitForAnimationToEnd
+- swipe:
+    start: "50%, 20%"
+    end: "50%, 92%"
+    duration: 320
+- waitForAnimationToEnd
+- takeScreenshot: parity_08_quick_cycle_end
+- runFlow:
+    when:
+      visible:
+        text: "Home"
+    commands:
+      - evalScript: '${console.log("[PlayerParity/YTM] PARITY_07 cycle ended on mini")}'
+
+- evalScript: '${console.log("[PlayerParity/YTM] END parity flow complete — compare screenshots with Tilawa run")}'
