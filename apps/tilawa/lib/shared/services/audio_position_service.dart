@@ -51,9 +51,11 @@ class AudioPositionServiceImpl implements AudioPositionService {
     }
 
     void refreshPositionTimer() {
-      final bool shouldPollPosition =
+      final PlaybackState state = _audioHandler.playbackState.value;
+      final bool hasActiveMedia =
           _audioHandler.mediaItem.valueOrNull != null &&
-          _audioHandler.playbackState.value.playing;
+          state.processingState == AudioProcessingState.ready;
+      final bool shouldPollPosition = hasActiveMedia && state.playing;
 
       if (!shouldPollPosition) {
         positionTimer?.cancel();

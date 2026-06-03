@@ -12,6 +12,8 @@ import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_core/services/analytics_service.dart';
 import 'package:tilawa_core/utils/surah_names.dart';
 import '../../features/audio_player/domain/entities/audio_modes.dart';
+import '../../features/audio_player/domain/resolve_media_session_update_position.dart';
+import '../../features/audio_player/domain/services/playback_notification_bridge.dart';
 import '../../features/audio_player/domain/entities/reciter_audio_catalog.dart';
 import '../../features/audio_player/domain/services/artist_media_playlist_cache.dart';
 import '../../features/audio_player/domain/services/audio_entity_media_item_mapper.dart';
@@ -73,6 +75,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   // Audio loading management
   bool _isLoadingAudio = false;
   String? _currentLoadingArtist;
+
+  /// Last [MediaItem.id] published in [playbackState] (cross-track guard).
+  String? _lastPublishedMediaItemId;
 
   Stream<List<IndexedAudioSource>> get _effectiveSequence =>
       Rx.combineLatest3<
@@ -275,10 +280,25 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       (enabled) => _broadcastState(_player.playbackEvent),
     );
 
+    // Keep audio_service / Android MediaSession position aligned with
+    // just_audio (e.g. after hot restart when playbackEvent is stale).
+    _player.positionStream
+        .distinct()
+        .listen((Duration _) {
+          if (mediaItem.valueOrNull == null && queue.value.isEmpty) {
+            return;
+          }
+          _broadcastState(_player.playbackEvent);
+        });
+
     _player.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
         stop();
         _player.seek(Duration.zero, index: 0);
+        return;
+      }
+      if (state == ProcessingState.ready && mediaItem.valueOrNull != null) {
+        _broadcastState(_player.playbackEvent);
       }
     });
 
@@ -562,6 +582,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
           artist: currentItem.artist,
         );
       }
+      _broadcastState(_player.playbackEvent);
     } catch (e) {
       // Check for just_audio interruption or abortion
       bool isInterrupted =
@@ -591,6 +612,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   @override
   Future<void> pause() async {
     await _player.pause();
+    _broadcastState(_player.playbackEvent);
     // Log analytics event
     final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
@@ -601,11 +623,23 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
   @override
   Future<void> seek(Duration position) async {
     await _player.seek(position);
+    if (mediaItem.valueOrNull != null) {
+      _broadcastState(_player.playbackEvent);
+    }
     // Log analytics event
     final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
     if (currentItem != null) {
       await _analyticsService.logAudioSeek(currentItem.id, position.inSeconds);
     }
+  }
+
+  @override
+  Future<void> click([audio_service.MediaButton button =
+      audio_service.MediaButton.media]) {
+    if (button == audio_service.MediaButton.media) {
+      PlaybackNotificationBridge.notifyContentTap();
+    }
+    return super.click(button);
   }
 
   @override
@@ -615,13 +649,58 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
     if (currentItem != null) {
       await _analyticsService.logAudioStop(currentItem.id);
     }
-    await playbackState.firstWhere(
-      (state) =>
-          state.processingState == audio_service.AudioProcessingState.idle,
-    );
+    try {
+      await playbackState
+          .firstWhere(
+            (state) =>
+                state.processingState ==
+                audio_service.AudioProcessingState.idle,
+          )
+          .timeout(const Duration(seconds: 3));
+    } on TimeoutException {
+      log(
+        'stop: timed out waiting for idle; clearing mediaItem to avoid stale UI',
+      );
+    }
     // System notification stop leaves [mediaItem] set unless cleared; the UI
     // listens to [currentAudio] and would keep showing the mini player.
     mediaItem.add(null);
+  }
+
+  Duration _resolveMediaSessionUpdatePosition({
+    required Duration enginePosition,
+    required bool playing,
+    required bool engineReady,
+  }) {
+    final String? itemId = mediaItem.valueOrNull?.id;
+    final Duration previous = playbackState.value.updatePosition;
+    final bool trackChanged =
+        itemId != null &&
+        _lastPublishedMediaItemId != null &&
+        itemId != _lastPublishedMediaItemId;
+    if (itemId != null) {
+      _lastPublishedMediaItemId = itemId;
+    }
+    if (trackChanged) {
+      return enginePosition;
+    }
+    Duration position = resolveMediaSessionUpdatePosition(
+      enginePosition: enginePosition,
+      previousUpdatePosition: previous,
+      playing: playing,
+      engineReady: engineReady,
+    );
+    final Duration? trackDuration = mediaItem.valueOrNull?.duration;
+    if (trackDuration != null &&
+        trackDuration > Duration.zero &&
+        position > trackDuration) {
+      if (enginePosition > Duration.zero && enginePosition <= trackDuration) {
+        position = enginePosition;
+      } else {
+        position = Duration.zero;
+      }
+    }
+    return position;
   }
 
   void _broadcastState(PlaybackEvent event) {
@@ -637,6 +716,11 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       rawIndex,
       _player.shuffleModeEnabled,
       _player.shuffleIndices,
+    );
+    final Duration updatePosition = _resolveMediaSessionUpdatePosition(
+      enginePosition: _player.position,
+      playing: playing,
+      engineReady: _player.processingState == ProcessingState.ready,
     );
     playbackState.add(
       playbackState.value.copyWith(
@@ -665,7 +749,7 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
               audio_service.AudioProcessingState.completed,
         }[_player.processingState]!,
         playing: playing,
-        updatePosition: _player.position,
+        updatePosition: updatePosition,
         bufferedPosition: _player.bufferedPosition,
         speed: _player.speed,
         queueIndex: queueIndex,
