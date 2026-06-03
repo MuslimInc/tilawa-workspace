@@ -17,12 +17,14 @@ import '../../../app_review/domain/entities/app_review_signal.dart';
 import '../../../app_review/domain/services/app_review_trigger_manager.dart';
 import '../../../history/domain/usecases/add_or_update_history_use_case.dart';
 import '../../../settings/domain/services/sleep_timer_settings.dart';
+import '../../domain/entities/active_playback_snapshot.dart';
 import '../../domain/entities/audio_modes.dart';
-import '../../domain/resolved_playback_duration.dart';
 import '../../domain/resolve_playback_display_position.dart';
+import '../../domain/resolved_playback_duration.dart';
 import '../../domain/usecases/audio_player_usecases.dart';
 import '../../domain/usecases/check_audio_playability_use_case.dart';
 import '../../domain/usecases/get_audio_streams_use_case.dart';
+import '../../domain/usecases/sync_active_playback_from_handler_use_case.dart';
 
 part 'audio_player_bloc.freezed.dart';
 part 'audio_player_bloc.g.dart';
@@ -31,6 +33,10 @@ part 'audio_player_state.dart';
 
 @injectable
 class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
+  /// When false, unit tests avoid scheduled [syncActivePlayback] side effects.
+  @visibleForTesting
+  static bool scheduleActivePlaybackSyncOnCreate = true;
+
   AudioPlayerBloc(
     this._getAudioStreams,
     this._playAudio,
@@ -50,6 +56,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     this._removeQueueItem,
     this._moveQueueItem,
     this._loadAudioPlayerData,
+    this._syncActivePlayback,
     this._checkAudioPlayability,
     this._sleepTimerSettings,
     this._addOrUpdateHistory,
@@ -59,6 +66,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     // State update events
     on<ResetAudioPlayer>(_onResetAudioPlayer);
     on<LoadAudioPlayerData>(_onLoadAudioPlayerData);
+    on<SyncActivePlayback>(_onSyncActivePlayback);
     on<UpdateAudio>(_onUpdateAudio);
     on<UpdatePlaybackStateEntity>(_onUpdatePlaybackStateEntity);
     on<UpdatePositionData>(_onUpdatePositionData);
@@ -90,6 +98,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
     _setupAudioStreams();
     _setupSettingsSubscription();
+    _scheduleActivePlaybackSync();
   }
 
   final GetAudioStreamsUseCase _getAudioStreams;
@@ -110,6 +119,7 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
   final RemoveQueueItemUseCase _removeQueueItem;
   final MoveQueueItemUseCase _moveQueueItem;
   final LoadAudioPlayerDataUseCase _loadAudioPlayerData;
+  final SyncActivePlaybackFromHandlerUseCase _syncActivePlayback;
   final CheckAudioPlayabilityUseCase _checkAudioPlayability;
   final SleepTimerSettings _sleepTimerSettings;
   final AddOrUpdateHistoryUseCase _addOrUpdateHistory;
@@ -219,6 +229,26 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     );
   }
 
+  /// Re-binds [AudioPlayerBloc] to the singleton handler after hot restart.
+  ///
+  /// Hydrated state can hold a stale surah while Android keeps playing; the
+  /// handler retains the real [MediaItem] when [getIt] is not reset.
+  void _scheduleActivePlaybackSync() {
+    if (!scheduleActivePlaybackSyncOnCreate) {
+      return;
+    }
+    Future<void>.microtask(() {
+      if (!isClosed) {
+        add(const AudioPlayerEvent.syncActivePlayback());
+      }
+    });
+    Future<void>.delayed(const Duration(milliseconds: 200), () {
+      if (!isClosed) {
+        add(const AudioPlayerEvent.syncActivePlayback());
+      }
+    });
+  }
+
   void _setupSettingsSubscription() {
     _subscriptions.add(
       _sleepTimerSettings.isSleepTimerEnabledStream.listen(
@@ -298,7 +328,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
     emit(
       state.copyWith(
-        status: AudioPlayerStatus.success,
+        status: state.isSessionDismissed && event.audio == state.currentAudio
+            ? AudioPlayerStatus.initial
+            : AudioPlayerStatus.success,
         currentAudio: event.audio,
       ),
     );
@@ -344,6 +376,24 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
           ),
         );
       }
+    }
+
+    if (_isInactiveHandlerPlayback(event.playbackState) &&
+        state.currentAudio != null) {
+      if (state.dismissedAudioId == state.currentAudio!.id) {
+        emit(
+          state.copyWith(
+            status: AudioPlayerStatus.initial,
+            playbackState: event.playbackState,
+          ),
+        );
+      } else {
+        await _reflectExternalSessionEnded(
+          emit,
+          playbackState: event.playbackState,
+        );
+      }
+      return;
     }
 
     emit(
@@ -394,7 +444,9 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
 
     emit(
       state.copyWith(
-        status: AudioPlayerStatus.success,
+        status: state.isSessionDismissed
+            ? AudioPlayerStatus.initial
+            : AudioPlayerStatus.success,
         positionData: event.positionData,
       ),
     );
@@ -658,6 +710,67 @@ class AudioPlayerBloc extends HydratedBloc<AudioPlayerEvent, AudioPlayerState> {
     }
 
     emit(state.copyWith(status: AudioPlayerStatus.success));
+  }
+
+  Future<void> _onSyncActivePlayback(
+    SyncActivePlayback event,
+    Emitter<AudioPlayerState> emit,
+  ) async {
+    final Either<Failure, ActivePlaybackSnapshot?> result =
+        await _syncActivePlayback();
+    await result.fold(
+      (_) async {},
+      (ActivePlaybackSnapshot? snapshot) async {
+        if (snapshot == null) {
+          return;
+        }
+        if (_isInactiveHandlerPlayback(snapshot.playbackState)) {
+          await _reflectExternalSessionEnded(
+            emit,
+            playbackState: snapshot.playbackState,
+          );
+          return;
+        }
+        emit(
+          state.copyWith(
+            status: AudioPlayerStatus.success,
+            currentAudio: snapshot.currentAudio,
+            playbackState: snapshot.playbackState,
+            dismissedAudioId: null,
+          ),
+        );
+        _emitPositionDataUpdate();
+      },
+    );
+  }
+
+  bool _isInactiveHandlerPlayback(PlaybackStateEntity playback) {
+    return playback.processingState == AudioProcessingStateStatus.idle &&
+        !playback.isPlaying;
+  }
+
+  /// Mirrors in-app [StopAudio] when the native session ends (notification stop).
+  Future<void> _reflectExternalSessionEnded(
+    Emitter<AudioPlayerState> emit, {
+    PlaybackStateEntity? playbackState,
+  }) async {
+    final AudioEntity? audio = state.currentAudio;
+    if (audio == null || state.dismissedAudioId == audio.id) {
+      return;
+    }
+    await _saveHistory(audio);
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    emit(
+      state.copyWith(
+        status: AudioPlayerStatus.initial,
+        playbackState: playbackState ?? state.playbackState,
+        dismissedAudioId: audio.id,
+        sleepTimerTargetTime: null,
+        lastSleepTimerDuration: null,
+        lastSleepTimerType: null,
+      ),
+    );
   }
 
   Future<void> _onUpdateQueue(

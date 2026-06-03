@@ -1,5 +1,6 @@
 import 'package:tilawa_core/entities/audio.dart';
 import 'package:tilawa_core/utils/typedefs.dart';
+import '../entities/active_playback_snapshot.dart';
 import '../entities/audio_modes.dart';
 
 abstract class AudioPlayerRepository {
@@ -13,6 +14,9 @@ abstract class AudioPlayerRepository {
 
   // Current State Getters
   PlaybackStateEntity get getPlaybackState;
+
+  /// Live handler session; survives Flutter hot restart when [getIt] is reused.
+  ActivePlaybackSnapshot? readActivePlaybackSnapshot();
 
   // Playback Controls
   ResultVoid play();

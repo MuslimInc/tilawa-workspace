@@ -551,6 +551,7 @@ void main() {
 
       verify(mockPlayer.stop()).called(1);
       verify(mockAnalytics.logAudioStop('1')).called(1);
+      expect(handler.mediaItem.valueOrNull, isNull);
     });
 
     test('seek calls player.seek and logs analytics', () async {

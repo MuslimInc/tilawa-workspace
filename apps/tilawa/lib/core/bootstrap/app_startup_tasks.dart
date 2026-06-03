@@ -20,6 +20,7 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa/core/observers/composite_bloc_observer.dart';
@@ -904,6 +905,7 @@ class AppStartupTasks {
           androidNotificationOngoing: true,
         ),
       );
+      _requestActivePlaybackSyncAfterHandlerReady();
       logger.d(
         '[AppLaunch] source=AppStartupTasks.initializeAudioService: Audio service initialized successfully at (${DateTime.now()})',
       );
@@ -1017,6 +1019,13 @@ class AppStartupTasks {
         '[AppLaunch] source=AppStartupTasks.initializePrayerNotifications: Warning: Could not initialize prayer notifications at (${DateTime.now()}): $e',
       );
     }
+  }
+
+  void _requestActivePlaybackSyncAfterHandlerReady() {
+    if (!getIt.isRegistered<AudioPlayerBloc>()) {
+      return;
+    }
+    getIt<AudioPlayerBloc>().add(const AudioPlayerEvent.syncActivePlayback());
   }
 
   bool _isEnabled(bool isEnabled, String toggleName) {

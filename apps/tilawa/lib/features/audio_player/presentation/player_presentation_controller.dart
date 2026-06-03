@@ -430,6 +430,13 @@ class PlayerPresentationController extends ChangeNotifier {
 
   /// Called when the expanded page mounts.
   void onRouteOpened() {
+    if (_shellHost != null && _transitionProgress > 0.01) {
+      _shellHost!.collapse();
+      _transitionProgress = 0;
+      _isDragging = false;
+      _collapseBiased = false;
+      _collapseRequested = false;
+    }
     if (_phase == PlayerPresentationPhase.mini) {
       _phase = PlayerPresentationPhase.expanding;
     }

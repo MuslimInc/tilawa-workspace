@@ -7,24 +7,22 @@ import 'quran_player_visual_mode.dart';
 /// Enable in debug builds, or with
 /// `--dart-define=QURAN_PLAYER_DEBUG_LOG=true`.
 abstract final class QuranPlayerDebugLog {
-  static bool get enabled =>
-      const bool.fromEnvironment(
-        'QURAN_PLAYER_DEBUG_LOG',
-        defaultValue: false,
-      );
+  static bool get enabled => const bool.fromEnvironment(
+    'QURAN_PLAYER_DEBUG_LOG',
+    defaultValue: true,
+  );
 
   static String playerMode({
     required double expandProgress,
     required bool isCollapsing,
     required bool isUserDragging,
     String? transitionOwner,
-  }) =>
-      quranPlayerVisualMode(
-        expandProgress: expandProgress,
-        isCollapsing: isCollapsing,
-        isUserDragging: isUserDragging,
-        transitionOwner: transitionOwner,
-      );
+  }) => quranPlayerVisualMode(
+    expandProgress: expandProgress,
+    isCollapsing: isCollapsing,
+    isUserDragging: isUserDragging,
+    transitionOwner: transitionOwner,
+  );
 
   static double curvedRouteProgress(double raw, AnimationStatus status) {
     if (status == AnimationStatus.reverse) {
@@ -39,9 +37,15 @@ abstract final class QuranPlayerDebugLog {
 
   static void hero(String event, [Map<String, Object?> fields = const {}]) {}
 
-  static void lifecycle(String phase, [Map<String, Object?> fields = const {}]) {}
+  static void lifecycle(
+    String phase, [
+    Map<String, Object?> fields = const {},
+  ]) {}
 
-  static void animation(String event, [Map<String, Object?> fields = const {}]) {}
+  static void animation(
+    String event, [
+    Map<String, Object?> fields = const {},
+  ]) {}
 
   static void drag(String event, [Map<String, Object?> fields = const {}]) {}
 

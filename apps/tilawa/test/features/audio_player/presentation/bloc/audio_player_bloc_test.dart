@@ -7,9 +7,11 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tilawa/features/app_review/domain/services/app_review_trigger_manager.dart';
+import 'package:tilawa/features/audio_player/domain/entities/active_playback_snapshot.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/audio_player_usecases.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/check_audio_playability_use_case.dart';
 import 'package:tilawa/features/audio_player/domain/usecases/get_audio_streams_use_case.dart';
+import 'package:tilawa/features/audio_player/domain/usecases/sync_active_playback_from_handler_use_case.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/history/domain/entities/history_entity.dart';
 import 'package:tilawa/features/history/domain/usecases/add_or_update_history_use_case.dart';
@@ -39,6 +41,7 @@ import 'audio_player_bloc_test.mocks.dart';
   RemoveQueueItemUseCase,
   MoveQueueItemUseCase,
   LoadAudioPlayerDataUseCase,
+  SyncActivePlaybackFromHandlerUseCase,
   GetAudioStreamsUseCase,
   SettingsCubit,
   CheckAudioPlayabilityUseCase,
@@ -48,7 +51,11 @@ import 'audio_player_bloc_test.mocks.dart';
 ])
 void main() {
   setUpAll(() async {
+    AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = false;
     provideDummy<Either<Failure, void>>(const Right(null));
+    provideDummy<Either<Failure, ActivePlaybackSnapshot?>>(
+      const Right(null),
+    );
     provideDummy<Either<Failure, HistoryEntity>>(
       Right(
         HistoryEntity(
@@ -71,6 +78,7 @@ void main() {
   });
 
   tearDownAll(() async {
+    AudioPlayerBloc.scheduleActivePlaybackSyncOnCreate = true;
     await clearHydratedStorageForTest();
   });
 
@@ -91,6 +99,7 @@ void main() {
   late MockSetRepeatModeUseCase mockSetRepeatMode;
   late MockSetShuffleModeUseCase mockSetShuffleMode;
   late MockLoadAudioPlayerDataUseCase mockLoadAudioPlayerData;
+  late MockSyncActivePlaybackFromHandlerUseCase mockSyncActivePlayback;
   late MockGetAudioStreamsUseCase mockGetAudioStreams;
   late MockSettingsCubit mockSettingsCubit;
   late MockCheckAudioPlayabilityUseCase mockCheckAudioPlayability;
@@ -123,7 +132,11 @@ void main() {
     mockSetRepeatMode = MockSetRepeatModeUseCase();
     mockSetShuffleMode = MockSetShuffleModeUseCase();
     mockLoadAudioPlayerData = MockLoadAudioPlayerDataUseCase();
+    mockSyncActivePlayback = MockSyncActivePlaybackFromHandlerUseCase();
     mockGetAudioStreams = MockGetAudioStreamsUseCase();
+    when(
+      mockSyncActivePlayback.call(),
+    ).thenAnswer((_) async => const Right(null));
     mockSettingsCubit = MockSettingsCubit();
     mockCheckAudioPlayability = MockCheckAudioPlayabilityUseCase();
     mockAddOrUpdateHistory = MockAddOrUpdateHistoryUseCase();
@@ -157,7 +170,9 @@ void main() {
     when(mockGetAudioStreams.volume).thenAnswer((_) => volumeSubject);
     when(mockGetAudioStreams.speed).thenAnswer((_) => speedSubject);
     when(mockGetAudioStreams.position).thenAnswer((_) => positionSubject);
-    when(mockMoveQueueItem.call(any, any)).thenAnswer((_) async => const Right(null));
+    when(
+      mockMoveQueueItem.call(any, any),
+    ).thenAnswer((_) async => const Right(null));
 
     // Setup Mock Analytics
     when(
@@ -247,6 +262,7 @@ void main() {
       mockRemoveQueueItem,
       mockMoveQueueItem,
       mockLoadAudioPlayerData,
+      mockSyncActivePlayback,
       mockCheckAudioPlayability,
       mockSettingsCubit,
       mockAddOrUpdateHistory,
@@ -726,6 +742,53 @@ void main() {
             audioUrl: 'url',
             artworkUrl: null,
             completed: false,
+          ),
+        ).called(1);
+      },
+    );
+
+    blocTest<AudioPlayerBloc, AudioPlayerState>(
+      'hides mini player when handler reports idle after system stop',
+      seed: () => const AudioPlayerState(
+        status: AudioPlayerStatus.success,
+        currentAudio: historyAudio,
+      ),
+      build: () => buildBloc(),
+      act: (bloc) async {
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        bloc.add(
+          const AudioPlayerEvent.updatePlaybackStateEntity(
+            PlaybackStateEntity(
+              isPlaying: false,
+              processingState: AudioProcessingStateStatus.idle,
+              position: Duration.zero,
+              bufferedPosition: Duration.zero,
+              duration: Duration.zero,
+              currentIndex: 0,
+              queue: <AudioEntity>[],
+            ),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+      },
+      verify: (bloc) {
+        expect(bloc.state.shouldShowBottomPlayer, isFalse);
+        expect(bloc.state.dismissedAudioId, historyAudio.id);
+        expect(bloc.state.status, AudioPlayerStatus.initial);
+        verify(
+          mockAddOrUpdateHistory.call(
+            surahId: anyNamed('surahId'),
+            surahName: anyNamed('surahName'),
+            surahNameEn: anyNamed('surahNameEn'),
+            reciterId: anyNamed('reciterId'),
+            reciterName: anyNamed('reciterName'),
+            moshafId: anyNamed('moshafId'),
+            moshafName: anyNamed('moshafName'),
+            lastPositionMs: anyNamed('lastPositionMs'),
+            durationMs: anyNamed('durationMs'),
+            audioUrl: anyNamed('audioUrl'),
+            artworkUrl: anyNamed('artworkUrl'),
+            completed: anyNamed('completed'),
           ),
         ).called(1);
       },

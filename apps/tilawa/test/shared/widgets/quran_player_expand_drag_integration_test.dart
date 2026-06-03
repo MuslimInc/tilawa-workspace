@@ -262,6 +262,7 @@ void main() {
             miniPlayerHeight: 76,
             interactiveDrag: true,
             collapseBiased: true,
+            interactiveCollapseAnchor: 1,
           );
 
       expect(expandForward.showMiniPlayer, isFalse);

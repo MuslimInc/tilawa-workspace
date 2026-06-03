@@ -162,13 +162,18 @@ class PlayerExpandTransitionMetrics {
     bool collapseBiased = false,
     bool heroHandoff = false,
     bool interactiveDrag = false,
+
+    /// Progress where collapse intent started during an interactive drag.
+    /// Blends expand-forward and collapse metrics to avoid one-frame jumps.
+    double? interactiveCollapseAnchor,
   }) {
     final double t = progress.clamp(0.0, 1.0);
 
-    if (interactiveDrag && !collapseBiased) {
+    if (interactiveDrag) {
       return _computeInteractiveDragMetrics(
         progress: t,
         miniPlayerHeight: miniPlayerHeight,
+        collapseAnchor: collapseBiased ? interactiveCollapseAnchor : null,
       );
     }
 
@@ -280,9 +285,37 @@ class PlayerExpandTransitionMetrics {
     );
   }
 
-  /// Finger-driven expand/collapse — linear sheet travel (1:1 with finger)
-  /// and YouTube Music expand-forward opacity (mini lingers, feed visible).
+  /// Finger-driven expand/collapse — linear sheet travel (1:1 with finger).
   static PlayerExpandTransitionMetrics _computeInteractiveDragMetrics({
+    required double progress,
+    required double miniPlayerHeight,
+    double? collapseAnchor,
+  }) {
+    final PlayerExpandTransitionMetrics expandForward =
+        _computeInteractiveExpandForwardMetrics(
+      progress: progress,
+      miniPlayerHeight: miniPlayerHeight,
+    );
+
+    final double? anchor = collapseAnchor;
+    if (anchor == null || progress >= anchor - 0.001) {
+      return expandForward;
+    }
+
+    final PlayerExpandTransitionMetrics collapse =
+        _computeInteractiveCollapseDragMetrics(
+      progress: progress,
+      miniPlayerHeight: miniPlayerHeight,
+    );
+
+    const double blendSpan = 0.35;
+    final double blend = Curves.easeInOut.transform(
+      ((anchor - progress) / blendSpan).clamp(0.0, 1.0),
+    );
+    return _lerpTransitionMetrics(expandForward, collapse, blend);
+  }
+
+  static PlayerExpandTransitionMetrics _computeInteractiveExpandForwardMetrics({
     required double progress,
     required double miniPlayerHeight,
   }) {
@@ -336,6 +369,91 @@ class PlayerExpandTransitionMetrics {
       showMiniPlayer: miniOpacity > 0.08,
       showExpandedSheet: t > 0.001 && sheetPresentationOpacity > 0.08,
       showMorphLayer: false,
+    );
+  }
+
+  /// Collapse-intent drag metrics with linear sheet travel (no path flip).
+  static PlayerExpandTransitionMetrics _computeInteractiveCollapseDragMetrics({
+    required double progress,
+    required double miniPlayerHeight,
+  }) {
+    final double t = progress.clamp(0.0, 1.0);
+    final PlayerExpandTransitionMetrics settled =
+        PlayerExpandTransitionMetrics.compute(
+      progress: t,
+      miniPlayerHeight: miniPlayerHeight,
+      collapseBiased: true,
+    );
+
+    // Ramp morph fades during finger-driven collapse (no step at ~0.78).
+    final double morphBlend = _interactiveCollapseMorphBlend(t);
+    final double handoffT = settled.handoffT * morphBlend;
+    final double stageChromeOpacity =
+        1 + (settled.stageChromeOpacity - 1) * morphBlend;
+
+    return PlayerExpandTransitionMetrics(
+      miniOpacity: settled.miniOpacity,
+      expandedOpacity: settled.expandedOpacity,
+      handoffT: handoffT,
+      stageChromeOpacity: stageChromeOpacity,
+      miniIdentityOpacity:
+          1 + (settled.miniIdentityOpacity - 1) * morphBlend,
+      sheetPresentationOpacity: settled.sheetPresentationOpacity,
+      backdropOpacity: settled.backdropOpacity,
+      scrimOpacity: settled.scrimOpacity,
+      miniSlideY: settled.miniSlideY,
+      sheetMotionT: t,
+      queueChromeT: settled.queueChromeT,
+      showMiniPlayer: settled.miniOpacity > 0.08,
+      showExpandedSheet:
+          t > 0.001 && settled.sheetPresentationOpacity > 0.08 && t > 0.74,
+      showMorphLayer: handoffT > 0.02,
+    );
+  }
+
+  /// 0 above [high], 1 below [low], eased between (interactive collapse drag).
+  static double _interactiveCollapseMorphBlend(
+    double progress, {
+    double high = 0.90,
+    double low = 0.42,
+  }) {
+    final double t = progress.clamp(0.0, 1.0);
+    if (t >= high) {
+      return 0;
+    }
+    if (t <= low) {
+      return 1;
+    }
+    return Curves.easeInOut.transform((high - t) / (high - low));
+  }
+
+  static PlayerExpandTransitionMetrics _lerpTransitionMetrics(
+    PlayerExpandTransitionMetrics a,
+    PlayerExpandTransitionMetrics b,
+    double t,
+  ) {
+    double lerp(double x, double y) => x + (y - x) * t;
+    final double miniOpacity = lerp(a.miniOpacity, b.miniOpacity);
+    final double sheetPresentationOpacity = lerp(
+      a.sheetPresentationOpacity,
+      b.sheetPresentationOpacity,
+    );
+    return PlayerExpandTransitionMetrics(
+      miniOpacity: miniOpacity,
+      expandedOpacity: lerp(a.expandedOpacity, b.expandedOpacity),
+      handoffT: lerp(a.handoffT, b.handoffT),
+      stageChromeOpacity: lerp(a.stageChromeOpacity, b.stageChromeOpacity),
+      miniIdentityOpacity: lerp(a.miniIdentityOpacity, b.miniIdentityOpacity),
+      sheetPresentationOpacity: sheetPresentationOpacity,
+      backdropOpacity: lerp(a.backdropOpacity, b.backdropOpacity),
+      scrimOpacity: lerp(a.scrimOpacity, b.scrimOpacity),
+      miniSlideY: lerp(a.miniSlideY, b.miniSlideY),
+      sheetMotionT: lerp(a.sheetMotionT, b.sheetMotionT),
+      queueChromeT: lerp(a.queueChromeT, b.queueChromeT),
+      showMiniPlayer: miniOpacity > 0.08,
+      showExpandedSheet:
+          sheetPresentationOpacity > 0.08 && lerp(a.sheetMotionT, b.sheetMotionT) > 0.001,
+      showMorphLayer: lerp(a.handoffT, b.handoffT) > 0.02,
     );
   }
 

@@ -7,6 +7,7 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tilawa/features/audio_player/data/repositories/audio_player_repository_impl.dart';
+import 'package:tilawa/features/audio_player/domain/entities/active_playback_snapshot.dart';
 import 'package:tilawa/features/audio_player/domain/entities/audio_modes.dart';
 import 'package:tilawa/shared/audio/audio_player_handler.dart';
 import 'package:tilawa/shared/services/audio_position_service.dart';
@@ -86,6 +87,39 @@ void main() {
     volumeSubject.close();
     speedSubject.close();
     positionSubject.close();
+  });
+
+  group('readActivePlaybackSnapshot', () {
+    test('returns null when handler mediaItem is null', () {
+      expect(repository.readActivePlaybackSnapshot(), isNull);
+    });
+
+    test('returns audio and playback when handler has active media', () {
+      mediaItemSubject.add(testMediaItem);
+      playbackStateSubject.add(testPlaybackState);
+      queueSubject.add(<audio_service.MediaItem>[testMediaItem]);
+
+      final ActivePlaybackSnapshot? snapshot =
+          repository.readActivePlaybackSnapshot();
+
+      expect(snapshot, isNotNull);
+      expect(snapshot!.currentAudio.id, 'test-id');
+      expect(snapshot.currentAudio.title, 'Test Title');
+      expect(snapshot.playbackState.isPlaying, isTrue);
+      expect(snapshot.playbackState.queue, hasLength(1));
+    });
+
+    test('returns null when handler is idle and not playing', () {
+      mediaItemSubject.add(testMediaItem);
+      playbackStateSubject.add(
+        audio_service.PlaybackState(
+          processingState: audio_service.AudioProcessingState.idle,
+        ),
+      );
+      queueSubject.add(<audio_service.MediaItem>[testMediaItem]);
+
+      expect(repository.readActivePlaybackSnapshot(), isNull);
+    });
   });
 
   group('AudioPlayerRepositoryImpl - currentAudio Stream', () {
@@ -389,6 +423,32 @@ void main() {
 
       expect(result.isRight, true);
       verify(mockAudioHandler.pause()).called(1);
+    });
+
+    test('play swallows loading interrupted errors as success', () async {
+      when(mockAudioHandler.play()).thenThrow(
+        Exception('Loading interrupted'),
+      );
+
+      final Either<Failure, void> result = await repository.play();
+
+      expect(result.isRight, true);
+    });
+
+    test('pause swallows abort errors as success', () async {
+      when(mockAudioHandler.pause()).thenThrow(Exception('abort'));
+
+      final Either<Failure, void> result = await repository.pause();
+
+      expect(result.isRight, true);
+    });
+
+    test('play returns Left for non-interrupted failures', () async {
+      when(mockAudioHandler.play()).thenThrow(Exception('network down'));
+
+      final Either<Failure, void> result = await repository.play();
+
+      expect(result.isLeft, true);
     });
 
     test('stop calls audioHandler.stop and returns Right', () async {

@@ -43,8 +43,11 @@ abstract class AudioPlayerState with _$AudioPlayerState {
   bool get hasAudio => currentAudio != null;
   bool get isSleepTimerActive => sleepTimerTargetTime != null;
 
+  bool get isSessionDismissed =>
+      currentAudio != null && dismissedAudioId == currentAudio!.id;
+
   bool get shouldShowBottomPlayer =>
       currentAudio != null &&
       status == AudioPlayerStatus.success &&
-      dismissedAudioId != currentAudio?.id;
+      !isSessionDismissed;
 }

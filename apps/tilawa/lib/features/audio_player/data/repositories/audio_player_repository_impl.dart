@@ -8,6 +8,7 @@ import 'package:tilawa_core/utils/typedefs.dart';
 
 import '../../../../shared/audio/audio_player_handler.dart';
 import '../../../../shared/services/audio_position_service.dart';
+import '../../domain/entities/active_playback_snapshot.dart';
 import '../../domain/entities/audio_modes.dart';
 import '../../domain/repositories/audio_player_repository.dart';
 import 'mapped_playback_queue_cache.dart';
@@ -87,6 +88,27 @@ class AudioPlayerRepositoryImpl implements AudioPlayerRepository {
 
   @override
   Stream<double> get volume => _audioHandler.volume.distinct();
+
+  @override
+  ActivePlaybackSnapshot? readActivePlaybackSnapshot() {
+    final audio_service.MediaItem? item = _audioHandler.mediaItem.value;
+    if (item == null) {
+      return null;
+    }
+    final PlaybackStateEntity playback = getPlaybackState;
+    if (_isInactivePlayback(playback)) {
+      return null;
+    }
+    return ActivePlaybackSnapshot(
+      currentAudio: _mapMediaItemToEntity(item),
+      playbackState: playback,
+    );
+  }
+
+  bool _isInactivePlayback(PlaybackStateEntity playback) {
+    return playback.processingState == AudioProcessingStateStatus.idle &&
+        !playback.isPlaying;
+  }
 
   @override
   PlaybackStateEntity get getPlaybackState {

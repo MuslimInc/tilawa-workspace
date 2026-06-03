@@ -231,6 +231,27 @@ void main() {
     });
 
     test(
+      'audit: onRouteOpened collapses shell when overlay was expanded',
+      () {
+        final _FakeShellHost shell = _FakeShellHost();
+        controller.bindShellOverlay(shell);
+        controller.syncShellOverlayProgress(
+          progress: 1,
+          status: AnimationStatus.completed,
+          isCollapsing: false,
+          isUserDragging: false,
+        );
+        expect(controller.phase, PlayerPresentationPhase.expanded);
+
+        controller.onRouteOpened();
+
+        expect(shell.collapseCount, 1);
+        expect(controller.routeOpen, isTrue);
+        expect(controller.transitionProgress, closeTo(0, 0.001));
+      },
+    );
+
+    test(
       'audit: syncShellOverlayProgress is ignored while route is open',
       () {
         final _FakeShellHost shell = _FakeShellHost();

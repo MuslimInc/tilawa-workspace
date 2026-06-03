@@ -610,9 +610,8 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
 
   @override
   Future<void> stop() async {
-    await _player.stop();
-    // Log analytics event
     final audio_service.MediaItem? currentItem = mediaItem.valueOrNull;
+    await _player.stop();
     if (currentItem != null) {
       await _analyticsService.logAudioStop(currentItem.id);
     }
@@ -620,6 +619,9 @@ class AudioPlayerHandlerImpl extends audio_service.BaseAudioHandler
       (state) =>
           state.processingState == audio_service.AudioProcessingState.idle,
     );
+    // System notification stop leaves [mediaItem] set unless cleared; the UI
+    // listens to [currentAudio] and would keep showing the mini player.
+    mediaItem.add(null);
   }
 
   void _broadcastState(PlaybackEvent event) {

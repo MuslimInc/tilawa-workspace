@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Enforces ≥90% line coverage on Phase C player logic (excludes quran_player_widget.dart).
+# Enforces ≥90% line coverage on Quran player logic (excludes quran_player_widget.dart).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 MIN_PCT=90
@@ -13,6 +13,16 @@ TESTS=(
   test/shared/widgets/quran_player_expanded_route_transition_test.dart
   test/shared/widgets/quran_player_queue_utils_test.dart
   test/shared/widgets/quran_player_queue_hot_path_test.dart
+  test/shared/widgets/quran_player_morph_layout_test.dart
+  test/shared/widgets/quran_player_morph_layer_test.dart
+  test/shared/widgets/quran_player_collapse_drag_layout_test.dart
+  test/shared/widgets/quran_player_collapse_drag_visibility_test.dart
+  test/shared/widgets/quran_player_animation_stability_test.dart
+  test/shared/widgets/quran_player_playback_control_layout_test.dart
+  test/shared/widgets/quran_player_expanded_stage_layouts_test.dart
+  test/shared/widgets/quran_player_expanded_stage_gesture_scope_test.dart
+  test/shared/widgets/quran_player_shell_overlay_stack_test.dart
+  test/shared/widgets/quran_player_shell_route_coexistence_test.dart
   test/features/audio_player/presentation/player_presentation_controller_test.dart
 )
 
@@ -24,10 +34,21 @@ SCOPE=(
   lib/shared/widgets/quran_player_transition_test_utils.dart
   lib/shared/widgets/quran_player_hero_tags.dart
   lib/shared/widgets/quran_player_expanded_route_transition.dart
+  lib/shared/widgets/quran_player_morph_layout.dart
+  lib/shared/widgets/quran_player_morph_layer.dart
+  lib/shared/widgets/quran_player_animation_stability.dart
+  lib/shared/widgets/quran_player_expanded_stage_gesture_scope.dart
+  lib/shared/widgets/quran_player_expanded_stage_layouts.dart
   lib/features/audio_player/presentation/player_presentation_controller.dart
 )
 
-fvm flutter test --coverage "${TESTS[@]}" >/dev/null
+if command -v fvm >/dev/null 2>&1; then
+  FLUTTER=(fvm flutter)
+else
+  FLUTTER=(flutter)
+fi
+
+"${FLUTTER[@]}" test --coverage "${TESTS[@]}" >/dev/null
 
 python3 - "$MIN_PCT" "${SCOPE[@]}" <<'PY'
 import re, sys
@@ -65,4 +86,4 @@ if failed:
     sys.exit(1)
 PY
 
-echo "Phase C player coverage ≥ ${MIN_PCT}%"
+echo "Quran player scoped coverage ≥ ${MIN_PCT}%"
