@@ -45,31 +45,19 @@ ResolvedPlaybackDuration resolvePlaybackDisplayDurationDetailed({
     }
   }
 
-  if (playbackState != null) {
-    for (final AudioEntity queuedAudio in playbackState.queue) {
-      if (queuedAudio.id == audio.id &&
-          queuedAudio.duration > Duration.zero) {
-        return ResolvedPlaybackDuration(
-          duration: queuedAudio.duration,
-          source: 'queueItem',
-        );
-      }
-    }
-  }
-
-  if (audio.duration > Duration.zero) {
-    return ResolvedPlaybackDuration(
-      duration: audio.duration,
-      source: 'metadata',
-    );
-  }
-
   final Duration cachedDuration =
       cachedDurations[audio.id] ?? Duration.zero;
   if (cachedDuration > Duration.zero) {
     return ResolvedPlaybackDuration(
       duration: cachedDuration,
       source: 'cache',
+    );
+  }
+
+  if (audio.duration > Duration.zero) {
+    return ResolvedPlaybackDuration(
+      duration: audio.duration,
+      source: 'metadata',
     );
   }
 

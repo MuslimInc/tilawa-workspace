@@ -120,6 +120,26 @@ void main() {
 
       expect(repository.readActivePlaybackSnapshot(), isNull);
     });
+
+    test('returns null after stop clears mediaItem and playback is idle', () async {
+      mediaItemSubject.add(testMediaItem);
+      playbackStateSubject.add(testPlaybackState);
+      queueSubject.add(<audio_service.MediaItem>[testMediaItem]);
+      expect(repository.readActivePlaybackSnapshot(), isNotNull);
+
+      when(mockAudioHandler.stop()).thenAnswer((_) async {
+        playbackStateSubject.add(
+          audio_service.PlaybackState(
+            processingState: audio_service.AudioProcessingState.idle,
+          ),
+        );
+        mediaItemSubject.add(null);
+      });
+
+      await repository.stop();
+
+      expect(repository.readActivePlaybackSnapshot(), isNull);
+    });
   });
 
   group('AudioPlayerRepositoryImpl - currentAudio Stream', () {

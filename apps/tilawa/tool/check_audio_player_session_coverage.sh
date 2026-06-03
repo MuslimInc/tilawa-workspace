@@ -7,6 +7,7 @@ MIN_PCT=90
 TESTS=(
   test/features/audio_player/presentation/bloc/audio_player_bloc_test.dart
   test/features/audio_player/presentation/bloc/audio_player_bloc_sync_active_playback_test.dart
+  test/features/audio_player/domain/playback_reconciliation_scheduler_test.dart
   test/features/audio_player/domain/usecases/sync_active_playback_from_handler_use_case_test.dart
   test/features/audio_player/data/repositories/audio_player_repository_impl_test.dart
   test/shared/audio/audio_player_handler_impl_test.dart
