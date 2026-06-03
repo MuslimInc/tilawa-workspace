@@ -218,6 +218,7 @@ class PrayerAdhanNotificationService
           PrayerNotificationConfig.adhanSoundRawName,
         ),
         playSound: true,
+        audioAttributesUsage: AudioAttributesUsage.alarm,
       ),
     );
     await androidPlugin.createNotificationChannel(
@@ -323,7 +324,6 @@ class PrayerAdhanNotificationService
           prayerTimesForDays.length < PrayerNotificationConfig.scheduleDaysAhead
           ? prayerTimesForDays.length
           : PrayerNotificationConfig.scheduleDaysAhead;
-
       int scheduled = 0;
       DateTime? earliestScheduledTarget;
       DateTime? latestScheduledTarget;
@@ -620,7 +620,8 @@ class PrayerAdhanNotificationService
           .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin
           >();
-      return await impl?.canScheduleExactNotifications() ?? true;
+      final bool canExact = await impl?.canScheduleExactNotifications() ?? true;
+      return canExact;
     } catch (e) {
       logger.w(
         '${PrayerNotificationConfig.logTag} canScheduleExactAlarms failed: $e',
@@ -680,9 +681,10 @@ class PrayerAdhanNotificationService
       bool adhanHandledNatively = false;
       if (playAdhan && _adhanPlayer.isSupported) {
         try {
+          final DateTime trigger = DateTime.now().add(const Duration(seconds: 1));
           adhanHandledNatively = await _adhanPlayer.scheduleAdhan(
             id: testId,
-            scheduledTime: DateTime.now().add(const Duration(seconds: 1)),
+            scheduledTime: trigger,
             prayerName: prayer.name,
             prayerKey: prayer.name.toLowerCase(),
           );
@@ -693,14 +695,22 @@ class PrayerAdhanNotificationService
         }
       }
 
+      bool immediatePlayback = false;
+      if (playAdhan && !adhanHandledNatively && _adhanPlayer.isSupported) {
+        immediatePlayback = await _adhanPlayer.playAdhanNow(
+          id: testId,
+          prayerName: prayer.name,
+          prayerKey: prayer.name.toLowerCase(),
+        );
+      }
+
       logger.d(
         '${PrayerNotificationConfig.logTag} [TEST] Firing test notification | '
         'prayer=${prayer.name} | playAdhan=$playAdhan | native=$adhanHandledNatively | '
-        'id=$testId',
+        'immediate=$immediatePlayback | id=$testId',
       );
-      // Keep debug behavior aligned with production XOR routing:
-      // when native adhan is scheduled successfully, avoid a second FLN card.
-      if (!adhanHandledNatively) {
+      // XOR: native alarm scheduled, immediate FG playback, or FLN card — never two.
+      if (!adhanHandledNatively && !immediatePlayback) {
         await _notifications.show(
           id: testId,
           title: _titleFor(l10n, prayer),
@@ -708,7 +718,7 @@ class PrayerAdhanNotificationService
           notificationDetails: _detailsFor(
             l10n,
             playAdhan,
-            adhanHandledNatively: adhanHandledNatively,
+            adhanHandledNatively: false,
           ),
           payload: payload,
         );
@@ -718,7 +728,7 @@ class PrayerAdhanNotificationService
         );
       } else {
         logger.d(
-          '${PrayerNotificationConfig.logTag} [TEST OK] Native adhan scheduled; FLN suppressed to avoid duplicate card | '
+          '${PrayerNotificationConfig.logTag} [TEST OK] Native/immediate adhan; FLN suppressed | '
           'prayer=${prayer.name} | id=$testId',
         );
       }
@@ -1023,6 +1033,9 @@ class PrayerAdhanNotificationService
               )
             : null,
         playSound: !playAdhan || !adhanHandledNatively,
+        audioAttributesUsage: playAdhan && !adhanHandledNatively
+            ? AudioAttributesUsage.alarm
+            : AudioAttributesUsage.notification,
       ),
       iOS: DarwinNotificationDetails(
         presentAlert: true,

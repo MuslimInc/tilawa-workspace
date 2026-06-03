@@ -39,6 +39,16 @@ abstract interface class IAdhanAlarmPlayer {
     String? sound,
   });
 
+  /// Starts adhan playback immediately via the native foreground service,
+  /// without [AlarmManager]. Used when [scheduleAdhan] fails (e.g. exact alarm
+  /// denied). Returns `false` when unsupported or start fails.
+  Future<bool> playAdhanNow({
+    required int id,
+    required String prayerName,
+    required String prayerKey,
+    String? sound,
+  });
+
   /// Cancel a previously scheduled adhan by [id].
   Future<void> cancelAdhan(int id, {String? prayerName});
 

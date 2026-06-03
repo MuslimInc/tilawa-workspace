@@ -112,7 +112,9 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
     required String prayerKey,
     String? sound,
   }) async {
-    if (!isSupported) return false;
+    if (!isSupported) {
+      return false;
+    }
     try {
       final bool ok =
           await _channel.invokeMethod<bool>('scheduleAdhan', {
@@ -132,6 +134,32 @@ class AndroidAdhanAlarmPlayer implements IAdhanAlarmPlayer {
       return ok;
     } on PlatformException catch (e) {
       logger.e('[AndroidAdhanAlarmPlayer] scheduleAdhan failed: ${e.message}');
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> playAdhanNow({
+    required int id,
+    required String prayerName,
+    required String prayerKey,
+    String? sound,
+  }) async {
+    if (!isSupported) {
+      return false;
+    }
+    try {
+      final bool ok =
+          await _channel.invokeMethod<bool>('playAdhanNow', {
+            'id': id,
+            'prayerName': prayerName,
+            'prayerKey': prayerKey,
+            'sound': sound,
+          }) ??
+          false;
+      return ok;
+    } on PlatformException catch (e) {
+      logger.e('[AndroidAdhanAlarmPlayer] playAdhanNow failed: ${e.message}');
       return false;
     }
   }
