@@ -5,6 +5,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:flutter_local_notifications_platform_interface/flutter_local_notifications_platform_interface.dart';
 import 'package:go_router/go_router.dart';
@@ -147,6 +149,17 @@ class AppRouter {
       try {
         final AudioPlayerBloc bloc = context.read<AudioPlayerBloc>();
         if (!bloc.state.hasAudio) {
+          if (getIt.isRegistered<AudioPlayerRepository>()) {
+            final bool handlerHasSession =
+                getIt<AudioPlayerRepository>().readActivePlaybackSnapshot() !=
+                null;
+            if (handlerHasSession) {
+              bloc.add(
+                const AudioPlayerEvent.requestPlaybackReconciliation(),
+              );
+              return null;
+            }
+          }
           return const HomeRoute().location;
         }
       } catch (_) {

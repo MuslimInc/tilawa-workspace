@@ -20,7 +20,11 @@ import 'package:tilawa/core/bootstrap/app_launch_config.dart';
 import 'package:tilawa/core/bootstrap/app_startup.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
 import 'package:tilawa/core/di/injection.dart';
+import 'package:tilawa/features/audio_player/domain/repositories/audio_player_repository.dart';
+import 'package:tilawa/features/audio_player/domain/services/playback_notification_bridge.dart';
 import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
+import 'package:tilawa/features/audio_player/presentation/player_presentation_controller.dart';
+import 'package:tilawa/features/audio_player/presentation/quran_player_presentation_entry.dart';
 import 'package:tilawa/core/logging/app_logger.dart';
 import 'package:tilawa_core/services/app_orientation_service.dart';
 import 'package:tilawa/core/observers/composite_bloc_observer.dart';
@@ -905,6 +909,7 @@ class AppStartupTasks {
           androidNotificationOngoing: true,
         ),
       );
+      _wirePlaybackNotificationBridge();
       _requestActivePlaybackSyncAfterHandlerReady();
       logger.d(
         '[AppLaunch] source=AppStartupTasks.initializeAudioService: Audio service initialized successfully at (${DateTime.now()})',
@@ -1021,11 +1026,37 @@ class AppStartupTasks {
     }
   }
 
+  void _wirePlaybackNotificationBridge() {
+    PlaybackNotificationBridge.onContentTap = () {
+      if (!getIt.isRegistered<AudioPlayerBloc>()) {
+        return;
+      }
+      final AudioPlayerBloc bloc = getIt<AudioPlayerBloc>();
+      bloc.add(const AudioPlayerEvent.requestPlaybackReconciliation());
+      final bool hasActiveAudio =
+          getIt.isRegistered<AudioPlayerRepository>() &&
+          (bloc.state.hasAudio ||
+              getIt<AudioPlayerRepository>().readActivePlaybackSnapshot() !=
+                  null);
+      if (!hasActiveAudio || !getIt.isRegistered<PlayerPresentationController>()) {
+        return;
+      }
+      unawaited(
+        QuranPlayerPresentationEntry.openExpanded(
+          presentation: getIt<PlayerPresentationController>(),
+          hasActiveAudio: true,
+        ),
+      );
+    };
+  }
+
   void _requestActivePlaybackSyncAfterHandlerReady() {
     if (!getIt.isRegistered<AudioPlayerBloc>()) {
       return;
     }
-    getIt<AudioPlayerBloc>().add(const AudioPlayerEvent.syncActivePlayback());
+    getIt<AudioPlayerBloc>().add(
+      const AudioPlayerEvent.requestPlaybackReconciliation(),
+    );
   }
 
   bool _isEnabled(bool isEnabled, String toggleName) {
