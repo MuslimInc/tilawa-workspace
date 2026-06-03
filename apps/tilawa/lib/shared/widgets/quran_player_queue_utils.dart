@@ -75,3 +75,32 @@ abstract final class QuranPlayerQueueUtils {
     return null;
   }
 }
+
+/// O(1) reuse of [QuranPlayerQueueUtils.queueIndexById] across rebuilds.
+final class QuranPlayerQueueIndexCache {
+  int _cachedGeneration = -1;
+  List<AudioEntity>? _cachedQueue;
+  Map<String, int>? _cachedIndexById;
+
+  /// Returns a cached map when [queueGeneration] and [queue] are unchanged.
+  Map<String, int> indexByIdFor({
+    required List<AudioEntity> queue,
+    required int queueGeneration,
+  }) {
+    if (_cachedGeneration == queueGeneration &&
+        identical(_cachedQueue, queue) &&
+        _cachedIndexById != null) {
+      return _cachedIndexById!;
+    }
+    _cachedGeneration = queueGeneration;
+    _cachedQueue = queue;
+    _cachedIndexById = QuranPlayerQueueUtils.queueIndexById(queue);
+    return _cachedIndexById!;
+  }
+
+  void clear() {
+    _cachedGeneration = -1;
+    _cachedQueue = null;
+    _cachedIndexById = null;
+  }
+}

@@ -404,7 +404,6 @@ class _AppShellChrome extends StatelessWidget {
           final bool narrow = context.isNarrow;
           final Widget player = QuranPlayerWidget(
             key: const ValueKey<String>('app_shell_quran_player'),
-            embeddedInShellFooter: true,
             isKeyboardOpen: isKeyboardOpen,
             hostAbsorbsBottomSafeArea: navVisible,
           );

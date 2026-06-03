@@ -161,22 +161,49 @@ class PlayerExpandTransitionMetrics {
     required double miniPlayerHeight,
     bool collapseBiased = false,
     bool heroHandoff = false,
+    bool interactiveDrag = false,
   }) {
     final double t = progress.clamp(0.0, 1.0);
 
-    // Hero handoff: keep footer mini visible until the flight is mostly done.
-    final double miniFull = heroHandoff ? 0.10 : 0.08;
-    final double miniGone = heroHandoff ? 0.82 : 0.42;
+    if (interactiveDrag && !collapseBiased) {
+      return _computeInteractiveDragMetrics(
+        progress: t,
+        miniPlayerHeight: miniPlayerHeight,
+      );
+    }
+
     const double expandedStart = 0.08;
     const double expandedFull = 0.48;
     const double queueStart = 0.86;
     const double sheetSettledExpanded = 0.98;
 
-    final double miniOpacity = t >= miniGone
-        ? 0
-        : t <= miniFull
-        ? 1
-        : Curves.easeInOut.transform((miniGone - t) / (miniGone - miniFull));
+    final double miniOpacity;
+    if (collapseBiased && !heroHandoff) {
+      // Footer handoff after `/player` pops: mini returns as progress falls.
+      const double miniHiddenAbove = 0.88;
+      const double miniFullBelow = 0.22;
+      if (t >= miniHiddenAbove) {
+        miniOpacity = 0;
+      } else if (t <= miniFullBelow) {
+        miniOpacity = 1;
+      } else {
+        miniOpacity = Curves.easeInOut.transform(
+          (miniHiddenAbove - t) / (miniHiddenAbove - miniFullBelow),
+        );
+      }
+    } else {
+      // YouTube Music: mini lingers while the sheet rides up; morph handles
+      // artwork/title through mid-transition (not a hard cut at ~40%).
+      final double miniFull = heroHandoff ? 0.10 : 0.06;
+      final double miniGone = heroHandoff ? 0.82 : 0.78;
+      miniOpacity = t >= miniGone
+          ? 0
+          : t <= miniFull
+          ? 1
+          : Curves.easeInOut.transform(
+              (miniGone - t) / (miniGone - miniFull),
+            );
+    }
 
     final double expandedOpacity = t <= expandedStart
         ? 0
@@ -193,28 +220,32 @@ class PlayerExpandTransitionMetrics {
 
     final double sheetTravelDim;
     if (collapseBiased) {
-      sheetTravelDim = t;
+      // Track progress but ease out opacity near fully expanded so the sheet
+      // does not read as a solid panel during the first collapse frames.
+      sheetTravelDim = t * (0.25 + 0.75 * t);
     } else if (t >= sheetSettledExpanded) {
       sheetTravelDim = 1;
     } else {
-      const double sheetFadeInBy = 0.58;
-      sheetTravelDim = Curves.easeOut.transform(
-        (t / sheetFadeInBy).clamp(0.0, 1.0),
+      // YouTube Music: feed stays visible; panel fill follows the finger and
+      // only becomes solid near the top (no opaque half-screen block at t≈0.5).
+      const double sheetOpaqueFrom = 0.90;
+      sheetTravelDim = Curves.easeIn.transform(
+        (t / sheetOpaqueFrom).clamp(0.0, 1.0),
       );
     }
     final double sheetPresentationOpacity =
         (expandedOpacity * sheetTravelDim).clamp(0.0, 1.0);
 
-    // Keep a minimum dim while the expanded sheet is visible (avoids white flash).
-    final double scrimBase =
-        (t * (0.12 + 0.38 * expandedOpacity)).clamp(0.0, 0.5);
+    // Dim scrim only — never paint an opaque surface backdrop during the
+    // transition (that reads as a full-height white flash while collapsing).
+    final double scrimBase = collapseBiased
+        ? (t * (0.12 + 0.38 * expandedOpacity)).clamp(0.0, 0.5)
+        : (0.45 * Curves.easeIn.transform(t)).clamp(0.0, 0.45);
     final double scrimOpacity = collapseBiased
-        ? (scrimBase * sheetTravelDim).clamp(0.0, 0.5)
+        ? (scrimBase * Curves.easeIn.transform(t)).clamp(0.0, 0.5)
         : scrimBase;
 
-    final double backdropOpacity = collapseBiased
-        ? (0.92 * sheetPresentationOpacity).clamp(0.0, 0.92)
-        : (0.92 * expandedOpacity).clamp(0.0, 0.92);
+    const double backdropOpacity = 0;
 
     final double queueChromeT = t <= queueStart
         ? 0
@@ -242,9 +273,69 @@ class PlayerExpandTransitionMetrics {
       sheetMotionT: sheetMotionT,
       queueChromeT: queueChromeT,
       showMiniPlayer: miniOpacity > 0.08,
-      showExpandedSheet:
-          t > 0.001 && sheetPresentationOpacity > 0.08,
+      showExpandedSheet: t > 0.001 &&
+          sheetPresentationOpacity > 0.08 &&
+          (!collapseBiased || t > 0.74),
       showMorphLayer: effectiveHandoffT > 0.02,
+    );
+  }
+
+  /// Finger-driven expand/collapse — linear sheet travel (1:1 with finger)
+  /// and YouTube Music expand-forward opacity (mini lingers, feed visible).
+  static PlayerExpandTransitionMetrics _computeInteractiveDragMetrics({
+    required double progress,
+    required double miniPlayerHeight,
+  }) {
+    final double t = progress.clamp(0.0, 1.0);
+
+    const double miniFull = 0.06;
+    const double miniGone = 0.78;
+    final double miniOpacity = t >= miniGone
+        ? 0
+        : t <= miniFull
+        ? 1
+        : Curves.easeInOut.transform(
+            (miniGone - t) / (miniGone - miniFull),
+          );
+
+    const double expandedStart = 0.08;
+    const double expandedFull = 0.48;
+    final double expandedOpacity = t <= expandedStart
+        ? 0
+        : t >= expandedFull
+        ? 1
+        : Curves.easeOut.transform(
+            (t - expandedStart) / (expandedFull - expandedStart),
+          );
+
+    const double sheetOpaqueFrom = 0.90;
+    final double sheetTravelDim = Curves.easeIn.transform(
+      (t / sheetOpaqueFrom).clamp(0.0, 1.0),
+    );
+    final double sheetPresentationOpacity =
+        (expandedOpacity * sheetTravelDim).clamp(0.0, 1.0);
+
+    final double miniSlideY = (1 - miniOpacity) * miniPlayerHeight * 0.2;
+    final double scrimOpacity = (0.45 * Curves.easeIn.transform(t)).clamp(
+      0.0,
+      0.45,
+    );
+
+    return PlayerExpandTransitionMetrics(
+      miniOpacity: miniOpacity,
+      expandedOpacity: expandedOpacity,
+      handoffT: 0,
+      stageChromeOpacity: 1,
+      miniIdentityOpacity: miniOpacity,
+      sheetPresentationOpacity: sheetPresentationOpacity,
+      backdropOpacity: 0,
+      scrimOpacity: scrimOpacity,
+      miniSlideY: miniSlideY,
+      sheetMotionT: t,
+      queueChromeT: 0,
+      showMiniPlayer: miniOpacity > 0.08,
+      showExpandedSheet: t > 0.001 && sheetPresentationOpacity > 0.08,
+      showMorphLayer: false,
     );
   }
 

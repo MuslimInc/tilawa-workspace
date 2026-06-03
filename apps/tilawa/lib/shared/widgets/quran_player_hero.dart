@@ -3,15 +3,10 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:tilawa/features/audio_player/presentation/quran_player_semantics_ids.dart';
 import 'package:tilawa/shared/widgets/quran_player_debug_log.dart';
+import 'package:tilawa/shared/widgets/quran_player_hero_tags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-/// Stable [Hero] tags for the Quran player shared-element flights.
-abstract final class QuranPlayerHeroTags {
-  static String artwork(String audioId) => 'quran_player_artwork_$audioId';
-
-  static String metadata(String audioId) => 'quran_player_metadata_$audioId';
-}
-
+// coverage:ignore-file — Hero flight callbacks; build paths covered in widget tests.
 /// Album art that morphs between mini and expanded via [Hero].
 class QuranPlayerHeroArtwork extends StatelessWidget {
   const QuranPlayerHeroArtwork({
@@ -230,136 +225,5 @@ class QuranPlayerHeroMetadata extends StatelessWidget {
         child: metadata,
       ),
     );
-  }
-}
-
-/// Legacy imperative route — use [QuranPlayerExpandedRoute] (`/player`) instead.
-@Deprecated('Use QuranPlayerExpandedRoute via GoRouter')
-class QuranPlayerExpandedHeroRoute<T> extends PageRoute<T> {
-  QuranPlayerExpandedHeroRoute({
-    required this.pageBuilder,
-    this.onTransitionStart,
-    this.onTransitionEnd,
-    super.settings,
-  });
-
-  final Widget Function(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  )
-  pageBuilder;
-
-  final VoidCallback? onTransitionStart;
-  final VoidCallback? onTransitionEnd;
-
-  double? _lastLoggedTransitionT;
-  CurvedAnimation? _curvedPrimary;
-
-  Animation<double> _primaryCurve(Animation<double> parent) {
-    _curvedPrimary ??= CurvedAnimation(
-      parent: parent,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.easeInCubic,
-    );
-    return _curvedPrimary!;
-  }
-
-  @override
-  void dispose() {
-    _curvedPrimary?.dispose();
-    super.dispose();
-  }
-
-  @override
-  bool get opaque => false;
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  bool get barrierDismissible => false;
-
-  @override
-  Color? get barrierColor => null;
-
-  @override
-  String? get barrierLabel => null;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 420);
-
-  @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 360);
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    return pageBuilder(
-      context,
-      _primaryCurve(animation),
-      secondaryAnimation,
-    );
-  }
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-    final Animation<double> curved = _primaryCurve(animation);
-
-    return AnimatedBuilder(
-      animation: curved,
-      builder: (context, _) {
-        final double t = curved.value;
-        final double? last = _lastLoggedTransitionT;
-        if (last == null || (t - last).abs() >= 0.05 || t == 0 || t == 1) {
-          _lastLoggedTransitionT = t;
-          QuranPlayerDebugLog.hero(
-            'route.transition',
-            <String, Object?>{
-              't': t.toStringAsFixed(3),
-              'rawT': animation.value.toStringAsFixed(3),
-              'status': animation.status.name,
-            },
-          );
-        }
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            ColoredBox(
-              color: scheme.surface.withValues(alpha: (0.88 * t).clamp(0.0, 0.88)),
-            ),
-            ColoredBox(
-              color: scheme.scrim.withValues(alpha: (0.42 * t).clamp(0.0, 0.42)),
-            ),
-            child,
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  TickerFuture didPush() {
-    _lastLoggedTransitionT = null;
-    QuranPlayerDebugLog.hero('route.push', const <String, Object?>{});
-    onTransitionStart?.call();
-    return super.didPush();
-  }
-
-  @override
-  bool didPop(T? result) {
-    _lastLoggedTransitionT = null;
-    QuranPlayerDebugLog.hero('route.pop', const <String, Object?>{});
-    onTransitionEnd?.call();
-    return super.didPop(result);
   }
 }

@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +24,7 @@ import '../../features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import '../../features/audio_player/presentation/cubit/player_background_cubit.dart';
 import '../../features/audio_player/presentation/player_presentation_controller.dart';
 import '../../features/audio_player/presentation/player_presentation_phase.dart';
-import '../../features/audio_player/presentation/quran_player_navigation.dart';
+import '../../features/audio_player/presentation/player_shell_overlay_host.dart';
 import '../../features/audio_player/presentation/quran_player_presentation_entry.dart';
 import '../../features/audio_player/presentation/quran_player_semantics_ids.dart';
 import '../../features/audio_player/presentation/widgets/background_source_dialog.dart';
@@ -33,6 +35,7 @@ import '../../helpers/show_slider_dialog.dart';
 import '../models/position_data.dart';
 import 'quran_player_chrome.dart';
 import 'quran_player_debug_log.dart';
+import 'quran_player_expand_gesture_policy.dart';
 import 'quran_player_expand_physics.dart';
 import 'quran_player_hero.dart';
 import 'quran_player_morph_layer.dart';
@@ -53,7 +56,6 @@ class QuranPlayerWidget extends StatefulWidget {
     this.bottomNavBarHeight = 0,
     this.isKeyboardOpen = false,
     this.hostAbsorbsBottomSafeArea = false,
-    this.embeddedInShellFooter = false,
   });
 
   static double collapsedHeight(BuildContext context) =>
@@ -92,10 +94,10 @@ class QuranPlayerWidget extends StatefulWidget {
           return collapsedHeight(context);
         }
         return QuranPlayerLayoutInsets.phoneFooterSlotHeight(
-          context,
-          playerHeight: collapsedHeight(context),
-          hostAbsorbsBottomSafeArea: shell.hostAbsorbsBottomSafeArea,
-        ) +
+              context,
+              playerHeight: collapsedHeight(context),
+              hostAbsorbsBottomSafeArea: shell.hostAbsorbsBottomSafeArea,
+            ) +
             shell.bottomNavBarHeight;
       }
     }
@@ -142,10 +144,6 @@ class QuranPlayerWidget extends StatefulWidget {
   /// includes the system gesture inset.
   final bool hostAbsorbsBottomSafeArea;
 
-  /// When true, the mini player is laid out in [TilawaAdaptiveShell]'s
-  /// [TilawaAdaptiveShell.phoneFooterAboveNav] slot (above the bottom nav).
-  /// The expanded sheet is rendered in the root overlay via [OverlayPortal].
-  final bool embeddedInShellFooter;
 
   @override
   State<QuranPlayerWidget> createState() => QuranPlayerWidgetState();
@@ -155,8 +153,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     with TickerProviderStateMixin {
   late AnimationController _expandController;
   final OverlayPortalController _portalController = OverlayPortalController();
-  bool _portalVisibilitySyncScheduled = false;
-
   late PlayerPresentationController _presentation;
   String? _lastSyncedRoutePath;
   late final void Function() _systemBackHandle;
@@ -179,14 +175,39 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   /// Progress when the current expand/collapse drag began.
   double _expandDragStartProgress = 0;
 
-  double? _lastLoggedExpandProgress;
-  int _lastDragLogMs = 0;
-  String? _lastLayoutLogSignature;
+  /// Frozen at [drag.start] so overlay layout cannot retune travel mid-gesture.
+  double? _expandDragFrozenAnchorHeight;
+
+  /// Routes all pointer moves to [_applyExpandDragPixels] while the shell
+  /// footer drag is active. The overlay portal paints above the footer mini,
+  /// so the footer [GestureDetector] often stops receiving updates after the
+  /// first frame even though the arena was won at pointer-down.
+  bool _shellExpandPointerRouteAttached = false;
+  PointerRoute? _shellExpandPointerRoute;
+  bool _expandDragEndHandled = false;
+  int? _expandDragActivePointerId;
+
+  bool _idleShellSettleScheduled = false;
+
+
+  /// Coalesced target for [_syncShellPortalVisibility] (applied post-frame
+  /// when the scheduler is in [SchedulerPhase.persistentCallbacks]).
+  bool _pendingPortalVisible = false;
+  bool _shellPortalVisibilitySyncScheduled = false;
 
   /// Controls the swipe-down-to-dismiss offset for the mini player.
   double _dismissOffsetY = 0;
   Animation<double>? _dismissAnimation;
   late AnimationController _dismissAnimController;
+
+  late final PlayerShellOverlayHost _shellOverlayHost;
+
+  /// Cached screen height minus the shell footer slot top in the overlay.
+  ///
+  /// Set each frame in the overlay builder so [_applyExpandDragPixels] can
+  /// use the same anchor the sheet geometry uses. Falls back to
+  /// [_miniPlayerHeight] until the first overlay layout.
+  double _shellAnchorHeight = 0;
 
   /// The height of the mini player bar (excluding nav bar offset).
   /// Must be tall enough for: outer padding (8+16) + progress bar (3) +
@@ -194,52 +215,23 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   double get _miniPlayerHeight => QuranPlayerWidget.collapsedHeight(context);
 
   /// Whether the player is currently expanded.
-  bool get isExpanded => _usesHeroExpansion
-      ? _presentation.isExpandedSettled
-      : _expandController.value == 1.0;
+  bool get isExpanded => _presentation.isExpandedSettled;
 
   /// Whether the player is currently expanding or expanded.
-  bool get isExpanding => _usesHeroExpansion
-      ? _presentation.routeOpen || _presentation.visualProgress > 0.01
-      : _expandController.value > 0.01;
-
-  double get _visualExpandProgress => _usesHeroExpansion
-      ? _presentation.visualProgress
-      : _expandController.value;
-
-  /// Shell footer uses a root [Hero] route instead of [OverlayPortal] morphing.
-  bool get _usesHeroExpansion => widget.embeddedInShellFooter;
+  bool get isExpanding =>
+      _presentation.visualProgress > 0.01 ||
+      _expandController.isAnimating ||
+      _isUserDraggingExpand;
 
   Map<String, Object?> _coreStateFields() {
-    if (_usesHeroExpansion) {
-      return <String, Object?>{
-        ..._presentation.snapshot(),
-        'dismissOffsetY': _dismissOffsetY.toStringAsFixed(1),
-        'route': _currentRoutePath(),
-        'embeddedInShellFooter': widget.embeddedInShellFooter,
-        'portalShowing': null,
-      };
-    }
     return <String, Object?>{
-      'visualMode': QuranPlayerDebugLog.playerMode(
-        expandProgress: _expandController.value,
-        isCollapsing: _isCollapsing,
-        isUserDragging: _isUserDraggingExpand,
-        transitionOwner: 'expandController',
-      ),
-      'visualProgress': _expandController.value.toStringAsFixed(3),
-      'transitionOwner': 'expandController',
-      'renderTree': 'overlay',
+      ..._presentation.snapshot(),
+      'expandProgress': _expandController.value.toStringAsFixed(3),
       'expandStatus': _expandController.status.name,
       'expandIsAnimating': _expandController.isAnimating,
-      'isCollapsing': _isCollapsing,
-      'isUserDragging': _isUserDraggingExpand,
       'dismissOffsetY': _dismissOffsetY.toStringAsFixed(1),
       'route': _currentRoutePath(),
-      'embeddedInShellFooter': widget.embeddedInShellFooter,
-      'portalShowing': widget.embeddedInShellFooter
-          ? _portalController.isShowing
-          : null,
+      'portalShowing': _portalController.isShowing,
     };
   }
 
@@ -254,107 +246,10 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
   }
 
-  void _maybeLogDragProgress(String source, {required double primaryDelta}) {
-    if (!QuranPlayerDebugLog.enabled) {
-      return;
-    }
-    final double progress = _visualExpandProgress;
-    final int now = DateTime.now().millisecondsSinceEpoch;
-    final double? last = _lastLoggedExpandProgress;
-    final bool progressMoved = last == null || (progress - last).abs() >= 0.025;
-    final bool throttled = now - _lastDragLogMs < 100;
-    if (!progressMoved && throttled) {
-      return;
-    }
-    _lastLoggedExpandProgress = progress;
-    _lastDragLogMs = now;
-    final metrics = _transitionMetrics(progress);
-    QuranPlayerDebugLog.maybeWarnTransitionGap(
-      progress: progress,
-      miniOpacity: metrics.miniOpacity,
-      expandedOpacity: metrics.expandedOpacity,
-      source: source,
-    );
-    QuranPlayerDebugLog.drag(
-      'update',
-      <String, Object?>{
-        'source': source,
-        'primaryDelta': primaryDelta.toStringAsFixed(1),
-        ..._coreStateFields(),
-        'miniOpacity': metrics.miniOpacity.toStringAsFixed(3),
-        'expandedOpacity': metrics.expandedOpacity.toStringAsFixed(3),
-        'sheetPresentationOpacity': metrics.sheetPresentationOpacity
-            .toStringAsFixed(3),
-        'sheetMotionT': metrics.sheetMotionT.toStringAsFixed(3),
-        'queueChromeT': metrics.queueChromeT.toStringAsFixed(3),
-        'showMini': metrics.showMiniPlayer,
-        'showExpanded': metrics.showExpandedSheet,
-      },
-    );
-  }
-
-  void _maybeLogLayoutTree({
-    required String tree,
-    required double progress,
-    required PlayerExpandTransitionMetrics metrics,
-    required Size overlaySize,
-    required Rect hostRect,
-    required bool showMiniInTree,
-    required bool miniAnchoredInFooter,
-    required bool animateShellInOverlay,
-    required double bottomInset,
-  }) {
-    if (!QuranPlayerDebugLog.enabled) {
-      return;
-    }
-    final String signature =
-        '$tree|${progress.toStringAsFixed(2)}|'
-        '${metrics.showMiniPlayer}|${metrics.showExpandedSheet}|'
-        '$animateShellInOverlay';
-    if (_lastLayoutLogSignature == signature) {
-      return;
-    }
-    _lastLayoutLogSignature = signature;
-    QuranPlayerDebugLog.maybeWarnTransitionGap(
-      progress: progress,
-      miniOpacity: metrics.miniOpacity,
-      expandedOpacity: metrics.expandedOpacity,
-      source: 'layout.$tree',
-    );
-    QuranPlayerDebugLog.layout(
-      'tree',
-      <String, Object?>{
-        'tree': tree,
-        ..._coreStateFields(),
-        'overlayW': overlaySize.width.toStringAsFixed(0),
-        'overlayH': overlaySize.height.toStringAsFixed(0),
-        'hostTop': hostRect.top.toStringAsFixed(0),
-        'hostBottom': hostRect.bottom.toStringAsFixed(0),
-        'showMiniInTree': showMiniInTree,
-        'miniAnchoredInFooter': miniAnchoredInFooter,
-        'animateShellInOverlay': animateShellInOverlay,
-        'bottomInset': bottomInset.toStringAsFixed(1),
-        'miniOpacity': metrics.miniOpacity.toStringAsFixed(3),
-        'expandedOpacity': metrics.expandedOpacity.toStringAsFixed(3),
-        'sheetPresentationOpacity': metrics.sheetPresentationOpacity
-            .toStringAsFixed(3),
-        'scrimOpacity': metrics.scrimOpacity.toStringAsFixed(3),
-        'sheetMotionT': metrics.sheetMotionT.toStringAsFixed(3),
-        'queueChromeT': metrics.queueChromeT.toStringAsFixed(3),
-        'showMini': metrics.showMiniPlayer,
-        'showExpanded': metrics.showExpandedSheet,
-        if (miniAnchoredInFooter && _usesHeroExpansion)
-          'expandedInFooterTree': false,
-      },
-    );
-  }
-
   @override
   void initState() {
     super.initState();
-    QuranPlayerDebugLog.lifecycle('initState', <String, Object?>{
-      'embeddedInShellFooter': widget.embeddedInShellFooter,
-    });
+    QuranPlayerDebugLog.lifecycle('initState', const <String, Object?>{});
     // Token-aligned: durationMedium (400ms). Cannot read tokens in initState
     // (no theme/build context yet); keep literals in sync with
     // TilawaDesignTokens by hand.
@@ -370,10 +265,13 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
 
     _presentation = getIt<PlayerPresentationController>();
+    _shellOverlayHost = _QuranPlayerShellOverlayHost(this);
     _expandController.addListener(_syncExpandedPlayerSystemChrome);
     _expandController.addListener(_syncSystemBackIntercepts);
     _expandController.addStatusListener(_onExpandAnimationStatus);
     _presentation.addListener(_onPresentationChanged);
+    _presentation.bindShellOverlay(_shellOverlayHost);
+    _expandController.addListener(_onShellExpandControllerTick);
 
     _systemBackHandle = handleSystemBack;
     _dismissHandle = _dismissWithUndo;
@@ -384,9 +282,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       if (mounted) {
         QuranPlayerDebugLog.lifecycle('firstFrame', _coreStateFields());
         _syncExpandedPlayerSystemChrome();
-        if (widget.embeddedInShellFooter && !_usesHeroExpansion) {
-          _schedulePortalVisibilitySync();
-        }
+        _settleIdleShellOverlayIfNeeded(reason: 'firstFrame');
       }
     });
   }
@@ -408,19 +304,14 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         },
       );
       _lastSyncedRoutePath = path;
-      if (_usesHeroExpansion) {
-        _reconcileHeroRouteWithNavigation();
-      } else {
-        _settleExpandOnRouteChange();
-      }
+      _presentation.reconcileWithNavigationStack();
     }
   }
 
   @override
   void didUpdateWidget(covariant QuranPlayerWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.embeddedInShellFooter != widget.embeddedInShellFooter ||
-        oldWidget.bottomNavBarHeight != widget.bottomNavBarHeight ||
+    if (oldWidget.bottomNavBarHeight != widget.bottomNavBarHeight ||
         oldWidget.isKeyboardOpen != widget.isKeyboardOpen) {
       QuranPlayerDebugLog.lifecycle(
         'didUpdateWidget',
@@ -434,9 +325,36 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   }
 
   @override
+  void reassemble() {
+    super.reassemble();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _settleIdleShellOverlayIfNeeded(reason: 'reassemble');
+    });
+  }
+
+  @override
   void deactivate() {
     QuranPlayerDebugLog.lifecycle('deactivate', _coreStateFields());
-    QuranPlayerSystemBackCoordinator.setIntercepts(false);
+    _detachShellExpandPointerRoute();
+    _isUserDraggingExpand = false;
+    _expandDragNetDy = 0;
+    _expandDragFrozenAnchorHeight = null;
+    _expandDragActivePointerId = null;
+    if (_expandController.isAnimating) {
+      _expandController.stop();
+    }
+    final double progress = _expandController.value;
+    if (progress > 0.01 && progress < 0.99) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        _snapShellOverlayIdleProgress(immediate: true);
+      });
+    }
     QuranPlayerSystemBackCoordinator.unbind(handle: _systemBackHandle);
     context
         .read<QuranPlayerChromeNotifier>()
@@ -447,8 +365,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   @override
   void dispose() {
     QuranPlayerDebugLog.lifecycle('dispose', _coreStateFields());
+    _detachShellExpandPointerRoute();
     _presentation.unbindDismissPlayer(handle: _dismissHandle);
     _presentation.unbindSystemBack(handle: _systemBackHandle);
+    _presentation.unbindShellOverlay(_shellOverlayHost);
+    _expandController.removeListener(_onShellExpandControllerTick);
+    _hideShellPortalSafely();
     _presentation.removeListener(_onPresentationChanged);
     QuranPlayerSystemBackCoordinator.unbind(handle: _systemBackHandle);
     _expandController.removeStatusListener(_onExpandAnimationStatus);
@@ -467,7 +389,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     final bool intercepts =
         QuranPlayerRoutePolicy.shouldShowPlayer(_currentRoutePath()) &&
         _audioBloc.state.shouldShowBottomPlayer &&
-        (_usesHeroExpansion ? _presentation.routeOpen : isExpanding);
+        isExpanding;
     QuranPlayerSystemBackCoordinator.setIntercepts(intercepts);
   }
 
@@ -490,13 +412,231 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       if (!mounted) {
         return;
       }
-      if (_usesHeroExpansion &&
-          _presentation.phase == PlayerPresentationPhase.mini) {
-        _isCollapsing = false;
-      }
+      _isCollapsing =
+            _presentation.phase == PlayerPresentationPhase.collapsing ||
+            _presentation.collapseBiasedForMetrics;
+        if (_presentation.phase == PlayerPresentationPhase.mini) {
+          _isCollapsing = false;
+        }
+      _syncShellPortalVisibility();
       _syncExpandedPlayerSystemChrome();
       _syncSystemBackIntercepts();
     });
+  }
+
+  void _onShellExpandControllerTick() {
+    _syncShellPortalVisibility();
+    _syncShellOverlayPresentation();
+  }
+
+  void _syncShellOverlayPresentation() {
+    if (!_presentation.hasShellOverlayHost) {
+      _presentation.bindShellOverlay(_shellOverlayHost);
+    }
+    _presentation.syncShellOverlayProgress(
+      progress: _expandController.value,
+      status: _expandController.status,
+      isCollapsing: _isCollapsing,
+      isUserDragging: _isUserDraggingExpand,
+    );
+  }
+
+  /// Keeps [PlayerPresentationController] aligned with [_expandController].
+  void _reconcileShellPresentationWithController() {
+    if (!mounted) {
+      return;
+    }
+    final double controllerProgress = _expandController.value;
+    if ((_presentation.transitionProgress - controllerProgress).abs() <=
+        0.015) {
+      return;
+    }
+    QuranPlayerDebugLog.warn(
+      'shell.presentationDesync',
+      <String, Object?>{
+        'controller': controllerProgress.toStringAsFixed(3),
+        'presentation': _presentation.transitionProgress.toStringAsFixed(3),
+        'phase': _presentation.phase.name,
+      },
+    );
+    _syncShellOverlayPresentation();
+  }
+
+  void _scheduleIdleShellOverlaySettleIfNeeded() {
+    if (_idleShellSettleScheduled) {
+      return;
+    }
+    _idleShellSettleScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _idleShellSettleScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      _reconcileShellPresentationWithController();
+      if (_expandController.isAnimating || _isUserDraggingExpand) {
+        return;
+      }
+      final double progress = _expandController.value;
+      if (progress > 0.02 && progress < 0.98) {
+        _settleIdleShellOverlayIfNeeded(reason: 'idleMidProgress');
+      }
+    });
+  }
+
+  /// OverlayPortal paints **above** its [child]. When collapsed, the portal
+  /// must be hidden or the mini bar is covered (list shows through).
+  void _syncShellPortalVisibility() {
+    final bool wantOverlay =
+        _expandController.value > 0.01 ||
+        _expandController.isAnimating ||
+        _isUserDraggingExpand;
+    if (wantOverlay == _pendingPortalVisible &&
+        _shellPortalVisibilitySyncScheduled) {
+      return;
+    }
+    _pendingPortalVisible = wantOverlay;
+    _scheduleShellPortalVisibilitySync();
+  }
+
+  void _scheduleShellPortalVisibilitySync() {
+    if (_shellPortalVisibilitySyncScheduled) {
+      return;
+    }
+    _shellPortalVisibilitySyncScheduled = true;
+    void apply() {
+      _shellPortalVisibilitySyncScheduled = false;
+      if (!mounted) {
+        return;
+      }
+      final bool show = _pendingPortalVisible;
+      if (show) {
+        if (!_portalController.isShowing) {
+          _portalController.show();
+        }
+      } else if (_portalController.isShowing) {
+        _portalController.hide();
+      }
+    }
+
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => apply());
+      return;
+    }
+    apply();
+  }
+
+  void _hideShellPortalSafely() {
+    _pendingPortalVisible = false;
+    if (!_portalController.isShowing) {
+      return;
+    }
+    void hide() {
+      if (_portalController.isShowing) {
+        _portalController.hide();
+      }
+    }
+
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => hide());
+      return;
+    }
+    hide();
+  }
+
+  bool get _shellOverlayPortalActive =>
+      _expandController.value > 0.01 ||
+      _expandController.isAnimating ||
+      _isUserDraggingExpand;
+
+  /// Snaps an idle, interrupted shell transition to mini or expanded.
+  ///
+  /// When [collapseBiased] is true at mid-progress, opacity curves keep the
+  /// mini nearly invisible until progress reaches ~0.22 — snap to mini.
+  void _snapShellOverlayIdleProgress({required bool immediate}) {
+    if (!mounted) {
+      return;
+    }
+    final double progress = _expandController.value;
+    if (progress <= 0.01) {
+      _isCollapsing = false;
+      _syncShellOverlayPresentation();
+      _syncShellPortalVisibility();
+      return;
+    }
+    if (progress >= 0.99) {
+      _isCollapsing = false;
+      _syncShellOverlayPresentation();
+      _syncShellPortalVisibility();
+      return;
+    }
+
+    final bool collapseStuck =
+        _isCollapsing ||
+        _presentation.collapseBiasedForMetrics ||
+        _presentation.phase == PlayerPresentationPhase.collapsing;
+    final double threshold = context.tokens.playerProgressThreshold;
+    final double target = collapseStuck
+        ? 0.0
+        : (progress < threshold ? 0.0 : 1.0);
+
+    _isCollapsing = target == 0.0;
+
+    QuranPlayerDebugLog.animation(
+      'shell.snap.idle',
+      <String, Object?>{
+        'from': progress.toStringAsFixed(3),
+        'target': target.toStringAsFixed(0),
+        'collapseStuck': collapseStuck,
+        'immediate': immediate,
+        ..._coreStateFields(),
+      },
+    );
+
+    if (immediate) {
+      _expandController.removeListener(_onShellExpandControllerTick);
+      _expandController.value = target;
+      _expandController.addListener(_onShellExpandControllerTick);
+      _onShellExpandControllerTick();
+    } else {
+      unawaited(
+        _expandController.animateTo(
+          target,
+          duration: context.tokens.durationMedium,
+          curve: Curves.easeOutCubic,
+        ),
+      );
+    }
+    _syncShellPortalVisibility();
+  }
+
+  void _settleIdleShellOverlayIfNeeded({required String reason}) {
+    if (!mounted) {
+      return;
+    }
+    if (_expandController.isAnimating || _isUserDraggingExpand) {
+      _syncShellPortalVisibility();
+      return;
+    }
+    final double progress = _expandController.value;
+    if (progress <= 0.02 || progress >= 0.98) {
+      if (progress <= 0.02 && progress > 0) {
+        _expandController.value = 0;
+      }
+      _isCollapsing = false;
+      _syncShellOverlayPresentation();
+      _syncShellPortalVisibility();
+      return;
+    }
+    QuranPlayerDebugLog.animation(
+      'shell.settle.$reason',
+      <String, Object?>{
+        'from': progress.toStringAsFixed(3),
+        ..._coreStateFields(),
+      },
+    );
+    _snapShellOverlayIdleProgress(immediate: true);
   }
 
   /// Edge-to-edge nav is transparent; publish the queue sheet color app-wide
@@ -507,10 +647,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     }
     final QuranPlayerChromeNotifier notifier = context
         .read<QuranPlayerChromeNotifier>();
-    final bool overlayActive = _usesHeroExpansion
-        ? _presentation.overlayChromeActive
-        : _expandController.value > 0.01 &&
-              (!widget.embeddedInShellFooter || _portalController.isShowing);
+    final bool overlayActive =
+        _presentation.overlayChromeActive && _portalController.isShowing;
     if (overlayActive) {
       notifier.setSystemNavigationBarColorOverride(
         quranPlayerQueueSheetColor(Theme.of(context).colorScheme),
@@ -520,91 +658,68 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     }
   }
 
-  void _schedulePortalVisibilitySync() {
-    if (_portalVisibilitySyncScheduled) {
-      return;
-    }
-    _portalVisibilitySyncScheduled = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _portalVisibilitySyncScheduled = false;
-      if (!mounted) {
-        QuranPlayerDebugLog.warn(
-          'overlay.portalSync.unmounted',
-          const <String, Object?>{},
-        );
-        return;
-      }
-      final bool wasShowing = _portalController.isShowing;
-      if (!wasShowing) {
-        _portalController.show();
-      }
-      QuranPlayerDebugLog.overlay(
-        'portalSync',
-        <String, Object?>{
-          'wasShowing': wasShowing,
-          'isShowing': _portalController.isShowing,
-          ..._coreStateFields(),
-        },
-      );
-      _syncExpandedPlayerSystemChrome();
-    });
-  }
-
   /// Expand the player to full-screen.
   ///
-  /// Shell footer: pushes a [Hero] route. Other layouts: animates progress.
+  /// Shell footer: in-place overlay via [PlayerPresentationController].
   void expand() {
     HapticFeedback.lightImpact();
     _isCollapsing = false;
-    _lastLayoutLogSignature = null;
-    if (_usesHeroExpansion) {
+    unawaited(
       QuranPlayerPresentationEntry.openExpanded(
         presentation: _presentation,
         hasActiveAudio: _audioBloc.state.hasAudio,
-      );
-      return;
-    }
-    QuranPlayerDebugLog.animation(
-      'expand.start',
-      <String, Object?>{
-        'from': _expandController.value.toStringAsFixed(3),
-        'hero': false,
-        ..._coreStateFields(),
-      },
+      ),
     );
-    _expandController.animateTo(
+  }
+
+  Future<void> _expandShellOverlay() async {
+    _isCollapsing = false;
+    _syncShellPortalVisibility();
+    await _expandController.animateTo(
       1.0,
       duration: context.tokens.durationMedium,
       curve: Curves.easeOutCubic,
     );
   }
 
-  /// Collapse the player back to the mini bar.
-  void collapse() {
+  Future<void> _collapseShellOverlay() async {
     _isCollapsing = true;
-    _lastLayoutLogSignature = null;
-    QuranPlayerDebugLog.animation(
-      'collapse.start',
-      <String, Object?>{
-        'from': _expandController.value.toStringAsFixed(3),
-        'hero': _usesHeroExpansion,
-        ..._coreStateFields(),
-      },
-    );
-    if (_usesHeroExpansion) {
-      _presentation.collapse();
-      return;
-    }
-    _expandController.animateTo(
+    _syncShellPortalVisibility();
+    await _expandController.animateTo(
       0.0,
       duration: const Duration(milliseconds: 360),
       curve: Curves.easeOutCubic,
     );
+    if (mounted) {
+      _isCollapsing = false;
+      _syncShellPortalVisibility();
+    }
+  }
+
+  /// Collapse the player back to the mini bar.
+  void collapse() {
+    _isCollapsing = true;
+    QuranPlayerDebugLog.animation(
+      'collapse.start',
+      <String, Object?>{
+        'from': _expandController.value.toStringAsFixed(3),
+        ..._coreStateFields(),
+      },
+    );
+    _presentation.collapse();
   }
 
   /// Phone shell: animate sheet + mini in one overlay layer to avoid desync.
-  bool get _animateShellInOverlay =>
-      widget.embeddedInShellFooter && _expandController.isAnimating;
+  /// True when the sheet must render in the overlay layer (above the shell
+  /// scaffold) rather than in the footer slot. This is required both during
+  /// programmatic animations AND during user drag — otherwise the expanding
+  /// sheet renders inside the footer slot and the page content paints on top.
+  bool get _animateShellInOverlay {
+    final double progress = _expandController.value;
+    return _expandController.isAnimating ||
+        _isUserDraggingExpand ||
+        (_portalController.isShowing && progress > 0.01 && progress < 0.99);
+  }
 
   void _onExpandAnimationStatus(AnimationStatus status) {
     if (!mounted) {
@@ -622,15 +737,13 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
     if (status == AnimationStatus.completed ||
         status == AnimationStatus.dismissed) {
-      if (!_usesHeroExpansion) {
-        if (_expandController.value <= 0.01) {
-          _isCollapsing = false;
-        }
-        if (_expandController.value >= 0.99) {
-          _isCollapsing = false;
-        }
+      if (_expandController.value <= 0.01) {
+        _isCollapsing = false;
       }
-      _isUserDraggingExpand = false;
+      if (_expandController.value >= 0.99) {
+        _isCollapsing = false;
+      }
+      _settleIdleShellOverlayIfNeeded(reason: 'animationStatus');
     }
   }
 
@@ -657,10 +770,11 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     return PlayerExpandTransitionMetrics.compute(
       progress: progress,
       miniPlayerHeight: _miniPlayerHeight,
-      collapseBiased: _usesHeroExpansion
-          ? _isCollapsing
-          : _collapseBiasedMetrics(progress),
-      heroHandoff: footerHandoff && _usesHeroExpansion,
+      interactiveDrag: _isUserDraggingExpand,
+      collapseBiased: _isUserDraggingExpand
+          ? _collapseBiasedMetrics(progress)
+          : _presentation.collapseBiasedForMetrics,
+      heroHandoff: footerHandoff && _presentation.routeOpen,
     );
   }
 
@@ -687,10 +801,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   double _sheetTravelOffset({
     required PlayerExpandTransitionMetrics metrics,
     required double screenHeight,
-    required double collapseAnchorY,
+    required double miniPlayerHeight,
   }) {
-    final double travel = collapseAnchorY > 0 ? collapseAnchorY : screenHeight;
-    return travel * (1 - metrics.sheetMotionT);
+    final double t = metrics.sheetMotionT.clamp(0.0, 1.0);
+    final double sheetHeight =
+        miniPlayerHeight + (screenHeight - miniPlayerHeight) * t;
+    return screenHeight - sheetHeight;
   }
 
   Widget? _buildMorphLayer(
@@ -702,7 +818,12 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     required Rect miniBarRect,
     required double collapseAnchorY,
   }) {
-    if (_usesHeroExpansion || !metrics.showMorphLayer) {
+    if (!metrics.showMorphLayer) {
+      return null;
+    }
+    // Hero artwork uses [Hero] while `/player` is open; morph handles the
+    // footer handoff after the route leaves the stack.
+    if (_presentation.routeOpen) {
       return null;
     }
     final theme = Theme.of(context);
@@ -715,6 +836,9 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       barTokens: barTokens,
       expandedArtBorderRadius: tokens.radiusLarge,
     );
+    final double morphAnchor = _shellAnchorHeight > 0
+        ? _shellAnchorHeight
+        : _miniPlayerHeight;
     final layout = QuranPlayerMorphLayout.compute(
       progress: progress,
       viewport: overlaySize,
@@ -722,7 +846,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       sheetOffsetY: _sheetTravelOffset(
         metrics: metrics,
         screenHeight: overlaySize.height,
-        collapseAnchorY: collapseAnchorY,
+        miniPlayerHeight: morphAnchor,
       ),
       geometry: geometry,
     );
@@ -734,97 +858,88 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     );
   }
 
-  /// Snaps hero presentation to GoRouter, or mid-transition overlay progress.
-  void _settleExpandOnRouteChange() {
-    if (_usesHeroExpansion) {
+  void _attachShellExpandPointerRoute() {
+    if (_shellExpandPointerRouteAttached) {
       return;
     }
-    if (_isUserDraggingExpand) {
-      _finishExpandDrag(
-        DragEndDetails(),
-        source: 'route',
+    _shellExpandPointerRoute ??= _handleShellExpandPointerEvent;
+    GestureBinding.instance.pointerRouter.addGlobalRoute(
+      _shellExpandPointerRoute!,
+    );
+    _shellExpandPointerRouteAttached = true;
+  }
+
+  void _detachShellExpandPointerRoute() {
+    if (!_shellExpandPointerRouteAttached ||
+        _shellExpandPointerRoute == null) {
+      return;
+    }
+    GestureBinding.instance.pointerRouter.removeGlobalRoute(
+      _shellExpandPointerRoute!,
+    );
+    _shellExpandPointerRouteAttached = false;
+  }
+
+  void _handleShellExpandPointerEvent(PointerEvent event) {
+    if (!_isUserDraggingExpand) {
+      return;
+    }
+    if (event is PointerMoveEvent) {
+      if (!QuranPlayerExpandGesturePolicy.shouldPointerRouteApplyMove(
+        isUserDraggingExpand: _isUserDraggingExpand,
+        activePointerId: _expandDragActivePointerId,
+        eventPointerId: event.pointer,
+      )) {
+        return;
+      }
+      _expandDragActivePointerId ??= event.pointer;
+      _applyExpandDragPixels(
+        event.delta.dy,
+        source: 'pointerRoute',
+        channel: QuranPlayerExpandDragChannel.pointerRoute,
       );
       return;
     }
-    if (_expandController.isAnimating) {
-      return;
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      if (!QuranPlayerExpandGesturePolicy.shouldPointerRouteFinishOnRelease(
+        pointerRouteAttached: _shellExpandPointerRouteAttached,
+        dragEndHandled: _expandDragEndHandled,
+        activePointerId: _expandDragActivePointerId,
+        eventPointerId: event.pointer,
+      )) {
+        return;
+      }
+      _finishExpandDrag(
+        DragEndDetails(primaryVelocity: 0),
+        source: 'pointerRoute',
+      );
     }
-    final double progress = _expandController.value;
-    if (progress <= 0.01 || progress >= 0.99) {
-      return;
-    }
-    final double threshold = context.tokens.playerProgressThreshold;
-    if (progress < threshold) {
-      _expandController.value = 0;
-      _isCollapsing = false;
-    } else {
-      expand();
-    }
-  }
-
-  /// Keeps `/player` open over shell tab changes; resyncs after hot reload.
-  void _reconcileHeroRouteWithNavigation() {
-    final QuranPlayerNavigation navigation = getIt<QuranPlayerNavigation>();
-    final bool playerOnStack = navigation.isExpandedRouteOnStack;
-
-    // #region agent log
-    QuranPlayerDebugLog.agent(
-      hypothesisId: 'HR',
-      location: 'quran_player_widget.dart:_reconcileHeroRouteWithNavigation',
-      message: 'hero route reconcile',
-      data: <String, Object?>{
-        'playerOnStack': playerOnStack,
-        'routeOpen': _presentation.routeOpen,
-        'phase': _presentation.phase.name,
-        'visualProgress': _presentation.visualProgress.toStringAsFixed(3),
-        'shouldRestore': _presentation.shouldRestoreExpandedRoute,
-        'matchedPath': _currentRoutePath(),
-      },
-    );
-    // #endregion
-
-    if (playerOnStack) {
-      return;
-    }
-
-    if (!_presentation.routeOpen && _presentation.visualProgress <= 0.01) {
-      return;
-    }
-
-    if (kDebugMode &&
-        _presentation.shouldRestoreExpandedRoute &&
-        _audioBloc.state.hasAudio) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) {
-          return;
-        }
-        if (getIt<QuranPlayerNavigation>().isExpandedRouteOnStack) {
-          return;
-        }
-        QuranPlayerDebugLog.animation(
-          'reconcile.restoreExpanded',
-          _coreStateFields(),
-        );
-        QuranPlayerPresentationEntry.openExpanded(
-          presentation: _presentation,
-          hasActiveAudio: _audioBloc.state.hasAudio,
-        );
-      });
-      return;
-    }
-
-    _presentation.reconcileWithNavigationStack();
-    _isCollapsing = false;
   }
 
   void _onExpandGestureStart() {
+    _expandDragEndHandled = false;
+    _expandDragActivePointerId = null;
     _isUserDraggingExpand = true;
     _expandDragStartProgress = _expandController.value;
     _expandDragNetDy = 0;
-    _expandController.stop();
+    // canceled: true would emit [AnimationStatus.dismissed] and
+    // [_onExpandAnimationStatus] used to clear [_isUserDraggingExpand] here,
+    // orphaning the footer drag after the first pixel.
+    _expandController.stop(canceled: false);
     _isCollapsing = false;
-    _lastLoggedExpandProgress = null;
-    _lastLayoutLogSignature = null;
+    _seedShellAnchorForExpandDrag();
+    _expandDragFrozenAnchorHeight = _shellAnchorHeight;
+    _presentation.syncShellOverlayProgress(
+      progress: _expandController.value,
+      status: _expandController.status,
+      isCollapsing: _isCollapsing,
+      isUserDragging: true,
+    );
+    _pendingPortalVisible = true;
+    if (!_portalController.isShowing) {
+      _portalController.show();
+    }
+    _attachShellExpandPointerRoute();
     QuranPlayerDebugLog.drag(
       'expandGesture.start',
       <String, Object?>{
@@ -832,9 +947,40 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         'expandWasAnimating': _expandController.isAnimating,
       },
     );
+    setState(() {});
   }
 
-  void _applyExpandDragPixels(double dragPixels, {required String source}) {
+  /// Pre-seeds [_shellAnchorHeight] before the overlay's first layout so drag
+  /// travel matches YouTube Music 1:1 tracking from the first pixel.
+  void _seedShellAnchorForExpandDrag() {
+    if (!mounted) {
+      return;
+    }
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double footprint = QuranPlayerWidget.collapsedFootprint(
+      context,
+      bottomNavBarHeight: widget.bottomNavBarHeight,
+      hostAbsorbsBottomSafeArea: widget.hostAbsorbsBottomSafeArea,
+    );
+    final double anchorTop = (screenHeight - footprint).clamp(
+      0.0,
+      screenHeight - _miniPlayerHeight,
+    );
+    _shellAnchorHeight = (screenHeight - anchorTop).clamp(
+      _miniPlayerHeight,
+      screenHeight,
+    );
+    if (_isUserDraggingExpand) {
+      _expandDragFrozenAnchorHeight = _shellAnchorHeight;
+    }
+  }
+
+  void _applyExpandDragPixels(
+    double dragPixels, {
+    required String source,
+    QuranPlayerExpandDragChannel channel =
+        QuranPlayerExpandDragChannel.footerRecognizer,
+  }) {
     if (!mounted) {
       QuranPlayerDebugLog.warn(
         'drag.update.unmounted',
@@ -842,13 +988,25 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       );
       return;
     }
-    if (_usesHeroExpansion) {
+    if (!QuranPlayerExpandGesturePolicy.shouldApplyRecognizerDragDelta(
+      pointerRouteAttached: _shellExpandPointerRouteAttached,
+      channel: channel,
+    )) {
       return;
     }
-    final tokens = context.tokens;
-    final double travel = QuranPlayerExpandPhysics.travelPixels(
-      context.viewportHeight,
-      tokens.playerDragSensitivity,
+    // Travel = screen height minus anchor height so the sheet top tracks the
+    // finger 1:1 (YouTube Music style). _shellAnchorHeight (= screenH -
+    // hostRect.top) is set each overlay frame; seeded at drag start before
+    // the portal's first layout.
+    final double anchor = _isUserDraggingExpand &&
+            _expandDragFrozenAnchorHeight != null
+        ? _expandDragFrozenAnchorHeight!
+        : _shellAnchorHeight > 0
+        ? _shellAnchorHeight
+        : _miniPlayerHeight;
+    final double travel = (context.viewportHeight - anchor).clamp(
+      1.0,
+      double.infinity,
     );
     _expandDragNetDy += dragPixels;
     final double before = _expandController.value;
@@ -860,11 +1018,18 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     if ((next - before).abs() > 0.0001) {
       _expandController.value = next;
     }
-    _maybeLogDragProgress(source, primaryDelta: dragPixels);
   }
 
   void _finishExpandDrag(DragEndDetails details, {required String source}) {
+    if (_expandDragEndHandled) {
+      return;
+    }
+    _expandDragEndHandled = true;
+    _detachShellExpandPointerRoute();
     _isUserDraggingExpand = false;
+    _expandDragFrozenAnchorHeight = null;
+    _expandDragActivePointerId = null;
+    _syncShellOverlayPresentation();
     final tokens = context.tokens;
     final double primaryVelocity = details.primaryVelocity ?? 0;
     final double progress = _expandController.value;
@@ -890,15 +1055,28 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
       },
     );
     if (target == PlayerExpandSnapTarget.expand) {
-      if (progress < 0.92) {
-        expand();
+      _isCollapsing = false;
+      if (progress < 0.98) {
+        // Shell footer: animate directly so there is no async gap between
+        // _isUserDraggingExpand=false and the animation starting. If we go
+        // through expand() → PresentationEntry.openExpanded() the async await
+        // leaves _animateShellInOverlay=false for one frame, freezing the UI.
+        unawaited(_expandShellOverlay());
+      } else if (progress < 0.999) {
+        _expandController.value = 1;
+        _syncShellOverlayPresentation();
+        _syncShellPortalVisibility();
       }
     } else {
       if (progress > 0.08) {
-        collapse();
+        // Same reasoning: animate directly for shell footer to avoid gap.
+        _isCollapsing = true;
+        unawaited(_collapseShellOverlay());
       } else {
         _expandController.value = 0;
         _isCollapsing = false;
+        _syncShellOverlayPresentation();
+        _syncShellPortalVisibility();
       }
     }
   }
@@ -921,17 +1099,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   /// Current route path without [GoRouterState.of] (overlay is above the router).
   static String _currentRoutePath() =>
       QuranPlayerRoutePolicy.currentMatchedLocation();
-
-  /// Bottom offset for the mini player above nav chrome and the home indicator.
-  double _resolveBottomInset(BuildContext context) {
-    return QuranPlayerLayoutInsets.miniPlayerBottomInset(
-      context: context,
-      hostBottomNavBarHeight: widget.bottomNavBarHeight,
-      hostAbsorbsBottomSafeArea: widget.hostAbsorbsBottomSafeArea,
-      phoneNavVisible: _phoneBottomNavVisibleForLayout(),
-      routePath: _currentRoutePath(),
-    );
-  }
 
   void _onVerticalDragStart(DragStartDetails details) {
     if (_expandController.value > 0.01) {
@@ -957,22 +1124,17 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
           context.tokens.playerMaxDismissOffset,
         );
       });
-      _maybeLogDragProgress(
-        'mini.dismiss',
-        primaryDelta: primaryDelta,
-      );
-      return;
-    }
-
-    if (_usesHeroExpansion && !_presentation.routeOpen) {
-      _expandDragNetDy += primaryDelta;
       return;
     }
 
     if (_expandController.value <= 0 && primaryDelta < 0) {
       _onExpandGestureStart();
     }
-    _applyExpandDragPixels(primaryDelta, source: 'mini');
+    _applyExpandDragPixels(
+      primaryDelta,
+      source: 'mini',
+      channel: QuranPlayerExpandDragChannel.footerRecognizer,
+    );
   }
 
   void _onVerticalDragEnd(DragEndDetails details) {
@@ -1000,25 +1162,6 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
         _dismissWithUndo();
       } else {
         _animateDismissReset();
-      }
-      return;
-    }
-
-    if (_usesHeroExpansion && !_presentation.routeOpen) {
-      final double netDragDy = _expandDragNetDy;
-      _expandDragNetDy = 0;
-      final bool expandIntent =
-          primaryVelocity < -tokens.playerVelocityThreshold || netDragDy < -28;
-      QuranPlayerDebugLog.drag(
-        expandIntent ? 'mini.end.expand' : 'mini.end.noExpandHandler',
-        <String, Object?>{
-          'primaryVelocity': primaryVelocity.toStringAsFixed(1),
-          'netDragDy': netDragDy.toStringAsFixed(1),
-          ..._coreStateFields(),
-        },
-      );
-      if (expandIntent) {
-        expand();
       }
       return;
     }
@@ -1059,8 +1202,8 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   void _dismissWithUndo() {
     QuranPlayerDebugLog.drag('mini.dismiss.commit', _coreStateFields());
     HapticFeedback.lightImpact();
-    if (_usesHeroExpansion && _presentation.routeOpen) {
-      _presentation.collapse();
+    if (isExpanding) {
+      collapse();
     }
     context.read<AudioPlayerBloc>().add(const AudioPlayerEvent.stopAudio());
   }
@@ -1069,37 +1212,10 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
   Widget build(BuildContext context) {
     PerfLogger.markBuild('QuranPlayerWidget');
 
-    if (widget.embeddedInShellFooter) {
-      if (_usesHeroExpansion) {
-        return _buildShellFooterMini(context);
-      }
-      _schedulePortalVisibilitySync();
-      return OverlayPortal.overlayChildLayoutBuilder(
-        controller: _portalController,
-        overlayChildBuilder: _buildExpandedOverlay,
-        child: _buildShellFooterMini(context),
-      );
-    }
-
-    final Size size = MediaQuery.sizeOf(context);
-    if (size.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final double bottomInset = _resolveBottomInset(context);
-    final double miniHeight = _miniPlayerHeight;
-    final Rect hostRect = Rect.fromLTWH(
-      0,
-      size.height - bottomInset - miniHeight,
-      size.width,
-      miniHeight,
-    );
-
-    return _buildPlayerTree(
-      context,
-      hostRect: hostRect,
-      overlaySize: size,
-      showMiniInTree: true,
+    return OverlayPortal.overlayChildLayoutBuilder(
+      controller: _portalController,
+      overlayChildBuilder: _buildExpandedOverlay,
+      child: _buildShellFooterMini(context),
     );
   }
 
@@ -1141,6 +1257,10 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
     BuildContext overlayContext,
     OverlayChildLayoutInfo layoutInfo,
   ) {
+    if (!_shellOverlayPortalActive) {
+      return const SizedBox.shrink();
+    }
+
     if (layoutInfo.childPaintTransform.determinant() == 0.0) {
       QuranPlayerDebugLog.warn(
         'overlay.degenerateTransform',
@@ -1239,53 +1359,78 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             onCollapse: collapse,
             onDismiss: _dismissWithUndo,
             onPlayerExpandDragStart: _onExpandGestureStart,
-            onPlayerExpandDragUpdate: (double dy) =>
-                _applyExpandDragPixels(dy, source: 'expanded'),
+            onPlayerExpandDragUpdate: (double dy) => _applyExpandDragPixels(
+              dy,
+              source: 'expanded',
+              channel: QuranPlayerExpandDragChannel.expandedRecognizer,
+            ),
             onPlayerExpandDragEnd: (DragEndDetails details) =>
                 _finishExpandDrag(details, source: 'expanded'),
           ),
         );
 
+        final Widget? footerMiniGestureChild = miniAnchoredInFooter
+            ? _MiniPlayerTransition(
+                key: const ValueKey<String>('shell_footer_mini_gesture'),
+                progress: 0,
+                audio: audio,
+                useHeroArtwork: false,
+                identityChromeOpacity: 1,
+                retainExpandDragGestures: true,
+                dismissAnimController: _dismissAnimController,
+                dismissAnimation: _dismissAnimation,
+                dismissOffsetY: _dismissOffsetY,
+                onVerticalDragStart: _onVerticalDragStart,
+                onVerticalDragUpdate: _onVerticalDragUpdate,
+                onVerticalDragEnd: _onVerticalDragEnd,
+                onTap: expand,
+                onClose: _dismissWithUndo,
+              )
+            : null;
+
         return AnimatedBuilder(
           animation: Listenable.merge(
             <Listenable>[
               _expandController,
-              if (_usesHeroExpansion) _presentation,
+              if (!_isUserDraggingExpand)
+                _presentation,
             ],
           ),
-          child: expandedPlayer,
-          builder: (context, expandedChild) {
-            final double progress = _usesHeroExpansion
-                ? _visualExpandProgress
-                : _expandController.value;
-            final PlayerExpandTransitionMetrics metrics =
-                _usesHeroExpansion && miniAnchoredInFooter
-                ? _presentation.metricsForFooter(
-                    miniPlayerHeight: _miniPlayerHeight,
-                  )
-                : _transitionMetrics(progress);
+          child: footerMiniGestureChild != null
+              ? _PlayerAnimatedSubtree(
+                  expandedPlayer: expandedPlayer,
+                  footerMiniGesture: footerMiniGestureChild,
+                )
+              : expandedPlayer,
+          builder: (context, animatedChild) {
+            final Widget expandedChild;
+            final Widget? stableFooterMini;
+            if (animatedChild is _PlayerAnimatedSubtree) {
+              expandedChild = animatedChild.expandedPlayer;
+              stableFooterMini = animatedChild.footerMiniGesture;
+            } else {
+              expandedChild = animatedChild!;
+              stableFooterMini = null;
+            }
+
+            // Sheet geometry must follow [_expandController] — not
+            // [PlayerPresentationController.visualProgress], which can stay at
+            // 1.0 while a drag pulls the controller back to ~0.8.
+            final double layoutProgress =
+                _expandController.value.clamp(0.0, 1.0);
+            final PlayerExpandTransitionMetrics metrics = _transitionMetrics(
+              layoutProgress,
+            );
+            if (!_isUserDraggingExpand) {
+              _reconcileShellPresentationWithController();
+              if (!_expandController.isAnimating) {
+                _scheduleIdleShellOverlaySettleIfNeeded();
+              }
+            }
             final bool animateShellInOverlay = _animateShellInOverlay;
             final double layoutBottomInset = showMiniInTree
-                ? _miniPlayerBottomInsetForProgress(context, progress)
+                ? _miniPlayerBottomInsetForProgress(context, layoutProgress)
                 : 0;
-
-            _maybeLogLayoutTree(
-              tree: !showMiniInTree
-                  ? 'overlay'
-                  : miniAnchoredInFooter
-                  ? (_usesHeroExpansion && _presentation.routeOpen
-                        ? 'footerMiniHeroHandoff'
-                        : 'footerMini')
-                  : 'stackMini',
-              progress: progress,
-              metrics: metrics,
-              overlaySize: overlaySize,
-              hostRect: hostRect,
-              showMiniInTree: showMiniInTree,
-              miniAnchoredInFooter: miniAnchoredInFooter,
-              animateShellInOverlay: animateShellInOverlay,
-              bottomInset: layoutBottomInset,
-            );
 
             final Rect miniBarRect = _miniBarRectInOverlay(
               overlaySize: overlaySize,
@@ -1298,65 +1443,56 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
             final Widget? morphLayer = _buildMorphLayer(
               context,
               audio: audio,
-              progress: progress,
+              progress: layoutProgress,
               metrics: metrics,
               overlaySize: overlaySize,
               miniBarRect: miniBarRect,
               collapseAnchorY: hostRect.top,
             );
 
-            // #region agent log
-            if (_usesHeroExpansion && miniAnchoredInFooter) {
-              QuranPlayerDebugLog.agent(
-                hypothesisId: 'A',
-                location: 'quran_player_widget.dart:footerBuilder',
-                message: 'hero+morph stack state',
-                throttleProgress: true,
-                progress: progress,
-                data: <String, Object?>{
-                  'progress': progress.toStringAsFixed(3),
-                  'morphVisible': morphLayer != null,
-                  'handoffT': metrics.handoffT.toStringAsFixed(3),
-                  'miniIdentityOpacity': metrics.miniIdentityOpacity
-                      .toStringAsFixed(3),
-                  'stageChromeOpacity': metrics.stageChromeOpacity
-                      .toStringAsFixed(3),
-                  'routeOpen': _presentation.routeOpen,
-                  'phase': _presentation.phase.name,
-                },
-              );
-            }
-            // #endregion
-
             final Widget miniPlayer = Opacity(
               opacity: metrics.miniOpacity,
               child: Transform.translate(
                 offset: Offset(0, metrics.miniSlideY),
-                child: _MiniPlayerTransition(
-                  progress: progress,
-                  audio: audio,
-                  useHeroArtwork: _usesHeroExpansion,
-                  identityChromeOpacity: metrics.miniIdentityOpacity,
-                  dismissAnimController: _dismissAnimController,
-                  dismissAnimation: _dismissAnimation,
-                  dismissOffsetY: _dismissOffsetY,
-                  onVerticalDragStart: _onVerticalDragStart,
-                  onVerticalDragUpdate: _onVerticalDragUpdate,
-                  onVerticalDragEnd: _onVerticalDragEnd,
-                  onTap: expand,
-                  onClose: _dismissWithUndo,
-                ),
+                child:
+                    stableFooterMini ??
+                    _MiniPlayerTransition(
+                      progress: layoutProgress,
+                      audio: audio,
+                      useHeroArtwork: false,
+                      identityChromeOpacity: metrics.miniIdentityOpacity,
+                      retainExpandDragGestures: _isUserDraggingExpand,
+                      dismissAnimController: _dismissAnimController,
+                      dismissAnimation: _dismissAnimation,
+                      dismissOffsetY: _dismissOffsetY,
+                      onVerticalDragStart: _onVerticalDragStart,
+                      onVerticalDragUpdate: _onVerticalDragUpdate,
+                      onVerticalDragEnd: _onVerticalDragEnd,
+                      onTap: expand,
+                      onClose: _dismissWithUndo,
+                    ),
               ),
             );
 
             if (!showMiniInTree) {
+              // Sheet anchor = full height from mini-bar top to screen bottom.
+              // This ensures the sheet top starts flush with the mini bar and
+              // tracks the finger 1:1 (YouTube Music style).
+              final double anchorHeight = (screenHeight - hostRect.top).clamp(
+                _miniPlayerHeight,
+                screenHeight,
+              );
+              if (!_isUserDraggingExpand &&
+                  _shellAnchorHeight != anchorHeight) {
+                _shellAnchorHeight = anchorHeight;
+              }
               return SizedBox(
                 height: screenHeight,
                 width: overlaySize.width,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    if (progress > 0.001)
+                    if (metrics.backdropOpacity > 0)
                       Positioned.fill(
                         child: IgnorePointer(
                           child: ColoredBox(
@@ -1376,17 +1512,23 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                           ),
                         ),
                       ),
-                    if (metrics.showExpandedSheet && expandedChild != null)
-                      PlayerExpandMetricsScope(
-                        metrics: metrics,
-                        child: _ExpandedPlayerMotion(
-                          sheetMotionT: metrics.sheetMotionT,
-                          screenHeight: screenHeight,
-                          sheetOpacity: metrics.sheetPresentationOpacity,
-                          collapseAnchorY: hostRect.top,
-                          semanticLabel:
-                              context.l10n.playerExpandedSheetSemanticLabel,
-                          child: expandedChild,
+                    if (metrics.showExpandedSheet)
+                      IgnorePointer(
+                        // Overlay paints above the footer mini; the growing
+                        // sheet must not steal the active vertical drag.
+                        ignoring: _isUserDraggingExpand,
+                        child: PlayerExpandMetricsScope(
+                          metrics: metrics,
+                          child: _ExpandedPlayerMotion(
+                            sheetMotionT: metrics.sheetMotionT,
+                            screenHeight: screenHeight,
+                            miniPlayerHeight: anchorHeight,
+                            sheetOpacity: metrics.sheetPresentationOpacity,
+                            semanticLabel: context
+                                .l10n
+                                .playerExpandedSheetSemanticLabel,
+                            child: expandedChild,
+                          ),
                         ),
                       ),
                     if (animateShellInOverlay && metrics.showMiniPlayer)
@@ -1395,25 +1537,51 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                         left: 0,
                         right: 0,
                         height: _miniPlayerHeight,
-                        child: miniPlayer,
+                        // During user drag the footer mini's GestureDetector
+                        // owns the arena. This overlay copy is visual-only;
+                        // if interactive it creates a second recognizer that
+                        // reports conflicting deltas and reverses progress.
+                        child: IgnorePointer(
+                          ignoring: _isUserDraggingExpand,
+                          child: miniPlayer,
+                        ),
                       ),
-                    if (morphLayer != null) Positioned.fill(child: morphLayer),
+                    if (morphLayer != null)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          ignoring: _isUserDraggingExpand,
+                          child: morphLayer,
+                        ),
+                      ),
                   ],
                 ),
               );
             }
 
             if (miniAnchoredInFooter) {
+              // The overlay covers this slot whenever the portal is active.
+              // BUT: the footer mini's GestureDetector wins the gesture arena
+              // at pointer-down time. Replacing it with SizedBox.shrink()
+              // mid-gesture orphans the pointer — all Update/End events stop.
+              // Solution: keep it alive at Opacity(0) during active drag so
+              // the winning recognizer stays mounted and events keep flowing.
+              if (_isUserDraggingExpand) {
+                return SizedBox(
+                  height: _miniPlayerHeight,
+                  child: Opacity(opacity: 0, child: miniPlayer),
+                );
+              }
+              if (_shellOverlayPortalActive) {
+                return const SizedBox.shrink();
+              }
               return SizedBox(
                 height: _miniPlayerHeight,
-                child: animateShellInOverlay
-                    ? const SizedBox.shrink()
-                    : IgnorePointer(
-                        ignoring: !metrics.showMiniPlayer,
-                        child: metrics.showMiniPlayer
-                            ? miniPlayer
-                            : const SizedBox.shrink(),
-                      ),
+                child: IgnorePointer(
+                  ignoring: !metrics.showMiniPlayer,
+                  child: metrics.showMiniPlayer
+                      ? miniPlayer
+                      : const SizedBox.shrink(),
+                ),
               );
             }
 
@@ -1426,7 +1594,7 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      if (progress > 0.001)
+                      if (metrics.backdropOpacity > 0)
                         Positioned.fill(
                           child: IgnorePointer(
                             child: ColoredBox(
@@ -1446,21 +1614,30 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
                             ),
                           ),
                         ),
-                      if (metrics.showExpandedSheet && expandedChild != null)
-                        PlayerExpandMetricsScope(
-                          metrics: metrics,
-                          child: _ExpandedPlayerMotion(
-                            sheetMotionT: metrics.sheetMotionT,
-                            screenHeight: screenHeight,
-                            sheetOpacity: metrics.sheetPresentationOpacity,
-                            collapseAnchorY: hostRect.top,
-                            semanticLabel:
-                                context.l10n.playerExpandedSheetSemanticLabel,
-                            child: expandedChild,
+                      if (metrics.showExpandedSheet)
+                        IgnorePointer(
+                          ignoring: _isUserDraggingExpand,
+                          child: PlayerExpandMetricsScope(
+                            metrics: metrics,
+                            child: _ExpandedPlayerMotion(
+                              sheetMotionT: metrics.sheetMotionT,
+                              screenHeight: screenHeight,
+                              miniPlayerHeight: _miniPlayerHeight,
+                              sheetOpacity: metrics.sheetPresentationOpacity,
+                              semanticLabel: context
+                                  .l10n
+                                  .playerExpandedSheetSemanticLabel,
+                              child: expandedChild,
+                            ),
                           ),
                         ),
                       if (morphLayer != null)
-                        Positioned.fill(child: morphLayer),
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            ignoring: _isUserDraggingExpand,
+                            child: morphLayer,
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -1489,6 +1666,21 @@ class QuranPlayerWidgetState extends State<QuranPlayerWidget>
 // Organisms
 // ---------------------------------------------------------------------------
 
+/// Stable [AnimatedBuilder.child] so footer mini drag survives expand ticks.
+@immutable
+class _PlayerAnimatedSubtree extends StatelessWidget {
+  const _PlayerAnimatedSubtree({
+    required this.expandedPlayer,
+    required this.footerMiniGesture,
+  });
+
+  final Widget expandedPlayer;
+  final Widget footerMiniGesture;
+
+  @override
+  Widget build(BuildContext context) => expandedPlayer;
+}
+
 /// Slide/scale motion for the expanded sheet during expand/collapse.
 ///
 /// Kept separate from [_ExpandedPlayerOrganism] so only this lightweight
@@ -1497,38 +1689,47 @@ class _ExpandedPlayerMotion extends StatelessWidget {
   const _ExpandedPlayerMotion({
     required this.sheetMotionT,
     required this.screenHeight,
+    required this.miniPlayerHeight,
     required this.sheetOpacity,
     required this.semanticLabel,
     required this.child,
-    this.collapseAnchorY = 0,
   });
 
   final double sheetMotionT;
   final double screenHeight;
+  final double miniPlayerHeight;
   final double sheetOpacity;
   final String semanticLabel;
   final Widget child;
 
-  /// When > 0, collapse travel ends with the sheet top at this Y (mini bar).
-  final double collapseAnchorY;
-
   @override
   Widget build(BuildContext context) {
     final double t = sheetMotionT.clamp(0.0, 1.0);
-    final double travel = collapseAnchorY > 0 ? collapseAnchorY : screenHeight;
-    final double offsetY = travel * (1 - t);
+    final double sheetHeight =
+        miniPlayerHeight + (screenHeight - miniPlayerHeight) * t;
     return RepaintBoundary(
       child: Semantics(
         container: true,
         label: semanticLabel,
-        child: Transform.translate(
-          offset: Offset(0, offsetY),
-          child: Opacity(
-            opacity: sheetOpacity.clamp(0.0, 1.0),
+        child: Align(
+          alignment: Alignment.bottomCenter,
+          child: ClipRect(
             child: SizedBox(
-              height: screenHeight,
+              height: sheetHeight,
               width: double.infinity,
-              child: child,
+              child: Opacity(
+                opacity: sheetOpacity.clamp(0.0, 1.0),
+                child: OverflowBox(
+                  alignment: Alignment.topCenter,
+                  minHeight: screenHeight,
+                  maxHeight: screenHeight,
+                  child: SizedBox(
+                    height: screenHeight,
+                    width: double.infinity,
+                    child: child,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -1543,10 +1744,12 @@ class _ExpandedPlayerMotion extends StatelessWidget {
 /// ticks, not on every state rebuild of the parent.
 class _MiniPlayerTransition extends StatelessWidget {
   const _MiniPlayerTransition({
+    super.key,
     required this.progress,
     required this.audio,
     this.useHeroArtwork = false,
     required this.identityChromeOpacity,
+    this.retainExpandDragGestures = false,
     required this.dismissAnimController,
     required this.dismissAnimation,
     required this.dismissOffsetY,
@@ -1561,6 +1764,10 @@ class _MiniPlayerTransition extends StatelessWidget {
   final AudioEntity audio;
   final bool useHeroArtwork;
   final double identityChromeOpacity;
+
+  /// Keeps the footer mini drag recognizer alive past
+  /// [DesignTokens.playerIgnorePointerThreshold] during expand/collapse drag.
+  final bool retainExpandDragGestures;
   final AnimationController dismissAnimController;
   final Animation<double>? dismissAnimation;
   final double dismissOffsetY;
@@ -1573,7 +1780,9 @@ class _MiniPlayerTransition extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IgnorePointer(
-      ignoring: progress > context.tokens.playerIgnorePointerThreshold,
+      ignoring:
+          !retainExpandDragGestures &&
+          progress > context.tokens.playerIgnorePointerThreshold,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onVerticalDragStart: onVerticalDragStart,
@@ -1794,6 +2003,9 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
 
   final DraggableScrollableController _queueController =
       DraggableScrollableController();
+
+  final QuranPlayerQueueIndexCache _queueIndexCache =
+      QuranPlayerQueueIndexCache();
 
   double? _lastExpandValue;
 
@@ -2231,6 +2443,8 @@ class _ExpandedPlayerOrganismState extends State<_ExpandedPlayerOrganism> {
                                                           scrollController,
                                                       queueController:
                                                           _queueController,
+                                                      queueIndexCache:
+                                                          _queueIndexCache,
                                                       sheetParentHeight:
                                                           constraints.maxHeight,
                                                       peekSize: _queuePeekSize,
@@ -4007,6 +4221,7 @@ class _PlayerQueueSheet extends StatelessWidget {
   const _PlayerQueueSheet({
     required this.scrollController,
     required this.queueController,
+    required this.queueIndexCache,
     required this.sheetParentHeight,
     required this.peekSize,
     required this.snapSizes,
@@ -4021,6 +4236,7 @@ class _PlayerQueueSheet extends StatelessWidget {
 
   final ScrollController scrollController;
   final DraggableScrollableController queueController;
+  final QuranPlayerQueueIndexCache queueIndexCache;
   final double sheetParentHeight;
   final double peekSize;
   final List<double> snapSizes;
@@ -4044,8 +4260,12 @@ class _PlayerQueueSheet extends StatelessWidget {
     final tokens = theme.tokens;
     final List<AudioEntity> queue =
         state.playbackState?.queue ?? <AudioEntity>[];
-    final Map<String, int> queueIndexById =
-        QuranPlayerQueueUtils.queueIndexById(queue);
+    final int queueGeneration =
+        state.playbackState?.queueGeneration ?? 0;
+    final Map<String, int> queueIndexById = queueIndexCache.indexByIdFor(
+      queue: queue,
+      queueGeneration: queueGeneration,
+    );
     final int? currentIndex = state.playbackState?.currentIndex;
     final String sourceLabel =
         currentAudio.album ??
@@ -4452,4 +4672,16 @@ class QuranPlayerExpandedPageContent extends StatelessWidget {
       },
     );
   }
+}
+
+final class _QuranPlayerShellOverlayHost implements PlayerShellOverlayHost {
+  _QuranPlayerShellOverlayHost(this._state);
+
+  final QuranPlayerWidgetState _state;
+
+  @override
+  Future<void> expand() => _state._expandShellOverlay();
+
+  @override
+  Future<void> collapse() => _state._collapseShellOverlay();
 }
