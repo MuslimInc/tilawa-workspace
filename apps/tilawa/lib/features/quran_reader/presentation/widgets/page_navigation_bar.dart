@@ -364,6 +364,15 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
                                   },
                                 ),
                               ),
+                              const SizedBox(width: 10),
+                              NavActionButton(
+                                icon: Icons.format_list_bulleted_rounded,
+                                onTap: () {
+                                  HapticFeedback.selectionClick();
+                                  widget.onShowIndex();
+                                },
+                                tooltip: context.l10n.surahIndex,
+                              ),
                               if (kShareScreenshotEnabled ||
                                   kShareVideoReelEnabled) ...[
                                 const SizedBox(width: 10),
