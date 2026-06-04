@@ -1,9 +1,9 @@
 # Releasing to Google Play from mobile (GitHub Actions)
 
 The [`android-release`](../.github/workflows/android-release.yml) workflow
-builds a signed Android App Bundle with Shorebird and publishes it to Google
-Play. Once set up, you can cut a release entirely from the **GitHub mobile app
-or a mobile browser** — no laptop needed.
+builds a signed Android App Bundle with a plain `flutter build appbundle` and
+publishes it to Google Play. Once set up, you can cut a release entirely from
+the **GitHub mobile app or a mobile browser** — no laptop needed.
 
 ## One-time setup (needs the keystore + Play service account once)
 
@@ -12,12 +12,9 @@ repository secret**:
 
 | Secret | What it is | How to get it |
 | --- | --- | --- |
-| `ANDROID_KEYSTORE_BASE64` | Upload keystore (`.jks`) as base64 | On a machine that has the keystore: `base64 -w0 upload-keystore.jks` and paste the output. **This is the one step that needs access to the keystore file.** |
-| `ANDROID_KEYSTORE_PASSWORD` | Keystore store password | From your `key.properties` |
-| `ANDROID_KEY_PASSWORD` | Key password | From your `key.properties` |
-| `ANDROID_KEY_ALIAS` | Key alias | From your `key.properties` |
-| `SHOREBIRD_TOKEN` | Shorebird CI token | Run `shorebird login:ci` once and paste the token |
-| `PLAY_SERVICE_ACCOUNT_JSON` | Play Console service-account JSON | Play Console → Setup → API access → create/download a service account with **Release** permission, paste the whole JSON |
+| `ANDROID_KEYSTORE_BASE64` | Upload keystore (`.jks`) as base64 | On a device that has the keystore: `base64 -w0 upload-keystore.jks` and paste the output. **This is the one step that needs access to the keystore file.** |
+| `ANDROID_KEY_PROPERTIES` | The full `key.properties` file contents (`storePassword`, `keyPassword`, `keyAlias`). The workflow overrides `storeFile`, so its value there does not matter. | Paste your `key.properties` as-is |
+| `PLAY_SERVICE_ACCOUNT_JSON` | Play Console service-account JSON | Play Console → link a Google Cloud project → create a service account → download its JSON key → grant it release permissions on the app. Paste the whole JSON. |
 
 > The only blocker that genuinely needs the keystore file is
 > `ANDROID_KEYSTORE_BASE64`. If the keystore lives only on the laptop, that one
@@ -45,8 +42,12 @@ edit `pubspec.yaml` to bump the release.
 
 ## Notes
 
-- Builds use **Shorebird** (`shorebird release android`) to preserve OTA patch
-  capability, matching `docs/google_play_release_checklist.md`.
+- Builds use a plain `flutter build appbundle --release` (Flutter 3.44.1,
+  Java 17). Code generation runs via `melos run gen` before the build, since
+  the app's generated files are git-ignored.
+- This path does **not** register the release with Shorebird, so you cannot
+  `shorebird patch` on top of it. That is intentional per the request to ship a
+  standard AAB.
 - The AAB is also attached to the run as the `app-release-aab` artifact, so you
   can download and upload it manually if the Play step ever needs to be skipped.
 - Release notes / Data Safety / screenshots are still managed in the Play

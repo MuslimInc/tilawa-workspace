@@ -1,21 +1,19 @@
 name: Android Release (Google Play)
 
-# Build a signed Android App Bundle with Shorebird and publish it to Google
-# Play. Designed to be triggered from the GitHub mobile app / web UI
-# ("Actions" tab -> this workflow -> "Run workflow"), so a release can be cut
-# without a laptop.
+# Build a signed Android App Bundle with Flutter and publish it to Google
+# Play. Trigger it from the GitHub mobile app / web ("Actions" tab -> this
+# workflow -> "Run workflow"), so a release can be cut without a laptop.
 #
 # IMPORTANT: GitHub only shows the "Run workflow" button once this file is on
 # the repository's DEFAULT branch. Merge it first, then trigger from mobile.
 #
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
-#   ANDROID_KEYSTORE_BASE64     - upload keystore (.jks) as base64 (one-time;
-#                                 needs the keystore file: `base64 -w0 key.jks`)
-#   ANDROID_KEYSTORE_PASSWORD   - keystore store password
-#   ANDROID_KEY_PASSWORD        - key password
-#   ANDROID_KEY_ALIAS           - key alias
-#   SHOREBIRD_TOKEN             - CI token from `shorebird login:ci`
-#   PLAY_SERVICE_ACCOUNT_JSON   - Google Play service-account JSON (full text)
+#   ANDROID_KEYSTORE_BASE64   - upload keystore (.jks) as base64
+#                               (`base64 -w0 upload-keystore.jks`)
+#   ANDROID_KEY_PROPERTIES    - the full key.properties file contents
+#                               (storePassword / keyPassword / keyAlias lines;
+#                               storeFile is overridden by this workflow)
+#   PLAY_SERVICE_ACCOUNT_JSON - Google Play service-account JSON (full text)
 #
 # See docs/ci_release.md for the full setup walkthrough.
 
@@ -29,7 +27,7 @@ on:
         default: internal
         required: true
       build_name:
-        description: "Version name, e.g. 1.0.8 (must be committed-compatible)"
+        description: "Version name, e.g. 1.0.8"
         required: true
       build_number:
         description: "Version code, e.g. 40 (must be higher than the last upload)"
@@ -61,8 +59,18 @@ jobs:
           distribution: zulu
           java-version: "17"
 
-      - name: Set up Shorebird
-        uses: shorebirdtech/setup-shorebird@v1
+      - name: Set up Flutter 3.44.1
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.1"
+          channel: stable
+          cache: true
+
+      - name: Resolve workspace dependencies
+        run: flutter pub get
+
+      - name: Generate code (melos run gen)
+        run: dart run melos run gen
 
       - name: Restore upload keystore
         env:
@@ -73,28 +81,21 @@ jobs:
 
       - name: Write key.properties
         env:
-          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
         run: |
-          cat > "$GITHUB_WORKSPACE/apps/tilawa/android/key.properties" <<EOF
-          storePassword=$STORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=$GITHUB_WORKSPACE/apps/tilawa/android/app/upload-keystore.jks
-          EOF
+          KEYSTORE_PATH="$GITHUB_WORKSPACE/apps/tilawa/android/app/upload-keystore.jks"
+          # Keep store/key passwords + alias from the secret, but force storeFile
+          # to the keystore we just decoded so the path is always correct in CI.
+          printf '%s\n' "$KEY_PROPERTIES" \
+            | grep -v -i '^[[:space:]]*storeFile[[:space:]]*=' \
+            > "$GITHUB_WORKSPACE/apps/tilawa/android/key.properties"
+          echo "storeFile=$KEYSTORE_PATH" \
+            >> "$GITHUB_WORKSPACE/apps/tilawa/android/key.properties"
 
-      - name: Build signed AAB with Shorebird
+      - name: Build signed release AAB
         working-directory: apps/tilawa
-        env:
-          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
-        # GitHub Actions sets CI=true, so Shorebird runs non-interactively.
-        # Flutter build args after `--` set the version name/code, so no
-        # pubspec edit is needed to bump the release.
         run: |
-          shorebird release android \
-            --flutter-version=3.44.1 \
-            -- \
+          flutter build appbundle --release \
             --build-name=${{ inputs.build_name }} \
             --build-number=${{ inputs.build_number }}
 
