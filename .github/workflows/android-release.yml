@@ -70,7 +70,12 @@ jobs:
         run: flutter pub get
 
       - name: Generate code (melos run gen)
-        run: dart run melos run gen
+        run: |
+          # The `gen` melos script calls `melos exec ...` internally, so melos
+          # must be on PATH as a global executable (not just `dart run melos`).
+          dart pub global activate melos '>=7.8.0 <8.0.0'
+          export PATH="$HOME/.pub-cache/bin:$PATH"
+          melos run gen
 
       - name: Restore upload keystore
         env:
