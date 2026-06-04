@@ -1,6 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tilawa/router/json_type_registry.dart';
+
+// An object that is NOT registered and has no toJson — mirrors an in-session
+// route `extra` such as PrayerAlertsPermissionNavExtra.
+@immutable
+class UnregisteredExtra {
+  const UnregisteredExtra();
+}
 
 // Simple test class implementing toJson/fromJson pattern
 @immutable
@@ -71,6 +80,35 @@ void main() {
       const unregistered = 'Simple String';
       final Object? result = registry.encode(unregistered);
       expect(result, unregistered);
+    });
+
+    test('should drop non-encodable unregistered objects to null', () {
+      // Regression: a non-JSON-encodable route `extra` (e.g.
+      // PrayerAlertsPermissionNavExtra) must never be returned as-is, or
+      // GoRouter's platform route reporting / state restoration crashes the
+      // app with "Converting object to an encodable object failed".
+      final Object? result = registry.encode(const UnregisteredExtra());
+      expect(result, isNull);
+      // The encoded result must be JSON-serializable.
+      expect(() => jsonEncode(result), returnsNormally);
+    });
+
+    test('should keep JSON-safe collections of primitives', () {
+      final value = {
+        'a': 1,
+        'b': <Object?>['x', true, 2.5, null],
+      };
+      final Object? result = registry.encode(value);
+      expect(result, value);
+      expect(() => jsonEncode(result), returnsNormally);
+    });
+
+    test('should drop collections that contain non-encodable objects', () {
+      final value = {
+        'steps': <Object?>[const UnregisteredExtra()],
+      };
+      final Object? result = registry.encode(value);
+      expect(result, isNull);
     });
 
     test('should pass through maps without metadata during decoding', () {

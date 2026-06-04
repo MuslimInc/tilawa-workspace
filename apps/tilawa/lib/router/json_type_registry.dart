@@ -15,6 +15,17 @@ class JsonTypeRegistry {
   }
 
   /// Encodes an object into a Map with metadata if it's a registered type.
+  ///
+  /// Unregistered values are only returned when they are already JSON-safe
+  /// (primitives, or collections of primitives). Any other object — e.g. an
+  /// in-session route `extra` that was never registered — is dropped to `null`
+  /// rather than passed through. This is critical: GoRouter feeds the encoded
+  /// result to the platform route-information channel
+  /// ([SystemNavigator.routeInformationUpdated]) and to state restoration,
+  /// both of which serialize it. A non-encodable object there throws a fatal
+  /// "Converting object to an encodable object failed" error that crashes the
+  /// app on launch. Dropping it is safe because the live navigation still uses
+  /// the real in-memory `extra`; only the persisted/reported copy is omitted.
   Object? encode(Object? object) {
     if (object == null) {
       return null;
@@ -31,12 +42,29 @@ class JsonTypeRegistry {
           final dynamic data = (object as dynamic).toJson();
           return {'__type': encoder.key, 'data': data};
         } catch (e) {
-          // If toJson fails or doesn't exist, fall back to returning object
+          // If toJson fails or doesn't exist, fall back to dropping the object
           break;
         }
       }
     }
-    return object;
+    return _isJsonSafe(object) ? object : null;
+  }
+
+  /// Whether [value] can be JSON-encoded without a custom converter.
+  static bool _isJsonSafe(Object? value) {
+    if (value == null || value is String || value is num || value is bool) {
+      return true;
+    }
+    if (value is Map) {
+      return value.entries.every(
+        (MapEntry<dynamic, dynamic> e) =>
+            e.key is String && _isJsonSafe(e.value),
+      );
+    }
+    if (value is List) {
+      return value.every(_isJsonSafe);
+    }
+    return false;
   }
 
   /// Decodes a Map with metadata back into its original type.
