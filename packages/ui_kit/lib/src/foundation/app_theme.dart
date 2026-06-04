@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 import 'component_tokens.dart';
@@ -14,7 +13,11 @@ import 'design_tokens.dart';
 class AppTheme {
   AppTheme._();
 
-  /// Toggle for using Google Fonts, can be disabled in tests
+  /// Brand typeface, bundled as a package asset (see `pubspec.yaml`). Fonts
+  /// declared in a package are exposed to consumers under the
+  /// `packages/<package>/<family>` namespace.
+  static const String _fontFamily =
+      'packages/tilawa_ui_kit/IBMPlexSansArabic';
 
   // Light theme configuration constants
   static const FlexSurfaceMode _lightSurfaceMode =
@@ -57,7 +60,9 @@ class AppTheme {
     if (_isFlutterTestEnvironment()) {
       return base;
     }
-    return GoogleFonts.ibmPlexSansArabicTextTheme(base);
+    // Apply the bundled brand typeface while preserving each M3 style's own
+    // weight/size so Flutter resolves the matching bundled font file.
+    return base.apply(fontFamily: _fontFamily);
   }
 
   static bool _isFlutterTestEnvironment() {
