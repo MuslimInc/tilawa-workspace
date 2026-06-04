@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tilawa/core/extensions.dart';
+import 'package:tilawa/features/share/presentation/utils/share_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../domain/entities/entities.dart';
@@ -89,7 +90,7 @@ class AyahOptionsSheet extends StatelessWidget {
                 title: Text(context.l10n.shareAsText),
                 onTap: onShare,
               ),
-              if (onShareScreenshot != null)
+              if (kShareScreenshotEnabled && onShareScreenshot != null)
                 ListTile(
                   leading: const Icon(Icons.camera_alt_outlined),
                   title: Text(context.l10n.shareScreenshot),

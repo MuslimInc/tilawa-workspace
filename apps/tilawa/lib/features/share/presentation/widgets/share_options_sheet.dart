@@ -80,14 +80,16 @@ class _ShareOptionsSheetState extends State<ShareOptionsSheet> {
                 },
               ),
               SizedBox(height: tokens.spaceMedium),
-              _ShareOptionCard(
-                icon: Icons.image_rounded,
-                title: context.l10n.shareScreenshot,
-                description: context.l10n.shareScreenshotDescription,
-                onTap: () => widget.onShareScreenshot(_selectedSurah),
-              ),
+              if (kShareScreenshotEnabled)
+                _ShareOptionCard(
+                  icon: Icons.image_rounded,
+                  title: context.l10n.shareScreenshot,
+                  description: context.l10n.shareScreenshotDescription,
+                  onTap: () => widget.onShareScreenshot(_selectedSurah),
+                ),
               if (kShareVideoReelEnabled) ...[
-                SizedBox(height: tokens.spaceSmall),
+                if (kShareScreenshotEnabled)
+                  SizedBox(height: tokens.spaceSmall),
                 _ShareOptionCard(
                   icon: Icons.movie_creation_outlined,
                   title: context.l10n.shareModeReel,
