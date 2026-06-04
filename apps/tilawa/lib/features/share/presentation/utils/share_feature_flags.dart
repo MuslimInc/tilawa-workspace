@@ -12,3 +12,11 @@ const bool kShareFfmpegNativeEnabled = bool.fromEnvironment(
 
 /// Video reel UI and navigation. Mirrors [kShareFfmpegNativeEnabled].
 const bool kShareVideoReelEnabled = kShareFfmpegNativeEnabled;
+
+/// Screenshot share UI and navigation. Frozen by default: the screenshot
+/// composer route carries a non-serializable `extra` (a GlobalKey/Notifier),
+/// so keeping its entry points hidden removes that navigation path entirely.
+/// Enable with `--dart-define=SHARE_SCREENSHOT_ENABLED=true`.
+const bool kShareScreenshotEnabled = bool.fromEnvironment(
+  'SHARE_SCREENSHOT_ENABLED',
+);

@@ -9,6 +9,7 @@ import 'package:tilawa/features/quran_reader/presentation/widgets/atoms/nav_acti
 import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/navigation_index_card.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/page_slider_section.dart';
 import 'package:tilawa/features/quran_reader/presentation/widgets/molecules/slider_preview_pill.dart';
+import 'package:tilawa/features/share/presentation/utils/share_feature_flags.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 class PageNavigationBar extends StatefulWidget {
@@ -363,14 +364,17 @@ class _PageNavigationBarState extends State<PageNavigationBar> {
                                   },
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              NavActionButton(
-                                icon: Icons.share_rounded,
-                                onTap: widget.onShare,
-                                tooltip: MaterialLocalizations.of(
-                                  context,
-                                ).shareButtonLabel,
-                              ),
+                              if (kShareScreenshotEnabled ||
+                                  kShareVideoReelEnabled) ...[
+                                const SizedBox(width: 10),
+                                NavActionButton(
+                                  icon: Icons.share_rounded,
+                                  onTap: widget.onShare,
+                                  tooltip: MaterialLocalizations.of(
+                                    context,
+                                  ).shareButtonLabel,
+                                ),
+                              ],
                             ],
                           ),
                         ),
