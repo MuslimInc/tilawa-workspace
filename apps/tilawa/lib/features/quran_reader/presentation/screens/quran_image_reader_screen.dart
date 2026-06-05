@@ -24,6 +24,7 @@ import '../../../../features/share/presentation/widgets/share_options_sheet.dart
 import '../../domain/ports/quran_image_preload_status.dart';
 import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
 import '../theme/quran_reader_theme.dart';
+import '../widgets/surah_index_sheet.dart';
 
 /// Wraps `quran_image`'s reader flow inside the Tilawa app.
 ///
@@ -247,6 +248,33 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
     }
   }
 
+  Future<void> _showSurahIndex() async {
+    final navigationBloc = context.read<NavigationBloc>();
+    final fontEngine = getIt<LoadQuranFontsToEngineUseCase>();
+    final theme = Theme.of(context);
+    final readerOverlayStyle = _buildReaderSystemUiOverlayStyle(theme);
+
+    fontEngine.pauseBackgroundWarmUp();
+    SystemChrome.setSystemUIOverlayStyle(
+      _buildShareSheetSystemUiOverlayStyle(theme),
+    );
+    try {
+      await showTilawaModalBottomSheet<void>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (sheetContext) => SurahIndexSheet(
+          onSurahSelected: (surahNumber) {
+            navigationBloc.add(PageChanged(getPageNumber(surahNumber, 1)));
+            Navigator.of(sheetContext).pop();
+          },
+        ),
+      );
+    } finally {
+      SystemChrome.setSystemUIOverlayStyle(readerOverlayStyle);
+      fontEngine.resumeBackgroundWarmUp();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_isPreloaded) {
@@ -257,7 +285,10 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
 
     return BlocProvider<NavigationBloc>.value(
       value: bloc,
-      child: _ReaderShell(onShareRequested: _showShareOptions),
+      child: _ReaderShell(
+        onShareRequested: _showShareOptions,
+        onShowIndex: _showSurahIndex,
+      ),
     );
   }
 }
@@ -265,9 +296,13 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
 /// Inner shell that watches [NavigationBloc] state to show
 /// loading → error → reader transitions.
 class _ReaderShell extends StatelessWidget {
-  const _ReaderShell({required this.onShareRequested});
+  const _ReaderShell({
+    required this.onShareRequested,
+    required this.onShowIndex,
+  });
 
   final Future<void> Function(int currentPage) onShareRequested;
+  final VoidCallback onShowIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -287,6 +322,7 @@ class _ReaderShell extends StatelessWidget {
             restoreOrientations: AppOrientationService.defaultOrientations,
             restoreSystemUiOverlayStyle: AppSystemChromeStyle.defaultAppStyle,
             onShareRequested: onShareRequested,
+            onShowIndex: onShowIndex,
             headerImageFilter: Theme.of(
               context,
             ).extension<QuranReaderTheme>()?.headerImageFilter,

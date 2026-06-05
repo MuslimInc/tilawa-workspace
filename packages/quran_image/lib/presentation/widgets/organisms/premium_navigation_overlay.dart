@@ -19,6 +19,7 @@ class PremiumNavigationOverlay extends StatefulWidget {
     required this.onInteractionStart,
     required this.onInteractionEnd,
     this.onShareRequested,
+    this.onShowIndex,
   });
 
   final ValueListenable<PageState?> previewStateListenable;
@@ -29,6 +30,7 @@ class PremiumNavigationOverlay extends StatefulWidget {
   final VoidCallback onInteractionStart;
   final VoidCallback onInteractionEnd;
   final VoidCallback? onShareRequested;
+  final VoidCallback? onShowIndex;
 
   @override
   State<PremiumNavigationOverlay> createState() =>
@@ -123,6 +125,7 @@ class _PremiumNavigationOverlayState extends State<PremiumNavigationOverlay>
                       onInteractionStart: widget.onInteractionStart,
                       onInteractionEnd: widget.onInteractionEnd,
                       onShareRequested: widget.onShareRequested,
+                      onShowIndex: widget.onShowIndex,
                     )
                   : const SizedBox.shrink(),
             ),
@@ -143,6 +146,7 @@ class _PremiumNavigationControls extends StatelessWidget {
     required this.onInteractionStart,
     required this.onInteractionEnd,
     this.onShareRequested,
+    this.onShowIndex,
   });
 
   final ValueListenable<PageState?> previewStateListenable;
@@ -153,6 +157,7 @@ class _PremiumNavigationControls extends StatelessWidget {
   final VoidCallback onInteractionStart;
   final VoidCallback onInteractionEnd;
   final VoidCallback? onShareRequested;
+  final VoidCallback? onShowIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -177,9 +182,32 @@ class _PremiumNavigationControls extends StatelessWidget {
                 RepaintBoundary(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
+                      final tokens = Theme.of(context).tokens;
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Surah-index FAB, floating just above the page card.
+                          if (onShowIndex != null) ...[
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: tokens.spaceLarge,
+                              ),
+                              child: Center(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: tokens.contentMaxWidthForm,
+                                  ),
+                                  child: Align(
+                                    alignment: AlignmentDirectional.centerEnd,
+                                    child: _PremiumIndexFab(
+                                      onTap: onShowIndex!,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: tokens.spaceSmall),
+                          ],
                           /// TODO[feature]: Disable this feature for now because it is not stable yet, and we want to focus on getting the core navigation experience right first. We can re-enable it once it's more polished.
                           // if (onShareRequested != null) ...[
                           //   Padding(
@@ -238,5 +266,50 @@ class _PremiumNavigationControls extends StatelessWidget {
       message: 'build',
     );
     return controls;
+  }
+}
+
+/// Circular floating button that opens the host's surah index, sitting just
+/// above the page navigation card. Mirrors the bottom bar's button styling but
+/// adds elevation so it reads as a floating action.
+class _PremiumIndexFab extends StatelessWidget {
+  const _PremiumIndexFab({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = theme.tokens;
+    final colorScheme = theme.colorScheme;
+    final double size = tokens.iconSizeExtraLarge;
+
+    return Semantics(
+      button: true,
+      child: Material(
+        color: colorScheme.surfaceContainerLow,
+        elevation: 3,
+        shadowColor: Colors.black.withValues(alpha: tokens.opacityMedium),
+        shape: CircleBorder(
+          side: BorderSide(
+            color: colorScheme.primary.withValues(alpha: tokens.opacityMedium),
+            width: tokens.borderWidthThin,
+          ),
+        ),
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Icon(
+              Icons.list_rounded,
+              size: tokens.iconSizeMedium,
+              color: colorScheme.onSurface,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

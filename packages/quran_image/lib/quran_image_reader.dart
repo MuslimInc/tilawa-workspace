@@ -24,6 +24,7 @@ class QuranImageReader extends StatefulWidget {
     this.restoreOrientations,
     this.restoreSystemUiOverlayStyle,
     this.onShareRequested,
+    this.onShowIndex,
     this.headerImageFilter,
   });
 
@@ -50,6 +51,10 @@ class QuranImageReader extends StatefulWidget {
   /// Called when the user taps the share/reel button in the navigation overlay.
   /// The host app is responsible for opening its share composer.
   final void Function(int currentPage)? onShareRequested;
+
+  /// Called when the user taps the surah index button in the navigation
+  /// overlay. The host app is responsible for showing its surah index UI.
+  final void Function()? onShowIndex;
 
   /// Optional filter for the Surah header images.
   final ColorFilter? headerImageFilter;
@@ -1132,6 +1137,7 @@ class _QuranImageReaderState extends State<QuranImageReader>
               onShareRequested: widget.onShareRequested != null
                   ? () => widget.onShareRequested!(_lastSettledPageIndex + 1)
                   : null,
+              onShowIndex: widget.onShowIndex,
             ),
           ],
         ),
@@ -1140,7 +1146,29 @@ class _QuranImageReaderState extends State<QuranImageReader>
 
     PerfLogger.logElapsed(sw, widgetName: 'QuranImageReader', message: 'build');
 
-    return Directionality(textDirection: TextDirection.rtl, child: scaffold);
+    // React to external page jumps (e.g. the host's surah index). The reader
+    // normally OUTPUTS page changes via _onReaderPageChanged; this listener
+    // closes the loop by moving the PageController when the bloc's current
+    // page changes from a source other than this reader. The settled-page
+    // guard prevents an infinite loop with our own PageChanged dispatch.
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: BlocListener<NavigationBloc, NavigationState>(
+        listenWhen: (prev, curr) =>
+            curr is NavigationLoaded &&
+            (prev is! NavigationLoaded ||
+                prev.pageState.currentPage != curr.pageState.currentPage),
+        listener: (context, state) {
+          if (state is NavigationLoaded) {
+            final target = state.pageState.currentPage;
+            if (target != _lastSettledPageIndex + 1) {
+              _navigateToPage(target);
+            }
+          }
+        },
+        child: scaffold,
+      ),
+    );
   }
 }
 
