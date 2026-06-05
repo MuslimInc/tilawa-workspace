@@ -62,13 +62,6 @@ class RecitersRootBackScope extends StatelessWidget {
     );
   }
 
-  static bool canPop(int mainTabIndex) {
-    if (QuranPlayerSystemBackCoordinator.interceptsSystemBack) {
-      return false;
-    }
-    return canExitApp(mainTabIndex);
-  }
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
