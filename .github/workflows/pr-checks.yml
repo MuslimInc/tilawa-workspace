@@ -55,10 +55,14 @@ jobs:
           export PATH="$HOME/.pub-cache/bin:$PATH"
           melos run gen
 
-      - name: Analyze (melos run analyze)
+      - name: Analyze (dart analyze --fatal-infos)
         run: |
           export PATH="$HOME/.pub-cache/bin:$PATH"
-          melos run analyze
+          # flex_color_scheme is a vendored third-party fork — don't gate our
+          # PRs on its lint infos. Every first-party package still runs under
+          # the strict --fatal-infos so real errors (undefined symbols, invalid
+          # overrides, …) fail the check.
+          melos exec --ignore="flex_color_scheme" -- dart analyze --fatal-infos
 
       - name: Test (melos run test)
         run: |

@@ -62,6 +62,18 @@ class RecitersRootBackScope extends StatelessWidget {
     );
   }
 
+  /// Whether a system-back press would exit the app — the policy the
+  /// [onPopInvokedWithResult] callback applies. Back never exits while the
+  /// expanded player is intercepting it, otherwise it follows [canExitApp].
+  /// [PopScope.canPop] is pinned to `false` (we exit explicitly in the
+  /// callback), so this stays a pure, test-only description of that decision.
+  static bool canPop(int mainTabIndex) {
+    if (QuranPlayerSystemBackCoordinator.interceptsSystemBack) {
+      return false;
+    }
+    return canExitApp(mainTabIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
