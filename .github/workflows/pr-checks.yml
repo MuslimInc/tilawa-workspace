@@ -1,0 +1,66 @@
+name: PR Checks
+
+# Fast feedback gate for pull requests: regenerate code, run static analysis,
+# and run the test suite. Catches compile/analyze errors (e.g. an interface
+# change that breaks an implementer) long before they surface in the much
+# slower signed-release build.
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Cancel superseded runs for the same ref to save CI minutes.
+concurrency:
+  group: pr-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "17"
+
+      # Keep in sync with .github/workflows/android-release.yml.
+      - name: Set up Flutter 3.44.1
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.1"
+          channel: stable
+          cache: true
+
+      - name: Resolve workspace dependencies
+        run: flutter pub get
+
+      - name: Activate melos
+        run: dart pub global activate melos '>=7.8.0 <8.0.0'
+
+      # The melos scripts call `melos exec` internally, so melos must be on PATH
+      # as a global executable. Export it once for every step that needs it.
+      - name: Generate code (melos run gen)
+        run: |
+          export PATH="$HOME/.pub-cache/bin:$PATH"
+          melos run gen
+
+      - name: Analyze (melos run analyze)
+        run: |
+          export PATH="$HOME/.pub-cache/bin:$PATH"
+          melos run analyze
+
+      - name: Test (melos run test)
+        run: |
+          export PATH="$HOME/.pub-cache/bin:$PATH"
+          melos run test
