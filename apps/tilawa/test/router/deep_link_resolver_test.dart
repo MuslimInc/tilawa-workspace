@@ -120,6 +120,41 @@ void main() {
     });
   });
 
+  group('DeepLinkResolver.notificationDataFromPayload', () {
+    test('resolves morning athkar string payload to category 1', () {
+      final Map<String, dynamic>? data =
+          DeepLinkResolver.notificationDataFromPayload('morning_athkar_20260605');
+      expect(data, isNotNull);
+      expect(
+        DeepLinkResolver.resolveLocation(data!),
+        startsWith('/athkar/1'),
+      );
+    });
+
+    test('resolves evening athkar string payload to category 2', () {
+      final Map<String, dynamic>? data =
+          DeepLinkResolver.notificationDataFromPayload('evening_athkar_20260605');
+      expect(data, isNotNull);
+      expect(
+        DeepLinkResolver.resolveLocation(data!),
+        startsWith('/athkar/2'),
+      );
+    });
+
+    test('still decodes JSON payloads', () {
+      expect(
+        DeepLinkResolver.notificationDataFromPayload('{"type":"settings"}'),
+        const {'type': 'settings'},
+      );
+    });
+
+    test('returns null for null, empty, or non-athkar non-JSON payloads', () {
+      expect(DeepLinkResolver.notificationDataFromPayload(null), isNull);
+      expect(DeepLinkResolver.notificationDataFromPayload(''), isNull);
+      expect(DeepLinkResolver.notificationDataFromPayload('not-json'), isNull);
+    });
+  });
+
   group('resolveFromData', () {
     test('builds a destination with resolved location, extra and source', () {
       final NotificationDestination dest = resolver.resolveFromData(

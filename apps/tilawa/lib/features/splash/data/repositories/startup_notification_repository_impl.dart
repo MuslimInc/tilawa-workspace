@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:injectable/injectable.dart';
 import 'package:tilawa/router/app_router.dart';
+import 'package:tilawa/router/deep_link_resolver.dart';
 
 import '../../domain/repositories/startup_notification_repository.dart';
 
@@ -16,13 +15,11 @@ class StartupNotificationRepositoryImpl
     if (response != null) {
       AppRouter.pendingLocalNotificationResponse = null;
       AppRouter.lastProcessedNotificationId = response.id;
-      final String? payload = response.payload;
-      if (payload != null) {
-        try {
-          return Map<String, dynamic>.from(jsonDecode(payload) as Map);
-        } catch (_) {}
-      }
-      return const {};
+      // Shared resolver understands both JSON payloads and the plain-string
+      // athkar payloads; empty map signals "launched from a notification but
+      // no destination data" so the splash falls back to home.
+      return DeepLinkResolver.notificationDataFromPayload(response.payload) ??
+          const {};
     }
 
     final pendingFcm = AppRouter.pendingFcmMessage;
