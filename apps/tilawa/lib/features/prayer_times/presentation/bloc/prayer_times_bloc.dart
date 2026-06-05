@@ -270,8 +270,15 @@ class PrayerTimesBloc extends Bloc<PrayerTimesEvent, PrayerTimesState> {
   ) async {
     emit(state.copyWith(isLoadingLocation: true));
 
+    // Explicit "Enable location" tap: allow opening app settings when the
+    // permission is permanently denied so the user can re-grant it. The passive
+    // load in [_onLoadPrayerTimes] leaves this false so opening the screen never
+    // navigates the user away to system settings.
     final Either<Failure, LocationResult> locationResult =
-        await _getCurrentLocationUseCase.call(forceRefresh: true);
+        await _getCurrentLocationUseCase.call(
+          forceRefresh: true,
+          allowOpenSettings: true,
+        );
 
     locationResult.fold(
       (failure) => emit(

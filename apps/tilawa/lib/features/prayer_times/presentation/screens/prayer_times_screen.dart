@@ -265,9 +265,6 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
     BuildContext context,
     PrayerTimesState state,
   ) {
-    final theme = Theme.of(context);
-    final tokens = theme.tokens;
-
     return TilawaIllustratedState(
       visual: const TilawaStateVisual(
         icon: Icons.my_location_rounded,
@@ -276,32 +273,20 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
       title: context.l10n.locationRequired,
       subtitle: context.l10n.locationRequiredDescription,
       semanticLabel: context.l10n.locationRequired,
-      primaryAction: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (state.errorMessage.isNotEmpty) ...[
-            Text(
-              state.errorMessage,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: tokens.spaceMedium),
-          ],
-          TilawaButton(
-            text: context.l10n.enableLocation,
-            leadingIcon: const Icon(Icons.my_location_rounded),
-            isLoading: state.isLoadingLocation,
-            onPressed: state.isLoadingLocation
-                ? null
-                : () {
-                    context.read<PrayerTimesBloc>().add(
-                      const PrayerTimesEvent.updateLocation(),
-                    );
-                  },
-          ),
-        ],
+      // The localized title + subtitle already explain this state. The raw
+      // failure message (e.g. "Location permission denied") is an untranslated
+      // technical string, so it is intentionally not surfaced to the user.
+      primaryAction: TilawaButton(
+        text: context.l10n.enableLocation,
+        leadingIcon: const Icon(Icons.my_location_rounded),
+        isLoading: state.isLoadingLocation,
+        onPressed: state.isLoadingLocation
+            ? null
+            : () {
+                context.read<PrayerTimesBloc>().add(
+                  const PrayerTimesEvent.updateLocation(),
+                );
+              },
       ),
     );
   }

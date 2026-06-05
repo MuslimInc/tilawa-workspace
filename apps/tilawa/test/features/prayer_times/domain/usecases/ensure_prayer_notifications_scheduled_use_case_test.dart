@@ -308,7 +308,8 @@ class _FakePrayerTimesRepository implements PrayerTimesRepository {
   Future<bool> hasLocationPermission() async => false;
 
   @override
-  Future<bool> requestLocationPermission() async => false;
+  Future<bool> requestLocationPermission({bool allowOpenSettings = false}) async =>
+      false;
 
   @override
   Future<void> saveSettings(PrayerSettingsEntity settings) async {

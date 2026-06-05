@@ -13,7 +13,11 @@ class RequestLocationPermissionUseCase {
 
   Future<Either<Failure, bool>> call() async {
     try {
-      final bool granted = await _repository.requestLocationPermission();
+      // Explicit user action: allow opening app settings when permanently
+      // denied so the user can re-grant permission.
+      final bool granted = await _repository.requestLocationPermission(
+        allowOpenSettings: true,
+      );
       return Right(granted);
     } catch (e) {
       return Left(Failure.unexpectedError(e.toString()));

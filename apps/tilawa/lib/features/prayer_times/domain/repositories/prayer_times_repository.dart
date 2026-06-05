@@ -53,8 +53,12 @@ abstract class PrayerTimesRepository {
   /// Check if location permission is granted
   Future<bool> hasLocationPermission();
 
-  /// Request location permission
-  Future<bool> requestLocationPermission();
+  /// Request location permission.
+  ///
+  /// [allowOpenSettings] opens the system app-settings page when the permission
+  /// is permanently denied. Pass `true` only for explicit user actions; passive
+  /// loads must leave it `false` so they never navigate the user away.
+  Future<bool> requestLocationPermission({bool allowOpenSettings = false});
 }
 
 /// Result class for location operations
