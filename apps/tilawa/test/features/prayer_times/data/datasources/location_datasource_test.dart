@@ -228,21 +228,46 @@ void main() {
         expect(result, true);
       });
 
-      test('returns false when permission denied forever', () async {
-        when(
-          mockGeolocatorClient.checkPermission(),
-        ).thenAnswer((_) async => LocationPermission.denied);
-        when(
-          mockGeolocatorClient.requestPermission(),
-        ).thenAnswer((_) async => LocationPermission.deniedForever);
-        when(mockGeolocatorClient.openAppSettings()).thenAnswer((_) async {
-          return;
-        }); // Future<void>
+      test(
+        'denied forever returns false without opening settings by default',
+        () async {
+          when(
+            mockGeolocatorClient.checkPermission(),
+          ).thenAnswer((_) async => LocationPermission.denied);
+          when(
+            mockGeolocatorClient.requestPermission(),
+          ).thenAnswer((_) async => LocationPermission.deniedForever);
 
-        final bool result = await dataSource.requestPermission();
+          final bool result = await dataSource.requestPermission();
 
-        expect(result, false);
-      });
+          expect(result, false);
+          // Passive request must never yank the user out to the App-info page
+          // (this previously caused a resume loop on the prayer-times screen).
+          verifyNever(mockGeolocatorClient.openAppSettings());
+        },
+      );
+
+      test(
+        'denied forever opens settings when allowOpenSettings is true',
+        () async {
+          when(
+            mockGeolocatorClient.checkPermission(),
+          ).thenAnswer((_) async => LocationPermission.denied);
+          when(
+            mockGeolocatorClient.requestPermission(),
+          ).thenAnswer((_) async => LocationPermission.deniedForever);
+          when(
+            mockGeolocatorClient.openAppSettings(),
+          ).thenAnswer((_) async {});
+
+          final bool result = await dataSource.requestPermission(
+            allowOpenSettings: true,
+          );
+
+          expect(result, false);
+          verify(mockGeolocatorClient.openAppSettings()).called(1);
+        },
+      );
     });
     group('getCountryCode', () {
       test('should return EG for coordinates in Egypt when geocoding fails', () async {

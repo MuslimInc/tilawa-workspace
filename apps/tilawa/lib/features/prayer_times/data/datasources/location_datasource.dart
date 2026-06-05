@@ -11,7 +11,7 @@ abstract class LocationDataSource {
   Future<LocationResult> getCurrentLocation({bool forceRefresh = false});
   Future<String?> getCountryCode(double latitude, double longitude);
   Future<bool> hasPermission();
-  Future<bool> requestPermission();
+  Future<bool> requestPermission({bool allowOpenSettings = false});
   Future<bool> isLocationServiceEnabled();
 }
 
@@ -101,20 +101,31 @@ class LocationDataSourceImpl implements LocationDataSource {
   }
 
   @override
-  Future<bool> requestPermission() async {
-    LocationPermission permission = await _geolocatorClient.checkPermission();
+  Future<bool> requestPermission({bool allowOpenSettings = false}) async {
+    try {
+      LocationPermission permission = await _geolocatorClient.checkPermission();
 
-    if (permission == LocationPermission.denied) {
-      permission = await _geolocatorClient.requestPermission();
-    }
+      if (permission == LocationPermission.denied) {
+        permission = await _geolocatorClient.requestPermission();
+      }
 
-    if (permission == LocationPermission.deniedForever) {
-      await _geolocatorClient.openAppSettings();
+      if (permission == LocationPermission.deniedForever) {
+        // Only jump to the system settings page on an explicit user action
+        // ([allowOpenSettings] == true). During the passive prayer-times load
+        // this would yank the user out to the App-info page and loop right back
+        // here on resume — which read as a crash.
+        if (allowOpenSettings) {
+          await _geolocatorClient.openAppSettings();
+        }
+        return false;
+      }
+
+      return permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always;
+    } catch (_) {
+      // Never let a platform/permission error cross the layer boundary.
       return false;
     }
-
-    return permission == LocationPermission.whileInUse ||
-        permission == LocationPermission.always;
   }
 
   @override

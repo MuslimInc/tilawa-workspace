@@ -303,6 +303,7 @@ void main() {
         when(
           mockGetCurrentLocationUseCase.call(
             forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
           ),
         ).thenAnswer((_) async => Right(tLocationResult));
         // Mocks for the triggered loadPrayerTimes
@@ -873,6 +874,7 @@ void main() {
         when(
           mockGetCurrentLocationUseCase.call(
             forceRefresh: anyNamed('forceRefresh'),
+            allowOpenSettings: anyNamed('allowOpenSettings'),
           ),
         ).thenAnswer(
           (_) async => Left(Failure.unexpectedError('Location denied')),
