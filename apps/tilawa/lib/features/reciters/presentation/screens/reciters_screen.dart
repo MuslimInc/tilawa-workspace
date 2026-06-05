@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,7 +17,6 @@ import 'package:tilawa/features/tour_guide/presentation/widgets/tour_target.dart
 import 'package:tilawa_core/entities/reciter_entity.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
-import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
 import '../../../../screens/cubit/main_screen_cubit.dart';
 import '../../../../screens/cubit/main_screen_state.dart';
@@ -31,31 +31,28 @@ import '../reciter_semantics_ids.dart';
 import '../tour/reciters_tour_launcher.dart';
 import '../tour/reciters_tour_targets.dart';
 
-/// Main-shell system back: collapse expanded player, tab focus, then exit.
+/// Main-shell system back: collapse expanded player, focus the reciters tab,
+/// then exit — all handled explicitly.
 ///
-/// Wrap [MainTabViewport] (not individual tab caches) so [PopScope.canPop]
-/// updates when [MainScreenCubit.currentIndex] changes. A [PopScope] inside
-/// offstage [RecitersScreen] would stay stale and allow exit from other tabs.
+/// [canPop] is pinned to `false` so system back is *always* delivered to
+/// [PopScope.onPopInvokedWithResult], where the decision is made fresh at press
+/// time. Two reasons this is explicit rather than driven by `canPop`:
 ///
-/// [PopScope.canPop] is a cached value: the framework only re-reads it when
-/// this widget rebuilds. When a full-screen root route (e.g. the Quran reader
-/// pushed over the shell) is popped, the GoRouter notification that flips the
-/// matched location back to `/` can fire while this subtree is still covered
-/// and mid-transition, so a single rebuild may recompute `canPop` against the
-/// not-yet-settled stack and freeze it at `false`. The result is a dead system
-/// back on the reciters tab until an unrelated tab switch forces another
-/// rebuild.
-///
-/// This [State] listens to the router directly and re-runs the build on the
-/// next frame for every route change, so `canPop` converges to the settled
-/// stack and the framework's own back handling exits the app — no explicit
-/// [SystemNavigator] call required.
-class RecitersRootBackScope extends StatefulWidget {
+///  * The shell sits at the root of a nested navigator whose root route cannot
+///    be popped, so `canPop: true` does **not** exit the app here — exit must
+///    be done explicitly via [SystemNavigator.pop].
+///  * A dynamic `canPop` is a cached value the framework only re-reads on
+///    rebuild. Returning from the full-screen Quran reader (a root route over
+///    the shell) raced with the route stack settling and froze `canPop` at
+///    `false`, making back a dead no-op until an unrelated tab switch. Reading
+///    state fresh in the callback removes that timing dependency entirely.
+class RecitersRootBackScope extends StatelessWidget {
   const RecitersRootBackScope({super.key, required this.child});
 
   final Widget child;
 
   /// Pure exit policy, kept static so it stays unit-testable without a tree.
+  /// Only the reciters tab (index 0), sitting on the main shell, may exit.
   static bool canExitApp(int mainTabIndex) {
     if (mainTabIndex != 0) {
       return false;
@@ -65,79 +62,30 @@ class RecitersRootBackScope extends StatefulWidget {
     );
   }
 
-  static bool canPop(int mainTabIndex) {
-    if (QuranPlayerSystemBackCoordinator.interceptsSystemBack) {
-      return false;
-    }
-    return canExitApp(mainTabIndex);
-  }
-
-  @override
-  State<RecitersRootBackScope> createState() => _RecitersRootBackScopeState();
-}
-
-class _RecitersRootBackScopeState extends State<RecitersRootBackScope> {
-  late final Listenable _routerDelegate;
-
-  @override
-  void initState() {
-    super.initState();
-    _routerDelegate = AppRouter.router.routerDelegate
-      ..addListener(_onRouteChanged);
-  }
-
-  void _onRouteChanged() {
-    if (!mounted) {
-      return;
-    }
-    // Rebuild after the frame, never synchronously: GoRouter can notify during
-    // a build/layout pass (initial route, redirects), where setState would
-    // throw. Deferring also lets [RecitersRootBackScope.canPop] read the
-    // settled stack once a pop has finished transitioning, instead of the
-    // popped route (e.g. the Quran reader) that is still on top mid-pop.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _routerDelegate.removeListener(_onRouteChanged);
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<MainScreenCubit, MainScreenState, int>(
-      selector: (MainScreenState state) => state.currentIndex,
-      builder: (BuildContext context, int tabIndex) {
-        return ValueListenableBuilder<bool>(
-          valueListenable:
-              QuranPlayerSystemBackCoordinator.interceptsSystemBackListenable,
-          builder: (BuildContext context, bool _, Widget? popChild) {
-            return PopScope(
-              canPop: RecitersRootBackScope.canPop(tabIndex),
-              onPopInvokedWithResult: (bool didPop, Object? result) {
-                if (didPop) {
-                  // canPop was true: the framework already popped/exited.
-                  return;
-                }
-                if (QuranPlayerSystemBackCoordinator.interceptsSystemBack) {
-                  QuranPlayerSystemBackCoordinator.handleSystemBack();
-                  return;
-                }
-                if (tabIndex != 0) {
-                  context.read<MainScreenCubit>().selectTab(0);
-                }
-              },
-              child: popChild!,
-            );
-          },
-          child: widget.child,
-        );
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (didPop) {
+          return;
+        }
+        // Expanded player intercepts back to collapse the now-playing sheet.
+        if (QuranPlayerSystemBackCoordinator.interceptsSystemBack) {
+          QuranPlayerSystemBackCoordinator.handleSystemBack();
+          return;
+        }
+        final int tabIndex = context.read<MainScreenCubit>().state.currentIndex;
+        if (tabIndex != 0) {
+          context.read<MainScreenCubit>().selectTab(0);
+          return;
+        }
+        // Reciters tab: this scope is the active back handler only on the main
+        // shell ('/'); pushed routes handle their own back. So a back here
+        // means "exit the app".
+        SystemNavigator.pop();
       },
+      child: child,
     );
   }
 }
