@@ -67,8 +67,10 @@ class AthkarNotificationService implements IAthkarNotificationService {
   static const int _dynamicMorningNotificationBaseId = 11000000;
   static const int _dynamicEveningNotificationBaseId = 12000000;
   static const int _dynamicScheduleWindowDays = 14;
-  static const String _morningAthkarPayloadPrefix = 'morning_athkar_';
-  static const String _eveningAthkarPayloadPrefix = 'evening_athkar_';
+  static const String _morningAthkarPayloadPrefix =
+      DeepLinkResolver.athkarMorningPayloadPrefix;
+  static const String _eveningAthkarPayloadPrefix =
+      DeepLinkResolver.athkarEveningPayloadPrefix;
 
   /// Delay for athkar notifications after prayer times (1 hour)
   static const Duration _athkarNotificationDelay = Duration(hours: 1);

@@ -22,6 +22,12 @@ class DeepLinkResolver {
   static const int athkarMorningCategoryId = 1;
   static const int athkarEveningCategoryId = 2;
 
+  /// Prefixes for the plain-string payloads emitted by the athkar local
+  /// notifications (e.g. `morning_athkar_20260605`). These are NOT JSON, so
+  /// the cold-start path must detect them before attempting [jsonDecode].
+  static const String athkarMorningPayloadPrefix = 'morning_athkar_';
+  static const String athkarEveningPayloadPrefix = 'evening_athkar_';
+
   // ---------------------------------------------------------------------------
   // Map (FCM / generic deep-link) resolution
   // ---------------------------------------------------------------------------
@@ -179,16 +185,41 @@ class DeepLinkResolver {
     return null;
   }
 
-  /// Parses a JSON payload string into a normalized data map, or `null`.
+  /// Parses a notification payload string into a normalized data map, or
+  /// `null`. Handles both JSON payloads (FCM / generic deep links) and the
+  /// plain-string athkar payloads emitted by the local athkar notifications.
   static Map<String, dynamic>? notificationDataFromPayload(String? payload) {
     if (payload == null || payload.isEmpty) {
       return null;
+    }
+    // Athkar local notifications use plain-string payloads (not JSON), so they
+    // must be recognised here; otherwise the cold-start launch path drops them
+    // and lands on home instead of the morning/evening athkar screen.
+    final Map<String, dynamic>? athkar = _athkarDataFromPayload(payload);
+    if (athkar != null) {
+      return athkar;
     }
     try {
       return Map<String, dynamic>.from(jsonDecode(payload) as Map);
     } catch (_) {
       return null;
     }
+  }
+
+  /// Maps a plain-string athkar payload to the normalized `athkar` data map
+  /// consumed by [resolveLocation], or `null` when [payload] is not athkar.
+  static Map<String, dynamic>? _athkarDataFromPayload(String payload) {
+    final bool isMorning = payload.startsWith(athkarMorningPayloadPrefix);
+    final bool isEvening = payload.startsWith(athkarEveningPayloadPrefix);
+    if (!isMorning && !isEvening) {
+      return null;
+    }
+    return <String, dynamic>{
+      'type': 'athkar',
+      'categoryId': isMorning ? athkarMorningCategoryId : athkarEveningCategoryId,
+      'categoryName':
+          isMorning ? athkarMorningCategoryName : athkarEveningCategoryName,
+    };
   }
 
   /// Normalizes legacy payload aliases (`actionType`→`type`, `actionData`→`data`)
