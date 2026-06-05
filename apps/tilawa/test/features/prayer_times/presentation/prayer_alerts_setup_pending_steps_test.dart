@@ -1,4 +1,4 @@
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/prayer_times/domain/value_objects/prayer_alarm_capability.dart';
 import 'package:tilawa/features/prayer_times/presentation/prayer_alerts_setup_pending_steps.dart';
 import 'package:tilawa/features/prayer_times/presentation/widgets/prayer_alerts_permission_flow.dart';

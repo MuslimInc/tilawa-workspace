@@ -25,7 +25,8 @@ class PrayerWatchdogLocationDataSource implements LocationDataSource {
   Future<bool> isLocationServiceEnabled() async => false;
 
   @override
-  Future<bool> requestPermission() async => false;
+  Future<bool> requestPermission({bool allowOpenSettings = false}) async =>
+      false;
 }
 
 /// No routing from the background isolate.
