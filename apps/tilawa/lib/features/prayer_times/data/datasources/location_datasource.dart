@@ -27,6 +27,17 @@ class LocationDataSourceImpl implements LocationDataSource {
     timeLimit: Duration(seconds: 15),
   );
 
+  /// Hard cap on the native reverse-geocoder. `placemarkFromCoordinates` has no
+  /// built-in timeout and can hang indefinitely when the platform Geocoder is
+  /// slow/unavailable — which would freeze the prayer-times screen on its
+  /// loading spinner, since the load awaits it. On timeout we fall back to the
+  /// offline approximation (country) or simply skip the location name.
+  static const Duration _geocodingTimeout = Duration(seconds: 5);
+
+  /// Dart-side backstop for the position fetch in case Geolocator's own
+  /// [LocationSettings.timeLimit] does not fire on a given device.
+  static const Duration _positionTimeout = Duration(seconds: 18);
+
   @override
   Future<LocationResult> getCurrentLocation({bool forceRefresh = false}) async {
     final bool serviceEnabled = await isLocationServiceEnabled();
@@ -48,9 +59,9 @@ class LocationDataSourceImpl implements LocationDataSource {
     }
 
     try {
-      final Position position = await _geolocatorClient.getCurrentPosition(
-        locationSettings: _locationSettings,
-      );
+      final Position position = await _geolocatorClient
+          .getCurrentPosition(locationSettings: _locationSettings)
+          .timeout(_positionTimeout);
       return _getLocationResultFromPosition(position);
     } catch (e) {
       if (e is TimeoutException) {
@@ -76,7 +87,7 @@ class LocationDataSourceImpl implements LocationDataSource {
       final List<Placemark> placemarks = await placemarkFromCoordinates(
         latitude,
         longitude,
-      );
+      ).timeout(_geocodingTimeout);
 
       if (placemarks.isNotEmpty) {
         final code = placemarks.first.isoCountryCode;
@@ -152,7 +163,7 @@ class LocationDataSourceImpl implements LocationDataSource {
       final List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
-      );
+      ).timeout(_geocodingTimeout);
 
       if (placemarks.isNotEmpty) {
         final List<String> addressParts = [];
