@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_image/core/perf_logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -85,6 +86,18 @@ class RecitersRootBackScope extends StatelessWidget {
                     }
                     if (tabIndex != 0) {
                       context.read<MainScreenCubit>().selectTab(0);
+                      return;
+                    }
+                    // tabIndex == 0: the pop was blocked by a stale
+                    // [canPop] == false. Returning from a full-screen root
+                    // route (e.g. the Quran reader) can leave [PopScope.canPop]
+                    // frozen at the value computed while that route was on top
+                    // (where [canExitApp] was false), so system back becomes a
+                    // dead no-op until a tab switch forces a rebuild. Re-check
+                    // against the live route stack and exit explicitly so back
+                    // always works on the reciters tab.
+                    if (canExitApp(tabIndex)) {
+                      SystemNavigator.pop();
                     }
                   },
                   child: popChild!,
