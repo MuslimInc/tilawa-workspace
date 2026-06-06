@@ -1,0 +1,145 @@
+name: Firebase App Distribution (APK)
+
+# Build a signed release APK and push it to Firebase App Distribution so it can
+# be installed on a tester's phone before cutting a Play release. Trigger it
+# from the GitHub mobile app / web ("Actions" tab -> this workflow ->
+# "Run workflow"), so a test build can be cut without a laptop.
+#
+# IMPORTANT: GitHub only shows the "Run workflow" button once this file is on
+# the repository's DEFAULT branch. Merge it first, then trigger from mobile.
+#
+# Required repository secret (Settings -> Secrets and variables -> Actions),
+# in addition to the ones android-release.yml already uses
+# (ANDROID_KEYSTORE_BASE64, ANDROID_KEY_PROPERTIES):
+#   FIREBASE_SERVICE_ACCOUNT_JSON - a Google service-account JSON (full text)
+#       with the "Firebase App Distribution Admin" role. Create it in
+#       Google Cloud Console -> IAM -> Service accounts (or Firebase Console
+#       -> Project settings -> Service accounts -> Generate new private key),
+#       then paste the whole JSON as the secret value.
+#
+# The Firebase Android App ID is read automatically from the committed
+# apps/tilawa/android/app/google-services.json, so it does not need a secret.
+#
+# One-time Firebase setup: in the Firebase Console -> App Distribution, create a
+# testers group (default name below is "testers") and add your tester email /
+# device to it.
+
+on:
+  workflow_dispatch:
+    inputs:
+      groups:
+        description: "Firebase tester groups (comma-separated)"
+        required: true
+        default: "testers"
+      release_notes:
+        description: "Release notes shown to testers"
+        required: false
+        default: "Test build from CI"
+      build_name:
+        description: "Version name override, e.g. 2.0.4 (optional)"
+        required: false
+        default: ""
+      build_number:
+        description: "Version code override, e.g. 48 (optional)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+# Never run two distributions at once.
+concurrency:
+  group: firebase-app-distribution
+  cancel-in-progress: false
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: "17"
+
+      # Keep in sync with .github/workflows/android-release.yml.
+      - name: Set up Flutter 3.44.1
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.1"
+          channel: stable
+          cache: true
+
+      - name: Resolve workspace dependencies
+        run: flutter pub get
+
+      - name: Generate code (melos run gen)
+        run: |
+          dart pub global activate melos '>=7.8.0 <8.0.0'
+          export PATH="$HOME/.pub-cache/bin:$PATH"
+          melos run gen
+
+      - name: Restore upload keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode \
+            > "$GITHUB_WORKSPACE/apps/tilawa/android/app/upload-keystore.jks"
+
+      - name: Write key.properties
+        env:
+          KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: |
+          KEYSTORE_PATH="$GITHUB_WORKSPACE/apps/tilawa/android/app/upload-keystore.jks"
+          printf '%s\n' "$KEY_PROPERTIES" \
+            | grep -v -i '^[[:space:]]*storeFile[[:space:]]*=' \
+            > "$GITHUB_WORKSPACE/apps/tilawa/android/key.properties"
+          echo "storeFile=$KEYSTORE_PATH" \
+            >> "$GITHUB_WORKSPACE/apps/tilawa/android/key.properties"
+
+      - name: Build release APK
+        working-directory: apps/tilawa
+        run: |
+          EXTRA=""
+          if [ -n "${{ inputs.build_name }}" ]; then
+            EXTRA="$EXTRA --build-name=${{ inputs.build_name }}"
+          fi
+          if [ -n "${{ inputs.build_number }}" ]; then
+            EXTRA="$EXTRA --build-number=${{ inputs.build_number }}"
+          fi
+          flutter build apk --release $EXTRA
+
+      - name: Read Firebase App ID from google-services.json
+        run: |
+          APP_ID=$(jq -r \
+            '.client[]
+              | select(.client_info.android_client_info.package_name=="com.tilawa.app")
+              | .client_info.mobilesdk_app_id' \
+            apps/tilawa/android/app/google-services.json)
+          if [ -z "$APP_ID" ] || [ "$APP_ID" = "null" ]; then
+            echo "::error::Could not read Firebase App ID from google-services.json"
+            exit 1
+          fi
+          echo "FIREBASE_APP_ID=$APP_ID" >> "$GITHUB_ENV"
+          echo "Firebase App ID: $APP_ID"
+
+      - name: Distribute to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ env.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+          groups: ${{ inputs.groups }}
+          releaseNotes: ${{ inputs.release_notes }}
+          file: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload APK as build artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: ignore
