@@ -1,4 +1,4 @@
-name: Firebase App Distribution (APK)
+name: Firebase App Distribution (APK).
 
 # Build a signed release APK and push it to Firebase App Distribution so it can
 # be installed on a tester's phone before cutting a Play release. Trigger it
