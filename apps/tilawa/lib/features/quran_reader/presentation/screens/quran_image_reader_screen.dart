@@ -23,6 +23,7 @@ import '../../../../features/audio_player/presentation/bloc/audio_player_bloc.da
 import '../../../../features/share/presentation/widgets/share_options_sheet.dart';
 import '../../domain/ports/quran_image_preload_status.dart';
 import '../../domain/usecases/load_quran_fonts_to_engine_use_case.dart';
+import '../navigation/quran_image_reader_index_navigation.dart';
 import '../theme/quran_reader_theme.dart';
 import '../widgets/surah_index_sheet.dart';
 
@@ -249,7 +250,11 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
   }
 
   Future<void> _showSurahIndex() async {
-    final navigationBloc = context.read<NavigationBloc>();
+    final NavigationBloc? navigationBloc = _navigationBloc;
+    if (navigationBloc == null) {
+      return;
+    }
+
     final fontEngine = getIt<LoadQuranFontsToEngineUseCase>();
     final theme = Theme.of(context);
     final readerOverlayStyle = _buildReaderSystemUiOverlayStyle(theme);
@@ -259,15 +264,26 @@ class _QuranImageReaderScreenState extends State<QuranImageReaderScreen>
       _buildShareSheetSystemUiOverlayStyle(theme),
     );
     try {
-      await showTilawaModalBottomSheet<void>(
+      final int? selectedSurah = await showTilawaModalBottomSheet<int>(
         context: context,
+        useSafeArea: true,
         backgroundColor: Colors.transparent,
         builder: (sheetContext) => SurahIndexSheet(
           onSurahSelected: (surahNumber) {
-            navigationBloc.add(PageChanged(getPageNumber(surahNumber, 1)));
-            Navigator.of(sheetContext).pop();
+            Navigator.of(sheetContext).pop(surahNumber);
           },
         ),
+      );
+      if (selectedSurah == null ||
+          !QuranImageReaderIndexNavigation.shouldDispatchSelection(
+            isMounted: mounted,
+            selectedSurah: selectedSurah,
+          )) {
+        return;
+      }
+      QuranImageReaderIndexNavigation.dispatchSelection(
+        navigationBloc,
+        selectedSurah,
       );
     } finally {
       SystemChrome.setSystemUIOverlayStyle(readerOverlayStyle);
