@@ -63,7 +63,8 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     bool forceDebugSource = false,
     bool? preloadAllPages,
   }) async {
-    final targetSource = forceDebugSource
+    final bool useDebugSource = forceDebugSource && !kReleaseMode;
+    final targetSource = useDebugSource
         ? MarkerDataSource.debug
         : MarkerDataSource.production;
     if (_isInitialized && _dataSource == targetSource) {
@@ -95,7 +96,8 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     required bool? preloadAllPages,
   }) async {
     final timer = PerfLogger.startTimer();
-    _dataSource = forceDebugSource
+    final bool useDebugSource = forceDebugSource && !kReleaseMode;
+    _dataSource = useDebugSource
         ? MarkerDataSource.debug
         : MarkerDataSource.production;
 
@@ -245,15 +247,19 @@ class AssetVerseMarkerRepository implements VerseMarkerRepository {
     MarkerDataSource source, {
     bool preloadAllPages = true,
   }) async {
-    if (_dataSource == source) return;
+    final MarkerDataSource effectiveSource =
+        source == MarkerDataSource.debug && kReleaseMode
+        ? MarkerDataSource.production
+        : source;
+    if (_dataSource == effectiveSource) return;
     _log(
-      'setDataSource source=${source.name} preloadAllPages=$preloadAllPages',
+      'setDataSource source=${effectiveSource.name} preloadAllPages=$preloadAllPages',
     );
-    _dataSource = source;
+    _dataSource = effectiveSource;
     _cache.clear();
     _preloadProgress = 0.0;
 
-    if (source == MarkerDataSource.production) {
+    if (effectiveSource == MarkerDataSource.production) {
       String raw;
       try {
         raw = await rootBundle.loadString(

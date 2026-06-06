@@ -9,7 +9,7 @@ The debug coordinates system allows precise per-page marker debugging and valida
 ```
 assets/data/
 ├── verse_marker_coordinates.json          # Production: All pages in one file
-└── quran_marker_debug_coordinates/        # Debug: Individual page files
+└── quran_marker_debug_coordinates/        # Dev-only: not bundled in release AAB
     ├── 1.json                             # Page 1: Al-Fatiha
     ├── 2.json                             # Page 2: Al-Baqara start
     ├── ...
@@ -19,6 +19,11 @@ assets/data/
     ├── 603.json                           # Page 603
     └── 604.json                           # Page 604: An-Nas
 ```
+
+Per-page files stay in the repo for coordinate tooling but are **not** listed
+under `flutter: assets:` in `pubspec.yaml`, so store builds exclude them. To
+debug on device, temporarily add
+`assets/data/quran_marker_debug_coordinates/` to `pubspec.yaml` (debug only).
 
 ## Usage
 
