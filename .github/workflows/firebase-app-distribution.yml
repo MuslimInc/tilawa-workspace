@@ -114,14 +114,11 @@ jobs:
           if [ -n "${{ inputs.build_number }}" ]; then
             EXTRA="$EXTRA --build-number=${{ inputs.build_number }}"
           fi
-          # The app's build.gradle already restricts abiFilters to arm64-v8a, so
-          # a plain build produces a single arm64 app-release.apk — no
-          # --split-per-abi (which conflicts with abiFilters).
-          # --split-debug-info strips the Dart debug info out of libapp.so into
-          # build/symbols (uploaded below), which meaningfully shrinks the APK.
-          # We intentionally do NOT pass --obfuscate, so crash stack traces keep
-          # readable symbol names for this test build.
+          # arm64-only: ndk.abiFilters (build.gradle) + --target-platform below.
+          # --split-debug-info strips Dart debug info out of libapp.so into
+          # build/symbols (uploaded below), shrinking the user-facing binary.
           flutter build apk --release \
+            --target-platform android-arm64 \
             --split-debug-info=build/symbols $EXTRA
 
       - name: Read Firebase App ID from google-services.json

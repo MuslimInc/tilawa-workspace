@@ -100,9 +100,22 @@ jobs:
       - name: Build signed release AAB
         working-directory: apps/tilawa
         run: |
+          # arm64-only: ndk.abiFilters (build.gradle) filters plugin JNI; Flutter
+          # still AOT-compiles all ABIs unless --target-platform is set (they
+          # do not conflict — unlike --split-per-abi).
           flutter build appbundle --release \
+            --target-platform android-arm64 \
+            --split-debug-info=build/symbols \
             --build-name=${{ inputs.build_name }} \
             --build-number=${{ inputs.build_number }}
+
+      - name: Upload debug symbols
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-symbols-${{ inputs.build_number }}
+          path: apps/tilawa/build/symbols
+          if-no-files-found: ignore
 
       - name: Publish to Google Play
         uses: r0adkll/upload-google-play@v1

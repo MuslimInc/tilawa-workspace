@@ -61,8 +61,15 @@ android {
         targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
-        // Play AAB: arm64 only — 64-bit required on Play since 2019; drops 32-bit
-        // and x86_64 native libs from the bundle.
+        // Play AAB: arm64 only — 64-bit required on Play since 2019.
+        //
+        // Two layers (both needed for a lean AAB; neither conflicts):
+        // 1. ndk.abiFilters — Gradle packaging filter for plugin JNI (.so).
+        // 2. flutter build --target-platform android-arm64 — Flutter AOT for
+        //    libapp.so / libflutter.so (abiFilters alone does not limit this;
+        //    verified: without --target-platform the AAB stays ~80 MB).
+        //
+        // Do NOT use --split-per-abi here; it conflicts with abiFilters.
         ndk {
             abiFilters "arm64-v8a"
         }
