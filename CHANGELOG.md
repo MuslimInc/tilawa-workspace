@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.6+50] - 2026-06-07 [Google Play Release]
+
+### Added
+
+- **In-app updates**: Optional and required update prompts driven by Firestore
+  config (Google Play in-app update API).
+- **Quran image reader**: Surah index FAB above the navigation card for quick
+  jumps within the mushaf reader.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.6** (build **50**).
+- **App size**: Arm64-only release bundles and split debug symbols shrink
+  download and update size on Play.
+- **Reciters**: Alphabet index rail stays fixed size when the mini player
+  appears.
+
+### Fixed
+
+- **Quran reader**: Surah index routes through reader `NavigationBloc`; back
+  navigation and share/reader polish from recent fixes.
+- **Prayer times**: Geocoding timeout prevents the screen hanging on the
+  loading spinner; location permission recovery improvements.
+- **Premium navigation**: Overlay alignment on the image reader.
+- **Reciters**: System back exits the app from the catalog as expected.
+
 ## [1.0.7+39] - 2026-06-02 [Google Play Release]
 
 ### Added

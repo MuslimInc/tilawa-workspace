@@ -12,6 +12,39 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.0.6** (build **50**) |
+| Git tag | `v2.0.6+50` (pending) |
+| Date | 2026-06-07 |
+| Track | Internal testing → Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• In-app updates when a newer version is on Google Play
+• Surah index in the Quran image reader for quick navigation
+• Smaller downloads and faster updates on supported devices
+• More reliable prayer times when location lookup is slow
+• Reciters list and alphabet index behave better with the mini player
+• Navigation and stability fixes across the Quran reader
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• تحديثات داخل التطبيق عند توفر إصدار أحدث على Google Play
+• فهرس السور في قارئ المصحف للانتقال السريع
+• تنزيلات أصغر وتحديثات أسرع على الأجهزة المدعومة
+• أوقات صلاة أكثر موثوقية عند بطء تحديد الموقع
+• قائمة القرّاء وفهرس أ–ي يعملان أفضل مع المشغّل المصغّر
+• إصلاحات تنقل واستقرار في قارئ القرآن
+```
+
+---
+
+## Previous current release (1.0.7+39)
+
+| Field | Value |
+|-------|--------|
 | Version | **1.0.7** (build **39**) |
 | Git tag | `v1.0.7+39` (pending) |
 | Date | 2026-06-02 |
