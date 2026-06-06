@@ -198,7 +198,7 @@ class _PremiumNavigationControls extends StatelessWidget {
                                     maxWidth: tokens.contentMaxWidthForm,
                                   ),
                                   child: Align(
-                                    alignment: AlignmentDirectional.centerEnd,
+                                    alignment: AlignmentDirectional.centerStart,
                                     child: _PremiumIndexFab(
                                       onTap: onShowIndex!,
                                     ),
@@ -208,6 +208,7 @@ class _PremiumNavigationControls extends StatelessWidget {
                             ),
                             SizedBox(height: tokens.spaceSmall),
                           ],
+
                           /// TODO[feature]: Disable this feature for now because it is not stable yet, and we want to focus on getting the core navigation experience right first. We can re-enable it once it's more polished.
                           // if (onShareRequested != null) ...[
                           //   Padding(
