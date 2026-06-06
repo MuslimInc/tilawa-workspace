@@ -16,18 +16,10 @@ extension AppStartupWidgets on AppStartupTasks {
     );
   }
 
-  /// Builds the root app widget with DevicePreview wrapper.
-  ///
-  /// Release omits [DevicePreview] entirely so no preview store or listeners
-  /// ship in store builds.
+  /// Builds the root app widget. [DevicePreview] wraps debug/profile builds only
+  /// (see [device_preview_app_builder.dart] conditional import).
   Widget buildRootApp() {
-    if (kReleaseMode) {
-      return const TilawaApp();
-    }
-    return DevicePreview(
-      enabled: false,
-      builder: (context) => const TilawaApp(),
-    );
+    return wrapRootAppWithDevicePreview(const TilawaApp());
   }
 
   /// Builds the fatal error fallback app when bootstrap fails catastrophically.

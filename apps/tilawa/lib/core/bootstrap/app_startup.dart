@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -22,6 +21,7 @@ import 'package:tilawa/core/bootstrap/splash_launch_handoff.dart';
 import 'package:tilawa/core/telemetry/startup_telemetry.dart';
 import 'package:tilawa/core/bootstrap/critical_init_coordinator.dart';
 import 'package:tilawa/core/bootstrap/launch_timeline.dart';
+import 'package:tilawa/core/debug/device_preview_app_builder.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import '../../firebase_options.dart';

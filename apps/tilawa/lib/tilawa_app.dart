@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:device_preview/device_preview.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +16,7 @@ import 'core/di/injection.dart';
 import 'app/app_providers.dart';
 import 'core/bootstrap/first_frame_log.dart';
 import 'core/bootstrap/splash_launch_handoff.dart';
+import 'core/debug/device_preview_app_builder.dart';
 import 'core/services/notification_startup_service.dart';
 import 'core/services/update_service.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
@@ -168,11 +167,7 @@ class _PlayerApp extends StatelessWidget {
                 // showPerformanceOverlay: kDebugMode || kProfileMode,
                 // checkerboardRasterCacheImages: kDebugMode || kProfileMode,
                 builder: (context, child) {
-                  // Release: skip DevicePreview.appBuilder — no preview ancestor
-                  // work; profile/debug still use it when preview is enabled.
-                  final app = kReleaseMode
-                      ? (child ?? const SizedBox.shrink())
-                      : DevicePreview.appBuilder(context, child);
+                  final app = applyDevicePreviewAppBuilder(context, child);
                   final routedChild = _DefaultRouteSystemUiOverlay(
                     child: app,
                   );
