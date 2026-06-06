@@ -121,7 +121,7 @@ jobs:
           # build/symbols (uploaded below), which meaningfully shrinks the APK.
           # We intentionally do NOT pass --obfuscate, so crash stack traces keep
           # readable symbol names for this test build.
-          flutter build apk --release --split-per-abi \
+          flutter build apk --release \
             --split-debug-info=build/symbols $EXTRA
 
       - name: Read Firebase App ID from google-services.json
@@ -145,14 +145,14 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           groups: ${{ inputs.groups }}
           releaseNotes: ${{ inputs.release_notes }}
-          file: apps/tilawa/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          file: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload APK as build artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: app-arm64-v8a-release-apk
-          path: apps/tilawa/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          name: app-release-apk
+          path: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: ignore
 
       - name: Upload debug symbols
