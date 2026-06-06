@@ -151,8 +151,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: app-arm64-v8a-release-apk
-          path: apps/tilawa/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          name: app-release-apk
+          path: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: ignore
 
       - name: Upload debug symbols
