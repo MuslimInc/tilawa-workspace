@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tilawa/core/bootstrap/app_startup_readiness.dart';
 import 'package:tilawa/core/di/injection.dart';
 import 'package:tilawa/core/extensions.dart';
-import 'package:tilawa/features/audio_player/presentation/bloc/audio_player_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/utils/reciters_letter_index_preference.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciters_catalog_search_field.dart';
@@ -652,24 +651,9 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
     final double gutterWidth = _recitersLetterIndexGutterWidth(theme);
     final double scrollbarWidth = theme.componentTokens.alphabetScrollbar.width;
 
-    // Keep the rail's rectangle constant when the mini player shows/hides.
-    // On narrow phones the player lives in the Scaffold's bottomNavigationBar,
-    // so its appearance shrinks this body — and the rail's Expanded letters
-    // would resize (a jarring height jump). Reserve the player's height while
-    // it is hidden so the rail spans the same extent in both states. On wide
-    // layouts the player overlays the body instead of shrinking it, so no
-    // reserve is needed there.
-    final bool playerVisible = context.select<AudioPlayerBloc, bool>(
-      (bloc) =>
-          bloc.state.shouldShowBottomPlayer && bloc.state.currentAudio != null,
-    );
-    final double bottomReserve = (context.isNarrow && !playerVisible)
-        ? theme.tokens.playerCollapsedHeight
-        : 0;
-
     return PositionedDirectional(
       top: verticalMargin,
-      bottom: verticalMargin + bottomReserve,
+      bottom: verticalMargin,
       start: isRtl ? 0 : null,
       end: isRtl ? null : 0,
       width: gutterWidth,
