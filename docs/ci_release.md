@@ -42,12 +42,12 @@ edit `pubspec.yaml` to bump the release.
 
 ## Notes
 
-- Builds use a plain `flutter build appbundle --release` (Flutter 3.44.1,
-  Java 17). Code generation runs via `melos run gen` before the build, since
-  the app's generated files are git-ignored.
-- This path does **not** register the release with Shorebird, so you cannot
-  `shorebird patch` on top of it. That is intentional per the request to ship a
-  standard AAB.
+- Builds use `flutter build appbundle --release --target-platform android-arm64
+  --split-debug-info=build/symbols` (Flutter 3.44.1, Java 17). Arm64 is also
+  set via `ndk.abiFilters` in `app/build.gradle`; the CLI flag is still
+  required so Flutter AOT does not compile unused ABIs into the AAB. Code
+  generation runs via `melos run gen` before the build. Debug symbols are
+  attached as the `debug-symbols-<versionCode>` artifact for Crashlytics.
 - The AAB is also attached to the run as the `app-release-aab` artifact, so you
   can download and upload it manually if the Play step ever needs to be skipped.
 - Release notes / Data Safety / screenshots are still managed in the Play

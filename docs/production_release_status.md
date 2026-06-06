@@ -20,8 +20,8 @@
 2. Tag: `git tag v1.0.3+28`
 3. Quality: `melos run analyze` and `cd apps/tilawa && flutter test`
 4. Kotlin: `cd apps/tilawa/android && ./gradlew test`
-5. Build: `cd apps/tilawa && shorebird release android --flutter-version=3.44.0`
+5. Build: `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols`
 6. Upload `build/app/outputs/bundle/release/app-release.aab` to Internal testing
 7. Staged rollout after pre-launch report
 
-See also: [google_play_release_checklist.md](google_play_release_checklist.md), [shorebird.md](shorebird.md).
+See also: [google_play_release_checklist.md](google_play_release_checklist.md), [ci_release.md](ci_release.md).

@@ -28,10 +28,12 @@ For policy gaps, phased remediation, and Console-only verification, see
 
 ## 4. Build Artifacts
 
-- [ ] Build production AAB with Shorebird (required when native/Kotlin or plugin native code changed):
-      `cd apps/tilawa && shorebird release android --flutter-version=3.44.1`
+- [ ] Build production AAB (arm64 enforced by `ndk.abiFilters` in `build.gradle`
+      **and** `--target-platform android-arm64` on the Flutter CLI — both are
+      required; they do not conflict):
+      `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols`
 - [ ] Verify artifact exists: `apps/tilawa/build/app/outputs/bundle/release/app-release.aab`
-- [ ] Do **not** use `shorebird patch` for this release if Kotlin, plugins, or assets changed.
+- [ ] Upload `build/symbols/` to Crashlytics (or download from the CI `debug-symbols` artifact).
 - [ ] Smoke test release build on physical Android devices.
 
 ## 5. Play Console Readiness

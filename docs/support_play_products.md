@@ -23,11 +23,11 @@ flutter run --dart-define=TILAWA_LAUNCH_SUPPORT_TILAWA_ENABLED=false
 ## Upload a build to Play Console
 
 Play unlocks **One-time products** after it sees `com.android.vending.BILLING` in an
-uploaded AAB. Use a **Shorebird release** (native/billing changes cannot ship via patch):
+Upload a release AAB via the **Android Release (Google Play)** GitHub workflow, or locally:
 
 ```bash
 cd apps/tilawa
-shorebird release android --flutter-version=3.44.0
+flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols
 ```
 
 Upload: `apps/tilawa/build/app/outputs/bundle/release/app-release.aab`
@@ -37,7 +37,7 @@ Upload: `apps/tilawa/build/app/outputs/bundle/release/app-release.aab`
 
 Then: merchant account → create the three consumables → license testers.
 
-See also: [`docs/shorebird.md`](shorebird.md), [`docs/google_play_release_checklist.md`](google_play_release_checklist.md).
+See also: [`docs/google_play_release_checklist.md`](google_play_release_checklist.md), [`docs/ci_release.md`](ci_release.md).
 
 ## Cloud Function
 

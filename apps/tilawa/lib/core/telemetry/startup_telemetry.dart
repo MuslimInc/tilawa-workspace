@@ -6,7 +6,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:shorebird_code_push/shorebird_code_push.dart';
 import 'package:tilawa_core/constants/analytics_constants.dart';
 
 import '../logging/app_logger.dart';
@@ -28,7 +27,6 @@ abstract final class StartupTelemetry {
   static String? _lastPhase;
   static String? _appVersion;
   static String? _buildNumber;
-  static int? _shorebirdPatchNumber;
   static bool _contextLoaded = false;
 
   @visibleForTesting
@@ -73,7 +71,6 @@ abstract final class StartupTelemetry {
     _lastPhase = null;
     _appVersion = null;
     _buildNumber = null;
-    _shorebirdPatchNumber = null;
     _contextLoaded = false;
     _healthLogSinkInstance = const NoopStartupHealthLogSink();
     firestoreLoggingEnabled = true;
@@ -135,7 +132,6 @@ abstract final class StartupTelemetry {
           AnalyticsParams.elapsedMs: elapsedMs,
           AnalyticsParams.appVersion: ?_appVersion,
           AnalyticsParams.buildNumber: ?_buildNumber,
-          AnalyticsParams.patchNumber: ?_shorebirdPatchNumber,
           AnalyticsParams.sessionId: _sessionId,
         },
       ),
@@ -197,7 +193,6 @@ abstract final class StartupTelemetry {
           AnalyticsParams.error: _truncate(errorMessage, 100),
           AnalyticsParams.appVersion: ?_appVersion,
           AnalyticsParams.buildNumber: ?_buildNumber,
-          AnalyticsParams.patchNumber: ?_shorebirdPatchNumber,
           AnalyticsParams.sessionId: _sessionId,
         },
       ),
@@ -232,7 +227,6 @@ abstract final class StartupTelemetry {
           AnalyticsParams.elapsedMs: elapsedMs,
           AnalyticsParams.appVersion: ?_appVersion,
           AnalyticsParams.buildNumber: ?_buildNumber,
-          AnalyticsParams.patchNumber: ?_shorebirdPatchNumber,
           AnalyticsParams.sessionId: _sessionId,
         },
       ),
@@ -268,15 +262,6 @@ abstract final class StartupTelemetry {
     } catch (e) {
       logger.d('StartupTelemetry package info: $e');
     }
-    try {
-      final ShorebirdUpdater updater = ShorebirdUpdater();
-      if (updater.isAvailable) {
-        final Patch? patch = await updater.readCurrentPatch();
-        _shorebirdPatchNumber = patch?.number;
-      }
-    } catch (e) {
-      logger.d('StartupTelemetry shorebird patch: $e');
-    }
     if (_crashlyticsPrimed) {
       await _applyCrashlyticsContext();
     }
@@ -293,12 +278,6 @@ abstract final class StartupTelemetry {
     if (_buildNumber != null) {
       await crashlytics.setCustomKey('build_number', _buildNumber!);
     }
-    if (_shorebirdPatchNumber != null) {
-      await crashlytics.setCustomKey(
-        'shorebird_patch_number',
-        _shorebirdPatchNumber!,
-      );
-    }
     await crashlytics.setCustomKey('startup_session_id', _sessionId);
     if (_lastPhase != null) {
       await crashlytics.setCustomKey('startup_last_phase', _lastPhase!);
@@ -311,7 +290,6 @@ abstract final class StartupTelemetry {
       'client_timestamp_ms': DateTime.now().millisecondsSinceEpoch,
       'app_version': _appVersion,
       'build_number': _buildNumber,
-      'patch_number': _shorebirdPatchNumber,
       'platform': _platformName(),
       'build_mode': kReleaseMode
           ? 'release'

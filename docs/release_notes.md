@@ -116,8 +116,7 @@ Older entries: see [`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Unreleased
 
-_Dart-only fixes queued for Shorebird patch or the next `pubspec` bump — move here
-from the post-release section when shipped._
+_Dart-only fixes queued for the next Play release — move here when shipped._
 
 ---
 
@@ -127,7 +126,6 @@ from the post-release section when shipped._
    500 characters if needed).
 2. Record the same version in [`CHANGELOG.md`](../CHANGELOG.md).
 3. Tag: `git tag -a v1.0.5+32 -m "Release 1.0.5+32"` and `git push origin v1.0.5+32`.
-4. Build: `cd apps/tilawa && shorebird release android --flutter-version=3.44.1`
-   (new native changes) or `shorebird patch android --release-version 1.0.7+39`
-   (Dart-only).
+4. Build: GitHub Actions **Android Release (Google Play)** workflow, or locally:
+   `cd apps/tilawa && flutter build appbundle --release --target-platform android-arm64 --split-debug-info=build/symbols`
 5. Checklist: [`google_play_release_checklist.md`](google_play_release_checklist.md)

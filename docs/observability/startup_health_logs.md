@@ -16,7 +16,6 @@ BigQuery export.
 | `elapsed_ms` | number | Ms since process start |
 | `session_id` | string | Per-launch id |
 | `app_version` / `build_number` | string | From `package_info_plus` |
-| `patch_number` | number | Shorebird patch, when available |
 | `platform` | string | `android`, `ios`, … |
 | `build_mode` | string | `release`, `profile`, `debug` |
 | `client_timestamp_ms` | number | Device wall clock |
@@ -29,7 +28,7 @@ funnels.
 
 - Stuck splash: `event == "startup_phase"` and `phase == "boot_gate_start"` with
   no matching `startup_completed` for the same `session_id`.
-- Bad patch: filter `patch_number == 1` and `event == "startup_failed"`.
+- Startup failures: `event == "startup_failed"` grouped by `reason`.
 
 ## Security rules (deploy to Firebase)
 

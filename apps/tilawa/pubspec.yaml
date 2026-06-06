@@ -93,7 +93,6 @@ dependencies:
   meta: ^1.17.0
   in_app_review: ^2.0.12
   url_launcher: ^6.3.2
-  shorebird_code_push: ^2.0.6
 
 dev_dependencies:
   bloc_lint: ^0.4.1
@@ -120,7 +119,6 @@ flutter:
   generate: true
 
   assets:
-    - shorebird.yaml
     - assets/images/
     - assets/json/
     - assets/data/

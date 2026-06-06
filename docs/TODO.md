@@ -26,11 +26,6 @@ something comes to mind; check boxes when done.
 
 _Add new product work here._
 
-- [ ] **Support Tilawa — Shorebird patch** `P1`  
-  Ship PR #56 fixes (billing dedupe, app-review sacred-flow ref-count) on
-  `1.0.4+31` via `shorebird patch android --release-version 1.0.4+31`, then
-  update [`release_notes.md`](release_notes.md) Unreleased → shipped.
-
 - [ ] **Support — optional UI listen to verified stream** `P2`  
   Consider `watchVerifiedPurchases` in Support bloc so background-only success
   can show thank-you without relying only on `purchaseSupportProduct` return.
