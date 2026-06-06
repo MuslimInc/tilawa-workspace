@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -390,18 +392,36 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
               ),
               child: Padding(
                 padding: componentTokens.verticalPadding,
-                child: Column(
-                  children: [
-                    for (final letter in widget.letters)
-                      Expanded(
-                        child: _buildLetterItem(
-                          letter: letter,
-                          primaryColor: primaryColor,
-                          unselectedColor: unselectedColor,
-                          componentTokens: componentTokens,
-                        ),
-                      ),
-                  ],
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final int count = widget.letters.length;
+                    final double maxHeight = constraints.maxHeight;
+                    // Android fast-scroll style: keep each letter at a compact,
+                    // FIXED slot and let the flexible gaps (spaceBetween) absorb
+                    // height changes — e.g. when the mini player shows/hides at
+                    // the bottom — so the glyphs never resize. The slot only
+                    // shrinks if the rail is genuinely too short to fit them all.
+                    final double preferredSlot =
+                        componentTokens.letterFontSize + 2;
+                    final double slot = (count > 0 && maxHeight.isFinite)
+                        ? math.min(preferredSlot, maxHeight / count)
+                        : preferredSlot;
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        for (final letter in widget.letters)
+                          SizedBox(
+                            height: slot,
+                            child: _buildLetterItem(
+                              letter: letter,
+                              primaryColor: primaryColor,
+                              unselectedColor: unselectedColor,
+                              componentTokens: componentTokens,
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
