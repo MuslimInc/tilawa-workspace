@@ -10,6 +10,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Client startup telemetry (see docs/observability/startup_health_logs.md).
+    // Remote in-app update policy (see InAppUpdateConfigDataSourceImpl).
+    match /app_config/in_app_update {
+      allow read: if true;
+      allow write: if false;
+    }
+
     match /app_startup_logs/{logId} {
       allow create: if request.resource.data.keys().hasAll([
           'level',

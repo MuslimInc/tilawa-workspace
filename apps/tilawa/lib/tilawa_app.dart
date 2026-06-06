@@ -18,7 +18,7 @@ import 'core/bootstrap/first_frame_log.dart';
 import 'core/bootstrap/splash_launch_handoff.dart';
 import 'core/debug/device_preview_app_builder.dart';
 import 'core/services/notification_startup_service.dart';
-import 'core/services/update_service.dart';
+import 'features/in_app_update/in_app_update.dart';
 import 'features/downloads/data/services/batch_download_manager.dart';
 import 'features/downloads/data/services/download_queue_manager.dart';
 import 'features/localization/presentation/bloc/localization_bloc.dart';
@@ -120,9 +120,9 @@ class _TilawaAppState extends State<TilawaApp> with WidgetsBindingObserver {
 
   Future<void> _checkForUpdate() async {
     try {
-      if (getIt.isRegistered<UpdateService>()) {
+      if (getIt.isRegistered<InAppUpdateCoordinator>()) {
         // Run in background to not block UI
-        getIt<UpdateService>().checkForUpdate();
+        getIt<InAppUpdateCoordinator>().checkForUpdate();
       }
     } catch (e) {
       logger.d('[QuranPlayerApp] Error checking for update: $e');
