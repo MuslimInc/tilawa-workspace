@@ -65,9 +65,13 @@ jobs:
         with:
           distribution: zulu
           java-version: "17"
-          # Cache the Gradle dependency/build caches so repeat test builds are
-          # noticeably faster after the first run.
+          # Monorepo Android lives under apps/tilawa/android — point cache at
+          # those Gradle files so dependency + wrapper caches restore on repeat
+          # runs (default only scans repo-root **/gradle/**).
           cache: gradle
+          cache-dependency-path: |
+            apps/tilawa/android/**/*.gradle*
+            apps/tilawa/android/**/gradle-wrapper.properties
 
       # Keep in sync with .github/workflows/android-release.yml.
       - name: Set up Flutter 3.44.1
@@ -76,6 +80,9 @@ jobs:
           flutter-version: "3.44.1"
           channel: stable
           cache: true
+
+      - name: Restore Android build caches
+        uses: ./.github/actions/cache-android-build
 
       - name: Resolve workspace dependencies
         run: flutter pub get
