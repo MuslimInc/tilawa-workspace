@@ -1,1 +1,11 @@
 include: ../../analysis_options.yaml
+
+# Vendored flex_color_scheme fork — not gated in CI (see pr-checks.yml).
+# Upstream deprecation infos (M3 year2023, dialogBackgroundColor) are ignored
+# until we rebase the fork; experiments/ are excluded from analysis.
+analyzer:
+  exclude:
+    - experiments/**
+  errors:
+    deprecated_member_use: ignore
+    unintended_html_in_doc_comment: ignore

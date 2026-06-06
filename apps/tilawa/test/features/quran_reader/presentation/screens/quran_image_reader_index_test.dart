@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_bloc.dart';
 import 'package:quran_image/presentation/bloc/navigation/navigation_state.dart';
-import 'package:quran_qcf/quran_qcf.dart';
 import 'package:tilawa/features/quran_reader/presentation/navigation/quran_image_reader_index_navigation.dart';
 
 import '../../helpers/test_navigation_bloc_factory.dart';

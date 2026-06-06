@@ -30,6 +30,9 @@ melos:
       run: dart analyze --fatal-infos
       exec:
         concurrency: 1
+      packageFilters:
+        ignore:
+          - flex_color_scheme
 
     format:
       description: Check Dart formatting across all packages.
