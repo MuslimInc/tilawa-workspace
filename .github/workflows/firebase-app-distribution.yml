@@ -65,6 +65,9 @@ jobs:
         with:
           distribution: zulu
           java-version: "17"
+          # Cache the Gradle dependency/build caches so repeat test builds are
+          # noticeably faster after the first run.
+          cache: gradle
 
       # Keep in sync with .github/workflows/android-release.yml.
       - name: Set up Flutter 3.44.1
@@ -111,7 +114,15 @@ jobs:
           if [ -n "${{ inputs.build_number }}" ]; then
             EXTRA="$EXTRA --build-number=${{ inputs.build_number }}"
           fi
-          flutter build apk --release $EXTRA
+          # --split-per-abi emits one APK per ABI. The app's build.gradle
+          # restricts abiFilters to arm64-v8a, so this produces a single
+          # app-arm64-v8a-release.apk.
+          # --split-debug-info strips the Dart debug info out of libapp.so into
+          # build/symbols (uploaded below), which meaningfully shrinks the APK.
+          # We intentionally do NOT pass --obfuscate, so crash stack traces keep
+          # readable symbol names for this test build.
+          flutter build apk --release --split-per-abi \
+            --split-debug-info=build/symbols $EXTRA
 
       - name: Read Firebase App ID from google-services.json
         run: |
@@ -134,12 +145,20 @@ jobs:
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
           groups: ${{ inputs.groups }}
           releaseNotes: ${{ inputs.release_notes }}
-          file: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
+          file: apps/tilawa/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
       - name: Upload APK as build artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: app-release-apk
-          path: apps/tilawa/build/app/outputs/flutter-apk/app-release.apk
+          name: app-arm64-v8a-release-apk
+          path: apps/tilawa/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          if-no-files-found: ignore
+
+      - name: Upload debug symbols
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-symbols
+          path: apps/tilawa/build/symbols
           if-no-files-found: ignore
