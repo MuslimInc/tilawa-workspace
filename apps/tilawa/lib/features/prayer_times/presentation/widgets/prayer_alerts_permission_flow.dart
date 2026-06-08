@@ -121,42 +121,27 @@ class _PrayerAlertsPermissionFlowState extends State<PrayerAlertsPermissionFlow>
     final TilawaDesignTokens tokens = theme.tokens;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: widget.steps.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return _PermissionStepPage(
-                    step: widget.steps[index],
-                    tokens: tokens,
-                    theme: theme,
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(
-                tokens.spaceLarge,
-                0,
-                tokens.spaceLarge,
-                context.floatingBottomPadding,
-              ),
-              child: _PermissionStepFooter(
-                step: widget.steps[_currentPage],
-                isLoading: _isRequesting,
-                onAllow: () => _onAllow(widget.steps[_currentPage]),
-                onSkip: _onSkip,
-                tokens: tokens,
-                theme: theme,
-              ),
-            ),
-          ],
+      body: TilawaThumbReachLayout(
+        useSafeArea: true,
+        content: PageView.builder(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: widget.steps.length,
+          itemBuilder: (BuildContext context, int index) {
+            return _PermissionStepPage(
+              step: widget.steps[index],
+              tokens: tokens,
+              theme: theme,
+            );
+          },
+        ),
+        actions: _PermissionStepFooter(
+          step: widget.steps[_currentPage],
+          isLoading: _isRequesting,
+          onAllow: () => _onAllow(widget.steps[_currentPage]),
+          onSkip: _onSkip,
+          tokens: tokens,
+          theme: theme,
         ),
       ),
     );
@@ -225,31 +210,36 @@ class _PermissionStepFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = theme.colorScheme;
     final bool isInfoOnly = step == PrayerAlertsPermissionStep.oemAutostart;
     final String primaryLabel = isInfoOnly
         ? context.l10n.prayerAlertsPermissionContinue
         : context.l10n.prayerAlertsPermissionAllow;
 
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Row(
-        children: <Widget>[
-          TilawaButton(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: tokens.spaceLarge,
+      children: <Widget>[
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: TilawaButton(
             text: context.l10n.prayerAlertsPermissionSkip,
             variant: TilawaButtonVariant.ghost,
             size: TilawaButtonSize.large,
             onPressed: isLoading ? null : onSkip,
           ),
-          const Spacer(),
-          TilawaButton(
-            text: primaryLabel,
-            variant: TilawaButtonVariant.primary,
-            size: TilawaButtonSize.large,
-            isLoading: isLoading,
-            onPressed: isLoading ? null : onAllow,
-          ),
-        ],
-      ),
+        ),
+        TilawaButton(
+          text: primaryLabel,
+          variant: TilawaButtonVariant.primary,
+          size: TilawaButtonSize.large,
+          foregroundColor: colorScheme.onPrimary,
+          isLoading: isLoading,
+          onPressed: isLoading ? null : onAllow,
+          isFullWidth: true,
+        ),
+      ],
     );
   }
 }
