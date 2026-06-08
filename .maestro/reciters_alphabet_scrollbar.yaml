@@ -1,7 +1,7 @@
 # reciters_alphabet_scrollbar.yaml
 # E2E — Android-style alphabet index on the Reciters list (LTR).
 #
-# Coverage (~95%): scrub/tap/deselect, horizontal drift, filter chip persistence,
+# Coverage (~95%): rail scroll, scrub/tap/deselect, filter chip persistence,
 # rail restore, favorites + letter Clear all.
 #
 # Note: [Clear all] appears only with multiple filters (favorites + letter),
@@ -23,6 +23,8 @@ appId: com.tilawa.app
     file: subflows/ensure_reciters_alphabet.yaml
 - runFlow:
     file: subflows/alphabet_reset_filters.yaml
+- runFlow:
+    file: subflows/alphabet_scroll_rail.yaml
 - runFlow:
     file: subflows/alphabet_scrub_gestures.yaml
 - runFlow:

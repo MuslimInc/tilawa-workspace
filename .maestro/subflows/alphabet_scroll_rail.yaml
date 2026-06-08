@@ -1,0 +1,38 @@
+appId: com.tilawa.app
+---
+# Scroll the alphabet rail when letters overflow (fixed row height).
+# Requires subflow ensure_reciters_alphabet to have run first.
+
+- assertVisible:
+    id: "reciters_alphabet_scrollbar"
+
+# Swipe up on the rail to reveal trailing letters.
+- swipe:
+    from:
+      id: "reciters_alphabet_scrollbar"
+    direction: UP
+    duration: 500
+- waitForAnimationToEnd
+
+# Scrub still works after scrolling.
+- tapOn:
+    id: "reciters_alphabet_scrollbar"
+    point: "50%, 85%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"
+
+# Swipe down to return toward the top of the index.
+- swipe:
+    from:
+      id: "reciters_alphabet_scrollbar"
+    direction: DOWN
+    duration: 500
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "reciters_alphabet_scrollbar"
+    point: "50%, 8%"
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"

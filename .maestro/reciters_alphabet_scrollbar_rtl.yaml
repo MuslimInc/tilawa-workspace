@@ -21,6 +21,8 @@ appId: com.tilawa.app
 - runFlow:
     file: subflows/alphabet_reset_filters.yaml
 - runFlow:
+    file: subflows/alphabet_scroll_rail.yaml
+- runFlow:
     file: subflows/alphabet_scrub_gestures.yaml
 - runFlow:
     file: subflows/alphabet_deselect.yaml

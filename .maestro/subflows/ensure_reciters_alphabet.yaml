@@ -8,7 +8,7 @@ appId: com.tilawa.app
 
 - extendedWaitUntil:
     visible:
-      id: "reciter_card_1"
+      id: "reciters_favorites_toggle"
     timeout: 15000
 
 - extendedWaitUntil:

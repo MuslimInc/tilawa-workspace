@@ -1,0 +1,17 @@
+# reciters_alphabet_scrollbar_with_player.yaml
+# Alphabet rail scroll + scrub while the shell mini-player is visible.
+#
+# Run:
+#   maestro test .maestro/reciters_alphabet_scrollbar_with_player.yaml --udid emulator-5554
+
+appId: com.tilawa.app
+---
+
+- launchApp:
+    clearState: false
+- runFlow:
+    file: subflows/ensure_main_shell.yaml
+- runFlow:
+    file: subflows/ensure_reciters_screen.yaml
+- runFlow:
+    file: subflows/alphabet_scroll_with_player.yaml

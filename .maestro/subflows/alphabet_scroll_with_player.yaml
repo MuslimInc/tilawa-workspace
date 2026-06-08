@@ -1,0 +1,37 @@
+appId: com.tilawa.app
+---
+# Alphabet rail scroll + scrub while the shell mini-player is visible.
+# Uses the shared Quran player bootstrap (starts Al-Fatihah playback).
+
+- runFlow:
+    file: ../quran_player/subflows/start_playback.yaml
+
+- back
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "reciters_search_launcher"
+    timeout: 10000
+
+- runFlow:
+    file: ensure_reciters_alphabet.yaml
+
+- assertVisible:
+    id: "quran_player_mini"
+
+- swipe:
+    from:
+      id: "reciters_alphabet_scrollbar"
+    direction: UP
+    duration: 500
+- waitForAnimationToEnd
+
+- swipe:
+    from:
+      id: "reciters_alphabet_scrollbar"
+    direction: DOWN
+    duration: 900
+- waitForAnimationToEnd
+- assertVisible:
+    id: "reciters_alphabet_letter_selected"

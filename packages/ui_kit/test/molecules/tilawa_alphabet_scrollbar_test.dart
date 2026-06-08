@@ -797,6 +797,87 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('distributes letters evenly across the full track height', (
+      tester,
+    ) async {
+      const double trackHeight = 600;
+      await tester.pumpWidget(
+        _wrap(
+          SizedBox(
+            height: trackHeight,
+            child: TilawaAlphabetScrollbar(
+              letters: letters,
+              selectedLetter: null,
+              onLetterSelected: (_) {},
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final theme = Theme.of(tester.element(find.byType(Scaffold)));
+      final double verticalPadding = theme
+          .componentTokens
+          .alphabetScrollbar
+          .verticalPadding
+          .vertical;
+      final double expectedSlot =
+          (trackHeight - verticalPadding) / letters.length;
+      final double firstCenter = tester.getCenter(find.text('ا')).dy;
+      final double secondCenter = tester.getCenter(find.text('ب')).dy;
+      expect(secondCenter - firstCenter, closeTo(expectedSlot, 1.0));
+    });
+
+    testWidgets('scrolls with fixed row height when letters overflow', (
+      tester,
+    ) async {
+      final manyLetters = List.generate(
+        30,
+        (i) => String.fromCharCode('ا'.codeUnitAt(0) + i),
+      );
+
+      await tester.pumpWidget(
+        _wrap(
+          SizedBox(
+            height: 220,
+            child: TilawaAlphabetScrollbar(
+              letters: manyLetters,
+              selectedLetter: null,
+              onLetterSelected: (_) {},
+              onPanUpdate: (_) {},
+              onPanStart: (_) {},
+              onPanEnd: (_) {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('alphabet_scrollbar_scroll')), findsOneWidget);
+
+      final theme = Theme.of(tester.element(find.byType(Scaffold)));
+      final double itemExtent =
+          theme.componentTokens.alphabetScrollbar.itemExtent;
+      final double firstCenter = tester.getCenter(find.text(manyLetters.first)).dy;
+      final double secondCenter =
+          tester.getCenter(find.text(manyLetters[1])).dy;
+      expect(secondCenter - firstCenter, closeTo(itemExtent, 1.0));
+
+      final ScrollableState scrollable =
+          tester.state(find.byType(Scrollable)) as ScrollableState;
+      await scrollable.position.moveTo(scrollable.position.maxScrollExtent);
+      await tester.pump();
+
+      expect(
+        scrollable.position.pixels,
+        greaterThan(0),
+      );
+      expect(find.text(manyLetters.last), findsOneWidget);
+    });
+
     testWidgets('didUpdateWidget keeps letters evenly distributed', (
       tester,
     ) async {

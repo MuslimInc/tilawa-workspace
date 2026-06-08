@@ -1,6 +1,9 @@
 appId: com.tilawa.app
 ---
-# Tap the same letter twice without moving → deselect (no filter chip).
+# Tap the same rail row twice without moving → deselect (no filter chip).
+# Prior scrub steps end near the bottom of the index; use the top track
+# point (8%) so the first tap selects a stable letter, then the second
+# tap clears it.
 
 - tapOn:
     id: "reciters_alphabet_scrollbar"
