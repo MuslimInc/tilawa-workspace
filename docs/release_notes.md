@@ -12,6 +12,37 @@ the changelog for full engineering detail.
 
 | Field | Value |
 |-------|--------|
+| Version | **2.0.7** (build **51**) |
+| Git tag | `v2.0.7+51` (pending) |
+| Date | 2026-06-08 |
+| Track | Internal testing → Production |
+
+### What's new (en-US) — copy for Play Console
+
+```text
+• Fresh warm look with a softer canvas and cleaner cards
+• Pick your language on first launch before onboarding
+• Redesigned settings, grouped into clear sections
+• Reciters alphabet index stays clear of the mini player
+• Key buttons sit lower for easier one-handed reach
+```
+
+### ما الجديد (ar) — نص متجر Play
+
+```text
+• مظهر دافئ جديد بخلفية أنعم وبطاقات أوضح
+• اختر لغتك عند أول تشغيل قبل بدء الإعداد
+• إعدادات بتصميم جديد مرتّبة في أقسام واضحة
+• فهرس القرّاء أ–ي لا يتداخل مع المشغّل المصغّر
+• أزرار رئيسية أقرب لليد لتحكّم أسهل بيد واحدة
+```
+
+---
+
+## Previous current release (2.0.6+50)
+
+| Field | Value |
+|-------|--------|
 | Version | **2.0.6** (build **50**) |
 | Git tag | `v2.0.6+50` (pending) |
 | Date | 2026-06-07 |

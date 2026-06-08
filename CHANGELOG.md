@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.7+51] - 2026-06-08 [Google Play Release]
+
+### Added
+
+- **Language welcome**: First-run language picker precedes onboarding, with an
+  Arabic/English segmented switcher wired to the localization bloc.
+- **Thumb-reach layout**: Shared 72/28 layout keeps primary actions in the
+  one-handed reach zone across onboarding and the prayer-alerts permission flow.
+
+### Changed
+
+- **Version**: Production track bumped to **2.0.7** (build **51**).
+- **Theme**: New warm cream canvas (`#F9F7F2`) with white raised cards for quiet
+  lift and lighter shadows; screens now inherit the canvas instead of painting a
+  surface background.
+- **Settings**: Redesigned into labelled Appearance and Playback & storage
+  sections with leading-icon headers and a member-since profile subtitle.
+- **Reciters**: Alphabet index rail and active-letter overlay clear the Quran
+  mini player so every letter stays reachable during playback.
+
+### Fixed
+
+- **Athkar**: Tasbeeh floating action button sits clear of the bottom
+  navigation bar.
+
 ## [2.0.6+50] - 2026-06-07 [Google Play Release]
 
 ### Added
