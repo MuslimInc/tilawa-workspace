@@ -590,6 +590,12 @@ abstract class AppLocalizations {
   /// **'View profile'**
   String get settingsViewProfile;
 
+  /// Profile subtitle showing when the user joined
+  ///
+  /// In en, this message translates to:
+  /// **'Member since {date}'**
+  String settingsMemberSince(String date);
+
   /// Login section header on settings screen
   ///
   /// In en, this message translates to:
@@ -601,6 +607,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Support'**
   String get settingsSupportSection;
+
+  /// Appearance section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get settingsAppearance;
+
+  /// Playback and storage section header on settings screen
+  ///
+  /// In en, this message translates to:
+  /// **'Playback & storage'**
+  String get settingsPlaybackAndStorage;
+
+  /// Light theme option label
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// Dark theme option label
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// System theme option label
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get themeSystem;
+
+  /// Choose theme dialog title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Theme'**
+  String get chooseTheme;
 
   /// Legacy key; prefer bottomNavSearch for shell navigation
   ///
@@ -1351,12 +1393,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Dark Mode'**
   String get darkTheme;
-
-  /// Choose theme dialog title
-  ///
-  /// In en, this message translates to:
-  /// **'Choose Theme'**
-  String get chooseTheme;
 
   /// Choose language dialog title
   ///

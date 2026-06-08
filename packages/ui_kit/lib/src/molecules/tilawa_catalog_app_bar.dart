@@ -23,6 +23,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
     this.automaticallyImplyLeading = false,
     this.onBackPressed,
     this.showBottomHairline = TilawaAppBarConfig.showBottomHairline,
+    this.centerTitle = false,
   }) : assert(title != null || titleWidget != null);
 
   /// Must match laid-out column height (use [TilawaAppBarConfig] helpers).
@@ -43,6 +44,9 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
   final VoidCallback? onBackPressed;
   final bool showBottomHairline;
 
+  /// When true, the title is centered between balanced leading/trailing slots.
+  final bool centerTitle;
+
   /// Title-only catalog header.
   factory TilawaCatalogAppBar.titleOnly(
     BuildContext context, {
@@ -53,6 +57,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
     bool automaticallyImplyLeading = true,
     VoidCallback? onBackPressed,
     bool showBottomHairline = TilawaAppBarConfig.showBottomHairline,
+    bool centerTitle = false,
   }) {
     return TilawaCatalogAppBar(
       key: key,
@@ -63,6 +68,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
       automaticallyImplyLeading: automaticallyImplyLeading,
       onBackPressed: onBackPressed,
       showBottomHairline: showBottomHairline,
+      centerTitle: centerTitle,
     );
   }
 
@@ -82,7 +88,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
     return TilawaAppBar(
       automaticallyImplyLeading: automaticallyImplyLeading,
       surface: TilawaAppBarSurface.parchment,
-      centerTitle: false,
+      centerTitle: centerTitle,
       toolbarHeight: 0,
       showBottomHairline: showBottomHairline,
       bottom: PreferredSize(
@@ -99,6 +105,7 @@ class TilawaCatalogAppBar extends StatelessWidget implements PreferredSizeWidget
               spacing: tokens.spaceSmall,
               children: [
                 _CatalogTitleRow(
+                  centerTitle: centerTitle,
                   leading: TilawaAppBarChrome.resolveCatalogRowLeading(
                     context,
                     leading: leading,
@@ -123,11 +130,13 @@ class _CatalogTitleRow extends StatelessWidget {
     required this.title,
     this.leading,
     this.actions,
+    this.centerTitle = false,
   });
 
   final Widget title;
   final Widget? leading;
   final List<Widget>? actions;
+  final bool centerTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -137,15 +146,47 @@ class _CatalogTitleRow extends StatelessWidget {
       tokens,
     );
 
+    if (!centerTitle) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          if (leading != null) ...<Widget>[
+            leading!,
+            SizedBox(width: tokens.spaceSmall),
+          ],
+          Expanded(child: title),
+          ...?spacedActions,
+        ],
+      );
+    }
+
+    final double sideSlotWidth = tokens.minInteractiveDimension;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (leading != null) ...<Widget>[
-          leading!,
-          SizedBox(width: tokens.spaceSmall),
-        ],
-        Expanded(child: title),
-        ...?spacedActions,
+        SizedBox(
+          width: sideSlotWidth,
+          child: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: leading,
+          ),
+        ),
+        Expanded(
+          child: Center(child: title),
+        ),
+        SizedBox(
+          width: sideSlotWidth,
+          child: Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: spacedActions == null
+                ? null
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: spacedActions,
+                  ),
+          ),
+        ),
       ],
     );
   }

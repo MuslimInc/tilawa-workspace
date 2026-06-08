@@ -21,7 +21,7 @@ BorderRadius _resolveSettingsTileBorderRadius(
 class TilawaSettingsTile extends StatelessWidget {
   const TilawaSettingsTile({
     super.key,
-    required this.icon,
+    this.icon,
     required this.title,
     required this.onTap,
     this.iconColor,
@@ -30,7 +30,7 @@ class TilawaSettingsTile extends StatelessWidget {
     this.trailing,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final Color? iconColor;
   final String title;
   final VoidCallback onTap;
@@ -61,8 +61,9 @@ class TilawaSettingsTile extends StatelessWidget {
     final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
       direction,
     );
-    final double minLeadingWidth =
-        resolvedIconPadding.horizontal + tokens.tileIconSize;
+    final double minLeadingWidth = icon == null
+        ? 0
+        : resolvedIconPadding.horizontal + tokens.tileIconSize;
     final TextStyle titleStyle =
         theme.textTheme.bodyLarge?.copyWith(
           fontSize: tokens.tileTitleFontSize,
@@ -95,11 +96,13 @@ class TilawaSettingsTile extends StatelessWidget {
               minTileHeight: designTokens.minInteractiveDimension,
               contentPadding: listTileContentPadding,
               shape: RoundedRectangleBorder(borderRadius: resolvedRadius),
-              leading: _SettingsLeadingIcon(
-                icon: icon,
-                color: effectiveIconColor,
-                tokens: tokens,
-              ),
+              leading: icon == null
+                  ? null
+                  : _SettingsLeadingIcon(
+                      icon: icon!,
+                      color: effectiveIconColor,
+                      tokens: tokens,
+                    ),
               title: Text(
                 title,
                 maxLines: 2,
@@ -111,7 +114,7 @@ class TilawaSettingsTile extends StatelessWidget {
                   // Right chevron; ListTile still places trailing on the
                   // correct edge in RTL.
                   Icon(
-                    FluentIcons.chevron_right_24_filled,
+                    FluentIcons.chevron_right_20_regular,
                     size: tokens.tileTrailingSize,
                     color: colorScheme.onSurfaceVariant.withValues(
                       alpha: (tokens.tileTrailingOpacity * 1.35).clamp(
@@ -141,7 +144,7 @@ class TilawaSettingsTile extends StatelessWidget {
 class TilawaSettingsSwitchTile extends StatelessWidget {
   const TilawaSettingsSwitchTile({
     super.key,
-    required this.icon,
+    this.icon,
     required this.title,
     required this.value,
     required this.onChanged,
@@ -150,7 +153,7 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     this.borderRadius = BorderRadius.zero,
   });
 
-  final IconData icon;
+  final IconData? icon;
   final Color? iconColor;
   final String title;
   final bool value;
@@ -180,8 +183,9 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
     final EdgeInsets resolvedIconPadding = tokens.tileIconPadding.resolve(
       direction,
     );
-    final double minLeadingWidth =
-        resolvedIconPadding.horizontal + tokens.tileIconSize;
+    final double minLeadingWidth = icon == null
+        ? 0
+        : resolvedIconPadding.horizontal + tokens.tileIconSize;
     final TextStyle titleStyle =
         theme.textTheme.bodyLarge?.copyWith(
           fontSize: tokens.tileTitleFontSize,
@@ -214,11 +218,13 @@ class TilawaSettingsSwitchTile extends StatelessWidget {
               minTileHeight: designTokens.minInteractiveDimension,
               contentPadding: listTileContentPadding,
               shape: RoundedRectangleBorder(borderRadius: resolvedRadius),
-              leading: _SettingsLeadingIcon(
-                icon: icon,
-                color: effectiveIconColor,
-                tokens: tokens,
-              ),
+              leading: icon == null
+                  ? null
+                  : _SettingsLeadingIcon(
+                      icon: icon!,
+                      color: effectiveIconColor,
+                      tokens: tokens,
+                    ),
               title: Text(
                 title,
                 maxLines: 2,
@@ -264,9 +270,7 @@ class _SettingsLeadingIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 220),
-      curve: Curves.easeOutCubic,
+    return Container(
       padding: tokens.tileIconPadding,
       decoration: BoxDecoration(
         color: color.withValues(alpha: tokens.tileIconContainerOpacity),

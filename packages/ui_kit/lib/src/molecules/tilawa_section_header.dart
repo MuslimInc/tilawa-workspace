@@ -12,6 +12,7 @@ class TilawaSectionHeader extends StatelessWidget {
     super.key,
     required this.title,
     this.subtitle,
+    this.leadingIcon,
     this.trailing,
     required this.padding,
     required this.titleTextStyle,
@@ -24,6 +25,7 @@ class TilawaSectionHeader extends StatelessWidget {
     BuildContext context, {
     required String title,
     String? subtitle,
+    IconData? leadingIcon,
     Widget? trailing,
     Widget? bottom,
   }) {
@@ -32,9 +34,9 @@ class TilawaSectionHeader extends StatelessWidget {
     final tokens = theme.componentTokens.settingsGroup;
 
     final TextStyle? base = theme.textTheme.titleSmall?.copyWith(
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0.2,
-      height: 1.25,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0,
+      height: 1.3,
       color: colorScheme.onSurface,
     );
 
@@ -45,7 +47,7 @@ class TilawaSectionHeader extends StatelessWidget {
         ) ??
         TextStyle(
           fontSize: tokens.groupTitleFontSize,
-          fontWeight: FontWeight.w700,
+          fontWeight: FontWeight.w600,
           letterSpacing: tokens.groupTitleLetterSpacing,
           color: colorScheme.onSurface,
         );
@@ -59,6 +61,7 @@ class TilawaSectionHeader extends StatelessWidget {
     return TilawaSectionHeader(
       title: title,
       subtitle: subtitle,
+      leadingIcon: leadingIcon,
       trailing: trailing,
       padding: tokens.groupHeaderPadding,
       titleTextStyle: titleTextStyle,
@@ -68,6 +71,7 @@ class TilawaSectionHeader extends StatelessWidget {
   }
 
   final String title;
+  final IconData? leadingIcon;
   final String? subtitle;
   final Widget? trailing;
   final EdgeInsetsGeometry padding;
@@ -77,6 +81,9 @@ class TilawaSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tokens = Theme.of(context).tokens;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: padding,
       child: Column(
@@ -93,10 +100,25 @@ class TilawaSectionHeader extends StatelessWidget {
                   children: [
                     Semantics(
                       header: true,
-                      child: Text(
-                        title,
-                        style: titleTextStyle,
-                        textAlign: TextAlign.start,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (leadingIcon != null) ...[
+                            Icon(
+                              leadingIcon,
+                              size: tokens.iconSizeSmall,
+                              color: colorScheme.onSurface,
+                            ),
+                            SizedBox(width: tokens.spaceSmall),
+                          ],
+                          Flexible(
+                            child: Text(
+                              title,
+                              style: titleTextStyle,
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     if (subtitle != null && subtitleTextStyle != null) ...[

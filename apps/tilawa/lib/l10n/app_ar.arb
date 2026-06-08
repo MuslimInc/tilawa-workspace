@@ -345,8 +345,15 @@
     "settings": "الإعدادات",
     "settingsYourAccount": "حسابك",
     "settingsViewProfile": "عرض الملف الشخصي",
+    "settingsMemberSince": "عضو منذ {date}",
     "settingsLoginSection": "تسجيل الدخول",
     "settingsSupportSection": "الدعم",
+    "settingsAppearance": "المظهر",
+    "settingsPlaybackAndStorage": "التشغيل والتخزين",
+    "themeLight": "فاتح",
+    "themeDark": "داكن",
+    "themeSystem": "النظام",
+    "chooseTheme": "اختر المظهر",
     "@settings": {
         "description": "Settings section title"
     },

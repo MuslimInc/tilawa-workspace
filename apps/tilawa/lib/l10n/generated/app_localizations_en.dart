@@ -276,10 +276,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsViewProfile => 'View profile';
 
   @override
+  String settingsMemberSince(String date) {
+    return 'Member since $date';
+  }
+
+  @override
   String get settingsLoginSection => 'Login';
 
   @override
   String get settingsSupportSection => 'Support';
+
+  @override
+  String get settingsAppearance => 'Appearance';
+
+  @override
+  String get settingsPlaybackAndStorage => 'Playback & storage';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get themeSystem => 'System';
+
+  @override
+  String get chooseTheme => 'Choose Theme';
 
   @override
   String get bottomNavReciters => 'Reciters';
@@ -692,9 +715,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get darkTheme => 'Dark Mode';
-
-  @override
-  String get chooseTheme => 'Choose Theme';
 
   @override
   String get chooseLanguage => 'Choose Language';

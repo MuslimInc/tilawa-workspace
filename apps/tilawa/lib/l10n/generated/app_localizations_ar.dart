@@ -276,10 +276,33 @@ class AppLocalizationsAr extends AppLocalizations {
   String get settingsViewProfile => 'عرض الملف الشخصي';
 
   @override
+  String settingsMemberSince(String date) {
+    return 'عضو منذ $date';
+  }
+
+  @override
   String get settingsLoginSection => 'تسجيل الدخول';
 
   @override
   String get settingsSupportSection => 'الدعم';
+
+  @override
+  String get settingsAppearance => 'المظهر';
+
+  @override
+  String get settingsPlaybackAndStorage => 'التشغيل والتخزين';
+
+  @override
+  String get themeLight => 'فاتح';
+
+  @override
+  String get themeDark => 'داكن';
+
+  @override
+  String get themeSystem => 'النظام';
+
+  @override
+  String get chooseTheme => 'اختر السمة';
 
   @override
   String get bottomNavReciters => 'القراء';
@@ -690,9 +713,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get darkTheme => 'الوضع الداكن';
-
-  @override
-  String get chooseTheme => 'اختر السمة';
 
   @override
   String get chooseLanguage => 'اختر اللغة';

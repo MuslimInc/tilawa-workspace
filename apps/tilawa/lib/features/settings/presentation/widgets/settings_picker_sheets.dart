@@ -8,6 +8,7 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../color_picker/color_picker.dart';
 import '../../../localization/presentation/bloc/localization_bloc.dart';
+import '../../../theme/domain/app_theme_mode.dart';
 import '../../../theme/domain/primary_color_preset.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
@@ -76,6 +77,15 @@ abstract final class SettingsSheets {
           ],
         );
       },
+    );
+  }
+
+  static void showThemePicker(BuildContext context) {
+    showTilawaModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
+      shape: TilawaBottomSheetScaffold.modalShape(context),
+      builder: (_) => const SettingsThemeSheet(),
     );
   }
 
@@ -201,6 +211,64 @@ class SettingsPrimaryColorSheet extends StatelessWidget {
           onTap: onCustomColorTap,
         ),
       ],
+    );
+  }
+}
+
+class SettingsThemeSheet extends StatelessWidget {
+  const SettingsThemeSheet({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return BlocBuilder<ThemeCubit, ThemeState>(
+      builder: (context, state) {
+        return TilawaBottomSheetScaffold(
+          topBar: Text(
+            l10n.chooseTheme,
+            style: context.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          children: [
+            TilawaSelectionTile(
+              title: l10n.themeLight,
+              isSelected:
+                  !state.useSystemTheme && state.mode == AppThemeMode.light,
+              onTap: () {
+                context.read<ThemeCubit>().applyThemePreference(
+                  useSystemTheme: false,
+                  mode: AppThemeMode.light,
+                );
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: l10n.themeDark,
+              isSelected:
+                  !state.useSystemTheme && state.mode == AppThemeMode.dark,
+              onTap: () {
+                context.read<ThemeCubit>().applyThemePreference(
+                  useSystemTheme: false,
+                  mode: AppThemeMode.dark,
+                );
+                Navigator.pop(context);
+              },
+            ),
+            TilawaSelectionTile(
+              title: l10n.themeSystem,
+              isSelected: state.useSystemTheme,
+              onTap: () {
+                context.read<ThemeCubit>().applyThemePreference(
+                  useSystemTheme: true,
+                );
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

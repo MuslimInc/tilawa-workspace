@@ -54,11 +54,11 @@ class TilawaAlphabetScrollbarTokens {
   ) {
     return TilawaAlphabetScrollbarTokens(
       width: kTilawaMinInteractiveDimension,
-      itemExtent:
-          kTilawaMinInteractiveDimension, // fix: Accessibility — Tilawa 44 dp row hit target.
-      selectedIndicatorExtent: 40,
-      letterFontSize: 14,
-      verticalPadding: const EdgeInsets.symmetric(vertical: 12),
+      // Legacy row metric; spacing is computed from the live track height.
+      itemExtent: 24,
+      selectedIndicatorExtent: 32,
+      letterFontSize: 12,
+      verticalPadding: const EdgeInsets.symmetric(vertical: 8),
       overlaySize: 64,
       overlayFontSize: 32,
       overlayRadius: 16,

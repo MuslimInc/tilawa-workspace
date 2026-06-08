@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/extensions.dart';
@@ -14,7 +15,25 @@ import '../../../app_review/presentation/cubit/app_review_cubit.dart';
 import '../../../app_review/presentation/cubit/app_review_state.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../theme/domain/app_theme_mode.dart';
+import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
+
+String settingsMemberSinceLabel(BuildContext context, DateTime createdAt) {
+  final locale = Localizations.localeOf(context).toString();
+  final formatted = DateFormat.yMMM(locale).format(createdAt);
+  return context.l10n.settingsMemberSince(formatted);
+}
+
+String settingsThemeLabel(ThemeState state, AppLocalizations l10n) {
+  if (state.useSystemTheme) {
+    return l10n.themeSystem;
+  }
+  return switch (state.mode) {
+    AppThemeMode.dark => l10n.themeDark,
+    AppThemeMode.light => l10n.themeLight,
+  };
+}
 
 String settingsLanguageLabel(Locale locale, AppLocalizations l10n) {
   return switch (locale.languageCode) {
@@ -28,7 +47,7 @@ Icon _settingsChevronIcon(BuildContext context) {
   final groupTokens = theme.componentTokens.settingsGroup;
 
   return Icon(
-    FluentIcons.chevron_right_24_filled,
+    FluentIcons.chevron_right_20_regular,
     size: groupTokens.tileTrailingSize,
     color: theme.colorScheme.onSurfaceVariant.withValues(
       alpha: (groupTokens.tileTrailingOpacity * 1.35).clamp(0.45, 0.72),
@@ -117,23 +136,63 @@ class SettingsProfileHeader extends StatelessWidget {
           authenticated: (user) => user,
           orElse: () => null,
         );
+        final theme = Theme.of(context);
+        final tokens = theme.tokens;
+        final colorScheme = theme.colorScheme;
+        final isGuest = user == null;
         final title = switch (user) {
           null => context.l10n.signInToSync,
           final u when u.displayName.trim().isNotEmpty => u.displayName.trim(),
           _ => context.l10n.guestUser,
         };
-        final isGuest = user == null;
+        final subtitle = switch (user) {
+          null => null,
+          final u => settingsMemberSinceLabel(context, u.createdAt),
+        };
         final photoUrl = user?.photoUrl?.trim() ?? '';
 
         return TilawaSettingsGroupHorizontalInset(
-          child: TilawaSettingsGroupPanel(
-            children: [
-              TilawaCatalogSettingsProfileRow(
-                avatar: _ProfileAvatar(photoUrl: photoUrl),
-                title: title,
-                onTap: isGuest ? () => const LoginRoute().push(context) : null,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: isGuest ? () => const LoginRoute().push(context) : null,
+              borderRadius: BorderRadius.circular(tokens.radiusLarge),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  tokens.spaceMedium,
+                  tokens.spaceLarge,
+                  tokens.spaceMedium,
+                  tokens.spaceMedium,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _ProfileAvatar(photoUrl: photoUrl, size: 72),
+                    SizedBox(height: tokens.spaceMedium),
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                    if (subtitle != null) ...[
+                      SizedBox(height: tokens.spaceExtraSmall),
+                      Text(
+                        subtitle,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
         );
       },
@@ -142,15 +201,15 @@ class SettingsProfileHeader extends StatelessWidget {
 }
 
 class _ProfileAvatar extends StatelessWidget {
-  const _ProfileAvatar({required this.photoUrl});
+  const _ProfileAvatar({required this.photoUrl, this.size = 56});
 
   final String photoUrl;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    const size = 56.0;
-    const iconSize = 28.0;
+    final iconSize = size * 0.5;
 
     return CircleAvatar(
       radius: size / 2,
@@ -190,7 +249,6 @@ class SettingsRateAppTile extends StatelessWidget {
         final tokens = Theme.of(context).tokens;
 
         return TilawaSettingsTile(
-          icon: FluentIcons.star_24_regular,
           title: context.l10n.rateTilawa,
           showDivider: !isLast,
           trailing: state.isBusy
@@ -253,7 +311,6 @@ class _SettingsShareAppTileState extends State<SettingsShareAppTile> {
     final tokens = Theme.of(context).tokens;
 
     return TilawaSettingsTile(
-      icon: Icons.share_outlined,
       title: context.l10n.shareTilawa,
       showDivider: !widget.isLast,
       trailing: _isSharing
@@ -271,8 +328,36 @@ class _SettingsShareAppTileState extends State<SettingsShareAppTile> {
   }
 }
 
-class SettingsLogoutSection extends StatelessWidget {
-  const SettingsLogoutSection({
+class SettingsGuestAccountGroup extends StatelessWidget {
+  const SettingsGuestAccountGroup({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthAuthenticated) {
+          return const SizedBox.shrink();
+        }
+
+        return TilawaSettingsGroup(
+          title: context.l10n.settingsLoginSection,
+          leadingIcon: FluentIcons.person_24_regular,
+          includeTopGap: false,
+          children: [
+            TilawaSettingsTile(
+              title: context.l10n.signIn,
+              onTap: () => const LoginRoute().push(context),
+              showDivider: false,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class SettingsAccountActions extends StatelessWidget {
+  const SettingsAccountActions({
     super.key,
     required this.onLogout,
     required this.onDeleteAccount,
@@ -289,24 +374,29 @@ class SettingsLogoutSection extends StatelessWidget {
           return const SizedBox.shrink();
         }
 
-        return TilawaSettingsGroup(
-          title: context.l10n.settingsYourAccount,
-          children: [
-            TilawaSettingsTile(
-              icon: FluentIcons.delete_24_regular,
-              title: context.l10n.deleteAccount,
-              iconColor: Theme.of(context).colorScheme.error,
-              onTap: onDeleteAccount,
-              showDivider: false,
+        final tokens = context.tokens;
+
+        return TilawaSettingsGroupHorizontalInset(
+          child: Padding(
+            padding: EdgeInsets.only(top: tokens.spaceLarge),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: tokens.spaceSmall,
+              children: [
+                TilawaButton(
+                  text: context.l10n.logout,
+                  isFullWidth: true,
+                  onPressed: onLogout,
+                ),
+                TilawaButton(
+                  text: context.l10n.deleteAccount,
+                  variant: TilawaButtonVariant.danger,
+                  isFullWidth: true,
+                  onPressed: onDeleteAccount,
+                ),
+              ],
             ),
-            TilawaSettingsTile(
-              icon: FluentIcons.sign_out_24_regular,
-              title: context.l10n.logout,
-              iconColor: Theme.of(context).colorScheme.error,
-              onTap: onLogout,
-              showDivider: false,
-            ),
-          ],
+          ),
         );
       },
     );
@@ -324,7 +414,6 @@ class SettingsLegalSection extends StatelessWidget {
       title: l10n.settingsLegalSection,
       children: [
         TilawaSettingsTile(
-          icon: FluentIcons.shield_24_regular,
           title: l10n.privacyPolicy,
           onTap: () => openLegalUrl(AppLegalUrls.privacyPolicy),
           showDivider: false,

@@ -1140,7 +1140,7 @@ class TilawaSettingsGroupTokens {
     const tileIconContainerOpacity = 0.1;
     const selectionTileSelectedBackgroundColor = Colors.transparent;
     const tileDividerOpacity = 0.05;
-    final groupSurfaceColor = colorScheme.surfaceContainerLow;
+    final groupSurfaceColor = colorScheme.surface;
     final groupContainerBorderColor = _groupContainerBorderColor(
       colorScheme,
       tileDividerOpacity,
@@ -1158,16 +1158,16 @@ class TilawaSettingsGroupTokens {
       groupHorizontalPadding: 20,
       groupHeaderPadding: const EdgeInsetsDirectional.fromSTEB(
         0,
-        20,
+        24,
         0,
-        10,
+        8,
       ),
-      groupBorderRadius: 20,
-      groupShadowOpacity: 0.10,
-      groupShadowBlur: 14,
-      groupShadowOffset: const Offset(0, 4),
-      groupTitleFontSize: 11.5,
-      groupTitleLetterSpacing: 1.2,
+      groupBorderRadius: 16,
+      groupShadowOpacity: 0,
+      groupShadowBlur: 0,
+      groupShadowOffset: Offset.zero,
+      groupTitleFontSize: 13.5,
+      groupTitleLetterSpacing: 0,
       tileContentPadding: const EdgeInsets.symmetric(
         horizontal: 16,
         vertical: 14,
@@ -1179,16 +1179,16 @@ class TilawaSettingsGroupTokens {
       tileIconPadding: const EdgeInsets.all(7),
       tileIconBorderRadius: 12,
       tileIconSize: 22,
-      tileTitleFontSize: 15,
+      tileTitleFontSize: 16,
       tileSubtitleFontSize: 12.5,
       tileSubtitleOpacity: 0.6,
       tileSubtitleSpacing: 4,
-      tileTrailingSize: 14,
+      tileTrailingSize: 16,
       tileTrailingOpacity: 0.45,
       tileIconContainerOpacity: tileIconContainerOpacity,
       tileDividerPadding: const EdgeInsetsDirectional.only(
-        start: 56,
-        end: 0,
+        start: 16,
+        end: 16,
       ),
       tileDividerHeight: 1,
       tileDividerThickness: 0.5,

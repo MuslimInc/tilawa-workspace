@@ -354,6 +354,15 @@
     "@settingsViewProfile": {
         "description": "Profile row subtitle on settings (catalog style)"
     },
+    "settingsMemberSince": "Member since {date}",
+    "@settingsMemberSince": {
+        "description": "Profile subtitle showing when the user joined",
+        "placeholders": {
+            "date": {
+                "type": "String"
+            }
+        }
+    },
     "settingsLoginSection": "Login",
     "@settingsLoginSection": {
         "description": "Login section header on settings screen"
@@ -361,6 +370,30 @@
     "settingsSupportSection": "Support",
     "@settingsSupportSection": {
         "description": "Support section header on settings screen"
+    },
+    "settingsAppearance": "Appearance",
+    "@settingsAppearance": {
+        "description": "Appearance section header on settings screen"
+    },
+    "settingsPlaybackAndStorage": "Playback & storage",
+    "@settingsPlaybackAndStorage": {
+        "description": "Playback and storage section header on settings screen"
+    },
+    "themeLight": "Light",
+    "@themeLight": {
+        "description": "Light theme option label"
+    },
+    "themeDark": "Dark",
+    "@themeDark": {
+        "description": "Dark theme option label"
+    },
+    "themeSystem": "System",
+    "@themeSystem": {
+        "description": "System theme option label"
+    },
+    "chooseTheme": "Choose theme",
+    "@chooseTheme": {
+        "description": "Theme picker sheet title"
     },
     "bottomNavReciters": "Reciters",
     "@bottomNavReciters": {

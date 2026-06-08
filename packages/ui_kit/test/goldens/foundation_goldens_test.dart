@@ -14,7 +14,8 @@ class _LightNeutralSwatchRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const swatches = <({String label, Color color})>[
-      (label: 'surface', color: AppColors.lightBackground),
+      (label: 'canvas', color: AppColors.lightCanvas),
+      (label: 'surface', color: AppColors.lightSurface),
       (
         label: 'containerHigh',
         color: AppColors.lightSurfaceContainerHighBase,

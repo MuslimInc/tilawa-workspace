@@ -435,9 +435,9 @@ void main() {
     test('defaults creates expected values', () {
       final tokens = TilawaSettingsGroupTokens.defaults();
       expect(tokens.groupHorizontalPadding, 20.0);
-      expect(tokens.groupBorderRadius, 20.0);
-      expect(tokens.groupShadowOpacity, 0.10);
-      expect(tokens.tileTitleFontSize, 15.0);
+      expect(tokens.groupBorderRadius, 16.0);
+      expect(tokens.groupShadowOpacity, 0);
+      expect(tokens.tileTitleFontSize, 16.0);
       expect(tokens.tileSubtitleOpacity, 0.6);
       expect(tokens.switchActiveTrackOpacity, 0.5);
       expect(tokens.selectionTileSelectedBackgroundColor, isA<Color>());
@@ -453,7 +453,7 @@ void main() {
         tokens.selectionTileSelectedBackgroundColor,
         Colors.transparent,
       );
-      expect(tokens.groupSurfaceColor, scheme.surfaceContainerLow);
+      expect(tokens.groupSurfaceColor, scheme.surface);
       expect(
         tokens.groupContainerBorderColor,
         scheme.outlineVariant.withValues(alpha: 0.05 * 2),
