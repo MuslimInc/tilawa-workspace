@@ -71,15 +71,16 @@ void main() {
       },
     );
 
-    test('light scaffold and surfaces use Pinterest neutrals not primary', () {
+    test('light scaffold and surfaces use warm canvas not primary', () {
       final theme = AppTheme.getLightTheme(
         primaryColor: AppColors.primaryCoral,
       );
       final scheme = theme.colorScheme;
 
-      expect(theme.scaffoldBackgroundColor, AppColors.lightBackground);
-      expect(scheme.surface, AppColors.lightBackground);
+      expect(theme.scaffoldBackgroundColor, AppColors.lightCanvas);
       expect(scheme.surface, AppColors.lightSurface);
+      expect(scheme.surfaceContainerLowest, AppColors.lightCanvas);
+      expect(scheme.surfaceContainerLow, AppColors.lightSurface);
       expect(scheme.onSurface, AppColors.lightInk);
       expect(scheme.surfaceContainerHigh, AppColors.catalogFilterUnselectedLight);
       expect(scheme.surfaceTint, Colors.transparent);

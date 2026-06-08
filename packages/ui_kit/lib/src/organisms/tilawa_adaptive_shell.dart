@@ -138,7 +138,7 @@ class TilawaAdaptiveShell extends StatelessWidget {
           // Stripping view padding here made labels sit flush on newer
           // Android gesture nav. Only the scrolling body should ignore the
           // bottom inset so content can extend behind the bar.
-          final Color bodyColor = Theme.of(context).colorScheme.surface;
+          final Color bodyColor = Theme.of(context).scaffoldBackgroundColor;
 
           Widget? bottomNavigationBar;
           if (bottomNavVisible) {
@@ -199,7 +199,10 @@ class TilawaAdaptiveShell extends StatelessWidget {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     final padding = context.contentSafePadding;
 
+    final Color bodyColor = Theme.of(context).scaffoldBackgroundColor;
+
     return Scaffold(
+      backgroundColor: bodyColor,
       body: Stack(
         children: [
           Row(

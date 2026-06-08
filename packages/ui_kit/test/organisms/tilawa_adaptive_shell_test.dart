@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../lib/src/foundation/app_colors.dart';
+import '../../lib/src/foundation/app_theme.dart';
 import '../../lib/src/foundation/component_tokens.dart';
 import '../../lib/src/foundation/design_tokens.dart';
 import '../../lib/src/organisms/tilawa_adaptive_shell.dart';
@@ -579,6 +581,52 @@ void main() {
       if (tester.any(railFinder)) {
         final railRect = tester.getRect(railFinder);
         expect(railRect.left, closeTo(0.0, 1.0));
+      }
+    });
+  });
+
+  group('TilawaAdaptiveShell — scaffold canvas', () {
+    testWidgets('phone and wide layouts use theme scaffoldBackgroundColor', (
+      tester,
+    ) async {
+      final ThemeData theme = AppTheme.getLightTheme(
+        primaryColor: AppColors.defaultPrimary,
+      );
+      final Color expectedCanvas = theme.scaffoldBackgroundColor;
+
+      for (final Size size in <Size>[
+        const Size(400, 800),
+        const Size(1000, 900),
+      ]) {
+        await tester.binding.setSurfaceSize(size);
+        tester.view.physicalSize = size;
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: TilawaAdaptiveShell(
+              destinations: _destinations,
+              selectedIndex: 0,
+              onDestinationSelected: (_) {},
+              bottomPlayer: const SizedBox.shrink(),
+              child: const SizedBox.shrink(),
+            ),
+          ),
+        );
+        await tester.pump();
+
+        final Scaffold scaffold = tester.widget<Scaffold>(
+          find.byType(Scaffold).first,
+        );
+        expect(
+          scaffold.backgroundColor,
+          expectedCanvas,
+          reason: 'size $size',
+        );
       }
     });
   });

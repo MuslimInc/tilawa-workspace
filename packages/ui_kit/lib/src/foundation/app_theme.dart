@@ -89,7 +89,7 @@ class AppTheme {
       secondaryContainer: AppColors.lightSchemeSecondaryContainer,
       tertiary: AppColors.lightBody,
       tertiaryContainer: AppColors.lightTertiaryContainer,
-      appBarColor: AppColors.lightBackground,
+      appBarColor: AppColors.lightSurface,
       error: AppColors.error,
       brightness: Brightness.light,
     );
@@ -238,11 +238,11 @@ class AppTheme {
       onSurface: AppColors.lightInk,
       onSurfaceVariant: AppColors.lightMute,
       surfaceTint: Colors.transparent,
-      surfaceContainerLowest: AppColors.lightBackground,
-      surfaceContainerLow: AppColors.lightBackground,
-      // Warm neutral container ramp (Pinterest). Fixed hexes — not harmonized
-      // toward [primary] — so chrome stays white / #E5E5E0 / slate ink.
-      surfaceContainer: AppColors.lightSurfaceContainer,
+      surfaceContainerLowest: AppColors.lightCanvas,
+      surfaceContainerLow: AppColors.lightSurface,
+      // Warm canvas + white card ramp. Fixed hexes — not harmonized toward
+      // [primary] — so chrome stays cream / white / #E5E5E0 / slate ink.
+      surfaceContainer: AppColors.lightCanvas,
       surfaceContainerHigh: AppColors.lightSurfaceContainerHighBase,
       surfaceContainerHighest: AppColors.lightSurfaceContainerHighestBase,
       tertiary: AppColors.lightBody,
@@ -429,7 +429,7 @@ class AppTheme {
     final themedSurfaces = _applySurfaceScale(
       theme: theme,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.surface,
+      scaffoldBackgroundColor: colorScheme.surfaceContainerLowest,
     );
 
     return themedSurfaces.copyWith(

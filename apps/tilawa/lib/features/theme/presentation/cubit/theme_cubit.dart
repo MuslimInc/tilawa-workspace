@@ -186,7 +186,7 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
   }
 
   Future<void> setMode(AppThemeMode mode) async {
-    emit(state.copyWith(mode: mode));
+    emit(state.copyWith(mode: mode, useSystemTheme: false));
   }
 
   /// Apply a predefined primary color from [PrimaryColorPreset].
@@ -213,9 +213,19 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
   }
 
   Future<void> setUseSystemTheme(bool useSystemTheme) async {
-    // Deferred field: persisted for compatibility, but not yet wired to
-    // MaterialApp.themeMode / OS system wiring.
     emit(state.copyWith(useSystemTheme: useSystemTheme));
+  }
+
+  Future<void> applyThemePreference({
+    required bool useSystemTheme,
+    AppThemeMode? mode,
+  }) async {
+    emit(
+      state.copyWith(
+        useSystemTheme: useSystemTheme,
+        mode: mode ?? state.mode,
+      ),
+    );
   }
 
   Future<void> toggleDark(bool enabled) async {

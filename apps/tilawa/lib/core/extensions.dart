@@ -15,6 +15,9 @@ extension BuildContextThemeX on BuildContext {
   bool get isDarkMode => theme.brightness == Brightness.dark;
 
   bool get isArabic => Localizations.localeOf(this).languageCode == 'ar';
+
+  /// Warm app canvas (`ThemeData.scaffoldBackgroundColor` in light mode).
+  Color get scaffoldCanvasColor => theme.scaffoldBackgroundColor;
 }
 
 extension FailureExtensions on Failure {

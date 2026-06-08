@@ -86,13 +86,19 @@ abstract final class AppColors {
   static const double launchSplashLogoSize = 288;
 
   // ---------------------------------------------------------------------------
-  // Light neutral ramp — Pinterest catalog chrome (white / #E5E5E0 / black).
+  // Light neutral ramp — warm canvas + white cards (#F9F7F2 / #FFFFFF / ink).
   // ---------------------------------------------------------------------------
 
-  /// Canvas / scaffold (`#FFFFFF`).
-  static const Color lightBackground = Color(0xFFFFFFFF);
+  /// Warm app canvas / scaffold (Chaptrs-style cream `#F9F7F2`).
+  ///
+  /// The page rests on this tone; cards, sheets, and app bars use
+  /// [lightSurface] (`#FFFFFF`) for quiet lift without heavy shadows.
+  static const Color lightCanvas = Color(0xFFF9F7F2);
 
-  /// Cards and sheets on canvas (same as [lightBackground] in light mode).
+  /// Alias for scaffold assembly — same as [lightCanvas].
+  static const Color lightBackground = lightCanvas;
+
+  /// Raised cards, sheets, dialogs, and app bars on the warm canvas.
   static const Color lightSurface = Color(0xFFFFFFFF);
 
   /// Primary ink on surfaces (`#0F172A`).
@@ -127,8 +133,8 @@ abstract final class AppColors {
         : catalogFilterUnselectedLight;
   }
 
-  /// Light contained surface (Pinterest `surface-card` `#F6F6F3`).
-  static const Color lightSurfaceContainer = Color(0xFFF6F6F3);
+  /// Section / list canvas tier — matches [lightCanvas].
+  static const Color lightSurfaceContainer = lightCanvas;
 
   /// Light top container tier (Pinterest `hairline` `#DADAD3`).
   static const Color lightSurfaceContainerHighestBase = Color(0xFFDADAD3);

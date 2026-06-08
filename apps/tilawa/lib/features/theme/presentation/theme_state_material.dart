@@ -18,6 +18,10 @@ extension ThemeStateMaterial on ThemeState {
       ? Color(primaryColorArgb)
       : Color(PrimaryColorPreset.brandLocked.valueArgb);
 
-  ThemeMode get themeMode =>
-      mode == AppThemeMode.dark ? ThemeMode.dark : ThemeMode.light;
+  ThemeMode get themeMode {
+    if (useSystemTheme) {
+      return ThemeMode.system;
+    }
+    return mode == AppThemeMode.dark ? ThemeMode.dark : ThemeMode.light;
+  }
 }

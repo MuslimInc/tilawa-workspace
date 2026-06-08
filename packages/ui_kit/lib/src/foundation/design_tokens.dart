@@ -305,7 +305,7 @@ class TilawaDesignTokens extends ThemeExtension<TilawaDesignTokens> {
       radiusLarge: 16.0,
       radiusExtraLarge: 24.0,
       opacitySubtle: 0.1,
-      opacityShadow: 0.18,
+      opacityShadow: 0.12,
       opacityShadowStrong: 0.28,
       opacityMedium: 0.3,
       opacityEmphasis: 0.7,

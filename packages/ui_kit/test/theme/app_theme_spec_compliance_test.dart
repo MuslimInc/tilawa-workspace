@@ -81,15 +81,16 @@ void main() {
     });
 
     test(
-      'light Pinterest neutrals: white canvas and #E5E5E0 idle tier',
+      'light warm canvas: cream scaffold, white cards, #E5E5E0 idle tier',
       () {
         final ThemeData theme = AppTheme.getLightTheme(
           primaryColor: AppColors.defaultPrimary,
         );
         final ColorScheme scheme = theme.colorScheme;
 
-        expect(theme.scaffoldBackgroundColor, AppColors.lightBackground);
+        expect(theme.scaffoldBackgroundColor, AppColors.lightCanvas);
         expect(scheme.surface, AppColors.lightSurface);
+        expect(scheme.surfaceContainerLow, AppColors.lightSurface);
         expect(scheme.onSurface, AppColors.lightInk);
         expect(
           scheme.surfaceContainerHigh,
