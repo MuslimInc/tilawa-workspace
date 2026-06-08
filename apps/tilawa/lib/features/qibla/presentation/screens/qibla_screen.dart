@@ -59,8 +59,6 @@ class _QiblaScreenState extends State<QiblaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final ColorScheme colorScheme = theme.colorScheme;
     final isLandscape =
         MediaQuery.orientationOf(context) == Orientation.landscape;
 
@@ -78,7 +76,6 @@ class _QiblaScreenState extends State<QiblaScreen> {
             ToastUtils.showToast(msg: context.l10n.qiblaCompassAccuracyPoor);
           },
           child: Scaffold(
-            backgroundColor: colorScheme.surface,
             appBar: TilawaCatalogAppBar.titleOnly(
               context,
               title: context.l10n.qiblaDirection,

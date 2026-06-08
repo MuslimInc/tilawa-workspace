@@ -376,10 +376,8 @@ class _RecitersScreenState extends State<RecitersScreen> {
   Widget build(BuildContext context) {
     PerfLogger.markBuild('RecitersScreen');
     if (_isStartupLiteUi) {
-      final ColorScheme colorScheme = Theme.of(context).colorScheme;
       return Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: colorScheme.surface,
         appBar: TilawaCatalogAppBar.titleOnly(
           context,
           title: context.l10n.reciters,
@@ -470,7 +468,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
                   state is RecitersLoaded &&
                   _allowHeavyLoadedResults &&
                   state.filteredReciters.isNotEmpty;
-              final ColorScheme colorScheme = Theme.of(context).colorScheme;
               final double appBarHeight =
                   TilawaAppBarConfig.catalogTitleSearchAndFilterRowHeight(
                     context,
@@ -478,7 +475,6 @@ class _RecitersScreenState extends State<RecitersScreen> {
 
               return Scaffold(
                 resizeToAvoidBottomInset: false,
-                backgroundColor: colorScheme.surface,
                 appBar: _RecitersTilawaAppBar(
                   bottomHeight: appBarHeight,
                   state: state,
@@ -573,7 +569,8 @@ class _RecitersSliverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     PerfLogger.markBuild('_RecitersSliverScreen');
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
-    const double letterIndexVerticalMargin = 8;
+    final tokens = Theme.of(context).tokens;
+    final double letterIndexVerticalMargin = tokens.spaceSmall;
     final bool letterIndexAvailable =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
@@ -1410,7 +1407,6 @@ class ReciterAlphabetScrollbar extends StatefulWidget {
   final List<ReciterEntity> allReciters;
   final ScrollController scrollController;
   final Function(String? letter) onLetterSelected;
-
   /// Group label for the scrollbar (e.g. letter index).
   final String? scrollbarSemanticsLabel;
 

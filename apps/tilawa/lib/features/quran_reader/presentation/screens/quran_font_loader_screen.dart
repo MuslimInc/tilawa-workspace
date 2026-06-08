@@ -383,7 +383,7 @@ class _FontLoaderSurface extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        ColoredBox(color: colorScheme.surface),
+        ColoredBox(color: theme.scaffoldBackgroundColor),
         ExcludeSemantics(
           child: CustomPaint(
             painter: _FontLoaderAmbientPainter(

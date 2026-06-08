@@ -34,7 +34,6 @@ class PrayerNotificationStatusScreen extends StatelessWidget {
             await _handleBack(innerContext);
           },
           child: Scaffold(
-            backgroundColor: innerContext.colorScheme.surface,
             appBar: TilawaCatalogAppBar(
               preferredHeight:
                   TilawaAppBarConfig.catalogTitleOnlyHeight(innerContext),

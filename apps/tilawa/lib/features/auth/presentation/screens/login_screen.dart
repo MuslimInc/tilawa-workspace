@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:gap/gap.dart';
 import 'package:tilawa/core/app_legal_urls.dart';
 import 'package:tilawa/core/extensions.dart';
 import 'package:tilawa/core/utils/legal_url_launcher.dart';
 import 'package:tilawa/core/utils/toast_utils.dart';
+import 'package:tilawa_core/services/app_system_chrome_style.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
-import '../../../../features/localization/presentation/bloc/localization_bloc.dart';
 
 import '../../../../router/app_router.dart';
 import '../../../../router/app_router_config.dart';
 import '../bloc/auth_bloc.dart';
+
+/// Warm brown login canvas — distinct from the runtime sage primary.
+const Color _kLoginAccent = AppColors.primaryBrown;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,7 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // Automatically trigger sign in when screen opens to improve UX
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final authBloc = context.read<AuthBloc>();
@@ -40,18 +42,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Stack(
-        children: [
-          // Language Switcher
-          Positioned(
-            top: context.systemTopSafeArea + context.tokens.spaceSmall,
-            right: 16,
-            child: const _AppLanguageSwitcher(),
-          ),
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+    final ColorScheme loginScheme = colorScheme.copyWith(
+      primary: _kLoginAccent,
+      onPrimary: AppTheme.getLightTheme(
+        primaryColor: _kLoginAccent,
+      ).colorScheme.onPrimary,
+    );
+    final SystemUiOverlayStyle overlayStyle =
+        AppSystemChromeStyle.buildDefaultAppStyle(
+          theme,
+          statusBarBackgroundColor: theme.scaffoldBackgroundColor,
+          navigationBarColor: theme.scaffoldBackgroundColor,
+        );
 
-          SafeArea(
+    return Theme(
+      data: theme.copyWith(colorScheme: loginScheme),
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: overlayStyle,
+        child: Scaffold(
+          body: SafeArea(
             child: BlocConsumer<AuthBloc, AuthState>(
               listenWhen: (AuthState previous, AuthState current) {
                 if (current is AuthAuthenticated &&
@@ -74,67 +86,75 @@ class _LoginScreenState extends State<LoginScreen> {
                 );
               },
               builder: (context, state) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                return TilawaThumbReachLayout(
+                  content: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: tokens.spaceLarge,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Center(
+                          child: Container(
+                            width:
+                                tokens.minInteractiveDimension * 2 +
+                                tokens.spaceExtraSmall,
+                            height:
+                                tokens.minInteractiveDimension * 2 +
+                                tokens.spaceExtraSmall,
+                            decoration: BoxDecoration(
+                              color: loginScheme.primary.withValues(
+                                alpha: tokens.opacitySubtle,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.auto_stories_rounded,
+                              size: tokens.minInteractiveDimension,
+                              color: loginScheme.primary,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: tokens.spaceExtraLarge),
+                        Text(
+                          context.l10n.welcomeToApp,
+                          style: theme.textTheme.headlineLarge?.copyWith(
+                            color: colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: tokens.spaceMedium),
+                        Text(
+                          context.l10n.signInWithGoogleDescription,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                  actions: Column(
+                    mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Spacer(),
-                      // Brand Icon
-                      Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.auto_stories_rounded,
-                          size: 48,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const Gap(32),
-
-                      // Welcome Text
-                      Text(
-                        context.l10n.welcomeToApp,
-                        style: context.textTheme.headlineLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      Gap(14),
-
-                      // Subtitle
-                      Text(
-                        context.l10n.signInWithGoogleDescription,
-                        style: context.textTheme.bodyLarge?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const Spacer(),
-
-                      // Action Button
+                    spacing: tokens.spaceMedium,
+                    children: <Widget>[
                       _GoogleSignInButton(
                         isLoading: state is AuthLoading,
                         onPressed: () => context.read<AuthBloc>().add(
                           const SignInWithGoogleEvent(),
                         ),
                       ),
-                      Gap(16),
-                      _LoginLegalFooter(),
-                      const Gap(48),
+                      const _LoginLegalFooter(),
                     ],
                   ),
                 );
               },
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -158,51 +178,44 @@ class _GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final ColorScheme colorScheme = theme.colorScheme;
+
+    return TilawaButton(
+      text: context.l10n.continueWithGoogle,
+      semanticLabel: context.l10n.continueWithGoogle,
+      size: TilawaButtonSize.large,
+      isFullWidth: true,
+      isLoading: isLoading,
+      onPressed: onPressed,
+      backgroundColor: colorScheme.surface,
+      foregroundColor: colorScheme.onSurface,
+      borderColor: colorScheme.outlineVariant,
+      borderRadius: tokens.radiusExtraLarge,
+      textStyle: theme.textTheme.labelLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
       ),
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Theme.of(context).colorScheme.primary,
-          elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 24),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (isLoading)
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: TilawaLoadingIndicator(
-                  centered: false,
-                  strokeWidth: 2.5,
-                ),
-              )
-            else ...[
-              SvgPicture.asset(
-                'assets/icons/google_icon.svg',
-                width: 24,
-                height: 24,
-              ),
-              const Gap(12),
-              Text(context.l10n.continueWithGoogle),
-            ],
-          ],
-        ),
+      leadingIcon: const _GoogleMark(),
+    );
+  }
+}
+
+/// Multicolor Google “G” — kept outside [IconTheme] tinting.
+class _GoogleMark extends StatelessWidget {
+  const _GoogleMark();
+
+  @override
+  Widget build(BuildContext context) {
+    final double size = Theme.of(context).tokens.iconSizeMedium;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: SvgPicture.asset(
+        'assets/icons/google_icon.svg',
+        fit: BoxFit.contain,
       ),
     );
   }
@@ -213,37 +226,27 @@ class _LoginLegalFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return TextButton(
       onPressed: () => openLegalUrl(AppLegalUrls.privacyPolicy),
+      style: TextButton.styleFrom(
+        foregroundColor: colorScheme.primary,
+      ),
       child: Text(
         context.l10n.privacyPolicy,
-        style: context.textTheme.bodyMedium?.copyWith(
-          color: Colors.white.withValues(alpha: 0.92),
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: colorScheme.primary,
           decoration: TextDecoration.underline,
-          decorationColor: Colors.white.withValues(alpha: 0.92),
+          decorationColor: colorScheme.primary.withValues(
+            alpha: tokens.opacityEmphasis,
+          ),
         ),
         textAlign: TextAlign.center,
       ),
-    );
-  }
-}
-
-class _AppLanguageSwitcher extends StatelessWidget {
-  const _AppLanguageSwitcher();
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<LocalizationBloc, LocalizationState>(
-      builder: (context, state) {
-        return TilawaLanguageSwitcher(
-          currentLanguage: state.locale.languageCode,
-          languages: const ['ar', 'en'],
-          getLanguageName: (code) => code == 'ar' ? 'العربية' : 'English',
-          onLanguageChanged: (code) {
-            context.read<LocalizationBloc>().add(ChangeLanguage(Locale(code)));
-          },
-        );
-      },
     );
   }
 }

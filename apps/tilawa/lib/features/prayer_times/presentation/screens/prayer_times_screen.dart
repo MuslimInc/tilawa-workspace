@@ -20,8 +20,8 @@ import '../formatters/prayer_location_label_formatter.dart';
 import '../layout/prayer_times_layout.dart';
 import '../mappers/prayer_row_view_data_mapper.dart';
 import '../models/prayer_row_view_data.dart';
-import '../prayer_notification_semantics_ids.dart';
 import '../prayer_alerts_permission_navigation.dart';
+import '../prayer_notification_semantics_ids.dart';
 import '../widgets/prayer_notification_settings_sheet.dart';
 import '../widgets/widgets.dart';
 
@@ -138,13 +138,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen>
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
     return Scaffold(
-      // Parchment surface when opened as a standalone route (debug route list,
-      // deep links). In the main tab the shell still paints behind us, but an
-      // opaque surface avoids the black void from a transparent scaffold.
-      backgroundColor: theme.colorScheme.surface,
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -1547,4 +1541,3 @@ class _AdhanPlayingBannerState extends State<_AdhanPlayingBanner>
     );
   }
 }
-
