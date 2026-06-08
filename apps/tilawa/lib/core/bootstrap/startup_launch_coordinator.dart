@@ -12,7 +12,7 @@ enum StartupLaunchTarget { home, login, onboarding, notification }
 
 const String _homeLocation = '/';
 const String _loginLocation = '/login';
-const String _onboardingLocation = '/onboarding';
+const String _onboardingLocation = '/language-welcome';
 
 /// Final launch decision used by the boot gate before the router is built.
 class StartupLaunchPlan {

@@ -114,7 +114,7 @@ class _SplashScreenState extends State<SplashScreen> {
               case SplashNavigateToLogin():
                 _goAndReset(const LoginRoute().location);
               case SplashNavigateToOnboarding():
-                _goAndReset(const OnboardingRoute().location);
+                _goAndReset(const LanguageWelcomeRoute().location);
               case SplashNavigateToNotification(:final location, :final extra):
                 AppRouter.navigateFromColdStart(location, extra: extra);
               case SplashFailure():
