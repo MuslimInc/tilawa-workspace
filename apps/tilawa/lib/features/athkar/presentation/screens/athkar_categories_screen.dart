@@ -26,7 +26,8 @@ class AthkarCategoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tokens = Theme.of(context).tokens;
-    final double fabBottomOffset = QuranPlayerWidget.fabBottomOffset(context);
+    final double fabBottomOffset =
+        QuranPlayerWidget.fabBottomOffset(context) + tokens.spaceLarge;
     return Scaffold(
       appBar: TilawaCatalogAppBar.titleOnly(
         context,
