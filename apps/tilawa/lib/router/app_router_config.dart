@@ -23,6 +23,7 @@ import '../features/bookmarks/presentation/screens/bookmarks_screen.dart';
 import '../features/downloads/presentation/widgets/downloads_screen_scope.dart';
 import '../features/history/presentation/bloc/history_bloc.dart';
 import '../features/history/presentation/screens/history_screen.dart';
+import '../features/onboarding/presentation/screens/language_welcome_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_alerts_permission_screen.dart';
 import '../features/prayer_times/presentation/screens/prayer_notification_status_screen.dart';
@@ -130,6 +131,24 @@ class RecitersSearchRoute extends GoRouteData with $RecitersSearchRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const RecitersSearchScreenScope();
+  }
+}
+
+@TypedGoRoute<LanguageWelcomeRoute>(path: '/language-welcome')
+class LanguageWelcomeRoute extends GoRouteData with $LanguageWelcomeRoute {
+  const LanguageWelcomeRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return launchRoutePage(
+      state: state,
+      child: build(context, state),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const LanguageWelcomeScreen();
   }
 }
 

@@ -4,6 +4,7 @@ export 'breakpoints.dart';
 export 'color_scheme_ext.dart';
 export 'component_tokens.dart';
 export 'content_bounds.dart';
+export 'tilawa_thumb_reach_layout.dart';
 export 'content_grid.dart';
 export 'design_tokens.dart';
 export 'display_feature_insets.dart';

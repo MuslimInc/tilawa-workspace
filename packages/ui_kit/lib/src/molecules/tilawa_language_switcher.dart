@@ -26,22 +26,23 @@ class TilawaLanguageSwitcher extends StatelessWidget {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.segmentedControl;
 
+    final ColorScheme colorScheme = theme.colorScheme;
+
     return Container(
       padding: tokens.containerPadding,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(
-          alpha: tokens.containerOpacity,
-        ),
+        color: colorScheme.primary,
         borderRadius: BorderRadius.circular(tokens.containerRadius),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         textDirection: TextDirection.ltr,
+        spacing: tokens.itemSpacing,
         children: languages.map((lang) {
           final isSelected = currentLanguage == lang;
           final String label = getLanguageName(lang);
           return Material(
-            color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+            color: isSelected ? colorScheme.onPrimary : Colors.transparent,
             borderRadius: BorderRadius.circular(tokens.itemRadius),
             child: InkWell(
               onTap: enabled && !isLoading
@@ -65,17 +66,15 @@ class TilawaLanguageSwitcher extends StatelessWidget {
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: isSelected
-                                    ? theme.colorScheme.onPrimary
-                                    : theme.colorScheme.primary,
+                                color: colorScheme.primary,
                               ),
                             )
                           : Text(
                               label,
                               style: theme.textTheme.labelLarge?.copyWith(
                                 color: isSelected
-                                    ? theme.colorScheme.onPrimary
-                                    : theme.colorScheme.surface,
+                                    ? colorScheme.primary
+                                    : colorScheme.onPrimary,
                                 fontWeight: isSelected
                                     ? tokens.selectedFontWeight
                                     : tokens.unselectedFontWeight,

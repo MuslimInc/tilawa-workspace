@@ -3,7 +3,9 @@ import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
 
 import 'onboarding_page_indicator.dart';
 
-/// Bottom chrome: page indicator and navigation actions.
+/// Thumb-reach chrome: page indicator and navigation actions.
+///
+/// Footer chrome for [OnboardingScreen] inside [TilawaThumbReachLayout].
 class OnboardingFooterBar extends StatelessWidget {
   const OnboardingFooterBar({
     super.key,
@@ -39,55 +41,39 @@ class OnboardingFooterBar extends StatelessWidget {
     final TilawaDesignTokens tokens = theme.tokens;
     final ColorScheme colorScheme = theme.colorScheme;
 
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        tokens.spaceLarge,
-        0,
-        tokens.spaceLarge,
-        context.floatingBottomPadding,
-      ),
-      child: TilawaContentBounds(
-        kind: TilawaContentKind.form,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: tokens.spaceLarge,
-          children: [
-            Semantics(
-              label: '${currentPage + 1} / $pageCount',
-              child: OnboardingPageIndicator(
-                count: pageCount,
-                currentIndex: currentPage,
-              ),
-            ),
-            // Keep Back (left) and the primary action (right) in every locale.
-            Directionality(
-              textDirection: TextDirection.ltr,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if (_canGoBack)
-                    TilawaButton(
-                      text: backLabel,
-                      variant: TilawaButtonVariant.ghost,
-                      size: TilawaButtonSize.large,
-                      semanticLabel: backLabel,
-                      onPressed: onBack,
-                    ),
-                  const Spacer(),
-                  TilawaButton(
-                    text: _primaryLabel,
-                    variant: TilawaButtonVariant.primary,
-                    size: TilawaButtonSize.large,
-                    semanticLabel: _primaryLabel,
-                    foregroundColor: colorScheme.onPrimary,
-                    onPressed: _onPrimary,
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      spacing: tokens.spaceLarge,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Semantics(
+          label: '${currentPage + 1} / $pageCount',
+          child: OnboardingPageIndicator(
+            count: pageCount,
+            currentIndex: currentPage,
+          ),
         ),
-      ),
+        if (_canGoBack)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TilawaButton(
+              text: backLabel,
+              variant: TilawaButtonVariant.ghost,
+              size: TilawaButtonSize.large,
+              semanticLabel: backLabel,
+              onPressed: onBack,
+            ),
+          ),
+        TilawaButton(
+          text: _primaryLabel,
+          variant: TilawaButtonVariant.primary,
+          size: TilawaButtonSize.large,
+          semanticLabel: _primaryLabel,
+          foregroundColor: colorScheme.onPrimary,
+          onPressed: _onPrimary,
+          isFullWidth: true,
+        ),
+      ],
     );
   }
 }

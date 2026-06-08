@@ -118,43 +118,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           builder: (BuildContext context, OnboardingState state) {
             return Scaffold(
               backgroundColor: pageBackground,
-              body: Column(
-                children: <Widget>[
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: pageCount,
-                      onPageChanged: (int index) {
-                        setState(() => _currentPage = index);
-                        _applyPageSystemChrome();
-                        context.read<OnboardingCubit>().pageChanged(index);
-                        if (index == pageCount - 1) {
-                          unawaited(getIt<PrepareGoogleSignInUseCase>()());
-                        }
-                      },
-                      itemBuilder: (BuildContext context, int index) {
-                        return OnboardingPage(
-                          content: pages[index],
-                          semanticsLabel: context.l10n.onboardingPageSemantics(
-                            index + 1,
-                            pageCount,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  OnboardingFooterBar(
-                    pageCount: pageCount,
-                    currentPage: _currentPage,
-                    backLabel: context.l10n.previous,
-                    nextLabel: context.l10n.next,
-                    completeLabel: context.l10n.startJourney,
-                    onBack: () => _goToPage(_currentPage - 1),
-                    onNext: () => _goToPage(_currentPage + 1),
-                    onComplete: () =>
-                        context.read<OnboardingCubit>().completeOnboarding(),
-                  ),
-                ],
+              body: TilawaThumbReachLayout(
+                content: PageView.builder(
+                  controller: _pageController,
+                  itemCount: pageCount,
+                  onPageChanged: (int index) {
+                    setState(() => _currentPage = index);
+                    _applyPageSystemChrome();
+                    context.read<OnboardingCubit>().pageChanged(index);
+                    if (index == pageCount - 1) {
+                      unawaited(getIt<PrepareGoogleSignInUseCase>()());
+                    }
+                  },
+                  itemBuilder: (BuildContext context, int index) {
+                    return OnboardingPage(
+                      content: pages[index],
+                      semanticsLabel: context.l10n.onboardingPageSemantics(
+                        index + 1,
+                        pageCount,
+                      ),
+                    );
+                  },
+                ),
+                actions: OnboardingFooterBar(
+                  pageCount: pageCount,
+                  currentPage: _currentPage,
+                  backLabel: context.l10n.previous,
+                  nextLabel: context.l10n.next,
+                  completeLabel: context.l10n.startJourney,
+                  onBack: () => _goToPage(_currentPage - 1),
+                  onNext: () => _goToPage(_currentPage + 1),
+                  onComplete: () =>
+                      context.read<OnboardingCubit>().completeOnboarding(),
+                ),
               ),
             );
           },

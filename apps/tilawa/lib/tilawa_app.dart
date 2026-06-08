@@ -302,11 +302,12 @@ class _DefaultRouteSystemUiOverlayState
       '/login' => AppSystemChromeStyle.buildColoredScreenStyle(
         backgroundColor: theme.colorScheme.primary,
       ),
-      '/onboarding' => AppSystemChromeStyle.buildDefaultAppStyle(
-        theme,
-        statusBarBackgroundColor: theme.scaffoldBackgroundColor,
-        navigationBarColor: theme.scaffoldBackgroundColor,
-      ),
+      '/language-welcome' || '/onboarding' =>
+        AppSystemChromeStyle.buildDefaultAppStyle(
+          theme,
+          statusBarBackgroundColor: theme.scaffoldBackgroundColor,
+          navigationBarColor: theme.scaffoldBackgroundColor,
+        ),
       _ => AppSystemChromeStyle.buildDefaultAppStyle(
         theme,
         statusBarBackgroundColor: theme.scaffoldBackgroundColor,

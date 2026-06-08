@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tilawa/features/onboarding/presentation/widgets/onboarding_footer_bar.dart';
+import 'package:tilawa/features/onboarding/presentation/widgets/onboarding_page_indicator.dart';
 import 'package:tilawa/features/theme/domain/primary_color_preset.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa_ui_kit/tilawa_ui_kit.dart';
@@ -18,8 +19,19 @@ void main() {
     WidgetTester tester, {
     required Locale locale,
     required int currentPage,
+    bool useOnboardingScreenSplit = false,
   }) async {
     final AppLocalizations l10n = locale.languageCode == 'ar' ? ar : en;
+    final OnboardingFooterBar footer = OnboardingFooterBar(
+      pageCount: 3,
+      currentPage: currentPage,
+      backLabel: l10n.previous,
+      nextLabel: l10n.next,
+      completeLabel: l10n.startJourney,
+      onBack: () {},
+      onNext: () {},
+      onComplete: () {},
+    );
 
     await tester.pumpWidget(
       MaterialApp(
@@ -30,56 +42,85 @@ void main() {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         locale: locale,
         home: Scaffold(
-          body: OnboardingFooterBar(
-            pageCount: 3,
-            currentPage: currentPage,
-            backLabel: l10n.previous,
-            nextLabel: l10n.next,
-            completeLabel: l10n.startJourney,
-            onBack: () {},
-            onNext: () {},
-            onComplete: () {},
-          ),
+          body: useOnboardingScreenSplit
+              ? TilawaThumbReachLayout(
+                  content: const SizedBox.shrink(),
+                  actions: footer,
+                )
+              : footer,
         ),
       ),
     );
     await tester.pumpAndSettle();
   }
 
-  group('OnboardingFooterBar primary action placement', () {
-    testWidgets('places next on the physical right in English', (
+  Finder primaryButtonFinder(String label) {
+    return find.ancestor(
+      of: find.text(label),
+      matching: find.byType(TextButton),
+    );
+  }
+
+  Finder contentColumnFinder() {
+    return find.descendant(
+      of: find.byType(OnboardingFooterBar),
+      matching: find.byType(Column),
+    );
+  }
+
+  group('OnboardingFooterBar thumb-reach placement', () {
+    testWidgets('uses a full-width primary action in English', (
       WidgetTester tester,
     ) async {
-      await pumpFooterBar(tester, locale: const Locale('en'), currentPage: 1);
+      await pumpFooterBar(tester, locale: const Locale('en'), currentPage: 0);
 
-      final Rect back = tester.getRect(find.text(en.previous));
-      final Rect next = tester.getRect(find.text(en.next));
+      final Rect primary = tester.getRect(primaryButtonFinder(en.next));
+      final Rect content = tester.getRect(contentColumnFinder());
 
-      expect(next.center.dx, greaterThan(back.center.dx));
+      expect(primary.width, content.width);
     });
 
-    testWidgets('places next on the physical right in Arabic RTL', (
-      WidgetTester tester,
-    ) async {
-      await pumpFooterBar(tester, locale: const Locale('ar'), currentPage: 1);
-
-      final Rect back = tester.getRect(find.text(ar.previous));
-      final Rect next = tester.getRect(find.text(ar.next));
-
-      expect(next.center.dx, greaterThan(back.center.dx));
-    });
-
-    testWidgets('aligns first-page next to the physical right', (
+    testWidgets('uses a full-width primary action in Arabic RTL', (
       WidgetTester tester,
     ) async {
       await pumpFooterBar(tester, locale: const Locale('ar'), currentPage: 0);
 
-      final Rect next = tester.getRect(find.text(ar.next));
-      final Rect bounds = tester.getRect(find.byType(TilawaContentBounds));
+      final Rect primary = tester.getRect(primaryButtonFinder(ar.next));
+      final Rect content = tester.getRect(contentColumnFinder());
 
-      expect(next.center.dx, greaterThan(bounds.center.dx));
-      expect(next.width, lessThan(bounds.width * 0.75));
+      expect(primary.width, content.width);
+    });
+
+    testWidgets('places back above the primary action in the lower stack', (
+      WidgetTester tester,
+    ) async {
+      await pumpFooterBar(tester, locale: const Locale('en'), currentPage: 1);
+
+      final Rect back = tester.getRect(primaryButtonFinder(en.previous));
+      final Rect primary = tester.getRect(primaryButtonFinder(en.next));
+
+      expect(back.bottom, lessThan(primary.top));
+      expect(back.center.dy, lessThan(primary.center.dy));
+    });
+
+    testWidgets('starts the action band near 72% of the screen height', (
+      WidgetTester tester,
+    ) async {
+      await pumpFooterBar(
+        tester,
+        locale: const Locale('en'),
+        currentPage: 0,
+        useOnboardingScreenSplit: true,
+      );
+
+      final Rect screen = tester.getRect(find.byType(Scaffold));
+      final Rect indicator = tester.getRect(find.byType(OnboardingPageIndicator));
+
+      final double bandStart = screen.height *
+          TilawaThumbReachLayout.actionBandStartFraction();
+
+      expect(indicator.top, greaterThanOrEqualTo(bandStart - 1));
+      expect(indicator.top, lessThan(bandStart + screen.height * 0.08));
     });
   });
 }
-
