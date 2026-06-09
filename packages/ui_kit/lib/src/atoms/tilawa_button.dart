@@ -20,6 +20,12 @@ enum TilawaButtonVariant {
 
   /// Prominent action for destructive operations like deletion.
   danger,
+
+  /// Low-weight destructive action — transparent fill, error-tinted label and
+  /// outline. Use for settings-style destructive actions (e.g. "Delete
+  /// account") where the action should be reachable but must not dominate the
+  /// screen. Pair [danger] (solid) only inside an explicit confirmation step.
+  dangerOutline,
 }
 
 /// Sizes for [TilawaButton] determining its height and padding.
@@ -248,6 +254,11 @@ class TilawaButton extends StatelessWidget {
       ),
       TilawaButtonVariant.ghost => (Colors.transparent, colors.primary, null),
       TilawaButtonVariant.danger => (colors.error, colors.onError, null),
+      TilawaButtonVariant.dangerOutline => (
+        Colors.transparent,
+        colors.error,
+        colors.error,
+      ),
     };
   }
 

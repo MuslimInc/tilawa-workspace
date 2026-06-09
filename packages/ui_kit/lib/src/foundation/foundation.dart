@@ -11,6 +11,7 @@ export 'display_feature_insets.dart';
 export 'tilawa_bottom_sheet_actions.dart';
 export 'tilawa_bottom_sheet_scaffold.dart';
 export 'tilawa_bottom_sheet_title_row.dart';
+export 'tilawa_dialog.dart';
 export 'tilawa_interaction_feedback.dart';
 export 'tilawa_modal_bottom_sheet.dart';
 export 'responsive_typography.dart';

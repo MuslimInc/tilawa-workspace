@@ -21,16 +21,15 @@ abstract final class SettingsSheets {
     required PrimaryColorSource currentSource,
     required String? currentPresetId,
   }) {
-    showTilawaModalBottomSheet<void>(
+    showTilawaPickerDialog<void>(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      shape: TilawaBottomSheetScaffold.modalShape(context),
-      builder: (sheetContext) => SettingsPrimaryColorSheet(
+      title: context.l10n.choosePrimaryColor,
+      bodyBuilder: (dialogContext) => SettingsPrimaryColorSheet(
         currentColor: currentColor,
         currentSource: currentSource,
         currentPresetId: currentPresetId,
         onCustomColorTap: () {
-          Navigator.pop(sheetContext);
+          Navigator.pop(dialogContext);
           SettingsSheets.showCustomPrimaryColorPicker(
             context,
             currentColor: currentColor,
@@ -81,11 +80,10 @@ abstract final class SettingsSheets {
   }
 
   static void showThemePicker(BuildContext context) {
-    showTilawaModalBottomSheet<void>(
+    showTilawaPickerDialog<void>(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      shape: TilawaBottomSheetScaffold.modalShape(context),
-      builder: (_) => const SettingsThemeSheet(),
+      title: context.l10n.chooseTheme,
+      bodyBuilder: (_) => const SettingsThemeSheet(),
     );
   }
 
@@ -93,11 +91,10 @@ abstract final class SettingsSheets {
     BuildContext context, {
     required Locale currentLocale,
   }) {
-    showTilawaModalBottomSheet<void>(
+    showTilawaPickerDialog<void>(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      shape: TilawaBottomSheetScaffold.modalShape(context),
-      builder: (_) => SettingsLanguageSheet(currentLocale: currentLocale),
+      title: context.l10n.chooseLanguage,
+      bodyBuilder: (_) => SettingsLanguageSheet(currentLocale: currentLocale),
     );
   }
 
@@ -105,44 +102,43 @@ abstract final class SettingsSheets {
     BuildContext context, {
     required int currentValue,
   }) {
-    showTilawaModalBottomSheet<void>(
+    showTilawaPickerDialog<void>(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerLow,
-      shape: TilawaBottomSheetScaffold.modalShape(context),
-      builder: (_) => SettingsConcurrentDownloadsSheet(
+      title: context.l10n.concurrentDownloads,
+      bodyBuilder: (_) => SettingsConcurrentDownloadsSheet(
         currentValue: currentValue,
       ),
     );
   }
 
-  static Future<void> showLogoutConfirmation(BuildContext context) {
-    return showTilawaConfirmSheet(
+  static Future<void> showLogoutConfirmation(BuildContext context) async {
+    final authBloc = context.read<AuthBloc>();
+    final confirmed = await showTilawaConfirmDialog(
       context: context,
       title: context.l10n.logout,
       message: context.l10n.logoutConfirmation,
       confirmLabel: context.l10n.logout,
       cancelLabel: context.l10n.cancel,
-      onConfirm: () {
-        Navigator.pop(context, true);
-        context.read<AuthBloc>().add(const SignOutEvent());
-      },
-      onClose: () => Navigator.pop(context, false),
     );
+    if (confirmed == true) {
+      authBloc.add(const SignOutEvent());
+    }
   }
 
-  static Future<void> showDeleteAccountConfirmation(BuildContext context) {
-    return showTilawaConfirmSheet(
+  static Future<void> showDeleteAccountConfirmation(
+    BuildContext context,
+  ) async {
+    final authBloc = context.read<AuthBloc>();
+    final confirmed = await showTilawaConfirmDialog(
       context: context,
       title: context.l10n.deleteAccount,
       message: context.l10n.deleteAccountConfirmation,
       confirmLabel: context.l10n.deleteAccount,
       cancelLabel: context.l10n.cancel,
-      onConfirm: () {
-        Navigator.pop(context, true);
-        context.read<AuthBloc>().add(const DeleteAccountEvent());
-      },
-      onClose: () => Navigator.pop(context, false),
     );
+    if (confirmed == true) {
+      authBloc.add(const DeleteAccountEvent());
+    }
   }
 }
 
@@ -165,13 +161,8 @@ class SettingsPrimaryColorSheet extends StatelessWidget {
     final theme = Theme.of(context);
     final isCustom = currentSource == PrimaryColorSource.custom;
 
-    return TilawaBottomSheetScaffold(
-      topBar: Text(
-        context.l10n.choosePrimaryColor,
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         ...PrimaryColorPreset.values.map((preset) {
           final isSelected = !isCustom && currentPresetId == preset.id;
@@ -208,6 +199,7 @@ class SettingsPrimaryColorSheet extends StatelessWidget {
           ),
           title: context.l10n.custom,
           isSelected: isCustom,
+          showDivider: false,
           onTap: onCustomColorTap,
         ),
       ],
@@ -224,13 +216,8 @@ class SettingsThemeSheet extends StatelessWidget {
 
     return BlocBuilder<ThemeCubit, ThemeState>(
       builder: (context, state) {
-        return TilawaBottomSheetScaffold(
-          topBar: Text(
-            l10n.chooseTheme,
-            style: context.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             TilawaSelectionTile(
               title: l10n.themeLight,
@@ -259,6 +246,7 @@ class SettingsThemeSheet extends StatelessWidget {
             TilawaSelectionTile(
               title: l10n.themeSystem,
               isSelected: state.useSystemTheme,
+              showDivider: false,
               onTap: () {
                 context.read<ThemeCubit>().applyThemePreference(
                   useSystemTheme: true,
@@ -280,13 +268,8 @@ class SettingsLanguageSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaBottomSheetScaffold(
-      topBar: Text(
-        context.l10n.chooseLanguage,
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         TilawaSelectionTile(
           title: 'العربية',
@@ -301,6 +284,7 @@ class SettingsLanguageSheet extends StatelessWidget {
         TilawaSelectionTile(
           title: 'English',
           isSelected: currentLocale.languageCode == englishLanguageCode,
+          showDivider: false,
           onTap: () {
             context.read<LocalizationBloc>().add(
               const ChangeLanguage(Locale(englishLanguageCode)),
@@ -323,13 +307,8 @@ class SettingsConcurrentDownloadsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaBottomSheetScaffold(
-      topBar: Text(
-        context.l10n.concurrentDownloads,
-        style: context.textTheme.titleMedium?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         for (
           int i = 1;
@@ -339,6 +318,8 @@ class SettingsConcurrentDownloadsSheet extends StatelessWidget {
           TilawaSelectionTile(
             title: '$i',
             isSelected: currentValue == i,
+            showDivider:
+                i < TilawaSettingsScreenTokens.maxConcurrentDownloadsPickerCount,
             onTap: () {
               context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
               Navigator.pop(context);

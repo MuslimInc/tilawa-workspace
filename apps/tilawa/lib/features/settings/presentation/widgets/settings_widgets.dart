@@ -390,7 +390,7 @@ class SettingsAccountActions extends StatelessWidget {
                 ),
                 TilawaButton(
                   text: context.l10n.deleteAccount,
-                  variant: TilawaButtonVariant.danger,
+                  variant: TilawaButtonVariant.dangerOutline,
                   isFullWidth: true,
                   onPressed: onDeleteAccount,
                 ),

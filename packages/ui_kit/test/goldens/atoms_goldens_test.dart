@@ -362,6 +362,15 @@ void main() {
               ),
             ),
           ),
+          GoldenTestScenario(
+            name: 'Danger Outline',
+            child: const TilawaPreviewWrapper(
+              child: TilawaButton(
+                text: 'Danger Outline Button',
+                variant: TilawaButtonVariant.dangerOutline,
+              ),
+            ),
+          ),
         ],
       ),
     );
