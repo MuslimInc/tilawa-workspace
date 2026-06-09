@@ -289,8 +289,8 @@ class _ImmersiveComposerScaffoldState extends State<ImmersiveComposerScaffold>
             ),
 
             if (widget.floatingActionButton != null)
-              Positioned(
-                right: theme.tokens.spaceMedium,
+              PositionedDirectional(
+                end: theme.tokens.spaceMedium,
                 bottom: theme.tokens.spaceMedium + padding.bottom,
                 child: ScaleTransition(
                   scale: _controller,
