@@ -196,6 +196,9 @@ class _ReferenceOverlayValidatorState extends State<ReferenceOverlayValidator> {
                   ),
                 const SizedBox(height: 8),
                 FloatingActionButton(
+                  // Debug-only overlay tool; unique tag avoids a default-Hero
+                  // clash with the underlying screen's FAB while it is shown.
+                  heroTag: 'reference_overlay_validator_fab',
                   mini: true,
                   backgroundColor: _isVisible ? Colors.teal : Colors.grey,
                   onPressed: () {

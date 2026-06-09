@@ -45,28 +45,37 @@ organisms/      TilawaMediaPlayerBar, TilawaSettingsGroup, …
 
 ---
 
-## 2. Theme freeze — Pinterest catalog chrome (light)
+## 2. Theme freeze — calm catalog chrome (light)
 
-Default primary: **coral** `#E60023` (`AppColors.defaultPrimary`).
+Default primary: **Sage** `#219653` (`AppColors.defaultPrimary`), **brand-locked**
+for production. Legacy presets (coral, teal, gold, brown, purple) remain only
+for the dev/QA color picker (`--dart-define=TILAWA_SHOW_COLOR_PICKER=true`) and
+for deserialising previously-stored user choices — they are **not** the runtime
+brand. See the `AppColors` class docstring for the lock.
 
-**Accent usage (Pinterest rule):** coral (or user primary) for **one** emphasis
-per screen — primary CTA, active bottom nav, hearts/favorites, progress fill,
-switch ON. **Not** for scaffold, app bars, search fields, filter chips, or list
-row chrome.
+**Accent usage (one-accent rule):** Sage (or the dev-picked primary) for **one**
+emphasis per screen — primary CTA, active bottom nav, hearts/favorites, progress
+fill, switch ON. **Not** for scaffold, app bars, search fields, filter chips, or
+list row chrome.
 
-### Light neutral ramp (not primary-harmonized)
+### Light neutral ramp (warm canvas + white cards, not primary-harmonized)
 
 | `AppColors` | Hex | `ColorScheme` / usage |
 |-------------|-----|------------------------|
-| `lightBackground` | `#FFFFFF` | Scaffold, `surface` |
-| `lightInk` | `#000000` | `onSurface` |
+| `lightCanvas` / `lightBackground` | `#F9F7F2` | Scaffold, `surfaceContainerLowest`, `surfaceContainer` |
+| `lightSurface` | `#FFFFFF` | Cards, sheets, dialogs, app bars (`surface`, `surfaceContainerLow`) |
+| `lightInk` | `#0F172A` | `onSurface` |
 | `lightBody` | `#33332E` | Secondary body |
-| `lightMute` | `#62625B` | Muted labels |
+| `lightMute` | `#62625B` | Muted labels (`onSurfaceVariant`) |
 | `lightAsh` | `#91918C` | Hints / idle icons |
-| `lightSurfaceContainer` | `#F6F6F3` | `surfaceContainer` |
 | `lightSurfaceContainerHighBase` | `#E5E5E0` | Idle chips, search fill, `surfaceContainerHigh` |
-| `lightSurfaceContainerHighestBase` | `#DADAD3` | Hairline tier |
+| `lightSurfaceContainerHighestBase` | `#DADAD3` | Hairline tier (`surfaceContainerHighest`) |
 | `lightHairline` | `#DADAD3` | `outlineVariant` |
+
+> The scaffold rests on the warm cream **canvas** (`#F9F7F2`); cards/sheets/app
+> bars lift with white **surface** (`#FFFFFF`) and a hairline outline rather than
+> heavy shadow. This is the inverse of a white-scaffold system — keep them
+> straight when reading `_refineLightColorScheme` in `app_theme.dart`.
 
 `AppTheme` sets **`surfaceTint` → transparent** on cards, dialogs, sheets, and
 app bars so Material 3 does not wash neutrals with the user primary.
@@ -119,7 +128,7 @@ duplicate hex.
 
 | Suite | Path | Purpose |
 |-------|------|---------|
-| Colour roles | `test/theme/app_theme_color_roles_test.dart` | Contrast, Pinterest neutrals, preset no-op on surfaces |
+| Colour roles | `test/theme/app_theme_color_roles_test.dart` | Contrast, warm neutral ramp, preset no-op on surfaces |
 | DESIGN compliance | `test/theme/app_theme_spec_compliance_test.dart` | M3 extensions, transparent elevation tint, app bar = `surface` |
 | Goldens | `test/goldens/` | Visual regression (Alchemist); default primary in `TilawaPreviewWrapper` |
 | Review checklist | `test/goldens/REVIEW_CHECKLIST.md` | Human sign-off after `--update-goldens` |
