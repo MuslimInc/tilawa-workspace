@@ -176,7 +176,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                 ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+                    borderRadius: _shareComposerCardRadius(tokens),
                     border: Border.all(
                       color: AppShareComposerColors.gold.withValues(
                         alpha: 0.22,
@@ -199,7 +199,7 @@ class _ShareAudioConfigSheetState extends State<ShareAudioConfigSheet> {
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+                    borderRadius: _shareComposerCardRadius(tokens),
                     child: Stack(
                       children: [
                         SingleChildScrollView(
@@ -407,11 +407,12 @@ class _ConfigHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: _shareComposerCardRadius(tokens),
         border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
         color: Colors.white.withValues(alpha: 0.07),
       ),
@@ -426,7 +427,10 @@ class _ConfigHeader extends StatelessWidget {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(999),
+                  borderRadius: _shareComposerPillRadius(
+                    tokens,
+                    _kShareComposerBadgePillHeight,
+                  ),
                   color: AppShareComposerColors.gold.withValues(alpha: 0.14),
                   border: Border.all(
                     color: AppShareComposerColors.gold.withValues(alpha: 0.28),
@@ -528,12 +532,13 @@ class _RangeSelectionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final exceedsLimit = verseCount > ShareLimits.maxVersesPerClip;
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: _shareComposerCardRadius(tokens),
         color: Colors.white.withValues(alpha: 0.07),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
@@ -628,6 +633,8 @@ class _VerseDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final clampedValue = value.clamp(min, max);
+    final tokens = Theme.of(context).tokens;
+    final fieldRadius = _shareComposerChromeRadius(tokens);
 
     return DropdownButtonFormField<int>(
       initialValue: clampedValue,
@@ -647,19 +654,19 @@ class _VerseDropdown extends StatelessWidget {
           vertical: 14,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: fieldRadius,
           borderSide: BorderSide(
             color: AppShareComposerColors.deepGreen.withValues(alpha: 0.08),
           ),
         ),
         disabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: fieldRadius,
           borderSide: BorderSide(
             color: AppShareComposerColors.deepGreen.withValues(alpha: 0.04),
           ),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: fieldRadius,
           borderSide: const BorderSide(color: AppShareComposerColors.gold),
         ),
       ),
@@ -683,11 +690,12 @@ class _LiveVideoPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: _shareComposerCardRadius(tokens),
         color: Colors.white.withValues(alpha: 0.07),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
@@ -712,7 +720,7 @@ class _LiveVideoPreview extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: _shareComposerCardRadius(tokens),
             child: AspectRatio(
               aspectRatio: 9 / 16,
               child: ColoredBox(
@@ -748,12 +756,13 @@ class _ProgressCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final normalizedProgress = progress == 0 ? null : progress;
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: _shareComposerCardRadius(tokens),
         color: Colors.white.withValues(alpha: 0.07),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
@@ -769,7 +778,10 @@ class _ProgressCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: _shareComposerPillRadius(
+              tokens,
+              _kShareComposerProgressHeight,
+            ),
             child: LinearProgressIndicator(
               value: normalizedProgress,
               minHeight: 8,
@@ -806,11 +818,12 @@ class _SharingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: _shareComposerCardRadius(tokens),
         color: Colors.white.withValues(alpha: 0.07),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
@@ -857,11 +870,12 @@ class _FeedbackCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: _shareComposerCardRadius(tokens),
         color: backgroundColor,
         border: Border.all(color: outlineColor.withValues(alpha: 0.28)),
       ),
@@ -894,11 +908,15 @@ class _MetadataPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: _shareComposerPillRadius(
+          tokens,
+          _kShareComposerBadgePillHeight,
+        ),
         color: Colors.white.withValues(alpha: 0.08),
       ),
       child: Row(
@@ -938,6 +956,7 @@ class _SelectionBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final backgroundColor = isError
         ? AppShareComposerColors.feedbackErrorBackground
         : Colors.black.withValues(alpha: 0.16);
@@ -948,7 +967,7 @@ class _SelectionBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: _shareComposerChromeRadius(tokens),
         color: backgroundColor,
         border: Border.all(color: accent.withValues(alpha: 0.22)),
       ),
@@ -988,12 +1007,13 @@ class _VideoReviewPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final tokens = theme.tokens;
     final bool exists = File(filePath).existsSync();
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: _shareComposerCardRadius(tokens),
         color: Colors.white.withValues(alpha: 0.07),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
@@ -1009,7 +1029,7 @@ class _VideoReviewPreview extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           ClipRRect(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: _shareComposerCardRadius(tokens),
             child: AspectRatio(
               aspectRatio: 9 / 16,
               child: ColoredBox(
@@ -1046,3 +1066,20 @@ class _VideoReviewPreview extends StatelessWidget {
     );
   }
 }
+
+const double _kShareComposerBadgePillHeight = 32;
+const double _kShareComposerProgressHeight = 8;
+
+BorderRadius _shareComposerCardRadius(TilawaDesignTokens tokens) =>
+    BorderRadius.circular(tokens.resolveRadius(family: TilawaRadiusFamily.card));
+
+BorderRadius _shareComposerChromeRadius(TilawaDesignTokens tokens) =>
+    BorderRadius.circular(tokens.resolveRadius(family: TilawaRadiusFamily.chrome));
+
+BorderRadius _shareComposerPillRadius(
+  TilawaDesignTokens tokens,
+  double height,
+) =>
+    BorderRadius.circular(
+      tokens.resolveRadius(family: TilawaRadiusFamily.pill, height: height),
+    );

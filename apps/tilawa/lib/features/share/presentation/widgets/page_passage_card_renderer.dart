@@ -202,7 +202,7 @@ class _PosterPill extends StatelessWidget {
       child: Container(
         padding: _PagePosterLayout.pillPadding,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(_PagePosterLayout.pillRadius),
+          borderRadius: BorderRadius.circular(_PagePosterLayout.pillResolvedRadius),
           color: AppPagePassagePosterColors.deepGreen.withValues(alpha: 0.08),
         ),
         child: Row(
@@ -294,7 +294,10 @@ abstract final class _PagePosterLayout {
     horizontal: 14,
     vertical: 10,
   );
-  static const double pillRadius = 999;
+  static double pillCornerRadius(double height) => height / 2;
+
+  static double get pillResolvedRadius =>
+      pillCornerRadius(pillPadding.vertical + pillTextSize);
   static const double pillIconSize = 16;
   static const double pillIconGap = 8;
   static const double pillTextSize = 16;

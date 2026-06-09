@@ -134,7 +134,7 @@ class _GeneratedImagePreviewState extends State<GeneratedImagePreview> {
             color: theme.colorScheme.surfaceContainerHighest,
             child: Center(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(theme.tokens.radiusSmall),
                 child: Image.file(
                   File(widget.filePath),
                   fit: BoxFit.contain,
