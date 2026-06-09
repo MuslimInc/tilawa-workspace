@@ -127,6 +127,54 @@ class _DownloadsTabViewState extends State<DownloadsTabView>
   }
 }
 
+class DownloadsNestedTabView extends StatefulWidget {
+  const DownloadsNestedTabView({super.key, this.onBrowseReciters});
+
+  final VoidCallback? onBrowseReciters;
+
+  @override
+  State<DownloadsNestedTabView> createState() => _DownloadsNestedTabViewState();
+}
+
+class _DownloadsNestedTabViewState extends State<DownloadsNestedTabView>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      context.read<DownloadsBloc>().add(const LoadDownloads());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return BlocListener<DownloadsBloc, DownloadsState>(
+      listenWhen: (DownloadsState previous, DownloadsState current) =>
+          current.uiNotificationSeq != previous.uiNotificationSeq &&
+          current.uiNotification != null,
+      listener: (BuildContext context, DownloadsState state) {
+        context.read<DownloadsBloc>().add(const ClearDownloadsUiNotification());
+      },
+      child: BlocBuilder<DownloadsBloc, DownloadsState>(
+        builder: (context, state) {
+          return _DownloadsSliverBody(
+            state: state,
+            onBrowseReciters: widget.onBrowseReciters,
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _DownloadsScreenAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const _DownloadsScreenAppBar({
@@ -283,6 +331,45 @@ class _DownloadsBody extends StatelessWidget {
   }
 }
 
+class _DownloadsSliverBody extends StatelessWidget {
+  const _DownloadsSliverBody({required this.state, this.onBrowseReciters});
+
+  final DownloadsState state;
+  final VoidCallback? onBrowseReciters;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      key: const PageStorageKey<String>('reciters_downloads_tab'),
+      physics: const AlwaysScrollableScrollPhysics(
+        parent: BouncingScrollPhysics(),
+      ),
+      slivers: [
+        SliverOverlapInjector(
+          handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+        ),
+        switch (state.status) {
+          DownloadsStateStatus.initial ||
+          DownloadsStateStatus.loading => const SliverFillRemaining(
+            hasScrollBody: false,
+            child: TilawaLoadingIndicator(),
+          ),
+          DownloadsStateStatus.loaded => _DownloadsSliverList(
+            downloadsByReciter: state.downloads,
+            onBrowseReciters: onBrowseReciters,
+          ),
+          DownloadsStateStatus.error => SliverFillRemaining(
+            hasScrollBody: false,
+            child: _ErrorView(
+              message: state.errorMessage ?? context.l10n.error,
+            ),
+          ),
+        },
+      ],
+    );
+  }
+}
+
 class _ErrorView extends StatelessWidget {
   const _ErrorView({required this.message});
 
@@ -344,6 +431,53 @@ class _DownloadsList extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _DownloadsSliverList extends StatelessWidget {
+  const _DownloadsSliverList({
+    required this.downloadsByReciter,
+    this.onBrowseReciters,
+  });
+
+  final Map<String, Map<String, List<DownloadItem>>> downloadsByReciter;
+  final VoidCallback? onBrowseReciters;
+
+  @override
+  Widget build(BuildContext context) {
+    if (downloadsByReciter.isEmpty) {
+      return SliverFillRemaining(
+        hasScrollBody: false,
+        child: _EmptyDownloadsView(onBrowseReciters: onBrowseReciters),
+      );
+    }
+
+    final tokens = Theme.of(context).tokens;
+    return SliverToBoxAdapter(
+      child: TilawaContentBounds(
+        kind: TilawaContentKind.settings,
+        child: Padding(
+          padding: EdgeInsets.only(top: tokens.spaceSmall, bottom: 120),
+          child: Column(
+            children: [
+              for (int i = 0; i < downloadsByReciter.length; i++)
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: tokens.spaceLarge,
+                    vertical: tokens.spaceSmall,
+                  ),
+                  child: ReciterDownloadsSection(
+                    reciterName: downloadsByReciter.keys.elementAt(i),
+                    downloadsByNarrative: downloadsByReciter.values.elementAt(
+                      i,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

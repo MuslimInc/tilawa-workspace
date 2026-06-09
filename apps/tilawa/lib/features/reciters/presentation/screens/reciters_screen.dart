@@ -480,27 +480,48 @@ class _RecitersScreenState extends State<RecitersScreen>
               final bool showLetterIndex = context.select<SettingsCubit, bool>(
                 (cubit) => cubit.state.showRecitersAlphabetIndex,
               );
-              final double appBarHeight = _recitersTabbedHeaderHeight(context);
+              final headerChrome = _RecitersHeaderChrome(
+                tabController: _tabController,
+                onTabSelected: _selectHomeTabIndex,
+                onOpenSearch: () => const RecitersSearchRoute().push(context),
+              );
 
               return Scaffold(
                 resizeToAvoidBottomInset: false,
-                appBar: _RecitersTilawaAppBar(
-                  bottomHeight: appBarHeight,
-                  tabController: _tabController,
-                  onTabSelected: _selectHomeTabIndex,
-                  onOpenSearch: () => const RecitersSearchRoute().push(context),
-                ),
-                body: _RecitersTabbedBody(
-                  tabController: _tabController,
-                  state: state,
-                  allowHeavyLoadedResults: _allowHeavyLoadedResults,
-                  showLetterIndex: showLetterIndex,
-                  allScrollController: _allScrollController,
-                  favoritesScrollController: _favoritesScrollController,
-                  onClearAll: _clearAllFilters,
-                  onLetterSelected: _onLetterSelected,
-                  onRetry: _refreshReciters,
-                  onBrowseReciters: () => _selectHomeTab(RecitersHomeTab.all),
+                body: SafeArea(
+                  bottom: false,
+                  child: NestedScrollView(
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      return [
+                        _RecitersScrollingHeaderSliver(
+                          title: context.l10n.reciters,
+                          headerChrome: headerChrome,
+                        ),
+                        SliverOverlapAbsorber(
+                          handle:
+                              NestedScrollView.sliverOverlapAbsorberHandleFor(
+                                context,
+                              ),
+                          sliver: _RecitersPinnedTabBarSliver(
+                            headerChrome: headerChrome,
+                          ),
+                        ),
+                      ];
+                    },
+                    body: _RecitersTabbedBody(
+                      tabController: _tabController,
+                      state: state,
+                      allowHeavyLoadedResults: _allowHeavyLoadedResults,
+                      showLetterIndex: showLetterIndex,
+                      allScrollController: _allScrollController,
+                      favoritesScrollController: _favoritesScrollController,
+                      onClearAll: _clearAllFilters,
+                      onLetterSelected: _onLetterSelected,
+                      onRetry: _refreshReciters,
+                      onBrowseReciters: () =>
+                          _selectHomeTab(RecitersHomeTab.all),
+                    ),
+                  ),
                 ),
               );
             },
@@ -549,6 +570,7 @@ class _RecitersStartupLitePane extends StatelessWidget {
 
 class _RecitersSliverScreen extends StatelessWidget {
   const _RecitersSliverScreen({
+    required this.pageStorageKey,
     required this.state,
     required this.allowHeavyLoadedResults,
     required this.showLetterIndex,
@@ -558,6 +580,7 @@ class _RecitersSliverScreen extends StatelessWidget {
     required this.onRetry,
   });
 
+  final PageStorageKey<String> pageStorageKey;
   final RecitersState state;
   final bool allowHeavyLoadedResults;
   final bool showLetterIndex;
@@ -571,12 +594,18 @@ class _RecitersSliverScreen extends StatelessWidget {
     PerfLogger.markBuild('_RecitersSliverScreen');
     final bool isRtl = Directionality.of(context) == TextDirection.rtl;
     final tokens = Theme.of(context).tokens;
-    final double letterIndexVerticalMargin = tokens.spaceSmall;
+    final double letterIndexTopInset =
+        _recitersPinnedTabBarHeight(context) + tokens.spaceSmall;
+    final double letterIndexBottomInset = tokens.spaceSmall;
     final bool letterIndexAvailable =
         state is RecitersLoaded &&
         allowHeavyLoadedResults &&
         (state as RecitersLoaded).filteredReciters.isNotEmpty;
     final bool showLetterIndexRail = letterIndexAvailable && showLetterIndex;
+    final ScrollController? primaryScrollController =
+        PrimaryScrollController.maybeOf(context);
+    final ScrollController railScrollController =
+        primaryScrollController ?? scrollController;
 
     return MediaQuery(
       data: MediaQuery.of(context).removeViewInsets(removeBottom: true),
@@ -587,11 +616,19 @@ class _RecitersSliverScreen extends StatelessWidget {
           RefreshIndicator.adaptive(
             onRefresh: onRetry,
             child: CustomScrollView(
-              controller: scrollController,
+              key: pageStorageKey,
+              controller: primaryScrollController == null
+                  ? scrollController
+                  : null,
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
               slivers: [
+                SliverOverlapInjector(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                    context,
+                  ),
+                ),
                 _RecitersResultSection(
                   state: state,
                   allowHeavyLoadedResults: allowHeavyLoadedResults,
@@ -606,9 +643,10 @@ class _RecitersSliverScreen extends StatelessWidget {
           if (showLetterIndexRail)
             _RecitersLetterIndexGutter(
               isRtl: isRtl,
-              verticalMargin: letterIndexVerticalMargin,
+              topInset: letterIndexTopInset,
+              bottomInset: letterIndexBottomInset,
               reciters: (state as RecitersLoaded).reciters,
-              scrollController: scrollController,
+              scrollController: railScrollController,
               onLetterSelected: onLetterSelected,
               scrollbarSemanticsLabel: context.l10n.a11yRecitersLetterIndex,
               scrollbarSemanticsHint:
@@ -651,6 +689,7 @@ class _RecitersTabbedBody extends StatelessWidget {
       controller: tabController,
       children: [
         _RecitersSliverScreen(
+          pageStorageKey: const PageStorageKey<String>('reciters_all_tab'),
           state: state,
           allowHeavyLoadedResults: allowHeavyLoadedResults,
           showLetterIndex: showLetterIndex,
@@ -660,6 +699,9 @@ class _RecitersTabbedBody extends StatelessWidget {
           onRetry: onRetry,
         ),
         _RecitersSliverScreen(
+          pageStorageKey: const PageStorageKey<String>(
+            'reciters_favorites_tab',
+          ),
           state: state,
           allowHeavyLoadedResults: allowHeavyLoadedResults,
           showLetterIndex: showLetterIndex,
@@ -686,7 +728,7 @@ class _RecitersDownloadsTab extends StatelessWidget {
       children: [
         const Positioned.fill(child: _RecitersAmbientBackground()),
         DownloadsScreenScope(
-          child: DownloadsTabView(onBrowseReciters: onBrowseReciters),
+          child: DownloadsNestedTabView(onBrowseReciters: onBrowseReciters),
         ),
       ],
     );
@@ -694,13 +736,11 @@ class _RecitersDownloadsTab extends StatelessWidget {
 }
 
 /// Letter-index rail pinned to the trailing screen edge (Pinterest-style).
-///
-/// The list body already sits below [Scaffold.appBar]; do not offset this rail
-/// by app-bar height again or it will overlap reciter rows.
 class _RecitersLetterIndexGutter extends StatelessWidget {
   const _RecitersLetterIndexGutter({
     required this.isRtl,
-    required this.verticalMargin,
+    required this.topInset,
+    required this.bottomInset,
     required this.reciters,
     required this.scrollController,
     required this.onLetterSelected,
@@ -709,7 +749,8 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
   });
 
   final bool isRtl;
-  final double verticalMargin;
+  final double topInset;
+  final double bottomInset;
   final List<ReciterEntity> reciters;
   final ScrollController scrollController;
   final ValueChanged<String?> onLetterSelected;
@@ -723,8 +764,8 @@ class _RecitersLetterIndexGutter extends StatelessWidget {
     final double scrollbarWidth = theme.componentTokens.alphabetScrollbar.width;
 
     return PositionedDirectional(
-      top: verticalMargin,
-      bottom: verticalMargin,
+      top: topInset,
+      bottom: bottomInset,
       start: isRtl ? 0 : null,
       end: isRtl ? null : 0,
       width: gutterWidth,
@@ -928,62 +969,143 @@ Alignment _recitersEmptyContentAlignment(BuildContext context) {
   return const Alignment(0, -0.2);
 }
 
-double _recitersTabbedHeaderHeight(BuildContext context) {
+double _recitersPinnedTabBarHeight(BuildContext context) {
   final ThemeData theme = Theme.of(context);
   final TilawaDesignTokens tokens = theme.tokens;
-  final double searchHeight = theme.componentTokens.searchField.height;
-  final double contentHeight =
-      searchHeight + tokens.spaceSmall + kTextTabBarHeight;
+  final EdgeInsets padding = TilawaAppBarConfig.catalogChromePadding(tokens);
 
-  return TilawaAppBarConfig.catalogTitleAndContentHeight(
-    context,
-    contentHeight: contentHeight,
-  );
+  return padding.vertical + kTextTabBarHeight;
 }
 
-/// Reciters list chrome: title, search launcher, and primary tabs.
-class _RecitersTilawaAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
-  const _RecitersTilawaAppBar({
-    required this.bottomHeight,
+class _RecitersHeaderChrome {
+  const _RecitersHeaderChrome({
     required this.tabController,
     required this.onTabSelected,
     required this.onOpenSearch,
   });
 
-  final double bottomHeight;
   final TabController tabController;
   final ValueChanged<int> onTabSelected;
+  final VoidCallback onOpenSearch;
+}
+
+class _RecitersScrollingHeaderSliver extends StatelessWidget {
+  const _RecitersScrollingHeaderSliver({
+    required this.title,
+    required this.headerChrome,
+  });
+
+  final String title;
+  final _RecitersHeaderChrome headerChrome;
 
   @override
-  Size get preferredSize => Size.fromHeight(bottomHeight);
-  final VoidCallback onOpenSearch;
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    final TilawaDesignTokens tokens = theme.tokens;
+    final TextStyle? titleStyle = theme.textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w700,
+    );
+
+    return SliverToBoxAdapter(
+      child: ColoredBox(
+        color: theme.colorScheme.surface,
+        child: Padding(
+          padding: TilawaAppBarConfig.catalogChromePadding(tokens).copyWith(
+            bottom: 0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: tokens.spaceSmall,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(title, style: titleStyle),
+              ),
+              TourTarget(
+                targetId: RecitersTourTargets.searchField,
+                child: RecitersCatalogSearchField.launcher(
+                  semanticsIdentifier:
+                      ReciterSemanticsIds.recitersSearchLauncher,
+                  onTap: headerChrome.onOpenSearch,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecitersPinnedTabBarSliver extends StatelessWidget {
+  const _RecitersPinnedTabBarSliver({
+    required this.headerChrome,
+  });
+
+  final _RecitersHeaderChrome headerChrome;
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPersistentHeader(
+      pinned: true,
+      delegate: _RecitersPinnedTabBarDelegate(
+        height: _recitersPinnedTabBarHeight(context),
+        headerChrome: headerChrome,
+      ),
+    );
+  }
+}
+
+class _RecitersPinnedTabBarDelegate extends SliverPersistentHeaderDelegate {
+  const _RecitersPinnedTabBarDelegate({
+    required this.height,
+    required this.headerChrome,
+  });
+
+  final double height;
+  final _RecitersHeaderChrome headerChrome;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return _RecitersPinnedTabBarContent(headerChrome: headerChrome);
+  }
+
+  @override
+  bool shouldRebuild(_RecitersPinnedTabBarDelegate oldDelegate) {
+    return height != oldDelegate.height ||
+        headerChrome != oldDelegate.headerChrome;
+  }
+}
+
+class _RecitersPinnedTabBarContent extends StatelessWidget {
+  const _RecitersPinnedTabBarContent({required this.headerChrome});
+
+  final _RecitersHeaderChrome headerChrome;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
 
-    return TilawaCatalogAppBar(
-      preferredHeight: bottomHeight,
-      title: context.l10n.reciters,
-      bottomContent: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TourTarget(
-            targetId: RecitersTourTargets.searchField,
-            child: RecitersCatalogSearchField.launcher(
-              semanticsIdentifier: ReciterSemanticsIds.recitersSearchLauncher,
-              onTap: onOpenSearch,
-            ),
-          ),
-          SizedBox(height: tokens.spaceSmall),
-          _RecitersHomeTabBar(
-            controller: tabController,
-            onTabSelected: onTabSelected,
-          ),
-        ],
+    return Material(
+      color: theme.colorScheme.surface,
+      shape: TilawaAppBarChrome.bottomHairline(theme.colorScheme, tokens),
+      child: TilawaSearchFieldSlot(
+        padding: TilawaAppBarConfig.catalogChromePadding(tokens),
+        child: _RecitersHomeTabBar(
+          controller: headerChrome.tabController,
+          onTabSelected: headerChrome.onTabSelected,
+        ),
       ),
     );
   }
