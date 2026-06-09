@@ -35,7 +35,8 @@ class TilawaGlassPanel extends StatelessWidget {
     final effectiveBorderRadius =
         borderRadius ??
         BorderRadius.circular(
-          designTokens.radiusExtraLarge + componentTokens.borderRadiusOffset,
+          designTokens.resolveRadius(family: TilawaRadiusFamily.card) +
+              componentTokens.borderRadiusOffset,
         );
 
     final child = Container(

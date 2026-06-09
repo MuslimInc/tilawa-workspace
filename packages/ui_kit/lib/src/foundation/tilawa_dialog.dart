@@ -9,7 +9,7 @@ import 'tilawa_bottom_sheet_title_row.dart';
 /// These mirror the `showTilawa*Sheet` preset family (see
 /// `tilawa_modal_bottom_sheet.dart`) but render as centered cards on a scrim
 /// instead of bottom sheets. The visual language follows the brand confirmation
-/// dialog: a rounded [TilawaDesignTokens.radiusExtraLarge] card, a title row
+/// dialog: a rounded card ([TilawaRadiusFamily.card]), a title row
 /// with an end-aligned close button, an optional body, and **stacked
 /// full-width** actions — primary on top, secondary (cancel) below.
 ///
@@ -150,7 +150,9 @@ Future<T?> _showTilawaDialog<T>({
           vertical: tokens.spaceExtraLarge,
         ),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+          borderRadius: BorderRadius.circular(
+            tokens.resolveRadius(family: TilawaRadiusFamily.card),
+          ),
         ),
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: maxWidth),

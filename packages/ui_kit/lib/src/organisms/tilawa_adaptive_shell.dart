@@ -322,6 +322,10 @@ class _BottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final tokens = theme.componentTokens.adaptiveShell;
+    final designTokens = theme.tokens;
+    final double bottomNavTopRadius = designTokens.resolveRadius(
+      family: TilawaRadiusFamily.card,
+    );
     final Color navColor = tokens.bottomNavBackgroundColor;
 
     final int count = destinations.length;
@@ -403,6 +407,9 @@ class _BottomNavBar extends StatelessWidget {
                   child: Material(
                     color: tokens.bottomNavBackgroundColor,
                     shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(bottomNavTopRadius),
+                      ),
                       side: BorderSide(
                         color: tokens.bottomNavOutlineColor,
                         width: tokens.bottomNavBorderWidth,

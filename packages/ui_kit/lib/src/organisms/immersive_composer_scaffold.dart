@@ -345,7 +345,9 @@ class _OverlayPanel extends StatelessWidget {
         color: disableBlur
             ? componentTokens.composerSurfaceColor
             : componentTokens.overlayPanelTranslucentFillColor,
-        borderRadius: BorderRadius.circular(tokens.radiusLarge),
+        borderRadius: BorderRadius.circular(
+          tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+        ),
         border: Border.all(color: componentTokens.panelBorderColor),
       ),
       child: child,
@@ -354,7 +356,9 @@ class _OverlayPanel extends StatelessWidget {
     if (disableBlur) return panel;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(tokens.radiusLarge),
+      borderRadius: BorderRadius.circular(
+        tokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+      ),
       child: BackdropFilter(
         filter: ImageFilter.blur(
           sigmaX: tokens.blurGlass * componentTokens.backgroundBlurScale,
@@ -395,7 +399,9 @@ class _TopAppBar extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: componentTokens.composerSurfaceColor,
-        borderRadius: BorderRadius.circular(designTokens.radiusLarge),
+        borderRadius: BorderRadius.circular(
+          designTokens.resolveRadius(family: TilawaRadiusFamily.chrome),
+        ),
         border: Border.all(color: componentTokens.panelBorderColor),
       ),
       child: Padding(

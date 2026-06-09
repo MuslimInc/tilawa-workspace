@@ -468,7 +468,9 @@ class _TilawaAlphabetScrollbarState extends State<TilawaAlphabetScrollbar> {
                 color: theme.colorScheme.surface.withValues(
                   alpha: tokens.opacityGlass,
                 ),
-                borderRadius: BorderRadius.circular(tokens.radiusExtraLarge),
+                borderRadius: BorderRadius.circular(
+                  tokens.resolveRadius(family: TilawaRadiusFamily.card),
+                ),
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
