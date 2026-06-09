@@ -418,11 +418,14 @@ class TilawaAdaptiveShellTokens {
 
   /// Top corner radius of the phone bottom bar (bottom corners are square).
   ///
-  /// Uses the same value as [bottomNavInnerRadius] so the outer shell and
-  /// per-item tap targets share one corner radius.
+  /// Deprecated: [TilawaAdaptiveShell] resolves [TilawaRadiusFamily.card].
+  @Deprecated('Use resolveRadius(card). Will be removed.')
+  final double bottomNavInnerRadius;
+
+  /// Alias for [bottomNavInnerRadius]; kept for token tests.
+  @Deprecated('Use resolveRadius(card). Will be removed.')
   double get bottomNavRadius => bottomNavInnerRadius;
 
-  final double bottomNavInnerRadius;
   final double bottomNavBorderWidth;
   final double bottomNavItemGap;
 
@@ -447,6 +450,8 @@ class TilawaAdaptiveShellTokens {
   /// [RoundedRectangleBorder.side] for the floating bottom nav ([TilawaDesignTokens.opacitySubtle] on [ColorScheme.outlineVariant]).
   final Color bottomNavOutlineColor;
 
+  /// Deprecated: side rail uses [TilawaRadiusFamily.chrome] via resolveRadius.
+  @Deprecated('Use resolveRadius(chrome). Will be removed.')
   final double sideRailRadius;
 
   /// [NavigationRail.indicatorColor]: primary tint over [ColorScheme.surfaceContainerHigh].
@@ -1078,6 +1083,7 @@ class TilawaSettingsGroupTokens {
   final double groupHorizontalPadding;
 
   final EdgeInsetsGeometry groupHeaderPadding;
+  @Deprecated('Use resolveRadius(chrome). Will be removed.')
   final double groupBorderRadius;
   final double groupShadowOpacity;
   final double groupShadowBlur;
@@ -1087,6 +1093,7 @@ class TilawaSettingsGroupTokens {
   final EdgeInsetsGeometry tileContentPadding;
   final EdgeInsetsGeometry switchTileContentPadding;
   final EdgeInsetsGeometry tileIconPadding;
+  @Deprecated('Use resolveRadius(decorative). Will be removed.')
   final double tileIconBorderRadius;
   final double tileIconSize;
   final double tileTitleFontSize;

@@ -46,6 +46,7 @@ class TilawaSheetHandleTokens {
   /// Space above the drag pill; matches [TilawaDesignTokens.spaceMedium].
   final double marginTop;
   final double marginBottom;
+  @Deprecated('Use resolveRadius(pill, height). Will be removed.')
   final double cornerRadius;
   final double colorOpacity;
 
@@ -179,6 +180,7 @@ class TilawaIconBoxTokens {
   final double padding;
 
   /// Corner radius of the container.
+  @Deprecated('Use resolveRadius(decorative). Will be removed.')
   final double borderRadius;
 
   /// Alpha applied to the icon colour for the hairline container border.
@@ -293,6 +295,7 @@ class TilawaIconToggleTokens {
   final Color activeBackgroundColor;
   final Color inactiveBackgroundColor;
   final double padding;
+  @Deprecated('Use resolveRadius(pill, height). Will be removed.')
   final double borderRadius;
 
   factory TilawaIconToggleTokens.defaults() {

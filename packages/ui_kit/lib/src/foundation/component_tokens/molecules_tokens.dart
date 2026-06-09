@@ -166,6 +166,7 @@ class TilawaFeedbackStripTokens {
   });
 
   final EdgeInsetsGeometry padding;
+  @Deprecated('Use resolveRadius(chrome). Will be removed.')
   final double borderRadius;
   final double spinnerSize;
   final double spinnerStrokeWidth;
@@ -911,6 +912,7 @@ class TilawaSearchFieldTokens {
 
   final double height;
   final Color backgroundColor;
+  @Deprecated('Use resolveRadius(chrome). Will be removed.')
   final double borderRadius;
   final EdgeInsetsGeometry contentPadding;
 
@@ -1257,6 +1259,7 @@ class TilawaPermissionBannerTokens {
   });
 
   final EdgeInsetsGeometry padding;
+  @Deprecated('Use resolveRadius(chrome). Will be removed.')
   final double borderRadius;
   final double iconSize;
   final double iconSpacing;
