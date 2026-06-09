@@ -60,15 +60,15 @@ class _ShellExpandDragHarnessState extends State<_ShellExpandDragHarness>
       return;
     }
     _pointerRouteAttached = false;
-    final PlayerExpandSnapTarget target =
-        QuranPlayerExpandPhysics.resolveSnap(
+    final PlayerExpandSnapTarget target = QuranPlayerExpandPhysics.resolveSnap(
       progress: _controller.value,
       primaryVelocity: 0,
       progressThreshold: progressThreshold,
       velocityThreshold: velocityThreshold,
     );
-    final double targetValue =
-        target == PlayerExpandSnapTarget.expand ? 1.0 : 0.0;
+    final double targetValue = target == PlayerExpandSnapTarget.expand
+        ? 1.0
+        : 0.0;
     _controller.value = targetValue;
     _activePointerId = null;
   }
@@ -266,7 +266,8 @@ void main() {
           );
 
       expect(expandForward.showMiniPlayer, isFalse);
-      expect(collapseDrag.showMiniPlayer, isTrue);
+      expect(collapseDrag.showMorphLayer, isTrue);
+      expect(collapseDrag.showMiniPlayer, isFalse);
     });
   });
 }

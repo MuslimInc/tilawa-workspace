@@ -115,6 +115,24 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
               TilawaSettingsGroup(
+                title: l10n.settingsRecitersSection,
+                leadingIcon: Icons.record_voice_over_rounded,
+                children: [
+                  BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (context, state) {
+                      return TilawaSettingsSwitchTile(
+                        title: l10n.showRecitersAlphabetIndex,
+                        value: state.showRecitersAlphabetIndex,
+                        onChanged: context
+                            .read<SettingsCubit>()
+                            .setShowRecitersAlphabetIndex,
+                        showDivider: false,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              TilawaSettingsGroup(
                 title: l10n.settingsPlaybackAndStorage,
                 leadingIcon: FluentIcons.storage_24_regular,
                 children: [

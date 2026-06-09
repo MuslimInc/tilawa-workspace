@@ -350,6 +350,10 @@
     "settingsSupportSection": "الدعم",
     "settingsAppearance": "المظهر",
     "settingsPlaybackAndStorage": "التشغيل والتخزين",
+    "settingsRecitersSection": "القراء",
+    "@settingsRecitersSection": {
+        "description": "Reciters section header on settings screen"
+    },
     "themeLight": "فاتح",
     "themeDark": "داكن",
     "themeSystem": "النظام",
@@ -1125,6 +1129,14 @@
     "restorePlaybackStateSubtitle": "استئناف الصوت من حيث توقفت",
     "@restorePlaybackStateSubtitle": {
         "description": "Restore playback state setting subtitle"
+    },
+    "showRecitersAlphabetIndex": "إظهار فهرس الحروف",
+    "@showRecitersAlphabetIndex": {
+        "description": "Settings title for showing the reciters alphabet index rail"
+    },
+    "showRecitersAlphabetIndexSubtitle": "عرض شريط أ-ي أثناء تصفح القراء",
+    "@showRecitersAlphabetIndexSubtitle": {
+        "description": "Settings subtitle for showing the reciters alphabet index rail"
     },
     "timeRemaining": "الوقت المتبقي",
     "@timeRemaining": {

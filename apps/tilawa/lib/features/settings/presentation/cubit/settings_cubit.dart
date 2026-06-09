@@ -15,6 +15,7 @@ class SettingsState extends Equatable {
     this.isSleepTimerEnabled = true,
     this.prefetchQuranAssetsOnWifiOnly = true,
     this.showPrayerTimesAlertChipLabels = true,
+    this.showRecitersAlphabetIndex = true,
     this.appInfo,
   });
 
@@ -23,6 +24,7 @@ class SettingsState extends Equatable {
   final bool isSleepTimerEnabled;
   final bool prefetchQuranAssetsOnWifiOnly;
   final bool showPrayerTimesAlertChipLabels;
+  final bool showRecitersAlphabetIndex;
   final AppInfo? appInfo;
 
   SettingsState copyWith({
@@ -31,6 +33,7 @@ class SettingsState extends Equatable {
     bool? isSleepTimerEnabled,
     bool? prefetchQuranAssetsOnWifiOnly,
     bool? showPrayerTimesAlertChipLabels,
+    bool? showRecitersAlphabetIndex,
     AppInfo? appInfo,
   }) {
     return SettingsState(
@@ -42,6 +45,8 @@ class SettingsState extends Equatable {
           prefetchQuranAssetsOnWifiOnly ?? this.prefetchQuranAssetsOnWifiOnly,
       showPrayerTimesAlertChipLabels:
           showPrayerTimesAlertChipLabels ?? this.showPrayerTimesAlertChipLabels,
+      showRecitersAlphabetIndex:
+          showRecitersAlphabetIndex ?? this.showRecitersAlphabetIndex,
       appInfo: appInfo ?? this.appInfo,
     );
   }
@@ -53,6 +58,7 @@ class SettingsState extends Equatable {
     isSleepTimerEnabled,
     prefetchQuranAssetsOnWifiOnly,
     showPrayerTimesAlertChipLabels,
+    showRecitersAlphabetIndex,
     appInfo,
   ];
 }
@@ -107,6 +113,8 @@ class SettingsCubit extends HydratedCubit<SettingsState>
             json['prefetchQuranAssetsOnWifiOnly'] as bool? ?? true,
         showPrayerTimesAlertChipLabels:
             json['showPrayerTimesAlertChipLabels'] as bool? ?? true,
+        showRecitersAlphabetIndex:
+            json['showRecitersAlphabetIndex'] as bool? ?? true,
       );
     } catch (_) {
       return const SettingsState();
@@ -121,6 +129,7 @@ class SettingsCubit extends HydratedCubit<SettingsState>
       'isSleepTimerEnabled': state.isSleepTimerEnabled,
       'prefetchQuranAssetsOnWifiOnly': state.prefetchQuranAssetsOnWifiOnly,
       'showPrayerTimesAlertChipLabels': state.showPrayerTimesAlertChipLabels,
+      'showRecitersAlphabetIndex': state.showRecitersAlphabetIndex,
     };
   }
 
@@ -144,6 +153,10 @@ class SettingsCubit extends HydratedCubit<SettingsState>
 
   void setShowPrayerTimesAlertChipLabels(bool show) {
     emit(state.copyWith(showPrayerTimesAlertChipLabels: show));
+  }
+
+  void setShowRecitersAlphabetIndex(bool show) {
+    emit(state.copyWith(showRecitersAlphabetIndex: show));
   }
 
   void _updateQueueManager() {

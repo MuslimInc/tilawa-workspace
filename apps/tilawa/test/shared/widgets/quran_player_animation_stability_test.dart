@@ -94,7 +94,7 @@ void main() {
       },
     );
 
-    test('sheetMotionT tracks progress during interactive collapse drag', () {
+    test('sheetMotionT protects high-expanded band then tracks drag', () {
       const double dragStart = 1.0;
       final List<double> timeline =
           QuranPlayerAnimationStability.simulateCollapseDragProgress(
@@ -116,7 +116,15 @@ void main() {
           ),
           interactiveCollapseAnchor: dragStart,
         );
-        expect(metrics.sheetMotionT, closeTo(progress, 0.02));
+        if (progress >= 0.90) {
+          expect(metrics.sheetMotionT, 1, reason: 'progress=$progress');
+        } else {
+          expect(
+            metrics.sheetMotionT,
+            closeTo(progress, 0.02),
+            reason: 'progress=$progress',
+          );
+        }
       }
     });
   });

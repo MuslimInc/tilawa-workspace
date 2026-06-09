@@ -79,6 +79,54 @@ class _DownloadsScreenState extends State<DownloadsScreen>
   }
 }
 
+class DownloadsTabView extends StatefulWidget {
+  const DownloadsTabView({super.key, this.onBrowseReciters});
+
+  final VoidCallback? onBrowseReciters;
+
+  @override
+  State<DownloadsTabView> createState() => _DownloadsTabViewState();
+}
+
+class _DownloadsTabViewState extends State<DownloadsTabView>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      context.read<DownloadsBloc>().add(const LoadDownloads());
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+
+    return BlocListener<DownloadsBloc, DownloadsState>(
+      listenWhen: (DownloadsState previous, DownloadsState current) =>
+          current.uiNotificationSeq != previous.uiNotificationSeq &&
+          current.uiNotification != null,
+      listener: (BuildContext context, DownloadsState state) {
+        context.read<DownloadsBloc>().add(const ClearDownloadsUiNotification());
+      },
+      child: BlocBuilder<DownloadsBloc, DownloadsState>(
+        builder: (context, state) {
+          return _DownloadsBody(
+            state: state,
+            onBrowseReciters: widget.onBrowseReciters,
+          );
+        },
+      ),
+    );
+  }
+}
+
 class _DownloadsScreenAppBar extends StatelessWidget
     implements PreferredSizeWidget {
   const _DownloadsScreenAppBar({
@@ -214,9 +262,10 @@ class _ClearAllDownloadsDialog extends StatelessWidget {
 }
 
 class _DownloadsBody extends StatelessWidget {
-  const _DownloadsBody({required this.state});
+  const _DownloadsBody({required this.state, this.onBrowseReciters});
 
   final DownloadsState state;
+  final VoidCallback? onBrowseReciters;
 
   @override
   Widget build(BuildContext context) {
@@ -225,6 +274,7 @@ class _DownloadsBody extends StatelessWidget {
       DownloadsStateStatus.loading => const TilawaLoadingIndicator(),
       DownloadsStateStatus.loaded => _DownloadsList(
         downloadsByReciter: state.downloads,
+        onBrowseReciters: onBrowseReciters,
       ),
       DownloadsStateStatus.error => _ErrorView(
         message: state.errorMessage ?? context.l10n.error,
@@ -262,14 +312,18 @@ class _ErrorView extends StatelessWidget {
 }
 
 class _DownloadsList extends StatelessWidget {
-  const _DownloadsList({required this.downloadsByReciter});
+  const _DownloadsList({
+    required this.downloadsByReciter,
+    this.onBrowseReciters,
+  });
 
   final Map<String, Map<String, List<DownloadItem>>> downloadsByReciter;
+  final VoidCallback? onBrowseReciters;
 
   @override
   Widget build(BuildContext context) {
     if (downloadsByReciter.isEmpty) {
-      return const _EmptyDownloadsView();
+      return _EmptyDownloadsView(onBrowseReciters: onBrowseReciters);
     }
 
     final tokens = Theme.of(context).tokens;
@@ -335,7 +389,9 @@ class _DownloadsAppBarTitle extends StatelessWidget {
 }
 
 class _EmptyDownloadsView extends StatelessWidget {
-  const _EmptyDownloadsView();
+  const _EmptyDownloadsView({this.onBrowseReciters});
+
+  final VoidCallback? onBrowseReciters;
 
   @override
   Widget build(BuildContext context) {
@@ -350,7 +406,7 @@ class _EmptyDownloadsView extends StatelessWidget {
       primaryAction: TilawaButton(
         text: context.l10n.reciters,
         leadingIcon: const Icon(Icons.record_voice_over_rounded),
-        onPressed: () => context.go('/'),
+        onPressed: onBrowseReciters ?? () => context.go('/'),
       ),
     );
   }

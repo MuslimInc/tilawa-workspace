@@ -379,6 +379,10 @@
     "@settingsPlaybackAndStorage": {
         "description": "Playback and storage section header on settings screen"
     },
+    "settingsRecitersSection": "Reciters",
+    "@settingsRecitersSection": {
+        "description": "Reciters section header on settings screen"
+    },
     "themeLight": "Light",
     "@themeLight": {
         "description": "Light theme option label"
@@ -1206,6 +1210,14 @@
     "restorePlaybackStateSubtitle": "Resume audio from where you left off",
     "@restorePlaybackStateSubtitle": {
         "description": "Restore playback state setting subtitle"
+    },
+    "showRecitersAlphabetIndex": "Show Alphabet Index",
+    "@showRecitersAlphabetIndex": {
+        "description": "Settings title for showing the reciters alphabet index rail"
+    },
+    "showRecitersAlphabetIndexSubtitle": "Display the A-Z shortcut rail while browsing reciters",
+    "@showRecitersAlphabetIndexSubtitle": {
+        "description": "Settings subtitle for showing the reciters alphabet index rail"
     },
     "timeRemaining": "Time Remaining",
     "@timeRemaining": {
