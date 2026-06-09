@@ -1689,7 +1689,9 @@ class __PerformanceBenchmarkOverlayState
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(
+          Theme.of(context).tokens.radiusSmall,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

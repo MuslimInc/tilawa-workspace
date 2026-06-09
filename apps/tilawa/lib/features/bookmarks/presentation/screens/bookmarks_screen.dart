@@ -99,21 +99,28 @@ class BookmarksScreen extends StatelessWidget {
                                         itemBuilder: (context, index) {
                                           final BookmarkEntity bookmark =
                                               filteredBookmarks[index];
+                                          final tokens = Theme.of(
+                                            context,
+                                          ).tokens;
                                           return Dismissible(
                                             key: ValueKey(bookmark.id),
                                             background: Container(
                                               alignment: Alignment.centerRight,
                                               padding: EdgeInsets.only(
-                                                right: Theme.of(
-                                                  context,
-                                                ).tokens.spaceLarge,
+                                                right: tokens.spaceLarge,
                                               ),
                                               decoration: BoxDecoration(
                                                 color: Theme.of(
                                                   context,
                                                 ).colorScheme.error,
                                                 borderRadius:
-                                                    BorderRadius.circular(16),
+                                                    BorderRadius.circular(
+                                                  tokens.resolveRadius(
+                                                    family:
+                                                        TilawaRadiusFamily
+                                                            .card,
+                                                  ),
+                                                ),
                                               ),
                                               child: Icon(
                                                 Icons.delete_outline_rounded,
@@ -194,16 +201,19 @@ class BookmarksScreen extends StatelessWidget {
       separatorBuilder: (context, index) => SizedBox(height: 8),
       itemBuilder: (context, index) {
         final BookmarkEntity bookmark = bookmarks[index];
+        final tokens = Theme.of(context).tokens;
         return Dismissible(
           key: ValueKey(bookmark.id),
           background: Container(
             alignment: Alignment.centerRight,
             padding: EdgeInsets.only(
-              right: Theme.of(context).tokens.spaceLarge,
+              right: tokens.spaceLarge,
             ),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.error,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(
+                tokens.resolveRadius(family: TilawaRadiusFamily.card),
+              ),
             ),
             child: Icon(
               Icons.delete_outline_rounded,
