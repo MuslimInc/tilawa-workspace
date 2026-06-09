@@ -80,9 +80,7 @@ class _DownloadsScreenState extends State<DownloadsScreen>
 }
 
 class DownloadsTabView extends StatefulWidget {
-  const DownloadsTabView({super.key, this.onBrowseReciters});
-
-  final VoidCallback? onBrowseReciters;
+  const DownloadsTabView({super.key});
 
   @override
   State<DownloadsTabView> createState() => _DownloadsTabViewState();
@@ -117,10 +115,7 @@ class _DownloadsTabViewState extends State<DownloadsTabView>
       },
       child: BlocBuilder<DownloadsBloc, DownloadsState>(
         builder: (context, state) {
-          return _DownloadsBody(
-            state: state,
-            onBrowseReciters: widget.onBrowseReciters,
-          );
+          return _DownloadsBody(state: state);
         },
       ),
     );
@@ -310,10 +305,9 @@ class _ClearAllDownloadsDialog extends StatelessWidget {
 }
 
 class _DownloadsBody extends StatelessWidget {
-  const _DownloadsBody({required this.state, this.onBrowseReciters});
+  const _DownloadsBody({required this.state});
 
   final DownloadsState state;
-  final VoidCallback? onBrowseReciters;
 
   @override
   Widget build(BuildContext context) {
@@ -322,7 +316,6 @@ class _DownloadsBody extends StatelessWidget {
       DownloadsStateStatus.loading => const TilawaLoadingIndicator(),
       DownloadsStateStatus.loaded => _DownloadsList(
         downloadsByReciter: state.downloads,
-        onBrowseReciters: onBrowseReciters,
       ),
       DownloadsStateStatus.error => _ErrorView(
         message: state.errorMessage ?? context.l10n.error,
@@ -332,7 +325,10 @@ class _DownloadsBody extends StatelessWidget {
 }
 
 class _DownloadsSliverBody extends StatelessWidget {
-  const _DownloadsSliverBody({required this.state, this.onBrowseReciters});
+  const _DownloadsSliverBody({
+    required this.state,
+    this.onBrowseReciters,
+  });
 
   final DownloadsState state;
   final VoidCallback? onBrowseReciters;
@@ -359,7 +355,6 @@ class _DownloadsSliverBody extends StatelessWidget {
             onBrowseReciters: onBrowseReciters,
           ),
           DownloadsStateStatus.error => SliverFillRemaining(
-            hasScrollBody: false,
             child: _ErrorView(
               message: state.errorMessage ?? context.l10n.error,
             ),
@@ -399,18 +394,14 @@ class _ErrorView extends StatelessWidget {
 }
 
 class _DownloadsList extends StatelessWidget {
-  const _DownloadsList({
-    required this.downloadsByReciter,
-    this.onBrowseReciters,
-  });
+  const _DownloadsList({required this.downloadsByReciter});
 
   final Map<String, Map<String, List<DownloadItem>>> downloadsByReciter;
-  final VoidCallback? onBrowseReciters;
 
   @override
   Widget build(BuildContext context) {
     if (downloadsByReciter.isEmpty) {
-      return _EmptyDownloadsView(onBrowseReciters: onBrowseReciters);
+      return const _EmptyDownloadsView();
     }
 
     final tokens = Theme.of(context).tokens;
@@ -449,7 +440,6 @@ class _DownloadsSliverList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (downloadsByReciter.isEmpty) {
       return SliverFillRemaining(
-        hasScrollBody: false,
         child: _EmptyDownloadsView(onBrowseReciters: onBrowseReciters),
       );
     }
@@ -529,18 +519,20 @@ class _EmptyDownloadsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TilawaIllustratedState(
-      visual: const TilawaStateVisual(
-        icon: Icons.offline_pin_rounded,
-        tone: TilawaStateVisualTone.tertiary,
-      ),
-      title: context.l10n.noDownloadsYet,
-      subtitle: context.l10n.downloadSurahsOffline,
-      semanticLabel: context.l10n.noDownloadsYet,
-      primaryAction: TilawaButton(
-        text: context.l10n.reciters,
-        leadingIcon: const Icon(Icons.record_voice_over_rounded),
-        onPressed: onBrowseReciters ?? () => context.go('/'),
+    return SizedBox.expand(
+      child: TilawaIllustratedState(
+        visual: const TilawaStateVisual(
+          icon: Icons.offline_pin_rounded,
+          tone: TilawaStateVisualTone.tertiary,
+        ),
+        title: context.l10n.noDownloadsYet,
+        subtitle: context.l10n.downloadSurahsOffline,
+        semanticLabel: context.l10n.noDownloadsYet,
+        primaryAction: TilawaButton(
+          text: context.l10n.reciters,
+          leadingIcon: const Icon(Icons.record_voice_over_rounded),
+          onPressed: onBrowseReciters ?? () => context.go('/'),
+        ),
       ),
     );
   }

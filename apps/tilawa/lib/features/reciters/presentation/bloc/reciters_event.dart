@@ -23,14 +23,6 @@ class ClearLetterFilter extends RecitersEvent {
   const ClearLetterFilter();
 }
 
-class ToggleFavoritesFilter extends RecitersEvent {
-  const ToggleFavoritesFilter(this.favoriteIds);
-  final Set<int> favoriteIds;
-
-  @override
-  List<Object?> get props => [favoriteIds];
-}
-
 class SyncFavoriteIds extends RecitersEvent {
   const SyncFavoriteIds(this.favoriteIds);
   final Set<int> favoriteIds;

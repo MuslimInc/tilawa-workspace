@@ -51,17 +51,20 @@ void main() {
       verify(mockGetReciters.call()).called(1);
     });
 
-    test('second LoadReciters reuses use case when data already loaded', () async {
-      when(mockGetReciters.call()).thenAnswer(
-        (_) async => const Right<Failure, List<ReciterEntity>>(reciters),
-      );
+    test(
+      'second LoadReciters reuses use case when data already loaded',
+      () async {
+        when(mockGetReciters.call()).thenAnswer(
+          (_) async => const Right<Failure, List<ReciterEntity>>(reciters),
+        );
 
-      bloc.add(const LoadReciters());
-      await bloc.stream.firstWhere((s) => s is RecitersLoaded);
-      bloc.add(const LoadReciters());
-      await bloc.stream.firstWhere((s) => s is RecitersLoaded);
+        bloc.add(const LoadReciters());
+        await bloc.stream.firstWhere((s) => s is RecitersLoaded);
+        bloc.add(const LoadReciters());
+        await bloc.stream.firstWhere((s) => s is RecitersLoaded);
 
-      verify(mockGetReciters.call()).called(2);
-    });
+        verify(mockGetReciters.call()).called(2);
+      },
+    );
   });
 }

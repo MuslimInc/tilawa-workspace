@@ -24,10 +24,12 @@ import 'package:tilawa/features/reciters/domain/usecases/get_reciters_use_case.d
 import 'package:tilawa/features/reciters/domain/usecases/toggle_favorite_reciter_use_case.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/alphabet_scrollbar/alphabet_scrollbar_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/bloc/reciters_bloc.dart';
+import 'package:tilawa/features/reciters/presentation/bloc/reciters_tabs_bloc.dart';
 import 'package:tilawa/features/reciters/presentation/cubit/favorites_cubit.dart';
 import 'package:tilawa/features/prayer_times/domain/repositories/prayer_alerts_permission_onboarding_repository.dart';
 import 'package:tilawa/features/reciters/presentation/screens/reciters_screen.dart';
 import 'package:tilawa/features/reciters/presentation/tour/reciters_tour_launcher.dart';
+import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/features/tour_guide/domain/services/tour_target_registry.dart';
 import 'package:tilawa/l10n/generated/app_localizations.dart';
 import 'package:tilawa/screens/cubit/main_screen_cubit.dart';
@@ -67,6 +69,9 @@ class _MockSetLanguageUseCase extends Mock implements SetLanguageUseCase {}
 
 class _MockAppReviewTriggerManager extends Mock
     implements AppReviewTriggerManager {}
+
+class _MockSettingsCubit extends MockCubit<SettingsState>
+    implements SettingsCubit {}
 
 class _NoopRecitersTourLauncher implements RecitersTourLauncher {
   @override
@@ -288,18 +293,26 @@ void main() {
         ),
       );
 
+    final mockSettingsCubit = _MockSettingsCubit();
+    when(() => mockSettingsCubit.state).thenReturn(const SettingsState());
+    when(() => mockSettingsCubit.stream).thenAnswer((_) => const Stream.empty());
+
     return MultiBlocProvider(
       providers: [
         BlocProvider<MainScreenCubit>(
           create: (_) => MainScreenCubit(),
         ),
         BlocProvider<RecitersBloc>.value(value: recitersBloc),
+        BlocProvider<RecitersTabsBloc>(
+          create: (_) => RecitersTabsBloc(),
+        ),
         BlocProvider<AlphabetScrollbarBloc>(
           create: (_) => AlphabetScrollbarBloc(),
         ),
         BlocProvider<LocalizationBloc>(
           create: (_) => LocalizationBloc(mockGetLanguage, mockSetLanguage),
         ),
+        BlocProvider<SettingsCubit>.value(value: mockSettingsCubit),
       ],
       child: MaterialApp(
         theme: ThemeData(
@@ -376,7 +389,7 @@ void main() {
 
       await tester.pumpWidget(buildRecitersScreenTestApp());
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 600));
+      await tester.pump(const Duration(milliseconds: 500));
       await tester.pump();
 
       expect(find.byType(RecitersScreen), findsOneWidget);

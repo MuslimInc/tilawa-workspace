@@ -23,12 +23,6 @@ class RecitersScreenScope extends StatelessWidget {
     );
   }
 
-  static RecitersHomeTab _initialTabFor(RecitersState state) {
-    return state is RecitersLoaded && state.showFavoritesOnly
-        ? RecitersHomeTab.favorites
-        : RecitersHomeTab.all;
-  }
-
   @override
   Widget build(BuildContext context) {
     final RecitersBloc recitersBloc = _createRecitersBloc();
@@ -36,11 +30,7 @@ class RecitersScreenScope extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => recitersBloc),
-        BlocProvider(
-          create: (_) => RecitersTabsBloc(
-            initialTab: _initialTabFor(recitersBloc.state),
-          ),
-        ),
+        BlocProvider(create: (_) => RecitersTabsBloc()),
         BlocProvider(create: (_) => getIt<AlphabetScrollbarBloc>()),
       ],
       child: child ?? const RecitersScreen(),

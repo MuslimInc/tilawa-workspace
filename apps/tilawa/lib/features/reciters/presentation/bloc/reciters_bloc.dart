@@ -20,7 +20,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     on<LoadReciters>(_onLoadReciters);
     on<FilterByLetter>(_onFilterByLetter);
     on<ClearLetterFilter>(_onClearLetterFilter);
-    on<ToggleFavoritesFilter>(_onToggleFavoritesFilter);
     on<SyncFavoriteIds>(_onSyncFavoriteIds);
     on<ClearFavoritesFilter>(_onClearFavoritesFilter);
     on<LanguageChanged>(_onLanguageChanged);
@@ -144,33 +143,6 @@ class RecitersBloc extends Bloc<RecitersEvent, RecitersState> {
     emit(
       currentState.copyWith(
         clearSelectedLetter: true,
-        filteredReciters: filteredReciters,
-      ),
-    );
-  }
-
-  void _onToggleFavoritesFilter(
-    ToggleFavoritesFilter event,
-    Emitter<RecitersState> emit,
-  ) {
-    if (state is! RecitersLoaded) {
-      return;
-    }
-
-    final currentState = state as RecitersLoaded;
-    final bool newShowFavoritesOnly = !currentState.showFavoritesOnly;
-
-    final List<entity.ReciterEntity> filteredReciters = _filterReciters(
-      currentState.reciters,
-      currentState.selectedLetter,
-      newShowFavoritesOnly,
-      event.favoriteIds,
-    );
-
-    emit(
-      currentState.copyWith(
-        showFavoritesOnly: newShowFavoritesOnly,
-        favoriteIds: event.favoriteIds,
         filteredReciters: filteredReciters,
       ),
     );

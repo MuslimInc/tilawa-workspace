@@ -54,8 +54,9 @@ void main() {
         mockRepository.getReciters(),
       ).thenAnswer((_) async => Right(tReciters));
 
-      final Either<Failure, List<ReciterEntity>> result =
-          await useCase('Sudais');
+      final Either<Failure, List<ReciterEntity>> result = await useCase(
+        'Sudais',
+      );
 
       expect(result, Right<Failure, List<ReciterEntity>>([tReciters.first]));
       verify(mockRepository.getReciters()).called(1);
@@ -66,8 +67,9 @@ void main() {
         mockRepository.getReciters(),
       ).thenAnswer((_) async => Right(tReciters));
 
-      final Either<Failure, List<ReciterEntity>> result =
-          await useCase('zzznomatch');
+      final Either<Failure, List<ReciterEntity>> result = await useCase(
+        'zzznomatch',
+      );
 
       expect(result, const Right<Failure, List<ReciterEntity>>([]));
       verify(mockRepository.getReciters()).called(1);
@@ -79,8 +81,9 @@ void main() {
         mockRepository.getReciters(),
       ).thenAnswer((_) async => const Left(tFailure));
 
-      final Either<Failure, List<ReciterEntity>> result =
-          await useCase('Sudais');
+      final Either<Failure, List<ReciterEntity>> result = await useCase(
+        'Sudais',
+      );
 
       expect(result, const Left<Failure, List<ReciterEntity>>(tFailure));
       verify(mockRepository.getReciters()).called(1);

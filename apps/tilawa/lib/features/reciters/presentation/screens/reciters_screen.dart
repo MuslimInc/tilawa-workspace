@@ -13,6 +13,7 @@ import 'package:tilawa/features/downloads/presentation/screens/downloads_screen.
 import 'package:tilawa/features/downloads/presentation/widgets/downloads_screen_scope.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciter_card.dart';
 import 'package:tilawa/features/reciters/presentation/widgets/reciters_catalog_search_field.dart';
+import 'package:tilawa/features/reciters/presentation/widgets/reciters_favorites_tab.dart';
 import 'package:tilawa/features/settings/presentation/cubit/settings_cubit.dart';
 import 'package:tilawa/features/tour_guide/presentation/widgets/tour_target.dart';
 import 'package:tilawa_core/entities/reciter_entity.dart';
@@ -32,6 +33,7 @@ import '../cubit/favorites_state.dart';
 import '../reciter_semantics_ids.dart';
 import '../tour/reciters_tour_launcher.dart';
 import '../tour/reciters_tour_targets.dart';
+import '../utils/reciters_loaded_rebuild_policy.dart';
 
 /// Main-shell system back: collapse expanded player, focus the reciters tab,
 /// then exit — all handled explicitly.
@@ -145,11 +147,7 @@ class _RecitersScreenState extends State<RecitersScreen>
     final RecitersBloc recitersBloc = context.read<RecitersBloc>();
     final RecitersTabsBloc tabsBloc = context.read<RecitersTabsBloc>();
     final RecitersState startupState = recitersBloc.state;
-    RecitersHomeTab initialTab = tabsBloc.state.selectedTab;
-    if (startupState is RecitersLoaded && startupState.showFavoritesOnly) {
-      initialTab = RecitersHomeTab.favorites;
-      tabsBloc.add(const RecitersTabSelected(RecitersHomeTab.favorites));
-    }
+    final RecitersHomeTab initialTab = tabsBloc.state.selectedTab;
     _tabController = TabController(
       length: RecitersHomeTab.values.length,
       vsync: this,
@@ -266,7 +264,13 @@ class _RecitersScreenState extends State<RecitersScreen>
   }
 
   void _scrollToTop() {
-    final ScrollController scrollController = _activeRecitersScrollController;
+    final ScrollController? primaryScrollController =
+        PrimaryScrollController.maybeOf(context);
+    final ScrollController fallback = _activeRecitersScrollController;
+    final ScrollController scrollController =
+        primaryScrollController != null && primaryScrollController.hasClients
+        ? primaryScrollController
+        : fallback;
     if (!scrollController.hasClients) {
       return;
     }
@@ -296,24 +300,12 @@ class _RecitersScreenState extends State<RecitersScreen>
   }
 
   void _syncRecitersFilterForTab(RecitersHomeTab selectedTab) {
+    if (selectedTab == RecitersHomeTab.favorites) {
+      return;
+    }
+
     final RecitersState recitersState = context.read<RecitersBloc>().state;
-    if (recitersState is! RecitersLoaded ||
-        selectedTab == RecitersHomeTab.downloads) {
-      return;
-    }
-
-    final bool shouldShowFavoritesOnly =
-        selectedTab == RecitersHomeTab.favorites;
-    if (recitersState.showFavoritesOnly == shouldShowFavoritesOnly) {
-      return;
-    }
-
-    if (shouldShowFavoritesOnly) {
-      final FavoritesState favoritesState = _favoritesCubit.state;
-      final Set<int> favoriteIds = favoritesState is FavoritesLoaded
-          ? favoritesState.favoriteIds
-          : recitersState.favoriteIds;
-      context.read<RecitersBloc>().add(ToggleFavoritesFilter(favoriteIds));
+    if (recitersState is! RecitersLoaded || !recitersState.showFavoritesOnly) {
       return;
     }
 
@@ -427,21 +419,9 @@ class _RecitersScreenState extends State<RecitersScreen>
               listenWhen: (_, current) => current is FavoritesLoaded,
               listener: (context, state) {
                 if (state is FavoritesLoaded) {
-                  final RecitersState recitersState = context
-                      .read<RecitersBloc>()
-                      .state;
-                  if (context.read<RecitersTabsBloc>().state.selectedTab ==
-                          RecitersHomeTab.favorites &&
-                      recitersState is RecitersLoaded &&
-                      !recitersState.showFavoritesOnly) {
-                    context.read<RecitersBloc>().add(
-                      ToggleFavoritesFilter(state.favoriteIds),
-                    );
-                  } else {
-                    context.read<RecitersBloc>().add(
-                      SyncFavoriteIds(state.favoriteIds),
-                    );
-                  }
+                  context.read<RecitersBloc>().add(
+                    SyncFavoriteIds(state.favoriteIds),
+                  );
                 }
               },
             ),
@@ -456,23 +436,8 @@ class _RecitersScreenState extends State<RecitersScreen>
           ],
           child: BlocBuilder<RecitersBloc, RecitersState>(
             buildWhen: (previous, current) {
-              // Skip rebuild when only favoriteIds changed — _FavoriteButton
-              // handles that independently via context.select<FavoritesCubit>.
               if (previous is RecitersLoaded && current is RecitersLoaded) {
-                // Check if only favoriteIds changed (filteredReciters gets
-                // re-sorted by _filterReciters but we don't need to rebuild)
-                final onlyFavoritesChanged =
-                    previous.favoriteIds != current.favoriteIds &&
-                    previous.selectedLetter == current.selectedLetter &&
-                    previous.showFavoritesOnly == current.showFavoritesOnly;
-
-                if (onlyFavoritesChanged) {
-                  return false;
-                }
-
-                return previous.filteredReciters != current.filteredReciters ||
-                    previous.selectedLetter != current.selectedLetter ||
-                    previous.showFavoritesOnly != current.showFavoritesOnly;
+                return shouldRebuildRecitersLoaded(previous, current);
               }
               return true;
             },
@@ -482,8 +447,8 @@ class _RecitersScreenState extends State<RecitersScreen>
               );
               final headerChrome = _RecitersHeaderChrome(
                 tabController: _tabController,
-                onTabSelected: _selectHomeTabIndex,
                 onOpenSearch: () => const RecitersSearchRoute().push(context),
+                onTabSelected: _selectHomeTabIndex,
               );
 
               return Scaffold(
@@ -597,10 +562,11 @@ class _RecitersSliverScreen extends StatelessWidget {
     final double letterIndexTopInset =
         _recitersPinnedTabBarHeight(context) + tokens.spaceSmall;
     final double letterIndexBottomInset = tokens.spaceSmall;
-    final bool letterIndexAvailable =
-        state is RecitersLoaded &&
-        allowHeavyLoadedResults &&
-        (state as RecitersLoaded).filteredReciters.isNotEmpty;
+    final bool letterIndexAvailable = switch (state) {
+      RecitersLoaded loaded when allowHeavyLoadedResults =>
+        loaded.filteredReciters.isNotEmpty,
+      _ => false,
+    };
     final bool showLetterIndexRail = letterIndexAvailable && showLetterIndex;
     final ScrollController? primaryScrollController =
         PrimaryScrollController.maybeOf(context);
@@ -688,31 +654,59 @@ class _RecitersTabbedBody extends StatelessWidget {
     return TabBarView(
       controller: tabController,
       children: [
-        _RecitersSliverScreen(
-          pageStorageKey: const PageStorageKey<String>('reciters_all_tab'),
-          state: state,
-          allowHeavyLoadedResults: allowHeavyLoadedResults,
-          showLetterIndex: showLetterIndex,
-          scrollController: allScrollController,
-          onClearAll: onClearAll,
-          onLetterSelected: onLetterSelected,
-          onRetry: onRetry,
-        ),
-        _RecitersSliverScreen(
-          pageStorageKey: const PageStorageKey<String>(
-            'reciters_favorites_tab',
+        _RecitersKeepAliveTab(
+          child: _RecitersSliverScreen(
+            pageStorageKey: const PageStorageKey<String>('reciters_all_tab'),
+            state: state,
+            allowHeavyLoadedResults: allowHeavyLoadedResults,
+            showLetterIndex: showLetterIndex,
+            scrollController: allScrollController,
+            onClearAll: onClearAll,
+            onLetterSelected: onLetterSelected,
+            onRetry: onRetry,
           ),
-          state: state,
-          allowHeavyLoadedResults: allowHeavyLoadedResults,
-          showLetterIndex: showLetterIndex,
-          scrollController: favoritesScrollController,
-          onClearAll: onClearAll,
-          onLetterSelected: onLetterSelected,
-          onRetry: onRetry,
         ),
-        _RecitersDownloadsTab(onBrowseReciters: onBrowseReciters),
+        _RecitersKeepAliveTab(
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              const Positioned.fill(child: _RecitersAmbientBackground()),
+              RecitersFavoritesTab(
+                pageStorageKey: const PageStorageKey<String>(
+                  'reciters_favorites_tab',
+                ),
+                scrollController: favoritesScrollController,
+              ),
+            ],
+          ),
+        ),
+        _RecitersKeepAliveTab(
+          child: _RecitersDownloadsTab(onBrowseReciters: onBrowseReciters),
+        ),
       ],
     );
+  }
+}
+
+/// Keeps off-screen [TabBarView] pages mounted to avoid rebuild jank on swipes.
+class _RecitersKeepAliveTab extends StatefulWidget {
+  const _RecitersKeepAliveTab({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_RecitersKeepAliveTab> createState() => _RecitersKeepAliveTabState();
+}
+
+class _RecitersKeepAliveTabState extends State<_RecitersKeepAliveTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }
 
@@ -932,16 +926,9 @@ class _RecitersEmptyStateContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TilawaDesignTokens tokens = theme.tokens;
-    final bool isFavoritesOnlyEmpty = state.showFavoritesOnly;
     final bool showClearAll = _hasActiveFilters(state);
-
-    final String title = isFavoritesOnlyEmpty
-        ? context.l10n.noFavorites
-        : context.l10n.noRecitersFound;
-
-    final IconData icon = isFavoritesOnlyEmpty
-        ? Icons.favorite_border_rounded
-        : Icons.person_off_outlined;
+    final String title = context.l10n.noRecitersFound;
+    final IconData icon = Icons.person_off_outlined;
 
     final Widget? primaryAction = showClearAll
         ? TilawaButton(
@@ -980,13 +967,13 @@ double _recitersPinnedTabBarHeight(BuildContext context) {
 class _RecitersHeaderChrome {
   const _RecitersHeaderChrome({
     required this.tabController,
-    required this.onTabSelected,
     required this.onOpenSearch,
+    required this.onTabSelected,
   });
 
   final TabController tabController;
-  final ValueChanged<int> onTabSelected;
   final VoidCallback onOpenSearch;
+  final ValueChanged<int> onTabSelected;
 }
 
 class _RecitersScrollingHeaderSliver extends StatelessWidget {
@@ -1147,6 +1134,9 @@ class _RecitersHomeTabBar extends StatelessWidget {
               child: TabBar(
                 controller: controller,
                 onTap: onTabSelected,
+                splashBorderRadius: BorderRadius.circular(
+                  tokens.radiusExtraLarge,
+                ),
                 dividerColor: Colors.transparent,
                 indicatorSize: TabBarIndicatorSize.tab,
                 indicatorPadding: EdgeInsets.all(tokens.spaceExtraSmall),
@@ -1406,7 +1396,6 @@ class _ReciterListSliver extends StatelessWidget {
                   final Widget card = ReciterCard(
                     key: ValueKey(reciter.id),
                     reciter: reciter,
-                    favoritesOnlyContext: state.showFavoritesOnly,
                   );
                   if (index == 0) {
                     return TourTarget(
@@ -1426,7 +1415,7 @@ class _ReciterListSliver extends StatelessWidget {
 }
 
 bool _shouldShowRecitersResultSummary(RecitersLoaded state) {
-  return state.showFavoritesOnly || state.selectedLetter != null;
+  return state.selectedLetter != null;
 }
 
 class _RecitersResultSummarySliver extends StatelessWidget {
@@ -1517,7 +1506,6 @@ class _ReciterGridSliver extends StatelessWidget {
                   return ReciterCard(
                     key: ValueKey(reciter.id),
                     reciter: reciter,
-                    favoritesOnlyContext: state.showFavoritesOnly,
                   );
                 },
               ),
@@ -1646,9 +1634,9 @@ EdgeInsetsGeometry _recitersResultPadding(
   final theme = Theme.of(context);
   final tokens = theme.tokens;
   final double centeredInset = math.max(
-    tokens.spaceMedium,
+    tokens.spaceSmall,
     ((constraints.crossAxisExtent - tokens.contentMaxWidthMedia) / 2) +
-        tokens.spaceMedium,
+        tokens.spaceSmall,
   );
   final double scrollbarInset = reserveScrollbarSpace
       ? _recitersLetterIndexGutterWidth(theme)
@@ -1663,5 +1651,5 @@ EdgeInsetsGeometry _recitersResultPadding(
 }
 
 bool _hasActiveFilters(RecitersLoaded state) {
-  return state.selectedLetter != null || state.showFavoritesOnly;
+  return state.selectedLetter != null;
 }

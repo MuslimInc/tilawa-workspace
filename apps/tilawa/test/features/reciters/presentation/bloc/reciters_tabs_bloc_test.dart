@@ -29,5 +29,24 @@ void main() {
       act: (bloc) => bloc.add(const RecitersTabSelected(RecitersHomeTab.all)),
       expect: () => const <RecitersTabsState>[],
     );
+
+    blocTest<RecitersTabsBloc, RecitersTabsState>(
+      'converges on the latest tab when events arrive in quick succession',
+      build: RecitersTabsBloc.new,
+      act: (bloc) {
+        bloc
+          ..add(const RecitersTabSelected(RecitersHomeTab.favorites))
+          ..add(const RecitersTabSelected(RecitersHomeTab.downloads))
+          ..add(const RecitersTabSelected(RecitersHomeTab.all));
+      },
+      expect: () => const [
+        RecitersTabsState(selectedTab: RecitersHomeTab.favorites),
+        RecitersTabsState(selectedTab: RecitersHomeTab.downloads),
+        RecitersTabsState(selectedTab: RecitersHomeTab.all),
+      ],
+      verify: (bloc) {
+        expect(bloc.state.selectedTab, RecitersHomeTab.all);
+      },
+    );
   });
 }
