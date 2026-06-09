@@ -1,0 +1,58 @@
+---
+description: Guard pass for generated or changed production code (any language). Apply reactively after writing, editing, refactoring, or fixing code — before presenting, committing, or merging — and when asked to "review this PR", "is this safe to merge?", "make this cleaner", "audit/refactor this", or "fix this bug". Catches Clean Code, SOLID, DRY/KISS/YAGNI, and LLM-specific failure modes. Not for tests (use test-guard), docs (use docs-guard), CI/tooling config, git workflow, or pure architecture discussion.
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# clean-code-guard (Cursor rule)
+
+A second-pass quality gate for generated or changed **production code**. Run it
+after the first implementation pass and fix violations before delivery. This
+does not replace `dart analyze` / `flutter test` — those handle mechanical
+verification; this is the judgement layer.
+
+Full skill (canonical source, with `references/`):
+[`.agents/skills/clean-code-guard/SKILL.md`](../../.agents/skills/clean-code-guard/SKILL.md).
+Read it (and the linked `references/`) when you need the reasoning or citation
+behind a rule, or when in review mode.
+
+## Always-applied imperatives
+
+**Functions and names**
+1. Names reveal intent — no bare `data`, `result`, `temp`, `item`, `value`, `manager`, `utils`, or `handle_*`/`process_*` without a qualifier.
+2. Functions stay small (~≤20 lines, one level of abstraction, one thing).
+3. Four arguments is the ceiling; at five, introduce a config object. No boolean flag args — split into two functions.
+4. Command/query separation: a function returns a value *or* has a side effect, not both.
+
+**Comments and structure**
+5. Comments explain *why*, not *what*. Delete paraphrasing comments, step-number scaffolding, and commented-out code.
+6. Match the file's existing style — read the file and one neighbor before writing; don't introduce a second pattern.
+
+**SOLID**
+7. One actor per module (SRP).
+8. Extend via new code, not edits to existing type-tag branches (OCP).
+9. No subclass refuses its parent's contract (LSP).
+10. Abstractions live with the client, not the implementation (DIP).
+
+**DRY, KISS, YAGNI**
+11. Delete duplicated *knowledge*, not duplicated *text*.
+12. The wrong abstraction is worse than duplication — re-inline before re-abstracting.
+13. Complexity ceiling: cyclomatic ≤10, nesting ≤5.
+14. No speculative parameters, flags, interfaces, or base classes without a present-day caller.
+
+**AI-specific guardrails (highest leverage)**
+15. Never swallow errors in broad catch-all handlers; catch only what you can recover from, else propagate.
+16. No defensive guards for cases the type/contract already excludes.
+17. Verify every import and external call against the installed version (check the lockfile / package) — do not invent APIs.
+18. No hardcoded "success" returns or mock fixtures in production code; never weaken a test to make it pass.
+19. Re-derive from spec instead of copy-from-similar (where off-by-one and null-semantic bugs enter).
+20. Enumerate boundary cases (empty/one/many, off-by-one, unicode/byte) before writing them.
+21. Strip dead code (unused imports/symbols, unreachable branches) before delivery.
+22. Read before write — the target file, one neighbor, and project rules (CLAUDE.md / `.cursor/rules`); reuse existing helpers, error types, and logging.
+
+## Tilawa specifics
+
+Use the project's own gates as the mechanical layer: run `dart analyze` and the
+relevant `flutter test test/features/<feature>/` after changes. Honour the
+repo's `Either<Failure, T>` boundaries (rule 15) and design-token usage (no
+hard-coded sizes/colors) when reviewing UI code.
