@@ -13,6 +13,7 @@ export 'tilawa_bottom_sheet_scaffold.dart';
 export 'tilawa_bottom_sheet_title_row.dart';
 export 'tilawa_dialog.dart';
 export 'tilawa_interaction_feedback.dart';
+export 'tilawa_interactive_surface.dart';
 export 'tilawa_modal_bottom_sheet.dart';
 export 'responsive_typography.dart';
 export 'safe_area_ext.dart';

@@ -22,6 +22,10 @@ void main() {
     'molecules/tilawa_alphabet_scrollbar.dart',
     'organisms/tilawa_media_player_bar.dart',
     'organisms/immersive_composer_scaffold.dart',
+    // The shared interaction primitive — its GestureDetector declares
+    // `behavior: HitTestBehavior.opaque` and is the canonical place the rest of
+    // the kit routes taps through (focus ring, press, haptics, state layers).
+    'foundation/tilawa_interactive_surface.dart',
   };
 
   test('GestureDetector call sites stay on the documented allow-list', () {
