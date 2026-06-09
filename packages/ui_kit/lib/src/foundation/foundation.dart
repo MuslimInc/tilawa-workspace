@@ -17,6 +17,5 @@ export 'tilawa_interactive_surface.dart';
 export 'tilawa_modal_bottom_sheet.dart';
 export 'responsive_typography.dart';
 export 'safe_area_ext.dart';
-export 'settings_screen_tokens.dart';
 export 'shell_padding.dart';
 export 'text_theme_ext.dart';

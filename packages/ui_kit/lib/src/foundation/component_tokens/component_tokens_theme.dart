@@ -33,7 +33,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     required this.immersiveComposer,
     required this.iconToggle,
     required this.permissionBanner,
-    required this.prayerAlertRow,
     required this.bottomSheetScaffold,
   });
 
@@ -62,7 +61,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
   final TilawaImmersiveComposerTokens immersiveComposer;
   final TilawaIconToggleTokens iconToggle;
   final TilawaPermissionBannerTokens permissionBanner;
-  final TilawaPrayerAlertRowTokens prayerAlertRow;
   final TilawaBottomSheetScaffoldTokens bottomSheetScaffold;
 
   /// Creates light theme component tokens.
@@ -129,7 +127,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       ),
       iconToggle: TilawaIconToggleTokens.fromColorScheme(effectiveColorScheme),
       permissionBanner: TilawaPermissionBannerTokens.defaults(),
-      prayerAlertRow: TilawaPrayerAlertRowTokens.defaults(),
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.defaults(),
     );
   }
@@ -161,7 +158,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
     TilawaImmersiveComposerTokens? immersiveComposer,
     TilawaIconToggleTokens? iconToggle,
     TilawaPermissionBannerTokens? permissionBanner,
-    TilawaPrayerAlertRowTokens? prayerAlertRow,
     TilawaBottomSheetScaffoldTokens? bottomSheetScaffold,
   }) {
     return TilawaComponentTokens(
@@ -190,7 +186,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       immersiveComposer: immersiveComposer ?? this.immersiveComposer,
       iconToggle: iconToggle ?? this.iconToggle,
       permissionBanner: permissionBanner ?? this.permissionBanner,
-      prayerAlertRow: prayerAlertRow ?? this.prayerAlertRow,
       bottomSheetScaffold: bottomSheetScaffold ?? this.bottomSheetScaffold,
     );
   }
@@ -285,11 +280,6 @@ class TilawaComponentTokens extends ThemeExtension<TilawaComponentTokens> {
       permissionBanner: TilawaPermissionBannerTokens.lerp(
         permissionBanner,
         other.permissionBanner,
-        t,
-      ),
-      prayerAlertRow: TilawaPrayerAlertRowTokens.lerp(
-        prayerAlertRow,
-        other.prayerAlertRow,
         t,
       ),
       bottomSheetScaffold: TilawaBottomSheetScaffoldTokens.lerp(

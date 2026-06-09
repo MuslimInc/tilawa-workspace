@@ -13,6 +13,15 @@ import '../../../theme/domain/primary_color_preset.dart';
 import '../../../theme/presentation/cubit/theme_cubit.dart';
 import '../cubit/settings_cubit.dart';
 
+/// [CircleAvatar] radius for preset color swatches in the primary picker.
+const double _primaryPickerPresetSwatchRadius = 12;
+
+/// Custom primary row swatch diameter (matches preset swatch size).
+const double _primaryPickerCustomSwatchSize = 24;
+
+/// Upper inclusive bound for concurrent-download options (1…N).
+const int _maxConcurrentDownloadsPickerCount = 5;
+
 /// Opens settings-related picker and confirmation sheets.
 abstract final class SettingsSheets {
   static void showPrimaryColorPicker(
@@ -169,8 +178,7 @@ class SettingsPrimaryColorSheet extends StatelessWidget {
           return TilawaSelectionTile(
             leading: CircleAvatar(
               backgroundColor: preset.value,
-              radius:
-                  TilawaSettingsScreenTokens.primaryPickerPresetSwatchRadius,
+              radius: _primaryPickerPresetSwatchRadius,
             ),
             title: _localizedPresetName(context, preset),
             isSelected: isSelected,
@@ -182,7 +190,7 @@ class SettingsPrimaryColorSheet extends StatelessWidget {
         }),
         TilawaSelectionTile(
           leading: CircleAvatar(
-            radius: TilawaSettingsScreenTokens.primaryPickerPresetSwatchRadius,
+            radius: _primaryPickerPresetSwatchRadius,
             backgroundColor: isCustom
                 ? currentColor
                 : theme.colorScheme.surfaceContainerHigh,
@@ -190,10 +198,7 @@ class SettingsPrimaryColorSheet extends StatelessWidget {
                 ? null
                 : Icon(
                     FluentIcons.color_24_regular,
-                    size:
-                        TilawaSettingsScreenTokens
-                            .primaryPickerCustomSwatchSize *
-                        0.5,
+                    size: _primaryPickerCustomSwatchSize * 0.5,
                     color: theme.colorScheme.primary,
                   ),
           ),
@@ -310,16 +315,11 @@ class SettingsConcurrentDownloadsSheet extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        for (
-          int i = 1;
-          i <= TilawaSettingsScreenTokens.maxConcurrentDownloadsPickerCount;
-          i++
-        )
+        for (int i = 1; i <= _maxConcurrentDownloadsPickerCount; i++)
           TilawaSelectionTile(
             title: '$i',
             isSelected: currentValue == i,
-            showDivider:
-                i < TilawaSettingsScreenTokens.maxConcurrentDownloadsPickerCount,
+            showDivider: i < _maxConcurrentDownloadsPickerCount,
             onTap: () {
               context.read<SettingsCubit>().setMaxConcurrentDownloads(i);
               Navigator.pop(context);
