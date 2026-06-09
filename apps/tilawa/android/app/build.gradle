@@ -95,6 +95,17 @@ android {
             // proceed with the default debug keystore. CI supplies credentials
             // via env; running assembleRelease without them will fail at the
             // apksigner step, which is the correct fail-fast for release.
+
+            // R8 full-mode: shrinks/obfuscates Java/Kotlin bytecode and strips
+            // unused resources. Keep rules for Flutter, Firebase, audio,
+            // credential manager, and the native prayer receivers live in
+            // proguard-rules.pro; plugin AARs supply their own consumer rules.
+            // Does not affect libapp.so (Dart AOT) — that is governed by the
+            // Flutter build flags — but trims the absolute install size.
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
         }
     }
 
