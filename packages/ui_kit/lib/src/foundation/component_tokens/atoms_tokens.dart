@@ -161,6 +161,7 @@ class TilawaIconBoxTokens {
     required this.backgroundColor,
     required this.padding,
     required this.borderRadius,
+    required this.borderOpacity,
   });
 
   /// Default icon size inside the box.
@@ -174,6 +175,9 @@ class TilawaIconBoxTokens {
 
   /// Corner radius of the container.
   final double borderRadius;
+
+  /// Alpha applied to the icon colour for the hairline container border.
+  final double borderOpacity;
 
   factory TilawaIconBoxTokens.defaults() {
     final colorScheme = ColorScheme.fromSeed(
@@ -189,6 +193,7 @@ class TilawaIconBoxTokens {
       backgroundColor: backgroundColor,
       padding: 8.0,
       borderRadius: 12.0,
+      borderOpacity: 0.15,
     );
   }
 
@@ -206,12 +211,14 @@ class TilawaIconBoxTokens {
     Color? backgroundColor,
     double? padding,
     double? borderRadius,
+    double? borderOpacity,
   }) {
     return TilawaIconBoxTokens(
       iconSize: iconSize ?? this.iconSize,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       padding: padding ?? this.padding,
       borderRadius: borderRadius ?? this.borderRadius,
+      borderOpacity: borderOpacity ?? this.borderOpacity,
     );
   }
 
@@ -225,6 +232,7 @@ class TilawaIconBoxTokens {
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t)!,
       padding: lerpTokenDouble(a.padding, b.padding, t),
       borderRadius: lerpTokenDouble(a.borderRadius, b.borderRadius, t),
+      borderOpacity: lerpTokenDouble(a.borderOpacity, b.borderOpacity, t),
     );
   }
 }

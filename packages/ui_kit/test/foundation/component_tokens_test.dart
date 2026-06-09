@@ -111,6 +111,10 @@ void main() {
         spinnerSize: 16.0,
         spinnerStrokeWidth: 2.0,
         contentGap: 8.0,
+        infoAccentOpacity: 0.3,
+        successAccentOpacity: 0.5,
+        warningAccentOpacity: 0.5,
+        errorAccentOpacity: 0.7,
       );
       const second = TilawaFeedbackStripTokens(
         padding: EdgeInsets.all(20),
@@ -118,11 +122,19 @@ void main() {
         spinnerSize: 20.0,
         spinnerStrokeWidth: 3.0,
         contentGap: 12.0,
+        infoAccentOpacity: 0.4,
+        successAccentOpacity: 0.6,
+        warningAccentOpacity: 0.6,
+        errorAccentOpacity: 0.8,
       );
       final result = TilawaFeedbackStripTokens.lerp(first, second, 0.5);
       expect(result.borderRadius, closeTo(17.5, 0.01));
       expect(result.spinnerSize, closeTo(18.0, 0.01));
       expect(result.contentGap, closeTo(10.0, 0.01));
+      expect(result.infoAccentOpacity, closeTo(0.35, 0.01));
+      expect(result.successAccentOpacity, closeTo(0.55, 0.01));
+      expect(result.warningAccentOpacity, closeTo(0.55, 0.01));
+      expect(result.errorAccentOpacity, closeTo(0.75, 0.01));
     });
   });
 

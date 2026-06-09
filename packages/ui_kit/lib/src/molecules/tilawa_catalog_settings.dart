@@ -106,7 +106,7 @@ class TilawaCatalogSettingsLinkRow extends StatelessWidget {
               if (showChevron && onTap != null)
                 Icon(
                   FluentIcons.chevron_right_20_regular,
-                  size: 20,
+                  size: tokens.iconSizeMedium,
                   color: colorScheme.onSurface.withValues(
                     alpha: tokens.opacityEmphasis,
                   ),
@@ -231,7 +231,7 @@ class TilawaCatalogSettingsProfileRow extends StatelessWidget {
               if (onTap != null)
                 Icon(
                   FluentIcons.chevron_right_20_regular,
-                  size: 20,
+                  size: tokens.iconSizeMedium,
                   color: colorScheme.onSurface.withValues(
                     alpha: tokens.opacityEmphasis,
                   ),

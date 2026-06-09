@@ -1181,7 +1181,9 @@ class TilawaSettingsGroupTokens {
       tileSubtitleOpacity: 0.6,
       tileSubtitleSpacing: 4,
       tileTrailingSize: 16,
-      tileTrailingOpacity: 0.45,
+      // Effective rendered alpha of the trailing chevron (was 0.45 * 1.35
+      // applied inline at the call site; folded here to keep pixels stable).
+      tileTrailingOpacity: 0.6075,
       tileIconContainerOpacity: tileIconContainerOpacity,
       tileDividerPadding: const EdgeInsetsDirectional.only(
         start: 16,

@@ -44,15 +44,25 @@ class TilawaFeedbackStrip extends StatelessWidget {
     TilawaFeedbackVariant? v,
   ) {
     if (v == null) return null;
-    final ColorScheme cs = Theme.of(context).colorScheme;
+    final ThemeData theme = Theme.of(context);
+    final ColorScheme cs = theme.colorScheme;
+    final tokens = theme.componentTokens.feedbackStrip;
     return switch (v) {
-      TilawaFeedbackVariant.info => cs.outline.withValues(alpha: 0.35),
+      TilawaFeedbackVariant.info => cs.outline.withValues(
+        alpha: tokens.infoAccentOpacity,
+      ),
       // Success and warning use their own hues so they are distinguishable
       // from error (and each other) by colour, not just opacity. Relying on
       // a single red at different alphas fails WCAG 1.4.1 (use of colour).
-      TilawaFeedbackVariant.success => cs.success.withValues(alpha: 0.55),
-      TilawaFeedbackVariant.warning => cs.warning.withValues(alpha: 0.55),
-      TilawaFeedbackVariant.error => cs.error.withValues(alpha: 0.72),
+      TilawaFeedbackVariant.success => cs.success.withValues(
+        alpha: tokens.successAccentOpacity,
+      ),
+      TilawaFeedbackVariant.warning => cs.warning.withValues(
+        alpha: tokens.warningAccentOpacity,
+      ),
+      TilawaFeedbackVariant.error => cs.error.withValues(
+        alpha: tokens.errorAccentOpacity,
+      ),
     };
   }
 

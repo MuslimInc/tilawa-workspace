@@ -117,10 +117,7 @@ class TilawaSettingsTile extends StatelessWidget {
                     FluentIcons.chevron_right_20_regular,
                     size: tokens.tileTrailingSize,
                     color: colorScheme.onSurfaceVariant.withValues(
-                      alpha: (tokens.tileTrailingOpacity * 1.35).clamp(
-                        0.45,
-                        0.72,
-                      ),
+                      alpha: tokens.tileTrailingOpacity,
                     ),
                   ),
               onTap: onTap,

@@ -159,6 +159,10 @@ class TilawaFeedbackStripTokens {
     required this.spinnerSize,
     required this.spinnerStrokeWidth,
     required this.contentGap,
+    required this.infoAccentOpacity,
+    required this.successAccentOpacity,
+    required this.warningAccentOpacity,
+    required this.errorAccentOpacity,
   });
 
   final EdgeInsetsGeometry padding;
@@ -167,6 +171,13 @@ class TilawaFeedbackStripTokens {
   final double spinnerStrokeWidth;
   final double contentGap;
 
+  /// Border-accent alphas per [TilawaFeedbackVariant]. Error is strongest so
+  /// the most urgent strip reads loudest; info is a quiet outline tint.
+  final double infoAccentOpacity;
+  final double successAccentOpacity;
+  final double warningAccentOpacity;
+  final double errorAccentOpacity;
+
   factory TilawaFeedbackStripTokens.defaults() {
     return const TilawaFeedbackStripTokens(
       padding: EdgeInsets.all(16),
@@ -174,6 +185,10 @@ class TilawaFeedbackStripTokens {
       spinnerSize: 18,
       spinnerStrokeWidth: 2.2,
       contentGap: 8,
+      infoAccentOpacity: 0.35,
+      successAccentOpacity: 0.55,
+      warningAccentOpacity: 0.55,
+      errorAccentOpacity: 0.72,
     );
   }
 
@@ -183,6 +198,10 @@ class TilawaFeedbackStripTokens {
     double? spinnerSize,
     double? spinnerStrokeWidth,
     double? contentGap,
+    double? infoAccentOpacity,
+    double? successAccentOpacity,
+    double? warningAccentOpacity,
+    double? errorAccentOpacity,
   }) {
     return TilawaFeedbackStripTokens(
       padding: padding ?? this.padding,
@@ -190,6 +209,10 @@ class TilawaFeedbackStripTokens {
       spinnerSize: spinnerSize ?? this.spinnerSize,
       spinnerStrokeWidth: spinnerStrokeWidth ?? this.spinnerStrokeWidth,
       contentGap: contentGap ?? this.contentGap,
+      infoAccentOpacity: infoAccentOpacity ?? this.infoAccentOpacity,
+      successAccentOpacity: successAccentOpacity ?? this.successAccentOpacity,
+      warningAccentOpacity: warningAccentOpacity ?? this.warningAccentOpacity,
+      errorAccentOpacity: errorAccentOpacity ?? this.errorAccentOpacity,
     );
   }
 
@@ -208,6 +231,26 @@ class TilawaFeedbackStripTokens {
         t,
       ),
       contentGap: lerpTokenDouble(a.contentGap, b.contentGap, t),
+      infoAccentOpacity: lerpTokenDouble(
+        a.infoAccentOpacity,
+        b.infoAccentOpacity,
+        t,
+      ),
+      successAccentOpacity: lerpTokenDouble(
+        a.successAccentOpacity,
+        b.successAccentOpacity,
+        t,
+      ),
+      warningAccentOpacity: lerpTokenDouble(
+        a.warningAccentOpacity,
+        b.warningAccentOpacity,
+        t,
+      ),
+      errorAccentOpacity: lerpTokenDouble(
+        a.errorAccentOpacity,
+        b.errorAccentOpacity,
+        t,
+      ),
     );
   }
 }

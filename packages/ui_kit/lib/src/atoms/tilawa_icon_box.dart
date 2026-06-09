@@ -44,7 +44,7 @@ class TilawaIconBox extends StatelessWidget {
           borderRadius ?? tokens.borderRadius,
         ),
         border: Border.all(
-          color: resolvedIconColor.withValues(alpha: 0.15),
+          color: resolvedIconColor.withValues(alpha: tokens.borderOpacity),
           width: 1.0,
         ),
       ),

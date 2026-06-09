@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../atoms/tilawa_loading_indicator.dart';
 import '../foundation/component_tokens.dart';
+import '../foundation/design_tokens.dart';
 
 /// Switches [languages] with the same chrome as [TilawaSegmentedControl].
 class TilawaLanguageSwitcher extends StatelessWidget {
@@ -61,10 +63,10 @@ class TilawaLanguageSwitcher extends StatelessWidget {
                     padding: tokens.itemPadding,
                     child: Center(
                       child: isLoading && isSelected
-                          ? SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
+                          ? SizedBox.square(
+                              dimension: theme.tokens.iconSizeSmall,
+                              child: TilawaLoadingIndicator(
+                                centered: false,
                                 strokeWidth: 2,
                                 color: colorScheme.primary,
                               ),
